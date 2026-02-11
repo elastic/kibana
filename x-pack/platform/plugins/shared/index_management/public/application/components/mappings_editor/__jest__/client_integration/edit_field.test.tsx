@@ -154,7 +154,8 @@ describe('Mappings editor: edit field', () => {
 
     // Change field type to Range using EuiComboBox harness
     const fieldTypeComboBox = new EuiComboBoxTestHarness('fieldType');
-    fieldTypeComboBox.select('range');
+    await fieldTypeComboBox.select('range');
+    await fieldTypeComboBox.close();
 
     // Wait for SubTypeParameter to appear (range type has subTypes)
     await within(flyout).findByTestId('fieldSubType');

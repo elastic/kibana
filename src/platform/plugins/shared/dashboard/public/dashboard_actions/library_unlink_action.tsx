@@ -78,10 +78,10 @@ export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     const title = getTitle(embeddable);
     try {
-      const { references, rawState } = embeddable.getSerializedStateByValue();
+      const byValueState = embeddable.getSerializedStateByValue();
       await embeddable.parentApi.replacePanel(embeddable.uuid, {
         panelType: embeddable.type,
-        serializedState: { rawState: { ...rawState, title }, references },
+        serializedState: { ...byValueState, title },
       });
       coreServices.notifications.toasts.addSuccess({
         title: dashboardUnlinkFromLibraryActionStrings.getSuccessMessage(title ? `'${title}'` : ''),

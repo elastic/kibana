@@ -57,7 +57,7 @@ export function MetricDimensionEditor(
   const stops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
 
   return (
-    <>
+    <div className="lnsIndexPatternDimensionEditor--padded">
       <EuiFormRow
         display="columnCompressed"
         fullWidth
@@ -170,6 +170,6 @@ export function MetricDimensionEditor(
           </PalettePanelContainer>
         </EuiFormRow>
       )}
-    </>
+    </div>
   );
 }

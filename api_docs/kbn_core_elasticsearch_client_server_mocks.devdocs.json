@@ -24,6 +24,8 @@
           ">"
         ],
         "path": "src/core/packages/elasticsearch/client-server-mocks/src/agent_manager.mocks.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -44,6 +46,8 @@
           "<T, Y> extends jest.MockInstance<T, Y, any>"
         ],
         "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -62,6 +66,8 @@
               "<T, unknown>, \"body\">> | undefined) => this"
             ],
             "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -76,6 +82,8 @@
                   "Awaited<T>"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+                "lineNumber": 36,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -93,6 +101,8 @@
                   "<T, unknown>, \"body\">> | undefined"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+                "lineNumber": 36,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -115,6 +125,8 @@
               "<T, unknown>, \"body\">> | undefined) => this"
             ],
             "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -129,6 +141,8 @@
                   "Awaited<T>"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+                "lineNumber": 42,
+                "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -146,6 +160,8 @@
                   "<T, unknown>, \"body\">> | undefined"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+                "lineNumber": 42,
+                "columnNumber": 39,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -168,6 +184,8 @@
               "<Awaited<T>, unknown>>) => this"
             ],
             "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -184,6 +202,8 @@
                   "<Awaited<T>, unknown>>"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+                "lineNumber": 48,
+                "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -206,6 +226,8 @@
               "<Awaited<T>, unknown>>) => this"
             ],
             "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -222,6 +244,8 @@
                   "<Awaited<T>, unknown>>"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+                "lineNumber": 55,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -240,6 +264,8 @@
         "label": "ClusterClientMock",
         "description": [],
         "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+        "lineNumber": 321,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -283,7 +309,7 @@
               "DeleteRequest",
               ", options?: ",
               "TransportRequestOptions",
-              " | undefined]>; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              " | undefined]>; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "DeeplyMockedApi",
               "<",
               "default",
@@ -593,6 +619,10 @@
               "DeeplyMockedApi",
               "<",
               "default",
+              ">; project: ",
+              "DeeplyMockedApi",
+              "<",
+              "default",
               ">; putScript: ",
               "ClientApiMockInstance",
               "<Promise<",
@@ -787,6 +817,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+            "lineNumber": 322,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -805,6 +837,8 @@
               ")"
             ],
             "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+            "lineNumber": 323,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -821,6 +855,8 @@
         "label": "ScopedClusterClientMock",
         "description": [],
         "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+        "lineNumber": 305,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -864,7 +900,7 @@
               "DeleteRequest",
               ", options?: ",
               "TransportRequestOptions",
-              " | undefined]>; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              " | undefined]>; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "DeeplyMockedApi",
               "<",
               "default",
@@ -1174,6 +1210,10 @@
               "DeeplyMockedApi",
               "<",
               "default",
+              ">; project: ",
+              "DeeplyMockedApi",
+              "<",
+              "default",
               ">; putScript: ",
               "ClientApiMockInstance",
               "<Promise<",
@@ -1368,6 +1408,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+            "lineNumber": 306,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1411,7 +1453,7 @@
               "DeleteRequest",
               ", options?: ",
               "TransportRequestOptions",
-              " | undefined]>; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              " | undefined]>; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "DeeplyMockedApi",
               "<",
               "default",
@@ -1721,6 +1763,10 @@
               "DeeplyMockedApi",
               "<",
               "default",
+              ">; project: ",
+              "DeeplyMockedApi",
+              "<",
+              "default",
               ">; putScript: ",
               "ClientApiMockInstance",
               "<Promise<",
@@ -1915,6 +1961,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+            "lineNumber": 307,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1958,7 +2006,7 @@
               "DeleteRequest",
               ", options?: ",
               "TransportRequestOptions",
-              " | undefined]>; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              " | undefined]>; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "DeeplyMockedApi",
               "<",
               "default",
@@ -2268,6 +2316,10 @@
               "DeeplyMockedApi",
               "<",
               "default",
+              ">; project: ",
+              "DeeplyMockedApi",
+              "<",
+              "default",
               ">; putScript: ",
               "ClientApiMockInstance",
               "<Promise<",
@@ -2462,6 +2514,8 @@
               "ElasticsearchClient"
             ],
             "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+            "lineNumber": 308,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2491,6 +2545,8 @@
           "ClusterClientMock"
         ],
         "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+        "lineNumber": 335,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2510,6 +2566,8 @@
           "<T[P]>; } & T"
         ],
         "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2554,7 +2612,7 @@
           "DeleteRequest",
           ", options?: ",
           "TransportRequestOptions",
-          " | undefined]>; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+          " | undefined]>; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
           "DeeplyMockedApi",
           "<",
           "default",
@@ -2864,6 +2922,10 @@
           "DeeplyMockedApi",
           "<",
           "default",
+          ">; project: ",
+          "DeeplyMockedApi",
+          "<",
+          "default",
           ">; putScript: ",
           "ClientApiMockInstance",
           "<Promise<",
@@ -3058,6 +3120,8 @@
           "ElasticsearchClient"
         ],
         "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+        "lineNumber": 300,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3072,6 +3136,8 @@
         "label": "elasticsearchClientMock",
         "description": [],
         "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+        "lineNumber": 373,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3087,6 +3153,8 @@
               "ClusterClientMock"
             ],
             "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+            "lineNumber": 374,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3104,6 +3172,8 @@
               "CustomClusterClientMock"
             ],
             "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+            "lineNumber": 375,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3121,6 +3191,8 @@
               "ScopedClusterClientMock"
             ],
             "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+            "lineNumber": 376,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3138,6 +3210,8 @@
               "ElasticsearchClientMock"
             ],
             "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+            "lineNumber": 377,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3153,6 +3227,8 @@
                   "Promise<unknown> | undefined"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+                "lineNumber": 302,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3173,6 +3249,8 @@
               ">"
             ],
             "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+            "lineNumber": 378,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3188,6 +3266,8 @@
                   "Promise<unknown> | undefined"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+                "lineNumber": 287,
+                "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3206,6 +3286,8 @@
               "<T, unknown> & T>"
             ],
             "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+            "lineNumber": 379,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3221,6 +3303,8 @@
                   "T"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+                "lineNumber": 348,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3235,6 +3319,8 @@
                   "{ statusCode?: number | undefined; }"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+                "lineNumber": 349,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -3249,6 +3335,8 @@
                   "{ [x: string]: string | string[]; }"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+                "lineNumber": 350,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3265,6 +3353,8 @@
               "(err: any) => Promise<never>"
             ],
             "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+            "lineNumber": 380,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3280,6 +3370,8 @@
                   "any"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+                "lineNumber": 356,
+                "columnNumber": 45,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -3300,6 +3392,8 @@
               "<TResponse, unknown>"
             ],
             "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+            "lineNumber": 381,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -3320,9 +3414,11 @@
                   "TransportRequestOptions",
                   "; id: any; }; connection: ",
                   "Connection",
-                  " | null; attempts: number; aborted: boolean; sniff?: { hosts: any[]; reason: string; } | undefined; } | undefined; }"
+                  " | null; attempts: number; aborted: boolean; sniff?: { hosts: any[]; reason: string; } | undefined; duration?: number | undefined; } | undefined; }"
                 ],
                 "path": "src/core/packages/elasticsearch/client-server-mocks/src/mocks.ts",
+                "lineNumber": 361,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }

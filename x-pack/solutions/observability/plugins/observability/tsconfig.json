@@ -145,7 +145,12 @@
     "@kbn/fleet-plugin",
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
-    "@kbn/observability-agent-builder-plugin"
+    "@kbn/observability-agent-builder-plugin",
+    "@kbn/kql",
+    "@kbn/shared-ux-utility",
+    "@kbn/lens-common",
+    "@kbn/apm-types",
+    "@kbn/apm-types-shared",
   ],
   "exclude": ["target/**/*"]
 }

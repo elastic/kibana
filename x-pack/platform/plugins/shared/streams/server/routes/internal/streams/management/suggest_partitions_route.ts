@@ -6,14 +6,15 @@
  */
 
 import { z } from '@kbn/zod';
-import { Streams } from '@kbn/streams-schema';
 import { partitionStream } from '@kbn/streams-ai';
+import { Streams } from '@kbn/streams-schema';
 import { from, map } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
 import { STREAMS_TIERED_ML_FEATURE } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
+import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { createServerRoute } from '../../../create_server_route';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 
@@ -72,9 +73,8 @@ export const suggestPartitionsRoute = createServerRoute({
     });
 
     const stream = await streamsClient.getStream(params.path.name);
-
     if (!Streams.ingest.all.Definition.is(stream)) {
-      throw new Error(`Stream ${stream.name} is not a valid ingest stream`);
+      throw new StatusError('Partitioning suggestions are only available for ingest streams', 400);
     }
 
     const partitionsPromise = partitionStream({

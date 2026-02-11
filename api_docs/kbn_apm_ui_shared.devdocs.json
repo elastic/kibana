@@ -22,6 +22,8 @@
           "<number>) => string"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +45,8 @@
               "<number>"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+            "lineNumber": 22,
+            "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -70,6 +74,8 @@
           "<number>, threshold: number) => string"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -91,6 +97,8 @@
               "<number>"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+            "lineNumber": 38,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -106,6 +114,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+            "lineNumber": 38,
+            "columnNumber": 58,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -133,6 +143,8 @@
           "<number>, { defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions) => string"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+        "lineNumber": 152,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -154,6 +166,8 @@
               "<number>"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "lineNumber": 153,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -169,6 +183,8 @@
               "FormatterOptions"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -196,6 +212,8 @@
           "<number>) => string"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -217,6 +235,8 @@
               "<number>"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+            "lineNumber": 30,
+            "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -244,6 +264,8 @@
           "<number>, denominator: number | undefined, fallbackResult: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -265,6 +287,8 @@
               "<number>"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -280,6 +304,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -295,6 +321,8 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -322,6 +350,8 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration/index.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -342,6 +372,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration/index.tsx",
+            "lineNumber": 28,
+            "columnNumber": 26,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -361,6 +393,8 @@
           "({\n  data,\n  hasData,\n  markerCurrentEvent,\n  markerValue,\n  onChartSelection,\n  selection,\n  loading,\n  hasError,\n  eventType,\n  'data-test-subj': dataTestSubj,\n  showAxisTitle = true,\n  showLegend = true,\n  isOtelData = false,\n}: DurationDistributionChartProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
+        "lineNumber": 106,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -375,6 +409,8 @@
               "DurationDistributionChartProps"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
+            "lineNumber": 106,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -401,6 +437,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+        "lineNumber": 137,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -413,6 +451,8 @@
             "label": "max",
             "description": [],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -427,6 +467,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -441,6 +483,8 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -458,6 +502,8 @@
           "(max: number, threshold: number) => DurationTimeUnit"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+        "lineNumber": 119,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -472,6 +518,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "lineNumber": 119,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -487,6 +535,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "lineNumber": 119,
+            "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -506,6 +556,8 @@
           "(type: string | undefined, subtype: string | undefined) => string"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/span_icon/get_span_icon.ts",
+        "lineNumber": 90,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -520,6 +572,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/span_icon/get_span_icon.ts",
+            "lineNumber": 90,
+            "columnNumber": 29,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -535,6 +589,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/span_icon/get_span_icon.ts",
+            "lineNumber": 90,
+            "columnNumber": 44,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -554,6 +610,8 @@
           "({ code, showTooltip = false }: HttpStatusCodeProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/http_status_code/index.tsx",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -568,6 +626,8 @@
               "HttpStatusCodeProps"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/http_status_code/index.tsx",
+            "lineNumber": 22,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -603,6 +663,8 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
+        "lineNumber": 92,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -624,6 +686,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
+            "lineNumber": 92,
+            "columnNumber": 61,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -643,6 +707,8 @@
           "({ type, subtype, size = 'l', ...props }: Props) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/span_icon/index.tsx",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -657,6 +723,8 @@
               "Props"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/span_icon/index.tsx",
+            "lineNumber": 21,
+            "columnNumber": 26,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -676,6 +744,8 @@
           "({\n  timestamp,\n  renderMode = 'inline',\n  timeUnit = 'milliseconds',\n  size = 's',\n}: TimestampProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/timestamp/index.tsx",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -690,6 +760,8 @@
               "TimestampProps"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/timestamp/index.tsx",
+            "lineNumber": 24,
+            "columnNumber": 27,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -717,6 +789,8 @@
           ") => number"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+        "lineNumber": 37,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -731,6 +805,8 @@
               "number"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "lineNumber": 37,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -752,6 +828,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "lineNumber": 37,
+            "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -777,6 +855,8 @@
           ">[]; }"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/hooks/use_chart_theme.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -793,6 +873,8 @@
         "label": "DurationDistributionChartData",
         "description": [],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -804,6 +886,8 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -825,6 +909,8 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -836,6 +922,8 @@
             "label": "areaSeriesColor",
             "description": [],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration_distribution_chart/index.tsx",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -850,6 +938,8 @@
         "label": "DurationProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration/index.tsx",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -861,6 +951,8 @@
             "label": "duration",
             "description": [],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration/index.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -875,6 +967,8 @@
               "{ duration?: number | undefined; type: \"transaction\" | \"trace\"; loading?: boolean | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration/index.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -889,6 +983,8 @@
               "\"m\" | \"s\" | \"xs\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration/index.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -903,6 +999,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/components/duration/index.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -920,6 +1018,8 @@
         "label": "NOT_AVAILABLE_LABEL",
         "description": [],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/numeric.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -935,6 +1035,8 @@
           "(value: number, options?: FormatterOptions | undefined) => ConvertedDuration"
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -947,6 +1049,8 @@
             "label": "value",
             "description": [],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "lineNumber": 29,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -961,6 +1065,8 @@
               "FormatterOptions | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+            "lineNumber": 29,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -978,6 +1084,8 @@
           "\"hours\" | \"minutes\" | \"seconds\" | \"milliseconds\""
         ],
         "path": "src/platform/packages/shared/kbn-apm-ui-shared/src/utils/formatters/duration.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

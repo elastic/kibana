@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
 
@@ -38,6 +38,8 @@ test.describe('Transactions Overview', { tag: ['@ess', '@svlOblt'] }, () => {
     const transactionTypeFilter = transactionsOverviewPage.getTransactionTypeFilter();
     await expect(transactionTypeFilter).toHaveValue('request');
 
+    expect(page.url()).toContain('transactionType=request');
+
     // Change to 'Worker' type
     await transactionsOverviewPage.selectTransactionType('Worker');
     await expect(transactionTypeFilter).toHaveValue('Worker');
@@ -45,6 +47,8 @@ test.describe('Transactions Overview', { tag: ['@ess', '@svlOblt'] }, () => {
     // Navigate to Overview tab
     await page.getByTestId('overviewTab').click();
     await waitForApmSettingsHeaderLink(page);
+
+    expect(page.url()).toContain('transactionType=Worker');
 
     // Verify transaction type is still 'Worker'
     await expect(transactionTypeFilter).toHaveValue('Worker');

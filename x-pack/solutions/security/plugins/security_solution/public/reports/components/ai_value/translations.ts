@@ -330,3 +330,10 @@ export const EXECUTIVE_SUMMARY_SECONDARY_TEXT = i18n.translate(
       'By reducing the manual burden of high-volume alert review, the AI SOC enhances efficiency, lowers operational costs, and enables teams to focus on higher-value security work. At the same time, it increases threat detection coverage — helping organizations respond faster, with fewer resources.',
   }
 );
+
+export const TOTAL_ALERTS_PROCESSED = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.totalAlertsProcessed',
+  {
+    defaultMessage: 'Total alerts processed',
+  }
+);

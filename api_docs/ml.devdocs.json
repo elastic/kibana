@@ -30,6 +30,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_locator.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,6 +46,8 @@
               "\"ML_APP_LOCATOR\""
             ],
             "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_locator.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -62,6 +66,8 @@
               "<object>>"
             ],
             "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_locator.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -76,6 +82,8 @@
                   "MlLocatorParams"
                 ],
                 "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_locator.ts",
+                "lineNumber": 31,
+                "columnNumber": 40,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -96,6 +104,8 @@
           "\nThis class is meant as a wrapper for the Management Locator.\nThis will ensure url formatting is consistent with what it was prior to being moved to the Management section."
         ],
         "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -110,6 +120,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -138,6 +150,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+                "lineNumber": 36,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -158,6 +172,8 @@
               " | undefined, appId?: string) => Promise<{ path: string; url: string | undefined; }>"
             ],
             "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -173,6 +189,8 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+                "lineNumber": 90,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -188,6 +206,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+                "lineNumber": 91,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -208,6 +228,8 @@
               ", appId?: string) => { path: string; url: string | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -222,6 +244,8 @@
                   "MlLocatorParams"
                 ],
                 "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+                "lineNumber": 103,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -237,6 +261,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+                "lineNumber": 104,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -255,6 +281,8 @@
               "(path: string, appId?: string) => Promise<void>"
             ],
             "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -269,6 +297,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+                "lineNumber": 114,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -284,6 +314,8 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/ml/public/locator/ml_management_locator.ts",
+                "lineNumber": 114,
+                "columnNumber": 51,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -307,6 +339,8 @@
           "({ jobIds }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -321,6 +355,8 @@
               "Props"
             ],
             "path": "x-pack/platform/plugins/shared/ml/public/application/components/jobs_awaiting_node_warning/new_job_awaiting_node_shared/lazy_loader.tsx",
+            "lineNumber": 19,
+            "columnNumber": 54,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -340,6 +376,8 @@
           "({ nodeAvailableCallback, size }: Props) => React.JSX.Element | null"
         ],
         "path": "x-pack/platform/plugins/shared/ml/public/application/components/node_available_warning/node_available_warning_shared.tsx",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -354,6 +392,8 @@
               "Props"
             ],
             "path": "x-pack/platform/plugins/shared/ml/public/application/components/node_available_warning/node_available_warning_shared.tsx",
+            "lineNumber": 20,
+            "columnNumber": 57,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -397,6 +437,8 @@
           ", dependencies?: React.DependencyList | undefined) => string"
         ],
         "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_href.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -431,6 +473,8 @@
               " | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_href.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -446,6 +490,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_href.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -461,6 +507,8 @@
               "MlLocatorParams"
             ],
             "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_href.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -476,6 +524,8 @@
               "React.DependencyList | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_href.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -519,6 +569,8 @@
           ", appId?: string) => string | undefined"
         ],
         "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_management_href.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -553,6 +605,8 @@
               " | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_management_href.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -568,6 +622,8 @@
               "MlLocatorParams"
             ],
             "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_management_href.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -583,6 +639,8 @@
               "string"
             ],
             "path": "x-pack/platform/plugins/shared/ml/public/locator/use_ml_management_href.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -601,6 +659,8 @@
         "label": "DataRecognizerConfigResponse",
         "description": [],
         "path": "x-pack/platform/plugins/shared/ml/common/types/modules.ts",
+        "lineNumber": 109,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -616,6 +676,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/modules.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -631,6 +693,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/modules.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -651,6 +715,8 @@
               "[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/modules.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -665,6 +731,8 @@
         "label": "JobExistResult",
         "description": [],
         "path": "x-pack/platform/plugins/shared/ml/common/types/data_recognizer.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -676,6 +744,8 @@
             "label": "jobsExist",
             "description": [],
             "path": "x-pack/platform/plugins/shared/ml/common/types/data_recognizer.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -691,6 +761,8 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/data_recognizer.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -705,6 +777,8 @@
         "label": "JobStat",
         "description": [],
         "path": "x-pack/platform/plugins/shared/ml/common/types/data_recognizer.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -716,6 +790,8 @@
             "label": "id",
             "description": [],
             "path": "x-pack/platform/plugins/shared/ml/common/types/data_recognizer.ts",
+            "lineNumber": 9,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -727,6 +803,8 @@
             "label": "earliestTimestampMs",
             "description": [],
             "path": "x-pack/platform/plugins/shared/ml/common/types/data_recognizer.ts",
+            "lineNumber": 10,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -738,6 +816,8 @@
             "label": "latestTimestampMs",
             "description": [],
             "path": "x-pack/platform/plugins/shared/ml/common/types/data_recognizer.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -752,6 +832,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/data_recognizer.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -766,6 +848,8 @@
         "label": "MlCapabilitiesResponse",
         "description": [],
         "path": "x-pack/platform/plugins/shared/ml/common/types/capabilities.ts",
+        "lineNumber": 208,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -780,6 +864,8 @@
               "{ isADEnabled: boolean; isDFAEnabled: boolean; isNLPEnabled: boolean; } & { canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; canGetTrainedModels: boolean; canTestTrainedModels: boolean; canGetFieldInfo: boolean; canGetMlInfo: boolean; canUseAiops: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canDeleteForecast: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; canCreateTrainedModels: boolean; canDeleteTrainedModels: boolean; canStartStopTrainedModels: boolean; canCreateInferenceEndpoint: boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/capabilities.ts",
+            "lineNumber": 209,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -791,6 +877,8 @@
             "label": "upgradeInProgress",
             "description": [],
             "path": "x-pack/platform/plugins/shared/ml/common/types/capabilities.ts",
+            "lineNumber": 210,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -802,6 +890,8 @@
             "label": "isPlatinumOrTrialLicense",
             "description": [],
             "path": "x-pack/platform/plugins/shared/ml/common/types/capabilities.ts",
+            "lineNumber": 211,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -813,6 +903,8 @@
             "label": "mlFeatureEnabledInSpace",
             "description": [],
             "path": "x-pack/platform/plugins/shared/ml/common/types/capabilities.ts",
+            "lineNumber": 212,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -829,6 +921,8 @@
           "\nA summary of an anomaly detection job."
         ],
         "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -842,6 +936,8 @@
               "\nThe identifier for the anomaly detection job."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -855,6 +951,8 @@
               "\nA description of the job."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -871,6 +969,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -887,6 +987,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -903,6 +1005,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -921,6 +1025,8 @@
               "JobActionState"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -937,6 +1043,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -950,6 +1058,8 @@
               "\nFlag indicating whether a datafeed exists for the job."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -963,6 +1073,8 @@
               "\nThe identifier for the datafeed."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -976,6 +1088,8 @@
               "\nThe status of the datafeed."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -992,6 +1106,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1008,6 +1124,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1024,6 +1142,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1041,6 +1161,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1057,6 +1179,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1075,6 +1199,8 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1088,6 +1214,8 @@
               "\nFlag indicating whether results of the job can be viewed in the Single Metric Viewer."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1104,6 +1232,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1121,6 +1251,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1137,6 +1269,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1153,6 +1287,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1166,6 +1302,8 @@
               "\nIndicates whether the job is currently awaiting assignment to a node before opening."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1183,6 +1321,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1199,6 +1339,8 @@
               "{ [x: string]: string; }"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1212,6 +1354,8 @@
               "\nThe size of the interval that the analysis is aggregated into, typically between 5m and 1h."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1228,6 +1372,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1248,6 +1394,8 @@
           "\"ml_anomaly_swimlane\""
         ],
         "path": "x-pack/platform/plugins/shared/ml/public/embeddables/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1345,6 +1493,8 @@
           "AnomalySwimLaneComponentApi"
         ],
         "path": "x-pack/platform/plugins/shared/ml/public/embeddables/anomaly_swimlane/types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1378,6 +1528,8 @@
           "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; index?: string | undefined; alias?: string | null | undefined; group?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; hidePanelTitles?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; swimlaneType: \"overall\"; }>"
         ],
         "path": "x-pack/platform/plugins/shared/ml/public/embeddables/anomaly_swimlane/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1393,6 +1545,8 @@
           "\"anomaly-swim-lane\""
         ],
         "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/constants.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1417,6 +1571,8 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/ml/common/types/locator.ts",
+        "lineNumber": 304,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1459,6 +1615,8 @@
           " | undefined; } & Record<string, unknown>) | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/ml/common/types/trained_models.ts",
+        "lineNumber": 108,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1476,6 +1634,8 @@
           "{ readonly ANOMALY_DETECTION_JOBS_MANAGE: \"\"; readonly ANOMALY_DETECTION_JOBS_MANAGE_FOR_URL: \"jobs\"; readonly ANOMALY_EXPLORER: \"explorer\"; readonly SINGLE_METRIC_VIEWER: \"timeseriesexplorer\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE: \"\"; readonly DATA_FRAME_ANALYTICS_JOBS_MANAGE_FOR_URL: \"data_frame_analytics\"; readonly DATA_FRAME_ANALYTICS_SOURCE_SELECTION: \"data_frame_analytics/source_selection\"; readonly DATA_FRAME_ANALYTICS_CREATE_JOB: \"data_frame_analytics/new_job\"; readonly TRAINED_MODELS_MANAGE: \"trained_models\"; readonly DATA_DRIFT_INDEX_SELECT: \"data_drift_index_select\"; readonly DATA_DRIFT_CUSTOM: \"data_drift_custom\"; readonly DATA_DRIFT: \"data_drift\"; readonly NODES: \"nodes\"; readonly MEMORY_USAGE: \"memory_usage\"; readonly DATA_FRAME_ANALYTICS_EXPLORATION: \"data_frame_analytics/exploration\"; readonly DATA_FRAME_ANALYTICS_MAP: \"data_frame_analytics/map\"; readonly SUPPLIED_CONFIGURATIONS: \"ad_supplied_configurations\"; readonly DATA_VISUALIZER: \"datavisualizer\"; readonly DATA_VISUALIZER_INDEX_SELECT: \"datavisualizer_index_select\"; readonly DATA_VISUALIZER_FILE: \"filedatavisualizer\"; readonly DATA_VISUALIZER_ESQL: \"datavisualizer/esql\"; readonly DATA_VISUALIZER_INDEX_VIEWER: \"jobs/new_job/datavisualizer\"; readonly ANOMALY_DETECTION_CREATE_JOB: \"jobs/new_job\"; readonly ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER: \"jobs/new_job/recognize\"; readonly ANOMALY_DETECTION_CREATE_JOB_SINGLE_METRIC: \"jobs/new_job/single_metric\"; readonly ANOMALY_DETECTION_CREATE_JOB_MULTI_METRIC: \"jobs/new_job/multi_metric\"; readonly ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_MULTI_METRIC: \"jobs/new_job/convert_to_multi_metric\"; readonly ANOMALY_DETECTION_CREATE_JOB_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_POPULATION: \"jobs/new_job/population\"; readonly ANOMALY_DETECTION_CREATE_JOB_CATEGORIZATION: \"jobs/new_job/categorization\"; readonly ANOMALY_DETECTION_CREATE_JOB_RARE: \"jobs/new_job/rare\"; readonly ANOMALY_DETECTION_CREATE_JOB_GEO: \"jobs/new_job/geo\"; readonly ANOMALY_DETECTION_CREATE_JOB_CONVERT_TO_ADVANCED: \"jobs/new_job/advanced\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: \"jobs/new_job/step/job_type\"; readonly ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: \"jobs/new_job/step/select_source\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_LENS: \"jobs/new_job/from_lens\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_PATTERN_ANALYSIS: \"jobs/new_job/from_pattern_analysis\"; readonly ANOMALY_DETECTION_CREATE_JOB_FROM_MAP: \"jobs/new_job/from_map\"; readonly ANOMALY_DETECTION_MODULES_VIEW_OR_CREATE: \"modules/check_view_or_create\"; readonly SETTINGS: \"\"; readonly CALENDARS_MANAGE: \"calendars_list\"; readonly CALENDARS_DST_MANAGE: \"calendars_dst_list\"; readonly CALENDARS_NEW: \"calendars_list/new_calendar\"; readonly CALENDARS_DST_NEW: \"calendars_dst_list/new_calendar\"; readonly CALENDARS_EDIT: \"calendars_list/edit_calendar\"; readonly CALENDARS_DST_EDIT: \"calendars_dst_list/edit_calendar\"; readonly FILTER_LISTS_MANAGE: \"filter_lists\"; readonly FILTER_LISTS_NEW: \"filter_lists/new_filter_list\"; readonly FILTER_LISTS_EDIT: \"filter_lists/edit_filter_list\"; readonly OVERVIEW: \"overview\"; readonly NOTIFICATIONS: \"notifications\"; readonly AIOPS: \"aiops\"; readonly AIOPS_EXPLAIN_LOG_RATE_SPIKES: \"aiops/explain_log_rate_spikes\"; readonly AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT: \"aiops/explain_log_rate_spikes_index_select\"; readonly AIOPS_LOG_RATE_ANALYSIS: \"aiops/log_rate_analysis\"; readonly AIOPS_LOG_RATE_ANALYSIS_INDEX_SELECT: \"aiops/log_rate_analysis_index_select\"; readonly AIOPS_LOG_CATEGORIZATION: \"aiops/log_categorization\"; readonly AIOPS_LOG_CATEGORIZATION_INDEX_SELECT: \"aiops/log_categorization_index_select\"; readonly AIOPS_CHANGE_POINT_DETECTION: \"aiops/change_point_detection\"; readonly AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT: \"aiops/change_point_detection_index_select\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/ml/common/constants/locator.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1512,6 +1672,8 @@
         " | undefined; }"
       ],
       "path": "x-pack/platform/plugins/shared/ml/public/plugin.ts",
+      "lineNumber": 368,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -2082,6 +2244,8 @@
         " & React.RefAttributes<{}>>; }; }"
       ],
       "path": "x-pack/platform/plugins/shared/ml/public/plugin.ts",
+      "lineNumber": 369,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -2108,6 +2272,8 @@
           " extends Error"
         ],
         "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2122,6 +2288,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2136,6 +2304,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
+                "lineNumber": 18,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2164,6 +2334,8 @@
           " extends Error"
         ],
         "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2178,6 +2350,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2192,6 +2366,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
+                "lineNumber": 25,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2220,6 +2396,8 @@
           " extends Error"
         ],
         "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2234,6 +2412,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2248,6 +2428,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/ml/server/lib/capabilities/errors.ts",
+                "lineNumber": 11,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2271,6 +2453,8 @@
           "\nA summary of an anomaly detection job."
         ],
         "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2284,6 +2468,8 @@
               "\nThe identifier for the anomaly detection job."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2297,6 +2483,8 @@
               "\nA description of the job."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2313,6 +2501,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2329,6 +2519,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2345,6 +2537,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2363,6 +2557,8 @@
               "JobActionState"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2379,6 +2575,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2392,6 +2590,8 @@
               "\nFlag indicating whether a datafeed exists for the job."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2405,6 +2605,8 @@
               "\nThe identifier for the datafeed."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2418,6 +2620,8 @@
               "\nThe status of the datafeed."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2434,6 +2638,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2450,6 +2656,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2466,6 +2674,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2483,6 +2693,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2499,6 +2711,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2517,6 +2731,8 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2530,6 +2746,8 @@
               "\nFlag indicating whether results of the job can be viewed in the Single Metric Viewer."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2546,6 +2764,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2563,6 +2783,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2579,6 +2801,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2595,6 +2819,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2608,6 +2834,8 @@
               "\nIndicates whether the job is currently awaiting assignment to a node before opening."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2625,6 +2853,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2641,6 +2871,8 @@
               "{ [x: string]: string; }"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2654,6 +2886,8 @@
               "\nThe size of the interval that the analysis is aggregated into, typically between 5m and 1h."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2670,6 +2904,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2698,6 +2934,8 @@
           "; } | undefined>; }"
         ],
         "path": "x-pack/platform/plugins/shared/ml/server/shared.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2721,6 +2959,8 @@
           "[]; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/ml/server/shared.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2736,6 +2976,8 @@
           "MlDatafeedStats"
         ],
         "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/datafeed_stats.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2751,6 +2993,8 @@
           "MlJob"
         ],
         "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/job.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2778,6 +3022,8 @@
           ">; }"
         ],
         "path": "x-pack/platform/plugins/shared/ml/server/shared.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2801,6 +3047,8 @@
           ">>>; }"
         ],
         "path": "x-pack/platform/plugins/shared/ml/server/shared.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2826,6 +3074,8 @@
           ">; }"
         ],
         "path": "x-pack/platform/plugins/shared/ml/server/shared.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2857,6 +3107,8 @@
           "[]; interval: string; examplesByJobId?: { [key: string]: any; } | undefined; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/ml/server/shared.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2874,6 +3126,8 @@
           "JobActionState"
         ],
         "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2963,6 +3217,8 @@
           ">; }"
         ],
         "path": "x-pack/platform/plugins/shared/ml/server/shared.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3002,6 +3258,8 @@
         "TrainedModelsProvider"
       ],
       "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts",
+      "lineNumber": 78,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -3018,6 +3276,8 @@
         "void"
       ],
       "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts",
+      "lineNumber": 79,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -3039,6 +3299,8 @@
           "MlCapabilities"
         ],
         "path": "x-pack/platform/plugins/shared/ml/common/types/capabilities.ts",
+        "lineNumber": 106,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -3057,6 +3319,8 @@
           "\nA summary of an anomaly detection job."
         ],
         "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3070,6 +3334,8 @@
               "\nThe identifier for the anomaly detection job."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3083,6 +3349,8 @@
               "\nA description of the job."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3099,6 +3367,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3115,6 +3385,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3131,6 +3403,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3149,6 +3423,8 @@
               "JobActionState"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3165,6 +3441,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3178,6 +3456,8 @@
               "\nFlag indicating whether a datafeed exists for the job."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3191,6 +3471,8 @@
               "\nThe identifier for the datafeed."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3204,6 +3486,8 @@
               "\nThe status of the datafeed."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3220,6 +3504,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3236,6 +3522,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3252,6 +3540,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3269,6 +3559,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3285,6 +3577,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3303,6 +3597,8 @@
               "> | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3316,6 +3612,8 @@
               "\nFlag indicating whether results of the job can be viewed in the Single Metric Viewer."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3332,6 +3630,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 112,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3349,6 +3649,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3365,6 +3667,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3381,6 +3685,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 129,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3394,6 +3700,8 @@
               "\nIndicates whether the job is currently awaiting assignment to a node before opening."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3411,6 +3719,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 139,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3427,6 +3737,8 @@
               "{ [x: string]: string; }"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 144,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3440,6 +3752,8 @@
               "\nThe size of the interval that the analysis is aggregated into, typically between 5m and 1h."
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3456,6 +3770,8 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3474,6 +3790,8 @@
           "\nThe status of the datafeed."
         ],
         "path": "x-pack/platform/plugins/shared/ml/common/constants/states.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3488,6 +3806,8 @@
           "\nThe status of the anomaly detection job."
         ],
         "path": "x-pack/platform/plugins/shared/ml/common/constants/states.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3505,6 +3825,8 @@
           "MlDatafeed"
         ],
         "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/datafeed.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3520,6 +3842,8 @@
           "MlJob"
         ],
         "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/job.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3535,6 +3859,8 @@
           "(\"xpack.ml.anomaly_detection_alert\" | \"xpack.ml.anomaly_detection_jobs_health\")[]"
         ],
         "path": "x-pack/platform/plugins/shared/ml/common/constants/alerts.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3552,6 +3878,8 @@
           "JobActionState"
         ],
         "path": "x-pack/platform/plugins/shared/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3569,6 +3897,8 @@
           "{ readonly ANOMALY_DETECTION: \"xpack.ml.anomaly_detection_alert\"; readonly AD_JOBS_HEALTH: \"xpack.ml.anomaly_detection_jobs_health\"; }"
         ],
         "path": "x-pack/platform/plugins/shared/ml/common/constants/alerts.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

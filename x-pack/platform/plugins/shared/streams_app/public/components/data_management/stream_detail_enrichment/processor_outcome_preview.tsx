@@ -16,8 +16,8 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
-import { Sample } from '@kbn/grok-ui';
 import { i18n } from '@kbn/i18n';
 import type { GrokProcessor } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
@@ -25,6 +25,13 @@ import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import {
+  useGrokExpressions,
+  GrokExpressionsProvider,
+  GrokSampleWithContext,
+  type DraftGrokExpression,
+  type FieldDefinition,
+} from '@kbn/grok-ui';
 import { useDocViewerSetup } from '../../../hooks/use_doc_viewer_setup';
 import { useDocumentExpansion } from '../../../hooks/use_document_expansion';
 import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
@@ -174,48 +181,78 @@ const PreviewDocumentsGroupBy = () => {
             { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }
           )}
         >
-          <EuiFilterButton
-            {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_all.id)}
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_all.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_all.id}
           >
-            {previewDocsFilterOptions.outcome_filter_all.label}
-          </EuiFilterButton>
-          <EuiFilterButton
-            {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
-            badgeColor="success"
-            numActiveFilters={simulationParsedRate}
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_all.id)}
+            >
+              {previewDocsFilterOptions.outcome_filter_all.label}
+            </EuiFilterButton>
+          </EuiToolTip>
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_parsed.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_parsed.id}
           >
-            {previewDocsFilterOptions.outcome_filter_parsed.label}
-          </EuiFilterButton>
-          <EuiFilterButton
-            {...getFilterButtonPropsFor(
-              previewDocsFilterOptions.outcome_filter_partially_parsed.id
-            )}
-            badgeColor="accent"
-            numActiveFilters={simulationPartiallyParsedRate}
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
+              badgeColor="success"
+              numActiveFilters={simulationParsedRate}
+            >
+              {previewDocsFilterOptions.outcome_filter_parsed.label}
+            </EuiFilterButton>
+          </EuiToolTip>
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_partially_parsed.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_partially_parsed.id}
           >
-            {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
-          </EuiFilterButton>
-          <EuiFilterButton
-            {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
-            badgeColor="accent"
-            numActiveFilters={simulationSkippedRate}
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(
+                previewDocsFilterOptions.outcome_filter_partially_parsed.id
+              )}
+              badgeColor="accent"
+              numActiveFilters={simulationPartiallyParsedRate}
+            >
+              {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
+            </EuiFilterButton>
+          </EuiToolTip>
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_skipped.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_skipped.id}
           >
-            {previewDocsFilterOptions.outcome_filter_skipped.label}
-          </EuiFilterButton>
-          <EuiFilterButton
-            {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
-            badgeColor="accent"
-            numActiveFilters={simulationFailedRate}
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
+              badgeColor="accent"
+              numActiveFilters={simulationSkippedRate}
+            >
+              {previewDocsFilterOptions.outcome_filter_skipped.label}
+            </EuiFilterButton>
+          </EuiToolTip>
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_failed.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_failed.id}
           >
-            {previewDocsFilterOptions.outcome_filter_failed.label}
-          </EuiFilterButton>
-          <EuiFilterButton
-            {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_dropped.id)}
-            badgeColor="accent"
-            numActiveFilters={simulationDroppedRate}
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
+              badgeColor="accent"
+              numActiveFilters={simulationFailedRate}
+            >
+              {previewDocsFilterOptions.outcome_filter_failed.label}
+            </EuiFilterButton>
+          </EuiToolTip>
+          <EuiToolTip
+            content={previewDocsFilterOptions.outcome_filter_dropped.tooltip}
+            key={previewDocsFilterOptions.outcome_filter_dropped.id}
           >
-            {previewDocsFilterOptions.outcome_filter_dropped.label}
-          </EuiFilterButton>
+            <EuiFilterButton
+              {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_dropped.id)}
+              badgeColor="accent"
+              numActiveFilters={simulationDroppedRate}
+            >
+              {previewDocsFilterOptions.outcome_filter_dropped.label}
+            </EuiFilterButton>
+          </EuiToolTip>
         </EuiFilterGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -292,21 +329,30 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         };
   });
 
-  const grokCollection = useStreamEnrichmentSelector(
-    (machineState) => machineState.context.grokCollection
-  );
+  // Get grok patterns from the draft processor
+  const grokPatterns =
+    draftProcessor?.processor &&
+    'action' in draftProcessor.processor &&
+    draftProcessor.processor.action === 'grok'
+      ? draftProcessor.processor.patterns
+      : [];
 
+  // Convert patterns to DraftGrokExpression instances for field analysis
+  // Kind of annoying we have to do this here when the Provider will also do this, but
+  // this will change when we allow grok expressions to overwrite the configured field in the UI.
+  const grokExpressions = useGrokExpressions(grokPatterns);
+
+  // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change)
+  // we defer to the standard preview table showing all columns
   const grokMode =
     draftProcessor?.processor &&
     'action' in draftProcessor.processor &&
     draftProcessor.processor.action === 'grok' &&
     !isEmpty(draftProcessor.processor.from) &&
-    // NOTE: If a Grok expression attempts to overwrite the configured field (non-additive change) we defer to the standard preview table showing all columns
-    !draftProcessor.resources?.grokExpressions.some((grokExpression) => {
-      if (draftProcessor.processor && !(draftProcessor.processor.action === 'grok')) return false;
-      const fieldName = draftProcessor.processor?.from;
+    !grokExpressions.some((grokExpression: DraftGrokExpression) => {
+      const fieldName = (draftProcessor.processor as GrokProcessor).from;
       return Array.from(grokExpression.getFields().values()).some(
-        (field) => field.name === fieldName
+        (field: FieldDefinition) => field.name === fieldName
       );
     });
 
@@ -439,19 +485,13 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         ? (document: SampleDocument, columnId: string) => {
             const value = document[columnId];
             if (typeof value === 'string' && columnId === validGrokField) {
-              return (
-                <Sample
-                  grokCollection={grokCollection}
-                  draftGrokExpressions={draftProcessor.resources?.grokExpressions ?? []}
-                  sample={value}
-                />
-              );
+              return <GrokSampleWithContext sample={value} />;
             } else {
               return <>&nbsp;</>;
             }
           }
         : undefined,
-    [draftProcessor.resources?.grokExpressions, grokCollection, grokMode, validGrokField]
+    [grokMode, validGrokField]
   );
 
   const hits = useMemo(() => {
@@ -492,7 +532,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     [userSelectedViewMode, isViewModeForced, setViewMode]
   );
 
-  return (
+  const content = (
     <>
       <RowSelectionContext.Provider value={rowSelectionContextValue}>
         <MemoPreviewTable
@@ -522,6 +562,13 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         />
       </DocViewerContext.Provider>
     </>
+  );
+
+  // Wrap with GrokExpressionsProvider when in grok mode to provide patterns to Sample components
+  return grokMode ? (
+    <GrokExpressionsProvider patterns={grokPatterns}>{content}</GrokExpressionsProvider>
+  ) : (
+    content
   );
 };
 

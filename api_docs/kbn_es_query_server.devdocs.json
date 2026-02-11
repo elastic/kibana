@@ -25,6 +25,8 @@
           "{ readonly mode: \"absolute\"; readonly from: string; readonly to: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query-server/src/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -40,6 +42,8 @@
           "{ esql: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query-server/src/types.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -80,6 +84,8 @@
           "<Readonly<{ key?: string | undefined; value?: string | undefined; label?: string | undefined; disabled?: boolean | undefined; dataViewId?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; pinned?: boolean | undefined; filterType?: string | undefined; } & { dsl: Record<string, any>; }>>"
         ],
         "path": "src/platform/packages/shared/kbn-es-query-server/src/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -95,6 +101,8 @@
           "{ query: string | Record<string, any>; language: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query-server/src/types.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -110,6 +118,8 @@
           "{ readonly mode: \"relative\"; readonly from: string; readonly to: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query-server/src/types.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -125,6 +135,8 @@
           "{ mode?: \"absolute\" | \"relative\" | undefined; from: string; to: string; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query-server/src/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -151,6 +163,8 @@
           "<Readonly<{ key?: string | undefined; value?: string | undefined; label?: string | undefined; disabled?: boolean | undefined; dataViewId?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; pinned?: boolean | undefined; filterType?: string | undefined; } & { condition: Readonly<{} & { value: string | number | boolean; operator: \"is\" | \"is_not\"; field: string; }> | Readonly<{} & { value: string[] | boolean[] | number[]; operator: \"is_one_of\" | \"is_not_one_of\"; field: string; }> | Readonly<{} & { value: Readonly<{ gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; operator: \"range\"; field: string; }> | Readonly<{} & { operator: \"exists\" | \"not_exists\"; field: string; }>; }> | Readonly<{ key?: string | undefined; value?: string | undefined; label?: string | undefined; disabled?: boolean | undefined; dataViewId?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; pinned?: boolean | undefined; filterType?: string | undefined; } & { group: Readonly<{} & { type: \"or\" | \"and\"; conditions: unknown[]; }>; }> | Readonly<{ key?: string | undefined; value?: string | undefined; label?: string | undefined; disabled?: boolean | undefined; dataViewId?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; pinned?: boolean | undefined; filterType?: string | undefined; } & { dsl: Record<string, any>; }>>"
         ],
         "path": "src/platform/packages/shared/kbn-es-query-server/src/filter.ts",
+        "lineNumber": 234,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -189,6 +203,8 @@
           "<string>; }>"
         ],
         "path": "src/platform/packages/shared/kbn-es-query-server/src/query.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -347,6 +363,8 @@
           "; }> | undefined>; }>"
         ],
         "path": "src/platform/packages/shared/kbn-es-query-server/src/stored_filter.ts",
+        "lineNumber": 52,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -393,6 +411,8 @@
           "<\"absolute\" | \"relative\" | undefined>; }>"
         ],
         "path": "src/platform/packages/shared/kbn-es-query-server/src/time_range.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

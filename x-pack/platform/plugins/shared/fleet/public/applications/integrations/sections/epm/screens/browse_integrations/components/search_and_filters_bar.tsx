@@ -70,6 +70,7 @@ const SortFilter: React.FC = () => {
           }
         ),
         key: 'a-z',
+        'data-test-subj': 'browseIntegrations.searchBar.sortByAZOption',
       },
       {
         label: i18n.translate(
@@ -79,6 +80,7 @@ const SortFilter: React.FC = () => {
           }
         ),
         key: 'z-a',
+        'data-test-subj': 'browseIntegrations.searchBar.sortByZAOption',
       },
     ],
     []
@@ -162,6 +164,7 @@ const SearchBar: React.FC = () => {
         }
       )}
       value={searchTerms}
+      data-test-subj="browseIntegrations.searchBar.input"
       onChange={(e) => setSearchTerms(e.target.value)}
       fullWidth
     />

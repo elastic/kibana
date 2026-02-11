@@ -194,7 +194,7 @@ describe('NoFindingsStates', () => {
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-l-center-center-column-FullSizeCenteredPage"
+          class="euiFlexGroup emotion-euiFlexGroup-m-center-center-column-FullSizeCenteredPage"
         />
       </div>
     `);

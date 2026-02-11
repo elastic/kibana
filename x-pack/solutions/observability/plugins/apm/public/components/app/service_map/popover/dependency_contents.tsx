@@ -49,7 +49,7 @@ export function DependencyContents({ elementData, environment, start, end }: Con
         return callApmApi('GET /internal/apm/service-map/dependency', {
           params: {
             query: {
-              dependencyName,
+              dependencies: dependencyName,
               environment,
               start,
               end,

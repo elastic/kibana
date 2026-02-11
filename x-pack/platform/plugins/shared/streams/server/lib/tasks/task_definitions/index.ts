@@ -8,8 +8,13 @@
 import type { Logger } from '@kbn/core/server';
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import type { GetScopedClients } from '../../../routes/types';
+import { createStreamsDescriptionGenerationTask } from './description_generation';
 import { createStreamsSystemIdentificationTask } from './system_identification';
+import { createStreamsInsightsDiscoveryTask } from './insights_discovery';
+import { createStreamsSignificantEventsQueriesGenerationTask } from './significant_events_queries_generation';
 import type { EbtTelemetryClient } from '../../telemetry';
+import { createStreamsFeaturesIdentificationTask } from './features_identification';
+import { createStreamsOnboardingTask } from './onboarding';
 
 export interface TaskContext {
   logger: Logger;
@@ -19,7 +24,12 @@ export interface TaskContext {
 
 export function createTaskDefinitions(taskContext: TaskContext) {
   return {
+    ...createStreamsDescriptionGenerationTask(taskContext),
     ...createStreamsSystemIdentificationTask(taskContext),
+    ...createStreamsSignificantEventsQueriesGenerationTask(taskContext),
+    ...createStreamsFeaturesIdentificationTask(taskContext),
+    ...createStreamsInsightsDiscoveryTask(taskContext),
+    ...createStreamsOnboardingTask(taskContext),
   } satisfies TaskDefinitionRegistry;
 }
 

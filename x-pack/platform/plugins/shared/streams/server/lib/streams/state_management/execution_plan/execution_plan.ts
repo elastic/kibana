@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { groupBy, orderBy } from 'lodash';
+import { groupBy } from 'lodash';
+import { getSegments } from '@kbn/streams-schema';
 import type { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   deleteComponent,
@@ -26,6 +27,7 @@ import {
   deleteIngestPipeline,
   upsertIngestPipeline,
 } from '../../ingest_pipelines/manage_ingest_pipelines';
+import { upsertEsqlView, deleteEsqlView } from '../../esql_views/manage_esql_views';
 import { FailedToExecuteElasticsearchActionsError } from '../errors/failed_to_execute_elasticsearch_actions_error';
 import { FailedToPlanElasticsearchActionsError } from '../errors/failed_to_plan_elasticsearch_actions_error';
 import { InsufficientPermissionsError } from '../../errors/insufficient_permissions_error';
@@ -37,6 +39,7 @@ import type {
   DeleteComponentTemplateAction,
   DeleteDatastreamAction,
   DeleteDotStreamsDocumentAction,
+  DeleteEsqlViewAction,
   DeleteIndexTemplateAction,
   DeleteIngestPipelineAction,
   DeleteQueriesAction,
@@ -46,6 +49,7 @@ import type {
   UpsertComponentTemplateAction,
   UpsertDatastreamAction,
   UpsertDotStreamsDocumentAction,
+  UpsertEsqlViewAction,
   UpsertIndexTemplateAction,
   UpsertIngestPipelineAction,
   RolloverAction,
@@ -54,6 +58,7 @@ import type {
   UnlinkSystemsAction,
   UpdateIngestSettingsAction,
   UpdateFailureStoreAction,
+  UnlinkFeaturesAction,
 } from './types';
 
 /**
@@ -90,7 +95,10 @@ export class ExecutionPlan {
       delete_queries: [],
       unlink_assets: [],
       unlink_systems: [],
+      unlink_features: [],
       update_ingest_settings: [],
+      upsert_esql_view: [],
+      delete_esql_view: [],
     };
   }
 
@@ -181,7 +189,10 @@ export class ExecutionPlan {
         delete_queries,
         unlink_assets,
         unlink_systems,
+        unlink_features,
         update_ingest_settings,
+        upsert_esql_view,
+        delete_esql_view,
         ...rest
       } = this.actionsByType;
       assertEmptyObject(rest);
@@ -223,12 +234,17 @@ export class ExecutionPlan {
         this.deleteQueries(delete_queries),
         this.unlinkAssets(unlink_assets),
         this.unlinkSystems(unlink_systems),
+        this.unlinkFeatures(unlink_features),
+        this.deleteEsqlViews(delete_esql_view),
       ]);
 
       await this.upsertAndDeleteDotStreamsDocuments([
         ...upsert_dot_streams_document,
         ...delete_dot_streams_document,
       ]);
+
+      // Upsert ES|QL views after the stream documents are created
+      await this.upsertEsqlViews(upsert_esql_view);
     } catch (error) {
       throw new FailedToExecuteElasticsearchActionsError(
         `Failed to execute Elasticsearch actions: ${error.message}`
@@ -268,6 +284,16 @@ export class ExecutionPlan {
       actions.map((action) =>
         this.dependencies.systemClient.syncSystemList(action.request.name, [])
       )
+    );
+  }
+
+  private async unlinkFeatures(actions: UnlinkFeaturesAction[]) {
+    if (actions.length === 0) {
+      return;
+    }
+
+    return Promise.all(
+      actions.map((action) => this.dependencies.featureClient.deleteFeatures(action.request.name))
     );
   }
 
@@ -361,17 +387,26 @@ export class ExecutionPlan {
   private async upsertIngestPipelines(actions: UpsertIngestPipelineAction[]) {
     const actionWithStreamsDepth = actions.map((action) => ({
       ...action,
-      depth: action.stream.match(/\./g)?.length ?? 0,
+      depth: getSegments(action.stream).length - 1,
     }));
-    return Promise.all(
-      orderBy(actionWithStreamsDepth, 'depth', 'desc').map((action) =>
-        upsertIngestPipeline({
-          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
-          logger: this.dependencies.logger,
-          pipeline: action.request,
-        })
-      )
-    );
+
+    const actionsByDepth = groupBy(actionWithStreamsDepth, 'depth');
+    const depths = Object.keys(actionsByDepth)
+      .map(Number)
+      .sort((a, b) => b - a); // Sort descending: deepest (children) first
+
+    // Process each depth level sequentially, with pipelines at the same depth in parallel
+    for (const depth of depths) {
+      await Promise.all(
+        actionsByDepth[depth].map((action) =>
+          upsertIngestPipeline({
+            esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+            logger: this.dependencies.logger,
+            pipeline: action.request,
+          })
+        )
+      );
+    }
   }
 
   private async deleteDatastreams(actions: DeleteDatastreamAction[]) {
@@ -453,6 +488,39 @@ export class ExecutionPlan {
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           names: [action.request.name],
           settings: action.request.settings,
+        })
+      )
+    );
+  }
+
+  private async upsertEsqlViews(actions: UpsertEsqlViewAction[]) {
+    if (actions.length === 0) {
+      return;
+    }
+
+    return Promise.all(
+      actions.map((action) =>
+        upsertEsqlView({
+          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          logger: this.dependencies.logger,
+          name: action.request.name,
+          query: action.request.query,
+        })
+      )
+    );
+  }
+
+  private async deleteEsqlViews(actions: DeleteEsqlViewAction[]) {
+    if (actions.length === 0) {
+      return;
+    }
+
+    return Promise.all(
+      actions.map((action) =>
+        deleteEsqlView({
+          esClient: this.dependencies.scopedClusterClient.asCurrentUser,
+          logger: this.dependencies.logger,
+          name: action.request.name,
         })
       )
     );

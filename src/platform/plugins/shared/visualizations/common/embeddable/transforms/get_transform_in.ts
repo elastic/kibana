@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
 import type { Reference } from '@kbn/content-management-utils';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type {
   VisualizeByReferenceState,
   VisualizeByValueState,
@@ -24,22 +24,19 @@ import type {
 
 export const VIS_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
-export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['transformIn']) {
+export function getTransformIn(transformDrilldownsIn: DrilldownTransforms['transformIn']) {
   function transformIn(state: VisualizeEmbeddableState): {
     state: StoredVisualizeEmbeddableState;
     references: Reference[];
   } {
-    const { enhancementsState, enhancementsReferences } = state.enhancements
-      ? transformEnhancementsIn(state.enhancements)
-      : { enhancementsState: undefined, enhancementsReferences: [] };
+    const { state: storedState, references: drilldownReferences } = transformDrilldownsIn(state);
 
     // by ref
-    if ((state as VisualizeByReferenceState).savedObjectId) {
-      const { savedObjectId, ...rest } = state as VisualizeByReferenceState;
+    if ((storedState as VisualizeByReferenceState).savedObjectId) {
+      const { savedObjectId, ...rest } = storedState as VisualizeByReferenceState;
       return {
         state: {
           ...rest,
-          ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         } as StoredVisualizeByReferenceState,
         references: [
           {
@@ -47,33 +44,31 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
             type: VISUALIZE_SAVED_OBJECT_TYPE,
             id: savedObjectId!,
           },
-          ...enhancementsReferences,
+          ...drilldownReferences,
         ],
       };
     }
 
     // by value
-    if ((state as VisualizeByValueState).savedVis) {
+    if ((storedState as VisualizeByValueState).savedVis) {
       const { references, savedVis } = extractVisReferences(
-        (state as VisualizeByValueState).savedVis
+        (storedState as VisualizeByValueState).savedVis
       );
 
       return {
         state: {
-          ...state,
-          ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+          ...storedState,
           savedVis,
         } as StoredVisualizeByValueState,
-        references: [...references, ...enhancementsReferences],
+        references: [...references, ...drilldownReferences],
       };
     }
 
     return {
       state: {
-        ...state,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+        ...storedState,
       } as StoredVisualizeEmbeddableState,
-      references: enhancementsReferences,
+      references: drilldownReferences,
     };
   }
   return transformIn;

@@ -84,10 +84,8 @@ export function createAddSingleMetricViewerPanelAction(
                 presentationContainerParent.addNewPanel({
                   panelType: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
                   serializedState: {
-                    rawState: {
-                      ...initialState,
-                      title: initialState.panelTitle,
-                    },
+                    ...initialState,
+                    title: initialState.panelTitle,
                   },
                 });
                 closeFlyout();

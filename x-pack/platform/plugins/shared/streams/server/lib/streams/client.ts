@@ -38,6 +38,7 @@ import { State } from './state_management/state';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import type { SystemClient } from './system/system_client';
+import type { FeatureClient } from './feature';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -74,6 +75,7 @@ export class StreamsClient {
       attachmentClient: AttachmentClient;
       queryClient: QueryClient;
       systemClient: SystemClient;
+      featureClient: FeatureClient;
       storageClient: StreamsStorageClient;
       logger: Logger;
       request: KibanaRequest;
@@ -101,10 +103,6 @@ export class StreamsClient {
 
   public async checkStreamStatus(): Promise<boolean | 'conflict'> {
     const rootLogsStreamExists = await this.checkRootLogsStreamExists();
-    if (this.dependencies.isServerless) {
-      // in serverless, Elasticsearch doesn't natively support streams yet
-      return rootLogsStreamExists;
-    }
     const isEnabledOnElasticsearch = await this.checkElasticsearchStreamStatus();
     if (isEnabledOnElasticsearch !== rootLogsStreamExists) {
       return 'conflict';
@@ -157,16 +155,13 @@ export class StreamsClient {
       );
     }
 
-    if (!this.dependencies.isServerless) {
-      // in serverless, Elasticsearch doesn't natively support streams yet
-      const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
+    const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
 
-      if (!elasticsearchStreamsEnabled) {
-        await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
-          method: 'POST',
-          path: '_streams/logs/_enable',
-        });
-      }
+    if (!elasticsearchStreamsEnabled) {
+      await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+        method: 'POST',
+        path: '_streams/logs/_enable',
+      });
     }
 
     return { acknowledged: true, result: 'created' };
@@ -176,7 +171,7 @@ export class StreamsClient {
    * Disabling streams means deleting the logs root stream
    * AND its descendants, including any Elasticsearch objects,
    * such as data streams. That means it deletes all data
-   * belonging to wired and group streams.
+   * belonging to wired streams.
    *
    * It does NOT delete classic streams.
    */
@@ -197,21 +192,13 @@ export class StreamsClient {
     const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
 
     if (rootStreamExists) {
-      const streams = await this.getManagedStreams();
-      const groupStreams = streams.filter((stream) => Streams.GroupStream.Definition.is(stream));
-
       await State.attemptChanges(
         [
           {
             type: 'delete' as const,
             name: LOGS_ROOT_STREAM_NAME,
           },
-        ].concat(
-          groupStreams.map((stream) => ({
-            type: 'delete' as const,
-            name: stream.name,
-          }))
-        ),
+        ],
         {
           ...this.dependencies,
           streamsClient: this,
@@ -355,6 +342,7 @@ export class StreamsClient {
             name,
             description: '',
             updated_at: now,
+            query_streams: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: { steps: [], updated_at: now },
@@ -365,6 +353,32 @@ export class StreamsClient {
               },
               failure_store: { inherit: {} },
             },
+          },
+        },
+      ],
+      { ...this.dependencies, streamsClient: this }
+    );
+
+    return { acknowledged: true, result: 'created' };
+  }
+
+  async createQueryStream({
+    name,
+    query,
+  }: {
+    name: string;
+    query: Streams.QueryStream.UpsertRequest['stream']['query'];
+  }): Promise<UpsertStreamResponse> {
+    await State.attemptChanges(
+      [
+        {
+          type: 'upsert',
+          definition: {
+            name,
+            description: '',
+            updated_at: new Date().toISOString(),
+            query_streams: [],
+            query,
           },
         },
       ],
@@ -420,7 +434,6 @@ export class StreamsClient {
    * - if a wired stream definition exists
    * - if an ingest stream definition exists
    * - if a data stream exists (creates an ingest definition on the fly)
-   * - if a group stream definition exists
    *
    * Throws when:
    * - no definition is found
@@ -705,28 +718,26 @@ export class StreamsClient {
       query,
     });
 
-    const streams = streamsSearchResponse.hits.hits.flatMap((hit) =>
-      this.getStreamDefinitionFromSource(hit._source)
-    );
+    const streams = streamsSearchResponse.hits.hits
+      .filter(
+        ({ _source: definition }) => !('group' in definition) // Filter out old Group streams
+      )
+      .flatMap((hit) => this.getStreamDefinitionFromSource(hit._source));
 
     const privileges = await checkAccessBulk({
       names: streams
-        .filter((stream) => !Streams.GroupStream.Definition.is(stream))
+        .filter((stream) => !Streams.QueryStream.Definition.is(stream))
         .map((stream) => stream.name),
       scopedClusterClient,
     });
 
     return streams.filter((stream) => {
-      if (Streams.GroupStream.Definition.is(stream)) return true;
+      if (Streams.QueryStream.Definition.is(stream)) return true;
       return privileges[stream.name]?.read === true;
     });
   }
 
   private async checkElasticsearchStreamStatus(): Promise<boolean> {
-    if (this.dependencies.isServerless) {
-      // in serverless, Elasticsearch doesn't natively support streams yet
-      return false;
-    }
     const response = (await this.dependencies.scopedClusterClient.asInternalUser.transport.request({
       method: 'GET',
       path: '/_streams/status',

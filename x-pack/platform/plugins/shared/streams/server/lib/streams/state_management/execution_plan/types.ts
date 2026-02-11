@@ -156,6 +156,13 @@ export interface UnlinkSystemsAction {
   };
 }
 
+export interface UnlinkFeaturesAction {
+  type: 'unlink_features';
+  request: {
+    name: string;
+  };
+}
+
 export interface UpdateIngestSettingsAction {
   type: 'update_ingest_settings';
   request: {
@@ -165,6 +172,21 @@ export interface UpdateIngestSettingsAction {
       'index.number_of_shards'?: number | null;
       'index.refresh_interval': string | -1 | null;
     };
+  };
+}
+
+export interface UpsertEsqlViewAction {
+  type: 'upsert_esql_view';
+  request: {
+    name: string;
+    query: string;
+  };
+}
+
+export interface DeleteEsqlViewAction {
+  type: 'delete_esql_view';
+  request: {
+    name: string;
   };
 }
 
@@ -188,8 +210,11 @@ export type ElasticsearchAction =
   | DeleteQueriesAction
   | UnlinkAssetsAction
   | UnlinkSystemsAction
+  | UnlinkFeaturesAction
   | UpdateFailureStoreAction
-  | UpdateIngestSettingsAction;
+  | UpdateIngestSettingsAction
+  | UpsertEsqlViewAction
+  | DeleteEsqlViewAction;
 
 export interface ActionsByType {
   upsert_component_template: UpsertComponentTemplateAction[];
@@ -211,6 +236,9 @@ export interface ActionsByType {
   delete_queries: DeleteQueriesAction[];
   unlink_assets: UnlinkAssetsAction[];
   unlink_systems: UnlinkSystemsAction[];
+  unlink_features: UnlinkFeaturesAction[];
   update_failure_store: UpdateFailureStoreAction[];
   update_ingest_settings: UpdateIngestSettingsAction[];
+  upsert_esql_view: UpsertEsqlViewAction[];
+  delete_esql_view: DeleteEsqlViewAction[];
 }

@@ -22,6 +22,8 @@
           "\nProvides a method to scope the {@link DeprecationsServiceSetup | Deprecations Service} to a specific domain."
         ],
         "path": "src/core/packages/deprecations/server/src/contracts.ts",
+        "lineNumber": 128,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
               "DeprecationsServiceSetup"
             ],
             "path": "src/core/packages/deprecations/server/src/contracts.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -55,6 +59,8 @@
                   "string"
                 ],
                 "path": "src/core/packages/deprecations/server/src/contracts.ts",
+                "lineNumber": 137,
+                "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -75,6 +81,8 @@
           "\nServer-side client that provides access to fetch all Kibana deprecations\n"
         ],
         "path": "src/core/packages/deprecations/server/src/request_handler_context.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -95,6 +103,8 @@
               ">[]>"
             ],
             "path": "src/core/packages/deprecations/server/src/request_handler_context.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -113,6 +123,8 @@
           "\nCore's `deprecations` request handler context."
         ],
         "path": "src/core/packages/deprecations/server/src/request_handler_context.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -129,6 +141,8 @@
               "DeprecationsClient"
             ],
             "path": "src/core/packages/deprecations/server/src/request_handler_context.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -145,6 +159,8 @@
           "\nThe deprecations service provides a way for the Kibana platform to communicate deprecated\nfeatures and configs with its users. These deprecations are only communicated\nif the deployment is using these features. Allowing for a user tailored experience\nfor upgrading the stack version.\n\nThe Deprecation service is consumed by the upgrade assistant to assist with the upgrade\nexperience.\n\nIf a deprecated feature can be resolved without manual user intervention.\nUsing correctiveActions.api allows the Upgrade Assistant to use this api to correct the\ndeprecation upon a user trigger.\n"
         ],
         "path": "src/core/packages/deprecations/server/src/contracts.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -163,6 +179,8 @@
               ") => void"
             ],
             "path": "src/core/packages/deprecations/server/src/contracts.ts",
+            "lineNumber": 91,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -179,6 +197,8 @@
                   "RegisterDeprecationsConfig"
                 ],
                 "path": "src/core/packages/deprecations/server/src/contracts.ts",
+                "lineNumber": 100,
+                "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -199,6 +219,8 @@
           "\nScoped clients and helpers to ease fetching the deprecations."
         ],
         "path": "src/core/packages/deprecations/server/src/contracts.ts",
+        "lineNumber": 116,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -215,6 +237,8 @@
               "IScopedClusterClient"
             ],
             "path": "src/core/packages/deprecations/server/src/contracts.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -231,6 +255,8 @@
               "SavedObjectsClientContract"
             ],
             "path": "src/core/packages/deprecations/server/src/contracts.ts",
+            "lineNumber": 123,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -246,6 +272,8 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "src/core/packages/deprecations/server/src/contracts.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -262,6 +290,8 @@
           "\nOptions to provide when registering deprecations via {@link DeprecationsServiceSetup.registerDeprecations}."
         ],
         "path": "src/core/packages/deprecations/server/src/contracts.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -290,6 +320,8 @@
               "[]>"
             ],
             "path": "src/core/packages/deprecations/server/src/contracts.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -306,6 +338,8 @@
                   "GetDeprecationsContext"
                 ],
                 "path": "src/core/packages/deprecations/server/src/contracts.ts",
+                "lineNumber": 113,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

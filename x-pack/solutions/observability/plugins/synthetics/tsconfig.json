@@ -18,6 +18,7 @@
     "@kbn/observability-plugin",
     "@kbn/fleet-plugin",
     "@kbn/unified-search-plugin",
+    "@kbn/kql",
     "@kbn/i18n",
     "@kbn/core",
     "@kbn/config-schema",

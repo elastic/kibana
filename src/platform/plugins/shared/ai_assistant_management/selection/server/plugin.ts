@@ -16,10 +16,6 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
-import {
-  AI_AGENTS_FEATURE_FLAG,
-  AI_AGENTS_FEATURE_FLAG_DEFAULT,
-} from '@kbn/ai-assistant-common/src/constants/feature_flags';
 import type { AIAssistantManagementSelectionConfig } from './config';
 import type {
   AIAssistantManagementSelectionPluginServerDependenciesSetup,
@@ -92,19 +88,9 @@ export class AIAssistantManagementSelectionPlugin
           ...chatExperienceSetting,
           getValue: async ({ request }: { request?: KibanaRequest } = {}) => {
             try {
-              const [coreStart, startServices] = await core.getStartServices();
-
-              const isAiAgentsEnabled = await coreStart.featureFlags.getBooleanValue(
-                AI_AGENTS_FEATURE_FLAG,
-                AI_AGENTS_FEATURE_FLAG_DEFAULT
-              );
-
-              if (!isAiAgentsEnabled) {
-                return AIChatExperience.Classic;
-              }
-
+              const [, startServices] = await core.getStartServices();
               // Avoid security exceptions before login - only check space when authenticated
-              if (request && startServices.spaces && request.auth.isAuthenticated) {
+              if (startServices.spaces && request?.auth.isAuthenticated) {
                 const activeSpace = await startServices.spaces.spacesService.getActiveSpace(
                   request
                 );
@@ -112,17 +98,11 @@ export class AIAssistantManagementSelectionPlugin
                   return AIChatExperience.Agent;
                 }
               }
-
-              if (this.config.preferredChatExperience) {
-                return this.config.preferredChatExperience;
-              }
-
-              return AIChatExperience.Classic;
             } catch (e) {
-              this.logger.error('Error in chat experience setting:');
+              this.logger.error('Error getting active space:');
               this.logger.error(e);
-              return AIChatExperience.Classic;
             }
+            return this.config.preferredChatExperience ?? AIChatExperience.Classic;
           },
         },
       });

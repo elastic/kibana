@@ -13,9 +13,9 @@ import {
   EuiComboBoxWrapper,
   EuiDataGridWrapper,
   EuiSuperSelectWrapper,
-  expect,
   KibanaCodeEditorWrapper,
 } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
@@ -29,6 +29,8 @@ export class StreamsApp {
   public readonly advancedSettingsCodeBlock;
   public readonly kibanaMonacoEditor;
   public readonly saveRoutingRuleButton;
+  public readonly concatFieldInput;
+  public readonly concatLiteralInput;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
@@ -62,6 +64,8 @@ export class StreamsApp {
     });
     this.kibanaMonacoEditor = new KibanaCodeEditorWrapper(this.page);
     this.saveRoutingRuleButton = this.page.getByTestId('streamsAppStreamDetailRoutingSaveButton');
+    this.concatFieldInput = new EuiSuperSelectWrapper(this.page, 'streamsAppConcatFieldInput');
+    this.concatLiteralInput = this.page.getByTestId('streamsAppConcatLiteralInput');
   }
 
   async goto() {
@@ -116,8 +120,19 @@ export class StreamsApp {
     await this.page.getByTestId('dataQualityTab').click();
   }
 
+  async clickRetentionTab() {
+    await this.page.getByTestId('retentionTab').click();
+  }
+
   async clickRootBreadcrumb() {
     await this.page.getByTestId('breadcrumb first').click();
+  }
+
+  async clickStreamsBreadcrumb() {
+    await this.page
+      .locator('a[data-test-subj^="breadcrumb"]')
+      .filter({ hasText: /^Streams$/ })
+      .click();
   }
 
   // Streams table utility methods
@@ -126,12 +141,13 @@ export class StreamsApp {
   }
 
   async verifyDatePickerTimeRange(expectedRange: { from: string; to: string }) {
+    // Use .first() because some pages (like Retention) may have multiple date pickers
     await expect(
-      this.page.testSubj.locator('superDatePickerstartDatePopoverButton'),
+      this.page.testSubj.locator('superDatePickerstartDatePopoverButton').first(),
       `Date picker 'start date' is incorrect`
     ).toHaveText(expectedRange.from);
     await expect(
-      this.page.testSubj.locator('superDatePickerendDatePopoverButton'),
+      this.page.testSubj.locator('superDatePickerendDatePopoverButton').first(),
       `Date picker 'end date' is incorrect`
     ).toHaveText(expectedRange.to);
   }
@@ -154,7 +170,7 @@ export class StreamsApp {
     ).toContainText(expectedIlmPolicy);
   }
 
-  async verifyDiscoverButtonLink(streamName: string) {
+  async verifyDiscoverButtonLink(streamName: string, sourceCommand: 'FROM' | 'TS' = 'FROM') {
     const locator = this.page.locator(
       `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
     );
@@ -166,13 +182,36 @@ export class StreamsApp {
     }
 
     // Expect encoded ESQL snippet to appear (basic validation)
-    // 'FROM <streamName>' should appear URL-encoded
-    const expectedFragment = encodeURIComponent(`FROM ${streamName}`);
+    // '<sourceCommand> <streamName>' should appear URL-encoded
+    const expectedFragment = encodeURIComponent(`${sourceCommand} ${streamName}`);
     if (!href.includes(expectedFragment)) {
       throw new Error(
         `Href for ${streamName} did not contain expected ESQL fragment. href=${href} expectedFragment=${expectedFragment}`
       );
     }
+  }
+
+  async getDiscoverButtonLinkSourceCommand(streamName: string): Promise<'FROM' | 'TS' | null> {
+    const locator = this.page.locator(
+      `[data-test-subj="streamsDiscoverActionButton-${streamName}"]`
+    );
+    await locator.waitFor();
+
+    const href = await locator.getAttribute('href');
+    if (!href) {
+      return null;
+    }
+
+    // Check which source command is used in the URL
+    const fromFragment = encodeURIComponent(`FROM ${streamName}`);
+    const tsFragment = encodeURIComponent(`TS ${streamName}`);
+
+    if (href.includes(tsFragment)) {
+      return 'TS';
+    } else if (href.includes(fromFragment)) {
+      return 'FROM';
+    }
+    return null;
   }
 
   async verifyStreamsAreInTable(streamNames: string[]) {
@@ -250,7 +289,7 @@ export class StreamsApp {
   }
 
   async switchToColumnsView() {
-    await this.page.getByTestId('columns').click();
+    await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click();
   }
 
   async saveRoutingRule() {
@@ -410,18 +449,26 @@ export class StreamsApp {
    */
   async clickAddProcessor(handleContextMenuClick: boolean = true) {
     if (handleContextMenuClick) {
-      await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton').click();
+      // New UI has direct button instead of context menu
+      await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateProcessorButton').click();
+    } else {
+      // When called from within a condition's context menu, use the old menu item
+      await this.page
+        .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor')
+        .click();
     }
-    await this.page
-      .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddProcessor')
-      .click();
   }
 
-  async clickAddCondition() {
-    await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateStepButton').click();
-    await this.page
-      .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddCondition')
-      .click();
+  async clickAddCondition(handleContextMenuClick: boolean = true) {
+    if (handleContextMenuClick) {
+      // New UI has direct button instead of context menu
+      await this.page.getByTestId('streamsAppStreamDetailEnrichmentCreateConditionButton').click();
+    } else {
+      // When called from within a condition's context menu, use the old menu item
+      await this.page
+        .getByTestId('streamsAppStreamDetailEnrichmentCreateStepButtonAddCondition')
+        .click();
+    }
   }
   async getProcessorPatternText() {
     return await this.page.getByTestId('fullText').locator('.euiText').textContent();
@@ -566,6 +613,19 @@ export class StreamsApp {
     await this.page.keyboard.press('Backspace');
     // Fill with new condition
     await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
+  }
+
+  async fillGrokPatternDefinitionsInput(value: string) {
+    await this.page.getByRole('button', { name: 'Advanced settings' }).click();
+    // Clean previous content
+    await this.page.getByTestId('streamsAppPatternDefinitionsEditor').click();
+    await this.page.keyboard.press('Control+A');
+    await this.page.keyboard.press('Backspace');
+    // Fill with new condition
+    await this.page
+      .getByTestId('streamsAppPatternDefinitionsEditor')
+      .getByRole('textbox')
+      .fill(value);
   }
 
   async fillDateProcessorSourceFieldInput(value: string) {
@@ -727,6 +787,13 @@ export class StreamsApp {
    */
   async expectSchemaEditorTableVisible() {
     await expect(this.page.getByTestId('streamsAppSchemaEditorFieldsTableLoaded')).toBeVisible();
+  }
+
+  async typeFieldName(value: string) {
+    await this.page.testSubj.typeWithDelay('streamsAppSchemaEditorAddFieldFlyoutFieldName', value, {
+      delay: 75,
+    });
+    await this.page.keyboard.press('Enter');
   }
 
   async searchFields(searchTerm: string) {
@@ -1058,5 +1125,21 @@ export class StreamsApp {
 
   async clickProcessorPreviewTab(label: string) {
     await this.page.getByText(label).click();
+  }
+
+  async clickAddConcatField() {
+    await this.page.getByTestId('streamsAppConcatAddFieldButton').click();
+  }
+
+  async clickAddConcatLiteral() {
+    await this.page.getByTestId('streamsAppConcatAddLiteralButton').click();
+  }
+
+  async fillConcatFieldInput(value: string) {
+    await this.concatFieldInput.selectOption(value);
+  }
+
+  async fillConcatLiteralInput(value: string) {
+    await this.concatLiteralInput.fill(value);
   }
 }

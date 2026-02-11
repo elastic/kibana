@@ -20,6 +20,8 @@
         "label": "DocLinksServiceSetup",
         "description": [],
         "path": "src/core/packages/doc-links/server/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -33,6 +35,8 @@
               "The branch/version the docLinks are pointing to"
             ],
             "path": "src/core/packages/doc-links/server/src/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -46,6 +50,8 @@
               "The base url for the elastic website"
             ],
             "path": "src/core/packages/doc-links/server/src/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -68,6 +74,8 @@
               }
             ],
             "path": "src/core/packages/doc-links/server/src/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -88,6 +96,8 @@
           "DocLinksServiceSetup"
         ],
         "path": "src/core/packages/doc-links/server/src/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -103,6 +113,8 @@
           "DocLinksServiceSetup"
         ],
         "path": "src/core/packages/doc-links/server/src/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

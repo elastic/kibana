@@ -30,6 +30,8 @@
           "\nA policy describing whether access to an external destination is allowed."
         ],
         "path": "src/core/packages/http/common/src/external_url_policy.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +45,8 @@
               "\nIndicates if this policy allows or denies access to the described destination."
             ],
             "path": "src/core/packages/http/common/src/external_url_policy.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -59,6 +63,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/http/common/src/external_url_policy.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -75,6 +81,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/http/common/src/external_url_policy.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -101,6 +109,8 @@
           "string"
         ],
         "path": "src/core/packages/http/common/src/versioning.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -116,6 +126,8 @@
           "\"elastic-api-version\""
         ],
         "path": "src/core/packages/http/common/src/constants.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -131,6 +143,8 @@
           "\"apiVersion\""
         ],
         "path": "src/core/packages/http/common/src/constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -146,6 +160,8 @@
           "\"elasticInternalOrigin\""
         ],
         "path": "src/core/packages/http/common/src/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -161,6 +177,8 @@
           "\"x-elastic-internal-origin\""
         ],
         "path": "src/core/packages/http/common/src/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -27,8 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const dataGrid = getService('dataGrid');
 
-  // Failing: See https://github.com/elastic/kibana/issues/245197
-  describe.skip('discover - ES|QL controls', function () {
+  describe('discover - ES|QL controls', function () {
     it('should add an ES|QL value control', async () => {
       await discover.selectTextBaseLang();
       await discover.waitUntilTabIsLoaded();
@@ -155,10 +154,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardControls.optionsListPopoverSelectOption('CN');
 
       await discover.waitUntilTabIsLoaded();
-      await testSubjects.existOrFail('unsavedChangesBadge');
+      await discover.ensureHasUnsavedChangesIndicator();
 
       await discover.revertUnsavedChanges();
-      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await discover.ensureNoUnsavedChangesIndicator();
     });
 
     it('should open the histogram in a dashboard', async () => {

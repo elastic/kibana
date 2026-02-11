@@ -8,7 +8,6 @@
  */
 
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
-import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
@@ -18,6 +17,7 @@ import type {
   HasSupportedTriggers,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesProjectRoutingOverrides,
   PublishesRendered,
   PublishesTimeRange,
   PublishesTitle,
@@ -26,6 +26,7 @@ import type {
 } from '@kbn/presentation-publishing';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { VisParams } from '@kbn/visualizations-common';
+import type { DrilldownsState } from '@kbn/embeddable-plugin/server';
 import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
 import type { HasVisualizeConfig } from './interfaces/has_visualize_config';
 import type { Vis, VisSavedObject } from '../types';
@@ -43,7 +44,7 @@ export type ExtraSavedObjectProperties = Pick<
 
 export type VisualizeRuntimeState = SerializedTitles &
   SerializedTimeRange &
-  Partial<DynamicActionsSerializedState> & {
+  DrilldownsState & {
     serializedVis: SerializedVis<VisParams>;
     savedObjectId?: string;
     savedObjectProperties?: ExtraSavedObjectProperties;
@@ -59,6 +60,7 @@ export type VisualizeApi = Partial<HasEditCapabilities> &
   PublishesDataViews &
   PublishesDataLoading &
   PublishesRendered &
+  PublishesProjectRoutingOverrides &
   Required<PublishesTitle> &
   HasVisualizeConfig &
   HasInspectorAdapters &

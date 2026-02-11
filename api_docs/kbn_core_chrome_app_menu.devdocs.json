@@ -18,6 +18,8 @@
           ") => null"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,6 +34,8 @@
               "AppMenuProps"
             ],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+            "lineNumber": 46,
+            "columnNumber": 25,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -50,6 +54,8 @@
         "label": "AppMenuProps",
         "description": [],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+        "lineNumber": 13,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -68,6 +74,8 @@
               " | undefined) => void"
             ],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -83,6 +91,8 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+                "lineNumber": 17,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -104,6 +114,8 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu/src/app_menu.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

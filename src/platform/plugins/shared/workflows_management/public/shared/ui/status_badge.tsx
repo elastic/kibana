@@ -25,8 +25,8 @@ import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { TokenColor } from '@elastic/eui/src/components/token/token_types';
 import { css } from '@emotion/react';
 import React from 'react';
-import { FormattedRelative } from '@kbn/i18n-react';
 import { ExecutionStatus } from '@kbn/workflows';
+import { FormattedRelativeEnhanced } from './formatted_relative_enhanced/formatted_relative_enhanced';
 import { getStatusLabel } from '../translations';
 interface ExecutionStatusColors {
   color: string;
@@ -157,7 +157,7 @@ export function StatusBadge({
               text-transform: capitalize;
             `}
           >
-            {date ? <FormattedRelative value={date} /> : statusLabel}
+            {date ? <FormattedRelativeEnhanced value={date} /> : statusLabel}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

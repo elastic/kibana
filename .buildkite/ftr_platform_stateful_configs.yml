@@ -5,6 +5,7 @@ disabled:
 
   # Base config files, only necessary to inform config finding script
   - src/platform/test/functional/config.base.js
+  - src/platform/test/functional/config.base.http2.ts
   - src/platform/test/functional/firefox/config.base.ts
   - x-pack/platform/test/functional/config.base.ts
   - x-pack/platform/test/localization/config.base.ts
@@ -90,10 +91,12 @@ enabled:
   - src/platform/test/functional/apps/discover/group10/config.ts
   - src/platform/test/functional/apps/discover/context_awareness/config.ts
   - src/platform/test/functional/apps/discover/observability/config.ts
+  - src/platform/test/functional/apps/discover/query_mode/config.ts
+  - src/platform/test/functional/apps/discover/query_mode_esql_default/config.ts
   - src/platform/test/functional/apps/discover/tabs/config.ts
   - src/platform/test/functional/apps/discover/tabs2/config.ts
   - src/platform/test/functional/apps/discover/tabs3/config.ts
-  - src/platform/test/functional/apps/discover/tabs_disabled/config.ts
+  - src/platform/test/functional/apps/discover/cascade_layout/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/home/config.ts
   - src/platform/test/functional/apps/kibana_overview/config.ts
@@ -150,6 +153,8 @@ enabled:
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group6/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group7/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group8/config.ts
+  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group9/config.ts
+  - x-pack/platform/test/alerting_api_integration/security_and_spaces/group10/config.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group3/config_with_schedule_circuit_breaker.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
   - x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/config_non_dedicated_task_runner.ts
@@ -204,6 +209,7 @@ enabled:
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_aws_ses_kbn_config/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_services_enabled_kbn_config/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/shared/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/rules/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/webhook_disabled_ssl_pfx/config.ts
   - x-pack/platform/test/functional/apps/advanced_settings/config.ts
   - x-pack/platform/test/functional/apps/aiops/config.ts
@@ -211,7 +217,6 @@ enabled:
   - x-pack/platform/test/functional/apps/canvas/config.ts
   - x-pack/platform/test/functional/apps/cross_cluster_replication/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group1/config.ts
-  - x-pack/platform/test/functional/apps/dashboard/group2/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
   - x-pack/platform/test/functional/apps/data_views/config.ts
   - x-pack/platform/test/functional/apps/dev_tools/config.ts
@@ -231,6 +236,10 @@ enabled:
   - x-pack/platform/test/functional/apps/lens/group5/config.ts
   - x-pack/platform/test/functional/apps/lens/group6/config.ts
   - x-pack/platform/test/functional/apps/lens/group7/config.ts
+  - x-pack/platform/test/functional/apps/lens/group8/config.ts
+  - x-pack/platform/test/functional/apps/lens/group9/config.ts
+  - x-pack/platform/test/functional/apps/lens/group10/config.ts
+  - x-pack/platform/test/functional/apps/lens/group11/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/tsvb/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/agg_based/config.ts
   - x-pack/platform/test/functional/apps/lens/open_in_lens/dashboard/config.ts
@@ -245,8 +254,11 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_jobs/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_integrations/config.ts
   - x-pack/platform/test/functional/apps/ml/anomaly_detection_result_views/config.ts
-  - x-pack/platform/test/functional/apps/ml/data_frame_analytics/config.ts
-  - x-pack/platform/test/functional/apps/ml/data_visualizer/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_frame_analytics/group1/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_frame_analytics/group2/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_visualizer/group1/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_visualizer/group2/config.ts
+  - x-pack/platform/test/functional/apps/ml/data_visualizer/group3/config.ts
   - x-pack/platform/test/functional/apps/ml/permissions/config.ts
   - x-pack/platform/test/functional/apps/ml/short_tests/config.ts
   - x-pack/platform/test/functional/apps/ml/stack_management_jobs/config.ts
@@ -282,7 +294,6 @@ enabled:
   - x-pack/platform/test/functional_cloud/intercepts.config.ts
   - x-pack/platform/test/licensing_plugin/config.public.ts
   - x-pack/platform/test/licensing_plugin/config.ts
-  - x-pack/platform/test/plugin_functional/config.ts
   - x-pack/platform/test/product_intercepts_functional/config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_and_security.config.ts
   - x-pack/platform/test/reporting_api_integration/reporting_without_security.config.ts
@@ -347,8 +358,6 @@ enabled:
   - x-pack/platform/test/reindex_service/config.ts
   - x-pack/platform/test/usage_collection/config.ts
   - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
-  - x-pack/performance/journeys_e2e/ecommerce_dashboard.ts
-  - x-pack/performance/journeys_e2e/ecommerce_dashboard_http2.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_map_only.ts
   - x-pack/performance/journeys_e2e/flight_dashboard.ts
   - x-pack/performance/journeys_e2e/login.ts
@@ -360,9 +369,10 @@ enabled:
   - x-pack/performance/journeys_e2e/promotion_tracking_dashboard.ts
   - x-pack/performance/journeys_e2e/web_logs_dashboard.ts
   - x-pack/performance/journeys_e2e/web_logs_dashboard_esql.ts
-  - x-pack/performance/journeys_e2e/web_logs_dashboard_dataview.ts
+  - x-pack/performance/journeys_e2e/web_logs_dashboard_esql_long_running.ts
+  - x-pack/performance/journeys_e2e/web_logs_dashboard_long_running.ts
   - x-pack/performance/journeys_e2e/data_stress_test_lens.ts
-  - x-pack/performance/journeys_e2e/data_stress_test_lens_http2.ts
+  - x-pack/performance/journeys_e2e/data_stress_test_lens_esql.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_saved_search_only.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_tsvb_gauge_only.ts
   - x-pack/performance/journeys_e2e/dashboard_listing_page.ts

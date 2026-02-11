@@ -43,11 +43,7 @@ const hasUnavailableEntity = (entityNodes: EntityNodeViewModel[]): boolean => {
     if (!node.documentsData || !Array.isArray(node.documentsData)) {
       return false;
     }
-    return node.documentsData.some(
-      (doc) =>
-        // TODO Remove workaround for missing type in schema when https://github.com/elastic/kibana/pull/243711 is merged
-        (doc.entity as { availableInEntityStore?: boolean })?.availableInEntityStore === false
-    );
+    return node.documentsData.some((doc) => doc.entity?.availableInEntityStore === false);
   });
 };
 

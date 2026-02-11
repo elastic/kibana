@@ -28,6 +28,8 @@
           " extends Error"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/src/errors.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -42,6 +44,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/src/errors.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -56,6 +60,8 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/src/errors.ts",
+                "lineNumber": 13,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -71,6 +77,8 @@
                   "BulkResponse"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/src/errors.ts",
+                "lineNumber": 13,
+                "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -101,6 +109,8 @@
           "<TStorageSettings, TApplicationType>"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
+        "lineNumber": 104,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -115,6 +125,8 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
+            "lineNumber": 116,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -129,6 +141,8 @@
                   "ElasticsearchClient"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
+                "lineNumber": 117,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -150,6 +164,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
+                "lineNumber": 118,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -165,6 +181,8 @@
                   "TStorageSettings"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
+                "lineNumber": 119,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -181,6 +199,8 @@
                   "<TApplicationType>"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
+                "lineNumber": 120,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -207,6 +227,8 @@
               "<TApplicationType>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
+            "lineNumber": 556,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -236,6 +258,8 @@
           " extends StorageSettingsBase"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -247,6 +271,8 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -271,6 +297,8 @@
           "<TDocumentType>"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 130,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -301,6 +329,8 @@
               "<TDocumentType, TSearchRequest>>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 131,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -316,6 +346,8 @@
                   "TSearchRequest"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+                "lineNumber": 100,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -342,6 +374,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 132,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -374,6 +408,8 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+                "lineNumber": 111,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -400,6 +436,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 133,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -425,6 +463,8 @@
                   " | undefined; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+                "lineNumber": 115,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -457,6 +497,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 134,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -480,6 +522,8 @@
                   " | undefined; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+                "lineNumber": 119,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -504,6 +548,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 135,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -536,6 +582,8 @@
               "<TDocumentType>>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 136,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -560,9 +608,9 @@
                   "QueryDslFieldAndFormat",
                   ")[] | undefined; query?: ",
                   "QueryDslQueryContainer",
-                  " | undefined; timeout?: string | undefined; allow_partial_search_results?: boolean | undefined; runtime_mappings?: ",
+                  " | undefined; timeout?: string | undefined; project_routing?: string | undefined; allow_partial_search_results?: boolean | undefined; runtime_mappings?: ",
                   "MappingRuntimeFields",
-                  " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & string) | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; allow_no_indices?: boolean | undefined; analyzer?: string | undefined; analyze_wildcard?: boolean | undefined; batched_reduce_size?: number | undefined; ccs_minimize_roundtrips?: boolean | undefined; default_operator?: ",
+                  " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & string) | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; project_routing?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; project_routing?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; allow_no_indices?: boolean | undefined; analyzer?: string | undefined; analyze_wildcard?: boolean | undefined; batched_reduce_size?: number | undefined; ccs_minimize_roundtrips?: boolean | undefined; default_operator?: ",
                   "QueryDslOperator",
                   " | undefined; df?: string | undefined; expand_wildcards?: ",
                   "ExpandWildcards",
@@ -572,7 +620,7 @@
                   "SuggestMode",
                   " | undefined; suggest_size?: number | undefined; suggest_text?: string | undefined; typed_keys?: boolean | undefined; rest_total_hits_as_int?: boolean | undefined; _source_excludes?: ",
                   "Fields",
-                  " | undefined; _source_includes?: ",
+                  " | undefined; _source_exclude_vectors?: boolean | undefined; _source_includes?: ",
                   "Fields",
                   " | undefined; q?: string | undefined; force_synthetic_source?: boolean | undefined; aggregations?: Record<string, ",
                   "AggregationsAggregationContainer",
@@ -617,6 +665,8 @@
                   " | undefined; realtime?: boolean | undefined; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+                "lineNumber": 125,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -633,6 +683,8 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -649,6 +701,8 @@
         "label": "StorageClientBulkOptions",
         "description": [],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 58,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -667,6 +721,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -681,6 +737,8 @@
         "label": "StorageClientCleanResponse",
         "description": [],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 82,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -692,6 +750,8 @@
             "label": "acknowledged",
             "description": [],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -706,6 +766,8 @@
               "\"deleted\" | \"noop\""
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -720,6 +782,8 @@
         "label": "StorageClientDeleteResponse",
         "description": [],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 77,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -731,6 +795,8 @@
             "label": "acknowledged",
             "description": [],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -745,6 +811,8 @@
               "\"deleted\" | \"not_found\""
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -759,6 +827,8 @@
         "label": "StorageSchema",
         "description": [],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -773,6 +843,8 @@
               "StorageSchemaProperties"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -817,6 +889,8 @@
           "> & TSchema[\"schema\"][\"properties\"])[key]> | undefined; } : object>>>>"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 157,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -880,6 +954,8 @@
           "> & TStorageSettings[\"schema\"][\"properties\"])[key]> | undefined; } : object>>>>"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 164,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -907,6 +983,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 103,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -939,6 +1017,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 111,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -956,6 +1036,8 @@
           "{ index: { document: Omit<TDocument, \"_id\">; _id?: string | undefined; }; } | { delete: { _id: string; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -988,6 +1070,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1003,6 +1087,8 @@
           "BulkResponse"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 73,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1026,6 +1112,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 122,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1059,6 +1147,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 118,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1082,6 +1172,8 @@
               " | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 119,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1107,6 +1199,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1122,6 +1216,8 @@
           "() => Promise<boolean>"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 128,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1155,6 +1251,8 @@
           "<TDocumentType>>"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 124,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1179,9 +1277,9 @@
               "QueryDslFieldAndFormat",
               ")[] | undefined; query?: ",
               "QueryDslQueryContainer",
-              " | undefined; timeout?: string | undefined; allow_partial_search_results?: boolean | undefined; runtime_mappings?: ",
+              " | undefined; timeout?: string | undefined; project_routing?: string | undefined; allow_partial_search_results?: boolean | undefined; runtime_mappings?: ",
               "MappingRuntimeFields",
-              " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & string) | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; allow_no_indices?: boolean | undefined; analyzer?: string | undefined; analyze_wildcard?: boolean | undefined; batched_reduce_size?: number | undefined; ccs_minimize_roundtrips?: boolean | undefined; default_operator?: ",
+              " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & string) | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; project_routing?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; project_routing?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; allow_no_indices?: boolean | undefined; analyzer?: string | undefined; analyze_wildcard?: boolean | undefined; batched_reduce_size?: number | undefined; ccs_minimize_roundtrips?: boolean | undefined; default_operator?: ",
               "QueryDslOperator",
               " | undefined; df?: string | undefined; expand_wildcards?: ",
               "ExpandWildcards",
@@ -1191,7 +1289,7 @@
               "SuggestMode",
               " | undefined; suggest_size?: number | undefined; suggest_text?: string | undefined; typed_keys?: boolean | undefined; rest_total_hits_as_int?: boolean | undefined; _source_excludes?: ",
               "Fields",
-              " | undefined; _source_includes?: ",
+              " | undefined; _source_exclude_vectors?: boolean | undefined; _source_includes?: ",
               "Fields",
               " | undefined; q?: string | undefined; force_synthetic_source?: boolean | undefined; aggregations?: Record<string, ",
               "AggregationsAggregationContainer",
@@ -1236,6 +1334,8 @@
               " | undefined; realtime?: boolean | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 125,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1262,9 +1362,9 @@
           "QueryDslFieldAndFormat",
           ")[] | undefined; query?: ",
           "QueryDslQueryContainer",
-          " | undefined; timeout?: string | undefined; allow_partial_search_results?: boolean | undefined; runtime_mappings?: ",
+          " | undefined; timeout?: string | undefined; project_routing?: string | undefined; allow_partial_search_results?: boolean | undefined; runtime_mappings?: ",
           "MappingRuntimeFields",
-          " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & string) | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; allow_no_indices?: boolean | undefined; analyzer?: string | undefined; analyze_wildcard?: boolean | undefined; batched_reduce_size?: number | undefined; ccs_minimize_roundtrips?: boolean | undefined; default_operator?: ",
+          " | undefined; body?: string | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & string) | ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; project_routing?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { id?: undefined; index?: undefined; force_synthetic_source?: undefined; preference?: undefined; realtime?: undefined; refresh?: undefined; routing?: undefined; _source?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; stored_fields?: undefined; version?: undefined; version_type?: undefined; } & { [key: string]: any; } & { index?: undefined; allow_no_indices?: undefined; allow_partial_search_results?: undefined; analyzer?: undefined; analyze_wildcard?: undefined; batched_reduce_size?: undefined; ccs_minimize_roundtrips?: undefined; default_operator?: undefined; df?: undefined; expand_wildcards?: undefined; ignore_throttled?: undefined; ignore_unavailable?: undefined; include_named_queries_score?: undefined; lenient?: undefined; max_concurrent_shard_requests?: undefined; preference?: undefined; pre_filter_shard_size?: undefined; project_routing?: undefined; request_cache?: undefined; routing?: undefined; scroll?: undefined; search_type?: undefined; suggest_field?: undefined; suggest_mode?: undefined; suggest_size?: undefined; suggest_text?: undefined; typed_keys?: undefined; rest_total_hits_as_int?: undefined; _source_excludes?: undefined; _source_exclude_vectors?: undefined; _source_includes?: undefined; q?: undefined; force_synthetic_source?: undefined; aggregations?: undefined; aggs?: undefined; collapse?: undefined; explain?: undefined; ext?: undefined; from?: undefined; highlight?: undefined; track_total_hits?: undefined; indices_boost?: undefined; docvalue_fields?: undefined; knn?: undefined; rank?: undefined; min_score?: undefined; post_filter?: undefined; profile?: undefined; query?: undefined; rescore?: undefined; retriever?: undefined; script_fields?: undefined; search_after?: undefined; size?: undefined; slice?: undefined; sort?: undefined; _source?: undefined; fields?: undefined; suggest?: undefined; terminate_after?: undefined; timeout?: undefined; track_scores?: undefined; version?: undefined; seq_no_primary_term?: undefined; stored_fields?: undefined; pit?: undefined; runtime_mappings?: undefined; stats?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; allow_no_indices?: boolean | undefined; analyzer?: string | undefined; analyze_wildcard?: boolean | undefined; batched_reduce_size?: number | undefined; ccs_minimize_roundtrips?: boolean | undefined; default_operator?: ",
           "QueryDslOperator",
           " | undefined; df?: string | undefined; expand_wildcards?: ",
           "ExpandWildcards",
@@ -1274,7 +1374,7 @@
           "SuggestMode",
           " | undefined; suggest_size?: number | undefined; suggest_text?: string | undefined; typed_keys?: boolean | undefined; rest_total_hits_as_int?: boolean | undefined; _source_excludes?: ",
           "Fields",
-          " | undefined; _source_includes?: ",
+          " | undefined; _source_exclude_vectors?: boolean | undefined; _source_includes?: ",
           "Fields",
           " | undefined; q?: string | undefined; force_synthetic_source?: boolean | undefined; aggregations?: Record<string, ",
           "AggregationsAggregationContainer",
@@ -1319,6 +1419,8 @@
           " | undefined; realtime?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 94,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1335,6 +1437,8 @@
           "<TDocument>"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 95,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1360,6 +1464,8 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 114,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1385,6 +1491,8 @@
               " | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1412,6 +1520,8 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 87,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1427,6 +1537,8 @@
           "WriteResponseBase"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 92,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1458,6 +1570,8 @@
           "<TDocumentType, TSearchRequest>>"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 97,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1473,6 +1587,8 @@
               "TSearchRequest"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+            "lineNumber": 100,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1492,6 +1608,8 @@
           ", \"index\"> & { track_total_hits: number | boolean; size: number; }"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1513,6 +1631,8 @@
           "<TDocument>, \"total\" | \"hits\"> & { total: { value: number; relation: \"gte\" | \"eq\"; }; } & { hits: HitsOf<TSearchRequest, TDocument>; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1544,6 +1664,8 @@
           "> & TStorageSettings[\"schema\"][\"properties\"])[key]> | undefined; } : object)[P] | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 169,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1565,6 +1687,8 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1579,6 +1703,8 @@
         "label": "types",
         "description": [],
         "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+        "lineNumber": 65,
+        "columnNumber": 7,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1597,6 +1723,8 @@
               " & { ignore_above: 1024; } & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1612,6 +1740,8 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+                "lineNumber": 44,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1634,6 +1764,8 @@
               "> & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1649,6 +1781,8 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+                "lineNumber": 44,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1671,6 +1805,8 @@
               "> & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1686,6 +1822,8 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+                "lineNumber": 44,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1708,6 +1846,8 @@
               "> & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1723,6 +1863,8 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+                "lineNumber": 44,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1745,6 +1887,8 @@
               "> & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1760,6 +1904,8 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+                "lineNumber": 44,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1782,6 +1928,8 @@
               "> & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1797,6 +1945,8 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+                "lineNumber": 44,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1817,6 +1967,8 @@
               " & { format: \"strict_date_optional_time\"; } & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1832,6 +1984,8 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+                "lineNumber": 44,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1854,6 +2008,8 @@
               "> & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+            "lineNumber": 73,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1869,6 +2025,8 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+                "lineNumber": 44,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1891,6 +2049,8 @@
               "> & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1906,6 +2066,8 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+                "lineNumber": 44,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1928,6 +2090,8 @@
               ", \"type\">> & Partial<StorageMappingPropertyObjectType> & Exclude<TOverrides, undefined>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1943,6 +2107,8 @@
                   "TOverrides | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/types.ts",
+                "lineNumber": 44,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }

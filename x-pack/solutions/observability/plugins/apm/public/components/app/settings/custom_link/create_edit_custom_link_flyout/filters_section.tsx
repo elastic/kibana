@@ -95,9 +95,16 @@ export function FiltersSection({
         }
         const filterId = filter.id;
         const selectOptions = getSelectOptions(filters, key);
+        const isEmptyFilter = isEmpty(key) || key === DEFAULT_OPTION.value;
+        const filterRowTestSubj = isEmptyFilter
+          ? 'apmCustomLinkFilterRowEmpty'
+          : `apmCustomLinkFilterRow-${key}`;
+        const filterSelectTestSubj = isEmptyFilter
+          ? 'apmCustomLinkFilterSelectEmpty'
+          : `apmCustomLinkFilterSelect-${key}-select`;
         return (
           <React.Fragment key={filterId}>
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="s" alignItems="center" data-test-subj={filterRowTestSubj}>
               <EuiFlexItem>
                 <EuiSelect
                   aria-label={i18n.translate(
@@ -106,7 +113,7 @@ export function FiltersSection({
                       defaultMessage: 'Choose a field to filter by',
                     }
                   )}
-                  data-test-subj={filterId}
+                  data-test-subj={filterSelectTestSubj}
                   id={filterId}
                   fullWidth
                   options={selectOptions}

@@ -111,9 +111,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   const { anomalyExplorerCommonStateService } = useAnomalyExplorerContext();
   const { services } = useMlKibana();
   const {
-    unifiedSearch: {
-      ui: { QueryStringInput },
-    },
+    kql: { QueryStringInput },
   } = services;
 
   // The internal state of the input query bar updated on every key stroke.

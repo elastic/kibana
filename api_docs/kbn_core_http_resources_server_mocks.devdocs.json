@@ -51,6 +51,8 @@
           ">"
         ],
         "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -65,6 +67,8 @@
         "label": "httpResourcesMock",
         "description": [],
         "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -80,6 +84,8 @@
               "HttpResourcesMock"
             ],
             "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -98,6 +104,8 @@
               ">"
             ],
             "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -116,6 +124,8 @@
               ">, [], any>; }"
             ],
             "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -134,6 +144,8 @@
               ">, [], any>; }"
             ],
             "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -374,6 +386,8 @@
               "<any>); }"
             ],
             "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

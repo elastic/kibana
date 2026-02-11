@@ -21,9 +21,9 @@ export function extractDashboardState(
   if (state && typeof state === 'object') {
     const stateAsObject = state as { [key: string]: unknown };
 
-    const { controlGroupState, autoApplyFilters } = extractControlGroupState(stateAsObject);
+    const { pinned_panels, autoApplyFilters } = extractControlGroupState(stateAsObject);
 
-    if (controlGroupState) dashboardState.controlGroupInput = controlGroupState;
+    if (pinned_panels) dashboardState.pinned_panels = pinned_panels;
     if (
       dashboardState.options?.auto_apply_filters === undefined &&
       typeof autoApplyFilters === 'boolean'

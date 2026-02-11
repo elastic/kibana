@@ -81,7 +81,7 @@ export function initializeESQLControlManager(
   initialState: ESQLControlState,
   setDataLoading: (loading: boolean) => void
 ) {
-  const sectionId$ = apiHasSections(parentApi) ? parentApi.getPanelSection$(uuid) : of(undefined);
+  const sectionId$ = apiHasSections(parentApi) ? parentApi.panelSection$(uuid) : of(undefined);
 
   const availableOptions$ = new BehaviorSubject<string[]>(initialState.availableOptions ?? []);
   const selectedOptions$ = new BehaviorSubject<string[]>(initialState.selectedOptions ?? []);
@@ -247,7 +247,9 @@ export function initializeESQLControlManager(
       },
     };
   };
-  const esqlVariable$ = new BehaviorSubject<ESQLControlVariable>(getEsqlVariable());
+
+  const startingSection = apiHasSections(parentApi) ? parentApi.getPanelSection(uuid) : undefined;
+  const esqlVariable$ = new BehaviorSubject<ESQLControlVariable>(getEsqlVariable(startingSection));
   const variableSubscriptions = combineLatest([
     sectionId$,
     variableName$,

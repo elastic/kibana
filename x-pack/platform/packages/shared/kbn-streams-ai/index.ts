@@ -15,3 +15,5 @@ export { partitionStream } from './workflows/partition_stream';
 export { suggestProcessingPipeline } from './workflows/suggest_processing_pipeline';
 export { generateSignificantEvents } from './src/significant_events/generate_significant_events';
 export { sumTokens } from './src/helpers/sum_tokens';
+export { identifyFeatures, type IdentifyFeaturesOptions } from './src/features/identify_features';
+export { generateAllComputedFeatures } from './src/features/computed';

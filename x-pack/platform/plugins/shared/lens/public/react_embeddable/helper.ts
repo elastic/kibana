@@ -30,9 +30,9 @@ import type {
 import type { LensByValueSerializedAPIConfig, LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
 import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { ESQLStartServices } from './esql';
 import { loadESQLAttributes } from './esql';
-import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 import type { LensEmbeddableStartServices } from './types';
 import { getLensBuilder } from '../lazy_builder';
 
@@ -169,7 +169,7 @@ export function getStructuredDatasourceStates(
 export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSerializedState {
   const builder = getLensBuilder();
 
-  if (!builder) {
+  if (!builder?.isEnabled) {
     // builder not enabled, return the state as is
     return state as LensSerializedState;
   }
@@ -208,7 +208,7 @@ export function transformToApiConfig(state: LensSerializedState): LensByValueSer
 
   const builder = getLensBuilder();
 
-  if (!builder) {
+  if (!builder?.isEnabled) {
     // builder not enabled, return the state as is
     return state as LensByValueSerializedAPIConfig;
   }

@@ -44,7 +44,6 @@ import type {
 import { createStreamsGlobalSearchResultProvider } from './lib/streams/create_streams_global_search_result_provider';
 import { FeatureService } from './lib/streams/feature/feature_service';
 import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/processor_suggestions_service';
-import { getDefaultFeatureRegistry } from './lib/streams/feature/feature_type_registry';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { TaskService } from './lib/tasks/task_service';
 import { SystemService } from './lib/streams/system/system_service';
@@ -109,7 +108,7 @@ export class StreamsPlugin
 
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
-    const featureService = new FeatureService(core, this.logger, getDefaultFeatureRegistry());
+    const featureService = new FeatureService(core, this.logger);
     const systemService = new SystemService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
@@ -156,6 +155,7 @@ export class StreamsPlugin
         attachmentClient,
         queryClient,
         systemClient,
+        featureClient,
       });
 
       return {

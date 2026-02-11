@@ -4,6 +4,9 @@ steps:
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
+      diskSizeGb: 105
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
       - quick_checks
@@ -24,6 +27,9 @@ steps:
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
+      diskSizeGb: 105
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
       - build
       - quick_checks

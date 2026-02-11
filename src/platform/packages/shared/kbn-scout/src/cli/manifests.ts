@@ -12,10 +12,15 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import CliTable3 from 'cli-table3';
 import dedent from 'dedent';
 import path from 'path';
+import { unlinkSync } from 'node:fs';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ScoutTestableModuleWithConfigs } from '@kbn/scout-reporting/src/registry';
-import { testableModules, testConfigs } from '@kbn/scout-reporting/src/registry';
-import { getGitSHA1ForPath } from '@kbn/scout-reporting/src/registry/manifest';
+import {
+  testableModules,
+  testConfigs,
+  testConfigManifests,
+  getGitSHA1ForPath,
+  type ScoutTestableModuleWithConfigs,
+} from '@kbn/scout-reporting';
 import { playwrightCLI } from '../playwright/cli_wrapper';
 
 const manifestUpdateReporter = path.join(
@@ -31,31 +36,52 @@ async function generateScoutConfigManifest(configPath: string, log?: ToolingLog)
   );
 }
 
-async function updateScoutConfigManifests(onlyOutdated: boolean, reload: boolean, log: ToolingLog) {
+async function updateScoutConfigManifests(
+  onlyOutdated: boolean,
+  removeDangling: boolean,
+  reload: boolean,
+  log: ToolingLog
+) {
+  const expectedManifestPaths: string[] = [];
   const updatedConfigPaths: string[] = [];
 
-  for (const config of testConfigs.all) {
-    const configDirSHA1 = await getGitSHA1ForPath(path.dirname(config.path));
+  // Update manifests for files that are outdated
+  await Promise.all(
+    testConfigs.all.map(async (config) => {
+      expectedManifestPaths.push(config.manifest.path);
+      const configDirSHA1 = await getGitSHA1ForPath(path.dirname(config.path));
 
-    if (onlyOutdated && config.manifest.exists && config.manifest.sha1 === configDirSHA1) {
-      log.debug(` ✅ ${config.module.name} / ${config.category} / ${config.type}`);
-      continue;
-    }
-
-    if (config.manifest.exists) {
-      if (config.manifest.sha1 !== configDirSHA1) {
-        log.info(
-          `Manifest file is outdated for Scout test config at ${config.path} ` +
-            `(expected parent directory git object hash '${config.manifest.sha1}' but got '${configDirSHA1}')`
-        );
+      if (onlyOutdated && config.manifest.exists && config.manifest.sha1 === configDirSHA1) {
+        log.debug(` ✅ ${config.module.name} / ${config.category} / ${config.type}`);
+        return;
       }
-    } else {
-      log.info(`No manifest file found for Scout test config at ${config.path}`);
-    }
 
-    log.info(`Generating manifest for test config at '${config.path}'`);
-    await generateScoutConfigManifest(config.path, log);
-    updatedConfigPaths.push(config.path);
+      if (config.manifest.exists) {
+        if (config.manifest.sha1 !== configDirSHA1) {
+          log.info(
+            `Manifest file is outdated for Scout test config at ${config.path} ` +
+              `(expected parent directory git object hash '${config.manifest.sha1}' but got '${configDirSHA1}')`
+          );
+        }
+      } else {
+        log.info(`No manifest file found for Scout test config at ${config.path}`);
+      }
+
+      log.info(`Generating manifest for test config at '${config.path}'`);
+      await generateScoutConfigManifest(config.path, log);
+      updatedConfigPaths.push(config.path);
+    })
+  );
+
+  if (removeDangling) {
+    // Remove any manifest files that no longer have a corresponding test config
+    testConfigManifests
+      .findPaths()
+      .filter((manifestPath) => !expectedManifestPaths.includes(manifestPath))
+      .forEach((manifestPath) => {
+        log.info(`Removing dangling manifest file at '${manifestPath}'`);
+        unlinkSync(manifestPath);
+      });
   }
 
   if (updatedConfigPaths.length === 0) {
@@ -128,18 +154,21 @@ export const updateTestConfigManifests: Command<void> = {
     'This command is used to collects and store information relating to a Scout test config ' +
     "that's usually only available during Playwright runtime",
   flags: {
-    boolean: ['includingUpToDate', 'noSummary'],
+    boolean: ['includingUpToDate', 'noSummary', 'keepDangling'],
     help: `
     --includingUpToDate  (optional)  Update all manifests, not just the ones that are outdated
+    --keepDangling       (optional)  Don't remove dangling manifest files
     --noSummary          (optional)  Don't display summary
     `,
   },
   run: async ({ flagsReader, log }) => {
     testConfigs.log = log;
     const shouldDisplaySummary = !flagsReader.boolean('noSummary');
+    const shouldRemoveDangling = !flagsReader.boolean('keepDangling');
     await updateScoutConfigManifests(
       !flagsReader.boolean('includingUpToDate'),
       shouldDisplaySummary,
+      shouldRemoveDangling,
       log
     );
     if (!shouldDisplaySummary) return;

@@ -46,6 +46,7 @@
       "triggersActionsUi",
       "uiActions",
       "unifiedSearch",
+      "kql",
       "files",
       "controls",
       "dataViewEditor",
@@ -63,7 +64,8 @@
       "productDocBase",
       "telemetry",
       "elasticAssistantSharedState",
-      "share"
+      "share",
+      "entityStore"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -97,6 +99,13 @@
     ],
     "extraPublicDirs": [
       "common"
+    ]
+  },
+  "build": {
+    "extraExcludes": [
+      // Data generator episode fixtures are large vendored artifacts intended for dev/testing only.
+      // Keep them out of distributable builds.
+      "**/scripts/data/episodes/**"
     ]
   }
 }

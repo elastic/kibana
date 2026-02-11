@@ -6,37 +6,54 @@
  */
 
 import { z } from '@kbn/zod';
-import { streamObjectNameSchema } from './shared/stream_object_name';
 
-const featureTypes = ['infrastructure'] as const;
-export type FeatureType = (typeof featureTypes)[number];
+const featureStatus = ['active', 'stale', 'expired'] as const;
+export const featureStatusSchema = z.enum(featureStatus);
+export type FeatureStatus = z.infer<typeof featureStatusSchema>;
 
-export const featureTypeSchema = z.enum(featureTypes);
+export const DATASET_ANALYSIS_FEATURE_TYPE = 'dataset_analysis' as const;
+export const LOG_SAMPLES_FEATURE_TYPE = 'log_samples' as const;
+export const LOG_PATTERNS_FEATURE_TYPE = 'log_patterns' as const;
+export const ERROR_LOGS_FEATURE_TYPE = 'error_logs' as const;
 
-export interface BaseFeature<T extends FeatureType = FeatureType> {
-  type: T;
-  name: string;
-  description: string;
-}
+const COMPUTED_FEATURE_TYPES = [
+  DATASET_ANALYSIS_FEATURE_TYPE,
+  LOG_SAMPLES_FEATURE_TYPE,
+  LOG_PATTERNS_FEATURE_TYPE,
+  ERROR_LOGS_FEATURE_TYPE,
+] as const;
 
-export const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
-  type: featureTypeSchema,
-  name: streamObjectNameSchema,
+export const baseFeatureSchema = z.object({
+  id: z.string(),
+  stream_name: z.string(),
+  type: z.string(),
+  subtype: z.string().optional(),
+  title: z.string().optional(),
   description: z.string(),
+  properties: z.record(z.string(), z.unknown()),
+  confidence: z.number().min(0).max(100),
+  evidence: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  meta: z.record(z.string(), z.any()).optional(),
 });
 
-export type InfrastructureFeature = BaseFeature<'infrastructure'>;
+export type BaseFeature = z.infer<typeof baseFeatureSchema>;
 
-export const infrastructureFeatureSchema: z.Schema<InfrastructureFeature> = baseFeatureSchema.and(
+export const featureSchema = baseFeatureSchema.and(
   z.object({
-    type: z.literal('infrastructure'),
+    uuid: z.string(),
+    status: featureStatusSchema,
+    last_seen: z.string(),
+    expires_at: z.string().optional(),
   })
 );
 
-export type Feature = InfrastructureFeature;
+export type Feature = z.infer<typeof featureSchema>;
 
-export const featureSchema: z.Schema<Feature> = infrastructureFeatureSchema;
-
-export function isFeature(feature: any): feature is Feature {
+export function isFeature(feature: unknown): feature is Feature {
   return featureSchema.safeParse(feature).success;
+}
+
+export function isComputedFeature(feature: BaseFeature): boolean {
+  return (COMPUTED_FEATURE_TYPES as unknown as string[]).includes(feature.type);
 }

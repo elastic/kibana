@@ -23,8 +23,14 @@ import type {
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
+import { asError } from '../utils/as_error';
 
-export function registerToolsRoutes({ router, getInternalServices, logger }: RouteDependencies) {
+export function registerToolsRoutes({
+  router,
+  getInternalServices,
+  logger,
+  analyticsService,
+}: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
   // list tools API
@@ -37,11 +43,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       access: 'public',
       summary: 'List tools',
       description:
-        'List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements.',
+        'List all available tools. Use this endpoint to retrieve complete tool definitions including their schemas and configuration requirements. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -76,11 +81,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       access: 'public',
       summary: 'Get a tool by id',
       description:
-        'Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements.',
+        'Get a specific tool by ID. Use this endpoint to retrieve the complete tool definition including its schema and configuration requirements. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -122,11 +126,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       access: 'public',
       summary: 'Create a tool',
       description:
-        'Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents.',
+        'Create a new tool. Use this endpoint to define a custom tool with specific functionality and configuration for use by agents. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -174,13 +177,30 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { tools: toolService } = getInternalServices();
+        const { tools: toolService, auditLogService } = getInternalServices();
         const createRequest: CreateToolPayload = request.body;
         const registry = await toolService.getRegistry({ request });
-        const tool = await registry.create(createRequest);
-        return response.ok<CreateToolResponse>({
-          body: await toDescriptorWithSchema(tool),
-        });
+        try {
+          const tool = await registry.create(createRequest);
+          analyticsService?.reportToolCreated({
+            toolId: createRequest.id,
+            toolType: createRequest.type,
+          });
+          auditLogService.logToolCreated(request, {
+            toolId: tool.id,
+            toolType: tool.type,
+          });
+          return response.ok<CreateToolResponse>({
+            body: await toDescriptorWithSchema(tool),
+          });
+        } catch (error) {
+          auditLogService.logToolCreated(request, {
+            toolId: createRequest.id,
+            toolType: createRequest.type,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 
@@ -194,11 +214,10 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       access: 'public',
       summary: 'Update a tool',
       description:
-        "Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata.",
+        "Update an existing tool. Use this endpoint to modify any aspect of the tool's configuration or metadata. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).",
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -246,14 +265,26 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { tools: toolService } = getInternalServices();
+        const { tools: toolService, auditLogService } = getInternalServices();
         const { toolId } = request.params;
         const update: UpdateToolPayload = request.body;
         const registry = await toolService.getRegistry({ request });
-        const tool = await registry.update(toolId, update);
-        return response.ok<UpdateToolResponse>({
-          body: await toDescriptorWithSchema(tool),
-        });
+        try {
+          const tool = await registry.update(toolId, update);
+          auditLogService.logToolUpdated(request, {
+            toolId: tool.id,
+            toolType: tool.type,
+          });
+          return response.ok<UpdateToolResponse>({
+            body: await toDescriptorWithSchema(tool),
+          });
+        } catch (error) {
+          auditLogService.logToolUpdated(request, {
+            toolId,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 
@@ -266,11 +297,11 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       },
       access: 'public',
       summary: 'Delete a tool',
-      description: 'Delete a tool by ID. This action cannot be undone.',
+      description:
+        'Delete a tool by ID. This action cannot be undone. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -293,12 +324,28 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
       },
       wrapHandler(async (ctx, request, response) => {
         const { toolId } = request.params;
-        const { tools: toolService } = getInternalServices();
+        const { tools: toolService, auditLogService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
-        const success = await registry.delete(toolId);
-        return response.ok<DeleteToolResponse>({
-          body: { success },
-        });
+        try {
+          const success = await registry.delete(toolId);
+          if (success) {
+            auditLogService.logToolDeleted(request, { toolId });
+          } else {
+            auditLogService.logToolDeleted(request, {
+              toolId,
+              error: new Error('Tool delete returned false'),
+            });
+          }
+          return response.ok<DeleteToolResponse>({
+            body: { success },
+          });
+        } catch (error) {
+          auditLogService.logToolDeleted(request, {
+            toolId,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 
@@ -310,16 +357,15 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
-      summary: 'Execute a Tool',
+      summary: 'Run a tool',
       description:
-        'Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration.',
+        'Run a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
         },
         tags: ['tools', 'oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },

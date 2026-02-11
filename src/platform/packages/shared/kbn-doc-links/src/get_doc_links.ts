@@ -29,7 +29,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
   const ELASTICSEARCH_APIS = `${API_DOCS}doc/elasticsearch/`;
   const ELASTICSEARCH_SERVERLESS_APIS = `${API_DOCS}doc/elasticsearch-serverless/`;
-  const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
   const KIBANA_APIS = `${API_DOCS}doc/kibana/`;
   const KIBANA_SERVERLESS_APIS = `${API_DOCS}doc/serverless/`;
   const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
@@ -75,6 +74,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       cloudConnect: `${ELASTIC_DOCS}deploy-manage/cloud-connect`,
       connectToAutoops: `${ELASTIC_DOCS}deploy-manage/monitor/autoops/cc-autoops-as-cloud-connected`,
       deploymentSignup: `${ELASTIC_WEBSITE_URL}cloud/elasticsearch-service/signup`,
+      cloudPricing: `${ELASTIC_WEBSITE_URL}pricing`,
     },
     console: {
       guide: `${ELASTIC_DOCS}explore-analyze/query-filter/tools/console`,
@@ -439,7 +439,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       automaticImport: `${ELASTIC_DOCS}solutions/security/get-started/automatic-import`,
       ml: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/anomaly-detection`,
       ruleChangeLog: `https://www.elastic.co/guide/en/security/current/prebuilt-rules-downloadable-updates.html`,
-      detectionsReq: `${ELASTIC_DOCS}solutions/security/detect-and-alert/detections-requirements`,
+      detectionsReq: `${ELASTIC_DOCS}solutions/security/detect-and-alert/detections-privileges`,
       networkMap: `${ELASTIC_DOCS}solutions/security/explore/configure-network-map-data`,
       troubleshootGaps: `${ELASTIC_DOCS}troubleshoot/security/detection-rules#troubleshoot-gaps`,
       gapsTable: `${ELASTIC_DOCS}solutions/security/detect-and-alert/monitor-rule-executions#gaps-table`,
@@ -538,6 +538,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       kibanaSearchSettings: `${ELASTIC_DOCS}reference/kibana/advanced-settings#kibana-search-settings`,
       discoverSettings: `${ELASTIC_DOCS}reference/kibana/advanced-settings#kibana-discover-settings`,
       rollupSettings: `${ELASTIC_DOCS}reference/kibana/advanced-settings#kibana-rollups-settings`,
+      sessionStorageSettings: `${ELASTIC_DOCS}reference/kibana/advanced-settings#state-storeinsessionstorage`,
       visualizationSettings: `${ELASTIC_DOCS}reference/kibana/advanced-settings#kibana-visualization-settings`,
       timelionSettings: `${ELASTIC_DOCS}reference/kibana/advanced-settings#kibana-timelion-settings`,
       generalSettings: `${ELASTIC_DOCS}reference/kibana/advanced-settings#kibana-general-settings`,
@@ -641,7 +642,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       apmRulesTransactionDuration: `${ELASTIC_DOCS}solutions/observability/incident-management/create-latency-threshold-rule`,
       apmRulesTransactionError: `${ELASTIC_DOCS}solutions/observability/incident-management/create-failed-transaction-rate-threshold-rule`,
       apmRulesAnomaly: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-apm-anomaly-rule`,
-      authorization: `${KIBANA_DOCS}alerting-setup.html#alerting-authorization`,
+      authorization: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/alerting-setup#alerting-authorization`,
       emailAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/email-action-type`,
       emailActionConfig: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/email-action-type`,
       emailExchangeClientSecretConfig: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/email-action-type#exchange-client-secret`,

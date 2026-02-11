@@ -10,19 +10,11 @@
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isAtomic } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
-import { getAllConnectorsInternal } from '../../../../common/schema';
 import { stepSchemas } from '../../../../common/step_schemas';
 
 export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema => {
   // Handle internal actions with pattern matching first
   // TODO: add output schema support for elasticsearch.request and kibana.request connectors
-  if (node.stepType.startsWith('elasticsearch.')) {
-    return z.unknown();
-  }
-
-  if (node.stepType.startsWith('kibana.')) {
-    return z.unknown();
-  }
 
   if (isAtomic(node)) {
     const stepDefinition = stepSchemas.getStepDefinition(node.stepType);
@@ -43,8 +35,8 @@ export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema =>
     }
   }
 
-  const allConnectors = getAllConnectorsInternal();
-  const connector = allConnectors.find((c) => c.type === node.stepType);
+  const allConnectorsMap = stepSchemas.getAllConnectorsMapCache();
+  const connector = allConnectorsMap?.get(node.stepType);
 
   if (connector) {
     if (!connector.outputSchema) {

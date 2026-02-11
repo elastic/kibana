@@ -196,17 +196,12 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiContextMenuItem>,
-        ...(assistantAvailability.isAiAgentsEnabled
-          ? [
-              <TryAIAgentContextMenuItem
-                analytics={analytics}
-                handleOpenAIAgentModal={handleOpenAIAgentModal}
-                hasAgentBuilderManagePrivilege={
-                  assistantAvailability.hasAgentBuilderManagePrivilege
-                }
-              />,
-            ]
-          : []),
+        <TryAIAgentContextMenuItem
+          key="try-ai-agent"
+          analytics={analytics}
+          handleOpenAIAgentModal={handleOpenAIAgentModal}
+          hasAgentBuilderManagePrivilege={assistantAvailability.hasAgentBuilderManagePrivilege}
+        />,
       ],
       [
         handleNavigateToSettings,
@@ -214,18 +209,13 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
         handleNavigateToAnonymization,
         handleShowAlertsModal,
         knowledgeBase.latestAlerts,
-        assistantAvailability.isAiAgentsEnabled,
         assistantAvailability.hasAgentBuilderManagePrivilege,
         analytics,
         handleOpenAIAgentModal,
       ]
     );
     const isAgentUpgradeDisabled = useMemo(() => {
-      return (
-        isDisabled ||
-        !assistantAvailability.hasAgentBuilderManagePrivilege ||
-        !assistantAvailability.isAiAgentsEnabled
-      );
+      return isDisabled || !assistantAvailability.hasAgentBuilderManagePrivilege;
     }, [assistantAvailability, isDisabled]);
 
     const onContinueTour = useCallback(() => {

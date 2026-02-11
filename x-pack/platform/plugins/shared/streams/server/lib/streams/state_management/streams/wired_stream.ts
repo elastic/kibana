@@ -47,7 +47,6 @@ import {
 import {
   validateRootStreamChanges,
   validateBracketsInFieldNames,
-  validateSettings,
 } from '../../helpers/validate_stream';
 import { generateIndexTemplate } from '../../index_templates/generate_index_template';
 import { getIndexTemplateName } from '../../index_templates/name';
@@ -64,7 +63,8 @@ import type {
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { hasSupportedStreamsRoot } from '../../root_stream_definition';
-import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
+import { formatSettings, settingsUpdateRequiresRollover, validateQueryStreams } from './helpers';
+import { validateSettings, validateSettingsWithDryRun } from './validate_settings';
 
 interface WiredStreamChanges extends StreamChanges {
   ownFields: boolean;
@@ -73,6 +73,7 @@ interface WiredStreamChanges extends StreamChanges {
   failure_store: boolean;
   lifecycle: boolean;
   settings: boolean;
+  query_streams: boolean;
 }
 
 export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definition> {
@@ -83,6 +84,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     lifecycle: false,
     failure_store: false,
     settings: false,
+    query_streams: false,
   };
 
   constructor(definition: Streams.WiredStream.Definition, dependencies: StateDependencies) {
@@ -161,6 +163,13 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     this._changes.settings =
       !startingStateStreamDefinition ||
       !_.isEqual(this._definition.ingest.settings, startingStateStreamDefinition.ingest.settings);
+
+    this._changes.query_streams =
+      !startingStateStreamDefinition ||
+      !_.isEqual(
+        this._definition.query_streams ?? [],
+        startingStateStreamDefinition.query_streams ?? []
+      );
 
     // The newly upserted definition will always have a new updated_at timestamp. But, if processing didn't change,
     // we should keep the existing updated_at as processing wasn't touched.
@@ -317,6 +326,15 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }))
     );
 
+    // Cascade delete to all child query streams
+    const childQueryStreams = this._definition.query_streams ?? [];
+    for (const childRef of childQueryStreams) {
+      cascadingChanges.push({
+        type: 'delete',
+        name: childRef.name,
+      });
+    }
+
     return { cascadingChanges, changeStatus: 'deleted' };
   }
 
@@ -432,6 +450,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       if (
         !stream.isDeleted() &&
         isChildOf(this._definition.name, stream.definition.name) &&
+        Streams.WiredStream.Definition.is(stream.definition) &&
         !children.has(stream.definition.name)
       ) {
         return {
@@ -445,23 +464,39 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }
     }
 
+    const queryStreamsValidation = validateQueryStreams({
+      desiredState,
+      name: this._definition.name,
+      queryStreams: this._definition.query_streams ?? [],
+    });
+
+    if (queryStreamsValidation) {
+      return queryStreamsValidation;
+    }
+
     if (!existsInStartingState) {
       await this.assertNoHierarchicalConflicts(this._definition.name);
     }
 
     const ancestors = desiredState
       .all()
-      .filter((stream) => {
-        return isDescendantOf(stream.definition.name, this._definition.name);
+      .filter((stream): stream is StreamActiveRecord<Streams.WiredStream.Definition> => {
+        return (
+          isDescendantOf(stream.definition.name, this._definition.name) &&
+          Streams.WiredStream.Definition.is(stream.definition)
+        );
       })
-      .map((stream) => stream.definition as Streams.WiredStream.Definition);
+      .map((stream) => stream.definition);
 
     const descendants = desiredState
       .all()
-      .filter((stream) => {
-        return isDescendantOf(this._definition.name, stream.definition.name);
+      .filter((stream): stream is StreamActiveRecord<Streams.WiredStream.Definition> => {
+        return (
+          isDescendantOf(this._definition.name, stream.definition.name) &&
+          Streams.WiredStream.Definition.is(stream.definition)
+        );
       })
-      .map((stream) => stream.definition as Streams.WiredStream.Definition);
+      .map((stream) => stream.definition);
 
     validateAncestorFields({
       ancestors,
@@ -499,6 +534,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       // Validate the Streamlang DSL
       const validationResult = validateStreamlang(this._definition.ingest.processing, {
         reservedFields,
+        streamType: 'wired',
       });
 
       if (!validationResult.isValid) {
@@ -524,9 +560,37 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       }
     }
 
-    validateSettings(this._definition, this.dependencies.isServerless);
+    const ancestorsAndSelf = getAncestorsAndSelf(this._definition.name).map(
+      (id) => desiredState.get(id)!
+    ) as WiredStream[];
 
-    await validateSimulation(this._definition, this.dependencies.scopedClusterClient);
+    const inheritedSettings = getInheritedSettings(
+      ancestorsAndSelf.map((ancestor) => ancestor.definition) as Streams.WiredStream.Definition[]
+    );
+
+    const allowlistValidation = validateSettings({
+      settings: inheritedSettings,
+      isServerless: this.dependencies.isServerless,
+    });
+
+    if (!allowlistValidation.isValid) {
+      return allowlistValidation;
+    }
+
+    const shouldValidateSettingsWithDryRun =
+      existsInStartingState && ancestorsAndSelf.some((ancestor) => ancestor.hasChangedSettings());
+
+    await Promise.all([
+      shouldValidateSettingsWithDryRun
+        ? validateSettingsWithDryRun({
+            scopedClusterClient: this.dependencies.scopedClusterClient,
+            streamName: this._definition.name,
+            settings: inheritedSettings,
+            isServerless: this.dependencies.isServerless,
+          })
+        : Promise.resolve(),
+      validateSimulation(this._definition, this.dependencies.scopedClusterClient),
+    ]);
 
     return { isValid: true, errors: [] };
   }
@@ -929,6 +993,12 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       },
       {
         type: 'unlink_systems',
+        request: {
+          name: this._definition.name,
+        },
+      },
+      {
+        type: 'unlink_features',
         request: {
           name: this._definition.name,
         },

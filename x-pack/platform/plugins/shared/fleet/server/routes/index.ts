@@ -66,9 +66,8 @@ export function registerRoutes(
   registerDebugRoutes(fleetAuthzRouter);
   registerCloudConnectorRoutes(fleetAuthzRouter);
 
-  if (experimentalFeatures.agentlessPoliciesAPI) {
-    registerAgentlessPoliciesRoutes(fleetAuthzRouter);
-  }
+  registerAgentlessPoliciesRoutes(fleetAuthzRouter);
+
   // Conditional config routes
   if (config.agents.enabled) {
     registerAgentAPIRoutes(fleetAuthzRouter, config);

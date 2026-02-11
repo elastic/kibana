@@ -46,7 +46,7 @@ _search_ai_lake_analyst:
       privileges:
         - "feature_ml.read"
         - "feature_siemV5.all"
-        - "feature_securitySolutionRulesV1.all"
+        - "feature_securitySolutionRulesV2.all"
         - "feature_securitySolutionCasesV2.all"
         - "feature_securitySolutionAssistant.all"
         - "feature_securitySolutionAttackDiscovery.minimal_all"
@@ -57,6 +57,7 @@ _search_ai_lake_analyst:
         - "feature_indexPatterns.read"
         - "feature_fleetv2.read"
         - "feature_agentBuilder.all"
+        - "feature_workflowsManagement.all"
       resources: "*"
 
 _search_ai_lake_soc_manager:
@@ -125,7 +126,7 @@ _search_ai_lake_soc_manager:
         - "feature_siemV5.global_artifact_management_all"
         - "feature_siemV5.workflow_insights_all"
         - "feature_siemV5.soc_management_all"
-        - "feature_securitySolutionRulesV1.all"
+        - "feature_securitySolutionRulesV2.all"
         - "feature_securitySolutionCasesV2.all"
         - "feature_securitySolutionAssistant.all"
         - "feature_securitySolutionAttackDiscovery.all"
@@ -138,4 +139,5 @@ _search_ai_lake_soc_manager:
         - "feature_fleetv2.all"
         - "feature_advancedSettings.all"
         - "feature_agentBuilder.all"
+        - "feature_workflowsManagement.all"
       resources: "*"

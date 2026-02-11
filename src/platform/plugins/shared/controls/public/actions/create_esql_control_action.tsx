@@ -47,9 +47,7 @@ export const createESQLControlAction = (): ActionDefinition<
           const newControl = {
             panelType: 'esqlControl',
             serializedState: {
-              rawState: {
-                ...controlState,
-              },
+              ...controlState,
             },
           };
 

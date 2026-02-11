@@ -241,6 +241,7 @@ export const AgentResponseSchema = schema.object({
             error_msg: schema.maybe(schema.string()),
             retry_error_msg: schema.maybe(schema.string()),
             retry_until: schema.maybe(schema.string()),
+            reason: schema.maybe(schema.string()),
           })
         ),
       }),
@@ -836,7 +837,9 @@ export const GetAvailableAgentVersionsResponseSchema = schema.object({
 
 export const ChangeAgentPrivilegeLevelRequestSchema = {
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({
+      meta: { description: 'The agent ID to change privilege level for' },
+    }),
   }),
   body: schema.nullable(
     schema.object({
@@ -871,7 +874,9 @@ export const BulkChangeAgentsPrivilegeLevelResponseSchema = ActionIdSchema;
 
 export const PostAgentRollbackRequestSchema = {
   params: schema.object({
-    agentId: schema.string(),
+    agentId: schema.string({
+      meta: { description: 'The agent ID to rollback' },
+    }),
   }),
 };
 

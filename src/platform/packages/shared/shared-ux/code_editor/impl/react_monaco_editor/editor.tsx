@@ -28,10 +28,10 @@
  */
 
 import type { monaco as monacoEditor } from '@kbn/monaco';
-import { monaco, defaultThemesResolvers, initializeSupportedLanguages } from '@kbn/monaco';
-import { useEuiTheme, EuiPortal, type EuiPortalProps } from '@elastic/eui';
+import { defaultThemesResolvers, initializeSupportedLanguages, monaco } from '@kbn/monaco';
+import { EuiPortal, type EuiPortalProps, useEuiTheme } from '@elastic/eui';
 import * as React from 'react';
-import { useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 
 if (process.env.NODE_ENV !== 'production') {
   import(
@@ -122,12 +122,21 @@ export interface MonacoEditorProps {
    * An event emitted when the content of the current model has changed.
    */
   onChange?: ChangeHandler;
+  /**
+   * Optional z-index to override the default z-index of the overflow widgets container.
+   */
+  overflowWidgetsContainerZIndexOverride?: number;
 }
 
 // initialize supported languages
 initializeSupportedLanguages();
 
 export const OVERFLOW_WIDGETS_TEST_ID = 'kbnCodeEditorEditorOverflowWidgetsContainer';
+const OVERFLOW_WIDGETS_CONTAINER_CLASS = 'monaco-editor-overflowing-widgets-container';
+// eui flyout z-index is 1000 and highly unlikely to change, so we hardcode values here
+// we want to ensure the overflow widgets appear above or below the flyout as needed depending on where the editor is rendered
+const OVERFLOW_WIDGETS_Z_INDEX_BELOW_EUI_FLYOUT = 900;
+const OVERFLOW_WIDGETS_Z_INDEX_ABOVE_EUI_FLYOUT = 1100;
 
 export function MonacoEditor({
   width = '100%',
@@ -142,6 +151,7 @@ export function MonacoEditor({
   editorWillUnmount,
   onChange,
   className,
+  overflowWidgetsContainerZIndexOverride,
 }: MonacoEditorProps) {
   const containerElement = useRef<HTMLDivElement | null>(null);
   const overflowWidgetsDomNode = useRef<HTMLDivElement | null>(null);
@@ -211,7 +221,23 @@ export function MonacoEditor({
       // add the monaco class name to the overflow widgets dom node so that styles,
       // for it's widgets still apply
       overflowWidgetsDomNode.current?.classList.add('monaco-editor');
+      // for applying styles specific to the overflow widgets container
+      overflowWidgetsDomNode.current?.classList.add(OVERFLOW_WIDGETS_CONTAINER_CLASS);
       overflowWidgetsDomNode.current?.setAttribute('data-test-subj', OVERFLOW_WIDGETS_TEST_ID);
+
+      // handle special case of editor being rendered inside a container with a high z-index, like an EUI flyout
+      // if this is the case by default we will just raise the overflow widgets container z-index above the flyout (1000)
+      // more specific edge cases can use the z-index override prop
+      const isInsideStackedContainer =
+        containerElement.current!.closest('.euiFlyout') !== null || // covers both overlay and push flyouts
+        containerElement.current!.closest('[data-euiportal="true"]') !== null; // covers custom portals, like security timeline overlay
+      const defaultZIndex = isInsideStackedContainer
+        ? OVERFLOW_WIDGETS_Z_INDEX_ABOVE_EUI_FLYOUT
+        : OVERFLOW_WIDGETS_Z_INDEX_BELOW_EUI_FLYOUT;
+
+      overflowWidgetsDomNode.current!.style.zIndex = String(
+        overflowWidgetsContainerZIndexOverride ?? defaultZIndex
+      );
 
       // Before initializing monaco editor
       const finalOptions = { ...options, ...handleEditorWillMount() };

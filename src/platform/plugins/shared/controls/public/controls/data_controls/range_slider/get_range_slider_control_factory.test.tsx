@@ -11,7 +11,7 @@ import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { PublishesUnifiedSearch, SerializedPanelState } from '@kbn/presentation-publishing';
+import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import type { Query } from '@testing-library/react';
 import { render, waitFor } from '@testing-library/react';
 
@@ -99,10 +99,8 @@ describe('RangeSliderControlApi', () => {
     test('should not set appliedFilters$ when value is not provided', async () => {
       const { api } = await factory.buildEmbeddable({
         initialState: {
-          rawState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-          },
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
         },
         finalizeApi,
         uuid,
@@ -114,11 +112,9 @@ describe('RangeSliderControlApi', () => {
     test('should set appliedFilters$ when value is provided', async () => {
       const { api } = await factory.buildEmbeddable({
         initialState: {
-          rawState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-            value: ['5', '10'],
-          },
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          value: ['5', '10'],
         },
         finalizeApi,
         uuid,
@@ -154,11 +150,9 @@ describe('RangeSliderControlApi', () => {
     test('should set blocking error when data view is not found', async () => {
       const { api } = await factory.buildEmbeddable({
         initialState: {
-          rawState: {
-            dataViewId: 'notGonnaFindMeDataView',
-            fieldName: 'myFieldName',
-            value: ['5', '10'],
-          },
+          dataViewId: 'notGonnaFindMeDataView',
+          fieldName: 'myFieldName',
+          value: ['5', '10'],
         },
         finalizeApi,
         uuid,
@@ -178,11 +172,9 @@ describe('RangeSliderControlApi', () => {
       max = null; // simulate no results by returning max aggregation value of null
       const { Component } = await factory.buildEmbeddable({
         initialState: {
-          rawState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-            value: ['5', '10'],
-          },
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          value: ['5', '10'],
         },
         finalizeApi,
         uuid,
@@ -199,10 +191,8 @@ describe('RangeSliderControlApi', () => {
     test('bounds inputs should display min and max placeholders when there is no selected range', async () => {
       const { Component } = await factory.buildEmbeddable({
         initialState: {
-          rawState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-          },
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
         },
         finalizeApi,
         uuid,
@@ -222,34 +212,30 @@ describe('RangeSliderControlApi', () => {
     test('default value provided when state.step is undefined', async () => {
       const { api } = await factory.buildEmbeddable({
         initialState: {
-          rawState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-          },
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
         },
         finalizeApi,
         uuid,
         parentApi,
       });
-      const serializedState = api.serializeState() as SerializedPanelState<RangeSliderControlState>;
-      expect(serializedState.rawState.step).toBe(1);
+      const serializedState = api.serializeState() as RangeSliderControlState;
+      expect(serializedState.step).toBe(1);
     });
 
     test('retains value from initial state', async () => {
       const { api } = await factory.buildEmbeddable({
         initialState: {
-          rawState: {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-            step: 1024,
-          },
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          step: 1024,
         },
         finalizeApi,
         uuid,
         parentApi,
       });
-      const serializedState = api.serializeState() as SerializedPanelState<RangeSliderControlState>;
-      expect(serializedState.rawState.step).toBe(1024);
+      const serializedState = api.serializeState() as RangeSliderControlState;
+      expect(serializedState.step).toBe(1024);
     });
   });
 });

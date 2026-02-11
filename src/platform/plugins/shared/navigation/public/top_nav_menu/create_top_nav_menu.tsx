@@ -20,17 +20,15 @@ const LazyTopNavMenu = lazy(async () => {
 });
 
 /**
- * @deprecated
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
  */
 export function createTopNav(
   /**
-   * @deprecated AppMenu will decouple from UnifiedSearch, so this parameter
-   * will be removed once AppMenu becomes the default.
+   * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
    */
   unifiedSearch: UnifiedSearchPublicPluginStart,
   /**
-   * @deprecated AppMenu will not allow for reigstering global menu items, so this parameter
-   * will be removed once AppMenu becomes the default.
+   * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
    */
   extraConfig: RegisteredTopNavMenuData[]
 ) {

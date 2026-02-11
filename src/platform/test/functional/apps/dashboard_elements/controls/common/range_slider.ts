@@ -239,7 +239,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.rangeSliderSetLowerBound(firstId, '2');
         await dashboardControls.rangeSliderSetUpperBound(firstId, '3');
         await dashboardControls.rangeSliderWaitForLoading(firstId);
-        await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+        await dashboard.ensureHasUnsavedChangesNotification();
       });
 
       it('changes to range can be discarded', async () => {
@@ -252,7 +252,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('dashboard does not load with unsaved changes when changes are discarded', async () => {
         await dashboard.switchToEditMode();
         await retry.try(async () => {
-          await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+          await dashboard.ensureMissingUnsavedChangesNotification();
         });
       });
 

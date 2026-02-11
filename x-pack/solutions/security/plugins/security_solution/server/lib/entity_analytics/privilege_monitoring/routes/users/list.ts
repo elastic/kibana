@@ -21,6 +21,7 @@ import {
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const listUsersRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -42,27 +43,30 @@ export const listUsersRoute = (router: EntityAnalyticsRoutesDeps['router'], logg
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<ListPrivMonUsersResponse>> => {
-        const siemResponse = buildSiemResponse(response);
-        try {
-          const secSol = await context.securitySolution;
-          const { elasticsearch } = await context.core;
-          const crudService = createPrivilegedUsersCrudService({
-            esClient: elasticsearch.client.asCurrentUser,
-            index: getPrivilegedMonitorUsersIndex(secSol.getSpaceId()),
-            logger: secSol.getLogger(),
-          });
+      withMinimumLicense(
+        async (context, request, response): Promise<IKibanaResponse<ListPrivMonUsersResponse>> => {
+          const siemResponse = buildSiemResponse(response);
+          try {
+            const secSol = await context.securitySolution;
+            const { elasticsearch } = await context.core;
+            const crudService = createPrivilegedUsersCrudService({
+              esClient: elasticsearch.client.asCurrentUser,
+              index: getPrivilegedMonitorUsersIndex(secSol.getSpaceId()),
+              logger: secSol.getLogger(),
+            });
 
-          const body = await crudService.list(request.query.kql);
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error listing users: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+            const body = await crudService.list(request.query.kql);
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error listing users: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };
