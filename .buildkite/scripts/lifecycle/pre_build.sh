@@ -29,5 +29,8 @@ fi
 
 # Annotate ingestable meta-data (prefixed with 'ingest:')
 if [[ "${BUILDKITE_PULL_REQUEST_BASE_BRANCH:-}" != "" ]]; then # if we're in a PR build
-  buildkite-agent meta-data set "ingest:is_draft_pr" "${GITHUB_PR_DRAFT:-}" # GITHUB_PR_DRAFT is set by our pr build trigger bot
+  # GITHUB_PR_DRAFT is set by our pr build trigger bot
+  buildkite-agent meta-data set "ingest:is_draft_pr" "${GITHUB_PR_DRAFT:-}"
+  # GITHUB_PR_LABELS is set by our pr build trigger bot, and is a comma-separated list of labels on the PR
+  buildkite-agent meta-data set "ingest:pr_labels" "${GITHUB_PR_LABELS:-}"
 fi
