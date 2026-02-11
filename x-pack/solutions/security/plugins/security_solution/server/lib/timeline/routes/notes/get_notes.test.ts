@@ -272,4 +272,59 @@ describe('get notes route', () => {
     expect(response.body.notes[0].note).toEqual('note attached to alert only');
     expect(response.body.totalCount).toEqual(1);
   });
+
+  test('should return timeline-only notes when eventId is empty or missing', async () => {
+    const timelineId = '94d67688-1a81-41e7-a9cc-feff2a320b8f';
+    const mockNotesFromDb = [
+      {
+        // Timeline note with empty eventId - should be INCLUDED
+        id: uuidv4(),
+        timelineId,
+        eventId: '',
+        note: 'note on timeline',
+        created: 1770829616878,
+        createdBy: 'elastic',
+        updated: 1770829616878,
+        updatedBy: 'elastic',
+      },
+      {
+        // Investigation guide-like note without eventId - should be INCLUDED
+        id: uuidv4(),
+        timelineId,
+        note: 'investigation guide without eventId',
+        created: 1770829580900,
+        createdBy: 'elastic',
+        updated: 1770829580900,
+        updatedBy: 'elastic',
+      },
+      {
+        // Note attached to both timeline and alert - should be EXCLUDED
+        id: uuidv4(),
+        timelineId,
+        eventId: '71a66a11cdc337f01005859081ebad8d5bf093e7396b44b8eae7882d4744910b',
+        note: 'note attached to timeline and alert',
+        created: 1770829574213,
+        createdBy: 'elastic',
+        updated: 1770829574213,
+        updatedBy: 'elastic',
+      },
+    ];
+
+    mockGetAllSavedNote.mockResolvedValue({
+      notes: mockNotesFromDb,
+      totalCount: mockNotesFromDb.length,
+    });
+
+    const response = await server.inject(
+      getAllNotesRequest({ associatedFilter: AssociatedFilter.savedObjectOnly }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toEqual(200);
+    expect(response.body.notes).toHaveLength(2);
+    expect(response.body.notes.map((note: { note: string }) => note.note).sort()).toEqual(
+      ['note on timeline', 'investigation guide without eventId'].sort()
+    );
+    expect(response.body.totalCount).toEqual(2);
+  });
 });
