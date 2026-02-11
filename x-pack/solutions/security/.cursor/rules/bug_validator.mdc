@@ -224,7 +224,14 @@ Using the parsed data from Step 0, verify the affected code still exists:
    - If the bug was filed against a significantly older version, search for major refactors
    - Check if the component was rewritten, moved to a different module, or replaced
 
-6. **Documentation verification:**
+6. **Space-awareness check (when the bug mentions spaces, multi-space, or cross-cluster):**
+   - Check saved object `namespaceType`: `'agnostic'` means shared across all spaces (potential data leak); `'single'` or `'multiple'` means space-scoped
+   - Check ES client usage: raw `esClient` bypasses space filtering; plugin-provided clients (e.g., ML plugin's `filterJobsForSpace`) are space-aware
+   - Check index naming: indices with `{namespace}` or `{spaceId}` in the name are space-scoped; global indices (e.g., `.ml-anomalies-*`) are not
+   - Check Fleet packages: always `namespaceType: 'agnostic'`; an install in Space A is visible in Space B
+   - Check ML jobs: the ML plugin filters jobs by space via `ml-job` saved objects; raw `esClient.ml.getJobs()` returns all jobs across all spaces
+
+7. **Documentation verification:**
    - Check the [Elastic Security documentation](https://www.elastic.co/docs/solutions/security) to verify the feature is still documented and how it's expected to work
    - Use the Documentation Reference table (in Domain Knowledge below) to find the right doc page for the feature area
    - Compare the bug's "Expected behavior" against the documented behavior:
@@ -438,6 +445,20 @@ The bug is likely still reproducible.
 >
 > The Entity Store enable/disable logic in `entity_store_management_page.tsx` is unchanged since Feb 4, 2026. No merged PRs reference #251674. The permission check for "Rules, Alerts and Exceptions" privileges on re-enable is not handled -- the code assumes full privileges. No tests cover the restricted-privilege re-enable scenario.
 
+### STILL VALID -- by design (UX issue)
+
+The code behaves as intentionally implemented, but the behavior doesn't match reasonable user expectations. Not a code defect; may warrant a UX improvement, documentation update, or product decision.
+
+**When to use:**
+- The implementation matches the intended design (e.g., scheduled batch processing, eventual consistency)
+- But the user experience is poor (e.g., data doesn't update until the next scheduled run, no loading indicator)
+- Integration tests confirm the behavior is working as coded
+
+**Example:**
+> **Verdict: STILL VALID -- by design (Medium confidence)**
+>
+> Risk score recalculation runs on a scheduled task, not on-demand. When asset criticality is unassigned, the deletion is immediate but the risk score only updates on the next task run. Integration tests confirm this behavior. The UX issue is that the user expects the score to revert immediately, but the system is designed for eventual consistency. Consider adding a UI notice or triggering an immediate recalculation on criticality change.
+
 ### INCONCLUSIVE
 
 Cannot determine the bug's validity from static analysis alone.
@@ -460,6 +481,12 @@ Cannot determine the bug's validity from static analysis alone.
 > **Verdict: INCONCLUSIVE**
 >
 > The data view picker component in `privileged_user_monitoring_page.tsx` was modified in PR #249100, which refactored the page layout. The data view picker is still imported but it's unclear from the code whether it's now properly hidden on this specific page. The bug's "Current behavior" shows a visual issue (data view picker displayed when it shouldn't be) that requires viewing the rendered UI to verify.
+
+### Important: Never Use "LIKELY FIXED"
+
+**Do not use "LIKELY FIXED" as a verdict.** If you find a PR that might fix the issue but you cannot confirm it addresses the specific root cause, classify as **INCONCLUSIVE** and flag for deep-dive. In practice, "LIKELY FIXED" verdicts are unreliable -- half turn out to be wrong when investigated further.
+
+Either confirm the fix with evidence (read the PR diff + verify it addresses the root cause = **FIXED**), or acknowledge uncertainty (**INCONCLUSIVE**). There is no middle ground.
 
 ---
 
@@ -611,6 +638,28 @@ When bugs mention navigating to specific pages, map them to code paths:
 | Security > Attack Discovery | `/app/security/attack_discovery` | `public/attack_discovery/` |
 | Stack Management > Entity Store | Stack Management registration | `public/entity_analytics/`, `server/lib/entity_analytics/entity_store/` |
 
+### Platform Plugin Boundaries
+
+Security Solution depends on many platform plugins. When a bug traces to shared behavior (Cases, Lens, Inspect, etc.), look in Security code first, then cross into the platform plugin.
+
+| Bug Area | Security Code (look here first) | Platform Plugin (then check here) |
+|----------|--------------------------------|----------------------------------|
+| Add to Case / Case selector | `detections/.../use_add_to_case_actions`, entity flyout actions | `x-pack/platform/plugins/shared/cases/` |
+| Visualizations / Open in Lens | `common/components/visualization_actions/` | `x-pack/platform/plugins/shared/lens/` |
+| Inspect modal | `common/components/inspect/` | `src/platform/plugins/shared/inspector/` |
+| ML jobs / Anomaly data | Feature-specific ML integration code | `x-pack/platform/plugins/shared/ml/` |
+| Session View | Flyout integration, event rendering | `x-pack/solutions/security/plugins/session_view/` |
+| Save to Dashboard / Library | `visualization_actions/use_save_to_library.tsx` | `src/platform/plugins/shared/presentation_util/` |
+| Fleet / Integrations | Integration install checks | `x-pack/platform/plugins/shared/fleet/` |
+| Alerts table (bulk actions) | `detections/components/alerts_table/` | `x-pack/platform/plugins/shared/response-ops/` |
+| Discover in Timeline | `common/components/discover_in_timeline/` | `src/platform/plugins/shared/discover/` |
+| Osquery actions | Flyout/notes Osquery integration | `x-pack/platform/plugins/shared/osquery/` |
+
+**When to cross the boundary:**
+- If the bug's root cause is in how Security *calls* the platform plugin (wrong params, missing config), fix is in Security
+- If the bug's root cause is in how the platform plugin *behaves* (e.g., Cases modal not filtering closed cases from the query), fix is in the platform plugin
+- Note which side the fix belongs to in your verdict report
+
 ### Test Locations
 
 When checking for test coverage, search these directories:
@@ -619,7 +668,11 @@ When checking for test coverage, search these directories:
 |-----------|----------|
 | Cypress E2E | `x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/` |
 | Scout (Playwright) | `x-pack/solutions/security/plugins/security_solution/test/scout/` |
-| API Integration | `x-pack/test/security_solution_api_integration/` |
+| API Integration (general) | `x-pack/test/security_solution_api_integration/` |
+| API Integration (Security) | `x-pack/solutions/security/test/security_solution_api_integration/` |
+| Entity Analytics API tests | `test_suites/entity_analytics/` (within either API integration path) |
+| Detection Engine API tests | `test_suites/detections_response/` (within either API integration path) |
+| Investigation API tests | `test_suites/investigation/` (within either API integration path) |
 | Unit Tests | Co-located with source (e.g., `*.test.ts`, `*.test.tsx` next to source files) |
 
 ### Documentation Reference
@@ -714,11 +767,96 @@ When bugs mention roles or permissions, search for these patterns:
 
 ---
 
+## Common Defect Patterns
+
+When a bug's description matches one of these patterns, use the investigation shortcut to accelerate analysis. These patterns recur across all Security Solution teams.
+
+### Missing Permission Check in Parallel Code Path
+
+**Symptom:** An action (e.g., "Investigate in Timeline," "Add to Case") works correctly from one UI location but fails or is incorrectly available from another.
+
+**Root cause:** One code path checks a privilege but a parallel entry point for the same action doesn't.
+
+**Investigation shortcut:** Find the working code path (e.g., alerts table `TakeActionDropdown` checks `canInvestigateInTimeline`), then diff against the broken one (e.g., entity flyout `TakeAction` skips the check).
+
+### UI Restriction Without API Enforcement
+
+**Symptom:** A UI element is hidden or disabled, but the underlying action still succeeds (or the restricted items still appear in a list/modal).
+
+**Root cause:** Frontend hides an option (e.g., `hiddenStatuses` removes "Closed" from a filter dropdown) but the backend query or API doesn't enforce the same restriction.
+
+**Investigation shortcut:** Trace both the UI hide/disable logic AND the API query or server validation. Check if the query's default/initial filter actually excludes the restricted items.
+
+### Shared State Across Independent UI Sections
+
+**Symptom:** Collapsing, expanding, paginating, or toggling one section affects another section that should be independent.
+
+**Root cause:** Multiple sections share a single state variable, a single component instance (without a `key` prop to force remount), or a CSS layout that couples their sizes.
+
+**Investigation shortcut:**
+- Check for shared `useState` or shared context across sections
+- Check if sections use the same component instance without `key={sectionId}` to reset state
+- Check `EuiFlexGroup` for default `alignItems: stretch` (causes height coupling)
+
+### Hardcoded Size Limits Without Pagination
+
+**Symptom:** Feature works for small data sets but breaks or silently drops data beyond a threshold (often 10,000).
+
+**Root cause:** ES queries use `size: N` or `MAX_*` constants without scroll/search_after pagination. Elasticsearch's default `max_result_window` is 10,000.
+
+**Investigation shortcut:** Search for `size:` constants and `MAX_` variables in the affected area's ES queries. Check if results beyond the limit are silently dropped.
+
+### Cross-Space Data Leakage
+
+**Symptom:** Data from Space A is visible in Space B, or a feature installed in one space appears active in another.
+
+**Root cause:** Code uses raw `esClient` (bypasses space filtering), or saved objects with `namespaceType: 'agnostic'` are visible across all spaces, or index names don't include the space namespace.
+
+**Investigation shortcut:** See the Space-Awareness Checklist in Step 1 of the Analysis Framework.
+
+### Stale Data After Mutation
+
+**Symptom:** Changing a value in one panel (e.g., asset criticality) doesn't update a related display in another panel (e.g., risk score) until page refresh.
+
+**Root cause:** The mutation's `onSuccess` handler invalidates its own query cache but not the caches of related queries in sibling or child components.
+
+**Investigation shortcut:** Find the mutation hook (e.g., `useMutation` or `useBulkAction`). Check its `onSuccess`/`onSettled` callback. List all React Query keys it invalidates. Then find other components displaying related data and check if their query keys are also invalidated.
+
+### Special Characters in Query Construction
+
+**Symptom:** Feature works for normal values but errors with "Failed to create query," "Cannot retrieve search results," or similar when values contain special characters (IPv6 `%` zone IDs, colons, quotes).
+
+**Root cause:** User-provided values (IPs, usernames, field values) are used verbatim in KQL, EQL, or ESQL without proper escaping or sanitization.
+
+**Investigation shortcut:** Trace how the value flows from the UI into the query builder. Check for `match_phrase`, `term`, or KQL string interpolation with no escaping. Look at `encodeIpv6`/`decodeIpv6` for IPv6 -- they only handle `:`, not `%` zone IDs.
+
+### Data Format Mismatch in Shared Components
+
+**Symptom:** A shared UI component (Inspect modal, embeddable, flyout) shows errors, missing data, or garbled content for a specific feature, but works fine for others.
+
+**Root cause:** The shared component assumes one response format (e.g., standard ES search with `took`, JSON body) but receives another (e.g., ESQL response with `columns`/`values`, no `took`).
+
+**Investigation shortcut:** Check the shared component's data expectations (e.g., `response.took` for timing, `JSON.parse(body)` for request display). Compare against the actual data format the feature provides.
+
+### Event Propagation in Nested Interactive Elements
+
+**Symptom:** Clicking a button inside a row or panel triggers both the button's action AND the parent's click handler (e.g., "Collapse all" in Session View also opens a preview panel).
+
+**Root cause:** The inner element's click handler doesn't call `e.stopPropagation()`, so the event bubbles up to the parent's `onClick`.
+
+**Investigation shortcut:** Find the inner button's `onClick` handler. Check if it calls `stopPropagation()`. Find the parent element's `onClick`. If both exist without propagation control, the bug is confirmed.
+
+---
+
 ## Bulk Mode
 
 When processing a list of issues (from a list URL), use a lighter analysis strategy to provide a quick overview, then drill down on request.
 
-### Batch Processing
+### Two-Pass Bulk Strategy
+
+Use a two-pass approach: quick triage first, then deep-dive on uncertain results.
+
+**Pass 1: Quick triage (all issues)**
 
 1. **Fetch the list:** Use `gh issue list` or `gh api search/issues` to get all matching issues (up to 15)
 2. **Fetch issue bodies in parallel:** Launch up to 5 concurrent `gh issue view` calls to fetch issue details simultaneously
@@ -730,10 +868,36 @@ When processing a list of issues (from a list URL), use a lighter analysis strat
      ```
    - If a merged PR is found that closes the issue, verdict = FIXED (skip deeper analysis)
    - If no PR found, do a quick code path check (Step 1 -- verify feature exists)
-   - Skip deep diff analysis (Step 2) and detailed test coverage (Step 4) in bulk mode
+   - Skip deep diff analysis (Step 2) and detailed test coverage (Step 4) in quick pass
    - Run Steps 1 and 3 in parallel for each issue
 4. **Present the summary table** (see Output Format above)
-5. **Offer drill-down:** Ask the user which issues they want full analysis on
+5. **Offer Pass 2** for INCONCLUSIVE items
+
+**Pass 2: Deep-dive (INCONCLUSIVE items only)**
+
+After presenting the Pass 1 summary, offer to deep-dive:
+
+> "I found N INCONCLUSIVE issues. Would you like me to run a deeper investigation on those? This involves reading the source code (Step 1b), checking change history (Step 2), and verifying test coverage (Step 4)."
+
+For each INCONCLUSIVE issue in Pass 2:
+- Run the full analysis (Steps 1b + 2 + 4)
+- Goal: resolve to FIXED, STILL VALID, or OBSOLETE whenever possible
+- Present updated verdicts after all deep-dives complete
+
+### Duplicate Detection
+
+During bulk triage, watch for issues that share the same root cause:
+
+- **Same defect, different entry points:** e.g., missing privilege check in entity flyout (#232195) = same bug as in document flyout (#250150)
+- **Same defect, different reports:** e.g., bugs filed at different times against different versions describing the same underlying issue
+- **Same pattern, different features:** e.g., multiple bugs about stale data after mutation in different panels
+
+Flag duplicates in the summary table:
+```
+| #232195 | Timeline privilege on PUM flyout | STILL VALID | High | Duplicate of #250150 (same root cause: entity flyout TakeAction lacks privilege check) |
+```
+
+This helps the team fix root causes once instead of triaging each report independently.
 
 ### Quick Pass vs Full Analysis
 
@@ -828,10 +992,18 @@ I've completed the static analysis for #251674. Here's what I found and what I s
 - Bug descriptions that commonly map to specific code paths
 - Version thresholds where major refactors make older bugs likely obsolete
 
+**Known high-bug-density areas (from real triage runs):**
+- **ESQL integration points** -- Shared components (Inspect modal, filter bars, error handlers) often assume standard ES search format but break with ESQL responses
+- **Cross-space features** -- Space scoping is frequently incomplete for newer features; check raw `esClient` usage and agnostic saved objects
+- **Multi-entry-point actions** -- Actions like "Add to Case," "Investigate in Timeline," and "Ask AI Assistant" are accessible from multiple UI locations; privilege checks may exist on one entry point but not others
+- **Date/time-dependent queries** -- Components sometimes don't re-fetch when the global time picker changes; check if ESQL hooks properly depend on time range props
+- **Nested flyouts and z-index** -- Grid layout mode and multi-flyout scenarios frequently cause layering issues
+
 **When the user confirms, add the pattern to the relevant section:**
 - New team/code path mappings -> Domain Knowledge
 - New permission patterns -> Common Permission/Privilege Patterns
 - New investigation shortcuts -> Analysis Framework
+- New defect patterns -> Common Defect Patterns
 
 ---
 
