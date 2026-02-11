@@ -142,7 +142,7 @@ export const useEsqlCallbacks = ({
 
         return (fields || []).map((field) => ({
           ...field,
-          timeSeriesDimension: dimensionFields.has(field.name),
+          isTimeSeriesDimension: dimensionFields.has(field.name),
         }));
       }
       return [];

@@ -92,7 +92,7 @@ export interface ESQLFieldWithMetadata {
   isEcs?: boolean;
   hasConflict?: boolean;
   isUnmappedField?: boolean;
-  timeSeriesDimension?: boolean;
+  isTimeSeriesDimension?: boolean;
   metadata?: {
     description?: string;
   };

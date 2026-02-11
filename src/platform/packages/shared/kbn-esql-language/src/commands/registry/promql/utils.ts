@@ -50,13 +50,13 @@ type PromqlPositionType =
 
 interface PromqlPosition {
   type: PromqlPositionType;
-  currentParam?: string;
-  canAddGrouping?: boolean;
-  selector?: PromQLSelector;
-  canSuggestRangeSelector?: boolean;
-  isCompleteLabel?: boolean;
-  canSuggestCommaInFunctionArgs?: boolean;
-  signatureTypes?: PromQLFunctionParamType[];
+  currentParam?: string; // param name being edited (e.g. 'step' for after_param_equals)
+  canAddGrouping?: boolean; // whether by/without can be appended to the the query
+  selector?: PromQLSelector; // selector node at cursor (for duration/label checks)
+  canSuggestRangeSelector?: boolean; // whether [5m] range selector can be suggested
+  isCompleteLabel?: boolean; // label at cursor is complete (suggest comma instead of new label)
+  canSuggestCommaInFunctionArgs?: boolean; // whether comma can be suggested between function args
+  signatureTypes?: PromQLFunctionParamType[]; // expected param types for current function arg position
 }
 
 // Shared identifier pattern for param names, column names, etc.

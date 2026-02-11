@@ -107,6 +107,10 @@ export async function autocomplete(
       return suggestParamValues(position.currentParam, context);
 
     case 'inside_grouping':
+      return position.isCompleteLabel
+        ? [commaCompleteItem]
+        : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain', false);
+
     case 'after_label_brace':
       return position.isCompleteLabel
         ? [commaCompleteItem]
@@ -337,7 +341,7 @@ function buildFieldSuggestions(
       (column) =>
         !column.userDefined &&
         types.includes(column.type) &&
-        (!onlyDimensions || column.timeSeriesDimension)
+        (!onlyDimensions || column.isTimeSeriesDimension)
     )
     .map((column) => {
       const text = wrap === 'wrap' ? `(${column.name})` : `${column.name} `;
