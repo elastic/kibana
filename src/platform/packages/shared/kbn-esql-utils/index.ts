@@ -61,7 +61,6 @@ export {
   getTimeseriesIndices,
   getInferenceEndpoints,
   getEditorExtensions,
-  hasDateBreakdown,
   getProjectRoutingFromEsqlQuery,
   hasOnlySourceCommand,
   isComputedColumn,
