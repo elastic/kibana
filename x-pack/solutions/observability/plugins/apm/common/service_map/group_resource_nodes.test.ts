@@ -5,10 +5,22 @@
  * 2.0.
  */
 
-import type { ConnectionElement, ServiceMapExitSpan, ServiceMapService } from './types';
-import type { GroupedNode } from './types';
+import type {
+  ConnectionElement,
+  GroupedEdge,
+  GroupedNode,
+  ServiceMapExitSpan,
+  ServiceMapService,
+} from './types';
 import { groupResourceNodes } from './group_resource_nodes';
 import { getEdgeId, getExternalConnectionNode, getServiceConnectionNode } from './utils';
+
+type ResultElement = ConnectionElement | GroupedNode | GroupedEdge;
+
+const isEdge = (
+  el: ResultElement
+): el is { data: { id: string; source: string; target: string } } =>
+  'source' in el.data && 'target' in el.data;
 
 describe('groupResourceNodes', () => {
   const createService = (service: { serviceName: string; agentName: string }) =>
@@ -442,10 +454,8 @@ describe('groupResourceNodes', () => {
       expect(groupedNodes.length).toBe(1);
 
       // No edge should reference a non-existent node
-      const nodeIds = new Set(
-        result.elements.filter((el) => !el.data.source && !el.data.target).map((el) => el.data.id)
-      );
-      const edges = result.elements.filter((el) => el.data.source && el.data.target);
+      const nodeIds = new Set(result.elements.filter((el) => !isEdge(el)).map((el) => el.data.id));
+      const edges = result.elements.filter(isEdge);
 
       for (const edge of edges) {
         expect(nodeIds.has(edge.data.source)).toBe(true);
@@ -483,13 +493,10 @@ describe('groupResourceNodes', () => {
       const result = groupResourceNodes({ elements });
 
       // The outgoing edge from the now-grouped node should be removed
-      const orphanedEdges = result.elements.filter((el) => {
-        if (!el.data.source || !el.data.target) return false;
-        const allNodeIds = new Set(
-          result.elements.filter((e) => !e.data.source && !e.data.target).map((e) => e.data.id)
-        );
-        return !allNodeIds.has(el.data.source) || !allNodeIds.has(el.data.target);
-      });
+      const allNodeIds = new Set(result.elements.filter((e) => !isEdge(e)).map((e) => e.data.id));
+      const orphanedEdges = result.elements
+        .filter(isEdge)
+        .filter((el) => !allNodeIds.has(el.data.source) || !allNodeIds.has(el.data.target));
 
       expect(orphanedEdges).toHaveLength(0);
     });
