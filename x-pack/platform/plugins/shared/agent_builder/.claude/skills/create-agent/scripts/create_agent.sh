@@ -51,9 +51,9 @@ SYMBOL="${SYMBOL:-${NAME:0:2}}"
 # Generate an ID from the name: lowercase, replace spaces/underscores with hyphens, strip non-alphanumeric
 AGENT_ID="$(echo "$NAME" | tr '[:upper:]' '[:lower:]' | tr ' _' '-' | tr -cd 'a-z0-9-')"
 
-# Source common.sh for Kibana auto-detection (after parsing --kibana-url)
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../../../../../../../.. && pwd)"
-source "$REPO_ROOT/.claude/skills/kibana-api/scripts/common.sh"
+# Source shared Kibana API utilities (after parsing --kibana-url)
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+source "$REPO_ROOT/scripts/kibana_api_common.sh"
 
 # Build the tool_ids JSON array from comma-separated string
 if command -v jq &>/dev/null; then

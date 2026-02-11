@@ -198,7 +198,7 @@ Analyze the chat output from Task 7. Check each criterion:
 If tools failed (tool results contain `"status":"failed"`):
 1. **Get the execution details** to see the actual error. Extract the `execution_id` from the tool result and call:
    ```bash
-   source .claude/skills/kibana-api/scripts/common.sh && kibana_curl "$KIBANA_URL/api/workflowExecutions/<execution_id>" > /tmp/wf_exec.json
+   source "$(git rev-parse --show-toplevel)/scripts/kibana_api_common.sh" && kibana_curl "$KIBANA_URL/api/workflowExecutions/<execution_id>" > /tmp/wf_exec.json
    ```
    Then read `/tmp/wf_exec.json` and check `error.message` and `stepExecutions[].error.message`.
 2. **Common errors:**
@@ -222,7 +222,7 @@ If Task 8 found code issues:
 1. **Diagnose**: Identify which files need changes (connector spec, workflows, or data source definition)
 2. **Verify MCP tool names**: If the error involved unknown tools or invalid parameters, use the `listTools` sub-action to discover actual tool names and schemas:
    ```bash
-   source .claude/skills/kibana-api/scripts/common.sh && kibana_curl -X POST -H "Content-Type: application/json" \
+   source "$(git rev-parse --show-toplevel)/scripts/kibana_api_common.sh" && kibana_curl -X POST -H "Content-Type: application/json" \
      "$KIBANA_URL/api/actions/connector/<connector_id>/_execute" \
      -d '{"params":{"subAction":"listTools","subActionParams":{}}}'
    ```

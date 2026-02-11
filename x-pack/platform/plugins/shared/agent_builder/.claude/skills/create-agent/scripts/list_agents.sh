@@ -3,8 +3,8 @@ set -euo pipefail
 
 # Lists all existing Agent Builder agents.
 
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../../../../../../../.. && pwd)"
-source "$REPO_ROOT/.claude/skills/kibana-api/scripts/common.sh"
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+source "$REPO_ROOT/scripts/kibana_api_common.sh"
 
 RESPONSE="$(kibana_curl -w "\n%{http_code}" \
   "$KIBANA_URL/api/agent_builder/agents")"

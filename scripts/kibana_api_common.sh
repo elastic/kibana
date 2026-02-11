@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 # Shared Kibana API utilities.
-# Source this file from other skill scripts to get auto-detected KIBANA_URL,
+# Source this file from any skill or script to get auto-detected KIBANA_URL,
 # KIBANA_AUTH, and a kibana_curl wrapper.
 #
-# Usage (adjust ../ count based on nesting depth):
-#   REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../../.. && pwd)"  # from .claude/skills/<name>/scripts/
-#   REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../../../../../../../.. && pwd)"  # from <plugin>/.claude/skills/<name>/scripts/
-#   source "$REPO_ROOT/.claude/skills/kibana-api/scripts/common.sh"
+# Usage:
+#   REPO_ROOT="$(git rev-parse --show-toplevel)"
+#   source "$REPO_ROOT/scripts/kibana_api_common.sh"
 #
 # After sourcing, KIBANA_URL and KIBANA_AUTH are set to working values.
 # If auto-detection fails and no overrides were provided, the script exits with an error.

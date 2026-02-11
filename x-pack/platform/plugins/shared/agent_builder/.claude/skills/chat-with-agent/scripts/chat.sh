@@ -33,9 +33,9 @@ if [[ -z "$AGENT_ID" || -z "$PROMPT" ]]; then
   usage
 fi
 
-# Source common.sh for Kibana auto-detection
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../../../../../../../.. && pwd)"
-source "$REPO_ROOT/.claude/skills/kibana-api/scripts/common.sh"
+# Source shared Kibana API utilities
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+source "$REPO_ROOT/scripts/kibana_api_common.sh"
 
 # Build request payload
 if command -v jq &>/dev/null; then

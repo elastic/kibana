@@ -10,16 +10,11 @@ This skill provides shared shell utilities for other skills that need to call Ki
 
 ## Usage
 
-Source `common.sh` from any skill script. The number of `..` segments depends on how deep the skill is nested:
+Source `scripts/kibana_api_common.sh` from any skill script:
 
 ```bash
-# From .claude/skills/<name>/scripts/ (4 levels up):
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../../.. && pwd)"
-
-# From x-pack/platform/plugins/shared/<plugin>/.claude/skills/<name>/scripts/ (9 levels up):
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd ../../../../../../../../.. && pwd)"
-
-source "$REPO_ROOT/.claude/skills/kibana-api/scripts/common.sh"
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+source "$REPO_ROOT/scripts/kibana_api_common.sh"
 ```
 
 After sourcing, the following are available:
