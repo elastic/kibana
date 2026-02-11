@@ -148,6 +148,8 @@ export class ManagementPlugin
         const [coreStart, deps] = await core.getStartServices();
         const chromeStyle$ = coreStart.chrome.getChromeStyle$();
 
+        // Resolve fleet at runtime via `core.plugins.onStart` instead of declaring it
+        // as a plugin dependency to avoid massive circular dependency issues in the plugin graph.
         const fleetResult = await coreStart.plugins.onStart<{
           fleet: { config: { isAirGapped?: boolean } };
         }>('fleet');
