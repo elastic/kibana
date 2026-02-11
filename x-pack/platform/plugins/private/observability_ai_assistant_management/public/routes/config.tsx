@@ -13,7 +13,7 @@ import { SettingsPage } from './components/settings_page';
 const Tabs = t.union([
   t.literal('settings'),
   t.literal('knowledge_base'),
-  t.literal('search_connector'),
+  t.literal('content_connector'),
   t.undefined,
 ]);
 export type TabsRt = t.TypeOf<typeof Tabs>;

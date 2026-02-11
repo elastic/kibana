@@ -93,7 +93,11 @@ export function ManageViewsFlyout<TSavedViewState extends SavedViewItem>({
           defaultMessage: 'Mark as default',
         })}
         key={item.id}
-        data-test-subj="infraRenderMakeDefaultActionButton"
+        data-test-subj={
+          item.attributes.isDefault
+            ? 'infraRenderMakeDefaultActionButton-filled'
+            : 'infraRenderMakeDefaultActionButton-empty'
+        }
         iconType={item.attributes.isDefault ? 'starFilled' : 'starEmpty'}
         size="s"
         onClick={() => {
@@ -161,6 +165,10 @@ export function ManageViewsFlyout<TSavedViewState extends SavedViewItem>({
             search={searchConfig}
             pagination={true}
             sorting={true}
+            tableCaption={i18n.translate('xpack.infra.openView.table.tableCaption', {
+              defaultMessage: 'Saved views',
+            })}
+            data-test-subj="savedViews-viewsTable"
           />
         </EuiFlyoutBody>
         <EuiModalFooter>
@@ -212,7 +220,7 @@ const DeleteConfimation = ({ isDisabled, onConfirm }: DeleteConfimationProps) =>
       aria-label={i18n.translate('xpack.infra.deleteConfimation.deleteButton.ariaLabel', {
         defaultMessage: 'Delete',
       })}
-      data-test-subj="infraDeleteConfimationButton"
+      data-test-subj="infraDeleteConfirmationButton"
       iconType="trash"
       color="danger"
       size="s"

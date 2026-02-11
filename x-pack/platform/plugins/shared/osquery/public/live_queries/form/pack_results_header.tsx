@@ -10,11 +10,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 import { AddToCaseWrapper } from '../../cases/add_to_cases';
+import type { AddToTimelineHandler } from '../../types';
 
 interface PackResultsHeadersProps {
   actionId?: string;
   queryIds: string[];
   agentIds?: string[];
+  addToTimeline?: AddToTimelineHandler;
 }
 
 const resultsHeadingCss = ({ euiTheme }: UseEuiTheme) => ({
@@ -29,8 +31,8 @@ const iconsListCss = {
 };
 
 export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
-  ({ actionId, agentIds, queryIds }) => {
-    const iconProps = useMemo(() => ({ color: 'text', size: 'xs', iconSize: 'l' }), []);
+  ({ actionId, agentIds, queryIds, addToTimeline }) => {
+    const iconProps = useMemo(() => ({ color: 'text', size: 'xs', iconSize: 'l' } as const), []);
 
     return (
       <>
@@ -64,6 +66,7 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
                       value={queryIds}
                       isIcon={true}
                       iconProps={iconProps}
+                      addToTimeline={addToTimeline}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

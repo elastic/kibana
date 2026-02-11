@@ -30,6 +30,7 @@ export const INTERNAL_INFERENCE_CONNECTORS = [
   'Anthropic-Claude-Sonnet-3-7',
   'Anthropic-Claude-Sonnet-4-5',
   'Anthropic-Claude-Opus-4-5',
+  'Anthropic-Claude-Opus-4-6',
   'OpenAI-GPT-OSS-120B',
   'OpenAI-GPT-4-1',
   'OpenAI-GPT-4-1-Mini',

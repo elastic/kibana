@@ -13,6 +13,7 @@ import type {
   ESQLDecimalLiteral,
   ESQLFunction,
   ESQLIntegerLiteral,
+  ESQLList,
   ESQLParamLiteral,
   ESQLSource,
   ESQLStringLiteral,
@@ -169,4 +170,61 @@ export const col = (
  */
 export const kwd = (keyword: string): SynthLiteralFragment => {
   return new SynthLiteralFragment(keyword);
+};
+
+/**
+ * Supported primitive types for ES|QL list literals.
+ */
+export type ListPrimitive = string | number | boolean;
+
+/**
+ * Creates an ES|QL list literal AST node from an array of primitive values.
+ *
+ * The array elements must all be of the same primitive type: string, number,
+ * or boolean. ES|QL list literals use square brackets and are rendered as:
+ *
+ * - `[1, 2, 3]` for integer lists
+ * - `["a", "b"]` for string lists
+ * - `[TRUE, FALSE]` for boolean lists
+ *
+ * @param values An array of primitive values (strings, numbers, or booleans).
+ *     All elements must be of the same type.
+ * @returns ES|QL list literal node.
+ * @throws Error if the array is empty or contains unsupported types.
+ */
+export const list = (values: ListPrimitive[]): ESQLList => {
+  if (values.length === 0) {
+    throw new Error('Cannot create an empty list literal');
+  }
+
+  // Currently in ES|QL language all list elements must be of the same type,
+  // we verify that here.
+  const firstType = typeof values[0];
+
+  for (let i = 1; i < values.length; i++) {
+    if (typeof values[i] !== firstType) {
+      throw new Error(
+        `All list elements must be of the same type. Expected "${firstType}", but found "${typeof values[
+          i
+        ]}" at index ${i}`
+      );
+    }
+  }
+
+  const astValues = values.map((value) => {
+    switch (typeof value) {
+      case 'string':
+        return str(value);
+      case 'number':
+        return num(value);
+      case 'boolean':
+        return bool(value);
+      default:
+        throw new Error(`Unsupported list element type: ${typeof value}`);
+    }
+  });
+
+  const node = Builder.expression.list.literal({ values: astValues });
+
+  return SynthNode.from(node);
 };

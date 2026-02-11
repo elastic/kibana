@@ -66,8 +66,37 @@ const registerHttpRequestMockHelpers = (
   const setLoadTemplatesResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('GET', `${API_BASE_PATH}/index_templates`, response, error);
 
-  const setLoadIndicesResponse = (response?: HttpResponse, error?: ResponseError) =>
-    mockResponse('GET', `${API_BASE_PATH}/indices`, response, error);
+  const setLoadIndicesStatsResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('GET', `${API_BASE_PATH}/indices_stats`, response, error);
+
+  /**
+   * The indices list endpoint switched from returning an array (`/indices`) to returning
+   * a record keyed by index name (`/indices_get`). Most tests still pass an array, so we
+   * normalize here and mock both endpoints for compatibility.
+   */
+  const setLoadIndicesResponse = (response?: HttpResponse, error?: ResponseError) => {
+    const normalizedIndicesGetResponse = (() => {
+      if (!response) return response;
+      if (Array.isArray(response)) {
+        return response.reduce<Record<string, unknown>>((acc, index: any) => {
+          if (index?.name) acc[index.name] = index;
+          return acc;
+        }, {});
+      }
+      return response;
+    })();
+
+    // New endpoint (record keyed by index name)
+    mockResponse('GET', `${API_BASE_PATH}/indices_get`, normalizedIndicesGetResponse, error);
+
+    // Legacy endpoint (array) - keep for older consumers/tests
+    const legacyResponse = Array.isArray(response)
+      ? response
+      : response && typeof response === 'object'
+      ? Object.values(response as Record<string, unknown>)
+      : response;
+    mockResponse('GET', `${API_BASE_PATH}/indices`, legacyResponse, error);
+  };
 
   const setReloadIndicesResponse = (response?: HttpResponse, error?: ResponseError) =>
     mockResponse('POST', `${API_BASE_PATH}/indices/reload`, response, error);
@@ -221,6 +250,7 @@ const registerHttpRequestMockHelpers = (
   };
   return {
     setLoadTemplatesResponse,
+    setLoadIndicesStatsResponse,
     setLoadIndicesResponse,
     setReloadIndicesResponse,
     setLoadDataStreamsResponse,

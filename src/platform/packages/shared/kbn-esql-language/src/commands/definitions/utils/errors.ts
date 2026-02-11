@@ -265,6 +265,77 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'promqlMissingParam':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingParam', {
+          defaultMessage: '[PROMQL] Missing required param "{param}"',
+          values: { param: out.param },
+        }),
+        type: 'error',
+      };
+    case 'promqlMissingParamValue':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingParamValue', {
+          defaultMessage: '[PROMQL] Missing value for "{param}"',
+          values: { param: out.param },
+        }),
+        type: 'error',
+      };
+    case 'promqlInvalidDateParam':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidDateParam', {
+          defaultMessage:
+            '[PROMQL] Invalid {param} value. Use ISO 8601 with Z (e.g. 2024-01-15T10:00:00Z) or ?_tstart/?_tend',
+          values: { param: out.param },
+        }),
+        type: 'error',
+      };
+    case 'promqlInvalidStepParam':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlInvalidStepParam', {
+          defaultMessage: '[PROMQL] Invalid step value',
+        }),
+        type: 'error',
+      };
+    case 'promqlMissingQuery':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlMissingQuery', {
+          defaultMessage: '[PROMQL] Missing query',
+        }),
+        type: 'error',
+      };
+    case 'promqlUnknownFunction':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlUnknownFunction', {
+          defaultMessage: '[PROMQL] Unknown function "{fn}"',
+          values: { fn: out.fn },
+        }),
+        type: 'error',
+      };
+    case 'promqlWrongNumberArgs':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlWrongNumberArgs', {
+          defaultMessage:
+            '[PROMQL] Wrong number of arguments for "{fn}". Expected {expected}, got {actual}',
+          values: { fn: out.fn, expected: out.expected, actual: out.actual },
+        }),
+        type: 'error',
+      };
+    case 'promqlGroupingNotAllowed':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlGroupingNotAllowed', {
+          defaultMessage: '[PROMQL] Grouping is only allowed on aggregation',
+        }),
+        type: 'error',
+      };
+    case 'promqlNoMatchingSignature':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.promqlNoMatchingSignature', {
+          defaultMessage: '[PROMQL] Argument types require ({required}) for function "{fn}"',
+          values: { fn: out.fn, required: out.required },
+        }),
+        type: 'error',
+      };
     case 'wrongDissectOptionArgumentType':
       return {
         message: i18n.translate(

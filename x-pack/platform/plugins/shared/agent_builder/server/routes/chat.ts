@@ -167,6 +167,14 @@ export function registerChatRoutes({
         }
       )
     ),
+    action: schema.maybe(
+      schema.oneOf([schema.literal('regenerate')], {
+        meta: {
+          description:
+            'The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.',
+        },
+      })
+    ),
   });
 
   const validateAttachments = async ({
@@ -186,6 +194,12 @@ export function registerChatRoutes({
       }
     }
     return results;
+  };
+
+  const validateAction = (payload: ChatRequestBodyPayload) => {
+    if (payload.action === 'regenerate' && !payload.conversation_id) {
+      throw createBadRequestError('conversation_id is required when action is regenerate');
+    }
   };
 
   const validateConfigurationOverrides = async ({
@@ -231,6 +245,7 @@ export function registerChatRoutes({
       capabilities,
       browser_api_tools: browserApiTools,
       configuration_overrides: configurationOverrides,
+      action,
     } = payload;
 
     return chatService.converse({
@@ -247,6 +262,7 @@ export function registerChatRoutes({
         attachments,
       },
       request,
+      action,
     });
   };
 
@@ -259,7 +275,7 @@ export function registerChatRoutes({
       access: 'public',
       summary: 'Send chat message',
       description:
-        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.',
+        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
@@ -297,6 +313,8 @@ export function registerChatRoutes({
           : [];
 
         await validateConfigurationOverrides({ payload, request });
+
+        validateAction(payload);
 
         const chatEvents$ = callConverse({
           payload,
@@ -377,6 +395,8 @@ export function registerChatRoutes({
           : [];
 
         await validateConfigurationOverrides({ payload, request });
+
+        validateAction(payload);
 
         const chatEvents$ = callConverse({
           payload,

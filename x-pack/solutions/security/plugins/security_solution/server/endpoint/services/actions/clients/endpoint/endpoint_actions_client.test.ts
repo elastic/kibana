@@ -475,7 +475,7 @@ describe('EndpointActionsClient', () => {
         case 'runscript':
           expectedParams = {
             ...expectedParams,
-            file_hash: 'e5441eb2bb',
+            file_sha256: 'e5441eb2bb',
             file_id: 'file-1-2-3',
             file_name: 'my_script.sh',
             file_size: 12098,
@@ -700,7 +700,7 @@ describe('EndpointActionsClient', () => {
         expect.objectContaining({
           document: expect.objectContaining({
             meta: {
-              file_hash: 'e5441eb2bb',
+              file_sha256: 'e5441eb2bb',
               file_id: 'file-1-2-3',
               file_name: 'my_script.sh',
               file_size: 12098,

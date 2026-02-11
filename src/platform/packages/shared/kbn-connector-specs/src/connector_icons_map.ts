@@ -49,6 +49,15 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconJina" */ './specs/jina/icon/jina')),
   ],
   [
+    '.sharepoint-online',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconsharepointonline" */ './specs/sharepoint_online/icon'
+        )
+    ),
+  ],
+  [
     '.abuseipdb',
     lazy(() => import(/* webpackChunkName: "connectorIconAbuseipdb" */ './specs/abuseipdb/icon')),
   ],
@@ -63,5 +72,11 @@ export const ConnectorIconsMap: Map<
   [
     '.urlvoid',
     lazy(() => import(/* webpackChunkName: "connectorIconUrlvoid" */ './specs/urlvoid/icon')),
+  ],
+  [
+    '.google_drive',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
+    ),
   ],
 ]);
