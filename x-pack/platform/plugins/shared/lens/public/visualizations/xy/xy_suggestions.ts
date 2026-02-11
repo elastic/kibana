@@ -46,7 +46,6 @@ const COLUMN_SORT_ORDER = {
  */
 /**
  * For TS/PromQL ES|QL queries, prefers 'line' when the x-axis uses a date column (time series),
- * or when there is no x-axis yet (xValue undefined) so all XY suggestions in that context stay consistent.
  * Otherwise returns undefined so the default series type is used.
  */
 function getPreferredSeriesTypeForTimeSeriesQuery(
