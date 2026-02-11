@@ -158,3 +158,7 @@ if [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-2" ]] || [[ "${TEST_ENABLE_FIPS_VE
   fi
 fi
 
+# Use unverified snapshots for ES, until we have a verified snapshot for 9.4.0
+# Will revert it back after the snapshot verification passes
+export KBN_ES_SNAPSHOT_USE_UNVERIFIED=true
+
