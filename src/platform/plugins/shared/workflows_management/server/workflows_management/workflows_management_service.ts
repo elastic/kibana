@@ -69,11 +69,7 @@ import {
 } from '../../common/lib/errors';
 
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
-import {
-  parseWorkflowYamlToJSON,
-  parseYamlToJSONWithoutValidation,
-  stringifyWorkflowDefinition,
-} from '../../common/lib/yaml';
+import { parseWorkflowYamlToJSON, updateWorkflowYamlFields } from '../../common/lib/yaml';
 import { getWorkflowZodSchema } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
 import { hasScheduledTriggers } from '../lib/schedule_utils';
@@ -531,23 +527,17 @@ export class WorkflowsService {
         }
 
         if (yamlUpdated && existingDocument._source?.yaml) {
-          const originalYamlParse = parseYamlToJSONWithoutValidation(existingDocument._source.yaml);
-          const baseDefinition = originalYamlParse.success
-            ? originalYamlParse.json
-            : existingDocument._source?.definition;
-
-          if (baseDefinition) {
-            const fieldUpdates = {
-              ...(workflow.name !== undefined && { name: workflow.name }),
-              ...(workflow.enabled !== undefined && { enabled: updatedData.enabled }),
-              ...(workflow.description !== undefined && { description: workflow.description }),
-              ...(workflow.tags !== undefined && { tags: workflow.tags }),
-            };
-            updatedData.yaml = stringifyWorkflowDefinition({
-              ...baseDefinition,
-              ...fieldUpdates,
-            });
-          }
+          // Use in-place YAML field updates to preserve formatting, comments,
+          // and template expressions that would be corrupted by a parse-to-JSON then re-stringify cycle.
+          // `enabledValue` is passed separately because the server may override
+          // the requested value (e.g. force `false` when the workflow has no valid
+          // definition). Other fields (name, description, tags) are read directly
+          // from the `workflow` object inside `updateWorkflowYamlFields`.
+          updatedData.yaml = updateWorkflowYamlFields(
+            existingDocument._source.yaml,
+            workflow,
+            updatedData.enabled
+          );
         }
       }
 
