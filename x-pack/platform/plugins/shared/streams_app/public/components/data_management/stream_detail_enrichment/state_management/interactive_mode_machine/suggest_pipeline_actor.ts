@@ -32,19 +32,29 @@ import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine
 const POLLING_INTERVAL_MS = 2000;
 const MAX_POLLING_TIME_MS = 5 * 60 * 1000; // 5 minutes
 
-class PollingAbortedError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'PollingAbortedError';
-  }
-}
+const POLLING_ABORTED_ERROR_NAME = 'PollingAbortedError';
+const POLLING_TIMEOUT_ERROR_NAME = 'PollingTimeoutError';
 
-class PollingTimeoutError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'PollingTimeoutError';
-  }
-}
+const createNamedError = (name: string, message: string): Error => {
+  const error = new Error(message);
+  error.name = name;
+  return error;
+};
+
+const createPollingAbortedError = (message: string): Error =>
+  createNamedError(POLLING_ABORTED_ERROR_NAME, message);
+
+const createPollingTimeoutError = (message: string): Error =>
+  createNamedError(POLLING_TIMEOUT_ERROR_NAME, message);
+
+const isNamedError = (error: unknown, name: string): error is Error =>
+  error instanceof Error && error.name === name;
+
+const isPollingAbortedError = (error: unknown): error is Error =>
+  isNamedError(error, POLLING_ABORTED_ERROR_NAME);
+
+const isPollingTimeoutError = (error: unknown): error is Error =>
+  isNamedError(error, POLLING_TIMEOUT_ERROR_NAME);
 
 const pollWithTimeout = async <T>({
   signal,
@@ -231,8 +241,8 @@ export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise
       result.status === TaskStatus.InProgress || result.status === TaskStatus.NotStarted,
     intervalMs: POLLING_INTERVAL_MS,
     timeoutMs: MAX_POLLING_TIME_MS,
-    createAbortError: () => new PollingAbortedError('Pipeline suggestion was cancelled'),
-    createTimeoutError: () => new PollingTimeoutError('Pipeline suggestion timed out'),
+    createAbortError: () => createPollingAbortedError('Pipeline suggestion was cancelled'),
+    createTimeoutError: () => createPollingTimeoutError('Pipeline suggestion timed out'),
   });
 
   // Step 4: Handle terminal states
@@ -414,7 +424,10 @@ export async function loadExistingSuggestionLogic(
     throw error;
   }
 
-  if (taskResult.status === TaskStatus.InProgress || taskResult.status === TaskStatus.BeingCanceled) {
+  if (
+    taskResult.status === TaskStatus.InProgress ||
+    taskResult.status === TaskStatus.BeingCanceled
+  ) {
     return { type: 'in_progress' };
   }
 
@@ -516,11 +529,11 @@ export async function pollExistingSuggestionLogic(
         result.status === TaskStatus.InProgress || result.status === TaskStatus.BeingCanceled,
       intervalMs: POLLING_INTERVAL_MS,
       timeoutMs: MAX_POLLING_TIME_MS,
-      createAbortError: () => new PollingAbortedError('Polling was cancelled'),
-      createTimeoutError: () => new PollingTimeoutError('Polling timed out'),
+      createAbortError: () => createPollingAbortedError('Polling was cancelled'),
+      createTimeoutError: () => createPollingTimeoutError('Polling timed out'),
     });
   } catch (error) {
-    if (error instanceof PollingAbortedError || error instanceof PollingTimeoutError) {
+    if (isPollingAbortedError(error) || isPollingTimeoutError(error)) {
       return { type: 'none' };
     }
     throw error;
