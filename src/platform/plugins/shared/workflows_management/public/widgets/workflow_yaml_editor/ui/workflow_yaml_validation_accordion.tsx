@@ -20,16 +20,19 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { selectWorkflowId } from '../../../entities/workflows/store/workflow_detail/selectors';
 import type {
   YamlValidationErrorSeverity,
   YamlValidationResult,
 } from '../../../features/validate_workflow_yaml/model/types';
+import { useTelemetry } from '../../../hooks/use_telemetry';
 
-const severityOrder = ['error', 'warning', 'info'];
+const severityOrder = ['error', 'warning'];
 
 interface WorkflowYamlValidationAccordionProps {
   isMounted: boolean;
@@ -51,28 +54,62 @@ export function WorkflowYamlValidationAccordion({
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
   const accordionId = useGeneratedHtmlId({ prefix: 'wf-yaml-editor-validation-errors' });
+  const workflowId = useSelector(selectWorkflowId);
+  const telemetry = useTelemetry();
+  const previousErrorsRef = useRef<string>('');
+
   let icon: React.ReactNode | null = null;
   let buttonContent: React.ReactNode | null = null;
 
-  const allValidationErrors: YamlValidationResult[] = [
-    ...(validationErrors || []),
-    ...(errorValidating
-      ? [
-          {
-            id: 'error-validating',
-            endLineNumber: 0,
-            endColumn: 0,
-            hoverMessage: null,
-            severity: 'error' as YamlValidationErrorSeverity,
-            message: errorValidating.message,
-            owner: 'variable-validation' as YamlValidationResult['owner'],
-            startLineNumber: 0,
-            startColumn: 0,
-            afterMessage: null,
-          },
-        ]
-      : []),
-  ];
+  const allValidationErrors: YamlValidationResult[] = useMemo(
+    () => [
+      ...(validationErrors?.filter(
+        (error) => error.severity === 'error' || error.severity === 'warning'
+      ) || []),
+      ...(errorValidating
+        ? [
+            {
+              id: 'error-validating',
+              endLineNumber: 0,
+              endColumn: 0,
+              hoverMessage: null,
+              severity: 'error' as YamlValidationErrorSeverity,
+              message: errorValidating.message,
+              owner: 'variable-validation' as YamlValidationResult['owner'],
+              startLineNumber: 0,
+              startColumn: 0,
+              afterMessage: null,
+            },
+          ]
+        : []),
+    ],
+    [validationErrors, errorValidating]
+  );
+
+  // Report telemetry when validation errors change (only when errors are present and stable)
+  useEffect(() => {
+    // Only report if validation is complete (not loading) and there are errors
+    if (!isLoading && isMounted && allValidationErrors.length > 0) {
+      // Create a stable key from error set to detect actual changes
+      const errorKey = allValidationErrors
+        .map((e) => `${e.owner}-${e.startLineNumber}-${e.startColumn}`)
+        .sort()
+        .join('|');
+
+      // Only report if the error set has actually changed
+      if (errorKey !== previousErrorsRef.current) {
+        previousErrorsRef.current = errorKey;
+        telemetry.reportWorkflowValidationError({
+          workflowId,
+          validationResults: allValidationErrors,
+          editorType: 'yaml', // Validation always happens in YAML editor context
+        });
+      }
+    } else if (!isLoading && isMounted && allValidationErrors.length === 0) {
+      // Clear the previous errors ref when there are no errors
+      previousErrorsRef.current = '';
+    }
+  }, [isLoading, isMounted, allValidationErrors, workflowId, telemetry]);
 
   const highestSeverity = allValidationErrors?.reduce((acc: string | null, error) => {
     if (error.severity === 'error') {
@@ -80,9 +117,6 @@ export function WorkflowYamlValidationAccordion({
     }
     if (error.severity === 'warning' && acc !== 'error') {
       return 'warning';
-    }
-    if (error.severity === 'info' && acc !== 'error' && acc !== 'warning') {
-      return 'info';
     }
     return acc;
   }, null);
