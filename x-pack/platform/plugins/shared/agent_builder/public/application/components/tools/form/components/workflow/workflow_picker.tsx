@@ -26,6 +26,7 @@ export const WorkflowPicker: React.FC = () => {
 
   const options: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
     return (workflows || []).map((workflow) => ({
+      key: workflow.id,
       label: workflow.name,
       value: workflow.id,
     }));
@@ -37,6 +38,7 @@ export const WorkflowPicker: React.FC = () => {
     if (!selectedWorkflow) return [];
     return [
       {
+        key: selectedWorkflow.id,
         label: selectedWorkflow.name,
         value: selectedWorkflow.id,
       },

@@ -2600,10 +2600,10 @@
   dependencies:
     "@elastic/ecs-helpers" "^2.1.1"
 
-"@elastic/ecs@9.0.0":
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ecs/-/ecs-9.0.0.tgz#5599c87f72a1b2137467f80c158777ff5c4fdd81"
-  integrity sha512-FVFOFGgo8D2XoYs/2M9gaC76VzKhMKkrVqnGkbuQAB0CKoAFy9k5I2K7IMmDs6l4R5OVFiJk6uwfLiTXyHyjDA==
+"@elastic/ecs@9.2.0":
+  version "9.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/ecs/-/ecs-9.2.0.tgz#9b2b19b6c829192edcd79a1f0df348ccd633b3e6"
+  integrity sha512-qYPncAQYJa+PgZT0S0JE2tvaPnxxGx7sUhICMmk9NGkJeeEko6GQ24XLKxaDLFxr4DuYVf/0EOaRX39OENqxwA==
 
 "@elastic/elasticsearch-types@npm:@elastic/elasticsearch@^8.2.1":
   version "8.6.0"
@@ -2723,10 +2723,10 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
-"@elastic/monaco-esql@3.1.16":
-  version "3.1.16"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.16.tgz#b58d5830305582951e0a17fee4a4b308863b72b8"
-  integrity sha512-EvYVTy3gQ/hiByUkIiJy07ny0kv9k6jQdBoMH8mixkfkDpGZQ5RP1EGUPMqJRTPV7/L0tL0lNhbc45cJ34Sm0Q==
+"@elastic/monaco-esql@3.1.18":
+  version "3.1.18"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.18.tgz#e6931ca44fb5309275cc3db115d472fd88fa0dab"
+  integrity sha512-3yexduJ2l6RLw2E+uQmO1saO+iWc7zVFyyIcgsZa+Qz2mOCnfMBziUYRdEOuZ+cJdFe1G5HpHisAaYaBSSAIrQ==
 
 "@elastic/node-crypto@1.2.3", "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -26936,6 +26936,11 @@ monaco-marker-data-provider@^1.0.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/monaco-marker-data-provider/-/monaco-marker-data-provider-1.1.1.tgz#0ca69f367152f5aa12cec2bda95f32b7403e876f"
   integrity sha512-PGB7TJSZE5tmHzkxv/OEwK2RGNC2A7dcq4JRJnnj31CUAsfmw0Gl+1QTrH0W0deKhcQmQM0YVPaqgQ+0wCt8Mg==
+
+monaco-promql@1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/monaco-promql/-/monaco-promql-1.8.0.tgz#3fb16d11e58474e1e8bf08514eb762da51aa88d4"
+  integrity sha512-XdgRojBzEe/rKtrJaHbSfoMFOMD5TXymDHIitTngmBT6XEjtAirnA7Rb2YJAO1SZrJfgvAo4LFCzJ71fH7+WOw==
 
 monaco-types@^0.1.0:
   version "0.1.0"

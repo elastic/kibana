@@ -7,28 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, distinctUntilChanged, map, type Observable, shareReplay } from 'rxjs';
+import {
+  combineLatest,
+  distinctUntilChanged,
+  map,
+  pairwise,
+  startWith,
+  takeUntil,
+  type Observable,
+} from 'rxjs';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { ChromeStyle, ChromeUserBanner } from '@kbn/core-chrome-browser';
 
 const SNAPSHOT_REGEX = /-snapshot/i;
 
-export interface BodyClassesStateDeps {
+export interface BodyClassesSideEffectDeps {
   kibanaVersion: string;
   headerBanner$: Observable<ChromeUserBanner | undefined>;
   isVisible$: Observable<boolean>;
   chromeStyle$: Observable<ChromeStyle | undefined>;
   actionMenu$: Observable<MountPoint | undefined>;
+  stop$: Observable<void>;
 }
 
-/** Creates observable that emits body CSS classes based on chrome state */
-export function createBodyClassesState({
+/** Updates body CSS classes based on chrome state changes. */
+export const handleBodyClasses = ({
   kibanaVersion,
   headerBanner$,
   isVisible$,
   chromeStyle$,
   actionMenu$,
-}: BodyClassesStateDeps): Observable<string[]> {
+  stop$,
+}: BodyClassesSideEffectDeps): void => {
   const areClassesEqual = (prev: string[], next: string[]) =>
     prev.length === next.length && prev.every((value, index) => value === next[index]);
 
@@ -39,17 +49,26 @@ export function createBodyClassesState({
     return `kbnVersion-${formattedVersionClass}`;
   };
 
-  return combineLatest([headerBanner$, isVisible$, chromeStyle$, actionMenu$]).pipe(
-    map(([headerBanner, isVisible, chromeStyleValue, actionMenu]) => {
-      return [
-        'kbnBody',
-        headerBanner ? 'kbnBody--hasHeaderBanner' : 'kbnBody--noHeaderBanner',
-        isVisible ? 'kbnBody--chromeVisible' : 'kbnBody--chromeHidden',
-        chromeStyleValue === 'project' && actionMenu ? 'kbnBody--hasProjectActionMenu' : '',
-        getKbnVersionClass(),
-      ].filter((className) => !!className);
-    }),
-    distinctUntilChanged(areClassesEqual),
-    shareReplay(1)
-  );
-}
+  const body = document.body;
+
+  combineLatest([headerBanner$, isVisible$, chromeStyle$, actionMenu$])
+    .pipe(
+      map(([headerBanner, isVisible, chromeStyleValue, actionMenu]) => {
+        return [
+          'kbnBody',
+          headerBanner ? 'kbnBody--hasHeaderBanner' : 'kbnBody--noHeaderBanner',
+          isVisible ? 'kbnBody--chromeVisible' : 'kbnBody--chromeHidden',
+          chromeStyleValue === 'project' && actionMenu ? 'kbnBody--hasProjectActionMenu' : '',
+          getKbnVersionClass(),
+        ].filter((className) => Boolean(className));
+      }),
+      distinctUntilChanged(areClassesEqual),
+      startWith<string[]>([]),
+      pairwise(),
+      takeUntil(stop$)
+    )
+    .subscribe(([previousClasses, newClasses]) => {
+      body.classList.remove(...previousClasses);
+      body.classList.add(...newClasses);
+    });
+};

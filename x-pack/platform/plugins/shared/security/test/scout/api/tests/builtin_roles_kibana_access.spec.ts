@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
-
 import type {
   SecurityGetRoleResponse,
   SecurityGetRoleRole,

@@ -12,6 +12,7 @@ FTR (FunctionalTestRunner) runs Kibana UI functional tests written in mocha with
 
 1. Identify the FTR config and test file location.
    - FTR suites live under `test/**` or `x-pack/**/test/**` with config files.
+   - To confirm a config is actually executed in CI, check the relevant `.buildkite/ftr_*_configs.yml` and whether it’s listed under `enabled:` vs `disabled:`.
 2. Understand the test structure.
    - Tests export a provider function that defines a mocha suite.
    - Use `describe/it/before/beforeEach/after/afterEach`.

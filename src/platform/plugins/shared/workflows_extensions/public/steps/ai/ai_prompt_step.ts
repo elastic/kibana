@@ -20,23 +20,6 @@ import { ActionsMenuGroup, createPublicStepDefinition } from '../../step_registr
 
 export const AiPromptStepDefinition = createPublicStepDefinition({
   ...AiPromptStepCommonDefinition,
-  editorHandlers: {
-    dynamicSchema: {
-      getOutputSchema: ({ input }) => {
-        if (!input.schema) {
-          return AiPromptOutputSchema;
-        }
-
-        const zodSchema = fromJSONSchema(input.schema);
-
-        if (!zodSchema) {
-          return AiPromptOutputSchema;
-        }
-
-        return getStructuredOutputSchema(zodSchema);
-      },
-    },
-  },
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/sparkles').then(({ icon }) => ({
       default: icon,
@@ -129,5 +112,31 @@ See this [JSON Schema reference](https://json-schema.org/learn/getting-started-s
     body: "{{ steps.get_recommendation.output }}"
 \`\`\``,
     ],
+  },
+
+  editorHandlers: {
+    config: {
+      'connector-id': {
+        connectorIdSelection: {
+          connectorTypes: ['inference.unified_completion', 'bedrock', 'gen-ai', 'gemini'],
+          enableCreation: false,
+        },
+      },
+    },
+    dynamicSchema: {
+      getOutputSchema: ({ input }) => {
+        if (!input.schema) {
+          return AiPromptOutputSchema;
+        }
+
+        const zodSchema = fromJSONSchema(input.schema);
+
+        if (!zodSchema) {
+          return AiPromptOutputSchema;
+        }
+
+        return getStructuredOutputSchema(zodSchema);
+      },
+    },
   },
 });
