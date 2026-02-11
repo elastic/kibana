@@ -18,15 +18,16 @@ export async function getDrilldownFactories(
 ): Promise<DrilldownFactory[]> {
   const factories: DrilldownFactory[] = [];
   await asyncForEach(entries, async ([type, getDrilldownDefinition]) => {
-    const { displayName, euiIcon, license, setup, supportedTriggers } = await getDrilldownDefinition();
+    const { displayName, euiIcon, license, setup, supportedTriggers } =
+      await getDrilldownDefinition();
     const isCompatible = setup.isCompatible ? setup.isCompatible(context) : true;
     if (isCompatible) {
       factories.push({
         type,
         isLicenseCompatible: await isCompatibleLicense(license?.minimalLicense),
-        displayName: displayName,
-        euiIcon: euiIcon,
-        supportedTriggers: supportedTriggers,
+        displayName,
+        euiIcon,
+        supportedTriggers,
         ...setup,
         order: setup.order ?? 0,
       });

@@ -27,13 +27,13 @@ import {
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
+import { asyncForEach } from '@kbn/std';
 import type { DrilldownRegistryEntry, HasDrilldowns } from '../drilldowns/types';
 import { getDrilldownRegistryEntries } from '../drilldowns/registry';
 import { getEmbeddableTriggers } from './get_embeddable_triggers';
 import { core, isCompatibleLicense } from '../kibana_services';
 import { OPEN_CREATE_DRILLDOWN_FLYOUT_ACTION_ID, DRILLDOWN_ACTION_GROUP } from './constants';
 import { apiHasDrilldowns } from '../drilldowns/api_has_drilldowns';
-import { asyncForEach } from '@kbn/std';
 
 export type CreateDrilldownActionApi = CanAccessViewMode &
   Required<HasDrilldowns> &
@@ -109,20 +109,14 @@ export const openCreateDrilldownFlyout: ActionDefinition<EmbeddableApiContext> =
   },
 };
 
-export async function getAllDrilldownTriggers(
-  entries: DrilldownRegistryEntry[],
-  context: object,
-) {
+export async function getAllDrilldownTriggers(entries: DrilldownRegistryEntry[], context: object) {
   const drilldownTriggers = new Set<string>();
-  await asyncForEach(
-    entries,
-    async ([, drilldownGetFn]: DrilldownRegistryEntry) => {
-      const { license, setup, supportedTriggers } = await drilldownGetFn();
-      const isCompatible = setup.isCompatible ? setup.isCompatible(context) : true;
-      if (isCompatible && await isCompatibleLicense(license?.minimalLicense)) {
-        supportedTriggers.forEach((trigger) => drilldownTriggers.add(trigger));
-      }
+  await asyncForEach(entries, async ([, drilldownGetFn]: DrilldownRegistryEntry) => {
+    const { license, setup, supportedTriggers } = await drilldownGetFn();
+    const isCompatible = setup.isCompatible ? setup.isCompatible(context) : true;
+    if (isCompatible && (await isCompatibleLicense(license?.minimalLicense))) {
+      supportedTriggers.forEach((trigger) => drilldownTriggers.add(trigger));
     }
-  );
+  });
   return Array.from(drilldownTriggers);
 }

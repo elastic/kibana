@@ -45,12 +45,9 @@ export const txtSelectDrilldown = i18n.translate(
   }
 );
 
-export const txtName = i18n.translate(
-  'embeddableApi.components.DrilldownTable.nameColumnTitle',
-  {
-    defaultMessage: 'Name',
-  }
-);
+export const txtName = i18n.translate('embeddableApi.components.DrilldownTable.nameColumnTitle', {
+  defaultMessage: 'Name',
+});
 
 export const txtAction = i18n.translate(
   'embeddableApi.components.DrilldownTable.actionColumnTitle',

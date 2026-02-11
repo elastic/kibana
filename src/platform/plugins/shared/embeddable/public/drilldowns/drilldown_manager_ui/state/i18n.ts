@@ -100,15 +100,12 @@ export const insufficientLicenseLevel = i18n.translate(
 );
 
 export const invalidDrilldownType = (type: string) =>
-  i18n.translate(
-    'embeddableApi.drilldowns.components.flyoutDrilldownWizard.invalidDrilldownType',
-    {
-      defaultMessage: "Drilldown type {type} doesn't exist",
-      values: {
-        type,
-      },
-    }
-  );
+  i18n.translate('embeddableApi.drilldowns.components.flyoutDrilldownWizard.invalidDrilldownType', {
+    defaultMessage: "Drilldown type {type} doesn't exist",
+    values: {
+      type,
+    },
+  });
 
 export const txtDefaultTitle = i18n.translate(
   'embeddableApi.drilldowns.drilldownManager.state.defaultTitle',
