@@ -26,6 +26,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import { css } from '@emotion/react';
+
 import type { TimeRangeBounds, TimeRange } from './types';
 import { textToTimeRange } from './parse';
 import { durationToDisplayShortText, timeRangeToDisplayText } from './format';
@@ -55,7 +57,7 @@ export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
   startDate: Date | null;
   /** End as Date object */
   endDate: Date | null;
-  /** Text representation fo the time range */
+  /** Text representation of the time range */
   value: string;
   /** Whether the time range is invalid */
   isInvalid: boolean;
@@ -103,7 +105,7 @@ export function DateRangePicker(props: DateRangePickerProps) {
   };
   const onInputKeyDown = (event: KeyboardEvent) => {
     if (event.key === keys.ENTER && isEditing && text) {
-      onChange?.({
+      onChange({
         start: timeRange.start,
         end: timeRange.end,
         startDate: timeRange.startDate,
@@ -129,9 +131,15 @@ export function DateRangePicker(props: DateRangePickerProps) {
     if (isEditing) setIsEditing(false);
   };
 
+  const wrapperStyles = css`
+    display: flex;
+    align-items: center;
+    gap: ${euiTheme.size.s};
+  `;
+
   return (
     <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
-      <div css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s }}>
+      <div css={wrapperStyles}>
         <EuiFormControlLayout
           compressed={compressed}
           isInvalid={isInvalid}

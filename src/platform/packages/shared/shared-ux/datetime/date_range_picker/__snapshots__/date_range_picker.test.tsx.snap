@@ -2,7 +2,7 @@
 
 exports[`DateRangePicker renders 1`] = `
 <div
-  class="css-zekgly-DateRangePicker"
+  class="css-1ee1uzx-wrapperStyles"
 >
   <div
     class="euiFormControlLayout emotion-euiFormControlLayout-compressed"
