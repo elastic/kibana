@@ -23,12 +23,12 @@ import { selectTabRuntimeState, type RuntimeStateManager } from '../runtime_stat
 import type { DiscoverInternalState } from '../types';
 import {
   fromSavedObjectTabToTabState,
-  fromSavedSearchToSavedObjectTab,
   fromTabStateToSavedObjectTab,
 } from '../tab_mapping_utils';
 import type { DiscoverServices } from '../../../../../build_services';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { getSerializedSearchSourceDataViewDetails } from '../utils';
+import { createSearchSource } from '../../utils/create_search_source';
 
 export interface HasUnsavedChangesResult {
   hasUnsavedChanges: boolean;
@@ -96,17 +96,28 @@ export const selectHasUnsavedChanges = (
     const tabState = selectTab(state, tabId);
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
     const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
-    const normalizedTab = tabStateContainer
-      ? fromSavedSearchToSavedObjectTab({
-          tab: tabState,
-          savedSearch: tabStateContainer.savedSearchState.getState(),
-          services,
-        })
-      : fromTabStateToSavedObjectTab({
-          tab: tabState,
-          overridenTimeRestore: Boolean(persistedTab.timeRestore),
-          services,
-        });
+    const normalizedTab = (() => {
+      const baseTab = fromTabStateToSavedObjectTab({
+        tab: tabState,
+        overridenTimeRestore: Boolean(persistedTab.timeRestore),
+        services,
+      });
+
+      if (tabStateContainer) {
+        const currentDataView = tabRuntimeState?.currentDataView$.getValue();
+        return {
+          ...baseTab,
+          serializedSearchSource: createSearchSource({
+            dataView: currentDataView,
+            appState: tabState.appState,
+            globalState: tabState.globalState,
+            services,
+          }).getSerializedFields(),
+        };
+      }
+
+      return baseTab;
+    })();
 
     for (const stringKey of Object.keys(TAB_COMPARATORS)) {
       const key = stringKey as keyof DiscoverSessionTab;

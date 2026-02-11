@@ -21,12 +21,10 @@ import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { selectAllTabs } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
 import { selectTabRuntimeState } from '../runtime_state';
-import {
-  fromSavedSearchToSavedObjectTab,
-  fromTabStateToSavedObjectTab,
-} from '../tab_mapping_utils';
+import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { appendAdHocDataViews, replaceAdHocDataViewWithId } from './data_views';
 import { resetDiscoverSession } from './reset_discover_session';
+import { createSearchSource } from '../../utils/create_search_source';
 
 type AdHocDataViewAction = 'copy' | 'replace';
 
@@ -77,15 +75,21 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
         let updatedTab: DiscoverSessionTab;
 
         if (tabStateContainer) {
+          const currentDataView = tabRuntimeState.currentDataView$.getValue();
+          const serializedSearchSource = createSearchSource({
+            dataView: currentDataView,
+            appState: tab.appState,
+            globalState: tab.globalState,
+            services,
+          }).getSerializedFields();
+
           updatedTab = cloneDeep({
-            ...fromSavedSearchToSavedObjectTab({
+            ...fromTabStateToSavedObjectTab({
               tab,
-              savedSearch: tabStateContainer.savedSearchState.getState(),
+              overridenTimeRestore: newTimeRestore,
               services,
             }),
-            timeRestore: newTimeRestore,
-            timeRange: newTimeRestore ? tab.globalState.timeRange : undefined,
-            refreshInterval: newTimeRestore ? tab.globalState.refreshInterval : undefined,
+            serializedSearchSource,
           });
         } else {
           updatedTab = cloneDeep(

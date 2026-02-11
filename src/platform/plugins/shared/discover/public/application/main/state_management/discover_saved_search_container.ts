@@ -9,27 +9,8 @@
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
-import type { DiscoverAppState } from './redux';
 import type { DiscoverServices } from '../../../build_services';
-import type { TabState } from './redux';
-
-export interface UpdateParams {
-  /**
-   * The next data view to be used
-   */
-  nextDataView?: DataView | undefined;
-  /**
-   * The next AppState that should be used for updating the saved search
-   */
-  nextState?: DiscoverAppState | undefined;
-  /**
-   * use filter and query services to update the saved search
-   */
-  useFilterAndQueryServices?: boolean;
-}
 
 /**
  * Container for the saved search state, allowing to update the saved search
@@ -61,19 +42,12 @@ export interface DiscoverSavedSearchContainer {
    * @param nextSavedSearch
    */
   assignNextSavedSearch: (nextSavedSearch: SavedSearch) => void;
-  /**
-   * Updates the current state of the saved search
-   * @param params
-   */
-  update: (params: UpdateParams) => SavedSearch;
 }
 
 export function getSavedSearchContainer({
   services,
-  getCurrentTab,
 }: {
   services: DiscoverServices;
-  getCurrentTab: () => TabState;
 }): DiscoverSavedSearchContainer {
   const initialSavedSearch = services.savedSearch.getNew();
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
@@ -88,31 +62,8 @@ export function getSavedSearchContainer({
   const getInitial$ = () => savedSearchInitial$;
   const getCurrent$ = () => savedSearchCurrent$;
 
-  const assignNextSavedSearch = ({ nextSavedSearch }: { nextSavedSearch: SavedSearch }) => {
+  const assignNextSavedSearch = (nextSavedSearch: SavedSearch) => {
     savedSearchCurrent$.next(nextSavedSearch);
-  };
-
-  const update = ({ nextDataView, nextState, useFilterAndQueryServices }: UpdateParams) => {
-    addLog('[savedSearch] update', { nextDataView, nextState });
-
-    const previousSavedSearch = getState();
-    const dataView = nextDataView
-      ? nextDataView
-      : previousSavedSearch.searchSource.getField('index')!;
-
-    const nextSavedSearch = updateSavedSearch({
-      savedSearch: { ...previousSavedSearch },
-      dataView,
-      appState: nextState || {},
-      globalState: getCurrentTab().globalState,
-      services,
-      useFilterAndQueryServices,
-    });
-
-    assignNextSavedSearch({ nextSavedSearch });
-
-    addLog('[savedSearch] update done', nextSavedSearch);
-    return nextSavedSearch;
   };
 
   return {
@@ -120,8 +71,7 @@ export function getSavedSearchContainer({
     getInitial$,
     getState,
     set,
-    assignNextSavedSearch: (nextSavedSearch) => assignNextSavedSearch({ nextSavedSearch }),
-    update,
+    assignNextSavedSearch,
   };
 }
 

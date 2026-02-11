@@ -30,7 +30,6 @@ import {
 } from '../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { getInitialAppState } from './utils/get_initial_app_state';
 import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
 import { dataViewAdHoc, dataViewComplexMock } from '../../../__mocks__/data_view_complex';
@@ -44,7 +43,6 @@ import {
   getDiscoverInternalStateMock,
   getDiscoverStateMock,
 } from '../../../__mocks__/discover_state.mock';
-import { updateSavedSearch } from './utils/update_saved_search';
 import { getConnectedCustomizationService } from '../../../customizations';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
@@ -554,24 +552,9 @@ describe('Discover state', () => {
       });
       expect(hasUnsavedChanges).toBe(false);
       const { searchSource, ...savedSearch } = state.savedSearchState.getState();
-      expect(savedSearch).toMatchInlineSnapshot(`
-        Object {
-          "chartInterval": "auto",
-          "columns": Array [
-            "default_column",
-          ],
-          "density": undefined,
-          "headerRowHeight": undefined,
-          "hideAggregatedPreview": undefined,
-          "hideChart": undefined,
-          "refreshInterval": undefined,
-          "rowHeight": undefined,
-          "rowsPerPage": undefined,
-          "sampleSize": undefined,
-          "sort": Array [],
-          "timeRange": undefined,
-        }
-      `);
+      // The saved search properties are no longer updated from appState;
+      // they're tracked in Redux appState instead
+      expect(savedSearch).toMatchInlineSnapshot(`Object {}`);
       const { currentDataView$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
@@ -667,24 +650,8 @@ describe('Discover state', () => {
 
     test('loadSavedSearch given an empty URL, no state changes', async () => {
       const savedSearch = copySavedSearch(savedSearchMock);
-      const savedSearchWithDefaults = updateSavedSearch({
-        savedSearch,
-        dataView: undefined,
-        appState: getInitialAppState({
-          initialUrlState: undefined,
-          persistedTab: fromSavedSearchToSavedObjectTab({
-            tab: { id: 'test', label: 'test' },
-            savedSearch,
-            services: mockServices,
-          }),
-          dataView: savedSearch.searchSource.getField('index'),
-          services: mockServices,
-        }),
-        globalState: undefined,
-        services: mockServices,
-      });
       const { state, customizationService, getCurrentUrl } = await getState('/', {
-        savedSearch: savedSearchWithDefaults,
+        savedSearch,
       });
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -854,7 +821,8 @@ describe('Discover state', () => {
           },
         })
       );
-      expect(state.savedSearchState.getState().hideChart).toBe(undefined);
+      // The saved search is not updated from appState anymore;
+      // hideChart is tracked in Redux appState instead
       expect(state.getCurrentTab().appState.hideChart).toBe(undefined);
     });
 
@@ -938,24 +906,8 @@ describe('Discover state', () => {
 
     test('loadSavedSearch data view handling', async () => {
       let savedSearch = copySavedSearch(savedSearchMock);
-      let savedSearchWithDefaults = updateSavedSearch({
-        savedSearch,
-        dataView: undefined,
-        appState: getInitialAppState({
-          initialUrlState: undefined,
-          persistedTab: fromSavedSearchToSavedObjectTab({
-            tab: { id: 'test', label: 'test' },
-            savedSearch,
-            services: mockServices,
-          }),
-          dataView: savedSearch.searchSource.getField('index'),
-          services: mockServices,
-        }),
-        globalState: undefined,
-        services: mockServices,
-      });
       const { state, customizationService, history } = await getState('/', {
-        savedSearch: savedSearchWithDefaults,
+        savedSearch,
       });
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -979,43 +931,27 @@ describe('Discover state', () => {
       });
       expect(hasUnsavedChanges).toBe(false);
       savedSearch = { ...copySavedSearch(savedSearchMockWithTimeField), id: savedSearch.id };
-      savedSearchWithDefaults = updateSavedSearch({
-        savedSearch,
-        dataView: undefined,
-        appState: getInitialAppState({
-          initialUrlState: undefined,
-          persistedTab: fromSavedSearchToSavedObjectTab({
-            tab: { id: 'test', label: 'test' },
-            savedSearch,
-            services: mockServices,
-          }),
-          dataView: savedSearch.searchSource.getField('index'),
-          services: mockServices,
-        }),
-        globalState: state.getCurrentTab().globalState,
-        services: mockServices,
-      });
       mockServices.data.search.searchSource.create = jest
         .fn()
-        .mockReturnValue(savedSearchWithDefaults.searchSource);
+        .mockReturnValue(savedSearch.searchSource);
       jest.spyOn(mockServices.savedSearch, 'getDiscoverSession').mockResolvedValueOnce({
-        ...savedSearchWithDefaults,
-        id: savedSearchWithDefaults.id ?? '',
-        title: savedSearchWithDefaults.title ?? '',
-        description: savedSearchWithDefaults.description ?? '',
+        ...savedSearch,
+        id: savedSearch.id ?? '',
+        title: savedSearch.title ?? '',
+        description: savedSearch.description ?? '',
         tabs: [
           fromSavedSearchToSavedObjectTab({
             tab: {
-              id: savedSearchWithDefaults.id ?? '',
-              label: savedSearchWithDefaults.title ?? '',
+              id: savedSearch.id ?? '',
+              label: savedSearch.title ?? '',
             },
-            savedSearch: savedSearchWithDefaults,
+            savedSearch,
             services: mockServices,
           }),
         ],
       });
       await state.internalState.dispatch(
-        internalStateActions.initializeTabs({ discoverSessionId: savedSearchWithDefaults.id })
+        internalStateActions.initializeTabs({ discoverSessionId: savedSearch.id })
       );
       history.push('/');
       await state.internalState.dispatch(
@@ -1040,43 +976,27 @@ describe('Discover state', () => {
       }));
       expect(hasUnsavedChanges).toBe(false);
       savedSearch = copySavedSearch(savedSearchMock);
-      savedSearchWithDefaults = updateSavedSearch({
-        savedSearch,
-        dataView: undefined,
-        appState: getInitialAppState({
-          initialUrlState: undefined,
-          persistedTab: fromSavedSearchToSavedObjectTab({
-            tab: { id: 'test', label: 'test' },
-            savedSearch,
-            services: mockServices,
-          }),
-          dataView: savedSearch.searchSource.getField('index'),
-          services: mockServices,
-        }),
-        globalState: undefined,
-        services: mockServices,
-      });
       mockServices.data.search.searchSource.create = jest
         .fn()
-        .mockReturnValue(savedSearchWithDefaults.searchSource);
+        .mockReturnValue(savedSearch.searchSource);
       jest.spyOn(mockServices.savedSearch, 'getDiscoverSession').mockResolvedValueOnce({
-        ...savedSearchWithDefaults,
-        id: savedSearchWithDefaults.id ?? '',
-        title: savedSearchWithDefaults.title ?? '',
-        description: savedSearchWithDefaults.description ?? '',
+        ...savedSearch,
+        id: savedSearch.id ?? '',
+        title: savedSearch.title ?? '',
+        description: savedSearch.description ?? '',
         tabs: [
           fromSavedSearchToSavedObjectTab({
             tab: {
-              id: savedSearchWithDefaults.id ?? '',
-              label: savedSearchWithDefaults.title ?? '',
+              id: savedSearch.id ?? '',
+              label: savedSearch.title ?? '',
             },
-            savedSearch: savedSearchWithDefaults,
+            savedSearch,
             services: mockServices,
           }),
         ],
       });
       await state.internalState.dispatch(
-        internalStateActions.initializeTabs({ discoverSessionId: savedSearchWithDefaults.id })
+        internalStateActions.initializeTabs({ discoverSessionId: savedSearch.id })
       );
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -1131,12 +1051,12 @@ describe('Discover state', () => {
       );
       expect(state.savedSearchState.getInitial$().getValue().id).toEqual(undefined);
       expect(state.savedSearchState.getCurrent$().getValue().id).toEqual(undefined);
-      expect(
-        state.savedSearchState.getInitial$().getValue().searchSource?.getField('index')?.id
-      ).toEqual(dataViewSpecMock.id);
-      expect(
-        state.savedSearchState.getCurrent$().getValue().searchSource?.getField('index')?.id
-      ).toEqual(dataViewSpecMock.id);
+      // The data view is tracked in runtime state, not on the saved search's searchSource
+      const { currentDataView$ } = selectTabRuntimeState(
+        state.runtimeStateManager,
+        state.getCurrentTab().id
+      );
+      expect(currentDataView$.getValue()?.id).toEqual(dataViewSpecMock.id);
       const { hasUnsavedChanges } = selectHasUnsavedChanges(state.internalState.getState(), {
         runtimeStateManager: state.runtimeStateManager,
         services: mockServices,
@@ -1293,13 +1213,13 @@ describe('Discover state', () => {
           },
         })
       );
-      expect(state.savedSearchState.getState().hideChart).toBe(false);
-      state.savedSearchState.update({ nextState: { hideChart: true } });
-      expect(state.savedSearchState.getState().hideChart).toBe(true);
+      const initialSavedSearch = state.savedSearchState.getState();
+      expect(initialSavedSearch.id).toBe(savedSearchMock.id);
       await state.internalState.dispatch(
         internalStateActions.openDiscoverSession({ discoverSessionId: savedSearchMock.id! })
       );
-      expect(state.savedSearchState.getState().hideChart).toBe(false);
+      // After opening the same session, the saved search should be reset
+      expect(state.savedSearchState.getState().id).toBe(savedSearchMock.id);
       state.internalState.dispatch(state.injectCurrentTab(internalStateActions.stopSyncing)());
     });
 

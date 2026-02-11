@@ -126,7 +126,6 @@ export function getDiscoverStateContainer({
    */
   const savedSearchContainer = getSavedSearchContainer({
     services,
-    getCurrentTab,
   });
 
   const dataStateContainer = getDataStateContainer({

@@ -26,7 +26,6 @@ import { isDataViewSource } from '../../../../../../common/data_sources';
 import { copySavedSearch } from '../../discover_saved_search_container';
 import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/validate_time';
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
-import { updateSavedSearch } from '../../utils/update_saved_search';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
@@ -193,7 +192,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         dataViewId,
         locationDataViewSpec: dataViewSpec,
         initialAdHocDataViewSpec,
-        savedSearch: persistedTabSavedSearch,
+        currentDataView: persistedTabDataView,
         isEsqlMode,
         services,
         internalState: stateContainer.internalState,
@@ -238,15 +237,9 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       services,
     });
 
-    const savedSearch = updateSavedSearch({
-      savedSearch: persistedTabSavedSearch
-        ? copySavedSearch(persistedTabSavedSearch)
-        : services.savedSearch.getNew(),
-      dataView,
-      appState: initialAppState,
-      globalState: initialGlobalState,
-      services,
-    });
+    const savedSearch = persistedTabSavedSearch
+      ? copySavedSearch(persistedTabSavedSearch)
+      : services.savedSearch.getNew();
 
     /**
      * Sync global services
