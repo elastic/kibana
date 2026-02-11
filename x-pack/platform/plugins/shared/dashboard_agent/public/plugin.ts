@@ -12,7 +12,6 @@ import type {
   DashboardAgentPluginPublicSetupDependencies,
   DashboardAgentPluginPublicStartDependencies,
 } from './types';
-import { registerDashboardAttachmentUiDefinition } from './attachment_types';
 
 export class DashboardAgentPlugin
   implements
@@ -23,6 +22,8 @@ export class DashboardAgentPlugin
       DashboardAgentPluginPublicStartDependencies
     >
 {
+  private cleanupAttachmentUi?: () => void;
+
   constructor(_initContext: PluginInitializerContext) {}
 
   public setup(
@@ -33,15 +34,22 @@ export class DashboardAgentPlugin
   }
 
   public start(
-    _core: CoreStart,
+    core: CoreStart,
     plugins: DashboardAgentPluginPublicStartDependencies
   ): DashboardAgentPluginPublicStart {
-    registerDashboardAttachmentUiDefinition({
-      attachments: plugins.agentBuilder.attachments,
+    import('./attachment_types').then(({ registerDashboardAttachmentUiDefinition }) => {
+      this.cleanupAttachmentUi = registerDashboardAttachmentUiDefinition({
+        attachments: plugins.agentBuilder.attachments,
+        chat$: plugins.agentBuilder.events.chat$,
+        share: plugins.share,
+        core,
+      });
     });
 
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    this.cleanupAttachmentUi?.();
+  }
 }

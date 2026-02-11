@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filterVisualizationIds, buildMarkdownPanel, getMarkdownPanelHeight } from './utils';
+import { filterVisualizationIds } from './manage_dashboard/utils';
 
 // TODO: Add tests for normalizePanels and resolveLensConfigFromAttachment once attachment mocking utilities are available
 // These functions require AttachmentStateManager which is complex to mock
@@ -42,61 +42,6 @@ describe('filterVisualizationIds', () => {
   it('should handle empty input array', () => {
     const result = filterVisualizationIds([], ['viz1']);
     expect(result).toEqual([]);
-  });
-});
-
-describe('buildMarkdownPanel', () => {
-  it('should create a markdown panel with the correct type', () => {
-    const content = '# Test Markdown';
-    const panel = buildMarkdownPanel(content);
-
-    expect(panel.type).toBe('DASHBOARD_MARKDOWN');
-    expect(panel.config).toEqual({ content });
-  });
-
-  it('should position the panel at x=0, y=0', () => {
-    const panel = buildMarkdownPanel('test');
-
-    expect(panel.grid.x).toBe(0);
-    expect(panel.grid.y).toBe(0);
-  });
-
-  it('should use full width for markdown panel', () => {
-    const panel = buildMarkdownPanel('test');
-
-    expect(panel.grid.w).toBe(48); // MARKDOWN_PANEL_WIDTH
-  });
-
-  it('should calculate height based on content lines', () => {
-    const shortContent = 'Single line';
-    const longContent = 'Line 1\nLine 2\nLine 3\nLine 4\nLine 5';
-
-    const shortPanel = buildMarkdownPanel(shortContent);
-    const longPanel = buildMarkdownPanel(longContent);
-
-    // Longer content should result in taller panel (up to max)
-    expect(longPanel.grid.h).toBeGreaterThanOrEqual(shortPanel.grid.h);
-  });
-});
-
-describe('getMarkdownPanelHeight', () => {
-  it('should return minimum height for short content', () => {
-    const height = getMarkdownPanelHeight('Short');
-    expect(height).toBeGreaterThanOrEqual(4); // MARKDOWN_MIN_HEIGHT
-  });
-
-  it('should increase height for multi-line content', () => {
-    const shortHeight = getMarkdownPanelHeight('Short');
-    const longHeight = getMarkdownPanelHeight('Line 1\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6');
-
-    expect(longHeight).toBeGreaterThan(shortHeight);
-  });
-
-  it('should cap height at maximum', () => {
-    const veryLongContent = Array(50).fill('Line').join('\n');
-    const height = getMarkdownPanelHeight(veryLongContent);
-
-    expect(height).toBeLessThanOrEqual(12); // MARKDOWN_MAX_HEIGHT
   });
 });
 

@@ -30,7 +30,6 @@ import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 
 import type { DashboardStartDependencies } from '../plugin';
 
@@ -55,7 +54,6 @@ export let uiActionsService: UiActionsPublicStart;
 export let unifiedSearchService: UnifiedSearchPublicPluginStart;
 export let urlForwardingService: UrlForwardingStart;
 export let usageCollectionService: UsageCollectionStart | undefined;
-export let agentBuilderService: AgentBuilderPluginStart | undefined;
 
 const servicesReady$ = new BehaviorSubject(false);
 
@@ -81,7 +79,6 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDep
   unifiedSearchService = deps.unifiedSearch;
   urlForwardingService = deps.urlForwarding;
   usageCollectionService = deps.usageCollection;
-  agentBuilderService = deps.agentBuilder;
 
   servicesReady$.next(true);
 };

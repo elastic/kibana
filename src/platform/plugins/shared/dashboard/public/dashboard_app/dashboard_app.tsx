@@ -17,7 +17,6 @@ import useObservable from 'react-use/lib/useObservable';
 import { debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { getQueryParams } from '@kbn/kibana-utils-plugin/public';
 import type { DashboardState } from '../../common/types';
 import type { DashboardApi, DashboardCreationOptions } from '..';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
@@ -34,7 +33,6 @@ import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/ur
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
-import { useDashboardAgentContext } from './hooks/agent';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -53,7 +51,6 @@ import {
   loadAndRemoveDashboardState,
   startSyncingExpandedPanelState,
 } from './url';
-import { DASHBOARD_ATTACHMENT_ID_PARAM } from '../../common/page_bundle_constants';
 import type { DashboardInternalApi } from '../dashboard_api/types';
 
 export interface DashboardAppProps {
@@ -108,6 +105,16 @@ export function DashboardApp({
 
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
 
+  useObservabilityAIAssistantContext({
+    dashboardApi,
+  });
+
+  useExecutionContext(coreServices.executionContext, {
+    type: 'application',
+    page: 'app',
+    id: savedDashboardId || 'new',
+  });
+
   const kbnUrlStateStorage = useMemo(
     () =>
       createKbnUrlStateStorage({
@@ -116,30 +123,6 @@ export function DashboardApp({
       }),
     [history]
   );
-
-  useObservabilityAIAssistantContext({
-    dashboardApi,
-  });
-
-  // Extract attachmentId from URL query parameter.
-  // The attachment ID is passed when navigating from the agent to a dashboard.
-  // TODO: Remove this param from URL after attachment ID is stored in the DashboardAttachmentService
-  const urlAttachmentId = useMemo(
-    () => getQueryParams(history.location)[DASHBOARD_ATTACHMENT_ID_PARAM] as string | undefined,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
-  useDashboardAgentContext({
-    dashboardApi,
-    urlAttachmentId,
-  });
-
-  useExecutionContext(coreServices.executionContext, {
-    type: 'application',
-    page: 'app',
-    id: savedDashboardId || 'new',
-  });
 
   /**
    * Clear search session when leaving dashboard route

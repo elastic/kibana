@@ -6,18 +6,14 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
-import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export interface DashboardAgentSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
 }
 
 export interface DashboardAgentStartDependencies {
-  dashboard: DashboardPluginStart;
   share: SharePluginStart;
-  spaces?: SpacesPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

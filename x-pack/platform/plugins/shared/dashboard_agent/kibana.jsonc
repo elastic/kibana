@@ -8,19 +8,9 @@
     "id": "dashboardAgent",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "dashboardAgent"
-    ],
-    "requiredPlugins": [
-      "agentBuilder",
-      "agentBuilderPlatform",
-      "dashboard"
-    ],
-    "optionalPlugins": [
-      "share",
-      "spaces"
-    ],
+    "configPath": ["xpack", "dashboardAgent"],
+    "requiredPlugins": ["agentBuilder", "agentBuilderPlatform", "dashboard", "data"],
+    "optionalPlugins": ["share"],
     "requiredBundles": []
   }
 }

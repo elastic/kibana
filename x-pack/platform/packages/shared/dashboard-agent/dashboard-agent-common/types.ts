@@ -7,7 +7,12 @@
 
 import { z } from '@kbn/zod';
 import type { ToolUiEvent } from '@kbn/agent-builder-common/chat';
-import type { DASHBOARD_PANEL_ADDED_EVENT, DASHBOARD_PANEL_REMOVED_EVENT } from './constants';
+import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  DASHBOARD_ATTACHMENT_TYPE,
+  DASHBOARD_PANEL_ADDED_EVENT,
+  DASHBOARD_PANELS_REMOVED_EVENT,
+} from './constants';
 
 /**
  * Zod schema for Lens panel entries.
@@ -103,8 +108,6 @@ export type DashboardSection = z.infer<typeof dashboardSectionSchema>;
 export const dashboardAttachmentDataSchema = z.object({
   title: z.string(),
   description: z.string(),
-  /** Optional markdown content for the summary panel */
-  markdownContent: z.string().optional(),
   /** Optional saved object ID if the dashboard was saved */
   savedObjectId: z.string().optional(),
   /** Array of top-level panel entries */
@@ -123,20 +126,15 @@ export type DashboardAttachmentData = z.infer<typeof dashboardAttachmentDataSche
  */
 export interface PanelAddedEventData {
   dashboardAttachmentId: string;
-  panel: {
-    type: 'lens';
-    panelId: string;
-    visualization: Record<string, unknown>;
-    title?: string;
-  };
+  panel: AttachmentPanel;
 }
 
 /**
  * Data payload for a panel removed event.
  */
-export interface PanelRemovedEventData {
+export interface PanelsRemovedEventData {
   dashboardAttachmentId: string;
-  panelId: string;
+  panelIds: string[];
 }
 
 /**
@@ -144,4 +142,9 @@ export interface PanelRemovedEventData {
  */
 export type DashboardUiEvent =
   | ToolUiEvent<typeof DASHBOARD_PANEL_ADDED_EVENT, PanelAddedEventData>
-  | ToolUiEvent<typeof DASHBOARD_PANEL_REMOVED_EVENT, PanelRemovedEventData>;
+  | ToolUiEvent<typeof DASHBOARD_PANELS_REMOVED_EVENT, PanelsRemovedEventData>;
+
+export type DashboardAttachment = Attachment<
+  typeof DASHBOARD_ATTACHMENT_TYPE,
+  DashboardAttachmentData
+>;

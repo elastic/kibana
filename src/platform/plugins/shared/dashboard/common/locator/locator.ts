@@ -17,11 +17,7 @@ import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DashboardLocatorParams } from '../types';
-import {
-  DASHBOARD_APP_ID,
-  SEARCH_SESSION_ID,
-  DASHBOARD_ATTACHMENT_ID_PARAM,
-} from '../page_bundle_constants';
+import { DASHBOARD_APP_ID, SEARCH_SESSION_ID } from '../page_bundle_constants';
 
 /**
  * Useful for ensuring that we don't pass any non-serializable values to history.push (for example, functions).
@@ -53,7 +49,7 @@ export interface DashboardAppLocatorDependencies {
 
 export type ForwardedDashboardState = Omit<
   DashboardLocatorParams,
-  'dashboardId' | 'preserveSavedFilters' | 'useHash' | 'searchSessionId' | 'dashboardAttachmentId'
+  'dashboardId' | 'preserveSavedFilters' | 'useHash' | 'searchSessionId'
 >;
 
 /**
@@ -83,7 +79,6 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       useHash: paramsUseHash,
       preserveSavedFilters,
       dashboardId,
-      dashboardAttachmentId,
       ...restParams
     } = params;
     const useHash = paramsUseHash ?? this.deps.useHashedUrl;
@@ -127,12 +122,6 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
 
     if (params.searchSessionId) {
       path = `${path}&${SEARCH_SESSION_ID}=${params.searchSessionId}`;
-    }
-
-    if (dashboardAttachmentId) {
-      path = `${path}&${DASHBOARD_ATTACHMENT_ID_PARAM}=${encodeURIComponent(
-        dashboardAttachmentId
-      )}`;
     }
 
     return {

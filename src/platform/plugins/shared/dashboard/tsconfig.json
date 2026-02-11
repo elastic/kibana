@@ -102,8 +102,7 @@
     "@kbn/core-chrome-app-menu-components",
     "@kbn/core-chrome-app-menu",
     "@kbn/test-jest-helpers",
-    "@kbn/agent-builder-common",
-    "@kbn/dashboard-agent-common",
+    "@kbn/scout",
     "@kbn/image-embeddable-plugin"
   ],
   "exclude": ["target/**/*"]

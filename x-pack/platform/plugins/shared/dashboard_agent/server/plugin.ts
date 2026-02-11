@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type {
   DashboardAgentSetupDependencies,
   DashboardAgentStartDependencies,
@@ -65,26 +64,11 @@ export class DashboardAgentPlugin
     coreSetup: CoreSetup<DashboardAgentStartDependencies, DashboardAgentPluginStart>,
     setupDeps: DashboardAgentSetupDependencies
   ) {
-    const [, startDeps] = await coreSetup.getStartServices();
-
-    const dashboardLocator =
-      startDeps.share?.url?.locators?.get<DashboardLocatorParams>('DASHBOARD_APP_LOCATOR');
-
-    if (!dashboardLocator) {
-      this.logger.warn('Dashboard locator is unavailable; skipping dashboard tool registration.');
-      return;
-    }
-
     // Register the dashboard attachment type
     setupDeps.agentBuilder.attachments.registerType(createDashboardAttachmentType() as any);
 
     // Register the consolidated manage_dashboard tool
-    setupDeps.agentBuilder.tools.register(
-      manageDashboardTool({
-        dashboardLocator,
-        spaces: startDeps.spaces,
-      })
-    );
+    setupDeps.agentBuilder.tools.register(manageDashboardTool({}));
 
     // Register the dashboard agent
     registerDashboardAgent(setupDeps.agentBuilder);

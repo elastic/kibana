@@ -6,6 +6,7 @@
  */
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DashboardAgentPluginPublicSetup {}
@@ -18,4 +19,5 @@ export interface DashboardAgentPluginPublicSetupDependencies {}
 
 export interface DashboardAgentPluginPublicStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
+  share?: SharePluginStart;
 }

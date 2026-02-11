@@ -180,10 +180,6 @@ export const isErrorResult = (result: ToolResult): result is ErrorResult => {
   return result.type === ToolResultType.error;
 };
 
-export const isDashboardResult = (result: ToolResult): result is DashboardResult => {
-  return result.type === ToolResultType.dashboard;
-};
-
 export const isFileReferenceResult = (result: ToolResult): result is FileReferenceResult => {
   return result.type === ToolResultType.fileReference;
 };

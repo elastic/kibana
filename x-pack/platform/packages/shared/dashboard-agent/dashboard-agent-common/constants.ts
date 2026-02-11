@@ -23,4 +23,4 @@ export const DASHBOARD_PANEL_ADDED_EVENT = 'dashboard:panel_added';
 /**
  * UI event type for panel removed
  */
-export const DASHBOARD_PANEL_REMOVED_EVENT = 'dashboard:panel_removed';
+export const DASHBOARD_PANELS_REMOVED_EVENT = 'dashboard:panels_removed';

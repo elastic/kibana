@@ -19,6 +19,7 @@ project:
     sourceRoot: x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common
 dependsOn:
   - '@kbn/agent-builder-common'
+  - '@kbn/zod'
 tags:
   - shared-common
   - package
@@ -29,3 +30,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
+tasks: {}

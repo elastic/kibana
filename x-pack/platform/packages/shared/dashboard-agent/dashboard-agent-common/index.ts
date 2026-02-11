@@ -9,7 +9,7 @@ export {
   DASHBOARD_ATTACHMENT_TYPE,
   DASHBOARD_AGENT_ID,
   DASHBOARD_PANEL_ADDED_EVENT,
-  DASHBOARD_PANEL_REMOVED_EVENT,
+  DASHBOARD_PANELS_REMOVED_EVENT,
 } from './constants';
 
 export {
@@ -29,6 +29,6 @@ export type {
   DashboardSection,
   DashboardAttachmentData,
   PanelAddedEventData,
-  PanelRemovedEventData,
+  PanelsRemovedEventData,
   DashboardUiEvent,
 } from './types';

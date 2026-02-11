@@ -63,11 +63,5 @@ export type DashboardLocatorParams = Partial<
      * See PassThroughContext presentation container interface for details
      */
     passThroughContext?: SerializableRecord;
-
-    /**
-     * Attachment ID for agent conversation context.
-     * Used to maintain continuity between agent interactions and dashboard state.
-     */
-    dashboardAttachmentId?: string;
   }
 >;

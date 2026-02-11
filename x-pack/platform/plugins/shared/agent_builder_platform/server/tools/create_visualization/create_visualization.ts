@@ -9,8 +9,8 @@ import { z } from '@kbn/zod';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
-import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID } from '@kbn/management-settings-ids';
 import type { VisualizationConfig } from './types';
 import { guessChartType } from './guess_chart_type';
@@ -146,32 +146,42 @@ This tool will:
           esql: esqlQuery,
         };
 
-        let resultAttachmentId: string;
-        let version: number;
+        // Step 4: Try to store as attachment (optional - may fail if visualization type not registered)
+        let resultAttachmentId: string | undefined;
+        let version: number | undefined;
         let isUpdate = false;
 
-        if (attachmentId && attachments.getAttachmentRecord(attachmentId)) {
-          const updated = await attachments.update(attachmentId, {
-            data: visualizationData,
-            description: `Visualization: ${nlQuery.slice(0, 50)}${
-              nlQuery.length > 50 ? '...' : ''
-            }`,
-          });
-          resultAttachmentId = attachmentId;
-          version = updated?.current_version ?? 1;
-          isUpdate = true;
-          logger.debug(`Updated visualization attachment ${attachmentId} to version ${version}`);
-        } else {
-          const newAttachment = await attachments.add({
-            type: VISUALIZATION_ATTACHMENT_TYPE,
-            data: visualizationData,
-            description: `Visualization: ${nlQuery.slice(0, 50)}${
-              nlQuery.length > 50 ? '...' : ''
-            }`,
-          });
-          resultAttachmentId = newAttachment.id;
-          version = newAttachment.current_version;
-          logger.debug(`Created new visualization attachment ${resultAttachmentId}`);
+        try {
+          if (attachmentId && attachments.getAttachmentRecord(attachmentId)) {
+            const updated = await attachments.update(attachmentId, {
+              data: visualizationData,
+              description: `Visualization: ${nlQuery.slice(0, 50)}${
+                nlQuery.length > 50 ? '...' : ''
+              }`,
+            });
+            resultAttachmentId = attachmentId;
+            version = updated?.current_version ?? 1;
+            isUpdate = true;
+            logger.debug(`Updated visualization attachment ${attachmentId} to version ${version}`);
+          } else {
+            const newAttachment = await attachments.add({
+              type: VISUALIZATION_ATTACHMENT_TYPE,
+              data: visualizationData,
+              description: `Visualization: ${nlQuery.slice(0, 50)}${
+                nlQuery.length > 50 ? '...' : ''
+              }`,
+            });
+            resultAttachmentId = newAttachment.id;
+            version = newAttachment.current_version;
+            logger.debug(`Created new visualization attachment ${resultAttachmentId}`);
+          }
+        } catch (attachmentError) {
+          // Attachment creation is optional - continue without it
+          logger.warn(
+            `Could not create visualization attachment (type may not be registered): ${
+              attachmentError instanceof Error ? attachmentError.message : String(attachmentError)
+            }`
+          );
         }
 
         return {
@@ -180,13 +190,13 @@ This tool will:
               type: ToolResultType.visualization,
               tool_result_id: getToolResultId(),
               data: {
-                attachment_id: resultAttachmentId,
-                version,
-                is_update: isUpdate,
                 query: nlQuery,
                 visualization: validatedConfig,
                 chart_type: selectedChartType,
                 esql: esqlQuery,
+                ...(resultAttachmentId && { attachment_id: resultAttachmentId }),
+                ...(version !== undefined && { version }),
+                ...(isUpdate && { is_update: isUpdate }),
               },
             },
           ],

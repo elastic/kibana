@@ -32,7 +32,10 @@ export const createDashboardAttachmentType = (): AttachmentTypeDefinition<
     format: (attachment) => {
       return {
         getRepresentation: () => {
-          return { type: 'text', value: formatDashboardAttachment(attachment.data) };
+          return {
+            type: 'text',
+            value: formatDashboardAttachment(attachment.id, attachment.data),
+          };
         },
       };
     },
@@ -40,7 +43,7 @@ export const createDashboardAttachmentType = (): AttachmentTypeDefinition<
   };
 };
 
-const formatDashboardAttachment = (data: DashboardAttachmentData): string => {
+const formatDashboardAttachment = (attachmentId: string, data: DashboardAttachmentData): string => {
   // Count top-level panels plus panels in all sections
   const sectionPanelCount = (data.sections ?? []).reduce(
     (acc, section) => acc + section.panels.length,
@@ -51,7 +54,8 @@ const formatDashboardAttachment = (data: DashboardAttachmentData): string => {
   const sectionInfo =
     sectionCount > 0 ? `, ${sectionCount} section${sectionCount !== 1 ? 's' : ''}` : '';
 
-  return `Dashboard: "${data.title}" - ${data.description} (${panelCount} panel${
-    panelCount !== 1 ? 's' : ''
-  }${sectionInfo})`;
+  // Include attachment id prominently so the LLM can reference it in subsequent calls
+  return `Dashboard "${data.title}" (dashboardAttachment.id: "${attachmentId}")
+Description: ${data.description}
+Panels: ${panelCount}${sectionInfo}`;
 };
