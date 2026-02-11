@@ -571,7 +571,9 @@ describe('fetchEntityRelationships', () => {
         spaceId: 'default',
       });
 
-      expect(esClient.asInternalUser.helpers.esql).toBeCalledTimes(1);
+      // With 9 relationship fields and max 8 FORK branches, expect 2 batches
+      const expectedBatches = Math.ceil(ENTITY_RELATIONSHIP_FIELDS.length / 8);
+      expect(esClient.asInternalUser.helpers.esql).toBeCalledTimes(expectedBatches);
       const esqlCallArgs = esClient.asInternalUser.helpers.esql.mock.calls[0];
       const query = esqlCallArgs[0].query;
 
@@ -650,7 +652,10 @@ describe('fetchEntityRelationships', () => {
         spaceId: 'default',
       });
 
-      expect(esClient.asInternalUser.helpers.esql).toBeCalledTimes(1);
+      // With 9 relationship fields and max 8 FORK branches, expect 2 batches
+      const expectedBatches = Math.ceil(ENTITY_RELATIONSHIP_FIELDS.length / 8);
+      expect(esClient.asInternalUser.helpers.esql).toBeCalledTimes(expectedBatches);
+      // All batches share the same DSL filter
       const esqlCallArgs = esClient.asInternalUser.helpers.esql.mock.calls[0];
       const filterArg = esqlCallArgs[0].filter as any;
 
@@ -702,7 +707,9 @@ describe('fetchEntityRelationships', () => {
         spaceId: 'default',
       });
 
-      expect(esClient.asInternalUser.helpers.esql).toBeCalledTimes(1);
+      // With 9 relationship fields and max 8 FORK branches, expect 2 batches
+      const expectedBatches = Math.ceil(ENTITY_RELATIONSHIP_FIELDS.length / 8);
+      expect(esClient.asInternalUser.helpers.esql).toBeCalledTimes(expectedBatches);
       const esqlCallArgs = esClient.asInternalUser.helpers.esql.mock.calls[0];
 
       // Filter should be undefined when no entityIds provided
@@ -787,7 +794,7 @@ describe('fetchEntityRelationships', () => {
   });
 
   describe('query structure', () => {
-    it('should include FORK branches for all relationship fields', async () => {
+    it('should split FORK branches into batches of 8 and cover all relationship fields', async () => {
       const indexName = getEntitiesLatestIndexName('default');
 
       (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest
@@ -818,24 +825,31 @@ describe('fetchEntityRelationships', () => {
         spaceId: 'default',
       });
 
-      const esqlCallArgs = esClient.asInternalUser.helpers.esql.mock.calls[0];
-      const query = esqlCallArgs[0].query;
+      // With 9 relationship fields, expect 2 batches (8 + 1)
+      const expectedBatches = Math.ceil(ENTITY_RELATIONSHIP_FIELDS.length / 8);
+      expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(expectedBatches);
 
-      // Verify FORK structure is present
-      expect(query).toContain('FORK');
+      // Collect all queries across batches
+      const allQueries = esClient.asInternalUser.helpers.esql.mock.calls.map(
+        (call: any) => call[0].query as string
+      );
 
-      // Verify all relationship fields from ENTITY_RELATIONSHIP_FIELDS are handled
-      ENTITY_RELATIONSHIP_FIELDS.forEach((field) => {
-        expect(query).toContain(`entity.relationships.${field}`);
+      // Each batch query should contain FORK
+      allQueries.forEach((query: string) => {
+        expect(query).toContain('FORK');
+        expect(query).toContain('STATS badge = COUNT(*)');
+        expect(query).toContain('actorIds = VALUES(entity.id)');
+        expect(query).toContain('targetIds = VALUES(_target_id)');
       });
 
-      // Verify aggregation structure
-      expect(query).toContain('STATS badge = COUNT(*)');
-      expect(query).toContain('actorIds = VALUES(entity.id)');
-      expect(query).toContain('targetIds = VALUES(_target_id)');
+      // All relationship fields should be covered across all batches
+      const combinedQueries = allQueries.join('\n');
+      ENTITY_RELATIONSHIP_FIELDS.forEach((field) => {
+        expect(combinedQueries).toContain(`entity.relationships.${field}`);
+      });
     });
 
-    it('should include actorDocData and targetDocData in query', async () => {
+    it('should include actorsDocData and targetsDocData in query', async () => {
       const indexName = getEntitiesLatestIndexName('default');
 
       (esClient.asInternalUser.indices as jest.Mocked<any>).getSettings = jest

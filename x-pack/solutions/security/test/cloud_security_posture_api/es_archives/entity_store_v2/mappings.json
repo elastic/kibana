@@ -4,7 +4,7 @@
     "aliases": {
       "entities-generic-latest": {}
     },
-    "index": ".entities.v2.latest.security_generic_entities-space",
+    "index": ".entities.v2.latest.security_entities-space",
     "settings": {
       "index": {
         "mode": "lookup"
@@ -419,19 +419,31 @@
             },
             "relationships": {
               "properties": {
-                "Owns": {
+                "Accessed_frequently_by": {
                   "type": "keyword"
                 },
-                "Depends_on": {
+                "Accesses_frequently": {
                   "type": "keyword"
                 },
                 "Communicates_with": {
                   "type": "keyword"
                 },
+                "Dependent_of": {
+                  "type": "keyword"
+                },
+                "Depends_on": {
+                  "type": "keyword"
+                },
+                "Owned_by": {
+                  "type": "keyword"
+                },
+                "Owns": {
+                  "type": "keyword"
+                },
                 "Supervised_by": {
                   "type": "keyword"
                 },
-                "Accessed_frequently_by": {
+                "Supervises": {
                   "type": "keyword"
                 }
               }

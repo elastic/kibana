@@ -104,12 +104,12 @@ describe('ESQL utils', () => {
 
   describe('buildLookupJoinEsql', () => {
     it('should generate LOOKUP JOIN statements with provided index name', () => {
-      const result = buildLookupJoinEsql('.entities.v2.latest.security_generic_default');
+      const result = buildLookupJoinEsql('.entities.v2.latest.security_default');
 
       expect(result).toContain('| DROP entity.id');
       expect(result).toContain('| DROP entity.target.id');
       expect(result).toContain(
-        '| LOOKUP JOIN .entities.v2.latest.security_generic_default ON entity.id'
+        '| LOOKUP JOIN .entities.v2.latest.security_default ON entity.id'
       );
       expect(result).toContain('| RENAME actorEntityName    = entity.name');
       expect(result).toContain('| RENAME actorEntityType    = entity.type');
@@ -122,14 +122,14 @@ describe('ESQL utils', () => {
     });
 
     it('should include two LOOKUP JOIN statements for actor and target', () => {
-      const result = buildLookupJoinEsql('.entities.v2.latest.security_generic_test');
+      const result = buildLookupJoinEsql('.entities.v2.latest.security_test');
 
       const lookupJoinMatches = result.match(/LOOKUP JOIN/g);
       expect(lookupJoinMatches).toHaveLength(2);
     });
 
     it('should use the provided index name in both LOOKUP JOIN statements', () => {
-      const indexName = '.entities.v2.latest.security_generic_custom';
+      const indexName = '.entities.v2.latest.security_custom';
       const result = buildLookupJoinEsql(indexName);
 
       const indexMatches = result.match(new RegExp(indexName.replace(/\./g, '\\.'), 'g'));

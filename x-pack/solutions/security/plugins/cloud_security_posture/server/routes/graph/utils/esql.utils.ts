@@ -83,12 +83,12 @@ export const formatJsonProperty = (propertyName: string, valueVar: string): stri
  * Generates ESQL statements for entity enrichment using LOOKUP JOIN.
  * This is the preferred method for enriching actor and target entities with entity store data.
  *
- * @param lookupIndexName - The name of the lookup index (e.g., '.entities.v2.latest.security_generic_default')
+ * @param lookupIndexName - The name of the lookup index (e.g., '.entities.v2.latest.security_default')
  * @returns ESQL statements for LOOKUP JOIN enrichment
  *
  * @example
  * ```typescript
- * buildLookupJoinEsql('.entities.v2.latest.security_generic_default')
+ * buildLookupJoinEsql('.entities.v2.latest.security_default')
  * // Returns ESQL with LOOKUP JOIN for actor and target enrichment
  * ```
  */
