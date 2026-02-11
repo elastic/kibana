@@ -133,7 +133,7 @@ function buildFormBasedLayer(layer: LegacyMetricStateNoESQL): FormBasedPersisted
 }
 
 function getValueColumns(layer: LegacyMetricStateESQL) {
-  return [getValueColumn(ACCESSOR, layer.metric.column, layer.metric.data_type ?? 'number')];
+  return [getValueColumn(ACCESSOR, layer.metric.column, 'number')];
 }
 
 type LegacyMetricAttributes = Extract<

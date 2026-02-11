@@ -8,8 +8,7 @@
  */
 
 import type { TextBasedLayer, TextBasedLayerColumn } from '@kbn/lens-common';
-import type { ApiDatatypeCategory } from './utils';
-import { toApiDatatypeCategory } from './utils';
+import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 
 /**
  * Creates a TextBasedLayerColumn from API config.
@@ -17,7 +16,7 @@ import { toApiDatatypeCategory } from './utils';
 export const getValueColumn = (
   id: string,
   fieldName?: string,
-  fieldType?: ApiDatatypeCategory
+  fieldType: DatatableColumnType = 'string'
 ): TextBasedLayerColumn => {
   return {
     columnId: id,
@@ -31,12 +30,9 @@ export const getValueColumn = (
  */
 export const getValueApiColumn = (accessor: string, layer: TextBasedLayer) => {
   const column = layer.columns.find((c) => c.columnId === accessor);
-  const columnType = column?.meta?.type;
-  const apiDatatype = toApiDatatypeCategory(columnType);
 
   return {
     operation: 'value' as const,
     column: column!.fieldName,
-    datatype: apiDatatype,
   };
 };

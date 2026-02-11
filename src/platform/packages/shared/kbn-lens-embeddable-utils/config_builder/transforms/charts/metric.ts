@@ -533,36 +533,20 @@ function getValueColumns(layer: MetricStateESQL) {
   }
   return [
     ...(layer.breakdown_by
-      ? [
-          getValueColumn(
-            getAccessorName('breakdown'),
-            layer.breakdown_by.column,
-            layer.breakdown_by.data_type ?? 'string'
-          ),
-        ]
+      ? [getValueColumn(getAccessorName('breakdown'), layer.breakdown_by.column)]
       : []),
-    getValueColumn(
-      getAccessorName('metric'),
-      primaryMetric.column,
-      primaryMetric.data_type ?? 'number'
-    ),
+    getValueColumn(getAccessorName('metric'), primaryMetric.column, 'number'),
     ...(primaryMetric.background_chart?.type === 'bar'
       ? [
           getValueColumn(
             getAccessorName('max'),
             primaryMetric.background_chart.goal_value.column,
-            primaryMetric.background_chart.goal_value.data_type ?? 'number'
+            'number'
           ),
         ]
       : []),
     ...(secondaryMetric
-      ? [
-          getValueColumn(
-            getAccessorName('secondary'),
-            secondaryMetric.column,
-            secondaryMetric.data_type ?? 'number'
-          ),
-        ]
+      ? [getValueColumn(getAccessorName('secondary'), secondaryMetric.column, 'number')]
       : []),
   ];
 }
