@@ -31,7 +31,7 @@ steps:
   - name: download-drive-item
     type: sharepoint-online.downloadDriveItem
     if: "${{ inputs.download_action == 'downloadDriveItem' }}"
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= sharepoint-online-stack-connector-id %>
     with:
       driveId: "${{ inputs.drive_id }}"
       itemId: "${{ inputs.item_id }}"
@@ -41,7 +41,7 @@ steps:
     steps:
       - name: download-item-from-url
         type: sharepoint-online.downloadItemFromURL
-        connector-id: <%= stackConnectorId %>
+        connector-id: <%= sharepoint-online-stack-connector-id %>
         with:
           downloadUrl: "${{ inputs.download_url }}"
       - name: extract-content
@@ -64,7 +64,7 @@ steps:
   - name: get-site-page-contents
     type: sharepoint-online.getSitePageContents
     if: "${{ inputs.download_action == 'getSitePageContents' }}"
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= sharepoint-online-stack-connector-id %>
     with:
       siteId: "${{ inputs.site_id }}"
       pageId: "${{ inputs.page_id }}"

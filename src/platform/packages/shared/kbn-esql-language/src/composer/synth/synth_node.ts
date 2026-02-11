@@ -10,7 +10,7 @@
 import { Walker } from '../../ast/walker';
 import { Builder } from '../../ast/builder';
 import { BasicPrettyPrinter } from '../../pretty_print';
-import { printAst, type PrintAstOptions } from '../../shared/debug';
+import { printAst, type PrintAstOptions } from '../../debug';
 import type { ESQLProperNode } from '../../types';
 
 /**
