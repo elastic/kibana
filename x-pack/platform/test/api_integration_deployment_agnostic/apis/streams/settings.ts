@@ -116,18 +116,35 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const definition = Streams.WiredStream.GetResponse.parse(await getStream(apiClient, name));
           expect(definition.data_stream_exists).to.be(false);
 
-          const response = await updateDefinition(definition, {
-            'index.refresh_interval': { value: '15s' },
+          const response = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+            params: {
+              path: { name },
+              body: {
+                ...emptyAssets,
+                stream: {
+                  description: '',
+                  ingest: {
+                    ...definition.stream.ingest,
+                    processing: omit(definition.stream.ingest.processing, 'updated_at'),
+                    settings: {
+                      'index.refresh_interval': { value: '15s' },
+                    },
+                  },
+                },
+              } as Streams.ingest.all.UpsertRequest,
+            },
           });
-          expect(response).to.have.property('acknowledged', true);
 
-          const updatedDefinition = Streams.WiredStream.GetResponse.parse(
-            await getStream(apiClient, name)
-          );
-          expect(updatedDefinition.data_stream_exists).to.be(false);
-          expect(updatedDefinition.effective_settings).to.eql({
-            'index.refresh_interval': { value: '15s', from: name },
-          });
+          if (response.status !== 404) {
+            throw new Error(
+              `Expected 404 but got ${response.status}. Body: ${JSON.stringify(response.body)}`
+            );
+          }
+
+          expect(response.body).to.have.property('statusCode', 404);
+          expect(response.body).to.have.property('error', 'Not Found');
+          expect(response.body.message).to.contain(`Elasticsearch data stream "${name}" does not exist`);
+          expect(response.body.message).to.contain('resync API');
         } finally {
           await deleteStream(apiClient, name);
         }

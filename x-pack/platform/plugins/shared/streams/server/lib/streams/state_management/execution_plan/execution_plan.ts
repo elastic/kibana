@@ -8,6 +8,7 @@
 import { groupBy } from 'lodash';
 import { getSegments } from '@kbn/streams-schema';
 import type { SecurityHasPrivilegesRequest } from '@elastic/elasticsearch/lib/api/types';
+import { errors } from '@elastic/elasticsearch';
 import { StatusError } from '../../errors/status_error';
 import {
   deleteComponent,
@@ -61,6 +62,46 @@ import type {
   UpdateFailureStoreAction,
   UnlinkFeaturesAction,
 } from './types';
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const extractNameFromReason = (reason: string): string | undefined => {
+  const match = reason.match(/no such index \[([^\]]+)\]/);
+  return match?.[1];
+};
+
+const toMissingDataStreamError = (error: unknown): StatusError | undefined => {
+  // Normalize "backing data stream missing" into a user-actionable 404.
+  // This keeps missing backing data streams from being wrapped as 500s.
+  let name: string | undefined;
+
+  if (error instanceof errors.ResponseError && error.statusCode === 404) {
+    const body = error.meta?.body;
+    if (isRecord(body) && isRecord(body.error)) {
+      const esError = body.error;
+      const type = typeof esError.type === 'string' ? esError.type : '';
+      const reason = typeof esError.reason === 'string' ? esError.reason : '';
+      const resourceId = typeof esError['resource.id'] === 'string' ? esError['resource.id'] : '';
+      const index = typeof esError.index === 'string' ? esError.index : '';
+
+      if (type === 'index_not_found_exception' || type === 'resource_not_found_exception') {
+        name = resourceId || index || extractNameFromReason(reason);
+      }
+    }
+
+    name ??= extractNameFromReason(error.message);
+  } else if (error instanceof Error) {
+    const dataStreamNotFound = error.message.match(/^Data stream (.+) not found$/);
+    name = dataStreamNotFound?.[1] ?? extractNameFromReason(error.message);
+  }
+
+  if (!name) {
+    return;
+  }
+
+  return new StatusError(`Elasticsearch data stream "${name}" does not exist`, 404);
+};
 
 /**
  * This class takes a list of ElasticsearchActions and groups them by type.
@@ -247,6 +288,10 @@ export class ExecutionPlan {
       // Upsert ES|QL views after the stream documents are created
       await this.upsertEsqlViews(upsert_esql_view);
     } catch (error) {
+      const missingDataStream = toMissingDataStreamError(error);
+      if (missingDataStream) {
+        throw missingDataStream;
+      }
       if (error instanceof StatusError) {
         throw error;
       }

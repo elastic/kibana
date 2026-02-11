@@ -10,7 +10,7 @@ import { emptyAssets } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
-import { deleteStream, disableStreams, enableStreams, putStream } from './helpers/requests';
+import { deleteStream, disableStreams, enableStreams, putStream, restoreDataStream } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -82,6 +82,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         `Elasticsearch data stream "${streamName}" does not exist`
       );
       expect(response.body.message).to.contain('resync API');
+    });
+
+    it('can restore the stream by recreating only the backing Elasticsearch data stream', async () => {
+      await restoreDataStream(apiClient, streamName);
+
+      const dsResponse = await esClient.indices.getDataStream({ name: streamName });
+      expect(dsResponse.data_streams).to.have.length(1);
+      expect(dsResponse.data_streams[0].name).to.be(streamName);
     });
   });
 }

@@ -36,17 +36,22 @@ export function MissingDataStreamCallout({
   const abortController = useAbortController();
 
   const restoreStream = useCallback(async () => {
-    await streamsRepositoryClient.fetch('POST /api/streams/_resync 2023-10-31', {
+    await streamsRepositoryClient.fetch('POST /internal/streams/{name}/_restore_data_stream', {
+      params: {
+        path: {
+          name: streamName,
+        },
+      },
       signal: abortController.signal,
     });
 
     toasts.addSuccess(
       i18n.translate('xpack.streams.missingDataStream.restore.successToast', {
-        defaultMessage: 'Stream restore triggered',
+        defaultMessage: 'Data stream restore triggered',
       })
     );
     refreshDefinition();
-  }, [abortController.signal, refreshDefinition, streamsRepositoryClient, toasts]);
+  }, [abortController.signal, refreshDefinition, streamName, streamsRepositoryClient, toasts]);
 
   const deleteStreamProperly = useCallback(async () => {
     const confirmed = await overlays.openConfirm(

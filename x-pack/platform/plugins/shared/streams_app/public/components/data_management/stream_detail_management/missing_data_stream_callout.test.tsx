@@ -57,7 +57,7 @@ describe('MissingDataStreamCallout', () => {
     expect(screen.getByTestId('streamsMissingDataStreamDeleteButton')).toBeDisabled();
   });
 
-  it('restores stream by triggering resync and refreshing definition', async () => {
+  it('restores stream by recreating the backing data stream and refreshing definition', async () => {
     const refreshDefinition = jest.fn();
     const user = userEvent.setup();
 
@@ -73,7 +73,10 @@ describe('MissingDataStreamCallout', () => {
 
     await user.click(screen.getByTestId('streamsMissingDataStreamRestoreButton'));
 
-    expect(mockFetch).toHaveBeenCalledWith('POST /api/streams/_resync 2023-10-31', expect.anything());
+    expect(mockFetch).toHaveBeenCalledWith('POST /internal/streams/{name}/_restore_data_stream', {
+      params: { path: { name: 'logs-test' } },
+      signal: expect.anything(),
+    });
     expect(mockAddSuccess).toHaveBeenCalled();
     expect(refreshDefinition).toHaveBeenCalled();
   });
