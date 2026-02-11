@@ -6,21 +6,21 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiButtonEmpty, EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
-import { useSearchItems } from '../../hooks/use_search_items';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
 import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
+import { SECTION_SLUG } from '../../common/constants';
 
 import { Wizard } from './components/wizard';
 
-type Props = RouteComponentProps<{ savedObjectId: string }>;
-export const CreateTransformSection: FC<Props> = ({ match }) => {
+type Props = RouteComponentProps<{ savedObjectId?: string }>;
+export const CreateTransformSection: FC<Props> = ({ match, history }) => {
   // Set breadcrumb and page title
   useEffect(() => {
     breadcrumbService.setBreadcrumbs(BREADCRUMB_SECTION.CREATE_TRANSFORM);
@@ -28,8 +28,13 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
   }, []);
 
   const { esTransform } = useDocumentationLinks();
-
-  const { error: searchItemsError, searchItems } = useSearchItems(match.params.savedObjectId);
+  const defaultSavedObjectId = match.params.savedObjectId;
+  const onSavedObjectSelected = useCallback(
+    (savedObjectId: string) => {
+      history.push(`/${SECTION_SLUG.CREATE_TRANSFORM}/${savedObjectId}`);
+    },
+    [history]
+  );
 
   const docsLink = (
     <EuiButtonEmpty
@@ -69,18 +74,10 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
       <EuiSpacer size="l" />
 
       <EuiPageTemplate.Section data-test-subj="transformPageCreateTransform" paddingSize={'none'}>
-        {searchItemsError !== undefined && (
-          <>
-            <EuiCallOut
-              announceOnMount={false}
-              title={searchItemsError}
-              color="danger"
-              iconType="warning"
-            />
-            <EuiSpacer size="l" />
-          </>
-        )}
-        {searchItems !== undefined && <Wizard searchItems={searchItems} />}
+        <Wizard
+          defaultSavedObjectId={defaultSavedObjectId}
+          onSavedObjectSelected={onSavedObjectSelected}
+        />
       </EuiPageTemplate.Section>
     </CapabilitiesWrapper>
   );
