@@ -61,8 +61,8 @@ Go to the [{{fleet}}](docs-content://reference/fleet/index.md) docs for more inf
 :   Hash pin used for certificate verification. The pin is a base64-encoded string of the SHA-256 fingerprint.
 
 ::::{note}
-    The `xpack.fleet.agents.elasticsearch.*` settings are intended for a quickstart setup, for more advanced usage use preconfigured outputs `xpack.fleet.outputs`
-    ::::
+The `xpack.fleet.agents.elasticsearch.*` settings are intended for a quickstart setup. For more advanced use cases, use the `xpack.fleet.outputs` setting to preconfigure outputs.
+::::
 
 
 ## Preconfiguration settings (for advanced use cases) [_preconfiguration_settings_for_advanced_use_cases]
