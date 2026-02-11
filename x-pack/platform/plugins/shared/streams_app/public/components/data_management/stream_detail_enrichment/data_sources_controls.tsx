@@ -60,7 +60,7 @@ export const DataSourcesControls = () => {
             iconType="controls"
             onClick={openDataSourcesManagement}
             aria-label={manageDataSourcesLabel}
-            size="s"
+            size="xs"
           />
         </EuiToolTip>
       </EuiPanel>
@@ -85,11 +85,18 @@ const DataSourceSelector = () => {
       inputDisplay: (
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="xs">
           <span className="eui-textTruncate">{name}</span>
-          {snapshot.context.simulationMode === 'partial' ? (
-            <PartialSimulationBadge short />
-          ) : (
-            <CompleteSimulationBadge short />
-          )}
+          <div
+            css={{
+              display: 'flex',
+              lineHeight: 0,
+            }}
+          >
+            {snapshot.context.simulationMode === 'partial' ? (
+              <PartialSimulationBadge short />
+            ) : (
+              <CompleteSimulationBadge short />
+            )}
+          </div>
         </EuiFlexGroup>
       ),
       dropdownDisplay: (
@@ -115,14 +122,15 @@ const DataSourceSelector = () => {
       aria-label={i18n.translate('xpack.streams.dataSource.dataSourceSelector.ariaLabel', {
         defaultMessage: 'Select a data source...',
       })}
+      compressed
+      css={css`
+        width: 210px;
+      `}
       data-test-subj="streamsAppProcessingDataSourceSelector"
+      hasDividers
       options={options}
       valueOfSelected={selectedDataSourceRef?.id}
       onChange={(id) => selectDataSource(id)}
-      hasDividers
-      css={css`
-        width: 280px;
-      `}
     />
   );
 };

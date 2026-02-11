@@ -96,6 +96,7 @@ const externals = {
     'useToggle',
     'useUnmount',
     'useUpdateEffect',
+    'useObservable',
   ].reduce((memo, subset) => {
     memo[`react-use/lib/${subset}`] = `__kbnSharedDeps__.ReactUse.${subset}`;
     return memo;
