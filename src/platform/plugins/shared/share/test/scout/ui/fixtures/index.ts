@@ -12,23 +12,18 @@ import type { KibanaUrl, ScoutPage, ScoutWorkerFixtures, ScoutTestFixtures } fro
 import type { ShareExtendedPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
+interface PageObjectsDeps {
+  pageObjects: ShareExtendedPageObjects;
+  page: ScoutPage;
+  kbnUrl: KibanaUrl;
+}
+type UseFn = (pageObjects: ShareExtendedPageObjects) => Promise<void>;
+
 export interface ShareTestFixtures extends ScoutTestFixtures {
   pageObjects: ShareExtendedPageObjects;
 }
-
 export const test = base.extend<ShareTestFixtures, ScoutWorkerFixtures>({
-  pageObjects: async (
-    {
-      pageObjects,
-      page,
-      kbnUrl,
-    }: {
-      pageObjects: ShareExtendedPageObjects;
-      page: ScoutPage;
-      kbnUrl: KibanaUrl;
-    },
-    use: (pageObjects: ShareExtendedPageObjects) => Promise<void>
-  ) => {
+  pageObjects: async ({ pageObjects, page, kbnUrl }: PageObjectsDeps, use: UseFn) => {
     const extendedPageObjects = extendPageObjects(pageObjects, page, kbnUrl);
     await use(extendedPageObjects);
   },
