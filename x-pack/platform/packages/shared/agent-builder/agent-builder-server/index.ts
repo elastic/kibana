@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export type { ProcessedAttachment, ProcessedRoundInput } from './processed_input';
 export type {
   ToolProvider,
   ToolProviderHasOptions,
@@ -85,7 +86,6 @@ export type {
   BeforeAgentHookContext,
   BeforeToolCallHookContext,
   AfterToolCallHookContext,
-  ProcessedRoundInput,
 } from './hooks/types';
 export { HookLifecycle, HookExecutionMode } from './hooks/types';
 export {

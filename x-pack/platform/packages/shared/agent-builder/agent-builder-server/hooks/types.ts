@@ -6,16 +6,12 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import {
-  type ProcessedRoundInput,
-  HookLifecycle,
-  HookExecutionMode,
-} from '@kbn/agent-builder-common';
+import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-common';
+import type { ProcessedRoundInput } from '../processed_input';
 import type { RunToolReturn } from '../runner';
 import type { ToolCallSource } from '../runner/runner';
 
 export { HookLifecycle, HookExecutionMode };
-export type { ProcessedRoundInput };
 
 interface AgentHookContextBase {
   request: KibanaRequest;
