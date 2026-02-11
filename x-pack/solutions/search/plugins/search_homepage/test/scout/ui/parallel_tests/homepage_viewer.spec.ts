@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-search';
+import { expect } from '@kbn/scout-search/ui';
 import { test } from '../fixtures';
 
 test.describe('Homepage - Viewer', { tag: ['@svlSearch', '@ess'] }, () => {
