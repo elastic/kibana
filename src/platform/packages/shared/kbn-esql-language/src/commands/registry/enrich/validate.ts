@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isAssignment, isColumn, isOptionNode } from '../../../ast/is';
+import { isAssignment, isColumn, isOptionNode } from '../../../ast/utils/is';
 import { errors, getMessageFromId } from '../../definitions/utils/errors';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import type {

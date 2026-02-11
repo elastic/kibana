@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isBooleanLiteral, isCommand } from '../ast/is';
+import { isBooleanLiteral, isCommand } from '../ast/utils/is';
 import { Builder } from '../ast/builder';
 import { ParameterHole, DoubleParameterHole } from './parameter_hole';
 import { Walker } from '../ast/walker';

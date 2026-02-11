@@ -20,7 +20,7 @@ import { withinQuotes } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
 import { getOverlapRange, isRestartingExpression } from '../../definitions/utils/shared';
-import { isSubQuery, isSource } from '../../../ast/is';
+import { isSubQuery, isSource } from '../../../ast/utils/is';
 import { esqlCommandRegistry } from '../../../..';
 
 const SOURCE_TYPE_INDEX = 'index';

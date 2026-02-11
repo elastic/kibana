@@ -6,7 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { isFunctionExpression, isOptionNode, isColumn, isIdentifier } from '../../../../ast/is';
+import {
+  isFunctionExpression,
+  isOptionNode,
+  isColumn,
+  isIdentifier,
+} from '../../../../ast/utils/is';
 import { validateFunction } from './function';
 import { validateOption } from './option';
 import { validateColumnForCommand } from './column';

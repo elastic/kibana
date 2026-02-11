@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isAssignment, isFunctionExpression } from '../../../../ast/is';
+import { isAssignment, isFunctionExpression } from '../../../../ast/utils/is';
 
 import type { ESQLAstAllCommands, ESQLAstItem, ESQLFunction } from '../../../../types';
 import type { FunctionParameterType } from '../../types';

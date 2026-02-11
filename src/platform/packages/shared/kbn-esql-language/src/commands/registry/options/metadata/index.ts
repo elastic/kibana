@@ -13,8 +13,8 @@ import type { ISuggestionItem } from '../../types';
 import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 import { handleFragment } from '../../../definitions/utils/autocomplete/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
-import { isColumn, isOptionNode } from '../../../../ast/is';
-import { SuggestionCategory } from '../../../../shared/sorting/types';
+import { isColumn, isOptionNode } from '../../../../ast/utils/is';
+import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
 
 export const METADATA_FIELDS = [
   '_version',

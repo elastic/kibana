@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isList } from '../../../../../../ast/is';
+import { isList } from '../../../../../../ast/utils/is';
 import { isMarkerNode } from '../../../ast';
 import { getOperatorSuggestion } from '../../../operators';
 import type { ISuggestionItem } from '../../../../../registry/types';

@@ -9,7 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
-import { isStringLiteral } from '../is';
+import { isStringLiteral } from '../utils/is';
 import { TIME_DURATION_UNITS } from '../../parser';
 import { LeafPrinter } from '../../pretty_print';
 import type {

@@ -12,7 +12,7 @@ import type { ICommandContext, ICommandCallbacks } from '../types';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import { esqlCommandRegistry } from '..';
 import { errors } from '../../definitions/utils';
-import { isSubQuery } from '../../../ast/is';
+import { isSubQuery } from '../../../ast/utils/is';
 
 const MIN_BRANCHES = 2;
 const MAX_BRANCHES = 8;

@@ -8,8 +8,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import { within } from '../../../ast/location';
-import { isOptionNode } from '../../../ast/is';
+import { within } from '../../../ast/utils/location';
+import { isOptionNode } from '../../../ast/utils/is';
 import { buildFieldsDefinitionsWithMetadata } from '../../definitions/utils';
 import type {
   ESQLAstAllCommands,
@@ -22,7 +22,7 @@ import type {
 import type { ICommand } from '../registry';
 import type { GetColumnsByTypeFn, ICommandContext, ISuggestionItem } from '../types';
 import type { JoinCommandPosition, JoinStaticPosition } from './types';
-import { SuggestionCategory } from '../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 import { getLookupJoinSource } from '../../definitions/utils/sources';
 
 const REGEX =

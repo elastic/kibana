@@ -11,7 +11,7 @@ import { BasicPrettyPrinter } from '../../../../pretty_print';
 import * as commands from '..';
 import { EsqlQuery } from '../../../../composer/query';
 import type { ESQLAstItem, ESQLCommandOption, ESQLMap } from '../../../../types';
-import { isStringLiteral } from '../../../is';
+import { isStringLiteral } from '../../../utils/is';
 
 describe('commands.rerank', () => {
   describe('.list()', () => {

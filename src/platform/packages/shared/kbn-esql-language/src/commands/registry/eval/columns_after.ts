@@ -8,7 +8,7 @@
  */
 
 import { uniqBy } from 'lodash';
-import { isAssignment, isColumn } from '../../../ast/is';
+import { isAssignment, isColumn } from '../../../ast/utils/is';
 import { getExpressionType } from '../../definitions/utils';
 import type { ESQLAstItem, ESQLCommand } from '../../../types';
 import type { ESQLColumnData, ESQLUserDefinedColumn, UnmappedFieldsStrategy } from '../types';

@@ -11,7 +11,7 @@ import type { ESQLMessage, ESQLSingleAstItem } from '../../../../types';
 import type { SupportedDataType } from '../../..';
 import { getExpressionType } from '../expressions';
 import { getMessageFromId } from '../errors';
-import { isMap } from '../../../../ast/is';
+import { isMap } from '../../../../ast/utils/is';
 import { parseMapParams } from '../maps';
 
 // the setting 'approximation' uses 'map_param' as a type,

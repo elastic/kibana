@@ -11,7 +11,7 @@ import type { ESQLColumn, ESQLIdentifier, ESQLMessage } from '../../../../types'
 import { UnmappedFieldsStrategy, type ICommandContext } from '../../../registry/types';
 import { errors } from '../errors';
 import { getColumnExists, getColumnName } from '../columns';
-import { isParametrized } from '../../../../ast/is';
+import { isParametrized } from '../../../../ast/utils/is';
 
 export function validateColumnForCommand(
   column: ESQLColumn | ESQLIdentifier,

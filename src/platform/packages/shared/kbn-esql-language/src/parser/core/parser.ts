@@ -25,7 +25,7 @@ import type {
   ESQLProperNode,
   EditorError,
 } from '../../types';
-import { isFunctionExpression, isProperNode, isQuery, isMap, isCommand } from '../../ast/is';
+import { isFunctionExpression, isProperNode, isQuery, isMap, isCommand } from '../../ast/utils/is';
 import { singleItems } from '../../ast/visitor/utils';
 import { DEFAULT_CHANNEL, SOURCE_COMMANDS } from './constants';
 import type { EsqlParsingTarget } from './types';

@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isColumn, isFunctionExpression, isInlineCast, isLiteral } from '../../../../../ast/is';
-import { within } from '../../../../../ast/location';
+import {
+  isColumn,
+  isFunctionExpression,
+  isInlineCast,
+  isLiteral,
+} from '../../../../../ast/utils/is';
+import { within } from '../../../../../ast/utils/location';
 import type { ESQLSingleAstItem, ESQLFunction } from '../../../../../types';
 import type { ESQLColumnData } from '../../../../registry/types';
 import { isNullCheckOperator } from './utils';

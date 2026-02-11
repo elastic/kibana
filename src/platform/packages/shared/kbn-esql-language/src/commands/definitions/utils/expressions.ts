@@ -13,7 +13,7 @@ import {
   isInlineCast,
   isLiteral,
   isParamLiteral,
-} from '../../../ast/is';
+} from '../../../ast/utils/is';
 import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../../types';
 import { lastItem } from '../../../ast/visitor/utils';
 import type {
@@ -32,7 +32,7 @@ import { TIME_SYSTEM_PARAMS } from './literals';
 import { isMarkerNode } from './ast';
 import { getUnmappedFieldType } from './settings';
 import { getPromqlFunctionDefinition, normalizePromqlReturnType } from './promql';
-import type { PromQLAstExpression } from '../../../promql/types';
+import type { PromQLAstExpression } from '../../../embedded_languages/promql/types';
 
 // #region type detection
 

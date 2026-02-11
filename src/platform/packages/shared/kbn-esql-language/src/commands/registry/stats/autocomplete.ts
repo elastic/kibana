@@ -8,7 +8,7 @@
  */
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { FunctionParameterContext } from '../../definitions/utils/autocomplete/expressions/types';
-import { isAssignment, isColumn } from '../../../ast/is';
+import { isAssignment, isColumn } from '../../../ast/utils/is';
 import type { ICommandCallbacks } from '../types';
 import { Location } from '../types';
 import type {
@@ -41,7 +41,7 @@ import { FunctionDefinitionTypes } from '../../definitions/types';
 import { getPosition, getCommaAndPipe, rightAfterColumn } from './utils';
 import { isMarkerNode, findAstPosition } from '../../definitions/utils/ast';
 import { getAssignmentExpressionRoot } from '../../definitions/utils/expressions';
-import { within } from '../../../ast/location';
+import { within } from '../../../ast/utils/location';
 import { inOperators, nullCheckOperators } from '../../definitions/all_operators';
 import { buildExpressionFunctionParameterContext } from '../../definitions/utils';
 

@@ -18,7 +18,7 @@ import {
 } from '../complete_items';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { EDITOR_MARKER } from '../../definitions/constants';
-import { isColumn } from '../../../ast/is';
+import { isColumn } from '../../../ast/utils/is';
 import { ESQL_STRING_TYPES } from '../../definitions/types';
 import { columnExists, handleFragment } from '../../definitions/utils/autocomplete/helpers';
 import type { ESQLAstAllCommands, ESQLAstFuseCommand } from '../../../types';

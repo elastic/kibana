@@ -41,10 +41,10 @@ import {
   isIntegerLiteral,
   isProperNode,
   isStringLiteral,
-} from '../ast/is';
+} from '../ast/utils/is';
 import { replaceProperties } from '../ast/walker/helpers';
 import { resolveItem } from '../ast/visitor/utils';
-import { printAst } from '../shared/debug';
+import { printAst } from '../debug';
 
 export class ComposerQuery {
   public readonly [composerQuerySymbol] = true;

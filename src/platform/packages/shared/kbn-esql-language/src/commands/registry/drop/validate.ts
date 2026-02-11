@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { errors } from '../../definitions/utils';
-import { isColumn } from '../../../ast/is';
+import { isColumn } from '../../../ast/utils/is';
 import type { ESQLAst, ESQLColumn, ESQLAstAllCommands, ESQLMessage } from '../../../types';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import type { ICommandContext, ICommandCallbacks } from '../types';

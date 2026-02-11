@@ -8,7 +8,7 @@
  */
 import type { ESQLAstAllCommands, ESQLCommand } from '../../../types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import { isColumn } from '../../../ast/is';
+import { isColumn } from '../../../ast/utils/is';
 import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
 import {
   getLastNonWhitespaceChar,

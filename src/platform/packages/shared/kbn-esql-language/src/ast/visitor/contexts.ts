@@ -50,7 +50,7 @@ import type {
   VisitorOutput,
 } from './types';
 import { Builder } from '../builder';
-import { isProperNode } from '../is';
+import { isProperNode } from '../utils/is';
 
 export class VisitorContext<
   Methods extends VisitorMethods = VisitorMethods,

@@ -16,7 +16,7 @@ import {
   isInlineCast,
   isLiteral,
   isParamLiteral,
-} from '../../../../ast/is';
+} from '../../../../ast/utils/is';
 import { getLocationInfo } from '../../../registry/location';
 import type { ICommandCallbacks, ICommandContext, Location } from '../../../registry/types';
 import type {
@@ -35,7 +35,7 @@ import type {
 } from '../../types';
 import { getExpressionType, getMatchingSignatures } from '../expressions';
 import { ColumnValidator } from './column';
-import type { PromQLFunction } from '../../../../promql/types';
+import type { PromQLFunction } from '../../../../embedded_languages/promql/types';
 
 export function validateFunction({
   fn,

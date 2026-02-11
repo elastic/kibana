@@ -13,7 +13,7 @@ import type {
   ESQLMessage,
 } from '../../../../types';
 import type { ICommandCallbacks, ICommandContext } from '../../../registry/types';
-import { isColumn, isFunctionExpression } from '../../../../ast/is';
+import { isColumn, isFunctionExpression } from '../../../../ast/utils/is';
 import { validateColumnForCommand } from './column';
 import { validateFunction } from './function';
 

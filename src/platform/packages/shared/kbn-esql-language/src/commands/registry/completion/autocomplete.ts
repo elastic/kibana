@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { isFunctionExpression, isLiteral } from '../../../ast/is';
+import { isFunctionExpression, isLiteral } from '../../../ast/utils/is';
 import { suggestForExpression } from '../../definitions/utils';
 import type * as ast from '../../../types';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';
@@ -43,7 +43,7 @@ import {
   type ICommandCallbacks,
 } from '../types';
 import { getFunctionDefinition } from '../../definitions/utils/functions';
-import { SuggestionCategory } from '../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',

@@ -32,8 +32,8 @@ import type { ESQLAstItem, ESQLFunction, InlineCastingType } from '../../../type
 import { removeFinalUnknownIdentiferArg, techPreviewLabel } from './shared';
 import { getTestFunctions } from './test_functions';
 import { getMatchingSignatures } from './expressions';
-import { isLiteral } from '../../../ast/is';
-import { SuggestionCategory } from '../../../shared/sorting/types';
+import { isLiteral } from '../../../ast/utils/is';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
 

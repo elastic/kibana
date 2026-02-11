@@ -16,12 +16,12 @@ import {
   isLiteral,
   isParamLiteral,
   isProperNode,
-} from '../ast/is';
+} from '../ast/utils/is';
 import {
   BinaryExpressionGroup,
   binaryExpressionGroup,
   unaryExpressionGroup,
-} from '../ast/grouping';
+} from '../ast/utils/grouping';
 import type { ESQLAstExpressionNode } from '../ast/visitor';
 import { Visitor } from '../ast/visitor';
 import { resolveItem } from '../ast/visitor/utils';

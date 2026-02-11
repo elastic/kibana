@@ -9,9 +9,12 @@
 import type { ESQLCommand, ESQLAstPromqlCommand } from '../../../types';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';
 import type { IAdditionalFields } from '../registry';
-import { isBinaryExpression, isIdentifier } from '../../../ast/is';
+import { isBinaryExpression, isIdentifier } from '../../../ast/utils/is';
 import { PromqlParamName } from './utils';
-import { collectMetricsAndLabels, findPromqlExpression } from '../../../promql/traversal';
+import {
+  collectMetricsAndLabels,
+  findPromqlExpression,
+} from '../../../embedded_languages/promql/ast/utils/traversal';
 
 export const columnsAfter = async (
   command: ESQLCommand,
