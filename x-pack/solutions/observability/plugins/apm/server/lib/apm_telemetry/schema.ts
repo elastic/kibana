@@ -752,18 +752,6 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
       description: 'Indicates whether any service is being monitored within the last day.',
     },
   },
-  otel_total_docs: {
-    type: 'long',
-    _meta: {
-      description: 'Total number of documents in OTel indices overall',
-    },
-  },
-  otel_total_size_bytes: {
-    type: 'long',
-    _meta: {
-      description: 'Total size in bytes of all OTel indices overall',
-    },
-  },
   otel_1d_docs: {
     type: 'long',
     _meta: {

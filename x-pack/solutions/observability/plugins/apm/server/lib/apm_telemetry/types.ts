@@ -77,8 +77,6 @@ export interface APMUsage {
   has_any_services_per_official_agent: boolean;
   has_any_services: boolean;
   services_per_agent: Record<AgentName, number>;
-  otel_total_docs: number;
-  otel_total_size_bytes: number;
   otel_1d_docs: number;
   otel_1d_size_bytes: number;
   otel_docs_per_agent: Record<string, number>;
@@ -279,7 +277,9 @@ export interface APMUsage {
     | 'per_service'
     | 'top_traces'
     | 'per_agent_config_settings'
-    | 'otel_agents',
+    | 'otel_agents'
+    | 'otel_agents_by_signal'
+    | 'otel_sdk_distro',
     { took: { ms: number } }
   >;
 }
