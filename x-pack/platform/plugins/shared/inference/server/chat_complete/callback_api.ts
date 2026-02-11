@@ -7,7 +7,12 @@
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatCompleteOptions, AnonymizationRule } from '@kbn/inference-common';
+import type {
+  ChatCompleteOptions,
+  AnonymizationRule,
+  ChatCompleteAnonymizationTarget,
+} from '@kbn/inference-common';
+import type { EffectivePolicy } from '@kbn/anonymization-common';
 import {
   createInferenceRequestError,
   getConnectorFamily,
@@ -48,6 +53,13 @@ interface CreateChatCompleteApiOptions {
   callbackManager?: InferenceCallbackManager;
   /** Promise resolving per-space salt for deterministic tokenization (from AnonymizationPolicyService). */
   saltPromise?: Promise<string | undefined>;
+  /**
+   * Resolves effective field policy for a request-scoped target when provided
+   * by consumer metadata.
+   */
+  resolveEffectivePolicy?: (
+    target?: ChatCompleteAnonymizationTarget
+  ) => Promise<EffectivePolicy | undefined>;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -84,6 +96,7 @@ export function createChatCompleteCallbackApi({
   esClient,
   callbackManager,
   saltPromise,
+  resolveEffectivePolicy,
 }: CreateChatCompleteApiOptions) {
   return (
     {
@@ -129,15 +142,21 @@ export function createChatCompleteCallbackApi({
           });
 
           return from(
-            anonymizeMessages({
-              system,
-              messages,
-              anonymizationRules,
-              regexWorker,
-              esClient,
-              salt: salt ?? undefined,
-            })
+            resolveEffectivePolicy?.(metadata?.anonymization?.target) ?? Promise.resolve(undefined)
           ).pipe(
+            switchMap((effectivePolicy) =>
+              from(
+                anonymizeMessages({
+                  system,
+                  messages,
+                  anonymizationRules,
+                  regexWorker,
+                  esClient,
+                  salt: salt ?? undefined,
+                  effectivePolicy,
+                })
+              )
+            ),
             switchMap((anonymization) => {
               const connector = executor.getConnector();
               const connectorType = connector.type;

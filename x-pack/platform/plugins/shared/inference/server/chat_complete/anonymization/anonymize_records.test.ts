@@ -321,4 +321,68 @@ describe('anonymizeRecords', () => {
     expect(numCount).toBe(0);
     expect(urlCount).toBe(1);
   });
+
+  it('applies field policy anonymize before regex/NER rules', async () => {
+    const input = [{ 'kibana.alert.host.name': 'my-host-01' }];
+
+    const result = await anonymizeRecords({
+      input,
+      anonymizationRules: [],
+      regexWorker,
+      esClient: mockEsClient,
+      salt: 'test-salt',
+      effectivePolicy: {
+        'kibana.alert.host.name': {
+          action: 'anonymize',
+          entityClass: 'HOST_NAME',
+        },
+      },
+    });
+
+    expect(result.records[0]['kibana.alert.host.name']).not.toBe('my-host-01');
+    expect(result.records[0]['kibana.alert.host.name']).toContain('HOST_NAME_');
+    expect(result.anonymizations).toHaveLength(1);
+    expect(result.anonymizations[0].rule.type).toBe('FieldPolicy');
+    expect(result.anonymizations[0].entity.value).toBe('my-host-01');
+  });
+
+  it('applies deny field policy by blanking matched values', async () => {
+    const input = [{ 'kibana.alert.user.name': 'alice' }];
+
+    const result = await anonymizeRecords({
+      input,
+      anonymizationRules: [],
+      regexWorker,
+      esClient: mockEsClient,
+      effectivePolicy: {
+        'kibana.alert.user.name': {
+          action: 'deny',
+        },
+      },
+    });
+
+    expect(result.records[0]['kibana.alert.user.name']).toBe('');
+    expect(result.anonymizations).toHaveLength(0);
+  });
+
+  it('matches field policy by JSON pointer path and stripped root segment', async () => {
+    const input = [{ '/response/kibana.alert.host.name': 'host-1' }];
+
+    const result = await anonymizeRecords({
+      input,
+      anonymizationRules: [],
+      regexWorker,
+      esClient: mockEsClient,
+      salt: 'test-salt',
+      effectivePolicy: {
+        'kibana.alert.host.name': {
+          action: 'anonymize',
+          entityClass: 'HOST_NAME',
+        },
+      },
+    });
+
+    expect(result.records[0]['/response/kibana.alert.host.name']).toContain('HOST_NAME_');
+    expect(result.anonymizations).toHaveLength(1);
+  });
 });

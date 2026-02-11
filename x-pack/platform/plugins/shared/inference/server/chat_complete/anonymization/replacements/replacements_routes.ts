@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import { replaceTokensWithOriginals } from '@kbn/anonymization-common';
+import { apiPrivileges } from '@kbn/anonymization-plugin/common';
 import { ReplacementsRepository } from './replacements_repository';
 import { ensureReplacementsIndex } from './replacements_index';
 
@@ -30,8 +31,7 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
       path: `${REPLACEMENTS_API_BASE}/{id}`,
       security: {
         authz: {
-          enabled: false,
-          reason: 'Authorization handled inline',
+          requiredPrivileges: [apiPrivileges.readAnonymization],
         },
       },
     })
@@ -83,8 +83,7 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
       path: `${REPLACEMENTS_API_BASE}/_by_scope`,
       security: {
         authz: {
-          enabled: false,
-          reason: 'Authorization handled inline',
+          requiredPrivileges: [apiPrivileges.readAnonymization],
         },
       },
     })
@@ -145,8 +144,7 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
       path: `${REPLACEMENTS_API_BASE}/_deanonymize`,
       security: {
         authz: {
-          enabled: false,
-          reason: 'Authorization handled inline',
+          requiredPrivileges: [apiPrivileges.readAnonymization],
         },
       },
     })
@@ -198,8 +196,7 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
       path: `${REPLACEMENTS_API_BASE}/_import`,
       security: {
         authz: {
-          enabled: false,
-          reason: 'Authorization handled inline',
+          requiredPrivileges: [apiPrivileges.manageAnonymization],
         },
       },
     })

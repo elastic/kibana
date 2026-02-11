@@ -14,6 +14,8 @@ const API_VERSION = '1';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const security = getService('security');
   const es = getService('es');
 
   describe('anonymization replacements', function () {
@@ -55,9 +57,6 @@ export default function ({ getService }: FtrProviderContext) {
       return { id, doc };
     };
 
-    // ---------------------------------------------------------------
-    // 1.34: Resolve/deanonymize API
-    // ---------------------------------------------------------------
     describe('resolve and deanonymize', () => {
       it('resolves replacements by ID', async () => {
         const { id } = await createReplacementsDoc();
@@ -113,9 +112,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // ---------------------------------------------------------------
-    // 1.36: Space isolation
-    // ---------------------------------------------------------------
     describe('space isolation', () => {
       it('returns 404 for replacements from a different namespace', async () => {
         const { id } = await createReplacementsDoc({ namespace: 'other-space' });
@@ -130,9 +126,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // ---------------------------------------------------------------
-    // 1.37: Import/merge
-    // ---------------------------------------------------------------
     describe('import and merge', () => {
       it('imports compatible replacements successfully', async () => {
         const source = await createReplacementsDoc({
@@ -200,6 +193,63 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
         expect(status).to.be(409);
+      });
+    });
+
+    describe('authorization gating', () => {
+      const username = `anon_replacements_readonly_${Date.now()}`;
+      const roleName = `anon_replacements_readonly_role_${Date.now()}`;
+      const password = `${username}-password`;
+
+      before(async () => {
+        await security.role.create(roleName, {
+          elasticsearch: {},
+          kibana: [
+            {
+              feature: {
+                dashboard: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'Anonymization Replacements Readonly Test User',
+        });
+      });
+
+      after(async () => {
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+      });
+
+      it('returns 403 for replacements reads without anonymization privileges', async () => {
+        const { status } = await supertestWithoutAuth
+          .get(`${REPLACEMENTS_API}/rbac-denied-id`)
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('elastic-api-version', API_VERSION);
+
+        expect(status).to.be(403);
+      });
+
+      it('returns 403 for replacements imports without anonymization privileges', async () => {
+        const { status } = await supertestWithoutAuth
+          .post(`${REPLACEMENTS_API}/_import`)
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('elastic-api-version', API_VERSION)
+          .send({
+            sourceId: 'source-id',
+            destinationId: 'destination-id',
+          });
+
+        expect(status).to.be(403);
       });
     });
   });

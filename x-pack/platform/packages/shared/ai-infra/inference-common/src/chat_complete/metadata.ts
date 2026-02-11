@@ -14,6 +14,7 @@ import type { Attributes } from '@opentelemetry/api';
  */
 export interface ChatCompleteMetadata {
   connectorTelemetry?: ConnectorTelemetryMetadata;
+  anonymization?: ChatCompleteAnonymizationMetadata;
   attributes?: Attributes;
 }
 
@@ -23,4 +24,24 @@ export interface ChatCompleteMetadata {
 export interface ConnectorTelemetryMetadata {
   pluginId?: string;
   aggregateBy?: string;
+}
+
+export interface ChatCompleteAnonymizationTarget {
+  targetType: 'data_view' | 'index_pattern' | 'index';
+  targetId: string;
+}
+
+export interface ChatCompleteAnonymizationScope {
+  scopeType: 'thread' | 'execution';
+  scopeId: string;
+}
+
+/**
+ * Optional anonymization metadata consumers can pass so inference can resolve
+ * field-based policy for a target and keep scope/profile context for runtime flows.
+ */
+export interface ChatCompleteAnonymizationMetadata {
+  profileId?: string;
+  target?: ChatCompleteAnonymizationTarget;
+  scope?: ChatCompleteAnonymizationScope;
 }

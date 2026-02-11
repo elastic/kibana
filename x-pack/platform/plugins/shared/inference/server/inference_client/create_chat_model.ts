@@ -10,7 +10,8 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { InferenceChatModel, type InferenceChatModelParams } from '@kbn/inference-langchain';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AnonymizationRule } from '@kbn/inference-common';
+import type { AnonymizationRule, ChatCompleteAnonymizationTarget } from '@kbn/inference-common';
+import type { EffectivePolicy } from '@kbn/anonymization-common';
 import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
 import { getConnectorById } from '../util/get_connector_by_id';
 import { createClient } from './create_client';
@@ -27,6 +28,9 @@ export interface CreateChatModelOptions {
   esClient: ElasticsearchClient;
   /** Promise resolving per-space salt for deterministic tokenization. */
   saltPromise?: Promise<string | undefined>;
+  resolveEffectivePolicy?: (
+    target?: ChatCompleteAnonymizationTarget
+  ) => Promise<EffectivePolicy | undefined>;
   callbacks?: InferenceCallbacks;
 }
 
@@ -40,6 +44,7 @@ export const createChatModel = async ({
   regexWorker,
   esClient,
   saltPromise,
+  resolveEffectivePolicy,
   callbacks,
 }: CreateChatModelOptions): Promise<InferenceChatModel> => {
   const client = createClient({
@@ -50,6 +55,7 @@ export const createChatModel = async ({
     esClient,
     logger,
     saltPromise,
+    resolveEffectivePolicy,
     callbacks,
   });
   const connector = await getConnectorById({ connectorId, actions, request });

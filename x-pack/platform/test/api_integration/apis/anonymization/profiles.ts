@@ -28,13 +28,12 @@ const defaultProfile = {
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const security = getService('security');
 
   describe('anonymization profiles', function () {
     let createdProfileId: string;
 
-    // ---------------------------------------------------------------
-    // 1.18: CRUD lifecycle
-    // ---------------------------------------------------------------
     describe('CRUD lifecycle', () => {
       it('creates a profile', async () => {
         const { body, status } = await supertest
@@ -108,9 +107,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // ---------------------------------------------------------------
-    // 1.19: Uniqueness enforcement
-    // ---------------------------------------------------------------
     describe('uniqueness enforcement', () => {
       let profileId: string;
 
@@ -147,9 +143,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // ---------------------------------------------------------------
-    // 1.22: Field rule validation
-    // ---------------------------------------------------------------
     describe('field rule validation', () => {
       it('returns 400 when anonymized=true but entityClass is missing', async () => {
         const { status, body } = await supertest
@@ -169,9 +162,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // ---------------------------------------------------------------
-    // 1.20: Space isolation (basic — single-space check)
-    // ---------------------------------------------------------------
     describe('space isolation', () => {
       it('returns 404 when getting a profile with a non-matching namespace', async () => {
         // Create a profile in default space
@@ -196,6 +186,63 @@ export default function ({ getService }: FtrProviderContext) {
           .delete(`${PROFILES_API}/${created.id}`)
           .set('kbn-xsrf', 'true')
           .set('elastic-api-version', API_VERSION);
+      });
+    });
+
+    describe('RBAC enforcement', () => {
+      const username = `anon_profiles_readonly_${Date.now()}`;
+      const roleName = `anon_profiles_readonly_role_${Date.now()}`;
+      const password = `${username}-password`;
+
+      before(async () => {
+        await security.role.create(roleName, {
+          elasticsearch: {},
+          kibana: [
+            {
+              feature: {
+                dashboard: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'Anonymization Profiles Readonly Test User',
+        });
+      });
+
+      after(async () => {
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+      });
+
+      it('returns 403 for profile reads without anonymization privileges', async () => {
+        const { status } = await supertestWithoutAuth
+          .get(`${PROFILES_API}/_find`)
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('elastic-api-version', API_VERSION);
+
+        expect(status).to.be(403);
+      });
+
+      it('returns 403 for profile writes without anonymization privileges', async () => {
+        const { status } = await supertestWithoutAuth
+          .post(PROFILES_API)
+          .auth(username, password)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('elastic-api-version', API_VERSION)
+          .send({
+            ...defaultProfile,
+            targetId: `rbac-denied-target-${Date.now()}`,
+          });
+
+        expect(status).to.be(403);
       });
     });
   });

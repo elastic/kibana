@@ -8,10 +8,15 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { BoundOptions, InferenceClient } from '@kbn/inference-common';
-import type { AnonymizationRule } from '@kbn/inference-common';
+import type {
+  BoundOptions,
+  InferenceClient,
+  AnonymizationRule,
+  ChatCompleteAnonymizationTarget,
+} from '@kbn/inference-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
+import type { EffectivePolicy } from '@kbn/anonymization-common';
 import { createChatCompleteApi } from '../chat_complete';
 import { createOutputApi } from '../../common/output/create_output_api';
 import { bindClient } from '../../common/inference_client/bind_client';
@@ -30,6 +35,7 @@ export function createInferenceClient({
   esClient,
   callbacks,
   saltPromise,
+  resolveEffectivePolicy,
 }: {
   request: KibanaRequest;
   logger: Logger;
@@ -39,6 +45,9 @@ export function createInferenceClient({
   esClient: ElasticsearchClient;
   callbacks?: InferenceCallbacks;
   saltPromise?: Promise<string | undefined>;
+  resolveEffectivePolicy?: (
+    target?: ChatCompleteAnonymizationTarget
+  ) => Promise<EffectivePolicy | undefined>;
 }): InferenceClient {
   const callbackManager = createCallbackManager(callbacks);
 
@@ -51,6 +60,7 @@ export function createInferenceClient({
     esClient,
     callbackManager,
     saltPromise,
+    resolveEffectivePolicy,
   });
 
   const chatComplete = createChatCompleteApi({

@@ -62,7 +62,13 @@ export type {
   ToolCallsOfToolOptions,
 } from './tools_of';
 
-export type { ChatCompleteMetadata, ConnectorTelemetryMetadata } from './metadata';
+export type {
+  ChatCompleteMetadata,
+  ConnectorTelemetryMetadata,
+  ChatCompleteAnonymizationMetadata,
+  ChatCompleteAnonymizationTarget,
+  ChatCompleteAnonymizationScope,
+} from './metadata';
 export {
   isChatCompletionChunkEvent,
   isChatCompletionEvent,

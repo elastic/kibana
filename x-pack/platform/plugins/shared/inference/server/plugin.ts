@@ -11,6 +11,7 @@ import type {
   BoundInferenceClient,
   InferenceClient,
   AnonymizationSettings,
+  ChatCompleteAnonymizationTarget,
 } from '@kbn/inference-common';
 import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -104,6 +105,29 @@ export class InferencePlugin
       }
     };
 
+    const getEffectivePolicyForRequest = async (
+      request: KibanaRequest,
+      target?: ChatCompleteAnonymizationTarget
+    ) => {
+      if (!this.anonymizationPolicyService || !target) {
+        return undefined;
+      }
+
+      try {
+        const basePath = core.http.basePath.get(request);
+        const spaceMatch = basePath.match(/^\/s\/([^/]+)/);
+        const namespace = spaceMatch?.[1] ?? 'default';
+
+        return await this.anonymizationPolicyService.resolveEffectivePolicy(namespace, {
+          type: target.targetType,
+          id: target.targetId,
+        });
+      } catch (err) {
+        this.logger.error(`Failed to resolve effective anonymization policy: ${err.message}`);
+        return undefined;
+      }
+    };
+
     const createAnonymizationRulesPromise = async (request: KibanaRequest) => {
       const soClient = core.savedObjects.getScopedClient(request);
       const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
@@ -134,6 +158,7 @@ export class InferencePlugin
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
           // Salt is resolved lazily — undefined when anonymization plugin is unavailable
           saltPromise,
+          resolveEffectivePolicy: (target) => getEffectivePolicyForRequest(options.request, target),
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
@@ -149,6 +174,7 @@ export class InferencePlugin
           regexWorker: this.regexWorker!,
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
           saltPromise,
+          resolveEffectivePolicy: (target) => getEffectivePolicyForRequest(options.request, target),
           logger: this.logger,
         });
       },
