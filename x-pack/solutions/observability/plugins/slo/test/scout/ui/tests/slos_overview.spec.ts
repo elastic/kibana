@@ -5,33 +5,38 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
 const TEST_TIMEOUT = 3 * 60 * 1000; // 3 minutes timeout, needed to wait for the SLOs to be created
 
-test.describe('SLOs Overview', { tag: ['@ess', '@svlOblt'] }, () => {
-  // eslint-disable-next-line @kbn/eslint/scout_no_describe_configure
-  test.describe.configure({ timeout: TEST_TIMEOUT });
+test.describe(
+  'SLOs Overview',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    // eslint-disable-next-line @kbn/eslint/scout_no_describe_configure
+    test.describe.configure({ timeout: TEST_TIMEOUT });
 
-  test.beforeEach(async ({ pageObjects, browserAuth }) => {
-    await browserAuth.loginAsAdmin();
-    await pageObjects.slo.goto();
-  });
-
-  test('Go to slos overview and validate data retention tab', async ({ page }) => {
-    // Already navigated in beforeEach
-    // This test ensures the page loads
-    expect(page).toBeDefined();
-    await expect(async () => {
-      await page.getByTestId('querySubmitButton').click();
-
-      await expect
-        .poll(() => page.locator('text=Test Stack SLO').count(), { timeout: 1000 })
-        .toBeGreaterThan(5);
-    }).toPass({
-      intervals: [10000],
-      timeout: TEST_TIMEOUT,
+    test.beforeEach(async ({ pageObjects, browserAuth }) => {
+      await browserAuth.loginAsAdmin();
+      await pageObjects.slo.goto();
     });
-  });
-});
+
+    test('Go to slos overview and validate data retention tab', async ({ page }) => {
+      // Already navigated in beforeEach
+      // This test ensures the page loads
+      expect(page).toBeDefined();
+      await expect(async () => {
+        await page.getByTestId('querySubmitButton').click();
+
+        await expect
+          .poll(() => page.locator('text=Test Stack SLO').count(), { timeout: 1000 })
+          .toBeGreaterThan(5);
+      }).toPass({
+        intervals: [10000],
+        timeout: TEST_TIMEOUT,
+      });
+    });
+  }
+);
