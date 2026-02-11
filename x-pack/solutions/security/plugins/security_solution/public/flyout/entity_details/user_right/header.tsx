@@ -23,27 +23,20 @@ import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
-import type { FirstLastSeenData } from '../../shared/components/observed_entity/types';
+import type { FirstLastSeenData } from '../shared/components/observed_entity/types';
 import type { ManagedUserData } from '../shared/hooks/use_managed_user';
 
 interface UserPanelHeaderProps {
   userName: string;
-  scopeId: string;
   managedUser: ManagedUserData;
-  /** Passed from panel's observedUser.lastSeen; optional for Storybook */
-  lastSeen?: FirstLastSeenData;
+  lastSeen: FirstLastSeenData;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
 
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const UserPanelHeader = ({
-  userName,
-  scopeId,
-  managedUser,
-  lastSeen,
-}: UserPanelHeaderProps) => {
+export const UserPanelHeader = ({ userName, managedUser, lastSeen }: UserPanelHeaderProps) => {
   const observedUserLastSeenDate = lastSeen?.date;
   const isLoading = lastSeen?.isLoading ?? false;
 

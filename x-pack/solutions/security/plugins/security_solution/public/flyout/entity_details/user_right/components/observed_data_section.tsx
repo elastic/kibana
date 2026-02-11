@@ -46,6 +46,7 @@ export const ObservedDataSection = memo(
     queryId: string;
   }) => {
     const { euiTheme } = useEuiTheme();
+    const xsFontSize = useEuiFontSize('xxs').fontSize;
 
     const buttonContent = (
       <EuiTitle size="xs">
@@ -57,90 +58,6 @@ export const ObservedDataSection = memo(
         </h3>
       </EuiTitle>
     );
-
-    return (
-      <InspectButtonContainer>
-        <EuiAccordion
-          initialIsOpen={true}
-          id="observedEntity-accordion"
-          data-test-subj="observedEntity-accordion"
-          buttonProps={{
-            'data-test-subj': 'observedEntity-accordion-button',
-            css: css`
-              color: ${euiTheme.colors.primary};
-            `,
-          }}
-          buttonContent={buttonContent}
-          css={css`
-            .euiAccordion__optionalAction {
-              margin-left: auto;
-            }
-          `}
-        >
-          {observedUser.isLoading ? (
-            <EuiLoadingSpinner data-test-subj="observedDataSectionLoadingSpinner" />
-          ) : (
-            <ObservedDataSectionContent
-              userName={userName}
-              observedUser={observedUser}
-              contextID={contextID}
-              scopeId={scopeId}
-              queryId={queryId}
-            />
-          )}
-        </EuiAccordion>
-      </InspectButtonContainer>
-    );
-  }
-);
-ObservedDataSection.displayName = 'ObservedDataSection';
-
-const ObservedDataSectionContent = memo(
-  ({
-    userName,
-    observedUser,
-    contextID,
-    scopeId,
-    queryId,
-  }: {
-    userName: string;
-    observedUser: ObservedUserData;
-    contextID: string;
-    scopeId: string;
-    queryId: string;
-  }) => {
-    const { to, from, isInitializing } = useGlobalTime();
-    const { euiTheme } = useEuiTheme();
-    const xsFontSize = useEuiFontSize('xxs').fontSize;
-
-    const { jobNameById } = useInstalledSecurityJobNameById();
-    const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
-    const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
-      criteriaFields: getCriteriaFromUsersType(UsersType.details, userName),
-      startDate: from,
-      endDate: to,
-      skip: isInitializing,
-      jobIds,
-      aggregationInterval: 'auto',
-    });
-
-    const observedUserWithAnomalies = useMemo(
-      () => ({
-        ...observedUser,
-        anomalies: {
-          isLoading: isLoadingAnomaliesData,
-          anomalies: anomaliesData,
-          jobNameById,
-        },
-      }),
-      [
-        observedUser,
-        isLoadingAnomaliesData,
-        anomaliesData,
-        jobNameById,
-      ]
-    );
-    const observedFields = useObservedUserItems(observedUserWithAnomalies);
 
     const extraAction = (
       <>
@@ -184,23 +101,90 @@ const ObservedDataSectionContent = memo(
     );
 
     return (
-      <>
-        <div
+      <InspectButtonContainer>
+        <EuiAccordion
+          initialIsOpen={true}
+          id="observedEntity-accordion"
+          data-test-subj="observedEntity-accordion"
+          buttonProps={{
+            'data-test-subj': 'observedEntity-accordion-button',
+            css: css`
+              color: ${euiTheme.colors.primary};
+            `,
+          }}
+          buttonContent={buttonContent}
+          extraAction={extraAction}
           css={css`
-            display: flex;
-            align-items: center;
-            margin-bottom: ${euiTheme.size.s};
+            .euiAccordion__optionalAction {
+              margin-left: auto;
+            }
           `}
         >
-          {extraAction}
-        </div>
-        <ObservedEntity
-          observedData={observedUserWithAnomalies}
-          contextID={contextID}
-          scopeId={scopeId}
-          observedFields={observedFields}
-        />
-      </>
+          {observedUser.isLoading ? (
+            <EuiLoadingSpinner data-test-subj="observedDataSectionLoadingSpinner" />
+          ) : (
+            <ObservedDataSectionContent
+              userName={userName}
+              observedUser={observedUser}
+              contextID={contextID}
+              scopeId={scopeId}
+              queryId={queryId}
+            />
+          )}
+        </EuiAccordion>
+      </InspectButtonContainer>
+    );
+  }
+);
+ObservedDataSection.displayName = 'ObservedDataSection';
+
+const ObservedDataSectionContent = memo(
+  ({
+    userName,
+    observedUser,
+    contextID,
+    scopeId,
+    queryId,
+  }: {
+    userName: string;
+    observedUser: ObservedUserData;
+    contextID: string;
+    scopeId: string;
+    queryId: string;
+  }) => {
+    const { to, from, isInitializing } = useGlobalTime();
+
+    const { jobNameById } = useInstalledSecurityJobNameById();
+    const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
+    const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
+      criteriaFields: getCriteriaFromUsersType(UsersType.details, userName),
+      startDate: from,
+      endDate: to,
+      skip: isInitializing,
+      jobIds,
+      aggregationInterval: 'auto',
+    });
+
+    const observedUserWithAnomalies = useMemo(
+      () => ({
+        ...observedUser,
+        anomalies: {
+          isLoading: isLoadingAnomaliesData,
+          anomalies: anomaliesData,
+          jobNameById,
+        },
+      }),
+      [observedUser, isLoadingAnomaliesData, anomaliesData, jobNameById]
+    );
+    const observedFields = useObservedUserItems(observedUserWithAnomalies);
+
+    return (
+      <ObservedEntity
+        observedData={observedUserWithAnomalies}
+        contextID={contextID}
+        scopeId={scopeId}
+        observedFields={observedFields}
+      />
     );
   }
 );
