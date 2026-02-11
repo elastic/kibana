@@ -109,11 +109,11 @@ export function AppearanceSettings({
           options={gaugeShapes.map(({ id, label, icon }) => ({
             value: id,
             label,
-            prepend: <EuiIcon type={icon} />,
+            prepend: <EuiIcon type={icon} aria-hidden={true} />,
           }))}
           selectedOptions={[selectedOption]}
           singleSelection={{ asPlainText: true }}
-          prepend={<EuiIcon type={selectedOption.icon} />}
+          prepend={<EuiIcon type={selectedOption.icon} aria-hidden={true} />}
         />
       </EuiFormRow>
       {(state.shape === GaugeShapes.HORIZONTAL_BULLET ||

@@ -82,7 +82,12 @@ const DashboardUnsavedItem = ({
     <div css={styles.item} key={id}>
       <EuiFlexGroup alignItems="center" gutterSize="none" css={styles.heading} responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon color="text" css={styles.icon} type={title ? 'dashboardApp' : 'clock'} />
+          <EuiIcon
+            color="text"
+            css={styles.icon}
+            type={title ? 'dashboardApp' : 'clock'}
+            aria-hidden={true}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">

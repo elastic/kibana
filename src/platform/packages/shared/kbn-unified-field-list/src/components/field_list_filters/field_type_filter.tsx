@@ -199,7 +199,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
           css={filterButtonStyle}
           onClick={() => setIsOpen((value) => !value)}
         >
-          <EuiIcon type="filter" />
+          <EuiIcon type="filter" aria-hidden={true} />
         </EuiFilterButton>
       }
     >

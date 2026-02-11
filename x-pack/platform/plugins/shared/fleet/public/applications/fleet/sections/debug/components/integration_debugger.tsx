@@ -220,13 +220,13 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
             prepend={
               selectedOptions.length > 0 ? (
                 <EuiButtonEmpty>
-                  <EuiIcon type={selectedOptions[0]?.icon ?? 'fleetApp'} />
+                  <EuiIcon type={selectedOptions[0]?.icon ?? 'fleetApp'} aria-hidden={true} />
                 </EuiButtonEmpty>
               ) : undefined
             }
             renderOption={(option, searchValue, contentClassName) => (
               <span className={contentClassName}>
-                <EuiIcon type={(option as any).icon} />
+                <EuiIcon type={(option as any).icon} aria-hidden={true} />
                 &nbsp;
                 <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
               </span>

@@ -84,7 +84,7 @@ export const QuickStat: React.FC<BaseQuickStatProps> = ({
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <span>
-                <EuiIcon type={icon} color={iconColor} />
+                <EuiIcon type={icon} color={iconColor} aria-hidden={true} />
               </span>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

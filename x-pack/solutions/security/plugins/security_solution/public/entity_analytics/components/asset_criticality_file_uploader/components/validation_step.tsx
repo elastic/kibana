@@ -67,7 +67,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
               <EuiFlexItem grow>
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type={'checkInCircleFilled'} color="success" />
+                    <EuiIcon type={'checkInCircleFilled'} color="success" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <span data-test-subj="asset-criticality-validLinesMessage">
@@ -115,7 +115,7 @@ export const AssetCriticalityValidationStep: React.FC<AssetCriticalityValidation
               <EuiFlexItem grow>
                 <EuiFlexGroup gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type={'error'} color="danger" />
+                    <EuiIcon type={'error'} color="danger" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <span data-test-subj="asset-criticality-invalidLinesMessage">

@@ -150,7 +150,7 @@ export const AgentPolicySummaryLine = memo<{
             >
               <EuiFlexGroup alignItems="center" gutterSize="xs">
                 <EuiFlexItem>
-                  <EuiIcon size="m" type="warning" color="warning" />
+                  <EuiIcon size="m" type="warning" color="warning" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText color="subdued" size="xs">

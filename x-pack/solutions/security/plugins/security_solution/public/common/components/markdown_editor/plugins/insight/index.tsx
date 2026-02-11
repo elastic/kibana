@@ -227,7 +227,7 @@ const LicensedInsightComponent = ({
           keepDataView={true}
           data-test-subj="insight-investigate-in-timeline-button"
         >
-          <EuiIcon type="timeline" />
+          <EuiIcon type="timeline" aria-hidden={true} />
           {` ${label} (${numeral(totalCount).format(resultFormat)})`}
         </InvestigateInTimelineButton>
         <div>{description}</div>

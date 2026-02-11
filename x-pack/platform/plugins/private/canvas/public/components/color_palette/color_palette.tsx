@@ -54,7 +54,12 @@ export const ColorPalette: FC<Props> = ({
         {(color) => {
           const match = chroma(color).hex() === chroma(value).hex();
           const icon = match ? (
-            <EuiIcon type="check" className="selected-color" color={readableColor(value)} />
+            <EuiIcon
+              type="check"
+              className="selected-color"
+              color={readableColor(value)}
+              aria-hidden={true}
+            />
           ) : null;
 
           return (

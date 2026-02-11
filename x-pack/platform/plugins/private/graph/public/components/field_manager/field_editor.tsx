@@ -181,7 +181,7 @@ export function FieldEditor({
                 name: i18n.translate('xpack.graph.fieldManager.settingsLabel', {
                   defaultMessage: 'Edit settings',
                 }),
-                icon: <EuiIcon type="pencil" size="m" />,
+                icon: <EuiIcon type="pencil" size="m" aria-hidden={true} />,
                 panel: 'settings',
               },
               {
@@ -192,7 +192,9 @@ export function FieldEditor({
                   : i18n.translate('xpack.graph.fieldManager.disableFieldLabel', {
                       defaultMessage: 'Disable field',
                     }),
-                icon: <EuiIcon type={isDisabled ? 'eye' : 'eyeClosed'} size="m" />,
+                icon: (
+                  <EuiIcon type={isDisabled ? 'eye' : 'eyeClosed'} size="m" aria-hidden={true} />
+                ),
                 onClick: toggleDisabledState,
                 toolTipContent: isDisabled
                   ? i18n.translate('xpack.graph.fieldManager.enableFieldTooltipContent', {
@@ -215,7 +217,7 @@ export function FieldEditor({
                       'No new vertices for this field will be discovered.  Existing vertices remain in the graph.',
                   }
                 ),
-                icon: <EuiIcon type="trash" size="m" />,
+                icon: <EuiIcon type="trash" size="m" aria-hidden={true} />,
                 onClick: () => {
                   deselectField(initialField.name);
                   setOpen(false);

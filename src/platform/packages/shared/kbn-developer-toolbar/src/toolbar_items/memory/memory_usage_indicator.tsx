@@ -60,7 +60,8 @@ export const MemoryUsageIndicator: React.FC = () => {
       <div>Threshold: {(warningThreshold / 1000).toFixed(1)}GB</div>
       {memoryInfo.leak && (
         <div>
-          <EuiIcon type="warningFilled" color={'danger'} size="s" /> Potential memory leak detected
+          <EuiIcon type="warningFilled" color={'danger'} size="s" aria-hidden={true} /> Potential
+          memory leak detected
         </div>
       )}
       <div>Samples: {memoryInfo.history.length}</div>

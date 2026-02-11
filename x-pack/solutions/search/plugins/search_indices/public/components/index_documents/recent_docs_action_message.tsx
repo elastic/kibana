@@ -31,7 +31,7 @@ export const RecentDocsActionMessage: React.FC<RecentDocsActionMessageProps> = (
     <EuiPanel hasBorder={false} hasShadow={false} color="subdued" borderRadius="none">
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="calendar" />
+          <EuiIcon type="calendar" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <p>

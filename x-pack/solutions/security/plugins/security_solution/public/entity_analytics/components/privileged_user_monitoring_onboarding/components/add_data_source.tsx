@@ -94,7 +94,7 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
             data-test-subj="privilegedUserMonitoringAddIndexCard"
             hasBorder
             layout="horizontal"
-            icon={<EuiIcon size="l" type="indexOpen" />}
+            icon={<EuiIcon size="l" type="indexOpen" aria-hidden={true} />}
             titleSize="xs"
             title={
               <FormattedMessage
@@ -118,7 +118,7 @@ export const AddDataSourcePanel = ({ onComplete }: AddDataSourcePanelProps) => {
           <EuiCard
             hasBorder
             layout="horizontal"
-            icon={<EuiIcon size="l" type="importAction" />}
+            icon={<EuiIcon size="l" type="importAction" aria-hidden={true} />}
             titleSize="xs"
             data-test-subj="privilegedUserMonitoringImportCSVCard"
             title={

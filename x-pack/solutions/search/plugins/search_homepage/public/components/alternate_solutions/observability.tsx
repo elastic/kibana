@@ -42,7 +42,7 @@ export const Observability: React.FC = () => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="center" alignItems="flexStart">
           <EuiFlexItem css={LogoContainerStyle} grow={false}>
-            <EuiIcon size="xxl" type="logoObservability" name="Observability" />
+            <EuiIcon size="xxl" type="logoObservability" name="Observability" aria-hidden={true} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

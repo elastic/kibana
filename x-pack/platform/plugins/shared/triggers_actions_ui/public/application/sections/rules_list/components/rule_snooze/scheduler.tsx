@@ -86,7 +86,7 @@ export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
         <EuiPopoverTitle>
           <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="arrowLeft" />
+              <EuiIcon type="arrowLeft" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiLink color="text" style={{ fontWeight: 'bold' }} onClick={onClose}>

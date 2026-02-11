@@ -25,7 +25,7 @@ export const Security: React.FC = () => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="center" alignItems="flexStart">
           <EuiFlexItem css={LogoContainerStyle} grow={false}>
-            <EuiIcon size="xxl" type="logoSecurity" name="Security" />
+            <EuiIcon size="xxl" type="logoSecurity" name="Security" aria-hidden={true} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

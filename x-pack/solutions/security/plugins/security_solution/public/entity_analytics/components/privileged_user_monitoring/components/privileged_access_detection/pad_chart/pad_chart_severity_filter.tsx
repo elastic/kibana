@@ -43,7 +43,7 @@ export const PrivilegedAccessDetectionSeverityFilter: React.FC<SeverityFilterPro
                   grow={false}
                 >
                   <EuiFlexGroup alignItems={'center'} gutterSize={'xs'}>
-                    <EuiIcon type={'eyeClosed'} />
+                    <EuiIcon type={'eyeClosed'} aria-hidden={true} />
                     <EuiText size={'s'} color={euiTheme.colors.textSubdued}>
                       <p>{`${band.start}-${band.end}`}</p>
                     </EuiText>

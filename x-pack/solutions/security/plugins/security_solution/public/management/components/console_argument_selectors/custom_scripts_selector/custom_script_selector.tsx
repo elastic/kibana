@@ -258,7 +258,7 @@ export const CustomScriptSelector = memo<
     </EuiPopover>
   ) : (
     <EuiText size="s" color="subdued" data-test-subj={testId('noMultipleArgs')}>
-      <EuiIcon type="warning" size="s" color="subdued" />{' '}
+      <EuiIcon type="warning" size="s" color="subdued" aria-hidden={true} />{' '}
       <FormattedMessage
         id="xpack.securitySolution.endpoint.customScriptSelector.noMultipleArgs"
         defaultMessage="Argument is only supported once per command"

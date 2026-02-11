@@ -36,7 +36,7 @@ export const ToolFormSection: FC<PropsWithChildren<ToolFormSectionProps>> = memo
               <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexItem>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
-                    {icon && <EuiIcon type={icon} />}
+                    {icon && <EuiIcon type={icon} aria-hidden={true} />}
                     <EuiText color={euiTheme.colors.textHeading}>
                       <h3>{title}</h3>
                     </EuiText>

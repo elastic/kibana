@@ -46,7 +46,7 @@ const getListItem = (stat: StatState) => ({
     <EuiToolTip content={stat.description}>
       <EuiText tabIndex={0}>
         <h6>
-          {stat.title} <EuiIcon type="question" />
+          {stat.title} <EuiIcon type="question" aria-hidden={true} />
         </h6>
       </EuiText>
     </EuiToolTip>

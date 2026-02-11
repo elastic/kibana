@@ -81,7 +81,7 @@ export const DragHandle = () => {
       className="drag-handle"
       data-test-subj="stepDragHandle"
     >
-      <EuiIcon type="grab" size="m" />
+      <EuiIcon type="grab" size="m" aria-hidden={true} />
     </span>
   );
 };

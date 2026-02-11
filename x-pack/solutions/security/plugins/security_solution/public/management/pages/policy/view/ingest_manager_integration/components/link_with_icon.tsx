@@ -28,7 +28,7 @@ export const LinkWithIcon: FC<ComponentProps> = memo(({ children, size = 'l', ..
   return (
     <LinkToApp {...props}>
       <LinkLabel size={size}>{children}</LinkLabel>
-      <EuiIcon type={size === 'm' ? 'arrowRight' : 'popout'} />
+      <EuiIcon type={size === 'm' ? 'arrowRight' : 'popout'} aria-hidden={true} />
     </LinkToApp>
   );
 });

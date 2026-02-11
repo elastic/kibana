@@ -26,7 +26,7 @@ export const useCopyIDAction = ({ onActionSuccess }: UseCopyIDActionProps) => {
         });
       },
       'data-test-subj': 'cases-action-copy-id',
-      icon: <EuiIcon type="copyClipboard" size="m" />,
+      icon: <EuiIcon type="copyClipboard" size="m" aria-hidden={true} />,
       key: 'cases-action-copy-id',
     };
   };

@@ -62,7 +62,11 @@ export function ComponentTemplatePanel({
           defaultMessage: 'Mappings',
         }),
         render: (_, record) =>
-          record.component_template?.template.mappings ? <EuiIcon type="check" /> : '-',
+          record.component_template?.template.mappings ? (
+            <EuiIcon type="check" aria-hidden={true} />
+          ) : (
+            '-'
+          ),
       },
       {
         field: 'settings',
@@ -70,7 +74,11 @@ export function ComponentTemplatePanel({
           defaultMessage: 'Settings',
         }),
         render: (_, record) =>
-          record.component_template?.template.settings ? <EuiIcon type="check" /> : '-',
+          record.component_template?.template.settings ? (
+            <EuiIcon type="check" aria-hidden={true} />
+          ) : (
+            '-'
+          ),
       },
       {
         field: 'aliases',
@@ -79,7 +87,11 @@ export function ComponentTemplatePanel({
         }),
         render: (_, record) => (
           <span>
-            {record.component_template?.template.aliases ? <EuiIcon type="check" /> : '-'}
+            {record.component_template?.template.aliases ? (
+              <EuiIcon type="check" aria-hidden={true} />
+            ) : (
+              '-'
+            )}
           </span>
         ),
       },

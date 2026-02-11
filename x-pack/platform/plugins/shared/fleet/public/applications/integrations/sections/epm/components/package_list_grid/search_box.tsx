@@ -139,6 +139,7 @@ export const SearchBox: FunctionComponent<Props> = ({
                   padding: 0,
                   backgroundColor: euiTheme.colors.lightestShade,
                 }}
+                aria-hidden={true}
               />
             </button>
           </EuiText>

@@ -129,7 +129,9 @@ export const SuppliedConfigurationsFlyout: FC<Props> = ({ module, onClose }) => 
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem grow={false}>
-            {isLogoObject(module.logo) ? <EuiIcon size="xxl" type={module.logo.icon} /> : null}
+            {isLogoObject(module.logo) ? (
+              <EuiIcon size="xxl" type={module.logo.icon} aria-hidden={true} />
+            ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">

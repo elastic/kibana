@@ -111,7 +111,8 @@ export const getDataViewSelectOptions = ({
         {
           inputDisplay: (
             <span data-test-subj="security-alerts-option-super">
-              <EuiIcon type="logoSecurity" size="s" /> {i18n.SIEM_SECURITY_DATA_VIEW_LABEL}
+              <EuiIcon type="logoSecurity" size="s" aria-hidden={true} />{' '}
+              {i18n.SIEM_SECURITY_DATA_VIEW_LABEL}
               <StyledBadge data-test-subj="security-alerts-option-badge">
                 {i18n.ALERTS_BADGE_TITLE}
               </StyledBadge>
@@ -124,7 +125,8 @@ export const getDataViewSelectOptions = ({
         inputDisplay:
           id === defaultDataViewId ? (
             <span data-test-subj="security-option-super">
-              <EuiIcon type="logoSecurity" size="s" /> {i18n.SECURITY_DEFAULT_DATA_VIEW_LABEL}
+              <EuiIcon type="logoSecurity" size="s" aria-hidden={true} />{' '}
+              {i18n.SECURITY_DEFAULT_DATA_VIEW_LABEL}
               {isModified && id === dataViewId && (
                 <StyledBadge data-test-subj="security-modified-option-badge">
                   {i18n.MODIFIED_BADGE_TITLE}
@@ -133,7 +135,7 @@ export const getDataViewSelectOptions = ({
             </span>
           ) : (
             <span data-test-subj="dataView-option-super">
-              <EuiIcon type="logoKibana" size="s" /> {title}
+              <EuiIcon type="logoKibana" size="s" aria-hidden={true} /> {title}
               {isModified && id === dataViewId && (
                 <StyledBadge data-test-subj="security-modified-option-badge">
                   {i18n.MODIFIED_BADGE_TITLE}

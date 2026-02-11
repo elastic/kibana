@@ -166,7 +166,7 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
               <div>
                 <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="logoElastic" size="l" />
+                    <EuiIcon type="logoElastic" size="l" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiTitle size={'s'}>

@@ -84,7 +84,7 @@ export const GroupsFilterPopoverComponent = ({
       {uniqueGroups.length === 0 && (
         <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
           <EuiFlexItem grow={true}>
-            <EuiIcon type="minusInCircle" />
+            <EuiIcon type="minusInCircle" aria-hidden={true} />
             <EuiSpacer size="xs" />
             <p>{i18n.NO_GROUPS_AVAILABLE}</p>
           </EuiFlexItem>

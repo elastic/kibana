@@ -60,7 +60,7 @@ const PrependLabel = () => {
               size="s"
               onClick={() => setIsPopoverOpen((popoverValue) => !popoverValue)}
             >
-              <EuiIcon type="question" color="text" />
+              <EuiIcon type="question" color="text" aria-hidden={true} />
             </EuiButtonEmpty>
           }
           isOpen={isPopoverOpen}

@@ -57,7 +57,13 @@ export const FailedFieldInfo = () => {
             <span>{failedDocsErrorsColumnName}</span>
           </EuiTitle>
           <EuiToolTip content={failedDocsErrorsColumnNameTooltip}>
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </EuiToolTip>
         </EuiFlexGroup>
         <EuiFlexItem

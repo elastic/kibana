@@ -74,9 +74,13 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
                     >
                       <EuiFlexItem grow={false}>
                         {uploadedLookups[lookupName] != null ? (
-                          <EuiIcon type="checkInCircleFilled" color={euiTheme.colors.success} />
+                          <EuiIcon
+                            type="checkInCircleFilled"
+                            color={euiTheme.colors.success}
+                            aria-hidden={true}
+                          />
                         ) : (
-                          <EuiIcon type="dot" />
+                          <EuiIcon type="dot" aria-hidden={true} />
                         )}
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>

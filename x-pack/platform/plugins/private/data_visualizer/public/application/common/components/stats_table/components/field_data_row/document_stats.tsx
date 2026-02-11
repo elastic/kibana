@@ -79,7 +79,7 @@ export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
         size="m"
       />
     ) : (
-      <EuiIcon type="document" size={'m'} className={'columnHeader__icon'} />
+      <EuiIcon type="document" size={'m'} className={'columnHeader__icon'} aria-hidden={true} />
     )
   ) : null;
 

@@ -203,7 +203,7 @@ function RangesParamEditor({
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="sortRight" color="subdued" />
+                  <EuiIcon type="sortRight" color="subdued" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFieldNumber

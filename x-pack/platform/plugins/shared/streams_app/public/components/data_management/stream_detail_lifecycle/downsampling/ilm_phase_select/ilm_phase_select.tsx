@@ -84,7 +84,11 @@ export const IlmPhaseSelect = ({
     () =>
       availableOptions.map((option) => {
         const icon =
-          option === 'delete' ? 'trash' : <EuiIcon type="dot" color={ilmPhases[option].color} />;
+          option === 'delete' ? (
+            'trash'
+          ) : (
+            <EuiIcon type="dot" color={ilmPhases[option].color} aria-hidden={true} />
+          );
 
         return (
           <EuiContextMenuItem

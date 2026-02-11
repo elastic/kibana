@@ -45,7 +45,7 @@ export const CreateIntegrationLanding = React.memo(() => {
                     justifyContent="flexStart"
                   >
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="package" size="l" />
+                      <EuiIcon type="package" size="l" aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiText size="s" color="subdued">

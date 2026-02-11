@@ -110,6 +110,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
           css={{
             marginLeft: '10px',
           }}
+          aria-hidden={true}
         />
       </>
     ) : (

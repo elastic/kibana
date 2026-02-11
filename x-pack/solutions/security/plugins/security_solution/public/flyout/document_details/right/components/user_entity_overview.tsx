@@ -224,7 +224,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type={USER_ICON} />
+            <EuiIcon type={USER_ICON} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <PreviewLink

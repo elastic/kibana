@@ -346,7 +346,7 @@ const ButtonContent: React.FC<{
         </EuiFlexItem>
       ) : (
         <EuiFlexItem grow={false}>
-          <EuiIcon type={iconClass} size="m" />
+          <EuiIcon type={iconClass} size="m" aria-hidden={true} />
         </EuiFlexItem>
       )}
       <EuiFlexItem>

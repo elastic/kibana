@@ -118,7 +118,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       align: 'center',
       truncateText: true,
       render: (template: TemplateListItem) =>
-        template._kbnMeta.hasDatastream ? <EuiIcon type="check" /> : null,
+        template._kbnMeta.hasDatastream ? <EuiIcon type="check" aria-hidden={true} /> : null,
     },
     {
       name: i18n.translate('xpack.idxMgmt.templateList.table.contentColumnTitle', {

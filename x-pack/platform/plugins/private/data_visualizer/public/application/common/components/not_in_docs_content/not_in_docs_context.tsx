@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 export const NotInDocsContent: FC = () => (
   <Fragment>
     <EuiText textAlign="center">
-      <EuiIcon type="warning" />
+      <EuiIcon type="warning" aria-hidden={true} />
     </EuiText>
     <EuiText textAlign="center" size={'xs'}>
       <FormattedMessage

@@ -60,7 +60,7 @@ export class DateFormatEditor extends DefaultFormatEditor<DateFormatEditorFormat
                   defaultMessage="Documentation"
                 />
                 &nbsp;
-                <EuiIcon type="link" />
+                <EuiIcon type="link" aria-hidden={true} />
               </EuiLink>
             </span>
           }

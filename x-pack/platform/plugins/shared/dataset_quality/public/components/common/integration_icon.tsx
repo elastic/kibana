@@ -26,6 +26,6 @@ export const IntegrationIcon = ({ integration }: IntegrationIconProps) => {
       tryApi
     />
   ) : (
-    <EuiIcon type={loggingIcon} size="m" />
+    <EuiIcon type={loggingIcon} size="m" aria-hidden={true} />
   );
 };

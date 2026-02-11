@@ -59,7 +59,7 @@ export const DistinctValues = ({ showIcon, config }: Props) => {
         className={'columnHeader__icon'}
       />
     ) : (
-      <EuiIcon type="database" size={'m'} className={'columnHeader__icon'} />
+      <EuiIcon type="database" size={'m'} className={'columnHeader__icon'} aria-hidden={true} />
     )
   ) : null;
 

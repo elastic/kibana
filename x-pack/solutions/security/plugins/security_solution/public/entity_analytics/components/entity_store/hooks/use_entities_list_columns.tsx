@@ -106,7 +106,7 @@ export const useEntitiesListColumns = (): EntitiesListColumns => {
         const entityType = getEntityType(record);
         return (
           <span>
-            <EuiIcon type={EntityIconByType[entityType]} />
+            <EuiIcon type={EntityIconByType[entityType]} aria-hidden={true} />
             <span css={{ paddingLeft: euiTheme.size.s }}>{record.entity.name}</span>
           </span>
         );

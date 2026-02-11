@@ -108,7 +108,7 @@ export const useComparisonColumns = ({
         docIndex === 0 ? (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="pinFilled" />
+              <EuiIcon type="pinFilled" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{columnTitle}</EuiFlexItem>
           </EuiFlexGroup>

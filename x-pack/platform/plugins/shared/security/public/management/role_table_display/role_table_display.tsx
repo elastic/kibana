@@ -31,7 +31,14 @@ export const RoleTableDisplay = ({ role, navigateToApp }: Props) => {
         data-test-subj="roleDeprecationTooltip"
       >
         <div tabIndex={0}>
-          {role.name} <EuiIcon type="warning" color="warning" size="s" className={'eui-alignTop'} />
+          {role.name}{' '}
+          <EuiIcon
+            type="warning"
+            color="warning"
+            size="s"
+            className={'eui-alignTop'}
+            aria-hidden={true}
+          />
         </div>
       </EuiToolTip>
     );

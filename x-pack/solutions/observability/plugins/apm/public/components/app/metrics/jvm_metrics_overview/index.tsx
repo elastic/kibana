@@ -70,7 +70,13 @@ export function JvmMetricsOverview() {
             {i18n.translate('xpack.apm.jvmsTable.nameColumnLabel', {
               defaultMessage: 'Name',
             })}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </>
         </EuiToolTip>
       ),

@@ -231,7 +231,8 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
       label={finalConfig.label}
       labelAppend={
         <EuiLink {...workflowManagementLinkProps} external={false}>
-          {finalConfig.createWorkflowLinkText} <EuiIcon type="plusInCircle" size="s" />
+          {finalConfig.createWorkflowLinkText}{' '}
+          <EuiIcon type="plusInCircle" size="s" aria-hidden={true} />
         </EuiLink>
       }
       helpText={helpText}
@@ -303,7 +304,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
                         id="workflows.params.viewAllWorkflowsLinkText"
                         defaultMessage="View all workflows"
                       />
-                      <EuiIcon type="popout" size="s" />
+                      <EuiIcon type="popout" size="s" aria-hidden={true} />
                     </EuiLink>
                   </EuiText>
                 </EuiPopoverFooter>

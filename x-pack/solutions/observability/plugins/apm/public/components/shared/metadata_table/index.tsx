@@ -78,7 +78,7 @@ export function MetadataTable({ sections, isLoading }: Props) {
             href={docLinks.links.apm.metaData}
             target="_blank"
           >
-            <EuiIcon type="question" />
+            <EuiIcon type="question" aria-hidden={true} />
             {i18n.translate('xpack.apm.metadata.help', {
               defaultMessage: 'How to add labels and other data',
             })}

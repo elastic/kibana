@@ -247,7 +247,7 @@ export function ErrorSampleDetails({
                     },
                   })}
                 >
-                  <EuiIcon type="merge" />
+                  <EuiIcon type="merge" aria-hidden={true} />
                   <TransactionLinkName>{transaction.transaction.name}</TransactionLinkName>
                 </TransactionDetailLink>
               </EuiToolTip>

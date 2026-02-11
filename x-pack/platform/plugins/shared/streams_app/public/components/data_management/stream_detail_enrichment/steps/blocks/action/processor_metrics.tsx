@@ -101,7 +101,7 @@ export const ProcessorMetricBadges = ({
             <EuiTextColor color="success">
               <EuiFlexGroup gutterSize="xs">
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="check" />
+                  <EuiIcon type="check" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem>{parsedRate}</EuiFlexItem>
               </EuiFlexGroup>
@@ -123,7 +123,7 @@ export const ProcessorMetricBadges = ({
               <EuiTextColor color="danger">
                 <EuiFlexGroup gutterSize="xs">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="cross" />
+                    <EuiIcon type="cross" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem>{failedRate}</EuiFlexItem>
                 </EuiFlexGroup>

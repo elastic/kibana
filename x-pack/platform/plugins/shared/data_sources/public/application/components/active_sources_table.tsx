@@ -112,7 +112,7 @@ const ActionsCell: React.FC<{
     onDelete && (
       <EuiContextMenuItem
         key="delete"
-        icon={<EuiIcon type="trash" color="danger" />}
+        icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
         css={({ euiTheme }) => ({
           color: euiTheme.colors.danger,
         })}

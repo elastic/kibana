@@ -166,7 +166,7 @@ export const GraphControls = React.memo(
                 })}
                 onClick={handleNorth}
               >
-                <EuiIcon type="arrowUp" />
+                <EuiIcon type="arrowUp" aria-hidden={true} />
               </button>
             </div>
             <div className="panning-controls-middle">
@@ -178,7 +178,7 @@ export const GraphControls = React.memo(
                 })}
                 onClick={handleWest}
               >
-                <EuiIcon type="arrowLeft" />
+                <EuiIcon type="arrowLeft" aria-hidden={true} />
               </button>
               <button
                 className="center-button"
@@ -188,7 +188,7 @@ export const GraphControls = React.memo(
                 })}
                 onClick={handleCenterClick}
               >
-                <EuiIcon type="bullseye" />
+                <EuiIcon type="bullseye" aria-hidden={true} />
               </button>
               <button
                 className="east-button"
@@ -198,7 +198,7 @@ export const GraphControls = React.memo(
                 })}
                 onClick={handleEast}
               >
-                <EuiIcon type="arrowRight" />
+                <EuiIcon type="arrowRight" aria-hidden={true} />
               </button>
             </div>
             <div className="panning-controls-bottom">
@@ -210,7 +210,7 @@ export const GraphControls = React.memo(
                 })}
                 onClick={handleSouth}
               >
-                <EuiIcon type="arrowDown" />
+                <EuiIcon type="arrowDown" aria-hidden={true} />
               </button>
             </div>
           </EuiPanel>
@@ -222,7 +222,7 @@ export const GraphControls = React.memo(
               data-test-subj="resolver:graph-controls:zoom-in"
               onClick={handleZoomInClick}
             >
-              <EuiIcon type="plusInCircle" />
+              <EuiIcon type="plusInCircle" aria-hidden={true} />
             </button>
             <StyledEuiRange
               className="zoom-slider"
@@ -240,7 +240,7 @@ export const GraphControls = React.memo(
               data-test-subj="resolver:graph-controls:zoom-out"
               onClick={handleZoomOutClick}
             >
-              <EuiIcon type="minusInCircle" />
+              <EuiIcon type="minusInCircle" aria-hidden={true} />
             </button>
           </EuiPanel>
         </StyledGraphControlsColumn>

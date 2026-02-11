@@ -109,7 +109,7 @@ export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, o
               })}
               data-test-subj="sloDetailDiscoverLink"
             >
-              <EuiIcon type="sortRight" css={{ marginRight: '4px' }} />
+              <EuiIcon type="sortRight" css={{ marginRight: '4px' }} aria-hidden={true} />
               <FormattedMessage
                 id="xpack.slo.sloDetails.viewEventsLink"
                 defaultMessage="View events"

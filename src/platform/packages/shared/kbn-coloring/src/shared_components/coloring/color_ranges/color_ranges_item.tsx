@@ -202,7 +202,12 @@ export function ColorRangeItem({
             isInvalid={!isColorValid}
           />
         ) : (
-          <EuiIcon type={RelatedIcon} size="m" color={euiTheme.colors.disabled} />
+          <EuiIcon
+            type={RelatedIcon}
+            size="m"
+            color={euiTheme.colors.disabled}
+            aria-hidden={true}
+          />
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={true}>

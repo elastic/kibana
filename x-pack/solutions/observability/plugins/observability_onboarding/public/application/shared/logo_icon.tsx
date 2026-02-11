@@ -121,7 +121,14 @@ export function LogoIcon({ logo, euiIconType, isAvatar, size, className }: LogoI
     );
   }
   if (iconType || euiIconType) {
-    return <EuiIcon type={euiIconType ?? iconType!} size={size} className={className} />;
+    return (
+      <EuiIcon
+        type={euiIconType ?? iconType!}
+        size={size}
+        className={className}
+        aria-hidden={true}
+      />
+    );
   }
   return null;
 }

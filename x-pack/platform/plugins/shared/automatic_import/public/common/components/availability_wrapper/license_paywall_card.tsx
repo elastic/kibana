@@ -30,7 +30,7 @@ export const LicensePaywallCard = React.memo(() => {
           label: i18n.ENTERPRISE_LICENSE_LABEL,
         }}
         isDisabled={true}
-        icon={<EuiIcon size="xl" type="lock" />}
+        icon={<EuiIcon size="xl" type="lock" aria-hidden={true} />}
         title={
           <h3>
             <strong>{i18n.ENTERPRISE_LICENSE_TITLE}</strong>

@@ -22,7 +22,7 @@ export function DetailViewHeader({
         <EuiLink data-test-subj="apmDetailViewHeaderLink" href={backHref}>
           <EuiFlexGroup direction="row" gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="arrowLeft" />
+              <EuiIcon type="arrowLeft" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>{backLabel}</EuiFlexItem>
           </EuiFlexGroup>

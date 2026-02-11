@@ -47,6 +47,7 @@ const getColumns: (data: RelatedCase[]) => Array<EuiBasicTableColumn<RelatedCase
             css={css`
               margin-left: 4px;
             `}
+            aria-hidden={true}
           />
         </CaseDetailsLink>
       </CellTooltipWrapper>

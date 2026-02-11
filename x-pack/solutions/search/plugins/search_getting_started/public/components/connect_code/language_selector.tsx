@@ -41,7 +41,7 @@ export const LanguageSelector = ({
         'data-test-subj': `lang-option-${lang.id}`,
         inputDisplay: (
           <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiIcon type={`${assetBasePath}/${lang.icon}`} />
+            <EuiIcon type={`${assetBasePath}/${lang.icon}`} aria-hidden={true} />
             <EuiText>{lang.title}</EuiText>
           </EuiFlexGroup>
         ),

@@ -84,6 +84,7 @@ function itemButtonContent(iconType: string, color: string, title: string, miles
           size="m"
           color={color}
           data-test-subj={`${TEST_SUBJ_PREFIX}-item-icon-${milestoneId}`}
+          aria-hidden={true}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -163,7 +164,7 @@ export const YourTrialCompanionTODOItem: React.FC<YourTrialCompanionTODOItemProp
           gutterSize="m"
         >
           <EuiFlexItem grow={false}>
-            <EuiIcon type="empty" size="m" />
+            <EuiIcon type="empty" size="m" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup
@@ -195,7 +196,7 @@ export const YourTrialCompanionTODOItem: React.FC<YourTrialCompanionTODOItemProp
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="empty" size="m" />
+            <EuiIcon type="empty" size="m" aria-hidden={true} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiAccordion>

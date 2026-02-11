@@ -104,6 +104,7 @@ export function AddStop({
                 height: 16px;
               `}
               color={euiTheme.euiTheme.colors.text}
+              aria-hidden={true}
             />
           </div>
         </button>

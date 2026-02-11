@@ -48,7 +48,11 @@ export function SeriesChartTypes({ seriesId, series, seriesConfig }: Props) {
             flush="both"
           >
             {icon && (
-              <EuiIcon type={(data ?? []).find(({ id }) => id === seriesType)?.icon!} size="l" />
+              <EuiIcon
+                type={(data ?? []).find(({ id }) => id === seriesType)?.icon!}
+                size="l"
+                aria-hidden={true}
+              />
             )}
           </EuiButtonEmpty>
         </EuiToolTip>

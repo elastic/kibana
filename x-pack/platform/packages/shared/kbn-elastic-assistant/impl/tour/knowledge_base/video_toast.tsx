@@ -48,7 +48,8 @@ const VideoComponent: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           />
           <EuiText size="s" grow={false} css={{ marginTop: 20 }}>
             <h4>
-              <EuiIcon type="cheer" color="success" /> {i18n.KNOWLEDGE_BASE_TOUR_VIDEO_STEP_TITLE}
+              <EuiIcon type="cheer" color="success" aria-hidden={true} />{' '}
+              {i18n.KNOWLEDGE_BASE_TOUR_VIDEO_STEP_TITLE}
             </h4>
             <p>{i18n.KNOWLEDGE_BASE_TOUR_VIDEO_STEP_DESC}</p>
           </EuiText>

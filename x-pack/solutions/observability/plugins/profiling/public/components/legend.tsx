@@ -20,7 +20,7 @@ export function Legend({ legendItems }: { legendItems: LegendItem[] }) {
           <EuiFlexItem key={label} grow={false}>
             <EuiFlexGroup direction="row" gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="dot" color={color} />
+                <EuiIcon type="dot" color={color} aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">{label}</EuiText>

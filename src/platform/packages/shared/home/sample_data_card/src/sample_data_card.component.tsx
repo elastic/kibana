@@ -46,7 +46,7 @@ export const SampleDataCard = ({
       data-test-subj={`sampleDataSetCard${id}`}
       icon={
         <EuiFlexGroup justifyContent="center">
-          <EuiIcon size="original" type={image} />
+          <EuiIcon size="original" type={image} aria-hidden={true} />
         </EuiFlexGroup>
       }
       {...{ title, description, betaBadgeProps, footer }}

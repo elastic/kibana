@@ -65,7 +65,7 @@ export const LinkEditor = ({
         label: (
           <EuiFlexGroup gutterSize="s" alignItems="center" aria-label={LinkInfo[type].description}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type={LinkInfo[type].icon} color="text" />
+              <EuiIcon type={LinkInfo[type].icon} color="text" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>{LinkInfo[type].displayName}</EuiFlexItem>
           </EuiFlexGroup>

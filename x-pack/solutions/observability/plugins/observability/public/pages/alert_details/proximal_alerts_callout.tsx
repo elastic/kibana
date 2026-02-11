@@ -45,7 +45,7 @@ export function ProximalAlertsCallout({ alertDetail, switchTabs }: Props) {
           {i18n.translate('xpack.observability.alertDetails.proximalAlert.action', {
             defaultMessage: 'See related alerts',
           })}{' '}
-          <EuiIcon type={'arrowRight'} fontSize={'xs'} />
+          <EuiIcon type={'arrowRight'} fontSize={'xs'} aria-hidden={true} />
         </EuiLink>
       )}
     </EuiCallOut>

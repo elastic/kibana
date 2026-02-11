@@ -94,7 +94,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
       items: [
         {
           name: labels.EXPLORE_IN_ML_APP,
-          icon: <EuiIcon type="dataVisualizer" size="m" />,
+          icon: <EuiIcon type="dataVisualizer" size="m" aria-hidden={true} />,
           href: getMLJobLinkHref({
             basePath,
             monitorId,
@@ -129,7 +129,7 @@ export const ManageMLJobComponent = ({ hasMLJob, onEnableJob, onJobDelete }: Pro
         {
           name: labels.DISABLE_ANOMALY_DETECTION,
           'data-test-subj': 'uptimeDeleteMLJobBtn',
-          icon: <EuiIcon type="trash" size="m" />,
+          icon: <EuiIcon type="trash" size="m" aria-hidden={true} />,
           onClick: () => {
             setIsPopOverOpen(false);
             onJobDelete();

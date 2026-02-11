@@ -76,7 +76,7 @@ export const RoundThinkingTitle = ({ isLoading, hasSteps, onShow }: RoundThinkin
         <EuiText size="s" color="subdued" css={clampTextStyles}>
           <p>{thinkingButtonLabel}</p>
         </EuiText>
-        {hasSteps && <EuiIcon type="arrowRight" color="subdued" size="m" />}
+        {hasSteps && <EuiIcon type="arrowRight" color="subdued" size="m" aria-hidden={true} />}
       </EuiFlexGroup>
     </EuiFlexGroup>
   );

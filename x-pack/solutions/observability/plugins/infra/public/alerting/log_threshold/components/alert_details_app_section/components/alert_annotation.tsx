@@ -37,7 +37,7 @@ export function AlertAnnotation({ alertStarted }: { alertStarted: number }) {
           opacity: 1,
         },
       }}
-      marker={<EuiIcon type="warning" color="danger" />}
+      marker={<EuiIcon type="warning" color="danger" aria-hidden={true} />}
       markerPosition={Position.Top}
     />
   );

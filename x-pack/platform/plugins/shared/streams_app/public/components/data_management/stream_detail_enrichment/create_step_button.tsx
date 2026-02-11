@@ -113,7 +113,9 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
       data-stream-type={streamType}
     >
       {mode === 'prominent' ? createTextProminent : createText}
-      {mode === 'prominent' || mode === 'subdued' ? <EuiIcon type="arrowDown" /> : null}
+      {mode === 'prominent' || mode === 'subdued' ? (
+        <EuiIcon type="arrowDown" aria-hidden={true} />
+      ) : null}
     </EuiButton>
   );
 

@@ -74,7 +74,7 @@ export const AddEntryButton: React.FC<Props> = React.memo(
             iconSide="right"
             onClick={onButtonClick}
           >
-            <EuiIcon type="plusInCircle" />
+            <EuiIcon type="plusInCircle" aria-hidden={true} />
             {i18n.NEW}
           </EuiButton>
         }

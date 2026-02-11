@@ -294,11 +294,11 @@ const OSQUERY_COLUMN_VALUE_TYPE_OPTIONS = [
   },
   {
     value: 'value',
-    inputDisplay: <EuiIcon type="user" size="m" />,
+    inputDisplay: <EuiIcon type="user" size="m" aria-hidden={true} />,
     dropdownDisplay: (
       <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="user" size="m" />
+          <EuiIcon type="user" size="m" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s" className="eui-textNoWrap">

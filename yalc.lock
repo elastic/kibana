@@ -1,0 +1,10 @@
+{
+  "version": "v1",
+  "packages": {
+    "@elastic/eslint-plugin-eui": {
+      "signature": "34ff805eeffd956bfdeebfc4a0f66f9f",
+      "file": true,
+      "replaced": "2.7.0"
+    }
+  }
+}

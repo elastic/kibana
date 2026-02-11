@@ -361,6 +361,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                             color="subdued"
                             type="question"
                             className="eui-alignTop"
+                            aria-hidden={true}
                           />
                         </EuiFlexItem>
                       </EuiFlexGroup>
@@ -393,6 +394,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                             color="subdued"
                             type="question"
                             className="eui-alignTop"
+                            aria-hidden={true}
                           />
                         </EuiFlexItem>
                       </EuiFlexGroup>

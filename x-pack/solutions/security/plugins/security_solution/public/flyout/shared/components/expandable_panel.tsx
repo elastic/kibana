@@ -153,6 +153,7 @@ export const ExpandablePanel: FC<PropsWithChildren<ExpandablePanelPanelProps>> =
                   margin: ${euiTheme.size.s} 0;
                 `}
                 data-test-subj={`${dataTestSubj}TitleIcon`}
+                aria-hidden={true}
               />
             </EuiFlexItem>
           )}

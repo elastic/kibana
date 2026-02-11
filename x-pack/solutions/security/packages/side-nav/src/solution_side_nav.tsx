@@ -271,7 +271,7 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
         <EuiFlexGroup alignItems="center" gutterSize="none">
           <EuiFlexItem>{label}</EuiFlexItem>
           <EuiFlexItem grow={0} id={`solutionSideNavCustomIconItem-${id}`}>
-            <EuiIcon type={iconType} color="text" />
+            <EuiIcon type={iconType} color="text" aria-hidden={true} />
           </EuiFlexItem>
         </EuiFlexGroup>
       );

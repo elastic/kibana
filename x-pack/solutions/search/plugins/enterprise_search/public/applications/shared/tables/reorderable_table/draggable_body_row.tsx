@@ -64,7 +64,7 @@ export const DraggableBodyRow = <Item extends object>({
                       { defaultMessage: 'Drag handle' }
                     )}
                   >
-                    <EuiIcon type="grab" />
+                    <EuiIcon type="grab" aria-hidden />
                   </div>
                 )}
               </EuiFlexItem>

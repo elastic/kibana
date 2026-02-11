@@ -289,7 +289,7 @@ export class AbstractLayer implements ILayer {
 
   getLayerIcon(isTocIcon: boolean): LayerIcon {
     return {
-      icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} />,
+      icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} aria-hidden={true} />,
     };
   }
 

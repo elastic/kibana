@@ -64,7 +64,7 @@ export const SizeDocCountDetails: FunctionComponent<{
         left: (
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="documents" />
+              <EuiIcon type="documents" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiI18nNumber value={documents || 0} />

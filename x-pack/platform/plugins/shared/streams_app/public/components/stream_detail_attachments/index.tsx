@@ -304,6 +304,7 @@ export function StreamDetailAttachments({ definition }: { definition: Streams.al
                             <EuiIcon
                               type={isSelectionPopoverOpen ? 'arrowUp' : 'arrowDown'}
                               size="s"
+                              aria-hidden={true}
                             />
                           </EuiFlexItem>
                         </EuiFlexGroup>

@@ -83,7 +83,7 @@ export function DocumentsColumn({
       iconColor="danger"
     />
   ) : (
-    <EuiIcon type="visLine" size="m" />
+    <EuiIcon type="visLine" size="m" aria-hidden={true} />
   );
 
   const cellAriaLabel = hasData

@@ -247,7 +247,10 @@ function StreamNode({
               margin-right: ${euiThemeVars.euiSizeXS};
             `}
           >
-            <EuiIcon type={collapsed?.[node.name] ? 'arrowRight' : 'arrowDown'} />
+            <EuiIcon
+              type={collapsed?.[node.name] ? 'arrowRight' : 'arrowDown'}
+              aria-hidden={true}
+            />
           </button>
         )}
         <EuiLink
@@ -259,12 +262,12 @@ function StreamNode({
         </EuiLink>
         {node.type === 'root' && (
           <EuiBadge color="hollow">
-            <EuiIcon type="branch" size="s" />
+            <EuiIcon type="branch" size="s" aria-hidden={true} />
           </EuiBadge>
         )}
         {node.type === 'classic' && (
           <EuiBadge color="hollow">
-            <EuiIcon type="bullseye" size="s" />
+            <EuiIcon type="bullseye" size="s" aria-hidden={true} />
           </EuiBadge>
         )}
         <EuiFlexGroup

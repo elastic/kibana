@@ -52,6 +52,7 @@ export const ShareBadge: React.FC<ShareBadgeProps> = ({
         css={css`
           margin-right: 4px;
         `}
+        aria-hidden={true}
       />
       {label}
     </EuiBadge>

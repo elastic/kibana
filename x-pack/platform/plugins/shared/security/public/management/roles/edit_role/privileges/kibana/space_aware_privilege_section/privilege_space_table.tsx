@@ -187,7 +187,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             ? '*'
             : basePrivilege;
 
-          let icon = <EuiIcon type="empty" size="s" />;
+          let icon = <EuiIcon type="empty" size="s" aria-hidden={true} />;
           if (privilegeCalculator.hasSupersededInheritedPrivileges(record.privilegeIndex)) {
             icon = (
               <span data-test-subj="spaceTablePrivilegeSupersededWarning">

@@ -25,7 +25,9 @@ export function ConversationListItemLabel({
           {labelText}
         </span>
       </span>
-      {isPublic ? <EuiIcon type="users" size="m" css={{ flexShrink: 0 }} /> : null}
+      {isPublic ? (
+        <EuiIcon type="users" size="m" css={{ flexShrink: 0 }} aria-hidden={true} />
+      ) : null}
     </span>
   );
 }

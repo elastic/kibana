@@ -89,6 +89,7 @@ export const SeverityLegendControl: FC<SeverityControlProps> = ({
                     type={isSelected ? 'dot' : 'eyeClosed'}
                     color={isSelected ? severity.color : euiTheme.colors.textDisabled}
                     size={isSelected ? 'm' : 's'}
+                    aria-hidden={true}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

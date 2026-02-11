@@ -158,7 +158,7 @@ export const AnalyticsCollectionCard: React.FC<
                 })
               ) : (
                 <>
-                  <EuiIcon type={CARD_THEME.icon} />
+                  <EuiIcon type={CARD_THEME.icon} aria-hidden />
                   {secondaryMetric}%
                 </>
               )}

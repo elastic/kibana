@@ -99,7 +99,7 @@ export const SearchApplicationContent = () => {
               ),
             text: (
               <>
-                <EuiIcon size="s" type="arrowLeft" /> {searchApplicationName}
+                <EuiIcon size="s" type="arrowLeft" aria-hidden /> {searchApplicationName}
               </>
             ),
           },
@@ -132,7 +132,7 @@ export const SearchApplicationContent = () => {
             isSelected: contentTabId === SearchApplicationContentTabs.SCHEMA,
             label: (
               <EuiFlexGroup gutterSize="s" alignItems="center">
-                {hasSchemaConflicts && <EuiIcon type="warning" color="danger" />}
+                {hasSchemaConflicts && <EuiIcon type="warning" color="danger" aria-hidden />}
                 {SCHEMA_TAB_TITLE}
               </EuiFlexGroup>
             ),

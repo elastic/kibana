@@ -265,7 +265,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           {actionFactory.getIconType(context) && (
             <EuiFlexItem grow={false}>
-              <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
+              <EuiIcon type={actionFactory.getIconType(context)!} size="m" aria-hidden={true} />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={true}>
@@ -381,7 +381,7 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
               }
             >
               {actionFactory.getIconType(context) && (
-                <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
+                <EuiIcon type={actionFactory.getIconType(context)!} size="m" aria-hidden={true} />
               )}
             </EuiKeyPadMenuItem>
           </EuiToolTip>

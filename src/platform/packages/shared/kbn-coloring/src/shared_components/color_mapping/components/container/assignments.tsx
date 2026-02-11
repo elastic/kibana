@@ -290,7 +290,7 @@ export function Assignments({
                     <EuiContextMenuItem
                       data-test-subj="lns-colorMapping-clearAllAssignments"
                       size="s"
-                      icon={<EuiIcon type="eraser" size="m" color="danger" />}
+                      icon={<EuiIcon type="eraser" size="m" color="danger" aria-hidden={true} />}
                       onClick={() => {
                         setShowOtherActions(false);
                         dispatch(removeAllAssignments());

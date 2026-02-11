@@ -139,7 +139,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
           />
           {hiddenFields > 0 && (
             <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiIcon type="arrowRight" color="subdued" />
+              <EuiIcon type="arrowRight" color="subdued" aria-hidden />
               <EuiTextColor color="subdued">
                 <code>
                   <FormattedMessage

@@ -202,7 +202,7 @@ export function SparkPlotItem({
         justifyContent: 'center',
       }}
     >
-      <EuiIcon type="visLine" color={euiTheme.colors.mediumShade} />
+      <EuiIcon type="visLine" color={euiTheme.colors.mediumShade} aria-hidden={true} />
     </div>
   );
 }

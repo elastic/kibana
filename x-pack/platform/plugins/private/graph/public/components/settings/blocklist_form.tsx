@@ -47,7 +47,7 @@ export function BlocklistForm({
               id="xpack.graph.blocklist.noEntriesDescription"
               defaultMessage="You don't have any blocked terms. Select vertices and click {stopSign} in the control panel on the right to block them. Documents that match blocked terms are no longer explored and relationships to them are hidden."
               values={{
-                stopSign: <EuiIcon type="eyeClosed" />,
+                stopSign: <EuiIcon type="eyeClosed" aria-hidden={true} />,
               }}
             />
           }

@@ -69,7 +69,7 @@ export const DeployStep = React.memo<DeployStepProps>(
               <EuiFlexItem>
                 <EuiFlexGroup direction="row" alignItems="flexStart" justifyContent="flexStart">
                   <EuiFlexItem grow={false} css={{ marginTop: '3px' }}>
-                    <EuiIcon type="download" color="primary" size="m" />
+                    <EuiIcon type="download" color="primary" size="m" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiFlexGroup direction="column" gutterSize="xs">

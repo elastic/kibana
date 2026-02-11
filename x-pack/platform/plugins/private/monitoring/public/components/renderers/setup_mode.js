@@ -141,7 +141,7 @@ export class WrappedSetupModeRenderer extends React.Component {
                     id="xpack.monitoring.setupMode.description"
                     defaultMessage="You are in setup mode. The ({flagIcon}) icon indicates configuration options."
                     values={{
-                      flagIcon: <EuiIcon type="flag" />,
+                      flagIcon: <EuiIcon type="flag" aria-hidden={true} />,
                     }}
                   />
                 </EuiFlexItem>

@@ -57,6 +57,7 @@ export const SearchResponseWarningsBadge = (props: Props) => {
             css={css`
               margin-left: ${euiTheme.size.xxs};
             `}
+            aria-hidden={true}
           />
           {props.warnings.length}
         </EuiButton>

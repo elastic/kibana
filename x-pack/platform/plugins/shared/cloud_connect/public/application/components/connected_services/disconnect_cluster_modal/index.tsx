@@ -88,7 +88,7 @@ export const DisconnectClusterModal: React.FC<DisconnectClusterModalProps> = ({
                       }}
                       data-test-subj="disconnectClusterNameLink"
                     >
-                      {clusterName} <EuiIcon type="copy" />
+                      {clusterName} <EuiIcon type="copy" aria-hidden={true} />
                     </EuiLink>
                   ),
                 }}

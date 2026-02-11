@@ -157,7 +157,7 @@ export const AddConnectorInline = ({
         buttonContent={
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
+              <EuiIcon type={actionTypeRegistered.iconClass} size="m" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>

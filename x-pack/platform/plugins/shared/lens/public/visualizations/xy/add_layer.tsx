@@ -76,7 +76,7 @@ export function AddLayerButton({
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
-      icon: icon && <EuiIcon size="m" type={icon} />,
+      icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
       ['data-test-subj']: `lnsLayerAddButton-${type}`,
     };
   };
@@ -93,7 +93,7 @@ export function AddLayerButton({
       toolTipContent,
       disabled,
       name: label,
-      icon: icon && <EuiIcon size="m" type={icon} />,
+      icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
       ['data-test-subj']: `lnsLayerAddButton-${type}`,
     };
   };
@@ -160,7 +160,7 @@ export function AddLayerButton({
                       toolTipContent,
                       disabled,
                       name: label,
-                      icon: icon && <EuiIcon size="m" type={icon} />,
+                      icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
                       ['data-test-subj']: `lnsLayerAddButton-${type}`,
                       onClick: () => {
                         addLayer(type);
@@ -174,7 +174,7 @@ export function AddLayerButton({
                   toolTipContent,
                   disabled,
                   name: label,
-                  icon: icon && <EuiIcon size="m" type={icon} />,
+                  icon: icon && <EuiIcon size="m" type={icon} aria-hidden={true} />,
                   ['data-test-subj']: `lnsLayerAddButton-${type}`,
                   onClick: () => {
                     addLayer(type);

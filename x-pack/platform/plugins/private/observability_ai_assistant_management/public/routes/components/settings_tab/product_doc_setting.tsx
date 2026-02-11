@@ -190,7 +190,12 @@ export function ProductDocSetting({
           data-test-subj="productDocRetryLink"
           css={linkCss}
         >
-          <EuiIcon type="refresh" size="s" data-test-subj="productDocRetryIcon" />
+          <EuiIcon
+            type="refresh"
+            size="s"
+            data-test-subj="productDocRetryIcon"
+            aria-hidden={true}
+          />
           <span>
             {i18n.translate(
               'xpack.observabilityAiAssistantManagement.settingsPage.retryLinkLabel',
@@ -214,7 +219,7 @@ export function ProductDocSetting({
               aria-disabled
               css={linkCss}
             >
-              <EuiIcon type="refresh" size="s" />
+              <EuiIcon type="refresh" size="s" aria-hidden={true} />
               <span>
                 {i18n.translate(
                   'xpack.observabilityAiAssistantManagement.settingsPage.retryLinkLabel',
@@ -244,7 +249,7 @@ export function ProductDocSetting({
           aria-label="Uninstall Elastic documentation"
           css={linkCss}
         >
-          <EuiIcon type="cross" size="s" />
+          <EuiIcon type="cross" size="s" aria-hidden={true} />
           <span>
             {i18n.translate(
               'xpack.observabilityAiAssistantManagement.settingsPage.uninstallProductDocButtonLabel',
@@ -263,7 +268,7 @@ export function ProductDocSetting({
         aria-disabled={!canInstallProductDoc}
         css={linkCss}
       >
-        <EuiIcon type="download" size="s" />
+        <EuiIcon type="download" size="s" aria-hidden={true} />
         <span>
           {i18n.translate(
             'xpack.observabilityAiAssistantManagement.settingsPage.installProductDocButtonLabel',

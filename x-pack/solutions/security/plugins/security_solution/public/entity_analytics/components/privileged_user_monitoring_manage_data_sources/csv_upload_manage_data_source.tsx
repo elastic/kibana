@@ -38,7 +38,7 @@ export const CsvUploadManageDataSource = ({
     <>
       <EuiFlexGroup alignItems="flexStart" direction="column">
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiIcon size="l" type="importAction" />
+          <EuiIcon size="l" type="importAction" aria-hidden={true} />
           <EuiText>
             <h1>
               <FormattedMessage

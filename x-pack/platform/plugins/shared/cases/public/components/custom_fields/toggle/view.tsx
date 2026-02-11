@@ -16,7 +16,11 @@ const ViewComponent: CustomFieldType<CaseCustomFieldToggle>['View'] = ({ customF
   const iconType = value ? 'check' : 'empty';
 
   return (
-    <EuiIcon data-test-subj={`toggle-custom-field-view-${customField?.key}`} type={iconType}>
+    <EuiIcon
+      data-test-subj={`toggle-custom-field-view-${customField?.key}`}
+      type={iconType}
+      aria-hidden={true}
+    >
       {value}
     </EuiIcon>
   );

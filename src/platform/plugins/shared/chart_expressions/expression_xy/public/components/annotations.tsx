@@ -357,7 +357,7 @@ export const Annotations = ({
                 <div css={styles.tooltipRow}>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="stopFilled" color={color} />
+                      <EuiIcon type="stopFilled" color={color} aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiTitle size="xxxs">

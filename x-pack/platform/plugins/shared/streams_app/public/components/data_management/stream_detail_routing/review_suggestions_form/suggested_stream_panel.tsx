@@ -147,7 +147,7 @@ export function SuggestedStreamPanel({
           </EuiFlexItem>
         ) : matchRate.value !== undefined ? (
           <>
-            <EuiIcon type="check" color="success" size="s" />
+            <EuiIcon type="check" color="success" size="s" aria-hidden={true} />
             <EuiText size="s" color="success">
               {matchRate.value}
             </EuiText>

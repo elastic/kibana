@@ -80,7 +80,7 @@ export const LinkCard: React.FC<LinkCardProps> = React.memo(
           </EuiFlexItem>
           {target === '_blank' && (
             <EuiFlexItem grow={false}>
-              <EuiIcon size="s" type="popout" color="primary" />
+              <EuiIcon size="s" type="popout" color="primary" aria-hidden={true} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

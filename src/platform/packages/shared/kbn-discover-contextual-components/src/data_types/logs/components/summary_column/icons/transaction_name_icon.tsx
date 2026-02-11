@@ -25,6 +25,7 @@ export const TransactionNameIcon = (agentName: AgentName) => {
       css={css`
         margin-right: ${euiTheme.size.xs};
       `}
+      aria-hidden={true}
     />
   );
 };

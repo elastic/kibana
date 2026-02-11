@@ -99,16 +99,16 @@ export function KnowledgeBaseTab() {
       name: '',
       render: (category: KnowledgeBaseEntryCategory) => {
         if (category.entries.length === 1 && category.entries[0].role === 'user_entry') {
-          return <EuiIcon type="documentation" color="primary" />;
+          return <EuiIcon type="documentation" color="primary" aria-hidden={true} />;
         }
         if (
           category.entries.length === 1 &&
           category.entries[0].role === 'assistant_summarization'
         ) {
-          return <EuiIcon type="sparkles" color="primary" />;
+          return <EuiIcon type="sparkles" color="primary" aria-hidden={true} />;
         }
 
-        return <EuiIcon type="logoElastic" />;
+        return <EuiIcon type="logoElastic" aria-hidden={true} />;
       },
       width: '40px',
     },

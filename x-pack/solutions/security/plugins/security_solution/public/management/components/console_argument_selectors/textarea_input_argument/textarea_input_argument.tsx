@@ -356,7 +356,7 @@ export const TextareaInputArgument = memo<TextareaInputArgumentProps>(
       </EuiPopover>
     ) : (
       <EuiText size="s" color="subdued" data-test-subj={testId('noMultipleArgs')}>
-        <EuiIcon type="warning" size="s" color="subdued" />{' '}
+        <EuiIcon type="warning" size="s" color="subdued" aria-hidden={true} />{' '}
         <FormattedMessage
           id="xpack.securitySolution.consoleArgumentSelectors.textAreaInputArgument.noMultipleArgs"
           defaultMessage="Argument is only supported once per command"

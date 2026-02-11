@@ -82,7 +82,7 @@ export const OnboardingCardPanel = React.memo<PropsWithChildren<OnboardingCardPa
         >
           <EuiFlexItem grow={false}>
             <span className="onboardingCardIcon">
-              <EuiIcon type={iconType} size="l" />
+              <EuiIcon type={iconType} size="l" aria-hidden={true} />
             </span>
           </EuiFlexItem>
           <EuiFlexItem>

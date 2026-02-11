@@ -92,7 +92,7 @@ export function IdleRoutingStreamEntry({
                   { defaultMessage: 'Drag Handle' }
                 )}
               >
-                <EuiIcon type="grabOmnidirectional" />
+                <EuiIcon type="grabOmnidirectional" aria-hidden={true} />
               </EuiPanel>
             </EuiFlexItem>
           )}

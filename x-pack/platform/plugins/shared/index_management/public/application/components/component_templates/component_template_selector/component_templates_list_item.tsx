@@ -92,7 +92,7 @@ export const ComponentTemplatesListItem = ({
             {isDraggable && (
               <EuiFlexItem>
                 <div {...dragHandleProps}>
-                  <EuiIcon type="grab" />
+                  <EuiIcon type="grab" aria-hidden={true} />
                 </div>
               </EuiFlexItem>
             )}
@@ -132,7 +132,9 @@ export const ComponentTemplatesListItem = ({
       </EuiFlexGroup>
 
       {/* Check icon when selected */}
-      {isSelectedValue && <EuiIcon css={styles.checkIcon} type="check" color="success" />}
+      {isSelectedValue && (
+        <EuiIcon css={styles.checkIcon} type="check" color="success" aria-hidden={true} />
+      )}
     </div>
   );
 };

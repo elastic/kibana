@@ -38,7 +38,7 @@ export const ModelStarted = ({
       <EuiFlexItem grow>
         <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" color="success" />
+            <EuiIcon type="checkInCircleFilled" color="success" aria-hidden />
           </EuiFlexItem>
           <EuiFlexItem grow>
             <EuiText color="success" size="xs">

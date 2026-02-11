@@ -55,7 +55,12 @@ export function TraceSummary({ summary }: Props) {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="errorFilled" color={theme.euiTheme.colors.danger} size="s" />
+            <EuiIcon
+              type="errorFilled"
+              color={theme.euiTheme.colors.danger}
+              size="s"
+              aria-hidden={true}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText color="subdued" size="s">

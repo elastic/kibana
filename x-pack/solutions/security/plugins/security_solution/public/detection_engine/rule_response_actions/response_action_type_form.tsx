@@ -67,7 +67,7 @@ const ResponseActionTypeFormComponent = ({ item, onDeleteAction }: ResponseActio
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type={logo} size="m" />
+          <EuiIcon type={logo} size="m" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText>{name}</EuiText>

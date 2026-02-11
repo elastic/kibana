@@ -63,7 +63,7 @@ export const AttackDiscoveryCard: OnboardingCardComponent = React.memo(
                           {i18n.ATTACK_DISCOVERY_CARD_CALLOUT_INTEGRATIONS_BUTTON}
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiIcon type="arrowRight" color="primary" size="s" />
+                          <EuiIcon type="arrowRight" color="primary" size="s" aria-hidden={true} />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiLink>

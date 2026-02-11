@@ -60,7 +60,7 @@ const buildFilterEvent = (rowIdx: number, columnIdx: number, table: Datatable) =
 const getIcon =
   (type: string) =>
   ({ width, height, color }: { width: number; height: number; color: string }) =>
-    <EuiIcon type={type} fill={color} css={{ width, height }} />;
+    <EuiIcon type={type} fill={color} css={{ width, height }} aria-hidden={true} />;
 
 export interface MetricVisComponentProps {
   data: Datatable;

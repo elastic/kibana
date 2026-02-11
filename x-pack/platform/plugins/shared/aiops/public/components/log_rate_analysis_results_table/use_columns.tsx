@@ -466,6 +466,7 @@ export const useColumns = (
                 color="subdued"
                 type={currentAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE ? 'sortUp' : 'sortDown'}
                 className="eui-alignTop"
+                aria-hidden={true}
               />
               &nbsp;
               {logRateChange.message}

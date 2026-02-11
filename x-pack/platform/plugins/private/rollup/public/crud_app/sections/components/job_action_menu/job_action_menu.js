@@ -67,7 +67,7 @@ export class JobActionMenuUi extends Component {
           defaultMessage: 'Start {isSingleSelection, plural, one {job} other {jobs}}',
           values: { isSingleSelection },
         }),
-        icon: <EuiIcon type="play" />,
+        icon: <EuiIcon type="play" aria-hidden={true} />,
         onClick: () => {
           this.closePopover();
           startJobs();
@@ -81,7 +81,7 @@ export class JobActionMenuUi extends Component {
           defaultMessage: 'Stop {isSingleSelection, plural, one {job} other {jobs}}',
           values: { isSingleSelection },
         }),
-        icon: <EuiIcon type="stop" />,
+        icon: <EuiIcon type="stop" aria-hidden={true} />,
         onClick: () => {
           this.closePopover();
           stopJobs();
@@ -94,7 +94,7 @@ export class JobActionMenuUi extends Component {
         name: i18n.translate('xpack.rollupJobs.jobActionMenu.cloneJobLabel', {
           defaultMessage: 'Clone job',
         }),
-        icon: <EuiIcon data-test-subj="jobCloneActionContextMenu" type="copy" />,
+        icon: <EuiIcon data-test-subj="jobCloneActionContextMenu" type="copy" aria-hidden={true} />,
         onClick: () => {
           this.closePopover();
           const { jobs } = this.props;
@@ -111,7 +111,7 @@ export class JobActionMenuUi extends Component {
             isSingleSelection,
           },
         }),
-        icon: <EuiIcon type="trash" />,
+        icon: <EuiIcon type="trash" aria-hidden={true} />,
         onClick: () => {
           this.closePopover();
           this.openDeleteConfirmationModal();

@@ -38,6 +38,7 @@ const SectionPanelTitle = ({
                   vertical-align: text-bottom;
                   margin-right: ${euiTheme.size.s};
                 `}
+                aria-hidden={true}
               />
             </Fragment>
           )}

@@ -252,7 +252,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="arrowRight" />
+                  <EuiIcon type="arrowRight" aria-hidden={true} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
@@ -275,7 +275,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   const filterPanel = isIntegrationPopoverOpen ? (
     <>
       <EuiPopoverTitle paddingSize="s" onClick={() => setIsIntegrationPopoverOpen(false)}>
-        <EuiIcon type="arrowLeft" />
+        <EuiIcon type="arrowLeft" aria-hidden={true} />
         <EuiLink
           color="text"
           css={css`

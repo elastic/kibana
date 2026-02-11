@@ -73,6 +73,7 @@ const DurationIcon = () => {
       css={css`
         margin-right: ${euiTheme.size.xs};
       `}
+      aria-hidden={true}
     />
   );
 };

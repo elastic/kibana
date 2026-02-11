@@ -175,7 +175,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
         <EuiPanel grow={false} paddingSize="l">
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="pencil" />
+              <EuiIcon type="pencil" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>

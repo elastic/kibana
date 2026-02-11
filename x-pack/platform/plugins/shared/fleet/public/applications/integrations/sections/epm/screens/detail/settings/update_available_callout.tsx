@@ -154,7 +154,7 @@ const BreakingChangesButton = ({ href, onClick }: { href?: string; onClick: () =
           id="xpack.fleet.integrations.settings.versionInfo.reviewBreakingChangesButton"
           defaultMessage="Review breaking changes"
         />
-        <EuiIcon type="popout" />
+        <EuiIcon type="popout" aria-hidden={true} />
       </EuiButton>
     );
   }

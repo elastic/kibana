@@ -74,7 +74,7 @@ const LoadingCalloutComponent: React.FC<Props> = ({
       <EuiFlexGroup alignItems="center" data-test-subj="leftContent" gutterSize="none">
         <EuiFlexItem grow={false}>
           {isTerminalState ? (
-            <EuiIcon type="logoElastic" size="l" />
+            <EuiIcon type="logoElastic" size="l" aria-hidden={true} />
           ) : (
             <EuiLoadingElastic data-test-subj="loadingElastic" size="l" />
           )}

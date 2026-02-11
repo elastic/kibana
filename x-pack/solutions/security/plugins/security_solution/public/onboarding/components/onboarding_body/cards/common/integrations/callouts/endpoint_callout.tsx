@@ -35,7 +35,7 @@ export const EndpointCallout = React.memo(() => {
           id="xpack.securitySolution.onboarding.integrationsCard.callout.endpointLabel"
           defaultMessage={`{icon} {new} {text} {link}`}
           values={{
-            icon: <EuiIcon type="cheer" size="m" />,
+            icon: <EuiIcon type="cheer" size="m" aria-hidden={true} />,
             new: (
               <b
                 css={css`

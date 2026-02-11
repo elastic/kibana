@@ -26,6 +26,7 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({ service, endpo
           data-test-subj={`table-column-service-provider-${service}`}
           type={provider ? provider.icon : 'empty'}
           style={{ marginRight: '8px' }}
+          aria-hidden={true}
         />
       </EuiFlexItem>
       <EuiFlexItem>

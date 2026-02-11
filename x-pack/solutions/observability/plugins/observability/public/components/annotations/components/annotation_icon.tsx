@@ -32,6 +32,7 @@ function AnnotationIcon({ annotation }: AnnotationIconProps) {
             (iconValue as IconType)
       }
       color={color}
+      aria-hidden={true}
     />
   );
 }

@@ -24,7 +24,13 @@ export type ArrowDirection = 'arrowLeft' | 'arrowRight';
 export const ArrowHead = React.memo<{
   direction: ArrowDirection;
 }>(({ direction }) => (
-  <EuiIcon color="subdued" data-test-subj="arrow-icon" size="s" type={direction} />
+  <EuiIcon
+    color="subdued"
+    data-test-subj="arrow-icon"
+    size="s"
+    type={direction}
+    aria-hidden={true}
+  />
 ));
 
 ArrowHead.displayName = 'ArrowHead';

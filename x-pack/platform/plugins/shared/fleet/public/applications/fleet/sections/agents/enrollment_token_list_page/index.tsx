@@ -199,7 +199,9 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       width: '70px',
       align: 'center' as HorizontalAlignment,
       render: (active: boolean) => {
-        return <EuiIcon size="m" color={active ? 'success' : 'danger'} type="dot" />;
+        return (
+          <EuiIcon size="m" color={active ? 'success' : 'danger'} type="dot" aria-hidden={true} />
+        );
       },
     },
     {

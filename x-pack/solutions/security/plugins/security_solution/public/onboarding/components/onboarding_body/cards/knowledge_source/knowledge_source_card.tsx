@@ -100,7 +100,7 @@ export const KnowledgeSourceCard: OnboardingCardComponent = ({
                         {i18n.KNOWLEDGE_SOURCE_CARD_CALLOUT_INTEGRATIONS_BUTTON}
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type="arrowRight" color="primary" size="s" />
+                        <EuiIcon type="arrowRight" color="primary" size="s" aria-hidden={true} />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiLink>

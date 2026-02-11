@@ -48,7 +48,7 @@ export const QueryRuleDraggableListItemActionTypeBadge: React.FC<{
       <EuiFlexItem grow={false} css={DocumentCountLabelContainer(euiTheme)}>
         <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="documents" />
+            <EuiIcon type="documents" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={DocumentCountLabelStyle(euiTheme)}>
             {queryRule.actions.docs?.length ?? 0}

@@ -64,7 +64,7 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
               {deploymentState ? (
                 <>
                   <li>
-                    <EuiIcon type="alert" color="subdued" />{' '}
+                    <EuiIcon type="alert" color="subdued" aria-hidden={true} />{' '}
                     <FormattedMessage
                       id="xpack.aiAssistant.welcomeMessage.modelIsNotDeployedLabel"
                       defaultMessage="Model {modelId} is not deployed"
@@ -74,7 +74,7 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
                     />
                   </li>
                   <li>
-                    <EuiIcon type="alert" color="subdued" />{' '}
+                    <EuiIcon type="alert" color="subdued" aria-hidden={true} />{' '}
                     <FormattedMessage
                       id="xpack.aiAssistant.welcomeMessage.modelIsNotStartedLabel"
                       defaultMessage="Deployment state of {modelId} is {deploymentState}"
@@ -89,7 +89,7 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
 
               {deploymentReason ? (
                 <li>
-                  <EuiIcon type="alert" color="subdued" />{' '}
+                  <EuiIcon type="alert" color="subdued" aria-hidden={true} />{' '}
                   <FormattedMessage
                     id="xpack.aiAssistant.welcomeMessage.modelIsNotStartedLabelReason"
                     defaultMessage="reason: {reason}"
@@ -102,7 +102,7 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
 
               {allocationState ? (
                 <li>
-                  <EuiIcon type="alert" color="subdued" />{' '}
+                  <EuiIcon type="alert" color="subdued" aria-hidden={true} />{' '}
                   <FormattedMessage
                     id="xpack.aiAssistant.welcomeMessage.modelIsNotFullyAllocatedLabel"
                     defaultMessage="Allocation state of {modelId} is {allocationState}"

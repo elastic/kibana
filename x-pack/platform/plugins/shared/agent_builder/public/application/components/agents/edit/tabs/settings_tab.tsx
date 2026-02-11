@@ -62,7 +62,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
         <EuiFlexItem grow={1}>
           <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-              <EuiIcon type="bullseye" />
+              <EuiIcon type="bullseye" aria-hidden={true} />
               <EuiTitle size="xs">
                 <h2 id="system-references-section-title">
                   {i18n.translate('xpack.agentBuilder.agents.form.settings.systemReferencesTitle', {
@@ -195,7 +195,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
         <EuiFlexItem grow={1}>
           <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-              <EuiIcon type="tag" />
+              <EuiIcon type="tag" aria-hidden={true} />
               <EuiTitle size="xs">
                 <h2 id="labels-section-title">
                   {i18n.translate('xpack.agentBuilder.agents.form.settings.labelsTitle', {
@@ -268,7 +268,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
         <EuiFlexItem grow={1}>
           <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-              <EuiIcon type="brush" />
+              <EuiIcon type="brush" aria-hidden={true} />
               <EuiTitle size="xs">
                 <h2 id="presentation-section-title">
                   {i18n.translate('xpack.agentBuilder.agents.form.settings.presentationTitle', {

@@ -181,7 +181,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`discoverApp`} />}
+            icon={<EuiIcon size="xxl" type={`discoverApp`} aria-hidden={true} />}
             title={
               <FormattedMessage
                 id="xpack.fileUpload.resultsLinks.viewIndexInDiscoverTitle"
@@ -197,7 +197,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`managementApp`} />}
+            icon={<EuiIcon size="xxl" type={`managementApp`} aria-hidden={true} />}
             title={
               <FormattedMessage
                 id="xpack.fileUpload.resultsLinks.indexManagementTitle"
@@ -213,7 +213,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`managementApp`} />}
+            icon={<EuiIcon size="xxl" type={`managementApp`} aria-hidden={true} />}
             title={
               <FormattedMessage
                 id="xpack.fileUpload.resultsLinks.dataViewManagementTitle"
@@ -229,7 +229,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`filebeatApp`} />}
+            icon={<EuiIcon size="xxl" type={`filebeatApp`} aria-hidden={true} />}
             data-test-subj="fileDataVisFilebeatConfigLink"
             title={
               <FormattedMessage
@@ -247,7 +247,7 @@ export const ResultsLinks: FC<Props> = ({
         <EuiFlexItem>
           <EuiCard
             hasBorder
-            icon={<EuiIcon size="xxl" type={`productRobot`} />}
+            icon={<EuiIcon size="xxl" type={`productRobot`} aria-hidden={true} />}
             title={
               <FormattedMessage
                 id="xpack.fileUpload.resultsLinks.agentBuilder"
@@ -265,7 +265,7 @@ export const ResultsLinks: FC<Props> = ({
           <EuiFlexItem key={link.title}>
             <EuiCard
               hasBorder
-              icon={<EuiIcon size="xxl" type={link.icon} />}
+              icon={<EuiIcon size="xxl" type={link.icon} aria-hidden={true} />}
               data-test-subj="fileDataVisLink"
               title={link.title}
               description={link.description}

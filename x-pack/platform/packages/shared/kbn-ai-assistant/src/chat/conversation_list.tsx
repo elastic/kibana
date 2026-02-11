@@ -244,7 +244,7 @@ export function ConversationList({
               <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
                 <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="warning" color="danger" />
+                    <EuiIcon type="warning" color="danger" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="s" color="danger">

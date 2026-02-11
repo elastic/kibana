@@ -201,7 +201,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                         id="xpack.fleet.agentPolicyList.agentsColumn.sharedText"
                         defaultMessage="Shared"
                       />{' '}
-                      <EuiIcon type="info" />
+                      <EuiIcon type="info" aria-hidden={true} />
                     </EuiText>
                   </EuiToolTip>
                 </EuiFlexItem>

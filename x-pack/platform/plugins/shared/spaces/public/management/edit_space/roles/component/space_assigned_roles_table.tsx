@@ -395,7 +395,7 @@ export const SpaceAssignedRolesTable = ({
                             width: 180,
                             items: [
                               {
-                                icon: <EuiIcon type="trash" color="danger" />,
+                                icon: <EuiIcon type="trash" color="danger" aria-hidden={true} />,
                                 name: (
                                   <EuiTextColor color="danger">
                                     {i18n.translate(

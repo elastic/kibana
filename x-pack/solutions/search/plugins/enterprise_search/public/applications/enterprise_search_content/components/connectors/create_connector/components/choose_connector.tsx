@@ -129,7 +129,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
       }
       return {
         _append,
-        _prepend: <EuiIcon size="l" type={connector.iconPath} />,
+        _prepend: <EuiIcon size="l" type={connector.iconPath} aria-hidden />,
         'aria-label': connector.name + _ariaLabelAppend,
         key: key.toString(),
         label: connector.name,
@@ -150,7 +150,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
         'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
         { defaultMessage: 'Select a data source for your connector to use.' }
       )}
-      prepend={<EuiIcon type={selectedConnector?.iconPath ?? 'plugs'} size="l" />}
+      prepend={<EuiIcon type={selectedConnector?.iconPath ?? 'plugs'} size="l" aria-hidden />}
       singleSelection
       fullWidth
       placeholder={i18n.translate(

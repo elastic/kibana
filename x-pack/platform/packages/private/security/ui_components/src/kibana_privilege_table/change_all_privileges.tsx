@@ -88,7 +88,7 @@ export class ChangeAllPrivilegesControl extends Component<Props, State> {
             id="xpack.security.management.editRole.changeAllPrivilegesLink"
             defaultMessage="Bulk actions"
           />{' '}
-          <EuiIcon size="s" type="arrowDown" />
+          <EuiIcon size="s" type="arrowDown" aria-hidden={true} />
         </EuiText>
       </EuiLink>
     );

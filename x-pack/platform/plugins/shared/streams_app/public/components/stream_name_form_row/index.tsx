@@ -261,7 +261,7 @@ export function StreamNameFormRow({
         prepend={
           prefix
             ? [
-                <EuiIcon type="streamsWired" />,
+                <EuiIcon type="streamsWired" aria-hidden={true} />,
                 <EuiFormLabel
                   css={css`
                     inline-size: min(${prefix.length}ch, ${PREFIX_MAX_VISIBLE_CHARACTERS}ch);

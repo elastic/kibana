@@ -75,7 +75,7 @@ export const SearchApplicationIndicesFlyout: React.FC = () => {
       ),
       render: (health: 'red' | 'green' | 'yellow' | 'unavailable') => (
         <span>
-          <EuiIcon type="dot" color={healthColorsMap[health] ?? ''} />
+          <EuiIcon type="dot" color={healthColorsMap[health] ?? ''} aria-hidden />
           &nbsp;{health ?? '-'}
         </span>
       ),

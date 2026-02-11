@@ -105,9 +105,21 @@ export const useColumns = (
         align: 'center',
         render: (value: boolean) =>
           value ? (
-            <EuiIcon data-test-subj="installation-status" type="check" color="success" size="l" />
+            <EuiIcon
+              data-test-subj="installation-status"
+              type="check"
+              color="success"
+              size="l"
+              aria-hidden={true}
+            />
           ) : (
-            <EuiIcon data-test-subj="installation-status" type="cross" color="danger" size="l" />
+            <EuiIcon
+              data-test-subj="installation-status"
+              type="cross"
+              color="danger"
+              size="l"
+              aria-hidden={true}
+            />
           ),
       },
       {

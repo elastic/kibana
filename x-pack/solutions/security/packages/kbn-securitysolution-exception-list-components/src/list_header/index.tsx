@@ -143,7 +143,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
           {
             text: (
               <div data-test-subj={`${dataTestSubj || ''}Breadcrumb`} css={breadCrumbTextStyles}>
-                <EuiIcon size="s" type="arrowLeft" />
+                <EuiIcon size="s" type="arrowLeft" aria-hidden={true} />
                 {i18n.EXCEPTION_LIST_HEADER_BREADCRUMB}
               </div>
             ),

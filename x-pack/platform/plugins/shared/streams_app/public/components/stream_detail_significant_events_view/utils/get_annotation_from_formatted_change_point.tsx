@@ -26,7 +26,7 @@ export function getAnnotationFromFormattedChangePoint({
   const color = theme.colors[change.color];
   return {
     color,
-    icon: <EuiIcon type="dot" color={color} />,
+    icon: <EuiIcon type="dot" color={color} aria-hidden={true} />,
     id: `change_point_${time}`,
     label: <ChangePointSummary xFormatter={xFormatter} changes={changes} />,
     x: time,

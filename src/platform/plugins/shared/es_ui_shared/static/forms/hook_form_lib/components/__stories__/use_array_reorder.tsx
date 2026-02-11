@@ -90,7 +90,7 @@ export function Reorder() {
                                     css={{ marginTop: '20px' }}
                                     aria-label="Change row order"
                                   >
-                                    <EuiIcon type="grab" />
+                                    <EuiIcon type="grab" aria-hidden={true} />
                                   </div>
                                 </EuiFlexItem>
                                 <EuiFlexItem>

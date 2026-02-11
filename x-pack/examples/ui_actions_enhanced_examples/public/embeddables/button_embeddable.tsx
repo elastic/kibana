@@ -37,7 +37,7 @@ export const getButtonEmbeddableFactory = (uiActionsEnhanced: AdvancedUiActionsS
           return (
             <EuiFlexItem>
               <EuiCard
-                icon={<EuiIcon size="xxl" type={`logoKibana`} />}
+                icon={<EuiIcon size="xxl" type={`logoKibana`} aria-hidden={true} />}
                 title={`Click me!`}
                 description={'This embeddable fires "VALUE_CLICK" trigger on click'}
                 onClick={onClick}

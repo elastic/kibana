@@ -105,7 +105,7 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
       >
         <EuiFlexItem grow={false}>
           <div css={iconContainerStyles}>
-            <EuiIcon type="help" color="warning" size="m" />
+            <EuiIcon type="help" color="warning" size="m" aria-hidden={true} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
