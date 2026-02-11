@@ -12,7 +12,7 @@ import { SLO_ERROR_BUDGET_ID } from '../../../../../embeddable/slo/error_budget/
 import { useKibana } from '../../../../../hooks/use_kibana';
 import type { ErrorBudgetChartPanelProps } from './types';
 import { ErrorBudgetChartFlyoutPanel } from './error_budget_chart_flyout_panel';
-import { ErrorBudgetChartPagePanel as ErrorBudgetChartPagePanel } from './error_budget_chart_page_panel';
+import { ErrorBudgetChartPagePanel } from './error_budget_chart_page_panel';
 import { useSloDetailsContext } from '../../slo_details_context';
 
 export function ErrorBudgetChartPanel(props: ErrorBudgetChartPanelProps) {
