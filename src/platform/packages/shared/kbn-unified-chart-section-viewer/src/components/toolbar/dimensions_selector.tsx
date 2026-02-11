@@ -236,11 +236,11 @@ export const DimensionsSelector = ({
     }
     return (
       <EuiFlexGroup
-        direction="column"
         gutterSize="xs"
         css={css`
           padding: 8px 0;
         `}
+        justifyContent="spaceBetween"
       >
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
@@ -251,8 +251,8 @@ export const DimensionsSelector = ({
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiButtonEmpty size="xs" flush="left" onClick={handleClearAll}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty size="xs" flush="right" onClick={handleClearAll}>
             <FormattedMessage
               id="metricsExperience.dimensionsSelector.clearSelection"
               defaultMessage="Clear selection"
