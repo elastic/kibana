@@ -234,6 +234,43 @@
       "muteAll": {
         "type": "boolean"
       },
+      "mutedAlerts": {
+        "properties": {
+          "alertInstanceId": {
+            "type": "keyword"
+          },
+          "conditionOperator": {
+            "type": "keyword"
+          },
+          "conditions": {
+            "properties": {
+              "field": {
+                "type": "keyword"
+              },
+              "snapshotValue": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              },
+              "value": {
+                "type": "keyword"
+              }
+            },
+            "type": "nested"
+          },
+          "expiresAt": {
+            "type": "date"
+          },
+          "mutedAt": {
+            "type": "date"
+          },
+          "mutedBy": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
+      },
       "mutedInstanceIds": {
         "type": "keyword"
       },

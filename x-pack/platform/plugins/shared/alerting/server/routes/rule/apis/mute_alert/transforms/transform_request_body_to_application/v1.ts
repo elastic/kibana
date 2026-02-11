@@ -31,8 +31,6 @@ export const transformRequestBodyToApplication = (
           })),
         }
       : {}),
-    ...(body.condition_operator != null
-      ? { conditionOperator: body.condition_operator }
-      : {}),
+    ...(body.condition_operator != null ? { conditionOperator: body.condition_operator } : {}),
   };
 };

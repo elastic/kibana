@@ -74,14 +74,11 @@ export const AcknowledgeAlertAction = typedMemo(
               })
         );
       } catch (error) {
-        notifications.toasts.addError(
-          error.body?.message ? new Error(error.body.message) : error,
-          {
-            title: i18n.translate('xpack.responseOpsAlertsTable.actions.acknowledgeError', {
-              defaultMessage: 'Error updating alert status',
-            }),
-          }
-        );
+        notifications.toasts.addError(error.body?.message ? new Error(error.body.message) : error, {
+          title: i18n.translate('xpack.responseOpsAlertsTable.actions.acknowledgeError', {
+            defaultMessage: 'Error updating alert status',
+          }),
+        });
       }
       onActionExecuted?.();
       refresh();

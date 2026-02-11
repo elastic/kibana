@@ -131,11 +131,7 @@ const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
     'accessing global execution summary for',
     'accessed global execution summary for',
   ],
-  rule_alert_snooze: [
-    'snooze alert of',
-    'snoozing alert of',
-    'snoozed alert of',
-  ],
+  rule_alert_snooze: ['snooze alert of', 'snoozing alert of', 'snoozed alert of'],
   rule_alert_unsnooze: [
     'auto-unsnooze alert of',
     'auto-unsnoozing alert of',

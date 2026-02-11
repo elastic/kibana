@@ -39,7 +39,9 @@ function evaluateSingleCondition(
       return {
         met: changed,
         reason: changed
-          ? `Field '${condition.field}' changed from '${condition.snapshotValue}' to '${currentStr ?? 'undefined'}'`
+          ? `Field '${condition.field}' changed from '${condition.snapshotValue}' to '${
+              currentStr ?? 'undefined'
+            }'`
           : '',
       };
     }
@@ -103,9 +105,7 @@ export function evaluateMuteConditions(
 
   if (operator === 'any') {
     const firstMet = results.find((r) => r.met);
-    return firstMet
-      ? { shouldUnmute: true, reason: firstMet.reason }
-      : { shouldUnmute: false };
+    return firstMet ? { shouldUnmute: true, reason: firstMet.reason } : { shouldUnmute: false };
   }
 
   // operator === 'all'
@@ -113,7 +113,10 @@ export function evaluateMuteConditions(
   return allMet
     ? {
         shouldUnmute: true,
-        reason: results.map((r) => r.reason).filter(Boolean).join('; '),
+        reason: results
+          .map((r) => r.reason)
+          .filter(Boolean)
+          .join('; '),
       }
     : { shouldUnmute: false };
 }

@@ -246,7 +246,10 @@ describe('unmuteInstance()', () => {
       { version: '123' }
     );
     // mutedInstanceIds should NOT be in the update (not modified since alert wasn't there)
-    const updateAttrs = unsecuredSavedObjectsClient.update.mock.calls[0][2] as Record<string, unknown>;
+    const updateAttrs = unsecuredSavedObjectsClient.update.mock.calls[0][2] as Record<
+      string,
+      unknown
+    >;
     expect(updateAttrs.mutedInstanceIds).toBeUndefined();
   });
 

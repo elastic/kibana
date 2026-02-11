@@ -98,9 +98,7 @@ describe('evaluateMuteConditions', () => {
     it('should unmute when an arbitrary field has changed', () => {
       const entry: MutedAlertInstance = {
         ...BASE_ENTRY,
-        conditions: [
-          { type: 'field_change', field: 'host.name', snapshotValue: 'server-a' },
-        ],
+        conditions: [{ type: 'field_change', field: 'host.name', snapshotValue: 'server-a' }],
       };
       const result = evaluateMuteConditions(entry, { 'host.name': 'server-b' });
       expect(result.shouldUnmute).toBe(true);
@@ -109,9 +107,7 @@ describe('evaluateMuteConditions', () => {
     it('should NOT unmute when field is unchanged', () => {
       const entry: MutedAlertInstance = {
         ...BASE_ENTRY,
-        conditions: [
-          { type: 'field_change', field: 'host.name', snapshotValue: 'server-a' },
-        ],
+        conditions: [{ type: 'field_change', field: 'host.name', snapshotValue: 'server-a' }],
       };
       const result = evaluateMuteConditions(entry, { 'host.name': 'server-a' });
       expect(result.shouldUnmute).toBe(false);

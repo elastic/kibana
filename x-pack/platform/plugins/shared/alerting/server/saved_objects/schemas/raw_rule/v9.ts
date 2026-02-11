@@ -25,9 +25,7 @@ const mutedAlertInstanceSchema = schema.object({
   mutedBy: schema.maybe(schema.string()),
   expiresAt: schema.maybe(schema.string()),
   conditions: schema.maybe(schema.arrayOf(muteConditionSchema)),
-  conditionOperator: schema.maybe(
-    schema.oneOf([schema.literal('any'), schema.literal('all')])
-  ),
+  conditionOperator: schema.maybe(schema.oneOf([schema.literal('any'), schema.literal('all')])),
 });
 
 export const rawRuleSchema = rawRuleSchemaV8.extends({

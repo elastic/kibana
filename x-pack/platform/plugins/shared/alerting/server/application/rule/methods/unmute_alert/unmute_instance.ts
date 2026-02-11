@@ -79,9 +79,7 @@ async function unmuteInstanceWithOCC(
   const mutedAlerts = attributes.mutedAlerts;
 
   const isInMutedIds = mutedInstanceIds.includes(alertInstanceId);
-  const isInMutedAlerts = mutedAlerts?.some(
-    (entry) => entry.alertInstanceId === alertInstanceId
-  );
+  const isInMutedAlerts = mutedAlerts?.some((entry) => entry.alertInstanceId === alertInstanceId);
 
   if (!attributes.muteAll && (isInMutedIds || isInMutedAlerts)) {
     const updateAttrs: Record<string, unknown> = {

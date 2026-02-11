@@ -159,9 +159,16 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
     prefix: 'snoozeWithTimeBound',
   });
 
-  const hasConditions = untilSeverityChanges || untilSeverityEquals || (untilFieldChanges && watchedFieldName.trim().length > 0);
+  const hasConditions =
+    untilSeverityChanges ||
+    untilSeverityEquals ||
+    (untilFieldChanges && watchedFieldName.trim().length > 0);
   const hasMultipleConditions =
-    [untilSeverityChanges, untilSeverityEquals, untilFieldChanges && watchedFieldName.trim().length > 0].filter(Boolean).length > 1 ||
+    [
+      untilSeverityChanges,
+      untilSeverityEquals,
+      untilFieldChanges && watchedFieldName.trim().length > 0,
+    ].filter(Boolean).length > 1 ||
     (hasConditions && withTimeBound);
 
   const buildConditions = useCallback((): MuteCondition[] => {
@@ -190,7 +197,15 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
       });
     }
     return conditions;
-  }, [alertData, currentSeverity, targetSeverity, untilFieldChanges, untilSeverityChanges, untilSeverityEquals, watchedFieldName]);
+  }, [
+    alertData,
+    currentSeverity,
+    targetSeverity,
+    untilFieldChanges,
+    untilSeverityChanges,
+    untilSeverityEquals,
+    watchedFieldName,
+  ]);
 
   const applyQuickSnooze = useCallback(
     async (value: number, unit: string) => {
@@ -243,7 +258,17 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
     } else {
       await applyQuickSnooze(customValue, customUnit);
     }
-  }, [absoluteDate, applyQuickSnooze, buildConditions, conditionOperator, customUnit, customValue, onApplySnooze, onClose, useAbsoluteTime]);
+  }, [
+    absoluteDate,
+    applyQuickSnooze,
+    buildConditions,
+    conditionOperator,
+    customUnit,
+    customValue,
+    onApplySnooze,
+    onClose,
+    useAbsoluteTime,
+  ]);
 
   const applyConditionsOnly = useCallback(async () => {
     setIsLoading(true);
@@ -269,7 +294,17 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [absoluteDate, buildConditions, conditionOperator, customUnit, customValue, onApplySnooze, onClose, useAbsoluteTime, withTimeBound]);
+  }, [
+    absoluteDate,
+    buildConditions,
+    conditionOperator,
+    customUnit,
+    customValue,
+    onApplySnooze,
+    onClose,
+    useAbsoluteTime,
+    withTimeBound,
+  ]);
 
   // M5: Radio group options for condition operator
   const conditionOperatorOptions = useMemo(
@@ -447,7 +482,9 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
                 </EuiLink>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">|</EuiText>
+                <EuiText size="xs" color="subdued">
+                  |
+                </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiLink
@@ -568,7 +605,9 @@ export const AlertSnoozePopover: React.FC<AlertSnoozePopoverProps> = ({
                 </EuiLink>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">|</EuiText>
+                <EuiText size="xs" color="subdued">
+                  |
+                </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiLink

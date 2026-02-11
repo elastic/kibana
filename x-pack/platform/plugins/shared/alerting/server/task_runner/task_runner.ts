@@ -456,9 +456,7 @@ export class TaskRunner<
           );
         }
       } catch (err) {
-        this.logger.error(
-          `Failed to persist auto-unmute for rule '${ruleId}': ${err.message}`
-        );
+        this.logger.error(`Failed to persist auto-unmute for rule '${ruleId}': ${err.message}`);
       }
     }
 

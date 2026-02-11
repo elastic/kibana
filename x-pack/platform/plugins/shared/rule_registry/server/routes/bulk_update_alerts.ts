@@ -93,9 +93,7 @@ export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>)
         const coreContext = await context.core;
         const auditLogger = coreContext.audit;
         if (auditLogger) {
-          const alertDesc = ids
-            ? `alerts [ids=${ids.join(',')}]`
-            : 'alerts matching query';
+          const alertDesc = ids ? `alerts [ids=${ids.join(',')}]` : 'alerts matching query';
           const auditAction = WORKFLOW_STATUS_AUDIT_ACTIONS[status] ?? 'alert_update';
           auditLogger.log({
             message: `User has updated workflow status to '${status}' for ${alertDesc} in index ${index}`,

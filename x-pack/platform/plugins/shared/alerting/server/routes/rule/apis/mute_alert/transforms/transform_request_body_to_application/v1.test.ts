@@ -89,9 +89,7 @@ describe('transformRequestBodyToApplication', () => {
 
   it('omits optional condition fields when not provided', () => {
     const result = transformRequestBodyToApplication({
-      conditions: [
-        { type: 'severity_change', field: 'kibana.alert.severity' },
-      ],
+      conditions: [{ type: 'severity_change', field: 'kibana.alert.severity' }],
     });
 
     expect(result.conditions![0]).toEqual({

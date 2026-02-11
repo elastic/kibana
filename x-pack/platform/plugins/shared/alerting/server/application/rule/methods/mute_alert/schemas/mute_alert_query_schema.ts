@@ -42,7 +42,5 @@ export const muteAlertQuerySchema = schema.object({
   /** Conditions under which the mute is automatically lifted. */
   conditions: schema.maybe(schema.arrayOf(muteConditionSchema)),
   /** How conditions (including time expiry) combine: 'any' = OR, 'all' = AND. Default 'any'. */
-  conditionOperator: schema.maybe(
-    schema.oneOf([schema.literal('any'), schema.literal('all')])
-  ),
+  conditionOperator: schema.maybe(schema.oneOf([schema.literal('any'), schema.literal('all')])),
 });

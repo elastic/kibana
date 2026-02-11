@@ -266,7 +266,10 @@ describe('mute alert instance', () => {
       query: { conditions, conditionOperator: 'all' },
     });
 
-    const updateAttrs = unsecuredSavedObjectsClient.update.mock.calls[0][2] as Record<string, unknown>;
+    const updateAttrs = unsecuredSavedObjectsClient.update.mock.calls[0][2] as Record<
+      string,
+      unknown
+    >;
 
     expect(updateAttrs.mutedAlerts).toHaveLength(1);
     expect((updateAttrs.mutedAlerts as Array<Record<string, unknown>>)[0]).toEqual(
@@ -362,7 +365,10 @@ describe('mute alert instance', () => {
       query: {},
     });
 
-    const updateAttrs = unsecuredSavedObjectsClient.update.mock.calls[0][2] as Record<string, unknown>;
+    const updateAttrs = unsecuredSavedObjectsClient.update.mock.calls[0][2] as Record<
+      string,
+      unknown
+    >;
 
     expect(updateAttrs.mutedInstanceIds).toEqual(['instance1']);
     expect(updateAttrs.mutedAlerts).toBeUndefined();
