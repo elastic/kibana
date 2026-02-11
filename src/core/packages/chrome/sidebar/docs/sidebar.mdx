@@ -50,14 +50,18 @@ core.chrome.sidebar.registerApp({
 });
 ```
 
-Required fields:
+The input to `registerApp` is a `SidebarAppConfig` object with the following fields:
+
+Required:
 - `appId`: Unique identifier for the sidebar app. It must be a valid sidebar app id.
 - `loadComponent`: Async function that resolves the sidebar React component.
 
-Optional fields:
+Optional (defaults applied on registration):
 - `store`: Store created via `createSidebarStore`. State persists to localStorage.
 - `status`: Availability status (defaults to `available`).
 - `restoreOnReload`: Whether the app auto-reopens on page reload (defaults to `true`).
+
+After registration, the app is stored as a `SidebarAppDefinition` with `status` and `restoreOnReload` guaranteed.
 
 ## Build a sidebar app component
 

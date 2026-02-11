@@ -69,8 +69,8 @@ export type SidebarComponentType<TState = undefined, TActions = undefined> = Com
 /** Status of a sidebar app. */
 export type SidebarAppStatus = 'available' | 'pending' | 'unavailable';
 
-/** App definition for sidebar registration */
-export interface SidebarAppDefinition<TState = undefined, TActions = undefined> {
+/** Config for sidebar app registration. `status` and `restoreOnReload` are optional with defaults. */
+export interface SidebarAppConfig<TState = undefined, TActions = undefined> {
   /** Unique identifier */
   appId: SidebarAppId;
   /** App status. Defaults to `available`. Use the returned updater for async checks. */
@@ -90,6 +90,15 @@ export interface SidebarAppDefinition<TState = undefined, TActions = undefined> 
   store?: SidebarStoreConfig<TState, TActions>;
 }
 
+/** Complete app definition after registration, with defaults applied */
+export type SidebarAppDefinition<TState = undefined, TActions = undefined> = SidebarAppConfig<
+  TState,
+  TActions
+> & {
+  status: SidebarAppStatus;
+  restoreOnReload: boolean;
+};
+
 /** Sidebar app update payload */
 export interface SidebarAppUpdate {
   /** App status. When omitted, status is unchanged. */
@@ -103,7 +112,7 @@ export type SidebarAppUpdater = (update: SidebarAppUpdate) => void;
 export interface SidebarSetup {
   /** Register a sidebar app */
   registerApp<TState = undefined, TActions = undefined>(
-    app: SidebarAppDefinition<TState, TActions>
+    app: SidebarAppConfig<TState, TActions>
   ): SidebarAppUpdater;
 }
 

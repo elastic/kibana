@@ -10,6 +10,7 @@
 import type { Observable } from 'rxjs';
 import { map, startWith, Subject, distinctUntilChanged } from 'rxjs';
 import type {
+  SidebarAppConfig,
   SidebarAppDefinition,
   SidebarAppId,
   SidebarAppUpdate,
@@ -25,7 +26,7 @@ export class SidebarRegistryService {
 
   @bind
   registerApp<TState = undefined, TActions = undefined>(
-    app: SidebarAppDefinition<TState, TActions>
+    app: SidebarAppConfig<TState, TActions>
   ): SidebarAppUpdater {
     if (!isValidSidebarAppId(app.appId)) {
       throw new Error(
@@ -83,7 +84,7 @@ export class SidebarRegistryService {
 
     return this.changed$.pipe(
       startWith(undefined),
-      map(() => this.registeredApps.get(appId)?.status ?? 'available'),
+      map(() => this.registeredApps.get(appId)!.status),
       distinctUntilChanged()
     );
   }
@@ -95,6 +96,6 @@ export class SidebarRegistryService {
 
   isRestorable(appId: SidebarAppId): boolean {
     const app = this.registeredApps.get(appId);
-    return app ? app.restoreOnReload !== false : false;
+    return app ? app.restoreOnReload : false;
   }
 }

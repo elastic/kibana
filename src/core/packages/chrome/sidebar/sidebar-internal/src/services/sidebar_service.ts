@@ -41,10 +41,7 @@ export class SidebarService {
         const update = this.registry.registerApp(app);
         return (appUpdate) => {
           update(appUpdate);
-          if (
-            this.state.getCurrentAppId() === app.appId &&
-            !this.registry.isOpenable(app.appId)
-          ) {
+          if (this.state.getCurrentAppId() === app.appId && !this.registry.isOpenable(app.appId)) {
             this.state.close();
           }
         };
@@ -84,7 +81,7 @@ export class SidebarService {
           this.state.close();
         }
       },
-      getStatus: () => this.registry.getApp(appId).status ?? 'available',
+      getStatus: () => this.registry.getApp(appId).status,
       getStatus$: () => this.registry.getStatus$(appId),
     };
 

@@ -10,7 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 import type {
   SidebarApp,
-  SidebarAppDefinition,
+  SidebarAppConfig,
   SidebarSetup,
   SidebarStart,
 } from '@kbn/core-chrome-sidebar';
@@ -19,7 +19,7 @@ const DEFAULT_WIDTH = 400;
 
 const createSetupContractMock = (): jest.Mocked<SidebarSetup> => {
   const registerApp = jest.fn(
-    <TState = undefined, TActions = undefined>(_app: SidebarAppDefinition<TState, TActions>) =>
+    <TState = undefined, TActions = undefined>(_app: SidebarAppConfig<TState, TActions>) =>
       jest.fn()
   ) as jest.MockedFunction<SidebarSetup['registerApp']>;
 

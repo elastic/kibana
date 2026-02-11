@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { SidebarAppDefinition, SidebarAppId } from '@kbn/core-chrome-sidebar';
+import type { SidebarAppConfig, SidebarAppId } from '@kbn/core-chrome-sidebar';
 import { createSidebarStore } from '@kbn/core-chrome-sidebar';
 import { SidebarService } from './sidebar_service';
 
@@ -54,14 +54,14 @@ const createService = (): SidebarService => {
 
 const registerApp = <TState = undefined, TActions = undefined>(
   service: SidebarService,
-  app: Partial<SidebarAppDefinition<TState, TActions>> & Pick<SidebarAppDefinition, 'appId'>
+  app: Partial<SidebarAppConfig<TState, TActions>> & Pick<SidebarAppConfig, 'appId'>
 ) => {
   return service.setup().registerApp({
     status: 'available',
     restoreOnReload: true,
     loadComponent: async () => () => null,
     ...app,
-  } as SidebarAppDefinition<TState, TActions>);
+  } as SidebarAppConfig<TState, TActions>);
 };
 
 describe('SidebarService (integration)', () => {
@@ -81,7 +81,7 @@ describe('SidebarService (integration)', () => {
 
       expect(start.isOpen()).toBe(true);
       expect(start.getCurrentAppId()).toBe(APP_ID_A);
-      
+
       updateApp({ status: 'available' });
       expect(start.isOpen()).toBe(true);
       expect(start.getCurrentAppId()).toBe(APP_ID_A);
