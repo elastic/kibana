@@ -11,6 +11,7 @@ import type {
   UiSettingsServiceStart,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { Runner } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -37,6 +38,7 @@ export interface ToolsServiceSetupDeps {
 export interface ToolsServiceStartDeps {
   getRunner: () => Runner;
   elasticsearch: ElasticsearchServiceStart;
+  security: SecurityServiceStart;
   spaces?: SpacesPluginStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
@@ -70,6 +72,7 @@ export class ToolsService {
   start({
     getRunner,
     elasticsearch,
+    security,
     spaces,
     uiSettings,
     savedObjects,
@@ -95,6 +98,7 @@ export class ToolsService {
       logger,
       esClient: elasticsearch.client.asInternalUser,
       toolTypes,
+      security,
     });
 
     const getRegistry: ToolsServiceStart['getRegistry'] = async ({ request }) => {
