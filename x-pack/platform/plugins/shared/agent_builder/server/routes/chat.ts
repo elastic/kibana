@@ -257,6 +257,7 @@ export function registerChatRoutes({
         capabilities,
         browserApiTools,
         configurationOverrides,
+        action,
         nextInput: {
           message: input,
           prompts,

@@ -18,6 +18,7 @@ import type {
   AgentCapabilities,
   AgentConfigurationOverrides,
   BrowserApiToolMetadata,
+  ConversationAction,
 } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
@@ -93,6 +94,7 @@ export const handleAgentExecution = async ({
     nextInput,
     browserApiTools,
     configurationOverrides,
+    action,
   } = execution.agentParams;
 
   const { logger, trackingService, analyticsService } = deps;
@@ -130,6 +132,7 @@ export const handleAgentExecution = async ({
     selectedConnectorId: services.selectedConnectorId,
     browserApiTools,
     configurationOverrides,
+    action,
     agentService: deps.agentService,
     logger,
     trackingService,
@@ -249,6 +252,7 @@ const executeAgent = ({
   selectedConnectorId,
   browserApiTools,
   configurationOverrides,
+  action,
   agentService,
   logger,
   trackingService,
@@ -269,6 +273,7 @@ const executeAgent = ({
   selectedConnectorId: string;
   browserApiTools?: BrowserApiToolMetadata[];
   configurationOverrides?: AgentConfigurationOverrides;
+  action?: ConversationAction;
   agentService: AgentsServiceStart;
   logger: Logger;
   trackingService?: TrackingService;
@@ -294,6 +299,7 @@ const executeAgent = ({
     agentService,
     browserApiTools,
     configurationOverrides,
+    action,
   });
 
   // Generate title (for CREATE) or use existing title (for UPDATE)
@@ -315,6 +321,7 @@ const executeAgent = ({
         conversationId,
         title$,
         agentEvents$,
+        action,
       })
     : EMPTY;
 
@@ -343,6 +350,7 @@ const buildPersistenceEvents = ({
   conversationId,
   title$,
   agentEvents$,
+  action,
 }: {
   agentId: string;
   conversation: ConversationWithOperation;
@@ -350,6 +358,7 @@ const buildPersistenceEvents = ({
   conversationId?: string;
   title$: Observable<string>;
   agentEvents$: Observable<ChatEvent>;
+  action?: ConversationAction;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
@@ -368,5 +377,6 @@ const buildPersistenceEvents = ({
     conversation,
     title$,
     roundCompletedEvents$,
+    action,
   });
 };

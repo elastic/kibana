@@ -12,6 +12,7 @@ import type {
   ConverseInput,
   AgentConfigurationOverrides,
   BrowserApiToolMetadata,
+  ConversationAction,
 } from '@kbn/agent-builder-common';
 import type { AgentBuilderErrorCode } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -56,6 +57,8 @@ export interface AgentExecutionParams {
   browserApiTools?: BrowserApiToolMetadata[];
   /** Runtime configuration overrides for this execution only. */
   configurationOverrides?: AgentConfigurationOverrides;
+  /** The action to perform: "regenerate" re-executes the last round with original input (requires conversationId). */
+  action?: ConversationAction;
 }
 
 /**
