@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { defaultConfig } from '../../../default/stateful/base.config';
+import { defaultConfig } from '../../default/stateful/base.config';
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
