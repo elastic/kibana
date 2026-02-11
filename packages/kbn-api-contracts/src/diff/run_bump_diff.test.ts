@@ -38,7 +38,7 @@ describe('runBumpDiff', () => {
       'npx bump-cli diff "/tmp/base.yaml" "/tmp/current.yaml" --format=json',
       expect.objectContaining({
         encoding: 'utf-8',
-        timeout: 120_000,
+        timeout: 240_000,
       })
     );
   });

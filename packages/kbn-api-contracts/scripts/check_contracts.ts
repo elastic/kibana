@@ -20,6 +20,8 @@ import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
 
 type Distribution = 'stack' | 'serverless';
 
+const GIT_SHOW_MAX_BUFFER = 50 * 1024 * 1024;
+
 interface CheckContractsOptions {
   distribution: Distribution;
   specPath: string;
@@ -65,6 +67,11 @@ const resolveElasticRemote = (): string => {
   return 'origin';
 };
 
+const isFileNotInCommit = (error: unknown): boolean => {
+  const stderr = (error as { stderr?: Buffer | string })?.stderr?.toString() ?? '';
+  return stderr.includes('does not exist in') || stderr.includes('path not found');
+};
+
 const getBaseOasFromMergeBase = (specPath: string, mergeBase: string): string | null => {
   mkdirSync(TMP_DIR, { recursive: true });
   const tmpPath = resolve(TMP_DIR, `base-${Date.now()}.yaml`);
@@ -72,12 +79,16 @@ const getBaseOasFromMergeBase = (specPath: string, mergeBase: string): string | 
   try {
     const baseContent = execSync(`git show ${mergeBase}:${specPath}`, {
       encoding: 'utf-8',
+      maxBuffer: GIT_SHOW_MAX_BUFFER,
       stdio: ['pipe', 'pipe', 'pipe'],
     });
     writeFileSync(tmpPath, baseContent);
     return tmpPath;
-  } catch {
-    return null;
+  } catch (error) {
+    if (isFileNotInCommit(error)) {
+      return null;
+    }
+    throw error;
   }
 };
 
@@ -92,23 +103,28 @@ const getBaseOasFromRemote = (
   try {
     const baseContent = execSync(`git show ${remote}/${baseBranch}:${specPath}`, {
       encoding: 'utf-8',
+      maxBuffer: GIT_SHOW_MAX_BUFFER,
       stdio: ['pipe', 'pipe', 'pipe'],
     });
     writeFileSync(tmpPath, baseContent);
     return tmpPath;
   } catch {
+    execSync(`git fetch ${remote} ${baseBranch} --depth=1`, {
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
     try {
-      execSync(`git fetch ${remote} ${baseBranch} --depth=1`, {
-        stdio: ['pipe', 'pipe', 'pipe'],
-      });
       const baseContent = execSync(`git show ${remote}/${baseBranch}:${specPath}`, {
         encoding: 'utf-8',
+        maxBuffer: GIT_SHOW_MAX_BUFFER,
         stdio: ['pipe', 'pipe', 'pipe'],
       });
       writeFileSync(tmpPath, baseContent);
       return tmpPath;
-    } catch {
-      return null;
+    } catch (error) {
+      if (isFileNotInCommit(error)) {
+        return null;
+      }
+      throw error;
     }
   }
 };

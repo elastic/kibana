@@ -12,13 +12,14 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { BumpDiffEntry } from './parse_bump_diff';
 
 const OAS_DOCS_DIR = path.resolve(REPO_ROOT, './oas_docs');
-const DIFF_TIMEOUT = 120_000;
+const DIFF_TIMEOUT = 240_000;
 
 export const runBumpDiff = (basePath: string, currentPath: string): BumpDiffEntry[] => {
   try {
     const output = execSync(`npx bump-cli diff "${basePath}" "${currentPath}" --format=json`, {
       cwd: OAS_DOCS_DIR,
       encoding: 'utf-8',
+      maxBuffer: 50 * 1024 * 1024,
       stdio: ['pipe', 'pipe', 'pipe'],
       timeout: DIFF_TIMEOUT,
     });

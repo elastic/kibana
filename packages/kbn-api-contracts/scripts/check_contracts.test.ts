@@ -118,14 +118,35 @@ describe('check_contracts', () => {
     ).rejects.toThrow('--distribution must be either "stack" or "serverless"');
   });
 
-  it('skips check when base OAS is not available', async () => {
-    mockExecSync.mockImplementation(() => {
-      throw new Error('git show failed');
+  it('skips check when base OAS does not exist on base branch', async () => {
+    const fileNotFoundError = new Error('git show failed');
+    (fileNotFoundError as any).stderr = Buffer.from(
+      "fatal: path 'oas_docs/output/kibana.yaml' does not exist in 'abc123'\n"
+    );
+
+    mockExecSync.mockImplementation((cmd: string) => {
+      if (cmd === 'git remote -v') return gitRemoteOutput;
+      if (typeof cmd === 'string' && cmd.startsWith('git fetch')) return '';
+      throw fileNotFoundError;
     });
 
     await runCallback({ flags: defaultFlags, log: mockLog });
 
     expect(mockLog.warning).toHaveBeenCalledWith('No base OAS found - skipping check');
+    expect(mockRunBumpDiff).not.toHaveBeenCalled();
+  });
+
+  it('throws when git show fails for unexpected reasons', async () => {
+    const unexpectedError = new Error('ENOBUFS');
+    (unexpectedError as any).stderr = Buffer.from('spawnSync /bin/sh ENOBUFS');
+
+    mockExecSync.mockImplementation((cmd: string) => {
+      if (cmd === 'git remote -v') return gitRemoteOutput;
+      if (typeof cmd === 'string' && cmd.startsWith('git fetch')) return '';
+      throw unexpectedError;
+    });
+
+    await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow('ENOBUFS');
     expect(mockRunBumpDiff).not.toHaveBeenCalled();
   });
 
