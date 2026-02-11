@@ -59,7 +59,7 @@ describe('tab mapping utils', () => {
   describe('fromSavedObjectTabToTabState', () => {
     it('should map saved object tab to tab state', () => {
       let tabState = fromSavedObjectTabToTabState({
-        tab: fromTabStateToSavedObjectTab({ tab: tab2, services }),
+        tab: fromTabStateToSavedObjectTab({ tab: tab2, overridenTimeRestore: false, services }),
         existingTab: tab1,
       });
       expect(tabState).toMatchInlineSnapshot(`
@@ -89,7 +89,7 @@ describe('tab mapping utils', () => {
           },
           "attributes": Object {
             "controlGroupState": undefined,
-            "timeRestore": true,
+            "timeRestore": false,
             "visContext": Object {
               "bar": "foo",
             },
@@ -110,11 +110,11 @@ describe('tab mapping utils', () => {
           "forceFetchOnSelect": false,
           "globalState": Object {
             "refreshInterval": Object {
-              "pause": false,
-              "value": 1000,
+              "pause": true,
+              "value": 500,
             },
             "timeRange": Object {
-              "from": "now-15m",
+              "from": "now-7d",
               "to": "now",
             },
           },
