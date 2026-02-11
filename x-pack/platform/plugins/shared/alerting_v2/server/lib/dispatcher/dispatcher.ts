@@ -201,14 +201,6 @@ export class DispatcherService implements DispatcherServiceContract {
         });
       }
 
-      this.logger.debug({
-        message: `Adding episode ${episode.episode_id} with group key ${JSON.stringify(
-          groupKey,
-          null,
-          2
-        )} to group ${notificationGroupId}`,
-      });
-
       groupMap.get(notificationGroupId)!.episodes.push(episode);
     }
 
@@ -232,16 +224,9 @@ export class DispatcherService implements DispatcherServiceContract {
 
         // Empty matcher = catch-all, always matches
         if (!policy.matcher) {
-          this.logger.debug({
-            message: `Episode ${episode.episode_id} matches policy ${policyId} (catch-all)`,
-          });
           matched.push({ episode, policy });
           continue;
         }
-
-        this.logger.debug({
-          message: `Episode ${episode.episode_id} matches policy ${policyId} with matcher ${policy.matcher} but matcher is not supported yet`,
-        });
 
         // TODO: Handle matcher evaluation here
         // matched.push({ episode, policy });
