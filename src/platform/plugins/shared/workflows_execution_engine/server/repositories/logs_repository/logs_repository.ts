@@ -40,8 +40,8 @@ export class LogsRepository {
   public async createLogs(logEvents: WorkflowLogEvent[]): Promise<void> {
     const dataStreamClient = await initializeDataStreamClient(this.coreDataStreams);
 
-    await dataStreamClient.bulk({
-      operations: logEvents.flatMap((logEvent) => [{ create: {} }, logEvent]),
+    await dataStreamClient.create({
+      documents: logEvents,
     });
   }
 

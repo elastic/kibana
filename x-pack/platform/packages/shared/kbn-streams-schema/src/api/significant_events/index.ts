@@ -42,6 +42,7 @@ type SignificantEventsResponse = StreamQueryKql & {
   change_points: {
     type: Partial<Record<ChangePointsType, ChangePointsValue>>;
   };
+  rule_backed: boolean;
 };
 
 interface SignificantEventsGetResponse {

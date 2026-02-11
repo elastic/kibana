@@ -19,8 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { GrokCollection } from '@kbn/grok-ui';
-import { DraftGrokExpression } from '@kbn/grok-ui';
-import type { UseFormSetValue, FieldValues } from 'react-hook-form';
+import type { UseFormSetValue } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
 import type { GrokProcessorResult } from '@kbn/grok-heuristics';
 import type { APIReturnType } from '@kbn/streams-plugin/public/api';
@@ -29,7 +28,7 @@ import { isNoSuggestionsError } from '../utils/no_suggestions_error';
 import { useStreamDetail } from '../../../../../../../hooks/use_stream_detail';
 import { selectPreviewRecords } from '../../../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../../../state_management/stream_enrichment_state_machine';
-import type { ProcessorFormState } from '../../../../types';
+import type { GrokFormState, ProcessorFormState } from '../../../../types';
 import { AdditionalChargesCallout } from './additional_charges_callout';
 import { GenerateSuggestionButton } from '../../../../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useGrokPatternSuggestion } from './use_grok_pattern_suggestion';
@@ -44,7 +43,7 @@ export const GrokPatternAISuggestions = ({
 }: {
   aiFeatures: AIFeatures;
   grokCollection: GrokCollection;
-  setValue: UseFormSetValue<FieldValues>;
+  setValue: UseFormSetValue<GrokFormState>;
   onAddPattern: () => void;
 }) => {
   const {
@@ -148,11 +147,10 @@ export const GrokPatternAISuggestions = ({
         simulationResult={suggestionsState.value.simulationResult}
         onAccept={() => {
           if (suggestionsState.value) {
+            // Convert string[] to { value: string }[] for form state
             setValue(
               'patterns',
-              suggestionsState.value.grokProcessor.patterns.map(
-                (value) => new DraftGrokExpression(grokCollection, value)
-              ),
+              suggestionsState.value.grokProcessor.patterns.map((p) => ({ value: p })),
               { shouldValidate: true }
             );
             setValue(

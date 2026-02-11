@@ -86,6 +86,7 @@ describe('get()', () => {
       attributes: {
         ruleTypeId: '123',
         name: 'test template',
+        description: 'test template',
         tags: ['foo'],
         schedule: { interval: '10s' },
         params: {
@@ -105,6 +106,8 @@ describe('get()', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "alertDelay": undefined,
+        "artifacts": undefined,
+        "description": "test template",
         "flapping": undefined,
         "id": "1",
         "name": "test template",
