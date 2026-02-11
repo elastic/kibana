@@ -79,4 +79,10 @@ export const ConnectorIconsMap: Map<
       () => import(/* webpackChunkName: "connectorIconJiraCloud" */ './specs/atlassian/jira/icon')
     ),
   ],
+  [
+    '.google_drive',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
+    ),
+  ],
 ]);
