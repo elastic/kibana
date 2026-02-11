@@ -40,7 +40,6 @@ export interface SyncTaskState extends Record<string, unknown> {
   maxCleanUpRetries: number;
   disableAutoSync?: boolean;
   privateLocationId?: string;
-  syncInterval?: string;
 }
 
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
@@ -102,9 +101,8 @@ export class SyncPrivateLocationMonitorsTask {
     }
     const taskState = this.getNewTaskState({ taskInstance });
 
-    // Resolve the sync interval from dynamic settings, falling back to task state, then default
+    // Resolve the sync interval from dynamic settings, falling back to task schedule, then default
     const resolvedInterval = await this.resolveSyncInterval(savedObjects, taskInstance);
-    taskState.syncInterval = resolvedInterval;
 
     try {
       const soClient = savedObjects.createInternalRepository([
@@ -242,7 +240,6 @@ export class SyncPrivateLocationMonitorsTask {
       hasAlreadyDoneCleanup: taskInstance.state.hasAlreadyDoneCleanup || false,
       maxCleanUpRetries: taskInstance.state.maxCleanUpRetries || 3,
       disableAutoSync: taskInstance.state.disableAutoSync ?? false,
-      syncInterval: taskInstance.state.syncInterval,
     };
   }
 
@@ -264,8 +261,9 @@ export class SyncPrivateLocationMonitorsTask {
       );
     }
 
-    // Fall back to persisted task state, then the default
-    return taskInstance.state.syncInterval ?? DEFAULT_TASK_SCHEDULE;
+    // Fall back to the task's current schedule, then the default
+    const currentSchedule = taskInstance.schedule as IntervalSchedule | undefined;
+    return currentSchedule?.interval ?? DEFAULT_TASK_SCHEDULE;
   }
 
   start = async () => {

@@ -161,7 +161,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         hasAlreadyDoneCleanup: false,
         lastStartedAt: expect.anything(),
         maxCleanUpRetries: 2,
-        syncInterval: '5m',
       });
     });
 
@@ -200,7 +199,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         maxCleanUpRetries: 2,
         hasAlreadyDoneCleanup: false,
         lastStartedAt: expect.anything(),
-        syncInterval: '5m',
       });
     });
 
@@ -230,7 +228,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         lastStartedAt: expect.anything(),
         hasAlreadyDoneCleanup: false,
         maxCleanUpRetries: 2,
-        syncInterval: '5m',
       });
     });
 
@@ -607,7 +604,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.runTask({ taskInstance });
 
       expect(result.schedule).toEqual({ interval: '10m' });
-      expect(result.state.syncInterval).toBe('10m');
     });
 
     it('should fall back to default when dynamic settings read fails', async () => {
@@ -630,15 +626,17 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.runTask({ taskInstance });
 
       expect(result.schedule).toEqual({ interval: DEFAULT_TASK_SCHEDULE });
-      expect(result.state.syncInterval).toBe(DEFAULT_TASK_SCHEDULE);
     });
 
-    it('should fall back to persisted task state interval when settings read fails', async () => {
+    it('should fall back to task schedule interval when settings read fails', async () => {
       jest
         .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
         .mockRejectedValue(new Error('SO not found'));
 
-      const taskInstance = getMockTaskInstance({ syncInterval: '15m' });
+      const taskInstance = {
+        ...getMockTaskInstance(),
+        schedule: { interval: '15m' },
+      };
       jest.spyOn(task, 'hasMWsChanged').mockResolvedValue({ hasMWsChanged: false } as any);
       jest.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
       jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
@@ -653,7 +651,6 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.runTask({ taskInstance });
 
       expect(result.schedule).toEqual({ interval: '15m' });
-      expect(result.state.syncInterval).toBe('15m');
     });
 
     it('should use default when privateLocationsSyncInterval is not set in dynamic settings', async () => {
@@ -677,41 +674,38 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       const result = await task.runTask({ taskInstance });
 
       expect(result.schedule).toEqual({ interval: DEFAULT_TASK_SCHEDULE });
-      expect(result.state.syncInterval).toBe(DEFAULT_TASK_SCHEDULE);
     });
 
-    it('should follow full fallback chain: dynamic settings -> task state -> default', async () => {
+    it('should follow full fallback chain: dynamic settings -> task schedule -> default', async () => {
       const { savedObjects } = mockServerSetup.coreStart;
 
-      // Scenario 1: Dynamic settings has a valid value
+      // Scenario 1: Dynamic settings has a valid value — uses it regardless of schedule
       jest.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue({
         ...DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES,
         privateLocationsSyncInterval: 7,
       });
-      const result1 = await task.resolveSyncInterval(
-        savedObjects,
-        getMockTaskInstance({ syncInterval: '15m' })
-      );
+      const taskWithSchedule = {
+        ...getMockTaskInstance(),
+        schedule: { interval: '15m' },
+      };
+      const result1 = await task.resolveSyncInterval(savedObjects, taskWithSchedule);
       expect(result1).toBe('7m');
 
-      // Scenario 2: Dynamic settings read fails and task state has persisted interval
+      // Scenario 2: Dynamic settings read fails — falls back to task's current schedule
       jest
         .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
         .mockRejectedValue(new Error('SO read error'));
-      const result2 = await task.resolveSyncInterval(
-        savedObjects,
-        getMockTaskInstance({ syncInterval: '15m' })
-      );
+      const result2 = await task.resolveSyncInterval(savedObjects, taskWithSchedule);
       expect(result2).toBe('15m');
 
-      // Scenario 3: Dynamic settings read fails and there is no persisted task state interval
+      // Scenario 3: Dynamic settings read fails and no schedule on task — falls back to default
       jest
         .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
         .mockRejectedValue(new Error('SO read error'));
       const result3 = await task.resolveSyncInterval(savedObjects, getMockTaskInstance());
       expect(result3).toBe(DEFAULT_TASK_SCHEDULE);
 
-      // Scenario 4: Dynamic settings returns undefined for the interval and there is no persisted task state interval
+      // Scenario 4: Dynamic settings returns undefined for the interval — falls back to schedule then default
       jest.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue({
         ...DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES,
         privateLocationsSyncInterval: undefined,
