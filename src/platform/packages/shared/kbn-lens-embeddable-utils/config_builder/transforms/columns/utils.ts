@@ -9,7 +9,6 @@
 
 import type { DataType, TimeScaleUnit } from '@kbn/lens-common';
 import type { Query } from '@kbn/es-query';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { fromFilterAPIToLensState, fromFilterLensStateToAPI } from './filter';
 import type {
   LensApiAllMetricOperations,
@@ -25,35 +24,6 @@ import type {
 import type { LensApiAllOperations, LensApiBucketOperations } from '../../schema';
 
 export const LENS_EMPTY_AS_NULL_DEFAULT_VALUE = false;
-
-/**
- * API datatype categories (simplified from full DataType for API consumers)
- */
-export type ApiDatatypeCategory = 'number' | 'string' | 'date';
-
-/**
- * Maps the full Lens DataType to simplified API datatype category.
- * - 'number' → 'number'
- * - 'date' → 'date'
- * - Everything else → 'string'
- */
-export function toApiDatatypeCategory(
-  dataType?: DataType | DatatableColumnType,
-  defaultType: ApiDatatypeCategory = 'string'
-): ApiDatatypeCategory {
-  if (!dataType || dataType === 'unknown' || dataType === 'null') {
-    return defaultType;
-  }
-
-  if (dataType === 'number') {
-    return 'number';
-  }
-  if (dataType === 'date') {
-    return 'date';
-  }
-
-  return 'string';
-}
 
 const LENS_DEFAULT_LABEL = '';
 export function getLensStateMetricSharedProps(

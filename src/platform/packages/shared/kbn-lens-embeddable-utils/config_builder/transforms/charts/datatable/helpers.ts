@@ -79,3 +79,24 @@ export function isColorByValueColor(color: unknown): color is ColorByValueType {
   if (color == null) return false;
   return typeof color === 'object' && 'type' in color && color.type === 'dynamic';
 }
+
+type InferredDatatype = 'number' | 'string';
+
+/**
+ * Infers the datatype from the color configuration.
+ * - colorMapping → 'string'
+ * - colorByValue → 'number'
+ * - No color → uses the provided default
+ */
+export function inferDatatypeFromColor(
+  color: ColorByValueType | ColorMappingType | undefined,
+  defaultType: InferredDatatype
+): InferredDatatype {
+  if (isColorByValueColor(color)) {
+    return 'number';
+  }
+  if (isColorMappingColor(color)) {
+    return 'string';
+  }
+  return defaultType;
+}

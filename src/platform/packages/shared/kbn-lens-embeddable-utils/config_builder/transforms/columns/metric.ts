@@ -13,6 +13,7 @@ import type {
   CountIndexPatternColumn,
   CounterRateIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
+  DataType,
   DerivativeIndexPatternColumn,
   FormulaIndexPatternColumn,
   LastValueIndexPatternColumn,
@@ -84,7 +85,8 @@ import {
  * Specialized function signatures for transforming metric API operations to Lens state columns
  */
 export function fromMetricAPItoLensState(
-  options: LensApiAllMetricOrFormulaOperations | LensApiStaticValueOperation
+  options: LensApiAllMetricOrFormulaOperations | LensApiStaticValueOperation,
+  dataType?: DataType
 ): AnyMetricLensStateColumn[] {
   if (isAPIColumnOfType<LensApiCountMetricOperation>('count', options)) {
     return [fromCountAPItoLensState(options)];
@@ -111,7 +113,7 @@ export function fromMetricAPItoLensState(
     return [fromFormulaAPItoLensState(options)];
   }
   if (isAPIColumnOfType<LensApiLastValueOperation>('last_value', options)) {
-    return [fromLastValueAPItoLensState(options)];
+    return [fromLastValueAPItoLensState(options, dataType)];
   }
   if (isAPIColumnOfType<LensApiPercentileOperation>('percentile', options)) {
     return [fromPercentileAPItoLensState(options)];
