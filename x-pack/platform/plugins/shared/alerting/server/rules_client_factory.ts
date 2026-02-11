@@ -271,35 +271,39 @@ export class RulesClientFactory {
       getAuthenticationAPIKey(name: string) {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         if (authorizationHeader && authorizationHeader.credentials) {
-          const [_, apiKey] = Buffer.from(authorizationHeader.credentials, 'base64')
+          const [apiKeyId, apiKey] = Buffer.from(authorizationHeader.credentials, 'base64')
             .toString()
             .split(':');
 
-          if (apiKey) {
-            if (isUiamApiKey(apiKey)) {
-              if (this.isServerless) {
-                return {
-                  apiKeysEnabled: true,
-                  uiamResult: {
-                    name: `uiam-${name}`,
-                    id: apiKey[0],
-                    api_key: apiKey[1],
-                  },
-                };
-              } else {
-                throw new Error('UIAM API keys should only be used in serverless environments');
-              }
-            }
+          if (!apiKeyId || !apiKey) {
+            throw new Error(
+              `Failed to parse API key credentials from authorization header for alerting rule : ${name}`
+            );
+          }
 
+          if (isUiamApiKey(apiKey) && !this.isServerless) {
+            throw new Error('UIAM API keys should only be used in serverless environments');
+          }
+
+          if (isUiamApiKey(apiKey)) {
             return {
               apiKeysEnabled: true,
-              result: {
-                name,
-                id: apiKey[0],
-                api_key: apiKey[1],
+              uiamResult: {
+                name: `uiam-${name}`,
+                id: apiKeyId,
+                api_key: apiKey,
               },
             };
           }
+
+          return {
+            apiKeysEnabled: true,
+            result: {
+              name,
+              id: apiKeyId,
+              api_key: apiKey,
+            },
+          };
         }
         return { apiKeysEnabled: false };
       },
