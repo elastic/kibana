@@ -9,8 +9,8 @@ import { EuiDescriptionListDescription, EuiDescriptionListTitle } from '@elastic
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from '@emotion/styled';
-import type { NodeDataDefinition } from 'cytoscape';
-import type { ContentsProps } from '.';
+import type { ContentsProps } from './popover_content';
+import { isDependencyNodeData, type DependencyNodeData } from '../../../../../common/service_map';
 import { SPAN_SUBTYPE, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 
 const ItemRow = styled.div`
@@ -23,10 +23,17 @@ const SubduedDescriptionListTitle = styled(EuiDescriptionListTitle)`
   }
 `;
 
-export function ResourceContents({ elementData }: ContentsProps) {
-  const nodeData = elementData as NodeDataDefinition;
-  const subtype = nodeData[SPAN_SUBTYPE];
-  const type = nodeData[SPAN_TYPE];
+export function ResourceContents({ selection }: ContentsProps) {
+  if ('source' in selection && 'target' in selection) {
+    return null;
+  }
+  const node = selection;
+  if (!isDependencyNodeData(node.data)) {
+    return null;
+  }
+  const data: DependencyNodeData = node.data;
+  const subtype = data.spanSubtype ?? data[SPAN_SUBTYPE];
+  const type = data.spanType ?? data[SPAN_TYPE];
 
   const listItems = [
     {

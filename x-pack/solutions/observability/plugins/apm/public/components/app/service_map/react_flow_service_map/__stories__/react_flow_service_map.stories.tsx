@@ -45,7 +45,7 @@ const defaultTimeRange = {
 };
 
 const meta: Meta<typeof ReactFlowServiceMap> = {
-  title: 'app/ServiceMap/ReactFlow/ReactFlowServiceMap',
+  title: 'app/ServiceMap/ServiceMap',
   component: ReactFlowServiceMap,
   decorators: [
     (Story) => (
@@ -239,7 +239,7 @@ export const GenerateMap: StoryFn = () => {
 };
 
 /**
- * Checks if the JSON is in ServiceMapResponse format (same as Cytoscape)
+ * Checks if the JSON is in ServiceMapResponse format (API response)
  */
 function isServiceMapResponse(json: unknown): json is ServiceMapResponse {
   return (
@@ -310,7 +310,7 @@ const MapFromJSONTemplate = () => {
           iconType="pin"
         >
           <p>
-            <strong>ServiceMapResponse</strong> (same as Cytoscape):{' '}
+            <strong>ServiceMapResponse</strong> (API format):{' '}
             <code>{'{ spans: [], servicesData?: [], anomalies?: {} }'}</code>
           </p>
         </EuiCallOut>

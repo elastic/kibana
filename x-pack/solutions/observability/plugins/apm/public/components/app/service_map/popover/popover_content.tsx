@@ -7,99 +7,109 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle, EuiIconTip } from '@elastic/eui';
 import type { MouseEvent, ComponentType } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { enableDiagnosticMode } from '@kbn/observability-plugin/common';
-import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 import type { Environment } from '../../../../../common/environment_rt';
-import { popoverWidth } from '../cytoscape_options';
+import { isServiceNodeData, isGroupedNodeData, type ServiceMapNode, type ServiceMapEdge } from '../../../../../common/service_map';
+import { POPOVER_WIDTH } from './constants';
 import { DependencyContents } from './dependency_contents';
 import { EdgeContents } from './edge_contents';
 import { ExternalsListContents } from './externals_list_contents';
 import { ResourceContents } from './resource_contents';
 import { ServiceContents } from './service_contents';
 import { withDiagnoseButton } from './with_diagnose_button';
-import { DiagnosticFlyout } from '../diagnostic_tool/diagnostic_flyout';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
-/**
- * Unified element data format that works with both Cytoscape and React Flow
- */
-export interface ElementData extends Record<string, unknown> {
-  id: string;
-  label?: string;
+export type ServiceMapSelection = ServiceMapNode | ServiceMapEdge;
+
+function isEdge(selection: ServiceMapSelection): selection is ServiceMapEdge {
+  return 'source' in selection && 'target' in selection;
 }
 
 /**
- * Determines which content component to render based on the element data.
- * This function works with both Cytoscape and React Flow node data.
+ * Props for the popover content subcomponents (service, dependency, edge, etc.)
+ * They receive the raw React Flow node or edge.
+ */
+export interface ContentsProps {
+  selection: ServiceMapSelection;
+  environment: Environment;
+  kuery: string;
+  start: string;
+  end: string;
+  onFocusClick: (event: React.MouseEvent<HTMLAnchorElement>) => void;
+  showDiagnoseButton?: boolean;
+  onDiagnoseClick?: () => void;
+}
+
+/**
+ * Returns the content component for the given selection (node or edge).
  */
 export function getContentsComponent(
-  elementData: ElementData,
+  selection: ServiceMapSelection,
   isDiagnosticModeEnabled: boolean
-): ComponentType<any> | null {
-  // Grouped nodes (externals list)
-  if (elementData.groupedConnections && Array.isArray(elementData.groupedConnections)) {
-    return ExternalsListContents;
-  }
-
-  // Service nodes - check both SERVICE_NAME (Cytoscape) and isService (React Flow)
-  if (elementData[SERVICE_NAME] || elementData.isService === true) {
-    return isDiagnosticModeEnabled ? withDiagnoseButton(ServiceContents) : ServiceContents;
-  }
-
-  // Resource nodes
-  if (elementData[SPAN_TYPE] === 'resource' || elementData.spanType === 'resource') {
-    return ResourceContents;
-  }
-
-  // Edge elements
-  if (elementData.source && elementData.target) {
+): ComponentType<ContentsProps> | null {
+  if (isEdge(selection)) {
     return EdgeContents;
   }
-
-  // Dependency/external nodes
-  if (elementData.label) {
-    return DependencyContents;
+  const data = selection.data;
+  if (isGroupedNodeData(data)) {
+    return ExternalsListContents;
   }
+  if (isServiceNodeData(data)) {
+    return isDiagnosticModeEnabled ? withDiagnoseButton(ServiceContents) : ServiceContents;
+  }
+  if (data.spanType === 'resource') {
+    return ResourceContents;
+  }
+  return DependencyContents;
+}
 
-  return null;
+function getPopoverTitle(selection: ServiceMapSelection): string {
+  if (isEdge(selection)) {
+    return `${selection.source} → ${selection.target}`;
+  }
+  return selection.data.label ?? selection.id;
 }
 
 interface PopoverContentProps {
-  elementData: ElementData;
-  /** The element ID (used as fallback for label) */
-  elementId: string;
+  selectedNode: ServiceMapNode | null;
+  selectedEdge: ServiceMapEdge | null;
   environment: Environment;
-  /** KQL filter */
   kuery: string;
   start: string;
   end: string;
   onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
+  /** Called when user clicks "Open diagnostic tool" – parent should open the flyout and close the popover. */
+  onOpenDiagnostic?: () => void;
 }
 
 /**
- * Shared popover content component used by both Cytoscape and React Flow service maps.
- * Renders the popover title, divider, and appropriate contents component.
+ * Shared popover content for the React Flow service map.
+ * Uses the selected node or edge directly (no conversion to ElementData).
  */
 export function PopoverContent({
-  elementData,
-  elementId,
+  selectedNode,
+  selectedEdge,
   environment,
   kuery,
   start,
   end,
   onFocusClick,
+  onOpenDiagnostic,
 }: PopoverContentProps) {
   const { core } = useApmPluginContext();
   const isDiagnosticModeEnabled = core.uiSettings.get(enableDiagnosticMode);
-  const [isDiagnosticFlyoutOpen, setIsDiagnosticFlyoutOpen] = useState(false);
+  const handleDiagnoseClick = useCallback(() => {
+    onOpenDiagnostic?.();
+  }, [onOpenDiagnostic]);
 
-  const ContentsComponent = getContentsComponent(elementData, isDiagnosticModeEnabled);
+  const selection = selectedEdge ?? selectedNode;
+  if (selection == null) {
+    return null;
+  }
 
-  const handleDiagnoseClick = useCallback(() => setIsDiagnosticFlyoutOpen(true), []);
-  const handleCloseDiagnosticFlyout = useCallback(() => setIsDiagnosticFlyoutOpen(false), []);
-
+  const ContentsComponent = getContentsComponent(selection, isDiagnosticModeEnabled);
   if (!ContentsComponent) {
     return null;
   }
@@ -109,13 +119,13 @@ export function PopoverContent({
       <EuiFlexGroup
         direction="column"
         gutterSize="s"
-        style={{ minWidth: popoverWidth }}
+        style={{ minWidth: POPOVER_WIDTH }}
         data-test-subj="serviceMapPopoverContent"
       >
         <EuiFlexItem>
           <EuiTitle size="xxs">
             <h3 style={{ wordBreak: 'break-all' }} data-test-subj="serviceMapPopoverTitle">
-              {elementData.label ?? elementId}
+              {getPopoverTitle(selection)}
               {kuery && (
                 <EuiIconTip
                   position="bottom"
@@ -130,8 +140,8 @@ export function PopoverContent({
           <EuiHorizontalRule margin="xs" />
         </EuiFlexItem>
         <ContentsComponent
+          selection={selection}
           onFocusClick={onFocusClick}
-          elementData={elementData}
           environment={environment}
           kuery={kuery}
           start={start}
@@ -140,13 +150,6 @@ export function PopoverContent({
           onDiagnoseClick={handleDiagnoseClick}
         />
       </EuiFlexGroup>
-      {elementData.id && (
-        <DiagnosticFlyout
-          selectedNode={elementData}
-          isOpen={isDiagnosticFlyoutOpen}
-          onClose={handleCloseDiagnosticFlyout}
-        />
-      )}
     </>
   );
 }

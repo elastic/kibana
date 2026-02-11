@@ -50,6 +50,7 @@ export const DiamondNode = memo(
     const { euiTheme } = useEuiTheme();
 
     const borderColor = selected ? euiTheme.colors.primary : euiTheme.colors.mediumShade;
+    const diamondBorderWidth = selected ? '4px' : '3px';
 
     const iconUrl = useMemo(() => {
       if (spanType || spanSubtype) {
@@ -131,7 +132,7 @@ export const DiamondNode = memo(
       width: ${DEPENDENCY_NODE_DIAMOND_SIZE}px;
       height: ${DEPENDENCY_NODE_DIAMOND_SIZE}px;
       transform: rotate(45deg);
-      border: ${euiTheme.border.width.thick} solid ${borderColor};
+      border: ${diamondBorderWidth} solid ${borderColor};
       background: ${euiTheme.colors.backgroundBasePlain};
       display: flex;
       align-items: center;

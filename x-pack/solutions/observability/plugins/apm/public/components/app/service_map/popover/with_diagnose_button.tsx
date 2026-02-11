@@ -17,18 +17,21 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-interface WithDiagnoseButtonProps {
+export interface WithDiagnoseButtonProps {
   showDiagnoseButton: boolean;
   onDiagnoseClick?: () => void;
 }
 
+/** P must include the diagnose props (optional) so they can be destructured and passed through. */
 // This HOC wraps a component and adds a diagnose button at the bottom if showDiagnoseButton is true.
-export const withDiagnoseButton = <P extends object>(WrappedComponent: React.ComponentType<P>) => {
-  function ComponentWithDiagnoseButton(props: P & WithDiagnoseButtonProps) {
-    const { showDiagnoseButton, onDiagnoseClick, ...rest } = props as WithDiagnoseButtonProps & P;
+export const withDiagnoseButton = <P extends Partial<WithDiagnoseButtonProps>>(
+  WrappedComponent: React.ComponentType<P>
+): React.ComponentType<P> => {
+  function ComponentWithDiagnoseButton(props: P) {
+    const { showDiagnoseButton, onDiagnoseClick, ...rest } = props;
     return (
       <>
-        <WrappedComponent {...(rest as P)} />
+        <WrappedComponent {...rest} />
         {showDiagnoseButton && (
           <>
             <EuiHorizontalRule margin="s" />
@@ -66,5 +69,3 @@ export const withDiagnoseButton = <P extends object>(WrappedComponent: React.Com
   }
   return ComponentWithDiagnoseButton;
 };
-
-export type { WithDiagnoseButtonProps };

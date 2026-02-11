@@ -7,7 +7,12 @@
 
 import type { Node, Edge, MarkerType } from '@xyflow/react';
 import type { AgentName } from '@kbn/apm-types/src/es_schemas/ui/fields';
-import type { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '@kbn/apm-types';
+import type {
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+} from '@kbn/apm-types';
 import type { ServiceAnomalyStats } from '../anomaly_detection';
 
 /**
@@ -33,22 +38,27 @@ export interface ServiceNodeData extends BaseNodeData {
 }
 
 /**
- * Data for dependency/external nodes
+ * Data for dependency/external nodes (camelCase and optional ES field names).
  */
 export interface DependencyNodeData extends BaseNodeData {
   isService: false;
   spanType?: string;
   spanSubtype?: string;
+  [SPAN_TYPE]?: string;
+  [SPAN_SUBTYPE]?: string;
 }
 
 /**
- * Grouped connection info
+ * Grouped connection info (camelCase and optional ES field names for display).
  */
 export interface GroupedConnectionInfo {
   id: string;
   label: string;
   spanType?: string;
   spanSubtype?: string;
+  [SPAN_TYPE]?: string;
+  [SPAN_SUBTYPE]?: string;
+  [SPAN_DESTINATION_SERVICE_RESOURCE]?: string;
 }
 
 /**

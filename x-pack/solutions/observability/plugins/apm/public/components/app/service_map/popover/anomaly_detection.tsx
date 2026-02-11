@@ -26,7 +26,7 @@ import {
 import { TRANSACTION_REQUEST } from '../../../../../common/transaction_types';
 import { asDuration, asInteger } from '../../../../../common/utils/formatters';
 import { MLSingleMetricLink } from '../../../shared/links/machine_learning_links/mlsingle_metric_link';
-import { popoverWidth } from '../cytoscape_options';
+import { POPOVER_WIDTH } from './constants';
 
 const HealthStatusTitle = styled(EuiTitle)`
   display: inline;
@@ -46,7 +46,7 @@ const EnableText = styled.section`
   color: ${({ theme }) => theme.euiTheme.colors.textSubdued};
   line-height: 1.4;
   font-size: ${() => useEuiFontSize('s').fontSize};
-  width: ${popoverWidth}px;
+  width: ${POPOVER_WIDTH}px;
 `;
 
 export const ContentLine = styled.section`

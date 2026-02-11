@@ -7,7 +7,7 @@
 
 import { EuiPopover, useEuiTheme } from '@elastic/eui';
 import type { MouseEvent } from 'react';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactFlowInstance, Viewport } from '@xyflow/react';
 import { useReactFlow } from '@xyflow/react';
 import { i18n } from '@kbn/i18n';
@@ -17,15 +17,10 @@ import {
   EDGE_OFFSET_DIVISOR,
   CENTER_ANIMATION_DURATION_MS,
 } from './constants';
-import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
 import type { Environment } from '../../../../../common/environment_rt';
-import { PopoverContent, type ElementData } from '../popover/popover_content';
-import { isServiceNodeData, isGroupedNodeData } from '../../../../../common/service_map';
-import type {
-  ServiceMapNode,
-  ServiceMapNodeData,
-  ServiceMapEdge,
-} from '../../../../../common/service_map';
+import { PopoverContent, type ServiceMapSelection } from '../popover/popover_content';
+import type { ServiceMapNode, ServiceMapEdge } from '../../../../../common/service_map';
+import { DiagnosticFlyout } from '../diagnostic_tool/diagnostic_flyout';
 
 interface PopoverPosition {
   position: 'absolute';
@@ -112,60 +107,6 @@ function getNodePopoverPosition(
   };
 }
 
-/**
- * Transforms React Flow node data to the unified ElementData format
- * used by the shared PopoverContent component.
- * This will be removed / adapted when the Cytoscape solution is replaced.
- */
-function transformNodeDataForPopover(nodeData: ServiceMapNodeData): ElementData {
-  const baseData: ElementData = {
-    id: nodeData.id,
-    label: nodeData.label,
-  };
-
-  if (isServiceNodeData(nodeData)) {
-    return {
-      ...baseData,
-      isService: true,
-      [SERVICE_NAME]: nodeData.id,
-      serviceAnomalyStats: nodeData.serviceAnomalyStats,
-      agentName: nodeData.agentName,
-    };
-  }
-
-  if (isGroupedNodeData(nodeData)) {
-    return {
-      ...baseData,
-      groupedConnections: nodeData.groupedConnections,
-      [SPAN_TYPE]: nodeData.spanType,
-      spanType: nodeData.spanType,
-    };
-  }
-
-  const spanType = 'spanType' in nodeData ? nodeData.spanType : undefined;
-  return {
-    ...baseData,
-    [SPAN_TYPE]: spanType,
-    spanType,
-  };
-}
-
-/**
- * Transforms React Flow edge data to the unified ElementData format
- * used by the shared PopoverContent component (for EdgeContents).
- * This will be removed / adapted when the Cytoscape solution is replaced.
- */
-function transformEdgeDataForPopover(edge: ServiceMapEdge): ElementData {
-  return {
-    id: edge.id,
-    source: edge.source,
-    target: edge.target,
-    sourceData: edge.data?.sourceData ?? { id: edge.source },
-    targetData: edge.data?.targetData ?? { id: edge.target },
-    resources: edge.data?.resources ?? [],
-  };
-}
-
 interface ReactFlowPopoverProps {
   selectedNode: ServiceMapNode | null;
   selectedEdge: ServiceMapEdge | null;
@@ -190,20 +131,18 @@ export function ReactFlowPopover({
   const { euiTheme } = useEuiTheme();
   const popoverRef = useRef<EuiPopover>(null);
   const reactFlowInstance = useReactFlow();
+  const [diagnosticFlyoutSelection, setDiagnosticFlyoutSelection] =
+    useState<ServiceMapSelection | null>(null);
 
-  const nodeData = selectedNode?.data;
+  const handleOpenDiagnostic = useCallback(() => {
+    const selection: ServiceMapSelection | null = selectedEdge ?? selectedNode;
+    if (selection) {
+      setDiagnosticFlyoutSelection(selection);
+      onClose();
+    }
+  }, [selectedNode, selectedEdge, onClose]);
+
   const selectedNodeId = selectedNode?.id;
-
-  // Transform data for popover content - handles both nodes and edges
-  const elementData = useMemo(() => {
-    if (selectedEdge) {
-      return transformEdgeDataForPopover(selectedEdge);
-    }
-    if (nodeData) {
-      return transformNodeDataForPopover(nodeData);
-    }
-    return null;
-  }, [nodeData, selectedEdge]);
 
   // Calculate popover position using dedicated helper functions
   const popoverStyle = useMemo(() => {
@@ -245,11 +184,7 @@ export function ReactFlowPopover({
     ? centerSelectedNode
     : (_event: MouseEvent<HTMLAnchorElement>) => onClose();
 
-  const isOpen = (!!selectedNode || !!selectedEdge) && !!elementData;
-
-  const displayElementId = selectedEdge
-    ? `${selectedEdge.source} → ${selectedEdge.target}`
-    : selectedNodeId ?? '';
+  const isOpen = !!selectedNode || !!selectedEdge;
 
   const trigger = <div style={{ width: 1, height: 1, visibility: 'hidden' }} aria-hidden="true" />;
 
@@ -287,18 +222,24 @@ export function ReactFlowPopover({
           'aria-modal': 'false',
         }}
       >
-        {elementData && (
-          <PopoverContent
-            elementData={elementData}
-            elementId={displayElementId}
-            environment={environment}
-            kuery={kuery}
-            start={start}
-            end={end}
-            onFocusClick={onFocusClick}
-          />
-        )}
+        <PopoverContent
+          selectedNode={selectedNode}
+          selectedEdge={selectedEdge}
+          environment={environment}
+          kuery={kuery}
+          start={start}
+          end={end}
+          onFocusClick={onFocusClick}
+          onOpenDiagnostic={handleOpenDiagnostic}
+        />
       </EuiPopover>
+      {diagnosticFlyoutSelection && (
+        <DiagnosticFlyout
+          selection={diagnosticFlyoutSelection}
+          isOpen={true}
+          onClose={() => setDiagnosticFlyoutSelection(null)}
+        />
+      )}
     </div>
   );
 }

@@ -6,7 +6,7 @@
  */
 
 /**
- * Groups React Flow nodes directly without Cytoscape intermediate format.
+ * Groups React Flow nodes for the service map.
  * This is a React Flow native implementation of resource node grouping.
  */
 
@@ -126,7 +126,7 @@ function createGroupedEdges(group: GroupInfo): ServiceMapEdge[] {
  * Nodes with 4+ targets from the same source(s) are grouped into a single node.
  *
  * This is a React Flow native implementation that doesn't require
- * conversion to/from Cytoscape format.
+ * grouping.
  */
 export function groupReactFlowNodes(
   nodes: ServiceMapNode[],

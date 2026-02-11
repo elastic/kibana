@@ -13,30 +13,34 @@ import {
 } from '@elastic/eui';
 import React, { Fragment } from 'react';
 import styled from '@emotion/styled';
-import type { NodeDataDefinition } from 'cytoscape';
-import type { ContentsProps } from '.';
+import type { ContentsProps } from './popover_content';
 import {
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_TYPE,
   SPAN_SUBTYPE,
 } from '../../../../../common/es_fields/apm';
-import type { ExternalConnectionNode } from '../../../../../common/service_map';
+import { isGroupedNodeData, type GroupedConnectionInfo } from '../../../../../common/service_map';
 
 const ExternalResourcesList = styled.section`
   max-height: 360px;
   overflow: auto;
 `;
 
-export function ExternalsListContents({ elementData }: ContentsProps) {
-  const nodeData = elementData as NodeDataDefinition;
+export function ExternalsListContents({ selection }: ContentsProps) {
+  if ('source' in selection && 'target' in selection) {
+    return null;
+  }
+  const node = selection;
+  if (!isGroupedNodeData(node.data)) {
+    return null;
+  }
+  const groupedConnections = node.data.groupedConnections;
   return (
     <EuiFlexItem>
       <ExternalResourcesList>
         <EuiDescriptionList>
-          {nodeData.groupedConnections.map((resource: ExternalConnectionNode) => {
-            const title = resource.label || resource[SPAN_DESTINATION_SERVICE_RESOURCE];
-            // Support both Cytoscape (span.type/span.subtype) and React Flow (spanType/spanSubtype) formats
-            // To be refactored when the Cytoscape is replaced.
+          {groupedConnections.map((resource: GroupedConnectionInfo) => {
+            const title = resource.label || (resource[SPAN_DESTINATION_SERVICE_RESOURCE] ?? '');
             const spanType = resource[SPAN_TYPE] ?? resource.spanType;
             const spanSubtype = resource[SPAN_SUBTYPE] ?? resource.spanSubtype;
             const desc = spanType && spanSubtype ? `${spanType} (${spanSubtype})` : '';

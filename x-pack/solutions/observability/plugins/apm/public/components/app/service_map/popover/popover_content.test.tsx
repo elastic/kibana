@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { getContentsComponent, type ElementData } from './popover_content';
-import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
+import { getContentsComponent } from './popover_content';
+import type { ServiceMapNode, ServiceMapEdge } from '../../../../../common/service_map';
 import { ServiceContents } from './service_contents';
 import { DependencyContents } from './dependency_contents';
 import { ExternalsListContents } from './externals_list_contents';
@@ -39,119 +39,98 @@ jest.mock('./with_diagnose_button', () => ({
   withDiagnoseButton: jest.fn((Component) => Component),
 }));
 
+function node(data: ServiceMapNode['data'], id = data.id): ServiceMapNode {
+  return { id, type: 'dependency', position: { x: 0, y: 0 }, data };
+}
+
+function edge(id: string, source: string, target: string): ServiceMapEdge {
+  return {
+    id,
+    source,
+    target,
+    type: 'default',
+    data: { isBidirectional: false },
+    style: { stroke: '#000', strokeWidth: 1 },
+    markerEnd: { type: 'arrow' as const, width: 20, height: 20, color: '#000' },
+  };
+}
+
 describe('getContentsComponent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   describe('service nodes', () => {
-    it('returns ServiceContents for nodes with SERVICE_NAME', () => {
-      const elementData: ElementData = {
-        id: 'test-service',
-        label: 'Test Service',
-        [SERVICE_NAME]: 'test-service',
-      };
-
-      const Component = getContentsComponent(elementData, false);
-      expect(Component).toBe(ServiceContents);
-    });
-
-    it('returns ServiceContents for nodes with isService=true (React Flow)', () => {
-      const elementData: ElementData = {
+    it('returns ServiceContents for service node data', () => {
+      const selection = node({
         id: 'test-service',
         label: 'Test Service',
         isService: true,
-      };
-
-      const Component = getContentsComponent(elementData, false);
+      });
+      const Component = getContentsComponent(selection, false);
       expect(Component).toBe(ServiceContents);
     });
 
     it('wraps ServiceContents with diagnose button when diagnostic mode is enabled', () => {
-      const elementData: ElementData = {
+      const selection = node({
         id: 'test-service',
         label: 'Test Service',
-        [SERVICE_NAME]: 'test-service',
-      };
-
-      getContentsComponent(elementData, true);
+        isService: true,
+      });
+      getContentsComponent(selection, true);
       expect(withDiagnoseButton).toHaveBeenCalledWith(ServiceContents);
     });
   });
 
   describe('dependency nodes', () => {
-    it('returns DependencyContents for nodes with label but no service name', () => {
-      const elementData: ElementData = {
+    it('returns DependencyContents for dependency node with label', () => {
+      const selection = node({
         id: 'test-dep',
         label: 'elasticsearch',
-      };
-
-      const Component = getContentsComponent(elementData, false);
+        isService: false,
+      });
+      const Component = getContentsComponent(selection, false);
       expect(Component).toBe(DependencyContents);
     });
   });
 
   describe('grouped nodes', () => {
-    it('returns ExternalsListContents for nodes with groupedConnections array', () => {
-      const elementData: ElementData = {
+    it('returns ExternalsListContents for nodes with groupedConnections', () => {
+      const selection = node({
         id: 'grouped',
         label: '3 resources',
+        isService: false,
+        isGrouped: true,
         groupedConnections: [
           { id: '1', label: 'Resource 1' },
           { id: '2', label: 'Resource 2' },
         ],
-      };
-
-      const Component = getContentsComponent(elementData, false);
+        count: 2,
+      });
+      const Component = getContentsComponent(selection, false);
       expect(Component).toBe(ExternalsListContents);
     });
   });
 
   describe('resource nodes', () => {
-    it('returns ResourceContents for nodes with SPAN_TYPE=resource (Cytoscape)', () => {
-      const elementData: ElementData = {
+    it('returns ResourceContents for nodes with spanType=resource', () => {
+      const selection = node({
         id: 'resource',
         label: 'Resource',
-        [SPAN_TYPE]: 'resource',
-      };
-
-      const Component = getContentsComponent(elementData, false);
-      expect(Component).toBe(ResourceContents);
-    });
-
-    it('returns ResourceContents for nodes with spanType=resource (React Flow)', () => {
-      const elementData: ElementData = {
-        id: 'resource',
-        label: 'Resource',
+        isService: false,
         spanType: 'resource',
-      };
-
-      const Component = getContentsComponent(elementData, false);
+        spanSubtype: 'elasticsearch',
+      });
+      const Component = getContentsComponent(selection, false);
       expect(Component).toBe(ResourceContents);
     });
   });
 
-  describe('edge nodes', () => {
-    it('returns EdgeContents for edges with source and target', () => {
-      const elementData: ElementData = {
-        id: 'edge-1',
-        source: 'node-1',
-        target: 'node-2',
-      };
-
-      const Component = getContentsComponent(elementData, false);
+  describe('edges', () => {
+    it('returns EdgeContents for edge selection', () => {
+      const selection = edge('edge-1', 'node-1', 'node-2');
+      const Component = getContentsComponent(selection, false);
       expect(Component).toBe(EdgeContents);
-    });
-  });
-
-  describe('unknown nodes', () => {
-    it('returns null for nodes without recognizable data', () => {
-      const elementData: ElementData = {
-        id: 'unknown',
-      };
-
-      const Component = getContentsComponent(elementData, false);
-      expect(Component).toBeNull();
     });
   });
 });

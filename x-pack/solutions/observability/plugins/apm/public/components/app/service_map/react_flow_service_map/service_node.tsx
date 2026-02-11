@@ -39,9 +39,9 @@ export const ServiceNode = memo(
 
     const borderWidth = useMemo(() => {
       const status = data.serviceAnomalyStats?.healthStatus;
-      if (status === ServiceHealthStatus.critical) return euiTheme.size.xs;
-      return euiTheme.size.xxs;
-    }, [data.serviceAnomalyStats?.healthStatus, euiTheme.size.xxs, euiTheme.size.xs]);
+      if (status === ServiceHealthStatus.critical) return '4px';
+      return selected ? '4px' : '3px';
+    }, [data.serviceAnomalyStats?.healthStatus, selected]);
 
     const borderStyle = useMemo(() => {
       const status = data.serviceAnomalyStats?.healthStatus;

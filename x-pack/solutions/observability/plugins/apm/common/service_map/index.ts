@@ -10,9 +10,7 @@ import type {
   ConnectionEdge,
   ConnectionNode,
   ExitSpanDestination,
-  ConnectionElement,
   ExternalConnectionNode,
-  GroupResourceNodesResponse,
   ServiceConnectionNode,
   ServicesResponse,
   ServiceMapResponse,
@@ -24,7 +22,14 @@ import type {
 
 export * from './utils';
 export * from './constants';
-export { getServiceMapNodes } from './get_service_map_nodes';
+export {
+  addMessagingConnections,
+  getAllNodes,
+  getAllServices,
+  mapNodes,
+  mapEdges,
+  markBidirectionalConnections,
+} from './get_service_map_nodes';
 export { getPaths } from './get_paths';
 export { transformToReactFlow } from './transform_to_react_flow';
 export { groupReactFlowNodes } from './group_react_flow_nodes';
@@ -35,8 +40,6 @@ export type {
   ConnectionEdge,
   ConnectionNode,
   ExitSpanDestination,
-  ConnectionElement,
-  GroupResourceNodesResponse,
   ExternalConnectionNode,
   ServiceConnectionNode,
   ServicesResponse,
