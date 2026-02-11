@@ -12,7 +12,6 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IStorageClient } from '@kbn/storage-adapter';
 import type { StreamQuery } from '@kbn/streams-schema';
 import { buildEsqlQuery } from '@kbn/streams-schema';
-import { isEqual, map, partition } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import type {
@@ -27,6 +26,7 @@ import {
   ASSET_ID,
   ASSET_TYPE,
   ASSET_UUID,
+  QUERY_ESQL_WHERE,
   QUERY_EVIDENCE,
   QUERY_FEATURE_FILTER,
   QUERY_FEATURE_NAME,
@@ -38,7 +38,7 @@ import {
   STREAM_NAME,
 } from '../fields';
 import type { QueryStorageSettings } from '../storage_settings';
-import { getRuleIdFromQueryLink } from './helpers/query';
+import { getRuleIdFromQueryLink, type QueryLinkWithStoredKql } from './helpers/query';
 
 type TermQueryFieldValue = string | boolean | number | null;
 
@@ -106,6 +106,7 @@ function toQueryLink<TQueryLink extends QueryLinkRequest>(
 type QueryLinkStorageFields = Omit<QueryLink, 'query' | 'stream_name'> & {
   [QUERY_TITLE]: string;
   [QUERY_KQL_BODY]: string;
+  [QUERY_ESQL_WHERE]: string;
   [QUERY_SEVERITY_SCORE]?: number;
   [RULE_BACKED]?: boolean;
 };
@@ -123,7 +124,12 @@ interface QueryBulkDeleteOperation {
 
 export type QueryBulkOperation = QueryBulkIndexOperation | QueryBulkDeleteOperation;
 
-function fromStorage(link: StoredQueryLink): QueryLink {
+interface StoredQueryContext {
+  esqlWhere: string;
+  kqlQuery?: string;
+}
+
+function fromStorage(link: StoredQueryLink): QueryLinkWithStoredKql {
   const storageFields: QueryLinkStorageFields & {
     [QUERY_FEATURE_NAME]: string;
     [QUERY_FEATURE_FILTER]: string;
@@ -144,36 +150,41 @@ function fromStorage(link: StoredQueryLink): QueryLink {
     query: {
       id: storageFields[ASSET_ID],
       title: storageFields[QUERY_TITLE],
-      kql: {
-        query: storageFields[QUERY_KQL_BODY],
+      esql: {
+        where: storageFields[QUERY_ESQL_WHERE],
       },
-      feature: storageFields[QUERY_FEATURE_NAME]
-        ? {
-            name: storageFields[QUERY_FEATURE_NAME],
-            filter: JSON.parse(storageFields[QUERY_FEATURE_FILTER]),
-            type: 'system',
-          }
-        : undefined,
       severity_score: storageFields[QUERY_SEVERITY_SCORE],
       evidence: storageFields[QUERY_EVIDENCE],
     },
-  } satisfies QueryLink;
+    // Attach stored KQL for rule ID generation during migration
+    _storedKqlQuery: link[QUERY_KQL_BODY],
+  };
 }
 
 type QueryLinkRequestWithRuleBacked = QueryLinkRequest & { rule_backed?: boolean };
 
-function toStorage(name: string, request: QueryLinkRequestWithRuleBacked): StoredQueryLink {
+function toStorage(
+  name: string,
+  request: QueryLinkRequestWithRuleBacked,
+  stored?: StoredQueryContext
+): StoredQueryLink {
   const link = toQueryLink(name, request);
   const { query, stream_name, ...rest } = link;
   const ruleBacked = request.rule_backed ?? true;
+
+  // Preserve kql.query from storage if esql.where hasn't changed.
+  // This maintains stable rule IDs during migration until esql.where is explicitly modified.
+  const esqlWhereUnchanged = stored?.esqlWhere === query.esql.where;
+
   return {
     ...rest,
     [STREAM_NAME]: name,
     [QUERY_TITLE]: query.title,
-    [QUERY_KQL_BODY]: query.kql.query,
-    [QUERY_FEATURE_NAME]: query.feature ? query.feature.name : '',
-    [QUERY_FEATURE_FILTER]: query.feature ? JSON.stringify(query.feature.filter) : '',
-    [QUERY_FEATURE_TYPE]: query.feature ? query.feature.type : '',
+    [QUERY_KQL_BODY]: esqlWhereUnchanged ? stored.kqlQuery : undefined,
+    [QUERY_ESQL_WHERE]: query.esql.where,
+    [QUERY_FEATURE_NAME]: undefined,
+    [QUERY_FEATURE_FILTER]: undefined,
+    [QUERY_FEATURE_TYPE]: undefined,
     [QUERY_SEVERITY_SCORE]: query.severity_score,
     [QUERY_EVIDENCE]: query.evidence,
     [RULE_BACKED]: ruleBacked,
@@ -181,10 +192,7 @@ function toStorage(name: string, request: QueryLinkRequestWithRuleBacked): Store
 }
 
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
-  return (
-    currentQuery.kql.query !== nextQuery.kql.query ||
-    !isEqual(currentQuery.feature, nextQuery.feature)
-  );
+  return currentQuery.esql.where !== nextQuery.esql.where;
 }
 
 function toQueryLinkFromQuery(query: StreamQuery, stream: string): QueryLink {
@@ -210,8 +218,34 @@ export class QueryClient {
 
   // ==================== Storage Operations ====================
 
+  /**
+   * Fetches only the fields needed for migration compatibility (esql.where and kql.query).
+   * Used to preserve kql.query in storage when esql.where hasn't changed.
+   */
+  private async getStoredContextById(uuid: string): Promise<StoredQueryContext | undefined> {
+    const result = await this.dependencies.storageClient.search({
+      size: 1,
+      track_total_hits: false,
+      _source: [QUERY_ESQL_WHERE, QUERY_KQL_BODY],
+      query: { term: { _id: uuid } },
+    });
+
+    const source = result.hits.hits.length === 1 ? result.hits.hits[0]._source : undefined;
+
+    if (!source) {
+      return undefined;
+    }
+
+    return {
+      esqlWhere: source[QUERY_ESQL_WHERE],
+      kqlQuery: source[QUERY_KQL_BODY],
+    };
+  }
+
   async linkQuery(name: string, link: QueryLinkRequest): Promise<QueryLink> {
-    const document = toStorage(name, link);
+    const uuid = getQueryLinkUuid(name, link);
+    const storedContext = await this.getStoredContextById(uuid);
+    const document = toStorage(name, link, storedContext);
 
     await this.dependencies.storageClient.index({
       id: document[ASSET_UUID],
@@ -235,8 +269,15 @@ export class QueryClient {
       },
     });
 
-    const existingQueryLinks = assetsResponse.hits.hits.map((hit) => {
-      return fromStorage(hit._source);
+    const existingQueryLinks = assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
+
+    // Build context map from parsed links for migration compatibility
+    const storedContextMap = new Map<string, StoredQueryContext>();
+    existingQueryLinks.forEach((link) => {
+      storedContextMap.set(link[ASSET_UUID], {
+        esqlWhere: link.query.esql.where,
+        kqlQuery: link._storedKqlQuery,
+      });
     });
 
     const nextQueryLinks = links.map((link) => {
@@ -252,7 +293,7 @@ export class QueryClient {
     ];
 
     if (operations.length) {
-      await this.bulkStorage(name, operations);
+      await this.bulkStorage(name, operations, storedContextMap);
     }
 
     return {
@@ -274,7 +315,9 @@ export class QueryClient {
     await this.dependencies.storageClient.clean();
   }
 
-  async getStreamToQueryLinksMap(names: string[]): Promise<Record<string, QueryLink[]>> {
+  async getStreamToQueryLinksMap(
+    names: string[]
+  ): Promise<Record<string, QueryLinkWithStoredKql[]>> {
     const filters = [...termsQuery(STREAM_NAME, names), ...termQuery(ASSET_TYPE, 'query')];
 
     const assetsResponse = await this.dependencies.storageClient.search({
@@ -290,7 +333,7 @@ export class QueryClient {
     const queriesPerName = names.reduce((acc, name) => {
       acc[name] = [];
       return acc;
-    }, {} as Record<string, QueryLink[]>);
+    }, {} as Record<string, QueryLinkWithStoredKql[]>);
 
     assetsResponse.hits.hits.forEach((hit) => {
       const name = hit._source[STREAM_NAME];
@@ -432,14 +475,18 @@ export class QueryClient {
     return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
   }
 
-  private async bulkStorage(name: string, operations: QueryBulkOperation[]) {
+  private async bulkStorage(
+    name: string,
+    operations: QueryBulkOperation[],
+    storedContextMap: Map<string, StoredQueryContext>
+  ) {
     return await this.dependencies.storageClient.bulk({
       operations: operations.map((operation) => {
         if ('index' in operation) {
-          const document = toStorage(
-            name,
-            Object.values(operation)[0].asset as QueryLinkRequestWithRuleBacked
-          );
+          const asset = Object.values(operation)[0].asset as QueryLinkRequest;
+          const uuid = getQueryLinkUuid(name, asset);
+          const storedContext = storedContextMap.get(uuid);
+          const document = toStorage(name, asset, storedContext);
           return {
             index: {
               document,
@@ -507,20 +554,32 @@ export class QueryClient {
 
     const currentQueriesToDelete = currentQueryLinks.filter((link) => !nextIds.has(link.query.id));
 
-    const currentQueriesToDeleteBeforeUpdate = currentQueryLinks.filter((link) =>
-      queries.some((query) => query.id === link.query.id && hasBreakingChange(link.query, query))
-    );
+    // Build a map for O(1) lookup of current links by query ID
+    const currentLinkById = new Map(currentQueryLinks.map((link) => [link.query.id, link]));
 
-    const [nextQueriesUpdatedWithBreakingChange, nextQueriesUpdatedWithoutBreakingChange] = map(
-      partition(
-        queries.filter((query) => currentIds.has(query.id)),
-        (query) => {
-          const currentLink = currentQueryLinks.find((link) => link.query.id === query.id);
-          return hasBreakingChange(currentLink!.query, query);
-        }
-      ),
-      (partitionedQueries) => partitionedQueries.map((query) => toQueryLinkFromQuery(query, stream))
-    );
+    // Categorize updated queries by breaking vs non-breaking changes in a single pass
+    const currentQueriesToDeleteBeforeUpdate: QueryLinkWithStoredKql[] = [];
+    const nextQueriesUpdatedWithBreakingChange: QueryLinkWithStoredKql[] = [];
+    const nextQueriesUpdatedWithoutBreakingChange: QueryLinkWithStoredKql[] = [];
+
+    for (const query of queries) {
+      const currentLink = currentLinkById.get(query.id);
+      if (!currentLink) continue; // New queries already handled in nextQueriesToCreate
+
+      const newLink = toQueryLinkFromQuery(query, stream);
+
+      if (hasBreakingChange(currentLink.query, query)) {
+        // Breaking change: delete old rule, create new one without _storedKqlQuery
+        currentQueriesToDeleteBeforeUpdate.push(currentLink);
+        nextQueriesUpdatedWithBreakingChange.push(newLink);
+      } else {
+        // Non-breaking change: carry over _storedKqlQuery to maintain stable rule IDs
+        nextQueriesUpdatedWithoutBreakingChange.push({
+          ...newLink,
+          _storedKqlQuery: currentLink._storedKqlQuery,
+        });
+      }
+    }
 
     await this.uninstallQueries([...currentQueriesToDelete, ...currentQueriesToDeleteBeforeUpdate]);
     await this.installQueries(
@@ -680,8 +739,8 @@ export class QueryClient {
   }
 
   private async installQueries(
-    queriesToCreate: QueryLink[],
-    queriesToUpdate: QueryLink[],
+    queriesToCreate: QueryLinkWithStoredKql[],
+    queriesToUpdate: QueryLinkWithStoredKql[],
     stream: string
   ) {
     const { rulesClient } = this.dependencies;
@@ -715,7 +774,7 @@ export class QueryClient {
     ]);
   }
 
-  private async uninstallQueries(queries: QueryLink[]) {
+  private async uninstallQueries(queries: QueryLinkWithStoredKql[]) {
     if (queries.length === 0) {
       return;
     }
@@ -731,7 +790,7 @@ export class QueryClient {
       });
   }
 
-  private toCreateRuleParams(query: QueryLink, stream: string) {
+  private toCreateRuleParams(query: QueryLinkWithStoredKql, stream: string) {
     const ruleId = getRuleIdFromQueryLink(query);
 
     const esqlQuery = buildEsqlQuery([stream, `${stream}.*`], query.query, true);
@@ -757,7 +816,7 @@ export class QueryClient {
     };
   }
 
-  private toUpdateRuleParams(query: QueryLink, stream: string) {
+  private toUpdateRuleParams(query: QueryLinkWithStoredKql, stream: string) {
     const ruleId = getRuleIdFromQueryLink(query);
     const esqlQuery = buildEsqlQuery([stream, `${stream}.*`], query.query, true);
     return {

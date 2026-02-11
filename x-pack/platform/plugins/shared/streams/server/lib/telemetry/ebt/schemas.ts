@@ -137,12 +137,6 @@ const streamsSignificantEventsQueriesGeneratedSchema: RootSchema<StreamsSignific
         description: 'The number of significant events queries generated',
       },
     },
-    systems_count: {
-      type: 'long',
-      _meta: {
-        description: 'The number of systems used to generate the queries',
-      },
-    },
     input_tokens_used: {
       type: 'long',
       _meta: {

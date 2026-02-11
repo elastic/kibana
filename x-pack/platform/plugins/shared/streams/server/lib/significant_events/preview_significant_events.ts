@@ -5,83 +5,46 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type {
-  SignificantEventsPreviewResponse,
-  StreamQueryKql,
-  Streams,
-} from '@kbn/streams-schema';
+import type { SignificantEventsPreviewResponse, Streams } from '@kbn/streams-schema';
 import { getIndexPatternsForStream } from '@kbn/streams-schema';
-import type { InferSearchResponseOf } from '@kbn/es-types';
-import { notFound } from '@hapi/boom';
-import type { ChangePointType } from '@kbn/es-types/src';
-import type { Condition } from '@kbn/streamlang';
-import { conditionToQueryDsl } from '@kbn/streamlang';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 
-type PreviewStreamQuery = Pick<StreamQueryKql, 'kql' | 'feature'>;
+interface OccurrenceBucket {
+  date: string;
+  count: number;
+}
 
-function createSearchRequest({
+/**
+ * Builds an ES|QL query to get date histogram occurrences for a given WHERE condition.
+ */
+function buildOccurrencesQuery({
+  indices,
+  esqlWhere,
   from,
   to,
-  kuery,
-  featureFilter,
   bucketSize,
 }: {
+  indices: string[];
+  esqlWhere: string;
   from: Date;
   to: Date;
-  kuery: string;
-  featureFilter?: Condition;
   bucketSize: string;
-}) {
-  return {
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                gte: from.toISOString(),
-                lte: to.toISOString(),
-              },
-            },
-          },
-          ...(featureFilter ? [conditionToQueryDsl(featureFilter)] : []),
-          {
-            kql: {
-              query: kuery,
-            },
-            // TODO: kql is not in the ES client's types yet (06-2025)
-          } as QueryDslQueryContainer,
-        ],
-      },
-    },
-    aggs: {
-      occurrences: {
-        date_histogram: {
-          field: '@timestamp',
-          fixed_interval: bucketSize,
-          extended_bounds: {
-            min: from.toISOString(),
-            max: to.toISOString(),
-          },
-        },
-      },
-      change_points: {
-        change_point: {
-          buckets_path: 'occurrences>_count',
-        },
-        // TODO: change_points is not in the ES client's types yet (06-2025)
-      } as {},
-    },
-  };
+}): string {
+  const indexPattern = indices.join(',');
+  const timeFilter = `@timestamp >= "${from.toISOString()}" AND @timestamp <= "${to.toISOString()}"`;
+  const combinedWhere = esqlWhere ? `(${esqlWhere}) AND ${timeFilter}` : timeFilter;
+
+  return `FROM ${indexPattern}
+| WHERE ${combinedWhere}
+| STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, ${bucketSize})
+| SORT bucket ASC`;
 }
 
 export async function previewSignificantEvents(
   params: {
     definition: Streams.all.Definition;
-    query: PreviewStreamQuery;
+    esqlWhere: string;
     from: Date;
     to: Date;
     bucketSize: string;
@@ -90,42 +53,51 @@ export async function previewSignificantEvents(
     scopedClusterClient: IScopedClusterClient;
   }
 ): Promise<SignificantEventsPreviewResponse> {
-  const { bucketSize, from, to, definition, query } = params;
+  const { bucketSize, from, to, definition, esqlWhere } = params;
   const { scopedClusterClient } = dependencies;
+  const indices = getIndexPatternsForStream(definition);
 
-  const searchRequest = createSearchRequest({
-    bucketSize,
+  const query = buildOccurrencesQuery({
+    indices,
+    esqlWhere,
     from,
-    kuery: query.kql.query,
-    featureFilter: query.feature?.filter,
     to,
+    bucketSize,
   });
 
-  const response = (await scopedClusterClient.asCurrentUser.search({
-    index: getIndexPatternsForStream(definition),
-    track_total_hits: false,
-    ...searchRequest,
-  })) as InferSearchResponseOf<unknown, ReturnType<typeof createSearchRequest>>;
+  try {
+    const response = (await scopedClusterClient.asCurrentUser.esql.query({
+      query,
+      drop_null_columns: true,
+    })) as unknown as ESQLSearchResponse;
 
-  if (!response.aggregations) {
-    throw notFound();
-  }
+    const bucketColIndex = response.columns.findIndex((col) => col.name === 'bucket');
+    const countColIndex = response.columns.findIndex((col) => col.name === 'count');
 
-  const aggregations = response.aggregations as typeof response.aggregations & {
-    change_points: {
-      type: Record<ChangePointType, { p_value: number; change_point: number }>;
+    if (bucketColIndex === -1 || countColIndex === -1) {
+      return {
+        esql: { where: esqlWhere },
+        change_points: { type: {} },
+        occurrences: [],
+      };
+    }
+
+    const occurrences: OccurrenceBucket[] = response.values.map((row) => ({
+      date: row[bucketColIndex] as string,
+      count: Number(row[countColIndex]),
+    }));
+
+    // TODO: Implement change points detection
+    return {
+      esql: { where: esqlWhere },
+      change_points: { type: {} },
+      occurrences,
     };
-  };
-
-  return {
-    ...query,
-    change_points: aggregations.change_points,
-    occurrences:
-      aggregations.occurrences.buckets.map((bucket) => {
-        return {
-          date: bucket.key_as_string,
-          count: bucket.doc_count,
-        };
-      }) ?? [],
-  };
+  } catch {
+    return {
+      esql: { where: esqlWhere },
+      change_points: { type: {} },
+      occurrences: [],
+    };
+  }
 }

@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import {
   buildEsqlQuery,
   getIndexPatternsForStream,
-  type StreamQueryKql,
+  type StreamQuery,
   type Streams,
 } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
@@ -45,7 +45,7 @@ export function PreviewDataSparkPlot({
   timeRange,
 }: {
   definition: Streams.all.Definition;
-  query: StreamQueryKql;
+  query: StreamQuery;
   isQueryValid: boolean;
   showTitle?: boolean;
   compressed?: boolean;
@@ -60,8 +60,7 @@ export function PreviewDataSparkPlot({
 
   const previewFetch = useSignificantEventPreviewFetch({
     name: definition.name,
-    feature: query.feature,
-    kqlQuery: query.kql.query,
+    esqlWhere: query.esql.where,
     timeRange: timeRange ?? timeState.asAbsoluteTimeRange,
     isQueryValid,
     noOfBuckets,
@@ -89,17 +88,17 @@ export function PreviewDataSparkPlot({
   } = useKibana();
   const useUrl = share.url.locators.useUrl;
 
-  const discoverLink = useUrl<DiscoverAppLocatorParams>(
-    () => ({
-      id: DISCOVER_APP_LOCATOR,
-      params: {
-        query: {
-          esql: isQueryValid ? buildEsqlQuery(getIndexPatternsForStream(definition), query) : '',
-        },
-      },
-    }),
-    [definition, query, isQueryValid]
-  );
+  const discoverLink = useUrl<DiscoverAppLocatorParams>(() => {
+    let esql = '';
+    if (isQueryValid) {
+      try {
+        esql = buildEsqlQuery(getIndexPatternsForStream(definition), query);
+      } catch {
+        // Keep esql empty on parse error
+      }
+    }
+    return { id: DISCOVER_APP_LOCATOR, params: { query: { esql } } };
+  }, [definition, query, isQueryValid]);
 
   function renderContent() {
     if (isQueryValid === false) {

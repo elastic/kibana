@@ -71,7 +71,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         'logs.branch_a.child1.nested',
         upsertRequest({
           queries: [
-            { id: 'my-error-query', title: 'error query', kql: { query: 'message: ERROR' } },
+            {
+              id: 'my-error-query',
+              title: 'error query',
+              esql: { where: 'KQL("message: ERROR")' },
+            },
           ],
         })
       );
@@ -252,7 +256,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             id: 'my-error-query',
             title: 'error query',
-            kql: { query: 'message: ERROR' },
+            esql: { where: 'KQL("message: ERROR")' },
           },
         ]);
       });
@@ -496,7 +500,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             id: 'my-error-query',
             title: 'error query',
-            kql: { query: 'message: ERROR' },
+            esql: { where: 'KQL("message: ERROR")' },
           },
         ]);
       });
@@ -748,7 +752,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
                 ...emptyAssets,
                 queries: [
-                  { id: 'my-error-query', title: 'error query', kql: { query: 'message: ERROR' } },
+                  {
+                    id: 'my-error-query',
+                    title: 'error query',
+                    esql: { where: 'KQL("message: ERROR")' },
+                  },
                 ],
               },
             },

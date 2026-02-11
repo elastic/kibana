@@ -38,7 +38,6 @@ interface StreamsDescriptionGeneratedProps {
 }
 interface StreamsSignificantEventsQueriesGeneratedProps {
   count: number;
-  systems_count: number;
   input_tokens_used: number;
   output_tokens_used: number;
   stream_name: string;

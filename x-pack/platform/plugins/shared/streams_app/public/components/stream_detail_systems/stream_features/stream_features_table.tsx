@@ -14,14 +14,14 @@ import {
   EuiInMemoryTable,
   EuiButtonEmpty,
   EuiPanel,
+  EuiText,
 } from '@elastic/eui';
 import type { Feature, Streams } from '@kbn/streams-schema';
-import { TableTitle } from '../stream_systems/table_title';
+import { i18n } from '@kbn/i18n';
 import { FeatureDetailsFlyout } from './feature_details_flyout';
 import { DeleteFeatureModal } from './delete_feature_modal';
 import {
   useStreamFeaturesTable,
-  FEATURES_LABEL,
   TABLE_CAPTION_LABEL,
   CLEAR_SELECTION,
   DELETE_SELECTED,
@@ -79,16 +79,22 @@ export function StreamFeaturesTable({
   const isSelectionActionsDisabled =
     selectedFeatures.length === 0 || isLoadingFeatures || isTableDisabled;
 
+  const start = pagination.pageIndex * pagination.pageSize + 1;
+  const end = Math.min((pagination.pageIndex + 1) * pagination.pageSize, features.length);
+  const total = features.length;
+
   return (
     <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>
-          <TableTitle
-            pageIndex={pagination.pageIndex}
-            pageSize={pagination.pageSize}
-            total={features.length}
-            label={FEATURES_LABEL}
-          />
+          <EuiText size="s">
+            <strong>
+              {i18n.translate('xpack.streams.streamFeaturesTable.tableTitle', {
+                defaultMessage: 'Showing {start}-{end} of {total} Features',
+                values: { start, end, total },
+              })}
+            </strong>
+          </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

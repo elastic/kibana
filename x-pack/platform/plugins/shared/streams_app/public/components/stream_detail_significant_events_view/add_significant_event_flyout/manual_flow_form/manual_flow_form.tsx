@@ -13,82 +13,104 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiPanel,
-  EuiSuperSelect,
+  EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { StreamQueryKql, Streams, System } from '@kbn/streams-schema';
-import React, { useEffect, useMemo, useState } from 'react';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDebounceFn } from '@kbn/react-hooks';
-import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { SeveritySelector } from '../common/severity_selector';
-import { ALL_DATA_OPTION } from '../../system_selector';
 
 interface Props {
   definition: Streams.all.Definition;
-  query: StreamQueryKql;
+  query: StreamQuery;
   isSubmitting: boolean;
   isEditMode: boolean;
-  setQuery: (query: StreamQueryKql) => void;
+  setQuery: (query: StreamQuery) => void;
   setCanSave: (canSave: boolean) => void;
-  systems: System[];
-  dataViews: DataView[];
 }
 
 const DEBOUNCE_DELAY_MS = 300;
 const DEBOUNCE_OPTIONS = { wait: DEBOUNCE_DELAY_MS };
 
-export function ManualFlowForm({
-  definition,
-  query,
-  setQuery,
-  setCanSave,
-  isSubmitting,
-  isEditMode,
-  systems,
-  dataViews,
-}: Props) {
+export function ManualFlowForm({ definition, query, setQuery, setCanSave, isSubmitting }: Props) {
   const [touched, setTouched] = useState({
     title: false,
-    feature: false,
-    kql: false,
+    esqlWhere: false,
     severity: false,
   });
 
-  // Debounced KQL query for preview chart API calls
-  const [debouncedKqlQuery, setDebouncedKqlQuery] = useState(query.kql.query);
+  // Debounced ES|QL WHERE condition for preview chart API calls
+  const [debouncedEsqlWhere, setDebouncedEsqlWhere] = useState(query.esql.where);
 
-  const { run: updateDebouncedKqlQuery } = useDebounceFn(
-    (kqlQuery: string) => setDebouncedKqlQuery(kqlQuery),
+  const { run: updateDebouncedEsqlWhere } = useDebounceFn(
+    (esqlWhere: string) => setDebouncedEsqlWhere(esqlWhere),
     DEBOUNCE_OPTIONS
   );
 
-  // Create a query object with debounced KQL for the preview chart
+  // Create a query object with debounced esql.where for the preview chart
+  // Only depend on properties actually used by PreviewDataSparkPlot
+  const { id, title, severity_score: severityScore } = query;
   const debouncedQuery = useMemo(
-    (): StreamQueryKql => ({
-      ...query,
-      kql: { query: debouncedKqlQuery },
+    (): StreamQuery => ({
+      id,
+      title,
+      severity_score: severityScore,
+      esql: { where: debouncedEsqlWhere },
     }),
-    [query, debouncedKqlQuery]
+    [id, title, severityScore, debouncedEsqlWhere]
   );
 
-  const validation = validateQuery(query);
+  // Memoize validation to avoid re-parsing ES|QL on every render
+  const validation = useMemo(() => validateQuery(query), [query]);
+  const debouncedValidation = useMemo(() => validateQuery(debouncedQuery), [debouncedQuery]);
 
   useEffect(() => {
-    const isValid = !validation.title.isInvalid && !validation.kql.isInvalid;
-    const isTouched = touched.title || touched.kql || touched.feature || touched.severity;
+    const isValid = !validation.title.isInvalid && !validation.esqlWhere.isInvalid;
+    const isTouched = touched.title || touched.esqlWhere || touched.severity;
     setCanSave(isValid && isTouched);
   }, [validation, setCanSave, touched]);
 
-  const options = [
-    { value: ALL_DATA_OPTION.value, inputDisplay: ALL_DATA_OPTION.label },
-    ...systems.map((system) => ({
-      value: system,
-      inputDisplay: system.name,
-    })),
-  ];
+  // Memoized event handlers
+  const handleTitleBlur = useCallback(() => {
+    setTouched((prev) => ({ ...prev, title: true }));
+  }, []);
+
+  const handleTitleChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const next = event.currentTarget.value;
+      setQuery({ ...query, title: next });
+      setTouched((prev) => ({ ...prev, title: true }));
+    },
+    [query, setQuery]
+  );
+
+  const handleSeverityChange = useCallback(
+    (score: number | undefined) => {
+      setQuery({ ...query, severity_score: score });
+      setTouched((prev) => ({ ...prev, severity: true }));
+    },
+    [query, setQuery]
+  );
+
+  const handleEsqlWhereBlur = useCallback(() => {
+    setTouched((prev) => ({ ...prev, esqlWhere: true }));
+  }, []);
+
+  const handleEsqlWhereChange = useCallback(
+    (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const nextEsqlWhere = event.currentTarget.value;
+      setQuery({
+        ...query,
+        esql: { where: nextEsqlWhere },
+      });
+      updateDebouncedEsqlWhere(nextEsqlWhere);
+      setTouched((prev) => ({ ...prev, esqlWhere: true }));
+    },
+    [query, setQuery, updateDebouncedEsqlWhere]
+  );
 
   return (
     <EuiPanel hasShadow={false} color="subdued">
@@ -108,14 +130,8 @@ export function ManualFlowForm({
             <EuiFieldText
               value={query?.title}
               disabled={isSubmitting}
-              onBlur={() => {
-                setTouched((prev) => ({ ...prev, title: true }));
-              }}
-              onChange={(event) => {
-                const next = event.currentTarget.value;
-                setQuery({ ...query, title: next });
-                setTouched((prev) => ({ ...prev, title: true }));
-              }}
+              onBlur={handleTitleBlur}
+              onChange={handleTitleChange}
               placeholder={i18n.translate(
                 'xpack.streams.addSignificantEventFlyout.manualFlow.titlePlaceholder',
                 { defaultMessage: 'Add title' }
@@ -135,55 +151,7 @@ export function ManualFlowForm({
           >
             <SeveritySelector
               severityScore={query.severity_score}
-              onChange={(score) => {
-                setQuery({ ...query, severity_score: score });
-                setTouched((prev) => ({ ...prev, severity: true }));
-              }}
-            />
-          </EuiFormRow>
-
-          <EuiFormRow
-            label={
-              <EuiFormLabel>
-                {i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldSystemLabel',
-                  { defaultMessage: 'System' }
-                )}
-              </EuiFormLabel>
-            }
-          >
-            <EuiSuperSelect
-              options={options}
-              valueOfSelected={
-                query.feature
-                  ? options.find(
-                      (option) =>
-                        option.value.name === query.feature?.name &&
-                        option.value.type === query.feature?.type
-                    )?.value
-                  : ALL_DATA_OPTION.value
-              }
-              placeholder={i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.manualFlow.systemPlaceholder',
-                { defaultMessage: 'Select system' }
-              )}
-              disabled={isSubmitting || systems.length === 0 || isEditMode}
-              onBlur={() => {
-                setTouched((prev) => ({ ...prev, feature: true }));
-              }}
-              onChange={(value) => {
-                const feature =
-                  value.type === ALL_DATA_OPTION.value.type
-                    ? undefined
-                    : {
-                        name: value.name,
-                        filter: value.filter,
-                        type: value.type,
-                      };
-                setQuery({ ...query, feature });
-                setTouched((prev) => ({ ...prev, feature: true }));
-              }}
-              fullWidth
+              onChange={handleSeverityChange}
             />
           </EuiFormRow>
 
@@ -192,35 +160,22 @@ export function ManualFlowForm({
               <EuiFormLabel>
                 {i18n.translate(
                   'xpack.streams.addSignificantEventFlyout.manualFlow.formFieldQueryLabel',
-                  { defaultMessage: 'Query' }
+                  { defaultMessage: 'Query (ES|QL WHERE condition)' }
                 )}
               </EuiFormLabel>
             }
-            {...(touched.kql && { ...validation.kql })}
+            {...(touched.esqlWhere && { ...validation.esqlWhere })}
           >
-            <UncontrolledStreamsAppSearchBar
-              query={
-                query.kql ? { language: 'kuery', ...query.kql } : { language: 'kuery', query: '' }
-              }
-              showQueryInput
-              showSubmitButton={false}
-              isDisabled={isSubmitting}
-              onQueryChange={(next) => {
-                // Immediately sync query state so it's always up-to-date for save
-                const nextKqlQuery = typeof next.query?.query === 'string' ? next.query.query : '';
-                setQuery({
-                  ...query,
-                  kql: { query: nextKqlQuery },
-                });
-                // Debounce the preview chart update
-                updateDebouncedKqlQuery(nextKqlQuery);
-                setTouched((prev) => ({ ...prev, kql: true }));
-              }}
+            <EuiTextArea
+              value={query.esql.where}
+              disabled={isSubmitting}
+              rows={3}
+              onBlur={handleEsqlWhereBlur}
+              onChange={handleEsqlWhereChange}
               placeholder={i18n.translate(
                 'xpack.streams.addSignificantEventFlyout.manualFlow.queryPlaceholder',
                 { defaultMessage: 'Enter query' }
               )}
-              indexPatterns={dataViews}
             />
           </EuiFormRow>
         </EuiForm>
@@ -230,7 +185,7 @@ export function ManualFlowForm({
         <PreviewDataSparkPlot
           definition={definition}
           query={debouncedQuery}
-          isQueryValid={!validation.kql.isInvalid}
+          isQueryValid={!debouncedValidation.esqlWhere.isInvalid}
         />
       </EuiFlexGroup>
     </EuiPanel>

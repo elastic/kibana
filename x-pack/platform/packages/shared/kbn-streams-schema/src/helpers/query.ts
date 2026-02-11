@@ -5,9 +5,34 @@
  * 2.0.
  */
 
+import type { Condition } from '@kbn/streamlang';
 import { conditionToESQLAst } from '@kbn/streamlang';
-import { BasicPrettyPrinter, Builder } from '@kbn/esql-language';
+import { BasicPrettyPrinter, Builder, Parser } from '@kbn/esql-language';
+import type { ESQLCommand } from '@kbn/esql-language';
 import type { StreamQuery } from '../queries';
+
+/**
+ * Builds the WHERE condition for a StreamQuery as an ESQL expression string.
+ * Combines the KQL query with the feature filter (if present) using AND.
+ *
+ * @example
+ * // Returns: 'KQL("message: error") AND `system.name` == "auth"'
+ * buildEsqlWhereCondition({ kql: { query: 'message: error' }, feature: { filter: { field: 'system.name', eq: 'auth' } } })
+ */
+export const buildEsqlWhereCondition = (query: {
+  kql: { query: string };
+  feature?: { filter: Condition };
+}): string => {
+  const kqlQuery = Builder.expression.func.call('KQL', [
+    Builder.expression.literal.string(query.kql.query),
+  ]);
+
+  const whereConditionAst = query.feature?.filter
+    ? Builder.expression.func.binary('and', [kqlQuery, conditionToESQLAst(query.feature.filter)])
+    : kqlQuery;
+
+  return BasicPrettyPrinter.expression(whereConditionAst);
+};
 
 export const buildEsqlQuery = (
   indices: string[],
@@ -36,20 +61,16 @@ export const buildEsqlQuery = (
     ],
   });
 
-  const kqlQuery = Builder.expression.func.call('KQL', [
-    Builder.expression.literal.string(query.kql.query),
-  ]);
+  const commands: ESQLCommand[] = [fromCommand];
 
-  const whereCondition = query.feature?.filter
-    ? Builder.expression.func.binary('and', [kqlQuery, conditionToESQLAst(query.feature.filter)])
-    : kqlQuery;
+  commands.push(
+    Builder.command({
+      name: 'where',
+      args: [Parser.parseExpression(query.esql.where).root],
+    })
+  );
 
-  const whereCommand = Builder.command({
-    name: 'where',
-    args: [whereCondition],
-  });
-
-  const esqlQuery = Builder.expression.query([fromCommand, whereCommand]);
+  const esqlQuery = Builder.expression.query(commands);
 
   return BasicPrettyPrinter.print(esqlQuery);
 };

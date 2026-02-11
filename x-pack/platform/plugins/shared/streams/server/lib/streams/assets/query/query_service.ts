@@ -9,9 +9,16 @@ import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { buildEsqlWhereCondition } from '@kbn/streams-schema';
 import type { StreamsPluginStartDependencies } from '../../../../types';
 import { queryStorageSettings, type QueryStorageSettings } from '../storage_settings';
 import { QueryClient, type StoredQueryLink } from './query_client';
+import {
+  QUERY_ESQL_WHERE,
+  QUERY_FEATURE_FILTER,
+  QUERY_FEATURE_NAME,
+  QUERY_KQL_BODY,
+} from '../fields';
 
 export class QueryService {
   constructor(
@@ -35,7 +42,31 @@ export class QueryService {
     const adapter = new StorageIndexAdapter<QueryStorageSettings, StoredQueryLink>(
       core.elasticsearch.client.asInternalUser,
       this.logger.get('queries'),
-      queryStorageSettings
+      queryStorageSettings,
+      {
+        migrateSource: (source) => {
+          // Compute esql.where on-read if missing (for legacy documents)
+          if (!source[QUERY_ESQL_WHERE]) {
+            const featureFilterJson = source[QUERY_FEATURE_FILTER];
+            const featureFilter =
+              featureFilterJson && typeof featureFilterJson === 'string' && featureFilterJson !== ''
+                ? JSON.parse(featureFilterJson)
+                : undefined;
+
+            const esqlWhere = buildEsqlWhereCondition({
+              kql: { query: source[QUERY_KQL_BODY] as string },
+              feature: source[QUERY_FEATURE_NAME]
+                ? {
+                    filter: featureFilter,
+                  }
+                : undefined,
+            });
+
+            return { ...source, [QUERY_ESQL_WHERE]: esqlWhere } as StoredQueryLink;
+          }
+          return source as StoredQueryLink;
+        },
+      }
     );
 
     return new QueryClient(

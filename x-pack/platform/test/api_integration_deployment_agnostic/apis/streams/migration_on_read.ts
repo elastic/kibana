@@ -207,7 +207,7 @@ const expectedQueriesResponse = {
     {
       id: '12345',
       title: 'Test',
-      kql: { query: 'atest' },
+      esql: { where: 'KQL("atest")' },
     },
   ],
 };
@@ -276,7 +276,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           body: {
             title: 'Init Query',
-            kql: { query: 'test' },
+            esql: { where: 'KQL("test")' },
           },
         },
       });

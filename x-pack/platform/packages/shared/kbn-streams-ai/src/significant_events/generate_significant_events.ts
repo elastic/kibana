@@ -6,13 +6,10 @@
  */
 
 import { omit } from 'lodash';
-import type { Feature, Streams, System } from '@kbn/streams-schema';
+import type { Feature, Streams } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
-import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
-import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
-import { conditionToQueryDsl } from '@kbn/streamlang';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { fromKueryExpression } from '@kbn/es-query';
 import { withSpan } from '@kbn/apm-utils';
@@ -30,26 +27,17 @@ interface Query {
 }
 
 /**
- * Generate significant event definitions, based on:
- * - the description of the system (or stream if system is undefined)
- * - dataset analysis
- * - for the given significant event types
+ * Generate significant event definitions based on the stream's features.
  */
 export async function generateSignificantEvents({
   stream,
-  system,
   features,
-  start,
-  end,
-  esClient,
   inferenceClient,
   signal,
-  sampleDocsSize,
   systemPrompt,
   logger,
 }: {
   stream: Streams.all.Definition;
-  system?: System;
   features: Feature[];
   start: number;
   end: number;
@@ -65,32 +53,14 @@ export async function generateSignificantEvents({
 }> {
   logger.debug('Starting significant event generation');
 
-  let formattedAnalysis: FormattedDocumentAnalysis | undefined;
-
-  if (system?.filter) {
-    logger.trace('Describing dataset for significant event generation (with filter)');
-    const analysis = await withSpan('describe_dataset_for_significant_event_generation', () =>
-      describeDataset({
-        sampleDocsSize,
-        start,
-        end,
-        esClient,
-        index: stream.name,
-        filter: conditionToQueryDsl(system.filter),
-      })
-    );
-    formattedAnalysis = formatDocumentAnalysis(analysis, { dropEmpty: true });
-  }
-
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
 
   logger.trace('Generating significant events via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
     executeAsReasoningAgent({
       input: {
-        name: system?.name || stream.name,
-        dataset_analysis: formattedAnalysis ? JSON.stringify(formattedAnalysis) : '',
-        description: system?.description || stream.description,
+        name: stream.name,
+        description: stream.description,
         features: JSON.stringify(
           features.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
         ),
