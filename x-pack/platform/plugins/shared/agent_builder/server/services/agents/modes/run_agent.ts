@@ -12,6 +12,7 @@ import type {
   ConverseInput,
   AgentConfiguration,
   RuntimeAgentConfigurationOverrides,
+  ConversationAction,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
@@ -64,6 +65,10 @@ export interface RunAgentParams {
    * Stored on the round for auditing purposes - does not affect LLM execution.
    */
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
+  /**
+   * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
+   */
+  action?: ConversationAction;
 }
 
 export interface RunAgentResponse {
