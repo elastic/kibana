@@ -10,9 +10,6 @@
 import type { TextBasedLayer, TextBasedLayerColumn } from '@kbn/lens-common';
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 
-/**
- * Creates a TextBasedLayerColumn from API config.
- */
 export const getValueColumn = (
   id: string,
   fieldName?: string,
@@ -25,14 +22,9 @@ export const getValueColumn = (
   };
 };
 
-/**
- * Converts a TextBasedLayerColumn back to API config.
- */
 export const getValueApiColumn = (accessor: string, layer: TextBasedLayer) => {
-  const column = layer.columns.find((c) => c.columnId === accessor);
-
   return {
     operation: 'value' as const,
-    column: column!.fieldName,
+    column: layer.columns.find((c) => c.columnId === accessor)!.fieldName,
   };
 };
