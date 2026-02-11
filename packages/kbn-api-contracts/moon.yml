@@ -18,8 +18,8 @@ project:
   metadata:
     sourceRoot: packages/kbn-api-contracts
 dependsOn:
-  - '@kbn/tooling-log'
   - '@kbn/dev-cli-runner'
+  - '@kbn/repo-info'
 tags:
   - shared-common
   - package
