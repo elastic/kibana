@@ -15,7 +15,7 @@ import {
   METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED,
   METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT,
   VALUE_OTEL_JVM_MEMORY_TYPE_HEAP,
-  ATTRIBUTE_OTEL_JVM_MEMORY_TYPE,
+  LABEL_TYPE,
   AGENT_NAME,
 } from '../../../../../../common/es_fields/apm';
 import { fetchAndTransformMetrics } from '../../../fetch_and_transform_metrics';
@@ -91,7 +91,7 @@ export function getHeapMemoryChart({
   const additionalFilters = isOpenTelemetry
     ? [
         { terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } },
-        { term: { [ATTRIBUTE_OTEL_JVM_MEMORY_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_HEAP } },
+        { term: { [LABEL_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_HEAP } },
       ]
     : [{ terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } }];
 
