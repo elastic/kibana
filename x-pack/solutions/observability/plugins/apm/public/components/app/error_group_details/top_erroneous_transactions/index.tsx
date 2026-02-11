@@ -161,6 +161,9 @@ export function TopErroneousTransactions({ serviceName }: Props) {
         rowHeader="transactionName"
         loading={loading}
         data-test-subj="topErroneousTransactionsTable"
+        tableCaption={i18n.translate('xpack.apm.errorGroupTopTransactions.tableCaption', {
+          defaultMessage: 'Top affected transactions',
+        })}
         error={
           status === FETCH_STATUS.FAILURE
             ? i18n.translate('xpack.apm.errorGroupTopTransactions.errorMessage', {
