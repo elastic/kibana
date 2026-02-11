@@ -1,0 +1,308 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { renderHook, act } from '@testing-library/react';
+import type { Template } from '../../../../common/types/domain/template/v1';
+import { TestProviders } from '../../../common/mock';
+import { useTemplatesActions } from './use_templates_actions';
+import { useCasesEditTemplateNavigation } from '../../../common/navigation';
+import { useDeleteTemplate } from './use_delete_template';
+import { useUpdateTemplate } from './use_update_template';
+import { useCreateTemplate } from './use_create_template';
+import { useExportTemplate } from './use_export_template';
+import { useCasesToast } from '../../../common/use_cases_toast';
+
+jest.mock('../../../common/navigation/hooks', () => ({
+  ...jest.requireActual('../../../common/navigation/hooks'),
+  useCasesEditTemplateNavigation: jest.fn(),
+}));
+
+jest.mock('./use_delete_template');
+jest.mock('./use_update_template');
+jest.mock('./use_create_template');
+jest.mock('./use_export_template');
+jest.mock('../../../common/use_cases_toast');
+
+const useCasesEditTemplateNavigationMock = useCasesEditTemplateNavigation as jest.Mock;
+const useDeleteTemplateMock = useDeleteTemplate as jest.Mock;
+const useUpdateTemplateMock = useUpdateTemplate as jest.Mock;
+const useCreateTemplateMock = useCreateTemplate as jest.Mock;
+const useExportTemplateMock = useExportTemplate as jest.Mock;
+const useCasesToastMock = useCasesToast as jest.Mock;
+
+describe('useTemplatesActions', () => {
+  const wrapper = ({ children }: React.PropsWithChildren<{}>) => (
+    <TestProviders>{children}</TestProviders>
+  );
+
+  const mockTemplate: Template = {
+    templateId: 'template-1',
+    name: 'Template 1',
+    owner: 'securitySolution',
+    definition: 'fields:\n  - name: field1\n    type: keyword',
+    templateVersion: 1,
+    deletedAt: null,
+    description: 'Description',
+    fieldCount: 5,
+    tags: ['tag1'],
+    author: 'user1',
+    lastUsedAt: '2024-01-01T00:00:00.000Z',
+    usageCount: 10,
+    isDefault: false,
+  };
+
+  let consoleSpy: jest.SpyInstance;
+  const navigateToCasesEditTemplateMock = jest.fn();
+  const deleteTemplateMock = jest.fn();
+  const setDefaultTemplateMock = jest.fn();
+  const cloneTemplateMock = jest.fn();
+  const exportTemplateMock = jest.fn();
+  const showSuccessToastMock = jest.fn();
+
+  beforeEach(() => {
+    consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    useCasesEditTemplateNavigationMock.mockReturnValue({
+      navigateToCasesEditTemplate: navigateToCasesEditTemplateMock,
+      getCasesEditTemplateUrl: jest.fn(),
+    });
+    useDeleteTemplateMock.mockReturnValue({
+      mutate: deleteTemplateMock,
+      isLoading: false,
+    });
+    useUpdateTemplateMock.mockReturnValue({
+      mutate: setDefaultTemplateMock,
+      isLoading: false,
+    });
+    useCreateTemplateMock.mockReturnValue({
+      mutate: cloneTemplateMock,
+      isLoading: false,
+    });
+    useExportTemplateMock.mockReturnValue({
+      mutate: exportTemplateMock,
+      isLoading: false,
+    });
+    useCasesToastMock.mockReturnValue({
+      showSuccessToast: showSuccessToastMock,
+      showErrorToast: jest.fn(),
+    });
+  });
+
+  afterEach(() => {
+    consoleSpy.mockRestore();
+    jest.clearAllMocks();
+  });
+
+  it('returns all action handlers', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    expect(result.current).toHaveProperty('handleEdit');
+    expect(result.current).toHaveProperty('handleClone');
+    expect(result.current).toHaveProperty('handleSetAsDefault');
+    expect(result.current).toHaveProperty('handleExport');
+    expect(result.current).toHaveProperty('handleDelete');
+    expect(result.current).toHaveProperty('confirmDelete');
+    expect(result.current).toHaveProperty('cancelDelete');
+    expect(result.current).toHaveProperty('templateToDelete');
+    expect(result.current).toHaveProperty('isDeleting');
+    expect(result.current).toHaveProperty('isSettingDefault');
+    expect(result.current).toHaveProperty('isCloning');
+    expect(result.current).toHaveProperty('isExporting');
+  });
+
+  it('handleEdit navigates to edit template page', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    expect(typeof result.current.handleEdit).toBe('function');
+
+    act(() => {
+      result.current.handleEdit(mockTemplate);
+    });
+
+    expect(navigateToCasesEditTemplateMock).toHaveBeenCalledWith({
+      templateId: mockTemplate.templateId,
+    });
+  });
+
+  it('handleClone calls cloneTemplate mutation with prefixed name', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    expect(typeof result.current.handleClone).toBe('function');
+
+    act(() => {
+      result.current.handleClone(mockTemplate);
+    });
+
+    expect(cloneTemplateMock).toHaveBeenCalledWith(
+      {
+        template: {
+          name: expect.stringContaining(mockTemplate.name),
+          owner: mockTemplate.owner,
+          definition: mockTemplate.definition,
+          description: mockTemplate.description,
+          fieldCount: mockTemplate.fieldCount,
+          fieldNames: mockTemplate.fieldNames,
+          tags: mockTemplate.tags,
+          author: mockTemplate.author,
+          isDefault: false,
+        },
+      },
+      {
+        onSuccess: expect.any(Function),
+      }
+    );
+  });
+
+  it('configures useCreateTemplate with disabled default toast for clone', () => {
+    renderHook(() => useTemplatesActions(), { wrapper });
+
+    expect(useCreateTemplateMock).toHaveBeenCalledWith({
+      disableDefaultSuccessToast: true,
+    });
+  });
+
+  it('shows custom success toast with original template name when clone succeeds', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    act(() => {
+      result.current.handleClone(mockTemplate);
+    });
+
+    // Get the onSuccess callback passed to cloneTemplate mutate call
+    const onSuccessCallback = cloneTemplateMock.mock.calls[0][1].onSuccess;
+
+    // Simulate successful clone
+    act(() => {
+      onSuccessCallback();
+    });
+
+    expect(showSuccessToastMock).toHaveBeenCalledWith('Template 1 was cloned successfully');
+  });
+
+  it('handleSetAsDefault calls setDefaultTemplate mutation with isDefault: true', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    expect(typeof result.current.handleSetAsDefault).toBe('function');
+
+    act(() => {
+      result.current.handleSetAsDefault(mockTemplate);
+    });
+
+    expect(setDefaultTemplateMock).toHaveBeenCalledWith({
+      templateId: mockTemplate.templateId,
+      template: { isDefault: true },
+    });
+  });
+
+  it('configures useUpdateTemplate with custom success toast for set as default', () => {
+    renderHook(() => useTemplatesActions(), { wrapper });
+
+    expect(useUpdateTemplateMock).toHaveBeenCalledWith({
+      disableDefaultSuccessToast: true,
+      onSuccess: expect.any(Function),
+    });
+  });
+
+  it('shows custom success toast when template is set as default', () => {
+    renderHook(() => useTemplatesActions(), { wrapper });
+
+    // Get the onSuccess callback passed to useUpdateTemplate
+    const { onSuccess } = useUpdateTemplateMock.mock.calls[0][0];
+
+    // Simulate successful update with template data
+    act(() => {
+      onSuccess({ ...mockTemplate, isDefault: true });
+    });
+
+    expect(showSuccessToastMock).toHaveBeenCalledWith('Template Template 1 was set as default');
+  });
+
+  it('handleExport calls exportTemplate mutation with template id', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    expect(typeof result.current.handleExport).toBe('function');
+
+    act(() => {
+      result.current.handleExport(mockTemplate);
+    });
+
+    expect(exportTemplateMock).toHaveBeenCalledWith({ templateId: mockTemplate.templateId });
+  });
+
+  it('handleDelete sets templateToDelete', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    expect(result.current.templateToDelete).toBeNull();
+
+    act(() => {
+      result.current.handleDelete(mockTemplate);
+    });
+
+    expect(result.current.templateToDelete).toEqual(mockTemplate);
+  });
+
+  it('confirmDelete calls deleteTemplate mutation and clears templateToDelete', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    act(() => {
+      result.current.handleDelete(mockTemplate);
+    });
+
+    expect(result.current.templateToDelete).toEqual(mockTemplate);
+
+    act(() => {
+      result.current.confirmDelete();
+    });
+
+    expect(deleteTemplateMock).toHaveBeenCalledWith({ templateId: mockTemplate.templateId });
+    expect(result.current.templateToDelete).toBeNull();
+  });
+
+  it('passes onDeleteSuccess to useDeleteTemplate hook', () => {
+    const onDeleteSuccessMock = jest.fn();
+    renderHook(() => useTemplatesActions({ onDeleteSuccess: onDeleteSuccessMock }), {
+      wrapper,
+    });
+
+    // Verify useDeleteTemplate was called with the onSuccess callback
+    expect(useDeleteTemplateMock).toHaveBeenCalledWith({
+      onSuccess: onDeleteSuccessMock,
+    });
+  });
+
+  it('cancelDelete clears templateToDelete without calling mutation', () => {
+    const { result } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    act(() => {
+      result.current.handleDelete(mockTemplate);
+    });
+
+    expect(result.current.templateToDelete).toEqual(mockTemplate);
+
+    act(() => {
+      result.current.cancelDelete();
+    });
+
+    expect(deleteTemplateMock).not.toHaveBeenCalled();
+    expect(result.current.templateToDelete).toBeNull();
+  });
+
+  it('handlers are stable between renders', () => {
+    const { result, rerender } = renderHook(() => useTemplatesActions(), { wrapper });
+
+    const firstRenderHandlers = { ...result.current };
+
+    rerender();
+
+    expect(result.current.handleEdit).toBe(firstRenderHandlers.handleEdit);
+    expect(result.current.handleClone).toBe(firstRenderHandlers.handleClone);
+    expect(result.current.handleSetAsDefault).toBe(firstRenderHandlers.handleSetAsDefault);
+    expect(result.current.handleExport).toBe(firstRenderHandlers.handleExport);
+    expect(result.current.handleDelete).toBe(firstRenderHandlers.handleDelete);
+    expect(result.current.cancelDelete).toBe(firstRenderHandlers.cancelDelete);
+  });
+});
