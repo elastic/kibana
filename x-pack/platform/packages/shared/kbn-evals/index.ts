@@ -72,3 +72,6 @@ export type {
   RetrievedDoc,
 } from './src/evaluators/rag/types';
 export { createEsqlEquivalenceEvaluator } from './src/evaluators/esql';
+
+// Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
+export { tags } from '@kbn/scout';
