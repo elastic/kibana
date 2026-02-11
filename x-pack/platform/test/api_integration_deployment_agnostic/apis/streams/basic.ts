@@ -179,16 +179,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     // Note: Each step is dependent on the previous
-    // Test full flow for each root stream
-    ['logs.otel', 'logs.ecs'].forEach((rootStream) => {
-      describe(`Full flow for ${rootStream}`, () => {
-        before(async () => {
-          await enableStreams(apiClient);
-        });
+    // Test full flow for logs.otel (processes JSON messages)
+    describe('Full flow for logs.otel', () => {
+      const rootStream = 'logs.otel';
 
-        after(async () => {
-          await disableStreams(apiClient);
-        });
+      before(async () => {
+        await enableStreams(apiClient);
+      });
+
+      after(async () => {
+        await disableStreams(apiClient);
+      });
 
         it(`Index a JSON document to ${rootStream}, should go to ${rootStream}`, async () => {
           const doc = {
@@ -438,31 +439,41 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await indexAndAssertTargetStream(esClient, `${rootStream}.nginx`, accessLogDoc);
         });
       });
-    });
 
-    // Additional validation and edge case tests (run once for 'logs' only)
+    // Additional validation and edge case tests (run once for 'logs.otel' only)
     describe('Full flow - validation and edge cases', () => {
       before(async () => {
         await enableStreams(apiClient);
+        // Create prerequisite streams for validation tests
+        await forkStream(apiClient, 'logs.otel', {
+          stream: { name: 'logs.otel.nginx' },
+          where: { field: 'attributes.log.logger', eq: 'nginx' },
+          status,
+        });
+        await forkStream(apiClient, 'logs.otel.nginx', {
+          stream: { name: 'logs.otel.nginx.access' },
+          where: { field: 'severity_text', eq: 'info' },
+          status,
+        });
       });
 
       after(async () => {
         await disableStreams(apiClient);
       });
 
-      it('Fork logs to logs.nginx.error with invalid condition', async () => {
+      it('Fork logs.otel to logs.otel.nginx.error with invalid condition', async () => {
         const body = {
           stream: {
-            name: 'logs.nginx.error',
+            name: 'logs.otel.nginx.error',
           },
           where: { field: 'attributes.log', eq: 'error' },
           status,
         };
-        const response = await forkStream(apiClient, 'logs.nginx', body);
+        const response = await forkStream(apiClient, 'logs.otel.nginx', body);
         expect(response).to.have.property('acknowledged', true);
       });
 
-      it('Index an Nginx error log message, should goto logs.nginx.error but fails', async () => {
+      it('Index an Nginx error log message, should goto logs.otel.nginx.error but fails', async () => {
         const doc = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
@@ -472,7 +483,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             message: 'test',
           }),
         };
-        const result = await indexAndAssertTargetStream(esClient, 'logs.nginx', doc);
+        const result = await indexAndAssertTargetStream(esClient, 'logs.otel.nginx', doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:20.000Z',
           body: { text: 'test' },
@@ -480,23 +491,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           attributes: {
             'log.logger': 'nginx',
           },
-          stream: { name: 'logs.nginx' },
+          stream: { name: 'logs.otel.nginx' },
         });
       });
 
-      it('Fork logs to logs.number-test', async () => {
+      it('Fork logs.otel to logs.otel.number-test', async () => {
         const body = {
           stream: {
-            name: 'logs.number-test',
+            name: 'logs.otel.number-test',
           },
           where: { field: 'attributes.code', gte: '500' },
           status,
         };
-        const response = await forkStream(apiClient, 'logs', body);
+        const response = await forkStream(apiClient, 'logs.otel', body);
         expect(response).to.have.property('acknowledged', true);
       });
 
-      it('Index documents with numbers and strings for logs.number-test condition', async () => {
+      it('Index documents with numbers and strings for logs.otel.number-test condition', async () => {
         const doc1 = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
@@ -513,14 +524,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             message: 'test',
           }),
         };
-        await indexAndAssertTargetStream(esClient, 'logs.number-test', doc1);
-        await indexAndAssertTargetStream(esClient, 'logs.number-test', doc2);
+        await indexAndAssertTargetStream(esClient, 'logs.otel.number-test', doc1);
+        await indexAndAssertTargetStream(esClient, 'logs.otel.number-test', doc2);
       });
 
-      it('Fork logs to logs.string-test', async () => {
+      it('Fork logs.otel to logs.otel.string-test', async () => {
         const body = {
           stream: {
-            name: 'logs.string-test',
+            name: 'logs.otel.string-test',
           },
           where: {
             or: [
@@ -530,11 +541,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           status,
         };
-        const response = await forkStream(apiClient, 'logs', body);
+        const response = await forkStream(apiClient, 'logs.otel', body);
         expect(response).to.have.property('acknowledged', true);
       });
 
-      it('Index documents with numbers and strings for logs.string-test condition', async () => {
+      it('Index documents with numbers and strings for logs.otel.string-test condition', async () => {
         const doc1 = {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: JSON.stringify({
@@ -549,14 +560,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             message: 'status_code: 400',
           }),
         };
-        await indexAndAssertTargetStream(esClient, 'logs.string-test', doc1);
-        await indexAndAssertTargetStream(esClient, 'logs.string-test', doc2);
+        await indexAndAssertTargetStream(esClient, 'logs.otel.string-test', doc1);
+        await indexAndAssertTargetStream(esClient, 'logs.otel.string-test', doc2);
       });
 
-      it('Fork logs to logs.weird-characters', async () => {
+      it('Fork logs.otel to logs.otel.weird-characters', async () => {
         const body = {
           stream: {
-            name: 'logs.weird-characters',
+            name: 'logs.otel.weird-characters',
           },
           where: {
             or: [
@@ -568,7 +579,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           status,
         };
-        const response = await forkStream(apiClient, 'logs', body);
+        const response = await forkStream(apiClient, 'logs.otel', body);
         expect(response).to.have.property('acknowledged', true);
       });
 
@@ -585,8 +596,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             'weird fieldname': 'Keep where it is',
           },
         };
-        await indexAndAssertTargetStream(esClient, 'logs.weird-characters', doc1);
-        await indexAndAssertTargetStream(esClient, 'logs', doc2);
+        await indexAndAssertTargetStream(esClient, 'logs.otel.weird-characters', doc1);
+        await indexAndAssertTargetStream(esClient, 'logs.otel', doc2);
       });
 
       it('should allow to update field type to incompatible type', async () => {
@@ -610,10 +621,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         };
-        await putStream(apiClient, 'logs.rollovertest', body, 200);
+        await putStream(apiClient, 'logs.otel.rollovertest', body, 200);
         await putStream(
           apiClient,
-          'logs.rollovertest',
+          'logs.otel.rollovertest',
           {
             ...body,
             stream: {
@@ -656,19 +667,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         };
-        await putStream(apiClient, 'logs.willfail', body, 400);
+        await putStream(apiClient, 'logs.otel.willfail', body, 400);
       });
 
       it('should not roll over more often than necessary', async () => {
         const expectedIndexCounts: Record<string, number> = {
-          logs: 1,
-          'logs.nginx': 1,
-          'logs.nginx.access': 1,
-          'logs.nginx.error': 1,
-          'logs.number-test': 1,
-          'logs.string-test': 1,
-          'logs.weird-characters': 1,
-          'logs.rollovertest': 2,
+          'logs.otel': 1,
+          'logs.otel.nginx': 1,
+          'logs.otel.nginx.access': 1,
+          'logs.otel.nginx.error': 1,
+          'logs.otel.number-test': 1,
+          'logs.otel.string-test': 1,
+          'logs.otel.weird-characters': 1,
+          'logs.otel.rollovertest': 2,
         };
         const dataStreams = await esClient.indices.getDataStream({
           name: Object.keys(expectedIndexCounts).join(','),
@@ -687,18 +698,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const deleteResponse = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
           params: {
             path: {
-              name: 'logs.nginx.access',
+              name: 'logs.otel.nginx.access',
             },
           },
         });
         expect(deleteResponse.status).to.eql(200);
 
-        const streamResponse = await getStream(apiClient, 'logs.nginx');
+        const streamResponse = await getStream(apiClient, 'logs.otel.nginx');
         expect(
           (streamResponse.stream as Streams.WiredStream.Definition).ingest.wired.routing
         ).to.eql([
           {
-            destination: 'logs.nginx.error',
+            destination: 'logs.otel.nginx.error',
             status: 'enabled',
             where: {
               field: 'attributes.log',
@@ -712,14 +723,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const deleteResponse = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
           params: {
             path: {
-              name: 'logs.nginx',
+              name: 'logs.otel.nginx',
             },
           },
         });
         expect(deleteResponse.status).to.eql(200);
 
-        await getStream(apiClient, 'logs.nginx', 404);
-        await getStream(apiClient, 'logs.nginx.error', 404);
+        await getStream(apiClient, 'logs.otel.nginx', 404);
+        await getStream(apiClient, 'logs.otel.nginx.error', 404);
       });
     });
 
@@ -741,8 +752,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
     }
 
-    // Test field inheritance for all root streams
-    ['logs', 'logs.otel', 'logs.ecs'].forEach((rootStream) => {
+    // Test field inheritance for new root streams
+    ['logs.otel', 'logs.ecs'].forEach((rootStream) => {
       describe(`Basic setup for ${rootStream}`, () => {
         before(async () => {
           await enableStreams(apiClient);
@@ -798,7 +809,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    // Validation tests (run once for 'logs' only)
+    // Validation tests (run once for 'logs.otel' only)
     describe('Basic setup - validation', () => {
       before(async () => {
         await enableStreams(apiClient);
@@ -809,7 +820,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('fails to create a stream if an existing template takes precedence', async () => {
-        const index = 'logs.noprecedence';
+        const index = 'logs.otel.noprecedence';
         await esClient.indices.putIndexTemplate({
           name: 'highest_priority_template',
           index_patterns: [index],
