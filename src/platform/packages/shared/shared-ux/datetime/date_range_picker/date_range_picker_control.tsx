@@ -85,6 +85,8 @@ export function DateRangePickerControl() {
 
   const onInputKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Enter' && isEditing && text) {
+      // Prevent Enter's keyup firing `onButtonClick`
+      event.preventDefault();
       applyRange();
     }
     if (event.key === 'Escape' && isEditing) {
