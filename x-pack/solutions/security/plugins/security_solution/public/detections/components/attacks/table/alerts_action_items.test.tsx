@@ -24,6 +24,7 @@ describe('AlertActionItems', () => {
     selectedGroup: 'host.name',
     groupBucket: {} as never,
     query: '{"bool":{"filter":[]}}',
+    closePopover: jest.fn(),
   };
 
   const { statusFilter: _statusFilter, ...baseActionItemsProps } = baseProps;
