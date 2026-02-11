@@ -17,7 +17,10 @@ const SLACK_API_BASE = 'https://slack.com/api';
  * Slack connector using OAuth2 Authorization Code flow.
  *
  * Required Slack App scopes:
- * - channels:read,channels:history - to list channels and read message history
+ * - channels:read,channels:history - to list public channels and read public channel history
+ * - groups:read,groups:history - to list private channels and read private channel history (if enabled)
+ * - im:read,im:history - to list DMs and read DM history (if enabled)
+ * - mpim:read,mpim:history - to list group DMs and read group DM history (if enabled)
  * - chat:write - for sending messages
  * - search:read - for searching messages (requires a user token)
  */
@@ -40,7 +43,7 @@ export const Slack: ConnectorSpec = {
           authorizationUrl: 'https://slack.com/oauth/v2/authorize',
           tokenUrl: 'https://slack.com/api/oauth.v2.access',
           scope:
-            'channels:read,channels:history,chat:write,search:read',
+            'channels:read,channels:history,groups:read,groups:history,im:read,im:history,mpim:read,mpim:history,chat:write,search:read',
           scopeQueryParam: 'user_scope', // Slack OAuth v2 uses user_scope for user token scopes
           tokenExtractor: 'slackUserToken', // extract authed_user.access_token for user-token-only scopes (e.g. search:read)
           useBasicAuth: false, // Slack uses POST body for client credentials
