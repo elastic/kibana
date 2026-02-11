@@ -228,6 +228,98 @@ describe('updateFailureIssue()', () => {
       }
     `);
   });
+
+  it('does not include new error message when error.message is missing', async () => {
+    const api = new GithubApi();
+
+    await updateFailureIssue(
+      'https://build-url',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        github: {
+          htmlUrl: 'https://github.com/issues/9101',
+          number: 9101,
+          nodeId: 'ijkl',
+          body: dedent`
+            # existing issue body
+
+            \`\`\`
+            Previous error message
+            \`\`\`
+
+            <!-- kibanaCiData = {"failed-test":{"test.failCount":5}} -->"
+          `,
+        },
+      },
+      api,
+      'main',
+      'kibana-on-merge',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        failure: 'new error stack trace',
+        time: '2018-01-01T01:00:00Z',
+        likelyIrrelevant: false,
+        id: 'test-id-456',
+        target: 'serverless=es',
+        location: '/path/to/test.ts',
+        duration: 5000,
+        owners: 'team:test',
+      }
+    );
+
+    const comment = api.addIssueComment.mock.calls[0][1] as string;
+    expect(comment).toContain('New failure for "serverless=es" target');
+    expect(comment).not.toContain('New error message');
+  });
+
+  it('includes new error message when error.message changed', async () => {
+    const api = new GithubApi();
+
+    await updateFailureIssue(
+      'https://build-url',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        github: {
+          htmlUrl: 'https://github.com/issues/1213',
+          number: 1213,
+          nodeId: 'qrst',
+          body: dedent`
+            # existing issue body
+
+            \`\`\`
+            Previous error message
+            \`\`\`
+
+            <!-- kibanaCiData = {"failed-test":{"test.failCount":3}} -->"
+          `,
+        },
+      },
+      api,
+      'main',
+      'kibana-on-merge',
+      {
+        classname: 'scout.suite',
+        name: 'scout test',
+        failure: 'new error stack trace',
+        errorMessage: 'TimeoutError: locator.click: Timeout 10000ms exceeded.',
+        time: '2018-01-01T01:00:00Z',
+        likelyIrrelevant: false,
+        id: 'test-id-1213',
+        target: 'serverless=es',
+        location: '/path/to/test.ts',
+        duration: 5000,
+        owners: 'team:test',
+      }
+    );
+
+    const comment = api.addIssueComment.mock.calls[0][1] as string;
+    expect(comment).toContain('New failure for "serverless=es" target');
+    expect(comment).toContain('New error message');
+    expect(comment).toContain('TimeoutError: locator.click: Timeout 10000ms exceeded.');
+  });
 });
 
 describe('createFailureIssue() - Scout failures', () => {
