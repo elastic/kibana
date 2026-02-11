@@ -673,9 +673,9 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             // Test scenario matching the API integration test:
             // - Root user owns 3 entities (Host, Service, Identity) - each with different type
             // - Each of those 3 entities communicates_with 2 entities of the same type (grouped)
-            // - Identity-1 is also supervised_by a supervisor entity (different type: User)
+            // - Identity-1 also supervises AND depends_on a delegate entity (different type: User)
             // - Root user performs an action (event) targeting host-1 and identity-1
-            // - Identity-1 performs 2 different actions targeting supervisor-1 (these get stacked)
+            // - Identity-1 performs 2 different actions targeting delegate-1 (these get stacked)
             // - External-caller has Communicates_with relationship targeting identity-1
 
             // Navigate to the event - include all 3 events
@@ -739,22 +739,22 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
             // Expected nodes with multiple relationships:
-            // - 9 entity nodes: root + 3 intermediate + 3 grouped targets + 1 supervisor + 1 external-caller
-            // - 7 relationship nodes: 1 Owns + 4 Communicates_with + 1 Supervised_by + 1 Depends_on
+            // - 9 entity nodes: root + 3 intermediate + 3 grouped targets + 1 delegate + 1 external-caller
+            // - 7 relationship nodes: 1 Owns + 4 Communicates_with + 1 Supervises + 1 Depends_on
             // - 1 label node: UpdatePolicy (not stacked)
-            // - 1 group node: for stacking Supervised_by and Depends_on (same source-target pair)
+            // - 1 group node: for stacking Supervises and Depends_on (same source-target pair)
             const expectedNodesWithMultipleRelationships = 18;
             await expandedFlyoutGraph.assertGraphNodesNumber(
               expectedNodesWithMultipleRelationships
             );
 
             // rel-hierarchy-identity-1 entity has the following relationships:
-            // - Supervised_by: rel-hierarchy-supervisor-1
-            // - Depends_on: rel-hierarchy-supervisor-1
+            // - Supervises: rel-hierarchy-delegate-1
+            // - Depends_on: rel-hierarchy-delegate-1
             // - Communicates_with: rel-hierarchy-network-1, rel-hierarchy-network-2
-            // Supervised_by and Depends_on share the same target (supervisor-1), so they are stacked in a group
-            const supervisedByIdRelationshipNodeId = 'rel(rel-hierarchy-identity-1-Supervised_by)';
-            await expandedFlyoutGraph.assertNodeExists(supervisedByIdRelationshipNodeId);
+            // Supervises and Depends_on share the same target (delegate-1), so they are stacked in a group
+            const supervisesRelationshipNodeId = 'rel(rel-hierarchy-identity-1-Supervises)';
+            await expandedFlyoutGraph.assertNodeExists(supervisesRelationshipNodeId);
 
             const dependsOnRelationshipNodeId = 'rel(rel-hierarchy-identity-1-Depends_on)';
             await expandedFlyoutGraph.assertNodeExists(dependsOnRelationshipNodeId);
@@ -763,14 +763,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
               'rel(rel-hierarchy-identity-1-Communicates_with)';
             await expandedFlyoutGraph.assertNodeExists(communicatesWithRelationshipNodeId);
 
-            const supervisedByIdRelationshipTargetNodeId = 'rel-hierarchy-supervisor-1';
-            await expandedFlyoutGraph.assertNodeEntityTag(
-              supervisedByIdRelationshipTargetNodeId,
-              'User'
-            );
+            const delegateTargetNodeId = 'rel-hierarchy-delegate-1';
+            await expandedFlyoutGraph.assertNodeEntityTag(delegateTargetNodeId, 'User');
             await expandedFlyoutGraph.assertNodeEntityDetails(
-              supervisedByIdRelationshipTargetNodeId,
-              'Hierarchy Supervisor Admin'
+              delegateTargetNodeId,
+              'Hierarchy Delegate Agent'
             );
 
             const communicatesWithIdRelationshipTargetNodeId = '3ed488a2068243098af41d666693f341';
@@ -819,26 +816,23 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             const expectedNodesAfterShowingActions = 20;
             await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodesAfterShowingActions);
 
-            await expandedFlyoutGraph.assertNodeEntityTag(
-              supervisedByIdRelationshipTargetNodeId,
-              'User'
-            );
+            await expandedFlyoutGraph.assertNodeEntityTag(delegateTargetNodeId, 'User');
 
             await expandedFlyoutGraph.showEntityRelationships('rel-hierarchy-identity-1');
             await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
 
             // Verify the group node exists that contains 2 label and 2 relationship nodes
-            // (stacked together because they share the same source-target pair: identity-1 → supervisor-1)
+            // (stacked together because they share the same source-target pair: identity-1 → delegate-1)
             const stackedGroupNodeId =
-              'grp(59d95e647275605ca691ba7c885dbfeb3e2638ea12aef38f03695760fe4334bd)';
+              'grp(30fe1a3db6add7620bc17c65035dd458088ccd164c434ad513a790fa9abc1575)';
             await expandedFlyoutGraph.assertNodeExists(stackedGroupNodeId);
 
             // hide entity relationships
-            await expandedFlyoutGraph.assertNodeDoesNotExist(supervisedByIdRelationshipNodeId);
+            await expandedFlyoutGraph.assertNodeDoesNotExist(supervisesRelationshipNodeId);
             await expandedFlyoutGraph.assertNodeDoesNotExist(dependsOnRelationshipNodeId);
             await expandedFlyoutGraph.assertNodeDoesNotExist(communicatesWithRelationshipNodeId);
 
-            await expandedFlyoutGraph.assertNodeExists(supervisedByIdRelationshipTargetNodeId);
+            await expandedFlyoutGraph.assertNodeExists(delegateTargetNodeId);
             await expandedFlyoutGraph.assertNodeDoesNotExist(
               communicatesWithIdRelationshipTargetNodeId
             );

@@ -74,7 +74,7 @@ export interface EventEdge extends GraphEdge {
  * Actor and target entities are grouped by type/subtype similar to event actors/targets.
  */
 export interface RelationshipEdge extends GraphEdge {
-  relationship: string; // "Owns", "Supervised_by", "Depends_on", etc.
+  relationship: string; // "Owns", "Supervises", "Depends_on", etc.
   relationshipNodeId: string; // Unique ID for deduplication (actorId-relationship)
   // Actor entity grouping (relationship-specific)
   actorIds: string[]; // All actor entity IDs in this group

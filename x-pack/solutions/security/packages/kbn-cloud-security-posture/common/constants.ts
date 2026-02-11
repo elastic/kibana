@@ -122,14 +122,10 @@ export const ENTITIES_LATEST_INDEX = '.entities.v2.latest.security_<space>';
  * These represent static/configuration-based relationships between entities.
  */
 export const ENTITY_RELATIONSHIP_FIELDS = [
-  'Accessed_frequently_by',
   'Accesses_frequently',
   'Communicates_with',
-  'Dependent_of',
   'Depends_on',
-  'Owned_by',
   'Owns',
-  'Supervised_by',
   'Supervises',
 ] as const;
 

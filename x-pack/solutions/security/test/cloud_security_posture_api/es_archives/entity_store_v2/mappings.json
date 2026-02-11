@@ -419,28 +419,16 @@
             },
             "relationships": {
               "properties": {
-                "Accessed_frequently_by": {
-                  "type": "keyword"
-                },
                 "Accesses_frequently": {
                   "type": "keyword"
                 },
                 "Communicates_with": {
                   "type": "keyword"
                 },
-                "Dependent_of": {
-                  "type": "keyword"
-                },
                 "Depends_on": {
                   "type": "keyword"
                 },
-                "Owned_by": {
-                  "type": "keyword"
-                },
                 "Owns": {
-                  "type": "keyword"
-                },
-                "Supervised_by": {
                   "type": "keyword"
                 },
                 "Supervises": {

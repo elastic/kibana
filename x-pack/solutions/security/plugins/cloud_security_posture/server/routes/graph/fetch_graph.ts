@@ -700,15 +700,9 @@ const buildRelationshipDslFilter = (entityIds: EntityId[]) => {
   };
 };
 
-// ES|QL FORK supports up to 8 branches. When there are more relationship fields,
-// we split into multiple queries and merge the results.
-const MAX_FORK_BRANCHES = 8;
-
 /**
  * Fetches entity relationships from the generic entities index.
  * Queries for all relationship types for entities matching the provided entityIds.
- * When there are more than 8 relationship fields, splits into multiple parallel queries
- * to respect the ES|QL FORK branch limit.
  * Note: Relationships are only available in v2 entity store with lookup mode enabled.
  */
 export const fetchEntityRelationships = async ({
@@ -735,48 +729,34 @@ export const fetchEntityRelationships = async ({
 
   logger.trace(`Fetching relationships from index [${indexName}] for ${entityIds.length} entities`);
 
+  const query = buildRelationshipsEsqlQuery({
+    indexName,
+    relationshipFields: ENTITY_RELATIONSHIP_FIELDS,
+  });
   const filter = buildRelationshipDslFilter(entityIds);
 
-  // Split relationship fields into batches to respect the ES|QL FORK branch limit (max 8)
-  const fieldBatches: (readonly string[])[] = [];
-  for (let i = 0; i < ENTITY_RELATIONSHIP_FIELDS.length; i += MAX_FORK_BRANCHES) {
-    fieldBatches.push(ENTITY_RELATIONSHIP_FIELDS.slice(i, i + MAX_FORK_BRANCHES));
-  }
+  logger.trace(`Relationships ES|QL query: ${query}`);
+  logger.trace(`Relationships filter: ${JSON.stringify(filter)}`);
 
-  const queryPromises = fieldBatches.map(async (fieldBatch) => {
-    const query = buildRelationshipsEsqlQuery({
-      indexName,
-      relationshipFields: fieldBatch,
-    });
+  try {
+    const response = await esClient.asInternalUser.helpers
+      .esql({
+        columnar: false,
+        filter,
+        query,
+      })
+      .toRecords<RelationshipEdge>();
 
-    logger.trace(`Relationships ES|QL query (batch of ${fieldBatch.length} fields): ${query}`);
+    logger.trace(`Fetched [${response.records.length}] relationship records`);
 
-    try {
-      const response = await esClient.asInternalUser.helpers
-        .esql({
-          columnar: false,
-          filter,
-          query,
-        })
-        .toRecords<RelationshipEdge>();
-
-      return response.records;
-    } catch (error) {
-      if (error.statusCode === 404) {
-        logger.debug(`Entities index ${indexName} does not exist, skipping relationship fetch`);
-        return [];
-      }
-      logger.error(`Error fetching relationships: ${error.message}`);
+    return response.records;
+  } catch (error) {
+    // If the index doesn't exist, return empty array
+    if (error.statusCode === 404) {
+      logger.debug(`Entities index ${indexName} does not exist, skipping relationship fetch`);
       return [];
     }
-  });
-
-  const batchResults = await Promise.all(queryPromises);
-  const allRecords = batchResults.flat();
-
-  logger.trace(
-    `Fetched [${allRecords.length}] relationship records from ${fieldBatches.length} batch(es)`
-  );
-
-  return allRecords;
+    logger.error(`Error fetching relationships: ${error.message}`);
+    return [];
+  }
 };

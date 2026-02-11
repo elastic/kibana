@@ -2381,15 +2381,15 @@ export default function (providerContext: FtrProviderContext) {
               // Test scenario:
               // - Root user owns 3 entities (Host, Service, Identity) - each with different type
               // - Each of those 3 entities communicates_with 2 entities of the same type
-              // - Identity-1 is supervised_by AND depends_on supervisor entity (different type: User)
+              // - Identity-1 supervises AND depends_on delegate entity (different type: User)
               // - Root user also performs an action (event) targeting host-1 and identity-1
-              // - Identity-1 performs 2 different actions targeting supervisor-1
+              // - Identity-1 performs 2 different actions targeting delegate-1
               // - External-caller has Communicates_with relationship targeting identity-1
               // Expected:
-              // - 9 entity nodes: root + 3 intermediate + 3 grouped targets + 1 supervisor + 1 external-caller
-              // - 7 relationship nodes: 1 Owns + 4 Communicates_with + 1 Supervised_by + 1 Depends_on
+              // - 9 entity nodes: root + 3 intermediate + 3 grouped targets + 1 delegate + 1 external-caller
+              // - 7 relationship nodes: 1 Owns + 4 Communicates_with + 1 Supervises + 1 Depends_on
               // - 3 label nodes: 1 UpdatePolicy + 2 new events (AuditLog, UserOperation)
-              // - 1 group node: stacking 2 relationships + 2 labels with same source-target pair (identity-1 → supervisor-1)
+              // - 1 group node: stacking 2 relationships + 2 labels with same source-target pair (identity-1 → delegate-1)
               const response = await postGraph(
                 supertest,
                 {
@@ -2427,7 +2427,7 @@ export default function (providerContext: FtrProviderContext) {
               expect(updatePolicyLabel.color).to.equal('primary');
               expect(updatePolicyLabel.shape).to.equal('label');
 
-              // Verify the two new label nodes (from identity-1 to supervisor-1)
+              // Verify the two new label nodes (from identity-1 to delegate-1)
               const auditLogLabel = labelNodes.find(
                 (node: LabelNodeDataModel) => node.label === 'google.admin.reports.v1.AuditLog'
               ) as LabelNodeDataModel;
@@ -2446,17 +2446,17 @@ export default function (providerContext: FtrProviderContext) {
                 (node: NodeDataModel) =>
                   node.shape === 'ellipse' || node.shape === 'rectangle' || node.shape === 'hexagon'
               );
-              // 1 root + 3 intermediate (host, service, identity) + 3 grouped targets + 1 supervisor + 1 external-caller = 9
+              // 1 root + 3 intermediate (host, service, identity) + 3 grouped targets + 1 delegate + 1 external-caller = 9
               expect(entityNodes.length).to.equal(9);
 
               // Verify relationship nodes count
               const relationshipNodes = response.body.nodes.filter(
                 (node: NodeDataModel) => node.shape === 'relationship'
               );
-              // 1 Owns + 3 Communicates_with (original) + 1 Communicates_with (external-caller) + 1 Supervised_by + 1 Depends_on = 7
+              // 1 Owns + 3 Communicates_with (original) + 1 Communicates_with (external-caller) + 1 Supervises + 1 Depends_on = 7
               expect(relationshipNodes.length).to.equal(7);
 
-              // Verify group node exists (stacking 2 relationships + 2 labels with same source-target pair: identity-1 → supervisor-1)
+              // Verify group node exists (stacking 2 relationships + 2 labels with same source-target pair: identity-1 → delegate-1)
               const groupNodes = response.body.nodes.filter(
                 (node: NodeDataModel) => node.shape === 'group'
               );
@@ -2470,12 +2470,11 @@ export default function (providerContext: FtrProviderContext) {
               // Verify UpdatePolicy label is NOT stacked (different source-target pair)
               expect(updatePolicyLabel.parentId).to.be(undefined);
 
-              // Verify the Supervised_by and Depends_on relationship nodes are stacked in the same group
-              const supervisedByNode = relationshipNodes.find(
-                (node: NodeDataModel) =>
-                  (node as RelationshipNodeDataModel).label === 'Supervised by'
+              // Verify the Supervises and Depends_on relationship nodes are stacked in the same group
+              const supervisesNode = relationshipNodes.find(
+                (node: NodeDataModel) => (node as RelationshipNodeDataModel).label === 'Supervises'
               ) as RelationshipNodeDataModel;
-              expect(supervisedByNode.parentId).to.equal(groupNode.id);
+              expect(supervisesNode.parentId).to.equal(groupNode.id);
 
               const dependsOnNode = relationshipNodes.find(
                 (node: NodeDataModel) => (node as RelationshipNodeDataModel).label === 'Depends on'
@@ -2493,8 +2492,8 @@ export default function (providerContext: FtrProviderContext) {
               // identity -> Communicates_with -> network_grouped = 2 edges
               // external-caller -> Communicates_with -> identity = 2 edges
               // root -> UpdatePolicy label -> (host, identity) = 1 + 2 = 3 edges
-              // identity -> group -> supervisor = 2 edges
-              // Group internal edges: group↔AuditLog, group↔UserOperation, group↔Supervised_by, group↔Depends_on = 8 edges
+              // identity -> group -> delegate = 2 edges
+              // Group internal edges: group↔AuditLog, group↔UserOperation, group↔Supervises, group↔Depends_on = 8 edges
               // Total: 4 + 2 + 2 + 2 + 2 + 3 + 2 + 8 = 25 edges
               expect(response.body).to.have.property('edges').length(25);
 
@@ -2605,23 +2604,23 @@ export default function (providerContext: FtrProviderContext) {
 
               expect(networkGroupedNode.documentsData!.length).to.equal(2);
 
-              // Verify supervisor node (different type: User, sub_type: AWS Organizations Admin)
-              const supervisorNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === 'rel-hierarchy-supervisor-1'
+              // Verify delegate node (different type: User, sub_type: AWS Organizations Admin)
+              const delegateNode = response.body.nodes.find(
+                (node: NodeDataModel) => node.id === 'rel-hierarchy-delegate-1'
               ) as EntityNodeDataModel;
-              expect(supervisorNode).not.to.be(undefined);
-              expect(supervisorNode.label).to.equal('Hierarchy Supervisor Admin');
-              expect(supervisorNode.shape).to.equal('ellipse');
-              expect(supervisorNode.tag).to.equal('User');
-              expect(supervisorNode.icon).to.equal('user');
-              expect(supervisorNode.count).to.be(undefined); // Single entity
-              expect(supervisorNode.documentsData!.length).to.equal(1);
-              expectExpect(supervisorNode.documentsData).toContainEqual(
+              expect(delegateNode).not.to.be(undefined);
+              expect(delegateNode.label).to.equal('Hierarchy Delegate Agent');
+              expect(delegateNode.shape).to.equal('ellipse');
+              expect(delegateNode.tag).to.equal('User');
+              expect(delegateNode.icon).to.equal('user');
+              expect(delegateNode.count).to.be(undefined); // Single entity
+              expect(delegateNode.documentsData!.length).to.equal(1);
+              expectExpect(delegateNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
-                  id: 'rel-hierarchy-supervisor-1',
+                  id: 'rel-hierarchy-delegate-1',
                   type: 'entity',
                   entity: expectExpect.objectContaining({
-                    name: 'Hierarchy Supervisor Admin',
+                    name: 'Hierarchy Delegate Agent',
                     type: 'User',
                     sub_type: 'AWS Organizations Admin',
                     availableInEntityStore: true,
@@ -2678,13 +2677,12 @@ export default function (providerContext: FtrProviderContext) {
               expect(externalCallerRelNode).not.to.be(undefined);
               expect(externalCallerRelNode.parentId).to.be(undefined);
 
-              // Verify Supervised_by relationship node count (1 node connecting identity-1 to supervisor)
-              const supervisedByNodes = relationshipNodes.filter(
-                (node: NodeDataModel) =>
-                  (node as RelationshipNodeDataModel).label === 'Supervised by'
+              // Verify Supervises relationship node count (1 node connecting identity-1 to delegate)
+              const supervisesNodes = relationshipNodes.filter(
+                (node: NodeDataModel) => (node as RelationshipNodeDataModel).label === 'Supervises'
               );
-              expect(supervisedByNodes.length).to.equal(1);
-              expect(supervisedByNodes[0].shape).to.equal('relationship');
+              expect(supervisesNodes.length).to.equal(1);
+              expect(supervisesNodes[0].shape).to.equal('relationship');
 
               // Verify edges
               response.body.edges.forEach((edge: EdgeDataModel) => {

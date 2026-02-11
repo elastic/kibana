@@ -1706,7 +1706,7 @@
       },
       "entity": {
         "target": {
-          "id": "rel-hierarchy-supervisor-1"
+          "id": "rel-hierarchy-delegate-1"
         }
       },
       "cloud": {
@@ -1771,7 +1771,7 @@
       },
       "entity": {
         "target": {
-          "id": "rel-hierarchy-supervisor-1"
+          "id": "rel-hierarchy-delegate-1"
         }
       },
       "cloud": {
