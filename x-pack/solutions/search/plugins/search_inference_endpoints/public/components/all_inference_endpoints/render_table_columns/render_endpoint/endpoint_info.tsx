@@ -31,23 +31,17 @@ const containerStyles = css`
   }
 `;
 
-const copyButtonHiddenStyles = ({ euiTheme }: UseEuiTheme) => css`
-  opacity: 0;
-  transition: opacity ${euiTheme.animation.fast} ease-in-out;
+const getCopyButtonStyles =
+  (visible: boolean) =>
+  ({ euiTheme }: UseEuiTheme) =>
+    css`
+      opacity: ${visible ? 1 : 0};
+      transition: opacity ${euiTheme.animation.fast} ease-in-out;
 
-  &:focus {
-    opacity: 1;
-  }
-`;
-
-const copyButtonVisibleStyles = ({ euiTheme }: UseEuiTheme) => css`
-  opacity: 1;
-  transition: opacity ${euiTheme.animation.fast} ease-in-out;
-
-  &:focus {
-    opacity: 1;
-  }
-`;
+      &:focus {
+        opacity: 1;
+      }
+    `;
 
 export interface EndpointInfoProps {
   inferenceId: string;
@@ -87,11 +81,7 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
           <EuiFlexItem grow={false}>
             <strong>{inferenceId}</strong>
           </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-            className="copyButton"
-            css={isCopied ? copyButtonVisibleStyles : copyButtonHiddenStyles}
-          >
+          <EuiFlexItem grow={false} className="copyButton" css={getCopyButtonStyles(isCopied)}>
             <EuiCopy textToCopy={inferenceId} afterMessage={i18n.COPY_ID_COPIED}>
               {(copy) => (
                 <EuiButtonIcon

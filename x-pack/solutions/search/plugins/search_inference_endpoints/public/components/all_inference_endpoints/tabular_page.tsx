@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { i18n as kbnI18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
 import type { EuiBasicTableColumn, UseEuiTheme } from '@elastic/eui';
@@ -19,7 +18,16 @@ import type {
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { EisCloudConnectPromoCallout, EisPromotionalCallout } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
-import * as i18n from '../../../common/translations';
+import {
+  ENDPOINT,
+  ENDPOINT_COPY_ID_ACTION_LABEL,
+  ENDPOINT_COPY_SUCCESS,
+  ENDPOINT_DELETE_ACTION_LABEL,
+  ENDPOINT_VIEW_ACTION_LABEL,
+  INFERENCE_ENDPOINTS_TABLE_CAPTION,
+  MODEL,
+  SERVICE_PROVIDER,
+} from '../../../common/translations';
 
 import { useTableData } from '../../hooks/use_table_data';
 import type { FilterOptions } from './types';
@@ -63,7 +71,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
 
   const copyContent = useCallback(
     (inferenceId: string) => {
-      const message = i18n.ENDPOINT_COPY_SUCCESS(inferenceId);
+      const message = ENDPOINT_COPY_SUCCESS(inferenceId);
       navigator.clipboard.writeText(inferenceId).then(() => {
         toasts?.addSuccess({
           title: message,
@@ -121,7 +129,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     () => [
       {
         field: 'inference_id',
-        name: i18n.ENDPOINT,
+        name: ENDPOINT,
         'data-test-subj': 'endpointCell',
 
         render: (
@@ -138,7 +146,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '300px',
       },
       {
-        name: i18n.MODEL,
+        name: MODEL,
         'data-test-subj': 'modelCell',
         render: (endpointInfo: InferenceInferenceEndpointInfo) => {
           return <Model endpointInfo={endpointInfo} />;
@@ -148,7 +156,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
       },
       {
         field: 'service',
-        name: i18n.SERVICE_PROVIDER,
+        name: SERVICE_PROVIDER,
         'data-test-subj': 'providerCell',
         render: (service: ServiceProviderKeys, endpointInfo: InferenceInferenceEndpointInfo) => {
           if (service) {
@@ -163,24 +171,24 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
       {
         actions: [
           {
-            name: i18n.ENDPOINT_VIEW_ACTION_LABEL,
-            description: i18n.ENDPOINT_VIEW_ACTION_LABEL,
+            name: ENDPOINT_VIEW_ACTION_LABEL,
+            description: ENDPOINT_VIEW_ACTION_LABEL,
             icon: 'eye',
             type: 'icon',
             onClick: (item) => displayInferenceFlyout(item),
             'data-test-subj': 'inference-endpoints-action-view-endpoint-label',
           },
           {
-            name: i18n.ENDPOINT_COPY_ID_ACTION_LABEL,
-            description: i18n.ENDPOINT_COPY_ID_ACTION_LABEL,
+            name: ENDPOINT_COPY_ID_ACTION_LABEL,
+            description: ENDPOINT_COPY_ID_ACTION_LABEL,
             icon: 'copyClipboard',
             type: 'icon',
             onClick: (item) => copyContent(item.inference_id),
             'data-test-subj': 'inference-endpoints-action-copy-id-label',
           },
           {
-            name: i18n.ENDPOINT_DELETE_ACTION_LABEL,
-            description: i18n.ENDPOINT_DELETE_ACTION_LABEL,
+            name: ENDPOINT_DELETE_ACTION_LABEL,
+            description: ENDPOINT_DELETE_ACTION_LABEL,
             icon: 'trash',
             type: 'icon',
             enabled: (item) => !isEndpointPreconfigured(item.inference_id),
@@ -253,12 +261,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             },
           }}
           data-test-subj="inferenceEndpointTable"
-          tableCaption={kbnI18n.translate(
-            'xpack.searchInferenceEndpoints.tabularPage.tableCaption',
-            {
-              defaultMessage: 'Inference endpoints list',
-            }
-          )}
+          tableCaption={INFERENCE_ENDPOINTS_TABLE_CAPTION}
         />
       </EuiFlexGroup>
       {showDeleteAction && selectedInferenceEndpoint ? (
