@@ -19,7 +19,7 @@ import { COMMON_HEADERS } from '../constants';
 
 // If transform was created with sufficient permissions -> should create and start
 // If transform was created with insufficient permissions -> should create but not start
-apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('/internal/transform/reauthorize_transforms', { tag: tags.stateful.all }, () => {
   let transformViewerUserApiCredentials: RoleApiCredentials;
 
   const transformCreatedByViewerId = getTransformIdByUser('transform_viewer');
