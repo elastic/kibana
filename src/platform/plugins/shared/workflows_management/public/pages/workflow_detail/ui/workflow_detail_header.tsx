@@ -37,6 +37,7 @@ import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
 import {
   selectHasChanges,
+  selectHasValidationErrors,
   selectIsExecutionsTab,
   selectIsSavingYaml,
   selectIsYamlSyntaxValid,

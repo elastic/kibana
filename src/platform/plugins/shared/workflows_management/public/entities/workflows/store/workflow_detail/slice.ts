@@ -28,6 +28,7 @@ const initialState: WorkflowDetailState = {
   highlightedStepId: undefined,
   isTestModalOpen: false,
   loading: initialLoadingState,
+  validationErrorCount: 0,
   connectorFlyout: {
     isOpen: false,
     connectorType: undefined,
@@ -82,6 +83,10 @@ const workflowDetailSlice = createSlice({
       state.activeTab = action.payload;
     },
 
+    setValidationErrorCount: (state, action: { payload: number }) => {
+      state.validationErrorCount = action.payload;
+    },
+
     // Connector flyout actions
     openCreateConnectorFlyout: (
       state,
@@ -133,6 +138,7 @@ export const {
   setExecution,
   clearExecution,
   setActiveTab,
+  setValidationErrorCount,
   openCreateConnectorFlyout,
   openEditConnectorFlyout,
   closeConnectorFlyout,

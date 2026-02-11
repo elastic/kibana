@@ -49,9 +49,15 @@ export const selectWorkflowDefinition = createSelector(
   (computed) => computed?.workflowDefinition
 );
 
-// Only checks if the current workflow yaml can be parses, does check the schema, only the yaml syntax
+// Only checks if the current workflow yaml can be parsed, does not check the schema, only the yaml syntax
 export const selectIsYamlSyntaxValid = createSelector(selectYamlComputed, (computed): boolean =>
   Boolean(computed?.workflowDefinition)
+);
+
+// Checks whether validation errors (from strict schema + custom validations) are present
+export const selectHasValidationErrors = createSelector(
+  selectDetail,
+  (detail): boolean => detail.validationErrorCount > 0
 );
 
 export const selectFocusedStepId = createSelector(selectDetail, (detail) => detail.focusedStepId);
