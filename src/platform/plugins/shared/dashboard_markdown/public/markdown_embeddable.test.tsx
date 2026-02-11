@@ -31,6 +31,7 @@ const renderEmbeddable = async (
   const factory = markdownEmbeddableFactory;
 
   const embeddable = await factory.buildEmbeddable({
+    initializeDrilldownsManager: jest.fn(),
     initialState: {
       content: '[click here](https://example.com)',
     },
