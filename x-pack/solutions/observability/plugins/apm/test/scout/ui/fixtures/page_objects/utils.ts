@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout-oblt';
+import type { ScoutPage } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT } from '../constants';
 
 export async function waitForTableToLoad(page: ScoutPage, testId: string) {

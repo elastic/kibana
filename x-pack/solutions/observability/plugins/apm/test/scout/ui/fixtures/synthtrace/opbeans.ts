@@ -5,11 +5,8 @@
  * 2.0.
  */
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
-import { apm, timerange, generateLongId, generateShortId } from '@kbn/synthtrace-client';
-import { shuffle, compact } from 'lodash';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import {
-  ERROR_MESSAGE,
-  PRODUCT_TRANSACTION_NAME,
   SERVICE_OPBEANS_JAVA,
   SERVICE_OPBEANS_NODE,
   SERVICE_OPBEANS_RUM,
