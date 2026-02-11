@@ -6,6 +6,14 @@ Agent Builder (`x-pack/platform/plugins/shared/agent_builder/`) is the standard 
 
 The Streams plugin's server-side is centered around `StreamsClient` (scoped per request via `StreamsService`), which provides methods for all stream operations. Tools will call `StreamsClient` methods directly rather than going through HTTP routes.
 
+**Key dependency details (learned during implementation):**
+- `StreamsPluginStart` was extended to expose `getScopedClients({ request })`, which returns `RouteHandlerScopedClients` — a bundle of `streamsClient`, `inferenceClient`, `scopedClusterClient`, `systemClient`, `uiSettingsClient`, and `logger`.
+- `StreamsClient.upsertStream()` requires a **full** `UpsertRequest` (not partial). Write tools must read-modify-write: get the current definition, apply changes, then send the complete request. The `processing.updated_at` field must be stripped when constructing upsert requests.
+- `FailureStore` is a union type (`{ inherit: {} } | { disabled: {} } | { lifecycle: { enabled: { data_retention?: string } } } | { lifecycle: { disabled: {} } }`), not `{ enabled: boolean }`.
+- `FieldDefinitionType` is restricted to: `keyword`, `match_only_text`, `long`, `double`, `date`, `boolean`, `ip`, `geo_point`.
+- `WiredStream.Definition` vs `ClassicStream.Definition` is a union requiring explicit type narrowing via `Streams.WiredStream.Definition.is()`.
+- Agent Builder's `ToolHandlerContext` provides: `request`, `spaceId`, `esClient`, `savedObjectsClient`, `modelProvider`, `toolProvider`, `runner`, `resultStore`, `events`, `logger`, `prompts`. Notably, `modelProvider.getDefaultModel()` returns the connector already bound to the agent's execution.
+
 ## Goals / Non-Goals
 
 **Goals:**
@@ -90,6 +98,55 @@ A new `streams` namespace is added to Agent Builder's namespace list, and the ag
 - What it should not do (search logs, replace Discover, modify ES components outside Streams)
 
 **Rationale:** Agent Builder's `configuration.instructions` field is the primary mechanism for shaping agent behavior. Well-crafted instructions are more effective than trying to encode behavior in tool schemas. The conversation history (provided by Agent Builder) gives the LLM the context it needs to track which stream is being discussed.
+
+### 7. Query documents tool: Let the agent see stream data
+
+**Decision:** Provide a `streams.query_documents` tool that returns recent sample documents from a stream, sorted by `@timestamp` descending. The tool accepts an optional count (default 20) and optional time range, and returns the documents with their source fields.
+
+**Rationale:** Users naturally want to ask "show me what's in this stream." Beyond serving that direct use case, the query tool makes the agent smarter across all workflows — it can inspect actual data before suggesting partitions, processors, or field mappings, grounding its recommendations in reality rather than metadata alone. It also solves a practical problem: the agent needs to know the time range of recent data when calling AI tools (partition suggestions, feature identification, etc.), and LLMs cannot reliably produce correct Unix timestamps for "now."
+
+**Trade-offs:**
+- Adds one more tool call to some workflows (e.g. query_documents → suggest_partitions), increasing latency slightly.
+- Sample documents enter the context window. Mitigation: default to 20 documents and truncate long field values to keep payload manageable.
+
+### 8. Query documents: Flatten + instruct for list presentation
+
+**Decision:** The `streams.query_documents` tool flattens nested document structures into dot-notation key-value maps before returning them, and the agent's system instructions direct it to present results as a chronological list rather than a prose summary.
+
+**Rationale:** Stream documents are often deeply nested (e.g. `body.text`, `resource.attributes.host.name`). Returning nested JSON causes two problems: (1) it uses more context window tokens, and (2) LLMs naturally summarize complex nested structures into prose, losing the per-document detail that makes time series data useful. Flattening to dot-notation (`{ "@timestamp": "...", "body.text": "...", "resource.attributes.host.name": "..." }`) reduces both nesting and token count. Combined with agent instructions to present results as a list, this ensures users see individual log entries rather than a summarized paragraph.
+
+**Trade-offs:**
+- Flattening is schema-agnostic — works for any stream without picking specific fields.
+- Dot-notation keys are readable and match the field paths users see in Discover.
+- The agent retains full data to reason about, but instructions guide presentation format.
+
+### 9. AI tool time ranges: Optional with server-side defaults
+
+**Decision:** The `startMs` and `endMs` parameters on AI orchestration tools (`suggest_partitions`, `generate_description`, `identify_features`, `identify_systems`) are optional. When omitted, the tool defaults to the last 24 hours using `Date.now()` server-side.
+
+**Rationale:** LLMs cannot reliably produce correct Unix timestamps. During testing, the agent hallucinated timestamps from 2022 when the current year is 2026, causing AI tools to analyze an empty time range. Making the parameters optional with sensible server-side defaults provides a safety net — even if the agent skips a `query_documents` call and goes straight to an AI tool, it still gets a reasonable time range.
+
+**Alternative considered:** Relying solely on the `query_documents` tool to establish time ranges. Rejected because the agent might not always think to call it first, and defense-in-depth is cheap here.
+
+### 10. AI connector: Use Agent Builder's model provider, not tool parameters
+
+**Decision:** AI orchestration tools obtain the LLM connector from the Agent Builder tool context (`context.modelProvider.getDefaultModel()`) rather than accepting a `connectorId` parameter.
+
+**Rationale:** Agent Builder already binds a connector to the agent's execution context. Exposing `connectorId` as a tool parameter forced the LLM to either pass it (which it doesn't know) or omit it and fall back to UI settings resolution — which failed when no default was configured, even though the agent was already running on a perfectly valid connector. Using the context's model provider is simpler, always works, and removes an unnecessary parameter from the tool schemas.
+
+### 11. Sequential mutations: One write at a time per stream
+
+**Decision:** The agent's system instructions require that when multiple mutations target the same stream, they MUST be executed one at a time — call the first tool, wait for it to complete, then call the next. The agent must never issue multiple mutation tool calls for the same stream in a single reasoning step.
+
+**Rationale:** The Streams API uses an exclusive lock when modifying a stream definition. During testing, the agent called `streams.fork_stream` three times in parallel to create three partitions on the same parent stream. The first call acquired the lock and succeeded; the other two failed with "Could not acquire lock for applying changes." This is inherent to the Streams API design — multiple concurrent writes to the same stream are not supported.
+
+**Alternative considered:** Server-side queuing or retry logic in the tool handler. Rejected because it would add complexity, hide failures, and conflict with the preview-confirm-apply model (the user expects each mutation to be a distinct, confirmable step).
+
+### 12. AI tool time ranges: Agent must pass accurate values
+
+**Decision:** The agent's system instructions require it to always pass accurate `startMs`/`endMs` values to AI tools based on data it has already observed (from prior `query_documents` calls). If no documents have been queried yet, the agent must call `query_documents` first to discover the actual time range before invoking an AI tool.
+
+**Rationale:** During testing, the agent queried documents from a stream and observed data from Feb 5th, but when subsequently calling `suggest_partitions` it passed no time range. The tool defaulted to the last 24 hours, found zero documents, and returned no suggestions. The server-side 24h default (Decision 9) is a safety net, not a substitute for accurate time ranges — data can easily be older than 24 hours. The agent instructions now make this a hard requirement rather than a soft suggestion.
 
 ## Risks / Trade-offs
 

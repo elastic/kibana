@@ -43,6 +43,23 @@ The agent SHALL provide a tool `streams.get_schema` that accepts a stream name a
 - **WHEN** the user asks "what fields are unmapped in logs.myapp?"
 - **THEN** the agent calls `streams.get_schema` and presents the unmapped fields with suggested types
 
+### Requirement: Query stream documents
+The agent SHALL provide a tool `streams.query_documents` that accepts a stream name and returns recent sample documents from the stream, sorted by `@timestamp` descending. The tool accepts optional parameters for document count (default 20) and time range. When no time range is provided, no time filter is applied and the most recent documents are returned regardless of age.
+
+The tool SHALL flatten nested document structures into dot-notation key-value maps (e.g. `body.text`, `resource.attributes.host.name`) to reduce nesting and make documents easier for both the agent and the user to read. Long string values SHALL be truncated to keep context window usage manageable.
+
+#### Scenario: User asks to see recent data
+- **WHEN** the user asks "show me some recent logs from logs.nginx" or "what's in logs.android?"
+- **THEN** the agent calls `streams.query_documents` and presents the returned documents as a **chronological list** showing timestamp and key fields per entry — not as a prose summary
+
+#### Scenario: Agent inspects data before AI analysis
+- **WHEN** the agent is about to call an AI tool (e.g. suggest_partitions) and needs to understand the data
+- **THEN** the agent calls `streams.query_documents` first to see actual data, determine the time range of recent activity, and use that context for the AI tool call
+
+#### Scenario: User asks about specific fields or values
+- **WHEN** the user asks "what does the message field look like in logs.apache?" or "show me error logs from logs.payments"
+- **THEN** the agent calls `streams.query_documents` and focuses its response on the relevant fields or filtered patterns
+
 ### Requirement: Get lifecycle stats
 The agent SHALL provide a tool `streams.get_lifecycle_stats` that accepts a stream name and returns the retention policy (type, value, source), ILM phase breakdown, and data tier distribution.
 

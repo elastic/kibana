@@ -20,10 +20,12 @@ const identifySystemsSchema = z.object({
   name: z.string().min(1).describe('The name of the stream to identify systems for'),
   startMs: z
     .number()
-    .describe('Start of the time range to analyze, as Unix timestamp in milliseconds'),
+    .optional()
+    .describe('Start of the time range to analyze, as Unix timestamp in milliseconds. Defaults to 24 hours ago.'),
   endMs: z
     .number()
-    .describe('End of the time range to analyze, as Unix timestamp in milliseconds'),
+    .optional()
+    .describe('End of the time range to analyze, as Unix timestamp in milliseconds. Defaults to now.'),
 });
 
 export function createIdentifySystemsTool({
@@ -50,6 +52,10 @@ export function createIdentifySystemsTool({
         const { connector } = await modelProvider.getDefaultModel();
         const resolvedConnectorId = connector.connectorId;
 
+        const now = Date.now();
+        const resolvedEndMs = endMs ?? now;
+        const resolvedStartMs = startMs ?? resolvedEndMs - 24 * 60 * 60 * 1000;
+
         const stream = await streamsClient.getStream(name);
 
         // Get existing systems for the stream
@@ -59,8 +65,8 @@ export function createIdentifySystemsTool({
         const result = await identifySystems({
           stream,
           systems: existingSystems,
-          start: startMs,
-          end: endMs,
+          start: resolvedStartMs,
+          end: resolvedEndMs,
           esClient: scopedClusterClient.asCurrentUser,
           inferenceClient: inferenceClient.bindTo({ connectorId: resolvedConnectorId }),
           logger,

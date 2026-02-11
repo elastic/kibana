@@ -39,7 +39,7 @@ The agent SHALL provide a tool `streams.fork_stream` that accepts a parent strea
 
 #### Scenario: Create multiple partitions sequentially
 - **WHEN** the user confirms a set of partitions (e.g. from AI suggestions)
-- **THEN** the agent creates each partition one at a time, reporting success for each
+- **THEN** the agent MUST create each partition one at a time — calling `fork_stream`, waiting for it to complete, then calling the next — because the Streams API uses an exclusive lock per stream. Issuing multiple fork calls in parallel SHALL result in lock conflicts. The agent reports success for each partition individually.
 
 ### Requirement: Delete stream
 The agent SHALL provide a tool `streams.delete_stream` that accepts a stream name and deletes the stream after confirmation.

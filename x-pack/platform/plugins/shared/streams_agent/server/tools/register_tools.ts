@@ -16,6 +16,7 @@ import { STREAMS_GET_STREAM_TOOL_ID, createGetStreamTool } from './get_stream';
 import { STREAMS_GET_DATA_QUALITY_TOOL_ID, createGetDataQualityTool } from './get_data_quality';
 import { STREAMS_GET_SCHEMA_TOOL_ID, createGetSchemaTool } from './get_schema';
 import { STREAMS_GET_LIFECYCLE_STATS_TOOL_ID, createGetLifecycleStatsTool } from './get_lifecycle_stats';
+import { STREAMS_QUERY_DOCUMENTS_TOOL_ID, createQueryDocumentsTool } from './query_documents';
 import { STREAMS_SET_RETENTION_TOOL_ID, createSetRetentionTool } from './set_retention';
 import { STREAMS_FORK_STREAM_TOOL_ID, createForkStreamTool } from './fork_stream';
 import { STREAMS_DELETE_STREAM_TOOL_ID, createDeleteStreamTool } from './delete_stream';
@@ -34,6 +35,7 @@ const STREAMS_READ_TOOL_IDS = [
   STREAMS_GET_DATA_QUALITY_TOOL_ID,
   STREAMS_GET_SCHEMA_TOOL_ID,
   STREAMS_GET_LIFECYCLE_STATS_TOOL_ID,
+  STREAMS_QUERY_DOCUMENTS_TOOL_ID,
 ];
 
 const STREAMS_WRITE_TOOL_IDS = [
@@ -75,6 +77,7 @@ export async function registerTools({
     createGetDataQualityTool({ core, logger }),
     createGetSchemaTool({ core, logger }),
     createGetLifecycleStatsTool({ core, logger }),
+    createQueryDocumentsTool({ core, logger }),
     // Write tools
     createSetRetentionTool({ core, logger }),
     createForkStreamTool({ core, logger }),

@@ -15,8 +15,9 @@
 - [x] 2.4 Implement `streams.get_data_quality` tool — returns degraded/failed doc counts, quality score, failure store status
 - [x] 2.5 Implement `streams.get_schema` tool — returns mapped fields with types, unmapped fields, inherited fields
 - [x] 2.6 Implement `streams.get_lifecycle_stats` tool — returns retention policy, ILM phase breakdown, data tier distribution
-- [x] 2.7 Add all read tool IDs to Agent Builder's `allow_lists.ts` (`AGENT_BUILDER_BUILTIN_TOOLS`)
-- [x] 2.8 Add read tool IDs to the agent's `configuration.tools` list
+- [x] 2.7 Implement `streams.query_documents` tool — returns recent sample documents sorted by `@timestamp` desc, with optional count (default 20) and optional time range (no time filter by default)
+- [x] 2.8 Add all read tool IDs to Agent Builder's `allow_lists.ts` (`AGENT_BUILDER_BUILTIN_TOOLS`)
+- [x] 2.9 Add read tool IDs to the agent's `configuration.tools` list
 
 ## 3. Write Tools (stream-management)
 
@@ -39,6 +40,8 @@
 - [x] 4.6 Implement `streams.identify_systems` tool — calls `identifySystems` from `@kbn/streams-ai`, returns detected systems
 - [x] 4.7 Implement `streams.generate_description` tool — calls `generateStreamDescription` from `@kbn/streams-ai`, returns generated description
 - [x] 4.8 Add all AI tool IDs to Agent Builder's allow lists and agent tool configuration
+- [x] 4.9 Make `startMs`/`endMs` optional on all AI tools, defaulting to last 24 hours via `Date.now()` server-side
+- [x] 4.10 Use `context.modelProvider.getDefaultModel()` for connector resolution instead of `connectorId` parameter
 
 ## 5. Integration & Testing
 

@@ -1,7 +1,25 @@
 ## ADDED Requirements
 
+### Requirement: AI tool time ranges default to last 24 hours
+All AI orchestration tools that accept time range parameters (`startMs`, `endMs`) SHALL make those parameters optional. When omitted, the tool SHALL default to the last 24 hours using `Date.now()` server-side. This prevents the agent from hallucinating incorrect Unix timestamps.
+
+### Requirement: AI tool time ranges must be accurate when available
+When the agent has already queried documents from a stream (via `streams.query_documents`) and knows the actual time range of the data, it MUST pass those timestamps as `startMs`/`endMs` to subsequent AI tool calls. The 24-hour server-side default is a safety net for cases where the agent has no prior knowledge, not a substitute for accurate values. If the agent has not yet queried documents and is about to call an AI tool, it MUST call `query_documents` first to discover the actual time range.
+
+#### Scenario: Agent uses known time range for AI tool
+- **WHEN** the agent has previously called `query_documents` and observed data spanning a specific time range
+- **AND** the user asks for an AI operation (e.g. "suggest partitions")
+- **THEN** the agent passes the observed `startMs`/`endMs` to the AI tool, ensuring the AI analyzes actual data rather than an empty 24-hour window
+
+#### Scenario: Agent discovers time range before AI tool
+- **WHEN** the user asks for an AI operation and no documents have been queried yet
+- **THEN** the agent calls `query_documents` first, extracts the time range from the results, and passes it to the AI tool
+
+### Requirement: AI tool connector from execution context
+All AI orchestration tools SHALL obtain the LLM connector from the Agent Builder tool context (`context.modelProvider.getDefaultModel()`) rather than accepting a `connectorId` parameter. This ensures the tools always use the same connector the agent is running on, without requiring the LLM to know or pass connector IDs.
+
 ### Requirement: Suggest partitions
-The agent SHALL provide a tool `streams.suggest_partitions` that accepts a stream name and an optional user hint, invokes the existing partition suggestion AI endpoint, and returns the suggested partitions with their names and routing conditions.
+The agent SHALL provide a tool `streams.suggest_partitions` that accepts a stream name and an optional user hint, invokes the existing partition suggestion AI endpoint, and returns the suggested partitions with their names and routing conditions. Time range parameters are optional (default: last 24 hours).
 
 #### Scenario: User asks for help organizing logs
 - **WHEN** the user asks "help me organize logs" or "suggest partitions for logs"

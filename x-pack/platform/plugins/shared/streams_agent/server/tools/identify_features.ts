@@ -22,10 +22,12 @@ const identifyFeaturesSchema = z.object({
   name: z.string().min(1).describe('The name of the stream to identify features for'),
   startMs: z
     .number()
-    .describe('Start of the time range to analyze, as Unix timestamp in milliseconds'),
+    .optional()
+    .describe('Start of the time range to analyze, as Unix timestamp in milliseconds. Defaults to 24 hours ago.'),
   endMs: z
     .number()
-    .describe('End of the time range to analyze, as Unix timestamp in milliseconds'),
+    .optional()
+    .describe('End of the time range to analyze, as Unix timestamp in milliseconds. Defaults to now.'),
 });
 
 export function createIdentifyFeaturesTool({
@@ -52,6 +54,10 @@ export function createIdentifyFeaturesTool({
         const { connector } = await modelProvider.getDefaultModel();
         const resolvedConnectorId = connector.connectorId;
 
+        const now = Date.now();
+        const resolvedEndMs = endMs ?? now;
+        const resolvedStartMs = startMs ?? resolvedEndMs - 24 * 60 * 60 * 1000;
+
         // Ensure stream exists
         await streamsClient.getStream(name);
 
@@ -62,8 +68,8 @@ export function createIdentifyFeaturesTool({
           query: {
             range: {
               '@timestamp': {
-                gte: startMs,
-                lte: endMs,
+                gte: resolvedStartMs,
+                lte: resolvedEndMs,
                 format: 'epoch_millis',
               },
             },

@@ -47,6 +47,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.get_data_quality`,
   `${internalNamespaces.streams}.get_schema`,
   `${internalNamespaces.streams}.get_lifecycle_stats`,
+  `${internalNamespaces.streams}.query_documents`,
   // Streams – write tools
   `${internalNamespaces.streams}.set_retention`,
   `${internalNamespaces.streams}.fork_stream`,
