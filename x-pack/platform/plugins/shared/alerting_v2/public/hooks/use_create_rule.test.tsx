@@ -1,18 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
+import type { FormValues } from '@kbn/alerting-v2-rule-form';
 import { useCreateRule } from './use_create_rule';
-import type { FormValues } from '../types';
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -39,8 +37,8 @@ const createMockNotifications = () => ({
 
 describe('useCreateRule', () => {
   const validFormData: FormValues = {
+    kind: 'signal',
     name: 'Test Rule',
-    kind: 'alert',
     description: 'Test Description',
     tags: ['tag1', 'tag2'],
     schedule: { custom: '5m' },
@@ -179,7 +177,7 @@ describe('useCreateRule', () => {
 
     const formData: FormValues = {
       name: 'Complex Rule',
-      kind: 'alert',
+      kind: 'signal',
       description: 'Complex Rule Description',
       tags: ['production', 'critical'],
       schedule: { custom: '1m' },
@@ -198,6 +196,7 @@ describe('useCreateRule', () => {
       const callBody = JSON.parse(http.post.mock.calls[0][1].body);
       expect(callBody).toEqual({
         name: 'Complex Rule',
+        kind: 'signal',
         description: 'Complex Rule Description',
         tags: ['production', 'critical'],
         schedule: { custom: '1m' },

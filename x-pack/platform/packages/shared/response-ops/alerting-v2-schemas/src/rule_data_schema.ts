@@ -40,6 +40,7 @@ export type RuleKind = z.infer<typeof ruleKindSchema>;
 export const createRuleDataSchema = z
   .object({
     name: z.string().min(1).max(64).describe('Human-readable rule name.'),
+    description: z.string().max(1024).optional().describe('Detailed description of the rule.'),
     kind: ruleKindSchema,
     tags: z
       .array(z.string().max(64).describe('Rule tag.'))

@@ -19,6 +19,7 @@ import type { CoreDiServiceStart } from '@kbn/core-di';
 import { ApplicationParameters, Context, CoreStart } from '@kbn/core-di-browser';
 import { Router } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ALERTING_V2_APP_ID, ALERTING_V2_APP_ROUTE } from './constants';
 import { App } from './components/app';
 
@@ -51,12 +52,16 @@ export const mountAlertingV2App = ({
 }): AppUnmount => {
   const { element, history } = params;
 
+  const queryClient = new QueryClient();
+
   ReactDOM.render(
     <Context.Provider value={container}>
       <I18nProvider>
-        <Router history={history}>
-          <App />
-        </Router>
+        <QueryClientProvider client={queryClient}>
+          <Router history={history}>
+            <App />
+          </Router>
+        </QueryClientProvider>
       </I18nProvider>
     </Context.Provider>,
     element

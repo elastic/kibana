@@ -94,10 +94,17 @@ export const RuleExecutionFieldGroup: React.FC<RuleExecutionFieldGroupProps> = (
         label={i18n.translate('xpack.esqlRuleForm.timeFieldLabel', {
           defaultMessage: 'Time Field',
         })}
+        isInvalid={!!errors.timeField}
+        error={errors.timeField?.message}
       >
         <Controller
           name="timeField"
           control={control}
+          rules={{
+            required: i18n.translate('xpack.esqlRuleForm.timeFieldRequiredError', {
+              defaultMessage: 'Time field is required.',
+            }),
+          }}
           render={({ field }) => <TimeFieldSelect {...field} fields={timeFields} />}
         />
       </EuiFormRow>

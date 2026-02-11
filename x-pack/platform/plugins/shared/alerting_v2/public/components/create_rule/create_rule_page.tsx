@@ -17,6 +17,8 @@ import { useHistory, useParams } from 'react-router-dom';
 import { RulesApi } from '../../services/rules_api';
 import { YamlTab } from './yaml_tab';
 import { FormTab } from './form_tab';
+import { useUpdateRule } from '../../hooks/use_update_rule';
+import { useCreateRule } from '../../hooks/use_create_rule';
 
 export const CreateRulePage = () => {
   const { id: ruleId } = useParams<{ id?: string }>();
@@ -25,6 +27,7 @@ export const CreateRulePage = () => {
   const rulesApi = useService(RulesApi);
   const http = useService(CoreStart('http'));
   const chrome = useService(CoreStart('chrome'));
+  const application = useService(CoreStart('application'));
   const notifications = useService(CoreStart('notifications'));
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
@@ -32,48 +35,19 @@ export const CreateRulePage = () => {
   const [selectedTabId, setSelectedTabId] = useState<'yaml' | 'form'>('form');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { updateRule } = useUpdateRule({ http, notifications, onSuccess: () => history.push('/') });
+  const { createRule } = useCreateRule({ http, notifications, onSuccess: () => history.push('/') });
+
   const saveRule = useCallback(
     async (formValues: any) => {
-      setIsSubmitting(true);
       if (isEditing && ruleId) {
-        try {
-          await rulesApi.updateRule(ruleId, formValues);
-          notifications.toasts.addSuccess(
-            i18n.translate('xpack.alertingV2.createRule.editSuccessToast', {
-              defaultMessage: 'Rule successfully updated',
-            })
-          );
-          history.push('/');
-        } catch (error) {
-          notifications.toasts.addError(error as Error, {
-            title: i18n.translate('xpack.alertingV2.createRule.editErrorToast', {
-              defaultMessage: 'Error updating rule',
-            }),
-          });
-        } finally {
-          setIsSubmitting(false);
-        }
+        await updateRule({ id: ruleId, formValues });
       } else {
-        try {
-          await rulesApi.createRule(formValues);
-          notifications.toasts.addSuccess(
-            i18n.translate('xpack.alertingV2.createRule.createSuccessToast', {
-              defaultMessage: 'Rule successfully created',
-            })
-          );
-          history.push('/');
-        } catch (error) {
-          notifications.toasts.addError(error as Error, {
-            title: i18n.translate('xpack.alertingV2.createRule.createErrorToast', {
-              defaultMessage: 'Error creating rule',
-            }),
-          });
-        } finally {
-          setIsSubmitting(false);
-        }
+        await createRule(formValues);
+        // Handle rule creation (not implemented in this snippet)
       }
     },
-    [setIsSubmitting, isEditing, ruleId, rulesApi, notifications, history]
+    [isEditing, ruleId, updateRule, createRule]
   );
 
   // Set breadcrumbs
@@ -83,7 +57,12 @@ export const CreateRulePage = () => {
         text: i18n.translate('xpack.alertingV2.breadcrumb.home', {
           defaultMessage: 'Alerting v2',
         }),
-        href: '#/',
+        onClick: (e) => {
+          e.preventDefault();
+          application.navigateToApp('management', {
+            path: `insightsAndAlerting/alerting_v2`,
+          });
+        },
       },
       {
         text: isEditing
@@ -95,7 +74,7 @@ export const CreateRulePage = () => {
             }),
       },
     ]);
-  }, [chrome, isEditing]);
+  }, [chrome, application, isEditing]);
 
   const tabs = useMemo(
     () => [

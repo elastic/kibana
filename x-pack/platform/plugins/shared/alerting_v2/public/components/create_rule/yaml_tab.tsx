@@ -21,6 +21,7 @@ import type { RulesApi } from '../../services/rules_api';
 import { RuleFooter } from './rule_footer';
 
 const DEFAULT_RULE_YAML = `name: Example rule
+kind: alert
 tags: []
 schedule:
   custom: 1m
