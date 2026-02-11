@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { InfraTimerangeInput } from '../../../../../common/http_api';
 import { calculateRateTimeranges } from './calculate_rate_timeranges';
 
@@ -12,8 +13,9 @@ export const createRateAggsWithInterface = (
   timerange: InfraTimerangeInput,
   id: string,
   field: string,
-  interfaceField: string
-) => {
+  interfaceField: string,
+  filter?: estypes.QueryDslQueryContainer
+): Record<string, estypes.AggregationsAggregationContainer> => {
   const { firstBucketRange, secondBucketRange, intervalInSeconds } =
     calculateRateTimeranges(timerange);
 
@@ -31,29 +33,35 @@ export const createRateAggsWithInterface = (
     },
   };
 
-  return {
-    [`${id}_first_bucket`]: {
-      filter: {
-        range: {
-          '@timestamp': {
-            gte: firstBucketRange.from,
-            lt: firstBucketRange.to,
-            format: 'epoch_millis',
-          },
+  const createBucketFilter = (range: { from: number; to: number }) => {
+    const rangeFilter: estypes.QueryDslQueryContainer = {
+      range: {
+        '@timestamp': {
+          gte: range.from,
+          lt: range.to,
+          format: 'epoch_millis',
         },
       },
+    };
+
+    if (!filter) {
+      return rangeFilter;
+    }
+
+    return {
+      bool: {
+        must: [filter, rangeFilter],
+      },
+    };
+  };
+
+  return {
+    [`${id}_first_bucket`]: {
+      filter: createBucketFilter(firstBucketRange),
       aggs: interfaceAggs,
     },
     [`${id}_second_bucket`]: {
-      filter: {
-        range: {
-          '@timestamp': {
-            gte: secondBucketRange.from,
-            lt: secondBucketRange.to,
-            format: 'epoch_millis',
-          },
-        },
-      },
+      filter: createBucketFilter(secondBucketRange),
       aggs: interfaceAggs,
     },
     [id]: {

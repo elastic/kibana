@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { FieldSchema } from './fields';
 
 /**
  * Template schema for case templates
@@ -85,21 +86,16 @@ export const TemplateSchema = z.object({
 export type Template = z.infer<typeof TemplateSchema>;
 
 /**
- * Parsed template field definition
- */
-export const ParsedTemplateFieldSchema = z.object({
-  control: z.string(),
-  name: z.string(),
-  label: z.string().optional(),
-  type: z.literal('keyword'),
-  metadata: z.record(z.unknown()),
-});
-
-/**
  * Parsed template definition
  */
 export const ParsedTemplateDefinitionSchema = z.object({
-  fields: z.array(ParsedTemplateFieldSchema),
+  fields: z.array(FieldSchema).refine(
+    (fields) => {
+      const fieldNames = new Set(fields.map((field) => field.name));
+      return fieldNames.size === fields.length;
+    },
+    { message: 'Field names must be unique.' }
+  ),
 });
 
 /**
