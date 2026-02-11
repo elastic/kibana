@@ -11,5 +11,9 @@
     ]
   },
   "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["target/**/*"]
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/react-kibana-context-theme",
+  ]
 }
