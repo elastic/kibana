@@ -110,7 +110,7 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
 
           await ensureProfilesIndex({ esClient, logger });
 
-          const repo = new ProfilesRepository(esClient, logger);
+          const repo = new ProfilesRepository(esClient);
 
           const saltId = `salt-${namespace}`;
 
@@ -179,7 +179,7 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
 
           await ensureProfilesIndex({ esClient, logger });
 
-          const repo = new ProfilesRepository(esClient, logger);
+          const repo = new ProfilesRepository(esClient);
           const result = await repo.find({
             namespace,
             filter: request.query.filter,
@@ -228,7 +228,7 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-          const repo = new ProfilesRepository(esClient, logger);
+          const repo = new ProfilesRepository(esClient);
           const profile = await repo.get(namespace, request.params.id);
 
           if (!profile) {
@@ -284,7 +284,7 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-          const repo = new ProfilesRepository(esClient, logger);
+          const repo = new ProfilesRepository(esClient);
           const profile = await repo.update(namespace, request.params.id, {
             ...request.body,
             updatedBy: coreContext.security.authc.getCurrentUser()?.username ?? 'unknown',
@@ -331,7 +331,7 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-          const repo = new ProfilesRepository(esClient, logger);
+          const repo = new ProfilesRepository(esClient);
           const deleted = await repo.delete(namespace, request.params.id);
 
           if (!deleted) {
