@@ -82,7 +82,6 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
         ? uniq([valueAsStr, ...suggestions])
         : suggestions;
     }, [suggestions, selectedValue]);
-
     const selectedOptionsMemo = useMemo((): string[] => {
       const valueAsStr = String(selectedValue);
       return selectedValue ? [valueAsStr] : [];
