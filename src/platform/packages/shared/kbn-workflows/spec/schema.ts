@@ -96,7 +96,7 @@ export const TimeoutPropSchema = z.object({
 export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
 const StepWithForEachSchema = z.object({
-  foreach: z.string().optional(),
+  foreach: z.union([z.string(), z.array(z.unknown())]).optional(),
 });
 export type StepWithForeach = z.infer<typeof StepWithForEachSchema>;
 
@@ -268,7 +268,7 @@ export function getHttpStepSchema(stepSchema: z.ZodType, loose: boolean = false)
 
 export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
-  foreach: z.string(),
+  foreach: z.union([z.string(), z.array(z.unknown())]),
   steps: z.array(BaseStepSchema).min(1),
 }).merge(StepWithIfConditionSchema);
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;
