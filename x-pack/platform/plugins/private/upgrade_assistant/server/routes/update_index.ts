@@ -36,7 +36,7 @@ export function registerUpdateIndexRoute({
       },
       validate: {
         params: schema.object({
-          index: schema.string(),
+          index: schema.string({ maxLength: 1000 }),
         }),
         body: schema.object({
           operations: schema.arrayOf(

@@ -20,7 +20,7 @@ export const registerUpdateRoute = ({
   lib: { handleEsError },
 }: RouteDependencies) => {
   const paramsSchema = schema.object({
-    id: schema.string(),
+    id: schema.string({ maxLength: 1000 }),
   });
 
   const bodySchema = schema.object({
