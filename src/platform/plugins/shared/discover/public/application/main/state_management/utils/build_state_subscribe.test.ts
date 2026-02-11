@@ -22,12 +22,10 @@ describe('buildStateSubscribe', () => {
   const stateContainer = getDiscoverStateMock({ savedSearch });
   stateContainer.dataState.refetch$.next = jest.fn();
   stateContainer.dataState.reset = jest.fn();
-  stateContainer.savedSearchState.update = jest.fn();
   jest.spyOn(internalStateActions, 'assignNextDataView');
 
   const getSubscribeFn = () => {
     return buildStateSubscribe({
-      savedSearchState: stateContainer.savedSearchState,
       dataState: stateContainer.dataState,
       internalState: stateContainer.internalState,
       runtimeStateManager: stateContainer.runtimeStateManager,
@@ -70,7 +68,6 @@ describe('buildStateSubscribe', () => {
 
     expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
     expect(stateContainer.dataState.reset).not.toHaveBeenCalled();
-    expect(stateContainer.savedSearchState.update).toHaveBeenCalled();
   });
 
   it('should call refetch$ if the chart is hidden', async () => {

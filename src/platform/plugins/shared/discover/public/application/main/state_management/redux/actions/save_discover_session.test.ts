@@ -153,13 +153,23 @@ describe('saveDiscoverSession', () => {
       breakdownField: 'breakdown-test',
     });
 
+    // Also update the breakdownField in the Redux appState, since that's the source of truth
+    const currentTabId = toolkit.getCurrentTab().id;
+    toolkit.internalState.dispatch(
+      internalStateActions.updateAppState({
+        tabId: currentTabId,
+        appState: {
+          breakdownField: 'breakdown-test',
+        },
+      })
+    );
+
     const resetOnSavedSearchChangeSpy = jest.spyOn(
       internalStateSlice.actions,
       'resetOnSavedSearchChange'
     );
     const setDataViewSpy = jest.spyOn(tabStateDataViewActions, 'setDataView');
     const setSavedSearchSpy = jest.spyOn(stateContainer.savedSearchState, 'set');
-    const currentTabId = toolkit.getCurrentTab().id;
 
     jest
       .spyOn(services.data.search.searchSource, 'create')

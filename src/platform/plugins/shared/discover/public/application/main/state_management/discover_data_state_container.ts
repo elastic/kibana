@@ -44,6 +44,7 @@ import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabSta
 import { internalStateActions, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
+import { createSearchSource } from './utils/create_search_source';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -283,6 +284,15 @@ export function getDataStateContainer({
               searchSessionManager.getNextSearchSessionId());
           }
 
+          const currentTab = getCurrentTab();
+          const currentDataView = currentDataView$.getValue();
+          const searchSource = createSearchSource({
+            dataView: currentDataView,
+            appState: currentTab.appState,
+            globalState: currentTab.globalState,
+            services,
+          });
+
           const commonFetchParams: Omit<CommonFetchParams, 'abortController'> = {
             dataSubjects,
             initialFetchStatus: getInitialFetchStatus(),
@@ -290,7 +300,7 @@ export function getDataStateContainer({
             searchSessionId,
             services,
             internalState,
-            savedSearch: savedSearchContainer.getState(),
+            searchSource,
             scopedProfilesManager,
             scopedEbtManager,
             getCurrentTab,

@@ -84,12 +84,14 @@ export function createDiscoverServicesMock(): DiscoverServices {
 
   dataPlugin.dataViews = createDiscoverDataViewsMock();
 
-  dataPlugin.search.searchSource.createEmpty = jest.fn(() => {
+  const createSearchSourceWithDeps = (fields?: Record<string, unknown>) => {
     const deps = {
       getConfig: jest.fn(),
     } as unknown as SearchSourceDependencies;
-    const searchSource = new SearchSource({}, deps);
-    searchSource.fetch$ = jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }));
+    const searchSource = new SearchSource(fields ?? {}, deps);
+    searchSource.fetch$ = jest
+      .fn()
+      .mockReturnValue(of({ rawResponse: { hits: { total: 2, hits: [] } } }));
     searchSource.createChild = jest.fn((options = {}) => {
       const childSearchSource = new SearchSource({}, deps);
       childSearchSource.setParent(searchSource, options);
@@ -100,7 +102,13 @@ export function createDiscoverServicesMock(): DiscoverServices {
       return childSearchSource;
     });
     return searchSource;
-  });
+  };
+
+  dataPlugin.search.searchSource.createEmpty = jest.fn(() => createSearchSourceWithDeps());
+
+  dataPlugin.search.searchSource.create = jest.fn(async (fields?: Record<string, unknown>) =>
+    createSearchSourceWithDeps(fields)
+  );
 
   const expressionsPlugin = expressionsPluginMock.createStartContract();
 

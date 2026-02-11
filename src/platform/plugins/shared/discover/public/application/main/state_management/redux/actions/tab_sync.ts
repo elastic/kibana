@@ -227,7 +227,6 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     // subscribing to state changes of appStateContainer, triggering data fetching
     const appStateSubscription = appStateContainer.state$.subscribe(
       buildStateSubscribe({
-        savedSearchState: savedSearchContainer,
         dataState: stateContainer.dataState,
         internalState: stateContainer.internalState,
         runtimeStateManager,
@@ -249,14 +248,8 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = stateContainer.dataState.subscribe();
 
-    // updates saved search when query or filters change, triggers data fetching
+    // triggers data fetching when query or filters change
     const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(() => {
-      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-      savedSearchContainer.update({
-        nextDataView: currentDataView$.getValue(),
-        nextState: getAppState(),
-        useFilterAndQueryServices: true,
-      });
       addLog('[getDiscoverStateContainer] filter changes triggers data fetching');
       dispatch(
         internalStateActions.fetchData({
