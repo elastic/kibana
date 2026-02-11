@@ -106,9 +106,17 @@ export function createDiscoverServicesMock(): DiscoverServices {
 
   dataPlugin.search.searchSource.createEmpty = jest.fn(() => createSearchSourceWithDeps());
 
-  dataPlugin.search.searchSource.create = jest.fn(async (fields?: Record<string, unknown>) =>
-    createSearchSourceWithDeps(fields)
-  );
+  dataPlugin.search.searchSource.create = jest.fn(async (fields?: Record<string, unknown>) => {
+    if (typeof fields?.index === 'string') {
+      try {
+        const dataView = await dataPlugin.dataViews.get(fields.index);
+        return createSearchSourceWithDeps({ ...fields, index: dataView });
+      } catch {
+        // Data view not found in mock, create with raw fields
+      }
+    }
+    return createSearchSourceWithDeps(fields);
+  });
 
   const expressionsPlugin = expressionsPluginMock.createStartContract();
 
