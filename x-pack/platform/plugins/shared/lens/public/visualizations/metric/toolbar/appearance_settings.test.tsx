@@ -9,7 +9,7 @@ import React from 'react';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { Alignment, MetricVisualizationState, PrimaryMetricPosition } from '@kbn/lens-common';
-import { METRIC_LAYOUT_BY_POSITION } from '@kbn/lens-common';
+import { LENS_METRIC_LAYOUT_BY_POSITION } from '@kbn/lens-common';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
 import { MetricAppearanceSettings } from './appearance_settings';
 
@@ -316,7 +316,7 @@ describe('appearance settings', () => {
       expect(mockSetState).toHaveBeenCalledWith(
         expect.objectContaining({
           primaryPosition: newPosition,
-          ...METRIC_LAYOUT_BY_POSITION[newPosition],
+          ...LENS_METRIC_LAYOUT_BY_POSITION[newPosition],
         })
       );
     }

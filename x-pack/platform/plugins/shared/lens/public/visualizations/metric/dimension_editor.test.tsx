@@ -22,9 +22,9 @@ import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { DataType, MetricVisualizationState } from '@kbn/lens-common';
 import {
+  LENS_LEGACY_METRIC_STATE_DEFAULTS,
   LENS_METRIC_GROUP_ID,
-  legacyMetricStateDefaults,
-  metricStateDefaults,
+  LENS_METRIC_STATE_DEFAULTS,
 } from '@kbn/lens-common';
 import type { Props, SupportingVisType, ApplyColor } from './dimension_editor';
 import {
@@ -227,7 +227,10 @@ describe('dimension editor', () => {
         });
         await setIcon('Compute');
         expect(setState).toHaveBeenCalledWith(
-          expect.objectContaining({ icon: 'compute', iconAlign: metricStateDefaults.iconAlign })
+          expect.objectContaining({
+            icon: 'compute',
+            iconAlign: LENS_METRIC_STATE_DEFAULTS.iconAlign,
+          })
         );
       });
 
@@ -241,7 +244,7 @@ describe('dimension editor', () => {
         expect(setState).toHaveBeenCalledWith(
           expect.objectContaining({
             icon: 'compute',
-            iconAlign: legacyMetricStateDefaults.iconAlign,
+            iconAlign: LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign,
           })
         );
       });

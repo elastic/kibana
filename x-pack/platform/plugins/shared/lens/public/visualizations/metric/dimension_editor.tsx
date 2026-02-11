@@ -41,8 +41,8 @@ import { css } from '@emotion/react';
 import {
   LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
   LENS_METRIC_GROUP_ID,
-  metricStateDefaults,
-  legacyMetricStateDefaults,
+  LENS_METRIC_STATE_DEFAULTS,
+  LENS_LEGACY_METRIC_STATE_DEFAULTS,
 } from '@kbn/lens-common';
 import { PalettePanelContainer, getAccessorType } from '../../shared_components';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
@@ -567,7 +567,7 @@ function SecondaryMetricEditor({
               },
             ]}
             idSelected={`${idPrefix}${
-              state.secondaryLabelPosition ?? metricStateDefaults.secondaryLabelPosition
+              state.secondaryLabelPosition ?? LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition
             }`}
             onChange={(_id, secondaryLabelPosition) => {
               setState({
@@ -728,7 +728,7 @@ function PrimaryMetricEditor({ state, setState, datasource, accessor }: SubProps
               setState({
                 ...state,
                 icon: newIcon,
-                iconAlign: legacyMetricStateDefaults.iconAlign,
+                iconAlign: LENS_LEGACY_METRIC_STATE_DEFAULTS.iconAlign,
               });
               return;
             }
@@ -737,7 +737,7 @@ function PrimaryMetricEditor({ state, setState, datasource, accessor }: SubProps
             setState({
               ...state,
               icon: newIcon,
-              iconAlign: metricStateDefaults.iconAlign,
+              iconAlign: LENS_METRIC_STATE_DEFAULTS.iconAlign,
             });
           }}
         />
@@ -983,7 +983,7 @@ export function DimensionEditorAdditionalSection({
             setState({
               ...state,
               showBar: supportingVisualizationType === 'bar',
-              applyColorTo: metricStateDefaults.applyColorTo,
+              applyColorTo: LENS_METRIC_STATE_DEFAULTS.applyColorTo,
             });
 
             if (supportingVisualizationType === 'trendline') {
@@ -1090,7 +1090,7 @@ export function DimensionEditorAdditionalSection({
               },
             ]}
             idSelected={`${buttonIdPrefix}${
-              state.applyColorTo ?? metricStateDefaults.applyColorTo
+              state.applyColorTo ?? LENS_METRIC_STATE_DEFAULTS.applyColorTo
             }`}
             onChange={(_id, newApplyColorTo) => {
               setState({
