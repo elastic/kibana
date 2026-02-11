@@ -26,6 +26,8 @@ export {
   type IndexAutocompleteItem,
   type ResolveIndexResponse,
   type ESQLSourceResult,
+  type EsqlView,
+  type EsqlViewsResult,
 } from './src/sources_autocomplete_types';
 
 export { type RecommendedQuery, type RecommendedField } from './src/extensions_autocomplete_types';
