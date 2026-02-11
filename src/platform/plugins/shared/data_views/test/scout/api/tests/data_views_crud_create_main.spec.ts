@@ -20,7 +20,7 @@ configArray.forEach((config) => {
       // Track created data view IDs for cleanup
       let createdIds: string[] = [];
 
-      apiTest.beforeAll(async ({ esArchiver, requestAuth, log }) => {
+      apiTest.beforeAll(async ({ esArchiver, requestAuth }) => {
         // Admin role required for creating data views and managing spaces
         adminApiCredentials = await requestAuth.getApiKey('admin');
         // Load ES archive for tests that need basic_index
