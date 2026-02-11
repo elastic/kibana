@@ -1512,7 +1512,6 @@
     "@babel/preset-env": "7.24.7",
     "@babel/preset-react": "7.24.7",
     "@babel/preset-typescript": "7.24.7",
-    "@babel/register": "7.24.6",
     "@babel/traverse": "7.26.8",
     "@babel/types": "7.21.2",
     "@cypress/debugging-proxy": "2.0.1",

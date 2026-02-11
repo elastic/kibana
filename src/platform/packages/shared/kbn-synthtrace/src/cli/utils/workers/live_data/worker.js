@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-var-requires*/
-require('@babel/register')({
-  extensions: ['.ts', '.js'],
-  presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
-});
+require('@kbn/setup-node-env');
 
 require('./synthtrace_live_data_worker');

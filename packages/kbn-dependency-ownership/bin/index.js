@@ -9,10 +9,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-require('@babel/register')({
-  extensions: ['.ts', '.js'],
-  presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
-});
+require('@kbn/setup-node-env');
 
 require('../src/cli');
