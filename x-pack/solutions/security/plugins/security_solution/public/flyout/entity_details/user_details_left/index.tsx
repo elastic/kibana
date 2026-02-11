@@ -19,6 +19,7 @@ import { LeftPanelContent } from '../shared/components/left_panel/left_panel_con
 
 interface UserParam {
   name: string;
+  email: string[];
 }
 
 export interface UserDetailsPanelProps extends Record<string, unknown> {

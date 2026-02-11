@@ -77,6 +77,7 @@ export const UserPanel = ({
   const { to, from, setQuery, deleteQuery } = useGlobalTime();
 
   const observedUser = useObservedUser(userName, scopeId);
+  const email = observedUser.details.user?.email;
 
   const managedUser = useManagedUser();
 
@@ -117,6 +118,7 @@ export const UserPanel = ({
 
   const openDetailsPanel = useNavigateToUserDetails({
     userName,
+    email,
     scopeId,
     contextID,
     isRiskScoreExist,
@@ -150,7 +152,6 @@ export const UserPanel = ({
       />
       <UserPanelHeader
         userName={userName}
-        scopeId={scopeId}
         managedUser={managedUser}
         lastSeen={observedUser.lastSeen}
       />
