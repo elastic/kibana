@@ -109,10 +109,7 @@ interface FindProfilesResult {
  * Operates directly against the `.anonymization-profiles` system index.
  */
 export class ProfilesRepository {
-  constructor(
-    private readonly esClient: ElasticsearchClient,
-    private readonly logger: Logger
-  ) {}
+  constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
 
   /**
    * Creates a new profile. Enforces uniqueness per (namespace, target_type, target_id).

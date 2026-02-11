@@ -14,11 +14,11 @@ import type {
 } from '@kbn/inference-common';
 import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { AnonymizationPolicyService } from '@kbn/anonymization-plugin/server';
 import { createClient as createInferenceClient, createChatModel } from './inference_client';
 import { RegexWorkerService } from './chat_complete/anonymization/regex_worker_service';
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
-import type { AnonymizationPolicyService } from '@kbn/anonymization-plugin/server';
 import { ensureReplacementsIndex } from './chat_complete/anonymization/replacements/replacements_index';
 import type {
   InferenceBoundClientCreateOptions,

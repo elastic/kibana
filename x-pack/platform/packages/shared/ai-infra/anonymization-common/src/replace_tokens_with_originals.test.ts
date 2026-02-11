@@ -31,36 +31,27 @@ describe('replaceTokensWithOriginals', () => {
   });
 
   it('replaces multiple different tokens', () => {
-    const result = replaceTokensWithOriginals(
-      'HOST_NAME_abc123 was accessed by USER_NAME_def456',
-      {
-        HOST_NAME_abc123: 'my-server',
-        USER_NAME_def456: 'alice',
-      }
-    );
+    const result = replaceTokensWithOriginals('HOST_NAME_abc123 was accessed by USER_NAME_def456', {
+      HOST_NAME_abc123: 'my-server',
+      USER_NAME_def456: 'alice',
+    });
 
     expect(result).toBe('my-server was accessed by alice');
   });
 
   it('replaces all occurrences of the same token', () => {
-    const result = replaceTokensWithOriginals(
-      'HOST_NAME_abc123 connects to HOST_NAME_abc123',
-      {
-        HOST_NAME_abc123: 'my-server',
-      }
-    );
+    const result = replaceTokensWithOriginals('HOST_NAME_abc123 connects to HOST_NAME_abc123', {
+      HOST_NAME_abc123: 'my-server',
+    });
 
     expect(result).toBe('my-server connects to my-server');
   });
 
   it('replaces longer tokens first to avoid partial matches', () => {
-    const result = replaceTokensWithOriginals(
-      'HOST_NAME_abc HOST_NAME_abc123',
-      {
-        HOST_NAME_abc: 'short-host',
-        HOST_NAME_abc123: 'long-host',
-      }
-    );
+    const result = replaceTokensWithOriginals('HOST_NAME_abc HOST_NAME_abc123', {
+      HOST_NAME_abc: 'short-host',
+      HOST_NAME_abc123: 'long-host',
+    });
 
     expect(result).toBe('short-host long-host');
   });

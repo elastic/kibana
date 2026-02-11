@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter, Logger, CoreSetup } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { replaceTokensWithOriginals } from '@kbn/anonymization-common';
 import { ReplacementsRepository } from './replacements_repository';
 import { ensureReplacementsIndex } from './replacements_index';

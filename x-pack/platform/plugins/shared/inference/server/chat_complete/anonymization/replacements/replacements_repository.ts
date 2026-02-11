@@ -62,10 +62,7 @@ const MAX_TOKEN_SOURCES = 10000;
  * Owned by the inference plugin.
  */
 export class ReplacementsRepository {
-  constructor(
-    private readonly esClient: ElasticsearchClient,
-    private readonly logger: Logger
-  ) {}
+  constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
 
   /**
    * Creates a new replacements set.

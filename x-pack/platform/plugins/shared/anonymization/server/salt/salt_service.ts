@@ -6,10 +6,7 @@
  */
 
 import { randomBytes } from 'crypto';
-import type {
-  SavedObjectsServiceStart,
-  Logger,
-} from '@kbn/core/server';
+import type { SavedObjectsServiceStart, Logger } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 
 export const ANONYMIZATION_SALT_SAVED_OBJECT_TYPE = 'anonymization-salt';

@@ -155,9 +155,7 @@ export const migrateAnonymizationSettings = async ({
         refresh: 'wait_for',
       });
 
-      logger.info(
-        `Migrated ai:anonymizationSettings to profile ${hit._id} in space ${namespace}`
-      );
+      logger.info(`Migrated ai:anonymizationSettings to profile ${hit._id} in space ${namespace}`);
     }
   } catch (err) {
     logger.error(
