@@ -80,23 +80,24 @@ function parseDensityToAPI(
 function parseSplitMetricsBySorting(
   columnId: string,
   columnIdMapping: ColumnIdMapping
-): { values: string[]; metricIndex: number } | undefined {
+): { values: string[]; index: number } | undefined {
   if (!isTransposeId(columnId)) {
     return undefined;
   }
 
-  const parts = columnId.split(TRANSPOSE_SEPARATOR);
-  // The last part is the metric column ID
   const metricColumnId = getOriginalId(columnId);
-  const mapped = metricColumnId ? columnIdMapping.get(metricColumnId) : undefined;
+  const mapped = columnIdMapping.get(metricColumnId);
 
   if (!mapped || mapped.type !== 'metric') {
     return undefined;
   }
 
+  // The last part is the metric column ID
+  const parts = columnId.split(TRANSPOSE_SEPARATOR);
+
   return {
     values: initial(parts),
-    metricIndex: mapped.index,
+    index: mapped.index,
   };
 }
 
@@ -118,14 +119,16 @@ function parseSortingToAPI(
   // Split_metrics_by sorting (contains ---)
   if (columnId.includes(TRANSPOSE_SEPARATOR)) {
     const parsed = parseSplitMetricsBySorting(columnId, columnIdMapping);
-    return parsed
-      ? {
-          column_type: 'split_metrics_by',
-          metric_index: parsed.metricIndex,
-          values: parsed.values,
-          direction: direction ?? DEFAULT_DIRECTION,
-        }
-      : undefined;
+    if (!parsed) {
+      return undefined;
+    }
+
+    return {
+      column_type: 'transposed_metric',
+      index: parsed.index,
+      values: parsed.values,
+      direction: direction ?? DEFAULT_DIRECTION,
+    };
   }
 
   // Look up the columnId in the mapping

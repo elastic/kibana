@@ -208,9 +208,60 @@ describe('Datatable Schema', () => {
           },
         ],
         sort_by: {
-          column_type: 'split_metrics_by',
-          metric_index: 1,
-          values: ['success'],
+          column_type: 'transposed_metric',
+          index: 1, // Points to metrics[1] (average of bytes)
+          values: ['success'], // Identifies the transposed column
+          direction: 'desc',
+        },
+      };
+
+      const validated = datatableStateSchema.validate(input);
+      expect(validated).toEqual({ ...defaultValues, ...input });
+    });
+
+    it('validates transposed metric sorting configuration with multiple split dimensions', () => {
+      const input: DatatableWithoutDefaultsConfig = {
+        ...baseDatatableConfig,
+        metrics: [
+          {
+            operation: 'median',
+            field: 'bytes',
+          },
+          {
+            operation: 'average',
+            field: 'bytes',
+          },
+        ],
+        rows: [
+          {
+            operation: 'date_histogram',
+            field: '@timestamp',
+            suggested_interval: '1d',
+            use_original_time_range: true,
+            include_empty_rows: true,
+          },
+          {
+            operation: 'terms',
+            fields: ['geo.dest'],
+            size: 10,
+          },
+        ],
+        split_metrics_by: [
+          {
+            operation: 'terms',
+            fields: ['status'],
+            size: 5,
+          },
+          {
+            operation: 'terms',
+            fields: ['product'],
+            size: 3,
+          },
+        ],
+        sort_by: {
+          column_type: 'transposed_metric',
+          index: 0, // Points to metrics[1] (median of bytes)
+          values: ['success1', 'success2'], // One value per split dimension
           direction: 'desc',
         },
       };
@@ -480,8 +531,8 @@ describe('Datatable Schema', () => {
           },
         ],
         sort_by: {
-          column_type: 'split_metrics_by',
-          metric_index: 2,
+          column_type: 'transposed_metric',
+          index: 2,
           values: ['success'],
           direction: 'desc',
         },
@@ -530,8 +581,8 @@ describe('Datatable Schema', () => {
           },
         ],
         sort_by: {
-          column_type: 'split_metrics_by',
-          metric_index: 2,
+          column_type: 'transposed_metric',
+          index: 2,
           values: ['success'],
           direction: 'desc',
         },
