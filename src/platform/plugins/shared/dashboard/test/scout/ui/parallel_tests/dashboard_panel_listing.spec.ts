@@ -14,10 +14,8 @@ import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '.
 // may include "observabilityGroup" panel group (and other panel groups)
 const DASHBOARD_PANEL_GROUP_ORDER = [
   'visualizationsGroup',
-  'controlsGroup',
   'annotation-and-navigationGroup',
   'mlGroup',
-  'legacyGroup',
 ];
 
 const DASHBOARD_PANEL_TYPE_COUNT = 18;
