@@ -53,6 +53,15 @@ export class WorkflowEditorPage {
   }
 
   /**
+   * Wait for navigation to the editor page and the YAML editor to be visible.
+   * Useful after triggering navigation from an external entry point (e.g. workflow list actions).
+   */
+  async waitForEditorView() {
+    await this.page.waitForURL('**/workflows/*');
+    await this.waitForEditorToLoad();
+  }
+
+  /**
    * Wait for the YAML editor to be visible and ready
    */
   async waitForEditorToLoad() {

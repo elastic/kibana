@@ -11,6 +11,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../fixtures';
 import { cleanupWorkflowsAndRules } from '../fixtures/cleanup';
+import { EXECUTION_TIMEOUT } from '../fixtures/constants';
 import {
   getDummyWorkflowYaml,
   getIncompleteStepTypeYaml,
@@ -58,14 +59,12 @@ test.describe(
       await pageObjects.workflowEditor.setExecuteModalInputs({ message: 'Hello Kibana' });
       await page.testSubj.click('executeWorkflowButton');
 
-      await page.waitForURL('**/workflows/*?executionId=*');
+      await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
-      const executionPanel = page.testSubj.locator('workflowExecutionPanel');
-      await executionPanel.getByRole('button', { name: 'hello_world_step' }).click();
-
-      await expect(
-        page.testSubj.locator('workflowStepExecutionDetails').getByTestId('jsonDataTable')
-      ).toContainText('Hello Kibana');
+      const helloWorldStep = await pageObjects.workflowExecution.getStep('hello_world_step');
+      await helloWorldStep.click();
+      const stepOutput = await pageObjects.workflowExecution.getStepResultJson<string>('output');
+      expect(stepOutput).toBe('Hello Kibana');
     });
 
     test('should show validation errors for invalid workflow YAML and clear them when fixed', async ({

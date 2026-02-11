@@ -44,8 +44,6 @@ test.describe(
       // Run with custom input
       await pageObjects.workflowEditor.executeWorkflowWithInputs({ message: 'test message' });
 
-      await page.waitForURL('**/workflows/*?executionId=*');
-
       await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
       // Verify overview section
@@ -90,7 +88,6 @@ test.describe(
 
     test('should display scrollable step executions with many iterations', async ({
       pageObjects,
-      page,
     }) => {
       const workflowName = 'Scroll Test Workflow';
 
@@ -101,7 +98,6 @@ test.describe(
       await pageObjects.workflowEditor.saveWorkflow();
 
       await pageObjects.workflowEditor.clickRunButton();
-      await page.waitForURL('**/workflows/*?executionId=*');
 
       await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 

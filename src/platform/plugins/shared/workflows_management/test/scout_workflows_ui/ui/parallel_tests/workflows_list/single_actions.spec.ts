@@ -35,7 +35,7 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
     await pageObjects.workflowList
       .getWorkflowAction(enabledWorkflow.name, 'runWorkflowAction')
       .click();
-    await page.waitForURL('**/workflows/*?executionId=*');
+    await pageObjects.workflowExecution.waitForExecutionView();
     await expect(
       page.locator('.euiPageHeaderSection').filter({ hasText: enabledWorkflow.name })
     ).toBeVisible();
@@ -47,7 +47,7 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
       'runWorkflowAction'
     );
     await runThreeDotsAction.click();
-    await page.waitForURL('**/workflows/*?executionId=*');
+    await pageObjects.workflowExecution.waitForExecutionView();
     await expect(
       page.locator('.euiPageHeaderSection').filter({ hasText: enabledWorkflow.name })
     ).toBeVisible();
@@ -124,7 +124,6 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
   });
 
   test('should open workflow for editing via edit action', async ({
-    page,
     pageObjects,
     apiServices,
     scoutSpace,
@@ -139,9 +138,7 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
 
     // verify edit via direct action button
     await pageObjects.workflowList.getWorkflowAction(workflow.name, 'editWorkflowAction').click();
-
-    await page.waitForURL('**/workflows/*');
-    await expect(page.testSubj.locator('workflowYamlEditor')).toBeVisible();
+    await pageObjects.workflowEditor.waitForEditorView();
 
     // verify edit via three dots menu action
     await pageObjects.workflowList.navigate();
@@ -150,9 +147,7 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
       'editWorkflowAction'
     );
     await editThreeDotsAction.click();
-
-    await page.waitForURL('**/workflows/*');
-    await expect(page.testSubj.locator('workflowYamlEditor')).toBeVisible();
+    await pageObjects.workflowEditor.waitForEditorView();
   });
 
   test('should clone workflow via three dots menu', async ({

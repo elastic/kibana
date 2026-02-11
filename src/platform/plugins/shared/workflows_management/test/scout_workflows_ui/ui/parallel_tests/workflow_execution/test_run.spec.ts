@@ -36,12 +36,11 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
     await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
     await page.testSubj.click('executeWorkflowButton');
 
-    await page.waitForURL('**/workflows/*?executionId=*');
+    await pageObjects.workflowExecution.waitForExecutionView();
 
-    const executionPanel = page.testSubj.locator('workflowExecutionPanel');
-    await expect(executionPanel).toBeVisible();
-
-    await executionPanel.getByRole('button', { name: 'hello_world_step' }).click();
+    await pageObjects.workflowExecution.executionPanel
+      .getByRole('button', { name: 'hello_world_step' })
+      .click();
     const stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
     await expect(stepDetails.getByTestId('jsonDataTable')).toContainText('Test run: true');
   });
@@ -60,12 +59,11 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
     await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
     await page.testSubj.click('executeWorkflowButton');
 
-    await page.waitForURL('**/workflows/*?executionId=*');
+    await pageObjects.workflowExecution.waitForExecutionView();
 
-    const executionPanel = page.testSubj.locator('workflowExecutionPanel');
-    await expect(executionPanel).toBeVisible();
-
-    await executionPanel.getByRole('button', { name: 'hello_world_step' }).click();
+    await pageObjects.workflowExecution.executionPanel
+      .getByRole('button', { name: 'hello_world_step' })
+      .click();
     const stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
     await expect(stepDetails.getByTestId('jsonDataTable')).toContainText('Test run: true');
   });
@@ -101,13 +99,12 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
     await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
     await page.testSubj.click('executeWorkflowButton');
 
-    await page.waitForURL('**/workflows/*?executionId=*');
-
-    const executionPanel = page.testSubj.locator('workflowExecutionPanel');
-    await expect(executionPanel).toBeVisible();
+    await pageObjects.workflowExecution.waitForExecutionView();
 
     // Not a test run since we ran from the list (enabled workflow), so isTestRun: false
-    await executionPanel.getByRole('button', { name: 'hello_world_step' }).click();
+    await pageObjects.workflowExecution.executionPanel
+      .getByRole('button', { name: 'hello_world_step' })
+      .click();
     const stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
     await expect(stepDetails.getByTestId('jsonDataTable')).toContainText('Test run: false');
   });
@@ -134,13 +131,12 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
     await pageObjects.workflowEditor.setTestStepInputs({ execution: { isTestRun: false } });
     await page.testSubj.click('submit-step-run');
 
-    await page.waitForURL('**/workflows/*?executionId=*');
-
-    const executionPanel = page.testSubj.locator('workflowExecutionPanel');
-    await expect(executionPanel).toBeVisible();
+    await pageObjects.workflowExecution.waitForExecutionView();
 
     // Only one hello_world_step should run (not 4 from the loop)
-    const helloWorldSteps = executionPanel.getByRole('button', { name: 'hello_world_step' });
+    const helloWorldSteps = pageObjects.workflowExecution.executionPanel.getByRole('button', {
+      name: 'hello_world_step',
+    });
     await expect(helloWorldSteps).toHaveCount(1);
 
     await helloWorldSteps.click();

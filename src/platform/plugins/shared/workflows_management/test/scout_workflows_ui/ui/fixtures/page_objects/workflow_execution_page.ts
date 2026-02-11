@@ -26,7 +26,19 @@ export class WorkflowExecutionPage {
   }
 
   /**
+   * Wait for the execution view to load (URL contains executionId and panel is visible).
+   * Useful after triggering a workflow execution from any entry point.
+   */
+  async waitForExecutionView() {
+    await this.page.waitForURL('**/workflows/*?executionId=*');
+    await this.executionPanel.waitFor({ state: 'visible' });
+  }
+
+  /**
    * Wait for the workflow execution panel to show the specified status.
+   *
+   * Automatically waits for the execution view to load first (URL navigation
+   * and panel visibility), then polls for the expected status badge.
    *
    * When expecting 'completed', this method also watches for 'failed' status
    * so it can fail fast with a descriptive error (including the step error JSON)
@@ -36,6 +48,7 @@ export class WorkflowExecutionPage {
    * @param timeout - The timeout in milliseconds
    */
   async waitForExecutionStatus(status: 'completed' | 'failed', timeout: number) {
+    await this.waitForExecutionView();
     const withStatus = (s: string) =>
       this.executionPanel.and(this.page.locator(`[data-execution-status="${s}"]`));
 
