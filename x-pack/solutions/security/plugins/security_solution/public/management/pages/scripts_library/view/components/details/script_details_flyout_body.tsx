@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useFormatBytes } from '../../../../../../common/components/formatted_bytes';
 import type { EndpointScript } from '../../../../../../../common/endpoint/types';
@@ -48,7 +49,21 @@ export const EndpointScriptDetailsFlyoutBody = memo<EndpointScriptDetailsFlyoutB
     const renderScriptDetails = useCallback(
       (key: KeyType, value: boolean | string | number | string[]): React.JSX.Element => {
         if (key === 'requiresInput') {
-          return <EuiText size="s">{value ? 'Yes' : 'No'}</EuiText>;
+          return (
+            <EuiText size="s">
+              {value ? (
+                <FormattedMessage
+                  id="xpack.securitySolution.script.details.requiresInputYes"
+                  defaultMessage="Yes"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.securitySolution.script.details.requiresInputNo"
+                  defaultMessage="No"
+                />
+              )}
+            </EuiText>
+          );
         }
 
         if (key === 'tags' && Array.isArray(value)) {

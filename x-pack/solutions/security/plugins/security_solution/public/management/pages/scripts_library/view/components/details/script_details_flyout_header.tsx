@@ -60,7 +60,7 @@ export const EndpointScriptDetailsFlyoutHeader = memo<EndpointScriptDetailsFlyou
             <EuiToolTip content={scriptName} anchorClassName="eui-textTruncate">
               <EuiTitle size="s">
                 <h2
-                  css={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                  className="eui-textTruncate"
                   data-test-subj={getTestId('scriptDetailsFlyoutTitle')}
                 >
                   {scriptName}
