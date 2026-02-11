@@ -109,16 +109,6 @@ export const WatchlistFilter = ({
     setSelected(selectedFromUrl);
   }, [selectedFromUrl]);
 
-  useEffect(() => {
-    if (!selectedIdFromUrl && defaultSelectedId) {
-      const defaultSelection = getItemById(defaultSelectedId);
-      if (defaultSelection) {
-        setSelected(defaultSelection);
-        navigateToWatchlist(defaultSelectedId);
-      }
-    }
-  }, [defaultSelectedId, getItemById, selectedIdFromUrl, navigateToWatchlist]);
-
   const navigateToWatchlist = useCallback(
     (watchlistId?: string) => {
       const isCleared = !watchlistId || watchlistId === 'none' || watchlistId === 'clear-selection';
@@ -133,6 +123,16 @@ export const WatchlistFilter = ({
     },
     [navigateTo]
   );
+
+  useEffect(() => {
+    if (!selectedIdFromUrl && defaultSelectedId) {
+      const defaultSelection = getItemById(defaultSelectedId);
+      if (defaultSelection) {
+        setSelected(defaultSelection);
+        navigateToWatchlist(defaultSelectedId);
+      }
+    }
+  }, [defaultSelectedId, getItemById, selectedIdFromUrl, navigateToWatchlist]);
 
   const onChangeComboBox = useCallback(
     (nextOptions: EuiComboBoxOptionOption<WatchlistOption>[]) => {
@@ -157,6 +157,7 @@ export const WatchlistFilter = ({
       <EuiFlexItem>
         <EuiComboBox
           data-test-subj="watchlistFilterComboBox"
+          aria-label="Watchlist"
           prepend="Watchlist"
           placeholder="Select watchlist"
           singleSelection={{ asPlainText: true }}
