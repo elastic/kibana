@@ -549,6 +549,52 @@ Human:`,
       expect(system).toEqual([{ text: addNoToolUsageDirective('some system instruction') }]);
     });
 
+    it('keeps tools in the request when ToolChoiceType.None but the history contains tool use', () => {
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          system: 'some system instruction',
+          messages: [
+            { role: MessageRole.User, content: 'question' },
+            {
+              role: MessageRole.Assistant,
+              content: null,
+              toolCalls: [
+                {
+                  function: { name: 'my_function', arguments: { foo: 'bar' } },
+                  toolCallId: '0',
+                },
+              ],
+            },
+            {
+              name: 'my_function',
+              role: MessageRole.Tool,
+              toolCallId: '0',
+              response: { bar: 'foo' },
+            },
+          ],
+          tools: {
+            my_function: {
+              description: 'my_function',
+              schema: {
+                type: 'object',
+                properties: { foo: { type: 'string' } },
+                required: ['foo'],
+              },
+            },
+          },
+          toolChoice: ToolChoiceType.none,
+        })
+        .subscribe(noop);
+
+      const { toolChoice, tools, system } = getCallParams();
+      expect(toolChoice).toBeUndefined();
+      expect(Array.isArray(tools)).toBe(true);
+      expect(tools?.some((t: any) => t?.toolSpec?.name === 'my_function')).toBe(true);
+      expect(system).toEqual([{ text: addNoToolUsageDirective('some system instruction') }]);
+    });
+
     it('propagates the abort signal when provided', () => {
       const abortController = new AbortController();
 

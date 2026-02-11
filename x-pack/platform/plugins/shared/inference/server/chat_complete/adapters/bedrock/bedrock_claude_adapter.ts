@@ -43,6 +43,10 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     stream = false,
   }) => {
     const noToolUsage = toolChoice === ToolChoiceType.none;
+    const hasToolUseInHistory = messages.some(
+      (m) =>
+        m.role === MessageRole.Tool || (m.role === MessageRole.Assistant && m.toolCalls?.length)
+    );
 
     const converseMessages = messagesToBedrock(messages).map((message) => ({
       role: message.role,
@@ -51,7 +55,11 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
     const systemMessage = noToolUsage
       ? [{ text: addNoToolUsageDirective(system) }]
       : [{ text: system }];
-    const bedRockTools = noToolUsage ? [] : toolsToConverseBedrock(tools, messages);
+
+    // if messages contain toolUse/toolResult blocks, the request must include tool
+    // definitions, even if we want to prevent the model from calling tools in this turn
+    const bedRockTools =
+      noToolUsage && !hasToolUseInHistory ? [] : toolsToConverseBedrock(tools, messages);
     const connector = executor.getConnector();
 
     const subActionParams = {
