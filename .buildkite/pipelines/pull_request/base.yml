@@ -32,13 +32,13 @@ steps:
 
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
+    key: checks
     agents:
       machineType: c4d-standard-2
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-c,us-central1-a
       diskSizeGb: 105
-    key: checks
     timeout_in_minutes: 60
     retry:
       automatic:
