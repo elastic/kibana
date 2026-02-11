@@ -99,8 +99,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }
     }
 
-    const runOnTM = await this.shouldUseTaskManager(request, useTaskManager);
-    if (runOnTM) {
+    const runOnTaskManager = await this.shouldUseTaskManager(request, useTaskManager);
+    if (runOnTaskManager) {
       return this.executeRemote({ executionId, agentId, request });
     } else {
       return this.executeLocally({ execution, request });
