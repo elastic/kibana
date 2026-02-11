@@ -28,6 +28,7 @@ plugins:
     - dashboard
     - workflows_extensions
     - global_search
+    - banners
     - navigation
   disabled:
 
