@@ -24,7 +24,11 @@ import {
 } from './basicXY.mock';
 import { dualReferenceLineXY, referenceLineXY } from './referenceLines.mock';
 import { annotationXY } from './annotations.mock';
-import { esqlChart, esqlChartWithBreakdownColorMapping, esqlXYWithCollapseByBreakdown } from './esqlXY.mock';
+import {
+  esqlChart,
+  esqlChartWithBreakdownColorMapping,
+  esqlXYWithCollapseByBreakdown,
+} from './esqlXY.mock';
 
 function setSeriesType(attributes: LensAttributes, seriesType: 'bar' | 'line' | 'area') {
   return {
