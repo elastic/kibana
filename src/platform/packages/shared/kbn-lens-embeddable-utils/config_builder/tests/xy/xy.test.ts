@@ -83,7 +83,7 @@ describe('XY', () => {
         );
       });
 
-      it('should convert a esql xy with collapse by breakdown', () => {
+      it('should convert an esql xy with collapse by breakdown', () => {
         validateConverter(esqlXYWithCollapseByBreakdown, xyStateSchema);
       });
     });
