@@ -67,8 +67,8 @@ export const AutoOpsPromotionCallout = ({
           defaultMessage="New! Connect this cluster to AutoOps"
         />
       }
-      color="info"
-      iconType="iInCircle"
+      color="primary"
+      iconType="info"
       data-test-subj="autoOpsPromotionCallout"
       onDismiss={handleDismiss}
       {...overrideCalloutProps}
