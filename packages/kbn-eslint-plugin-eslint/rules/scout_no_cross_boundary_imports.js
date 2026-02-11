@@ -68,8 +68,7 @@ module.exports = {
     messages: {
       platformTestImport:
         "Tests without a solution-specific Scout package should import from '@kbn/scout'.",
-      solutionTestImport:
-        "'{{solution}}' solution tests should import from '{{allowedPackage}}'.",
+      solutionTestImport: "'{{solution}}' solution tests should import from '{{allowedPackage}}'.",
     },
   },
 

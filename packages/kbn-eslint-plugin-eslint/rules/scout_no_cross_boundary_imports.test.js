@@ -20,8 +20,7 @@ const ruleTester = new RuleTester({
 
 // Solution plugin test files
 const SECURITY_TEST = 'x-pack/solutions/security/plugins/my-plugin/test/scout/ui/some_test.ts';
-const OBLT_TEST =
-  'x-pack/solutions/observability/plugins/my-plugin/test/scout_api/some_test.ts';
+const OBLT_TEST = 'x-pack/solutions/observability/plugins/my-plugin/test/scout_api/some_test.ts';
 
 // Platform plugin test files
 const PLATFORM_XPACK_TEST = 'x-pack/platform/plugins/security/test/scout/ui/some_test.ts';
