@@ -13,8 +13,6 @@ import type {
   RuleId,
 } from './types';
 
-const NOTIFICATION_POLICY_IDS: NotificationPolicyId[] = ['policy_123', 'policy_456'];
-
 export async function getFakeRulesByIds(ruleIds: RuleId[]): Promise<Map<RuleId, Rule>> {
   const now = new Date().toISOString();
   const rules = ruleIds.reduce((acc, ruleId) => {
@@ -22,9 +20,7 @@ export async function getFakeRulesByIds(ruleIds: RuleId[]): Promise<Map<RuleId, 
       id: ruleId,
       name: `Rule ${ruleId}`,
       description: `Description for rule ${ruleId}`,
-      notificationPolicyIds: [
-        NOTIFICATION_POLICY_IDS[Math.floor(Math.random() * NOTIFICATION_POLICY_IDS.length)],
-      ],
+      notificationPolicyIds: ['policy_123', 'policy_456'],
       enabled: true,
       createdAt: now,
       updatedAt: now,
@@ -39,7 +35,7 @@ const FAKE_POLICIES: Record<NotificationPolicyId, NotificationPolicy> = {
   policy_123: {
     id: 'policy_123',
     name: 'Policy matching critical alerts in non-dev environments',
-    matcher: 'data.severity == "critical" && data.env != "dev"', // require flatten data support
+    matcher: undefined, // catch-all, matcher is not supported yet
     groupBy: [], // not implemted yet, require flattened data support
     throttle: {
       interval: '1h',
@@ -49,7 +45,7 @@ const FAKE_POLICIES: Record<NotificationPolicyId, NotificationPolicy> = {
   policy_456: {
     id: 'policy_456',
     name: 'Policy matching all alerts but throttled to 5 minutes',
-    matcher: undefined, // catch-all
+    matcher: 'false', // matcher is not supported yet
     groupBy: [], // not implemted yet, require flattened data support
     throttle: {
       interval: '5m',

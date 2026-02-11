@@ -173,8 +173,7 @@ export class DispatcherService implements DispatcherServiceContract {
         };
       } else {
         // for (const field of policy.groupBy) {
-        //   // TODO: replace {} with episode.data when ESQL flattened support is added
-        //   groupKey[field] = get({}, field);
+        //   groupKey[field] = get(episode.data, field);
         // }
         throw new Error('Grouping by fields is not supported yet');
       }
@@ -357,7 +356,7 @@ export class DispatcherService implements DispatcherServiceContract {
 
 function isWithinInterval(lastNotifiedAt: Date, interval: string, now: Date): boolean {
   const intervalMillis = moment.duration(interval).asMilliseconds();
-  return lastNotifiedAt.getTime() + intervalMillis > now.getTime();
+  return lastNotifiedAt.getTime() + intervalMillis <= now.getTime();
 }
 
 function getSuppressionReason(suppression: AlertEpisodeSuppression): string {
