@@ -83,7 +83,6 @@ enum WIZARD_STEPS {
 
 interface SelectDataStepProps {
   isCurrentStep: boolean;
-  isNextActive: boolean;
   searchItems: SearchItems | undefined;
   searchItemsError: string | undefined;
   setCurrentStep: React.Dispatch<React.SetStateAction<WIZARD_STEPS>>;
@@ -92,7 +91,6 @@ interface SelectDataStepProps {
 
 const StepSelectData: FC<SelectDataStepProps> = ({
   isCurrentStep,
-  isNextActive,
   searchItems,
   searchItemsError,
   setCurrentStep,
@@ -108,12 +106,18 @@ const StepSelectData: FC<SelectDataStepProps> = ({
     setIsSourceSelectionModalVisible(false);
   }, []);
 
+  const editDataSource = useCallback(() => {
+    setCurrentStep(WIZARD_STEPS.SELECT_DATA);
+    setIsSourceSelectionModalVisible(true);
+  }, [setCurrentStep]);
+
   const handleSavedObjectSelected = useCallback(
     (id: string) => {
       onSavedObjectSelected(id);
       setIsSourceSelectionModalVisible(false);
+      setCurrentStep(WIZARD_STEPS.DEFINE);
     },
-    [onSavedObjectSelected]
+    [onSavedObjectSelected, setCurrentStep]
   );
 
   return (
@@ -152,11 +156,11 @@ const StepSelectData: FC<SelectDataStepProps> = ({
               </EuiModalBody>
             </EuiModal>
           )}
-
-          <WizardNav next={() => setCurrentStep(WIZARD_STEPS.DEFINE)} nextActive={isNextActive} />
         </>
       )}
-      {!isCurrentStep && searchItems && <StepSelectDataSummary searchItems={searchItems} />}
+      {!isCurrentStep && searchItems && (
+        <StepSelectDataSummary searchItems={searchItems} onEditDataSource={editDataSource} />
+      )}
     </>
   );
 };
@@ -328,6 +332,7 @@ export const Wizard: FC<WizardProps> = React.memo(
     }, [searchItems]);
 
     const prevSelectedSourceKeyRef = useRef<string | undefined>(undefined);
+    const skipSelectStepResetOnNextSourceChangeRef = useRef(false);
     useEffect(() => {
       if (!searchItems || !dataView || selectedSourceKey === undefined) return;
 
@@ -349,13 +354,15 @@ export const Wizard: FC<WizardProps> = React.memo(
       );
       setStepCreateState(getDefaultStepCreateState());
 
-      if (hasChanged) {
+      if (hasChanged && !skipSelectStepResetOnNextSourceChangeRef.current) {
         setCurrentStep(WIZARD_STEPS.SELECT_DATA);
       }
+      skipSelectStepResetOnNextSourceChangeRef.current = false;
     }, [searchItems, dataView, selectedSourceKey, cloneConfig]);
 
     const handleSavedObjectSelected = useCallback(
       (id: string) => {
+        skipSelectStepResetOnNextSourceChangeRef.current = true;
         onSavedObjectSelected?.(id);
         setSavedObjectId(id);
       },
@@ -375,7 +382,6 @@ export const Wizard: FC<WizardProps> = React.memo(
         children: (
           <StepSelectData
             isCurrentStep={currentStep === WIZARD_STEPS.SELECT_DATA}
-            isNextActive={searchItems !== undefined}
             searchItems={searchItems}
             searchItemsError={searchItemsError}
             setCurrentStep={setCurrentStep}
