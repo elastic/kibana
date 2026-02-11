@@ -30,6 +30,7 @@ plugins:
     - dashboard    
     - workflows_extensions
     - workflows_management
+    - global_search
   disabled:
 
 packages:
