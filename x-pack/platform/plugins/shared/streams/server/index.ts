@@ -12,6 +12,7 @@ import { config } from './plugin';
 import type { StreamsRouteRepository } from './routes';
 
 export type { StreamsConfig, StreamsPluginSetup, StreamsPluginStart, StreamsRouteRepository };
+export type { RouteHandlerScopedClients } from './routes/types';
 export { config };
 
 export const plugin = async (context: PluginInitializerContext<StreamsConfig>) => {

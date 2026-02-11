@@ -1,0 +1,21 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["common/**/*", "server/**/*", "../../../../../typings/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/core-http-server",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-plugin",
+    "@kbn/streams-plugin",
+    "@kbn/streams-ai",
+    "@kbn/streams-schema",
+    "@kbn/streamlang",
+    "@kbn/zod",
+    "@kbn/logging"
+  ],
+  "exclude": ["target/**/*"]
+}

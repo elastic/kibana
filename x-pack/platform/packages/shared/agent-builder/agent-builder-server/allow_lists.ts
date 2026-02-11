@@ -40,6 +40,26 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
+
+  // Streams – read tools
+  `${internalNamespaces.streams}.list_streams`,
+  `${internalNamespaces.streams}.get_stream`,
+  `${internalNamespaces.streams}.get_data_quality`,
+  `${internalNamespaces.streams}.get_schema`,
+  `${internalNamespaces.streams}.get_lifecycle_stats`,
+  // Streams – write tools
+  `${internalNamespaces.streams}.set_retention`,
+  `${internalNamespaces.streams}.fork_stream`,
+  `${internalNamespaces.streams}.delete_stream`,
+  `${internalNamespaces.streams}.update_processors`,
+  `${internalNamespaces.streams}.map_fields`,
+  `${internalNamespaces.streams}.enable_failure_store`,
+  `${internalNamespaces.streams}.update_settings`,
+  // Streams – AI orchestration tools
+  `${internalNamespaces.streams}.suggest_partitions`,
+  `${internalNamespaces.streams}.generate_description`,
+  `${internalNamespaces.streams}.identify_features`,
+  `${internalNamespaces.streams}.identify_systems`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
@@ -52,6 +72,7 @@ export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.observability}.agent`,
   'platform.dashboard.dashboard_agent',
   `${internalNamespaces.security}.agent`,
+  `${internalNamespaces.streams}.agent`,
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];

@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/streams-agent-plugin",
+  "owner": "@elastic/obs-onboarding-team",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "streamsAgent",
+    "browser": false,
+    "server": true,
+    "requiredPlugins": ["agentBuilder", "streams"],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

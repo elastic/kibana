@@ -15,6 +15,7 @@ export const internalNamespaces = {
   filestore: 'filestore',
   observability: 'observability',
   security: 'security',
+  streams: 'streams',
 } as const;
 
 /**
@@ -26,6 +27,7 @@ export const protectedNamespaces: string[] = [
   internalNamespaces.observability,
   internalNamespaces.platformDashboard, // Owned by dashboard_agent plugin
   internalNamespaces.security,
+  internalNamespaces.streams, // Owned by streams_agent plugin
 ];
 
 /**

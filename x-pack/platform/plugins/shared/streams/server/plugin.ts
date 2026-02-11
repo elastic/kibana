@@ -50,8 +50,14 @@ import { SystemService } from './lib/streams/system/system_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StreamsPluginStart {}
+
+export interface StreamsPluginStart {
+  getScopedClients: ({
+    request,
+  }: {
+    request: KibanaRequest;
+  }) => Promise<RouteHandlerScopedClients>;
+}
 
 export const config: PluginConfigDescriptor<StreamsConfig> = {
   schema: configSchema,
@@ -74,6 +80,11 @@ export class StreamsPlugin
   private ebtTelemetryService = new EbtTelemetryService();
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
+  private getScopedClients?: ({
+    request,
+  }: {
+    request: KibanaRequest;
+  }) => Promise<RouteHandlerScopedClients>;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -175,6 +186,8 @@ export class StreamsPlugin
       };
     };
 
+    this.getScopedClients = getScopedClients;
+
     const telemetryClient = this.ebtTelemetryService.getClient();
 
     taskService.registerTasks({
@@ -269,7 +282,9 @@ export class StreamsPlugin
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
 
-    return {};
+    return {
+      getScopedClients: this.getScopedClients!,
+    };
   }
 
   public stop() {}
