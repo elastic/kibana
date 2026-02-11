@@ -60,12 +60,12 @@ export const MetricsGrid = ({
   const flyoutData = useMemo(() => {
     if (!flyoutState?.metricUniqueKey) return undefined;
 
-    const metricAtPosition = fields[flyoutState.gridPosition];
-    if (metricAtPosition?.uniqueKey !== flyoutState.metricUniqueKey) return undefined;
+    const metricData = fields[flyoutState.gridPosition];
+    if (metricData?.uniqueKey !== flyoutState.metricUniqueKey) return undefined;
 
     return {
       gridPosition: flyoutState.gridPosition,
-      metric: metricAtPosition,
+      metric: metricData,
       esqlQuery: flyoutState.esqlQuery,
     };
   }, [flyoutState, fields]);
