@@ -237,9 +237,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
   });
 
   it('fails when the workflow abort signal is already aborted', async () => {
-    const events$ = throwError(
-      () => createRequestAbortedError('Converse request was aborted')
-    );
+    const events$ = throwError(() => createRequestAbortedError('Converse request was aborted'));
 
     const execution = createExecutionMock(events$);
     const abortController = new AbortController();
