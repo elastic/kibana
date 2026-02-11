@@ -7,64 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ToastsStart } from '@kbn/core/public';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
-import type { DrilldownDefinition, HasDrilldowns } from '../types';
+import type { DrilldownDefinition } from '../types';
 import type { DrilldownState } from '../../../server/drilldowns/types';
-
-/**
- * This are props of the public <DrilldownManager> React component which is
- * exposed from this plugin's contract, user can change these props every time
- * the public <DrilldownManager> is re-rendered.
- */
-export interface PublicDrilldownsManagerProps extends HasDrilldowns {
-  /**
-   * List of registered drilldowns
-   */
-  factories: DrilldownFactory[];
-
-  /**
-   * Initial screen which Drilldown Manager should display when it first opens.
-   * Afterwards the state of the currently visible screen is controlled by the
-   * Drilldown Manager.
-   *
-   * Possible values of the route:
-   *
-   * - `/create` --- opens with "Create new" tab selected.
-   * - `/new` --- opens with the "Create new" tab selected showing new drilldown form.
-   * - `/manage` --- opens with selected "Manage" tab.
-   * - `/manage/yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy` --- opens in edit mode where
-   *   drilldown with ID `yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy` is being edited.
-   */
-  initialRoute?: string;
-
-  /**
-   * Callback called when drilldown flyout should be closed.
-   */
-  onClose: () => void;
-
-  /**
-   * Drilldown setup context, i.e. context from open_context_menu trigger
-   */
-  setupContext: object;
-
-  /**
-   * List of possible triggers in current context
-   */
-  triggers: string[];
-
-  /**
-   * List of drilldown templates, which will be displayed to user for fast
-   * drilldown creation flow.
-   */
-  templates?: DrilldownTemplate[];
-
-  /**
-   * Whether to close the drilldown flyout after a drilldown was created
-   */
-  closeAfterCreate?: boolean;
-}
 
 /**
  * Template for a pre-configured new drilldown, this gives ability to create a
@@ -98,35 +42,3 @@ export type DrilldownFactory = Pick<
     type: string;
     isLicenseCompatible: boolean;
   };
-
-/**
- * These are static global dependencies of the <DrilldownManager> wired in
- * during the setup life-cycle of the plugin.
- */
-export interface DrilldownsManagerDependencies {
-  /**
-   * Trigger getter from UI Actions trigger registry.
-   */
-  getTrigger: (triggerId: string) => Trigger;
-
-  /**
-   * Implementation of local storage interface for persisting user preferences,
-   * e.g. user can dismiss the welcome message.
-   */
-  storage: IStorageWrapper;
-
-  /**
-   * Services for displaying user toast notifications.
-   */
-  toastService: ToastsStart;
-
-  /**
-   * Link to drilldowns user facing docs on corporate website.
-   */
-  docsLink?: string;
-
-  /**
-   * Link to trigger picker user facing docs on corporate website.
-   */
-  triggerPickerDocsLink?: string;
-}

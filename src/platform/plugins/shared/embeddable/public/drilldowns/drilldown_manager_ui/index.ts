@@ -8,21 +8,38 @@
  */
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { createElement } from 'react';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { core, uiActions } from '../../kibana_services';
 import { DrilldownManagerWithProvider } from './containers/drilldown_manager/drilldown_manager_with_provider';
-import type { PublicDrilldownsManagerProps } from './types';
+import type { DrilldownRegistryEntry, HasDrilldowns } from '../types';
+import type { DrilldownsManagerDeps } from './state';
+import { getCompatibleFactories } from './get_compatible_factories';
+import { getSiblingDrilldowns } from './get_sibling_drilldowns';
 
-export { getDrilldownFactories } from './get_drilldown_factories';
-export { getSiblingDrilldowns } from './get_sibling_drilldowns';
+export async function getDrilldownManagerUi(
+  props: HasDrilldowns &
+    Pick<
+      DrilldownsManagerDeps,
+      'initialRoute' | 'onClose' | 'setupContext' | 'triggers' | 'templates' | 'closeAfterCreate'
+    > & {
+      entries: DrilldownRegistryEntry[];
+    }
+) {
+  const { entries, ...rest } = props;
 
-export function DrilldownManager(props: PublicDrilldownsManagerProps) {
-  return DrilldownManagerWithProvider({
-    ...props,
-    factories: props.factories.filter((factory) => {
-      return factory.supportedTriggers.some((supportedTrigger) =>
-        props.triggers.includes(supportedTrigger)
-      );
-    }),
+  const factories = await getCompatibleFactories(entries, props.setupContext, props.triggers);
+  const templates = (props.setupContext as { embeddable?: unknown }).embeddable
+    ? getSiblingDrilldowns(
+        (props.setupContext as EmbeddableApiContext).embeddable,
+        factories.map(({ type }) => type)
+      )
+    : [];
+
+  return createElement(DrilldownManagerWithProvider, {
+    ...rest,
+    factories,
+    templates,
     getTrigger: (triggerId) => uiActions.getTrigger(triggerId),
     storage: new Storage(window?.localStorage),
     toastService: core.notifications.toasts,

@@ -84,23 +84,16 @@ export const openManageDrilldownsFlyout: ActionDefinition<EmbeddableApiContext> 
       core,
       parentApi: embeddable.parentApi,
       loadContent: async ({ closeFlyout }) => {
-        const { DrilldownManager, getDrilldownFactories, getSiblingDrilldowns } = await import(
-          '../drilldowns/drilldown_manager_ui'
-        );
-        const factories = await getDrilldownFactories(getDrilldownRegistryEntries(), context);
-
-        return (
-          <DrilldownManager
-            initialRoute={'/manage'}
-            drilldowns$={embeddable.drilldowns$}
-            setDrilldowns={embeddable.setDrilldowns}
-            setupContext={context}
-            triggers={getEmbeddableTriggers(embeddable)}
-            templates={getSiblingDrilldowns(embeddable)}
-            onClose={closeFlyout}
-            factories={factories}
-          />
-        );
+        const { getDrilldownManagerUi } = await import('../drilldowns/drilldown_manager_ui');
+        return getDrilldownManagerUi({
+          entries: getDrilldownRegistryEntries(),
+          initialRoute: '/manage',
+          drilldowns$: embeddable.drilldowns$,
+          setDrilldowns: embeddable.setDrilldowns,
+          setupContext: context,
+          triggers: getEmbeddableTriggers(embeddable),
+          onClose: closeFlyout,
+        });
       },
       flyoutProps: {
         'data-test-subj': 'editDrilldownFlyout',

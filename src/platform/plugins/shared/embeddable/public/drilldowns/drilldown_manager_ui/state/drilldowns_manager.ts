@@ -9,11 +9,10 @@
 
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, map } from 'rxjs';
-import type {
-  PublicDrilldownsManagerProps,
-  DrilldownsManagerDependencies,
-  DrilldownFactory,
-} from '../types';
+import type { ToastsStart } from '@kbn/core/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { DrilldownFactory, DrilldownTemplate } from '../types';
 import {
   toastDrilldownCreated,
   toastDrilldownsCRUDError,
@@ -25,12 +24,83 @@ import {
 import { DrilldownManager } from './drilldown_manager';
 import { useTableItems } from '../hooks/use_table_items';
 import type { DrilldownState } from '../../../../server/drilldowns/types';
+import type { HasDrilldowns } from '../../types';
 
 const helloMessageStorageKey = `drilldowns:hidWelcomeMessage`;
 
-export interface DrilldownsManagerDeps
-  extends DrilldownsManagerDependencies,
-    PublicDrilldownsManagerProps {}
+export type DrilldownsManagerDeps = HasDrilldowns & {
+  /**
+   * List of registered drilldowns
+   */
+  factories: DrilldownFactory[];
+
+  /**
+   * Initial screen which Drilldown Manager should display when it first opens.
+   * Afterwards the state of the currently visible screen is controlled by the
+   * Drilldown Manager.
+   *
+   * Possible values of the route:
+   *
+   * - `/create` --- opens with "Create new" tab selected.
+   * - `/new` --- opens with the "Create new" tab selected showing new drilldown form.
+   * - `/manage` --- opens with selected "Manage" tab.
+   * - `/manage/yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy` --- opens in edit mode where
+   *   drilldown with ID `yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy` is being edited.
+   */
+  initialRoute?: string;
+
+  /**
+   * Callback called when drilldown flyout should be closed.
+   */
+  onClose: () => void;
+
+  /**
+   * Drilldown setup context, i.e. context from open_context_menu trigger
+   */
+  setupContext: object;
+
+  /**
+   * List of possible triggers in current context
+   */
+  triggers: string[];
+
+  /**
+   * List of drilldown templates, which will be displayed to user for fast
+   * drilldown creation flow.
+   */
+  templates?: DrilldownTemplate[];
+
+  /**
+   * Whether to close the drilldown flyout after a drilldown was created
+   */
+  closeAfterCreate?: boolean;
+
+  /**
+   * Trigger getter from UI Actions trigger registry.
+   */
+  getTrigger: (triggerId: string) => Trigger;
+
+  /**
+   * Implementation of local storage interface for persisting user preferences,
+   * e.g. user can dismiss the welcome message.
+   */
+  storage: IStorageWrapper;
+
+  /**
+   * Services for displaying user toast notifications.
+   */
+  toastService: ToastsStart;
+
+  /**
+   * Link to drilldowns user facing docs on corporate website.
+   */
+  docsLink?: string;
+
+  /**
+   * Link to trigger picker user facing docs on corporate website.
+   */
+  triggerPickerDocsLink?: string;
+};
 
 /**
  * An instance of this class holds all the state necessary for Drilldown
