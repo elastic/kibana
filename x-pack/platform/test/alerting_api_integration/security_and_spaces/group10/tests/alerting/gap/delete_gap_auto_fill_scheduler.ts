@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { UserAtSpaceScenarios } from '../../../../scenarios';
+import { UserAtSpaceScenarios, ManageRuleSettingsOnlyUserAtSpace1 } from '../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
 import { getFindGaps } from '../../../../rule_gaps_utils';
@@ -35,7 +35,9 @@ export default function deleteGapAutoFillSchedulerTests({ getService }: FtrProvi
       });
     }
 
-    for (const scenario of UserAtSpaceScenarios) {
+    const ScenariosToTest = [...UserAtSpaceScenarios, ManageRuleSettingsOnlyUserAtSpace1];
+
+    for (const scenario of ScenariosToTest) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
         const apiOptions = {
@@ -59,9 +61,10 @@ export default function deleteGapAutoFillSchedulerTests({ getService }: FtrProvi
               'space_1_all at space1',
               'space_1_all_alerts_none_actions at space1',
               'space_1_all_with_restricted_fixture at space1',
+              'manage_rule_settings_only at space1',
             ].includes(scenario.id)
           ) {
-            // Crearte a scheduler by superuser and delete it by unauthorized user
+            // Create a scheduler by superuser and delete it by unauthorized user
             const createSchedulerResp = await supertest
               .post(
                 `${getUrlPrefix(

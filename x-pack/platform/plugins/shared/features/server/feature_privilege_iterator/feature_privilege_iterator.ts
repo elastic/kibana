@@ -143,6 +143,10 @@ function mergeWithSubFeatures(
           ...(mergedConfig.alerting?.rule?.manual_run ?? []),
           ...(subFeaturePrivilege.alerting?.rule?.manual_run ?? []),
         ]),
+        manage_rule_settings: mergeAlertingEntries([
+          ...(mergedConfig.alerting?.rule?.manage_rule_settings ?? []),
+          ...(subFeaturePrivilege.alerting?.rule?.manage_rule_settings ?? []),
+        ]),
         read: mergeAlertingEntries([
           ...(mergedConfig.alerting?.rule?.read ?? []),
           ...(subFeaturePrivilege.alerting?.rule?.read ?? []),
