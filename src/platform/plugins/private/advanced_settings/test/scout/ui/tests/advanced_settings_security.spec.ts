@@ -27,7 +27,7 @@ test.describe('security feature controls', { tag: tags.stateful.classic }, () =>
     await kbnClient.uiSettings.replace({});
     await browserAuth.loginWithCustomRole(getGlobalAdvancedSettingsAllRole());
     await page.goto(kbnUrl.app('management'));
-    const navLinks = await pageObjects.settings.getNavLinks();
+    const navLinks = await pageObjects.collapsibleNav.getNavLinks();
     expect(navLinks).toContain('Stack Management');
   });
 
@@ -58,8 +58,7 @@ test.describe('security feature controls', { tag: tags.stateful.classic }, () =>
     await browserAuth.loginWithCustomRole(getGlobalAdvancedSettingsAllRole());
     await page.goto(kbnUrl.get('/app/management/kibana/settings'));
     await pageObjects.settings.waitForPageLoad();
-    const badgeVisible = await pageObjects.settings.isHeaderBadgeVisible();
-    expect(badgeVisible).toBe(false);
+    await expect(pageObjects.settings.headerBadge()).toBeHidden();
   });
 
   test('global advanced_settings read-only privileges - shows Management navlink', async ({
@@ -72,7 +71,7 @@ test.describe('security feature controls', { tag: tags.stateful.classic }, () =>
     await kbnClient.uiSettings.replace({});
     await browserAuth.loginWithCustomRole(getGlobalAdvancedSettingsReadRole());
     await page.goto(kbnUrl.app('management'));
-    const navLinks = await pageObjects.settings.getNavLinks();
+    const navLinks = await pageObjects.collapsibleNav.getNavLinks();
     expect(navLinks).toContain('Stack Management');
   });
 
@@ -102,21 +101,21 @@ test.describe('security feature controls', { tag: tags.stateful.classic }, () =>
     await browserAuth.loginWithCustomRole(getGlobalAdvancedSettingsReadRole());
     await page.goto(kbnUrl.get('/app/management/kibana/settings'));
     await pageObjects.settings.waitForPageLoad();
-    const badgeVisible = await pageObjects.settings.isHeaderBadgeVisible();
-    expect(badgeVisible).toBe(true);
-    const badgeText = await pageObjects.settings.getHeaderBadgeText();
-    expect(badgeText?.toUpperCase()).toBe('READ ONLY');
+    await expect(pageObjects.settings.headerBadge()).toBeVisible();
+    await expect(pageObjects.settings.headerBadge()).toHaveAttribute(
+      'data-test-badge-label',
+      'Read only'
+    );
   });
 
   test('no advanced_settings privileges - does not show Management navlink', async ({
-    kbnUrl,
     browserAuth,
     page,
     pageObjects,
   }) => {
     await browserAuth.loginWithCustomRole(getNoAdvancedSettingsPrivilegesRole());
-    await page.goto(kbnUrl.app('discover'));
-    const navLinks = await pageObjects.settings.getNavLinks();
+    await page.gotoApp('discover');
+    const navLinks = await pageObjects.collapsibleNav.getNavLinks();
     expect(navLinks).toContain('Discover');
     expect(navLinks).not.toContain('Stack Management');
   });

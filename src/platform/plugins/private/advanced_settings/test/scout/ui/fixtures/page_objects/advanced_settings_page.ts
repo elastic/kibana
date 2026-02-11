@@ -54,20 +54,6 @@ export class AdvancedSettingsPage {
     return ariaChecked === 'true';
   }
 
-  async openCollapsibleNav() {
-    const collapsibleNav = this.page.testSubj.locator('collapsibleNav');
-    if (!(await collapsibleNav.isVisible())) {
-      await this.page.testSubj.locator('toggleNavButton').click();
-      await collapsibleNav.waitFor({ state: 'visible' });
-    }
-  }
-
-  async getNavLinks() {
-    await this.openCollapsibleNav();
-    const navLinks = this.page.testSubj.locator('collapsibleNavAppLink');
-    return navLinks.allInnerTexts();
-  }
-
   async isSettingDisabled(settingName: string) {
     const disabledAttr = await this.page.testSubj
       .locator(`management-settings-editField-${settingName}`)
@@ -75,11 +61,7 @@ export class AdvancedSettingsPage {
     return disabledAttr === 'true' || disabledAttr === '';
   }
 
-  async isHeaderBadgeVisible() {
-    return this.page.testSubj.locator('headerBadge').isVisible();
-  }
-
-  async getHeaderBadgeText() {
-    return this.page.testSubj.locator('headerBadge').getAttribute('data-test-badge-label');
+  headerBadge() {
+    return this.page.testSubj.locator('headerBadge');
   }
 }

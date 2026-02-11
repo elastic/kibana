@@ -40,7 +40,7 @@ test.describe('spaces feature controls', { tag: tags.stateful.classic }, () => {
   }) => {
     await browserAuth.loginAsAdmin();
     await page.goto(kbnUrl.app('home', { space: 'custom_space' }));
-    const navLinks = await pageObjects.settings.getNavLinks();
+    const navLinks = await pageObjects.collapsibleNav.getNavLinks();
     expect(navLinks).toContain('Stack Management');
   });
 
