@@ -36,6 +36,7 @@ export const LogExtractionState = z.object({
     .regex(/[smdh]$/)
     .default(TasksConfig[EntityStoreTaskType.Values.extractEntity].interval),
   paginationTimestamp: z.string().optional(),
+  paginationId: z.string().optional(),
   lastExecutionTimestamp: z.string().optional(),
 });
 

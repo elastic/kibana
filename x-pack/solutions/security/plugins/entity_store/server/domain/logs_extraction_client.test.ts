@@ -139,12 +139,17 @@ describe('LogsExtractionClient', () => {
         abortController: undefined,
       });
 
-      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
-        logExtractionState: expect.objectContaining({
-          paginationTimestamp: undefined,
-          lastExecutionTimestamp: expect.any(String),
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+        'user',
+        expect.objectContaining({
+          logExtractionState: expect.objectContaining({
+            paginationTimestamp: undefined,
+            paginationId: undefined,
+            lastExecutionTimestamp: expect.any(String),
+          }),
         }),
-      });
+        { mergeAttributes: false }
+      );
     });
 
     it('should handle empty results from ESQL query', async () => {
@@ -177,12 +182,17 @@ describe('LogsExtractionClient', () => {
 
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
       expect(mockIngestEntities).toHaveBeenCalledTimes(1);
-      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
-        logExtractionState: expect.objectContaining({
-          paginationTimestamp: undefined,
-          lastExecutionTimestamp: expect.any(String),
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+        'user',
+        expect.objectContaining({
+          logExtractionState: expect.objectContaining({
+            paginationTimestamp: undefined,
+            paginationId: undefined,
+            lastExecutionTimestamp: expect.any(String),
+          }),
         }),
-      });
+        { mergeAttributes: false }
+      );
     });
 
     it('should compute extraction window from lookbackPeriod and delay when no custom range', async () => {
@@ -289,11 +299,16 @@ describe('LogsExtractionClient', () => {
       });
 
       expect(result.success).toBe(false);
-      expect(!result.success && result.error.message).toBe('From date is after to date');
+      expect(!result.success && result.error.message).toBe(
+        'From 2024-01-02T12:00:00.000Z date is after to 2024-01-01T00:00:00.000Z date'
+      );
       expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
       expect(mockIngestEntities).not.toHaveBeenCalled();
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
-        error: { message: 'From date is after to date', action: 'extractLogs' },
+        error: {
+          message: 'From 2024-01-02T12:00:00.000Z date is after to 2024-01-01T00:00:00.000Z date',
+          action: 'extractLogs',
+        },
       });
     });
 
@@ -316,11 +331,16 @@ describe('LogsExtractionClient', () => {
       const result = await client.extractLogs('user');
 
       expect(result.success).toBe(false);
-      expect(!result.success && result.error.message).toBe('From date is after to date');
+      expect(!result.success && result.error.message).toBe(
+        'From 2025-01-15T12:00:00.000Z date is after to 2025-01-15T10:59:00.000Z date'
+      );
       expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
       expect(mockIngestEntities).not.toHaveBeenCalled();
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
-        error: { message: 'From date is after to date', action: 'extractLogs' },
+        error: {
+          message: 'From 2025-01-15T12:00:00.000Z date is after to 2025-01-15T10:59:00.000Z date',
+          action: 'extractLogs',
+        },
       });
 
       jest.useRealTimers();
@@ -584,12 +604,17 @@ describe('LogsExtractionClient', () => {
           targetIndex: expect.stringContaining('.entities.v2.latest.security_default'),
         })
       );
-      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('host', {
-        logExtractionState: expect.objectContaining({
-          paginationTimestamp: undefined,
-          lastExecutionTimestamp: expect.any(String),
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+        'host',
+        expect.objectContaining({
+          logExtractionState: expect.objectContaining({
+            paginationTimestamp: undefined,
+            paginationId: undefined,
+            lastExecutionTimestamp: expect.any(String),
+          }),
         }),
-      });
+        { mergeAttributes: false }
+      );
     });
 
     it('should return success false when engine is not started', async () => {

@@ -63,6 +63,8 @@ interface LogsExtractionQueryParams {
 
   toDateISO: string;
 
+  recoveryId?: string;
+
   pagination?: PaginationParams;
 }
 
@@ -73,15 +75,18 @@ export const buildLogsExtractionEsqlQuery = ({
   toDateISO,
   docsLimit,
   latestIndex,
+  recoveryId,
   pagination,
 }: LogsExtractionQueryParams): string => {
   return (
     `FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}` +
     // Where clause captures the full window that we will process
+    // We are including timestamp boundaries to ensure we are not missing any logs
+    // that contain the same timestamp (e.g. pagination recovery)
     `
   | WHERE (${getEuidEsqlDocumentsContainsIdFilter(type)})
-      AND ${TIMESTAMP_FIELD} > TO_DATETIME("${fromDateISO}")
+      AND ${TIMESTAMP_FIELD} ${recoveryId ? '>=' : '>'} TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")` +
     // Early construct the id (based on euid logic) so we can run stats per entity (equivalent to GROUP BY)
     `
@@ -101,7 +106,7 @@ export const buildLogsExtractionEsqlQuery = ({
   | SORT ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} ASC, ${recentData(
       ENGINE_METADATA_UNTYPED_ID_FIELD
     )} ASC
-  ${getPaginationWhereClause(pagination)}
+  ${getPaginationWhereClause(pagination, recoveryId ? { fromDateISO, recoveryId } : undefined)}
   | LIMIT ${docsLimit}` +
     // Concatenate the type of the entity and the id to perform the LOOKUP JOIN (otherwise ids won't match)
     `
@@ -236,18 +241,30 @@ function castDestType(fieldName: string, field: EntityField) {
   }
 }
 
-function getPaginationWhereClause(pagination?: PaginationParams) {
-  if (!pagination) {
+function getPaginationWhereClause(
+  pagination?: PaginationParams,
+  paginationRecovery?: { fromDateISO: string; recoveryId: string }
+) {
+  if (!pagination && !paginationRecovery) {
     return '';
   }
 
-  return ` | WHERE ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} > TO_DATETIME("${
-    pagination.timestampCursor
-  }") 
-            OR (${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} == TO_DATETIME("${
-    pagination.timestampCursor
-  }") 
-                AND ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} > "${pagination.idCursor}")`;
+  if (paginationRecovery) {
+    return buildPaginationWhereClause({
+      timestampCursor: paginationRecovery.fromDateISO,
+      idCursor: paginationRecovery.recoveryId,
+    });
+  }
+
+  if (pagination) {
+    return buildPaginationWhereClause(pagination);
+  }
+}
+
+function buildPaginationWhereClause({ timestampCursor, idCursor }: PaginationParams) {
+  return `| WHERE ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} > TO_DATETIME("${timestampCursor}") 
+            OR (${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} == TO_DATETIME("${timestampCursor}") 
+                AND ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} > "${idCursor}")`;
 }
 
 export function extractPaginationParams(
@@ -283,4 +300,12 @@ export function extractPaginationParams(
     timestampCursor,
     idCursor,
   };
+}
+
+function getRecoveryWhereClause(fromDateISO: string, recoveryId?: string) {
+  if (!recoveryId) {
+    return '';
+  }
+
+  return ` | WHERE ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} > TO_DATETIME("${recoveryId}")`;
 }

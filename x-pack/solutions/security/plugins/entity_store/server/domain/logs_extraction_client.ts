@@ -107,18 +107,27 @@ export class LogsExtractionClient {
         return operationResult;
       }
 
-      await this.engineDescriptorClient.update(type, {
-        logExtractionState: {
-          ...engineDescriptor.logExtractionState,
+      await this.engineDescriptorClient.update(
+        type,
+        {
+          ...engineDescriptor,
+          logExtractionState: {
+            ...engineDescriptor.logExtractionState,
 
-          // we went through all the pages,
-          // therefore we can leave the lastExecutionTimestamp as the beginning of the next
-          // window
-          paginationTimestamp: undefined,
+            // we went through all the pages,
+            // therefore we can leave the lastExecutionTimestamp as the beginning of the next
+            // window
+            paginationTimestamp: undefined,
+            paginationId: undefined,
 
-          lastExecutionTimestamp: moment().utc().toISOString(),
+            lastExecutionTimestamp: moment().utc().toISOString(),
+          },
+
+          // we need to do a full write to overwrite pagination
+          // id and timestamp cursors with undefined
         },
-      });
+        { mergeAttributes: false }
+      );
 
       return operationResult;
     } catch (error) {
@@ -144,6 +153,13 @@ export class LogsExtractionClient {
     );
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
 
+    const { paginationTimestamp, paginationId } = engineDescriptor.logExtractionState;
+    if (paginationTimestamp || paginationId) {
+      this.logger.warn(
+        `Recovering from corrupt state, using paginationTimestamp ${paginationTimestamp} and paginationId ${paginationId} beggning of the window.`
+      );
+    }
+
     const { fromDateISO, toDateISO } =
       opts?.specificWindow ||
       this.getExtractionWindow(engineDescriptor.logExtractionState, delayMs);
@@ -158,17 +174,10 @@ export class LogsExtractionClient {
     let pages = 0;
     let pagination: PaginationParams | undefined;
 
-    // On abort we save the pagination to the last seen timestamp cursor
-    opts?.abortController?.signal.addEventListener('abort', async () => {
-      await this.engineDescriptorClient.update(engineDescriptor.type, {
-        logExtractionState: {
-          ...engineDescriptor.logExtractionState,
-          paginationTimestamp: pagination?.timestampCursor,
-          lastExecutionTimestamp: moment().utc().toISOString(),
-        },
-      });
-    });
+    const onAbort = () => this.logger.debug('Aborting execution mid logs extraction');
+    opts?.abortController?.signal.addEventListener('abort', onAbort);
 
+    let recoveryId: string | undefined = paginationId;
     do {
       const query = buildLogsExtractionEsqlQuery({
         indexPatterns,
@@ -178,7 +187,11 @@ export class LogsExtractionClient {
         fromDateISO,
         toDateISO,
         pagination,
+        recoveryId,
       });
+
+      // Recovery id already used, clean up for next iteration
+      recoveryId = undefined;
 
       this.logger.debug(
         `Running query to extract logs from ${fromDateISO} to ${toDateISO} ${
@@ -213,8 +226,23 @@ export class LogsExtractionClient {
         });
       }
 
+      // On pagination we save the pagination to the last seen timestamp cursor
+      // so we can recover from corrupt state
+      if (pagination) {
+        await this.engineDescriptorClient.update(engineDescriptor.type, {
+          logExtractionState: {
+            ...engineDescriptor.logExtractionState,
+            paginationTimestamp: pagination?.timestampCursor,
+            paginationId: pagination?.idCursor,
+            lastExecutionTimestamp: moment().utc().toISOString(),
+          },
+        });
+      }
+
       // should never be larger than limit, just being safe
     } while (pagination);
+
+    opts?.abortController?.signal.removeEventListener('abort', onAbort);
 
     return {
       count: totalCount,
@@ -225,7 +253,7 @@ export class LogsExtractionClient {
 
   private validateExtractionWindow(fromDateISO: string, toDateISO: string) {
     if (moment(fromDateISO).isAfter(moment(toDateISO))) {
-      throw new Error('From date is after to date');
+      throw new Error(`From ${fromDateISO} date is after to ${toDateISO} date`);
     }
   }
 
@@ -237,21 +265,34 @@ export class LogsExtractionClient {
   // 3. LastExecutionTimestamp is present:
   //    fromDate = lastExecutionTimestamp | toDate = now - delay
   private getExtractionWindow(
-    logExtractionState: LogExtractionState,
+    logsExtractionState: LogExtractionState,
     delayMs: number
   ): { fromDateISO: string; toDateISO: string } {
+    const { paginationTimestamp } = logsExtractionState;
+
     const fromDateISO =
-      logExtractionState.paginationTimestamp ||
-      logExtractionState.lastExecutionTimestamp ||
-      this.getFromDate(logExtractionState);
+      paginationTimestamp ||
+      this.getDelayedLastExecutionTimestamp(logsExtractionState, delayMs) ||
+      this.getFromDateBasedOnLookback(logsExtractionState);
 
     const toDateISO = moment().utc().subtract(delayMs, 'millisecond').toISOString();
 
     return { fromDateISO, toDateISO };
   }
 
-  private getFromDate(logExtractionState: LogExtractionState): string {
-    const lookbackPeriodMs = parseDurationToMs(logExtractionState.lookbackPeriod);
+  private getDelayedLastExecutionTimestamp(
+    { lastExecutionTimestamp }: LogExtractionState,
+    durationMs: number
+  ): string | undefined {
+    if (!lastExecutionTimestamp) {
+      return undefined;
+    }
+
+    return moment(lastExecutionTimestamp).subtract(durationMs, 'millisecond').toISOString();
+  }
+
+  private getFromDateBasedOnLookback({ lookbackPeriod }: LogExtractionState): string {
+    const lookbackPeriodMs = parseDurationToMs(lookbackPeriod);
     return moment().utc().subtract(lookbackPeriodMs, 'millisecond').toISOString();
   }
 
