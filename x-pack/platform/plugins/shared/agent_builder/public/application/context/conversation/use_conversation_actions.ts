@@ -41,10 +41,6 @@ export interface ConversationActions {
     attachments?: AttachmentInput[];
   }) => void;
   removeOptimisticRound: () => void;
-  /**
-   * Optimistically clears the last round's response when resending.
-   * Called when resending - the backend has already persisted an empty round.
-   */
   clearLastRoundResponse: () => void;
   setAgentId: (agentId: string) => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
