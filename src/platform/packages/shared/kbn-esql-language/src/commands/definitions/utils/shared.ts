@@ -236,6 +236,72 @@ function getWildcardPosition(name: string) {
  */
 export const isParamExpressionType = (type: string): type is 'param' => type === 'param';
 
+/** Counts commas at the top nesting level, respecting parens/brackets/braces/strings. */
+export function countTopLevelCommas(text: string, start: number, end: number): number {
+  let commas = 0;
+  let parenDepth = 0;
+  let bracketDepth = 0;
+  let braceDepth = 0;
+  let quote: '"' | "'" | undefined;
+
+  for (let i = start; i < end && i < text.length; i++) {
+    const char = text[i];
+
+    if (quote) {
+      if (char === '\\' && i + 1 < end) {
+        i++;
+        continue;
+      }
+
+      if (char === quote) {
+        quote = undefined;
+      }
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      quote = char;
+      continue;
+    }
+
+    if (char === '(') {
+      parenDepth++;
+      continue;
+    }
+
+    if (char === ')') {
+      parenDepth = Math.max(0, parenDepth - 1);
+      continue;
+    }
+
+    if (char === '[') {
+      bracketDepth++;
+      continue;
+    }
+
+    if (char === ']') {
+      bracketDepth = Math.max(0, bracketDepth - 1);
+      continue;
+    }
+
+    if (char === '{') {
+      braceDepth++;
+      continue;
+    }
+
+    if (char === '}') {
+      braceDepth = Math.max(0, braceDepth - 1);
+      continue;
+    }
+
+    if (char === ',' && parenDepth === 0 && bracketDepth === 0 && braceDepth === 0) {
+      commas++;
+    }
+  }
+
+  return commas;
+}
+
 export function fuzzySearch(fuzzyName: string, resources: IterableIterator<string>) {
   const wildCardPosition = getWildcardPosition(fuzzyName);
   if (wildCardPosition !== 'none') {

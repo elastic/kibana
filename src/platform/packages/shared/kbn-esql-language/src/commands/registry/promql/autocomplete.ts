@@ -15,14 +15,11 @@ import { getDateLiterals } from '../../definitions/utils/literals';
 import {
   getPromqlFunctionSuggestions,
   getPromqlFunctionSuggestionsForReturnTypes,
+  getMetricTypesForSignature,
 } from '../../definitions/utils/promql';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
 import { SuggestionCategory } from '../../../shared/sorting';
-import {
-  ESQL_NUMBER_TYPES,
-  ESQL_STRING_TYPES,
-  type PromQLFunctionParamType,
-} from '../../definitions/types';
+import { ESQL_NUMBER_TYPES, ESQL_STRING_TYPES } from '../../definitions/types';
 import {
   assignCompletionItem,
   buildAddValuePlaceholder,
@@ -83,7 +80,9 @@ export async function autocomplete(
       const baseSuggestions = [
         ...availableParamSuggestions,
         ...(columnSuggestion ? [columnSuggestion] : []),
-        ...(canSuggestColumn ? suggestMetrics(context, needsWrappedQuery, ESQL_NUMBER_TYPES) : []),
+        ...(canSuggestColumn
+          ? buildFieldSuggestions(context, ESQL_NUMBER_TYPES, needsWrappedQuery ? 'wrap' : 'plain')
+          : []),
         ...(canSuggestColumn ? wrapFunctionSuggestions(needsWrappedQuery) : []),
       ];
 
@@ -109,7 +108,9 @@ export async function autocomplete(
 
     case 'inside_grouping':
     case 'after_label_brace':
-      return position.isCompleteLabel ? [commaCompleteItem] : suggestLabels(context);
+      return position.isCompleteLabel
+        ? [commaCompleteItem]
+        : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain', true);
 
     case 'after_label_name':
       // Future: suggest label operators (=, !=, =~, !~) when ES defines them
@@ -125,7 +126,7 @@ export async function autocomplete(
     }
 
     case 'after_label_selector': {
-      return position.signatureTypes?.includes('range_vector') && !position.selector?.duration
+      return position.signatureTypes?.includes('range_vector') && position.canSuggestRangeSelector
         ? [promqlRangeSelectorItem]
         : [];
     }
@@ -144,10 +145,13 @@ export async function autocomplete(
       const signatureTypes = position.signatureTypes ?? [];
       const types = getMetricTypesForSignature(signatureTypes);
 
-      const expectsOnlyScalar = isScalarOnlyParam(signatureTypes);
+      const expectsOnlyScalar =
+        signatureTypes.length > 0 && signatureTypes.every((type) => type === 'scalar');
       const scalarValues = expectsOnlyScalar ? [buildAddValuePlaceholder('number')] : [];
 
-      const metrics = expectsOnlyScalar ? [] : suggestMetrics(context, needsWrappedQuery, types);
+      const metrics = expectsOnlyScalar
+        ? []
+        : buildFieldSuggestions(context, types, needsWrappedQuery ? 'wrap' : 'plain');
 
       const functions = expectsOnlyScalar
         ? []
@@ -318,20 +322,6 @@ function wrapFunctionSuggestions(
   }));
 }
 
-/* Converts PromQL metric fields from context into autocomplete suggestions. */
-function suggestMetrics(
-  context: ICommandContext | undefined,
-  wrap: boolean | undefined,
-  types: readonly string[]
-): ISuggestionItem[] {
-  return buildFieldSuggestions(context, types, wrap ? 'wrap' : 'plain');
-}
-
-/* Converts dimension fields into label autocomplete suggestions for PromQL selectors. */
-function suggestLabels(context?: ICommandContext): ISuggestionItem[] {
-  return buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain', true);
-}
-
 function buildFieldSuggestions(
   context: ICommandContext | undefined,
   types: readonly string[],
@@ -360,28 +350,4 @@ function buildFieldSuggestions(
         category: SuggestionCategory.FIELD,
       });
     });
-}
-
-// ============================================================================
-// Function Argument Configuration
-// ============================================================================
-
-function isScalarOnlyParam(types: PromQLFunctionParamType[]): boolean {
-  return types.length > 0 && types.every((type) => type === 'scalar');
-}
-
-/* PromQL scalars and vector samples are float64 (no ints); we treat them as numeric ESQL types for suggestions. */
-function getEsqlTypesForPromqlParam(paramType: PromQLFunctionParamType): readonly string[] {
-  return paramType === 'string' ? ESQL_STRING_TYPES : ESQL_NUMBER_TYPES;
-}
-
-/** Derives ES|QL types from PromQL function signature types. */
-function getMetricTypesForSignature(signatureTypes: PromQLFunctionParamType[]): readonly string[] {
-  if (!signatureTypes.length) {
-    return ESQL_NUMBER_TYPES;
-  }
-
-  const types = signatureTypes.flatMap(getEsqlTypesForPromqlParam);
-
-  return Array.from(new Set(types));
 }

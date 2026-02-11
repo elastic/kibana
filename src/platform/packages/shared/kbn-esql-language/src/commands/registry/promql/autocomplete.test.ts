@@ -283,6 +283,77 @@ describe('inside query', () => {
     );
   });
 
+  test('suggests metrics after comma in wrapped parens query', async () => {
+    const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
+    const numericFieldTexts = numericFields.map((field) => `${field} `);
+    const query = 'PROMQL step = "5m" (sum(avg(quantile_over_time(0,  ) ) ) )';
+    const cursorPosition =
+      query.indexOf('quantile_over_time(0,  ') + 'quantile_over_time(0,  '.length;
+
+    await expectPromqlSuggestions(
+      query,
+      {
+        labelsContain: numericFields,
+        textsContain: numericFieldTexts,
+        labelsNotContain: promqlFunctionLabels,
+      },
+      mockCallbacks,
+      undefined,
+      cursorPosition
+    );
+  });
+
+  test('suggests scalar placeholder before comma in partially written first arg', async () => {
+    const query =
+      'PROMQL step = "5m" sum(quantile_over_time(  , bytes_counter {event.dataset = "value"} [5m]) )';
+    const cursorPosition = query.indexOf(', bytes_counter');
+
+    await expectPromqlSuggestions(
+      query,
+      {
+        textsContain: ['${0:0}'],
+      },
+      mockCallbacks,
+      undefined,
+      cursorPosition
+    );
+  });
+
+  test('suggests range-vector metrics when cursor is before selector with missing metric', async () => {
+    const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
+    const query = 'PROMQL step = "5m" sum(quantile_over_time( 0 ,   {event.dataset =  "vue"}) )';
+    const cursorPosition = query.indexOf('{event.dataset');
+
+    await expectPromqlSuggestions(
+      query,
+      {
+        labelsContain: numericFields,
+        labelsNotContain: promqlFunctionLabels,
+      },
+      mockCallbacks,
+      undefined,
+      cursorPosition
+    );
+  });
+
+  test('does not leak grouping label suggestions inside function args when by clause exists later', async () => {
+    const numericFields = getFieldNamesByType(ESQL_NUMBER_TYPES, true);
+    const query =
+      'PROMQL step = "5m" sum(quantile_over_time( 0,  bytes {event.dataset =""} [5m]) ) by (event.dataset )';
+    const cursorPosition = query.indexOf('bytes');
+
+    await expectPromqlSuggestions(
+      query,
+      {
+        labelsContain: numericFields,
+        labelsNotContain: ['event.dataset'],
+      },
+      mockCallbacks,
+      undefined,
+      cursorPosition
+    );
+  });
+
   test('suggests comma after complete first arg in multi-arg function', async () => {
     const query = 'PROMQL step = "5m" quantile(0.9 )';
     const cursorPosition = query.indexOf(')');
@@ -303,6 +374,68 @@ describe('inside query', () => {
       labelsContain: [','],
       labelsNotContain: promqlFunctionLabels,
     });
+  });
+
+  test('does not suggest comma when cursor is at range selector boundary', async () => {
+    const query =
+      'PROMQL step = "5m" sum(avg(quantile_over_time(0, bytes{event.dataset="value"} [5m]) ))';
+    const cursorPosition = query.indexOf('[5m]');
+
+    await expectPromqlSuggestions(
+      query,
+      { labelsNotContain: [','] },
+      mockCallbacks,
+      undefined,
+      cursorPosition
+    );
+  });
+
+  test('suggests range selector before an existing range token after label selector', async () => {
+    const query =
+      'PROMQL step = "5m" sum(quantile_over_time( 0, bytes  {event.dataset =""}  [5m]) )';
+    const cursorPosition = query.indexOf('[5m]');
+
+    await expectPromqlSuggestions(
+      query,
+      {
+        labelsContain: [promqlRangeSelectorItem.label],
+        labelsNotContain: [','],
+      },
+      mockCallbacks,
+      undefined,
+      cursorPosition
+    );
+  });
+
+  test('does not suggest comma when cursor is inside range selector', async () => {
+    const query =
+      'PROMQL step = "5m" sum(avg(quantile_over_time(0, bytes{event.dataset="value"} [5m]) ))';
+    const cursorPosition = query.indexOf('[5m]') + 2;
+
+    await expectPromqlSuggestions(
+      query,
+      { labelsNotContain: [','] },
+      mockCallbacks,
+      undefined,
+      cursorPosition
+    );
+  });
+
+  test('suggests range selector before closing paren after malformed label matcher', async () => {
+    const query =
+      'PROMQL step = "5m" sum(avg(quantile_over_time( 0,  bytes_normal_counter   {event.dataset "value"} )     )  )';
+    const cursorPosition = query.indexOf(' )     )') + 1;
+
+    await expectPromqlSuggestions(
+      query,
+      {
+        labelsContain: [promqlRangeSelectorItem.label],
+        labelsNotContain: [','],
+      },
+      mockCallbacks,
+      undefined,
+      cursorPosition
+    );
   });
 
   test.each([
@@ -419,6 +552,22 @@ describe('aggregation functions (by clause)', () => {
       labelsContain: labelNames,
       labelsNotContain: promqlFunctionLabels,
     });
+  });
+
+  test('does not suggest comma inside an empty trailing grouping clause', async () => {
+    const query =
+      'PROMQL step = "5m" sum(avg(quantile_over_time(0, bytes{event.dataset=""}[5m])) by (event.dataset)) by ()';
+    const cursorPosition = query.lastIndexOf(')'); // cursor inside final by (|)
+
+    await expectPromqlSuggestions(
+      query,
+      {
+        labelsNotContain: [','],
+      },
+      mockCallbacks,
+      undefined,
+      cursorPosition
+    );
   });
 
   test('does not suggest by after aggregation that already has grouping', async () => {
@@ -684,6 +833,22 @@ describe('label selector suggestions', () => {
       labelsContain: labelNames,
       labelsNotContain: promqlFunctionLabels,
     });
+  });
+
+  test('suggests labels when cursor is before a typed operator and label name is missing', async () => {
+    const query =
+      'PROMQL step = "5m" sum(avg(quantile_over_time(0, bytes{ = ""}[5m])) by (event.dataset))';
+    const cursorPosition = query.indexOf('{ = ""') + 2; // bytes{| = ""}
+
+    await expectPromqlSuggestions(
+      query,
+      {
+        labelsContain: labelNames,
+      },
+      mockCallbacks,
+      undefined,
+      cursorPosition
+    );
   });
 
   test('does not suggest range selector when label map is incomplete', async () => {
