@@ -7,7 +7,11 @@
 
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu } from '@elastic/eui';
-import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import {
+  getAttackDiscoveryMarkdown,
+  getOriginalAlertIds,
+  type AttackDiscoveryAlert,
+} from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo } from 'react';
 import { useInvalidateFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
 import type { inputsModel } from '../../../../common/store';
@@ -37,9 +41,14 @@ export function AttacksGroupTakeActionItems({
     globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
   }, [globalQueries]);
 
+  const originalAlertIds = useMemo(
+    () => getOriginalAlertIds({ alertIds: attack.alertIds, replacements: attack.replacements }),
+    [attack.alertIds, attack.replacements]
+  );
+
   const baseAttackProps = useMemo(() => {
-    return { attackId: attack.id, relatedAlertIds: attack.alertIds };
-  }, [attack.alertIds, attack.id]);
+    return { attackId: attack.id, relatedAlertIds: originalAlertIds };
+  }, [attack.id, originalAlertIds]);
 
   const attacksWithAssignees = useMemo(() => {
     return [{ ...baseAttackProps, assignees: attack.assignees }];
@@ -78,12 +87,31 @@ export function AttacksGroupTakeActionItems({
     closePopover,
   });
 
+  const attacksWithTimelineAlerts = useMemo(() => [{ ...baseAttackProps }], [baseAttackProps]);
+
   const { items: investigateInTimelineItems } = useAttackInvestigateInTimelineContextMenuItems({
-    attack,
+    attacksWithTimelineAlerts,
     closePopover,
   });
 
-  const { items: casesItems } = useAttackCaseContextMenuItems({ closePopover, attack });
+  const attacksWithCase = useMemo(
+    () => [
+      {
+        ...baseAttackProps,
+        markdownComment: getAttackDiscoveryMarkdown({
+          attackDiscovery: attack,
+          replacements: attack.replacements,
+        }),
+      },
+    ],
+    [attack, baseAttackProps]
+  );
+
+  const { items: casesItems } = useAttackCaseContextMenuItems({
+    closePopover,
+    title: attack.title,
+    attacksWithCase,
+  });
 
   const defaultPanel: EuiContextMenuPanelDescriptor = useMemo(
     () => ({
