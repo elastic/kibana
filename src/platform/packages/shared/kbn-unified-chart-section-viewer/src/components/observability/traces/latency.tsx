@@ -60,11 +60,12 @@ const LatencyChartContent = ({
 };
 
 export const LatencyChart = () => {
-  const { filters, indexes } = useTraceMetricsContext();
+  const { filters, indexes, metadataFields } = useTraceMetricsContext();
 
   const latencyChart = getLatencyChart({
     indexes,
     filters,
+    metadataFields,
   });
 
   if (!latencyChart) {

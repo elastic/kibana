@@ -20,7 +20,7 @@ describe('validateConnectorIds', () => {
   };
 
   const mockConnectorTypes: Record<string, ConnectorTypeInfo> = {
-    slack: {
+    '.slack': {
       actionTypeId: '.slack',
       displayName: 'Slack',
       instances: [mockConnectorInstance],
@@ -30,8 +30,8 @@ describe('validateConnectorIds', () => {
       minimumLicenseRequired: 'basic',
       subActions: [],
     },
-    'inference.unified_completion': {
-      actionTypeId: '.gen-ai',
+    '.inference': {
+      actionTypeId: '.inference',
       displayName: 'OpenAI',
       instances: [
         {
@@ -39,6 +39,9 @@ describe('validateConnectorIds', () => {
           name: 'OpenAI Connector',
           isPreconfigured: false,
           isDeprecated: false,
+          config: {
+            taskType: 'chat_completion',
+          },
         },
       ],
       enabled: true,
@@ -351,7 +354,7 @@ describe('validateConnectorIds', () => {
   });
 
   describe('when handling different connector types', () => {
-    it('should validate connectors with sub-action types', () => {
+    it('should validate inference connectors with matching taskType', () => {
       const connectorIdItems: ConnectorIdItem[] = [
         createConnectorIdItem({
           key: 'openai-connector-1', // Valid UUID
@@ -366,6 +369,23 @@ describe('validateConnectorIds', () => {
         severity: 'info',
         message: null,
         beforeMessage: '✓ OpenAI Connector',
+      });
+    });
+
+    it('should validate inference connectors with non-matching taskType', () => {
+      const connectorIdItems: ConnectorIdItem[] = [
+        createConnectorIdItem({
+          key: 'openai-connector-1', // Valid UUID
+          connectorType: 'inference.rerank',
+        }),
+      ];
+
+      const results = validateConnectorIds(connectorIdItems, mockConnectorTypes, '');
+
+      expect(results).toHaveLength(1);
+      expect(results[0]).toMatchObject({
+        severity: 'error',
+        message: expect.stringContaining('Create a new connector or choose an existing one'),
       });
     });
 
