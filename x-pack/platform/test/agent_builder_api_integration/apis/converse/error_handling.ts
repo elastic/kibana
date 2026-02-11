@@ -61,8 +61,9 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
 
       const retryRequest = [...llmProxy.interceptedRequests]
         .reverse()
-        .find((request) => request.matchingInterceptorName === 'final-assistant-response')!
-        .requestBody;
+        .find(
+          (request) => request.matchingInterceptorName === 'final-assistant-response'
+        )!.requestBody;
 
       const messages = retryRequest.messages;
 
