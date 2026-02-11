@@ -7,7 +7,13 @@
 
 import { ALERT_INDEX_PATTERN, ApmRuleType } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/alerts-ui-shared';
-import { ERROR_GROUP_ID, SERVICE_ENVIRONMENT, SERVICE_NAME } from '@kbn/apm-types';
+import {
+  ERROR_GROUP_ID,
+  ERROR_GROUP_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+} from '@kbn/apm-types';
 import type { TopAlert } from '../../../../../typings/alerts';
 import { getApmErrorCountRuleData } from './apm_error_count_rule';
 
@@ -77,6 +83,59 @@ describe('getApmErrorCountRuleData', () => {
       );
     });
 
+    it('includes error.grouping_name filter when present in alert fields', () => {
+      const alert: TopAlert = {
+        ...mockAlert,
+        fields: {
+          ...mockAlert.fields,
+          [ERROR_GROUP_NAME]: 'NullPointerException',
+        },
+      } as unknown as TopAlert;
+
+      const result = getApmErrorCountRuleData({ alert, rule: baseRule })!;
+
+      expect(result).toBeDefined();
+      expect(result.discoverAppLocatorParams?.query?.query).toBe(
+        '(service.name:"my-service" AND error.grouping_name:"NullPointerException" AND service.environment:"production" AND processor.event:"error")'
+      );
+    });
+
+    it('includes transaction.name filter when present in alert fields', () => {
+      const alert: TopAlert = {
+        ...mockAlert,
+        fields: {
+          ...mockAlert.fields,
+          [TRANSACTION_NAME]: 'GET /api/users',
+        },
+      } as unknown as TopAlert;
+
+      const result = getApmErrorCountRuleData({ alert, rule: baseRule })!;
+
+      expect(result).toBeDefined();
+      expect(result.discoverAppLocatorParams?.query?.query).toBe(
+        '(service.name:"my-service" AND transaction.name:"GET /api/users" AND service.environment:"production" AND processor.event:"error")'
+      );
+    });
+
+    it('includes all additional group by fields when present in alert fields', () => {
+      const alert: TopAlert = {
+        ...mockAlert,
+        fields: {
+          ...mockAlert.fields,
+          [ERROR_GROUP_ID]: 'abc123',
+          [ERROR_GROUP_NAME]: 'NullPointerException',
+          [TRANSACTION_NAME]: 'GET /api/users',
+        },
+      } as unknown as TopAlert;
+
+      const result = getApmErrorCountRuleData({ alert, rule: baseRule })!;
+
+      expect(result).toBeDefined();
+      expect(result.discoverAppLocatorParams?.query?.query).toBe(
+        '(service.name:"my-service" AND error.grouping_key:"abc123" AND error.grouping_name:"NullPointerException" AND transaction.name:"GET /api/users" AND service.environment:"production" AND processor.event:"error")'
+      );
+    });
+
     it('excludes service.environment filter when ENVIRONMENT_ALL', () => {
       const alert: TopAlert = {
         ...mockAlert,
@@ -91,23 +150,6 @@ describe('getApmErrorCountRuleData', () => {
       expect(result).toBeDefined();
       expect(result.discoverAppLocatorParams?.query?.query).toBe(
         '(service.name:"my-service" AND processor.event:"error")'
-      );
-    });
-
-    it('builds query with all fields when error.grouping_key is also present', () => {
-      const alert: TopAlert = {
-        ...mockAlert,
-        fields: {
-          ...mockAlert.fields,
-          [ERROR_GROUP_ID]: 'abc123',
-        },
-      } as unknown as TopAlert;
-
-      const result = getApmErrorCountRuleData({ alert, rule: baseRule })!;
-
-      expect(result).toBeDefined();
-      expect(result.discoverAppLocatorParams?.query?.query).toBe(
-        '(service.name:"my-service" AND error.grouping_key:"abc123" AND service.environment:"production" AND processor.event:"error")'
       );
     });
 

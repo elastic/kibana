@@ -9,24 +9,35 @@ import type { Rule } from '@kbn/alerts-ui-shared';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { ALERT_INDEX_PATTERN } from '@kbn/rule-data-utils';
 import { escapeKuery, escapeQuotes } from '@kbn/es-query';
-import { ERROR_GROUP_ID, PROCESSOR_EVENT, SERVICE_ENVIRONMENT, SERVICE_NAME } from '@kbn/apm-types';
+import {
+  ERROR_GROUP_ID,
+  ERROR_GROUP_NAME,
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+} from '@kbn/apm-types';
 import { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
 import type { TopAlert } from '../../../../../typings/alerts';
 
+const ERROR_COUNT_GROUP_BY_FIELDS = [
+  SERVICE_NAME,
+  ERROR_GROUP_ID,
+  ERROR_GROUP_NAME,
+  TRANSACTION_NAME,
+] as const;
+
 const apmErrorCountAlertFieldsToKqlQuery = (alert: TopAlert): string => {
-  const filters = [];
   const { fields } = alert as TopAlert<ObservabilityApmAlert>;
 
-  const serviceName = fields[SERVICE_NAME];
-  if (serviceName) {
-    filters.push(`${escapeKuery(SERVICE_NAME)}:"${escapeQuotes(serviceName)}"`);
-  }
-
-  const errorGroupingKey = fields[ERROR_GROUP_ID];
-  if (errorGroupingKey) {
-    filters.push(`${escapeKuery(ERROR_GROUP_ID)}:"${escapeQuotes(errorGroupingKey)}"`);
-  }
+  const filters = ERROR_COUNT_GROUP_BY_FIELDS.reduce<string[]>((acc, fieldName) => {
+    const value = fields[fieldName];
+    if (value) {
+      acc.push(`${escapeKuery(fieldName)}:"${escapeQuotes(value)}"`);
+    }
+    return acc;
+  }, []);
 
   const environment = fields[SERVICE_ENVIRONMENT];
   if (environment && environment !== 'ENVIRONMENT_ALL') {

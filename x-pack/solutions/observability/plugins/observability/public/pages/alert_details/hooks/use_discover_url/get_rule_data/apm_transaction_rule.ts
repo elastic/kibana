@@ -25,24 +25,22 @@ type ApmTransactionRuleDataResult = {
   };
 } | null;
 
+const TRANSACTION_GROUP_BY_FIELDS = [
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+  TRANSACTION_NAME,
+] as const;
+
 export const apmTransactionAlertFieldsToKqlQuery = (alert: TopAlert): string => {
-  const filters = [];
   const { fields } = alert as TopAlert<ObservabilityApmAlert>;
 
-  const serviceName = fields[SERVICE_NAME];
-  if (serviceName) {
-    filters.push(`${escapeKuery(SERVICE_NAME)}:"${escapeQuotes(serviceName)}"`);
-  }
-
-  const transactionType = fields[TRANSACTION_TYPE];
-  if (transactionType) {
-    filters.push(`${escapeKuery(TRANSACTION_TYPE)}:"${escapeQuotes(transactionType)}"`);
-  }
-
-  const transactionName = fields[TRANSACTION_NAME];
-  if (transactionName) {
-    filters.push(`${escapeKuery(TRANSACTION_NAME)}:"${escapeQuotes(transactionName)}"`);
-  }
+  const filters = TRANSACTION_GROUP_BY_FIELDS.reduce<string[]>((acc, fieldName) => {
+    const value = fields[fieldName];
+    if (value) {
+      acc.push(`${escapeKuery(fieldName)}:"${escapeQuotes(value)}"`);
+    }
+    return acc;
+  }, []);
 
   const environment = fields[SERVICE_ENVIRONMENT];
   if (environment && environment !== 'ENVIRONMENT_ALL') {
