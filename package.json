@@ -1364,7 +1364,7 @@
     "js-yaml": "4.1.1",
     "jsdom": "20.0.1",
     "json-schema-to-ts": "3.1.1",
-    "jsonwebtoken": "9.0.2",
+    "jsonwebtoken": "9.0.3",
     "jsts": "1.6.2",
     "kea": "2.6.0",
     "langchain": "0.3.35",
