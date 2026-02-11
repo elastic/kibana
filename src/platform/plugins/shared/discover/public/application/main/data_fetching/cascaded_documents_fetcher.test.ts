@@ -9,7 +9,6 @@
 
 import { buildDataTableRecord, type DataTableRecord } from '@kbn/discover-utils';
 import type { AggregateQuery } from '@kbn/es-query';
-import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { constructCascadeQuery } from '@kbn/esql-utils';
 import { apm } from '@elastic/apm-rum';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
@@ -136,6 +135,11 @@ describe('CascadedDocumentsFetcher', () => {
         inspectorAdapters: {
           requests: expect.any(RequestAdapter),
         },
+        inspectorConfig: {
+          title: 'Cascade Row Data Query',
+          description:
+            'This request queries Elasticsearch to fetch the documents matching the value of the expanded cascade row.',
+        },
       })
     );
     expect(stateManager.setCascadedDocuments).toHaveBeenCalledWith(params.nodeId, records);
@@ -156,22 +160,22 @@ describe('CascadedDocumentsFetcher', () => {
     );
   });
 
-  it('swallows abort errors and returns empty records', async () => {
+  it('rejects when the request is aborted', async () => {
     const { fetcher } = createFetcher();
     const delay = Promise.withResolvers<void>();
 
     mockFetchEsql.mockImplementation(async ({ abortSignal }) => {
       await delay.promise;
       abortSignal?.throwIfAborted();
-      throw Error('should have been AbortError');
+      return { records: [] };
     });
 
     const fetchPromise = fetcher.fetchCascadedDocuments(createFetchParams({ nodeId: 'node-3' }));
 
-    fetcher.cancelFetch('node-3', AbortReason.CANCELED);
+    fetcher.cancelFetch('node-3');
     delay.resolve();
 
-    await expect(fetchPromise).resolves.toEqual([]);
+    await expect(fetchPromise).rejects.toMatchObject({ name: 'AbortError' });
   });
 
   it('does not cancel fetches when the instance is inactive', async () => {
@@ -190,7 +194,7 @@ describe('CascadedDocumentsFetcher', () => {
 
     const fetchPromise = fetcher.fetchCascadedDocuments(createFetchParams({ nodeId: 'node-6' }));
 
-    fetcher.cancelFetch('node-6', AbortReason.CANCELED);
+    fetcher.cancelFetch('node-6');
     delay.resolve();
 
     await expect(fetchPromise).resolves.toEqual(records);
@@ -206,15 +210,26 @@ describe('CascadedDocumentsFetcher', () => {
     mockFetchEsql.mockImplementation(async ({ abortSignal }) => {
       await delay.promise;
       abortSignal?.throwIfAborted();
-      throw Error('should have been AbortError');
+      return { records: [] };
     });
 
     const first = fetcher.fetchCascadedDocuments(createFetchParams({ nodeId: 'node-4' }));
     const second = fetcher.fetchCascadedDocuments(createFetchParams({ nodeId: 'node-5' }));
 
-    fetcher.cancelAllFetches(AbortReason.CANCELED);
+    fetcher.cancelAllFetches();
     delay.resolve();
 
-    await expect(Promise.all([first, second])).resolves.toEqual([[], []]);
+    const results = await Promise.allSettled([first, second]);
+
+    expect(results).toEqual([
+      expect.objectContaining({
+        status: 'rejected',
+        reason: expect.objectContaining({ name: 'AbortError' }),
+      }),
+      expect.objectContaining({
+        status: 'rejected',
+        reason: expect.objectContaining({ name: 'AbortError' }),
+      }),
+    ]);
   });
 });
