@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
-import type { Instance } from '@kbn/synthtrace-client';
-import { apm, timerange } from '@kbn/synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { Instance } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
 const MAX_DEPENDENCIES = 10000;
 const MAX_DEPENDENCIES_PER_SERVICE = 500;
