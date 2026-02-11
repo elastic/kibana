@@ -59,9 +59,10 @@ export default function ({ getService }: AgentBuilderApiFtrProviderContext) {
 
       expect(body.response.message).to.eql(MOCKED_LLM_RESPONSE);
 
-      const retryRequest = llmProxy.interceptedRequests.find(
-        (request) => request.matchingInterceptorName === 'final-assistant-response'
-      )!.requestBody;
+      const retryRequest = [...llmProxy.interceptedRequests]
+        .reverse()
+        .find((request) => request.matchingInterceptorName === 'final-assistant-response')!
+        .requestBody;
 
       const messages = retryRequest.messages;
 
@@ -121,5 +122,8 @@ export const setupAnswerAgentCallsInvalidTool = async ({
   });
 
   // answer agent responds on the second round
+  mockFinalAnswer(proxy, response);
+  // Some layers may retry before the agent-level retry kicks in; provide an extra
+  // response so the proxy doesn't return a 404 mid-flow.
   mockFinalAnswer(proxy, response);
 };

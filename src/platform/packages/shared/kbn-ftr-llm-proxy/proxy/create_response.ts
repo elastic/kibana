@@ -14,7 +14,8 @@ import type { LLMMessage, ToolMessage } from './types';
 export function createOpenAiChunk(msg: string | ToolMessage): OpenAI.ChatCompletionChunk {
   let delta: OpenAI.ChatCompletionChunk.Choice.Delta;
   if (typeof msg === 'string') {
-    delta = { role: 'user', content: msg };
+    // Streaming chunks represent the model's output (assistant), not the user.
+    delta = { role: 'assistant', content: msg };
   } else {
     delta = {
       role: msg.role,
@@ -33,6 +34,22 @@ export function createOpenAiChunk(msg: string | ToolMessage): OpenAI.ChatComplet
         delta,
         index: 0,
         finish_reason: null,
+      },
+    ],
+  };
+}
+
+export function createOpenAiFinalChunk(): OpenAI.ChatCompletionChunk {
+  return {
+    id: v4(),
+    object: 'chat.completion.chunk',
+    created: 0,
+    model: 'gpt-4',
+    choices: [
+      {
+        delta: {},
+        index: 0,
+        finish_reason: 'stop',
       },
     ],
   };
