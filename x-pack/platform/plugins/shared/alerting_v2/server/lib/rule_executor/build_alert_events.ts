@@ -7,7 +7,7 @@
 
 import { createHash } from 'crypto';
 import type { ESQLRow } from '@kbn/es-types';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleResponse } from '../rules_client';
@@ -85,7 +85,7 @@ export function buildAlertEventsFromEsqlResponse({
       rowDoc,
       groupKeyFields: ruleAttributes.grouping?.fields ?? [],
       get fallbackSeed(): string {
-        return `${executionUuid}|row:${index}|${stringify(rowDoc)}`;
+        return `${executionUuid}|row:${index}|${stableStringify(rowDoc)}`;
       },
     });
 

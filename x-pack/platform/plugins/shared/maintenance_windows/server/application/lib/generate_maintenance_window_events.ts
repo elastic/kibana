@@ -7,25 +7,26 @@
 
 import _ from 'lodash';
 import moment from 'moment-timezone';
-import { RRule, Weekday } from '@kbn/rrule';
-import type { RRuleParams } from '@kbn/alerting-types';
+import { RRule } from '@kbn/rrule';
 import type { DateRange } from '../../../common';
-import type { MaintenanceWindow } from '../types';
+import type { MaintenanceWindow, Schedule } from '../types';
+import { transformCustomScheduleToRRule } from '../../lib/transforms/custom_to_rrule/latest';
+import { getDurationInMilliseconds } from '../../lib/transforms/custom_to_rrule/util';
 
 export interface GenerateMaintenanceWindowEventsParams {
-  rRule: RRuleParams;
+  schedule: Schedule;
   expirationDate: string;
-  duration: number;
   startDate?: string;
 }
 
 export const generateMaintenanceWindowEvents = ({
-  rRule,
+  schedule,
   expirationDate,
-  duration,
   startDate,
 }: GenerateMaintenanceWindowEventsParams) => {
-  const { dtstart, until, wkst, byweekday, ...rest } = rRule;
+  const duration = getDurationInMilliseconds(schedule.duration);
+  const { rRule } = transformCustomScheduleToRRule(schedule);
+  const { dtstart, until, byweekday, ...rest } = rRule;
 
   const rRuleStartDate = new Date(dtstart);
   const endDate = new Date(expirationDate);
@@ -34,7 +35,7 @@ export const generateMaintenanceWindowEvents = ({
     ...rest,
     dtstart: rRuleStartDate,
     until: until ? new Date(until) : null,
-    wkst: wkst ? Weekday[wkst] : null,
+    wkst: null,
     byweekday: byweekday ?? null,
   };
 
@@ -60,19 +61,21 @@ export const generateMaintenanceWindowEvents = ({
  */
 export const shouldRegenerateEvents = ({
   maintenanceWindow,
-  rRule,
-  duration,
+  schedule,
 }: {
   maintenanceWindow: MaintenanceWindow;
-  rRule?: RRuleParams;
-  duration?: number;
+  schedule?: Schedule;
 }): boolean => {
-  // If the rRule fails a deep equality check (there is a change), we should regenerate events
-  if (rRule && !_.isEqual(rRule, maintenanceWindow.rRule)) {
+  // If the schedule fails a deep equality check (there is a change), we should regenerate events
+  if (schedule && !_.isEqual(schedule, maintenanceWindow.schedule.custom)) {
     return true;
   }
+
+  const duration = schedule && getDurationInMilliseconds(schedule.duration);
+  const mwDuration = getDurationInMilliseconds(maintenanceWindow.schedule.custom.duration);
+
   // If the duration changes, we should regenerate events
-  if (typeof duration === 'number' && duration !== maintenanceWindow.duration) {
+  if (typeof duration === 'number' && duration !== mwDuration) {
     return true;
   }
   return false;
