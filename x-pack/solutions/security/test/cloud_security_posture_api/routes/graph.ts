@@ -215,6 +215,12 @@ export default function (providerContext: FtrProviderContext) {
           'x-pack/solutions/security/test/cloud_security_posture_api/es_archives/logs_gcp_audit'
         );
 
+        try {
+          await spacesService.delete('foo');
+        } catch (e) {
+          // Ignore if the space does not exist yet.
+        }
+
         await spacesService.create({
           id: 'foo',
           name: 'foo',
