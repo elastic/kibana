@@ -25,7 +25,7 @@ test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
     await expect(page.testSubj.locator('breadcrumbs')).toBeVisible();
     await expect(pageObjects.navigation.getBreadcrumbByText('Get started')).toBeVisible();
 
-    await page.testSubj.click('~nav-item-deepLinkId-securitySolutionUI:alerts');
+    await pageObjects.collapsibleNav.clickNavItemByDeepLinkId('securitySolutionUI:alerts');
     await expect(pageObjects.navigation.getBreadcrumbByText('Alerts')).toBeVisible();
 
     await pageObjects.navigation.clickLogo();
@@ -35,39 +35,41 @@ test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
   test('navigate using search', async ({ page }) => {
     await page.testSubj.click('nav-search-reveal');
     await page.testSubj.fill('nav-search-input', 'security dashboards');
-    await page.testSubj.waitForSelector('nav-search-option');
-    const options = await page.testSubj.locator('nav-search-option').all();
-    await options[0].click();
+    await page
+      .locator('[data-test-subj="nav-search-option"][url="/app/security/dashboards"]')
+      .click();
     await page.testSubj.click('nav-search-conceal');
 
     await page.waitForURL(/app\/security\/dashboards/);
     expect(page.url()).toContain('app/security/dashboards');
   });
 
-  test('shows cases in sidebar navigation', async ({ page, pageObjects }) => {
+  test('shows cases in sidebar navigation', async ({ pageObjects }) => {
     await expect(pageObjects.navigation.getSidenav()).toBeVisible();
-    await page.testSubj.click('kbnChromeNav-moreMenuTrigger');
+    await pageObjects.collapsibleNav.openMoreMenu();
     await expect(
-      page.testSubj.locator('~nav-item-deepLinkId-securitySolutionUI:cases')
+      pageObjects.collapsibleNav.getNavItemByDeepLinkId('securitySolutionUI:cases')
     ).toBeVisible();
   });
 
   test('navigates to cases app', async ({ page, pageObjects }) => {
     await expect(async () => {
       await pageObjects.navigation.goToSecurity();
-      await page.testSubj.click('kbnChromeNav-moreMenuTrigger');
-      await page.testSubj.click('~nav-item-deepLinkId-securitySolutionUI:cases');
+      await pageObjects.collapsibleNav.openMoreMenu();
+      await pageObjects.collapsibleNav.clickNavItemByDeepLinkId('securitySolutionUI:cases');
 
       expect(page.url()).toContain('/app/security/cases');
       await expect(page.testSubj.locator('cases-all-title')).toBeVisible();
     }).toPass({ timeout: 30000 });
   });
 
-  test('navigates to maintenance windows', async ({ page, browserAuth, pageObjects }) => {
+  test('navigates to maintenance windows', async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.navigation.goToSecurity();
-    await page.testSubj.click('~nav-item-id-stack_management');
-    await page.testSubj.click('~nav-item-id-management:maintenanceWindows');
+    await pageObjects.collapsibleNav.clickItem('stack_management');
+    await pageObjects.collapsibleNav.clickItem('management:maintenanceWindows', {
+      lowercase: false,
+    });
     await expect(pageObjects.navigation.getBreadcrumbByText('Maintenance Windows')).toBeVisible();
   });
 
@@ -85,9 +87,9 @@ test.describe('navigation', { tag: tags.serverless.security.complete }, () => {
     await expect(pageObjects.navigation.getFeedbackButtonSurveyLink()).toBeVisible();
   });
 
-  test('opens panel on legacy management landing page', async ({ page }) => {
+  test('opens panel on legacy management landing page', async ({ page, pageObjects }) => {
     await page.gotoApp('management');
     await expect(page.testSubj.locator('cards-navigation-page')).toBeVisible();
-    await expect(page.testSubj.locator('~nav-item-id-stack_management')).toBeVisible();
+    await expect(pageObjects.collapsibleNav.getNavItemById('stack_management')).toBeVisible();
   });
 });

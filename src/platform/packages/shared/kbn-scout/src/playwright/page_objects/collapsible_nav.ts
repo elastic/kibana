@@ -29,10 +29,36 @@ export class CollapsibleNav {
     }
   }
 
-  async clickItem(itemName: 'Discover' | 'Dashboards' | 'Maps' | 'Machine Learning') {
+  async clickItem(
+    itemName:
+      | 'Discover'
+      | 'Dashboards'
+      | 'Maps'
+      | 'Machine Learning'
+      | 'stack_management'
+      | 'management:maintenanceWindows',
+    { lowercase = true }: { lowercase?: boolean } = {}
+  ) {
     await this.expandNav();
+    const itemId = lowercase ? itemName.toLocaleLowerCase() : itemName;
     return this.config.serverless
-      ? this.page.testSubj.click(`*nav-item-id-${itemName.toLocaleLowerCase()}`)
+      ? this.page.testSubj.click(`*nav-item-id-${itemId}`)
       : this.page.click(`[title="${itemName}"]`);
+  }
+
+  async openMoreMenu() {
+    await this.page.testSubj.click('kbnChromeNav-moreMenuTrigger');
+  }
+
+  async clickNavItemByDeepLinkId(deepLinkId: string) {
+    await this.page.testSubj.click(`~nav-item-deepLinkId-${deepLinkId}`);
+  }
+
+  getNavItemById(id: string) {
+    return this.page.testSubj.locator(`~nav-item-id-${id}`);
+  }
+
+  getNavItemByDeepLinkId(deepLinkId: string) {
+    return this.page.testSubj.locator(`~nav-item-deepLinkId-${deepLinkId}`);
   }
 }
