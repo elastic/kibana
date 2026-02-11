@@ -49,7 +49,7 @@ const renderLandingPage = async (overrides: Partial<AppDependencies> = {}) => {
     sections: sectionsMock,
     chromeStyle: 'classic',
     coreStart,
-    hasEnterpriseLicense: false,
+    isAirGapped: false,
     getAutoOpsStatusHook: () => () => ({ isCloudConnectAutoopsEnabled: false, isLoading: false }),
     ...overrides,
   };
@@ -115,12 +115,11 @@ describe('Landing Page', () => {
   });
 
   describe('AutoOps Promotion Callout', () => {
-    test('Shows AutoOps callout when not in cloud and has enterprise license', async () => {
+    test('Shows AutoOps callout when not in cloud', async () => {
       await renderLandingPage({
         chromeStyle: 'classic',
         cardsNavigationConfig: { enabled: false },
         cloud: { isCloudEnabled: false },
-        hasEnterpriseLicense: true,
       });
 
       expect(screen.getByTestId('autoOpsPromotionCallout')).toBeInTheDocument();
@@ -131,43 +130,30 @@ describe('Landing Page', () => {
         chromeStyle: 'classic',
         cardsNavigationConfig: { enabled: false },
         cloud: { isCloudEnabled: true },
-        hasEnterpriseLicense: true,
       });
 
       expect(screen.queryByTestId('autoOpsPromotionCallout')).not.toBeInTheDocument();
     });
 
-    test('Hides AutoOps callout when not having enterprise license', async () => {
+    test('Shows AutoOps callout when cloud service is not available', async () => {
       await renderLandingPage({
         chromeStyle: 'classic',
         cardsNavigationConfig: { enabled: false },
-        cloud: { isCloudEnabled: false },
-        hasEnterpriseLicense: false,
-      });
-
-      expect(screen.queryByTestId('autoOpsPromotionCallout')).not.toBeInTheDocument();
-    });
-
-    test('Hides AutoOps callout when in cloud and without enterprise license', async () => {
-      await renderLandingPage({
-        chromeStyle: 'classic',
-        cardsNavigationConfig: { enabled: false },
-        cloud: { isCloudEnabled: true },
-        hasEnterpriseLicense: false,
-      });
-
-      expect(screen.queryByTestId('autoOpsPromotionCallout')).not.toBeInTheDocument();
-    });
-
-    test('Shows AutoOps callout when cloud service is not available but has enterprise license', async () => {
-      await renderLandingPage({
-        chromeStyle: 'classic',
-        cardsNavigationConfig: { enabled: false },
-        hasEnterpriseLicense: true,
         // cloud service not provided - defaults to isCloudEnabled: false
       });
 
       expect(screen.getByTestId('autoOpsPromotionCallout')).toBeInTheDocument();
+    });
+
+    test('Hides AutoOps callout when in air-gapped environment', async () => {
+      await renderLandingPage({
+        chromeStyle: 'classic',
+        cardsNavigationConfig: { enabled: false },
+        cloud: { isCloudEnabled: false },
+        isAirGapped: true,
+      });
+
+      expect(screen.queryByTestId('autoOpsPromotionCallout')).not.toBeInTheDocument();
     });
   });
 });
