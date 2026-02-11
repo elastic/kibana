@@ -16,10 +16,12 @@ export const googleDriveDataSource: DataSource = {
   }),
   iconType: '.google_drive',
 
-  stackConnector: {
-    type: '.google_drive',
-    config: {},
-  },
+  stackConnectors: [
+    {
+      type: '.google_drive',
+      config: {},
+    },
+  ],
 
   workflows: {
     directory: __dirname + '/workflows',

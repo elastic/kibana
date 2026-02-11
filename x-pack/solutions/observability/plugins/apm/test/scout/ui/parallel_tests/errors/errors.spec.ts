@@ -32,7 +32,7 @@ test.describe(
         await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
           testData.SERVICE_OPBEANS_NODE
         );
-        await expect(page.getByTestId('apmErrorGroupListEmptyState')).toBeVisible({
+        await expect(page.locator('td').getByTestId('apmErrorGroupListEmptyState')).toBeVisible({
           timeout: testData.EXTENDED_TIMEOUT,
         });
       });
@@ -202,7 +202,7 @@ test.describe(
       await test.step('typing non-matching text hides results', async () => {
         await errorsPage.tableSearchInput.fill('nonexistent error message');
         await expect(page.getByText(testData.ERROR_MESSAGE)).toBeHidden();
-        await expect(page.getByTestId('apmErrorGroupListEmptyState')).toBeVisible({
+        await expect(page.locator('td').getByTestId('apmErrorGroupListEmptyState')).toBeVisible({
           timeout: testData.EXTENDED_TIMEOUT,
         });
       });
