@@ -67,7 +67,6 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   const handleRequestError = useRequestErrorHandler();
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
   const { services } = useKibana<MonitoringStartServices>();
-  const learnMoreLink = services.docLinks.links.cloud.connectToAutoops;
   const cloudConnectUrl = services.application.getUrlForApp('cloud_connect');
   const handleConnectClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -128,7 +127,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
 
   const { supported, enabled } = getSetupModeState();
   const shouldShowAutoOpsPromotion =
-    showAutoOpsPromotion && !Legacy.shims.isCloud && Legacy.shims.hasEnterpriseLicense;
+    showAutoOpsPromotion && !Legacy.shims.isCloud && !Legacy.shims.isAirGapped;
 
   return (
     <EuiPageTemplate
@@ -150,7 +149,6 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
         <EuiSpacer size="m" />
         {shouldShowAutoOpsPromotion && (
           <AutoOpsPromotionCallout
-            learnMoreLink={learnMoreLink}
             cloudConnectUrl={cloudConnectUrl}
             onConnectClick={handleConnectClick}
             hasCloudConnectPermission={hasCloudConnectPermission}
