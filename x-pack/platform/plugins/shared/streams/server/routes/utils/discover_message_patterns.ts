@@ -101,8 +101,8 @@ export const stripPlaceholderTokens = (pattern: string): string => {
  */
 const MIN_EXCLUSION_TOKENS = 3;
 
-/** Sampling probability for the random_sampler aggregation (0..1). */
-const SAMPLING_PROBABILITY = 0.1;
+/** Target number of documents for the adaptive random_sampler probability. */
+const TARGET_SAMPLE_SIZE = 100_000;
 
 /** Minimum document count for a category to be returned by categorize_text. */
 const MIN_DOC_COUNT = 10;
@@ -262,6 +262,19 @@ export const discoverMessagePatterns = async ({
     };
   }
 
+  const countResponse = await esClient.count({
+    index,
+    query: {
+      bool: {
+        filter: dateRangeQuery(start, end),
+        must_not: mustNot.length > 0 ? mustNot : undefined,
+      },
+    },
+  });
+
+  const rawProbability = TARGET_SAMPLE_SIZE / countResponse.count;
+  const samplingProbability = rawProbability >= 0.5 ? 1 : rawProbability;
+
   const response = await esClient.search({
     index,
     size: 0,
@@ -275,7 +288,7 @@ export const discoverMessagePatterns = async ({
     aggregations: {
       sampler: {
         random_sampler: {
-          probability: SAMPLING_PROBABILITY,
+          probability: samplingProbability,
         },
         aggs: samplerSubAggs,
       },
