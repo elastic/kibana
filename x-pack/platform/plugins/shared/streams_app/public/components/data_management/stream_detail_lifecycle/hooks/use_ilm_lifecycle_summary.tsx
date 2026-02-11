@@ -163,7 +163,7 @@ export const useIlmLifecycleSummary = ({
   const saveIlmPolicy = async (
     policy: IlmPolicy,
     allowOverwrite = false,
-    allowMissingHot = false
+    sourcePolicyName?: string
   ) => {
     const phases = Object.fromEntries(
       Object.entries(policy.phases).map(([phaseName, phase]) => [
@@ -176,13 +176,13 @@ export const useIlmLifecycleSummary = ({
       params: {
         query: {
           allow_overwrite: allowOverwrite,
-          allow_missing_hot: allowMissingHot,
         },
         body: {
           name: policy.name,
           phases,
           meta: policy.meta,
           deprecated: policy.deprecated,
+          ...(sourcePolicyName ? { source_policy_name: sourcePolicyName } : {}),
         },
       },
       signal,
@@ -226,8 +226,7 @@ export const useIlmLifecycleSummary = ({
         deprecated: currentPolicy.current.deprecated,
       };
 
-      const originalMissingHot = !currentPolicy.current.phases.hot;
-      await saveIlmPolicy(updatedPolicy, true, originalMissingHot);
+      await saveIlmPolicy(updatedPolicy, true);
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.lifecycleSummary.policyUpdated', {
@@ -339,7 +338,7 @@ export const useIlmLifecycleSummary = ({
         meta: restMeta,
       };
 
-      await saveIlmPolicy(updatedPolicy, false, !originalHasHot);
+      await saveIlmPolicy(updatedPolicy, false, currentPolicy.current.name);
 
       await updateStreamLifecycle({ ilm: { policy: newPolicyName } });
 

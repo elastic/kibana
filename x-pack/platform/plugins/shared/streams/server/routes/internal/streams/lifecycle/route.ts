@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { BooleanFromString } from '@kbn/zod-helpers';
 import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { Streams, isIlmLifecycle, type IlmPolicyWithUsage } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { ilmPhases } from '../../../../lib/streams/lifecycle/ilm_phases';
@@ -39,12 +40,16 @@ const getDataStreamByBackingIndices = async (
     return {};
   }
 
-  const indexResponse: IndicesGetResponse = await scopedClusterClient.asCurrentUser.indices.get({
-    index: inUseIndices,
-    allow_no_indices: true,
-    ignore_unavailable: true,
-    filter_path: ['*.data_stream'],
-  });
+  const indexResponse = await processAsyncInChunks<IndicesGetResponse>(
+    inUseIndices,
+    async (indicesChunk) =>
+      scopedClusterClient.asCurrentUser.indices.get({
+        index: indicesChunk,
+        allow_no_indices: true,
+        ignore_unavailable: true,
+        filter_path: ['*.data_stream'],
+      })
+  );
 
   return Object.fromEntries(
     Object.entries(indexResponse).flatMap(([indexName, indexData]) => {
@@ -182,25 +187,27 @@ const lifecycleIlmPoliciesUpdateRoute = createServerRoute({
       }),
       meta: z.record(z.string(), z.any()).optional(),
       deprecated: z.boolean().optional(),
+      source_policy_name: z.string().optional(),
     }),
     query: z.object({
-      allow_overwrite: z.coerce.boolean().optional(),
-      allow_missing_hot: z.coerce.boolean().optional(),
+      allow_overwrite: BooleanFromString.optional().default(false),
     }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
     const { scopedClusterClient } = await getScopedClients({ request });
-    const { name, meta, ...policy } = params.body;
-    const { allow_overwrite: allowOverwrite = false, allow_missing_hot: allowMissingHot = false } =
-      params.query;
+    const { name, meta, source_policy_name: sourcePolicyName, ...policy } = params.body;
+    const { allow_overwrite: allowOverwrite = false } = params.query;
     const existingPolicy = await getExistingPolicy(scopedClusterClient, name);
+    const sourcePolicy = sourcePolicyName
+      ? await getExistingPolicy(scopedClusterClient, sourcePolicyName)
+      : undefined;
 
     assertPolicyNameIsValid(existingPolicy, allowOverwrite);
 
     assertValidPolicyPhases({
       existingPolicy,
       incomingPhases: policy.phases,
-      allowMissingHot,
+      sourcePolicy,
     });
 
     const basePolicy = existingPolicy?.policy ?? {};

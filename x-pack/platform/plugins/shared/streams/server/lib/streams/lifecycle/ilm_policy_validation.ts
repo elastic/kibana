@@ -61,16 +61,16 @@ export const assertPolicyNameIsValid = (
  * - The policy has **no phases at all** (at least one is required).
  * - The `hot` phase is missing, unless:
  *   - **Updating** an existing policy that already has no `hot` phase.
- *   - **Creating** a new policy with `allowMissingHot` set to `true`.
+ *   - **Creating** a new policy from a source policy that already has no `hot` phase.
  */
 export const assertValidPolicyPhases = ({
   existingPolicy,
   incomingPhases,
-  allowMissingHot,
+  sourcePolicy,
 }: {
   existingPolicy?: ExistingIlmPolicy;
   incomingPhases?: IlmPhases;
-  allowMissingHot: boolean;
+  sourcePolicy?: ExistingIlmPolicy;
 }): void => {
   const nonNullPhases = incomingPhases
     ? Object.entries(incomingPhases).filter(([, value]) => value != null)
@@ -88,13 +88,15 @@ export const assertValidPolicyPhases = ({
 
   const hasExistingPolicy = Boolean(existingPolicy);
   const existingAlreadyMissingHot = !Boolean(existingPolicy?.policy?.phases?.hot);
+  const hasSourcePolicy = Boolean(sourcePolicy);
+  const sourceAlreadyMissingHot = !Boolean(sourcePolicy?.policy?.phases?.hot);
 
   // Updating: valid only when the original policy was already missing hot
   const isValidUpdate = hasExistingPolicy && existingAlreadyMissingHot;
-  // New policy: valid only when explicitly opted in
-  const isValidNewPolicy = !hasExistingPolicy && allowMissingHot;
+  // New policy: valid only when the source policy was already missing hot
+  const isValidNewFromSource = !hasExistingPolicy && hasSourcePolicy && sourceAlreadyMissingHot;
 
-  if (!isValidUpdate && !isValidNewPolicy) {
+  if (!isValidUpdate && !isValidNewFromSource) {
     throw new StatusError('Policy is missing a required hot phase', 400);
   }
 };

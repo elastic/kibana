@@ -38,7 +38,6 @@ describe('ilm policy validation', () => {
           assertValidPolicyPhases({
             existingPolicy: undefined,
             incomingPhases: undefined,
-            allowMissingHot: true,
           })
         ).toThrow(
           expect.objectContaining({
@@ -53,7 +52,6 @@ describe('ilm policy validation', () => {
           assertValidPolicyPhases({
             existingPolicy: undefined,
             incomingPhases: {},
-            allowMissingHot: true,
           })
         ).toThrow(
           expect.objectContaining({
@@ -68,7 +66,6 @@ describe('ilm policy validation', () => {
           assertValidPolicyPhases({
             existingPolicy: undefined,
             incomingPhases: hotPhase,
-            allowMissingHot: true,
           })
         ).not.toThrow();
       });
@@ -80,7 +77,6 @@ describe('ilm policy validation', () => {
           assertValidPolicyPhases({
             existingPolicy: undefined,
             incomingPhases: hotPhase,
-            allowMissingHot: false,
           })
         ).not.toThrow();
       });
@@ -90,7 +86,6 @@ describe('ilm policy validation', () => {
           assertValidPolicyPhases({
             existingPolicy: policyWithHot,
             incomingPhases: hotPhase,
-            allowMissingHot: false,
           })
         ).not.toThrow();
       });
@@ -100,19 +95,17 @@ describe('ilm policy validation', () => {
           assertValidPolicyPhases({
             existingPolicy: policyWithoutHot,
             incomingPhases: hotPhase,
-            allowMissingHot: false,
           })
         ).not.toThrow();
       });
     });
 
     describe('new policy missing hot', () => {
-      it('throws when allowMissingHot is false', () => {
+      it('throws when no source policy is provided', () => {
         expect(() =>
           assertValidPolicyPhases({
             existingPolicy: undefined,
             incomingPhases: warmPhase,
-            allowMissingHot: false,
           })
         ).toThrow(
           expect.objectContaining({
@@ -122,12 +115,27 @@ describe('ilm policy validation', () => {
         );
       });
 
-      it('does not throw when allowMissingHot is true', () => {
+      it('throws when source policy has hot', () => {
         expect(() =>
           assertValidPolicyPhases({
             existingPolicy: undefined,
+            sourcePolicy: policyWithHot,
             incomingPhases: warmPhase,
-            allowMissingHot: true,
+          })
+        ).toThrow(
+          expect.objectContaining({
+            message: 'Policy is missing a required hot phase',
+            statusCode: 400,
+          })
+        );
+      });
+
+      it('does not throw when source policy already is missing hot', () => {
+        expect(() =>
+          assertValidPolicyPhases({
+            existingPolicy: undefined,
+            sourcePolicy: policyWithoutHot,
+            incomingPhases: warmPhase,
           })
         ).not.toThrow();
       });
@@ -139,7 +147,6 @@ describe('ilm policy validation', () => {
           assertValidPolicyPhases({
             existingPolicy: policyWithHot,
             incomingPhases: warmPhase,
-            allowMissingHot: false,
           })
         ).toThrow(
           expect.objectContaining({
@@ -149,22 +156,11 @@ describe('ilm policy validation', () => {
         );
       });
 
-      it('throws when existing policy has hot even if allowMissingHot is true', () => {
-        expect(() =>
-          assertValidPolicyPhases({
-            existingPolicy: policyWithHot,
-            incomingPhases: warmPhase,
-            allowMissingHot: true,
-          })
-        ).toThrow(StatusError);
-      });
-
       it('does not throw when existing policy already is missing hot', () => {
         expect(() =>
           assertValidPolicyPhases({
             existingPolicy: policyWithoutHot,
             incomingPhases: warmPhase,
-            allowMissingHot: false,
           })
         ).not.toThrow();
       });
