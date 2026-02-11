@@ -23,7 +23,7 @@ module.exports = {
   // An array of regexp pattern strings that are matched against, matched files will skip transformation:
   transformIgnorePatterns: [
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|gpt-tokenizer|flat|@langchain|eventsource-parser|zod/v4))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|gpt-tokenizer|flat|@langchain|eventsource-parser|zod/v4|p-map))[/\\\\].+\\.js$',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4))/dist/[/\\\\].+\\.js$',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4))/dist/util/[/\\\\].+\\.js$',
   ],
