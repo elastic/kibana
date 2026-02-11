@@ -12,7 +12,7 @@ import { test } from '../fixtures';
 const UPGRADE_TRIGGER_DEF_PREFIX_ID = 'productUpgradeInterceptTrigger';
 const CONFIGURED_UPGRADE_INTERCEPT_INTERVAL = 7 * 24 * 60 * 60 * 1000;
 
-test.describe('Product intercept for upgrade event', { tag: tags.ESS_ONLY }, () => {
+test.describe('Product intercept for upgrade event', { tag: tags.stateful.classic }, () => {
   let interceptUpgradeTriggerDefId: string;
 
   test.beforeAll(async ({ kbnClient }) => {
