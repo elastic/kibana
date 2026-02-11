@@ -20,7 +20,7 @@ export const BodySchema = z.object({
   logExtraction: LogExtractionBodyParams.optional().superRefine(validateLogExtractionParams),
 });
 
-export function validateKql(kql: string): {isValid: boolean, errorMsg?: string} {
+export function validateKql(kql: string): { isValid: boolean; errorMsg?: string } {
   try {
     if (!kql || kql.trim() === '') {
       return { isValid: true };

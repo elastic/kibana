@@ -72,9 +72,7 @@ describe('validateKql', () => {
     it('returns isValid true for AND/OR expressions', () => {
       expect(validateKql('foo:bar and baz:qux').isValid).toBe(true);
       expect(validateKql('foo:bar or baz:qux').isValid).toBe(true);
-      expect(validateKql('response:200 and nestedField:{ childOfNested: foo }').isValid).toBe(
-        true
-      );
+      expect(validateKql('response:200 and nestedField:{ childOfNested: foo }').isValid).toBe(true);
     });
 
     it('returns isValid true for parenthesized and nested field', () => {
