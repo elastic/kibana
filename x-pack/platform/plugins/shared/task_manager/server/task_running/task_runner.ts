@@ -51,7 +51,6 @@ import {
 import { intervalFromDate, parseIntervalAsMillisecond } from '../lib/intervals';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 import type {
-  AnyRunResult,
   CancelFunction,
   CancellableTask,
   ConcreteTaskInstance,
@@ -421,13 +420,13 @@ export class TaskManagerRunner implements TaskRunner {
         if (originalTaskCancel) return originalTaskCancel.call(this);
       };
 
-      const runner = getExecutionContextRunner<AnyRunResult>(this.executionContext, {
+      const runner = getExecutionContextRunner(this.executionContext, {
         name: `run ${this.instance.task.taskType}`,
         id: this.instance.task.id,
         description: 'run task',
       });
 
-      const result = await runner(() =>
+      const result = await runner.run(() =>
         withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
       );
 

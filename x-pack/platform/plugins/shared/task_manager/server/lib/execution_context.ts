@@ -8,29 +8,33 @@
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { ExecutionContextSetup } from '@kbn/core/server';
 
-type ExecutionFn<R> = (...args: unknown[]) => Promise<R>;
+export interface CreateExecutionContextArgs {
+  contextSetup: ExecutionContextSetup;
+  baseContext: KibanaExecutionContext;
+}
 
-export type ExecutionContextRunner<R> = (
-  fn: ExecutionFn<R>,
-  context?: KibanaExecutionContext
-) => Promise<R>;
+export interface ExecutionContextRunner {
+  run<T>(fn: () => Promise<T>, context?: KibanaExecutionContext): Promise<T>;
+}
+export class ExecutionContextRunnerImpl implements ExecutionContextRunner {
+  private contextSetup: ExecutionContextSetup;
+  private baseContext: KibanaExecutionContext;
 
-// Return a function that will run the function argument with an execution context.
-export function getExecutionContextRunner<R>(
-  contextSetup: ExecutionContextSetup,
-  baseContext: KibanaExecutionContext
-): ExecutionContextRunner<R> {
-  // make a shallow copy ...
-  baseContext = { ...baseContext };
-
-  async function executionContextRunner(
-    fn: ExecutionFn<R>,
-    context?: KibanaExecutionContext
-  ): Promise<R> {
-    // apply the contexts in order, always add type: "task manager"
-    const finalContext = { ...context, ...baseContext, type: 'task manager' };
-    return await contextSetup.withContext<Promise<R>>(finalContext, fn);
+  constructor(args: CreateExecutionContextArgs) {
+    this.contextSetup = args.contextSetup;
+    this.baseContext = args.baseContext;
   }
 
-  return executionContextRunner;
+  async run<T>(fn: () => Promise<T>, context: KibanaExecutionContext = {}): Promise<T> {
+    // apply the contexts in order, always add type: "task manager"
+    const finalContext = { ...context, ...this.baseContext, type: 'task manager' };
+    return this.contextSetup.withContext(finalContext, fn);
+  }
+}
+
+export function getExecutionContextRunner(
+  contextSetup: ExecutionContextSetup,
+  baseContext: KibanaExecutionContext = {}
+): ExecutionContextRunner {
+  return new ExecutionContextRunnerImpl({ contextSetup, baseContext });
 }

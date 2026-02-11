@@ -16,14 +16,14 @@ function getContextSetup() {
 
 describe('execution_context', () => {
   describe('getExecutionContextRunner', () => {
-    test('works as expected for typical usage', async () => {
+    test('works as expected for async usage', async () => {
       const contextSetup = getContextSetup();
       const runner = getExecutionContextRunner(contextSetup, {
         id: 'foo',
         name: 'bar',
       });
 
-      const result = await runner(async () => Promise.resolve(42));
+      const result = await runner.run(async () => Promise.resolve(42));
       expect(result).toBe(42);
 
       expect(contextSetup.withContext).toBeCalledWith(
@@ -44,7 +44,7 @@ describe('execution_context', () => {
       });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await runner(() => 42 as any);
+      const result = await runner.run(() => 42 as any);
       expect(result).toBe(42);
 
       expect(contextSetup.withContext).toBeCalledWith(
@@ -63,7 +63,7 @@ describe('execution_context', () => {
         type: 'kinda global',
       });
 
-      const result = await runner(async () => Promise.resolve(42), {
+      const result = await runner.run(async () => Promise.resolve(42), {
         type: 'more local',
       });
       expect(result).toBe(42);
@@ -82,7 +82,7 @@ describe('execution_context', () => {
         id: 'kinda global',
       });
 
-      const result = await runner(async () => Promise.resolve(42), {
+      const result = await runner.run(async () => Promise.resolve(42), {
         id: 'more local',
       });
       expect(result).toBe(42);
@@ -91,6 +91,37 @@ describe('execution_context', () => {
         {
           type: 'task manager',
           id: 'kinda global',
+        },
+        expect.any(Function)
+      );
+    });
+
+    test('works with no extra properties', async () => {
+      const contextSetup = getContextSetup();
+      const runner = getExecutionContextRunner(contextSetup);
+
+      const result = await runner.run(async () => Promise.resolve(42));
+      expect(result).toBe(42);
+
+      expect(contextSetup.withContext).toBeCalledWith(
+        {
+          type: 'task manager',
+        },
+        expect.any(Function)
+      );
+    });
+
+    test('works with no top-level properties', async () => {
+      const contextSetup = getContextSetup();
+      const runner = getExecutionContextRunner(contextSetup);
+
+      const result = await runner.run(async () => Promise.resolve(42), { id: 'foo' });
+      expect(result).toBe(42);
+
+      expect(contextSetup.withContext).toBeCalledWith(
+        {
+          type: 'task manager',
+          id: 'foo',
         },
         expect.any(Function)
       );
