@@ -9,7 +9,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-test.describe('per-spaces banners', { tag: tags.ESS_ONLY }, () => {
+test.describe('per-spaces banners', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.spaces.create({
       id: 'another-space',
