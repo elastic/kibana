@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.slack.send_message'
-description: 'Send a message to a Slack channel.'
+description: 'Send a message to a Slack public channel. Returns Slack API response including channel and message timestamp (ts). Requires chat:write and access to the channel.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:

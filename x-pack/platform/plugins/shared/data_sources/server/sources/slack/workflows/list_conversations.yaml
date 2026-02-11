@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.slack.list_conversations'
-description: 'List Slack public channels available to the authorized token.'
+description: 'List Slack public channels visible to the authorized token. Returns Slack API response including channels and pagination cursor (response_metadata.next_cursor when present). Requires channels:read.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:

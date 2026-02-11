@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.slack.get_conversation_history'
-description: 'Fetch message history for a specific Slack channel (public channels only).'
+description: 'Fetch message history for a specific Slack public channel. Returns Slack API response including messages plus pagination fields (has_more / response_metadata.next_cursor when present). Requires channels:history and access to the channel.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
