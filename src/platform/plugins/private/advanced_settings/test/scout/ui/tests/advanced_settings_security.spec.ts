@@ -16,7 +16,7 @@ import {
   getNoAdvancedSettingsPrivilegesRole,
 } from '../fixtures/services/privileges';
 
-test.describe('security feature controls', { tag: tags.ESS_ONLY }, () => {
+test.describe('security feature controls', { tag: tags.stateful.classic }, () => {
   test('global advanced_settings all privileges - shows management navlink', async ({
     kbnClient,
     kbnUrl,

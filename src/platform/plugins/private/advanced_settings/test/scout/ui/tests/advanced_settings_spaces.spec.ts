@@ -11,7 +11,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-test.describe('spaces feature controls', { tag: tags.ESS_ONLY }, () => {
+test.describe('spaces feature controls', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ kbnClient }) => {
     await kbnClient.savedObjects.clean({ types: ['config'] });
     await kbnClient.spaces.create({
