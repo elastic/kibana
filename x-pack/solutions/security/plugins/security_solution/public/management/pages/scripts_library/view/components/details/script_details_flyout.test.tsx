@@ -39,12 +39,6 @@ describe('EndpointScriptDetailsFlyout', () => {
         updatedBy: 'elastic',
         updatedAt: '2026-02-04T12:23:37Z',
       }),
-      queryParams: {
-        page: 1,
-        pageSize: 10,
-        sortField: 'name',
-        sortDirection: 'asc',
-      },
       onClickAction: jest.fn(),
       'data-test-subj': 'test',
     };

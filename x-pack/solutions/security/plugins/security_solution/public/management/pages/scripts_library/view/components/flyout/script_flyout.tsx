@@ -120,16 +120,7 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
           });
         }
       }
-    }, [
-      fetchScriptError,
-      isViewingOrEditing,
-      queryParams,
-      isMounted,
-      setUrlParams,
-      show,
-      toasts.addWarning,
-      toasts,
-    ]);
+    }, [fetchScriptError, isViewingOrEditing, queryParams, isMounted, setUrlParams, show, toasts]);
 
     return (
       <EuiFlyout
@@ -147,7 +138,6 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
 
         {!shouldFetchScriptToViewOrEdit && show === 'details' && (
           <EndpointScriptDetailsFlyout
-            queryParams={queryParams}
             onClickAction={onClickAction}
             scriptItem={formState.scriptItem as EndpointScript}
             data-test-subj={getTestId()}

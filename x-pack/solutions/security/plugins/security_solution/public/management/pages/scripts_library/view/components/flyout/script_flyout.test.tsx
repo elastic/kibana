@@ -16,6 +16,7 @@ import {
 import { useGetEndpointScript } from '../../../../../hooks/script_library';
 
 jest.mock('../../../../../hooks/script_library/use_get_script_by_id');
+const mockedUseGetEndpointScript = useGetEndpointScript as jest.Mock;
 
 describe('EndpointScriptFlyout', () => {
   let render: (props?: EndpointScriptFlyoutProps) => ReturnType<AppContextTestRender['render']>;
@@ -23,18 +24,19 @@ describe('EndpointScriptFlyout', () => {
   let mockedContext: AppContextTestRender;
   let scriptsGenerator: EndpointScriptsGenerator;
   let defaultProps: EndpointScriptFlyoutProps;
-
-  const defaultGetScriptHookReturn = {
-    isRefetching: false,
-    error: null,
-    refetch: jest.fn(),
-  };
+  let defaultGetScriptHookReturn: ReturnType<typeof mockedUseGetEndpointScript>;
 
   beforeEach(() => {
     scriptsGenerator = new EndpointScriptsGenerator('script-flyout-test');
     mockedContext = createAppRootMockRenderer();
 
-    (useGetEndpointScript as jest.Mock).mockReturnValue(defaultGetScriptHookReturn);
+    defaultGetScriptHookReturn = {
+      isRefetching: false,
+      error: null,
+      refetch: jest.fn(),
+    };
+
+    mockedUseGetEndpointScript.mockReturnValue(defaultGetScriptHookReturn);
 
     defaultProps = {
       queryParams: {
@@ -73,7 +75,7 @@ describe('EndpointScriptFlyout', () => {
   });
 
   it('should render loading state when `scriptItem` is not provided', () => {
-    (useGetEndpointScript as jest.Mock).mockImplementation(() => ({
+    mockedUseGetEndpointScript.mockImplementation(() => ({
       ...defaultGetScriptHookReturn,
       isRefetching: true,
     }));
@@ -112,7 +114,7 @@ describe('EndpointScriptFlyout', () => {
   it.each(['details', 'edit'])('should fetch script data when needed for `%s`', (show) => {
     const scriptData = scriptsGenerator.generate();
     const refetchMock = jest.fn().mockResolvedValue({ data: scriptData });
-    (useGetEndpointScript as jest.Mock).mockImplementation(() => ({
+    mockedUseGetEndpointScript.mockImplementation(() => ({
       ...defaultGetScriptHookReturn,
       refetch: refetchMock,
     }));
