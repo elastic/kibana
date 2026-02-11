@@ -62,9 +62,7 @@ export async function getStacktracesIdsField({
 
   const fields = maybe(response.hits.hits[0])?.fields;
 
-  if (fields?.[ELASTIC_PROFILER_STACK_TRACE_IDS]?.length) {
-    return ELASTIC_PROFILER_STACK_TRACE_IDS;
-  }
-
-  return TRANSACTION_PROFILER_STACK_TRACE_IDS;
+  return fields?.[ELASTIC_PROFILER_STACK_TRACE_IDS]?.length
+    ? ELASTIC_PROFILER_STACK_TRACE_IDS
+    : TRANSACTION_PROFILER_STACK_TRACE_IDS;
 }
