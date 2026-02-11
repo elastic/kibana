@@ -322,8 +322,61 @@ describe('createInactivityMonitoringTemplate', () => {
     expect(internalSoClientMock.create).not.toHaveBeenCalled();
   });
 
-  it('should not recreate but re-register asset ref if template already exists (e.g. on upgrade)', async () => {
+  it('should not recreate but re-register asset ref if template already exists with same data streams (e.g. on reinstall)', async () => {
     internalSoClientMock.get.mockResolvedValue({
+      id: 'fleet-nginx-inactivity-monitoring',
+      type: 'alerting_rule_template',
+      attributes: {
+        params: {
+          index: ['logs-nginx.access-*', 'metrics-nginx.stubstatus-*'],
+        },
+      },
+      references: [],
+    });
+
+    const result = await createInactivityMonitoringTemplate(
+      { logger, savedObjectsClient },
+      { packageInfo: mockIntegrationPackage }
+    );
+
+    expect(internalSoClientMock.create).not.toHaveBeenCalled();
+    expect(internalSoClientMock.update).not.toHaveBeenCalled();
+    expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
+      savedObjectsClient,
+      'nginx',
+      [{ id: 'fleet-nginx-inactivity-monitoring', type: 'alerting_rule_template' }],
+      false,
+      true
+    );
+    expect(result).toEqual({
+      id: 'fleet-nginx-inactivity-monitoring',
+      type: 'alerting_rule_template',
+    });
+  });
+
+  it('should update index patterns if data streams changed on upgrade', async () => {
+    internalSoClientMock.get.mockResolvedValue({
+      id: 'fleet-nginx-inactivity-monitoring',
+      type: 'alerting_rule_template',
+      attributes: {
+        params: {
+          searchType: 'esQuery',
+          esQuery: JSON.stringify({ query: { match_all: {} } }),
+          index: ['logs-nginx.access-*'],
+          timeField: '@timestamp',
+          timeWindowSize: 24,
+          timeWindowUnit: 'h',
+          threshold: [1],
+          thresholdComparator: '<',
+          size: 0,
+          aggType: 'count',
+          groupBy: 'all',
+          excludeHitsFromPreviousRun: true,
+        },
+      },
+      references: [],
+    });
+    internalSoClientMock.update.mockResolvedValue({
       id: 'fleet-nginx-inactivity-monitoring',
       type: 'alerting_rule_template',
       attributes: {},
@@ -336,6 +389,17 @@ describe('createInactivityMonitoringTemplate', () => {
     );
 
     expect(internalSoClientMock.create).not.toHaveBeenCalled();
+    expect(internalSoClientMock.update).toHaveBeenCalledWith(
+      'alerting_rule_template',
+      'fleet-nginx-inactivity-monitoring',
+      {
+        params: expect.objectContaining({
+          searchType: 'esQuery',
+          index: ['logs-nginx.access-*', 'metrics-nginx.stubstatus-*'],
+          timeField: '@timestamp',
+        }),
+      }
+    );
     expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
       savedObjectsClient,
       'nginx',

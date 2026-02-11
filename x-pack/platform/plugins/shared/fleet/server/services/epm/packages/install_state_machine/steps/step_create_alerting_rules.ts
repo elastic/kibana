@@ -156,7 +156,10 @@ export async function createInactivityMonitoringTemplate(
 
       // Check if the template already exists
       const existing = await internalSoClient
-        .get(KibanaSavedObjectType.alertingRuleTemplate, templateId)
+        .get<{ params?: Record<string, unknown> }>(
+          KibanaSavedObjectType.alertingRuleTemplate,
+          templateId
+        )
         .catch((err) => {
           if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
             return undefined;
@@ -168,6 +171,26 @@ export async function createInactivityMonitoringTemplate(
         logger.debug(
           `Inactivity monitoring template ${templateId} already exists for package ${pkgName}`
         );
+
+        // Update index patterns if data streams have changed (e.g. on package upgrade)
+        const existingParams = existing.attributes?.params;
+        const existingIndexPatterns = (existingParams?.index as string[]) ?? [];
+        const patternsChanged =
+          dataStreamPatterns.length !== existingIndexPatterns.length ||
+          dataStreamPatterns.some((p) => !existingIndexPatterns.includes(p));
+
+        if (patternsChanged) {
+          logger.debug(
+            `Updating inactivity monitoring template ${templateId} for package ${pkgName}: data stream patterns changed`
+          );
+          await internalSoClient.update(KibanaSavedObjectType.alertingRuleTemplate, templateId, {
+            params: {
+              ...(existingParams ?? {}),
+              index: dataStreamPatterns,
+            },
+          });
+        }
+
         // Re-register the asset ref (it may have been overwritten by stepInstallKibanaAssets)
         await saveKibanaAssetsRefs(savedObjectsClient, pkgName, [templateRef], false, true);
         return templateRef;
