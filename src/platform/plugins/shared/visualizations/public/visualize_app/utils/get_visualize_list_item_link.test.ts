@@ -13,7 +13,7 @@ import { createHashHistory } from 'history';
 import { FilterStateStore } from '@kbn/es-query';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { GLOBAL_STATE_STORAGE_KEY } from '@kbn/visualizations-common';
-import type { VisualizeUserContent } from '../components/visualize_listing';
+import type { VisualizeUserContent } from '../../utils/to_table_list_view_saved_object';
 
 const mockItem: VisualizeUserContent = {
   id: '9886b410-4c8b-11e8-b3d7-01146121b73d',

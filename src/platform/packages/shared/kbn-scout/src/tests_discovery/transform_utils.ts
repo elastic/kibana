@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DeploymentType, FlattenedConfigGroup, ModuleDiscoveryInfo } from './types';
+import type { ScoutTargetDomain } from '@kbn/scout-info';
+import type { FlattenedConfigGroup, ModuleDiscoveryInfo } from './types';
 
 // Counts modules by type (plugins and packages)
 export const countModulesByType = (
@@ -30,19 +31,19 @@ export const countModulesByType = (
  * - 'platform' => 'classic'
  * - Other groups => solution name from group (e.g., 'search' => 'elasticsearch')
  */
-const getDeploymentTypeForEch = (group: string): DeploymentType => {
+const getTargetDomainForEch = (group: string): ScoutTargetDomain => {
   if (group === 'platform') {
     return 'classic';
   }
   // Map group to solution name
   if (group === 'search') {
-    return 'elasticsearch';
+    return 'search';
   }
   if (group === 'security') {
-    return 'security';
+    return 'security_complete';
   }
   if (group === 'observability') {
-    return 'observability';
+    return 'observability_complete';
   }
 
   throw new Error(`Unknown group '${group}' for ECH deployment type`);
@@ -51,35 +52,29 @@ const getDeploymentTypeForEch = (group: string): DeploymentType => {
 /**
  * Determines deployment type for MKI (serverless) based on serverRunFlag
  */
-const getDeploymentTypeForMki = (serverRunFlag: string): DeploymentType => {
-  if (serverRunFlag === '--serverless=es') {
-    return 'elasticsearch';
-  }
-  if (serverRunFlag === '--serverless=security') {
-    return 'security';
-  }
-  if (serverRunFlag === '--serverless=security-essentials') {
-    return 'security essentials';
-  }
-  if (serverRunFlag === '--serverless=security-ease') {
-    return 'security ease';
-  }
-  if (serverRunFlag === '--serverless=oblt') {
-    return 'observability';
-  }
-  if (serverRunFlag === '--serverless=oblt-logs-essentials') {
-    return 'observability logs-essentials';
+const getTargetDomainForMki = (serverRunFlag: string): ScoutTargetDomain => {
+  const mappings: Record<string, ScoutTargetDomain> = {
+    '--arch serverless --domain search': 'search',
+    '--arch serverless --domain observability_complete': 'observability_complete',
+    '--arch serverless --domain observability_logs_essentials': 'observability_logs_essentials',
+    '--arch serverless --domain security_complete': 'security_complete',
+    '--arch serverless --domain security_essentials': 'security_essentials',
+    '--arch serverless --domain security_ease': 'security_ease',
+  };
+
+  if (!(serverRunFlag in mappings)) {
+    throw new Error(`Unknown serverRunFlag '${serverRunFlag}' for MKI deployment type`);
   }
 
-  throw new Error(`Unknown serverRunFlag '${serverRunFlag}' for MKI deployment type`);
+  return mappings[serverRunFlag];
 };
 
 /**
  * Builds the full scout command string from a server run flag
- * Format: "node scripts/scout run-tests <serverRunFlag> --testTarget=cloud"
+ * Format: "node scripts/scout run-tests --location cloud <serverRunFlag>"
  */
 const buildScoutCommand = (serverRunFlag: string): string => {
-  return `node scripts/scout run-tests ${serverRunFlag} --testTarget=cloud`;
+  return `node scripts/scout run-tests --location cloud ${serverRunFlag}`;
 };
 
 /**
@@ -95,24 +90,26 @@ export const flattenModulesByServerRunFlag = (
   for (const module of modules) {
     for (const config of module.configs) {
       for (const serverRunFlag of config.serverRunFlags) {
-        const mode: 'serverless' | 'stateful' = serverRunFlag.startsWith('--serverless')
+        const arch: 'serverless' | 'stateful' = serverRunFlag.includes('serverless')
           ? 'serverless'
           : 'stateful';
 
-        const key = `${mode}:${module.group}:${serverRunFlag}`;
+        const key = `${arch}:${module.group}:${serverRunFlag}`;
 
         // Get or create group
         let group = groupsMap.get(key);
         if (!group) {
           // Determine deployment type based on mode (ECH/stateful vs MKI/serverless)
-          const deploymentType =
-            mode === 'stateful'
-              ? getDeploymentTypeForEch(module.group)
-              : getDeploymentTypeForMki(serverRunFlag);
+          const domain =
+            arch === 'stateful'
+              ? getTargetDomainForEch(module.group)
+              : getTargetDomainForMki(serverRunFlag);
 
           group = {
-            mode,
-            deploymentType,
+            testTarget: {
+              arch,
+              domain,
+            },
             group: module.group,
             scoutCommand: buildScoutCommand(serverRunFlag),
             configs: [],
@@ -128,9 +125,9 @@ export const flattenModulesByServerRunFlag = (
 
   // Convert map to array and sort for consistent output
   return Array.from(groupsMap.values()).sort((a, b) => {
-    // Sort by mode first (stateful before serverless), then by group, then by scout command (alphabetical)
-    if (a.mode !== b.mode) {
-      return a.mode === 'stateful' ? -1 : 1;
+    // Sort by arch first (stateful before serverless), then by group, then by scout command (alphabetical)
+    if (a.testTarget.arch !== b.testTarget.arch) {
+      return a.testTarget.arch === 'stateful' ? -1 : 1;
     }
     if (a.group !== b.group) {
       return a.group.localeCompare(b.group);
