@@ -122,6 +122,7 @@ export class DispatcherService implements DispatcherServiceContract {
           last_series_event_timestamp: now.toISOString(), // irrelevant
           notification_group_id: group.id, // important to track the group for throttling
           source: 'internal',
+          reason: `notified by policy ${group.policyId} with throttle interval`,
         })),
       ],
     });
