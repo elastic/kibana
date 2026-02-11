@@ -34,9 +34,9 @@ export type DashboardContainerFactory = EmbeddableFactory<
 >;
 
 export interface DashboardCreationOptions {
-  initialInput?: Partial<DashboardContainerInput>;
+  getInitialInput?: () => Partial<DashboardContainerInput>;
 
-  incomingEmbeddable?: EmbeddablePackageState;
+  getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
 
   useSearchSessionsIntegration?: boolean;
   searchSessionSettings?: {
@@ -56,6 +56,7 @@ export interface DashboardCreationOptions {
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
   validateLoadedSavedObject?: (result: LoadDashboardFromSavedObjectReturn) => boolean;
+  isEmbeddedExternally?: boolean;
 }
 
 export class DashboardContainerFactoryDefinition
@@ -97,11 +98,14 @@ export class DashboardContainerFactoryDefinition
     const dashboardCreationStartTime = performance.now();
     const { createDashboard } = await import('./create/create_dashboard');
     try {
-      return Promise.resolve(
-        createDashboard(initialInput.id, creationOptions, dashboardCreationStartTime, savedObjectId)
+      const dashboard = await createDashboard(
+        creationOptions,
+        dashboardCreationStartTime,
+        savedObjectId
       );
+      return dashboard;
     } catch (e) {
-      return new ErrorEmbeddable(e.text, { id: e.id });
+      return new ErrorEmbeddable(e, { id: e.id });
     }
   };
 }

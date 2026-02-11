@@ -1,0 +1,10 @@
+title: Connector request properties for a generative AI connector
+description: Defines properties for connectors when type is `.gen-ai`.
+type: object
+properties:
+    apiProvider:
+        type: string
+        description: The OpenAI API provider.
+    apiUrl:
+        type: string
+        description: The OpenAI API endpoint.

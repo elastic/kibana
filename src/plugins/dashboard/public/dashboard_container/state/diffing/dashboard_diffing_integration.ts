@@ -84,7 +84,7 @@ export function startDiffingDashboardState(
   creationOptions?: DashboardCreationOptions
 ) {
   const checkForUnsavedChangesSubject$ = new Subject<null>();
-  this.subscriptions.add(
+  this.diffingSubscription.add(
     checkForUnsavedChangesSubject$
       .pipe(
         startWith(null),

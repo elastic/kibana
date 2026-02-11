@@ -1,0 +1,32 @@
+title: Set case configuration request
+description: External connection details, such as the closure type and default connector for cases.
+type: object
+required:
+  - closure_type
+  - connector
+  - owner
+properties:
+  closure_type:
+    $ref: 'closure_types.yaml'
+  connector:
+    description: An object that contains the connector configuration.
+    type: object
+    properties:
+      $ref: 'case_configure_connector_properties.yaml'
+    required:
+      - fields
+      - id
+      - name
+      - type
+  owner:
+    $ref: 'owners.yaml'
+  settings:
+    description: An object that contains the case settings.
+    type: object
+    properties:
+      syncAlerts:
+        description: Turns alert syncing on or off.
+        type: boolean
+        example: true
+    required: 
+      - syncAlerts

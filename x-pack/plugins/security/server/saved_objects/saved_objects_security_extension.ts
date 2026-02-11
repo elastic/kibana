@@ -1212,7 +1212,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       types: new Set(typesAndSpaces.keys()),
       spaces: spacesToAuthorize,
       enforceMap: typesAndSpaces,
-      auditOptions: { useSuccessOutcome: true },
+      auditOptions: { objects: auditableObjects, useSuccessOutcome: true },
     });
 
     return objects.map((result) => {

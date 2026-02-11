@@ -1,0 +1,7 @@
+name: page
+in: query
+description: The page number to return.
+schema:
+  type: integer
+  default: 1
+example: 1

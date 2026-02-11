@@ -96,7 +96,7 @@ export function LayerControl({
       return layer.hasErrors();
     });
     const isLoading = layerList.some((layer) => {
-      return layer.isVisible() && layer.showAtZoomLevel(zoom) && layer.isLayerLoading();
+      return layer.isLayerLoading(zoom);
     });
 
     return (

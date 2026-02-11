@@ -413,3 +413,14 @@ This page has been deleted. Refer to <<machine-learning-api-sync>>.
 == Alerts and Actions
 
 This page has been deleted. Refer to <<alerting-getting-started>>.
+
+[role="exclude",id="apis"]
+== APIs
+
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/x-pack/plugins/alerting/docs/openapi[alerting], {kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[cases], {kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[connectors], and {kib-repo}/tree/{branch}/x-pack/plugins/ml/common/openapi[machine learning] open API specifications.
+
+[role="exclude",id="upgrade-assistant-api-default-field"]
+== Add default field API
+
+This API was removed in 7.13.0. Refer to <<upgrade-assistant-api>>.

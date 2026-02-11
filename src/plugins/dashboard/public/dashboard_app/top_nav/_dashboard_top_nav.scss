@@ -1,11 +1,26 @@
-.dashboardTopNav {
-  width: 100%;
-  position: sticky;
-  z-index: $euiZLevel2;
-  background: $euiPageBackgroundColor;
+.kbnBody {
+  .dashboardTopNav {
+    width: 100%;
+    position: sticky;
+    z-index: $euiZLevel2;
+    background: $euiPageBackgroundColor;
+  }
 
-  top: $kbnHeaderOffset;
-  &.dashboardTopNav-fullscreenMode {
-    top: 0;
+  &.kbnBody--noHeaderBanner {
+    &.kbnBody--chromeVisible .dashboardTopNav {
+      top: $kbnHeaderOffset;
+    }
+    &.kbnBody--chromeHidden .dashboardTopNav {
+      top: 0;
+    }
+  }
+
+  &.kbnBody--hasHeaderBanner {
+    &.kbnBody--chromeVisible .dashboardTopNav {
+      top: $kbnHeaderOffsetWithBanner;
+    }
+    &.kbnBody--chromeHidden .dashboardTopNav {
+      top: $kbnHeaderBannerHeight;
+    }
   }
 }

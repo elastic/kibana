@@ -140,3 +140,7 @@ export const ResponseCheckJSONCodec = t.interface({
   expression: t.string,
 });
 export type ResponseCheckJSON = t.TypeOf<typeof ResponseCheckJSONCodec>;
+
+export const RequestBodyCheckCodec = t.interface({ value: t.string, type: CodeEditorModeCodec });
+
+export type RequestBodyCheck = t.TypeOf<typeof RequestBodyCheckCodec>;

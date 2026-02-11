@@ -102,7 +102,6 @@ export function runSaveAs(this: DashboardContainer) {
           this.dispatch.setLastSavedInput(stateToSave);
         });
       }
-      if (newCopyOnSave || !lastSavedId) this.expectIdChange();
       resolve(saveResult);
       return saveResult;
     };
@@ -175,10 +174,7 @@ export async function runClone(this: DashboardContainer) {
         saveOptions: { saveAsCopy: true },
         currentState: { ...currentState, title: newTitle },
       });
-
-      this.dispatch.setTitle(newTitle);
       resolve(saveResult);
-      this.expectIdChange();
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
     showCloneModal({ onClone, title: currentState.title, onClose: () => resolve(undefined) });

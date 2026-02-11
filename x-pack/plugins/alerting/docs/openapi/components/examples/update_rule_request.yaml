@@ -8,7 +8,7 @@ value:
       id: 96b668d0-a1b6-11ed-afdf-d39a49596974
       params:
         level: info
-        message: "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
+        message: "Rule {{rule.name}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
   params:
     aggField: sheet.version
     aggType: avg

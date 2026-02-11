@@ -110,8 +110,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           from: fromInMs,
           to: toInMs,
           id: rule.id,
-          kibanaSiemAppUrl: (rule.params?.meta as { kibana_siem_app_url?: string } | undefined)
-            ?.kibana_siem_app_url,
         });
       },
       async executor(options) {

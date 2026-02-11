@@ -1,0 +1,9 @@
+in: query
+name: searchFields
+description: The fields to perform the simple_query_string parsed query against.
+schema:
+  oneOf:
+    - type: string
+    - type: array
+      items:
+        type: string

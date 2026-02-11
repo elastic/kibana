@@ -263,6 +263,61 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
       ],
     },
     {
+      key: 'elasticAgentIntegration',
+      title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.title', {
+        defaultMessage: 'Elastic Agent Integration',
+      }),
+      steps: [
+        {
+          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1', {
+            defaultMessage: 'Copy credentials',
+          }),
+          content: (
+            <>
+              <EuiText>
+                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.hint', {
+                  defaultMessage:
+                    "You'll need these credentials to set up Universal Profiling. Please save them in a secure location, as they will be required in the subsequent step.",
+                })}
+              </EuiText>
+              <EuiSpacer />
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.secretToken', {
+                  defaultMessage: 'Secret token: {secretToken}',
+                  values: { secretToken },
+                })}
+              </EuiCodeBlock>
+              <EuiSpacer size="s" />
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.apmServerUrl', {
+                  defaultMessage: 'APM server url: {apmServerUrl}',
+                  values: { apmServerUrl: collectionAgentHostPort },
+                })}
+              </EuiCodeBlock>
+            </>
+          ),
+        },
+        {
+          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2', {
+            defaultMessage: 'Fleet',
+          }),
+          content: (
+            <EuiButton
+              iconType="gear"
+              fill
+              href={`${core.http.basePath.prepend(
+                '/app/integrations/detail/profiler_agent-8.8.0-preview/overview?prerelease=true'
+              )}`}
+            >
+              {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2.button', {
+                defaultMessage: 'Manage Universal Profiling agent in Fleet',
+              })}
+            </EuiButton>
+          ),
+        },
+      ],
+    },
+    {
       key: 'symbols',
       title: i18n.translate('xpack.profiling.tabs.symbols.title', {
         defaultMessage: 'Upload Symbols',
@@ -345,61 +400,6 @@ docker.elastic.co/observability/profiling-agent:${hostAgentVersion} /root/pf-hos
                 />
               </EuiText>
             </div>
-          ),
-        },
-      ],
-    },
-    {
-      key: 'elasticAgentIntegration',
-      title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.title', {
-        defaultMessage: 'Elastic Agent Integration',
-      }),
-      steps: [
-        {
-          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1', {
-            defaultMessage: 'Copy credentials',
-          }),
-          content: (
-            <>
-              <EuiText>
-                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.hint', {
-                  defaultMessage:
-                    "You'll need these credentials to set up Universal Profiling. Please save them in a secure location, as they will be required in the subsequent step.",
-                })}
-              </EuiText>
-              <EuiSpacer />
-              <EuiCodeBlock paddingSize="s" isCopyable>
-                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.secretToken', {
-                  defaultMessage: 'Secret token: {secretToken}',
-                  values: { secretToken },
-                })}
-              </EuiCodeBlock>
-              <EuiSpacer size="s" />
-              <EuiCodeBlock paddingSize="s" isCopyable>
-                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step1.apmServerUrl', {
-                  defaultMessage: 'APM server url: {apmServerUrl}',
-                  values: { apmServerUrl: collectionAgentHostPort },
-                })}
-              </EuiCodeBlock>
-            </>
-          ),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2', {
-            defaultMessage: 'Fleet',
-          }),
-          content: (
-            <EuiButton
-              iconType="gear"
-              fill
-              href={`${core.http.basePath.prepend(
-                '/app/integrations/detail/profiler_agent-8.8.0-preview/overview'
-              )}`}
-            >
-              {i18n.translate('xpack.profiling.tabs.elasticAgentIntegrarion.step2.button', {
-                defaultMessage: 'Manage Universal Profiling agent in Fleet',
-              })}
-            </EuiButton>
           ),
         },
       ],
