@@ -48,3 +48,7 @@ export const DEFAULT_TIME_RANGE = {
   start: 'now-1h',
   end: 'now',
 };
+
+export const DEFAULT_ERROR_LOGS_ONLY = true;
+export const DEFAULT_MAX_SEQUENCES = 10;
+export const DEFAULT_MAX_LOGS_PER_SEQUENCE = 50;

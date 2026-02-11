@@ -27,6 +27,7 @@ import { focusMainContent } from '../utils/focus_main_content';
 import { getHasSubmenu } from '../utils/get_has_submenu';
 import { useLayoutWidth } from '../hooks/use_layout_width';
 import { useNavigation } from '../hooks/use_navigation';
+import { useNewItems } from '../hooks/use_new_items';
 import { useResponsiveMenu } from '../hooks/use_responsive_menu';
 
 const navigationWrapperStyles = css`
@@ -110,6 +111,11 @@ export const Navigation = ({
 
   const setSize = visibleMenuItems.length + (overflowMenuItems.length > 0 ? 1 : 0);
 
+  const { getIsNewPrimary, getIsNewSecondary } = useNewItems(
+    [...items.primaryItems, ...items.footerItems],
+    activeItemId
+  );
+
   useLayoutWidth({ isCollapsed, isSidePanelOpen, setWidth });
 
   // Create the collapse button if a toggle callback is provided
@@ -156,6 +162,7 @@ export const Navigation = ({
                         isCollapsed={isCollapsed}
                         isCurrent={actualActiveItemId === item.id}
                         isHighlighted={item.id === visuallyActivePageId}
+                        isNew={getIsNewPrimary(item.id)}
                         onClick={() => onItemClick?.(item)}
                         {...itemProps}
                       >
@@ -164,7 +171,11 @@ export const Navigation = ({
                     }
                   >
                     {(closePopover, ids) => (
-                      <SideNav.SecondaryMenu title={item.label} badgeType={item.badgeType}>
+                      <SideNav.SecondaryMenu
+                        title={item.label}
+                        badgeType={item.badgeType}
+                        isNew={getIsNewSecondary(item.id)}
+                      >
                         {sections?.map((section, sectionIndex) => {
                           const firstNonEmptySectionIndex = item.sections?.findIndex(
                             (s) => s.items.length > 0
@@ -184,6 +195,7 @@ export const Navigation = ({
                                     key={subItem.id}
                                     isHighlighted={subItem.id === visuallyActiveSubpageId}
                                     isCurrent={actualActiveItemId === subItem.id}
+                                    isNew={getIsNewSecondary(subItem.id)}
                                     onClick={() => {
                                       onItemClick?.(subItem);
                                       if (subItem.href) {
@@ -228,6 +240,7 @@ export const Navigation = ({
                       isHighlighted={overflowMenuItems.some(
                         (item) => item.id === visuallyActivePageId
                       )}
+                      isNew={overflowMenuItems.some((item) => getIsNewPrimary(item.id))}
                       label={i18n.translate('core.ui.chrome.sideNavigation.moreMenuItemLabel', {
                         defaultMessage: 'More',
                       })}
@@ -266,6 +279,7 @@ export const Navigation = ({
                                   key={item.id}
                                   aria-describedby={ariaDescribedBy}
                                   isHighlighted={item.id === visuallyActivePageId}
+                                  isNew={getIsNewPrimary(item.id)}
                                   hasSubmenu={hasSubmenu}
                                   onClick={() => {
                                     onItemClick?.(item);
@@ -301,6 +315,7 @@ export const Navigation = ({
                                       key={subItem.id}
                                       isHighlighted={subItem.id === visuallyActiveSubpageId}
                                       isCurrent={actualActiveItemId === subItem.id}
+                                      isNew={getIsNewSecondary(subItem.id)}
                                       onClick={() => {
                                         onItemClick?.(subItem);
                                         closePopover();
@@ -346,6 +361,7 @@ export const Navigation = ({
                         aria-describedby={ariaDescribedBy}
                         isHighlighted={item.id === visuallyActivePageId}
                         isCurrent={actualActiveItemId === item.id}
+                        isNew={getIsNewPrimary(item.id)}
                         hasContent={getHasSubmenu(item)}
                         onClick={() => onItemClick?.(item)}
                         {...itemProps}
@@ -353,7 +369,11 @@ export const Navigation = ({
                     }
                   >
                     {(closePopover, ids) => (
-                      <SideNav.SecondaryMenu title={item.label} badgeType={item.badgeType}>
+                      <SideNav.SecondaryMenu
+                        title={item.label}
+                        badgeType={item.badgeType}
+                        isNew={getIsNewSecondary(item.id)}
+                      >
                         {sections?.map((section, sectionIndex) => {
                           const firstNonEmptySectionIndex = item.sections?.findIndex(
                             (s) => s.items.length > 0
@@ -373,6 +393,7 @@ export const Navigation = ({
                                     key={subItem.id}
                                     isHighlighted={subItem.id === visuallyActiveSubpageId}
                                     isCurrent={actualActiveItemId === subItem.id}
+                                    isNew={getIsNewSecondary(subItem.id)}
                                     onClick={() => {
                                       onItemClick?.(subItem);
                                       if (subItem.href) {
@@ -411,6 +432,7 @@ export const Navigation = ({
                 badgeType={openerNode.badgeType}
                 isPanel
                 title={openerNode.label}
+                isNew={getIsNewSecondary(openerNode.id)}
               >
                 {openerNode.sections?.map((section, sectionIndex) => (
                   <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
@@ -427,6 +449,7 @@ export const Navigation = ({
                           key={subItem.id}
                           isCurrent={actualActiveItemId === subItem.id}
                           isHighlighted={subItem.id === visuallyActiveSubpageId}
+                          isNew={getIsNewSecondary(subItem.id)}
                           onClick={() => onItemClick?.(subItem)}
                           testSubjPrefix={sidePanelItemPrefix}
                           {...subItem}

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiCard } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiIcon } from '@elastic/eui';
 
 import type { SampleDataSet, InstalledStatus } from '@kbn/home-sample-data-types';
 import { INSTALLED_STATUS } from './constants';
@@ -35,18 +35,21 @@ export const SampleDataCard = ({
   onStatusChange: onAction,
 }: Props) => {
   const { name: title, description, id } = sampleDataSet;
-
   const betaBadgeProps =
     sampleDataSet.status === INSTALLED_STATUS ? { label: INSTALLED_STATUS } : undefined;
 
   const footer = <Footer {...{ sampleDataSet, onAction }} />;
-
   return (
     <EuiCard
       textAlign="left"
       paddingSize="m"
       data-test-subj={`sampleDataSetCard${id}`}
-      {...{ image, title, description, betaBadgeProps, footer }}
+      icon={
+        <EuiFlexGroup justifyContent="center">
+          <EuiIcon size="original" type={image} />
+        </EuiFlexGroup>
+      }
+      {...{ title, description, betaBadgeProps, footer }}
     />
   );
 };
