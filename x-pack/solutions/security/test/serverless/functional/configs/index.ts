@@ -11,7 +11,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('serverless security UI', function () {
     this.tags(['esGate']);
 
-    loadTestFile(require.resolve('../test_suites/ftr/navigation'));
     loadTestFile(require.resolve('../test_suites/ftr/cases'));
     loadTestFile(require.resolve('../test_suites/ftr/advanced_settings'));
     loadTestFile(require.resolve('../test_suites/ml'));
