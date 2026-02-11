@@ -7,7 +7,10 @@
 
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
-import { SECURITY_FEATURE_ID_V5 } from '@kbn/security-solution-features/constants';
+import {
+  RULES_FEATURE_LATEST,
+  SECURITY_FEATURE_ID_V5,
+} from '@kbn/security-solution-features/constants';
 import * as i18n from './translations';
 
 export {
@@ -31,7 +34,7 @@ export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
 export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
 export const SECURITY_FEATURE_ID = SECURITY_FEATURE_ID_V5;
-export { RULES_FEATURE_ID } from '@kbn/security-solution-features/constants';
+export const RULES_FEATURE_ID = RULES_FEATURE_LATEST;
 export const APP_NAME = 'Security' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
 export const APP_PATH = `/app/security` as const;
@@ -117,6 +120,7 @@ export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
 export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
 export const RULES_UPDATES = `${RULES_PATH}/updates` as const;
 export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
+export const AI_RULE_CREATION_PATH = `${RULES_PATH}/ai_rule_creation` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailName` as const;
 export const HOSTS_PATH = '/hosts' as const;
@@ -524,9 +528,10 @@ export const MAX_COMMENT_LENGTH = 30000 as const;
 export const MAX_NOTES_PER_DOCUMENT = 100;
 
 /**
- * Cases external attachment IDs
+ * Cases attachment IDs
  */
 export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
+export const CASE_ATTACHMENT_INDICATOR_TYPE_ID = 'indicator' as const;
 
 /**
  * Rule gaps
