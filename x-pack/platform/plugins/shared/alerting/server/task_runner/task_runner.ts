@@ -65,6 +65,7 @@ import {
   withAlertingSpan,
   processRunResults,
   clearExpiredSnoozes,
+  clearExpiredMutedAlerts,
   getSchedule,
   getState,
   getTaskRunError,
@@ -444,7 +445,7 @@ export class TaskRunner<
           (entry) => !idsToUnmute.has(entry.alertInstanceId)
         );
 
-        await partiallyUpdateRuleWithEs(this.internalSavedObjectsRepository, ruleId, {
+        await partiallyUpdateRuleWithEs(this.context.elasticsearch.client.asInternalUser, ruleId, {
           mutedInstanceIds: updatedMutedInstanceIds,
           mutedAlerts: updatedMutedAlerts,
           updatedAt: new Date().toISOString(),
@@ -619,6 +620,20 @@ export class TaskRunner<
         } catch (e) {
           // Most likely a 409 conflict error, which is ok, we'll try again at the next rule run
           this.logger.debug(`Failed to clear expired snoozes: ${e.message}`);
+        }
+      })().catch(() => {});
+
+      (async () => {
+        try {
+          await clearExpiredMutedAlerts({
+            esClient: this.context.elasticsearch.client.asInternalUser,
+            logger: this.logger,
+            rule: runRuleParams.rule,
+            version: runRuleParams.version,
+          });
+        } catch (e) {
+          // Most likely a 409 conflict error, which is ok, we'll try again at the next rule run
+          this.logger.debug(`Failed to clear expired muted alerts: ${e.message}`);
         }
       })().catch(() => {});
 
