@@ -2120,11 +2120,37 @@ export class CstToAstConverter {
   private fromMmrCommand(ctx: cst.MmrCommandContext): ast.ESQLCommand<'mmr'> {
     const command = this.createCommand<'mmr', ast.ESQLAstMmrCommand>('mmr', ctx);
 
+    this.parseMmrQueryVectorParam(ctx, command);
     this.parseMmrOnOption(ctx, command);
     this.parseMmrLimitOption(ctx, command);
     this.parseMmrWithOption(ctx, command);
 
     return command;
+  }
+
+  private parseMmrQueryVectorParam(
+    ctx: cst.MmrCommandContext,
+    command: ast.ESQLAstMmrCommand
+  ): void {
+    const queryVectorCtx = ctx.mmrQueryVectorParams();
+
+    if (!queryVectorCtx || queryVectorCtx.children === null) {
+      return;
+    }
+
+    const childContext = queryVectorCtx.children[0];
+    let queryVector;
+
+    if (childContext instanceof cst.PrimaryExpressionContext) {
+      queryVector = this.fromPrimaryExpression(childContext);
+    } else if (childContext instanceof cst.ParameterContext) {
+      queryVector = this.fromParameter(childContext);
+    }
+
+    if (queryVector) {
+      command.queryVector = queryVector;
+      command.args.push(queryVector);
+    }
   }
 
   private parseMmrOnOption(ctx: cst.MmrCommandContext, command: ast.ESQLAstMmrCommand): void {
