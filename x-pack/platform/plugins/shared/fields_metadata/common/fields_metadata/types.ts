@@ -40,6 +40,8 @@ export const baseOTELPropertyRT = rt.intersection([
     stability: rt.keyof({
       stable: null,
       experimental: null,
+      development: null,
+      deprecated: null,
     }),
   }),
   rt.partial({

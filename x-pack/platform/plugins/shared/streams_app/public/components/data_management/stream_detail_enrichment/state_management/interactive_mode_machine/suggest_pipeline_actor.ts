@@ -32,6 +32,114 @@ import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine
 const POLLING_INTERVAL_MS = 2000;
 const MAX_POLLING_TIME_MS = 5 * 60 * 1000; // 5 minutes
 
+class PollingAbortedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PollingAbortedError';
+  }
+}
+
+class PollingTimeoutError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PollingTimeoutError';
+  }
+}
+
+const pollWithTimeout = async <T>({
+  signal,
+  getNext,
+  shouldContinue,
+  intervalMs,
+  timeoutMs,
+  createAbortError,
+  createTimeoutError,
+}: {
+  signal: AbortSignal;
+  getNext: () => Promise<T>;
+  shouldContinue: (value: T) => boolean;
+  intervalMs: number;
+  timeoutMs: number;
+  createAbortError: () => Error;
+  createTimeoutError: () => Error;
+}): Promise<T> => {
+  const deadline = Date.now() + timeoutMs;
+  let timerId: ReturnType<typeof setTimeout> | undefined;
+  let settled = false;
+
+  const clearTimer = () => {
+    if (timerId !== undefined) {
+      clearTimeout(timerId);
+      timerId = undefined;
+    }
+  };
+
+  return await new Promise<T>((resolve, reject) => {
+    const settleReject = (error: unknown) => {
+      if (settled) return;
+      settled = true;
+      clearTimer();
+      signal.removeEventListener('abort', onAbort);
+      reject(error);
+    };
+
+    const settleResolve = (value: T) => {
+      if (settled) return;
+      settled = true;
+      clearTimer();
+      signal.removeEventListener('abort', onAbort);
+      resolve(value);
+    };
+
+    const onAbort = () => {
+      settleReject(createAbortError());
+    };
+
+    const poll = async (): Promise<void> => {
+      if (settled) return;
+
+      if (signal.aborted) {
+        settleReject(createAbortError());
+        return;
+      }
+
+      if (Date.now() > deadline) {
+        settleReject(createTimeoutError());
+        return;
+      }
+
+      let next: T;
+      try {
+        next = await getNext();
+      } catch (error) {
+        if (isRequestAbortedError(error)) {
+          settleReject(createAbortError());
+          return;
+        }
+        settleReject(error);
+        return;
+      }
+
+      if (!shouldContinue(next)) {
+        settleResolve(next);
+        return;
+      }
+
+      if (Date.now() > deadline) {
+        settleReject(createTimeoutError());
+        return;
+      }
+
+      timerId = setTimeout(() => {
+        void poll();
+      }, intervalMs);
+    };
+
+    signal.addEventListener('abort', onAbort, { once: true });
+    void poll();
+  });
+};
+
 // Minimal input needed from state machine (services injected in implementation)
 export interface SuggestPipelineInputMinimal {
   streamName: string;
@@ -104,8 +212,6 @@ export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise
   });
 
   // Step 3: Poll for task completion
-  const startTime = Date.now();
-
   const getStatus = async () => {
     return streamsRepositoryClient.fetch(
       'POST /internal/streams/{name}/_pipeline_suggestion/_status',
@@ -118,40 +224,16 @@ export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise
     );
   };
 
-  let taskResult = await getStatus();
-
-  while (
-    taskResult.status === TaskStatus.InProgress ||
-    taskResult.status === TaskStatus.NotStarted
-  ) {
-    // Check for abort
-    if (signal.aborted) {
-      throw new Error('Pipeline suggestion was cancelled');
-    }
-
-    // Check for timeout
-    if (Date.now() - startTime > MAX_POLLING_TIME_MS) {
-      throw new Error('Pipeline suggestion timed out');
-    }
-
-    // Wait before next poll
-    await new Promise((resolve) => setTimeout(resolve, POLLING_INTERVAL_MS));
-
-    // Check for abort again after waiting
-    if (signal.aborted) {
-      throw new Error('Pipeline suggestion was cancelled');
-    }
-
-    try {
-      taskResult = await getStatus();
-    } catch (error) {
-      // If aborted during network request, throw a cancellation error
-      if (isRequestAbortedError(error)) {
-        throw new Error('Pipeline suggestion was cancelled');
-      }
-      throw error;
-    }
-  }
+  const taskResult = await pollWithTimeout({
+    signal,
+    getNext: getStatus,
+    shouldContinue: (result) =>
+      result.status === TaskStatus.InProgress || result.status === TaskStatus.NotStarted,
+    intervalMs: POLLING_INTERVAL_MS,
+    timeoutMs: MAX_POLLING_TIME_MS,
+    createAbortError: () => new PollingAbortedError('Pipeline suggestion was cancelled'),
+    createTimeoutError: () => new PollingTimeoutError('Pipeline suggestion timed out'),
+  });
 
   // Step 4: Handle terminal states
   switch (taskResult.status) {
@@ -425,36 +507,23 @@ export async function pollExistingSuggestionLogic(
     );
   };
 
-  const startTime = Date.now();
-
-  let taskResult = await getStatus();
-
-  while (
-    taskResult.status === TaskStatus.InProgress ||
-    taskResult.status === TaskStatus.BeingCanceled
-  ) {
-    if (signal.aborted) {
+  let taskResult;
+  try {
+    taskResult = await pollWithTimeout({
+      signal,
+      getNext: getStatus,
+      shouldContinue: (result) =>
+        result.status === TaskStatus.InProgress || result.status === TaskStatus.BeingCanceled,
+      intervalMs: POLLING_INTERVAL_MS,
+      timeoutMs: MAX_POLLING_TIME_MS,
+      createAbortError: () => new PollingAbortedError('Polling was cancelled'),
+      createTimeoutError: () => new PollingTimeoutError('Polling timed out'),
+    });
+  } catch (error) {
+    if (error instanceof PollingAbortedError || error instanceof PollingTimeoutError) {
       return { type: 'none' };
     }
-
-    if (Date.now() - startTime > MAX_POLLING_TIME_MS) {
-      return { type: 'none' };
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, POLLING_INTERVAL_MS));
-
-    if (signal.aborted) {
-      return { type: 'none' };
-    }
-
-    try {
-      taskResult = await getStatus();
-    } catch (error) {
-      if (isRequestAbortedError(error)) {
-        return { type: 'none' };
-      }
-      throw error;
-    }
+    throw error;
   }
 
   switch (taskResult.status) {

@@ -310,6 +310,9 @@ test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }
     // Wait a tick for the fire-and-forget cancel call to complete
     await page.waitForTimeout(100);
     expect(callTracker.cancelCalls).toBe(1);
+
+    // Cancel should not produce a user-visible error toast.
+    await expect(page.getByText('Failed to generate pipeline suggestion')).toHaveCount(0);
   });
 
   test('should acknowledge when dismissing "no suggestions found" state', async ({
