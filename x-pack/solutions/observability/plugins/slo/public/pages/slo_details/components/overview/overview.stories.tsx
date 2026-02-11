@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import { KibanaReactStorybookDecorator } from '../../../../utils/kibana_react.storybook_decorator';
 import { buildSlo } from '../../../../data/slo/slo';
 import { SloDetailsPageDefinition as Component } from '../definition/page_definition';
-import type { SloDetailsDefinitionProps } from '../definition/types';
+import { SloDetailsContextProvider } from '../slo_details_context';
 
 export default {
   component: Component,
@@ -16,10 +17,16 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const defaultProps: SloDetailsDefinitionProps = {
+const contextValue = {
   slo: buildSlo(),
+  isAutoRefreshing: false,
+  isFlyout: false,
 };
 
-export const Overview = {
-  args: defaultProps,
+export const SloDetails = {
+  render: () => (
+    <SloDetailsContextProvider value={contextValue}>
+      <Component />
+    </SloDetailsContextProvider>
+  ),
 };
