@@ -147,6 +147,8 @@ export default function ({ getService }: FtrProviderContext) {
             'fleet',
             'fleetv2',
             'cloudConnect',
+            'alerting_v2_alerts',
+            'alerting_v2_rules',
           ].sort()
         );
       });

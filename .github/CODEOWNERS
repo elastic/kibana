@@ -1008,6 +1008,7 @@ x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
+x-pack/platform/packages/shared/response-ops/alerting-v2-schemas @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
@@ -1019,6 +1020,7 @@ x-pack/platform/packages/shared/response-ops/retry-service @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/rule_form @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/rule_params @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/rules-apis @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/yaml-rule-editor @elastic/response-ops
 x-pack/platform/packages/shared/security/api_key_management @elastic/kibana-security
 x-pack/platform/packages/shared/security/form_components @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
@@ -1073,6 +1075,7 @@ x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
+x-pack/platform/plugins/shared/alerting_v2 @elastic/response-ops
 x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-presentation-team
 x-pack/platform/plugins/shared/automatic_import @elastic/integration-experience
 x-pack/platform/plugins/shared/automatic_import_v2 @elastic/integration-experience
@@ -1847,6 +1850,9 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 /x-pack/platform/test/api_integration/fixtures/kbn_archives/streams @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 /x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests @elastic/obs-sig-events-team @elastic/obs-onboarding-team
 
+
+# Alerting alerting_v2
+/x-pack/platform/test/api_integration_deployment_agnostic/apis/alerting_v2 @elastic/response-ops
 
 ### END Observability Plugins
 

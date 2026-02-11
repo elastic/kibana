@@ -298,6 +298,82 @@
       }
     }
   },
+  "alerting_notification_policy": {
+    "dynamic": false,
+    "properties": {
+      "createdAt": {
+        "type": "date"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "text",
+        "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } }
+      },
+      "description": {
+        "type": "text",
+        "fields": { "keyword": { "type": "keyword", "ignore_above": 256 } }
+      },
+      "updatedAt": {
+        "type": "date"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      },
+      "workflow_id": {
+        "type": "keyword"
+      }
+    }
+  },
+  "alerting_rule": {
+    "dynamic": false,
+    "properties": {
+      "createdAt": {
+        "type": "date"
+      },
+      "createdBy": {
+        "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "groupingKey": {
+        "type": "keyword"
+      },
+      "kind": {
+        "type": "keyword"
+      },
+      "lookbackWindow": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "text"
+      },
+      "query": {
+        "type": "text"
+      },
+      "schedule": {
+        "properties": {
+          "custom": {
+            "type": "keyword"
+          }
+        }
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "timeField": {
+        "type": "keyword"
+      },
+      "updatedAt": {
+        "type": "date"
+      },
+      "updatedBy": {
+        "type": "keyword"
+      }
+    }
+  },
   "alerting_rule_template": {
     "dynamic": false,
     "properties": {
