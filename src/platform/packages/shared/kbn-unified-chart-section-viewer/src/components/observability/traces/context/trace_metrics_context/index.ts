@@ -13,7 +13,6 @@ import type { UnifiedMetricsGridProps } from '../../../../../types';
 type TraceMetricsContextProps = {
   indexes: string;
   filters: string[];
-  metadataFields: string[];
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   actions: UnifiedMetricsGridProps['actions'];
 } & Pick<UnifiedMetricsGridProps, 'fetchParams' | 'services' | 'onBrushEnd' | 'onFilter'>;

@@ -20,7 +20,6 @@ describe('useEsqlQueryInfo', () => {
     expect(result.current.columns).toEqual(['field']);
     expect(result.current.dimensions).toEqual(['dim1', 'dim2']);
     expect(result.current.indices).toEqual(['metrics-*']);
-    expect(result.current.metadataFields).toEqual([]);
   });
 
   it('handles multiple metric fields in a stats query', () => {
@@ -32,7 +31,6 @@ describe('useEsqlQueryInfo', () => {
     expect(result.current.columns).toEqual(['metric1', 'metric2']);
     expect(result.current.dimensions).toEqual(['dim1']);
     expect(result.current.indices).toEqual(['metrics-*']);
-    expect(result.current.metadataFields).toEqual([]);
   });
 
   it('works with no dimensions', () => {
@@ -44,7 +42,6 @@ describe('useEsqlQueryInfo', () => {
     expect(result.current.columns).toEqual(['metric1']);
     expect(result.current.dimensions).toEqual([]);
     expect(result.current.indices).toEqual(['metrics-*']);
-    expect(result.current.metadataFields).toEqual([]);
   });
 
   it('handles multiple indices', () => {
@@ -53,16 +50,5 @@ describe('useEsqlQueryInfo', () => {
     const { result } = renderHook(() => useEsqlQueryInfo({ query }));
 
     expect(result.current.indices).toEqual(['metrics-*', 'custom-index-*']);
-    expect(result.current.metadataFields).toEqual([]);
-  });
-
-  it('extracts metadata fields requested via FROM ... METADATA ...', () => {
-    const query =
-      'FROM traces-* METADATA _id, _index | WHERE _id == "abc" AND _index == "traces-0001" | LIMIT 10';
-
-    const { result } = renderHook(() => useEsqlQueryInfo({ query }));
-
-    expect(result.current.filters).toEqual(['_id == "abc" AND _index == "traces-0001"']);
-    expect(result.current.metadataFields.sort()).toEqual(['_id', '_index'].sort());
   });
 });

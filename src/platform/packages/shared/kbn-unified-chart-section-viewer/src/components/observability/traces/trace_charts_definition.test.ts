@@ -18,11 +18,7 @@ describe('trace_charts_definition', () => {
 
   describe('getErrorRateChart', () => {
     it('should return error rate chart configuration', () => {
-      const result = getErrorRateChart({
-        indexes: mockIndexes,
-        filters: mockFilters,
-        metadataFields: [],
-      });
+      const result = getErrorRateChart({ indexes: mockIndexes, filters: mockFilters });
 
       expect(result).toEqual({
         id: 'error_rate',
@@ -39,11 +35,7 @@ describe('trace_charts_definition', () => {
     });
 
     it('should include all provided filters in the ESQL query', () => {
-      const result = getErrorRateChart({
-        indexes: mockIndexes,
-        filters: mockFilters,
-        metadataFields: [],
-      });
+      const result = getErrorRateChart({ indexes: mockIndexes, filters: mockFilters });
 
       expect(result?.esqlQuery).toContain('service.name == "test-service"');
       expect(result?.esqlQuery).toContain('environment == "production"');
@@ -51,18 +43,14 @@ describe('trace_charts_definition', () => {
     });
 
     it('should handle empty filters array', () => {
-      const result = getErrorRateChart({ indexes: mockIndexes, filters: [], metadataFields: [] });
+      const result = getErrorRateChart({ indexes: mockIndexes, filters: [] });
 
       expect(result?.esqlQuery).toContain('TO_STRING(processor.event) == "transaction"');
       expect(result?.esqlQuery).toContain('FROM traces-*');
     });
 
     it('should generate valid ESQL query structure', () => {
-      const result = getErrorRateChart({
-        indexes: mockIndexes,
-        filters: mockFilters,
-        metadataFields: [],
-      });
+      const result = getErrorRateChart({ indexes: mockIndexes, filters: mockFilters });
 
       expect(result?.esqlQuery).toMatch(/FROM .+/);
       expect(result?.esqlQuery).toContain('STATS');
@@ -71,25 +59,11 @@ describe('trace_charts_definition', () => {
       expect(result?.esqlQuery).toContain('SORT');
       expect(result?.esqlQuery).toContain('BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
     });
-
-    it('should include METADATA directive', () => {
-      const result = getErrorRateChart({
-        indexes: mockIndexes,
-        filters: ['_id == "abc" AND _index == "traces-0001"'],
-        metadataFields: ['_id', '_index'],
-      });
-
-      expect(result?.esqlQuery).toContain('FROM traces-* METADATA _id, _index');
-    });
   });
 
   describe('getLatencyChart', () => {
     it('should return latency chart configuration', () => {
-      const result = getLatencyChart({
-        indexes: mockIndexes,
-        filters: mockFilters,
-        metadataFields: [],
-      });
+      const result = getLatencyChart({ indexes: mockIndexes, filters: mockFilters });
 
       expect(result).toEqual({
         id: 'latency',
@@ -111,11 +85,7 @@ describe('trace_charts_definition', () => {
     });
 
     it('should include all provided filters in the ESQL query', () => {
-      const result = getLatencyChart({
-        indexes: mockIndexes,
-        filters: mockFilters,
-        metadataFields: [],
-      });
+      const result = getLatencyChart({ indexes: mockIndexes, filters: mockFilters });
 
       expect(result?.esqlQuery).toContain('service.name == "test-service"');
       expect(result?.esqlQuery).toContain('environment == "production"');
@@ -123,17 +93,13 @@ describe('trace_charts_definition', () => {
     });
 
     it('should handle empty filters array', () => {
-      const result = getLatencyChart({ indexes: mockIndexes, filters: [], metadataFields: [] });
+      const result = getLatencyChart({ indexes: mockIndexes, filters: [] });
 
       expect(result?.esqlQuery).toContain('FROM traces-*');
     });
 
     it('should generate valid ESQL query structure', () => {
-      const result = getLatencyChart({
-        indexes: mockIndexes,
-        filters: mockFilters,
-        metadataFields: [],
-      });
+      const result = getLatencyChart({ indexes: mockIndexes, filters: mockFilters });
 
       // Verify basic ESQL structure
       expect(result?.esqlQuery).toMatch(/FROM .+/);
@@ -146,11 +112,7 @@ describe('trace_charts_definition', () => {
 
   describe('getThroughputChart', () => {
     it('should return throughput chart configuration', () => {
-      const result = getThroughputChart({
-        indexes: mockIndexes,
-        filters: mockFilters,
-        metadataFields: [],
-      });
+      const result = getThroughputChart({ indexes: mockIndexes, filters: mockFilters });
 
       expect(result).toEqual({
         id: 'throughput',
@@ -168,11 +130,7 @@ describe('trace_charts_definition', () => {
     });
 
     it('should include all provided filters in the ESQL query', () => {
-      const result = getThroughputChart({
-        indexes: mockIndexes,
-        filters: mockFilters,
-        metadataFields: [],
-      });
+      const result = getThroughputChart({ indexes: mockIndexes, filters: mockFilters });
 
       expect(result?.esqlQuery).toContain('service.name == "test-service"');
       expect(result?.esqlQuery).toContain('environment == "production"');
@@ -180,17 +138,13 @@ describe('trace_charts_definition', () => {
     });
 
     it('should handle empty filters array', () => {
-      const result = getThroughputChart({ indexes: mockIndexes, filters: [], metadataFields: [] });
+      const result = getThroughputChart({ indexes: mockIndexes, filters: [] });
 
       expect(result?.esqlQuery).toContain('FROM traces-*');
     });
 
     it('should generate valid ESQL query structure', () => {
-      const result = getThroughputChart({
-        indexes: mockIndexes,
-        filters: mockFilters,
-        metadataFields: [],
-      });
+      const result = getThroughputChart({ indexes: mockIndexes, filters: mockFilters });
 
       // Verify basic ESQL structure
       expect(result?.esqlQuery).toMatch(/FROM .+/);
@@ -203,7 +157,6 @@ describe('trace_charts_definition', () => {
       const result = getErrorRateChart({
         indexes: mockIndexes,
         filters: mockInvalidFilters,
-        metadataFields: [],
       });
 
       expect(result).toBeNull();
@@ -213,7 +166,6 @@ describe('trace_charts_definition', () => {
       const result = getLatencyChart({
         indexes: mockIndexes,
         filters: mockInvalidFilters,
-        metadataFields: [],
       });
 
       expect(result).toBeNull();
@@ -223,7 +175,6 @@ describe('trace_charts_definition', () => {
       const result = getThroughputChart({
         indexes: mockIndexes,
         filters: mockInvalidFilters,
-        metadataFields: [],
       });
 
       expect(result).toBeNull();
