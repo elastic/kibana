@@ -8,7 +8,7 @@
  */
 
 import { type AggregateQuery, type Query, isOfAggregateQueryType } from '@kbn/es-query';
-import { hasTransformationalCommand } from '@kbn/esql-utils/src';
+import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { Parser } from '@kbn/esql-language';
 
 export function isValidNonTransformationalESQLQuery(
