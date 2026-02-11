@@ -74,8 +74,20 @@ export class DatePicker {
 
     if (await showBtn.isVisible()) {
       // Click to show start/end time pickers
-      await showBtn.click();
-      await this.page.testSubj.locator('superDatePickerAbsoluteTab').waitFor();
+      // Retry loop to handle flakiness when clicking showBtn and waiting for the Absolute tab
+      await expect.poll(
+        async () => {
+          await showBtn.click();
+          const absoluteTab = this.page.testSubj.locator('superDatePickerAbsoluteTab');
+          // Wait for the absolute tab to appear, but don't throw if it doesn't
+          await absoluteTab.waitFor({ state: 'visible', timeout: 2500 }).catch(() => {});
+          return await absoluteTab.isVisible();
+        },
+        {
+          timeout: 5000,
+          intervals: [500],
+        }
+      ).toBe(true);
       await this.page.testSubj.locator('superDatePickerstartDatePopoverButton').click();
     } else {
       await getTestSubjLocator('superDatePickerstartDatePopoverButton').waitFor();
