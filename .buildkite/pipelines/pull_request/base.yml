@@ -8,7 +8,6 @@ steps:
       spotZones: us-central1-c,us-central1-a
       diskSizeGb: 200
     key: build
-    depends_on: pre_build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 90
     retry:
@@ -25,7 +24,6 @@ steps:
       spotZones: us-central1-c,us-central1-a
       diskSizeGb: 105
     key: quick_checks
-    depends_on: pre_build
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -41,7 +39,6 @@ steps:
       spotZones: us-central1-c,us-central1-a
       diskSizeGb: 105
     key: checks
-    depends_on: pre_build
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -57,7 +54,6 @@ steps:
       spotZones: us-central1-c,us-central1-a
       diskSizeGb: 105
     key: linting
-    depends_on: pre_build
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -73,7 +69,6 @@ steps:
       spotZones: us-central1-c,us-central1-a
       diskSizeGb: 105
     key: linting_with_types
-    depends_on: pre_build
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -87,7 +82,6 @@ steps:
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     key: check_oas_snapshot
-    depends_on: pre_build
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -103,7 +97,6 @@ steps:
       spotZones: us-central1-c,us-central1-a
       diskSizeGb: 105
     key: check_types
-    depends_on: pre_build
     timeout_in_minutes: 60
     retry:
       automatic:
