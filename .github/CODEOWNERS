@@ -2291,7 +2291,6 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /.github/codeql @elastic/kibana-security
 /.github/workflows/codeql.yml @elastic/kibana-security
 /.github/workflows/codeql-pr.yml @elastic/kibana-security
-/.github/workflows/codeql-stats.yml @elastic/kibana-security
 /.github/instructions/security.instructions.md @elastic/kibana-security
 /.github/instructions/codeql.instructions.md @elastic/kibana-security
 /.github/workflows/evaluate-dependency-health.yml @elastic/kibana-security
