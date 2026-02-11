@@ -65,6 +65,7 @@ export const renderApp = ({
     share: pluginsSetup.share,
     kibanaEnvironment,
     licensing: pluginsStart.licensing,
+    metricsDataAccess: pluginsStart.metricsDataAccess,
   };
   const queryClient = new QueryClient();
 
