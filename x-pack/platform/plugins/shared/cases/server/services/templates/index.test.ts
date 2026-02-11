@@ -9,7 +9,11 @@ import yaml from 'js-yaml';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { SavedObject, SavedObjectsRawDoc } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsFindResponse, SavedObjectsRawDoc } from '@kbn/core/server';
+import type {
+  SavedObjectsRawDocSource,
+  SavedObjectsSearchResponse,
+} from '@kbn/core-saved-objects-api-server';
 import type { Template } from '../../../common/types/domain/template/v1';
 import { CASE_EXTENDED_FIELDS, CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import { TemplatesService } from '.';
@@ -56,7 +60,11 @@ describe('TemplatesService', () => {
         { id: 'template-2' } as SavedObject<Template>,
       ];
 
-      unsecuredSavedObjectsClient.search.mockResolvedValue({
+      const searchResponse: SavedObjectsSearchResponse<SavedObjectsRawDocSource, unknown> = {
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
         aggregations: {
           by_template: {
             buckets: [
@@ -77,7 +85,9 @@ describe('TemplatesService', () => {
             ],
           },
         },
-      });
+      };
+
+      unsecuredSavedObjectsClient.search.mockResolvedValue(searchResponse);
 
       savedObjectsSerializer.rawToSavedObject
         .mockReturnValueOnce(savedObjects[0])
@@ -228,9 +238,29 @@ describe('TemplatesService', () => {
   describe('deleteTemplate', () => {
     it('marks all matching templates as deleted', async () => {
       const service = createService();
-      unsecuredSavedObjectsClient.find.mockResolvedValue({
-        saved_objects: [{ id: 'so-1' }, { id: 'so-2' }],
-      });
+      const findResponse: SavedObjectsFindResponse = {
+        page: 1,
+        per_page: 10000,
+        total: 2,
+        saved_objects: [
+          {
+            id: 'so-1',
+            type: CASE_TEMPLATE_SAVED_OBJECT,
+            attributes: {} as Template,
+            references: [],
+            score: 0,
+          },
+          {
+            id: 'so-2',
+            type: CASE_TEMPLATE_SAVED_OBJECT,
+            attributes: {} as Template,
+            references: [],
+            score: 0,
+          },
+        ],
+      };
+
+      unsecuredSavedObjectsClient.find.mockResolvedValue(findResponse);
 
       await service.deleteTemplate('template-1');
 

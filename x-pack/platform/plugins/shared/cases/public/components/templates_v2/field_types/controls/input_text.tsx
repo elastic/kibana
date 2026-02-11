@@ -6,7 +6,7 @@
  */
 
 import type { z } from '@kbn/zod';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/components';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React from 'react';
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components/fields/text_field';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';

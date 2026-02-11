@@ -59,7 +59,6 @@ export const patchTemplateRoute = createCasesRoute({
       }
 
       const updatedTemplate = await casesClient.templates.updateTemplate(templateId, {
-        name: input.name ?? existingTemplate.attributes.name,
         owner: input.owner ?? existingTemplate.attributes.owner,
         definition: input.definition ?? existingTemplate.attributes.definition,
       });

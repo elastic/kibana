@@ -11,13 +11,13 @@ import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
 import React, { useCallback } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { useCasesTemplatesNavigation } from '../../../common/navigation';
-import { useCreateTemplate } from '../hooks/use_create_template';
-import { useCasesContext } from '../../cases_context/use_cases_context';
-import { useAvailableCasesOwners } from '../../app/use_available_owners';
-import { getOwnerDefaultValue } from '../../create/utils';
+import { useCasesTemplatesNavigation } from '../../../../common/navigation';
+import { useCreateTemplate } from '../../hooks/use_create_template';
+import { useCasesContext } from '../../../cases_context/use_cases_context';
+import { useAvailableCasesOwners } from '../../../app/use_available_owners';
+import { getOwnerDefaultValue } from '../../../create/utils';
 
-import * as i18n from '../translations';
+import * as i18n from '../../translations';
 
 const styles = {
   editorContainer: ({ euiTheme }: UseEuiTheme) =>

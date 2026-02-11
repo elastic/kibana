@@ -16,13 +16,13 @@ import {
 import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
-import { HeaderPage } from '../../header_page';
+import { HeaderPage } from '../../../header_page';
 import { CreateTemplateForm } from './form';
 import { CreateTemplatePreview } from './preview';
-import { exampleTemplateDefinition } from '../field_types/constants';
-import { GENERAL_CASES_OWNER } from '../../../../common/constants';
+import { exampleTemplateDefinition } from '../../field_types/constants';
+import { GENERAL_CASES_OWNER } from '../../../../../common/constants';
 
-import * as i18n from '../translations';
+import * as i18n from '../../translations';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CreateTemplatePageProps {}

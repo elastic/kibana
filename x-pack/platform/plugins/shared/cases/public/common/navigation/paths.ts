@@ -41,8 +41,6 @@ export const getCaseViewPath = (casesBasePath: string) =>
   normalizePath(`${casesBasePath}${CASE_VIEW_PATH}`);
 export const getCaseViewWithCommentPath = (casesBasePath: string) =>
   normalizePath(`${casesBasePath}${CASE_VIEW_COMMENT_PATH}`);
-export const getCreateTemplatePath = (casesBasePath: string) =>
-  normalizePath(`${casesBasePath}${CASES_CREATE_TEMPLATE_PATH}`);
 export const getCasesTemplatesPath = (casesBasePath: string) =>
   normalizePath(`${casesBasePath}${CASES_TEMPLATES_PATH}`);
 export const getCasesCreateTemplatePath = (casesBasePath: string) =>

@@ -24,7 +24,6 @@ import {
   getCaseViewWithCommentPath,
   useAllCasesNavigation,
   useCaseViewNavigation,
-  getCreateTemplatePath,
   getCasesTemplatesPath,
   getCasesCreateTemplatePath,
   getCasesEditTemplatePath,
@@ -34,14 +33,14 @@ import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
 import type { CaseViewProps } from '../case_view/types';
 import type { CreateCaseFormProps } from '../create/form';
-import type { CreateTemplatePageProps } from '../templates_v2/create_template/page';
+import type { CreateTemplatePageProps } from '../templates_v2/pages/create_template/page';
 import { TemplateFormPage } from '../templates_v2/pages/template_form_page';
 import { KibanaServices } from '../../common/lib/kibana/services';
 
 const CaseViewLazy: FC<CaseViewProps> = lazy(() => import('../case_view'));
 
 const CreateTemplateLazy: FC<CreateTemplatePageProps> = lazy(
-  () => import('../templates_v2/create_template/page')
+  () => import('../templates_v2/pages/create_template/page')
 );
 
 const AllCasesTemplatesLazy: React.FC = lazy(
@@ -100,12 +99,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
           )}
         </Route>
 
-        <Route exact path={getCreateTemplatePath(basePath)}>
-          <Suspense fallback={<EuiLoadingSpinner />}>
-            <CreateTemplateLazy />
-          </Suspense>
-        </Route>
-
         {isTemplatesEnabled && (
           <Route exact path={getCasesTemplatesPath(basePath)}>
             <Suspense fallback={<EuiLoadingSpinner />}>
@@ -113,16 +106,21 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
             </Suspense>
           </Route>
         )}
+
         {isTemplatesEnabled && (
           <Route exact path={getCasesCreateTemplatePath(basePath)}>
-            <TemplateFormPage />
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <CreateTemplateLazy />
+            </Suspense>
           </Route>
         )}
+
         {isTemplatesEnabled && (
           <Route exact path={getCasesEditTemplatePath(basePath)}>
             <TemplateFormPage />
           </Route>
         )}
+
         {/* NOTE: current case view implementation retains some local state between renders, eg. when going from one case directly to another one. as a short term fix, we are forcing the component remount. */}
         <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
           <Suspense fallback={<EuiLoadingSpinner />}>
