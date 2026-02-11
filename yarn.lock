@@ -2613,10 +2613,10 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@9.2.0":
-  version "9.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.2.0.tgz#33e028d0272838838da686738377c46e3c753ce7"
-  integrity sha512-M59qmMOZOk8pTcI9Ns2ow18PlyMbYrpcXqYwkChjiyXSmmqoCTvFXkC2bGQLxrrQkXaPbYR7aZqWD9b5F1405A==
+"@elastic/elasticsearch@9.2.1":
+  version "9.2.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.2.1.tgz#0a3a0a9ce020ab20d70915c94363c39305a3ead2"
+  integrity sha512-jXK+1tIaoz9HrV+0Wwumd4NEUyTNCiw5IkxdWRhqXD42WfHh+hMCLzmMne0bXS6dzvCX4Lva+9W7yN5HxalEgw==
   dependencies:
     "@elastic/transport" "^9.2.0"
     apache-arrow "18.x - 21.x"
