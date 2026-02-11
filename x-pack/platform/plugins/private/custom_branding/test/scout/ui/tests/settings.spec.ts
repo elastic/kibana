@@ -9,7 +9,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-test.describe('custom branding', { tag: tags.ESS_ONLY }, () => {
+test.describe('custom branding', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.customBrandingSettings.navigateToGlobalSettings();
