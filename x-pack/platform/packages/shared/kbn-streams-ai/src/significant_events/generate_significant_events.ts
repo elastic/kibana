@@ -14,7 +14,7 @@ import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import { fromKueryExpression } from '@kbn/es-query';
+import { fromKueryExpression, getKqlFieldNamesFromExpression } from '@kbn/es-query';
 import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
@@ -28,6 +28,22 @@ interface Query {
   severity_score: number;
   evidence?: string[];
 }
+
+/**
+ * Given a list of field names extracted from a KQL expression and a set of
+ * mapped fields, returns the subset of field names that do not match any
+ * mapped field. Wildcard patterns (e.g. `server.*`) are matched against all
+ * mapped fields using regex conversion.
+ */
+export const getUnmappedFields = (fieldNames: string[], mappedFields: Set<string>): string[] => {
+  return fieldNames.filter((fieldName) => {
+    if (fieldName.includes('*')) {
+      const regex = new RegExp('^' + fieldName.replace(/\*/g, '.*') + '$');
+      return !Array.from(mappedFields).some((mapped) => regex.test(mapped));
+    }
+    return !mappedFields.has(fieldName);
+  });
+};
 
 /**
  * Generate significant event definitions, based on:
@@ -84,6 +100,12 @@ export async function generateSignificantEvents({
 
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
 
+  logger.trace('Fetching field caps for unmapped field validation');
+  const fieldCapsResponse = await withSpan('field_caps_for_significant_events', () =>
+    esClient.fieldCaps({ index: stream.name, fields: '*' })
+  );
+  const mappedFields = new Set(Object.keys(fieldCapsResponse.fields));
+
   logger.trace('Generating significant events via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
     executeAsReasoningAgent({
@@ -104,17 +126,36 @@ export async function generateSignificantEvents({
           const queries = toolCall.function.arguments.queries;
 
           const queryValidationResults = queries.map((query) => {
-            let validation: { valid: true } | { valid: false; error: Error } = { valid: true };
             try {
               fromKueryExpression(query.kql);
             } catch (error) {
-              validation = { valid: false, error };
+              return {
+                query,
+                valid: false,
+                status: 'Failed to add',
+                error: error.message,
+              };
             }
+
+            const fieldNames = getKqlFieldNamesFromExpression(query.kql);
+            const unmappedFields = getUnmappedFields(fieldNames, mappedFields);
+
+            if (unmappedFields.length > 0) {
+              return {
+                query,
+                valid: false,
+                status: 'Failed to add',
+                error: `Query references unmapped fields: ${unmappedFields.join(
+                  ', '
+                )}. Use only fields that exist in the index.`,
+              };
+            }
+
             return {
               query,
-              valid: validation.valid,
-              status: validation.valid ? 'Added' : 'Failed to add',
-              error: 'error' in validation ? validation.error.message : undefined,
+              valid: true,
+              status: 'Added',
+              error: undefined,
             };
           });
 
