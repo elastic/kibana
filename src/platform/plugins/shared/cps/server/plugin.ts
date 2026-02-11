@@ -20,7 +20,7 @@ import { registerRoutes } from './routes';
 import type { CPSConfig } from './config';
 import type { CPSServerSetup, CPSServerStart } from './types';
 
-export class CPSServerPlugin implements Plugin<CPSServerSetup, CPSServerStart> {
+export class CPSServerPlugin implements Plugin<CPSServerSetup, CPSServerStart | undefined> {
   private readonly initContext: PluginInitializerContext;
   private readonly isServerless: boolean;
   private readonly config$: CPSConfig;
@@ -46,11 +46,17 @@ export class CPSServerPlugin implements Plugin<CPSServerSetup, CPSServerStart> {
     core.elasticsearch.setCpsFeatureFlag(cpsEnabled);
 
     return {
-      getCpsEnabled: () => cpsEnabled,
+      getCpsEnabled: () => !!cpsEnabled,
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart): CPSServerStart | undefined {
+    const { cpsEnabled } = this.config$;
+
+    if (!cpsEnabled) {
+      return undefined;
+    }
+
     return {
       createNpreClient: (request: KibanaRequest) => new NpreClient(this.log, core, request),
     };

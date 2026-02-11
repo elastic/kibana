@@ -8,7 +8,7 @@
 import * as Rx from 'rxjs';
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server/types';
+import type { CPSServerStart } from '@kbn/cps/server/types';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import type { ISpacesClient } from './spaces_client';
@@ -19,24 +19,22 @@ import { spacesConfig } from '../lib/__fixtures__';
 
 const debugLogger = jest.fn();
 
-const createMockCpsSetup = (): CPSServerSetup => ({
-  getCpsEnabled: jest.fn().mockReturnValue(true),
-});
-
-const createMockCpsStart = (): CPSServerStart => ({
-  createNpreClient: jest.fn().mockReturnValue({
-    getNpre: jest.fn().mockResolvedValue(undefined),
-    putNpre: jest.fn().mockResolvedValue(undefined),
-    deleteNpre: jest.fn().mockResolvedValue(undefined),
-    canPutNpre: jest.fn().mockResolvedValue(true),
-  }),
-});
+const createMockCpsStart = (): CPSServerStart => {
+  return {
+    createNpreClient: jest.fn().mockReturnValue({
+      getNpre: jest.fn().mockResolvedValue(undefined),
+      putNpre: jest.fn().mockResolvedValue(undefined),
+      deleteNpre: jest.fn().mockResolvedValue(undefined),
+      canPutNpre: jest.fn().mockResolvedValue(true),
+    }),
+  };
+};
 
 describe('SpacesClientService', () => {
   describe('#setup', () => {
     it('allows a single repository factory to be set', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
-      const setup = service.setup({ config$: Rx.of(spacesConfig) }, undefined);
+      const setup = service.setup({ config$: Rx.of(spacesConfig) });
 
       const repositoryFactory = jest.fn();
       setup.setClientRepositoryFactory(repositoryFactory);
@@ -48,7 +46,7 @@ describe('SpacesClientService', () => {
 
     it('allows a single client wrapper to be set', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
-      const setup = service.setup({ config$: Rx.of(spacesConfig) }, undefined);
+      const setup = service.setup({ config$: Rx.of(spacesConfig) });
 
       const clientWrapper = jest.fn();
       setup.registerClientWrapper(clientWrapper);
@@ -57,21 +55,12 @@ describe('SpacesClientService', () => {
         `"Client wrapper has already been set"`
       );
     });
-
-    it('accepts cpsSetup parameter', () => {
-      const service = new SpacesClientService(debugLogger, 'traditional');
-      const mockCpsSetup = createMockCpsSetup();
-      const setup = service.setup({ config$: Rx.of(spacesConfig) }, mockCpsSetup);
-
-      expect(setup).toBeDefined();
-      expect((service as any).cpsSetup).toBe(mockCpsSetup);
-    });
   });
 
   describe('#start', () => {
     it('throws if config is not available', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
-      service.setup({ config$: new Rx.Observable<ConfigType>() }, undefined);
+      service.setup({ config$: new Rx.Observable<ConfigType>() });
       const coreStart = coreMock.createStart();
       const start = service.start(coreStart, featuresPluginMock.createStart(), undefined);
 
@@ -85,7 +74,7 @@ describe('SpacesClientService', () => {
     describe('without a custom repository factory or wrapper', () => {
       it('returns an instance of the spaces client using the scoped repository', () => {
         const service = new SpacesClientService(debugLogger, 'traditional');
-        service.setup({ config$: Rx.of(spacesConfig) }, undefined);
+        service.setup({ config$: Rx.of(spacesConfig) });
 
         const coreStart = coreMock.createStart();
         const start = service.start(coreStart, featuresPluginMock.createStart(), undefined);
@@ -103,7 +92,7 @@ describe('SpacesClientService', () => {
 
     it('uses the custom repository factory when set', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
-      const setup = service.setup({ config$: Rx.of(spacesConfig) }, undefined);
+      const setup = service.setup({ config$: Rx.of(spacesConfig) });
 
       const customRepositoryFactory = jest.fn();
       setup.setClientRepositoryFactory(customRepositoryFactory);
@@ -123,7 +112,7 @@ describe('SpacesClientService', () => {
 
     it('wraps the client in the wrapper when registered', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
-      const setup = service.setup({ config$: Rx.of(spacesConfig) }, undefined);
+      const setup = service.setup({ config$: Rx.of(spacesConfig) });
 
       const wrapper = Symbol() as unknown as ISpacesClient;
 
@@ -148,7 +137,7 @@ describe('SpacesClientService', () => {
 
     it('wraps the client in the wrapper when registered, using the custom repository factory when configured', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
-      const setup = service.setup({ config$: Rx.of(spacesConfig) }, undefined);
+      const setup = service.setup({ config$: Rx.of(spacesConfig) });
 
       const customRepositoryFactory = jest.fn();
       setup.setClientRepositoryFactory(customRepositoryFactory);
@@ -176,8 +165,7 @@ describe('SpacesClientService', () => {
 
     it('creates spaces client with valid cps parameter', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
-      const mockCpsSetup = createMockCpsSetup();
-      service.setup({ config$: Rx.of(spacesConfig) }, mockCpsSetup);
+      service.setup({ config$: Rx.of(spacesConfig) });
 
       const coreStart = coreMock.createStart();
       const mockCpsStart = createMockCpsStart();
@@ -192,7 +180,7 @@ describe('SpacesClientService', () => {
 
     it('creates spaces client when cps parameters are undefined', () => {
       const service = new SpacesClientService(debugLogger, 'traditional');
-      service.setup({ config$: Rx.of(spacesConfig) }, undefined);
+      service.setup({ config$: Rx.of(spacesConfig) });
 
       const coreStart = coreMock.createStart();
       const start = service.start(coreStart, featuresPluginMock.createStart(), undefined);

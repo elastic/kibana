@@ -7,7 +7,6 @@
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
-import type { CPSServerSetup } from '@kbn/cps/server';
 import type { INpreClient } from '@kbn/cps/server/npre';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -19,12 +18,6 @@ import { ConfigSchema } from '../config';
 
 const createMockDebugLogger = () => {
   return jest.fn();
-};
-
-const createMockCpsSetup = (): CPSServerSetup => {
-  return {
-    getCpsEnabled: jest.fn().mockReturnValue(false),
-  } as unknown as CPSServerSetup;
 };
 
 const createMockNpreClient = (): INpreClient => {
@@ -259,7 +252,6 @@ describe('#getAll', () => {
       [],
       'traditional',
       featuresStart,
-      undefined,
       undefined
     );
     const actualSpaces = await client.getAll();
@@ -289,7 +281,6 @@ describe('#getAll', () => {
       [],
       'serverless',
       featuresStart,
-      undefined,
       undefined
     );
     const [actualSpace] = await client.getAll();
@@ -319,7 +310,6 @@ describe('#getAll', () => {
       [],
       'traditional',
       featuresStart,
-      undefined,
       undefined
     );
     await expect(
@@ -369,7 +359,6 @@ describe('#get', () => {
       [],
       'traditional',
       featuresStart,
-      undefined,
       undefined
     );
     const id = savedObject.id;
@@ -395,7 +384,6 @@ describe('#get', () => {
       [],
       'serverless',
       featuresStart,
-      undefined,
       undefined
     );
     const id = savedObject.id;
@@ -421,7 +409,6 @@ describe('#get', () => {
       [],
       'traditional',
       featuresStart,
-      undefined,
       undefined
     );
     const id = savedObject.id;
@@ -494,7 +481,6 @@ describe('#create', () => {
       [],
       'traditional',
       featuresStart,
-      undefined,
       undefined
     );
 
@@ -542,7 +528,6 @@ describe('#create', () => {
       [],
       'traditional',
       featuresStart,
-      undefined,
       undefined
     );
 
@@ -581,7 +566,6 @@ describe('#create', () => {
       [],
       'serverless',
       featuresStart,
-      undefined,
       undefined
     );
 
@@ -631,7 +615,6 @@ describe('#create', () => {
       [],
       'traditional',
       featuresStart,
-      undefined,
       undefined
     );
 
@@ -681,7 +664,6 @@ describe('#create', () => {
         [],
         'traditional',
         featuresStart,
-        undefined,
         undefined
       );
 
@@ -721,7 +703,6 @@ describe('#create', () => {
         [],
         'traditional',
         featuresStart,
-        undefined,
         undefined
       );
 
@@ -764,7 +745,6 @@ describe('#create', () => {
         [],
         'traditional',
         featuresStart,
-        undefined,
         undefined
       );
 
@@ -835,7 +815,6 @@ describe('#update', () => {
       [],
       'traditional',
       featuresStart,
-      undefined,
       undefined
     );
     const id = savedObject.id;
@@ -866,7 +845,6 @@ describe('#update', () => {
       [],
       'serverless',
       featuresStart,
-      undefined,
       undefined
     );
     const id = savedObject.id;
@@ -901,7 +879,6 @@ describe('#update', () => {
       [],
       'traditional',
       featuresStart,
-      undefined,
       undefined
     );
     const id = savedObject.id;
@@ -930,7 +907,6 @@ describe('#update', () => {
       [],
       'traditional',
       featuresStart,
-      undefined,
       undefined
     );
     const id = savedObject.id;
@@ -962,7 +938,6 @@ describe('#update', () => {
         [],
         'traditional',
         featuresStart,
-        undefined,
         undefined
       );
       const id = savedObject.id;
@@ -991,7 +966,6 @@ describe('#update', () => {
         [],
         'traditional',
         featuresStart,
-        undefined,
         undefined
       );
       const id = savedObject.id;
@@ -1026,7 +1000,6 @@ describe('#update', () => {
         [],
         'traditional',
         featuresStart,
-        undefined,
         undefined
       );
       const id = savedObject.id;
@@ -1082,7 +1055,6 @@ describe('#delete', () => {
       [],
       'traditional',
       featuresStart,
-      undefined,
       undefined
     );
 
@@ -1106,7 +1078,6 @@ describe('#delete', () => {
       [],
       'traditional',
       featuresStart,
-      undefined,
       undefined
     );
 
@@ -1131,7 +1102,6 @@ describe('#disableLegacyUrlAliases', () => {
       [],
       'traditional',
       featuresStart,
-      undefined,
       undefined
     );
     const aliases = [
@@ -1149,37 +1119,6 @@ describe('#disableLegacyUrlAliases', () => {
 });
 
 describe('projectRouting functionality', () => {
-  test('throws error when cpsSetup is provided but mockNpreClient is undefined', async () => {
-    const mockDebugLogger = createMockDebugLogger();
-    const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
-    mockCallWithRequestRepository.get.mockResolvedValue({
-      id: 'foo',
-      type: 'space',
-      references: [],
-      attributes: {
-        name: 'foo-name',
-        disabledFeatures: [],
-      },
-    } as any);
-    const mockConfig = createMockConfig();
-    const mockCpsSetup = createMockCpsSetup();
-    (mockCpsSetup.getCpsEnabled as jest.Mock).mockReturnValue(true);
-
-    expect(
-      () =>
-        new SpacesClient(
-          mockDebugLogger,
-          mockConfig,
-          mockCallWithRequestRepository,
-          [],
-          'traditional',
-          featuresStart,
-          mockCpsSetup,
-          undefined
-        )
-    ).toThrow();
-  });
-
   describe('#get with projectRouting', () => {
     test('includes projectRouting when CPS is enabled and npre exists', async () => {
       const mockDebugLogger = createMockDebugLogger();
@@ -1194,8 +1133,6 @@ describe('projectRouting functionality', () => {
         },
       } as any);
       const mockConfig = createMockConfig();
-      const mockCpsSetup = createMockCpsSetup();
-      (mockCpsSetup.getCpsEnabled as jest.Mock).mockReturnValue(true);
       const mockNpreClient = createMockNpreClient();
       (mockNpreClient.getNpre as jest.Mock).mockResolvedValue('project:test-project');
 
@@ -1206,7 +1143,6 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockCpsSetup,
         mockNpreClient
       );
 
@@ -1216,7 +1152,7 @@ describe('projectRouting functionality', () => {
       expect(mockNpreClient.getNpre).toHaveBeenCalledWith('kibana_space_foo_default');
     });
 
-    test('does not include projectRouting when CPS is disabled', async () => {
+    test('does not include projectRouting when npreClient is undefined', async () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue({
@@ -1229,9 +1165,6 @@ describe('projectRouting functionality', () => {
         },
       } as any);
       const mockConfig = createMockConfig();
-      const mockCpsSetup = createMockCpsSetup();
-      (mockCpsSetup.getCpsEnabled as jest.Mock).mockReturnValue(false);
-      const mockNpreClient = createMockNpreClient();
 
       const client = new SpacesClient(
         mockDebugLogger,
@@ -1240,46 +1173,12 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockCpsSetup,
-        mockNpreClient
+        undefined
       );
 
       const space = await client.get('foo');
 
       expect(space.projectRouting).toBeUndefined();
-      expect(mockNpreClient.getNpre).not.toHaveBeenCalled();
-    });
-
-    test('does not include projectRouting when cpsSetup is undefined', async () => {
-      const mockDebugLogger = createMockDebugLogger();
-      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
-      mockCallWithRequestRepository.get.mockResolvedValue({
-        id: 'foo',
-        type: 'space',
-        references: [],
-        attributes: {
-          name: 'foo-name',
-          disabledFeatures: [],
-        },
-      } as any);
-      const mockConfig = createMockConfig();
-      const mockNpreClient = createMockNpreClient();
-
-      const client = new SpacesClient(
-        mockDebugLogger,
-        mockConfig,
-        mockCallWithRequestRepository,
-        [],
-        'traditional',
-        featuresStart,
-        undefined, // cpsSetup is undefined
-        mockNpreClient
-      );
-
-      const space = await client.get('foo');
-
-      expect(space.projectRouting).toBeUndefined();
-      expect(mockNpreClient.getNpre).not.toHaveBeenCalled();
     });
   });
 
@@ -1298,8 +1197,6 @@ describe('projectRouting functionality', () => {
         },
       } as any);
       const mockConfig = createMockConfig();
-      const mockCpsSetup = createMockCpsSetup();
-      (mockCpsSetup.getCpsEnabled as jest.Mock).mockReturnValue(true);
       const mockNpreClient = createMockNpreClient();
       (mockNpreClient.canPutNpre as jest.Mock).mockResolvedValue(true);
       (mockNpreClient.getNpre as jest.Mock).mockResolvedValue('project:test-project');
@@ -1311,7 +1208,6 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockCpsSetup,
         mockNpreClient
       );
 
@@ -1343,9 +1239,6 @@ describe('projectRouting functionality', () => {
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.find.mockResolvedValue({ saved_objects: [], total: 0 } as any);
       const mockConfig = createMockConfig();
-      const mockCpsSetup = createMockCpsSetup();
-      (mockCpsSetup.getCpsEnabled as jest.Mock).mockReturnValue(false);
-      const mockNpreClient = createMockNpreClient();
 
       const client = new SpacesClient(
         mockDebugLogger,
@@ -1354,8 +1247,7 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockCpsSetup,
-        mockNpreClient
+        undefined
       );
 
       const spaceToCreate = {
@@ -1366,7 +1258,7 @@ describe('projectRouting functionality', () => {
       };
 
       await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to update Space, projectRouting property is only allowed when CPS is enabled"`
+        `"Unable to create Space, projectRouting property is only allowed when CPS is enabled"`
       );
     });
 
@@ -1375,8 +1267,6 @@ describe('projectRouting functionality', () => {
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.find.mockResolvedValue({ saved_objects: [], total: 0 } as any);
       const mockConfig = createMockConfig();
-      const mockCpsSetup = createMockCpsSetup();
-      (mockCpsSetup.getCpsEnabled as jest.Mock).mockReturnValue(true);
       const mockNpreClient = createMockNpreClient();
       (mockNpreClient.canPutNpre as jest.Mock).mockResolvedValue(false);
 
@@ -1387,7 +1277,6 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockCpsSetup,
         mockNpreClient
       );
 
@@ -1399,16 +1288,15 @@ describe('projectRouting functionality', () => {
       };
 
       await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to update Space, user is not authorized to update projectRouting"`
+        `"Unable to create Space, user is not authorized to update projectRouting"`
       );
     });
 
-    test('throws error when projectRouting is provided but cpsSetup is undefined', async () => {
+    test('throws error when projectRouting is provided but npreClient is undefined', async () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.find.mockResolvedValue({ saved_objects: [], total: 0 } as any);
       const mockConfig = createMockConfig();
-      const mockNpreClient = createMockNpreClient();
 
       const client = new SpacesClient(
         mockDebugLogger,
@@ -1417,8 +1305,7 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        undefined, // cpsSetup is undefined
-        mockNpreClient
+        undefined
       );
 
       const spaceToCreate = {
@@ -1429,11 +1316,11 @@ describe('projectRouting functionality', () => {
       };
 
       await expect(client.create(spaceToCreate)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Unable to update Space, projectRouting property is only allowed when CPS is enabled"`
+        `"Unable to create Space, projectRouting property is only allowed when CPS is enabled"`
       );
     });
 
-    test('creates space successfully when cpsSetup is undefined and no projectRouting provided', async () => {
+    test('creates space successfully when npreClient is undefined and no projectRouting provided', async () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.find.mockResolvedValue({ saved_objects: [], total: 0 } as any);
@@ -1456,7 +1343,6 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        undefined, // cpsSetup is undefined
         mockNpreClient
       );
 
@@ -1490,8 +1376,6 @@ describe('projectRouting functionality', () => {
         },
       } as any);
       const mockConfig = createMockConfig();
-      const mockCpsSetup = createMockCpsSetup();
-      (mockCpsSetup.getCpsEnabled as jest.Mock).mockReturnValue(true);
       const mockNpreClient = createMockNpreClient();
       (mockNpreClient.canPutNpre as jest.Mock).mockResolvedValue(true);
       (mockNpreClient.getNpre as jest.Mock).mockResolvedValue('project:updated-project');
@@ -1503,7 +1387,6 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockCpsSetup,
         mockNpreClient
       );
 
@@ -1538,8 +1421,6 @@ describe('projectRouting functionality', () => {
         },
       } as any);
       const mockConfig = createMockConfig();
-      const mockCpsSetup = createMockCpsSetup();
-      (mockCpsSetup.getCpsEnabled as jest.Mock).mockReturnValue(true);
       const mockNpreClient = createMockNpreClient();
       (mockNpreClient.canPutNpre as jest.Mock).mockResolvedValue(true);
       (mockNpreClient.getNpre as jest.Mock).mockResolvedValue(undefined);
@@ -1551,7 +1432,6 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockCpsSetup,
         mockNpreClient
       );
 
@@ -1573,9 +1453,6 @@ describe('projectRouting functionality', () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       const mockConfig = createMockConfig();
-      const mockCpsSetup = createMockCpsSetup();
-      (mockCpsSetup.getCpsEnabled as jest.Mock).mockReturnValue(false);
-      const mockNpreClient = createMockNpreClient();
 
       const client = new SpacesClient(
         mockDebugLogger,
@@ -1584,8 +1461,7 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockCpsSetup,
-        mockNpreClient
+        undefined
       );
 
       const spaceToUpdate = {
@@ -1600,11 +1476,10 @@ describe('projectRouting functionality', () => {
       );
     });
 
-    test('throws error when projectRouting update is provided but cpsSetup is undefined', async () => {
+    test('throws error when projectRouting update is provided but npreClient is undefined', async () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       const mockConfig = createMockConfig();
-      const mockNpreClient = createMockNpreClient();
 
       const client = new SpacesClient(
         mockDebugLogger,
@@ -1613,8 +1488,7 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        undefined, // cpsSetup is undefined
-        mockNpreClient
+        undefined
       );
 
       const spaceToUpdate = {
@@ -1627,49 +1501,6 @@ describe('projectRouting functionality', () => {
       await expect(client.update('foo', spaceToUpdate)).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Unable to update Space, projectRouting property is only allowed when CPS is enabled"`
       );
-    });
-
-    test('updates space successfully when cpsSetup is undefined and no projectRouting provided', async () => {
-      const mockDebugLogger = createMockDebugLogger();
-      const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
-      mockCallWithRequestRepository.update.mockResolvedValue({} as any);
-      mockCallWithRequestRepository.get.mockResolvedValue({
-        id: 'foo',
-        type: 'space',
-        references: [],
-        attributes: {
-          name: 'foo-name-updated',
-          disabledFeatures: [],
-        },
-      } as any);
-      const mockConfig = createMockConfig();
-      const mockNpreClient = createMockNpreClient();
-
-      const client = new SpacesClient(
-        mockDebugLogger,
-        mockConfig,
-        mockCallWithRequestRepository,
-        [],
-        'traditional',
-        featuresStart,
-        undefined, // cpsSetup is undefined
-        mockNpreClient
-      );
-
-      const spaceToUpdate = {
-        id: 'foo',
-        name: 'foo-name-updated',
-        disabledFeatures: [],
-      };
-
-      const updatedSpace = await client.update('foo', spaceToUpdate);
-
-      expect(updatedSpace.name).toBe('foo-name-updated');
-      expect(updatedSpace.projectRouting).toBeUndefined();
-      expect(mockNpreClient.putNpre).not.toHaveBeenCalled();
-      expect(mockNpreClient.deleteNpre).not.toHaveBeenCalled();
-      expect(mockNpreClient.getNpre).not.toHaveBeenCalled();
-      expect(mockCallWithRequestRepository.update).toHaveBeenCalled();
     });
   });
 
@@ -1689,8 +1520,6 @@ describe('projectRouting functionality', () => {
       mockCallWithRequestRepository.delete.mockResolvedValue({} as any);
       mockCallWithRequestRepository.deleteByNamespace.mockResolvedValue({} as any);
       const mockConfig = createMockConfig();
-      const mockCpsSetup = createMockCpsSetup();
-      (mockCpsSetup.getCpsEnabled as jest.Mock).mockReturnValue(true);
       const mockNpreClient = createMockNpreClient();
       (mockNpreClient.getNpre as jest.Mock).mockResolvedValue('project:test-project');
 
@@ -1701,7 +1530,6 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockCpsSetup,
         mockNpreClient
       );
 
@@ -1726,9 +1554,6 @@ describe('projectRouting functionality', () => {
       mockCallWithRequestRepository.delete.mockResolvedValue({} as any);
       mockCallWithRequestRepository.deleteByNamespace.mockResolvedValue({} as any);
       const mockConfig = createMockConfig();
-      const mockCpsSetup = createMockCpsSetup();
-      (mockCpsSetup.getCpsEnabled as jest.Mock).mockReturnValue(false);
-      const mockNpreClient = createMockNpreClient();
 
       const client = new SpacesClient(
         mockDebugLogger,
@@ -1737,14 +1562,10 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockCpsSetup,
-        mockNpreClient
+        undefined
       );
 
       await client.delete('foo');
-
-      expect(mockNpreClient.getNpre).not.toHaveBeenCalled();
-      expect(mockNpreClient.deleteNpre).not.toHaveBeenCalled();
     });
 
     test('allows delete when user is not authorized but no npre exists', async () => {
@@ -1762,8 +1583,6 @@ describe('projectRouting functionality', () => {
       mockCallWithRequestRepository.delete.mockResolvedValue({} as any);
       mockCallWithRequestRepository.deleteByNamespace.mockResolvedValue({} as any);
       const mockConfig = createMockConfig();
-      const mockCpsSetup = createMockCpsSetup();
-      (mockCpsSetup.getCpsEnabled as jest.Mock).mockReturnValue(true);
       const mockNpreClient = createMockNpreClient();
       (mockNpreClient.getNpre as jest.Mock).mockResolvedValue(undefined);
 
@@ -1774,7 +1593,6 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        mockCpsSetup,
         mockNpreClient
       );
 
@@ -1784,7 +1602,7 @@ describe('projectRouting functionality', () => {
       expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith('foo');
     });
 
-    test('deletes space successfully when cpsSetup is undefined', async () => {
+    test('deletes space successfully when npreClient is undefined', async () => {
       const mockDebugLogger = createMockDebugLogger();
       const mockCallWithRequestRepository = savedObjectsRepositoryMock.create();
       mockCallWithRequestRepository.get.mockResolvedValue({
@@ -1799,7 +1617,6 @@ describe('projectRouting functionality', () => {
       mockCallWithRequestRepository.delete.mockResolvedValue({} as any);
       mockCallWithRequestRepository.deleteByNamespace.mockResolvedValue({} as any);
       const mockConfig = createMockConfig();
-      const mockNpreClient = createMockNpreClient();
 
       const client = new SpacesClient(
         mockDebugLogger,
@@ -1808,16 +1625,13 @@ describe('projectRouting functionality', () => {
         [],
         'traditional',
         featuresStart,
-        undefined, // cpsSetup is undefined
-        mockNpreClient
+        undefined
       );
 
       await client.delete('foo');
 
       expect(mockCallWithRequestRepository.delete).toHaveBeenCalledWith('space', 'foo');
       expect(mockCallWithRequestRepository.deleteByNamespace).toHaveBeenCalledWith('foo');
-      expect(mockNpreClient.getNpre).not.toHaveBeenCalled();
-      expect(mockNpreClient.deleteNpre).not.toHaveBeenCalled();
     });
   });
 });

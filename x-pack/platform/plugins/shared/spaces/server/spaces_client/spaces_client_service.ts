@@ -14,7 +14,7 @@ import type {
   KibanaRequest,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
-import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server';
+import type { CPSServerStart } from '@kbn/cps/server';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 
 import type { ISpacesClient } from './spaces_client';
@@ -75,22 +75,15 @@ export class SpacesClientService {
 
   private clientWrapper?: SpacesClientWrapper;
 
-  private cpsSetup?: CPSServerSetup;
-
   constructor(
     private readonly debugLogger: (message: string) => void,
     private readonly buildFlavour: BuildFlavor
   ) {}
 
-  public setup(
-    { config$ }: SetupDeps,
-    cpsSetup: CPSServerSetup | undefined
-  ): SpacesClientServiceSetup {
+  public setup({ config$ }: SetupDeps): SpacesClientServiceSetup {
     config$.subscribe((nextConfig) => {
       this.config = nextConfig;
     });
-
-    this.cpsSetup = cpsSetup;
 
     return {
       setClientRepositoryFactory: (repositoryFactory: SpacesClientRepositoryFactory) => {
@@ -137,7 +130,6 @@ export class SpacesClientService {
           nonGlobalTypeNames,
           this.buildFlavour,
           features,
-          this.cpsSetup,
           cps?.createNpreClient(request)
         );
         if (this.clientWrapper) {

@@ -18,7 +18,7 @@ import {
 } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import type { INpreClient } from '@kbn/cps/server/npre';
-import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server/types';
+import type { CPSServerStart } from '@kbn/cps/server/types';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initDeleteSpacesApi } from './delete';
@@ -37,7 +37,7 @@ import {
 describe('Spaces Public API', () => {
   const spacesSavedObjects = createSpaces();
 
-  const setup = async (options?: { cpsSetup?: CPSServerSetup; cpsStart?: CPSServerStart }) => {
+  const setup = async (options?: { cpsStart?: CPSServerStart }) => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpService.createRouter();
     const versionedRouterMock = router.versioned as MockedVersionedRouter;
@@ -49,7 +49,7 @@ describe('Spaces Public API', () => {
 
     const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
-      .setup({ config$: Rx.of(spacesConfig) }, options?.cpsSetup)
+      .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
 
     const service = new SpacesService();
@@ -88,7 +88,6 @@ describe('Spaces Public API', () => {
       routeValidation: (config.validate as any).request as RouteValidatorConfig<{}, {}, {}>,
       routeHandler,
       savedObjectsRepositoryMock,
-      mockCpsSetup: options?.cpsSetup,
       mockCpsStart: options?.cpsStart,
     };
   };
@@ -98,10 +97,6 @@ describe('Spaces Public API', () => {
     canDelete?: boolean;
     expression?: string;
   }) => {
-    const mockCpsSetup = {
-      getCpsEnabled: jest.fn().mockReturnValue(options.cpsEnabled),
-    };
-
     const npreClient: INpreClient = {
       getNpre: jest.fn().mockResolvedValue(options.expression),
       putNpre: jest.fn().mockResolvedValue(undefined),
@@ -115,7 +110,6 @@ describe('Spaces Public API', () => {
 
     return {
       ...(await setup({
-        cpsSetup: mockCpsSetup,
         cpsStart: mockCpsStart,
       })),
       npreClient,
@@ -227,7 +221,7 @@ describe('Spaces Public API', () => {
   });
 
   describe('Cross-project search', () => {
-    it('deletes the NPRE when CPS is enabled and user has permission', async () => {
+    it('deletes the NPRE when CPS is enabled and it exists', async () => {
       const { routeHandler, npreClient } = await setupWithCps({
         cpsEnabled: true,
         canDelete: true,
@@ -249,7 +243,7 @@ describe('Spaces Public API', () => {
       expect(npreClient.deleteNpre).toHaveBeenCalledWith('kibana_space_a-space_default');
     });
 
-    it('returns 204 when user does not have permission to delete the NPRE but it does not exist', async () => {
+    it('returns 204 when the NPRE does not exist', async () => {
       const { routeHandler, npreClient } = await setupWithCps({
         cpsEnabled: true,
         canDelete: false,

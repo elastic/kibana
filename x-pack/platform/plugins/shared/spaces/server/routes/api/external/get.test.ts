@@ -16,7 +16,7 @@ import {
 } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import type { INpreClient } from '@kbn/cps/server/npre';
-import type { CPSServerSetup, CPSServerStart } from '@kbn/cps/server/types';
+import type { CPSServerStart } from '@kbn/cps/server/types';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
 import { initGetSpaceApi } from './get';
@@ -36,7 +36,7 @@ describe('GET space', () => {
   const spacesSavedObjects = createSpaces();
   const spaces = spacesSavedObjects.map((s) => ({ id: s.id, ...s.attributes }));
 
-  const setup = async (options?: { cpsSetup?: CPSServerSetup; cpsStart?: CPSServerStart }) => {
+  const setup = async (options?: { cpsStart?: CPSServerStart }) => {
     const httpService = httpServiceMock.createSetupContract();
     const router = httpService.createRouter();
     const versionedRouterMock = router.versioned as MockedVersionedRouter;
@@ -49,7 +49,7 @@ describe('GET space', () => {
 
     const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
-      .setup({ config$: Rx.of(spacesConfig) }, options?.cpsSetup)
+      .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
 
     const service = new SpacesService();
@@ -85,16 +85,11 @@ describe('GET space', () => {
 
     return {
       routeHandler: handler,
-      mockCpsSetup: options?.cpsSetup,
       mockCpsStart: options?.cpsStart,
     };
   };
 
   const setupWithCps = async (options: { cpsEnabled: boolean; expression?: string }) => {
-    const mockCpsSetup = {
-      getCpsEnabled: jest.fn().mockReturnValue(options.cpsEnabled),
-    };
-
     const npreClient: INpreClient = {
       getNpre: jest.fn().mockResolvedValue(options.expression),
       putNpre: jest.fn().mockResolvedValue(undefined),
@@ -102,13 +97,14 @@ describe('GET space', () => {
       canPutNpre: jest.fn().mockResolvedValue(true),
     };
 
-    const mockCpsStart = {
-      createNpreClient: jest.fn().mockReturnValue(npreClient),
-    };
+    const mockCpsStart = options.cpsEnabled
+      ? {
+          createNpreClient: jest.fn().mockReturnValue(npreClient),
+        }
+      : undefined;
 
     return {
       ...(await setup({
-        cpsSetup: mockCpsSetup,
         cpsStart: mockCpsStart,
       })),
       npreClient,

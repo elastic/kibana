@@ -135,10 +135,7 @@ export class SpacesPlugin
   }
 
   public setup(core: CoreSetup<PluginsStart>, plugins: PluginsSetup): SpacesPluginSetup {
-    const spacesClientSetup = this.spacesClientService.setup(
-      { config$: this.config$ },
-      plugins.cps
-    );
+    const spacesClientSetup = this.spacesClientService.setup({ config$: this.config$ });
     core.uiSettings.registerGlobal(getUiSettings());
 
     const spacesServiceSetup = this.spacesService.setup({

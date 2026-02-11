@@ -14,7 +14,6 @@ import type {
   SavedObject,
 } from '@kbn/core/server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
-import type { CPSServerSetup } from '@kbn/cps/server';
 import { PROJECT_ROUTING } from '@kbn/cps/server/constants';
 import type { INpreClient } from '@kbn/cps/server/npre';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
@@ -103,17 +102,12 @@ export class SpacesClient implements ISpacesClient {
     private readonly nonGlobalTypeNames: string[],
     private readonly buildFlavour: BuildFlavor,
     private readonly features: FeaturesPluginStart,
-    private readonly cpsSetup: CPSServerSetup | undefined,
     private readonly npreClient: INpreClient | undefined
   ) {
     this.isServerless = this.buildFlavour === 'serverless';
     this.deprecatedFeaturesReferences = this.collectDeprecatedFeaturesReferences(
       features.getKibanaFeatures()
     );
-
-    if (cpsSetup?.getCpsEnabled() && !npreClient) {
-      throw new Error('NpreClient must be provided when CPS is enabled');
-    }
   }
 
   public async getAll(options: v1.GetAllSpacesOptions = {}): Promise<v1.GetSpaceResult[]> {
@@ -140,9 +134,9 @@ export class SpacesClient implements ISpacesClient {
     const savedObject = await this.repository.get('space', id);
     const space = this.transformSavedObjectToSpace(savedObject);
 
-    if (this.cpsSetup?.getCpsEnabled()) {
+    if (this.npreClient) {
       space.projectRouting =
-        (await this.npreClient!.getNpre(getSpaceDefaultNpreName(id))) ?? PROJECT_ROUTING.ALL;
+        (await this.npreClient.getNpre(getSpaceDefaultNpreName(id))) ?? PROJECT_ROUTING.ALL;
     }
 
     return space;
@@ -182,13 +176,13 @@ export class SpacesClient implements ISpacesClient {
 
     let projectRoutingExpression: string | undefined;
     if (Object.hasOwn(space, 'projectRouting')) {
-      if (!this.cpsSetup?.getCpsEnabled()) {
+      if (!this.npreClient) {
         throw Boom.badRequest(
-          'Unable to update Space, projectRouting property is only allowed when CPS is enabled'
+          'Unable to create Space, projectRouting property is only allowed when CPS is enabled'
         );
-      } else if (!(await this.npreClient!.canPutNpre())) {
+      } else if (!(await this.npreClient.canPutNpre())) {
         throw Boom.forbidden(
-          'Unable to update Space, user is not authorized to update projectRouting'
+          'Unable to create Space, user is not authorized to update projectRouting'
         );
       } else {
         projectRoutingExpression = space.projectRouting;
@@ -204,16 +198,15 @@ export class SpacesClient implements ISpacesClient {
 
     const createdSavedObject = await this.repository.create('space', attributes, { id });
 
-    if (projectRoutingExpression) {
-      await this.npreClient!.putNpre(getSpaceDefaultNpreName(id), projectRoutingExpression);
-    }
-
     this.debugLogger(`SpacesClient.create(), created space object`);
 
     const savedSpace = this.transformSavedObjectToSpace(createdSavedObject);
 
     if (projectRoutingExpression) {
-      savedSpace.projectRouting = await this.npreClient!.getNpre(getSpaceDefaultNpreName(id));
+      const npreName = getSpaceDefaultNpreName(id);
+
+      await this.npreClient!.putNpre(npreName, projectRoutingExpression);
+      savedSpace.projectRouting = await this.npreClient!.getNpre(npreName);
     }
 
     return savedSpace;
@@ -240,16 +233,17 @@ export class SpacesClient implements ISpacesClient {
       throw Boom.badRequest('Unable to update Space, solution property cannot be empty');
     }
 
+    const npreName = getSpaceDefaultNpreName(id);
     if (Object.hasOwn(space, 'projectRouting')) {
-      if (!this.cpsSetup?.getCpsEnabled()) {
+      if (!this.npreClient) {
         throw Boom.badRequest(
           'Unable to update Space, projectRouting property is only allowed when CPS is enabled'
         );
-      } else if (await this.npreClient!.canPutNpre()) {
+      } else if (await this.npreClient.canPutNpre()) {
         if (space.projectRouting === undefined) {
-          await this.npreClient!.deleteNpre(getSpaceDefaultNpreName(id));
+          await this.npreClient.deleteNpre(npreName);
         } else {
-          await this.npreClient!.putNpre(getSpaceDefaultNpreName(id), space.projectRouting);
+          await this.npreClient.putNpre(npreName, space.projectRouting);
         }
       }
       // Remove projectRouting from space so it is not saved as part of the saved object
@@ -261,8 +255,8 @@ export class SpacesClient implements ISpacesClient {
     const updatedSavedObject = await this.repository.get('space', id);
     const updatedSpace = this.transformSavedObjectToSpace(updatedSavedObject);
 
-    if (this.cpsSetup?.getCpsEnabled()) {
-      updatedSpace.projectRouting = await this.npreClient!.getNpre(getSpaceDefaultNpreName(id));
+    if (this.npreClient) {
+      updatedSpace.projectRouting = await this.npreClient.getNpre(npreName);
     }
 
     return updatedSpace;
@@ -286,11 +280,8 @@ export class SpacesClient implements ISpacesClient {
 
     await this.repository.delete('space', id);
 
-    if (
-      this.cpsSetup?.getCpsEnabled() &&
-      !!(await this.npreClient?.getNpre(getSpaceDefaultNpreName(id)))
-    ) {
-      await this.npreClient!.deleteNpre(getSpaceDefaultNpreName(id));
+    if (this.npreClient && !!(await this.npreClient.getNpre(getSpaceDefaultNpreName(id)))) {
+      await this.npreClient.deleteNpre(getSpaceDefaultNpreName(id));
     }
   }
 
