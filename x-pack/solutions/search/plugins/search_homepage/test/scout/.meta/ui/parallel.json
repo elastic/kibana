@@ -1,0 +1,104 @@
+{
+  "lastModified": "2026-02-12T10:42:30.733Z",
+  "sha1": "9c4e6128abb7c045eef1eedf023bea32d6d586a6",
+  "tests": [
+    {
+      "id": "1c8c85aed319853-a4c7c49ef896953",
+      "title": "Homepage - Admin API keys button should be enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    },
+    {
+      "id": "1c8c85aed319853-ab69ce47467029e",
+      "title": "Homepage - Admin Should open connection details flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 26,
+        "column": 7
+      }
+    },
+    {
+      "id": "1c8c85aed319853-2982e3d66e6e02d",
+      "title": "Homepage - Admin Should create API key through the modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 36,
+        "column": 7
+      }
+    },
+    {
+      "id": "03e83e549838106-14fe8224ffdaafd",
+      "title": "Homepage - Viewer should not be able to see manage button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    },
+    {
+      "id": "03e83e549838106-2f0b6f5b90d58d5",
+      "title": "Homepage - Viewer Navigation cards should navigate to correct places",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "03e83e549838106-84e53ec73bf118c",
+      "title": "Homepage - Viewer Get started banner should move user back to getting started",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 58,
+        "column": 7
+      }
+    },
+    {
+      "id": "03e83e549838106-0a32eeb2ede6fbb",
+      "title": "Homepage - Viewer API keys button should be disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    }
+  ]
+}
