@@ -124,6 +124,12 @@ export function findPlugins(options?: FindPluginsOptions): PluginOrPackage[] {
   return result;
 }
 
+/**
+ * Finds all plugins owned by a specific team.
+ *
+ * @param team - The GitHub team identifier (e.g., `@elastic/kibana-core`).
+ * @returns Array of plugins owned by the specified team.
+ */
 export function findTeamPlugins(team: string): PluginOrPackage[] {
   const packages = getPackages(REPO_ROOT);
   const plugins = packages.filter(

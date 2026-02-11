@@ -10,12 +10,27 @@
 import Path from 'path';
 import type { Node, Project } from 'ts-morph';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { PluginOrPackage } from './types';
+import type { PluginOrPackage, UnnamedExport } from './types';
 import { ApiScope, Lifecycle } from './types';
 import type { ApiDeclaration, PluginApi } from './types';
 import { buildApiDeclarationTopNode } from './build_api_declarations/build_api_declaration';
 import { getDeclarationNodesForPluginScope } from './get_declaration_nodes_for_plugin';
 import { getSourceFileMatching } from './tsmorph_utils';
+
+/**
+ * Warnings encountered during plugin API collection.
+ */
+export interface PluginApiWarnings {
+  unnamedExports: UnnamedExport[];
+}
+
+/**
+ * Result of collecting plugin API, including any warnings found.
+ */
+export interface PluginApiResult {
+  pluginApi: PluginApi;
+  warnings: PluginApiWarnings;
+}
 
 /**
  * Collects all the information necessary to generate this plugins mdx api file(s).
@@ -26,23 +41,60 @@ export function getPluginApi(
   plugins: PluginOrPackage[],
   log: ToolingLog,
   captureReferences: boolean
-): PluginApi {
-  const client = getDeclarations(project, plugin, ApiScope.CLIENT, plugins, log, captureReferences);
-  const server = getDeclarations(project, plugin, ApiScope.SERVER, plugins, log, captureReferences);
-  const common = getDeclarations(project, plugin, ApiScope.COMMON, plugins, log, captureReferences);
+): PluginApiResult {
+  const clientResult = getDeclarations(
+    project,
+    plugin,
+    ApiScope.CLIENT,
+    plugins,
+    log,
+    captureReferences
+  );
+  const serverResult = getDeclarations(
+    project,
+    plugin,
+    ApiScope.SERVER,
+    plugins,
+    log,
+    captureReferences
+  );
+  const commonResult = getDeclarations(
+    project,
+    plugin,
+    ApiScope.COMMON,
+    plugins,
+    log,
+    captureReferences
+  );
+
+  const unnamedExports = [
+    ...clientResult.unnamedExports,
+    ...serverResult.unnamedExports,
+    ...commonResult.unnamedExports,
+  ];
+
   return {
-    id: plugin.id,
-    client,
-    server,
-    common,
-    serviceFolders: plugin.manifest.serviceFolders,
+    pluginApi: {
+      id: plugin.id,
+      client: clientResult.declarations,
+      server: serverResult.declarations,
+      common: commonResult.declarations,
+      serviceFolders: plugin.manifest.serviceFolders,
+    },
+    warnings: {
+      unnamedExports,
+    },
   };
 }
 
+interface DeclarationResult {
+  declarations: ApiDeclaration[];
+  unnamedExports: UnnamedExport[];
+}
+
 /**
- *
- * @returns All exported ApiDeclarations for the given plugin and scope (client, server, common), broken into
- * groups of typescript kinds (functions, classes, interfaces, etc).
+ * Returns all exported ApiDeclarations for the given plugin and scope (client, server, common),
+ * along with any unnamed exports that were encountered.
  */
 function getDeclarations(
   project: Project,
@@ -51,8 +103,8 @@ function getDeclarations(
   plugins: PluginOrPackage[],
   log: ToolingLog,
   captureReferences: boolean
-): ApiDeclaration[] {
-  const nodes = getDeclarationNodesForPluginScope(project, plugin, scope, log);
+): DeclarationResult {
+  const { nodes, unnamedExports } = getDeclarationNodesForPluginScope(project, plugin, scope, log);
 
   const contractTypes = getContractTypes(project, plugin, scope);
 
@@ -78,7 +130,7 @@ function getDeclarations(
   }, []);
 
   // We have all the ApiDeclarations, now lets group them by typescript kinds.
-  return declarations;
+  return { declarations, unnamedExports };
 }
 
 /**

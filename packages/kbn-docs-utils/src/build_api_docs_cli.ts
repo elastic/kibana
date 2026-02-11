@@ -44,6 +44,9 @@ async function endTransactionWithFailure(transaction: Transaction | null) {
   }
 }
 
+/**
+ * Runs the build API docs CLI, generating API documentation for Kibana plugins and packages.
+ */
 export function runBuildApiDocsCli() {
   startApm();
   run(
@@ -85,6 +88,7 @@ export function runBuildApiDocsCli() {
       const apiMapResult = buildApiMap(
         setupResult.project,
         setupResult.plugins,
+        setupResult.allPlugins,
         log,
         transaction,
         options

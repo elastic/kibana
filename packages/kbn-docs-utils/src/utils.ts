@@ -211,7 +211,16 @@ function removeBrokenLinksFromApi(
   if (api.signature) {
     api.signature = api.signature.map((sig) => {
       if (typeof sig !== 'string') {
-        if (!apiItemExists(sig.text, sig.scope, pluginApiMap[sig.pluginId])) {
+        const referencedPluginApi = pluginApiMap[sig.pluginId];
+
+        // If the referenced plugin isn't in our plugin map (e.g., single-package build),
+        // keep the link as-is since we can't verify if it exists.
+        if (!referencedPluginApi) {
+          return sig;
+        }
+
+        // Plugin is in the map - check if the specific API item exists.
+        if (!apiItemExists(sig.text, sig.scope, referencedPluginApi)) {
           if (missingApiItems[sig.pluginId] === undefined) {
             missingApiItems[sig.pluginId] = {};
           }
@@ -223,6 +232,7 @@ function removeBrokenLinksFromApi(
           missingApiItems[sig.pluginId][sourceId].push(`${pluginId}-${api.id}`);
 
           missingCnt++;
+          // Return plain text for broken links.
           return sig.text;
         }
         return sig;

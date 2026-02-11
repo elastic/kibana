@@ -145,6 +145,103 @@ By following these steps, you can successfully add and register a new tool to th
 
 The following tools are available in the MCP Dev Server.
 
+## Documentation Validation Tools
+
+### `check_package_docs`
+
+Quickly check a Kibana plugin or package for documentation issues. Returns pass/fail status and issue counts. Use this for initial assessment before deciding to fix issues.
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `package` | string | Yes* | The plugin or package ID (e.g., `@kbn/docs-utils`). |
+| `file` | string | Yes* | A file path; the owning package will be inferred. |
+
+*One of `package` or `file` is required.
+
+**Example response:**
+
+```json
+{
+  "package": "@kbn/some-plugin",
+  "directory": "/path/to/plugin",
+  "passed": false,
+  "totalIssues": 7,
+  "actionable": 5,
+  "pending": 2,
+  "counts": {
+    "apiCount": 20,
+    "missingComments": 3,
+    "missingReturns": 1,
+    "paramDocMismatches": 1,
+    "missingComplexTypeInfo": 0,
+    "isAnyType": 0,
+    "missingExports": 2
+  }
+}
+```
+
+> **Note:** `passed` is based on `actionable` issues only. `pending` issues (like `missingExports`) require human input or changes in other packages.
+
+### `fix_package_docs`
+
+Get detailed documentation issues for a Kibana plugin, package, or file. Returns issues grouped by file with source context and fix templates. Use this after `check_package_docs` identifies problems.
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `package` | string | Yes* | The plugin or package ID. |
+| `file` | string | Yes* | A file path; the owning package will be inferred. |
+| `issueTypes` | array | No | Filter to specific issue types (see below). |
+
+*One of `package` or `file` is required.
+
+**Issue Types:**
+
+| Type | Default | Description |
+|------|---------|-------------|
+| `missingComments` | ✅ | APIs without JSDoc comments. |
+| `missingReturns` | ✅ | Functions missing `@returns` tags. |
+| `paramDocMismatches` | ✅ | Parameter documentation mismatches. |
+| `missingComplexTypeInfo` | ✅ | Complex types lacking documentation. |
+| `isAnyType` | ✅ | APIs using `any` type. |
+| `missingExports` | ❌ | Types referenced but not exported. Opt-in only; often requires changes in consuming packages. |
+
+**Example response:**
+
+```json
+{
+  "package": "@kbn/some-plugin",
+  "totalIssues": 2,
+  "issuesByFile": [
+    {
+      "file": "src/index.ts",
+      "issues": [
+        {
+          "issueType": "missingReturns",
+          "id": "def-public.myFunction",
+          "label": "myFunction",
+          "file": "src/index.ts",
+          "line": 42,
+          "link": "https://github.com/elastic/kibana/blob/main/src/index.ts#L42",
+          "type": "Function",
+          "sourceSnippet": "39| /**\n40|  * Does something.\n41|  */\n42| export const myFunction = () => {\n43|   return 'hello';\n44| };",
+          "template": "@returns {TYPE}"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Workflow:**
+
+1. Run `check_package_docs` to get a quick summary.
+2. If issues exist, run `fix_package_docs` to get detailed context.
+3. Use the `sourceSnippet` and `template` to add missing documentation.
+
 # Semantic Code Search
 
 For semantic code search, please use the [semantic-code-search-mcp-server](https://github.com/elastic/semantic-code-search-mcp-server). This server provides a suite of tools for exploring and understanding the Kibana codebase.

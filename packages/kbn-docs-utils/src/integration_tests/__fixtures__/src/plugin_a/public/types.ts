@@ -64,8 +64,47 @@ export interface MyProps {
 
 export type AReactElementFn = () => ReactElement<MyProps>;
 
+/**
+ * A function type with multiple call signatures (overloads).
+ * This demonstrates handling of overloaded function types.
+ *
+ * @param input The input value to process.
+ * @returns The processed result.
+ */
+export interface OverloadedFunction {
+  /**
+   * Parse a string and return a number.
+   * @param input A string to parse.
+   * @returns The parsed number.
+   */
+  (input: string): number;
+  /**
+   * Double a number.
+   * @param input A number to double.
+   * @returns The doubled value.
+   */
+  // Intentionally separate overloads to test docs tooling handling of overloaded function types.
+  // eslint-disable-next-line @typescript-eslint/unified-signatures
+  (input: number): number;
+  /**
+   * Parse an array of strings.
+   * @param input An array of strings to parse.
+   * @returns An array of parsed numbers.
+   */
+  (input: string[]): number[];
+}
+
+/**
+ * A variable typed with the overloaded function.
+ */
+export const overloadedFn: OverloadedFunction = ((input: string | number | string[]) => {
+  if (typeof input === 'string') return parseInt(input, 10);
+  if (typeof input === 'number') return input * 2;
+  return input.map((s) => parseInt(s, 10));
+}) as OverloadedFunction;
+
 // Expected issues:
-//   missing comments (14):
+//   missing comments (15):
 //     line 19 - TypeWithGeneric
 //     line 21 - ImAType
 //     line 28 - t
@@ -80,11 +119,13 @@ export type AReactElementFn = () => ReactElement<MyProps>;
 //     line 61 - foo
 //     line 62 - bar
 //     line 65 - AReactElementFn
-//   param doc mismatches (3):
+//     line 80 - input
+//   param doc mismatches (4):
 //     line 30 - FnTypeWithGeneric
 //     line 54 - foo
 //     line 62 - bar
-//   no references (21):
+//     line 100 - overloadedFn
+//   no references (30):
 //     line 14 - StringOrUndefinedType
 //     line 19 - TypeWithGeneric
 //     line 21 - ImAType
@@ -106,3 +147,12 @@ export type AReactElementFn = () => ReactElement<MyProps>;
 //     line 61 - foo
 //     line 62 - bar
 //     line 65 - AReactElementFn
+//     line 67 - OverloadedFunction
+//     line 75 - Unnamed
+//     line 80 - input
+//     line 80 - input
+//     line 81 - Unnamed
+//     line 88 - input
+//     line 89 - Unnamed
+//     line 94 - input
+//     line 100 - overloadedFn

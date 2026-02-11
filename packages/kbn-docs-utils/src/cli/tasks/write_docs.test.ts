@@ -69,6 +69,7 @@ describe('writeDocs', () => {
       pathsByPlugin: new Map(),
       project: {} as any,
       initialDocIds: ['doc1', 'doc2'],
+      allPlugins: [mockPlugin],
     };
 
     apiMapResult = {
@@ -84,6 +85,7 @@ describe('writeDocs', () => {
       referencedDeprecations: {},
       unreferencedDeprecations: {},
       adoptionTrackedAPIs: {},
+      unnamedExports: {},
     };
 
     allPluginStats = {
@@ -105,6 +107,7 @@ describe('writeDocs', () => {
         eslintDisableLineCount: 0,
         eslintDisableFileCount: 0,
         enzymeImportCount: 0,
+        unnamedExports: [],
       },
     };
 

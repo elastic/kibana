@@ -20,7 +20,7 @@ import {
  * Collects API stats for a single plugin.
  */
 export function collectApiStatsForPlugin(doc: PluginApi, issues: IssuesByPlugin): ApiStats {
-  const { missingApiItems, referencedDeprecations, adoptionTrackedAPIs } = issues;
+  const { missingApiItems, referencedDeprecations, adoptionTrackedAPIs, unnamedExports } = issues;
 
   const stats: ApiStats = {
     missingComments: [],
@@ -34,6 +34,7 @@ export function collectApiStatsForPlugin(doc: PluginApi, issues: IssuesByPlugin)
     adoptionTrackedAPIsUnreferencedCount: 0,
     apiCount: countApiForPlugin(doc),
     missingExports: Object.values(missingApiItems[doc.id] ?? {}).length,
+    unnamedExports: unnamedExports?.[doc.id] || [],
   };
   Object.values(doc.client).forEach((def) => {
     collectStatsForApi(def, stats, doc);
@@ -66,7 +67,13 @@ function collectAdoptionTrackedAPIStats(
 }
 
 function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats, pluginApi: PluginApi): void {
-  const missingComment = doc.description === undefined || doc.description.length === 0;
+  const hasDescription = doc.description !== undefined && doc.description.length > 0;
+  const childHasDescription =
+    doc.children?.some(
+      (child) => child.description !== undefined && child.description.length > 0
+    ) ?? false;
+  const isParameterNode = doc.id.includes('.$'); // parameters and destructured parameter nodes carry .$ in their id
+  const missingComment = !hasDescription && !(isParameterNode && childHasDescription);
   // Ignore all stats coming from third party libraries, we can't fix that!
   if (doc.path.includes('node_modules')) return;
 
