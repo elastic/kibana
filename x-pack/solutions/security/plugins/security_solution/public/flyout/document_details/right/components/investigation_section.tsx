@@ -8,14 +8,15 @@
 import React, { memo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandSection } from '../hooks/use_expand_section';
-import { ExpandableSection } from './expandable_section';
+import { useExpandSection } from '../../../shared/hooks/use_expand_section';
+import { ExpandableSection } from '../../../shared/components/expandable_section';
 import { HighlightedFields } from './highlighted_fields';
 import { INVESTIGATION_SECTION_TEST_ID } from './test_ids';
 import { InvestigationGuide } from './investigation_guide';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { useDocumentDetailsContext } from '../../shared/context';
+import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
 const KEY = 'investigation';
 
@@ -29,7 +30,11 @@ export const InvestigationSection = memo(() => {
   const eventKind = getField(getFieldsData('event.kind'));
   const ancestorIndex = getField(getFieldsData('signal.ancestors.index')) ?? '';
 
-  const expanded = useExpandSection({ title: KEY, defaultValue: true });
+  const expanded = useExpandSection({
+    storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
+    title: KEY,
+    defaultValue: true,
+  });
 
   return (
     <ExpandableSection
@@ -40,7 +45,8 @@ export const InvestigationSection = memo(() => {
           defaultMessage="Investigation"
         />
       }
-      localStorageKey={KEY}
+      localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
+      sectionId={KEY}
       gutterSize="none"
       data-test-subj={INVESTIGATION_SECTION_TEST_ID}
     >

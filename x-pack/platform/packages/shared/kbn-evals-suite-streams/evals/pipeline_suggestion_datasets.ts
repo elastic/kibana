@@ -48,7 +48,11 @@ export interface PipelineSuggestionEvaluationExample {
   input: {
     stream_name: string; // e.g., 'logs.apache'
     system: string; // LogHub system to index
-    sample_document_count: number; // Number of documents to fetch for evaluation
+    // Two modes supported:
+    // 1. Inline mode: Provide sample_documents array (will create child stream with routing)
+    // 2. Index mode: Set sample_document_count (will read from existing indices)
+    sample_documents?: Array<Record<string, unknown>>; // Inline sample documents for evaluation
+    sample_document_count?: number; // Number of documents to fetch from existing stream
   };
   output: PipelineSuggestionGroundTruth;
   metadata: {
@@ -72,6 +76,7 @@ export const PIPELINE_SUGGESTION_DATASETS: PipelineSuggestionEvaluationDataset[]
     name: 'Web Server Logs - Pipeline Suggestion',
     description: 'Apache web server error logs',
     examples: [
+      // 🔧 NEW DATASETS GO HERE - Added by create_dataset_from_clipboard.ts
       {
         input: {
           stream_name: 'logs.apache',

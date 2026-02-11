@@ -10,6 +10,7 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkplaceAIAppPluginSetup {}
@@ -17,8 +18,9 @@ export interface WorkplaceAIAppPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkplaceAIAppPluginStart {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkplaceAIAppPluginSetupDependencies {}
+export interface WorkplaceAIAppPluginSetupDependencies {
+  workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
+}
 
 export interface WorkplaceAIAppPluginStartDependencies {
   inference: InferencePublicStart;
@@ -26,4 +28,15 @@ export interface WorkplaceAIAppPluginStartDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cloud?: CloudStart;
   share?: SharePluginStart;
+}
+
+/**
+ * Client-side config exposed from server via exposeToBrowser
+ */
+export interface WorkplaceAIClientConfig {
+  ears: {
+    url?: string;
+    ui_enabled: boolean;
+    allow_insecure: boolean;
+  };
 }

@@ -9,7 +9,11 @@ import { default as React, useMemo } from 'react';
 import { useEnrichmentFieldSuggestions } from '../../../hooks/use_field_suggestions';
 import { useStreamDataViewFieldTypes } from '../../../hooks/use_stream_data_view_field_types';
 import { useEnrichmentValueSuggestions } from '../../../hooks/use_value_suggestions';
-import { getFilterConditionField } from '../../../util/condition';
+import {
+  getFilterConditionField,
+  getFilterConditionOperator,
+  isArrayOperator,
+} from '../../../util/condition';
 import type { ConditionEditorProps } from '../shared/condition_editor';
 import { ConditionEditor } from '../shared/condition_editor';
 import { useSimulatorSelector } from './state_management/stream_enrichment_state_machine/use_stream_enrichment';
@@ -21,7 +25,10 @@ export type ProcessorConditionEditorProps = Omit<
 
 export function ProcessorConditionEditorWrapper(props: ProcessorConditionEditorProps) {
   const fieldSuggestions = useEnrichmentFieldSuggestions();
-  const valueSuggestions = useEnrichmentValueSuggestions(getFilterConditionField(props.condition));
+  const operator = getFilterConditionOperator(props.condition);
+  const valueSuggestions = useEnrichmentValueSuggestions(getFilterConditionField(props.condition), {
+    flattenArrays: isArrayOperator(operator),
+  });
   const streamName = useSimulatorSelector((state) => state.context.streamName);
 
   // Fetch DataView field types for displaying field type icons

@@ -9,7 +9,7 @@ import { uniqBy } from 'lodash';
 import { createHash } from 'crypto';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
-import { warningAndAboveLogFilter } from '../../../utils/ecs_otel_fields';
+import { warningAndAboveLogFilter } from '../../../utils/warning_and_above_log_filter';
 import { getTypedSearch } from '../../../utils/get_typed_search';
 import { kqlFilter as buildKqlFilter, timeRangeFilter } from '../../../utils/dsl_filters';
 import type { AnchorLog } from '../types';

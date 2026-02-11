@@ -17,5 +17,6 @@
     "@kbn/lens-plugin",
     "@kbn/developer-examples-plugin",
     "@kbn/data-plugin",
+    "@kbn/lens-common",
   ]
 }

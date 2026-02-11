@@ -9,22 +9,22 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
-import { type FeatureSelectorProps } from '../feature_selector';
+import { type SystemSelectorProps } from '../system_selector';
 import { SignificantEventsGenerationPanel } from '../generation_panel';
 import type { AIFeatures } from '../../../hooks/use_ai_features';
 
 export function EmptyState({
   definition,
-  refreshFeatures,
+  refreshSystems,
   onManualEntryClick,
   onGenerateSuggestionsClick,
-  features,
-  selectedFeatures,
-  onFeaturesChange,
+  systems,
+  selectedSystems,
+  onSystemsChange,
   aiFeatures,
-}: FeatureSelectorProps & {
+}: SystemSelectorProps & {
   definition: Streams.all.Definition;
-  refreshFeatures: () => void;
+  refreshSystems: () => void;
   onManualEntryClick: () => void;
   onGenerateSuggestionsClick: () => void;
   aiFeatures: AIFeatures | null;
@@ -52,12 +52,12 @@ export function EmptyState({
 
           <EuiFlexItem>
             <SignificantEventsGenerationPanel
-              features={features}
-              selectedFeatures={selectedFeatures}
-              onFeaturesChange={onFeaturesChange}
+              systems={systems}
+              selectedSystems={selectedSystems}
+              onSystemsChange={onSystemsChange}
               onGenerateSuggestionsClick={onGenerateSuggestionsClick}
               definition={definition}
-              refreshFeatures={refreshFeatures}
+              refreshSystems={refreshSystems}
               onManualEntryClick={onManualEntryClick}
               isGeneratingQueries={false}
               isSavingManualEntry={false}

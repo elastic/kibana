@@ -18,11 +18,11 @@ export function useCloneActiveSource() {
   const queryClient = useQueryClient();
 
   const getCloneName = (sourceToClone: ActiveSource): string => {
-    const allSources = queryClient.getQueryData<{ connectors: ActiveSource[] }>(
+    const allSources = queryClient.getQueryData<{ dataSources: ActiveSource[] }>(
       queryKeys.dataSources.list()
     );
 
-    return generateCloneName(sourceToClone.name, allSources?.connectors ?? []);
+    return generateCloneName(sourceToClone.name, allSources?.dataSources ?? []);
   };
 
   return { getCloneName };

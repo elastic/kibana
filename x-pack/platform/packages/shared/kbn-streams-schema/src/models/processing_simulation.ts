@@ -37,6 +37,9 @@ export type SimulationError = BaseSimulationError &
         type: 'reserved_field_failure';
         processor_id: string;
       }
+    | {
+        type: 'validation_error';
+      }
   );
 
 export type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'skipped' | 'failed' | 'dropped';

@@ -277,6 +277,7 @@ const FleetTopNav = memo(
     }, [euiTheme]);
 
     const { TopNavMenu } = services.navigation.ui;
+    const isFeedbackEnabled = services.notifications.feedback.isEnabled();
 
     const topNavConfig: TopNavMenuData[] = [];
 
@@ -295,13 +296,15 @@ const FleetTopNav = memo(
         run: () => {},
       });
     }
-    topNavConfig.push({
-      label: i18n.translate('xpack.fleet.appNavigation.giveFeedbackButton', {
-        defaultMessage: 'Give feedback',
-      }),
-      iconType: 'popout',
-      run: () => window.open(FEEDBACK_URL),
-    });
+    if (isFeedbackEnabled) {
+      topNavConfig.push({
+        label: i18n.translate('xpack.fleet.appNavigation.giveFeedbackButton', {
+          defaultMessage: 'Give feedback',
+        }),
+        iconType: 'popout',
+        run: () => window.open(FEEDBACK_URL),
+      });
+    }
 
     return (
       <TopNavMenu

@@ -13,7 +13,7 @@ import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiTabbedContent } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DocViewerTab } from './doc_viewer_tab';
-import type { DocView, DocViewRenderProps } from '../../types';
+import type { DocView, DocViewRenderProps, DocViewerRestorableState } from '../../types';
 
 export const INITIAL_TAB = 'unifiedDocViewer:initialTab';
 
@@ -24,6 +24,8 @@ export interface DocViewerApi {
 export interface DocViewerProps extends DocViewRenderProps, RefAttributes<DocViewerApi> {
   docViews: DocView[];
   initialTabId?: DocView['id'];
+  initialDocViewerState?: DocViewerRestorableState;
+  onInitialDocViewerStateChange?: (state: DocViewerRestorableState) => void;
   onUpdateSelectedTabId?: (tabId: string | undefined) => void;
 }
 
@@ -37,7 +39,17 @@ const getOriginalTabId = (fullTabId: string) => fullTabId.replace('kbn_doc_viewe
  * a `render` function.
  */
 export const DocViewer = forwardRef<DocViewerApi, DocViewerProps>(
-  ({ docViews, initialTabId, onUpdateSelectedTabId, ...renderProps }, ref) => {
+  (
+    {
+      docViews,
+      initialTabId,
+      initialDocViewerState,
+      onInitialDocViewerStateChange,
+      onUpdateSelectedTabId,
+      ...renderProps
+    },
+    ref
+  ) => {
     const tabs = docViews
       .filter(({ enabled }) => enabled) // Filter out disabled doc views
       .map((docView: DocView) => ({
@@ -48,6 +60,8 @@ export const DocViewer = forwardRef<DocViewerApi, DocViewerProps>(
             key={`${renderProps.hit.id}_${docView.id}`}
             docView={docView}
             renderProps={renderProps}
+            initialDocViewerState={initialDocViewerState}
+            onInitialDocViewerStateChange={onInitialDocViewerStateChange}
           />
         ),
         ['data-test-subj']: `docViewerTab-${docView.id}`,

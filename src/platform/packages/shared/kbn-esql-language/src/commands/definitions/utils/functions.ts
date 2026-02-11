@@ -29,15 +29,11 @@ import { withAutoSuggest } from './autocomplete/helpers';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
 import type { ESQLAstItem, ESQLFunction, InlineCastingType } from '../../../types';
-import { removeFinalUnknownIdentiferArg } from './shared';
+import { removeFinalUnknownIdentiferArg, techPreviewLabel } from './shared';
 import { getTestFunctions } from './test_functions';
 import { getMatchingSignatures } from './expressions';
 import { isLiteral } from '../../../ast/is';
 import { SuggestionCategory } from '../../../shared/sorting/types';
-
-const techPreviewLabel = i18n.translate('kbn-esql-language.esql.autocomplete.techPreviewLabel', {
-  defaultMessage: `Technical Preview`,
-});
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
 
@@ -442,7 +438,14 @@ export const buildColumnSuggestions = (
 ): ISuggestionItem[] => {
   const fieldsSuggestions = columns.map((column) => {
     const fieldType = column.type.charAt(0).toUpperCase() + column.type.slice(1);
-    const titleCaseType = `${column.name} (${fieldType})`;
+    const unmmapedSuffix = column.isUnmappedField
+      ? i18n.translate('kbn-esql-language.esql.autocomplete.unmappedFieldTypeSuffix', {
+          defaultMessage: ' - Unmapped Field',
+        })
+      : '';
+
+    const titleCaseType = `${column.name} (${fieldType})${unmmapedSuffix}`;
+
     // Check if the field is in the recommended fields from extensions list
     // and if so, mark it as recommended. This also ensures that recommended fields
     // that are registered wrongly, won't be shown as suggestions.

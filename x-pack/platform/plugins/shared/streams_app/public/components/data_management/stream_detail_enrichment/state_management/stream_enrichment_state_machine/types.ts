@@ -47,6 +47,7 @@ export interface StreamEnrichmentServiceDependencies {
 
 export interface StreamEnrichmentInput {
   definition: Streams.ingest.all.GetResponse;
+  grokCollection: GrokCollection;
 }
 
 export interface StreamEnrichmentContextType {
@@ -123,6 +124,12 @@ export type StreamEnrichmentEvent =
       options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
     }
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
+  | {
+      type: 'step.reorderByDragDrop';
+      sourceStepId: string;
+      targetStepId: string;
+      operation: 'before' | 'after' | 'inside';
+    }
   // YAML events forwarded to YAML mode machine
   | { type: 'yaml.contentChanged'; streamlangDSL: StreamlangDSL; yaml: string }
   | { type: 'yaml.runSimulation'; stepIdBreakpoint?: string }

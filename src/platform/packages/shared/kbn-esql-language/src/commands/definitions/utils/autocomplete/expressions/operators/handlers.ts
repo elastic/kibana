@@ -99,7 +99,9 @@ async function getListValueSuggestions(
   column: ESQLColumn | undefined,
   ignoredColumns: string[]
 ): Promise<ISuggestionItem[]> {
-  const argType = column ? getExpressionType(column, ctx.context?.columns) : undefined;
+  const argType = column
+    ? getExpressionType(column, ctx.context?.columns, ctx.context?.unmappedFieldsStrategy)
+    : undefined;
   const builder = new SuggestionBuilder(ctx);
 
   await builder.addFields({

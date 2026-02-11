@@ -33,6 +33,9 @@ export const flyoutOptions: OverlayFlyoutOpenOptions = {
   'data-test-subj': INSPECT_FLYOUT_ID,
   id: INSPECT_FLYOUT_ID,
   maxWidth: INSPECT_FLYOUT_MAX_WIDTH,
+  maskProps: {
+    headerZindexLocation: 'above',
+  },
 };
 
 export const InspectFlyout = ({ componentData, target, branch }: Props) => {
@@ -63,9 +66,10 @@ export const InspectFlyout = ({ componentData, target, branch }: Props) => {
     const flyoutElement = document.getElementById(INSPECT_FLYOUT_ID);
     const portalParent = flyoutElement?.closest(EUI_PORTAL_ATTRIBUTE);
 
-    if (portalParent instanceof HTMLElement) {
+    if (portalParent instanceof HTMLElement && flyoutElement instanceof HTMLElement) {
       requestAnimationFrame(() => {
         portalParent.style.zIndex = (toastZIndex + 2).toString();
+        flyoutElement.style.zIndex = (toastZIndex + 2).toString();
       });
     }
   }, [toastZIndex]);

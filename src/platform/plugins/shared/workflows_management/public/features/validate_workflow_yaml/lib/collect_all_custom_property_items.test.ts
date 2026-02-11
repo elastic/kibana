@@ -42,12 +42,16 @@ steps:
       message: "Hello, world!"
 `;
     const { workflowLookup, yamlLineCounter } = performComputation(yaml.trim());
-    const validator = jest.fn();
+    const selectionHandler = {
+      search: jest.fn(),
+      resolve: jest.fn(),
+      getDetails: jest.fn(),
+    };
     const getPropertyHandler = jest.fn();
     getPropertyHandler.mockImplementation(
       (stepType: string, scope: 'config' | 'input', key: string) => {
         if (stepType === 'run-agent' && scope === 'config' && key === 'agent-id') {
-          return { validation: { validate: validator } };
+          return { selection: selectionHandler };
         }
         return null;
       }
@@ -63,7 +67,7 @@ steps:
       propertyValue: 'great-agent',
       stepType: 'run-agent',
       scope: 'config',
-      validator,
+      selectionHandler,
       yamlPath: ['agent-id'],
       key: 'agent-id',
     });
@@ -79,12 +83,16 @@ steps:
       debug: true
 `;
     const { workflowLookup, yamlLineCounter } = performComputation(yaml.trim());
-    const validator = jest.fn();
+    const selectionHandler = {
+      search: jest.fn(),
+      resolve: jest.fn(),
+      getDetails: jest.fn(),
+    };
     const getPropertyHandler = jest.fn();
     getPropertyHandler.mockImplementation(
       (stepType: string, scope: 'config' | 'input', key: string) => {
         if (stepType === 'run-agent' && scope === 'input' && key === 'debug') {
-          return { validation: { validate: validator } };
+          return { selection: selectionHandler };
         }
         return null;
       }
@@ -100,7 +108,7 @@ steps:
       propertyValue: true,
       stepType: 'run-agent',
       scope: 'input',
-      validator,
+      selectionHandler,
       yamlPath: ['with', 'debug'],
       key: 'debug',
     });
@@ -119,15 +127,24 @@ steps:
         message: "Hello, world!"
 `;
     const { workflowLookup, yamlLineCounter } = performComputation(yaml.trim());
-    const validator = jest.fn();
+    const selectionHandler1 = {
+      search: jest.fn(),
+      resolve: jest.fn(),
+      getDetails: jest.fn(),
+    };
+    const selectionHandler2 = {
+      search: jest.fn(),
+      resolve: jest.fn(),
+      getDetails: jest.fn(),
+    };
     const getPropertyHandler = jest.fn();
     getPropertyHandler.mockImplementation(
       (stepType: string, scope: 'config' | 'input', key: string) => {
         if (stepType === 'run-agent' && scope === 'input' && key === 'obj.message') {
-          return { validation: { validate: validator } };
+          return { selection: selectionHandler1 };
         }
         if (stepType === 'run-agent' && scope === 'config' && key === 'agent-config.agent.id') {
-          return { validation: { validate: validator } };
+          return { selection: selectionHandler2 };
         }
         return null;
       }
@@ -143,7 +160,7 @@ steps:
       propertyValue: 'great-agent',
       stepType: 'run-agent',
       scope: 'config',
-      validator,
+      selectionHandler: selectionHandler2,
       yamlPath: ['agent-config', 'agent', 'id'],
       key: 'id',
     });
@@ -152,7 +169,7 @@ steps:
       propertyValue: 'Hello, world!',
       stepType: 'run-agent',
       scope: 'input',
-      validator,
+      selectionHandler: selectionHandler1,
       yamlPath: ['with', 'obj', 'message'],
       key: 'message',
     });

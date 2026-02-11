@@ -7,6 +7,11 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import {
+  ELASTIC_MANAGED_LLM_CONNECTOR_ID,
+  LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
+} from '@kbn/elastic-assistant-common';
+
+import {
   transformESToConversation,
   transformESSearchToConversations,
   transformESToConversations,
@@ -115,6 +120,32 @@ describe('transforms', () => {
   });
 
   describe('transformESToConversation', () => {
+    it('should correctly transform ES conversation with mapped connector ID', () => {
+      const esConversation = getEsConversationMock();
+
+      const message = transformESToConversation({
+        ...esConversation,
+        api_config: {
+          ...esConversation.api_config,
+          connector_id: ELASTIC_MANAGED_LLM_CONNECTOR_ID,
+        } as EsConversationSchema['api_config'],
+      });
+      expect(message.apiConfig?.connectorId).toBe(LATEST_ELASTIC_MANAGED_CONNECTOR_ID);
+    });
+
+    it('should correctly transform ES conversation with unmapped connector ID', () => {
+      const esConversation = getEsConversationMock();
+
+      const message = transformESToConversation({
+        ...esConversation,
+        api_config: {
+          ...esConversation.api_config,
+          connector_id: 'some-other-id',
+        } as EsConversationSchema['api_config'],
+      });
+      expect(message.apiConfig?.connectorId).toBe('some-other-id');
+    });
+
     it('should correctly transform ES conversation', () => {
       const esConversation = getEsConversationMock();
       const conversation = transformESToConversation(esConversation);

@@ -184,43 +184,57 @@ describe('When the tabular page is loaded', () => {
     expect(rows[11]).toHaveTextContent('third-party-model');
   });
 
-  // Caveat: preconfigured endpoints display a description instead of model id
-  it('should display all service and model ids or descriptions in the table', () => {
+  it('should display all service providers and model ids in the table', () => {
     renderTabularPageWithProviders();
 
     const rows = screen.getAllByRole('row');
+    // Row 1: .elser-2-elastic
     expect(rows[1]).toHaveTextContent('Elastic');
     expect(rows[1]).toHaveTextContent(elasticDescription);
-    expect(rows[1]).not.toHaveTextContent('elser_model_2');
+    expect(rows[1]).toHaveTextContent('elser_model_2');
 
+    // Row 2: .elser-2-elasticsearch
     expect(rows[2]).toHaveTextContent('Elasticsearch');
     expect(rows[2]).toHaveTextContent(elasticsearchDescription);
-    expect(rows[2]).not.toHaveTextContent('.elser_model_2');
+    expect(rows[2]).toHaveTextContent('.elser_model_2');
 
+    // Row 3: .multilingual-e5-small-elasticsearch
     expect(rows[3]).toHaveTextContent('Elasticsearch');
     expect(rows[3]).toHaveTextContent(elasticsearchDescription);
+    expect(rows[3]).toHaveTextContent('.multilingual-e5-small');
 
+    // Row 4: .multilingual-embed-v1-elastic
     expect(rows[4]).toHaveTextContent('Elastic');
-    expect(rows[1]).toHaveTextContent(elasticDescription);
+    expect(rows[4]).toHaveTextContent(elasticDescription);
+    expect(rows[4]).toHaveTextContent('multilingual-embed-v1');
 
+    // Row 5: .rerank-v1-elastic
     expect(rows[5]).toHaveTextContent('Elastic');
-    expect(rows[1]).toHaveTextContent(elasticDescription);
+    expect(rows[5]).toHaveTextContent(elasticDescription);
+    expect(rows[5]).toHaveTextContent('rerank-v1');
 
+    // Row 6: .sparkles
     expect(rows[6]).toHaveTextContent('Elastic');
-    expect(rows[1]).toHaveTextContent(elasticDescription);
+    expect(rows[6]).toHaveTextContent(elasticDescription);
+    expect(rows[6]).toHaveTextContent('rainbow-sprinkles');
 
+    // Row 7: custom-inference-id
     expect(rows[7]).toHaveTextContent('Elastic');
-    expect(rows[1]).toHaveTextContent(elasticDescription);
+    expect(rows[7]).toHaveTextContent('elser_model_2');
 
+    // Row 8: elastic-rerank
     expect(rows[8]).toHaveTextContent('Elasticsearch');
-    expect(rows[2]).toHaveTextContent(elasticsearchDescription);
+    expect(rows[8]).toHaveTextContent('.rerank-v1');
 
+    // Row 9: local-model
     expect(rows[9]).toHaveTextContent('Elasticsearch');
-    expect(rows[2]).toHaveTextContent(elasticsearchDescription);
+    expect(rows[9]).toHaveTextContent('.own_model');
 
+    // Row 10: my-elser-model-05
     expect(rows[10]).toHaveTextContent('Elasticsearch');
-    expect(rows[2]).toHaveTextContent(elasticsearchDescription);
+    expect(rows[10]).toHaveTextContent('.elser_model_2');
 
+    // Row 11: third-party-model
     expect(rows[11]).toHaveTextContent('OpenAI');
     expect(rows[11]).toHaveTextContent('.own_model');
   });
@@ -285,5 +299,24 @@ describe('When the tabular page is loaded', () => {
     expect(rows[9]).not.toHaveTextContent(techPreview);
     expect(rows[10]).not.toHaveTextContent(techPreview);
     expect(rows[11]).not.toHaveTextContent(techPreview);
+  });
+
+  it('should display endpoint stats with correct counts', () => {
+    renderTabularPageWithProviders();
+
+    const stats = screen.getByTestId('endpointStats');
+    expect(stats).toBeInTheDocument();
+
+    // 3 unique services: elasticsearch, openai, elastic
+    expect(screen.getByTestId('endpointStatsServicesCount')).toHaveTextContent('3');
+
+    // 8 unique models
+    expect(screen.getByTestId('endpointStatsModelsCount')).toHaveTextContent('8');
+
+    // 4 unique types: sparse_embedding, text_embedding, rerank, chat_completion
+    expect(screen.getByTestId('endpointStatsTypesCount')).toHaveTextContent('4');
+
+    // 11 endpoints total
+    expect(screen.getByTestId('endpointStatsEndpointsCount')).toHaveTextContent('11');
   });
 });

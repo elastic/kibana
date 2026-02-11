@@ -64,6 +64,17 @@ export interface StackConnectorConfig {
 }
 
 /**
+ * Workflow configuration for a data source.
+ * Workflows are loaded from YAML files in the specified directory.
+ */
+export interface WorkflowsConfig {
+  /** Absolute path to directory containing workflow YAML files (use join(__dirname, 'workflows')) */
+  directory: string;
+  /** Template variables to inject into workflow YAMLs (replaces <%= key %> patterns) */
+  templateInputs?: Record<string, string>;
+}
+
+/**
  * Abstraction defining a federated data source ("fetcher").
  * This defines:
  * - Connectivity (OAuth) configuration
@@ -78,12 +89,18 @@ export interface DataSource {
   name: string;
   /** Optional description of the data type */
   description?: string;
+  /**
+   * Icon type for UI display (e.g., '.github', '.notion', '.salesforce').
+   * This determines which icon to show in the UI and is separate from the stack connector type.
+   * Must correspond to an icon registered in @kbn/connector-specs ConnectorIconsMap.
+   */
+  iconType: string;
 
   /**
-   * Generates workflows for interacting with the third-party data source.
+   * How to load up workflows definitions for this data source type.
    * Workflows are the only model for "taking action" against the third party.
-   */
-  generateWorkflows(stackConnectorId?: string): WorkflowInfo[];
+   * */
+  workflows: WorkflowsConfig;
 
   /**
    * Stack connector configuration.

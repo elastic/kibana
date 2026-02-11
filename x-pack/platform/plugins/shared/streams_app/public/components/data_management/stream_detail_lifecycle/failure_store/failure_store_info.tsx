@@ -5,18 +5,17 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import type { TimeState } from '@kbn/es-query';
+import { SectionPanel } from '../common/section_panel';
 import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
 import { IngestionCard } from './cards/ingestion_card';
+import { FailureStoreSummary } from './failure_store_summary';
 import { FailureStoreIngestionRate } from './ingestion_rate';
 import type { StreamAggregations } from '../hooks/use_ingestion_rate';
 import type { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
 import type { useFailureStoreConfig } from '../hooks/use_failure_store_config';
-import { FailureStoreSummary } from './failure_store_summary';
 
 export const FailureStoreInfo = ({
   openModal,
@@ -37,59 +36,56 @@ export const FailureStoreInfo = ({
   aggregations?: StreamAggregations;
   failureStoreConfig: ReturnType<typeof useFailureStoreConfig>;
 }) => {
+  const hasPrivileges = definition.privileges?.manage_failure_store ?? false;
+
   return (
     <>
-      <EuiTitle size="xs">
-        <h4>
-          {i18n.translate('xpack.streams.streamDetailView.failureStoreEnabled.title', {
-            defaultMessage: 'Failure store ',
-          })}
-          <EuiIconTip
-            content={i18n.translate('xpack.streams.streamDetailView.failureStoreEnabled.tooltip', {
-              defaultMessage:
-                'A failure store is a secondary set of indices inside a data stream, dedicated to storing failed documents.',
-            })}
-            position="right"
-          />
-        </h4>
-      </EuiTitle>
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem>
+      {/* Retention Section */}
+      <SectionPanel
+        topCard={
           <RetentionCard
             openModal={openModal}
-            canManageFailureStore={definition.privileges?.manage_failure_store}
+            canManageFailureStore={hasPrivileges}
             streamName={definition.stream.name}
             failureStoreConfig={failureStoreConfig}
           />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <StorageSizeCard
-            stats={stats}
-            hasPrivileges={definition.privileges?.manage_failure_store}
-            statsError={statsError}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <IngestionCard
-            stats={stats}
-            hasPrivileges={definition.privileges?.manage_failure_store}
-            statsError={statsError}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {definition.privileges.lifecycle ? (
-        <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>
+        }
+        bottomCard={
+          <StorageSizeCard stats={stats} hasPrivileges={hasPrivileges} statsError={statsError} />
+        }
+      >
+        {definition.privileges.lifecycle ? (
           <FailureStoreSummary stats={stats} failureStoreConfig={failureStoreConfig} />
-        </EuiPanel>
-      ) : null}
-      <FailureStoreIngestionRate
-        definition={definition}
-        isLoadingStats={isLoadingStats}
-        stats={stats}
-        timeState={timeState}
-        statsError={statsError}
-        aggregations={aggregations}
-      />
+        ) : null}
+      </SectionPanel>
+      {/* Ingestion Section */}
+      <SectionPanel
+        topCard={
+          <IngestionCard
+            period="daily"
+            hasPrivileges={hasPrivileges}
+            stats={stats}
+            statsError={statsError}
+          />
+        }
+        bottomCard={
+          <IngestionCard
+            period="monthly"
+            hasPrivileges={hasPrivileges}
+            stats={stats}
+            statsError={statsError}
+          />
+        }
+      >
+        <FailureStoreIngestionRate
+          definition={definition}
+          isLoadingStats={isLoadingStats}
+          stats={stats}
+          timeState={timeState}
+          statsError={statsError}
+          aggregations={aggregations}
+        />
+      </SectionPanel>
     </>
   );
 };

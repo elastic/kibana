@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LlmProxy, LLmError } from '../llm_proxy';
+import type { LlmProxy, LLmError } from '@kbn/ftr-llm-proxy';
 import {
   mockTitleGeneration,
   mockTitleGenerationWithError,

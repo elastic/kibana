@@ -100,6 +100,22 @@ export class KbnClientUiSettings {
     });
   }
 
+  /**
+   * Update UI settings globally (like setting 'hideAnnouncements', 'theme:darkMode', etc)
+   */
+  async updateGlobal(updates: UiSettingValues) {
+    this.log.debug('applying global update to kibana config: %j', updates);
+
+    await this.requester.request({
+      path: `/internal/kibana/global_settings`,
+      method: 'POST',
+      body: {
+        changes: updates,
+      },
+      retries: 3,
+    });
+  }
+
   private async getAll({ space }: { space?: string } = {}) {
     const { data } = await this.requester.request<UiSettingsApiResponse>({
       path: pathWithSpace(space)`/internal/kibana/settings`,

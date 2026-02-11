@@ -17,7 +17,6 @@ export default function ({ getPageObject, getService, loadTestFile }: FtrProvide
 
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
-      await ml.testResources.disableKibanaAnnouncements();
       await browser.setWindowSize(1920, 1080);
       await securityPage.login(
         esTestConfig.getUrlParts().username,
@@ -28,7 +27,6 @@ export default function ({ getPageObject, getService, loadTestFile }: FtrProvide
     after(async () => {
       await securityPage.forceLogout();
       await ml.testResources.resetKibanaTimeZone();
-      await ml.testResources.resetKibanaAnnouncements();
     });
 
     loadTestFile(require.resolve('./transform_alerts'));

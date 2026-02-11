@@ -160,6 +160,10 @@ export function getFieldTypeName(type?: string) {
       return i18n.translate('fieldUtils.fieldNameIcons.versionFieldAriaLabel', {
         defaultMessage: 'Version',
       });
+    case KNOWN_FIELD_TYPES.NULL:
+      return i18n.translate('fieldUtils.fieldNameIcons.nullFieldAriaLabel', {
+        defaultMessage: 'Null',
+      });
     default:
       // If you see a typescript error here, that's a sign that there are missing switch cases ^^
       const _exhaustiveCheck: never = knownType;

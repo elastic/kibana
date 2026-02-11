@@ -76,7 +76,7 @@ steps:
       enableNestedVirtualization: true
       machineType: n2-standard-4
       diskSizeGb: 105
-    timeout_in_minutes: 60
+    timeout_in_minutes: 75
     parallelism: 20
     key: defend-workflows-stateful
     depends_on: build
@@ -94,7 +94,7 @@ steps:
       enableNestedVirtualization: true
       machineType: n2-standard-4
       diskSizeGb: 105
-    timeout_in_minutes: 60
+    timeout_in_minutes: 75
     parallelism: 14
     key: defend-workflows-serverless
     depends_on: build

@@ -27,13 +27,13 @@ import { PreviewDataSparkPlot } from '../common/preview_data_spark_plot';
 import { validateQuery } from '../common/validate_query';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { SeveritySelector } from '../common/severity_selector';
-import { ALL_DATA_OPTION } from '../../feature_selector';
+import { ALL_DATA_OPTION } from '../../system_selector';
 
 interface GeneratedEventPreviewProps {
   definition: Streams.all.Definition;
   query: StreamQueryKql;
   onSave: (query: StreamQueryKql) => void;
-  features: Omit<System, 'description'>[];
+  systems: Omit<System, 'description'>[];
   dataViews: DataView[];
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
@@ -45,7 +45,7 @@ export function GeneratedEventPreview({
   isEditing,
   setIsEditing,
   onSave,
-  features,
+  systems,
   dataViews,
 }: GeneratedEventPreviewProps) {
   const { euiTheme } = useEuiTheme();
@@ -54,7 +54,7 @@ export function GeneratedEventPreview({
 
   const options = [
     { value: ALL_DATA_OPTION.value, inputDisplay: ALL_DATA_OPTION.label },
-    ...features.map((feature) => ({ value: feature, inputDisplay: feature.name })),
+    ...systems.map((system) => ({ value: system, inputDisplay: system.name })),
   ];
 
   const [touched, setTouched] = useState({ title: false, feature: false, kql: false });
@@ -190,8 +190,8 @@ export function GeneratedEventPreview({
           label={
             <EuiFormLabel>
               {i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldFeatureLabel',
-                { defaultMessage: 'Feature' }
+                'xpack.streams.addSignificantEventFlyout.generatedEventPreview.formFieldSystemLabel',
+                { defaultMessage: 'System' }
               )}
             </EuiFormLabel>
           }
@@ -223,8 +223,8 @@ export function GeneratedEventPreview({
               setTouched((prev) => ({ ...prev, feature: true }));
             }}
             placeholder={i18n.translate(
-              'xpack.streams.addSignificantEventFlyout.generatedEventPreview.featurePlaceholder',
-              { defaultMessage: 'Select feature' }
+              'xpack.streams.addSignificantEventFlyout.generatedEventPreview.systemPlaceholder',
+              { defaultMessage: 'Select system' }
             )}
             disabled={!isEditing}
             fullWidth

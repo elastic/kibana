@@ -34,7 +34,7 @@ describe('getCalculatedStats', () => {
         buckets: undefined,
       });
 
-      expect(result).toEqual({ bytesPerDoc: 0, bytesPerDay: 0 });
+      expect(result).toEqual({ bytesPerDoc: 0, bytesPerDay: 0, perDayDocs: 0 });
     });
   });
 
@@ -48,6 +48,7 @@ describe('getCalculatedStats', () => {
 
       expect(result.bytesPerDoc).toBe(10);
       expect(result.bytesPerDay).toBe(0);
+      expect(result.perDayDocs).toBe(0);
     });
   });
 

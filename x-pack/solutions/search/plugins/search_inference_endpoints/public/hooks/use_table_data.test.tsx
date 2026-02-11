@@ -144,13 +144,54 @@ describe('useTableData', () => {
     ).toBeTruthy();
   });
 
-  it('should filter data based on searchKey', () => {
+  it('should filter data based on searchKey matching inference_id', () => {
     const searchKey2 = 'model-05';
     const { result } = renderHook(
       () => useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey2),
       { wrapper }
     );
     const filteredData = result.current.sortedTableData;
-    expect(filteredData.every((item) => item.inference_id.includes(searchKey))).toBeTruthy();
+    expect(filteredData.length).toBe(1);
+    expect(filteredData[0].inference_id).toBe('my-openai-model-05');
+  });
+
+  it('should filter data based on searchKey matching model_id', () => {
+    // Search for 'third-party' which only exists in model_id, not in inference_id
+    const searchKey2 = 'third-party';
+    const { result } = renderHook(
+      () => useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey2),
+      { wrapper }
+    );
+    const filteredData = result.current.sortedTableData;
+    expect(filteredData.length).toBe(1);
+    // Verify the correct endpoint was found by checking both inference_id and model_id
+    expect(filteredData[0].inference_id).toBe('my-openai-model-05');
+    expect(filteredData[0].service_settings.model_id).toBe('third-party-model');
+  });
+
+  it('should filter data case-insensitively', () => {
+    const searchKey2 = 'ELSER';
+    const { result } = renderHook(
+      () => useTableData(inferenceEndpoints, queryParams, filterOptions, searchKey2),
+      { wrapper }
+    );
+    const filteredData = result.current.sortedTableData;
+    expect(filteredData.length).toBe(2);
+    expect(filteredData.every((item) => item.inference_id.includes('elser'))).toBeTruthy();
+  });
+
+  it('should set pagination total to filtered count', () => {
+    const filteredSearchKey = 'third-party';
+    const { result } = renderHook(
+      () => useTableData(inferenceEndpoints, queryParams, filterOptions, filteredSearchKey),
+      { wrapper }
+    );
+
+    expect(result.current.pagination).toEqual({
+      pageIndex: 0,
+      pageSize: 10,
+      pageSizeOptions: INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
+      totalItemCount: 1,
+    });
   });
 });
