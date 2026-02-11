@@ -131,9 +131,6 @@ export function useDataSourceBrowser({
       // Snapshot current selection state at open time.
       // The browser UI is driven by `selectedSourcesRef.current`.
       const fullText = model.getValue() || '';
-      // IMPORTANT: `getIndexPatternFromESQLQuery` includes sources from subqueries, but the indices
-      // browser is intentionally main-query-only. Seed selection from the AST locations of the
-      // main `FROM`/`TS` command so what's selected always matches what we can insert/remove.
       selectedSourcesRef.current = getLocatedSourceItemsFromQuery(fullText)
         .map((it) => it.name)
         .filter((name): name is string => Boolean(name));
