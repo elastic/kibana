@@ -8,11 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import {
-  ANONYMIZATION_FEATURE_ID,
-  apiPrivileges,
-  uiPrivileges,
-} from '../common';
+import { ANONYMIZATION_FEATURE_ID, apiPrivileges, uiPrivileges } from '../common';
 
 export const registerFeatures = ({ features }: { features: FeaturesPluginSetup }) => {
   features.registerKibanaFeature({
