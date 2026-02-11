@@ -199,7 +199,7 @@ steps:
     insertStepSnippet(
       model as unknown as monaco.editor.ITextModel,
       yamlDocument,
-      'http',
+      'if',
       undefined,
       mockEditor
     );
@@ -211,14 +211,14 @@ steps:
     const inputYaml = ``;
     const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
+    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'if');
 
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('if', {
       full: true,
       withStepsSection: true,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
       full: true,
       withStepsSection: true,
     });
@@ -239,14 +239,14 @@ steps:
     const inputYaml = `steps:`;
     const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
+    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'if');
 
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('if', {
       full: true,
       withStepsSection: false,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
       full: true,
       withStepsSection: false,
     });
@@ -266,14 +266,14 @@ steps:
     const inputYaml = `steps: []`;
     const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
+    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'if');
 
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('if', {
       full: true,
       withStepsSection: false,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
       full: true,
       withStepsSection: false,
     });
@@ -295,14 +295,14 @@ steps:
   -`;
     const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
+    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'if');
 
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('if', {
       full: true,
       withStepsSection: false,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
       full: true,
       withStepsSection: false,
     });
@@ -326,14 +326,14 @@ steps:
     type: http`;
     const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
+    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'if');
 
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('if', {
       full: true,
       withStepsSection: false,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
       full: true,
       withStepsSection: false,
     });
@@ -362,16 +362,16 @@ steps:
     insertStepSnippet(
       model as unknown as monaco.editor.ITextModel,
       yamlDocument,
-      'http',
+      'if',
       new monaco.Position(3, 1)
     );
 
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('if', {
       full: true,
       withStepsSection: false,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
       full: true,
       withStepsSection: false,
     });
@@ -399,16 +399,16 @@ steps:
     insertStepSnippet(
       model as unknown as monaco.editor.ITextModel,
       yamlDocument,
-      'http',
+      'if',
       new monaco.Position(1, 7)
     );
 
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('if', {
       full: true,
       withStepsSection: false,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
       full: true,
       withStepsSection: false,
     });
@@ -445,16 +445,16 @@ steps:
     insertStepSnippet(
       model as unknown as monaco.editor.ITextModel,
       yamlDocument,
-      'http',
+      'if',
       new monaco.Position(5, 30)
     );
 
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('if', {
       full: true,
       withStepsSection: false,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
       full: true,
       withStepsSection: false,
     });
@@ -485,16 +485,16 @@ steps:
     insertStepSnippet(
       model as unknown as monaco.editor.ITextModel,
       yamlDocument,
-      'http',
+      'if',
       new monaco.Position(6, 1)
     );
 
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('if', {
       full: true,
       withStepsSection: false,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
       full: true,
       withStepsSection: false,
     });
@@ -514,16 +514,16 @@ steps:
     insertStepSnippet(
       model as unknown as monaco.editor.ITextModel,
       yamlDocument,
-      'http',
+      'if',
       new monaco.Position(1, 3)
     );
 
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('if', {
       full: true,
       withStepsSection: false,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
       full: true,
       withStepsSection: false,
     });
@@ -545,16 +545,16 @@ steps:
     insertStepSnippet(
       model as unknown as monaco.editor.ITextModel,
       yamlDocument,
-      'http',
+      'if',
       new monaco.Position(2, 5)
     );
 
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('if', {
       full: true,
       withStepsSection: false,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
       full: true,
       withStepsSection: false,
     });
@@ -582,16 +582,16 @@ steps:
     insertStepSnippet(
       model as unknown as monaco.editor.ITextModel,
       yamlDocument,
-      'http',
+      'if',
       new monaco.Position(2, 1)
     );
 
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('if', {
       full: true,
       withStepsSection: false,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
       full: true,
       withStepsSection: false,
     });
@@ -620,16 +620,16 @@ steps:
     insertStepSnippet(
       model as unknown as monaco.editor.ITextModel,
       yamlDocument,
-      'http',
+      'if',
       new monaco.Position(4, 1)
     );
 
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('if', {
       full: true,
       withStepsSection: false,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
       full: true,
       withStepsSection: false,
     });
@@ -657,16 +657,16 @@ steps:
     insertStepSnippet(
       model as unknown as monaco.editor.ITextModel,
       yamlDocument,
-      'http',
+      'if',
       new monaco.Position(2, 1)
     );
 
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('if', {
       full: true,
       withStepsSection: false,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
       full: true,
       withStepsSection: false,
     });
@@ -688,14 +688,14 @@ steps:
   ### Hello world`;
     const model = createFakeMonacoModel(inputYaml);
     const yamlDocument = parseDocument(inputYaml);
-    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'http');
+    insertStepSnippet(model as unknown as monaco.editor.ITextModel, yamlDocument, 'if');
 
-    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('http', {
+    expect(generateBuiltInStepSnippetSpy).toHaveBeenCalledWith('if', {
       full: true,
       withStepsSection: false,
     });
 
-    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+    const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
       full: true,
       withStepsSection: false,
     });
@@ -727,11 +727,11 @@ steps:
       insertStepSnippet(
         model as unknown as monaco.editor.ITextModel,
         yamlDocument,
-        'http',
+        'if',
         new monaco.Position(8, 1)
       );
 
-      const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+      const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
         full: true,
         withStepsSection: false,
       });
@@ -762,11 +762,11 @@ steps:
       insertStepSnippet(
         model as unknown as monaco.editor.ITextModel,
         yamlDocument,
-        'http',
+        'if',
         new monaco.Position(8, 1)
       );
 
-      const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+      const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
         full: true,
         withStepsSection: false,
       });
@@ -801,11 +801,11 @@ steps:
       insertStepSnippet(
         model as unknown as monaco.editor.ITextModel,
         yamlDocument,
-        'http',
+        'if',
         new monaco.Position(12, 1)
       );
 
-      const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('http', {
+      const snippetText = generateBuiltInStepSnippetModule.generateBuiltInStepSnippet('if', {
         full: true,
         withStepsSection: false,
       });

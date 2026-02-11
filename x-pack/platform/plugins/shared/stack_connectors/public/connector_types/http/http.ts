@@ -31,6 +31,7 @@ export function getConnectorType(): ConnectorTypeModel<
     actionTypeTitle: i18n.translate('xpack.stackConnectors.components.http.connectorTypeTitle', {
       defaultMessage: 'HTTP',
     }),
+    getHideInUi: () => true, // hidden from the stack connectors UI, will still be available for workflows UI
     actionConnectorFields: lazy(() => import('./http_connectors')),
     actionParamsFields: lazy(() => import('./http_params')),
     validateParams: async (actionParams: ActionParamsType) => {
