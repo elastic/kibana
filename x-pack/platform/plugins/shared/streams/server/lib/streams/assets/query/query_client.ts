@@ -15,11 +15,12 @@ import { buildEsqlQuery } from '@kbn/streams-schema';
 import { isEqual, map, partition } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
-import type {
-  Query,
-  QueryLinkRequest,
-  QueryUnlinkRequest,
-  QueryLink,
+import {
+  LEGACY_RULE_BACKED_FALLBACK,
+  type Query,
+  type QueryLink,
+  type QueryLinkRequest,
+  type QueryUnlinkRequest,
 } from '../../../../../common/queries';
 import type { EsqlRuleParams } from '../../../rules/esql/types';
 import { AssetNotFoundError } from '../../errors/asset_not_found_error';
@@ -140,7 +141,7 @@ function fromStorage(link: StoredQueryLink): QueryLink {
   return {
     ...storageFields,
     stream_name: link[STREAM_NAME],
-    rule_backed: storageFields[RULE_BACKED] ?? true,
+    rule_backed: storageFields[RULE_BACKED] ?? LEGACY_RULE_BACKED_FALLBACK,
     query: {
       id: storageFields[ASSET_ID],
       title: storageFields[QUERY_TITLE],
@@ -165,7 +166,7 @@ type QueryLinkRequestWithRuleBacked = QueryLinkRequest & { rule_backed?: boolean
 function toStorage(name: string, request: QueryLinkRequestWithRuleBacked): StoredQueryLink {
   const link = toQueryLink(name, request);
   const { query, stream_name, ...rest } = link;
-  const ruleBacked = request.rule_backed ?? true;
+  const ruleBacked = request.rule_backed ?? LEGACY_RULE_BACKED_FALLBACK;
   return {
     ...rest,
     [STREAM_NAME]: name,
@@ -613,7 +614,9 @@ export class QueryClient {
     if (options?.createRules === false) {
       const nextQueriesWithRuleBacked = nextQueries.map((link) => ({
         ...link,
-        rule_backed: currentIds.has(link.query.id) ? link.rule_backed ?? true : false,
+        rule_backed: currentIds.has(link.query.id)
+          ? link.rule_backed ?? LEGACY_RULE_BACKED_FALLBACK
+          : false,
       }));
       await this.syncQueryList(
         stream,
