@@ -42,7 +42,7 @@ export function createSearchSource({
     if (appState.query !== undefined) {
       searchSource.setField('query', appState.query);
     }
-    
+
     searchSource.setField('filter', [...globalFilters, ...appFilters]);
   }
 
