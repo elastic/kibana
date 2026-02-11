@@ -104,7 +104,7 @@ export class WorkflowsExecutionEnginePlugin
         usageReportingService,
         this.logger.get('metering')
       );
-      this.logger.debug('Workflows metering service initialized');
+      this.logger.info('Workflows metering service initialized');
     } else {
       this.logger.debug(
         'Workflows metering service not initialized: Usage API plugin is not available or not configured'
