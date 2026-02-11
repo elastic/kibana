@@ -89,6 +89,15 @@
     "updatedAt",
     "updatedBy"
   ],
+  "alerting_notification_policy": [
+    "createdAt",
+    "createdBy",
+    "description",
+    "name",
+    "updatedAt",
+    "updatedBy",
+    "workflow_id"
+  ],
   "alerting_rule": [
     "createdAt",
     "createdBy",
