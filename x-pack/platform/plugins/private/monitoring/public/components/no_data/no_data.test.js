@@ -12,7 +12,7 @@ import { NoData } from '.';
 jest.mock('../../legacy_shims', () => ({
   Legacy: {
     shims: {
-      hasEnterpriseLicense: false,
+      isAirGapped: false,
       useCloudConnectStatus: () => ({ isCloudConnectAutoopsEnabled: false, isLoading: false }),
     },
   },
@@ -21,13 +21,6 @@ jest.mock('../../legacy_shims', () => ({
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
     services: {
-      docLinks: {
-        links: {
-          cloud: {
-            connectToAutoops: 'https://docs.elastic.co/cloud/connect',
-          },
-        },
-      },
       application: {
         getUrlForApp: jest.fn(() => '/app/cloud_connect'),
         navigateToApp: jest.fn(),
