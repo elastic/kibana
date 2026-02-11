@@ -41,15 +41,43 @@ export async function createDocumentsAndTriggerTransform(
 ): Promise<void> {
   const es = providerContext.getService('es');
   const retry = providerContext.getService('retry');
+  const log = providerContext.getService('log');
 
-  const { count, transforms } = await es.transform.getTransformStats({
-    transform_id: HOST_TRANSFORM_ID,
-  });
-  expect(count).toBe(1);
-  let transform = transforms[0];
-  expect(transform.id).toBe(HOST_TRANSFORM_ID);
-  const triggerCount: number = transform.stats.trigger_count;
-  const docsProcessed: number = transform.stats.documents_processed;
+  // Wait for the transform to be created - Entity Store may report 'running' before transform exists
+  let transform: Awaited<ReturnType<typeof es.transform.getTransformStats>>['transforms'][0];
+  let triggerCount: number = 0;
+  let docsProcessed: number = 0;
+
+  await retry.waitForWithTimeout(
+    `Transform ${HOST_TRANSFORM_ID} to exist`,
+    TIMEOUT_MS,
+    async () => {
+      try {
+        const { count, transforms } = await es.transform.getTransformStats({
+          transform_id: HOST_TRANSFORM_ID,
+        });
+        if (count !== 1) {
+          log.debug(`Waiting for transform ${HOST_TRANSFORM_ID} to exist, count: ${count}`);
+          return false;
+        }
+        transform = transforms[0];
+        triggerCount = transform.stats.trigger_count;
+        docsProcessed = transform.stats.documents_processed;
+        log.debug(
+          `Transform ${HOST_TRANSFORM_ID} found, trigger_count: ${triggerCount}, docs_processed: ${docsProcessed}`
+        );
+        return true;
+      } catch (e: any) {
+        if (e.message?.includes('resource_not_found_exception')) {
+          log.debug(`Transform ${HOST_TRANSFORM_ID} not found yet, waiting...`);
+          return false;
+        }
+        throw e;
+      }
+    }
+  );
+
+  expect(transform!.id).toBe(HOST_TRANSFORM_ID);
 
   for (let i = 0; i < docs.length; i++) {
     const { result } = await es.index(buildHostTransformDocument(docs[i], dataStream));
