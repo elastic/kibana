@@ -6,10 +6,10 @@
  */
 
 import { OAuthAuthorizationService } from './oauth_authorization_service';
+import { actionsClientMock } from '../actions_client/actions_client.mock';
+import { createMockConnector } from '../application/connector/mocks';
 
-const mockActionsClient = {
-  get: jest.fn(),
-};
+const mockActionsClient = actionsClientMock.create();
 
 const mockEncryptedSavedObjectsClient = {
   getDecryptedAsInternalUser: jest.fn(),
@@ -17,8 +17,8 @@ const mockEncryptedSavedObjectsClient = {
 
 const createService = (kibanaBaseUrl = 'https://kibana.example.com') =>
   new OAuthAuthorizationService({
-    actionsClient: mockActionsClient as any,
-    encryptedSavedObjectsClient: mockEncryptedSavedObjectsClient as any,
+    actionsClient: mockActionsClient as never,
+    encryptedSavedObjectsClient: mockEncryptedSavedObjectsClient as never,
     kibanaBaseUrl,
   });
 
@@ -30,9 +30,11 @@ describe('OAuthAuthorizationService', () => {
   describe('getOAuthConfig', () => {
     it('returns OAuth config from decrypted secrets', async () => {
       const service = createService();
-      mockActionsClient.get.mockResolvedValue({
+      const getResult = createMockConnector({
+        id: 'connector-1',
         config: { authType: 'oauth_authorization_code' },
       });
+      mockActionsClient.get.mockResolvedValue(getResult);
       mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
         attributes: {
           secrets: {
@@ -61,7 +63,8 @@ describe('OAuthAuthorizationService', () => {
 
     it('falls back to config when secrets are missing fields', async () => {
       const service = createService();
-      mockActionsClient.get.mockResolvedValue({
+      const getResult = createMockConnector({
+        id: 'connector-1',
         config: {
           authType: 'oauth_authorization_code',
           authorizationUrl: 'https://config-provider.example.com/authorize',
@@ -69,6 +72,7 @@ describe('OAuthAuthorizationService', () => {
           scope: 'profile',
         },
       });
+      mockActionsClient.get.mockResolvedValue(getResult);
       mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
         attributes: {
           secrets: {},
@@ -91,9 +95,11 @@ describe('OAuthAuthorizationService', () => {
 
     it('supports auth.type for OAuth validation', async () => {
       const service = createService();
-      mockActionsClient.get.mockResolvedValue({
+      const getResult = createMockConnector({
+        id: 'connector-1',
         config: { auth: { type: 'oauth_authorization_code' } },
       });
+      mockActionsClient.get.mockResolvedValue(getResult);
       mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
         attributes: {
           secrets: {
@@ -115,9 +121,11 @@ describe('OAuthAuthorizationService', () => {
 
     it('passes namespace when provided', async () => {
       const service = createService();
-      mockActionsClient.get.mockResolvedValue({
+      const getResult = createMockConnector({
+        id: 'connector-1',
         config: { authType: 'oauth_authorization_code' },
       });
+      mockActionsClient.get.mockResolvedValue(getResult);
       mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
         attributes: {
           secrets: {
@@ -139,9 +147,11 @@ describe('OAuthAuthorizationService', () => {
 
     it('throws when connector does not use OAuth Authorization Code flow', async () => {
       const service = createService();
-      mockActionsClient.get.mockResolvedValue({
+      const getResult = createMockConnector({
+        id: 'connector-1',
         config: { authType: 'basic' },
       });
+      mockActionsClient.get.mockResolvedValue(getResult);
 
       await expect(service.getOAuthConfig('connector-1', undefined)).rejects.toThrow(
         'Connector does not use OAuth Authorization Code flow'
@@ -150,9 +160,11 @@ describe('OAuthAuthorizationService', () => {
 
     it('throws when missing required OAuth config (authorizationUrl)', async () => {
       const service = createService();
-      mockActionsClient.get.mockResolvedValue({
+      const getResult = createMockConnector({
+        id: 'connector-1',
         config: { authType: 'oauth_authorization_code' },
       });
+      mockActionsClient.get.mockResolvedValue(getResult);
       mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
         attributes: {
           secrets: { clientId: 'client-id' },
@@ -167,9 +179,11 @@ describe('OAuthAuthorizationService', () => {
 
     it('throws when missing required OAuth config (clientId)', async () => {
       const service = createService();
-      mockActionsClient.get.mockResolvedValue({
+      const getResult = createMockConnector({
+        id: 'connector-1',
         config: { authType: 'oauth_authorization_code' },
       });
+      mockActionsClient.get.mockResolvedValue(getResult);
       mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
         attributes: {
           secrets: { authorizationUrl: 'https://provider.example.com/authorize' },
