@@ -183,7 +183,7 @@ export const WorkflowDetailHeader = React.memo(
             paddingSize="m"
             alignItems="bottom"
           >
-            <EuiPageHeaderSection css={styles.headerSection}>
+            <EuiPageHeaderSection css={styles.headerSection} data-test-subj="workflowDetailHeader">
               <EuiButtonEmpty
                 iconType="sortLeft"
                 size="xs"

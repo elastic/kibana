@@ -36,9 +36,7 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
       .getWorkflowAction(enabledWorkflow.name, 'runWorkflowAction')
       .click();
     await pageObjects.workflowExecution.waitForExecutionView();
-    await expect(
-      page.locator('.euiPageHeaderSection').filter({ hasText: enabledWorkflow.name })
-    ).toBeVisible();
+    await expect(page.testSubj.locator('workflowDetailHeader')).toContainText(enabledWorkflow.name);
 
     // verify run via three dots menu action
     await pageObjects.workflowList.navigate();
@@ -48,9 +46,7 @@ test.describe('WorkflowsList/SingleActions', { tag: [...tags.stateful.classic] }
     );
     await runThreeDotsAction.click();
     await pageObjects.workflowExecution.waitForExecutionView();
-    await expect(
-      page.locator('.euiPageHeaderSection').filter({ hasText: enabledWorkflow.name })
-    ).toBeVisible();
+    await expect(page.testSubj.locator('workflowDetailHeader')).toContainText(enabledWorkflow.name);
   });
 
   test('should not run disabled workflow', async ({ pageObjects, apiServices, scoutSpace }) => {
