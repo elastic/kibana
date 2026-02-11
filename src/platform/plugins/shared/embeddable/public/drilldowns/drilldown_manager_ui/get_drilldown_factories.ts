@@ -7,24 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { asyncMap } from '@kbn/std';
+import { asyncForEach } from '@kbn/std';
 import type { DrilldownRegistryEntry } from '../types';
 import type { DrilldownFactory } from './types';
 import { isCompatibleLicense } from '../../kibana_services';
 
 export async function getDrilldownFactories(
-  entries: DrilldownRegistryEntry[]
+  entries: DrilldownRegistryEntry[],
+  context: object
 ): Promise<DrilldownFactory[]> {
-  return asyncMap(entries, async ([type, getDrilldownDefinition]) => {
-    const drilldownDefinition = await getDrilldownDefinition();
-    return {
-      type,
-      isLicenseCompatible: await isCompatibleLicense(drilldownDefinition.license?.minimalLicense),
-      displayName: drilldownDefinition.displayName,
-      euiIcon: drilldownDefinition.euiIcon,
-      supportedTriggers: drilldownDefinition.supportedTriggers,
-      ...drilldownDefinition.setup,
-      order: drilldownDefinition.setup.order ?? 0,
-    };
+  const factories: DrilldownFactory[] = [];
+  await asyncForEach(entries, async ([type, getDrilldownDefinition]) => {
+    const { displayName, euiIcon, license, setup, supportedTriggers } = await getDrilldownDefinition();
+    const isCompatible = setup.isCompatible ? setup.isCompatible(context) : true;
+    if (isCompatible) {
+      factories.push({
+        type,
+        isLicenseCompatible: await isCompatibleLicense(license?.minimalLicense),
+        displayName: displayName,
+        euiIcon: euiIcon,
+        supportedTriggers: supportedTriggers,
+        ...setup,
+        order: setup.order ?? 0,
+      });
+    }
   });
+  return factories;
 }

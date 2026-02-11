@@ -32,11 +32,6 @@ export function hasDrilldown(type: string) {
   return Boolean(registry[type]);
 }
 
-export async function getDrilldownTriggers() {
-  const { getDrilldownTriggers: getTriggers } = await import('../async_module');
-  return getTriggers(Object.values(registry));
-}
-
 export function getDrilldownRegistryEntries() {
   return Object.entries(registry);
 }

@@ -27,12 +27,13 @@ import {
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
-import type { HasDrilldowns } from '../drilldowns/types';
-import { getDrilldownRegistryEntries, getDrilldownTriggers } from '../drilldowns/registry';
+import type { DrilldownRegistryEntry, HasDrilldowns } from '../drilldowns/types';
+import { getDrilldownRegistryEntries } from '../drilldowns/registry';
 import { getEmbeddableTriggers } from './get_embeddable_triggers';
-import { core } from '../kibana_services';
+import { core, isCompatibleLicense } from '../kibana_services';
 import { OPEN_CREATE_DRILLDOWN_FLYOUT_ACTION_ID, DRILLDOWN_ACTION_GROUP } from './constants';
 import { apiHasDrilldowns } from '../drilldowns/api_has_drilldowns';
+import { asyncForEach } from '@kbn/std';
 
 export type CreateDrilldownActionApi = CanAccessViewMode &
   Required<HasDrilldowns> &
@@ -56,7 +57,8 @@ export const openCreateDrilldownFlyout: ActionDefinition<EmbeddableApiContext> =
     i18n.translate('embeddableApi.createDrilldownAction.displayName', {
       defaultMessage: 'Create drilldown',
     }),
-  isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
+  isCompatible: async (context: EmbeddableApiContext) => {
+    const { embeddable } = context;
     if (!isApiCompatible(embeddable)) return false;
     if (
       getInheritedViewMode(embeddable) !== 'edit' ||
@@ -68,7 +70,7 @@ export const openCreateDrilldownFlyout: ActionDefinition<EmbeddableApiContext> =
      * Check if there is an intersection between all registered drilldowns possible triggers that they could be attached to
      * and triggers that current embeddable supports
      */
-    const drilldownTriggers = await getDrilldownTriggers();
+    const drilldownTriggers = await getAllDrilldownTriggers(getDrilldownRegistryEntries(), context);
     return getEmbeddableTriggers(embeddable).some((trigger) => drilldownTriggers.includes(trigger));
   },
   execute: async (context: EmbeddableApiContext) => {
@@ -82,7 +84,7 @@ export const openCreateDrilldownFlyout: ActionDefinition<EmbeddableApiContext> =
         const { DrilldownManager, getDrilldownFactories, getSiblingDrilldowns } = await import(
           '../drilldowns/drilldown_manager_ui'
         );
-        const factories = await getDrilldownFactories(getDrilldownRegistryEntries());
+        const factories = await getDrilldownFactories(getDrilldownRegistryEntries(), context);
 
         return (
           <DrilldownManager
@@ -106,3 +108,21 @@ export const openCreateDrilldownFlyout: ActionDefinition<EmbeddableApiContext> =
     });
   },
 };
+
+export async function getAllDrilldownTriggers(
+  entries: DrilldownRegistryEntry[],
+  context: object,
+) {
+  const drilldownTriggers = new Set<string>();
+  await asyncForEach(
+    entries,
+    async ([, drilldownGetFn]: DrilldownRegistryEntry) => {
+      const { license, setup, supportedTriggers } = await drilldownGetFn();
+      const isCompatible = setup.isCompatible ? setup.isCompatible(context) : true;
+      if (isCompatible && await isCompatibleLicense(license?.minimalLicense)) {
+        supportedTriggers.forEach((trigger) => drilldownTriggers.add(trigger));
+      }
+    }
+  );
+  return Array.from(drilldownTriggers);
+}

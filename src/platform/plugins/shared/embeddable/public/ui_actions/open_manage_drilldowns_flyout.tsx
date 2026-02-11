@@ -87,7 +87,7 @@ export const openManageDrilldownsFlyout: ActionDefinition<EmbeddableApiContext> 
         const { DrilldownManager, getDrilldownFactories, getSiblingDrilldowns } = await import(
           '../drilldowns/drilldown_manager_ui'
         );
-        const factories = await getDrilldownFactories(getDrilldownRegistryEntries());
+        const factories = await getDrilldownFactories(getDrilldownRegistryEntries(), context);
 
         return (
           <DrilldownManager

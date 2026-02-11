@@ -11,22 +11,25 @@ import { i18n } from '@kbn/i18n';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LensApi } from '@kbn/lens-common-2';
 import type { DrilldownDefinition } from '@kbn/embeddable-plugin/public';
-import { DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS } from '../../common/constants';
+import { apiIsOfType, type EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS, DOC_TYPE } from '../../common/constants';
 import { DiscoverDrilldownEditor } from './editor';
 import type { DiscoverDrilldownState } from '../../server';
 import type { DiscoverAppLocator } from '../trigger_actions/open_in_discover_helpers';
 import { getHref, getLocation, isCompatible } from '../trigger_actions/open_in_discover_helpers';
 
-export type DiscoverDrilldownContext = ApplyGlobalFilterActionContext & {
+export type ExecutionContext = ApplyGlobalFilterActionContext & {
   embeddable: LensApi;
 };
+
+export type SetupContext = EmbeddableApiContext;
 
 export function getDiscoverDrilldown(deps: {
   locator: () => DiscoverAppLocator | undefined;
   dataViews: () => Pick<DataViewsService, 'get'>;
   hasDiscoverAccess: () => boolean;
   application: () => ApplicationStart;
-}): DrilldownDefinition<DiscoverDrilldownState, DiscoverDrilldownContext> {
+}): DrilldownDefinition<DiscoverDrilldownState, ExecutionContext, SetupContext> {
   return {
     displayName: i18n.translate('xpack.lens.app.exploreDataInDiscoverDrilldown', {
       defaultMessage: 'Open in Discover',
@@ -34,10 +37,7 @@ export function getDiscoverDrilldown(deps: {
     euiIcon: 'discoverApp',
     supportedTriggers: DISCOVER_DRILLDOWN_SUPPORTED_TRIGGERS,
     action: {
-      execute: async (
-        drilldownState: DiscoverDrilldownState,
-        context: DiscoverDrilldownContext
-      ) => {
+      execute: async (drilldownState: DiscoverDrilldownState, context: ExecutionContext) => {
         if (drilldownState.open_in_new_tab) {
           window.open(
             await getHref({
@@ -62,7 +62,7 @@ export function getDiscoverDrilldown(deps: {
       },
       isCompatible: async (
         DrilldownState: DiscoverDrilldownState,
-        { embeddable }: DiscoverDrilldownContext
+        { embeddable }: ExecutionContext
       ) => {
         return isCompatible({
           hasDiscoverAccess: deps.hasDiscoverAccess(),
@@ -71,7 +71,7 @@ export function getDiscoverDrilldown(deps: {
           embeddable,
         });
       },
-      getHref: (drilldownState: DiscoverDrilldownState, context: DiscoverDrilldownContext) =>
+      getHref: (drilldownState: DiscoverDrilldownState, context: ExecutionContext) =>
         getHref({
           locator: deps.locator(),
           dataViews: deps.dataViews(),
@@ -85,6 +85,8 @@ export function getDiscoverDrilldown(deps: {
       getInitialState: () => ({
         open_in_new_tab: true,
       }),
+      isCompatible: (context: SetupContext) =>
+        deps.hasDiscoverAccess() && apiIsOfType(context.embeddable, DOC_TYPE),
       isStateValid: () => true,
       order: 8,
     },

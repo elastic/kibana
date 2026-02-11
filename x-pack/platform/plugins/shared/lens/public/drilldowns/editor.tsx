@@ -12,10 +12,11 @@ import { i18n } from '@kbn/i18n';
 
 import type { DrilldownEditorProps } from '@kbn/embeddable-plugin/public';
 import type { DiscoverDrilldownState } from '../../server';
+import type { SetupContext } from './get_discover_drilldown';
 
-export const DiscoverDrilldownEditor: React.FC<DrilldownEditorProps<DiscoverDrilldownState>> = (
-  props
-) => {
+export const DiscoverDrilldownEditor: React.FC<
+  DrilldownEditorProps<DiscoverDrilldownState, SetupContext>
+> = (props) => {
   return (
     <EuiFormRow hasChildLabel={false}>
       <EuiSwitch
