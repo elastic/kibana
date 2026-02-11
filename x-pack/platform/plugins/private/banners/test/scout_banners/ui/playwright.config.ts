@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { FilterOptions } from './types';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
-  provider: [],
-  type: [],
-};
-
-export const PIPELINE_URL = 'ingest/ingest_pipelines';
-export const SERVERLESS_INDEX_MANAGEMENT_URL = 'index_details';
+/**
+ * These tests require a custom server configuration that sets up the global banner.
+ */
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
