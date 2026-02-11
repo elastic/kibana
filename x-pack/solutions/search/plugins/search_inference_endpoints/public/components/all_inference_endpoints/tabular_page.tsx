@@ -60,10 +60,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     InferenceInferenceEndpointInfo | undefined
   >(undefined);
   const [searchKey, setSearchKey] = React.useState('');
-  const [filterOptions, setFilterOptionsState] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
-  const setFilterOptions = useCallback((newFilterOptions: Partial<FilterOptions>) => {
-    setFilterOptionsState((prev) => ({ ...prev, ...newFilterOptions }));
-  }, []);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
 
   const copyContent = useCallback(
     (inferenceId: string) => {
@@ -115,12 +112,9 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     setSelectedInferenceEndpoint(undefined);
   }, []);
 
-  const onFilterChangedCallback = useCallback(
-    (newFilterOptions: Partial<FilterOptions>) => {
-      setFilterOptions(newFilterOptions);
-    },
-    [setFilterOptions]
-  );
+  const onFilterChangedCallback = useCallback((newFilterOptions: Partial<FilterOptions>) => {
+    setFilterOptions((prev) => ({ ...prev, ...newFilterOptions }));
+  }, []);
 
   const tableData = useTableData(inferenceEndpoints, filterOptions, searchKey);
 
