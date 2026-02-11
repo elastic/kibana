@@ -157,16 +157,7 @@ export const AutocompleteFieldWildcardComponent: React.FC<AutocompleteFieldWildc
           setSearchQuery(searchVal);
         }
       },
-      [
-        handleError,
-        handleSpacesWarning,
-        isRequired,
-        onChange,
-        selectedField,
-        touched,
-        warning,
-        handleWarning,
-      ]
+      [handleError, handleSpacesWarning, isRequired, selectedField, touched, warning, handleWarning]
     );
 
     const handleCreateOption = useCallback(
