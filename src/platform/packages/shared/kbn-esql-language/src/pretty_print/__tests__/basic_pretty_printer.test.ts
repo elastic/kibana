@@ -449,6 +449,16 @@ describe('single line query', () => {
         );
       });
     });
+
+    describe('PROMQL', () => {
+      test('realistic command', () => {
+        const src =
+          'PROMQL step = "5m" start = ?_tstart end = ?_tend index = kibana_sample_data_logstsdb col0 = (sum(avg(quantile_over_time(0.9,bytes{event.dataset="job"}[5m]))))';
+        const { text } = reprint(src);
+
+        expect(text).toBe(src);
+      });
+    });
   });
 
   describe('expressions', () => {

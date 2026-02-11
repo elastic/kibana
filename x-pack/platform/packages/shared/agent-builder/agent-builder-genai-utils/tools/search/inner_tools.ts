@@ -10,28 +10,24 @@ import type { Logger } from '@kbn/logging';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import { tool as toTool } from '@langchain/core/tools';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
-import type { ResourceResult, ToolResult } from '@kbn/agent-builder-common/tools';
+import type { Resource, ResourceListResult, ToolResult } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server/tools';
+import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server/tools';
 import { relevanceSearch } from '../relevance_search';
 import { naturalLanguageSearch } from '../nl_search';
 import type { MatchResult } from '../steps/perform_match_search';
 import { progressMessages } from './i18n';
 
-const convertMatchResult = (result: MatchResult): ResourceResult => {
+const convertMatchResult = (result: MatchResult): Resource => {
   return {
-    tool_result_id: getToolResultId(),
-    type: ToolResultType.resource,
-    data: {
-      reference: {
-        id: result.id,
-        index: result.index,
-      },
-      partial: true,
-      content: {
-        highlights: result.highlights,
-      },
+    reference: {
+      id: result.id,
+      index: result.index,
+    },
+    partial: true,
+    content: {
+      highlights: result.highlights,
     },
   };
 };
@@ -64,10 +60,18 @@ export const createRelevanceSearchTool = ({
             esClient,
             logger,
           });
-          const results = rawResults.map(convertMatchResult);
+          const resources = rawResults.map(convertMatchResult);
 
-          const content = JSON.stringify(results);
-          const artifact = { results };
+          const result: ResourceListResult = {
+            type: ToolResultType.resourceList,
+            tool_result_id: getToolResultId(),
+            data: {
+              resources,
+            },
+          };
+
+          const content = JSON.stringify({ results: [result] });
+          const artifact = { results: [result] };
           return [content, artifact];
         }
       );
@@ -132,7 +136,7 @@ export const createNaturalLanguageSearchTool = ({
                 },
                 {
                   tool_result_id: getToolResultId(),
-                  type: ToolResultType.tabularData,
+                  type: ToolResultType.esqlResults,
                   data: {
                     source: 'esql',
                     query: response.generatedQuery,
