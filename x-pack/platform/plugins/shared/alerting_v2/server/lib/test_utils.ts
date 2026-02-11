@@ -21,6 +21,8 @@ import type {
 import type { RuleResponse } from './rules_client';
 import type { QueryPayload } from './rule_executor/get_query_payload';
 import type { AlertEvent } from '../resources/alert_events';
+import type { RuleExecutionPipelineInput } from './rule_executor/execution_pipeline';
+import { createExecutionContext } from './cancellation';
 
 /**
  * Creates a mock Elasticsearch client.
@@ -79,8 +81,22 @@ export async function* createRowBatchStream<T>(rows: Array<T>): AsyncIterable<Ar
 }
 
 export function createRuleExecutionInput(
-  overrides: Partial<RuleExecutionInput> = {}
+  overrides?: Partial<RuleExecutionInput> & { abortSignal?: AbortSignal }
 ): RuleExecutionInput {
+  const abortSignal = overrides?.abortSignal ?? new AbortController().signal;
+
+  return {
+    ruleId: 'rule-1',
+    spaceId: 'default',
+    scheduledAt: '2025-01-01T00:00:00.000Z',
+    executionContext: createExecutionContext(abortSignal),
+    ...overrides,
+  };
+}
+
+export function createRuleExecutionPipelineInput(
+  overrides: Partial<RuleExecutionPipelineInput> = {}
+): RuleExecutionPipelineInput {
   return {
     ruleId: 'rule-1',
     spaceId: 'default',

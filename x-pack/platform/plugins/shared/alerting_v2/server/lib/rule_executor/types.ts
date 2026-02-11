@@ -8,6 +8,7 @@
 import type { QueryPayload } from './get_query_payload';
 import type { RuleResponse } from '../rules_client';
 import type { AlertEvent } from '../../resources/alert_events';
+import type { ExecutionContext } from '../cancellation';
 
 export interface RuleExecutorTaskParams {
   ruleId: string;
@@ -18,7 +19,7 @@ export interface RuleExecutionInput {
   readonly ruleId: string;
   readonly spaceId: string;
   readonly scheduledAt: string;
-  readonly abortSignal: AbortSignal;
+  readonly executionContext: ExecutionContext;
 }
 
 export interface RulePipelineState {

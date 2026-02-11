@@ -11,7 +11,7 @@ import type { RuleExecutionMiddleware } from './middleware';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { pipeStream } from './stream_utils';
 import {
-  createRuleExecutionInput,
+  createRuleExecutionPipelineInput,
   createMockStep,
   createQueryPayload,
   createRuleResponse,
@@ -45,7 +45,7 @@ describe('RuleExecutionPipeline', () => {
       );
 
       const pipeline = new RuleExecutionPipeline(loggerService, [step1, step2, step3], []);
-      const input = createRuleExecutionInput();
+      const input = createRuleExecutionPipelineInput();
 
       const result = await pipeline.execute(input);
 
@@ -80,7 +80,7 @@ describe('RuleExecutionPipeline', () => {
       );
 
       const pipeline = new RuleExecutionPipeline(loggerService, [step1, step2, step3], []);
-      const input = createRuleExecutionInput();
+      const input = createRuleExecutionPipelineInput();
 
       const result = await pipeline.execute(input);
 
@@ -116,7 +116,7 @@ describe('RuleExecutionPipeline', () => {
       );
 
       const pipeline = new RuleExecutionPipeline(loggerService, [step1, step2, step3], []);
-      const input = createRuleExecutionInput();
+      const input = createRuleExecutionPipelineInput();
 
       const result = await pipeline.execute(input);
 
@@ -154,7 +154,7 @@ describe('RuleExecutionPipeline', () => {
       );
 
       const pipeline = new RuleExecutionPipeline(loggerService, [step1, step2], []);
-      const input = createRuleExecutionInput();
+      const input = createRuleExecutionPipelineInput();
 
       await expect(pipeline.execute(input)).rejects.toThrow('Step failed');
       expect(step2.executeStream).not.toHaveBeenCalled();
@@ -163,7 +163,7 @@ describe('RuleExecutionPipeline', () => {
     it('returns empty completed result when no steps', async () => {
       const { loggerService } = createLoggerService();
       const pipeline = new RuleExecutionPipeline(loggerService, [], []);
-      const input = createRuleExecutionInput();
+      const input = createRuleExecutionPipelineInput();
 
       const result = await pipeline.execute(input);
 
@@ -215,7 +215,7 @@ describe('RuleExecutionPipeline', () => {
         [step1],
         [middleware1, middleware2]
       );
-      const input = createRuleExecutionInput();
+      const input = createRuleExecutionPipelineInput();
 
       await pipeline.execute(input);
 
@@ -255,7 +255,7 @@ describe('RuleExecutionPipeline', () => {
       );
 
       const pipeline = new RuleExecutionPipeline(loggerService, [step1], [errorMiddleware]);
-      const input = createRuleExecutionInput();
+      const input = createRuleExecutionPipelineInput();
 
       await expect(pipeline.execute(input)).rejects.toThrow('Step error');
       expect(errorHandlerCalled).toHaveBeenCalledWith(expect.any(Error));

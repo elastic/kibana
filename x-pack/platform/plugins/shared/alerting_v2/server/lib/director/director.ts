@@ -16,10 +16,12 @@ import type { AlertEpisodeStatus } from '../../resources/alert_events';
 import { alertEpisodeStatus, type AlertEvent } from '../../resources/alert_events';
 import { TransitionStrategyFactory } from './strategies/strategy_resolver';
 import type { ITransitionStrategy } from './strategies/types';
+import type { ExecutionContext } from '../cancellation';
 
 interface RunDirectorParams {
   ruleId: string;
   alertEvents: AsyncIterable<AlertEvent[]>;
+  executionContext: ExecutionContext;
 }
 
 interface CalculateNextStateParams {
@@ -42,11 +44,18 @@ export class DirectorService {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  async *run({ ruleId, alertEvents }: RunDirectorParams): AsyncIterable<AlertEvent[]> {
+  async *run({
+    ruleId,
+    alertEvents,
+    executionContext,
+  }: RunDirectorParams): AsyncIterable<AlertEvent[]> {
     const strategy = this.strategyFactory.getStrategy();
 
     for await (const batch of alertEvents) {
-      const processedBatch = await this.processBatch(ruleId, batch, strategy);
+      executionContext.throwIfAborted();
+
+      const processedBatch = await this.processBatch(ruleId, batch, strategy, executionContext);
+
       if (processedBatch.length > 0) {
         yield processedBatch;
       }
@@ -56,25 +65,37 @@ export class DirectorService {
   private async processBatch(
     ruleId: string,
     alertEvents: AlertEvent[],
-    strategy: ITransitionStrategy
+    strategy: ITransitionStrategy,
+    executionContext: ExecutionContext
   ): Promise<AlertEvent[]> {
+    const scope = executionContext.createScope();
     const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
-    const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(ruleId, groupHashes);
-
-    const alertsWithNextEpisode = alertEvents.map((currentAlertEvent) =>
-      this.getAlertEventWithNextEpisode({
-        currentAlertEvent,
-        previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
-        strategy,
-      })
+    const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(
+      ruleId,
+      groupHashes,
+      executionContext
     );
+    scope.add(() => alertStateByGroupHash.clear());
 
-    return alertsWithNextEpisode;
+    try {
+      executionContext.throwIfAborted();
+
+      return alertEvents.map((currentAlertEvent) =>
+        this.getAlertEventWithNextEpisode({
+          currentAlertEvent,
+          previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
+          strategy,
+        })
+      );
+    } finally {
+      await scope.disposeAll();
+    }
   }
 
   private async fetchLatestAlertStateByGroupHash(
     ruleId: string,
-    groupHashes: string[]
+    groupHashes: string[],
+    context: ExecutionContext
   ): Promise<Map<string, LatestAlertEventState>> {
     const request = getLatestAlertEventStateQuery({ ruleId, groupHashes }).toRequest();
     const rowBatchStream = this.queryService.executeQueryStream<LatestAlertEventState>({
@@ -83,11 +104,14 @@ export class DirectorService {
       params: request.params,
       // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
       filter: request.filter,
+      abortSignal: context.signal,
     });
 
     // Collect all rows from the batch stream (small result set for state lookup)
     const records: LatestAlertEventState[] = [];
     for await (const batch of rowBatchStream) {
+      context.throwIfAborted();
+
       for (const row of batch) {
         records.push(row);
       }

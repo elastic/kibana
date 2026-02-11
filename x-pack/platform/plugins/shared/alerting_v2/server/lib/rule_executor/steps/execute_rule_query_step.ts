@@ -64,7 +64,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
         query: rule.query,
         filter: queryPayload.filter,
         params: queryPayload.params,
-        abortSignal: input.abortSignal,
+        abortSignal: input.executionContext.signal,
       });
 
       step.logger.debug({

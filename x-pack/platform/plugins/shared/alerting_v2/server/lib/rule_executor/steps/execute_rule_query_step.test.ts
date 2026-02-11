@@ -48,10 +48,8 @@ describe('ExecuteRuleQueryStep', () => {
 
     const rule = createRuleResponse();
     const abortController = new AbortController();
-    const state = createRulePipelineState({
-      input: createRuleExecutionInput({ abortSignal: abortController.signal }),
-      rule,
-    });
+    const input = createRuleExecutionInput({ abortSignal: abortController.signal });
+    const state = createRulePipelineState({ input, rule });
 
     await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
@@ -59,7 +57,7 @@ describe('ExecuteRuleQueryStep', () => {
       query: rule.query,
       filter: expect.any(Object),
       params: undefined,
-      abortSignal: abortController.signal,
+      abortSignal: input.executionContext.signal,
     });
   });
 
@@ -80,7 +78,7 @@ describe('ExecuteRuleQueryStep', () => {
 
     await expect(
       collectStreamResults(step.executeStream(createPipelineStream([state])))
-    ).rejects.toThrow('Request aborted');
+    ).rejects.toThrow(/aborted/i);
   });
 
   it('propagates non-abort errors', async () => {

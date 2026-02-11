@@ -15,6 +15,9 @@ import { createQueryService } from '../services/query_service/query_service.mock
 import { alertEpisodeStatus, type AlertEvent } from '../../resources/alert_events';
 import { createAlertEvent, createEsqlResponse } from '../rule_executor/test_utils';
 import type { LatestAlertEventState } from './queries';
+import { createExecutionContext } from '../cancellation';
+
+const testExecutionContext = createExecutionContext(new AbortController().signal);
 
 function toAlertEventStream(events: AlertEvent[]): AsyncIterable<AlertEvent[]> {
   return (async function* () {
@@ -71,6 +74,7 @@ describe('DirectorService', () => {
       const result = await collectAlertEvents(
         directorService.run({
           ruleId: 'rule-1',
+          executionContext: testExecutionContext,
           alertEvents: toAlertEventStream([]),
         })
       );
@@ -91,6 +95,7 @@ describe('DirectorService', () => {
       const result = await collectAlertEvents(
         directorService.run({
           ruleId: 'rule-1',
+          executionContext: testExecutionContext,
           alertEvents: toAlertEventStream([alertEvent]),
         })
       );
@@ -124,6 +129,7 @@ describe('DirectorService', () => {
       const result = await collectAlertEvents(
         directorService.run({
           ruleId: 'rule-1',
+          executionContext: testExecutionContext,
           alertEvents: toAlertEventStream([alertEvent]),
         })
       );
@@ -157,6 +163,7 @@ describe('DirectorService', () => {
       const result = await collectAlertEvents(
         directorService.run({
           ruleId: 'rule-1',
+          executionContext: testExecutionContext,
           alertEvents: toAlertEventStream([alertEvent]),
         })
       );
@@ -188,6 +195,7 @@ describe('DirectorService', () => {
       const result = await collectAlertEvents(
         directorService.run({
           ruleId: 'rule-1',
+          executionContext: testExecutionContext,
           alertEvents: toAlertEventStream([alertEvent]),
         })
       );
@@ -219,6 +227,7 @@ describe('DirectorService', () => {
       const result = await collectAlertEvents(
         directorService.run({
           ruleId: 'rule-1',
+          executionContext: testExecutionContext,
           alertEvents: toAlertEventStream([alertEvent]),
         })
       );
@@ -250,6 +259,7 @@ describe('DirectorService', () => {
       const result = await collectAlertEvents(
         directorService.run({
           ruleId: 'rule-1',
+          executionContext: testExecutionContext,
           alertEvents: toAlertEventStream([alertEvent]),
         })
       );
@@ -286,6 +296,7 @@ describe('DirectorService', () => {
       const result = await collectAlertEvents(
         directorService.run({
           ruleId: 'rule-1',
+          executionContext: testExecutionContext,
           alertEvents: toAlertEventStream(alertEvents),
         })
       );
@@ -324,6 +335,7 @@ describe('DirectorService', () => {
       const result = await collectAlertEvents(
         directorService.run({
           ruleId: 'rule-1',
+          executionContext: testExecutionContext,
           alertEvents: toAlertEventStream([alertEvent]),
         })
       );
@@ -353,6 +365,7 @@ describe('DirectorService', () => {
       const result = await collectAlertEvents(
         directorService.run({
           ruleId: 'rule-1',
+          executionContext: testExecutionContext,
           alertEvents: toAlertEventStream([alertEvent]),
         })
       );
@@ -368,6 +381,7 @@ describe('DirectorService', () => {
         collectAlertEvents(
           directorService.run({
             ruleId: 'rule-1',
+            executionContext: testExecutionContext,
             alertEvents: toAlertEventStream([alertEvent]),
           })
         )

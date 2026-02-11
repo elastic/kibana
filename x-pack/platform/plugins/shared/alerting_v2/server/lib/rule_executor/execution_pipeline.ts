@@ -19,6 +19,18 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
+import { createExecutionContext } from '../cancellation';
+
+/**
+ * Raw input from the task runner. Contains an AbortSignal but no ExecutionContext yet.
+ * The pipeline creates the ExecutionContext from the signal.
+ */
+export interface RuleExecutionPipelineInput {
+  readonly ruleId: string;
+  readonly spaceId: string;
+  readonly scheduledAt: string;
+  readonly abortSignal: AbortSignal;
+}
 
 export interface RuleExecutionPipelineResult {
   readonly completed: boolean;
@@ -27,7 +39,7 @@ export interface RuleExecutionPipelineResult {
 }
 
 export interface RuleExecutionPipelineContract {
-  execute(input: RuleExecutionInput): Promise<RuleExecutionPipelineResult>;
+  execute(input: RuleExecutionPipelineInput): Promise<RuleExecutionPipelineResult>;
 }
 
 @injectable()
@@ -38,7 +50,15 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
     @inject(RuleExecutionMiddlewaresToken) private readonly middlewares: RuleExecutionMiddleware[]
   ) {}
 
-  public async execute(input: RuleExecutionInput): Promise<RuleExecutionPipelineResult> {
+  public async execute(rawInput: RuleExecutionPipelineInput): Promise<RuleExecutionPipelineResult> {
+    const executionContext = createExecutionContext(rawInput.abortSignal);
+    const input: RuleExecutionInput = {
+      ruleId: rawInput.ruleId,
+      spaceId: rawInput.spaceId,
+      scheduledAt: rawInput.scheduledAt,
+      executionContext,
+    };
+
     let pipelineState: RulePipelineState = { input };
 
     let stream: PipelineStateStream = (async function* () {

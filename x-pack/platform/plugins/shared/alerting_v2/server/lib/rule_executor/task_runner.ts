@@ -8,9 +8,10 @@
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { inject, injectable } from 'inversify';
 
-import type { RuleExecutionInput, HaltReason, RuleExecutorTaskParams } from './types';
+import type { HaltReason, RuleExecutorTaskParams } from './types';
 import type {
   RuleExecutionPipelineContract,
+  RuleExecutionPipelineInput,
   RuleExecutionPipelineResult,
 } from './execution_pipeline';
 import { RuleExecutionPipeline } from './execution_pipeline';
@@ -37,7 +38,7 @@ export class RuleExecutorTaskRunner {
   private createRuleExecutionInput(
     taskInstance: TaskRunParams['taskInstance'],
     abortController: AbortController
-  ): RuleExecutionInput {
+  ): RuleExecutionPipelineInput {
     const params = taskInstance.params as RuleExecutorTaskParams;
     const scheduledAt = taskInstance.scheduledAt;
 

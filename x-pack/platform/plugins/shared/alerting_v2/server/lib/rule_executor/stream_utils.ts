@@ -23,6 +23,13 @@ type OneToOneStepHandler = (
 const isAsyncIterable = (value: unknown): value is AsyncIterable<StepStreamResult> =>
   typeof (value as AsyncIterable<StepStreamResult>)?.[Symbol.asyncIterator] === 'function';
 
+/**
+ * Core stream transform for steps.
+ *
+ * Cancellation boundary checks are NOT performed here — they are the
+ * responsibility of `CancellationBoundaryMiddleware` which wraps every
+ * step globally. This keeps `pipeStream` focused on stream plumbing only.
+ */
 export const pipeStream = (input: PipelineStateStream, handler: StepStreamHandler) =>
   (async function* () {
     for await (const result of input) {
@@ -42,11 +49,14 @@ export const pipeStream = (input: PipelineStateStream, handler: StepStreamHandle
             return;
           }
         }
+
         continue;
       }
 
       const resolved = await output;
+
       yield resolved;
+
       if (resolved.type === 'halt') {
         return;
       }

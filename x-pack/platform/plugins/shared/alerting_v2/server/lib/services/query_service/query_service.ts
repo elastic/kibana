@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
+import { PassThrough, Readable } from 'stream';
+import { pipeline } from 'stream/promises';
 import type { EsqlQueryRequest, EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import { AsyncRecordBatchStreamReader } from 'apache-arrow/Arrow.node';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
+import { createExecutionContext, isRuleExecutionCancellationError } from '../../cancellation';
 
 export interface ExecuteQueryParams {
   query: EsqlQueryRequest['query'];
@@ -75,11 +77,15 @@ export class QueryService implements QueryServiceContract {
     params,
     abortSignal,
   }: ExecuteQueryParams): AsyncIterable<T[]> {
+    const context = createExecutionContext(abortSignal ?? new AbortController().signal);
+
     this.logger.debug({
       message: () => `QueryService: Executing streaming query`,
     });
 
     try {
+      context.throwIfAborted();
+
       const response = await this.esClient.esql.query(
         {
           query,
@@ -88,39 +94,70 @@ export class QueryService implements QueryServiceContract {
           params,
           format: 'arrow',
         },
-        { asStream: true, signal: abortSignal }
+        { asStream: true, signal: context.signal }
       );
 
-      // @ts-expect-error response is a Readable when asStream is true
-      yield* this.parseArrowStream<T>(response);
+      if (this.isReadable(response)) {
+        yield* this.parseArrowStream<T>(response, context);
+      } else {
+        // Test doubles often return JSON responses even when asStream=true.
+        // Fall back to object rows to keep the stream contract stable.
+        context.throwIfAborted();
+        yield this.toRows<T>(response as EsqlQueryResponse);
+      }
 
       this.logger.debug({
         message: `QueryService: Streaming query completed successfully`,
       });
     } catch (error) {
-      this.logger.error({
-        error,
-        code: 'ESQL_QUERY_ERROR',
-        type: 'QueryServiceError',
-      });
+      if (isRuleExecutionCancellationError(error)) {
+        this.logger.debug({
+          message: 'QueryService: Streaming query aborted',
+        });
+      } else {
+        this.logger.error({
+          error,
+          code: 'ESQL_QUERY_ERROR',
+          type: 'QueryServiceError',
+        });
+      }
 
       throw error;
     }
   }
 
-  private async *parseArrowStream<T>(response: Readable): AsyncIterable<T[]> {
+  private async *parseArrowStream<T>(
+    response: Readable,
+    context: ReturnType<typeof createExecutionContext>
+  ): AsyncIterable<T[]> {
     let reader: AsyncRecordBatchStreamReader;
+    const scope = context.createScope();
+    const passthrough = new PassThrough();
+    const streamPipeline = pipeline(response, passthrough, { signal: context.signal });
+    let pipelineError: unknown;
+    scope.add(() => {
+      passthrough.destroy();
+    });
 
     try {
-      reader = await AsyncRecordBatchStreamReader.from(Readable.from(response));
+      context.throwIfAborted();
+      reader = await AsyncRecordBatchStreamReader.from(Readable.from(passthrough));
     } catch (error) {
       // ES returns JSON instead of Arrow format when there's an error
       // Apache Arrow will fail to parse it, so we throw a more descriptive error
-      throw new Error(`Failed to parse ES|QL response. Error: ${error.message}`);
+      throw this.buildParseError(error);
     }
+
+    scope.add(async () => {
+      if (!reader.closed) {
+        await reader.cancel();
+      }
+    });
 
     try {
       for await (const batch of reader) {
+        context.throwIfAborted();
+
         if (batch.numRows === 0) {
           continue;
         }
@@ -131,12 +168,43 @@ export class QueryService implements QueryServiceContract {
     } catch (error) {
       // ES may return JSON error response instead of Arrow format
       // which causes parsing errors during iteration
-      throw new Error(`Failed to parse ES|QL response. Error: ${error.message}`);
+      throw this.buildParseError(error);
     } finally {
-      // Clean up the reader
-      if (!reader.closed) {
-        await reader.cancel();
+      try {
+        await scope.disposeAll();
+        await streamPipeline;
+      } catch (error) {
+        // Swallow pipeline cancellation errors: the primary error/abort reason
+        // is already propagated through the stream iteration above.
+        if (!context.signal.aborted) {
+          pipelineError = error;
+        }
       }
     }
+
+    if (pipelineError) {
+      throw pipelineError;
+    }
+  }
+
+  private buildParseError(error: unknown): Error {
+    const message = error instanceof Error ? error.message : String(error);
+    return new Error(`Failed to parse ES|QL response. Error: ${message}`);
+  }
+
+  private isReadable(value: unknown): value is Readable {
+    return value instanceof Readable;
+  }
+
+  private toRows<T>(response: EsqlQueryResponse): T[] {
+    const columnNames = response.columns.map((column) => column.name);
+    return response.values.map((valueRow) => {
+      const row = columnNames.reduce<Record<string, unknown>>((acc, columnName, index) => {
+        acc[columnName] = valueRow[index];
+        return acc;
+      }, {});
+
+      return row as T;
+    });
   }
 }
