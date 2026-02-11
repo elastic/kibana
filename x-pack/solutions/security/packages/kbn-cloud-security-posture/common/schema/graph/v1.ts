@@ -6,14 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { GRAPH_NODES_LIMIT } from '../../constants';
 
 export const INDEX_PATTERN_REGEX = /^[^A-Z^\\/?"<>|\s#,]+$/;
 
 export const graphRequestSchema = schema.object({
   nodesLimit: schema.maybe(schema.number()),
   showUnknownTarget: schema.maybe(schema.boolean()),
-  pinnedIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: GRAPH_NODES_LIMIT })),
+  pinnedIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
   query: schema.object({
     originEventIds: schema.arrayOf(
       schema.object({ id: schema.string(), isAlert: schema.boolean() })
