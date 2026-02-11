@@ -10,10 +10,6 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { spaceTest } from '../fixtures';
 
-/**
- * Tests that the Chat Experience can be changed to Classic mode
- * in a Search solution space.
- */
 spaceTest.describe(
   'GenAI Settings - Change Chat Experience to Classic in Search Space',
   { tag: ['@ess'] },

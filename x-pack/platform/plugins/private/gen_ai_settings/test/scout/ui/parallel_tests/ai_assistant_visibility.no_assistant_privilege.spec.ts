@@ -18,7 +18,7 @@ spaceTest.describe(
   { tag: ['@ess', '@svlOblt', '@svlSecurity'] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, pageObjects, scoutSpace }) => {
-      // Set AI Assistant, becasue the AI Assistant nav button will be visible for default value
+      // Set AI Assistant, because the AI Assistant nav button will be visible for default value
       await scoutSpace.uiSettings.set({
         [AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE]: AIAssistantType.Observability,
       });

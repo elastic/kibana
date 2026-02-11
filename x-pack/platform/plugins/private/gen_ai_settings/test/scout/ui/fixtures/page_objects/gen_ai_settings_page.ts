@@ -180,30 +180,25 @@ export class GenAiSettingsPage {
   }
 
   /**
-   * Get the Observability card element
+   * Get the Observability select card button (the actual button inside the card)
    */
-  getObservabilityCard() {
-    return this.page.testSubj.locator('aiAssistantObservabilityCard');
+  getObservabilityCardButton() {
+    return this.page.testSubj
+      .locator('aiAssistantObservabilityCard')
+      .locator('button[role="switch"]');
   }
 
   /**
-   * Get the Security card element
+   * Get the Security card select button (the actual button inside the card)
    */
-  getSecurityCard() {
-    return this.page.testSubj.locator('aiAssistantSecurityCard');
-  }
-
-  /**
-   * Get the AI Agent card element
-   */
-  getAIAgentCard() {
-    return this.page.testSubj.locator('aiAssistantAgentCard');
+  getSecurityCardButton() {
+    return this.page.testSubj.locator('aiAssistantSecurityCard').locator('button[role="switch"]');
   }
 
   /**
    * Get the AI Agent card select button (the actual button inside the card)
    */
-  getAIAgentCardSelectButton() {
+  getAIAgentCardButton() {
     return this.page.testSubj.locator('aiAssistantAgentCard').locator('button[role="switch"]');
   }
 
