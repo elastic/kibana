@@ -14,6 +14,22 @@ import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 import { EXECUTION_TIMEOUT } from '../../fixtures/constants';
 import { createGetUpdateCase } from '../../fixtures/workflows';
 
+/**
+ * Returns the correct case owner based on the project type.
+ * - Observability: uses 'observability'
+ * - Security / ESS: uses 'securitySolution'
+ * - ES: uses 'cases'
+ */
+const getCaseOwner = (projectType: string | undefined) => {
+  if (projectType === 'es' || projectType === undefined) {
+    return 'cases';
+  }
+  if (projectType === 'oblt') {
+    return 'observability';
+  }
+  return 'securitySolution';
+};
+
 test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
@@ -23,20 +39,26 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
     await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
   });
 
-  test('should run create_get_update_case workflow successfully', async ({ page, pageObjects }) => {
+  test('should run create_get_update_case workflow successfully', async ({
+    page,
+    pageObjects,
+    config,
+  }) => {
+    const caseOwner = getCaseOwner(config.projectType);
     const workflowInput = {
       title: `Test Case ${Math.floor(Math.random() * 10000)}`,
       description: 'This is a test case description',
       severity: 'low',
+      owner: caseOwner,
       comments: [
         {
           type: 'user',
-          owner: 'securitySolution',
+          owner: caseOwner,
           comment: 'This is the case comment 1',
         },
         {
           type: 'user',
-          owner: 'securitySolution',
+          owner: caseOwner,
           comment: 'This is the case comment 2',
         },
       ],

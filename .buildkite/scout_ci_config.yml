@@ -25,11 +25,8 @@ plugins:
     - streams
     - streams_app
     - transform
-    - fleet
-    - entity_store
-    - dashboard    
+    - dashboard
     - workflows_extensions
-    - workflows_management
   disabled:
 
 packages:

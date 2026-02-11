@@ -37,6 +37,10 @@ inputs:
         - high
         - critical
 
+    owner:
+      type: string
+      description: Owner of the case
+
     comments:
       type: array
       description: List of comments associated with the alert
@@ -70,6 +74,7 @@ inputs:
     - title
     - description
     - severity
+    - owner
 
   additionalProperties: false
 
@@ -85,7 +90,7 @@ steps:
         id: none
         name: none
         type: .none
-      owner: securitySolution
+      owner: \${{ inputs.owner }}
       settings:
         syncAlerts: false
       tags:
@@ -111,7 +116,7 @@ steps:
           caseId: \${{variables.case_id}}
           comment: \${{foreach.item.comment}}
           type: user
-          owner: securitySolution
+          owner: \${{inputs.owner}}
 
       - name: set_new_version
         type: data.set
