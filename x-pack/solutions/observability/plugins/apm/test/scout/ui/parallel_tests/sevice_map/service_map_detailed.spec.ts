@@ -13,8 +13,9 @@ import {
   SERVICE_OPBEANS_JAVA,
   SERVICE_OPBEANS_NODE,
 } from '../../fixtures/constants';
+import { tags } from '@kbn/scout-oblt';
 
-test.describe('Service map - nodes, edges and popovers', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Service map - nodes, edges and popovers', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects: { serviceMapPage } }) => {
     await browserAuth.loginAsViewer();
     await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
