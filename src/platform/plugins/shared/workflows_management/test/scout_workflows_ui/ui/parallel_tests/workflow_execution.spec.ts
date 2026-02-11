@@ -414,4 +414,111 @@ test.describe('Workflow execution', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
       expect(JSON.stringify(alertOutput)).toContain(mockAlerts[i].alert_id);
     }
   });
+
+  test('should not trigger a disabled workflow when alert fires', async ({
+    pageObjects,
+    page,
+    browserAuth,
+    apiServices,
+    scoutSpace,
+  }) => {
+    // Same custom role as the alert trigger test — needs index write + ingest pipeline privileges.
+    await browserAuth.loginWithCustomRole({
+      elasticsearch: {
+        cluster: ['manage_ingest_pipelines'],
+        indices: [
+          {
+            names: ['test-security-alerts-index'],
+            privileges: ['write', 'read', 'view_index_metadata', 'create_index'],
+          },
+        ],
+      },
+      kibana: [
+        {
+          base: ['all'],
+          feature: {},
+          spaces: ['*'],
+        },
+      ],
+    });
+
+    const disabledWorkflowName = 'Disabled alert target';
+    const canaryWorkflowName = 'Canary alert target';
+    const createRuleWorkflowName = 'Create rule for disabled test';
+    const triggerAlertWorkflowName = 'Trigger alert for disabled test';
+
+    const mockAlerts = [
+      {
+        severity: 'medium',
+        alert_id: 'disabled_workflow_test_alert',
+        description: 'Alert that should NOT trigger a disabled workflow.',
+        category: 'test',
+        timestamp: '2023-12-01T00:00:00Z',
+      },
+    ];
+
+    // Create four workflows: the target to be disabled, a canary that stays enabled
+    // (to prove alerts actually propagated), plus rule-creation and alert-trigger helpers.
+    // Reuse getCreateAlertRuleWorkflowYaml which creates a rule with two workflow actions:
+    // wf_single_alert (per-alert) and wf_multiple_alerts (summary mode).
+    const { created } = await apiServices.workflows.bulkCreate(scoutSpace.id, [
+      getPrintAlertsWorkflowYaml(disabledWorkflowName),
+      getPrintAlertsWorkflowYaml(canaryWorkflowName),
+      getCreateAlertRuleWorkflowYaml(createRuleWorkflowName),
+      getTriggerAlertWorkflowYaml(triggerAlertWorkflowName),
+    ]);
+    const [disabledWorkflow, canaryWorkflow, createRuleWorkflow, triggerAlertWorkflow] = created;
+
+    // Set up the detection rule with two actions:
+    // - wf_single_alert → the workflow we will disable
+    // - wf_multiple_alerts → the canary that stays enabled (proves alerts fired)
+    await pageObjects.workflowEditor.gotoWorkflow(createRuleWorkflow.id);
+    await pageObjects.workflowEditor.executeWorkflowWithInputs({
+      wf_single_alert: disabledWorkflow.id,
+      wf_multiple_alerts: canaryWorkflow.id,
+    });
+    await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
+
+    // Disable the target workflow from the workflows list UI
+    await page.gotoApp('workflows');
+    await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
+
+    const toggleSwitch = pageObjects.workflowList.getWorkflowStateToggle(disabledWorkflowName);
+    await expect(toggleSwitch).toBeChecked();
+    await toggleSwitch.click();
+    await expect(toggleSwitch).not.toBeChecked();
+
+    // Trigger alerts — the rule will fire both actions, but only the canary should execute
+    await pageObjects.workflowEditor.gotoWorkflow(triggerAlertWorkflow.id);
+    await pageObjects.workflowEditor.executeWorkflowWithInputs({ alerts: mockAlerts });
+    await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
+
+    // Wait for the canary workflow to receive executions — this proves alerts propagated
+    await page.gotoApp('workflows');
+    await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
+    await page.testSubj
+      .locator('workflowListTable')
+      .getByRole('link', { name: canaryWorkflowName })
+      .click();
+    await page.getByRole('button', { name: 'Executions' }).click();
+    await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
+
+    const canaryExecutions = page.testSubj.locator('workflowExecutionListItem');
+    await expect(canaryExecutions).toHaveCount(1, { timeout: ALERT_PROPAGATION_TIMEOUT });
+
+    // Now verify the disabled workflow has zero executions.
+    // The canary already received its execution, so any alert-triggered execution
+    // for the disabled workflow would have appeared by now.
+    await page.gotoApp('workflows');
+    await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
+    await page.testSubj
+      .locator('workflowListTable')
+      .getByRole('link', { name: disabledWorkflowName })
+      .click();
+    await page.getByRole('button', { name: 'Executions' }).click();
+    await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
+
+    const disabledExecutions = page.testSubj.locator('workflowExecutionListItem');
+    await expect(disabledExecutions).toHaveCount(0);
+  });
 });

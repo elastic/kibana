@@ -32,6 +32,12 @@ export interface WorkflowsApiService {
   create: (spaceId: string, yaml: string) => Promise<WorkflowDetailDto>;
   /** POST /api/workflows/_bulk_create — create multiple workflows at once. */
   bulkCreate: (spaceId: string, yamls: string[]) => Promise<BulkCreateResult>;
+  /** PUT /api/workflows/{id} — partially update a workflow (e.g. toggle enabled). */
+  update: (
+    spaceId: string,
+    id: string,
+    body: Partial<Pick<WorkflowDetailDto, 'name' | 'description' | 'enabled' | 'yaml'>>
+  ) => Promise<WorkflowDetailDto>;
   /** DELETE /api/workflows — delete workflows by IDs. */
   bulkDelete: (spaceId: string, ids: string[]) => Promise<void>;
   /** POST /api/workflows/search + DELETE — delete all workflows in a space. */
@@ -45,6 +51,19 @@ export const getWorkflowsApiService = (kbnClient: KbnClient): WorkflowsApiServic
         method: 'POST',
         path: `/s/${spaceId}/api/workflows`,
         body: { yaml },
+      });
+      return response.data;
+    },
+
+    update: async (
+      spaceId: string,
+      id: string,
+      body: Partial<Pick<WorkflowDetailDto, 'name' | 'description' | 'enabled' | 'yaml'>>
+    ): Promise<WorkflowDetailDto> => {
+      const response = await kbnClient.request<WorkflowDetailDto>({
+        method: 'PUT',
+        path: `/s/${spaceId}/api/workflows/${id}`,
+        body,
       });
       return response.data;
     },
