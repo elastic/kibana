@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import type { ReactNode } from 'react';
+import type { PropsWithChildren } from 'react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 export interface SloDetailsContextType {
@@ -20,10 +20,7 @@ const SloDetailsContext = createContext<SloDetailsContextType | undefined>(undef
 export function SloDetailsContextProvider({
   children,
   value,
-}: {
-  children: ReactNode;
-  value: SloDetailsContextType;
-}) {
+}: PropsWithChildren<{ value: SloDetailsContextType }>) {
   return <SloDetailsContext.Provider value={value}>{children}</SloDetailsContext.Provider>;
 }
 
