@@ -27,7 +27,6 @@ export const getUserFromRequest = async ({
 }: {
   request: KibanaRequest;
   security: SecurityServiceStart;
-  /** An ES client scoped to the request as the current user (needed for the authenticate fallback). */
   esClient: ElasticsearchClient;
 }): Promise<UserIdAndName> => {
   if (!request.isFakeRequest) {
