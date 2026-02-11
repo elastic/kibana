@@ -58,15 +58,6 @@ const validateFieldRules = (
   }
 };
 
-/**
- * Extracts the space ID from the request.
- */
-const getNamespace = (request: { url: { pathname?: string } }): string => {
-  // Kibana prefixes space-scoped URLs with /s/{spaceId}
-  const match = request.url.pathname?.match(/^\/s\/([^/]+)/);
-  return match?.[1] ?? 'default';
-};
-
 const runSettingsMigration = async ({
   namespace,
   esClient,
@@ -124,8 +115,8 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
             return response.badRequest({ body: { message: validationError } });
           }
 
-          const namespace = getNamespace(request);
           const coreContext = await context.core;
+          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
           await ensureProfilesIndex({ esClient, logger });
@@ -199,8 +190,8 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
       },
       async (context, request, response) => {
         try {
-          const namespace = getNamespace(request);
           const coreContext = await context.core;
+          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
           await ensureProfilesIndex({ esClient, logger });
@@ -256,8 +247,8 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
       },
       async (context, request, response) => {
         try {
-          const namespace = getNamespace(request);
           const coreContext = await context.core;
+          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
           const esClient = coreContext.elasticsearch.client.asInternalUser;
           await runSettingsMigration({
             namespace,
@@ -318,8 +309,8 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
             }
           }
 
-          const namespace = getNamespace(request);
           const coreContext = await context.core;
+          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
           const esClient = coreContext.elasticsearch.client.asInternalUser;
           await runSettingsMigration({
             namespace,
@@ -371,8 +362,8 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
       },
       async (context, request, response) => {
         try {
-          const namespace = getNamespace(request);
           const coreContext = await context.core;
+          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
           const esClient = coreContext.elasticsearch.client.asInternalUser;
           await runSettingsMigration({
             namespace,

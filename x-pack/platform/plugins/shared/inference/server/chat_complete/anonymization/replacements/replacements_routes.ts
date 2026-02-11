@@ -15,14 +15,6 @@ import { ensureReplacementsIndex } from './replacements_index';
 const API_VERSION = '1';
 const REPLACEMENTS_API_BASE = '/internal/inference/anonymization/replacements';
 
-/**
- * Extracts the space ID from the request URL.
- */
-const getNamespace = (request: { url: { pathname?: string } }): string => {
-  const match = request.url.pathname?.match(/^\/s\/([^/]+)/);
-  return match?.[1] ?? 'default';
-};
-
 export const registerReplacementsRoutes = (router: IRouter, logger: Logger): void => {
   // GET /internal/inference/anonymization/replacements/{id} — Resolve by ID
   router.versioned
@@ -46,8 +38,8 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
       },
       async (context, request, response) => {
         try {
-          const namespace = getNamespace(request);
           const coreContext = await context.core;
+          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
           const repo = new ReplacementsRepository(esClient);
@@ -102,8 +94,8 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
       },
       async (context, request, response) => {
         try {
-          const namespace = getNamespace(request);
           const coreContext = await context.core;
+          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
           const repo = new ReplacementsRepository(esClient);
@@ -162,8 +154,8 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
       },
       async (context, request, response) => {
         try {
-          const namespace = getNamespace(request);
           const coreContext = await context.core;
+          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
           const repo = new ReplacementsRepository(esClient);
@@ -214,8 +206,8 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
       },
       async (context, request, response) => {
         try {
-          const namespace = getNamespace(request);
           const coreContext = await context.core;
+          const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
           await ensureReplacementsIndex({ esClient, logger });
