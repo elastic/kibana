@@ -303,9 +303,10 @@ export class DrilldownsManager {
     this.setDrilldownFactory(factory);
     const drilldownManager = this.getDrilldownManager();
     if (drilldownManager) {
-      drilldownManager.setName(this.pickName(template.drilldownState.label));
-      drilldownManager.setTrigger(template.drilldownState.trigger);
-      drilldownManager.setConfig(template.drilldownState);
+      drilldownManager.setState({
+        ...template.drilldownState,
+        label: this.pickName(template.drilldownState.label),
+      });
     }
   };
 
@@ -322,9 +323,10 @@ export class DrilldownsManager {
     this.setDrilldownFactory(factory);
     const drilldownManager = this.getDrilldownManager();
     if (drilldownManager) {
-      drilldownManager.setName(this.pickName(drilldownState.label));
-      drilldownManager.setTrigger(drilldownState.trigger);
-      drilldownManager.setConfig(drilldownState);
+      drilldownManager.setState({
+        ...drilldownState,
+        label: this.pickName(drilldownState.label),
+      });
     }
   };
 

@@ -104,10 +104,7 @@ export type DrilldownDefinition<
     /**
      * Compatibility check during drilldown execution
      */
-    isCompatible?: (
-      drilldownState: TDrilldownState,
-      context: ExecutionContext
-    ) => Promise<boolean>;
+    isCompatible?: (drilldownState: TDrilldownState, context: ExecutionContext) => Promise<boolean>;
 
     MenuItem?: FC<{
       drilldownState: TDrilldownState;

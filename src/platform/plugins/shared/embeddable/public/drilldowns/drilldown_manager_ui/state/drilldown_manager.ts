@@ -9,7 +9,7 @@
 
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs';
 import { useSyncObservable } from '../hooks/use_sync_observable';
 import type { DrilldownState } from '../../../../server/drilldowns/types';
@@ -44,14 +44,9 @@ export class DrilldownManager {
   public readonly factory: DrilldownFactory;
 
   /**
-   * User entered name of this drilldown.
+   * User entered drilldown state.
    */
-  public readonly name$: BehaviorSubject<string>;
-
-  /**
-   * Whether the `name$` is valid or is in an error state.
-   */
-  public readonly nameError$: Observable<string | undefined>;
+  public readonly state$: BehaviorSubject<Partial<DrilldownState>>;
 
   /**
    * List of all triggers from which the user can pick in UI for this specific
@@ -62,28 +57,8 @@ export class DrilldownManager {
   public readonly uiTriggers: string[];
 
   /**
-   * User selected trigger.
-   */
-  public readonly trigger$: BehaviorSubject<string | undefined>;
-
-  /**
-   * Error identifier, in case `trigger$` is in an error state.
-   */
-  public readonly triggerError$: Observable<string | undefined>;
-
-  /**
-   * Current drilldown configuration
-   */
-  public readonly config$: BehaviorSubject<{}>;
-
-  /**
-   * Error identifier, in case `config$` is in an error state.
-   */
-  public readonly configError$: Observable<string | undefined>;
-
-  /**
-   * Whether the drilldown state is in an error and should not be saved. I value
-   * is `undefined`, there is no error.
+   * Whether the drilldown state is in an error and should not be saved. Value
+   * is `undefined` when there is no error.
    */
   public readonly error$: Observable<string | undefined>;
 
@@ -94,77 +69,54 @@ export class DrilldownManager {
     initialState,
   }: DrilldownManagerDeps) {
     this.factory = factory;
-    // this.placeContext = placeContext;
-    const { label, trigger, type, ...config } = initialState ?? {};
-    this.name$ = new BehaviorSubject<string>(label ?? '');
-    this.trigger$ = new BehaviorSubject<string | undefined>(trigger);
-    this.config$ = new BehaviorSubject<Partial<DrilldownState>>(config);
+    this.state$ = new BehaviorSubject<Partial<DrilldownState>>(initialState ?? {});
 
     this.uiTriggers = this.factory.supportedTriggers.filter((t) => triggers.includes(t));
 
     // Pre-select a trigger if there is only one trigger for user to choose from.
     // In case there is only one possible trigger, UI will not display a trigger picker.
-    if (this.uiTriggers.length === 1) this.trigger$.next(this.uiTriggers[0]);
+    if (this.uiTriggers.length === 1)
+      this.state$.next({
+        ...initialState,
+        trigger: this.uiTriggers[0],
+      });
 
-    this.nameError$ = this.name$.pipe(
-      map((currentName) => {
-        if (!currentName) return 'NAME_EMPTY';
+    this.error$ = this.state$.pipe(
+      map((currentState) => {
+        if (!currentState.label) return 'NAME_EMPTY';
+        if (!currentState.trigger) return 'NO_TRIGGER_SELECTED';
+        if (!this.factory.isStateValid(currentState)) return 'INVALID_CONFIG';
         return undefined;
       })
-    );
-
-    this.triggerError$ = this.trigger$.pipe(
-      map((currentTrigger) => {
-        if (!currentTrigger) return 'NO_TRIGGER_SELECTED';
-        return undefined;
-      })
-    );
-
-    this.configError$ = this.config$.pipe(
-      map((currentConfig) => {
-        if (!this.factory.isStateValid(currentConfig)) return 'INVALID_CONFIG';
-        return undefined;
-      })
-    );
-
-    this.error$ = combineLatest([this.nameError$, this.triggerError$, this.configError$]).pipe(
-      map(
-        ([nameError, configError, triggerError]) =>
-          nameError || triggerError || configError || undefined
-      )
     );
   }
 
   /**
-   * Change the name of the drilldown.
+   * Set drilldown label.
    */
-  public readonly setName = (name: string): void => {
-    this.name$.next(name);
+  public readonly setLabel = (label: string): void => {
+    this.state$.next({
+      ...this.state$.getValue(),
+      label,
+    });
   };
 
   /**
    * Change the selected trigger.
    */
   public readonly setTrigger = (trigger: string): void => {
-    this.trigger$.next(trigger);
+    this.state$.next({
+      ...this.state$.getValue(),
+      trigger,
+    });
   };
 
   /**
    * Update the current drilldown configuration.
    */
-  public readonly setConfig = (state: Partial<DrilldownState>): void => {
-    const { label, type, trigger, ...config } = state;
-    this.config$.next(config);
+  public readonly setState = (state: Partial<DrilldownState>): void => {
+    this.state$.next(state);
   };
-
-  /*
-  public getFactoryContext(): BaseActionFactoryContext {
-    return {
-      ...this.placeContext,
-      triggers: this.triggers$.getValue(),
-    };
-  }
-  */
 
   /**
    * Serialize the current drilldown draft into a serializable action which
@@ -172,24 +124,21 @@ export class DrilldownManager {
    */
   public serialize(): DrilldownState {
     return {
-      ...this.config$.getValue(),
-      label: this.name$.getValue(),
-      trigger: this.trigger$.getValue()!,
+      label: '',
+      trigger: '',
+      ...this.state$.getValue(),
       type: this.factory.type,
     };
   }
 
   public isValid(): boolean {
-    if (!this.name$.getValue()) return false;
-    if (!this.trigger$.getValue()) return false;
-    return this.factory.isStateValid(this.config$.getValue());
+    const state = this.state$.getValue();
+    return Boolean(state.label) && Boolean(state.trigger) && this.factory.isStateValid(state);
   }
 
   // Below are convenience React hooks for consuming observables in connected
   // React components.
 
-  public readonly useName = () => useObservable(this.name$, this.name$.getValue());
-  public readonly useTrigger = () => useObservable(this.trigger$, this.trigger$.getValue());
-  public readonly useConfig = () => useObservable(this.config$, this.config$.getValue());
+  public readonly useState = () => useObservable(this.state$, this.state$.getValue());
   public readonly useError = () => useSyncObservable(this.error$);
 }
