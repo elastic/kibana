@@ -1152,7 +1152,6 @@ x-pack/platform/test/plugin_api_integration/plugins/event_log @elastic/response-
 x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
 x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-ops
 x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
-x-pack/platform/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture @elastic/response-ops
 x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes @elastic/response-ops
 x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
@@ -1456,6 +1455,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/services/esql.ts @elastic/kibana-esql
 /src/platform/test/functional/page_objects/index_editor.ts @elastic/kibana-esql
 /src/platform/packages/shared/kbn-monaco/src/languages/esql @elastic/kibana-esql
+/src/platform/packages/shared/kbn-monaco/src/languages/promql @elastic/kibana-esql
 x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions @elastic/obs-exploration-team
 
 # Global Experience
@@ -2416,6 +2416,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/**
 src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/workchat-eng
@@ -3180,7 +3181,6 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/accessibility/apps/home.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077237
 /src/platform/test/api_integration/apis/home/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840077065
 /src/platform/test/functional/apps/home @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/199771/files#r1840075278
-/x-pack/platform/test/plugin_functional/plugins/global_search_test @elastic/appex-sharedux
 /src/platform/test/functional/services/saved_objects_finder.ts @elastic/appex-sharedux
 /src/platform/test/functional/apps/kibana_overview @elastic/appex-sharedux
 /x-pack/platform/test/functional_cloud @elastic/appex-sharedux
@@ -3264,10 +3264,21 @@ x-pack/platform/test/moon.yml @elastic/kibana-operations
 x-pack/solutions/observability/test/moon.yml @elastic/kibana-operations
 x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 
-# Leads approval
+# These files influence agent behavior and are loaded into every new agent session.
+# Changes here can have repo-wide impact (what instructions/tools/context an agent sees), so require
+# tech lead review by default.
 /AGENTS.md @elastic/kibana-tech-leads
 .cursorignore @elastic/kibana-tech-leads
 /.claude/ @elastic/kibana-tech-leads
+/.agent/skills/ @elastic/kibana-tech-leads
+
+# Delegate day-to-day edits of currently-existing skills to the QA team without requiring tech lead
+# codeowner review. Any new skill directory will fall back to the `/.agent/skills/` rule above.
+/.agent/skills/ftr-testing/** @elastic/appex-qa
+/.agent/skills/scout-best-practices-reviewer/** @elastic/appex-qa
+/.agent/skills/scout-create-scaffold/** @elastic/appex-qa
+/.agent/skills/scout-migrate-from-ftr/** @elastic/appex-qa
+/.agent/skills/scout-testing/** @elastic/appex-qa
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
