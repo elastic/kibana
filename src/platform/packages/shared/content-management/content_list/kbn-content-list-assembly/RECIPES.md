@@ -10,10 +10,11 @@ Copy-paste patterns for common assembly tasks. Every recipe uses the same fictio
 - [3. Create a part with presets and a base component](#3-create-a-part-with-presets-and-a-base-component)
 - [4. Build a compound component namespace](#4-build-a-compound-component-namespace)
 - [5. Parse children and filter by part](#5-parse-children-and-filter-by-part)
-- [6. Resolve presets with `resolve`](#6-resolve-presets-with-resolve)
-- [7. Resolve with runtime context](#7-resolve-with-runtime-context)
-- [8. Tag an existing component with `tagComponent`](#8-tag-an-existing-component-with-tagcomponent)
-- [9. Test declarative components](#9-test-declarative-components)
+- [6. Render passthrough React node children](#6-render-passthrough-react-node-children)
+- [7. Resolve presets with `resolve`](#7-resolve-presets-with-resolve)
+- [8. Resolve with runtime context](#8-resolve-with-runtime-context)
+- [9. Tag an existing component with `tagComponent`](#9-tag-an-existing-component-with-tagcomponent)
+- [10. Test declarative components](#10-test-declarative-components)
 
 ---
 
@@ -339,7 +340,74 @@ const parseButtons = (children: ReactNode): ParsedPart[] => {
 
 ---
 
-## 6. Resolve presets with `resolve`
+## 6. Render passthrough React node children
+
+Recipe 5 showed that `assembly.parseChildren()` returns `ParsedChild` items (`{ type: 'child', node }`) for non-part children. The renderer decides what to do with them: render them in place, reposition them, or ignore them.
+
+This recipe shows a complete `ActionBar` that renders arbitrary React nodes alongside its button parts, in source order.
+
+### Renderer implementation
+
+Use `assembly.parseChildren()` (not `part.parseChildren()`) to get the full interleaved result. Pass `{ supportsOtherChildren: true }` to suppress the dev-mode warning for unrecognized function components, since this renderer intentionally supports them.
+
+```tsx
+// action_bar/action_bar.tsx
+import type { FC, ReactNode } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { actionBar } from './assembly';
+import { button } from './button/part';
+
+interface ActionBarProps {
+  children?: ReactNode;
+}
+
+const ActionBarComponent: FC<ActionBarProps> = ({ children }) => {
+  const items = actionBar.parseChildren(children, { supportsOtherChildren: true });
+
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      {items.map((item, i) => {
+        // Render non-part children in their source-order position.
+        if (item.type === 'child') {
+          return <EuiFlexItem key={`child-${i}`} grow={false}>{item.node}</EuiFlexItem>;
+        }
+
+        // Resolve and render button parts.
+        const rendered = button.resolve(item);
+        if (!rendered) return null;
+
+        return (
+          <EuiFlexItem key={item.instanceId} grow={false}>
+            {rendered}
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
+  );
+};
+```
+
+### Consumer usage
+
+Regular React elements mix freely with declarative parts. JSX order determines render order.
+
+```tsx
+import { EuiText } from '@elastic/eui';
+
+const { Button } = ActionBar;
+
+<ActionBar>
+  <Button.Save onClick={handleSave} />
+  <EuiText size="s" color="subdued">Changes will be published immediately.</EuiText>
+  <Button.Delete onClick={handleDelete} />
+</ActionBar>
+```
+
+The `<EuiText>` renders between the two buttons, exactly where it appears in JSX.
+
+---
+
+## 7. Resolve presets with `resolve`
 
 With `resolve`, each preset's transformation logic is co-located with its definition. The assembly dispatches automatically -- no manual `Record` map or casts needed in consumer code. Register a `resolve` callback on `createComponent` to handle custom parts too.
 
@@ -382,9 +450,9 @@ for (const part of parts) {
 
 ---
 
-## 7. Resolve with runtime context
+## 8. Resolve with runtime context
 
-Recipe 6 shows `resolve` for the simple case: attributes in, JSX out. But when the output is a data structure (not JSX) and the builder needs runtime state from hooks -- like provider configuration or feature flags -- pass that state as `TContext`. The assembly component assembles context from hooks and hands it to `resolve` at call time.
+Recipe 7 shows `resolve` for the simple case: attributes in, JSX out. But when the output is a data structure (not JSX) and the builder needs runtime state from hooks -- like provider configuration or feature flags -- pass that state as `TContext`. The assembly component assembles context from hooks and hands it to `resolve` at call time.
 
 **When to use context:**
 - `TOutput` is a data structure (e.g., `EuiBasicTableColumn`), not `ReactNode`.
@@ -470,7 +538,7 @@ When `TContext` is `void` (the default), `resolve` requires no second argument.
 
 ---
 
-## 8. Tag an existing component with `tagComponent`
+## 9. Tag an existing component with `tagComponent`
 
 Use `tagComponent` when a component is **defined in another module** and you need to add assembly metadata to it. This is common when a declarative component is shared across multiple assemblies -- each assembly tags the same component with its own symbol, and the symbols don't collide because they're keyed by assembly name.
 
@@ -511,7 +579,7 @@ Each assembly writes its own symbol key (`kbn.Toolbar.part`, `kbn.Table.part`), 
 
 ---
 
-## 9. Test declarative components
+## 10. Test declarative components
 
 Verify that declarative components parse correctly, generate the right instance IDs, and carry the expected attributes. Test three things: identification, parsing, and resolution.
 

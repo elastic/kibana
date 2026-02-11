@@ -7,10 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isValidElement } from 'react';
 import type { FC, ReactNode } from 'react';
 import type { ParsedItem, ParsedPart } from './parsing';
 import { parseDeclarativeChildren } from './parsing';
 import { createDeclarativeComponent, tagDeclarativeComponent } from './factory';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Dev-mode warning helper
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Dev-mode helper: warns for function component children that are not
+ * registered parts. Only checks `{ type: 'child' }` items whose `node`
+ * is a React element with a function component type. Intrinsic HTML
+ * elements (e.g., `<div>`) are ignored.
+ *
+ * @param items - Parsed items from `parseDeclarativeChildren`.
+ * @param assemblyName - The assembly name for the warning prefix.
+ * @param scope - The scope name (part or assembly) for the warning message.
+ */
+const warnOnPassthroughComponents = (
+  items: ParsedItem[],
+  assemblyName: string,
+  scope: string
+): void => {
+  if (process.env.NODE_ENV !== 'production') {
+    for (const item of items) {
+      if (
+        item.type === 'child' &&
+        isValidElement(item.node) &&
+        typeof item.node.type === 'function'
+      ) {
+        const name =
+          (item.node.type as unknown as { displayName?: string }).displayName ||
+          item.node.type.name ||
+          'Unknown';
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[${assemblyName}] <${name}> is not a registered "${scope}" part and may not be rendered.`
+        );
+      }
+    }
+  }
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PartFactory
@@ -32,7 +72,7 @@ import { createDeclarativeComponent, tagDeclarativeComponent } from './factory';
  *   need ambient state that isn't part of the declared attributes -- for example,
  *   provider configuration, feature flags, or locale. The assembly component
  *   assembles the context from hooks and passes it to `resolve` at call time.
- *   See Recipe 7 in `RECIPES.md` for a worked example.
+ *   See Recipe 8 in `RECIPES.md` for a worked example.
  */
 export interface PartFactory<
   TPresetMap extends object = Record<string, unknown>,
@@ -179,10 +219,22 @@ export interface AssemblyFactory<TName extends string = string> {
    * All part types in the assembly are matched in a single pass.
    * Filter by `item.part` to scope to a specific part type.
    *
+   * In development, warns for function component children that are not
+   * registered parts. Pass `{ supportsOtherChildren: true }` to suppress
+   * the warning when the renderer intentionally handles non-part children.
+   *
    * @param children - React children to parse.
+   * @param options - Optional parsing options.
+   * @param options.supportsOtherChildren - When `true`, suppresses the
+   *   dev-mode warning for unrecognized function component children.
+   *   Use this when the assembly renderer intentionally renders
+   *   non-part children.
    * @returns Flat array of parsed items in source order.
    */
-  parseChildren: (children: ReactNode) => ParsedItem[];
+  parseChildren: (
+    children: ReactNode,
+    options?: { supportsOtherChildren?: boolean }
+  ) => ParsedItem[];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -228,8 +280,16 @@ export const defineAssembly = <const TName extends string>(config: {
 }): AssemblyFactory<TName> => ({
   name: config.name,
 
-  parseChildren: (children: ReactNode): ParsedItem[] =>
-    parseDeclarativeChildren(children, config.name),
+  parseChildren: (
+    children: ReactNode,
+    options?: { supportsOtherChildren?: boolean }
+  ): ParsedItem[] => {
+    const items = parseDeclarativeChildren(children, config.name);
+    if (!options?.supportsOtherChildren) {
+      warnOnPassthroughComponents(items, config.name, config.name);
+    }
+    return items;
+  },
 
   definePart: <
     TPresetMap extends object = Record<string, unknown>,
@@ -279,11 +339,24 @@ export const defineAssembly = <const TName extends string>(config: {
         if (resolver) return resolver(part.attributes, context);
 
         // Fall back to the custom component resolver.
-        return customResolver ? customResolver(part.attributes, context) : undefined;
+        if (customResolver) return customResolver(part.attributes, context);
+
+        if (process.env.NODE_ENV !== 'production') {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[${config.name}] No resolver found for part "${partDefinition.name}"` +
+              (part.preset ? ` preset "${part.preset}"` : '') +
+              `. If this part was wrapped with React.memo() or an HOC, ensure static properties are hoisted.`
+          );
+        }
+
+        return undefined;
       },
 
       parseChildren: (children: ReactNode): ParsedPart[] => {
         const items = parseDeclarativeChildren(children, config.name);
+        warnOnPassthroughComponents(items, config.name, partDefinition.name);
+
         return items.filter(
           (item): item is ParsedPart => item.type === 'part' && item.part === partDefinition.name
         );

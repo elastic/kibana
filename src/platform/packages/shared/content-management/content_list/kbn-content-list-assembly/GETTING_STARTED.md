@@ -9,6 +9,7 @@
 - [Mental model](#mental-model)
 - [Walkthrough: adding a pre-built column to an existing assembly](#walkthrough-adding-a-pre-built-column-to-an-existing-assembly)
 - [Walkthrough: building a new assembly from scratch](#walkthrough-building-a-new-assembly-from-scratch)
+- [Common pitfalls](#common-pitfalls)
 - [What to read next](#what-to-read-next)
 
 ## What is a declarative component?
@@ -299,6 +300,25 @@ const { Button } = ActionBar;
   <Button.Delete onClick={handleDelete} />
 </ActionBar>
 ```
+
+## Common pitfalls
+
+### Do not wrap declarative components with `React.memo()` or HOCs
+
+Declarative components carry their identity via static `Symbol.for()` properties on the function object. Wrappers like `React.memo()`, `forwardRef()`, and higher-order components create a new function that does not carry those statics, causing the component to silently disappear from the assembly output.
+
+Since declarative components return `null` and have no render cost, `React.memo()` provides no benefit anyway. If you must use an HOC, use `hoist-non-react-statics` or manually copy the Symbol properties.
+
+In development, a console warning will appear if a part has no resolver, which can help diagnose this issue.
+
+### Non-part children are supported
+
+Assemblies can accept regular React nodes alongside declarative parts. `assembly.parseChildren()` preserves non-part children as `{ type: 'child', node }` items in source order, and the renderer decides what to do with them -- render them inline, reposition them, or ignore them. See Recipe 6 for a worked example.
+
+The two parsing helpers handle non-part children differently:
+
+- **`assembly.parseChildren()`** -- returns the full interleaved result including non-part children. In development, it warns for unrecognized function component children by default. If your renderer handles non-part children intentionally, pass `{ supportsOtherChildren: true }` to suppress the warning.
+- **`part.parseChildren()`** -- filters to only matching parts and discards everything else. In development, it warns for function component children that are being discarded, since these are the most likely to be placed accidentally.
 
 ## What to read next
 

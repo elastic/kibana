@@ -68,7 +68,9 @@ export const useColumns = (children: ReactNode): Array<EuiBasicTableColumn<Conte
     return parts
       .map((part) => column.resolve(part, context))
       .filter((col): col is EuiBasicTableColumn<ContentListItem> => col !== undefined);
-    // Note: `children` is a new reference on every parent render, so this memo
-    // primarily guards against changes to the context deps (`itemConfig`, etc.).
-  }, [children, itemConfig, isReadOnly, labels.entity, supports]);
+    // `children` is intentionally excluded: JSX children create a new reference on every
+    // parent render, so including them would defeat memoization. Re-running when context
+    // deps change is sufficient.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemConfig, isReadOnly, labels.entity, supports]);
 };

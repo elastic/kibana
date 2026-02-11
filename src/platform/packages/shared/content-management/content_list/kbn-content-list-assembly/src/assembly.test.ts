@@ -210,7 +210,8 @@ describe('resolve', () => {
     expect(result).toEqual({ field: 'title', label: 'Col: Title' });
   });
 
-  it('should return `undefined` for a preset without a resolver.', () => {
+  it('should return `undefined` and warn for a preset without a resolver.', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const part = {
       type: 'part' as const,
       part: 'column',
@@ -220,9 +221,14 @@ describe('resolve', () => {
     };
     const result = column.resolve(part, { prefix: 'Col' });
     expect(result).toBeUndefined();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('No resolver found for part "column" preset "sort"')
+    );
+    warnSpy.mockRestore();
   });
 
-  it('should return `undefined` for a part without a preset.', () => {
+  it('should return `undefined` and warn for a part without a preset.', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const part = {
       type: 'part' as const,
       part: 'column',
@@ -232,6 +238,10 @@ describe('resolve', () => {
     };
     const result = column.resolve(part, { prefix: 'Col' });
     expect(result).toBeUndefined();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('No resolver found for part "column"')
+    );
+    warnSpy.mockRestore();
   });
 });
 
@@ -307,6 +317,36 @@ describe('part.parseChildren', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual(expect.objectContaining({ type: 'part', part: 'column' }));
+  });
+
+  it('should warn for function component children that are not registered parts.', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const UnknownComponent = (): null => null;
+    UnknownComponent.displayName = 'UnknownComponent';
+
+    const children = [
+      createElement(NameCol, { key: '1', label: 'Title' }),
+      createElement(UnknownComponent, { key: '2' }),
+    ];
+    column.parseChildren(children);
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '<UnknownComponent> is not a registered "column" part and may not be rendered'
+      )
+    );
+    warnSpy.mockRestore();
+  });
+
+  it('should not warn for intrinsic HTML element children.', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const div = createElement('div', { key: 'div' });
+
+    const children = [createElement(NameCol, { key: '1', label: 'Title' }), div];
+    column.parseChildren(children);
+
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 });
 
@@ -424,6 +464,7 @@ describe('assembly.parseChildren', () => {
   });
 
   it('should preserve interleaved order with passthrough children.', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     const div = createElement('div', { key: 'div' });
     const children = [
       createElement(NameCol, { key: '1', label: 'Title' }),
@@ -436,5 +477,51 @@ describe('assembly.parseChildren', () => {
     expect(result[0]).toEqual(expect.objectContaining({ type: 'part', part: 'column' }));
     expect(result[1]).toEqual(expect.objectContaining({ type: 'child' }));
     expect(result[2]).toEqual(expect.objectContaining({ type: 'part', part: 'spacer' }));
+    warnSpy.mockRestore();
+  });
+
+  it('should warn by default for function component children.', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const UnknownComponent = (): null => null;
+    UnknownComponent.displayName = 'MyCallout';
+
+    const children = [
+      createElement(NameCol, { key: '1', label: 'Title' }),
+      createElement(UnknownComponent, { key: '2' }),
+    ];
+    asm.parseChildren(children);
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        `<MyCallout> is not a registered "${assembly}" part and may not be rendered`
+      )
+    );
+    warnSpy.mockRestore();
+  });
+
+  it('should not warn when `supportsOtherChildren` is `true`.', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const UnknownComponent = (): null => null;
+    UnknownComponent.displayName = 'MyCallout';
+
+    const children = [
+      createElement(NameCol, { key: '1', label: 'Title' }),
+      createElement(UnknownComponent, { key: '2' }),
+    ];
+    asm.parseChildren(children, { supportsOtherChildren: true });
+
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+
+  it('should not warn for intrinsic HTML element passthrough children.', () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    const div = createElement('div', { key: 'div' });
+
+    const children = [createElement(NameCol, { key: '1', label: 'Title' }), div];
+    asm.parseChildren(children);
+
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 });
