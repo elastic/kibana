@@ -12,12 +12,13 @@ import { AbortMonitor } from './abort_monitor';
 
 const createMockExecutionClient = (
   overrides: Partial<AgentExecutionClient> = {}
-): jest.Mocked<AgentExecutionClient> => ({
-  create: jest.fn(),
-  get: jest.fn(),
-  updateStatus: jest.fn(),
-  ...overrides,
-});
+): jest.Mocked<AgentExecutionClient> =>
+  ({
+    create: jest.fn(),
+    get: jest.fn(),
+    updateStatus: jest.fn(),
+    ...overrides,
+  } as jest.Mocked<AgentExecutionClient>);
 
 describe('AbortMonitor', () => {
   let logger: MockedLogger;
