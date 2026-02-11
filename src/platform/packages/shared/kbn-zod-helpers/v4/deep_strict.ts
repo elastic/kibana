@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, NEVER } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import { difference, isArray, isPlainObject } from 'lodash';
 
 function getFlattenedKeys(obj: unknown, parentKey = '', keys: Set<string> = new Set()) {
@@ -20,43 +20,48 @@ function getFlattenedKeys(obj: unknown, parentKey = '', keys: Set<string> = new 
       getFlattenedKeys(value, parentKey, keys);
     });
   }
+
   keys.add(parentKey);
+
   return keys;
 }
 
 /**
  * Wraps a Zod schema to deeply reject any unrecognized keys in the input.
  *
- * This works by parsing the input with the given schema, then comparing the
- * flattened keys of the raw input against the flattened keys of the parsed
+ * This works by trial-parsing the input with the given schema, then comparing
+ * the flattened keys of the raw input against the flattened keys of the parsed
  * output. Any excess keys in the input will cause validation to fail.
+ *
+ * The actual parsing is done by piping through the original schema, so all
+ * schema-level errors are preserved.
  */
 export function DeepStrict<TSchema extends z.ZodType>(schema: TSchema) {
-  return z.unknown().transform((input, ctx) => {
-    const result = schema.safeParse(input);
+  return z.pipe(
+    z.unknown().check((ctx) => {
+      // Trial-parse to compare input vs output keys
+      const result = schema.safeParse(ctx.value);
 
-    if (!result.success) {
-      for (const issue of result.error.issues) {
-        ctx.addIssue(issue);
+      // If the schema itself rejects the input, skip the excess key check
+      // and let the pipe's second stage produce the proper schema errors.
+      if (!result.success) {
+        return;
       }
-      return NEVER;
-    }
 
-    const allInputKeys = Array.from(getFlattenedKeys(input));
-    const allOutputKeys = Array.from(getFlattenedKeys(result.data as Record<string, any>));
+      const allInputKeys = Array.from(getFlattenedKeys(ctx.value));
+      const allOutputKeys = Array.from(getFlattenedKeys(result.data as Record<string, any>));
 
-    const excessKeys = difference(allInputKeys, allOutputKeys);
+      const excessKeys = difference(allInputKeys, allOutputKeys);
 
-    if (excessKeys.length) {
-      ctx.addIssue({
-        code: 'unrecognized_keys',
-        keys: excessKeys,
-        input: input as Record<string, unknown>,
-        message: `Excess keys are not allowed`,
-      });
-      return NEVER;
-    }
-
-    return result.data as z.output<TSchema>;
-  });
+      if (excessKeys.length) {
+        ctx.issues.push({
+          code: 'unrecognized_keys',
+          keys: excessKeys,
+          input: ctx.value as Record<string, unknown>,
+          message: `Excess keys are not allowed`,
+        });
+      }
+    }),
+    schema
+  );
 }

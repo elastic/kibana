@@ -66,7 +66,10 @@ export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
 );
 
 export const querySchema: z.ZodType<QueryDslQueryContainer> = z.lazy(() =>
-  z.record(z.union([primitive, z.array(z.union([primitive, querySchema])), querySchema]))
+  z.record(
+    z.string(),
+    z.union([primitive, z.array(z.union([primitive, querySchema])), querySchema])
+  )
 );
 
 export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryKqlSchema;

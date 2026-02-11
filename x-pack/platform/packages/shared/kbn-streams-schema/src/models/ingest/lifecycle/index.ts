@@ -109,8 +109,16 @@ export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.un
 export const classicIngestStreamEffectiveLifecycleSchema: z.Schema<ClassicIngestStreamEffectiveLifecycle> =
   z.union([ingestStreamLifecycleSchema, disabledLifecycleSchema, errorLifecycleSchema]);
 
+const nonEmptyStringSchema = z
+  .string()
+  .nonempty()
+  .refine((val) => val.trim() !== '', 'No empty strings allowed');
+
 export const wiredIngestStreamEffectiveLifecycleSchema: z.Schema<WiredIngestStreamEffectiveLifecycle> =
-  z.union([dslLifecycleSchema, ilmLifecycleSchema]).and(z.object({ from: NonEmptyString }));
+  z.union([
+    dslLifecycleSchema.extend({ from: nonEmptyStringSchema }),
+    ilmLifecycleSchema.extend({ from: nonEmptyStringSchema }),
+  ]);
 
 export const ingestStreamEffectiveLifecycleSchema: z.Schema<IngestStreamEffectiveLifecycle> =
   z.union([classicIngestStreamEffectiveLifecycleSchema, wiredIngestStreamEffectiveLifecycleSchema]);

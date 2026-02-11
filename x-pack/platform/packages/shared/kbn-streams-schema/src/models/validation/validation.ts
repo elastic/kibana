@@ -17,18 +17,14 @@ function createIs<TLeft, TRight extends TLeft>(
   _base: z.Schema<TLeft>,
   narrow: z.Schema<TRight>
 ): Is<TLeft, TRight> {
-  return (value: TLeft): value is TRight => {
-    return narrow.safeParse(value).success;
-  };
+  return (value: TLeft): value is TRight => narrow.safeParse(value).success;
 }
 
 function createAs<TLeft, TRight extends TLeft>(
   _base: z.Schema<TLeft>,
   _narrow: z.Schema<TRight>
 ): As<TLeft, TRight> {
-  return (value: TRight): TRight => {
-    return value;
-  };
+  return (value: TRight): TRight => value;
 }
 
 function createAsserts<TLeft, TRight extends TLeft>(
@@ -37,6 +33,7 @@ function createAsserts<TLeft, TRight extends TLeft>(
 ): Asserts<TLeft, TRight> {
   return (value: TLeft) => {
     narrow.parse(value);
+
     return true;
   };
 }
@@ -45,9 +42,7 @@ function createParse<TLeft, TRight extends TLeft>(
   _base: z.Schema<TLeft>,
   narrow: z.Schema<TRight>
 ): Parse<TLeft, TRight> {
-  return (value: TLeft): TRight => {
-    return narrow.parse(value);
-  };
+  return (value: TLeft): TRight => narrow.parse(value);
 }
 
 export interface Validation<TLeft = any, TRight extends TLeft = any> {
@@ -64,6 +59,7 @@ export function validation<TLeft, TRight extends TLeft>(
   right: z.Schema<TRight>
 ): Validation<TLeft, TRight> {
   const strict = DeepStrict(right);
+
   return {
     is: createIs(left, strict),
     as: createAs(left, strict),
