@@ -12,9 +12,16 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import type { ChatEvent } from '@kbn/agent-builder-common';
+import type {
+  ChatEvent,
+  ConverseInput,
+  AgentCapabilities,
+  AgentConfigurationOverrides,
+  BrowserApiToolMetadata,
+} from '@kbn/agent-builder-common';
 import { agentBuilderDefaultAgentId, isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
@@ -84,7 +91,6 @@ export const buildAgentEventStream = async ({
   } = execution.agentParams;
 
   const { logger, trackingService, analyticsService } = deps;
-  const requestId = trackingService?.trackQueryStart();
 
   // Resolve scoped services
   const services = await resolveServices({
@@ -119,7 +125,6 @@ export const buildAgentEventStream = async ({
     selectedConnectorId: services.selectedConnectorId,
     browserApiTools,
     configurationOverrides,
-    requestId,
     agentService: deps.agentService,
     logger,
     trackingService,
@@ -257,7 +262,6 @@ const buildEventStream = ({
   selectedConnectorId,
   browserApiTools,
   configurationOverrides,
-  requestId,
   agentService,
   logger,
   trackingService,
@@ -265,8 +269,8 @@ const buildEventStream = ({
 }: {
   agentId: string;
   request: KibanaRequest;
-  nextInput: any;
-  capabilities: any;
+  nextInput: ConverseInput;
+  capabilities?: AgentCapabilities;
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
   storeConversation: boolean;
@@ -274,11 +278,10 @@ const buildEventStream = ({
   conversation: ConversationWithOperation;
   conversationId?: string;
   conversationClient: ConversationClient;
-  chatModel: any;
+  chatModel: InferenceChatModel;
   selectedConnectorId: string;
-  browserApiTools: any;
-  configurationOverrides: any;
-  requestId: string | undefined;
+  browserApiTools?: BrowserApiToolMetadata[];
+  configurationOverrides?: AgentConfigurationOverrides;
   agentService: AgentsServiceStart;
   logger: Logger;
   trackingService?: TrackingService;
