@@ -12,10 +12,8 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/logging",
     "@kbn/config-schema",
     "@kbn/anonymization-common",
-    "@kbn/zod",
     "@kbn/encrypted-saved-objects-plugin"
   ]
 }
