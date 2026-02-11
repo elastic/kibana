@@ -93,7 +93,7 @@ while read -r mode; do
 
   # prevent non-zero exit code from breaking the loop
   set +e;
-  node scripts/scout run-tests "$mode" --config "$config_path" --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+  node scripts/scout run-tests $mode --config "$config_path" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
   EXIT_CODE=$?
   set -e;
 
