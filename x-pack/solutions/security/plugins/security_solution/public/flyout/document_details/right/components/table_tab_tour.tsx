@@ -75,8 +75,9 @@ export const TableTabTour = ({
   setIsPopoverOpen: (isPopoverOpen: boolean) => void;
 }) => {
   const {
-    services: { storage },
+    services: { storage, notifications },
   } = useKibana();
+  const isTourEnabled = notifications.tours.isEnabled();
 
   const [state, setState] = useState(() => {
     const initialState = storage.get(FLYOUT_STORAGE_KEYS.TABLE_TAB_TOUR);
@@ -103,7 +104,7 @@ export const TableTabTour = ({
     setIsPopoverOpen(false);
   }, [state, setIsPopoverOpen, setState]);
 
-  if (!state.isTourActive) {
+  if (!state.isTourActive || !isTourEnabled) {
     return null;
   }
 

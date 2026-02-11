@@ -10,7 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnOperationWithLabelAndFormatSchema, esqlColumnSchema } from '../metric_ops';
-import { colorByValueSchema, colorMappingSchema, staticColorSchema } from '../color';
+import { colorMappingSchema, staticColorSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 
 import {
@@ -20,12 +20,19 @@ import {
   sharedPanelInfoSchema,
   legendTruncateAfterLinesSchema,
 } from '../shared';
-import { legendNestedSchema, legendVisibleSchema, valueDisplaySchema } from './partition_shared';
+import type { PartitionMetric } from './partition_shared';
+import {
+  legendNestedSchema,
+  legendVisibleSchema,
+  validateColoringAssignments,
+  valueDisplaySchema,
+} from './partition_shared';
 import {
   legendSizeSchema,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { groupIsNotCollapsed } from '../../utils';
 
 const treemapSharedStateSchema = {
   legend: schema.maybe(
@@ -67,15 +74,9 @@ const partitionStatePrimaryMetricOptionsSchema = {
 
 const partitionStateBreakdownByOptionsSchema = {
   /**
-   * Color configuration: static color, color by value, or color mapping
+   * Color configuration: color mapping only
    */
-  color: schema.maybe(
-    schema.oneOf([colorByValueSchema, colorMappingSchema], {
-      meta: {
-        description: 'Color configuration: static color, color by value, or color mapping',
-      },
-    })
-  ),
+  color: schema.maybe(colorMappingSchema),
   /**
    * Collapse by function. This parameter is used to collapse the
    * metric chart when the number of columns is bigger than the
@@ -90,18 +91,24 @@ const partitionStateBreakdownByOptionsSchema = {
   collapse_by: schema.maybe(collapseBySchema),
 };
 
-function validateGroupings(obj: {
-  metrics: unknown[];
-  group_by?: Array<{ collapse_by?: unknown }>;
+function validateForMultipleMetrics({
+  metrics,
+  group_by,
+}: {
+  metrics: Array<PartitionMetric>;
+  group_by?: Array<{ collapse_by?: string }>;
 }) {
-  if (obj.metrics.length > 1) {
-    if ((obj.group_by?.filter((def) => def.collapse_by == null).length ?? 0) > 1) {
-      return 'When using multiple metrics, the number of group by dimensions must not exceed 1 (collapsed dimensions do not count).';
+  const groupByDimensionNumber = (group_by && group_by.filter(groupIsNotCollapsed).length) || 0;
+  if (metrics.length === 1) {
+    if (groupByDimensionNumber > 2) {
+      return 'The number of non-collapsed group_by dimensions must not exceed 2';
+    }
+  } else {
+    if (groupByDimensionNumber > 1) {
+      return 'When multiple metrics are defined, the number of non-collapsed group_by dimensions must not exceed 1';
     }
   }
-  if ((obj.group_by?.filter((def) => def.collapse_by == null).length ?? 0) > 2) {
-    return 'The number of non-collapsed group by dimensions must not exceed 2.';
-  }
+  return validateColoringAssignments({ metrics, group_by });
 }
 
 export const treemapStateSchemaNoESQL = schema.object(
@@ -112,6 +119,7 @@ export const treemapStateSchemaNoESQL = schema.object(
     ...datasetSchema,
     ...dslOnlyPanelInfoSchema,
     ...treemapSharedStateSchema,
+    ...dslOnlyPanelInfoSchema,
     /**
      * Primary value configuration, must define operation. Supports field-based operations (count, unique count, metrics, sum, last value, percentile, percentile ranks), reference-based operations (differences, moving average, cumulative sum, counter rate), and formula-like operations (static value, formula).
      */
@@ -122,9 +130,7 @@ export const treemapStateSchemaNoESQL = schema.object(
       {
         minSize: 1,
         maxSize: 100,
-        meta: {
-          description: 'Array of metric configurations: minimum 1 (recommended).',
-        },
+        meta: { description: 'Array of metric configurations (minimum 1)' },
       }
     ),
     /**
@@ -136,9 +142,7 @@ export const treemapStateSchemaNoESQL = schema.object(
         {
           minSize: 1,
           maxSize: 100,
-          meta: {
-            description: 'Array of grouping dimensions (minimum 1, maximum 2 for non collapsed).',
-          },
+          meta: { description: 'Array of breakdown dimensions (minimum 1)' },
         }
       )
     ),
@@ -149,7 +153,7 @@ export const treemapStateSchemaNoESQL = schema.object(
       description:
         'Treemap chart configuration schema for data source queries (non-ES|QL mode), defining metrics and breakdown dimensions',
     },
-    validate: validateGroupings,
+    validate: validateForMultipleMetrics,
   }
 );
 
@@ -168,9 +172,7 @@ const treemapStateSchemaESQL = schema.object(
       {
         minSize: 1,
         maxSize: 100,
-        meta: {
-          description: 'Array of metric configurations: minimum 1 (recommended)',
-        },
+        meta: { description: 'Array of metric configurations (minimum 1)' },
       }
     ),
     /**
@@ -180,9 +182,7 @@ const treemapStateSchemaESQL = schema.object(
       schema.arrayOf(esqlColumnSchema.extends(partitionStateBreakdownByOptionsSchema), {
         minSize: 1,
         maxSize: 100,
-        meta: {
-          description: 'Array of grouping dimensions (minimum 1, maximum 2 for non collapsed).',
-        },
+        meta: { description: 'Array of breakdown dimensions (minimum 1)' },
       })
     ),
   },
@@ -192,14 +192,15 @@ const treemapStateSchemaESQL = schema.object(
       description:
         'Treemap chart configuration schema for ES|QL queries, defining metrics and breakdown dimensions using column-based configuration',
     },
-    validate: validateGroupings,
+    validate: validateForMultipleMetrics,
   }
 );
 
 export const treemapStateSchema = schema.oneOf([treemapStateSchemaNoESQL, treemapStateSchemaESQL], {
   meta: {
     id: 'treemapChartSchema',
-    description: 'Treemap chart configuration: DSL or ES|QL query based',
+    description:
+      'Treemap chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',
   },
 });
 

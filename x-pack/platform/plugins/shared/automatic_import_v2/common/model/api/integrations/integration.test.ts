@@ -8,6 +8,8 @@
 import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
 
 import {
+  ApproveAutoImportIntegrationRequestBody,
+  ApproveAutoImportIntegrationRequestParams,
   CreateAutoImportIntegrationRequestBody,
   CreateAutoImportIntegrationResponse,
   DeleteAutoImportIntegrationRequestParams,
@@ -44,6 +46,76 @@ describe('integration schemas', () => {
       },
     ],
     ...overrides,
+  });
+
+  describe('ApproveAutoImportIntegrationRequestParams', () => {
+    it('requires integration_id', () => {
+      const result = ApproveAutoImportIntegrationRequestParams.safeParse({});
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('integration_id: Required');
+    });
+
+    it('rejects empty integration_id', () => {
+      const payload = { integration_id: '   ' };
+      const result = ApproveAutoImportIntegrationRequestParams.safeParse(payload);
+      expectParseError(result);
+
+      expect(stringifyZodError(result.error)).toContain('integration_id: No empty strings allowed');
+    });
+
+    it('accepts valid params', () => {
+      const payload = { integration_id: 'integration-123' };
+      const result = ApproveAutoImportIntegrationRequestParams.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual(payload);
+    });
+
+    it('strips unknown properties', () => {
+      const payload = { integration_id: 'integration-123', unknown: 'property' };
+      const result = ApproveAutoImportIntegrationRequestParams.safeParse(payload);
+      expectParseSuccess(result);
+      expect(result.data).toEqual({ integration_id: 'integration-123' });
+    });
+  });
+
+  describe('ApproveAutoImportIntegrationRequestBody', () => {
+    const validPayload = {
+      version: '1.0.0',
+    };
+
+    it('accepts a valid payload', () => {
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(validPayload);
+      expectParseSuccess(result);
+    });
+
+    it('requires version', () => {
+      const payload = { ...validPayload };
+      delete (payload as any).version;
+
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toContain('version: Required');
+    });
+
+    it('rejects empty version', () => {
+      const payload = { ...validPayload, version: '   ' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+      expect(stringifyZodError(result.error)).toContain('version: No empty strings allowed');
+    });
+
+    it('accepts non-semver version strings', () => {
+      const payload = { ...validPayload, version: 'build-2026-01-29' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseSuccess(result);
+    });
+
+    it('rejects unknown properties', () => {
+      const payload = { ...validPayload, unknown: 'property' };
+      const result = ApproveAutoImportIntegrationRequestBody.safeParse(payload);
+      expectParseError(result);
+    });
   });
 
   describe('CreateAutoImportIntegrationRequestBody', () => {
@@ -708,7 +780,14 @@ describe('integration schemas', () => {
     });
 
     it('accepts all valid task status values', () => {
-      const statuses = ['pending', 'processing', 'completed', 'failed', 'cancelled'] as const;
+      const statuses = [
+        'pending',
+        'processing',
+        'completed',
+        'approved',
+        'failed',
+        'cancelled',
+      ] as const;
 
       statuses.forEach((status) => {
         const payload = [

@@ -464,22 +464,8 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const styles = useMemo(
     () =>
-      esqlEditorStyles(
-        theme.euiTheme,
-        editorHeight,
-        Boolean(editorMessages.errors.length),
-        Boolean(editorMessages.warnings.length),
-        Boolean(editorIsInline),
-        Boolean(hasOutline)
-      ),
-    [
-      theme.euiTheme,
-      editorHeight,
-      editorMessages.errors.length,
-      editorMessages.warnings.length,
-      editorIsInline,
-      hasOutline,
-    ]
+      esqlEditorStyles(theme.euiTheme, editorHeight, Boolean(editorIsInline), Boolean(hasOutline)),
+    [theme.euiTheme, editorHeight, editorIsInline, hasOutline]
   );
 
   const onMouseDownResize = useCallback<typeof onMouseDownResizeHandler>(
@@ -1016,7 +1002,7 @@ const ESQLEditorInternal = function ESQLEditor({
           ${lookupIndexBadgeStyle}
         `}
       />
-      {Boolean(editorIsInline) && (
+      {Boolean(editorIsInline) && (formLabel || !hideRunQueryButton) ? (
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}
@@ -1026,8 +1012,8 @@ const ESQLEditorInternal = function ESQLEditor({
             padding: ${theme.euiTheme.size.s} 0;
           `}
         >
-          <EuiFlexItem grow={false}>
-            {formLabel && (
+          {formLabel && (
+            <EuiFlexItem grow={false}>
               <EuiFormLabel
                 isFocused={labelInFocus && !isDisabled}
                 isDisabled={isDisabled}
@@ -1044,10 +1030,10 @@ const ESQLEditorInternal = function ESQLEditor({
               >
                 {formLabel}
               </EuiFormLabel>
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {!hideRunQueryButton && (
+            </EuiFlexItem>
+          )}
+          {!hideRunQueryButton && (
+            <EuiFlexItem grow={false}>
               <EuiToolTip
                 position="top"
                 content={i18n.translate('esqlEditor.query.runQuery', {
@@ -1067,10 +1053,10 @@ const ESQLEditorInternal = function ESQLEditor({
                   {queryRunButtonProperties.label}
                 </EuiButton>
               </EuiToolTip>
-            )}
-          </EuiFlexItem>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
-      )}
+      ) : null}
       <EuiFlexGroup
         gutterSize="none"
         css={{
@@ -1203,6 +1189,17 @@ const ESQLEditorInternal = function ESQLEditor({
           </EuiFlexItem>
         </div>
       </EuiFlexGroup>
+      {!hideQuickSearch && (
+        <QuickSearchVisor
+          query={code}
+          isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
+          isVisible={isVisorOpen}
+          onUpdateAndSubmitQuery={(newQuery) =>
+            onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
+          }
+          onToggleVisor={onToggleVisor}
+        />
+      )}
       {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (
         <ResizableButton
           onMouseDownResizeHandler={(mouseDownEvent) => {
@@ -1223,18 +1220,6 @@ const ESQLEditorInternal = function ESQLEditor({
               setResizableContainerHeight
             )
           }
-        />
-      )}
-      {!hideQuickSearch && (
-        <QuickSearchVisor
-          query={code}
-          isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
-          isVisible={isVisorOpen}
-          onUpdateAndSubmitQuery={(newQuery) => {
-            onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH);
-            editorRef.current?.focus();
-          }}
-          onToggleVisor={onToggleVisor}
         />
       )}
       <EditorFooter

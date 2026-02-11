@@ -6,6 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
+import { API_BASE_PATH } from '../../common/constants';
 import type { ClusterDetails, CloudConnectApiConfig } from '../types';
 import {
   type UseRequestConfig,
@@ -14,8 +15,6 @@ import {
   sendRequest as _sendRequest,
   useRequest as _useRequest,
 } from '../shared_imports';
-
-const API_BASE_PATH = '/internal/cloud_connect';
 
 export interface UpdateServicesResponse {
   success: boolean;
@@ -31,6 +30,11 @@ export interface AuthenticateResponse {
 }
 
 export interface DisconnectClusterResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface RotateApiKeyResponse {
   success: boolean;
   message: string;
 }
@@ -82,6 +86,20 @@ export class CloudConnectApiService {
     return await this.sendRequest<DisconnectClusterResponse>({
       path: `${API_BASE_PATH}/cluster`,
       method: 'delete',
+    });
+  }
+
+  public async rotateApiKey() {
+    return await this.sendRequest<RotateApiKeyResponse>({
+      path: `${API_BASE_PATH}/cluster/rotate_api_key`,
+      method: 'post',
+    });
+  }
+
+  public async rotateServiceApiKey(serviceKey: string) {
+    return await this.sendRequest<RotateApiKeyResponse>({
+      path: `${API_BASE_PATH}/cluster/${serviceKey}/rotate_api_key`,
+      method: 'post',
     });
   }
 }
