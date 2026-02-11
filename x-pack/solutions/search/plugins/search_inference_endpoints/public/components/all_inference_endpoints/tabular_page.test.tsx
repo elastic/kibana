@@ -13,9 +13,6 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { TabularPage } from './tabular_page';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { type FilterOptions, GroupByOptions, type QueryParams } from '../../types';
-import { useAllInferenceEndpointsState } from '../../hooks/use_all_inference_endpoints_state';
-import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
 
 const inferenceEndpoints = [
   {
@@ -163,26 +160,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
   };
 });
 
-jest.mock('../../hooks/use_all_inference_endpoints_state', () => ({
-  useAllInferenceEndpointsState: jest.fn(),
-}));
-
-const makeTableState = (
-  queryParams: Partial<QueryParams> = {},
-  filterOptions: Partial<FilterOptions> = {}
-) => ({
-  queryParams: {
-    ...DEFAULT_QUERY_PARAMS,
-    ...queryParams,
-  },
-  setQueryParams: jest.fn(),
-  filterOptions: {
-    ...DEFAULT_FILTER_OPTIONS,
-    ...filterOptions,
-  },
-  setFilterOptions: jest.fn(),
-});
-
 const renderTabularPageWithProviders = () => {
   return render(
     <EuiThemeProvider>
@@ -195,11 +172,14 @@ const renderTabularPageWithProviders = () => {
 
 describe('When the tabular page is loaded', () => {
   describe('group by none', () => {
+    beforeAll(() => {
+      window.history.pushState({}, '', '?groupBy=none');
+    });
     beforeEach(() => {
-      (useAllInferenceEndpointsState as jest.Mock).mockReturnValue(
-        makeTableState({ groupBy: GroupByOptions.None })
-      );
       renderTabularPageWithProviders();
+    });
+    afterAll(() => {
+      window.history.pushState({}, '', '/');
     });
 
     it('should display all inference ids in the table', () => {
@@ -340,7 +320,6 @@ describe('When the tabular page is loaded', () => {
   });
   describe('group by models', () => {
     beforeEach(() => {
-      (useAllInferenceEndpointsState as jest.Mock).mockReturnValue(makeTableState());
       renderTabularPageWithProviders();
     });
 
@@ -482,7 +461,6 @@ describe('When the tabular page is loaded', () => {
   });
 
   it('should display endpoint stats with correct counts', () => {
-    (useAllInferenceEndpointsState as jest.Mock).mockReturnValue(makeTableState());
     renderTabularPageWithProviders();
 
     const stats = screen.getByTestId('endpointStats');

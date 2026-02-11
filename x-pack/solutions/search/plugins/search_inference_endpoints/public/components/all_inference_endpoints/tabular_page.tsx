@@ -37,7 +37,6 @@ import { type FilterOptions, GroupByOptions } from '../../types';
 import { getModelId } from '../../utils/get_model_id';
 import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
 import { EditInferenceFlyout } from '../edit_inference_endpoints/edit_inference_flyout';
-import { GroupByOptions, type FilterOptions } from '../../types';
 
 import { DEFAULT_FILTER_OPTIONS } from './constants';
 import { ServiceProviderFilter } from './filter/service_provider_filter';
@@ -57,6 +56,19 @@ const searchContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
   width: ${euiTheme.base * 25}px;
 `;
 
+const initializeGroupBy = (): GroupByOptions => {
+  const params = new URLSearchParams(window.location.search);
+  const groupByParam = params.get('groupBy') ?? '';
+
+  switch (groupByParam) {
+    case GroupByOptions.None:
+      return GroupByOptions.None;
+    case GroupByOptions.Model:
+    default:
+      return GroupByOptions.Model;
+  }
+};
+
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
 }
@@ -66,7 +78,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     services: { cloud, application },
   } = useKibana();
   const [searchKey, setSearchKey] = useState('');
-  const [groupBy, setGroupBy] = React.useState<GroupByOptions>(GroupByOptions.None);
+  const [groupBy, setGroupBy] = React.useState<GroupByOptions>(initializeGroupBy);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
 
   const {
