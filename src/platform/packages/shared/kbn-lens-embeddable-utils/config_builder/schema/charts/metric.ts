@@ -130,13 +130,13 @@ const metricStatePrimaryMetricOptionsSchema = {
        */
       value: horizontalAlignmentSchema({
         meta: { description: 'Alignments for value' },
-        defaultValue: LENS_METRIC_STATE_DEFAULTS.valuesTextAlign,
+        defaultValue: LENS_METRIC_STATE_DEFAULTS.primaryAlign,
       }),
     },
     {
       defaultValue: {
         labels: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
-        value: LENS_METRIC_STATE_DEFAULTS.valuesTextAlign,
+        value: LENS_METRIC_STATE_DEFAULTS.primaryAlign,
       },
       meta: { id: 'metricPrimaryMetricAlignments' },
     }
