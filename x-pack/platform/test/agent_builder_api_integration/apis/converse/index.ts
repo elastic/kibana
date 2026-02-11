@@ -17,14 +17,16 @@ import { createRegenerateTests } from './regenerate';
 const executionModes: ExecutionMode[] = ['local', 'task_manager'];
 
 export default function (context: AgentBuilderApiFtrProviderContext) {
-  for (const mode of executionModes) {
-    describe(`Converse API [execution-mode: "${mode}"]`, function () {
-      createSimpleConversationTests(mode)(context);
-      createMultiRoundsTests(mode)(context);
-      createToolCallingTests(mode)(context);
-      createAttachmentsTests(mode)(context);
-      createErrorHandlingTests(mode)(context);
-      createRegenerateTests(mode)(context);
-    });
-  }
+  describe('Converse API', function () {
+    for (const mode of executionModes) {
+      describe(`execution mode: ${mode}`, function () {
+        createSimpleConversationTests(mode)(context);
+        createMultiRoundsTests(mode)(context);
+        createToolCallingTests(mode)(context);
+        createAttachmentsTests(mode)(context);
+        createErrorHandlingTests(mode)(context);
+        createRegenerateTests(mode)(context);
+      });
+    }
+  });
 }
