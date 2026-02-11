@@ -35,14 +35,7 @@ import { createSamplerAgg, isSamplingEnabled } from './utils/sampler';
 function removeParentAggs(obj: any) {
   for (const prop in obj) {
     if (prop === 'parentAggs') delete obj[prop];
-    else if (typeof obj[prop] === 'object') {
-      const hasParentAggsKey = 'parentAggs' in obj[prop];
-      removeParentAggs(obj[prop]);
-      // delete object if parentAggs was the last key
-      if (hasParentAggsKey && Object.keys(obj[prop]).length === 0) {
-        delete obj[prop];
-      }
-    }
+    else if (typeof obj[prop] === 'object') removeParentAggs(obj[prop]);
   }
 }
 
@@ -103,7 +96,7 @@ export class AggConfigs {
     );
 
     configStates = AggConfig.ensureIds(configStates);
-    configStates.forEach((params: any) => this.createAggConfig(params));
+    configStates.forEach((params) => this.createAggConfig(params));
   }
 
   public get hierarchical() {
@@ -245,7 +238,7 @@ export class AggConfigs {
   toDsl(): Record<string, any> {
     const dslTopLvl: Record<string, any> = {};
     let dslLvlCursor: Record<string, any>;
-    let nestedMetrics: Array<{ config: AggConfig; dsl: Record<string, any> }> | [];
+    let nestedMetrics: Array<{ config: AggConfig; dsl: any }> | [];
 
     const timeShifts = this.getTimeShifts();
     const hasMultipleTimeShifts = Object.keys(timeShifts).length > 1;
@@ -308,7 +301,7 @@ export class AggConfigs {
       const dsl = config.type.hasNoDslParams
         ? config.toDsl(this)
         : (dslLvlCursor[config.id] = config.toDsl(this));
-      let subAggs: any;
+      let subAggs: Record<string, unknown> | undefined;
 
       parseParentAggs(dslLvlCursor, dsl);
 
@@ -326,14 +319,16 @@ export class AggConfigs {
         });
       }
       if (subAggs && nestedMetrics) {
-        nestedMetrics.forEach((agg: any) => {
-          subAggs[agg.config.id] = agg.dsl;
+        nestedMetrics.forEach((agg: { config: AggConfig; dsl: Record<string, unknown> }) => {
+          subAggs![agg.config.id] = agg.dsl;
           // if a nested metric agg has parent aggs, we have to add them to every level of the tree
           // to make sure "bucket_path" references in the nested metric agg itself are still working
           if (agg.dsl.parentAggs) {
-            Object.entries(agg.dsl.parentAggs).forEach(([parentAggId, parentAgg]) => {
-              subAggs[parentAggId] = parentAgg;
-            });
+            Object.entries(agg.dsl.parentAggs as Record<string, unknown>).forEach(
+              ([parentAggId, parentAgg]) => {
+                subAggs![parentAggId] = parentAgg;
+              }
+            );
           }
         });
       }

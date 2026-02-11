@@ -39,7 +39,7 @@ export const SerializableType = {
 };
 
 export function deserializeField(field: SerializedValue) {
-  const type = field != null && (field as any)?.type;
+  const type = field != null && (field as Record<string, unknown>)?.type;
 
   switch (type) {
     case SerializableType.MultiFieldKey:

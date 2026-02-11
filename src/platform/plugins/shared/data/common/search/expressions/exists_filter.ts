@@ -53,7 +53,7 @@ export const existsFilterFunction: ExpressionFunctionExistsFilter = {
     return {
       type: 'kibana_filter',
       ...buildFilter(
-        {} as any as DataView,
+        {} as unknown as DataView,
         args.field.spec,
         FILTERS.EXISTS,
         args.negate || false,
