@@ -52,6 +52,7 @@ const renderWithIntl = (component: React.ReactElement) => {
 
 describe('ConditionEditor', () => {
   const mockOnConditionChange = jest.fn();
+  const mockOnValidityChange = jest.fn();
 
   const defaultFieldSuggestions: Suggestion[] = [
     { name: 'status', type: 'keyword' },
@@ -75,6 +76,7 @@ describe('ConditionEditor', () => {
           condition={{ field: 'severity_text', eq: 'info' }}
           status="enabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
@@ -88,6 +90,7 @@ describe('ConditionEditor', () => {
           condition={{ field: 'severity_text', eq: 'info' }}
           status="enabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
@@ -103,6 +106,7 @@ describe('ConditionEditor', () => {
           condition={{ field: 'severity_text', eq: 'info' }}
           status="disabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
@@ -120,6 +124,7 @@ describe('ConditionEditor', () => {
           condition={invalidCondition}
           status="enabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
@@ -240,6 +245,7 @@ describe('ConditionEditor', () => {
           condition={condition}
           status="enabled"
           onConditionChange={jest.fn()}
+          onValidityChange={jest.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -260,6 +266,7 @@ describe('ConditionEditor', () => {
           condition={condition}
           status="enabled"
           onConditionChange={jest.fn()}
+          onValidityChange={jest.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -279,6 +286,7 @@ describe('ConditionEditor', () => {
           condition={condition}
           status="enabled"
           onConditionChange={jest.fn()}
+          onValidityChange={jest.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -298,6 +306,7 @@ describe('ConditionEditor', () => {
           condition={condition}
           status="enabled"
           onConditionChange={jest.fn()}
+          onValidityChange={jest.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -317,6 +326,7 @@ describe('ConditionEditor', () => {
           condition={condition}
           status="enabled"
           onConditionChange={jest.fn()}
+          onValidityChange={jest.fn()}
           fieldSuggestions={defaultFieldSuggestions}
           valueSuggestions={defaultValueSuggestions}
         />
@@ -328,6 +338,81 @@ describe('ConditionEditor', () => {
         'https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math'
       );
       expect(link).toHaveAttribute('target', '_blank');
+    });
+  });
+
+  describe('Validity plumbing', () => {
+    it('should report invalid JSON without changing the condition', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      await user.click(screen.getByTestId('streamsAppConditionEditorSwitch'));
+
+      const editor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+      await user.clear(editor);
+      await user.paste('{');
+
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+      expect(mockOnValidityChange).toHaveBeenLastCalledWith(false);
+    });
+
+    it('should not clobber local syntax text on rerender while JSON is invalid', async () => {
+      const user = userEvent.setup();
+      const { rerender } = renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      await user.click(screen.getByTestId('streamsAppConditionEditorSwitch'));
+
+      const editor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+      await user.clear(editor);
+      await user.paste('{');
+
+      rerender(
+        <I18nProvider>
+          <ConditionEditor
+            condition={{ field: 'severity_text', eq: 'info' }}
+            status="enabled"
+            onConditionChange={mockOnConditionChange}
+            onValidityChange={mockOnValidityChange}
+          />
+        </I18nProvider>
+      );
+
+      expect(screen.getByTestId('streamsAppConditionEditorCodeEditor')).toHaveValue('{');
+    });
+
+    it('should report valid JSON and update condition on parse', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
+        />
+      );
+
+      await user.click(screen.getByTestId('streamsAppConditionEditorSwitch'));
+
+      const editor = screen.getByTestId('streamsAppConditionEditorCodeEditor');
+      await user.clear(editor);
+      await user.paste('{"field":"severity_text","eq":"warn"}');
+
+      expect(mockOnConditionChange).toHaveBeenCalledWith({ field: 'severity_text', eq: 'warn' });
+      expect(mockOnValidityChange).toHaveBeenLastCalledWith(true);
     });
   });
 });

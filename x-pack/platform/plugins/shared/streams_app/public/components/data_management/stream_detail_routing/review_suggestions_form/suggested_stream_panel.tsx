@@ -53,8 +53,12 @@ export function SuggestedStreamPanel({
   onSave?: () => void;
 }) {
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  const { changeSuggestionNameDebounced, changeSuggestionCondition, reviewSuggestedRule } =
-    useStreamRoutingEvents();
+  const {
+    changeSuggestionNameDebounced,
+    changeSuggestionCondition,
+    reviewSuggestedRule,
+    setConditionEditorValidity,
+  } = useStreamRoutingEvents();
 
   const editedSuggestion = routingSnapshot.context.editedSuggestion;
   const isEditing =
@@ -117,6 +121,7 @@ export function SuggestedStreamPanel({
             status="enabled"
             condition={currentSuggestion.condition}
             onConditionChange={handleConditionChange}
+            onValidityChange={setConditionEditorValidity}
             onStatusChange={() => {}}
             isSuggestionRouting={true}
           />

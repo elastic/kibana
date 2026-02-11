@@ -27,7 +27,7 @@ import {
   type OperatorKeys,
 } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
@@ -46,12 +46,19 @@ export interface ConditionEditorProps {
   condition: Condition;
   status: RoutingStatus;
   onConditionChange: (condition: Condition) => void;
+  onValidityChange: (isValid: boolean) => void;
   fieldSuggestions?: Suggestion[];
   valueSuggestions?: Suggestion[];
 }
 
 export function ConditionEditor(props: ConditionEditorProps) {
-  const { status, onConditionChange, fieldSuggestions = [], valueSuggestions = [] } = props;
+  const {
+    status,
+    onConditionChange,
+    onValidityChange,
+    fieldSuggestions = [],
+    valueSuggestions = [],
+  } = props;
   const { core } = useKibana();
 
   const isInvalidCondition = !isCondition(props.condition);
@@ -61,6 +68,53 @@ export function ConditionEditor(props: ConditionEditorProps) {
   const conditionEditableInUi = useMemo(() => isConditionEditableInUi(condition), [condition]);
 
   const [usingSyntaxEditor, toggleSyntaxEditor] = useToggle(!conditionEditableInUi);
+
+  const conditionJsonString = useMemo(() => JSON.stringify(condition, null, 2), [condition]);
+
+  const [syntaxEditorText, setSyntaxEditorText] = useState(conditionJsonString);
+  const syntaxEditorTextRef = useRef(syntaxEditorText);
+  const lastSyncedConditionJsonRef = useRef(conditionJsonString);
+  const prevUsingSyntaxEditorRef = useRef(usingSyntaxEditor);
+
+  useEffect(() => {
+    syntaxEditorTextRef.current = syntaxEditorText;
+  }, [syntaxEditorText]);
+
+  useEffect(() => {
+    // Ensure consumers start in a valid state.
+    onValidityChange(true);
+  }, [onValidityChange]);
+
+  useEffect(() => {
+    // When switching modes, reset validity and ensure the editor starts from the canonical condition.
+    if (prevUsingSyntaxEditorRef.current !== usingSyntaxEditor) {
+      onValidityChange(true);
+      if (usingSyntaxEditor) {
+        setSyntaxEditorText(conditionJsonString);
+        lastSyncedConditionJsonRef.current = conditionJsonString;
+      }
+      prevUsingSyntaxEditorRef.current = usingSyntaxEditor;
+    }
+  }, [conditionJsonString, onValidityChange, usingSyntaxEditor]);
+
+  useEffect(() => {
+    if (usingSyntaxEditor) return;
+
+    // Keep syntax text in sync while in UI mode so switching to syntax starts from current condition.
+    setSyntaxEditorText(conditionJsonString);
+    lastSyncedConditionJsonRef.current = conditionJsonString;
+  }, [conditionJsonString, usingSyntaxEditor]);
+
+  useEffect(() => {
+    if (!usingSyntaxEditor) return;
+
+    // If the parent updates the condition while the user hasn't edited the syntax editor,
+    // sync the text. If the user has edited locally, keep their text to avoid clobbering.
+    if (syntaxEditorTextRef.current === lastSyncedConditionJsonRef.current) {
+      setSyntaxEditorText(conditionJsonString);
+    }
+    lastSyncedConditionJsonRef.current = conditionJsonString;
+  }, [conditionJsonString, usingSyntaxEditor]);
 
   // Check if the selected field is a date type AND the operator is "in range"
   const isDateFieldWithRange = useMemo(() => {
@@ -145,14 +199,15 @@ export function ConditionEditor(props: ConditionEditorProps) {
           dataTestSubj="streamsAppConditionEditorCodeEditor"
           height={200}
           languageId="json"
-          value={JSON.stringify(condition, null, 2)}
+          value={syntaxEditorText}
           onChange={(value) => {
+            setSyntaxEditorText(value);
             try {
-              handleConditionChange(JSON.parse(value));
+              const parsedCondition = JSON.parse(value);
+              onValidityChange(true);
+              handleConditionChange(parsedCondition);
             } catch (error: unknown) {
-              // Silently ignore invalid JSON - the condition remains at its last valid value.
-              // The Update button will be disabled via hasRoutingChanges guard if no valid
-              // changes have been made. This avoids overriding user's partial input while typing.
+              onValidityChange(false);
             }
           }}
           options={{

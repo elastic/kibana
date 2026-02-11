@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { useController } from 'react-hook-form';
+import { useController, useFormContext } from 'react-hook-form';
 import { isConditionComplete } from '@kbn/streamlang';
+import { i18n } from '@kbn/i18n';
 import type { ProcessorFormState } from '../../../types';
 import { ProcessorConditionEditorWrapper } from '../../../processor_condition_editor';
 
@@ -18,12 +19,31 @@ export const ProcessorConditionEditor = () => {
       validate: isConditionComplete,
     },
   });
+  const { setError, clearErrors, trigger } = useFormContext<ProcessorFormState>();
 
   if (field.value === undefined) {
     return null;
   }
 
   return (
-    <ProcessorConditionEditorWrapper condition={field.value} onConditionChange={field.onChange} />
+    <ProcessorConditionEditorWrapper
+      condition={field.value}
+      onConditionChange={field.onChange}
+      onValidityChange={(isValid) => {
+        if (isValid) {
+          clearErrors('where');
+          void trigger('where');
+          return;
+        }
+
+        setError('where', {
+          type: 'manual',
+          message: i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.invalidProcessorWhereJsonError',
+            { defaultMessage: 'Invalid JSON' }
+          ),
+        });
+      }}
+    />
   );
 };

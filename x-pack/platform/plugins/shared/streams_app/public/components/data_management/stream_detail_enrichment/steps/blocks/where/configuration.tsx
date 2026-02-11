@@ -19,7 +19,7 @@ import { isConditionComplete } from '@kbn/streamlang';
 import { isEqual } from 'lodash';
 import React, { useState, useEffect, forwardRef } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
-import { useForm, FormProvider, useController } from 'react-hook-form';
+import { useForm, FormProvider, useController, useFormContext } from 'react-hook-form';
 import type { DeepPartial } from 'utility-types';
 import { useSelector } from '@xstate5/react';
 import { useDiscardConfirm } from '../../../../../../hooks/use_discard_confirm';
@@ -172,6 +172,7 @@ export const WhereBlockConditionEditor = () => {
       validate: (value) => isConditionComplete(value as Condition | undefined),
     },
   });
+  const { setError, clearErrors, trigger } = useFormContext<ConditionBlockFormState>();
 
   if (field.value === undefined) {
     return null;
@@ -181,6 +182,21 @@ export const WhereBlockConditionEditor = () => {
     <ProcessorConditionEditorWrapper
       condition={field.value as unknown as Condition}
       onConditionChange={field.onChange as (condition: Condition) => void}
+      onValidityChange={(isValid) => {
+        if (isValid) {
+          clearErrors('condition');
+          void trigger('condition');
+          return;
+        }
+
+        setError('condition', {
+          type: 'manual',
+          message: i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.invalidConditionJsonError',
+            { defaultMessage: 'Invalid JSON' }
+          ),
+        });
+      }}
     />
   );
 };

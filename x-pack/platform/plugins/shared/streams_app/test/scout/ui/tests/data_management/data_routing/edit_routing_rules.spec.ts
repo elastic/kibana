@@ -51,6 +51,26 @@ test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@s
     );
   });
 
+  test('should disable update when syntax editor JSON is invalid', async ({ page, pageObjects }) => {
+    const rountingRuleName = 'logs.edit-test';
+    await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
+
+    await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
+
+    await pageObjects.streams.fillConditionEditorWithSyntax(
+      '{"field":"service.name","eq":"updated-service"}'
+    );
+    await expect(page.getByTestId('streamsAppStreamDetailRoutingUpdateButton')).toBeEnabled();
+
+    await pageObjects.streams.fillConditionEditorWithSyntax('{');
+    await expect(page.getByTestId('streamsAppStreamDetailRoutingUpdateButton')).toBeDisabled();
+
+    await pageObjects.streams.fillConditionEditorWithSyntax(
+      '{"field":"service.name","eq":"updated-service"}'
+    );
+    await expect(page.getByTestId('streamsAppStreamDetailRoutingUpdateButton')).toBeEnabled();
+  });
+
   test('should cancel editing routing rule', async ({ page, pageObjects }) => {
     const rountingRuleName = 'logs.edit-test';
     await pageObjects.streams.clickEditRoutingRule(rountingRuleName);

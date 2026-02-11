@@ -45,6 +45,13 @@ export const StreamSystemDetailsFlyout = ({
   const { upsertSystem } = useStreamSystemsApi(definition);
   const [isUpdating, setIsUpdating] = React.useState(false);
   const [isEditingCondition, toggleIsEditingCondition] = useToggle(false);
+  const [isFilterValid, setIsFilterValid] = React.useState(true);
+
+  React.useEffect(() => {
+    if (!isEditingCondition) {
+      setIsFilterValid(true);
+    }
+  }, [isEditingCondition]);
 
   const updateSystem = () => {
     setIsUpdating(true);
@@ -127,6 +134,7 @@ export const StreamSystemDetailsFlyout = ({
               setCondition={(condition) =>
                 setUpdatedSystem({ ...updatedSystem, filter: condition })
               }
+              onValidityChange={setIsFilterValid}
             />
           </EuiFlexGroup>
           <EuiHorizontalRule />
@@ -157,7 +165,7 @@ export const StreamSystemDetailsFlyout = ({
               isLoading={isUpdating}
               onClick={updateSystem}
               fill
-              isDisabled={isEqual(system, updatedSystem)}
+              isDisabled={isEqual(system, updatedSystem) || !isFilterValid}
               data-test-subj="system_identification_existing_save_changes_button"
             >
               <FormattedMessage
