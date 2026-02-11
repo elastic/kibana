@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  AggregationsAggregationContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { dateRangeQuery } from '@kbn/es-query';
 
@@ -116,6 +119,16 @@ const MIN_TOKEN_LENGTH = 3;
 /** Number of sample documents returned per category via top_hits. */
 const SAMPLE_DOCS_PER_CATEGORY = 2;
 
+/** Number of random documents returned as fallback when categorization yields no results. */
+const RANDOM_SAMPLE_SIZE = CATEGORIES_SIZE * SAMPLE_DOCS_PER_CATEGORY;
+
+/**
+ * Candidate fields for categorize_text, in order of preference.
+ * `body.text` is preferred (OTel native); `message` is the ECS standard
+ * (and in Streams logs indices is often an alias for `body.text`).
+ */
+const CANDIDATE_FIELDS = ['body.text', 'message'] as const;
+
 /**
  * Returns true if a pattern has enough meaningful tokens (after placeholder and
  * short-token removal) to be reliably used for exclusion in subsequent iterations.
@@ -125,8 +138,52 @@ export const isMeaningfulPattern = (pattern: string): boolean => {
   return cleaned.split(/\s+/).filter((token) => token.length > 0).length >= MIN_EXCLUSION_TOKENS;
 };
 
+export interface DiscoverPatternsResult {
+  categories: MessageCategory[];
+  /** Random sample documents, used as fallback when categorization yields no results. */
+  randomSampleDocuments: Array<Record<string, unknown>>;
+  /** The text field used for categorize_text, or `undefined` if no suitable field was found. */
+  categorizationField: string | undefined;
+}
+
 /**
- * Runs a categorize_text aggregation on the message field to discover log patterns.
+ * Resolves which text field to use for categorize_text by checking
+ * `fieldCaps` for the {@link CANDIDATE_FIELDS}. Returns the first
+ * mapped field in preference order, or `undefined` if none are mapped.
+ */
+const resolveCategorizationField = async ({
+  esClient,
+  index,
+  start,
+  end,
+}: {
+  esClient: ElasticsearchClient;
+  index: string;
+  start: number;
+  end: number;
+}): Promise<string | undefined> => {
+  const fieldCapsResponse = await esClient.fieldCaps({
+    fields: [...CANDIDATE_FIELDS],
+    index,
+    index_filter: {
+      bool: { filter: dateRangeQuery(start, end) },
+    },
+    types: ['text', 'match_only_text'],
+  });
+
+  const mappedFields = Object.keys(fieldCapsResponse.fields);
+
+  return CANDIDATE_FIELDS.find((field) => mappedFields.includes(field));
+};
+
+/**
+ * Runs a categorize_text aggregation to discover log patterns, with automatic
+ * field detection (supports both ECS `message` and OTel `body.text`).
+ *
+ * Always includes a random-sampling fallback: when categorization yields no
+ * results (or no suitable text field is mapped), the caller can use
+ * `randomSampleDocuments` instead.
+ *
  * Accepts an optional list of patterns to exclude (from previous iterations).
  */
 export const discoverMessagePatterns = async ({
@@ -141,18 +198,69 @@ export const discoverMessagePatterns = async ({
   start: number;
   end: number;
   excludePatterns?: string[];
-}): Promise<MessageCategory[]> => {
-  const mustNot: QueryDslQueryContainer[] = (excludePatterns ?? [])
-    .map(stripPlaceholderTokens)
-    .filter((cleaned) => cleaned.length > 0)
-    .map((cleaned) => ({
-      match: {
-        message: {
-          query: cleaned,
-          minimum_should_match: EXCLUSION_MINIMUM_SHOULD_MATCH,
+}): Promise<DiscoverPatternsResult> => {
+  const categorizationField = await resolveCategorizationField({ esClient, index, start, end });
+
+  const mustNot: QueryDslQueryContainer[] =
+    categorizationField !== undefined
+      ? (excludePatterns ?? [])
+          .map(stripPlaceholderTokens)
+          .filter((cleaned) => cleaned.length > 0)
+          .map((cleaned) => ({
+            match: {
+              [categorizationField]: {
+                query: cleaned,
+                minimum_should_match: EXCLUSION_MINIMUM_SHOULD_MATCH,
+              },
+            },
+          }))
+      : [];
+
+  const samplerSubAggs: Record<string, AggregationsAggregationContainer> = {
+    random_docs: {
+      top_hits: {
+        size: RANDOM_SAMPLE_SIZE,
+        _source: true,
+      },
+    },
+  };
+
+  if (categorizationField) {
+    samplerSubAggs.categories = {
+      categorize_text: {
+        field: categorizationField,
+        min_doc_count: MIN_DOC_COUNT,
+        size: CATEGORIES_SIZE,
+        similarity_threshold: SIMILARITY_THRESHOLD,
+        categorization_analyzer: {
+          tokenizer: 'ml_standard',
+          char_filter: [
+            {
+              type: 'pattern_replace' as const,
+              pattern: '\\\\n',
+              replacement: '',
+            } as unknown as string,
+            ...PLACEHOLDER_CHAR_FILTERS,
+          ],
+          filter: [
+            {
+              type: 'length' as const,
+              min: MIN_TOKEN_LENGTH,
+            } as unknown as string,
+          ],
         },
       },
-    }));
+      aggs: {
+        sample: {
+          top_hits: {
+            size: SAMPLE_DOCS_PER_CATEGORY,
+            _source: true,
+            sort: { _score: { order: 'desc' as const } },
+          },
+        },
+      },
+    };
+  }
 
   const response = await esClient.search({
     index,
@@ -169,61 +277,34 @@ export const discoverMessagePatterns = async ({
         random_sampler: {
           probability: SAMPLING_PROBABILITY,
         },
-        aggs: {
-          message: {
-            categorize_text: {
-              field: 'message',
-              min_doc_count: MIN_DOC_COUNT,
-              size: CATEGORIES_SIZE,
-              similarity_threshold: SIMILARITY_THRESHOLD,
-              categorization_analyzer: {
-                tokenizer: 'ml_standard',
-                char_filter: [
-                  {
-                    type: 'pattern_replace' as const,
-                    pattern: '\\\\n',
-                    replacement: '',
-                  } as unknown as string,
-                  ...PLACEHOLDER_CHAR_FILTERS,
-                ],
-                filter: [
-                  {
-                    type: 'length' as const,
-                    min: MIN_TOKEN_LENGTH,
-                  } as unknown as string,
-                ],
-              },
-            },
-            aggs: {
-              sample: {
-                top_hits: {
-                  size: SAMPLE_DOCS_PER_CATEGORY,
-                  _source: true,
-                  sort: { _score: { order: 'desc' as const } },
-                },
-              },
-            },
-          },
-        },
+        aggs: samplerSubAggs,
       },
     },
   });
 
-  const samplerAgg = response.aggregations?.sampler as
-    | Record<string, { buckets: Array<Record<string, unknown>> }>
-    | undefined;
-  const buckets = samplerAgg?.message?.buckets ?? [];
+  const samplerAgg = response.aggregations
+    ? (response.aggregations.sampler as {
+        categories?: {
+          buckets: Array<{
+            key: string;
+            sample: { hits: { hits: { _source: Record<string, unknown> }[] } };
+          }>;
+        };
+        random_docs: { hits: { hits: { _source: Record<string, unknown> }[] } };
+      })
+    : undefined;
 
-  return buckets
-    .map((bucket) => {
-      const sampleAgg = bucket.sample as {
-        hits: { hits: Array<{ _source: Record<string, unknown> }> };
-      };
+  const categories =
+    samplerAgg?.categories?.buckets
+      .map((bucket) => ({
+        pattern: bucket.key,
+        sampleDocuments: bucket.sample.hits.hits.map((hit) => hit._source),
+      }))
+      .filter((category) => isMeaningfulPattern(category.pattern)) ?? [];
 
-      return {
-        pattern: bucket.key as string,
-        sampleDocuments: sampleAgg.hits.hits.map((hit) => hit._source),
-      };
-    })
-    .filter((category) => isMeaningfulPattern(category.pattern));
+  const randomSampleDocuments = (samplerAgg?.random_docs?.hits.hits ?? []).map(
+    (hit) => hit._source
+  );
+
+  return { categories, randomSampleDocuments, categorizationField };
 };

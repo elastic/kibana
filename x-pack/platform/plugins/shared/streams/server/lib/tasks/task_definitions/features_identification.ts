@@ -107,7 +107,7 @@ const getSampleDocuments = async ({
 }) => {
   let resetPatterns = false;
   // Discover message patterns, excluding previously found ones
-  let categories = await discoverMessagePatterns({
+  let result = await discoverMessagePatterns({
     esClient,
     index,
     start,
@@ -116,15 +116,17 @@ const getSampleDocuments = async ({
   });
 
   // If we didn't find enough new patterns, try again without excluding patterns
-  if (categories.length < MIN_NEW_PATTERNS) {
+  if (result.categorizationField && result.categories.length < MIN_NEW_PATTERNS) {
     resetPatterns = true;
-    categories = await discoverMessagePatterns({
+    result = await discoverMessagePatterns({
       esClient,
       index,
       start,
       end,
     });
   }
+
+  const { categories, randomSampleDocuments, categorizationField } = result;
 
   const now = Date.now();
 
@@ -138,9 +140,13 @@ const getSampleDocuments = async ({
     newPatterns,
   });
 
+  const sampleDocuments = categorizationField
+    ? categories.flatMap((c) => c.sampleDocuments)
+    : randomSampleDocuments;
+
   return {
     updatedPatterns,
-    sampleDocuments: categories.flatMap((c) => c.sampleDocuments),
+    sampleDocuments,
   };
 };
 

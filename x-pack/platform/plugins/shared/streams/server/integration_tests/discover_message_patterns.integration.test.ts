@@ -14,9 +14,11 @@ import {
   discoverMessagePatterns,
   isMeaningfulPattern,
 } from '../routes/utils/discover_message_patterns';
-import type { MessageCategory } from '../routes/utils/discover_message_patterns';
 
 const INDEX_NAME = 'test-discover-message-patterns';
+const BODY_TEXT_INDEX_NAME = 'test-discover-body-text-patterns';
+const BOTH_FIELDS_INDEX_NAME = 'test-discover-both-fields';
+const NO_TEXT_FIELD_INDEX_NAME = 'test-discover-no-text-field';
 const PATTERN_COUNT = 100;
 /**
  * Each pattern needs enough documents so the random_sampler (probability 0.1)
@@ -172,58 +174,226 @@ describe('discoverMessagePatterns integration', () => {
 
     const bulkResponse = await esClient.bulk({ operations, refresh: 'wait_for' });
     expect(bulkResponse.errors).toBe(false);
+
+    // Create index with body.text field (OTel convention) instead of message
+    await esClient.indices.create({
+      index: BODY_TEXT_INDEX_NAME,
+      mappings: {
+        properties: {
+          body: {
+            properties: {
+              text: { type: 'text' },
+            },
+          },
+          '@timestamp': { type: 'date' },
+        },
+      },
+    });
+
+    const bodyTextOps: Array<
+      { index: { _index: string } } | { body: { text: string }; '@timestamp': string }
+    > = [];
+
+    for (const template of templates) {
+      for (let i = 0; i < DOCS_PER_PATTERN; i++) {
+        bodyTextOps.push({ index: { _index: BODY_TEXT_INDEX_NAME } });
+        bodyTextOps.push({
+          body: { text: instantiateTemplate(template) },
+          '@timestamp': docTimestamp.toISOString(),
+        });
+      }
+    }
+
+    const bodyTextBulk = await esClient.bulk({ operations: bodyTextOps, refresh: 'wait_for' });
+    expect(bodyTextBulk.errors).toBe(false);
+
+    // Create index with both message and body.text fields
+    await esClient.indices.create({
+      index: BOTH_FIELDS_INDEX_NAME,
+      mappings: {
+        properties: {
+          message: { type: 'text' },
+          body: {
+            properties: {
+              text: { type: 'text' },
+            },
+          },
+          '@timestamp': { type: 'date' },
+        },
+      },
+    });
+
+    const bothFieldsOps: Array<
+      | { index: { _index: string } }
+      | { message: string; body: { text: string }; '@timestamp': string }
+    > = [];
+
+    for (const template of templates) {
+      for (let i = 0; i < DOCS_PER_PATTERN; i++) {
+        const text = instantiateTemplate(template);
+        bothFieldsOps.push({ index: { _index: BOTH_FIELDS_INDEX_NAME } });
+        bothFieldsOps.push({
+          message: text,
+          body: { text },
+          '@timestamp': docTimestamp.toISOString(),
+        });
+      }
+    }
+
+    const bothFieldsBulk = await esClient.bulk({
+      operations: bothFieldsOps,
+      refresh: 'wait_for',
+    });
+    expect(bothFieldsBulk.errors).toBe(false);
+
+    // Create index with no text field (only numeric data) for random fallback test
+    await esClient.indices.create({
+      index: NO_TEXT_FIELD_INDEX_NAME,
+      mappings: {
+        properties: {
+          status_code: { type: 'integer' },
+          '@timestamp': { type: 'date' },
+        },
+      },
+    });
+
+    const noTextOps: Array<
+      { index: { _index: string } } | { status_code: number; '@timestamp': string }
+    > = [];
+
+    for (let i = 0; i < 100; i++) {
+      noTextOps.push({ index: { _index: NO_TEXT_FIELD_INDEX_NAME } });
+      noTextOps.push({
+        status_code: faker.number.int({ min: 200, max: 599 }),
+        '@timestamp': docTimestamp.toISOString(),
+      });
+    }
+
+    const noTextBulk = await esClient.bulk({ operations: noTextOps, refresh: 'wait_for' });
+    expect(noTextBulk.errors).toBe(false);
   }, 120_000);
 
   afterAll(async () => {
-    await esClient.indices.delete({ index: INDEX_NAME, ignore_unavailable: true });
+    await esClient.indices.delete({
+      index: [INDEX_NAME, BODY_TEXT_INDEX_NAME, BOTH_FIELDS_INDEX_NAME, NO_TEXT_FIELD_INDEX_NAME],
+      ignore_unavailable: true,
+    });
     await kbnRoot?.shutdown();
     await manageES?.stop();
   });
 
-  it('progressively discovers patterns across iterative calls with exclusions', async () => {
+  /**
+   * Iteratively discovers patterns from the given index, asserting that the
+   * resolved categorization field matches expectations and that at least
+   * {@link MIN_EXPECTED_PATTERNS} unique patterns are found.
+   */
+  const assertDiscoversPatternsFor = async ({
+    index,
+    expectedField,
+    expectedDocProperties,
+  }: {
+    index: string;
+    expectedField: string;
+    expectedDocProperties: string[];
+  }) => {
     const discoveredPatterns = new Set<string>();
     const excludePatterns: string[] = [];
 
     for (let iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
-      const categories: MessageCategory[] = await discoverMessagePatterns({
+      const result = await discoverMessagePatterns({
         esClient,
-        index: INDEX_NAME,
+        index,
         start,
         end,
         excludePatterns: excludePatterns.length > 0 ? excludePatterns : undefined,
       });
+
+      const { categories, randomSampleDocuments, categorizationField } = result;
+
+      expect(categorizationField).toBe(expectedField);
+      expect(randomSampleDocuments.length).toBeGreaterThan(0);
 
       if (categories.length === 0) {
         break;
       }
 
       for (const category of categories) {
-        // Verify shape: pattern is a non-empty string
         expect(typeof category.pattern).toBe('string');
         expect(category.pattern.length).toBeGreaterThan(0);
-
-        // Verify shape: sampleDocuments is a non-empty array
-        expect(Array.isArray(category.sampleDocuments)).toBe(true);
         expect(category.sampleDocuments.length).toBeGreaterThan(0);
 
-        // Every sample document must carry a message field
         for (const doc of category.sampleDocuments) {
-          expect(doc).toHaveProperty('message');
+          for (const prop of expectedDocProperties) {
+            expect(doc).toHaveProperty(prop);
+          }
         }
 
         discoveredPatterns.add(category.pattern);
 
-        // Feed excludable patterns back for the next iteration
         if (isMeaningfulPattern(category.pattern)) {
           excludePatterns.push(category.pattern);
         }
       }
     }
 
-    // Soft assertion: random sampling and similarity merging may prevent
-    // every pattern from being discovered. We expect at least
-    // MIN_EXPECTED_PATTERNS unique patterns across up to MAX_ITERATIONS
-    // iterations.
     expect(discoveredPatterns.size).toBeGreaterThanOrEqual(MIN_EXPECTED_PATTERNS);
+  };
+
+  it(
+    'progressively discovers patterns across iterative calls with exclusions',
+    () =>
+      assertDiscoversPatternsFor({
+        index: INDEX_NAME,
+        expectedField: 'message',
+        expectedDocProperties: ['message'],
+      }),
+    60_000
+  );
+
+  it(
+    'discovers patterns using body.text field (OTel convention)',
+    () =>
+      assertDiscoversPatternsFor({
+        index: BODY_TEXT_INDEX_NAME,
+        expectedField: 'body.text',
+        expectedDocProperties: ['body'],
+      }),
+    60_000
+  );
+
+  it(
+    'prefers body.text over message when both fields are mapped',
+    () =>
+      assertDiscoversPatternsFor({
+        index: BOTH_FIELDS_INDEX_NAME,
+        expectedField: 'body.text',
+        expectedDocProperties: ['body', 'message'],
+      }),
+    60_000
+  );
+
+  it('returns random sample documents when no text field is mapped', async () => {
+    const result = await discoverMessagePatterns({
+      esClient,
+      index: NO_TEXT_FIELD_INDEX_NAME,
+      start,
+      end,
+    });
+
+    const { categories, randomSampleDocuments, categorizationField } = result;
+
+    // No suitable text field should be found
+    expect(categorizationField).toBeUndefined();
+
+    // No text field is mapped, so categorization should yield no results
+    expect(categories).toHaveLength(0);
+
+    // Random sample documents should still be returned as fallback
+    expect(randomSampleDocuments.length).toBeGreaterThan(0);
+
+    // Each random sample should have the expected fields
+    for (const doc of randomSampleDocuments) {
+      expect(doc).toHaveProperty('status_code');
+    }
   }, 60_000);
 });
