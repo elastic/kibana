@@ -191,22 +191,22 @@ When you create a new Saved Object type, define an initial model version (versio
 
 We recommend defining `create` and `forwardCompatibility` schemas that include **all** fields that appear in your mappings (and any non-indexed attributes you store). Exhaustive schemas give better validation on create and on read, and support safe rollbacks in Serverless.
 
-*Minimal but valid configuration:*
-
 ```ts
+import { schema } from '@kbn/config-schema';
+...
+const schemaV1 = schema.object({
+  foo: schema.string(),
+  bars: schema.arrayOf(schema.string()),
+});
+...
 const myType: SavedObjectsType = {
   ...
   modelVersions: {
     1: {
       changes: [],
       schemas: {
-        create: schema.object({}, { unknowns: 'allow' }),
-        forwardCompatibility: (attrs) => _.pick([
-          'knownField1',
-          'knownField2',
-          ...
-          'knownFieldN',
-        ]),
+        create: schemaV1,
+        forwardCompatibility: schemaV1.extends({}, { unknowns: 'ignore' }),
       },
     },
   },
@@ -214,7 +214,32 @@ const myType: SavedObjectsType = {
 };
 ```
 
-*Recommended:* Define `create` and `forwardCompatibility` so they list every field your type uses. This enables full Saved Objects Repository validation on both creation and retrieval.
+If you are working with complex Saved Object types that have many properties—especially if these properties are defined dynamically or if you use external validation libraries like zod—you may provide partial schemas for the `create` and `forwardCompatibility` fields. At a minimum, you must include all properties defined in your ES mappings to help ensure data consistency, since these mappings are stored in the Elasticsearch index. In these situations, your partial schemas can be defined as shown below:
+
+```ts
+import { schema } from '@kbn/config-schema';
+...
+const schemaV1 = schema.object({
+  mappedProperty1: schema.string(),
+  mappedProperty2: schema.arrayOf(schema.string()),
+  ...
+  mappedPropertyN: schema.boolean(),
+});
+...
+const myType: SavedObjectsType = {
+  ...
+  modelVersions: {
+    1: {
+      changes: [],
+      schemas: {
+        create: schemaV1.extends({}, { unknowns: 'allow' }),
+        forwardCompatibility: schemaV1.extends({}, { unknowns: 'allow' }),
+      },
+    },
+  },
+  ...
+};
+```
 
 ## Opting out of the global Saved Objects APIs
 

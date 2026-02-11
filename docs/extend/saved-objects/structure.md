@@ -9,7 +9,7 @@ This page describes the structure of a **Saved Object type** definition (the con
 
 The `SavedObjectsType` interface (from `@kbn/core-saved-objects-server`) also includes other properties such as `namespaceType`, `hidden`, `hiddenFromHttpApis`, and optional hooks. Refer to the type definition in `src/core/packages/saved-objects/server/src/saved_objects_type.ts` for the full contract.
 
-## Structure of a model version [_structure_of_a_model_version]
+## Structure of a model version [structure-of-a-model-version]
 
 Model versions are structured objects (not plain migration functions). They describe how a version behaves and what changed since the previous one.
 
@@ -152,7 +152,7 @@ let change: SavedObjectsModelDataRemovalChange = {
 ```
 
 :::{note}
-Due to backward compatibility, field usage must be stopped in a prior release before actual data removal (in case of rollback). See the field removal example in [Update](update.md#removing-an-existing-field-_removing_an_existing_field).
+Due to backward compatibility, field usage must be stopped in a prior release before actual data removal (in case of rollback). See the field removal example in [Update](update.md#removing-an-existing-field).
 :::
 
 #### unsafe_transform [_unsafe_transform]

@@ -119,7 +119,7 @@ The test bed only instantiates the parts of Core needed for the two SO repositor
 * No extensions (no security, encryption, or spaces).
 * All SO types use the same SO index.
 
-## Ensuring safe Saved Object type changes
+## Ensuring safe Saved Object type changes [ensuring-safe-saved-objects-type-changes]
 
 Saved Object type definitions drive migrations and the shape of the Saved Objects API. Changes to them must meet strict safety criteria to avoid:
 
@@ -165,7 +165,7 @@ If you get validation errors, see [Troubleshooting](#troubleshooting) below.
 * **Backward compatible mappings** — Updates must be done in place without reindexing. {{es}} does not allow breaking changes such as removing fields or changing field types (e.g. integer to text).
 * **Mandatory schemas** — New model versions must include both `create` and `forwardCompatibility` schemas.
 
-### Ensuring robust serverless rollbacks
+### Ensuring robust serverless rollbacks [ensuring-robust-serverless-rollbacks]
 
 For Serverless rollback guarantees, the validation script requires **data fixtures** for any updated Saved Object types. These represent the state before and after the upgrade.
 

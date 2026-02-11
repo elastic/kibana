@@ -72,7 +72,7 @@ const myType: SavedObjectsType = {
 
 If your type already had `schemas` with the legacy `migrations`, you can reuse the latest schema as the initial model version.
 
-See [Structure: Structure of a model version](structure.md#structure-of-a-model-version-_structure_of_a_model_version) for the available change types and schema options.
+See [Structure: Structure of a model version](structure.md#structure-of-a-model-version) for the available change types and schema options.
 
 ## Upgrading a type that already has model versions
 
@@ -213,7 +213,7 @@ Update the root `mappings` to include `dolly` as in the previous example.
 For a non-indexed field with a default, use only the `data_backfill` change (no `mappings_addition` or root mapping update).
 :::
 
-### Removing an existing field [_removing_an_existing_field]
+### Removing an existing field [removing-an-existing-field]
 
 Removing a field must be done in two releases to preserve rollback safety:
 
