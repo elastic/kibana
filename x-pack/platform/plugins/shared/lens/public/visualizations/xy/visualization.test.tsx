@@ -3195,7 +3195,7 @@ describe('xy_visualization', () => {
         // current incompatibility is only for date and numeric histograms as xAccessors
         const datasourceLayers = {
           first: mockDatasource.publicAPIMock,
-          second: createMockDatasource('testDatasource').publicAPIMock,
+          second: createMockDatasource('formBased').publicAPIMock,
         };
         datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
           id === 'a'
@@ -3252,7 +3252,7 @@ describe('xy_visualization', () => {
         // current incompatibility is only for date and numeric histograms as xAccessors
         const datasourceLayers = {
           first: mockDatasource.publicAPIMock,
-          second: createMockDatasource('testDatasource').publicAPIMock,
+          second: createMockDatasource('formBased').publicAPIMock,
         };
         datasourceLayers.first.getOperationForColumnId = jest.fn((id: string) =>
           id === 'a'
