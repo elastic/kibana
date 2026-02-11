@@ -2285,9 +2285,9 @@ describe('deletePreconfiguredConnector()', () => {
   });
 
   it('throws when preconfigured connector not found', async () => {
-    await expect(
-      actionsClient.deletePreconfiguredConnector({ id: 'nonexistent' })
-    ).rejects.toThrow(/Preconfigured connector nonexistent not found/);
+    await expect(actionsClient.deletePreconfiguredConnector({ id: 'nonexistent' })).rejects.toThrow(
+      /Preconfigured connector nonexistent not found/
+    );
   });
 
   it('throws when id is reserved for alert history connector', async () => {
