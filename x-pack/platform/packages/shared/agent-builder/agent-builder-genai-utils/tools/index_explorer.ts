@@ -19,6 +19,7 @@ import type {
 } from './steps/list_search_sources';
 import { listSearchSources } from './steps/list_search_sources';
 import { flattenMapping, getDataStreamMappings, getIndexMappings } from './utils/mappings';
+import { partitionByCcs, getFieldsFromFieldCaps } from './utils/ccs';
 import { generateXmlTree } from './utils/formatting/xml';
 
 export interface RelevantResource {
@@ -38,6 +39,11 @@ export interface ResourceDescriptor {
   fields?: string[];
 }
 
+/**
+ * Creates resource descriptors for indices. Partitions into local and remote (CCS)
+ * indices: local indices use _mapping; remote indices fall back to _field_caps
+ * because the _mapping API does not support cross-cluster index patterns.
+ */
 const createIndexSummaries = async ({
   indices,
   esClient,
@@ -45,22 +51,45 @@ const createIndexSummaries = async ({
   indices: IndexSearchSource[];
   esClient: ElasticsearchClient;
 }): Promise<ResourceDescriptor[]> => {
-  const allMappings = await getIndexMappings({
-    indices: indices.map((index) => index.name),
-    cleanup: true,
-    esClient,
-  });
+  const { local, remote } = partitionByCcs(indices);
+  const descriptors: ResourceDescriptor[] = [];
 
-  return indices.map<ResourceDescriptor>(({ name: indexName }) => {
-    const indexMappings = allMappings[indexName];
-    const flattened = flattenMapping(indexMappings.mappings);
-    return {
-      type: EsResourceType.index,
-      name: indexName,
-      description: indexMappings?.mappings._meta?.description,
-      fields: flattened.map((field) => field.path),
-    };
-  });
+  // Local indices: use _mapping API (supports full mapping tree + _meta.description)
+  if (local.length > 0) {
+    const allMappings = await getIndexMappings({
+      indices: local.map((index) => index.name),
+      cleanup: true,
+      esClient,
+    });
+
+    for (const { name: indexName } of local) {
+      const indexMappings = allMappings[indexName];
+      const flattened = flattenMapping(indexMappings.mappings);
+      descriptors.push({
+        type: EsResourceType.index,
+        name: indexName,
+        description: indexMappings?.mappings._meta?.description,
+        fields: flattened.map((field) => field.path),
+      });
+    }
+  }
+
+  // Remote (CCS) indices: use _field_caps API (CCS-compatible fallback)
+  if (remote.length > 0) {
+    const remoteDescriptors = await Promise.all(
+      remote.map(async ({ name }) => {
+        const fields = await getFieldsFromFieldCaps({ resource: name, esClient });
+        return {
+          type: EsResourceType.index as const,
+          name,
+          fields: fields.map((f) => f.path),
+        };
+      })
+    );
+    descriptors.push(...remoteDescriptors);
+  }
+
+  return descriptors;
 };
 
 const createAliasSummaries = async ({
@@ -78,6 +107,11 @@ const createAliasSummaries = async ({
   });
 };
 
+/**
+ * Creates resource descriptors for data streams. Partitions into local and remote (CCS)
+ * data streams: local use _data_stream/_mappings; remote fall back to _field_caps
+ * because the _data_stream/_mappings API does not support cross-cluster patterns.
+ */
 const createDatastreamSummaries = async ({
   datastreams,
   esClient,
@@ -85,22 +119,45 @@ const createDatastreamSummaries = async ({
   datastreams: DataStreamSearchSource[];
   esClient: ElasticsearchClient;
 }): Promise<ResourceDescriptor[]> => {
-  const allMappings = await getDataStreamMappings({
-    datastreams: datastreams.map((stream) => stream.name),
-    cleanup: true,
-    esClient,
-  });
+  const { local, remote } = partitionByCcs(datastreams);
+  const descriptors: ResourceDescriptor[] = [];
 
-  return datastreams.map<ResourceDescriptor>(({ name }) => {
-    const mappings = allMappings[name];
-    const flattened = flattenMapping(mappings.mappings);
-    return {
-      type: EsResourceType.dataStream,
-      name,
-      description: mappings?.mappings._meta?.description,
-      fields: flattened.map((field) => field.path),
-    };
-  });
+  // Local data streams: use _data_stream/_mappings API (full mapping tree + _meta.description)
+  if (local.length > 0) {
+    const allMappings = await getDataStreamMappings({
+      datastreams: local.map((stream) => stream.name),
+      cleanup: true,
+      esClient,
+    });
+
+    for (const { name } of local) {
+      const mappings = allMappings[name];
+      const flattened = flattenMapping(mappings.mappings);
+      descriptors.push({
+        type: EsResourceType.dataStream,
+        name,
+        description: mappings?.mappings._meta?.description,
+        fields: flattened.map((field) => field.path),
+      });
+    }
+  }
+
+  // Remote (CCS) data streams: use _field_caps API (CCS-compatible fallback)
+  if (remote.length > 0) {
+    const remoteDescriptors = await Promise.all(
+      remote.map(async ({ name }) => {
+        const fields = await getFieldsFromFieldCaps({ resource: name, esClient });
+        return {
+          type: EsResourceType.dataStream as const,
+          name,
+          fields: fields.map((f) => f.path),
+        };
+      })
+    );
+    descriptors.push(...remoteDescriptors);
+  }
+
+  return descriptors;
 };
 
 export const indexExplorer = async ({
@@ -124,8 +181,14 @@ export const indexExplorer = async ({
 }): Promise<IndexExplorerResponse> => {
   logger?.trace(() => `index_explorer - query="${nlQuery}", pattern="${indexPattern}"`);
 
+  // When pattern is '*', include remote clusters (CCS) by resolving both * and *:* and merging
+  const includeRemoteClusters = indexPattern === '*';
+  const perTypeLimit = indexPattern.includes(':') || includeRemoteClusters ? 50 : undefined;
+
   const sources = await listSearchSources({
     pattern: indexPattern,
+    perTypeLimit,
+    includeRemoteClusters,
     excludeIndicesRepresentedAsDatastream: true,
     excludeIndicesRepresentedAsAlias: false,
     esClient,

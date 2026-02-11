@@ -14,7 +14,11 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 const getDocumentByIdSchema = z.object({
   id: z.string().describe('ID of the document to retrieve'),
-  index: z.string().describe('Name of the index to retrieve the document from'),
+  index: z
+    .string()
+    .describe(
+      'Name of the index to retrieve the document from. Cross-cluster search (CCS) is supported: use cluster:index for remote clusters (document is fetched via search).'
+    ),
 });
 
 export const getDocumentByIdTool = (): BuiltinToolDefinition<typeof getDocumentByIdSchema> => {
@@ -22,7 +26,7 @@ export const getDocumentByIdTool = (): BuiltinToolDefinition<typeof getDocumentB
     id: platformCoreTools.getDocumentById,
     type: ToolType.builtin,
     description:
-      'Retrieve the full content (source) of an Elasticsearch document based on its ID and index name.',
+      'Retrieve the full content (source) of an Elasticsearch document based on its ID and index name. Cross-cluster search (CCS) is supported: the index can be a CCS target (e.g. cluster:index); for remote clusters the document is fetched via search.',
     schema: getDocumentByIdSchema,
     handler: async ({ id, index }, { esClient }) => {
       const result = await getDocumentById({ id, index, esClient: esClient.asCurrentUser });

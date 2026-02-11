@@ -169,6 +169,13 @@ export const i18nMessages = {
             defaultMessage: 'Target pattern',
           }
         ),
+        patternHelpText: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.indexSearch.patternHelpText',
+          {
+            defaultMessage:
+              'Index, alias, or data stream pattern. Cross-cluster search (CCS) is supported: use cluster:pattern (e.g. remote:logs-*, *:metrics-*).',
+          }
+        ),
         defaultRowLimitLabel: i18n.translate(
           'xpack.agentBuilder.tools.newTool.configuration.form.indexSearch.defaultRowLimitLabel',
           {

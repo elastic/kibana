@@ -21,6 +21,7 @@ export const IndexSearchConfiguration = () => {
     <>
       <EuiFormRow
         label={i18nMessages.configuration.form.indexSearch.patternLabel}
+        helpText={i18nMessages.configuration.form.indexSearch.patternHelpText}
         isInvalid={!!errors.pattern}
         error={errors.pattern?.message}
       >

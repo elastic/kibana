@@ -18,7 +18,7 @@ const nlToEsqlToolSchema = z.object({
     .string()
     .optional()
     .describe(
-      '(optional) Index to search against. If not provided, will use the index explorer to find the best index to use.'
+      '(optional) Index, alias, or datastream to search against. Cross-cluster search (CCS) is supported: use cluster:index (e.g. remote:logs-*). If not provided, will use the index explorer to find the best index to use.'
     ),
   context: z
     .string()
@@ -30,7 +30,8 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
   return {
     id: platformCoreTools.generateEsql,
     type: ToolType.builtin,
-    description: 'Generate an ES|QL query from a natural language query.',
+    description:
+      'Generate an ES|QL query from a natural language query. Cross-cluster search (CCS) is supported: use cluster:index or cluster:pattern when targeting remote clusters.',
     schema: nlToEsqlToolSchema,
     handler: async (
       { query: nlQuery, index, context },
