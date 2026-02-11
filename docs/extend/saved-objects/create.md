@@ -185,11 +185,11 @@ router.get(
 
 [1] Store the reference **name** (e.g. `vis1`) in the attribute (e.g. `dashboard.panels[0].visualization`), not the id. That way the reference stays correct when the id in the `references` array is updated.
 
-## Initial model version
+## Initial model version [initial-model-version]
 
 When you create a new Saved Object type, define an initial model version (version 1) that describes the current shape. The first version must be numbered 1, with no gaps in subsequent versions.
 
-We recommend defining `create` and `forwardCompatibility` schemas that include **all** fields that appear in your mappings (and any non-indexed attributes you store). Exhaustive schemas give better validation on create and on read, and support safe rollbacks in Serverless.
+We recommend defining `create` and `forwardCompatibility` schemas that include **all** fields of your Saved Object type: those that appear in your mappings, as well as any non-indexed attributes you store. Exhaustive schemas give better validation on create and on read, and support safe rollbacks in Serverless.
 
 ```ts
 import { schema } from '@kbn/config-schema';

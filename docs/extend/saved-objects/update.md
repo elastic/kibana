@@ -43,40 +43,14 @@ The first PR must define the **current, existing shape** of the type's documents
 * **No mapping changes** — Do not change any existing mappings; only add the required schemas.
 * **Deploy first** — This PR must be merged and released in Serverless before you open a second PR with your real changes.
 
-### Schema definition
+Please refer to [Create: Initial model version](create.md#initial-model-version) for more details on how to define the initial model version.
 
-We recommend defining `create` and `forwardCompatibility` schemas that reflect the type's current structure. That enables full Saved Objects Repository validation on both create and read.
+If your type was using the legacy `migrations` property, and it was already defining `schemas`, you can reuse the latest schema as the initial model version.
 
-*Minimal configuration example:*
-
-```ts
-const myType: SavedObjectsType = {
-  ...
-  modelVersions: {
-    1: {
-      changes: [],
-      schemas: {
-        create: schema.object({}, { unknowns: 'allow' }),
-        forwardCompatibility: (attrs) => _.pick([
-          'knownField1',
-          'knownField2',
-          ...
-          'knownFieldN',
-        ]),
-      },
-    },
-  },
-  ...
-};
-```
-
-If your type already had `schemas` with the legacy `migrations`, you can reuse the latest schema as the initial model version.
-
-See [Structure: Structure of a model version](structure.md#structure-of-a-model-version) for the available change types and schema options.
 
 ## Upgrading a type that already has model versions
 
-When the type already defines `modelVersions`, add a **new** model version for your change. Do not modify existing versions. The new version must be the next consecutive integer and must include the appropriate `changes` and updated `create` and `forwardCompatibility` schemas.
+When the type already defines `modelVersions`, add a **new** model version for your change. Do not modify existing versions. The new version must be the next consecutive integer and must include the appropriate `changes` and updated `create` and `forwardCompatibility` schemas. See [Structure: Structure of a model version](structure.md#structure-of-a-model-version) for the available change types and schema options.
 
 You must add a new model version whenever mappings change. The migration logic uses the presence of a new model version (and its `mappings_addition` or other mapping-related changes) to determine that it needs to update the index mappings for that type.
 
