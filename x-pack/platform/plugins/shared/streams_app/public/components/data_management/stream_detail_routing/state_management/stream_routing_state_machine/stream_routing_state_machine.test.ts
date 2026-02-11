@@ -5,24 +5,29 @@
  * 2.0.
  */
 
-import { createActor, setup } from 'xstate5';
+import { createActor, fromEventObservable, fromObservable } from 'xstate5';
+import { of } from 'rxjs';
 import { ALWAYS_CONDITION } from '@kbn/streamlang';
 import { isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
-import type { Streams } from '@kbn/streams-schema';
+import type { SampleDocument, Streams } from '@kbn/streams-schema';
 import { streamRoutingMachine } from './stream_routing_state_machine';
+import { routingSamplesMachine } from './routing_samples_state_machine';
+import type { RoutingSamplesInput } from './routing_samples_state_machine';
 import { routingConverter } from '../../utils';
 
-const stubRoutingSamplesMachine = setup({
-  types: {
-    context: {} as {},
-    events: {} as any,
-  },
-}).createMachine({
-  id: 'stubRoutingSamples',
-  initial: 'idle',
-  context: () => ({}),
-  states: {
-    idle: {},
+const stubRoutingSamplesMachine = routingSamplesMachine.provide({
+  actors: {
+    collectDocuments: fromObservable<
+      SampleDocument[],
+      Pick<RoutingSamplesInput, 'condition' | 'definition' | 'documentMatchFilter'>
+    >(() => of([])),
+    collectDocumentsCount: fromObservable<
+      number | null | undefined,
+      Pick<RoutingSamplesInput, 'condition' | 'definition' | 'documentMatchFilter'>
+    >(() => of(undefined)),
+    subscribeTimeUpdates: fromEventObservable(() =>
+      of<{ type: string }>({ type: 'routingSamples.refresh' })
+    ),
   },
 });
 

@@ -140,6 +140,7 @@ describe('ConditionEditor', () => {
           condition={{ field: 'severity_text', eq: 'info' }}
           status="enabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
@@ -167,6 +168,7 @@ describe('ConditionEditor', () => {
           condition={{ field: 'severity_text', eq: 'info' }}
           status="enabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
@@ -195,6 +197,7 @@ describe('ConditionEditor', () => {
           condition={{ field: 'severity_text', eq: 'info' }}
           status="enabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
@@ -224,6 +227,7 @@ describe('ConditionEditor', () => {
           condition={invalidCondition}
           status="enabled"
           onConditionChange={mockOnConditionChange}
+          onValidityChange={mockOnValidityChange}
         />
       );
 
