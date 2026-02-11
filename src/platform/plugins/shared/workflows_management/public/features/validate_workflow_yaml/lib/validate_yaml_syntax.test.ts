@@ -40,7 +40,7 @@ steps:
     const results = validateYamlSyntax(doc, lineCounter);
     expect(results.length).toBeGreaterThan(0);
 
-    const flowError = results.find((r) => r.message.includes('Flow mapping'));
+    const flowError = results.find((r) => r.message?.includes('Flow mapping'));
     expect(flowError).toBeDefined();
     expect(flowError!.owner).toBe('yaml-syntax-validation');
     expect(flowError!.severity).toBe('error');
@@ -48,14 +48,38 @@ steps:
     expect(flowError!.startColumn).toBeGreaterThan(0);
   });
 
-  it('should detect flow sequence values', () => {
+  it('should allow flow sequence values', () => {
     const { doc, lineCounter } = parseWithLineCounter(`name: Test Workflow
 tags: [tag1, tag2]`);
 
     const results = validateYamlSyntax(doc, lineCounter);
-    const flowError = results.find((r) => r.message?.includes('Flow sequence'));
-    expect(flowError).toBeDefined();
-    expect(flowError!.owner).toBe('yaml-syntax-validation');
+    expect(results).toHaveLength(0);
+  });
+
+  it('should allow nested flow sequences', () => {
+    const { doc, lineCounter } = parseWithLineCounter(`name: Test Workflow
+steps:
+  - name: step1
+    with:
+      items: [a, b, c]
+      labels: ["label1", "label2"]`);
+
+    const results = validateYamlSyntax(doc, lineCounter);
+    expect(results).toHaveLength(0);
+  });
+
+  it('should flag flow mapping but allow flow sequence in same document', () => {
+    const { doc, lineCounter } = parseWithLineCounter(`name: Test Workflow
+tags: [tag1, tag2]
+steps:
+  - name: step1
+    with:
+      comment: { key: value }`);
+
+    const results = validateYamlSyntax(doc, lineCounter);
+    expect(results).toHaveLength(1);
+    expect(results[0].message).toContain('Flow mapping');
+    expect(results[0].owner).toBe('yaml-syntax-validation');
   });
 
   it('should not flag quoted template expressions', () => {

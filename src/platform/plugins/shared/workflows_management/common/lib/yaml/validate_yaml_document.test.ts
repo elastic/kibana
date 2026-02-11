@@ -78,14 +78,37 @@ steps:
     expect(flowError!.range).toBeDefined();
   });
 
-  it('should detect flow sequence values', () => {
+  it('should allow flow sequence values', () => {
     const yaml = `name: Test Workflow
 tags: [tag1, tag2]`;
     const doc = parseDocument(yaml);
     const errors = getYamlDocumentErrorsDetailed(doc);
-    const flowError = errors.find((e) => e.message.includes('Flow sequence'));
-    expect(flowError).toBeDefined();
-    expect(flowError!.message).toContain('Flow sequence syntax is not allowed');
+    expect(errors).toHaveLength(0);
+  });
+
+  it('should allow nested flow sequences', () => {
+    const yaml = `name: Test Workflow
+steps:
+  - name: step1
+    with:
+      items: [a, b, c]
+      labels: ["label1", "label2"]`;
+    const doc = parseDocument(yaml);
+    const errors = getYamlDocumentErrorsDetailed(doc);
+    expect(errors).toHaveLength(0);
+  });
+
+  it('should flag flow mapping but allow flow sequence in the same document', () => {
+    const yaml = `name: Test Workflow
+tags: [tag1, tag2]
+steps:
+  - name: step1
+    with:
+      comment: { key: value }`;
+    const doc = parseDocument(yaml);
+    const errors = getYamlDocumentErrorsDetailed(doc);
+    expect(errors).toHaveLength(1);
+    expect(errors[0].message).toContain('Flow mapping syntax is not allowed');
   });
 
   it('should not flag block-style mappings', () => {

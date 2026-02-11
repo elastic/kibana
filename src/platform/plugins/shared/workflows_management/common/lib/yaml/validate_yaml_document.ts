@@ -27,7 +27,8 @@ export function getYamlDocumentErrors(document: Document): InvalidYamlSyntaxErro
  * Returns detailed errors with range information for use in editor validation.
  * Detects:
  * - Non-scalar keys (e.g. flow mappings used as keys)
- * - Flow mapping/sequence values (e.g. `comment: {{ inputs.comment }}`)
+ * - Flow mapping values (e.g. `comment: {{ inputs.comment }}`)
+ * Note: Flow sequences (e.g. `tags: [tag1, tag2]`) are allowed.
  */
 export function getYamlDocumentErrorsDetailed(document: Document): YamlDocumentError[] {
   const errors: YamlDocumentError[] = [];
@@ -42,20 +43,20 @@ export function getYamlDocumentErrorsDetailed(document: Document): YamlDocumentE
   visit(document, {
     Pair(_, pair) {
       if (isScalar(pair.key)) {
-        // Check for flow mapping/sequence values (e.g. `comment: {{ inputs.comment }}`)
+        // Check for flow mapping values (e.g. `comment: {{ inputs.comment }}`)
+        // Flow sequences (e.g. `tags: [tag1, tag2]`) are allowed.
         const value = pair.value as Node | null;
-        if (value && (isMap(value) || isSeq(value))) {
+        if (value && isMap(value)) {
           const collection = value as {
             flow?: boolean;
             range?: [number, number, number] | null;
           };
           if (collection.flow) {
-            const nodeType = isMap(value) ? 'mapping' : 'sequence';
             errors.push({
-              message: `Flow ${nodeType} syntax is not allowed. For template expressions, use quotes, e.g. "{{ inputs.comment }}"`,
+              message: `Flow mapping syntax is not allowed. For template expressions, use quotes, e.g. "{{ inputs.comment }}"`,
               range: collection.range ?? undefined,
             });
-            // Skip visiting children of the flow collection to avoid
+            // Skip visiting children of the flow mapping to avoid
             // duplicate errors (e.g. non-scalar keys inside {{ }})
             return visit.SKIP;
           }
