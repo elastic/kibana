@@ -47,6 +47,8 @@ export interface SignificantEventsEvaluationDataset {
   examples: SignificantEventsEvaluationExample[];
 }
 
+type AdditionalFeature = Omit<Feature, 'uuid' | 'status' | 'last_seen' | 'stream_name'>;
+
 const feature = (baseFeature: Omit<Feature, 'uuid' | 'status' | 'last_seen'>): Feature => ({
   ...baseFeature,
   uuid: `test-${baseFeature.id}`,
@@ -92,10 +94,8 @@ const logSamples = ({
 
 /** Computed feature: log_patterns */
 const logPatterns = ({
-  streamName,
   patterns,
 }: {
-  streamName: string;
   patterns: Array<{
     pattern: string;
     regex: string;
@@ -103,32 +103,26 @@ const logPatterns = ({
     sample: string;
     field: string;
   }>;
-}): Feature =>
-  feature({
-    stream_name: streamName,
-    id: 'log_patterns',
-    type: 'log_patterns',
-    description: 'Common log message patterns and their frequencies',
-    properties: { patterns },
-    confidence: 100,
-  });
+}): AdditionalFeature => ({
+  id: 'log_patterns',
+  type: 'log_patterns',
+  description: 'Common log message patterns and their frequencies',
+  properties: { patterns },
+  confidence: 100,
+});
 
 /** Computed feature: error_logs */
 const errorLogs = ({
-  streamName,
   samples,
 }: {
-  streamName: string;
   samples: Array<Record<string, unknown>>;
-}): Feature =>
-  feature({
-    stream_name: streamName,
-    id: 'error_logs',
-    type: 'error_logs',
-    description: 'Sample of log entries containing errors or exceptions',
-    properties: { samples },
-    confidence: 100,
-  });
+}): AdditionalFeature => ({
+  id: 'error_logs',
+  type: 'error_logs',
+  description: 'Sample of log entries containing errors or exceptions',
+  properties: { samples },
+  confidence: 100,
+});
 
 /**
  * Builds the computed features (dataset_analysis + log_samples) that are
@@ -171,7 +165,7 @@ const buildInput = ({
   additionalFeatures = [],
   ...baseInput
 }: Omit<SignificantEventsEvaluationExample['input'], 'features'> & {
-  additionalFeatures?: Feature[];
+  additionalFeatures?: AdditionalFeature[];
 }): SignificantEventsEvaluationExample['input'] => ({
   ...baseInput,
   features: [
@@ -180,7 +174,7 @@ const buildInput = ({
       sampleLogs: baseInput.sample_logs,
       ingestMode: baseInput.ingest_mode,
     }),
-    ...additionalFeatures,
+    ...additionalFeatures.map((f) => feature({ ...f, stream_name: baseInput.stream_name })),
   ],
 });
 
@@ -202,7 +196,6 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           ),
           additionalFeatures: [
             logPatterns({
-              streamName: 'synthtrace.security',
               patterns: [
                 {
                   pattern: '* server sshd[*]: Failed password for invalid user * from * port *',
@@ -215,21 +208,21 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
                 },
               ],
             }),
-            feature({
-              stream_name: 'synthtrace.security',
+            {
               id: 'openssh-sshd',
               type: 'technology',
               subtype: 'service',
               title: 'OpenSSH Server (sshd)',
               description:
-                'SSH daemon handling authentication. Logs show repeated failed password attempts from a single source IP, indicating brute-force or credential-stuffing activity.',
+                'OpenSSH daemon providing secure remote login and file transfer via the SSH protocol.',
               properties: { service: 'openssh', component: 'sshd' },
               confidence: 95,
               evidence: [
                 'sshd[20954]: Failed password for invalid user admin from 192.168.1.100 port 54321',
               ],
               tags: ['security', 'authentication'],
-            }),
+              meta: {},
+            },
           ],
         }),
         output: {
@@ -253,7 +246,6 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           ],
           additionalFeatures: [
             logPatterns({
-              streamName: 'synthtrace.operational',
               patterns: [
                 {
                   pattern: '* server01 systemd[1]: Started *',
@@ -271,14 +263,13 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
                 },
               ],
             }),
-            feature({
-              stream_name: 'synthtrace.operational',
+            {
               id: 'systemd-init',
               type: 'technology',
               subtype: 'service',
               title: 'systemd',
               description:
-                'Linux init system managing service lifecycle. Logs show service start/stop events.',
+                'Linux init system and service manager responsible for bootstrapping and managing system services.',
               properties: { service: 'systemd', component: 'init' },
               confidence: 95,
               evidence: [
@@ -286,7 +277,8 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
                 'systemd[1]: Stopping System Logging Service...',
               ],
               tags: ['operational', 'linux'],
-            }),
+              meta: {},
+            },
           ],
         }),
         output: {
@@ -313,7 +305,6 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           ingest_mode: 'single_doc',
           additionalFeatures: [
             errorLogs({
-              streamName: 'synthtrace.java_error',
               samples: [
                 {
                   message:
@@ -321,14 +312,13 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
                 },
               ],
             }),
-            feature({
-              stream_name: 'synthtrace.java_error',
-              id: 'java-11',
+            {
+              id: 'java',
               type: 'technology',
               subtype: 'programming_language',
               title: 'Java',
               description:
-                'Java application producing stack traces. NullPointerException observed in com.example.myproject.',
+                'General-purpose, class-based, object-oriented programming language and runtime environment.',
               properties: { language: 'java' },
               confidence: 95,
               evidence: [
@@ -336,7 +326,8 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
                 'at com.example.myproject.MyClass.myMethod(MyClass.java:123)',
               ],
               tags: ['error', 'java'],
-            }),
+              meta: {},
+            },
           ],
         }),
         output: {
@@ -360,7 +351,6 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           ),
           additionalFeatures: [
             logPatterns({
-              streamName: 'synthtrace.http_5xx_errors',
               patterns: [
                 {
                   pattern: '* - - [*] "* HTTP/1.1" 503 * "-" "*"',
@@ -372,19 +362,19 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
                 },
               ],
             }),
-            feature({
-              stream_name: 'synthtrace.http_5xx_errors',
+            {
               id: 'http-web-server',
               type: 'technology',
               subtype: 'web_server',
               title: 'HTTP Web Server',
               description:
-                'Web server producing combined log format access logs. All sampled requests return HTTP 503 Service Unavailable.',
+                'HTTP web server handling client requests and producing access logs in combined log format.',
               properties: { format: 'combined_log' },
               confidence: 90,
               evidence: ['"GET /api/user HTTP/1.1" 503 1234'],
               tags: ['web', 'http'],
-            }),
+              meta: {},
+            },
           ],
         }),
         output: {
@@ -414,7 +404,6 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           ingest_mode: 'single_doc',
           additionalFeatures: [
             errorLogs({
-              streamName: 'synthtrace.python_error',
               samples: [
                 {
                   message:
@@ -422,14 +411,13 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
                 },
               ],
             }),
-            feature({
-              stream_name: 'synthtrace.python_error',
+            {
               id: 'python',
               type: 'technology',
               subtype: 'programming_language',
               title: 'Python',
               description:
-                'Python application producing tracebacks. IndexError observed in main.py.',
+                'High-level, interpreted programming language used for general-purpose software development.',
               properties: { language: 'python' },
               confidence: 95,
               evidence: [
@@ -437,7 +425,8 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
                 'IndexError: list index out of range',
               ],
               tags: ['error', 'python'],
-            }),
+              meta: {},
+            },
           ],
         }),
         output: {
@@ -461,7 +450,6 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           ],
           additionalFeatures: [
             errorLogs({
-              streamName: 'synthtrace.docker_error',
               samples: [
                 {
                   message:
@@ -469,14 +457,13 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
                 },
               ],
             }),
-            feature({
-              stream_name: 'synthtrace.docker_error',
+            {
               id: 'docker-runtime',
               type: 'technology',
               subtype: 'container_runtime',
               title: 'Docker',
               description:
-                'Docker container runtime. Logs show image pull failures and daemon errors.',
+                'Container runtime for building, shipping, and running applications in isolated environments.',
               properties: { runtime: 'docker' },
               confidence: 95,
               evidence: [
@@ -484,7 +471,8 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
                 'docker: Error response from daemon: pull access denied',
               ],
               tags: ['container', 'docker'],
-            }),
+              meta: {},
+            },
           ],
         }),
         output: {
@@ -511,20 +499,18 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           ],
           additionalFeatures: [
             errorLogs({
-              streamName: 'synthtrace.k8s_error',
               samples: [
                 { message: '  Reason:       CrashLoopBackOff' },
                 { message: '  Reason:       Error' },
               ],
             }),
-            feature({
-              stream_name: 'synthtrace.k8s_error',
+            {
               id: 'kubernetes',
               type: 'infrastructure',
               subtype: 'container_orchestration',
               title: 'Kubernetes',
               description:
-                'Kubernetes pod status events. CrashLoopBackOff indicates a container is repeatedly crashing after startup.',
+                'Open-source container orchestration platform for automating deployment, scaling, and management of containerized applications.',
               properties: { orchestrator: 'kubernetes' },
               confidence: 90,
               evidence: [
@@ -533,7 +519,8 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
                 'Exit Code:    1',
               ],
               tags: ['kubernetes', 'container'],
-            }),
+              meta: {},
+            },
           ],
         }),
         output: {
@@ -557,21 +544,19 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           ],
           additionalFeatures: [
             errorLogs({
-              streamName: 'synthtrace.db_connection_error',
               samples: [
                 {
                   message: 'ERROR: could not connect to database "postgres": Connection refused',
                 },
               ],
             }),
-            feature({
-              stream_name: 'synthtrace.db_connection_error',
+            {
               id: 'postgresql',
               type: 'technology',
               subtype: 'database',
               title: 'PostgreSQL',
               description:
-                'PostgreSQL database. Logs show connection refused errors to the postgres database on port 5432.',
+                'Open-source relational database management system with SQL compliance and extensibility.',
               properties: { database: 'postgresql', port: 5432 },
               confidence: 95,
               evidence: [
@@ -579,7 +564,8 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
                 'accepting TCP/IP connections on port 5432',
               ],
               tags: ['database', 'postgresql'],
-            }),
+              meta: {},
+            },
           ],
         }),
         output: {
@@ -603,7 +589,6 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
           ],
           additionalFeatures: [
             logPatterns({
-              streamName: 'synthtrace.disk_space_warning',
               patterns: [
                 {
                   pattern: 'WARN: * is *% full',
@@ -621,19 +606,19 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
                 },
               ],
             }),
-            feature({
-              stream_name: 'synthtrace.disk_space_warning',
+            {
               id: 'disk-monitoring',
               type: 'infrastructure',
               subtype: 'monitoring',
               title: 'Disk Space Monitoring',
               description:
-                'Disk usage monitoring producing WARN and CRITICAL alerts when partitions approach capacity.',
+                'System-level disk usage monitoring that tracks filesystem capacity across partitions.',
               properties: { monitored_path: '/var/log' },
               confidence: 90,
               evidence: ['WARN: /var/log is 95% full', 'CRITICAL: /var/log is 99% full'],
               tags: ['infrastructure', 'disk', 'monitoring'],
-            }),
+              meta: {},
+            },
           ],
         }),
         output: {
@@ -665,7 +650,6 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
             sample_logs: sampleLogs,
             additionalFeatures: [
               logPatterns({
-                streamName: 'logs.nginx',
                 patterns: [
                   {
                     pattern: '* - - [*] "* HTTP/1.1" * * "-" "*"',
@@ -676,19 +660,19 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
                   },
                 ],
               }),
-              feature({
-                stream_name: 'logs.nginx',
+              {
                 id: 'nginx-web-server',
                 type: 'technology',
                 subtype: 'web_server',
                 title: 'Nginx',
                 description:
-                  'Nginx web server producing combined log format access logs with various HTTP status codes.',
+                  'High-performance HTTP server and reverse proxy commonly used for web serving and load balancing.',
                 properties: { server: 'nginx', format: 'combined_log' },
                 confidence: 95,
                 evidence: sampleLogs.slice(0, 2),
                 tags: ['web', 'nginx'],
-              }),
+                meta: {},
+              },
             ],
           });
         })(),
@@ -715,19 +699,19 @@ export const SIGNIFICANT_EVENTS_DATASETS: SignificantEventsEvaluationDataset[] =
             stream_description: 'Linux syslog, a mix of operational and system messages.',
             sample_logs: sampleLogs,
             additionalFeatures: [
-              feature({
-                stream_name: 'logs.syslog',
+              {
                 id: 'linux-syslog',
                 type: 'infrastructure',
                 subtype: 'operating_system',
                 title: 'Linux Syslog',
                 description:
-                  'Standard Linux syslog output with messages from various system services and daemons.',
+                  'Standard Linux system logging facility aggregating messages from the kernel and system services.',
                 properties: { os: 'linux', log_facility: 'syslog' },
                 confidence: 90,
                 evidence: sampleLogs.slice(0, 2),
                 tags: ['linux', 'syslog'],
-              }),
+                meta: {},
+              },
             ],
           });
         })(),
