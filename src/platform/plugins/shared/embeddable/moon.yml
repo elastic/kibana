@@ -37,6 +37,11 @@ dependsOn:
   - '@kbn/analytics'
   - '@kbn/content-management-utils'
   - '@kbn/config-schema'
+  - '@kbn/std'
+  - '@kbn/licensing-types'
+  - '@kbn/licensing-plugin'
+  - '@kbn/data-plugin'
+  - '@kbn/presentation-util'
 tags:
   - plugin
   - prod
