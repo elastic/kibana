@@ -294,15 +294,57 @@ export const convertPathParameters = (schema: unknown, knownParameters: KnownPar
   };
 };
 
+const seenReferences = new Set<string>();
+
 export const convert = (schema: z.ZodTypeAny) => {
+  let finalSchema = schema.toJSONSchema({
+    target: 'openapi-3.0',
+    cycles: 'ref',
+    reused: 'inline',
+    unrepresentable: 'any',
+  }) as OpenAPIV3.SchemaObject;
+
+  const shared: Record<string, OpenAPIV3.SchemaObject> = {};
+  if ('definitions' in finalSchema) {
+    // Zod describes the references inside "definitions", and references them like `#/definitions/...`.
+    // However, OAS expects Components instead (and references like `#/components/schemas/...`)
+    let schemaString = JSON.stringify(finalSchema).replaceAll(
+      '#/definitions/',
+      '#/components/schemas/'
+    );
+
+    const keyMap = new Map<string, string>();
+
+    // Zod seems to create reference names like `__schema0`, `__schema1`, etc.
+    // The problem is that different schemas might have the same reference name, which is a problem when we combine the schemas into a single OpenAPI document.
+    Object.keys(finalSchema.definitions as Record<string, OpenAPIV3.SchemaObject>).forEach(
+      (key) => {
+        let finalKey = key;
+        if (seenReferences.has(finalKey)) {
+          finalKey = `__schema${seenReferences.size}`;
+        }
+        seenReferences.add(finalKey);
+        keyMap.set(key, finalKey);
+
+        schemaString = schemaString.replaceAll(
+          `"#/components/schemas/${key}"`,
+          `"#/components/schemas/${finalKey}"`
+        );
+      }
+    );
+
+    const { definitions, ...rest } = JSON.parse(schemaString);
+    finalSchema = rest;
+
+    // Copy the definitions under the new keys to the shared object
+    Object.entries(definitions).forEach(([key, value]) => {
+      shared[keyMap.get(key)!] = value as OpenAPIV3.SchemaObject;
+    });
+  }
+
   return {
-    shared: {},
-    schema: z.toJSONSchema(schema, {
-      target: 'openapi-3.0',
-      cycles: 'ref',
-      reused: 'inline',
-      unrepresentable: 'any',
-    }) as OpenAPIV3.SchemaObject,
+    shared,
+    schema: finalSchema,
   };
 };
 
