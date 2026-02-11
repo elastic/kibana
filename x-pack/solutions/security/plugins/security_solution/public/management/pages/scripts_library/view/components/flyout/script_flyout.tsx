@@ -141,7 +141,6 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
 
         {!shouldFetchScriptToViewOrEdit && show === 'details' && (
           <EndpointScriptDetailsFlyout
-            queryParams={queryParams}
             onClickAction={onClickAction}
             scriptItem={formState.scriptItem as EndpointScript}
             data-test-subj={getTestId()}

@@ -6,19 +6,17 @@
  */
 import { EuiFlyoutFooter } from '@elastic/eui';
 import React, { memo } from 'react';
-import type { ListScriptsRequestQuery } from '../../../../../../../common/api/endpoint';
 import type { EndpointScript } from '../../../../../../../common/endpoint/types';
 import { EndpointScriptDetailsActions } from './script_details_actions';
 import type { UseScriptActionItemsProps } from '../../hooks/use_script_action_items';
 
 interface EndpointScriptDetailsFlyoutFooterProps {
-  queryParams: ListScriptsRequestQuery;
   scriptItem: EndpointScript;
   onClickAction: UseScriptActionItemsProps['onClickAction'];
   'data-test-subj'?: string;
 }
 export const EndpointScriptDetailsFlyoutFooter = memo<EndpointScriptDetailsFlyoutFooterProps>(
-  ({ queryParams, onClickAction, scriptItem, 'data-test-subj': dataTestSubj }) => {
+  ({ onClickAction, scriptItem, 'data-test-subj': dataTestSubj }) => {
     return (
       <EuiFlyoutFooter className="eui-textRight" data-test-subj={dataTestSubj}>
         <EndpointScriptDetailsActions

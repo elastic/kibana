@@ -7,7 +7,6 @@
 
 import React, { memo } from 'react';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
-import type { ListScriptsRequestQuery } from '../../../../../../../common/api/endpoint';
 import type { EndpointScript } from '../../../../../../../common/endpoint/types';
 
 import type { UseScriptActionItemsProps } from '../../hooks/use_script_action_items';
@@ -16,13 +15,12 @@ import { EndpointScriptDetailsFlyoutBody } from './script_details_flyout_body';
 import { EndpointScriptDetailsFlyoutFooter } from './script_details_flyout_footer';
 
 export interface EndpointScriptDetailsFlyoutProps {
-  queryParams: ListScriptsRequestQuery;
   scriptItem: EndpointScript;
   onClickAction: UseScriptActionItemsProps['onClickAction'];
   'data-test-subj'?: string;
 }
 export const EndpointScriptDetailsFlyout = memo<EndpointScriptDetailsFlyoutProps>(
-  ({ queryParams, scriptItem, onClickAction, 'data-test-subj': dataTestSubj }) => {
+  ({ scriptItem, onClickAction, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     return (
       <>
@@ -37,7 +35,6 @@ export const EndpointScriptDetailsFlyout = memo<EndpointScriptDetailsFlyoutProps
           data-test-subj={getTestId('body')}
         />
         <EndpointScriptDetailsFlyoutFooter
-          queryParams={queryParams}
           scriptItem={scriptItem}
           onClickAction={onClickAction}
           data-test-subj={getTestId('footer')}
