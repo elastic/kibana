@@ -17,7 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState, type ReactNode } from 'react';
+import React, { Fragment, useState, type ReactNode } from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import type { NetworkDirectionFormState } from '../../../../types';
 import { ProcessorFieldSelector } from '../processor_field_selector';
@@ -167,9 +167,8 @@ export const InternalNetworksSelector = () => {
       }}
     >
       {internalNetworksOptions.map(({ id, label, content }) => (
-        <>
+        <Fragment key={id}>
           <EuiCheckableCard
-            key={id}
             id={id}
             label={label}
             checked={selectedOption === id}
@@ -178,7 +177,7 @@ export const InternalNetworksSelector = () => {
             {selectedOption === id && content}
           </EuiCheckableCard>
           <EuiSpacer size="s" />
-        </>
+        </Fragment>
       ))}
     </EuiFormFieldset>
   );
