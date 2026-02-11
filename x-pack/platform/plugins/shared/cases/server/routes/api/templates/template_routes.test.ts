@@ -408,11 +408,11 @@ describe('Template Routes', () => {
   });
 
   describe('PATCH /internal/cases/templates/{template_id}', () => {
-    it('partially updates only the name and preserves other fields', async () => {
+    it('partially updates the definition and preserves other fields', async () => {
       const context = createMockContext();
       const request = {
         params: { template_id: 'template-1' },
-        body: { name: 'Patched Name' },
+        body: { definition: buildDefinition('Patched Template') },
       };
       const response = createMockResponse();
 
@@ -423,7 +423,7 @@ describe('Template Routes', () => {
         expect.objectContaining({
           body: expect.objectContaining({
             templateId: 'template-1',
-            name: 'Patched Name',
+            name: 'Patched Template',
             owner: 'securitySolution',
             templateVersion: 2,
           }),
