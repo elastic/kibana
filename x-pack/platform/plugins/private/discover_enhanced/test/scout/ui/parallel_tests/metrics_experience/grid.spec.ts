@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../../fixtures';
 
-spaceTest.describe('Metrics Experience - Grid', { tag: ['@ess', '@svlOblt'] }, () => {
+spaceTest.describe('Metrics in Discover - Grid', { tag: ['@ess', '@svlOblt'] }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.TSDB_LOGS);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME.TSDB_LOGS);

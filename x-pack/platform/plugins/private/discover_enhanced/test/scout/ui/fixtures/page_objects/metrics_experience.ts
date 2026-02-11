@@ -11,8 +11,6 @@ import { KibanaCodeEditorWrapper } from '@kbn/scout';
 export class MetricsExperiencePage {
   public readonly codeEditor: KibanaCodeEditorWrapper;
   public readonly grid: Locator;
-  public readonly emptyState: Locator;
-  public readonly renderedIndicator: Locator;
 
   constructor(
     private readonly page: ScoutPage,
@@ -20,8 +18,6 @@ export class MetricsExperiencePage {
   ) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
     this.grid = page.testSubj.locator('unifiedMetricsExperienceGrid');
-    this.emptyState = page.testSubj.locator('metricsExperienceNoData');
-    this.renderedIndicator = page.testSubj.locator('metricsExperienceRendered');
   }
 
   async setEsqlQuery(query: string) {
