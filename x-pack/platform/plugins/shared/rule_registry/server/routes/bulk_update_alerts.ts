@@ -91,7 +91,7 @@ export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>)
 
         // Emit audit event for workflow status changes (ACK, un-ACK, close)
         const coreContext = await context.core;
-        const auditLogger = coreContext.audit;
+        const auditLogger = coreContext.security?.audit?.logger;
         if (auditLogger) {
           const alertDesc = ids ? `alerts [ids=${ids.join(',')}]` : 'alerts matching query';
           const auditAction = WORKFLOW_STATUS_AUDIT_ACTIONS[status] ?? 'alert_update';
