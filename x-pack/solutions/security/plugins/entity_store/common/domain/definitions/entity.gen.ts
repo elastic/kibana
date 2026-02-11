@@ -23,6 +23,11 @@ export const EngineMetadata = z
   })
   .strict();
 
+export type EntityRiskLevels = z.infer<typeof EntityRiskLevels>;
+export const EntityRiskLevels = z.enum(['Unknown', 'Low', 'Moderate', 'High', 'Critical']);
+export type EntityRiskLevelsEnum = typeof EntityRiskLevels.enum;
+export const EntityRiskLevelsEnum = EntityRiskLevels.enum;
+
 export type EntityField = z.infer<typeof EntityField>;
 export const EntityField = z
   .object({
@@ -73,6 +78,10 @@ export const EntityField = z
     risk: z
       .object({
         /**
+         * Lexical description of the entity's risk.
+         */
+        calculated_level: EntityRiskLevels.optional(),
+        /**
          * The raw numeric value of the given entity's risk score.
          */
         calculated_score: z.number().optional(),
@@ -86,6 +95,19 @@ export const EntityField = z
   })
   .strict();
 
+/**
+ * The criticality level of the asset.
+ */
+export type AssetCriticalityLevel = z.infer<typeof AssetCriticalityLevel>;
+export const AssetCriticalityLevel = z.enum([
+  'low_impact',
+  'medium_impact',
+  'high_impact',
+  'extreme_impact',
+]);
+export type AssetCriticalityLevelEnum = typeof AssetCriticalityLevel.enum;
+export const AssetCriticalityLevelEnum = AssetCriticalityLevel.enum;
+
 export type Asset = z.infer<typeof Asset>;
 export const Asset = z
   .object({
@@ -96,9 +118,101 @@ export const Asset = z
     model: z.string().optional(),
     vendor: z.string().optional(),
     environment: z.string().optional(),
+    criticality: AssetCriticalityLevel.optional(),
     business_unit: z.string().optional(),
   })
   .strict();
+
+/**
+ * A generic representation of a document contributing to a Risk Score.
+ */
+export type RiskScoreInput = z.infer<typeof RiskScoreInput>;
+export const RiskScoreInput = z.object({
+  /**
+   * The unique identifier (`_id`) of the original source document
+   */
+  id: z.string(),
+  /**
+   * The unique index (`_index`) of the original source document
+   */
+  index: z.string(),
+  /**
+   * The risk category of the risk input document.
+   */
+  category: z.string(),
+  /**
+   * A human-readable description of the risk input document.
+   */
+  description: z.string(),
+  /**
+   * The weighted risk score of the risk input document.
+   */
+  risk_score: z.number().min(0).max(100).optional(),
+  /**
+   * The @timestamp of the risk input document.
+   */
+  timestamp: z.string().optional(),
+  contribution_score: z.number().optional(),
+});
+
+export type EntityRiskScoreRecord = z.infer<typeof EntityRiskScoreRecord>;
+export const EntityRiskScoreRecord = z.object({
+  /**
+   * The time at which the risk score was calculated.
+   */
+  '@timestamp': z.string().datetime(),
+  /**
+   * The identifier field defining this risk score. Coupled with `id_value`, uniquely identifies the entity being scored.
+   */
+  id_field: z.string(),
+  /**
+   * The identifier value defining this risk score. Coupled with `id_field`, uniquely identifies the entity being scored.
+   */
+  id_value: z.string(),
+  /**
+   * Lexical description of the entity's risk.
+   */
+  calculated_level: EntityRiskLevels,
+  /**
+   * The raw numeric value of the given entity's risk score.
+   */
+  calculated_score: z.number(),
+  /**
+   * The normalized numeric value of the given entity's risk score. Useful for comparing with other entities.
+   */
+  calculated_score_norm: z.number().min(0).max(100),
+  /**
+   * The contribution of Category 1 to the overall risk score (`calculated_score`). Category 1 contains Detection Engine Alerts.
+   */
+  category_1_score: z.number(),
+  /**
+   * The number of risk input documents that contributed to the Category 1 score (`category_1_score`).
+   */
+  category_1_count: z.number().int(),
+  /**
+   * A list of the highest-risk documents contributing to this risk score. Useful for investigative purposes.
+   */
+  inputs: z.array(RiskScoreInput),
+  category_2_score: z.number().optional(),
+  category_2_count: z.number().int().optional(),
+  notes: z.array(z.string()),
+  criticality_modifier: z.number().optional(),
+  criticality_level: AssetCriticalityLevel.optional(),
+  /**
+   * A list of modifiers that were applied to the risk score calculation.
+   */
+  modifiers: z
+    .array(
+      z.object({
+        type: z.string(),
+        subtype: z.string().optional(),
+        modifier_value: z.number().optional(),
+        contribution: z.number(),
+        metadata: z.object({}).catchall(z.unknown()).optional(),
+      })
+    )
+    .optional(),
+});
 
 export type UserEntity = z.infer<typeof UserEntity>;
 export const UserEntity = z
@@ -114,6 +228,7 @@ export const UserEntity = z
         id: z.array(z.string()).optional(),
         email: z.array(z.string()).optional(),
         hash: z.array(z.string()).optional(),
+        risk: EntityRiskScoreRecord.optional(),
       })
       .strict()
       .optional(),
@@ -142,6 +257,7 @@ export const HostEntity = z
         type: z.array(z.string()).optional(),
         mac: z.array(z.string()).optional(),
         architecture: z.array(z.string()).optional(),
+        risk: EntityRiskScoreRecord.optional(),
         entity: EntityField.optional(),
       })
       .strict()
@@ -164,6 +280,7 @@ export const ServiceEntity = z
     service: z
       .object({
         name: z.string(),
+        risk: EntityRiskScoreRecord.optional(),
         entity: EntityField.optional(),
       })
       .strict()
