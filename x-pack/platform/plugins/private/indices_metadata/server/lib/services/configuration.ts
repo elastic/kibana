@@ -20,7 +20,7 @@ import type { ArtifactService } from './artifact';
 import { ArtifactNotFoundError, ManifestNotFoundError } from './artifact.errors';
 import type { IndicesMetadataConfiguration } from './indices_metadata.types';
 import { IndicesMetadataConfigurationSchema } from './indices_metadata.types';
-import { TelemetryConfigProvider } from './telemetry_config_provider';
+import type { TelemetryConfigProvider } from './telemetry_config_provider';
 export const REFRESH_CONFIG_INTERVAL_MS = 60 * 60 * 1000;
 const CONFIGURATION_ARTIFACT_NAME = 'indices-metadata-configuration-v1';
 
