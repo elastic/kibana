@@ -111,17 +111,19 @@ export async function autocomplete(
         ? [commaCompleteItem]
         : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain', false);
 
+    // TODO: Re-enable label matcher suggestions when label signatures are implemented
+    // case 'after_label_brace':
+    //   return position.isCompleteLabel
+    //     ? [commaCompleteItem]
+    //     : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain', true);
+    // case 'after_label_name':
+    //   return [];
+    // case 'after_label_operator':
+    //   return [valuePlaceholderConstant];
     case 'after_label_brace':
-      return position.isCompleteLabel
-        ? [commaCompleteItem]
-        : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain', true);
-
     case 'after_label_name':
-      // Future: suggest label operators (=, !=, =~, !~) when ES defines them
-      return [];
-
     case 'after_label_operator':
-      return [valuePlaceholderConstant];
+      return [];
 
     case 'after_metric': {
       return position.signatureTypes?.includes('range_vector') && !position.selector?.duration
