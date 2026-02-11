@@ -214,7 +214,6 @@ describe('data_fetching related hooks', () => {
         cascadeGroupingChangeHandler: jest.fn(),
         onUpdateESQLQuery: jest.fn(),
         openInNewTab: jest.fn(),
-        registerCascadeRequestsInspectorAdapter: jest.fn(),
         ...overrides,
       };
 

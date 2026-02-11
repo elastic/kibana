@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, Fragment, useRef, useEffect } from 'react';
+import React, { useMemo, useCallback, Fragment, useRef } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import {
   DataCascade,
@@ -15,7 +15,6 @@ import {
   DataCascadeRowCell,
   type DataCascadeRowCellProps,
 } from '@kbn/shared-ux-document-data-cascade';
-import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { EsqlQuery } from '@kbn/esql-language';
@@ -58,14 +57,7 @@ const ESQLDataCascade = React.memo(
       esqlVariables,
       viewModeToggle,
       cascadeGroupingChangeHandler,
-      registerCascadeRequestsInspectorAdapter,
     } = useCascadedDocumentsContext();
-
-    const cascadeRequestsInspectorAdapter = useRef<RequestAdapter>(new RequestAdapter());
-
-    useEffect(() => {
-      registerCascadeRequestsInspectorAdapter(cascadeRequestsInspectorAdapter.current);
-    }, [registerCascadeRequestsInspectorAdapter]);
 
     const cascadeGroupData = useGroupedCascadeData({
       selectedCascadeGroups,

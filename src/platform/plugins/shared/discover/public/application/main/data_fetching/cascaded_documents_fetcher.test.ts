@@ -12,6 +12,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { constructCascadeQuery } from '@kbn/esql-utils';
 import { apm } from '@elastic/apm-rum';
+import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 import type {
@@ -132,6 +133,9 @@ describe('CascadedDocumentsFetcher', () => {
         expressions: discoverServices.expressions,
         timeRange: params.timeRange,
         scopedProfilesManager,
+        inspectorAdapters: {
+          requests: expect.any(RequestAdapter),
+        },
       })
     );
     expect(stateManager.setCascadedDocuments).toHaveBeenCalledWith(params.nodeId, records);
