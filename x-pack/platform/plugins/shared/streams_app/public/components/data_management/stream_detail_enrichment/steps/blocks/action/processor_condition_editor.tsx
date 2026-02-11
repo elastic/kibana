@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useController, useFormContext } from 'react-hook-form';
 import { isConditionComplete } from '@kbn/streamlang';
 import { i18n } from '@kbn/i18n';
@@ -19,7 +19,25 @@ export const ProcessorConditionEditor = () => {
       validate: isConditionComplete,
     },
   });
-  const { setError, clearErrors, trigger } = useFormContext<ProcessorFormState>();
+  const { setError, clearErrors } = useFormContext<ProcessorFormState>();
+
+  const handleValidityChange = useCallback(
+    (isValid: boolean) => {
+      if (isValid) {
+        clearErrors('where');
+        return;
+      }
+
+      setError('where', {
+        type: 'manual',
+        message: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.invalidProcessorWhereJsonError',
+          { defaultMessage: 'Invalid JSON' }
+        ),
+      });
+    },
+    [clearErrors, setError]
+  );
 
   if (field.value === undefined) {
     return null;
@@ -29,21 +47,7 @@ export const ProcessorConditionEditor = () => {
     <ProcessorConditionEditorWrapper
       condition={field.value}
       onConditionChange={field.onChange}
-      onValidityChange={(isValid) => {
-        if (isValid) {
-          clearErrors('where');
-          void trigger('where');
-          return;
-        }
-
-        setError('where', {
-          type: 'manual',
-          message: i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.invalidProcessorWhereJsonError',
-            { defaultMessage: 'Invalid JSON' }
-          ),
-        });
-      }}
+      onValidityChange={handleValidityChange}
     />
   );
 };

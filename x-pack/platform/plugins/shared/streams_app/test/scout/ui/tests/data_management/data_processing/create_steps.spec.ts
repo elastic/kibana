@@ -63,14 +63,14 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     await pageObjects.streams.clickAddCondition();
 
     await pageObjects.streams.toggleConditionEditorWithSyntaxSwitch();
-    await pageObjects.streams.fillConditionEditorWithSyntax('{');
-
-    await expect(page.getByTestId('streamsAppConditionConfigurationSaveConditionButton')).toBeDisabled();
-
     await pageObjects.streams.fillConditionEditorWithSyntax(
       '{"field":"test_field","contains":"logs"}'
     );
     await expect(page.getByTestId('streamsAppConditionConfigurationSaveConditionButton')).toBeEnabled();
+
+    // Regression check: going from valid JSON to invalid JSON must disable Update.
+    await pageObjects.streams.fillConditionEditorWithSyntax('{');
+    await expect(page.getByTestId('streamsAppConditionConfigurationSaveConditionButton')).toBeDisabled();
   });
 
   test('should be able to nest steps under conditions', async ({ pageObjects }) => {

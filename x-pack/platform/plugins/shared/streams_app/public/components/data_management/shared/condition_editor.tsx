@@ -27,7 +27,7 @@ import {
   type OperatorKeys,
 } from '@kbn/streamlang';
 import type { RoutingStatus } from '@kbn/streams-schema';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
@@ -75,27 +75,41 @@ export function ConditionEditor(props: ConditionEditorProps) {
   const syntaxEditorTextRef = useRef(syntaxEditorText);
   const lastSyncedConditionJsonRef = useRef(conditionJsonString);
   const prevUsingSyntaxEditorRef = useRef(usingSyntaxEditor);
+  const lastReportedValidityRef = useRef<boolean | undefined>(undefined);
+  const onValidityChangeRef = useRef(onValidityChange ?? (() => {}));
+
+  const reportValidityChange = useCallback((isValid: boolean) => {
+    if (lastReportedValidityRef.current === isValid) {
+      return;
+    }
+    lastReportedValidityRef.current = isValid;
+    onValidityChangeRef.current(isValid);
+  }, []);
 
   useEffect(() => {
     syntaxEditorTextRef.current = syntaxEditorText;
   }, [syntaxEditorText]);
 
   useEffect(() => {
-    // Ensure consumers start in a valid state.
-    onValidityChange(true);
+    onValidityChangeRef.current = onValidityChange ?? (() => {});
   }, [onValidityChange]);
+
+  useEffect(() => {
+    // Ensure consumers start in a valid state.
+    reportValidityChange(true);
+  }, [reportValidityChange]);
 
   useEffect(() => {
     // When switching modes, reset validity and ensure the editor starts from the canonical condition.
     if (prevUsingSyntaxEditorRef.current !== usingSyntaxEditor) {
-      onValidityChange(true);
+      reportValidityChange(true);
       if (usingSyntaxEditor) {
         setSyntaxEditorText(conditionJsonString);
         lastSyncedConditionJsonRef.current = conditionJsonString;
       }
       prevUsingSyntaxEditorRef.current = usingSyntaxEditor;
     }
-  }, [conditionJsonString, onValidityChange, usingSyntaxEditor]);
+  }, [conditionJsonString, reportValidityChange, usingSyntaxEditor]);
 
   useEffect(() => {
     if (usingSyntaxEditor) return;
@@ -204,10 +218,10 @@ export function ConditionEditor(props: ConditionEditorProps) {
             setSyntaxEditorText(value);
             try {
               const parsedCondition = JSON.parse(value);
-              onValidityChange(true);
+              reportValidityChange(true);
               handleConditionChange(parsedCondition);
             } catch (error: unknown) {
-              onValidityChange(false);
+              reportValidityChange(false);
             }
           }}
           options={{
