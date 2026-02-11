@@ -92,15 +92,10 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
       } else {
         const systemConnectorActionTypeId = SystemConnectorsMap.get(`.${stepType}`);
         if (systemConnectorActionTypeId) {
-          // Use system connector when connector-id is missing and connector type is in SystemConnectorsMap
-          const systemConnectorId = `system-connector-${systemConnectorActionTypeId}`;
-
-          output = await this.connectorExecutor.execute({
-            connectorType: stepType,
-            connectorNameOrId: systemConnectorId,
+          output = await this.connectorExecutor.executeSystemConnector({
+            connectorType: systemConnectorActionTypeId,
             input: renderedInputs,
             abortController: this.stepExecutionRuntime.abortController,
-            isSystemAction: true,
           });
         } else {
           throw new Error(`Connector ID is required for connector type ${stepType}`);
