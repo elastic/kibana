@@ -101,7 +101,11 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "entity-analytics-monitoring-entity-source": "a7307895e5c38accc21ebea852bd46ef98ebb73f7a73d116c8dfcd3932f57899",
         "entity-definition": "28cde811da5815b6fdebb0112419b593253fb5053d60c2cf29b50af3be058c67",
         "entity-discovery-api-key": "2350e2ce1b6e913f55aef2cd04971b15604b03e049370ef10949c3eeec38c46f",
+<<<<<<< HEAD
         "entity-engine-descriptor-v2": "c1c0c6f43e5ebab32706047658768be5962f9fc45fcca29c73d4beaffa28f193",
+=======
+        "entity-engine-descriptor-v2": "dd8feaab4efdaacb6135af0deb7ca19465fd35f1d1df92ddef72b5a3d07eb55d",
+>>>>>>> 3d1747ef7143 (Changes from node scripts/jest_integration -u src/core/server/integration_tests/ci_checks)
         "entity-engine-status": "005903620a00737932aa54ae57817b078810b2f71cc42e7715d1c22c5e5b715e",
         "epm-packages": "d3ca1a3ed046e4579a466455e8f4ab4951b73344a02dac44700843e2f928a26e",
         "epm-packages-assets": "1095b56fabdeb3994a60f4da02e87179dfaf57d5bb23b97458129bf14c66b46e",
