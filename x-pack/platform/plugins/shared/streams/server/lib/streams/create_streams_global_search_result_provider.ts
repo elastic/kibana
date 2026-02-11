@@ -71,11 +71,6 @@ async function findStreams({
     track_total_hits: false,
     query: {
       bool: {
-        must: {
-          exists: {
-            field: 'ingest',
-          },
-        },
         should: [
           {
             wildcard: {

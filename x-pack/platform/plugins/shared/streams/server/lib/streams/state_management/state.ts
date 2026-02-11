@@ -127,15 +127,6 @@ export class State {
         size: 10000,
         sort: [{ name: 'asc' }],
         track_total_hits: false,
-        query: {
-          bool: {
-            must: {
-              exists: {
-                field: 'ingest',
-              },
-            },
-          },
-        },
       });
 
       const streams = streamsSearchResponse.hits.hits
