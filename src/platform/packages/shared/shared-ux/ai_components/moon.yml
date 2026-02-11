@@ -16,7 +16,10 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   metadata:
-    sourceRoot: src/platform/packages/shared/shared-ux/ai_components/ai_button
+    sourceRoot: src/platform/packages/shared/shared-ux/ai_components
+dependsOn:
+  - '@kbn/i18n'
+  - '@kbn/react-kibana-context-theme'
 tags:
   - shared-common
   - package
