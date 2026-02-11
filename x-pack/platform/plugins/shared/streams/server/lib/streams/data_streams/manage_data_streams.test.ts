@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getTemplateLifecycle, updateDataStreamsFailureStore } from './manage_data_streams';
+import {
+  getTemplateLifecycle,
+  updateDataStreamsFailureStore,
+  updateDataStreamsLifecycle,
+} from './manage_data_streams';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type { Streams } from '@kbn/streams-schema';
@@ -103,6 +107,67 @@ describe('getTemplateLifecycle', () => {
       lifecycle: { enabled: false },
     });
     expect(result).toEqual({ disabled: {} });
+  });
+});
+
+describe('updateDataStreamsLifecycle downsampling', () => {
+  let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockLogger: jest.Mocked<Logger>;
+
+  beforeEach(() => {
+    mockEsClient = {
+      indices: {
+        putDataLifecycle: jest.fn().mockResolvedValue({}),
+      },
+    } as any;
+
+    mockLogger = {
+      debug: jest.fn(),
+      error: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+    } as any;
+  });
+
+  it('passes downsampling settings when provided', async () => {
+    await updateDataStreamsLifecycle({
+      esClient: mockEsClient,
+      logger: mockLogger,
+      names: ['test-stream'],
+      lifecycle: {
+        dsl: {
+          data_retention: '30d',
+          downsample: [{ after: '1d', fixed_interval: '1h' }],
+        },
+      },
+      isServerless: true,
+    });
+
+    expect(mockEsClient.indices.putDataLifecycle).toHaveBeenCalledWith({
+      name: ['test-stream'],
+      data_retention: '30d',
+      downsampling: [{ after: '1d', fixed_interval: '1h' }],
+    });
+  });
+
+  it('omits downsampling when no steps are provided', async () => {
+    await updateDataStreamsLifecycle({
+      esClient: mockEsClient,
+      logger: mockLogger,
+      names: ['test-stream'],
+      lifecycle: {
+        dsl: {
+          data_retention: '30d',
+          downsample: [],
+        },
+      },
+      isServerless: true,
+    });
+
+    expect(mockEsClient.indices.putDataLifecycle).toHaveBeenCalledWith({
+      name: ['test-stream'],
+      data_retention: '30d',
+    });
   });
 });
 

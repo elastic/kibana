@@ -5,13 +5,54 @@
  * 2.0.
  */
 
-import { Streams, isIlmLifecycle } from '@kbn/streams-schema';
+import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import { Streams, isIlmLifecycle, type IlmPolicyWithUsage } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { ilmPhases } from '../../../../lib/streams/lifecycle/ilm_phases';
 import { getEffectiveLifecycle } from '../../../../lib/streams/lifecycle/get_effective_lifecycle';
+import {
+  buildPolicyUsage,
+  normalizeIlmPhases,
+  type IlmPoliciesResponse,
+} from '../../../../lib/streams/lifecycle/ilm_policies';
+import {
+  getExistingPolicy,
+  assertValidPolicyPhases,
+  assertPolicyNameIsValid,
+} from '../../../../lib/streams/lifecycle/ilm_policy_validation';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
+
+const getDataStreamByBackingIndices = async (
+  scopedClusterClient: IScopedClusterClient,
+  policiesResponse: IlmPoliciesResponse
+): Promise<Record<string, string>> => {
+  const inUseIndices = Array.from(
+    new Set(
+      Object.values(policiesResponse).flatMap((policyEntry) => policyEntry.in_use_by?.indices ?? [])
+    )
+  );
+
+  if (inUseIndices.length === 0) {
+    return {};
+  }
+
+  const indexResponse: IndicesGetResponse = await scopedClusterClient.asCurrentUser.indices.get({
+    index: inUseIndices,
+    allow_no_indices: true,
+    ignore_unavailable: true,
+    filter_path: ['*.data_stream'],
+  });
+
+  return Object.fromEntries(
+    Object.entries(indexResponse).flatMap(([indexName, indexData]) => {
+      const { data_stream: dataStream } = indexData;
+      return dataStream ? [[indexName, dataStream]] : [];
+    })
+  );
+};
 
 const lifecycleStatsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{name}/lifecycle/_stats',
@@ -80,7 +121,104 @@ const lifecycleIlmExplainRoute = createServerRoute({
   },
 });
 
+const lifecycleIlmPoliciesRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/lifecycle/_policies',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({}),
+  handler: async ({ request, getScopedClients }): Promise<IlmPolicyWithUsage[]> => {
+    const { scopedClusterClient } = await getScopedClients({ request });
+    const policiesResponse =
+      (await scopedClusterClient.asCurrentUser.ilm.getLifecycle()) as IlmPoliciesResponse;
+    const dataStreamByBackingIndices = await getDataStreamByBackingIndices(
+      scopedClusterClient,
+      policiesResponse
+    );
+    return Object.entries(policiesResponse).map(([policyName, policyEntry]) => {
+      const { in_use_by } = buildPolicyUsage(policyEntry, dataStreamByBackingIndices);
+      return {
+        name: policyName,
+        phases: normalizeIlmPhases(policyEntry.policy?.phases),
+        meta: policyEntry.policy?._meta,
+        deprecated: policyEntry.policy?.deprecated,
+        in_use_by,
+      };
+    });
+  },
+});
+
+const ilmPhaseSchema = z
+  .object({
+    min_age: z.string().optional(),
+    actions: z.record(z.string(), z.any()).optional(),
+  })
+  .passthrough();
+
+const lifecycleIlmPoliciesUpdateRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/lifecycle/_policy',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      name: z.string(),
+      phases: z.object({
+        hot: ilmPhaseSchema.optional(),
+        warm: ilmPhaseSchema.optional(),
+        cold: ilmPhaseSchema.optional(),
+        frozen: ilmPhaseSchema.optional(),
+        delete: ilmPhaseSchema.optional(),
+      }),
+      meta: z.record(z.string(), z.any()).optional(),
+      deprecated: z.boolean().optional(),
+    }),
+    query: z.object({
+      allow_overwrite: z.coerce.boolean().optional(),
+      allow_missing_hot: z.coerce.boolean().optional(),
+    }),
+  }),
+  handler: async ({ params, request, getScopedClients }) => {
+    const { scopedClusterClient } = await getScopedClients({ request });
+    const { name, meta, ...policy } = params.body;
+    const { allow_overwrite: allowOverwrite = false, allow_missing_hot: allowMissingHot = false } =
+      params.query;
+    const existingPolicy = await getExistingPolicy(scopedClusterClient, name);
+
+    assertPolicyNameIsValid(existingPolicy, allowOverwrite);
+
+    assertValidPolicyPhases({
+      existingPolicy,
+      incomingPhases: policy.phases,
+      allowMissingHot,
+    });
+
+    const basePolicy = existingPolicy?.policy ?? {};
+    const mergedPolicy = {
+      ...basePolicy,
+      ...policy,
+      phases: policy.phases ?? basePolicy.phases,
+      _meta: meta ?? basePolicy._meta,
+      deprecated: policy.deprecated ?? basePolicy.deprecated,
+    };
+    await scopedClusterClient.asCurrentUser.ilm.putLifecycle({ name, policy: mergedPolicy });
+    return { acknowledged: true };
+  },
+});
+
 export const internalLifecycleRoutes = {
   ...lifecycleStatsRoute,
   ...lifecycleIlmExplainRoute,
+  ...lifecycleIlmPoliciesRoute,
+  ...lifecycleIlmPoliciesUpdateRoute,
 };

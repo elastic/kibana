@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 import {
@@ -125,6 +126,38 @@ test.describe(
 
       // Close the popover by pressing Escape
       await page.keyboard.press('Escape');
+    });
+
+    test('should delete a downsampling step from a DSL lifecycle', async ({
+      page,
+      apiServices,
+      pageObjects,
+    }) => {
+      const streamName = 'logs.nginx';
+      const streamDefinition = await apiServices.streams.getStreamDefinition(streamName);
+      await apiServices.streams.updateStream(streamName, {
+        ingest: {
+          ...streamDefinition.stream.ingest,
+          processing: omit(streamDefinition.stream.ingest.processing, 'updated_at'),
+          lifecycle: {
+            dsl: {
+              data_retention: '30d',
+              downsample: [{ after: '1d', fixed_interval: '1h' }],
+            },
+          },
+        },
+      });
+
+      await pageObjects.streams.gotoDataRetentionTab(streamName);
+
+      // Verify downsampling is rendered for the DSL lifecycle
+      await expect(page.getByTestId('downsamplingBar-label')).toBeVisible();
+
+      // Delete the downsampling step
+      await page.getByTestId('downsamplingPhase-1h-label').click();
+      await page.getByTestId('downsamplingPopover-step1-deleteButton').click();
+
+      await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
     });
   }
 );
