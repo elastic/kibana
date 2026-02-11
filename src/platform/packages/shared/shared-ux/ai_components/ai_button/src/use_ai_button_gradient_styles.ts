@@ -60,9 +60,7 @@ const getAiButtonThemeTokens = (euiTheme: ReturnType<typeof useEuiTheme>['euiThe
   const colors = euiTheme.colors as unknown as Record<string, unknown>;
   const aiUnknown = colors.ai;
   const ai =
-    aiUnknown && typeof aiUnknown === 'object'
-      ? (aiUnknown as Record<string, unknown>)
-      : {};
+    aiUnknown && typeof aiUnknown === 'object' ? (aiUnknown as Record<string, unknown>) : {};
 
   const filledButtonGradientStartValue = ai.filledButtonGradientStart;
   const filledButtonGradientEndValue = ai.filledButtonGradientEnd;
