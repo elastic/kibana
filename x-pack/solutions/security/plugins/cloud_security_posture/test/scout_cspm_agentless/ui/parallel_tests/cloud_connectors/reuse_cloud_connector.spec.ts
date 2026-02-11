@@ -6,7 +6,8 @@
  */
 
 import type { CreateAgentlessPolicyRequest } from '@kbn/fleet-plugin/common/types/rest_spec/agentless_policy';
-import { expect, spaceTest } from '@kbn/scout-security';
+import { spaceTest } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/ui';
 import { mockAgentlessPoliciesWithCapture, mockPackagePoliciesEmpty } from '../../fixtures/mocks';
 
 // Use the Fleet plugin's typed request body

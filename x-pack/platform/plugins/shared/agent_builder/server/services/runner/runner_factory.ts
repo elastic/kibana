@@ -22,11 +22,18 @@ export class RunnerFactoryImpl implements RunnerFactory {
   }
 
   private createRunnerDeps(): CreateRunnerDeps {
-    const { inference, trackingService, ...otherDeps } = this.deps;
+    const { inference, trackingService, uiSettings, savedObjects, ...otherDeps } = this.deps;
     return {
       ...otherDeps,
+      savedObjects,
+      uiSettings,
       trackingService,
-      modelProviderFactory: createModelProviderFactory({ inference, trackingService }),
+      modelProviderFactory: createModelProviderFactory({
+        inference,
+        trackingService,
+        uiSettings,
+        savedObjects,
+      }),
     };
   }
 }
