@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod';
-import { badRequest } from '@hapi/boom';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
@@ -37,21 +36,27 @@ export const getUnbackedQueriesCountRoute = createServerRoute({
   },
 });
 
-export const promoteAllUnbackedQueriesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/queries/_promote_all',
+export const promoteUnbackedQueriesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/queries/_promote',
   options: {
     access: 'internal',
-    summary: 'Promote all unbacked queries',
+    summary: 'Promote unbacked queries',
     description:
-      'Creates Kibana rules for all stored queries across streams that do not yet have a backing rule, then marks them as backed.',
+      'Creates Kibana rules for stored queries across streams that do not yet have a backing rule, then marks them as backed.',
   },
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({}),
-  handler: async ({ request, getScopedClients, server }): Promise<{ promoted: number }> => {
+  params: z.object({
+    body: z
+      .object({
+        queryIds: z.array(z.string()).optional(),
+      })
+      .nullish(),
+  }),
+  handler: async ({ params, request, getScopedClients, server }): Promise<{ promoted: number }> => {
     const { queryClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
@@ -59,7 +64,17 @@ export const promoteAllUnbackedQueriesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const all = await queryClient.getAllUnbackedQueries();
-    const byStream = all.reduce<Record<string, string[]>>((acc, link) => {
+    const requestedQueryIds = params?.body?.queryIds ?? [];
+
+    let toPromote = all;
+
+    if (requestedQueryIds.length > 0) {
+      const uniqueRequestedQueryIds = new Set(requestedQueryIds);
+
+      toPromote = all.filter((query) => uniqueRequestedQueryIds.has(query.query.id));
+    }
+
+    const byStream = toPromote.reduce<Record<string, string[]>>((acc, link) => {
       const stream = link.stream_name;
       if (!acc[stream]) acc[stream] = [];
       acc[stream].push(link.query.id);
@@ -75,57 +90,7 @@ export const promoteAllUnbackedQueriesRoute = createServerRoute({
   },
 });
 
-export const promoteUnbackedQueryByIdRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/queries/{queryId}/_promote',
-  options: {
-    access: 'internal',
-    summary: 'Promote a single unbacked query',
-    description:
-      'Creates a Kibana rule for a stored query that does not yet have a backing rule, then marks it as backed.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    path: z.object({
-      queryId: z.string(),
-    }),
-    body: z.object({
-      streamName: z.string(),
-    }),
-  }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<{ promoted: number }> => {
-    const { queryClient, licensing, uiSettingsClient } = await getScopedClients({
-      request,
-    });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const {
-      path: { queryId },
-      body: { streamName },
-    } = params;
-
-    const queries = await queryClient.bulkGetByIds(streamName, [queryId]);
-
-    if (queries.length === 0) {
-      throw badRequest('Query does not exist');
-    }
-
-    if (queries[0].rule_backed) {
-      return { promoted: 0 };
-    }
-
-    await queryClient.promoteQueries(streamName, [queryId]);
-
-    return { promoted: 1 };
-  },
-});
-
 export const internalQueriesRoutes = {
   ...getUnbackedQueriesCountRoute,
-  ...promoteAllUnbackedQueriesRoute,
-  ...promoteUnbackedQueryByIdRoute,
+  ...promoteUnbackedQueriesRoute,
 };

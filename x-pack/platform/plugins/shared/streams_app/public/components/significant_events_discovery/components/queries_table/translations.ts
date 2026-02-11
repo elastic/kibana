@@ -68,28 +68,28 @@ export const OCCURRENCES_TOOLTIP_NAME = i18n.translate(
 export const PROMOTED_BADGE_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.promotedBadgeLabel',
   {
-    defaultMessage: 'promoted',
+    defaultMessage: 'Scanning',
   }
 );
 
 export const NOT_PROMOTED_BADGE_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.notPromotedBadgeLabel',
   {
-    defaultMessage: 'not promoted',
+    defaultMessage: 'Not scanning',
   }
 );
 
 export const PROMOTED_TOOLTIP_CONTENT = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.promotedTooltipContent',
   {
-    defaultMessage: 'Query has a backing rule that looks for significant events',
+    defaultMessage: 'This query is used to scan for significant events in the background',
   }
 );
 
 export const NOT_PROMOTED_TOOLTIP_CONTENT = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.notPromotedTooltipContent',
   {
-    defaultMessage: "Query doesn't have a backing rule and it doesn't generate significant events",
+    defaultMessage: 'This query is not used to scan for significant events in the background',
   }
 );
 
@@ -185,6 +185,12 @@ export const PROMOTE_QUERY_ACTION_TITLE = i18n.translate(
 export const PROMOTE_QUERY_ACTION_DESCRIPTION = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.promoteQueryActionDescription',
   {
-    defaultMessage: 'Create a backing rule for this query and start looking for significant events',
+    defaultMessage: 'Start scanning this query in the background for significant events',
   }
 );
+
+export const getPromoteQuerySuccessToast = (queryTitle: string) =>
+  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.promoteQuerySuccess', {
+    defaultMessage: 'Promoted "{queryTitle}". It moved to the Scanning section.',
+    values: { queryTitle },
+  });

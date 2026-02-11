@@ -23,11 +23,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { sortBy } from 'lodash';
+import { orderBy } from 'lodash';
 import {
   useFetchSignificantEvents,
   type SignificantEventItem,
@@ -90,10 +90,16 @@ export function QueriesTable() {
   } = useKibana();
   const { timeState } = useTimefilter();
   const [searchQuery, setSearchQuery] = useState('');
-  const { data: queriesData, isLoading: queriesLoading } = useFetchSignificantEvents({
-    query: searchQuery,
-  });
-  const { data: streamsData, isLoading: streamsLoading } = useFetchStreams();
+  const {
+    data: queriesData,
+    isLoading: queriesLoading,
+    isError: hasQueriesError,
+  } = useFetchSignificantEvents({ query: searchQuery });
+  const {
+    data: streamsData,
+    isLoading: streamsLoading,
+    isError: hasStreamsError,
+  } = useFetchStreams();
   const { count: unbackedCount } = useUnbackedQueriesCount();
   const queryClient = useQueryClient();
   const { promoteAll } = useQueriesApi();
@@ -113,15 +119,11 @@ export function QueriesTable() {
     }
   }, [promoteAll, queryClient, toasts]);
 
-  const sortedQueries = useMemo(() => {
-    return sortBy(queriesData?.significant_events ?? [], ['rule_backed', (e) => e.query.title]);
-  }, [queriesData?.significant_events]);
-
   if (queriesLoading || streamsLoading) {
     return <LoadingPanel size="l" />;
   }
 
-  if (!queriesData || !streamsData) {
+  if (hasQueriesError || hasStreamsError) {
     return (
       <EuiEmptyPrompt
         iconType="error"
@@ -132,6 +134,12 @@ export function QueriesTable() {
     );
   }
 
+  const sortedQueries = orderBy(
+    queriesData?.significant_events ?? [],
+    ['rule_backed', (event) => event.query.severity_score, (event) => event.query.title],
+    ['desc', 'desc', 'asc']
+  );
+  const streamDefinitions = streamsData?.streams ?? [];
   const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
@@ -225,7 +233,7 @@ export function QueriesTable() {
           description: OPEN_IN_DISCOVER_ACTION_DESCRIPTION,
           enabled: () => discoverLocator !== undefined,
           onClick: (item) => {
-            const definition = streamsData.streams.find(
+            const definition = streamDefinitions.find(
               (streamItem) => streamItem.stream.name === item.stream_name
             );
 
@@ -316,7 +324,7 @@ export function QueriesTable() {
                 id="aggregated-occurrences"
                 name={CHART_SERIES_NAME}
                 type="bar"
-                timeseries={queriesData.aggregated_occurrences ?? []}
+                timeseries={queriesData?.aggregated_occurrences ?? []}
                 annotations={[]}
                 height={180}
               />
@@ -325,7 +333,7 @@ export function QueriesTable() {
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="s">{getEventsCount(queriesData.significant_events.length ?? 0)}</EuiText>
+        <EuiText size="s">{getEventsCount(queriesData?.significant_events.length ?? 0)}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBasicTable
@@ -338,8 +346,8 @@ export function QueriesTable() {
           columns={columns}
           itemId={(item) => item.query.id}
           items={sortedQueries}
-          loading={queriesLoading}
-          noItemsMessage={!queriesLoading ? NO_ITEMS_MESSAGE : ''}
+          loading={queriesLoading || streamsLoading}
+          noItemsMessage={!queriesLoading && !streamsLoading ? NO_ITEMS_MESSAGE : ''}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
