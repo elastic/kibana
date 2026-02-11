@@ -9,7 +9,7 @@
 
 import { debounce } from 'lodash';
 import { type MonacoYamlOptions } from 'monaco-yaml';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
 import { yamlLanguageService } from './yaml_language_service';
@@ -35,16 +35,14 @@ export const YamlEditor = React.memo(
     ...props
   }: YamlEditorProps) => {
     const [internalValue, setInternalValue] = useState(value);
-    const onSyncStateChangeRef = useRef(onSyncStateChange);
-    onSyncStateChangeRef.current = onSyncStateChange;
 
     // Create a wrapped onChange that also updates sync state
     const onChangeWithSync = useCallback(
       (newValue: string) => {
         onChange(newValue);
-        onSyncStateChangeRef.current?.(true);
+        onSyncStateChange?.(true);
       },
-      [onChange]
+      [onChange, onSyncStateChange]
     );
 
     const onChangeDebounced = useMemo(() => debounce(onChangeWithSync, 200), [onChangeWithSync]);
@@ -60,11 +58,11 @@ export const YamlEditor = React.memo(
         // Update internal state quickly so the change is reflected instantly in the editor
         setInternalValue(newValue);
         // Notify that the changes are not synced since we have pending changes
-        onSyncStateChangeRef.current?.(false);
+        onSyncStateChange?.(false);
         // Debounce the call to onChange to prevent excessive re-renders upstream
         onChangeDebounced(newValue);
       },
-      [onChangeDebounced]
+      [onChangeDebounced, onSyncStateChange]
     );
 
     useEffect(() => {
