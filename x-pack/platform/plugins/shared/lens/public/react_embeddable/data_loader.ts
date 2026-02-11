@@ -28,6 +28,7 @@ import {
   BehaviorSubject,
   debounceTime,
   distinctUntilChanged,
+  filter,
   map,
   merge,
   pipe,
@@ -41,7 +42,7 @@ import { getExpressionRendererParams } from './expressions/expression_params';
 import { getMergedSearchContext } from './expressions/merged_search_context';
 import { getLogError } from './expressions/telemetry';
 import { getUsedDataViews } from './expressions/update_data_views';
-import { getParentContext, getRenderMode } from './helper';
+import { getParentContext, getRenderMode, hasAnnotationGroupReference } from './helper';
 import { addLog } from './logger';
 import { apiHasLensComponentCallbacks } from './type_guards';
 import type { LensEmbeddableStartServices } from './types';
@@ -301,6 +302,11 @@ export function loadEmbeddableData(
     internalApi.disableTriggers$.pipe(
       waitUntilChanged(),
       map(() => 'disableTriggers' as ReloadReason)
+    ),
+    // Reload when a library annotation group referenced by this panel is updated.
+    services.eventAnnotationService.annotationGroupUpdated$.pipe(
+      filter((updatedGroupId) => hasAnnotationGroupReference(getState(), updatedGroupId)), // `waitUntilChanged` not needed
+      map(() => 'annotationGroupUpdated' as ReloadReason)
     )
   );
 

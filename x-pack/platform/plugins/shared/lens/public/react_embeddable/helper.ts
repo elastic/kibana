@@ -16,6 +16,7 @@ import {
 import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
 import type {
@@ -234,4 +235,9 @@ export function transformToApiConfig(state: LensSerializedState): LensByValueSer
     ...state,
     attributes: apiConfigAttributes,
   };
+}
+
+export function hasAnnotationGroupReference(state: LensRuntimeState, groupId: string): boolean {
+  const refs = state.attributes?.references ?? [];
+  return refs.some((ref) => ref.type === EVENT_ANNOTATION_GROUP_TYPE && ref.id === groupId);
 }
