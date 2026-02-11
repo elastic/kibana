@@ -535,7 +535,7 @@ export function getDataStateContainer({
       getCurrentTab().id
     );
 
-    cascadedDocumentsFetcher$.getValue().cancelAllFetches(reason);
+    cascadedDocumentsFetcher$.getValue().cancelAllFetches();
     abortController?.abort(reason);
     abortControllerFetchMore?.abort(reason);
   };

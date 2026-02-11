@@ -13,7 +13,6 @@ import type { CascadeQueryArgs } from '@kbn/esql-utils/src/utils/cascaded_docume
 import { apm } from '@elastic/apm-rum';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
@@ -106,10 +105,6 @@ export class CascadedDocumentsFetcher {
       }));
 
       this.stateManager.setCascadedDocuments(nodeId, records);
-    } catch (error) {
-      if (error.name !== 'AbortError') {
-        throw error;
-      }
     } finally {
       this.abortControllers.delete(nodeId);
     }
@@ -117,7 +112,7 @@ export class CascadedDocumentsFetcher {
     return records;
   }
 
-  cancelFetch(nodeId: string, reason: AbortReason = AbortReason.CANCELED) {
+  cancelFetch(nodeId: string) {
     if (!this.stateManager.getIsActiveInstance()) {
       return;
     }
@@ -125,13 +120,13 @@ export class CascadedDocumentsFetcher {
     const abortController = this.abortControllers.get(nodeId);
 
     if (abortController) {
-      abortController.abort(reason);
+      abortController.abort();
       this.abortControllers.delete(nodeId);
     }
   }
 
-  cancelAllFetches(reason: AbortReason = AbortReason.CANCELED) {
-    this.abortControllers.forEach((abortController) => abortController.abort(reason));
+  cancelAllFetches() {
+    this.abortControllers.forEach((abortController) => abortController.abort());
     this.abortControllers.clear();
   }
 }
