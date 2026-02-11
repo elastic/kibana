@@ -41,10 +41,7 @@ describe('UserPanelHeader', () => {
     const futureDay = '2989-03-07T20:00:00.000Z';
     const { getByTestId } = render(
       <TestProviders>
-        <UserPanelHeader
-          {...mockProps}
-          lastSeen={{ date: futureDay, isLoading: false }}
-        />
+        <UserPanelHeader {...mockProps} lastSeen={{ date: futureDay, isLoading: false }} />
       </TestProviders>
     );
 
@@ -92,10 +89,7 @@ describe('UserPanelHeader', () => {
   it('does not render observed badge when lastSeen date is undefined', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <UserPanelHeader
-          {...mockProps}
-          lastSeen={{ date: undefined, isLoading: false }}
-        />
+        <UserPanelHeader {...mockProps} lastSeen={{ date: undefined, isLoading: false }} />
       </TestProviders>
     );
 
@@ -121,10 +115,7 @@ describe('UserPanelHeader', () => {
   it('renders skeleton when loading', () => {
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <UserPanelHeader
-          {...mockProps}
-          lastSeen={{ date: undefined, isLoading: true }}
-        />
+        <UserPanelHeader {...mockProps} lastSeen={{ date: undefined, isLoading: true }} />
       </TestProviders>
     );
 
