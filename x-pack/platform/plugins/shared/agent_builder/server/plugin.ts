@@ -28,7 +28,7 @@ import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
-import { registerTaskDefinitions, registerExecutionEventsDataStream } from './services/execution';
+import { registerTaskDefinitions } from './services/execution';
 
 export class AgentBuilderPlugin
   implements
@@ -93,8 +93,6 @@ export class AgentBuilderPlugin
         return services.taskHandler;
       },
     });
-
-    registerExecutionEventsDataStream(coreSetup.dataStreams);
 
     registerFeatures({ features: setupDeps.features });
 

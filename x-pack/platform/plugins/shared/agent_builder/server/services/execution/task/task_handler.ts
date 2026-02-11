@@ -8,14 +8,8 @@
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
-import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import { ExecutionStatus } from '../types';
-import {
-  createAgentExecutionClient,
-  createExecutionEventsClient,
-  type AgentExecutionClient,
-  type ExecutionEventsClient,
-} from '../persistence';
+import { createAgentExecutionClient, type AgentExecutionClient } from '../persistence';
 import {
   handleAgentExecution,
   collectAndWriteEvents,
@@ -26,7 +20,6 @@ import { AbortMonitor } from './abort_monitor';
 
 export interface TaskHandlerDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
-  dataStreams: DataStreamsStart;
 }
 
 /**
@@ -58,7 +51,6 @@ class TaskHandlerImpl implements TaskHandler {
     fakeRequest: KibanaRequest;
   }): Promise<void> {
     const executionClient = this.createExecutionClient();
-    const eventsClient = this.createEventsClient();
 
     // 1. Load execution document
     const execution = await executionClient.get(executionId);
@@ -86,11 +78,11 @@ class TaskHandlerImpl implements TaskHandler {
         abortSignal: abortMonitor.getSignal(),
       });
 
-      // 5. Subscribe, collect, and write events to ES
+      // 5. Subscribe, collect, and write events to the execution document
       await collectAndWriteEvents({
         events$,
         execution,
-        eventsClient,
+        executionClient,
         logger: this.logger,
       });
 
@@ -124,12 +116,6 @@ class TaskHandlerImpl implements TaskHandler {
     return createAgentExecutionClient({
       logger: this.logger.get('execution-client'),
       esClient: this.deps.elasticsearch.client.asInternalUser,
-    });
-  }
-
-  private createEventsClient(): ExecutionEventsClient {
-    return createExecutionEventsClient({
-      dataStreams: this.deps.dataStreams,
     });
   }
 }

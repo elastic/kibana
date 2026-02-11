@@ -12,23 +12,19 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from './types';
 import type { AgentExecutionClient } from './persistence';
-import type { ExecutionEventsClient } from './persistence';
 
 // Mock persistence module
 const mockExecutionClient: jest.Mocked<AgentExecutionClient> = {
   create: jest.fn(),
   get: jest.fn(),
   updateStatus: jest.fn(),
-};
-
-const mockEventsClient: jest.Mocked<ExecutionEventsClient> = {
-  writeEvents: jest.fn(),
+  appendEvents: jest.fn(),
+  peek: jest.fn(),
   readEvents: jest.fn(),
 };
 
 jest.mock('./persistence', () => ({
   createAgentExecutionClient: () => mockExecutionClient,
-  createExecutionEventsClient: () => mockEventsClient,
 }));
 
 // Mock execution_runner module
@@ -59,7 +55,6 @@ import { createAgentExecutionService } from './execution_service';
 describe('AgentExecutionService', () => {
   const logger = loggerMock.create();
   const elasticsearch = elasticsearchServiceMock.createStart();
-  const dataStreams = {} as any;
   const taskManager = {
     schedule: mockTaskManagerSchedule,
   } as any;
@@ -75,7 +70,6 @@ describe('AgentExecutionService', () => {
   const service = createAgentExecutionService({
     logger,
     elasticsearch,
-    dataStreams,
     taskManager,
     inference: {} as any,
     conversationService: {} as any,
@@ -93,6 +87,8 @@ describe('AgentExecutionService', () => {
       agentId: 'agent-1',
       spaceId: 'default',
       agentParams: { nextInput: { message: 'hello' } },
+      eventCount: 0,
+      events: [],
     });
     // Default: UI setting returns false (run locally)
     mockGetScopedClient.mockReturnValue({});
@@ -333,6 +329,8 @@ describe('AgentExecutionService', () => {
         agentId: 'agent-1',
         spaceId: 'default',
         agentParams: { nextInput: { message: 'test' } },
+        eventCount: 0,
+        events: [],
       });
 
       await service.abortExecution('exec-1');
@@ -357,6 +355,8 @@ describe('AgentExecutionService', () => {
         agentId: 'agent-1',
         spaceId: 'default',
         agentParams: { nextInput: { message: 'test' } },
+        eventCount: 0,
+        events: [],
       });
 
       await expect(service.abortExecution('exec-1')).rejects.toThrow(
@@ -369,24 +369,17 @@ describe('AgentExecutionService', () => {
     // Detailed behavior is tested in execution_follower.test.ts.
     // This smoke test verifies that service.followExecution delegates correctly.
     it('should delegate to followExecution$ and return an observable', (done) => {
-      const eventDoc = {
-        '@timestamp': Date.now(),
-        agentExecutionId: 'exec-1',
-        eventNumber: 1,
-        agentId: 'agent-1',
-        spaceId: 'default',
-        event: { type: 'message_chunk', data: { message_id: 'm1', text_chunk: 'hello' } },
-      };
+      const fakeEvent = { type: 'message_chunk', data: { message_id: 'm1', text_chunk: 'hello' } };
 
-      mockEventsClient.readEvents.mockResolvedValueOnce([eventDoc] as any);
-      mockExecutionClient.get.mockResolvedValueOnce({
-        executionId: 'exec-1',
-        '@timestamp': new Date().toISOString(),
+      // peek: failed with 1 event
+      mockExecutionClient.peek.mockResolvedValueOnce({
         status: ExecutionStatus.failed,
-        agentId: 'agent-1',
-        spaceId: 'default',
-        agentParams: { nextInput: { message: 'test' } },
+        eventCount: 1,
       });
+      mockExecutionClient.readEvents.mockResolvedValueOnce({
+        events: [fakeEvent],
+        status: ExecutionStatus.failed,
+      } as any);
 
       const receivedEvents: any[] = [];
 
@@ -395,7 +388,7 @@ describe('AgentExecutionService', () => {
         error: () => {
           // We expect an error (failed status) — just verify events were emitted before it
           expect(receivedEvents).toHaveLength(1);
-          expect(receivedEvents[0]).toEqual(eventDoc.event);
+          expect(receivedEvents[0]).toEqual(fakeEvent);
           done();
         },
         complete: () => done.fail('Expected an error, not completion'),

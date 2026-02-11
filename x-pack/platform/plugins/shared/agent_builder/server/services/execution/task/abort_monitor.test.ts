@@ -17,6 +17,9 @@ const createMockExecutionClient = (
     create: jest.fn(),
     get: jest.fn(),
     updateStatus: jest.fn(),
+    appendEvents: jest.fn(),
+    peek: jest.fn(),
+    readEvents: jest.fn(),
     ...overrides,
   } as jest.Mocked<AgentExecutionClient>);
 
@@ -53,6 +56,8 @@ describe('AbortMonitor', () => {
       agentId: 'agent-1',
       spaceId: 'default',
       agentParams: { nextInput: { message: 'test' } },
+      eventCount: 0,
+      events: [],
     });
 
     const monitor = new AbortMonitor({
@@ -81,6 +86,8 @@ describe('AbortMonitor', () => {
       agentId: 'agent-1',
       spaceId: 'default',
       agentParams: { nextInput: { message: 'test' } },
+      eventCount: 0,
+      events: [],
     });
 
     const monitor = new AbortMonitor({
@@ -106,6 +113,8 @@ describe('AbortMonitor', () => {
       agentId: 'agent-1',
       spaceId: 'default',
       agentParams: { nextInput: { message: 'test' } },
+      eventCount: 0,
+      events: [],
     });
 
     const monitor = new AbortMonitor({
@@ -140,6 +149,8 @@ describe('AbortMonitor', () => {
       agentId: 'agent-1',
       spaceId: 'default',
       agentParams: { nextInput: { message: 'test' } },
+      eventCount: 0,
+      events: [],
     });
 
     const monitor = new AbortMonitor({
@@ -172,6 +183,8 @@ describe('AbortMonitor', () => {
       agentId: 'agent-1',
       spaceId: 'default',
       agentParams: { nextInput: { message: 'test' } },
+      eventCount: 0,
+      events: [],
     });
 
     const monitor = new AbortMonitor({
@@ -204,6 +217,8 @@ describe('AbortMonitor', () => {
       agentId: 'agent-1',
       spaceId: 'default',
       agentParams: { nextInput: { message: 'test' } },
+      eventCount: 0,
+      events: [],
     });
 
     const monitor = new AbortMonitor({

@@ -36,8 +36,8 @@ import {
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import type { AgentExecution, AgentExecutionEventDoc, SerializedExecutionError } from './types';
-import type { ExecutionEventsClient } from './persistence';
+import type { AgentExecution, SerializedExecutionError } from './types';
+import type { AgentExecutionClient } from './persistence';
 
 import { EVENT_BATCH_INTERVAL_MS } from './constants';
 
@@ -168,23 +168,22 @@ export const handleAgentExecution = async ({
 };
 
 /**
- * Subscribe to the event stream and write events to the data stream with 200ms batching.
+ * Subscribe to the event stream and append events to the execution document with 200ms batching.
  * Returns a promise that resolves when the observable completes and all events are flushed.
  */
 export const collectAndWriteEvents = ({
   events$,
   execution,
-  eventsClient,
+  executionClient,
   logger,
 }: {
   events$: Observable<ChatEvent>;
   execution: AgentExecution;
-  eventsClient: ExecutionEventsClient;
+  executionClient: AgentExecutionClient;
   logger: Logger;
 }): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
-    let eventNumber = 0;
-    let pendingEvents: AgentExecutionEventDoc[] = [];
+    let pendingEvents: ChatEvent[] = [];
     let flushTimer: ReturnType<typeof setTimeout> | undefined;
     let flushInProgress: Promise<void> | undefined;
 
@@ -194,7 +193,7 @@ export const collectAndWriteEvents = ({
       }
       const batch = pendingEvents;
       pendingEvents = [];
-      await eventsClient.writeEvents(batch);
+      await executionClient.appendEvents(execution.executionId, batch);
     };
 
     const scheduleFlush = () => {
@@ -219,15 +218,7 @@ export const collectAndWriteEvents = ({
 
     events$.subscribe({
       next: (event) => {
-        eventNumber += 1;
-        pendingEvents.push({
-          '@timestamp': Date.now(),
-          agentExecutionId: execution.executionId,
-          eventNumber,
-          agentId: execution.agentId,
-          spaceId: execution.spaceId,
-          event,
-        });
+        pendingEvents.push(event);
         scheduleFlush();
       },
       error: (err) => {

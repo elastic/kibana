@@ -9,6 +9,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
+import type { ChatEvent } from '@kbn/agent-builder-common';
 import type { AgentExecutionParams, ExecutionStatus, SerializedExecutionError } from '../types';
 
 export const agentExecutionIndexName = chatSystemIndex('agent-executions');
@@ -30,6 +31,8 @@ const storageSettings = {
           message: types.text({}),
         },
       }),
+      event_count: types.long({}),
+      events: types.object({ dynamic: false, properties: {} }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -42,6 +45,8 @@ export interface AgentExecutionProperties {
   space_id: string;
   agent_params: AgentExecutionParams;
   error?: SerializedExecutionError;
+  event_count?: number;
+  events?: ChatEvent[];
 }
 
 export type AgentExecutionStorageSettings = typeof storageSettings;

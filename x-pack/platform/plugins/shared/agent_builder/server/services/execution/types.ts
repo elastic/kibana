@@ -91,24 +91,10 @@ export interface AgentExecution {
   agentParams: AgentExecutionParams;
   /** Error details, present when status is 'failed'. */
   error?: SerializedExecutionError;
-}
-
-/**
- * A single event document persisted in the agent-execution-events data stream.
- */
-export interface AgentExecutionEventDoc {
-  /** Timestamp of the event. */
-  '@timestamp': number;
-  /** Id of the agent execution this event belongs to. */
-  agentExecutionId: string;
-  /** Sequential number of the event within the execution (used for ordering and `since` filtering). */
-  eventNumber: number;
-  /** Id of the agent this event belongs to. */
-  agentId: string;
-  /** Id of the space the execution was performed in. */
-  spaceId: string;
-  /** The actual event object. */
-  event: ChatEvent;
+  /** Number of events stored on the document (kept in sync with `events.length`). */
+  eventCount: number;
+  /** Inline events emitted during the execution. The array index is the event number. */
+  events: ChatEvent[];
 }
 
 /**

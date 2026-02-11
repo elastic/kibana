@@ -137,7 +137,6 @@ export class ServiceManager {
       agentService: agents,
       uiSettings,
       savedObjects,
-      dataStreams,
       spaces,
       trackingService,
       analyticsService,
@@ -146,7 +145,6 @@ export class ServiceManager {
     const execution = createAgentExecutionService({
       logger: logger.get('execution'),
       elasticsearch,
-      dataStreams,
       taskManager,
       spaces,
       inference,

@@ -13,8 +13,7 @@ import {
   createRequestAbortedError,
   isRoundCompleteEvent,
 } from '@kbn/agent-builder-common';
-import type { AgentExecutionClient, ExecutionEventsClient } from './persistence';
-import type { AgentExecutionEventDoc } from './types';
+import type { AgentExecutionClient } from './persistence';
 import { ExecutionStatus } from './types';
 import {
   FOLLOW_EXECUTION_IDLE_TIMEOUT_MS,
@@ -33,12 +32,10 @@ const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
  */
 export const followExecution$ = ({
   executionId,
-  eventsClient,
   executionClient,
   since,
 }: {
   executionId: string;
-  eventsClient: ExecutionEventsClient;
   executionClient: AgentExecutionClient;
   since?: number;
 }): Observable<ChatEvent> => {
@@ -46,11 +43,7 @@ export const followExecution$ = ({
     let stopped = false;
 
     const run = async () => {
-      for await (const event of pollExecutionEvents(executionId, {
-        eventsClient,
-        executionClient,
-        since,
-      })) {
+      for await (const event of pollExecutionEvents(executionId, { executionClient, since })) {
         if (stopped) return;
         observer.next(event);
       }
@@ -70,7 +63,12 @@ export const followExecution$ = ({
 /**
  * Async generator that polls for execution events and yields them as they arrive.
  *
- * - Yields events from each poll batch.
+ * Uses a two-step polling approach to minimize data transfer:
+ * 1. Lightweight `peek` (real-time GET with `_source_includes`) to fetch only
+ *    the status, error, and event count.
+ * 2. Full `readEvents` GET only when the event count has increased.
+ *
+ * - Yields new events from each poll.
  * - On terminal `failed` / `aborted` status: throws the appropriate error.
  * - On terminal `completed` status: drains remaining events then returns.
  * - Otherwise: waits {@link FOLLOW_POLL_INTERVAL_MS} and polls again.
@@ -78,16 +76,14 @@ export const followExecution$ = ({
 async function* pollExecutionEvents(
   executionId: string,
   {
-    eventsClient,
     executionClient,
     since,
   }: {
-    eventsClient: ExecutionEventsClient;
     executionClient: AgentExecutionClient;
     since?: number;
   }
 ): AsyncGenerator<ChatEvent> {
-  let lastEventNumber = since ?? 0;
+  let lastEventIndex = since ?? 0;
   let lastStatus: ExecutionStatus | undefined;
   const startTime = Date.now();
   let lastActivityTime = startTime;
@@ -107,47 +103,57 @@ async function* pollExecutionEvents(
       );
     }
 
-    // 1. Read & yield new events
-    const events = await eventsClient.readEvents(executionId, lastEventNumber);
-    if (events.length > 0) {
-      lastActivityTime = Date.now();
-    }
-    for (const eventDoc of events) {
-      yield eventDoc.event;
-      lastEventNumber = Math.max(lastEventNumber, eventDoc.eventNumber);
-    }
-
-    // 2. Check execution status
-    const execution = await executionClient.get(executionId);
-    if (!execution) {
+    // 1. Lightweight peek: status + event count (no events payload)
+    const peek = await executionClient.peek(executionId);
+    if (!peek) {
       throw new Error(`Execution ${executionId} not found`);
     }
 
-    if (execution.status !== lastStatus) {
-      lastActivityTime = Date.now();
-      lastStatus = execution.status;
+    const { status, error, eventCount } = peek;
+
+    // 2. Fetch new events only if the count has increased
+    let receivedRoundComplete = false;
+    const hasNewEvents = eventCount > lastEventIndex;
+    if (hasNewEvents) {
+      const { events: newEvents } = await executionClient.readEvents(executionId, lastEventIndex);
+
+      if (newEvents.length > 0) {
+        lastActivityTime = Date.now();
+      }
+      for (const event of newEvents) {
+        yield event;
+        if (isRoundCompleteEvent(event)) {
+          receivedRoundComplete = true;
+        }
+      }
+      lastEventIndex += newEvents.length;
     }
 
-    if (execution.status === ExecutionStatus.failed) {
-      throw execution.error
-        ? createAgentBuilderError(
-            execution.error.code,
-            execution.error.message,
-            execution.error.meta
-          )
+    // 3. Track status changes for idle timeout
+    if (status !== lastStatus) {
+      lastActivityTime = Date.now();
+      lastStatus = status;
+    }
+
+    // 4. Handle terminal statuses
+    if (status === ExecutionStatus.failed) {
+      throw error
+        ? createAgentBuilderError(error.code, error.message, error.meta)
         : createInternalError(`Execution ${executionId} failed`);
     }
 
-    if (execution.status === ExecutionStatus.aborted) {
+    if (status === ExecutionStatus.aborted) {
       throw createRequestAbortedError('request was aborted');
     }
 
-    if (execution.status === ExecutionStatus.completed) {
-      yield* drainRemainingEvents(executionId, eventsClient, lastEventNumber, events);
+    if (status === ExecutionStatus.completed) {
+      if (!receivedRoundComplete) {
+        yield* drainRemainingEvents(executionId, executionClient, lastEventIndex);
+      }
       return;
     }
 
-    // 3. Not terminal yet — wait before next poll
+    // 5. Not terminal yet — wait before next poll
     await delay(FOLLOW_POLL_INTERVAL_MS);
   }
 }
@@ -155,27 +161,25 @@ async function* pollExecutionEvents(
 /**
  * Drains remaining events after execution status becomes `completed`.
  *
- * ES near-real-time indexing means the last batch of events may not be
- * searchable yet. This generator retries a few times with a short delay,
- * stopping early once a `roundComplete` event is found.
+ * Even though GET is real-time, there can be a brief window where the status
+ * update and the final event append are separate operations. This generator
+ * retries a few times, stopping early once a `roundComplete` event is found.
  */
 async function* drainRemainingEvents(
   executionId: string,
-  eventsClient: ExecutionEventsClient,
-  lastEventNumber: number,
-  previousBatch: AgentExecutionEventDoc[]
+  executionClient: AgentExecutionClient,
+  lastEventIndex: number
 ): AsyncGenerator<ChatEvent> {
-  let receivedRoundComplete = previousBatch.some((e) => isRoundCompleteEvent(e.event));
-
-  for (let retry = 0; !receivedRoundComplete && retry < FOLLOW_TERMINAL_READ_MAX_RETRIES; retry++) {
-    const finalEvents = await eventsClient.readEvents(executionId, lastEventNumber);
-    for (const eventDoc of finalEvents) {
-      yield eventDoc.event;
-      lastEventNumber = Math.max(lastEventNumber, eventDoc.eventNumber);
-      if (isRoundCompleteEvent(eventDoc.event)) {
+  for (let retry = 0; retry < FOLLOW_TERMINAL_READ_MAX_RETRIES; retry++) {
+    const { events: finalEvents } = await executionClient.readEvents(executionId, lastEventIndex);
+    let receivedRoundComplete = false;
+    for (const event of finalEvents) {
+      yield event;
+      if (isRoundCompleteEvent(event)) {
         receivedRoundComplete = true;
       }
     }
+    lastEventIndex += finalEvents.length;
     if (receivedRoundComplete || finalEvents.length > 0) {
       break;
     }

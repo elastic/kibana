@@ -10,7 +10,6 @@ import type { Observable } from 'rxjs';
 import { shareReplay } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
-import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -27,12 +26,7 @@ import type {
 } from './types';
 import { ExecutionStatus } from './types';
 import { taskTypes } from './task';
-import {
-  createAgentExecutionClient,
-  createExecutionEventsClient,
-  type AgentExecutionClient,
-  type ExecutionEventsClient,
-} from './persistence';
+import { createAgentExecutionClient, type AgentExecutionClient } from './persistence';
 import {
   handleAgentExecution,
   collectAndWriteEvents,
@@ -44,7 +38,6 @@ import { followExecution$ } from './execution_follower';
 
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
-  dataStreams: DataStreamsStart;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
 }
@@ -126,7 +119,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   followExecution(executionId: string, options?: FollowExecutionOptions): Observable<ChatEvent> {
     return followExecution$({
       executionId,
-      eventsClient: this.createEventsClient(),
       executionClient: this.createExecutionClient(),
       since: options?.since,
     });
@@ -177,7 +169,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }): Promise<ExecuteAgentResult> {
     const { executionId } = execution;
     const executionClient = this.createExecutionClient();
-    const eventsClient = this.createEventsClient();
 
     // Update status to running
     await executionClient.updateStatus(executionId, ExecutionStatus.running);
@@ -208,7 +199,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         events$,
         execution,
         executionClient,
-        eventsClient,
         abortMonitor,
       });
 
@@ -234,13 +224,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     events$,
     execution,
     executionClient,
-    eventsClient,
     abortMonitor,
   }: {
     events$: Observable<ChatEvent>;
     execution: AgentExecution;
     executionClient: AgentExecutionClient;
-    eventsClient: ExecutionEventsClient;
     abortMonitor: AbortMonitor;
   }): void {
     const { executionId } = execution;
@@ -248,7 +236,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     collectAndWriteEvents({
       events$,
       execution,
-      eventsClient,
+      executionClient,
       logger: this.logger,
     })
       .then(async () => {
@@ -301,12 +289,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     return createAgentExecutionClient({
       logger: this.logger.get('execution-client'),
       esClient: this.deps.elasticsearch.client.asInternalUser,
-    });
-  }
-
-  private createEventsClient(): ExecutionEventsClient {
-    return createExecutionEventsClient({
-      dataStreams: this.deps.dataStreams,
     });
   }
 }

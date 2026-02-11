@@ -12,10 +12,8 @@ export type {
   ExecuteAgentResult,
   FollowExecutionOptions,
   AgentExecution,
-  AgentExecutionEventDoc,
   SerializedExecutionError,
 } from './types';
 export { ExecutionStatus } from './types';
 export { createAgentExecutionService, type AgentExecutionServiceDeps } from './execution_service';
 export { registerTaskDefinitions, createTaskHandler, type TaskHandler } from './task';
-export { registerExecutionEventsDataStream } from './persistence';
