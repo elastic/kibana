@@ -42,7 +42,12 @@ import { getExpressionRendererParams } from './expressions/expression_params';
 import { getMergedSearchContext } from './expressions/merged_search_context';
 import { getLogError } from './expressions/telemetry';
 import { getUsedDataViews } from './expressions/update_data_views';
-import { getParentContext, getRenderMode, hasAnnotationGroupReference } from './helper';
+import {
+  getParentContext,
+  getRenderMode,
+  hasAnnotationGroupReference,
+  updateAttributesWithAnnotation,
+} from './helper';
 import { addLog } from './logger';
 import { apiHasLensComponentCallbacks } from './type_guards';
 import type { LensEmbeddableStartServices } from './types';
@@ -302,11 +307,6 @@ export function loadEmbeddableData(
     internalApi.disableTriggers$.pipe(
       waitUntilChanged(),
       map(() => 'disableTriggers' as ReloadReason)
-    ),
-    // Reload when a library annotation group referenced by this panel is updated.
-    services.eventAnnotationService.annotationGroupUpdated$.pipe(
-      filter((updatedGroupId) => hasAnnotationGroupReference(getState(), updatedGroupId)), // `waitUntilChanged` not needed
-      map(() => 'annotationGroupUpdated' as ReloadReason)
     )
   );
 
@@ -323,6 +323,27 @@ export function loadEmbeddableData(
         reload('viewMode');
       }
     }),
+    // When a library annotation group is updated, check if it's used by the current visualization
+    // and if used, update attributes$ with updated group data to trigger a reload
+    services.eventAnnotationService.annotationGroupUpdated$
+      .pipe(filter((updatedGroupId) => hasAnnotationGroupReference(getState(), updatedGroupId)))
+      .subscribe(async (updatedGroupId) => {
+        try {
+          const updatedGroup = await services.eventAnnotationService.loadAnnotationGroup(
+            updatedGroupId
+          );
+          const updatedAttributes = updateAttributesWithAnnotation(
+            getState().attributes,
+            updatedGroupId,
+            updatedGroup
+          );
+          if (updatedAttributes) {
+            internalApi.updateAttributes(updatedAttributes);
+          }
+        } catch (err) {
+          addLog(`Failed to fetch annotation group ${updatedGroupId}: ${err}`);
+        }
+      }),
   ];
   // There are few key moments when errors are checked and displayed:
   // * at setup time (here) before the first expression evaluation

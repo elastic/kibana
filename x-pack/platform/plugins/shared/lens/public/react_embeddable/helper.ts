@@ -16,7 +16,10 @@ import {
 import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
+import {
+  EVENT_ANNOTATION_GROUP_TYPE,
+  type EventAnnotationGroupConfig,
+} from '@kbn/event-annotation-common';
 import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
 import type {
@@ -240,4 +243,35 @@ export function transformToApiConfig(state: LensSerializedState): LensByValueSer
 export function hasAnnotationGroupReference(state: LensRuntimeState, groupId: string): boolean {
   const refs = state.attributes?.references ?? [];
   return refs.some((ref) => ref.type === EVENT_ANNOTATION_GROUP_TYPE && ref.id === groupId);
+}
+
+/**
+ * Returns updated attributes with fresh annotation group data for all by-reference
+ * annotation layers that reference the given group ID, or undefined if no layers matched.
+ */
+export function updateAttributesWithAnnotation(
+  attributes: LensRuntimeState['attributes'],
+  groupId: string,
+  freshGroup: EventAnnotationGroupConfig
+): LensRuntimeState['attributes'] | undefined {
+  const vizState = attributes.state.visualization as Record<string, unknown> | undefined;
+  if (!Array.isArray(vizState?.layers)) return undefined;
+
+  let changed = false;
+  const layers = (vizState.layers as unknown[]).map((layer) => {
+    const record = layer as Record<string, unknown>;
+    if (record?.annotationGroupId !== groupId) return layer;
+    changed = true;
+    return {
+      ...record,
+      annotations: structuredClone(freshGroup.annotations),
+      ignoreGlobalFilters: freshGroup.ignoreGlobalFilters,
+      indexPatternId: freshGroup.indexPatternId,
+      __lastSaved: freshGroup,
+    };
+  });
+
+  return changed
+    ? { ...attributes, state: { ...attributes.state, visualization: { ...vizState, layers } } }
+    : undefined;
 }
