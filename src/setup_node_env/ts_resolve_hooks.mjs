@@ -19,7 +19,66 @@
 
 import { readFileSync, statSync, realpathSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { resolve as pathResolve } from 'node:path';
+import { resolve as pathResolve, dirname } from 'node:path';
+
+// Cache for package type lookups (true = CJS, false = ESM)
+const cjsPackageCache = new Map();
+
+/**
+ * Check whether a bare specifier refers to a CJS package (no "type": "module").
+ */
+function isCjsPackage(specifier) {
+  const parts = specifier.split('/');
+  const pkgName = specifier.startsWith('@') ? parts.slice(0, 2).join('/') : parts[0];
+
+  if (cjsPackageCache.has(pkgName)) return cjsPackageCache.get(pkgName);
+
+  let isCjs = true; // assume CJS when we can't determine
+  try {
+    const pkgJsonPath = pathResolve(process.cwd(), 'node_modules', pkgName, 'package.json');
+    const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf-8'));
+    isCjs = pkgJson.type !== 'module';
+  } catch {
+    /* can't read package.json — assume CJS */
+  }
+
+  cjsPackageCache.set(pkgName, isCjs);
+  return isCjs;
+}
+
+/**
+ * Rewrite named imports from CJS packages so they work in Node's ESM loader.
+ *
+ * Node can't resolve named exports from most CJS packages (e.g. lodash) via
+ * `import { pick } from 'lodash'`. The default export always works though.
+ * This rewrites:
+ *   import { pick, omit as o } from 'lodash';
+ * to:
+ *   import __cjs$0 from 'lodash'; const { pick, omit: o } = __cjs$0;
+ */
+function fixCjsNamedImports(code) {
+  let counter = 0;
+  return code.replace(
+    /^\s*import\s*\{([^}]+)\}\s*from\s*(["'])([^"']+)\2\s*;?/gm,
+    (match, names, quote, specifier) => {
+      // Skip relative imports, node builtins, and @kbn/* packages (ESM source)
+      if (
+        specifier.startsWith('.') ||
+        specifier.startsWith('/') ||
+        specifier.startsWith('node:') ||
+        specifier.startsWith('@kbn/')
+      ) {
+        return match;
+      }
+      if (!isCjsPackage(specifier)) return match;
+
+      const alias = `__cjs$${counter++}`;
+      // Convert ESM `as` aliases to destructuring `:` syntax
+      const destructured = names.replace(/\bas\b/g, ':');
+      return `import ${alias} from ${quote}${specifier}${quote}; const {${destructured}} = ${alias};`;
+    }
+  );
+}
 
 // Extensions to try as fallbacks, in priority order
 const EXTENSIONS = ['.ts', '.tsx', '/index.ts', '/index.tsx', '.js', '/index.js'];
@@ -215,24 +274,40 @@ export async function resolve(specifier, context, nextResolve) {
 }
 
 /**
- * Load hook: transforms .tsx files via esbuild since Node's
- * --experimental-transform-types doesn't support JSX syntax.
+ * Load hook: transforms .ts/.tsx files via esbuild since Node's
+ * --experimental-transform-types is strip-only and doesn't support
+ * parameter properties, enums, namespaces, or JSX syntax.
  * Also handles JSON imports so they work without explicit import attributes.
  */
 export async function load(url, context, nextLoad) {
-  if (url.endsWith('.tsx')) {
-    // Lazy-import esbuild to avoid loading it unless needed
+  if (url.endsWith('.ts') || url.endsWith('.tsx')) {
+    // Transform all .ts/.tsx files via esbuild instead of relying on Node's
+    // built-in --experimental-transform-types (strip-only mode). Node's type
+    // stripping can only remove type annotations — it cannot transform syntax
+    // like parameter properties (`public readonly x`), enums, or namespaces.
+    // esbuild handles the full TypeScript feature set.
     const { transformSync } = await import('esbuild');
     const filePath = fileURLToPath(url);
     const source = readFileSync(filePath, 'utf-8');
+    // Inject __dirname/__filename shims when the source uses them — these
+    // CJS globals don't exist in ESM scope. The banner is a single line so
+    // sourcemap line offsets stay minimal.
+    const needsCjsShims = source.includes('__dirname') || source.includes('__filename');
+    const banner = needsCjsShims
+      ? 'import { fileURLToPath as __esm_fUTP } from "node:url"; import { dirname as __esm_dN } from "node:path"; const __filename = __esm_fUTP(import.meta.url); const __dirname = __esm_dN(__filename);'
+      : '';
     const { code } = transformSync(source, {
-      loader: 'tsx',
+      loader: url.endsWith('.tsx') ? 'tsx' : 'ts',
       format: 'esm',
       target: 'node22',
       sourcefile: filePath,
       sourcemap: 'inline',
+      banner,
     });
-    return { format: 'module', source: code, shortCircuit: true };
+    // Fix named imports from CJS packages (e.g. lodash) that don't provide
+    // ESM named exports. Rewrites to default import + destructuring.
+    const fixedCode = fixCjsNamedImports(code);
+    return { format: 'module', source: fixedCode, shortCircuit: true };
   }
 
   // Handle JSON imports: ESM requires `with { type: 'json' }` but most
