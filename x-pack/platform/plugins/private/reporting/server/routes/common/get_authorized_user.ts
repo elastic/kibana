@@ -6,14 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 
 import type { ReportingCore } from '../../core';
+import type { ReportingUser } from '../../types';
 
 import { getUser } from './get_user';
-
-export type ReportingUser = AuthenticatedUser | false;
 
 interface GetAuthorizedUserOptions {
   /** If true, throws if security is disabled. Default: false */
@@ -35,7 +33,7 @@ export async function getAuthorizedUser(
     if (requireSecurity) {
       throw Boom.forbidden('Security must be enabled for this operation');
     }
-    return false;
+    return undefined;
   }
 
   // Security is enabled - user must be authenticated

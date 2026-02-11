@@ -67,7 +67,7 @@ const mockRequestParams = {
   jobParams: mockJobParams,
 };
 
-const mockUser: ReportingUser = { username: 'system_user' };
+const mockUser: ReportingUser = { username: 'system_user' } as ReportingUser;
 
 describe('GenerateSystemReportRequestHandler', () => {
   let reportingCore: ReportingCore;

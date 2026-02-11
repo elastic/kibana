@@ -9,8 +9,8 @@ import Boom from '@hapi/boom';
 import type { RequestHandler, RouteMethod } from '@kbn/core/server';
 
 import type { ReportingCore } from '../../core';
-import type { ReportingRequestHandlerContext } from '../../types';
-import { getAuthorizedUser, type ReportingUser } from './get_authorized_user';
+import type { ReportingUser, ReportingRequestHandlerContext } from '../../types';
+import { getAuthorizedUser } from './get_authorized_user';
 
 export type RequestHandlerUser<P, Q, B> = RequestHandler<
   P,

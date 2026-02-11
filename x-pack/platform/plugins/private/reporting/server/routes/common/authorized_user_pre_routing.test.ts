@@ -69,7 +69,7 @@ describe('authorized_user_pre_routing', function () {
 
     let handlerCalled = false;
     await authorizedUserPreRouting(mockCore, (user: unknown) => {
-      expect(user).toBe(false);
+      expect(user).toBeUndefined();
       handlerCalled = true;
       return Promise.resolve({ status: 200, options: {} });
     })(getMockContext(), getMockRequest(), mockResponseFactory);
@@ -86,7 +86,7 @@ describe('authorized_user_pre_routing', function () {
 
     let handlerCalled = false;
     await authorizedUserPreRouting(mockCore, (user: unknown) => {
-      expect(user).toBe(false);
+      expect(user).toBeUndefined();
       handlerCalled = true;
       return Promise.resolve({ status: 200, options: {} });
     })(getMockContext(), getMockRequest(), mockResponseFactory);
