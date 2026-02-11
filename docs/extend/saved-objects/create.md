@@ -35,7 +35,7 @@ export const dashboardVisualization: SavedObjectsType = {
 ```
 
 1. The name may form part of the URL path for the public Saved Objects HTTP API; use snake_case per our API URL path convention.
-2. This determines space behavior (single space, multiple spaces, or all spaces). See [Sharing Saved Objects](/extend/sharing-saved-objects.md) for details.
+2. This determines space behavior (single space, multiple spaces, or all spaces). See [Sharing Saved Objects](share.md) for details.
 3. If `hidden: true`, the type is not exposed by default via the Saved Objects Client APIs or HTTP APIs. Hidden types must be listed in `SavedObjectsClientProviderOptions[includedHiddenTypes]` to be accessible.
 
 ```typescript

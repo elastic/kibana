@@ -30,4 +30,5 @@ This documentation is organized into the following sections:
 * [Update](saved-objects/update.md) — Upgrade existing Saved Object types (legacy transition and new model versions).
 * [Validate](saved-objects/validate.md) — Test model versions, ensure safe type definition changes, and troubleshoot validation failures.
 * [Delete](saved-objects/delete.md) — Remove a Saved Object type registration.
+* [Share](saved-objects/share.md) — Sharing saved objects across spaces (namespace types, conversion, deep links, legacy URL aliases).
 * [Migrations](saved-objects/migrations.md) — How type schema and mapping changes are rolled out on Classic stack and Serverless.

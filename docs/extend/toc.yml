@@ -33,6 +33,7 @@ toc:
           - file: saved-objects/update.md
           - file: saved-objects/validate.md
           - file: saved-objects/delete.md
+          - file: saved-objects/share.md
           - file: saved-objects/migrations.md
       - file: ui-settings-service.md
       - file: patterns.md
@@ -62,7 +63,6 @@ toc:
       - file: running-elasticsearch.md
       - file: development-basepath.md
       - file: upgrading-nodejs.md
-      - file: sharing-saved-objects.md
       - file: legacy-url-aliases.md
   - file: plugin-list.md
     children:
