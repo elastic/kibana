@@ -81,7 +81,10 @@ export function getLegacyNodeId(node: ConnectionNodeLegacy) {
   if (isExitSpan(node)) {
     return getExitSpanNodeId(node);
   }
-  return `${(node as ConnectionNodeLegacy)[SERVICE_NAME]}`;
+  if (SERVICE_NAME in node) {
+    return `${node[SERVICE_NAME]}`;
+  }
+  return '';
 }
 
 export function getServiceConnectionNode(event: ServiceMapService): ServiceConnectionNode {

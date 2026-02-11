@@ -6,16 +6,27 @@
  */
 
 import { getConnections } from './utils';
-import type { Connection, ConnectionNode } from './types';
+import type {
+  Connection,
+  ConnectionNode,
+  ExternalConnectionNode,
+  ServiceConnectionNode,
+} from './types';
+import {
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+  AGENT_NAME,
+} from '@kbn/apm-types';
 
 function getConnectionsPairs(connections: Connection[]) {
-  const get = (n: Record<string, unknown>, key: string) => n[key];
   return connections
     .map((conn) => {
-      const source = get(conn.source as Record<string, unknown>, 'service.name');
-      const destination = get(conn.destination as Record<string, unknown>, 'service.name')
-        ? get(conn.destination as Record<string, unknown>, 'service.name')
-        : get(conn.destination as Record<string, unknown>, 'span.type');
+      const source = (conn.source as ServiceConnectionNode)[SERVICE_NAME];
+      const destination =
+        (conn.destination as ServiceConnectionNode)[SERVICE_NAME] ??
+        (conn.destination as ExternalConnectionNode)[SPAN_TYPE];
       return `${source} -> ${destination}`;
     })
     .filter((_) => _);
@@ -25,35 +36,20 @@ describe('getConnections', () => {
   const paths = [
     [
       {
-        'service.name': 'opbeans-ruby',
-        'agent.name': 'ruby',
+        [SERVICE_NAME]: 'opbeans-ruby',
+        [AGENT_NAME]: 'ruby',
       },
       {
-        'service.name': 'opbeans-node',
-        'agent.name': 'nodejs',
+        [SERVICE_NAME]: 'opbeans-node',
+        [AGENT_NAME]: 'nodejs',
       },
       {
-        'service.name': 'opbeans-go',
-        'agent.name': 'go',
+        [SERVICE_NAME]: 'opbeans-go',
+        [AGENT_NAME]: 'go',
       },
       {
-        'service.name': 'opbeans-java',
-        'agent.name': 'java',
-      },
-      {
-        'span.subtype': 'http',
-        'span.destination.service.resource': '172.18.0.6:3000',
-        'span.type': 'external',
-      },
-    ],
-    [
-      {
-        'service.name': 'opbeans-ruby',
-        'agent.name': 'ruby',
-      },
-      {
-        'service.name': 'opbeans-python',
-        'agent.name': 'python',
+        [SERVICE_NAME]: 'opbeans-java',
+        [AGENT_NAME]: 'java',
       },
       {
         'span.subtype': 'http',
@@ -63,12 +59,27 @@ describe('getConnections', () => {
     ],
     [
       {
-        'service.name': 'opbeans-go',
-        'agent.name': 'go',
+        [SERVICE_NAME]: 'opbeans-ruby',
+        [AGENT_NAME]: 'ruby',
       },
       {
-        'service.name': 'opbeans-node',
-        'agent.name': 'nodejs',
+        [SERVICE_NAME]: 'opbeans-python',
+        [AGENT_NAME]: 'python',
+      },
+      {
+        [SPAN_SUBTYPE]: 'http',
+        [SPAN_DESTINATION_SERVICE_RESOURCE]: '172.18.0.6:3000',
+        [SPAN_TYPE]: 'external',
+      },
+    ],
+    [
+      {
+        [SERVICE_NAME]: 'opbeans-go',
+        [AGENT_NAME]: 'go',
+      },
+      {
+        [SERVICE_NAME]: 'opbeans-node',
+        [AGENT_NAME]: 'nodejs',
       },
     ],
   ] as ConnectionNode[][];

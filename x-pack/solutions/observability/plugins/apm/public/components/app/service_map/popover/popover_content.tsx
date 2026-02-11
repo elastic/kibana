@@ -11,7 +11,12 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { enableDiagnosticMode } from '@kbn/observability-plugin/common';
 import type { Environment } from '../../../../../common/environment_rt';
-import { isServiceNodeData, isGroupedNodeData, type ServiceMapNode, type ServiceMapEdge } from '../../../../../common/service_map';
+import {
+  isServiceNodeData,
+  isGroupedNodeData,
+  type ServiceMapNode,
+  type ServiceMapEdge,
+} from '../../../../../common/service_map';
 import { POPOVER_WIDTH } from './constants';
 import { DependencyContents } from './dependency_contents';
 import { EdgeContents } from './edge_contents';

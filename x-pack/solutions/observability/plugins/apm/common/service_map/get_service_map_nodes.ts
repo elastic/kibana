@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ServiceAnomalyStats } from '../anomaly_detection';
 import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
 import {
   SERVICE_NAME,
@@ -90,8 +91,11 @@ export function getAllServices(
   destinationServices: ExitSpanDestination[],
   anomalies: ServiceAnomaliesResponse
 ) {
-  const anomaliesByServiceName = new Map(
-    anomalies.serviceAnomalies.map((item) => [item.serviceName, item])
+  const anomaliesByServiceName = new Map<string, ServiceAnomalyStats>(
+    anomalies.serviceAnomalies.map((item: { serviceName: string } & ServiceAnomalyStats) => [
+      item.serviceName,
+      item,
+    ])
   );
 
   const serviceNodes = new Map<string, ServiceConnectionNode>();
