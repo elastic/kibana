@@ -44,7 +44,7 @@ const config: InitialBenchConfig = {
       'x-pack/platform/test/functional/apps/lens/open_in_lens/dashboard/config.ts'
     ),
   ],
-  runs: 2,
+  runs: 1,
   timeout: 10 * 300_000,
 };
 
