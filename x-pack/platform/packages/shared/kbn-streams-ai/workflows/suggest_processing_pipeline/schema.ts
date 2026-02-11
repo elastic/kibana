@@ -6,10 +6,8 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
-import { z } from '@kbn/zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { z } from '@kbn/zod/v4';
 import {
-  NonEmptyString,
   conditionSchema,
   filterConditionSchema,
   shorthandBinaryFilterConditionSchema,
@@ -54,26 +52,26 @@ export const pipelineDefinitionSchema = z
 
 export type PipelineDefinition = z.infer<typeof pipelineDefinitionSchema>;
 
-export function getPipelineDefinitionJsonSchema(schema: z.ZodSchema) {
-  return zodToJsonSchema(schema, {
-    target: 'openApi3',
-    $refStrategy: 'root',
-    name: 'PipelineDefinition',
-    // Manually add recurring schemas for cleaner output
-    definitions: {
-      NonEmptyString,
-      StringOrNumberOrBoolean: stringOrNumberOrBoolean,
-      RangeCondition: rangeConditionSchema,
-      ShorthandBinaryFilterCondition: shorthandBinaryFilterConditionSchema,
-      ShorthandUnaryFilterCondition: shorthandUnaryFilterConditionSchema,
-      FilterCondition: filterConditionSchema,
-      AndCondition: andConditionSchema,
-      OrCondition: orConditionSchema,
-      NotCondition: notConditionSchema,
-      NeverCondition: neverConditionSchema,
-      AlwaysCondition: alwaysConditionSchema,
-      Condition: conditionSchema,
-      ProcessorBase: processorBaseWithWhereSchema,
-    },
+export function getPipelineDefinitionJsonSchema(schema: z.ZodType) {
+  // Register recurring schemas with IDs for cleaner $defs output
+  const registry = z.registry<{ id?: string }>();
+  // NonEmptyString, TODO: Fix
+  registry.add(stringOrNumberOrBoolean, { id: 'StringOrNumberOrBoolean' });
+  registry.add(rangeConditionSchema, { id: 'RangeCondition' });
+  registry.add(shorthandBinaryFilterConditionSchema, { id: 'ShorthandBinaryFilterCondition' });
+  registry.add(shorthandUnaryFilterConditionSchema, { id: 'ShorthandUnaryFilterCondition' });
+  registry.add(filterConditionSchema, { id: 'FilterCondition' });
+  registry.add(andConditionSchema, { id: 'AndCondition' });
+  registry.add(orConditionSchema, { id: 'OrCondition' });
+  registry.add(notConditionSchema, { id: 'NotCondition' });
+  registry.add(neverConditionSchema, { id: 'NeverCondition' });
+  registry.add(alwaysConditionSchema, { id: 'AlwaysCondition' });
+  registry.add(conditionSchema, { id: 'Condition' });
+  registry.add(processorBaseWithWhereSchema, { id: 'ProcessorBase' });
+
+  return z.toJSONSchema(schema, {
+    target: 'draft-7',
+    metadata: registry,
+    reused: 'ref',
   }) as OpenAPIV3.SchemaObject;
 }

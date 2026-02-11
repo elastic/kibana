@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { createPrompt } from '@kbn/inference-common';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { merge } from 'lodash';
 import systemsSystemPrompt from './system_prompt.text';
 import systemsUserPrompt from './user_prompt.text';
