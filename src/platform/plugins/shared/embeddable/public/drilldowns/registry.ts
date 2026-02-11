@@ -10,12 +10,12 @@
 import type { DrilldownDefinition } from './types';
 
 const registry: {
-  [key: string]: () => Promise<DrilldownDefinition<any, any>>;
+  [key: string]: () => Promise<DrilldownDefinition<any, any, any>>;
 } = {};
 
 export function registerDrilldown(
   type: string,
-  getFn: () => Promise<DrilldownDefinition<any, any>>
+  getFn: () => Promise<DrilldownDefinition<any, any, any>>
 ) {
   if (registry[type]) {
     throw new Error(`Drilldown already registered for type "${type}".`);

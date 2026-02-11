@@ -45,6 +45,11 @@ export interface PublicDrilldownsManagerProps extends HasDrilldowns {
   onClose: () => void;
 
   /**
+   * Drilldown setup context, i.e. context from open_context_menu trigger
+   */
+  setupContext: object;
+
+  /**
    * List of possible triggers in current context
    */
   triggers: string[];

@@ -18,9 +18,9 @@ export type DrilldownActionState = DrilldownState & { actionId: string };
 
 export type DrilldownDefinition<
   TDrilldownState extends DrilldownState = DrilldownState,
-  // Drilldown execution context, i.e. context from on_filter trigger
+  // Drilldown action execution context, i.e. context from on_filter trigger
   ExecutionContext extends object = object,
-  // Drilldown setup context, i.e. context from open panel context menu trigger
+  // Drilldown setup context, i.e. context from CONTEXT_MENU_TRIGGER
   SetupContext extends object = object
 > = {
   /**
@@ -61,14 +61,14 @@ export type DrilldownDefinition<
     /**
      * Drilldown editor component. Rendered as child of EuiForm component.
      */
-    readonly Editor: FC<DrilldownEditorProps<TDrilldownState>>;
+    readonly Editor: FC<DrilldownEditorProps<TDrilldownState, SetupContext>>;
 
     getInitialState(): Partial<Omit<TDrilldownState, 'trigger' | 'type'>>;
 
     /**
      * Compatibility check during drilldown setup
      */
-    isCompatible?(setupContext: SetupContext): boolean;
+    isCompatible?(context: SetupContext): boolean;
 
     isStateValid(state: Partial<Omit<TDrilldownState, 'label' | 'trigger' | 'type'>>): boolean;
 
@@ -91,23 +91,20 @@ export type DrilldownDefinition<
      * @param drilldownState Drilldown state.
      * @param executionContext Object that represents context in which the drilldown is being executed in.
      */
-    execute(drilldownState: TDrilldownState, executionContext: ExecutionContext): Promise<void>;
+    execute(drilldownState: TDrilldownState, context: ExecutionContext): Promise<void>;
 
     /**
      * Returns a link where drilldown should navigate on middle click or Ctrl + click.
      */
     getHref?(
       drilldownState: TDrilldownState,
-      executionContext: ExecutionContext
+      context: ExecutionContext
     ): Promise<string | undefined>;
 
     /**
      * Compatibility check during drilldown execution
      */
-    isCompatible?: (
-      drilldownState: TDrilldownState,
-      executionContext: ExecutionContext
-    ) => Promise<boolean>;
+    isCompatible?: (drilldownState: TDrilldownState, context: ExecutionContext) => Promise<boolean>;
 
     MenuItem?: FC<{
       drilldownState: TDrilldownState;
@@ -121,7 +118,10 @@ export type DrilldownRegistryEntry = [string, () => Promise<DrilldownDefinition>
 /**
  * Props provided to `Editor` component on every re-render.
  */
-export interface DrilldownEditorProps<TDrilldownState extends DrilldownState = DrilldownState> {
+export interface DrilldownEditorProps<
+  TDrilldownState extends DrilldownState = DrilldownState,
+  SetupContext extends object = object
+> {
   /**
    * Current (latest) state.
    */
@@ -135,7 +135,7 @@ export interface DrilldownEditorProps<TDrilldownState extends DrilldownState = D
   /**
    * Context information about where component is being rendered.
    */
-  // context: Context;
+  context: SetupContext;
 }
 
 export interface DrilldownsManager {

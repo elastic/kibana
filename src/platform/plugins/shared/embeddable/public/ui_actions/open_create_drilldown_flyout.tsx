@@ -56,7 +56,7 @@ export const openCreateDrilldownFlyout: ActionDefinition<EmbeddableApiContext> =
     i18n.translate('embeddable.createDrilldownAction.displayName', {
       defaultMessage: 'Create drilldown',
     }),
-  isCompatible: async ({ embeddable }) => {
+  isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
     if (!isApiCompatible(embeddable)) return false;
     if (
       getInheritedViewMode(embeddable) !== 'edit' ||
@@ -71,7 +71,8 @@ export const openCreateDrilldownFlyout: ActionDefinition<EmbeddableApiContext> =
     const drilldownTriggers = await getDrilldownTriggers();
     return getEmbeddableTriggers(embeddable).some((trigger) => drilldownTriggers.includes(trigger));
   },
-  execute: async ({ embeddable }) => {
+  execute: async (context: EmbeddableApiContext) => {
+    const { embeddable } = context;
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
 
     openLazyFlyout({
@@ -89,6 +90,7 @@ export const openCreateDrilldownFlyout: ActionDefinition<EmbeddableApiContext> =
             initialRoute={'/new'}
             drilldowns$={embeddable.drilldowns$}
             setDrilldowns={embeddable.setDrilldowns}
+            setupContext={context}
             triggers={getEmbeddableTriggers(embeddable)}
             templates={getSiblingDrilldowns(embeddable)}
             onClose={closeFlyout}

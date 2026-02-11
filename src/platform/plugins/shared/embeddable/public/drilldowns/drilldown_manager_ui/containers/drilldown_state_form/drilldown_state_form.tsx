@@ -33,7 +33,6 @@ export const DrilldownStateForm: React.FC<DrilldownStateFormProps> = ({ drilldow
     }),
     [drilldowns, trigger, drilldown]
   );
-  // const context = drilldown.getFactoryContext();
 
   return (
     <DrilldownForm
@@ -43,6 +42,7 @@ export const DrilldownStateForm: React.FC<DrilldownStateFormProps> = ({ drilldow
       disabled={disabled}
     >
       <drilldown.factory.Editor
+        context={drilldowns.deps.setupContext}
         state={config}
         onChange={disabled ? () => {} : drilldown.setConfig}
       />

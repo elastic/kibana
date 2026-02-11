@@ -32,11 +32,14 @@ export const CreateDrilldownForm: React.FC<CreateDrilldownFormProps> = ({ drilld
     }),
     [drilldowns, trigger, drilldown]
   );
-  // const context = state.getFactoryContext();
 
   return (
     <DrilldownForm name={name} onNameChange={drilldown.setName} triggers={triggerPickerProps}>
-      <drilldown.factory.Editor state={config} onChange={drilldown.setConfig} />
+      <drilldown.factory.Editor
+        context={drilldowns.deps.setupContext}
+        state={config}
+        onChange={drilldown.setConfig}
+      />
     </DrilldownForm>
   );
 };

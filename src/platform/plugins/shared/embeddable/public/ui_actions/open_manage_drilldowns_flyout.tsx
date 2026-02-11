@@ -73,11 +73,12 @@ export const openManageDrilldownsFlyout: ActionDefinition<EmbeddableApiContext> 
       </EuiFlexGroup>
     );
   },
-  isCompatible: async ({ embeddable }) => {
+  isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
     if (!isApiCompatible(embeddable) || getInheritedViewMode(embeddable) !== 'edit') return false;
     return (embeddable.drilldowns$.getValue() ?? []).length > 0;
   },
-  execute: async ({ embeddable }) => {
+  execute: async (context: EmbeddableApiContext) => {
+    const { embeddable } = context;
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     openLazyFlyout({
       core,
@@ -93,6 +94,7 @@ export const openManageDrilldownsFlyout: ActionDefinition<EmbeddableApiContext> 
             initialRoute={'/manage'}
             drilldowns$={embeddable.drilldowns$}
             setDrilldowns={embeddable.setDrilldowns}
+            setupContext={context}
             triggers={getEmbeddableTriggers(embeddable)}
             templates={getSiblingDrilldowns(embeddable)}
             onClose={closeFlyout}

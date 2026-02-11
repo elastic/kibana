@@ -39,10 +39,11 @@ import {
 } from '../../common/constants';
 import type { UrlDrilldownState } from '../../server';
 import { getEventScopeValues, getEventVariableList } from './variables/event_variables';
-import { getContextScopeValues } from './variables/context_variables';
+import { getContextScopeValues, getContextVariableList } from './variables/context_variables';
 import { getGlobalVariableList } from './variables/global_variables';
 
-type UrlDrilldownContext = ChartActionContext & EmbeddableApiContext;
+type ExecutionContext = ChartActionContext & EmbeddableApiContext;
+type SetupContext = EmbeddableApiContext;
 
 export function getUrlDrilldown(deps: {
   externalUrl: IExternalUrl;
@@ -52,8 +53,8 @@ export function getUrlDrilldown(deps: {
   getVariablesHelpDocsLink: () => string;
   settings: SettingsStart;
   theme: () => ThemeServiceStart;
-}): DrilldownDefinition<UrlDrilldownState, UrlDrilldownContext> {
-  function getRuntimeVariables(context: ChartActionContext) {
+}): DrilldownDefinition<UrlDrilldownState, ExecutionContext, SetupContext> {
+  function getRuntimeVariables(context: ExecutionContext) {
     return {
       event: getEventScopeValues(context),
       context: getContextScopeValues(context),
@@ -63,7 +64,7 @@ export function getUrlDrilldown(deps: {
 
   async function getHref(
     drilldownState: UrlDrilldownState,
-    context: UrlDrilldownContext
+    context: ExecutionContext
   ): Promise<string | undefined> {
     try {
       const url = await buildUrl(drilldownState, context);
@@ -77,7 +78,7 @@ export function getUrlDrilldown(deps: {
 
   async function buildUrl(
     drilldownState: UrlDrilldownState,
-    context: UrlDrilldownContext
+    context: ExecutionContext
   ): Promise<string> {
     const scope = getRuntimeVariables(context);
     const { isValid, error, invalidUrl } = await urlDrilldownValidateUrlTemplate(
@@ -120,12 +121,12 @@ export function getUrlDrilldown(deps: {
     return url;
   }
 
-  function getVariableList(trigger?: string): UrlTemplateEditorVariable[] {
+  function getVariableList(context: SetupContext, trigger?: string): UrlTemplateEditorVariable[] {
     const eventVariables = getEventVariableList(trigger);
-    // const contextVariables = getContextVariableList(context);
+    const contextVariables = getContextVariableList(context);
     const globalVariables = getGlobalVariableList(deps.getGlobalScope());
 
-    return [...eventVariables, ...globalVariables];
+    return [...eventVariables, ...contextVariables, ...globalVariables];
   }
 
   function getExampleUrl(trigger?: string): string {
@@ -154,7 +155,7 @@ export function getUrlDrilldown(deps: {
     },
     supportedTriggers: URL_DRILLDOWN_SUPPORTED_TRIGGERS,
     action: {
-      execute: async (drilldownState: UrlDrilldownState, context: UrlDrilldownContext) => {
+      execute: async (drilldownState: UrlDrilldownState, context: ExecutionContext) => {
         const url = await getHref(drilldownState, context);
         if (!url) return;
 
@@ -165,7 +166,7 @@ export function getUrlDrilldown(deps: {
         }
       },
       getHref,
-      isCompatible: async (drilldownState: UrlDrilldownState, context: UrlDrilldownContext) => {
+      isCompatible: async (drilldownState: UrlDrilldownState, context: ExecutionContext) => {
         const viewMode = getInheritedViewMode(context.embeddable);
         if (viewMode === 'edit') {
           // check if context is compatible by building the scope
@@ -184,21 +185,20 @@ export function getUrlDrilldown(deps: {
       },
     },
     setup: {
-      Editor: (props: DrilldownEditorProps<UrlDrilldownState>) => {
-        const [variables, exampleUrl] = useMemo(
-          () => [getVariableList(props.state.trigger), getExampleUrl(props.state.trigger)],
-          [props.state]
-        );
-
-        const config = useMemo(
+      Editor: (props: DrilldownEditorProps<UrlDrilldownState, SetupContext>) => {
+        const { variables, exampleUrl, config } = useMemo(
           () => ({
-            url: {
-              template: props.state.url ?? '',
+            variables: getVariableList(props.context, props.state.trigger),
+            exampleUrl: getExampleUrl(props.state.trigger),
+            config: {
+              url: {
+                template: props.state.url ?? '',
+              },
+              encodeUrl: props.state.encode_url ?? DEFAULT_ENCODE_URL,
+              openInNewTab: props.state.open_in_new_tab ?? DEFAULT_OPEN_IN_NEW_TAB,
             },
-            encodeUrl: props.state.encode_url ?? DEFAULT_ENCODE_URL,
-            openInNewTab: props.state.open_in_new_tab ?? DEFAULT_OPEN_IN_NEW_TAB,
           }),
-          [props.state]
+          [props]
         );
 
         const onConfigChange = useCallback(
