@@ -66,7 +66,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   const [selectedInferenceEndpoint, setSelectedInferenceEndpoint] = useState<
     InferenceInferenceEndpointInfo | undefined
   >(undefined);
-  const [searchKey, setSearchKey] = React.useState('');
+  const [searchKey, setSearchKey] = useState('');
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
 
   const copyContent = useCallback(
@@ -264,19 +264,19 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           tableCaption={INFERENCE_ENDPOINTS_TABLE_CAPTION}
         />
       </EuiFlexGroup>
-      {showDeleteAction && selectedInferenceEndpoint ? (
+      {showDeleteAction && selectedInferenceEndpoint && (
         <DeleteAction
           selectedEndpoint={selectedInferenceEndpoint}
           displayModal={showDeleteAction}
           onCancel={onCancelDeleteModal}
         />
-      ) : null}
-      {showInferenceFlyout && selectedInferenceEndpoint ? (
+      )}
+      {showInferenceFlyout && selectedInferenceEndpoint && (
         <EditInferenceFlyout
           onFlyoutClose={onCloseInferenceFlyout}
           selectedInferenceEndpoint={selectedInferenceEndpoint}
         />
-      ) : null}
+      )}
     </>
   );
 };
