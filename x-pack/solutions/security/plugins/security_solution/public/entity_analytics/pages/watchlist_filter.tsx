@@ -117,7 +117,7 @@ export const WatchlistFilter = ({
         navigateToWatchlist(defaultSelectedId);
       }
     }
-  }, [defaultSelectedId, getItemById, selectedIdFromUrl]);
+  }, [defaultSelectedId, getItemById, selectedIdFromUrl, navigateToWatchlist]);
 
   const navigateToWatchlist = useCallback(
     (watchlistId?: string) => {
