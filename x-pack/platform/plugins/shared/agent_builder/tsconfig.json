@@ -101,6 +101,11 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/home-plugin",
     "@kbn/data-plugin",
-    "@kbn/security-plugin"
+    "@kbn/security-plugin",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/core-data-streams-server",
+    "@kbn/task-manager-plugin",
+    "@kbn/data-streams",
+    "@kbn/es-mappings"
   ]
 }
