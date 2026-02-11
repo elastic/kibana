@@ -21,7 +21,6 @@ import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 import {
   ENDPOINT,
   ENDPOINT_COPY_ID_ACTION_LABEL,
-  ENDPOINT_COPY_SUCCESS,
   ENDPOINT_DELETE_ACTION_LABEL,
   ENDPOINT_VIEW_ACTION_LABEL,
   INFERENCE_ENDPOINTS_TABLE_CAPTION,
@@ -30,6 +29,7 @@ import {
 } from '../../../common/translations';
 
 import { useTableData } from '../../hooks/use_table_data';
+import { useEndpointActions } from '../../hooks/use_endpoint_actions';
 import type { FilterOptions } from './types';
 import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from './types';
 
@@ -58,29 +58,21 @@ interface TabularPageProps {
 
 export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
   const {
-    services: { notifications, cloud, application },
+    services: { cloud, application },
   } = useKibana();
-  const toasts = notifications?.toasts;
-  const [showDeleteAction, setShowDeleteAction] = useState(false);
-  const [showInferenceFlyout, setShowInferenceFlyout] = useState(false);
-  const [selectedInferenceEndpoint, setSelectedInferenceEndpoint] = useState<
-    InferenceInferenceEndpointInfo | undefined
-  >(undefined);
   const [searchKey, setSearchKey] = useState('');
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
 
-  const copyContent = useCallback(
-    (inferenceId: string) => {
-      const message = ENDPOINT_COPY_SUCCESS(inferenceId);
-      navigator.clipboard.writeText(inferenceId).then(() => {
-        toasts?.addSuccess({
-          title: message,
-          'aria-label': message,
-        });
-      });
-    },
-    [toasts]
-  );
+  const {
+    showDeleteAction,
+    showInferenceFlyout,
+    selectedInferenceEndpoint,
+    copyContent,
+    onCancelDeleteModal,
+    displayDeleteActionItem,
+    displayInferenceFlyout,
+    onCloseInferenceFlyout,
+  } = useEndpointActions();
 
   const uniqueProvidersAndTaskTypes = useMemo(() => {
     return inferenceEndpoints.reduce(
@@ -95,29 +87,6 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
       }
     );
   }, [inferenceEndpoints]);
-
-  const onCancelDeleteModal = useCallback(() => {
-    setSelectedInferenceEndpoint(undefined);
-    setShowDeleteAction(false);
-  }, []);
-
-  const displayDeleteActionitem = useCallback(
-    (selectedEndpoint: InferenceInferenceEndpointInfo) => {
-      setSelectedInferenceEndpoint(selectedEndpoint);
-      setShowDeleteAction(true);
-    },
-    []
-  );
-
-  const displayInferenceFlyout = useCallback((selectedEndpoint: InferenceInferenceEndpointInfo) => {
-    setSelectedInferenceEndpoint(selectedEndpoint);
-    setShowInferenceFlyout(true);
-  }, []);
-
-  const onCloseInferenceFlyout = useCallback(() => {
-    setShowInferenceFlyout(false);
-    setSelectedInferenceEndpoint(undefined);
-  }, []);
 
   const onFilterChangedCallback = useCallback((newFilterOptions: Partial<FilterOptions>) => {
     setFilterOptions((prev) => ({ ...prev, ...newFilterOptions }));
@@ -192,7 +161,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             icon: 'trash',
             type: 'icon',
             enabled: (item) => !isEndpointPreconfigured(item.inference_id),
-            onClick: (item) => displayDeleteActionitem(item),
+            onClick: (item) => displayDeleteActionItem(item),
             'data-test-subj': (item) =>
               isEndpointPreconfigured(item.inference_id)
                 ? 'inferenceUIDeleteAction-preconfigured'
@@ -202,7 +171,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '165px',
       },
     ],
-    [copyContent, displayDeleteActionitem, displayInferenceFlyout]
+    [copyContent, displayDeleteActionItem, displayInferenceFlyout]
   );
 
   return (
