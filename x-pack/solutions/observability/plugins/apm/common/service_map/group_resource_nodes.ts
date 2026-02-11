@@ -57,9 +57,7 @@ function groupConnections({
   return Array.from(groups.values()).filter(({ targets }) => targets.length >= MINIMUM_GROUP_SIZE);
 }
 
-function getGroupedNodeIds(
-  groupedConnections: ReturnType<typeof groupConnections>
-): Set<string> {
+function getGroupedNodeIds(groupedConnections: ReturnType<typeof groupConnections>): Set<string> {
   const groupedNodeIds = new Set<string>();
   for (const { targets } of groupedConnections) {
     for (const target of targets) {
@@ -157,7 +155,7 @@ function groupEdges({
   const nodeToGroup = new Map<string, string>();
   const outgoingEdgeKeys = new Set<string>();
   const outgoingEdges: GroupedEdge[] = [];
-  
+
   const incomingEdges = groupedConnections.flatMap(({ id, sources }) =>
     sources.map(
       (source): GroupedEdge => ({
@@ -170,7 +168,6 @@ function groupEdges({
     )
   );
 
- 
   for (const { id: groupId, targets } of groupedConnections) {
     for (const target of targets) {
       nodeToGroup.set(target, groupId);
@@ -179,10 +176,10 @@ function groupEdges({
 
   for (const [, { data }] of edgesMap) {
     const groupId = nodeToGroup.get(data.source);
-    
+
     if (groupId && !groupedNodeIds.has(data.target)) {
       const edgeKey = `${groupId}~>${data.target}`;
-      
+
       if (!outgoingEdgeKeys.has(edgeKey)) {
         outgoingEdgeKeys.add(edgeKey);
         outgoingEdges.push({
