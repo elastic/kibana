@@ -279,7 +279,8 @@ export async function getFullAgentPolicy(
     const dataPermissions = storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
       agentPolicy.namespace,
-      packagePolicies
+      packagePolicies,
+      agentInputs
     );
     dataPermissionsByOutputId[outputId] = {
       _elastic_agent_checks: {
