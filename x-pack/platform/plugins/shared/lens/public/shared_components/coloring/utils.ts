@@ -62,8 +62,7 @@ export function getAccessorTypeFromOperation(
   const dataType = useFallback ? dataTypeFallback : operation?.dataType;
   const hasArraySupport = operation?.hasArraySupport;
 
-  // For text_based datasource: when dataType is 'unknown', isBucketed is calculated as
-  // isNotNumeric('unknown') = true, which may be wrong. Recalculate from actual data.
+  // For text_based datasource: isBucketed is calculated as isNotNumeric(datatype), which may be wrong. Recalculate from actual data.
   // For form_based: trust operation.isBucketed as it's explicitly set by the operation definition.
   const isBucketed =
     useFallback && isTextBased ? !isDataTypeNumeric(dataTypeFallback) : operation?.isBucketed;
