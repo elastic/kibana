@@ -6,6 +6,5 @@
  */
 
 export const KBN_ARCHIVES = {
-  MINIMAL:
-    'x-pack/platform/plugins/shared/spaces/test/scout/ui/fixtures/kbn_archives/minimal.json',
+  MINIMAL: 'x-pack/platform/plugins/shared/spaces/test/scout/ui/fixtures/kbn_archives/minimal.json',
 };

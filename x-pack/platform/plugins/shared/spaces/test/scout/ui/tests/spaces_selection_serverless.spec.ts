@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { test } from '../fixtures';
 import { expect } from '@kbn/scout/ui';
+
+import { test } from '../fixtures';
 
 test.describe('Spaces selection', { tag: ['@svlOblt', '@svlSearch', '@svlSecurity'] }, () => {
   test('as Viewer - displays the space selection menu in header', async ({

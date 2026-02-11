@@ -7,6 +7,7 @@
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
+
 import { SpacesPage } from './spaces';
 
 export interface SpacesPageObjects extends PageObjects {

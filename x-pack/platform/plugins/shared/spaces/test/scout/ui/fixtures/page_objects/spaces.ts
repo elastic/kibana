@@ -12,7 +12,7 @@ export class SpacesPage {
 
   async isProjectHeaderVisible() {
     return await this.page.testSubj.isVisible('kibanaProjectHeader');
-}
+  }
 
   async navigateToHome() {
     await this.page.gotoApp('home');

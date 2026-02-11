@@ -7,6 +7,7 @@
 
 import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest } from '@kbn/scout';
+
 import type { SpacesPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
