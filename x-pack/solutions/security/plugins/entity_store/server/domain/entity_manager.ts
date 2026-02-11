@@ -17,14 +17,6 @@ import { EntityType } from '@kbn/entity-store/common';
 import { EntityField, ManagedEntityDefinition } from '@kbn/entity-store/common/domain/definitions/entity_schema';
 import { getEuidFromObject } from '@kbn/entity-store/common/domain/euid';
 
-const PROTECTED_FIELDS = [
-'entity.hashedId',
-'entity.id',
-'entity.EngineMetadata.UntypedId',
-'entity.EngineMetadata.Type',
-]
-
-
 interface EntityManagerDependencies {
   logger: Logger;
   esClient: ElasticsearchClient;
@@ -45,12 +37,12 @@ export class EntityManager {
   private getEntityId(entityType: EntityType, document: Entity): string {
     const id = getEuidFromObject(entityType, document);
     if (id === undefined) {
-      throw new Error(`Could not get EUID for document`);
+      throw new BadCRUDRequestError('', `Could not derive entity EUID from document`);
     }
     return id;
   }
 
-  public async upsertEntity(document: Entity, force: boolean) {
+  public async upsertEntity(document: Entity, force: boolean): Promise<void> {
     const entityType = document.entity?.type;
     if (entityType == null) {
       throw new BadCRUDRequestError('', 'entity.type is required');
@@ -59,11 +51,10 @@ export class EntityManager {
     this.logger.info(`Upserting entity ID ${id}`);
     
     // check protected fields
-    const flat = getFlattenedObject(document);
-    const definition = getEntityDefinition(entityType as EntityType, this.namespace);
-    const fieldDescriptions = getFieldDescriptions(id, flat, definition);
-    assertNoEUIDFields(id, fieldDescriptions);
     if (!force) {
+      const flat = getFlattenedObject(document);
+      const definition = getEntityDefinition(entityType as EntityType, this.namespace);
+      const fieldDescriptions = getFieldDescriptions(id, flat, definition);
       assertOnlyNonForcedAttributesInReq(id, fieldDescriptions);
     }
 
@@ -165,28 +156,11 @@ function getFieldDescriptions(
   return descriptions;
 }
 
-function assertNoEUIDFields(id: string, fields: Record<string, EntityField>) {
-  const notAllowedProps = [];
-  for (const [name, _description] of Object.entries(fields)) {
-    if (PROTECTED_FIELDS.includes(name)) {
-      notAllowedProps.push(name);
-    }
-  }
-
-  if (notAllowedProps.length > 0) {
-    const notAllowedPropsString = notAllowedProps.join(', ');
-    throw new BadCRUDRequestError(
-      id, 
-      `The fields are not allowed to be updated: ${notAllowedPropsString}`
-    );
-  }
-}
-
 function assertOnlyNonForcedAttributesInReq(id: string, fields: Record<string, EntityField>) {
   const notAllowedProps = [];
 
   for (const [name, description] of Object.entries(fields)) {
-    if (!description.allowAPIUpdate && !PROTECTED_FIELDS.includes(name)) {
+    if (!description.allowAPIUpdate) {
       notAllowedProps.push(name);
     }
   }
