@@ -53,7 +53,6 @@ describe('UiamAPIKeys', () => {
 
     uiamApiKeys = new UiamAPIKeys({
       logger,
-      clusterClient: mockClusterClient,
       license: mockLicense,
       uiam: mockUiam,
     });
@@ -297,33 +296,6 @@ describe('UiamAPIKeys', () => {
       expect(logger.error).toHaveBeenCalledWith(
         'Failed to invalidate API key key_id_123: Revocation failed'
       );
-    });
-  });
-
-  describe('getScopedClusterClientWithApiKey()', () => {
-    it('creates scoped client with UIAM headers when API key starts with UIAM prefix', () => {
-      const result = uiamApiKeys.getScopedClusterClientWithApiKey('essu_test_key_123');
-
-      expect(result).toBe(mockScopedClusterClient);
-      expect(mockClusterClient.asScoped).toHaveBeenCalledWith({
-        headers: {
-          authorization: 'ApiKey essu_test_key_123',
-          'x-client-authentication': 'shared-secret',
-        },
-      });
-      expect(mockUiam.getEsClientAuthenticationHeader).toHaveBeenCalled();
-    });
-
-    it('creates scoped client without UIAM headers when API key does not start with UIAM prefix', () => {
-      const result = uiamApiKeys.getScopedClusterClientWithApiKey('regular_api_key_123');
-
-      expect(result).toBe(mockScopedClusterClient);
-      expect(mockClusterClient.asScoped).toHaveBeenCalledWith({
-        headers: {
-          authorization: 'ApiKey regular_api_key_123',
-        },
-      });
-      expect(mockUiam.getEsClientAuthenticationHeader).not.toHaveBeenCalled();
     });
   });
 

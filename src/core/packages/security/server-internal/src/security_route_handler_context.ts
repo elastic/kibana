@@ -43,8 +43,6 @@ export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerCo
                 grant: (grantUiamApiKeyParams) => uiam.grant(this.request, grantUiamApiKeyParams),
                 invalidate: (invalidateUiamApiKeyParams) =>
                   uiam.invalidate(this.request, invalidateUiamApiKeyParams),
-                getScopedClusterClientWithApiKey: (apiKey) =>
-                  uiam.getScopedClusterClientWithApiKey(apiKey),
               }
             : null,
         },

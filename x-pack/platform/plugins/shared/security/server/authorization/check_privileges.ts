@@ -23,8 +23,6 @@ import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 
 import { ResourceSerializer } from './resource_serializer';
 import { validateEsPrivilegeResponse } from './validate_es_response';
-import { getScopedClient } from '../elasticsearch';
-import type { UiamServicePublic } from '../uiam';
 
 interface CheckPrivilegesActions {
   login: string;
@@ -33,7 +31,6 @@ interface CheckPrivilegesActions {
 export function checkPrivilegesFactory(
   actions: CheckPrivilegesActions,
   getClusterClient: () => Promise<IClusterClient>,
-  getUiamService: () => UiamServicePublic | undefined,
   applicationName: string
 ) {
   const createApplicationPrivilegesCheck = (
@@ -109,7 +106,7 @@ export function checkPrivilegesFactory(
         { requireLoginAction }
       );
 
-      const clusterClient = getScopedClient(request, await getClusterClient(), getUiamService());
+      const clusterClient = (await getClusterClient()).asScoped(request);
       const hasPrivilegesResponse = await clusterClient.asCurrentUser.security.hasPrivileges({
         cluster: privileges.elasticsearch?.cluster as estypes.SecurityClusterPrivilege[],
         index: Object.entries(privileges.elasticsearch?.index ?? {}).map(

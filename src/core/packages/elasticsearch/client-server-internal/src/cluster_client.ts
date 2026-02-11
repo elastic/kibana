@@ -30,6 +30,7 @@ import {
   getDefaultHeaders,
   ES_SECONDARY_AUTH_HEADER,
   ES_SECONDARY_CLIENT_AUTH_HEADER,
+  ES_CLIENT_AUTHENTICATION_HEADER,
 } from './headers';
 import {
   createInternalErrorHandler,
@@ -171,6 +172,21 @@ export class ClusterClient implements ICustomClusterClient {
       };
     } else {
       scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
+
+      // If we're creating scoped headers for a fake request, we need to check if we're in UIAM mode
+      // and if the credentials in the headers are UIAM credentials. If so, we need to add the shared
+      // secret to the headers, so that ES can forward it to UIAM service for validation.
+      if (this.security?.uiam) {
+        const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest({
+          headers: scopedHeaders,
+        });
+        if (authorizationHeader && isUiamCredential(authorizationHeader)) {
+          scopedHeaders = {
+            ...scopedHeaders,
+            [ES_CLIENT_AUTHENTICATION_HEADER]: this.security.uiam.sharedSecret,
+          };
+        }
+      }
     }
 
     return {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScopeableRequest } from '@kbn/core/server';
+import type { ScopeableRequest } from '@kbn/core-elasticsearch-server';
 
 export class HTTPAuthorizationHeader {
   /**

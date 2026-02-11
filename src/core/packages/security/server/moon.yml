@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/core-http-server'
   - '@kbn/logging'
   - '@kbn/core-elasticsearch-server'
-  - '@kbn/core'
 tags:
   - shared-server
   - package

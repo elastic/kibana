@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type {
   GrantAPIKeyResult,
@@ -16,7 +16,6 @@ import type {
 } from '@kbn/security-plugin-types-server';
 
 import type { SecurityLicense } from '../../../../common';
-import { getScopedClient } from '../../../elasticsearch';
 import { getDetailedErrorMessage } from '../../../errors';
 import type { UiamServicePublic } from '../../../uiam';
 
@@ -25,7 +24,6 @@ import type { UiamServicePublic } from '../../../uiam';
  */
 export interface UiamAPIKeysOptions {
   logger: Logger;
-  clusterClient: IClusterClient;
   license: SecurityLicense;
   uiam: UiamServicePublic;
 }
@@ -36,13 +34,11 @@ export interface UiamAPIKeysOptions {
  */
 export class UiamAPIKeys implements UiamAPIKeysType {
   private readonly logger: Logger;
-  private readonly clusterClient: IClusterClient;
   private readonly license: SecurityLicense;
   private readonly uiam: UiamServicePublic;
 
-  constructor({ logger, clusterClient, license, uiam }: UiamAPIKeysOptions) {
+  constructor({ logger, license, uiam }: UiamAPIKeysOptions) {
     this.logger = logger;
-    this.clusterClient = clusterClient;
     this.license = license;
     this.uiam = uiam;
   }
@@ -149,24 +145,6 @@ export class UiamAPIKeys implements UiamAPIKeysType {
         ],
       };
     }
-  }
-
-  /**
-   * Creates a scoped Elasticsearch client authenticated with an API key.
-   *
-   * This method creates a scoped cluster client that authenticates using the provided API key.
-   * If the API key is a UIAM credential (starts with 'essu_'), it adds the appropriate UIAM
-   * authentication headers.
-   *
-   * @param apiKey The API key secret.
-   * @returns A scoped cluster client configured with API key authentication
-   */
-  getScopedClusterClientWithApiKey(apiKey: string) {
-    return getScopedClient(
-      { headers: { authorization: `ApiKey ${apiKey}` } },
-      this.clusterClient,
-      this.uiam
-    );
   }
 
   /**

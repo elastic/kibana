@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { GrantAPIKeyResult, InvalidateAPIKeyResult } from '../api_keys';
 import type { GrantUiamAPIKeyParams, InvalidateUiamAPIKeyParams } from './uiam_api_keys';
 
@@ -34,16 +33,4 @@ export interface UiamAPIKeysWithContextType {
    * @throws {Error} If the request does not contain an authorization header or if the credential is not a UIAM credential.
    */
   invalidate(params: InvalidateUiamAPIKeyParams): Promise<InvalidateAPIKeyResult | null>;
-
-  /**
-   * Creates a scoped Elasticsearch client authenticated with an API key.
-   *
-   * This method creates a scoped cluster client that authenticates using the provided API key.
-   * If the API key is a UIAM credential (starts with 'essu_'), it adds the appropriate UIAM
-   * authentication headers.
-   *
-   * @param apiKey The API key secret.
-   * @returns A scoped cluster client configured with API key authentication
-   */
-  getScopedClusterClientWithApiKey(apiKey: string): IScopedClusterClient | null;
 }

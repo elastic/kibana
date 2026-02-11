@@ -42,6 +42,11 @@ export const ES_SECONDARY_CLIENT_AUTH_HEADER = 'es-secondary-x-client-authentica
 /**
  * @internal
  */
+export const ES_CLIENT_AUTHENTICATION_HEADER = 'x-client-authentication';
+
+/**
+ * @internal
+ */
 export const RESERVED_HEADERS = deepFreeze([PRODUCT_ORIGIN_HEADER, USER_AGENT_HEADER]);
 
 /**

@@ -27,7 +27,6 @@ import { isCreateRestAPIKeyParams } from '@kbn/security-plugin-types-server';
 
 import { getFakeKibanaRequest } from './fake_kibana_request';
 import type { SecurityLicense } from '../../../common';
-import { getScopedClient } from '../../elasticsearch';
 import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
 import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../routes/api_keys';
 import { type UiamServicePublic } from '../../uiam';
@@ -161,7 +160,7 @@ export class APIKeys implements NativeAPIKeysType {
       return null;
     }
     const { type, expiration, name, metadata } = createParams;
-    const scopedClusterClient = getScopedClient(request, this.clusterClient, this.uiam);
+    const scopedClusterClient = this.clusterClient.asScoped(request);
 
     this.logger.debug('Trying to create an API key');
 
@@ -216,7 +215,7 @@ export class APIKeys implements NativeAPIKeysType {
     }
 
     const { type, id, metadata } = updateParams;
-    const scopedClusterClient = getScopedClient(request, this.clusterClient, this.uiam);
+    const scopedClusterClient = this.clusterClient.asScoped(request);
 
     this.logger.debug('Trying to edit an API key');
 
@@ -339,11 +338,7 @@ export class APIKeys implements NativeAPIKeysType {
     let result: InvalidateAPIKeyResult;
     try {
       // User needs `manage_api_key` privilege to use this API
-      result = await getScopedClient(
-        request,
-        this.clusterClient,
-        this.uiam
-      ).asCurrentUser.security.invalidateApiKey({
+      result = await this.clusterClient.asScoped(request).asCurrentUser.security.invalidateApiKey({
         ids: params.ids,
       });
       this.logger.debug(
@@ -403,11 +398,7 @@ export class APIKeys implements NativeAPIKeysType {
 
     this.logger.debug(`Trying to validate an API key`);
     try {
-      await getScopedClient(
-        fakeRequest,
-        this.clusterClient,
-        this.uiam
-      ).asCurrentUser.security.authenticate();
+      await this.clusterClient.asScoped(fakeRequest).asCurrentUser.security.authenticate();
       this.logger.debug(`API key was validated successfully`);
       return true;
     } catch (e) {

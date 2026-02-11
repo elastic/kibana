@@ -7,32 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import type { FakeRequest } from '@kbn/core-elasticsearch-server';
 
 import { HTTPAuthorizationHeader } from './http_authorization_header';
 
+const createFakeRequest = (headers: Record<string, string | string[]> = {}): FakeRequest => ({
+  headers,
+});
+
 describe('HTTPAuthorizationHeader.parseFromRequest()', () => {
   it('returns `null` if request does not have authorization header', () => {
-    expect(
-      HTTPAuthorizationHeader.parseFromRequest(httpServerMock.createKibanaRequest())
-    ).toBeNull();
+    expect(HTTPAuthorizationHeader.parseFromRequest(createFakeRequest())).toBeNull();
   });
 
   it('returns `null` if authorization header value is not a string', () => {
     expect(
       HTTPAuthorizationHeader.parseFromRequest(
-        httpServerMock.createKibanaRequest({
-          headers: { authorization: ['Basic xxx', 'Bearer xxx'] as any },
-        })
+        createFakeRequest({ authorization: ['Basic xxx', 'Bearer xxx'] as any })
       )
     ).toBeNull();
   });
 
   it('returns `null` if authorization header value is an empty string', () => {
     expect(
-      HTTPAuthorizationHeader.parseFromRequest(
-        httpServerMock.createKibanaRequest({ headers: { authorization: '' } })
-      )
+      HTTPAuthorizationHeader.parseFromRequest(createFakeRequest({ authorization: '' }))
     ).toBeNull();
   });
 
@@ -53,9 +51,7 @@ describe('HTTPAuthorizationHeader.parseFromRequest()', () => {
     ];
 
     for (const [authorization, scheme] of headerValueAndSchemeMap) {
-      const header = HTTPAuthorizationHeader.parseFromRequest(
-        httpServerMock.createKibanaRequest({ headers: { authorization } })
-      );
+      const header = HTTPAuthorizationHeader.parseFromRequest(createFakeRequest({ authorization }));
       expect(header).not.toBeNull();
       expect(header!.scheme).toBe(scheme);
     }
@@ -70,18 +66,14 @@ describe('HTTPAuthorizationHeader.parseFromRequest()', () => {
     ];
 
     for (const [authorization, credentials] of headerValueAndCredentialsMap) {
-      const header = HTTPAuthorizationHeader.parseFromRequest(
-        httpServerMock.createKibanaRequest({ headers: { authorization } })
-      );
+      const header = HTTPAuthorizationHeader.parseFromRequest(createFakeRequest({ authorization }));
       expect(header).not.toBeNull();
       expect(header!.credentials).toBe(credentials);
     }
   });
 
   it('parses custom headers', () => {
-    const mockRequest = httpServerMock.createKibanaRequest({
-      headers: { 'es-client-authentication': 'SharedSecret secret' },
-    });
+    const mockRequest = createFakeRequest({ 'es-client-authentication': 'SharedSecret secret' });
 
     // Doesn't parse custom headers by default.
     expect(HTTPAuthorizationHeader.parseFromRequest(mockRequest)).toBeNull();

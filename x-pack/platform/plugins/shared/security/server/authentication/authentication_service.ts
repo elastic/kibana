@@ -366,7 +366,6 @@ export class AuthenticationService {
     const uiamAPIKeys = uiam
       ? new UiamAPIKeys({
           logger: this.logger.get('api-key-uiam'),
-          clusterClient,
           license: this.license,
           uiam,
         })
@@ -421,8 +420,6 @@ export class AuthenticationService {
           ? {
               grant: uiamAPIKeys.grant.bind(uiamAPIKeys),
               invalidate: uiamAPIKeys.invalidate.bind(uiamAPIKeys),
-              getScopedClusterClientWithApiKey:
-                uiamAPIKeys.getScopedClusterClientWithApiKey.bind(uiamAPIKeys),
             }
           : null,
       },

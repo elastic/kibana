@@ -268,14 +268,12 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
         },
         async (context, request, response) => {
           try {
-            const { apiKey } = request.body;
-            const [
-              {
-                security: { authc },
-              },
-            ] = await core.getStartServices();
+            const [{ elasticsearch }] = await core.getStartServices();
+
             // Get scoped client with UIAM headers
-            const scopedClient = authc.apiKeys.uiam?.getScopedClusterClientWithApiKey(apiKey);
+            const scopedClient = elasticsearch.client.asScoped({
+              headers: { authorization: `ApiKey ${request.body.apiKey}` },
+            });
 
             if (!scopedClient) {
               return response.badRequest({
