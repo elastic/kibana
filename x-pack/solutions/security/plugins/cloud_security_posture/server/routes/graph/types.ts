@@ -18,8 +18,6 @@ export interface OriginEventId {
 export const NON_ENRICHED_ENTITY_TYPE_PLURAL = 'Entities';
 export const NON_ENRICHED_ENTITY_TYPE_SINGULAR = 'Entity';
 
-export type LabelNodeId = string;
-
 /**
  * Base interface for graph edges with shared actor/target fields.
  * Extended by EventEdge and RelationshipEdge.
@@ -63,7 +61,7 @@ export interface EventEdge extends GraphEdge {
    * When a single document expands via MV_EXPAND into multiple rows with different entity types,
    * they should share the same label node because they originate from the same document(s).
    */
-  labelNodeId: LabelNodeId;
+  labelNodeId: string;
   // Actor attributes (event-specific)
   actorHostIps?: string[] | string;
   // Target attributes (event-specific)

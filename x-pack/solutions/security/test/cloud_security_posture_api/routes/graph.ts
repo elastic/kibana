@@ -539,6 +539,11 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).to.have.property('edges').length(6);
         expect(response.body).not.to.have.property('messages');
 
+        const groupNodes = response.body.nodes.filter(
+          (node: NodeDataModel) => node.shape === 'group'
+        );
+        expect(groupNodes).to.have.length(1);
+
         // Find the group node
         const groupNode = response.body.nodes.find((node: NodeDataModel) => node.shape === 'group');
         expect(groupNode).to.be.ok();

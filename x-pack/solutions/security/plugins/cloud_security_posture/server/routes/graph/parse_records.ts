@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import type { Logger } from '@kbn/core/server';
 import { castArray } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -21,7 +22,6 @@ import type {
   RelationshipNodeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { Writable } from '@kbn/utility-types';
-import { createHash } from 'node:crypto';
 import {
   type EventEdge,
   type RelationshipEdge,
@@ -41,8 +41,10 @@ interface ParseContext {
   readonly nodesMap: Record<string, NodeDataModel>;
   readonly edgesMap: Record<string, EdgeDataModel>;
   /**
-   * Maps connector node ID (label or relationship) to array of edges (source-target pairs).
-   * Used for both event labels and relationship nodes.
+   * Maps connector node ID (event or relationship) to array of edges (source-target pairs).
+   * A single connector node can connect to multiple actor-target pairs when
+   * MV_EXPAND creates multiple rows from the same document(s).
+   * Used for both event events and relationship nodes.
    */
   readonly connectorEdges: Record<string, ConnectorEdges[]>;
   readonly messages: ApiMessageCode[];
@@ -496,7 +498,7 @@ const sortEdges = (
  * Helper to process either label or relationship connector groups.
  */
 const processConnectorGroup = (
-  edgeId: string,
+  groupingKey: string,
   connectorIds: string[],
   connectorEdgesMap: Record<string, ConnectorEdges[]>,
   edgesMap: Record<string, EdgeDataModel>,
@@ -522,7 +524,7 @@ const processConnectorGroup = (
   } else {
     // Create group node for multiple connectors
     const groupNode: GroupNodeDataModel = {
-      id: `grp(${edgeId})`,
+      id: `grp(${groupingKey})`,
       shape: 'group',
     };
     nodesMap[groupNode.id] = groupNode;
@@ -599,13 +601,13 @@ const createEdgesAndGroups = (context: ParseContext) => {
   });
 
   // Process label nodes (handles stacking)
-  Object.entries(labelGrouping).forEach(([groupKey, nodeIds]) => {
-    processConnectorGroup(groupKey, nodeIds, connectorEdges, edgesMap, nodesMap, 'label');
+  Object.entries(labelGrouping).forEach(([groupingKey, nodeIds]) => {
+    processConnectorGroup(groupingKey, nodeIds, connectorEdges, edgesMap, nodesMap, 'label');
   });
 
   // Process relationship nodes (handles stacking)
-  Object.entries(relationshipGrouping).forEach(([groupKey, nodeIds]) => {
-    processConnectorGroup(groupKey, nodeIds, connectorEdges, edgesMap, nodesMap, 'relationship');
+  Object.entries(relationshipGrouping).forEach(([groupingKey, nodeIds]) => {
+    processConnectorGroup(groupingKey, nodeIds, connectorEdges, edgesMap, nodesMap, 'relationship');
   });
 };
 

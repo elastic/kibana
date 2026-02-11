@@ -1618,4 +1618,155 @@ describe('parseRecords', () => {
       expect(targetNode.count).toBe(2);
     });
   });
+
+  describe('label stacking by actor-target pairs', () => {
+    it('stacks labels with same actor-target pair under a group node even with different labelNodeIds', () => {
+      // Two different documents (different labelNodeIds) with the same actor-target pair
+      // should be stacked together under a group node
+      const records: GraphEdge[] = [
+        {
+          action: 'action1',
+          actorNodeId: 'actor1',
+          targetNodeId: 'target1',
+          actorEntityType: 'user',
+          targetEntityType: 'host',
+          actorIdsCount: 1,
+          targetIdsCount: 1,
+          actorsDocData: [
+            '{"id":"actor1","type":"entity","entity":{"name":"Actor","ecsParentField":"user"}}',
+          ],
+          targetsDocData: [
+            '{"id":"target1","type":"entity","entity":{"name":"Target","ecsParentField":"host"}}',
+          ],
+          badge: 1,
+          uniqueEventsCount: 1,
+          uniqueAlertsCount: 0,
+          docs: ['{"event":"foo"}'],
+          isAlert: false,
+          isOrigin: true,
+          isOriginAlert: false,
+          actorHostIps: [],
+          targetHostIps: [],
+          sourceIps: [],
+          sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1', // Different document
+        },
+        {
+          action: 'action2',
+          actorNodeId: 'actor1',
+          targetNodeId: 'target1',
+          actorEntityType: 'user',
+          targetEntityType: 'host',
+          actorIdsCount: 1,
+          targetIdsCount: 1,
+          actorsDocData: [
+            '{"id":"actor1","type":"entity","entity":{"name":"Actor","ecsParentField":"user"}}',
+          ],
+          targetsDocData: [
+            '{"id":"target1","type":"entity","entity":{"name":"Target","ecsParentField":"host"}}',
+          ],
+          badge: 1,
+          uniqueEventsCount: 1,
+          uniqueAlertsCount: 0,
+          docs: ['{"event":"bar"}'],
+          isAlert: false,
+          isOrigin: true,
+          isOriginAlert: false,
+          actorHostIps: [],
+          targetHostIps: [],
+          sourceIps: [],
+          sourceCountryCodes: [],
+          labelNodeId: 'doc-id-2', // Different document
+        },
+      ];
+      const result = parseRecords(mockLogger, records);
+
+      // Should have: 1 actor, 1 target, 2 labels, 1 group node = 5 nodes
+      expect(result.nodes.length).toBe(5);
+
+      // Should have a group node
+      const groupNode = result.nodes.find((n) => n.shape === 'group') as GroupNodeDataModel;
+      expect(groupNode).toBeDefined();
+
+      // Both label nodes should have the group as parent
+      const labelNodes = result.nodes.filter((n) => n.shape === 'label') as LabelNodeDataModel[];
+      expect(labelNodes.length).toBe(2);
+      expect(labelNodes[0].parentId).toBe(groupNode.id);
+      expect(labelNodes[1].parentId).toBe(groupNode.id);
+    });
+
+    it('does not stack labels with different actor-target pairs', () => {
+      // Two different actor-target pairs should NOT be stacked together
+      const records: GraphEdge[] = [
+        {
+          action: 'action1',
+          actorNodeId: 'actor1',
+          targetNodeId: 'target1',
+          actorEntityType: 'user',
+          targetEntityType: 'host',
+          actorIdsCount: 1,
+          targetIdsCount: 1,
+          actorsDocData: [
+            '{"id":"actor1","type":"entity","entity":{"name":"Actor1","ecsParentField":"user"}}',
+          ],
+          targetsDocData: [
+            '{"id":"target1","type":"entity","entity":{"name":"Target1","ecsParentField":"host"}}',
+          ],
+          badge: 1,
+          uniqueEventsCount: 1,
+          uniqueAlertsCount: 0,
+          docs: ['{"event":"foo"}'],
+          isAlert: false,
+          isOrigin: true,
+          isOriginAlert: false,
+          actorHostIps: [],
+          targetHostIps: [],
+          sourceIps: [],
+          sourceCountryCodes: [],
+          labelNodeId: 'doc-id-1',
+        },
+        {
+          action: 'action2',
+          actorNodeId: 'actor2',
+          targetNodeId: 'target2',
+          actorEntityType: 'user',
+          targetEntityType: 'host',
+          actorIdsCount: 1,
+          targetIdsCount: 1,
+          actorsDocData: [
+            '{"id":"actor2","type":"entity","entity":{"name":"Actor2","ecsParentField":"user"}}',
+          ],
+          targetsDocData: [
+            '{"id":"target2","type":"entity","entity":{"name":"Target2","ecsParentField":"host"}}',
+          ],
+          badge: 1,
+          uniqueEventsCount: 1,
+          uniqueAlertsCount: 0,
+          docs: ['{"event":"bar"}'],
+          isAlert: false,
+          isOrigin: true,
+          isOriginAlert: false,
+          actorHostIps: [],
+          targetHostIps: [],
+          sourceIps: [],
+          sourceCountryCodes: [],
+          labelNodeId: 'doc-id-2',
+        },
+      ];
+      const result = parseRecords(mockLogger, records);
+
+      // Should have: 2 actors, 2 targets, 2 labels = 6 nodes (NO group node)
+      expect(result.nodes.length).toBe(6);
+
+      // Should NOT have a group node
+      const groupNode = result.nodes.find((n) => n.shape === 'group');
+      expect(groupNode).toBeUndefined();
+
+      // Label nodes should NOT have parentId
+      const labelNodes = result.nodes.filter((n) => n.shape === 'label') as LabelNodeDataModel[];
+      expect(labelNodes.length).toBe(2);
+      expect(labelNodes[0].parentId).toBeUndefined();
+      expect(labelNodes[1].parentId).toBeUndefined();
+    });
+  });
 });
