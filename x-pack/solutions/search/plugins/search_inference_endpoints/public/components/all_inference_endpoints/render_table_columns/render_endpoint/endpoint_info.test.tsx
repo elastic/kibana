@@ -288,7 +288,7 @@ describe('EndpointInfo component tests', () => {
       await waitFor(() => {
         expect(
           screen.getByText(
-            'This feature is in technical preview and may be changed or removed in a future release'
+            'This functionality is experimental and not supported. It may change or be removed at any time.'
           )
         ).toBeInTheDocument();
       });
