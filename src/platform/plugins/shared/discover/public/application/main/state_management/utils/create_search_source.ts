@@ -38,9 +38,12 @@ export function createSearchSource({
     const appFilters = appState.filters ? cloneDeep(appState.filters) : [];
     const globalFilters = globalState?.filters ? cloneDeep(globalState.filters) : [];
 
-    searchSource
-      .setField('query', appState.query ?? undefined)
-      .setField('filter', [...globalFilters, ...appFilters]);
+    // Only set query field if it has a value (not undefined)
+    if (appState.query !== undefined) {
+      searchSource.setField('query', appState.query);
+    }
+    
+    searchSource.setField('filter', [...globalFilters, ...appFilters]);
   }
 
   return searchSource;
