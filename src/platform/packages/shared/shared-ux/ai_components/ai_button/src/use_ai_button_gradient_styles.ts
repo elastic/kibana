@@ -57,16 +57,25 @@ const fallbackTokens = {
 const getAiButtonThemeTokens = (euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']) => {
   // TODO: Replace the token accessors once EUI exposes AI button gradient tokens.
   // These will be consumable similarly to `euiTheme.colors.vis.euiColorVis6`.
-  const colorsAny = euiTheme.colors as unknown as Record<string, any>;
-  const aiAny = (colorsAny.ai ?? {}) as Record<string, any>;
+  const colors = euiTheme.colors as unknown as Record<string, unknown>;
+  const aiUnknown = colors.ai;
+  const ai =
+    aiUnknown && typeof aiUnknown === 'object'
+      ? (aiUnknown as Record<string, unknown>)
+      : {};
+
+  const filledButtonGradientStartValue = ai.filledButtonGradientStart;
+  const filledButtonGradientEndValue = ai.filledButtonGradientEnd;
 
   return {
     filledButtonGradientStart:
-      (aiAny.filledButtonGradientStart as string | undefined) ??
-      fallbackTokens.filledButtonGradientStart,
+      typeof filledButtonGradientStartValue === 'string'
+        ? filledButtonGradientStartValue
+        : fallbackTokens.filledButtonGradientStart,
     filledButtonGradientEnd:
-      (aiAny.filledButtonGradientEnd as string | undefined) ??
-      fallbackTokens.filledButtonGradientEnd,
+      typeof filledButtonGradientEndValue === 'string'
+        ? filledButtonGradientEndValue
+        : fallbackTokens.filledButtonGradientEnd,
   };
 };
 

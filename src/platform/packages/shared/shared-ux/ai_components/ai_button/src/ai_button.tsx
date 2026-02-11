@@ -17,7 +17,7 @@ export type AiButtonVariant = 'primary' | 'secondary' | 'empty' | 'iconOnly';
 
 interface AiButtonBaseProps {
   isDisabled?: boolean;
-  onClick?: () => void;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
   className?: string;
   'data-test-subj'?: string;
 }
