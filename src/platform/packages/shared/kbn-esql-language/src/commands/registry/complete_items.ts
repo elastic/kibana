@@ -574,3 +574,47 @@ export const getDateHistogramCompletionItem: (histogramBarTarget?: number) => IS
     sortText: '1',
     category: SuggestionCategory.CUSTOM_ACTION,
   });
+
+export function createResourceBrowserSuggestion(options: {
+  label: string;
+  description: string;
+  commandId: string;
+  rangeToReplace?: { start: number; end: number };
+  filterText?: string;
+  insertText?: string;
+  commandArgs?: Record<string, string>;
+}): ISuggestionItem {
+  return withAutoSuggest({
+    label: options.label,
+    text: options.insertText || '',
+    kind: 'Folder',
+    detail: options.description,
+    command: {
+      title: options.label,
+      id: options.commandId,
+      ...(options.commandArgs && { arguments: [options.commandArgs] }),
+    },
+    asSnippet: false,
+    filterText: options.filterText || '',
+    ...(options.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
+    category: SuggestionCategory.CUSTOM_ACTION,
+  });
+}
+
+export function createFieldsBrowserSuggestion(
+  commandArgs?: Record<string, string>
+): ISuggestionItem {
+  return createResourceBrowserSuggestion({
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.fieldsBrowser.suggestionLabel', {
+      defaultMessage: 'Browse fields',
+    }),
+    description: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.fieldsBrowser.suggestionDescription',
+      {
+        defaultMessage: 'Open field browser',
+      }
+    ),
+    commandId: 'esql.fieldsBrowser.open',
+    commandArgs,
+  });
+}

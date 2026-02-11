@@ -47,6 +47,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
 import { ESQLLang, ESQL_LANG_ID, monaco } from '@kbn/monaco';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import { FieldsBrowser } from '@kbn/esql-resource-browser';
 import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -55,6 +56,7 @@ import useObservable from 'react-use/lib/useObservable';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { QuerySource } from '@kbn/esql-types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './lookup_join';
+import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
 import {
@@ -651,6 +653,21 @@ const ESQLEditorInternal = function ESQLEditor({
     getJoinIndicesCallback,
   });
 
+  const {
+    isFieldsBrowserOpen,
+    setIsFieldsBrowserOpen,
+    browserPopoverPosition: fieldsBrowserPosition,
+    allFields,
+    recommendedFields,
+    isLoadingFields,
+    openFieldsBrowser,
+    handleFieldsBrowserSelect,
+  } = useFieldsBrowser({
+    editorRef,
+    editorModel,
+    esqlCallbacks,
+  });
+
   const queryRunButtonProperties = useMemo(() => {
     if (allowQueryCancellation && isLoading) {
       return {
@@ -1116,6 +1133,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     esqlVariables: esqlVariablesRef,
                     controlsContext: controlsContextRef,
                     openTimePickerPopover,
+                    openFieldsBrowser,
                   });
 
                   // Add editor key bindings
@@ -1318,6 +1336,18 @@ const ESQLEditorInternal = function ESQLEditor({
             />
           </div>
         ),
+        document.body
+      )}
+      {createPortal(
+        <FieldsBrowser
+          isOpen={isFieldsBrowserOpen}
+          isLoading={isLoadingFields}
+          allFields={allFields}
+          recommendedFields={recommendedFields}
+          position={fieldsBrowserPosition}
+          onSelect={(fieldNames) => handleFieldsBrowserSelect(fieldNames)}
+          onClose={() => setIsFieldsBrowserOpen(false)}
+        />,
         document.body
       )}
     </>

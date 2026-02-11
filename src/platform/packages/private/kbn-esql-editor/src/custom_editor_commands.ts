@@ -28,6 +28,7 @@ export interface MonacoCommandDependencies {
   esqlVariables: React.RefObject<ESQLControlVariable[] | undefined>;
   controlsContext: React.RefObject<ESQLControlsContext | undefined>;
   openTimePickerPopover: () => void;
+  openFieldsBrowser?: (options?: { preloadedFields?: string[] }) => void;
 }
 
 const triggerControl = async (
@@ -61,6 +62,7 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
     esqlVariables,
     controlsContext,
     openTimePickerPopover,
+    openFieldsBrowser,
   } = deps;
 
   const commandDisposables: monaco.IDisposable[] = [];
@@ -81,6 +83,28 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
       openTimePickerPopover();
     })
   );
+
+  // Open fields browser command (triggered by the "Browse fields" autocomplete item)
+  if (openFieldsBrowser) {
+    commandDisposables.push(
+      monaco.editor.registerCommand('esql.fieldsBrowser.open', (...args) => {
+        const [, payload] = args;
+        let preloadedFields: string[] | undefined;
+
+        if (payload?.fields) {
+          try {
+            preloadedFields = JSON.parse(payload.fields) as string[];
+          } catch {
+            preloadedFields = undefined;
+          }
+        }
+
+        openFieldsBrowser({
+          preloadedFields,
+        });
+      })
+    );
+  }
 
   // Accept recommended query command
   commandDisposables.push(
