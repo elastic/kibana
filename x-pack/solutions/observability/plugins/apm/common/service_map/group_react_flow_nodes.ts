@@ -149,9 +149,12 @@ export function groupReactFlowNodes(
     }
   }
 
-  // Keep ungrouped nodes and edges
+  // Keep ungrouped nodes and edges. Also remove edges where a grouped node
+  // is the source (e.g. messaging connections from exit spans that were grouped).
   const ungroupedNodes = nodes.filter((n) => !groupedNodeIds.has(n.id));
-  const ungroupedEdges = edges.filter((e) => !groupedEdgeIds.has(getEdgeId(e.source, e.target)));
+  const ungroupedEdges = edges.filter(
+    (e) => !groupedEdgeIds.has(getEdgeId(e.source, e.target)) && !groupedNodeIds.has(e.source)
+  );
 
   // Create grouped nodes and edges
   const groupedNodes = groups.map((g) => createGroupedNode(g, nodesById));
