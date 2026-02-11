@@ -37,7 +37,7 @@ import {
 import { MetadataReceiver } from './receiver';
 import { MetadataSender } from './sender';
 import type { ConfigurationService } from './configuration';
-import { TelemetryConfigProvider } from './telemetry_config_provider';
+import type { TelemetryConfigProvider } from './telemetry_config_provider';
 
 const TASK_TYPE = 'IndicesMetadata:IndicesMetadataTask';
 const TASK_ID = 'indices-metadata:indices-metadata-task:1.0.0';
