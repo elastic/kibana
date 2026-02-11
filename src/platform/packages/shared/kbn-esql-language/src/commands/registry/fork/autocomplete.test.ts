@@ -24,7 +24,11 @@ import {
 } from '../../../__tests__/commands/autocomplete';
 import type { ICommandCallbacks } from '../types';
 import type { FunctionReturnType } from '../../definitions/types';
-import { ESQL_STRING_TYPES, ESQL_NUMBER_TYPES } from '../../definitions/types';
+import {
+  ESQL_COMMON_NUMERIC_TYPES,
+  ESQL_STRING_TYPES,
+  ESQL_NUMBER_TYPES,
+} from '../../definitions/types';
 import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
 import { Parser } from '../../../parser';
 
@@ -76,7 +80,14 @@ export const EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS = [
 ];
 
 // types accepted by the AVG function
-export const AVG_TYPES: Array<EsqlFieldType & FunctionReturnType> = ['double', 'integer', 'long'];
+export const AVG_TYPES: Array<EsqlFieldType & FunctionReturnType> = [
+  'double',
+  'integer',
+  'long',
+  'aggregate_metric_double',
+  'tdigest',
+];
+const ACOS_TYPES = [...ESQL_COMMON_NUMERIC_TYPES, 'unsigned_long'] as const;
 
 export const EXPECTED_FOR_FIRST_EMPTY_EXPRESSION = [
   'BY ',
@@ -339,10 +350,10 @@ describe('FORK Autocomplete', () => {
             await forkExpectSuggestions(
               'FROM a | FORK (STATS AVG(integerField) BY ACOS(',
               [
-                ...getFieldNamesByType([...AVG_TYPES, 'unsigned_long']),
+                ...getFieldNamesByType(ACOS_TYPES),
                 ...getFunctionSignaturesByReturnType(
                   Location.STATS,
-                  [...AVG_TYPES, 'unsigned_long'],
+                  ACOS_TYPES,
                   {
                     scalar: true,
                     grouping: true,
