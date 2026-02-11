@@ -33,7 +33,11 @@ import {
   getPromqlMatchingSignatures,
   getPromqlSignatureMismatch,
 } from '../../definitions/utils/validation/function';
-import type { PromQLFunction, PromQLLabelName, PromQLSelector } from '../../../promql/types';
+import type {
+  PromQLFunction,
+  PromQLLabelName,
+  PromQLSelector,
+} from '../../../embedded_languages/promql/types';
 import {
   getUsedPromqlParamNames,
   IDENTIFIER_PATTERN,
