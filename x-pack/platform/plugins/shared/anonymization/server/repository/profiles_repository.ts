@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { createHash } from 'crypto';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AnonymizationProfile, FieldRule } from '@kbn/anonymization-common';
 import { ANONYMIZATION_PROFILES_INDEX } from '../../common';
@@ -111,6 +111,18 @@ interface FindProfilesResult {
 export class ProfilesRepository {
   constructor(private readonly esClient: ElasticsearchClient) {}
 
+  private buildProfileId(namespace: string, targetType: string, targetId: string): string {
+    const tuple = `${namespace}:${targetType}:${targetId}`;
+    const digest = createHash('sha256').update(tuple).digest('hex');
+    return `profile-${digest}`;
+  }
+
+  private isConflictError(err: unknown): boolean {
+    const statusCode = (err as { statusCode?: number; meta?: { statusCode?: number } })?.statusCode;
+    const metaStatusCode = (err as { meta?: { statusCode?: number } })?.meta?.statusCode;
+    return statusCode === 409 || metaStatusCode === 409;
+  }
+
   /**
    * Creates a new profile. Enforces uniqueness per (namespace, target_type, target_id).
    * @throws ConflictError if a profile for the same target already exists in the space.
@@ -127,7 +139,7 @@ export class ProfilesRepository {
     }
 
     const now = new Date().toISOString();
-    const id = uuidv4();
+    const id = this.buildProfileId(params.namespace, params.targetType, params.targetId);
 
     const doc: EsProfileDocument = {
       id,
@@ -165,12 +177,24 @@ export class ProfilesRepository {
       updated_by: params.createdBy,
     };
 
-    await this.esClient.index({
-      index: ANONYMIZATION_PROFILES_INDEX,
-      id,
-      document: doc,
-      refresh: 'wait_for',
-    });
+    try {
+      await this.esClient.index({
+        index: ANONYMIZATION_PROFILES_INDEX,
+        id,
+        op_type: 'create',
+        document: doc,
+        refresh: 'wait_for',
+      });
+    } catch (err) {
+      if (this.isConflictError(err)) {
+        const conflictError = new Error(
+          `A profile already exists for target (${params.targetType}, ${params.targetId}) in space ${params.namespace}`
+        );
+        (conflictError as { statusCode?: number }).statusCode = 409;
+        throw conflictError;
+      }
+      throw err;
+    }
 
     return this.toProfile(doc);
   }
