@@ -139,6 +139,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
               meta: column?.meta,
               variable: column?.variable,
               label: choice.field,
+              ...(props.isMetricDimension && { inMetricDimension: true }),
             };
             return props.setState(
               !selectedField
