@@ -16,7 +16,10 @@ const OSQUERY_ROOT = resolve(__dirname, '../..');
 (async () => {
   await bundle({
     sourceGlob: join(OSQUERY_ROOT, 'common/api/**/*.schema.yaml'),
-    outputFilePath: join(OSQUERY_ROOT, 'docs/openapi/serverless/osquery_api_{version}.bundled.schema.yaml'),
+    outputFilePath: join(
+      OSQUERY_ROOT,
+      'docs/openapi/serverless/osquery_api_{version}.bundled.schema.yaml'
+    ),
     options: {
       includeLabels: ['serverless'],
       prototypeDocument: {
@@ -37,7 +40,10 @@ const OSQUERY_ROOT = resolve(__dirname, '../..');
 
   await bundle({
     sourceGlob: join(OSQUERY_ROOT, 'common/api/**/*.schema.yaml'),
-    outputFilePath: join(OSQUERY_ROOT, 'docs/openapi/ess/osquery_api_{version}.bundled.schema.yaml'),
+    outputFilePath: join(
+      OSQUERY_ROOT,
+      'docs/openapi/ess/osquery_api_{version}.bundled.schema.yaml'
+    ),
     options: {
       includeLabels: ['ess'],
       prototypeDocument: {
