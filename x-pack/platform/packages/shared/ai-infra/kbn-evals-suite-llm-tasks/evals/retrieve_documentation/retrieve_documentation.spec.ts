@@ -11,6 +11,7 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import {
   containsAllTerms,
   evaluate,
+  tags,
   selectEvaluators,
   type Example,
   type TaskOutput,
@@ -76,7 +77,7 @@ const createNoopLogger = (): Logger =>
 
 evaluate.describe(
   'llm_tasks.retrieveDocumentation (task-level retriever evals)',
-  { tag: '@svlOblt' },
+  { tag: tags.serverless.observability.complete },
   () => {
     let installedBySuite = false;
 
