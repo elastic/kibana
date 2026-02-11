@@ -12,31 +12,21 @@ import { TestProviders } from '../../../common/mock';
 import { UserPanelHeader } from './header';
 import { managedUserDetails, mockManagedUserData } from './mocks';
 
+const defaultLastSeen = {
+  date: '2023-02-23T20:03:17.489Z',
+  isLoading: false,
+};
+
 const mockProps = {
   userName: 'test',
   scopeId: 'test-scope-id',
   managedUser: mockManagedUserData,
+  lastSeen: defaultLastSeen,
 };
-
-const mockUseObservedUserHeaderLastSeen = jest.fn().mockReturnValue({
-  lastSeenDate: '2023-02-23T20:03:17.489Z',
-  isLoading: false,
-});
-
-jest.mock('./hooks/use_observed_user_header_last_seen', () => ({
-  useObservedUserHeaderLastSeen: () => mockUseObservedUserHeaderLastSeen(),
-}));
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
 describe('UserPanelHeader', () => {
-  beforeEach(() => {
-    mockUseObservedUserHeaderLastSeen.mockReturnValue({
-      lastSeenDate: '2023-02-23T20:03:17.489Z',
-      isLoading: false,
-    });
-  });
-
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
@@ -49,13 +39,12 @@ describe('UserPanelHeader', () => {
 
   it('renders observed user date when it is bigger than managed user date', () => {
     const futureDay = '2989-03-07T20:00:00.000Z';
-    mockUseObservedUserHeaderLastSeen.mockReturnValue({
-      lastSeenDate: futureDay,
-      isLoading: false,
-    });
     const { getByTestId } = render(
       <TestProviders>
-        <UserPanelHeader {...mockProps} />
+        <UserPanelHeader
+          {...mockProps}
+          lastSeen={{ date: futureDay, isLoading: false }}
+        />
       </TestProviders>
     );
 
@@ -65,24 +54,19 @@ describe('UserPanelHeader', () => {
   it('renders managed user date when it is bigger than observed user date', () => {
     const futureDay = '2989-03-07T20:00:00.000Z';
     const entraManagedUser = managedUserDetails[ManagedUserDatasetKey.ENTRA]!;
-    mockUseObservedUserHeaderLastSeen.mockReturnValue({
-      lastSeenDate: '2020-01-01T00:00:00.000Z',
-      isLoading: false,
-    });
     const { getByTestId } = render(
       <TestProviders>
         <UserPanelHeader
-          {...{
-            ...mockProps,
-            managedUser: {
-              ...mockManagedUserData,
-              data: {
-                [ManagedUserDatasetKey.ENTRA]: {
-                  ...entraManagedUser,
-                  fields: {
-                    ...entraManagedUser.fields,
-                    '@timestamp': [futureDay],
-                  },
+          {...mockProps}
+          lastSeen={{ date: '2020-01-01T00:00:00.000Z', isLoading: false }}
+          managedUser={{
+            ...mockManagedUserData,
+            data: {
+              [ManagedUserDatasetKey.ENTRA]: {
+                ...entraManagedUser,
+                fields: {
+                  ...entraManagedUser.fields,
+                  '@timestamp': [futureDay],
                 },
               },
             },
@@ -106,13 +90,12 @@ describe('UserPanelHeader', () => {
   });
 
   it('does not render observed badge when lastSeen date is undefined', () => {
-    mockUseObservedUserHeaderLastSeen.mockReturnValue({
-      lastSeenDate: undefined,
-      isLoading: false,
-    });
     const { queryByTestId } = render(
       <TestProviders>
-        <UserPanelHeader {...mockProps} />
+        <UserPanelHeader
+          {...mockProps}
+          lastSeen={{ date: undefined, isLoading: false }}
+        />
       </TestProviders>
     );
 
@@ -123,12 +106,10 @@ describe('UserPanelHeader', () => {
     const { queryByTestId } = render(
       <TestProviders>
         <UserPanelHeader
-          {...{
-            ...mockProps,
-            managedUser: {
-              ...mockManagedUserData,
-              data: {},
-            },
+          {...mockProps}
+          managedUser={{
+            ...mockManagedUserData,
+            data: {},
           }}
         />
       </TestProviders>
@@ -138,13 +119,12 @@ describe('UserPanelHeader', () => {
   });
 
   it('renders skeleton when loading', () => {
-    mockUseObservedUserHeaderLastSeen.mockReturnValue({
-      lastSeenDate: undefined,
-      isLoading: true,
-    });
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <UserPanelHeader {...mockProps} />
+        <UserPanelHeader
+          {...mockProps}
+          lastSeen={{ date: undefined, isLoading: true }}
+        />
       </TestProviders>
     );
 

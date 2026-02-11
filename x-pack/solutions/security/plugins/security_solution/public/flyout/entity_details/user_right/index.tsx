@@ -148,7 +148,12 @@ export const UserPanel = ({
         isPreviewMode={isPreviewMode}
         isRulePreview={scopeId === TableId.rulePreview}
       />
-      <UserPanelHeader userName={userName} scopeId={scopeId} managedUser={managedUser} />
+      <UserPanelHeader
+        userName={userName}
+        scopeId={scopeId}
+        managedUser={managedUser}
+        lastSeen={observedUser.lastSeen}
+      />
       <UserPanelContent
         userName={userName}
         observedUser={observedUser}

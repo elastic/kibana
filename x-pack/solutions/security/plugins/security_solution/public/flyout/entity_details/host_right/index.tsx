@@ -148,7 +148,11 @@ export const HostPanel = ({
         isPreviewMode={isPreviewMode}
         isRulePreview={scopeId === TableId.rulePreview}
       />
-      <HostPanelHeader hostName={hostName} scopeId={scopeId} />
+      <HostPanelHeader
+        hostName={hostName}
+        scopeId={scopeId}
+        lastSeen={observedHost.lastSeen}
+      />
       <HostPanelContent
         hostName={hostName}
         observedHost={observedHost}

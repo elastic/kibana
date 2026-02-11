@@ -23,24 +23,29 @@ import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
-import { useObservedUserHeaderLastSeen } from './hooks/use_observed_user_header_last_seen';
+import type { FirstLastSeenData } from '../../shared/components/observed_entity/types';
 import type { ManagedUserData } from '../shared/hooks/use_managed_user';
 
 interface UserPanelHeaderProps {
   userName: string;
   scopeId: string;
   managedUser: ManagedUserData;
+  /** Passed from panel's observedUser.lastSeen; optional for Storybook */
+  lastSeen?: FirstLastSeenData;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
 
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const UserPanelHeader = ({ userName, scopeId, managedUser }: UserPanelHeaderProps) => {
-  const { lastSeenDate: observedUserLastSeenDate, isLoading } = useObservedUserHeaderLastSeen(
-    userName,
-    scopeId
-  );
+export const UserPanelHeader = ({
+  userName,
+  scopeId,
+  managedUser,
+  lastSeen,
+}: UserPanelHeaderProps) => {
+  const observedUserLastSeenDate = lastSeen?.date;
+  const isLoading = lastSeen?.isLoading ?? false;
 
   const oktaTimestamp = managedUser.data?.[ManagedUserDatasetKey.OKTA]?.fields?.[
     '@timestamp'

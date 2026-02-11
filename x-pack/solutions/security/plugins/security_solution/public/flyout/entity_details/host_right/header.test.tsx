@@ -10,30 +10,20 @@ import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { HostPanelHeader } from './header';
 
+const defaultLastSeen = {
+  date: '2023-02-23T20:03:17.489Z',
+  isLoading: false,
+};
+
 const mockProps = {
   hostName: 'test',
   scopeId: 'test-scope-id',
+  lastSeen: defaultLastSeen,
 };
-
-const mockUseObservedHostHeaderLastSeen = jest.fn().mockReturnValue({
-  lastSeenDate: '2023-02-23T20:03:17.489Z',
-  isLoading: false,
-});
-
-jest.mock('./hooks/use_observed_host_header_last_seen', () => ({
-  useObservedHostHeaderLastSeen: () => mockUseObservedHostHeaderLastSeen(),
-}));
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
 describe('HostPanelHeader', () => {
-  beforeEach(() => {
-    mockUseObservedHostHeaderLastSeen.mockReturnValue({
-      lastSeenDate: '2023-02-23T20:03:17.489Z',
-      isLoading: false,
-    });
-  });
-
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
@@ -46,13 +36,12 @@ describe('HostPanelHeader', () => {
 
   it('renders observed date', () => {
     const futureDay = '2989-03-07T20:00:00.000Z';
-    mockUseObservedHostHeaderLastSeen.mockReturnValue({
-      lastSeenDate: futureDay,
-      isLoading: false,
-    });
     const { getByTestId } = render(
       <TestProviders>
-        <HostPanelHeader {...mockProps} />
+        <HostPanelHeader
+          {...mockProps}
+          lastSeen={{ date: futureDay, isLoading: false }}
+        />
       </TestProviders>
     );
 
@@ -70,13 +59,12 @@ describe('HostPanelHeader', () => {
   });
 
   it('does not render observed badge when lastSeen date is undefined', () => {
-    mockUseObservedHostHeaderLastSeen.mockReturnValue({
-      lastSeenDate: undefined,
-      isLoading: false,
-    });
     const { queryByTestId } = render(
       <TestProviders>
-        <HostPanelHeader {...mockProps} />
+        <HostPanelHeader
+          {...mockProps}
+          lastSeen={{ date: undefined, isLoading: false }}
+        />
       </TestProviders>
     );
 
@@ -84,13 +72,12 @@ describe('HostPanelHeader', () => {
   });
 
   it('renders skeleton when loading', () => {
-    mockUseObservedHostHeaderLastSeen.mockReturnValue({
-      lastSeenDate: undefined,
-      isLoading: true,
-    });
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <HostPanelHeader {...mockProps} />
+        <HostPanelHeader
+          {...mockProps}
+          lastSeen={{ date: undefined, isLoading: true }}
+        />
       </TestProviders>
     );
 

@@ -21,19 +21,26 @@ import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
-import { useObservedHostHeaderLastSeen } from './hooks/use_observed_host_header_last_seen';
+import type { FirstLastSeenData } from '../../shared/components/observed_entity/types';
 
 interface HostPanelHeaderProps {
   hostName: string;
   scopeId: string;
+  /** Passed from panel's observedHost.lastSeen; optional for Storybook */
+  lastSeen?: FirstLastSeenData;
 }
 
 const linkTitleCSS = { width: 'fit-content' };
 
 const urlParamOverride = { timeline: { isOpen: false } };
 
-export const HostPanelHeader = ({ hostName, scopeId }: HostPanelHeaderProps) => {
-  const { lastSeenDate, isLoading } = useObservedHostHeaderLastSeen(hostName, scopeId);
+export const HostPanelHeader = ({
+  hostName,
+  scopeId,
+  lastSeen,
+}: HostPanelHeaderProps) => {
+  const lastSeenDate = lastSeen?.date;
+  const isLoading = lastSeen?.isLoading ?? false;
   const lastSeenDateFormatted = useMemo(
     () => lastSeenDate && new Date(lastSeenDate),
     [lastSeenDate]
