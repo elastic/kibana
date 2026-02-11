@@ -46,11 +46,12 @@ export const getBucketAvgMetricAgg = () => {
     params: [...params()],
     getSerializedFormat,
     getValue(agg, bucket) {
+      const b = bucket as Record<string, any>;
       const customMetric = agg.getParam('customMetric');
       const customBucket = agg.getParam('customBucket');
       const scaleMetrics = customMetric.type && customMetric.type.isScalable();
 
-      let value = bucket[agg.id] && bucket[agg.id].value;
+      let value = b[agg.id] && b[agg.id].value;
 
       if (scaleMetrics && customBucket.type.name === 'date_histogram') {
         const aggInfo = customBucket.write();

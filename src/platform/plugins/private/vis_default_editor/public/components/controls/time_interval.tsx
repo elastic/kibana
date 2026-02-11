@@ -103,12 +103,15 @@ function TimeIntervalParamEditor({
   const timeBase: string = get(editorConfig, 'interval.timeBase') as string;
   const options = timeBase
     ? []
-    : (aggParam.options || []).reduce((filtered: ComboBoxOption[], option: AggParamOption) => {
-        if (option.enabled ? option.enabled(agg) : true) {
-          filtered.push({ label: option.display, key: option.val });
-        }
-        return filtered;
-      }, []);
+    : ((aggParam.options || []) as AggParamOption[]).reduce(
+        (filtered: ComboBoxOption[], option: AggParamOption) => {
+          if (option.enabled ? option.enabled(agg) : true) {
+            filtered.push({ label: option.display, key: option.val });
+          }
+          return filtered;
+        },
+        []
+      );
 
   let selectedOptions: ComboBoxOption[] = [];
   let definedOption: ComboBoxOption | undefined;

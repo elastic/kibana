@@ -27,7 +27,7 @@ type ChangeAggType = ActionType<
   EditorStateActionTypes.CHANGE_AGG_TYPE,
   { aggId: AggId; value: IAggConfig['type'] }
 >;
-type SetAggParamValue<T extends AggParams = AggParams> = ActionType<
+type SetAggParamValue<T extends keyof AggParams = keyof AggParams> = ActionType<
   EditorStateActionTypes.SET_AGG_PARAM_VALUE,
   {
     aggId: AggId;

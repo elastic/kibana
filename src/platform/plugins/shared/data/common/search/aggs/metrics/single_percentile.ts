@@ -54,11 +54,12 @@ export const getSinglePercentileMetricAgg = () => {
       },
     ],
     getValue(agg, bucket) {
+      const b = bucket as Record<string, any>;
       let valueKey = String(agg.params.percentile);
       if (Number.isInteger(agg.params.percentile)) {
         valueKey += '.0';
       }
-      const { values } = bucket[agg.id] ?? {};
+      const { values } = b[agg.id] ?? {};
 
       return values ? values[valueKey] : NaN;
     },

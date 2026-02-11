@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AggParamOutput } from './base';
 import { BaseParamType } from './base';
 import { JsonParamType } from './json';
 import type { IAggConfig } from '../agg_config';
@@ -14,7 +15,7 @@ import type { IAggConfig } from '../agg_config';
 describe('JSON', function () {
   const paramName = 'json_test';
   let aggConfig: IAggConfig;
-  let output: Record<string, any>;
+  let output: AggParamOutput;
 
   const initAggParam = (config: Record<string, any> = {}) =>
     new JsonParamType({

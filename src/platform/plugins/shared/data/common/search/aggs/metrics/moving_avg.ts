@@ -70,7 +70,9 @@ export const getMovingAvgMetricAgg = () => {
        * would return the value 0 for null buckets, we need a specific
        * implementation here, that preserves the null value.
        */
-      return bucket[agg.id] ? bucket[agg.id].value : null;
+
+      const b = bucket as Record<string, any>;
+      return b[agg.id] ? b[agg.id].value : null;
     },
   });
 };

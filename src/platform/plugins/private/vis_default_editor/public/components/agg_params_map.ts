@@ -50,7 +50,8 @@ const buckets = {
     exclude: controls.IncludeExcludeParamEditor,
     orderBy: controls.OrderByParamEditor,
     orderAgg: controls.OrderAggParamEditor,
-    order: wrapWithInlineComp(controls.OrderParamEditor),
+
+    order: wrapWithInlineComp(controls.OrderParamEditor as any),
     size: wrapWithInlineComp(controls.SizeParamEditor),
     otherBucket: controls.OtherBucketParamEditor,
     missingBucket: controls.MissingBucketParamEditor,
@@ -60,7 +61,8 @@ const buckets = {
 const metrics = {
   [METRIC_TYPES.TOP_HITS]: {
     field: controls.TopFieldParamEditor,
-    aggregate: wrapWithInlineComp(controls.TopAggregateParamEditor),
+
+    aggregate: wrapWithInlineComp(controls.TopAggregateParamEditor as any),
     size: wrapWithInlineComp(controls.TopSizeParamEditor),
     sortField: controls.TopSortFieldParamEditor,
     sortOrder: controls.OrderParamEditor,

@@ -12,7 +12,8 @@ import { CidrMask } from '../lib/cidr_mask';
 import type { IBucketAggConfig } from '../bucket_agg_type';
 import type { IpPrefixKey } from '../lib/ip_prefix';
 
-export const createFilterIpPrefix = (aggConfig: IBucketAggConfig, key: IpPrefixKey) => {
+export const createFilterIpPrefix = (aggConfig: IBucketAggConfig, rawKey: unknown) => {
+  const key = rawKey as IpPrefixKey;
   let ipAddress = key.address;
 
   /*
@@ -32,7 +33,7 @@ export const createFilterIpPrefix = (aggConfig: IBucketAggConfig, key: IpPrefixK
   const range = new CidrMask(ipAddress + '/' + key.prefix_length).getRange();
 
   return buildRangeFilter(
-    aggConfig.params.field,
+    aggConfig.getField()!,
     { gte: range.from, lte: range.to },
     aggConfig.getIndexPattern()
   );

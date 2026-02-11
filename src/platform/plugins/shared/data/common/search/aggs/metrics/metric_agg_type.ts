@@ -79,6 +79,7 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
     this.getValue =
       config.getValue ||
       ((agg, bucket) => {
+        const b = bucket as any;
         // Metric types where an empty set equals `zero`
         const isSettableToZero = [
           METRIC_TYPES.CARDINALITY,
@@ -88,9 +89,9 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
 
         // Return proper values when no buckets are present
         // `Count` handles empty sets properly
-        if (!bucket[agg.id] && isSettableToZero && !agg.params.emptyAsNull) return 0;
+        if (!b[agg.id] && isSettableToZero && !agg.params.emptyAsNull) return 0;
 
-        const val = bucket[agg.id] && bucket[agg.id].value;
+        const val = b[agg.id] && b[agg.id].value;
         if (val === 0 && agg.params.emptyAsNull) {
           return null;
         }
@@ -115,6 +116,11 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
   }
 }
 
-export function isMetricAggType(aggConfig: any): aggConfig is MetricAggType {
-  return aggConfig && aggConfig.type === metricType;
+export function isMetricAggType(aggConfig: unknown): aggConfig is MetricAggType {
+  return (
+    typeof aggConfig === 'object' &&
+    aggConfig !== null &&
+    'type' in aggConfig &&
+    (aggConfig as Record<string, unknown>).type === metricType
+  );
 }

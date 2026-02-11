@@ -178,10 +178,11 @@ export function mergeTimeShifts(
     Object.entries(source).forEach(([key, val]) => {
       // copy over doc count into special key
       if (typeof val === 'number' && key === 'doc_count') {
+        const t = target as Record<string, any>;
         if (shift.asMilliseconds() === 0) {
-          target.doc_count = val;
+          t.doc_count = val;
         } else {
-          target[`doc_count_${shift.asMilliseconds()}`] = val;
+          t[`doc_count_${shift.asMilliseconds()}`] = val;
         }
       } else if (typeof val !== 'object') {
         // other meta keys not of interest
@@ -225,7 +226,11 @@ export function mergeTimeShifts(
               baseBucketMap[String(bucket.key)] = bucket;
             });
             buckets.forEach((bucket) => {
-              const bucketKey = bucketAgg.type.getShiftedKey(bucketAgg, bucket.key, shift);
+              const bucketKey = bucketAgg.type.getShiftedKey(
+                bucketAgg,
+                bucket.key as string | number,
+                shift
+              );
               // if a bucket is missing in the map, create an empty one
               if (!baseBucketMap[bucketKey]) {
                 baseBucketMap[String(bucketKey)] = {

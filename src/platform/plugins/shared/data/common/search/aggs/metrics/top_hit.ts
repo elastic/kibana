@@ -226,7 +226,7 @@ export const getTopHitMetricAgg = () => {
       },
     ],
     getValue(agg, bucket) {
-      const hits: any[] = _.get(bucket, `${agg.id}.hits.hits`);
+      const hits: any[] = _.get(bucket as Record<string, any>, `${agg.id}.hits.hits`);
       if (!hits || !hits.length) {
         return null;
       }

@@ -39,7 +39,8 @@ const getValueProps = (
     makeLabel(this: IPercentileRanksAggConfig) {
       const { getDefaultInstance } = getFieldFormatsStart();
       const field = this.getField();
-      const format = (field && field.format) || getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
+
+      const format = (field && (field as any).format) || getDefaultInstance(KBN_FIELD_TYPES.NUMBER);
       const customLabel = this.getParam('customLabel');
       const label = customLabel || this.getFieldDisplayName();
 

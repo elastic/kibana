@@ -96,7 +96,8 @@ export const getFiltersBucketAgg = ({ getConfig }: FiltersBucketAggDependencies)
           const params = output.params || (output.params = {});
           params.filters = outFilters;
         },
-        toExpressionAst: (filters: AggParamsFilters['filters']) => filters?.map(queryFilterToAst),
+        toExpressionAst: (value: unknown) =>
+          (value as AggParamsFilters['filters'])?.map(queryFilterToAst),
       },
     ],
   });

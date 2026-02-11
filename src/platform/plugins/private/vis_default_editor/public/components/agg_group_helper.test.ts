@@ -32,7 +32,7 @@ describe('DefaultEditorGroup helpers', () => {
           },
         },
         schema: 'metric',
-      } as IAggConfig,
+      } as unknown as IAggConfig,
       {
         id: '2',
         params: {
@@ -41,7 +41,7 @@ describe('DefaultEditorGroup helpers', () => {
           },
         },
         schema: 'metric2',
-      } as IAggConfig,
+      } as unknown as IAggConfig,
     ];
     schemas = [
       {

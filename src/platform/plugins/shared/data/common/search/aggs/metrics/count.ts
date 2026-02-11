@@ -38,12 +38,13 @@ export const getCountMetricAgg = () =>
       };
     },
     getValue(agg, bucket) {
+      const b = bucket as Record<string, any>;
       const timeShift = agg.getTimeShift();
       let value: unknown;
       if (!timeShift) {
-        value = bucket.doc_count;
+        value = b.doc_count;
       } else {
-        value = bucket[`doc_count_${timeShift.asMilliseconds()}`];
+        value = b[`doc_count_${timeShift.asMilliseconds()}`];
       }
       if (value === 0 && agg.params.emptyAsNull) {
         return null;

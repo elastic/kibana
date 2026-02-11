@@ -360,7 +360,8 @@ describe('AggConfigs', () => {
       ];
 
       const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
-      const dsl = ac.toDsl();
+
+      const dsl = ac.toDsl() as Record<string, any>;
       const histo = ac.byName('date_histogram')[0];
       const metrics = ac.bySchemaName('metrics');
 
@@ -397,7 +398,8 @@ describe('AggConfigs', () => {
         from: '2021-05-05T00:00:00.000Z',
         to: '2021-05-10T00:00:00.000Z',
       };
-      const dsl = ac.toDsl();
+
+      const dsl = ac.toDsl() as Record<string, any>;
 
       const terms = ac.byName('terms')[0];
       const avg = ac.byName('avg')[0];
@@ -460,7 +462,8 @@ describe('AggConfigs', () => {
         from: '2021-05-05T00:00:00.000Z',
         to: '2021-05-10T00:00:00.000Z',
       };
-      const dsl = ac.toDsl();
+
+      const dsl = ac.toDsl() as Record<string, any>;
 
       const terms = ac.byName('terms')[0];
       const avg = ac.byName('avg')[0];
@@ -487,7 +490,8 @@ describe('AggConfigs', () => {
         { typesRegistry, hierarchical: true },
         jest.fn()
       );
-      const topLevelDsl = ac.toDsl();
+
+      const topLevelDsl = ac.toDsl() as Record<string, any>;
       const buckets = ac.bySchemaName('buckets');
       const metrics = ac.bySchemaName('metrics');
 
@@ -562,7 +566,8 @@ describe('AggConfigs', () => {
         { typesRegistry, hierarchical: true },
         jest.fn()
       );
-      const topLevelDsl = ac.toDsl()['2'];
+
+      const topLevelDsl = (ac.toDsl() as Record<string, any>)['2'];
 
       expect(Object.keys(topLevelDsl.aggs)).toContain('1');
       expect(Object.keys(topLevelDsl.aggs)).toContain('1-bucket');
@@ -626,7 +631,8 @@ describe('AggConfigs', () => {
         { typesRegistry, hierarchical: true, probability: 0.5 },
         jest.fn()
       );
-      const topLevelDsl = ac.toDsl();
+
+      const topLevelDsl = ac.toDsl() as Record<string, any>;
 
       expect(Object.keys(topLevelDsl)).toContain('sampling');
       expect(Object.keys(topLevelDsl.sampling)).toEqual(['random_sampler', 'aggs']);
