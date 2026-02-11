@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AnonymizationProfile, FieldRule } from '@kbn/anonymization-common';
 import { ANONYMIZATION_PROFILES_INDEX } from '../../common';
 
@@ -109,10 +109,7 @@ interface FindProfilesResult {
  * Operates directly against the `.anonymization-profiles` system index.
  */
 export class ProfilesRepository {
-  constructor(
-    private readonly esClient: ElasticsearchClient,
-    private readonly logger: Logger
-  ) {}
+  constructor(private readonly esClient: ElasticsearchClient) {}
 
   /**
    * Creates a new profile. Enforces uniqueness per (namespace, target_type, target_id).
@@ -171,7 +168,7 @@ export class ProfilesRepository {
     await this.esClient.index({
       index: ANONYMIZATION_PROFILES_INDEX,
       id,
-      body: doc,
+      document: doc,
       refresh: 'wait_for',
     });
 
@@ -255,7 +252,7 @@ export class ProfilesRepository {
     await this.esClient.update({
       index: ANONYMIZATION_PROFILES_INDEX,
       id: profileId,
-      body: { doc: updateDoc },
+      doc: updateDoc,
       refresh: 'wait_for',
     });
 
@@ -288,7 +285,7 @@ export class ProfilesRepository {
     const sortField = params.sortField ?? 'created_at';
     const sortOrder = params.sortOrder ?? 'desc';
 
-    const must: object[] = [{ term: { namespace } }];
+    const must: Array<Record<string, unknown>> = [{ term: { namespace } }];
 
     if (targetType) {
       must.push({ term: { target_type: targetType } });
@@ -309,12 +306,10 @@ export class ProfilesRepository {
 
     const result = await this.esClient.search<EsProfileDocument>({
       index: ANONYMIZATION_PROFILES_INDEX,
-      body: {
-        query: { bool: { must } },
-        sort: [{ [sortKey]: { order: sortOrder } }],
-        from: (page - 1) * perPage,
-        size: perPage,
-      },
+      query: { bool: { must } },
+      sort: [{ [sortKey]: { order: sortOrder } }],
+      from: (page - 1) * perPage,
+      size: perPage,
     });
 
     const total =

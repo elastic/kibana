@@ -49,7 +49,7 @@ export const ensureAlertsDataViewProfile = async ({
     }
 
     // Ensure salt exists for this space
-    const salt = await saltService.getSalt(namespace);
+    await saltService.getSalt(namespace);
     const saltId = `salt-${namespace}`;
 
     // Create the default profile

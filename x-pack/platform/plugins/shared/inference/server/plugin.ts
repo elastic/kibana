@@ -138,7 +138,7 @@ export class InferencePlugin
       },
 
       getChatModel: async (options) => {
-        const salt = await getSaltForRequest(options.request);
+        const saltPromise = getSaltForRequest(options.request);
         return createChatModel({
           request: options.request,
           connectorId: options.connectorId,
@@ -148,7 +148,7 @@ export class InferencePlugin
           anonymizationRulesPromise: createAnonymizationRulesPromise(options.request),
           regexWorker: this.regexWorker!,
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
-          salt,
+          saltPromise,
           logger: this.logger,
         });
       },

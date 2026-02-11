@@ -21,6 +21,53 @@ interface LegacyAnonymizationSettings {
   rules: LegacyAnonymizationRule[];
 }
 
+const isEnabledRegexRule = (
+  rule: LegacyAnonymizationRule
+): rule is LegacyAnonymizationRule & {
+  type: 'RegExp';
+  enabled: true;
+  pattern: string;
+  entityClass: string;
+} =>
+  rule.type === 'RegExp' &&
+  rule.enabled === true &&
+  typeof rule.pattern === 'string' &&
+  rule.pattern.length > 0 &&
+  typeof rule.entityClass === 'string' &&
+  rule.entityClass.length > 0;
+
+const isEnabledNerRule = (
+  rule: LegacyAnonymizationRule
+): rule is LegacyAnonymizationRule & { type: 'NER'; enabled: true; modelId: string } =>
+  rule.type === 'NER' &&
+  rule.enabled === true &&
+  typeof rule.modelId === 'string' &&
+  rule.modelId.length > 0;
+
+interface MigrationUpdateDoc {
+  migration: {
+    ai_anonymization_settings: {
+      applied_at: string;
+    };
+  };
+  rules?: {
+    regex_rules?: Array<{
+      id: string;
+      type: 'regex';
+      entity_class: string;
+      pattern: string;
+      enabled: true;
+    }>;
+    ner_rules?: Array<{
+      id: string;
+      type: 'ner';
+      model_id: string;
+      allowed_entity_classes: string[];
+      enabled: true;
+    }>;
+  };
+}
+
 /**
  * Performs a one-time, idempotent migration of enabled regex/NER rules from
  * the advanced setting `ai:anonymizationSettings` into Anonymization Profiles.
@@ -75,12 +122,8 @@ export const migrateAnonymizationSettings = async ({
     }
 
     // Filter to enabled rules only
-    const enabledRegexRules = settings.rules.filter(
-      (r) => r.type === 'RegExp' && r.enabled && r.pattern && r.entityClass
-    );
-    const enabledNerRules = settings.rules.filter(
-      (r) => r.type === 'NER' && r.enabled && r.modelId
-    );
+    const enabledRegexRules = settings.rules.filter(isEnabledRegexRule);
+    const enabledNerRules = settings.rules.filter(isEnabledNerRule);
 
     if (enabledRegexRules.length === 0 && enabledNerRules.length === 0) {
       logger.debug(`No enabled rules in ai:anonymizationSettings for space ${namespace}`);
@@ -88,17 +131,15 @@ export const migrateAnonymizationSettings = async ({
     }
 
     // Find all profiles in this space that haven't been migrated yet
-    const profilesResult = await esClient.search({
+    const profilesResult = await esClient.search<Record<string, unknown>>({
       index: ANONYMIZATION_PROFILES_INDEX,
-      body: {
-        query: {
-          bool: {
-            must: [{ term: { namespace } }],
-            must_not: [{ exists: { field: 'migration.ai_anonymization_settings.applied_at' } }],
-          },
+      query: {
+        bool: {
+          must: [{ term: { namespace } }],
+          must_not: [{ exists: { field: 'migration.ai_anonymization_settings.applied_at' } }],
         },
-        size: 100,
       },
+      size: 100,
     });
 
     if (profilesResult.hits.hits.length === 0) {
@@ -118,7 +159,7 @@ export const migrateAnonymizationSettings = async ({
       const hasExistingRegex = (existingRules?.regex_rules?.length ?? 0) > 0;
       const hasExistingNer = (existingRules?.ner_rules?.length ?? 0) > 0;
 
-      const updateBody: Record<string, unknown> = {
+      const updateDoc: MigrationUpdateDoc = {
         migration: {
           ai_anonymization_settings: {
             applied_at: now,
@@ -128,30 +169,36 @@ export const migrateAnonymizationSettings = async ({
 
       // Only set regex rules if profile doesn't already have them
       if (!hasExistingRegex && enabledRegexRules.length > 0) {
-        updateBody['rules.regex_rules'] = enabledRegexRules.map((r, i) => ({
+        updateDoc.rules = {
+          ...(updateDoc.rules ?? {}),
+          regex_rules: enabledRegexRules.map((r, i) => ({
           id: `migrated-regex-${i}`,
           type: 'regex',
           entity_class: r.entityClass,
           pattern: r.pattern,
           enabled: true,
-        }));
+          })),
+        };
       }
 
       // Only set NER rules if profile doesn't already have them
       if (!hasExistingNer && enabledNerRules.length > 0) {
-        updateBody['rules.ner_rules'] = enabledNerRules.map((r, i) => ({
+        updateDoc.rules = {
+          ...(updateDoc.rules ?? {}),
+          ner_rules: enabledNerRules.map((r, i) => ({
           id: `migrated-ner-${i}`,
           type: 'ner',
           model_id: r.modelId,
           allowed_entity_classes: r.allowedEntityClasses ?? [],
           enabled: true,
-        }));
+          })),
+        };
       }
 
       await esClient.update({
         index: ANONYMIZATION_PROFILES_INDEX,
         id: hit._id,
-        body: { doc: updateBody },
+        doc: updateDoc,
         refresh: 'wait_for',
       });
 

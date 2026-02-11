@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ReplacementsSet, TokenSourceEntry } from '@kbn/anonymization-common';
 import { ANONYMIZATION_REPLACEMENTS_INDEX } from './replacements_index';
 
@@ -62,10 +62,7 @@ const MAX_TOKEN_SOURCES = 10000;
  * Owned by the inference plugin.
  */
 export class ReplacementsRepository {
-  constructor(
-    private readonly esClient: ElasticsearchClient,
-    private readonly logger: Logger
-  ) {}
+  constructor(private readonly esClient: ElasticsearchClient) {}
 
   /**
    * Creates a new replacements set.
@@ -103,7 +100,7 @@ export class ReplacementsRepository {
     await this.esClient.index({
       index: ANONYMIZATION_REPLACEMENTS_INDEX,
       id,
-      body: doc,
+      document: doc,
       refresh: 'wait_for',
     });
 
@@ -145,19 +142,17 @@ export class ReplacementsRepository {
   ): Promise<ReplacementsSet | null> {
     const result = await this.esClient.search<EsReplacementsDocument>({
       index: ANONYMIZATION_REPLACEMENTS_INDEX,
-      body: {
-        query: {
-          bool: {
-            must: [
-              { term: { namespace } },
-              { term: { scope_type: scopeType } },
-              { term: { scope_id: scopeId } },
-              { term: { profile_id: profileId } },
-            ],
-          },
+      query: {
+        bool: {
+          must: [
+            { term: { namespace } },
+            { term: { scope_type: scopeType } },
+            { term: { scope_id: scopeId } },
+            { term: { profile_id: profileId } },
+          ],
         },
-        size: 1,
       },
+      size: 1,
     });
 
     const doc = result.hits.hits[0]?._source;
@@ -219,25 +214,23 @@ export class ReplacementsRepository {
     await this.esClient.update({
       index: ANONYMIZATION_REPLACEMENTS_INDEX,
       id: replacementsId,
-      body: {
-        doc: {
-          token_to_original: mergedTokenToOriginal,
-          token_sources: mergedSources.map((s) => ({
-            token: s.token,
-            pointer: s.pointer,
-            entity_class: s.entityClass,
-            source_type: s.sourceType,
-            source_id: s.sourceId,
-            span_start: s.spanStart,
-            span_end: s.spanEnd,
-            field: s.field,
-            field_ref: s.fieldRef,
-            rule_type: s.ruleType,
-            rule_id: s.ruleId,
-            first_seen_at: s.firstSeenAt,
-          })),
-          updated_at: now,
-        },
+      doc: {
+        token_to_original: mergedTokenToOriginal,
+        token_sources: mergedSources.map((s) => ({
+          token: s.token,
+          pointer: s.pointer,
+          entity_class: s.entityClass,
+          source_type: s.sourceType,
+          source_id: s.sourceId,
+          span_start: s.spanStart,
+          span_end: s.spanEnd,
+          field: s.field,
+          field_ref: s.fieldRef,
+          rule_type: s.ruleType,
+          rule_id: s.ruleId,
+          first_seen_at: s.firstSeenAt,
+        })),
+        updated_at: now,
       },
       refresh: 'wait_for',
     });

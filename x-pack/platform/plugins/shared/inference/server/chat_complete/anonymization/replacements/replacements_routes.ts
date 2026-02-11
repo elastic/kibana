@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter, Logger, CoreSetup } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { replaceTokensWithOriginals } from '@kbn/anonymization-common';
 import { ReplacementsRepository } from './replacements_repository';
 import { ensureReplacementsIndex } from './replacements_index';
@@ -50,7 +50,7 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-          const repo = new ReplacementsRepository(esClient, logger);
+          const repo = new ReplacementsRepository(esClient);
           const replacements = await repo.get(namespace, request.params.id);
 
           if (!replacements) {
@@ -107,7 +107,7 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-          const repo = new ReplacementsRepository(esClient, logger);
+          const repo = new ReplacementsRepository(esClient);
           const replacements = await repo.findByScope(
             namespace,
             request.query.type,
@@ -168,7 +168,7 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-          const repo = new ReplacementsRepository(esClient, logger);
+          const repo = new ReplacementsRepository(esClient);
           const replacements = await repo.get(namespace, request.body.replacementsId);
 
           if (!replacements) {
@@ -223,7 +223,7 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
 
           await ensureReplacementsIndex({ esClient, logger });
 
-          const repo = new ReplacementsRepository(esClient, logger);
+          const repo = new ReplacementsRepository(esClient);
           const result = await repo.importReplacements(
             namespace,
             request.body.sourceId,

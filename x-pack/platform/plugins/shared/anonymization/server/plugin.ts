@@ -89,7 +89,7 @@ export class AnonymizationPlugin
 
     // Initialize services
     const saltService = new SaltService(core.savedObjects, deps.encryptedSavedObjects, this.logger);
-    const profilesRepo = new ProfilesRepository(esClient, this.logger);
+    const profilesRepo = new ProfilesRepository(esClient);
 
     this.policyService = {
       resolveEffectivePolicy: async (namespace, target) => {

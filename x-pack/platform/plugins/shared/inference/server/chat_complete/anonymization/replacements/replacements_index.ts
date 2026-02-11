@@ -79,10 +79,8 @@ export const ensureReplacementsIndex = async ({
 
     await esClient.indices.create({
       index: ANONYMIZATION_REPLACEMENTS_INDEX,
-      body: {
-        settings: ANONYMIZATION_REPLACEMENTS_SETTINGS,
-        mappings: ANONYMIZATION_REPLACEMENTS_MAPPINGS,
-      },
+      settings: ANONYMIZATION_REPLACEMENTS_SETTINGS,
+      mappings: ANONYMIZATION_REPLACEMENTS_MAPPINGS,
     });
 
     logger.info(`Created system index: ${ANONYMIZATION_REPLACEMENTS_INDEX}`);

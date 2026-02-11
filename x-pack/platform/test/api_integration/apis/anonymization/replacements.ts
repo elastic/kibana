@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
       await es.index({
         index: REPLACEMENTS_INDEX,
         id,
-        body: doc,
+        document: doc,
         refresh: 'wait_for',
       });
 

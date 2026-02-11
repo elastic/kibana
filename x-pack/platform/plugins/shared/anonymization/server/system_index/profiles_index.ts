@@ -107,10 +107,8 @@ export const ensureProfilesIndex = async ({
 
     await esClient.indices.create({
       index: ANONYMIZATION_PROFILES_INDEX,
-      body: {
-        settings: ANONYMIZATION_PROFILES_SETTINGS,
-        mappings: ANONYMIZATION_PROFILES_MAPPINGS,
-      },
+      settings: ANONYMIZATION_PROFILES_SETTINGS,
+      mappings: ANONYMIZATION_PROFILES_MAPPINGS,
     });
 
     logger.info(`Created system index: ${ANONYMIZATION_PROFILES_INDEX}`);
