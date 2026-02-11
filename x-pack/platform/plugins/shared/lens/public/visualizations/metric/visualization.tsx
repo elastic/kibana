@@ -31,6 +31,7 @@ import {
   LENS_METRIC_ID,
   LENS_METRIC_GROUP_ID,
 } from '@kbn/lens-common';
+import { getUpdatedMetricState } from '../../../common/content_management/v1/transforms/metric';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { getSuggestions } from './suggestions';
 import {
@@ -49,7 +50,6 @@ import {
   isSecondaryTrendConfigInvalid,
 } from './helpers';
 import { getAccessorType } from '../../shared_components';
-import { convertToRunTimeState } from './runtime_state';
 import { MetricAppearanceSettings } from './toolbar';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
 
@@ -406,7 +406,7 @@ export const getMetricVisualization = ({
   getSuggestions,
 
   initialize(addNewLayer, state, mainPalette) {
-    if (state) return convertToRunTimeState(state);
+    if (state) return getUpdatedMetricState(state);
 
     return {
       layerId: addNewLayer(),
