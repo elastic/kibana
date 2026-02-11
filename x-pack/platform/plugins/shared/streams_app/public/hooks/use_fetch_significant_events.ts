@@ -18,6 +18,7 @@ export interface SignificantEventItem {
   stream_name: string;
   occurrences: Array<{ x: number; y: number }>;
   change_points: SignificantEventsResponse['change_points'];
+  rule_backed: boolean;
 }
 
 type SignificantEventsFetchResult =
@@ -90,15 +91,16 @@ export const useFetchSignificantEvents = (
       }) => {
         return {
           significant_events: significantEvents.map((series) => {
-            const { occurrences, change_points: changePoints, stream_name, ...rest } = series;
+            const { occurrences, change_points, stream_name, rule_backed, ...rest } = series;
             return {
               query: rest,
               stream_name,
-              change_points: changePoints,
+              change_points,
               occurrences: occurrences.map((occurrence) => ({
                 x: new Date(occurrence.date).getTime(),
                 y: occurrence.count,
               })),
+              rule_backed,
             };
           }),
           aggregated_occurrences: aggregatedOccurrences.map((occurrence) => ({

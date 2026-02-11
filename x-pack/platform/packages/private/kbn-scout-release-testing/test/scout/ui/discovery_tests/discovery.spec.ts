@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test } from '@kbn/scout';
+import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import fs from 'fs';
 import os from 'os';
@@ -24,7 +24,7 @@ const queryName3 = 'CSV Export Test';
 const totalHitCount = 14004;
 let downloadedFilePath: string | null = null;
 
-test.describe('Discover app', { tag: ['@ess'] }, () => {
+test.describe('Discover app', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ kbnClient, esArchiver }) => {
     await kbnClient.importExport.load(
       'src/platform/test/functional/fixtures/kbn_archiver/discover'
