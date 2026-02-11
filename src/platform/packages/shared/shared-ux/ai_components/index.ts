@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/ai_components/ai_button'],
-};
+export { AiButton } from './ai_button/src/ai_button';
+export type { AiButtonProps, AiButtonVariant } from './ai_button/src/ai_button';

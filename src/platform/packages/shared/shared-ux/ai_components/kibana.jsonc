@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
-  "id": "@kbn/shared-ux-ai-components-ai-button",
+  "id": "@kbn/shared-ux-ai-components",
   "owner": ["@elastic/appex-sharedux"],
   "group": "platform",
   "visibility": "shared"
