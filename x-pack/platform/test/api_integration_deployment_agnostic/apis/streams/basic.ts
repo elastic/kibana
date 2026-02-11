@@ -190,7 +190,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await disableStreams(apiClient);
       });
 
-        it(`Index a JSON document to ${rootStream}, should go to ${rootStream}`, async () => {
+      it(`Index a JSON document to ${rootStream}, should go to ${rootStream}`, async () => {
         const doc = {
           '@timestamp': '2024-01-01T00:00:00.000Z',
           message: JSON.stringify({
@@ -200,12 +200,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             message: 'test',
           }),
         };
-          const response = await indexDocument(esClient, rootStream, doc);
+        const response = await indexDocument(esClient, rootStream, doc);
         expect(response.result).to.eql('created');
-          const result = await fetchDocument(esClient, rootStream, response._id);
-          expect(result._index).to.match(
-            new RegExp(`^\\.ds\\-${rootStream.replace('.', '\\.')}-.*`)
-          );
+        const result = await fetchDocument(esClient, rootStream, response._id);
+        expect(result._index).to.match(new RegExp(`^\\.ds\\-${rootStream.replace('.', '\\.')}-.*`));
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:00.000Z',
           body: {
@@ -213,7 +211,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           severity_text: 'info',
           attributes: { 'log.logger': 'nginx' },
-            stream: { name: rootStream },
+          stream: { name: rootStream },
         });
       });
 
@@ -228,7 +226,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: 'somethingelse', // a field named stream should work as well
           }),
         };
-          const result = await indexAndAssertTargetStream(esClient, rootStream, doc);
+        const result = await indexAndAssertTargetStream(esClient, rootStream, doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:00.000Z',
           body: { text: 'test' },
@@ -237,14 +235,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             'log.logger': 'nginx',
             stream: 'somethingelse',
           },
-            stream: { name: rootStream },
+          stream: { name: rootStream },
         });
       });
 
-        it(`Fork ${rootStream} to ${rootStream}.nginx`, async () => {
+      it(`Fork ${rootStream} to ${rootStream}.nginx`, async () => {
         const body = {
           stream: {
-              name: `${rootStream}.nginx`,
+            name: `${rootStream}.nginx`,
           },
           where: {
             field: 'attributes.log.logger',
@@ -252,14 +250,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           status,
         };
-          const response = await forkStream(apiClient, rootStream, body);
+        const response = await forkStream(apiClient, rootStream, body);
         expect(response).to.have.property('acknowledged', true);
       });
 
-        it(`fails to fork ${rootStream} to ${rootStream}.nginx when already forked`, async () => {
+      it(`fails to fork ${rootStream} to ${rootStream}.nginx when already forked`, async () => {
         const body = {
           stream: {
-              name: `${rootStream}.nginx`,
+            name: `${rootStream}.nginx`,
           },
           where: {
             field: 'log.logger',
@@ -267,17 +265,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           status,
         };
-          const response = await forkStream(apiClient, rootStream, body, 409);
-          expect(response).to.have.property(
-            'message',
-            `Child stream ${rootStream}.nginx already exists`
-          );
-        });
+        const response = await forkStream(apiClient, rootStream, body, 409);
+        expect(response).to.have.property(
+          'message',
+          `Child stream ${rootStream}.nginx already exists`
+        );
+      });
 
-        it(`fails to fork ${rootStream} when stream name contains uppercase characters`, async () => {
+      it(`fails to fork ${rootStream} when stream name contains uppercase characters`, async () => {
         const body = {
           stream: {
-              name: `${rootStream}.Nginx`,
+            name: `${rootStream}.Nginx`,
           },
           where: {
             field: 'log.logger',
@@ -285,17 +283,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           status,
         };
-          const response = await forkStream(apiClient, rootStream, body, 400);
+        const response = await forkStream(apiClient, rootStream, body, 400);
         expect(response).to.have.property(
           'message',
           'Desired stream state is invalid: Stream name cannot contain uppercase characters.'
         );
       });
 
-        it(`fails to fork ${rootStream} with empty stream name`, async () => {
+      it(`fails to fork ${rootStream} with empty stream name`, async () => {
         const body = {
           stream: {
-              name: `${rootStream}.`, // empty child stream name
+            name: `${rootStream}.`, // empty child stream name
           },
           where: {
             field: 'log.logger',
@@ -303,18 +301,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           status,
         };
-          const response = await forkStream(apiClient, rootStream, body, 400);
+        const response = await forkStream(apiClient, rootStream, body, 400);
         expect(response).to.have.property(
           'message',
           'Desired stream state is invalid: Stream name must not be empty.'
         );
       });
 
-        it(`fails to fork ${rootStream} with stream name that is over the 200 character limit`, async () => {
+      it(`fails to fork ${rootStream} with stream name that is over the 200 character limit`, async () => {
         const body = {
           stream: {
             // child stream is 201 chars
-              name: `${rootStream}.xwdaqmsegtkamcrofcfcomnlkkkrkqtlkbqizvjvtrbwereqygqaaxmodzccqipzpwymyowrtvljtxevczoohrbpgijilsdptszgssmrkpwhvkukkgiqhvmcuzygmolyyadbxwngbkqjkretmzhgntkjkhrmltgyurufizwlelvmaqtngwhwqhxpfsuxiivxspvtwfcem`,
+            name: `${rootStream}.xwdaqmsegtkamcrofcfcomnlkkkrkqtlkbqizvjvtrbwereqygqaaxmodzccqipzpwymyowrtvljtxevczoohrbpgijilsdptszgssmrkpwhvkukkgiqhvmcuzygmolyyadbxwngbkqjkretmzhgntkjkhrmltgyurufizwlelvmaqtngwhwqhxpfsuxiivxspvtwfcem`,
           },
           where: {
             field: 'log.logger',
@@ -322,14 +320,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           status,
         };
-          const response = await forkStream(apiClient, rootStream, body, 400);
+        const response = await forkStream(apiClient, rootStream, body, 400);
         expect(response).to.have.property(
           'message',
           'Desired stream state is invalid: Stream name cannot be longer than 200 characters.'
         );
       });
 
-        it(`Index an Nginx access log message, should goto ${rootStream}.nginx`, async () => {
+      it(`Index an Nginx access log message, should goto ${rootStream}.nginx`, async () => {
         const doc = {
           '@timestamp': '2024-01-01T00:00:10.000Z',
           message: JSON.stringify({
@@ -339,7 +337,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             message: 'test',
           }),
         };
-          const result = await indexAndAssertTargetStream(esClient, `${rootStream}.nginx`, doc);
+        const result = await indexAndAssertTargetStream(esClient, `${rootStream}.nginx`, doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:10.000Z',
           body: { text: 'test' },
@@ -347,11 +345,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           attributes: {
             'log.logger': 'nginx',
           },
-            stream: { name: `${rootStream}.nginx` },
+          stream: { name: `${rootStream}.nginx` },
         });
       });
 
-        it(`Index an Nginx access log message with subobjects, should goto ${rootStream}.nginx`, async () => {
+      it(`Index an Nginx access log message with subobjects, should goto ${rootStream}.nginx`, async () => {
         const doc = {
           '@timestamp': '2024-01-01T00:00:10.000Z',
           message: 'test',
@@ -360,7 +358,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             logger: 'nginx',
           },
         };
-          const result = await indexAndAssertTargetStream(esClient, `${rootStream}.nginx`, doc);
+        const result = await indexAndAssertTargetStream(esClient, `${rootStream}.nginx`, doc);
         expect(result._source).to.eql({
           '@timestamp': '2024-01-01T00:00:10.000Z',
           body: { text: 'test' },
@@ -368,19 +366,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           attributes: {
             'log.logger': 'nginx',
           },
-            stream: { name: `${rootStream}.nginx` },
+          stream: { name: `${rootStream}.nginx` },
         });
       });
 
-        it(`Fork ${rootStream} to ${rootStream}.nginx.access`, async () => {
+      it(`Fork ${rootStream} to ${rootStream}.nginx.access`, async () => {
         const body = {
           stream: {
-              name: `${rootStream}.nginx.access`,
+            name: `${rootStream}.nginx.access`,
           },
           where: { field: 'severity_text', eq: 'info' },
           status,
         };
-          const response = await forkStream(apiClient, `${rootStream}.nginx`, body);
+        const response = await forkStream(apiClient, `${rootStream}.nginx`, body);
         expect(response).to.have.property('acknowledged', true);
       });
 
@@ -394,10 +392,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }),
       };
 
-        it(`Index an Nginx access log message, should goto ${rootStream}.nginx.access`, async () => {
+      it(`Index an Nginx access log message, should goto ${rootStream}.nginx.access`, async () => {
         const result = await indexAndAssertTargetStream(
           esClient,
-            `${rootStream}.nginx.access`,
+          `${rootStream}.nginx.access`,
           accessLogDoc
         );
         expect(result._source).to.eql({
@@ -407,12 +405,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           attributes: {
             'log.logger': 'nginx',
           },
-            stream: { name: `${rootStream}.nginx.access` },
+          stream: { name: `${rootStream}.nginx.access` },
         });
       });
 
-        it(`Does not index to ${rootStream}.nginx.access if routing is disabled`, async () => {
-          await putStream(apiClient, `${rootStream}.nginx`, {
+      it(`Does not index to ${rootStream}.nginx.access if routing is disabled`, async () => {
+        await putStream(apiClient, `${rootStream}.nginx`, {
           ...emptyAssets,
           stream: {
             description: '',
@@ -424,7 +422,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 fields: {},
                 routing: [
                   {
-                      destination: `${rootStream}.nginx.access`,
+                    destination: `${rootStream}.nginx.access`,
                     where: { field: 'severity_text', eq: 'info' },
                     status: 'disabled',
                   },
@@ -435,9 +433,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-          await indexAndAssertTargetStream(esClient, `${rootStream}.nginx`, accessLogDoc);
-        });
+        await indexAndAssertTargetStream(esClient, `${rootStream}.nginx`, accessLogDoc);
       });
+    });
 
     describe('Full flow for logs.ecs', () => {
       const rootStream = 'logs.ecs';
