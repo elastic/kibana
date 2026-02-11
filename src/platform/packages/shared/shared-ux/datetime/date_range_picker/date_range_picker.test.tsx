@@ -69,6 +69,18 @@ describe('DateRangePicker', () => {
       expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
     });
 
+    it('restores previous text on Escape after typing', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+
+      const input = openEditing();
+
+      fireEvent.change(input, { target: { value: 'something else' } });
+      fireEvent.keyDown(input, { key: 'Escape' });
+
+      const button = screen.getByTestId('dateRangePickerControlButton');
+      expect(button).toHaveTextContent('Last 20 minutes');
+    });
+
     it('closes on outside click and returns to display mode', () => {
       const onChange = jest.fn();
       renderWithEuiTheme(<DateRangePicker {...defaultProps} onChange={onChange} />);

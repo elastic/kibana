@@ -22,6 +22,7 @@ import {
   EuiFormControlButton,
   EuiFormControlLayout,
   EuiOutsideClickDetector,
+  keys,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -101,7 +102,7 @@ export function DateRangePicker(props: DateRangePickerProps) {
     setText(event.target.value);
   };
   const onInputKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Enter' && isEditing && text) {
+    if (event.key === keys.ENTER && isEditing && text) {
       onChange?.({
         start: timeRange.start,
         end: timeRange.end,
@@ -112,7 +113,11 @@ export function DateRangePicker(props: DateRangePickerProps) {
       });
       setIsEditing(false);
     }
-    if (event.key === 'Escape' && isEditing) {
+    if (event.key === keys.ESCAPE && isEditing) {
+      if (lastValidText.current) {
+        setText(lastValidText.current);
+        lastValidText.current = '';
+      }
       setIsEditing(false);
     }
   };
