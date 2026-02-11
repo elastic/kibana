@@ -30,7 +30,7 @@ export enum ExecutionStatus {
 
 /**
  * Serializable execution parameters.
- * This is the serializable subset of {@link ChatConverseParams},
+ * This is the serializable subset of {@link ExecuteAgentParams},
  * omitting `request` (reconstructed from fakeRequest on TM node)
  * and `abortSignal` (replaced by the abort polling mechanism).
  */

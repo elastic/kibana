@@ -41,8 +41,8 @@ import {
   resolveServices,
   convertErrors,
   type ConversationWithOperation,
-} from '../chat/utils';
-import { createConversationIdSetEvent } from '../chat/utils/events';
+} from './utils';
+import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import type { AgentExecution, AgentExecutionEventDoc, SerializedExecutionError } from './types';
 import type { ExecutionEventsClient } from './persistence';
