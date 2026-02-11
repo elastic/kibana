@@ -17,7 +17,7 @@ type Executor = (typeof EXECUTORS)[number];
 
 const formatEnvPrefix = (overrides: Record<string, string>) =>
   Object.entries(overrides)
-    .map(([key, value]) => `${key}=${value}`)
+    .map(([key, value]) => `${key}=${key.includes('API_KEY') ? '[redacted]' : value}`)
     .join(' ');
 
 const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) => {
