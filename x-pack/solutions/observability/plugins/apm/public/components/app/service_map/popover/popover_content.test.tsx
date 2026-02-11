@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { MarkerType } from '@xyflow/react';
 import { getContentsComponent } from './popover_content';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../../common/service_map';
 import { ServiceContents } from './service_contents';
@@ -51,7 +52,7 @@ function edge(id: string, source: string, target: string): ServiceMapEdge {
     type: 'default',
     data: { isBidirectional: false },
     style: { stroke: '#000', strokeWidth: 1 },
-    markerEnd: { type: 'arrow' as const, width: 20, height: 20, color: '#000' },
+    markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20, color: '#000' },
   };
 }
 

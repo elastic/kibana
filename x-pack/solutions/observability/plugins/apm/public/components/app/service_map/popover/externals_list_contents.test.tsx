@@ -34,7 +34,7 @@ function groupedNode(data: {
     data: {
       id: data.id,
       label: data.label ?? data.id,
-      isService: false,
+      isService: false as const,
       isGrouped: true,
       groupedConnections: data.groupedConnections,
       count: data.groupedConnections.length,

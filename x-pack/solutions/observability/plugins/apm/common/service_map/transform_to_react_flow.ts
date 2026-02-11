@@ -29,6 +29,7 @@ import type {
   ServiceMapNodeData,
   ServiceNodeData,
   DependencyNodeData,
+  EdgeSourceData,
 } from './react_flow_types';
 import { createEdgeMarker } from './utils';
 import { getPaths } from './get_paths';
@@ -43,38 +44,40 @@ import {
 } from './get_service_map_nodes';
 import { DEFAULT_EDGE_STYLE } from './constants';
 
-function toServiceNodeData(node: ConnectionNode): ServiceNodeData {
+type ConnectionNodeRecord = ConnectionNode & Record<string, unknown>;
+
+function toServiceNodeData(node: ConnectionNodeRecord): ServiceNodeData {
   // Reuse ServiceAnomalyStats directly from the connection node
   const serviceAnomalyStats = 'serviceAnomalyStats' in node ? node.serviceAnomalyStats : undefined;
 
   return {
     id: node.id,
-    label: node[SERVICE_NAME] || node.label || node.id,
-    agentName: node[AGENT_NAME],
+    label: (node[SERVICE_NAME] as string) ?? node.label ?? node.id,
+    agentName: node[AGENT_NAME] as ServiceNodeData['agentName'],
     isService: true,
-    serviceAnomalyStats,
+    serviceAnomalyStats: serviceAnomalyStats as ServiceNodeData['serviceAnomalyStats'],
   };
 }
 
-function toDependencyNodeData(node: ConnectionNode): DependencyNodeData {
+function toDependencyNodeData(node: ConnectionNodeRecord): DependencyNodeData {
   return {
     id: node.id,
-    label: node[SPAN_DESTINATION_SERVICE_RESOURCE] || node.label || node.id,
-    spanType: node[SPAN_TYPE],
-    spanSubtype: node[SPAN_SUBTYPE],
+    label: (node[SPAN_DESTINATION_SERVICE_RESOURCE] as string) ?? node.label ?? node.id,
+    spanType: node[SPAN_TYPE] as string | undefined,
+    spanSubtype: node[SPAN_SUBTYPE] as string | undefined,
     isService: false,
   };
 }
 
-function isServiceNode(node: ConnectionNode): boolean {
+function isServiceNode(node: ConnectionNodeRecord): boolean {
   return node[SERVICE_NAME] !== undefined;
 }
 
-function toNodeData(node: ConnectionNode): ServiceMapNodeData {
+function toNodeData(node: ConnectionNodeRecord): ServiceMapNodeData {
   return isServiceNode(node) ? toServiceNodeData(node) : toDependencyNodeData(node);
 }
 
-function toReactFlowNode(node: ConnectionNode): ServiceMapNode {
+function toReactFlowNode(node: ConnectionNodeRecord): ServiceMapNode {
   return {
     id: node.id,
     type: isServiceNode(node) ? 'service' : 'dependency',
@@ -96,8 +99,8 @@ function toReactFlowEdge(edge: ConnectionEdge): ServiceMapEdge {
     ...(isBidirectional && { markerStart: createEdgeMarker() }),
     data: {
       isBidirectional,
-      sourceData: edge.sourceData,
-      targetData: edge.targetData,
+      sourceData: edge.sourceData as EdgeSourceData | undefined,
+      targetData: edge.targetData as EdgeSourceData | undefined,
       resources: edge.resources,
     },
   };
@@ -141,7 +144,7 @@ export function transformToReactFlow(
 
   const reactFlowNodes = [...uniqueNodes.values()]
     .filter((node) => !markedEdges.some((e) => e.isInverseEdge && e.target === node.id))
-    .map(toReactFlowNode);
+    .map((node) => toReactFlowNode(node as ConnectionNodeRecord));
 
   const reactFlowEdges: ServiceMapEdge[] = [];
   for (const edge of markedEdges) {

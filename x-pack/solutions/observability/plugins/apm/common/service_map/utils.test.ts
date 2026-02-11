@@ -9,12 +9,13 @@ import { getConnections } from './utils';
 import type { Connection, ConnectionNode } from './types';
 
 function getConnectionsPairs(connections: Connection[]) {
+  const get = (n: Record<string, unknown>, key: string) => n[key];
   return connections
     .map((conn) => {
-      const source = conn.source['service.name'];
-      const destination = conn.destination['service.name']
-        ? conn.destination['service.name']
-        : conn.destination['span.type'];
+      const source = get(conn.source as Record<string, unknown>, 'service.name');
+      const destination = get(conn.destination as Record<string, unknown>, 'service.name')
+        ? get(conn.destination as Record<string, unknown>, 'service.name')
+        : get(conn.destination as Record<string, unknown>, 'span.type');
       return `${source} -> ${destination}`;
     })
     .filter((_) => _);
