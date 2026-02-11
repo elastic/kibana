@@ -15,6 +15,9 @@ export * from './components/inference_costs_transparency_tour';
 export * from './components/eis_update_callout';
 export * from './components/eis_ccm_promotional_tour';
 export * from './components/eis_ccm_promotional_callout';
+export * from './components/connection_details/connection_details';
+export * from './components/form_info_field/form_info_field';
+export * from './components/connection_details/connection_details';
 
 export * from './types';
 export * from './utils';

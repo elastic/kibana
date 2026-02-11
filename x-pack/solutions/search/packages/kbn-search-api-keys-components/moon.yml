@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/search-shared-ui'
   - '@kbn/search-api-keys-server'
   - '@kbn/react-query'
+  - '@kbn/search-api-panels'
 tags:
   - shared-browser
   - package

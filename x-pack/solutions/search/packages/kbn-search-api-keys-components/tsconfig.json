@@ -14,7 +14,8 @@
     "@kbn/security-api-key-management",
     "@kbn/search-shared-ui",
     "@kbn/search-api-keys-server",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/search-api-panels"
   ],
   "exclude": [
     "target/**/*",

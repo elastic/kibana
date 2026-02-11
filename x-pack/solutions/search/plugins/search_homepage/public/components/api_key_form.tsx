@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiBadge, EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FormInfoField } from '@kbn/search-shared-ui';
+import { FormInfoField } from '@kbn/search-api-panels';
 import { i18n } from '@kbn/i18n';
 import { ApiKeyFlyoutWrapper, useSearchApiKey, Status } from '@kbn/search-api-keys-components';
 import { useQueryClient } from '@kbn/react-query';

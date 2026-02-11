@@ -18,9 +18,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
 import { css } from '@emotion/react';
-import { FormInfoField } from '@kbn/search-shared-ui';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { useSearchApiKey, Status } from '@kbn/search-api-keys-components';
+import { FormInfoField } from '@kbn/search-api-panels';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 
 export const ConnectToElasticsearch = () => {
