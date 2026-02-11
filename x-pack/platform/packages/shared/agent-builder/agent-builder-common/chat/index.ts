@@ -7,6 +7,7 @@
 
 export {
   ConversationRoundStatus,
+  type ConversationAction,
   type RoundInput,
   type ConverseInput,
   type AssistantResponse,

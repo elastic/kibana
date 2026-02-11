@@ -6,18 +6,30 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { LifecycleSummary } from './lifecycle_summary';
-import type { Streams } from '@kbn/streams-schema';
+import type { Streams, IngestStreamLifecycle } from '@kbn/streams-schema';
 
 // Mock the hooks
+const mockFetch = jest.fn().mockResolvedValue(undefined);
+const mockAddSuccess = jest.fn();
+const mockAddError = jest.fn();
+
 jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
+    core: {
+      notifications: {
+        toasts: {
+          addSuccess: mockAddSuccess,
+          addError: mockAddError,
+        },
+      },
+    },
     dependencies: {
       start: {
         streams: {
           streamsRepositoryClient: {
-            fetch: jest.fn().mockResolvedValue(undefined),
+            fetch: mockFetch,
           },
         },
       },
@@ -32,6 +44,7 @@ jest.mock('../../../../hooks/use_streams_app_fetch', () => ({
   useStreamsAppFetch: jest.fn(() => ({
     value: undefined,
     loading: false,
+    refresh: jest.fn(),
   })),
 }));
 
@@ -52,31 +65,47 @@ jest.mock('../hooks/use_ilm_phases_color_and_description', () => ({
 describe('LifecycleSummary', () => {
   const createDslDefinition = (
     dataRetention?: string,
-    downsample?: Array<{ after: string; fixed_interval: string }>
+    downsample?: Array<{ after: string; fixed_interval: string }>,
+    ingestLifecycle: IngestStreamLifecycle = { inherit: {} }
   ) =>
     ({
-      stream: { name: 'test-stream' },
+      stream: {
+        name: 'test-stream',
+        ingest: {
+          lifecycle: ingestLifecycle,
+          processing: { steps: [], updated_at: '2023-10-31' },
+        },
+      },
+      privileges: {
+        lifecycle: true,
+      },
       effective_lifecycle: {
         dsl: {
           data_retention: dataRetention,
           downsample,
         },
       },
-    } as Streams.ingest.all.GetResponse);
+    } as unknown as Streams.ingest.all.GetResponse);
 
   const createIlmDefinition = () =>
     ({
       stream: { name: 'test-stream' },
+      privileges: {
+        lifecycle: true,
+      },
       effective_lifecycle: {
         ilm: {
           policy: 'test-policy',
         },
       },
-    } as Streams.ingest.all.GetResponse);
+    } as unknown as Streams.ingest.all.GetResponse);
 
   const createDisabledDefinition = () =>
     ({
       stream: { name: 'test-stream' },
+      privileges: {
+        lifecycle: true,
+      },
       effective_lifecycle: { disabled: {} },
     } as Streams.ingest.all.GetResponse);
 
@@ -111,7 +140,7 @@ describe('LifecycleSummary', () => {
 
       expect(screen.getByTestId('downsamplingBar-label')).toBeInTheDocument();
     });
-    it('should lifecycle summary for disabled lifecycle', () => {
+    it('should render lifecycle summary for disabled lifecycle', () => {
       const definition = createDisabledDefinition();
       render(<LifecycleSummary definition={definition} />);
 
@@ -133,6 +162,7 @@ describe('LifecycleSummary', () => {
       mockUseStreamsAppFetch.mockReturnValue({
         value: undefined,
         loading: true,
+        refresh: jest.fn(),
       });
 
       const definition = createIlmDefinition();
@@ -140,6 +170,116 @@ describe('LifecycleSummary', () => {
       render(<LifecycleSummary definition={definition} />);
 
       expect(screen.getByTestId('dataLifecycleSummary-skeleton')).toBeInTheDocument();
+    });
+
+    it('should open edit policy modal when removing an ILM phase with affected resources', async () => {
+      const policies = [
+        {
+          name: 'test-policy',
+          phases: { hot: { min_age: '0d' }, warm: { min_age: '30d' } },
+          in_use_by: { data_streams: ['other-stream'], indices: [] },
+        },
+      ];
+      const ilmStatsValue = {
+        phases: {
+          hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} },
+          warm: { name: 'warm', min_age: '30d', size_in_bytes: 1000 },
+          delete: { name: 'delete', min_age: '60d' },
+        },
+      };
+
+      mockUseStreamsAppFetch.mockReturnValue({
+        value: ilmStatsValue,
+        loading: false,
+        refresh: jest.fn(),
+      });
+
+      mockFetch.mockImplementation((endpoint: string) => {
+        if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
+          return Promise.resolve(policies);
+        }
+        return Promise.resolve(undefined);
+      });
+
+      const definition = createIlmDefinition();
+
+      render(<LifecycleSummary definition={definition} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('lifecyclePhase-warm-name')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('lifecyclePhase-warm-button'));
+
+      // Wait for the popover to open and remove button to appear
+      await waitFor(() => {
+        expect(screen.getByTestId('lifecyclePhase-warm-removeButton')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('lifecyclePhase-warm-removeButton'));
+
+      // Wait for async openDeleteModal -> fetchPolicies -> modal render
+      await waitFor(() => {
+        expect(screen.getByTestId('editPolicyModalTitle')).toBeInTheDocument();
+      });
+    });
+
+    it('should save directly when removing an ILM phase with no affected resources', async () => {
+      const policies = [
+        {
+          name: 'test-policy',
+          phases: { hot: { min_age: '0d' }, warm: { min_age: '30d' } },
+          in_use_by: { data_streams: ['test-stream'], indices: [] },
+        },
+      ];
+      const ilmStatsValue = {
+        phases: {
+          hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} },
+          warm: { name: 'warm', min_age: '30d', size_in_bytes: 1000 },
+          delete: { name: 'delete', min_age: '60d' },
+        },
+      };
+
+      mockUseStreamsAppFetch.mockReturnValue({
+        value: ilmStatsValue,
+        loading: false,
+        refresh: jest.fn(),
+      });
+
+      mockFetch.mockImplementation((endpoint: string) => {
+        if (endpoint === 'GET /internal/streams/lifecycle/_policies') {
+          return Promise.resolve(policies);
+        }
+        return Promise.resolve(undefined);
+      });
+
+      const definition = createIlmDefinition();
+
+      render(<LifecycleSummary definition={definition} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('lifecyclePhase-warm-name')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('lifecyclePhase-warm-button'));
+
+      // Wait for the popover to open and remove button to appear
+      await waitFor(() => {
+        expect(screen.getByTestId('lifecyclePhase-warm-removeButton')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('lifecyclePhase-warm-removeButton'));
+
+      // Wait for async openDeleteModal -> fetchPolicies -> applyOverwrite -> saveIlmPolicy
+      await waitFor(() =>
+        expect(mockFetch).toHaveBeenCalledWith(
+          'POST /internal/streams/lifecycle/_policy',
+          expect.any(Object)
+        )
+      );
+
+      // Modal should not be shown since there are no affected resources
+      expect(screen.queryByTestId('editPolicyModalTitle')).not.toBeInTheDocument();
     });
   });
 });

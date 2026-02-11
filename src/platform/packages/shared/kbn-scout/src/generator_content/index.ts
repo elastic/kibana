@@ -108,9 +108,9 @@ export function generateApiSpecContent(scoutPackage: string, copyrightHeader: st
 import { apiTest, expect, tags } from '${scoutPackage}';
 import { testData } from '../fixtures';
 
-apiTest.describe('Scout API test suite example', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+apiTest.describe('Scout API test suite example', { tag: tags.deploymentAgnostic }, () => {
   let viewerApiCredentials: RoleApiCredentials;
-  
+
   apiTest.beforeAll(async ({ requestAuth }) => {
     viewerApiCredentials = await requestAuth.getApiKey('viewer');
   });
@@ -156,7 +156,7 @@ export function generateUiSpecContent(scoutPackage: string, copyrightHeader: str
   return `${copyrightHeader}import { expect, tags } from '${scoutPackage}';
 import { test, testData } from '../fixtures';
 
-test.describe('Scout ui test suite example', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+test.describe('Scout ui test suite example', { tag: tags.deploymentAgnostic }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.SOME_ARCHIVE);
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.SOME_ARCHIVE);
@@ -183,7 +183,7 @@ import { spaceTest, testData } from '../fixtures';
 
 spaceTest.describe(
   'Scout parallel UI test suite example',
-  { tag: tags.DEPLOYMENT_AGNOSTIC },
+  { tag: tags.deploymentAgnostic },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.SOME_ARCHIVE);

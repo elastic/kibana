@@ -28,7 +28,7 @@ import type { FunctionDefinition } from '../../types';
 import type { SupportedDataType } from '../../types';
 import { argMatchesParamType, getExpressionType, getParamAtPosition } from '../expressions';
 import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } from '../functions';
-import { SuggestionCategory } from '../../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
 import { buildConstantsDefinitions, getCompatibleLiterals, getDateLiterals } from '../literals';
 import { getColumnByName } from '../shared';
 

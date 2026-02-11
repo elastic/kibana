@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import {
@@ -19,7 +20,7 @@ import {
 
 test.describe(
   'Stream data retention - storage metrics integration',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();

@@ -8792,7 +8792,7 @@
         "mapping": {
           "ignore_malformed": "true",
           "total_fields": {
-            "limit": "2500"
+            "limit": "3500"
           }
         },
         "number_of_replicas": "0",

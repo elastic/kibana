@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { collectValues as collect, oldestValue } from './field_retention_operations';
+import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
 
@@ -28,7 +28,9 @@ export const hostEntityDefinition: EntityDefinitionWithoutId = {
   entityTypeFallback: 'Host',
   indexPatterns: [],
   fields: [
+    newestValue({ destination: 'entity.name', source: 'host.name' }),
     oldestValue({ source: 'host.entity.id' }),
+
     collect({ source: 'host.name' }),
     collect({ source: 'host.domain' }),
     collect({ source: 'host.hostname' }),

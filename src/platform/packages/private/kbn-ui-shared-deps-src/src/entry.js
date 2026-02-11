@@ -60,6 +60,7 @@ export const ReactUse = {
   useLocalStorage: require('react-use/lib/useLocalStorage'),
   useMount: require('react-use/lib/useMount'),
   useMountedState: require('react-use/lib/useMountedState'),
+  useObservable: require('react-use/lib/useObservable'),
   usePrevious: require('react-use/lib/usePrevious'),
   useSessionStorage: require('react-use/lib/useSessionStorage'),
   useTimeoutFn: require('react-use/lib/useTimeoutFn'),

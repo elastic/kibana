@@ -80,6 +80,7 @@ export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
         z-index: ${fullScreenZIndex} !important;
         position: fixed;
         inset: 0;
+        ${logicalCSS('right', 'var(--euiPushFlyoutOffsetInlineEnd, 0px)')}
         background-color: ${euiTheme.colors.backgroundBasePlain};
       `,
       [METRICS_GRID_RESTRICT_BODY_CLASS]: css`

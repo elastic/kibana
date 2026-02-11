@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/ebt-tools'
   - '@kbn/shared-ux-utility'
   - '@kbn/search-types'
+  - '@kbn/esql-resource-browser'
 tags:
   - shared-browser
   - package

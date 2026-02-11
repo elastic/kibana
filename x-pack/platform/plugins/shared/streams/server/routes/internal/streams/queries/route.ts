@@ -36,21 +36,27 @@ export const getUnbackedQueriesCountRoute = createServerRoute({
   },
 });
 
-export const promoteAllUnbackedQueriesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/queries/_promote_all',
+export const promoteUnbackedQueriesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/queries/_promote',
   options: {
     access: 'internal',
-    summary: 'Promote all unbacked queries',
+    summary: 'Promote unbacked queries',
     description:
-      'Creates Kibana rules for all stored queries across streams that do not yet have a backing rule, then marks them as backed.',
+      'Creates Kibana rules for stored queries across streams that do not yet have a backing rule, then marks them as backed.',
   },
   security: {
     authz: {
       requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({}),
-  handler: async ({ request, getScopedClients, server }): Promise<{ promoted: number }> => {
+  params: z.object({
+    body: z
+      .object({
+        queryIds: z.array(z.string()).optional(),
+      })
+      .nullish(),
+  }),
+  handler: async ({ params, request, getScopedClients, server }): Promise<{ promoted: number }> => {
     const { queryClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
@@ -58,7 +64,17 @@ export const promoteAllUnbackedQueriesRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const all = await queryClient.getAllUnbackedQueries();
-    const byStream = all.reduce<Record<string, string[]>>((acc, link) => {
+    const requestedQueryIds = params?.body?.queryIds ?? [];
+
+    let toPromote = all;
+
+    if (requestedQueryIds.length > 0) {
+      const uniqueRequestedQueryIds = new Set(requestedQueryIds);
+
+      toPromote = all.filter((query) => uniqueRequestedQueryIds.has(query.query.id));
+    }
+
+    const byStream = toPromote.reduce<Record<string, string[]>>((acc, link) => {
       const stream = link.stream_name;
       if (!acc[stream]) acc[stream] = [];
       acc[stream].push(link.query.id);
@@ -76,5 +92,5 @@ export const promoteAllUnbackedQueriesRoute = createServerRoute({
 
 export const internalQueriesRoutes = {
   ...getUnbackedQueriesCountRoute,
-  ...promoteAllUnbackedQueriesRoute,
+  ...promoteUnbackedQueriesRoute,
 };

@@ -49,6 +49,13 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
     return;
   }
 
+  const SCOUT_CONFIGS_DEPS =
+    process.env.SCOUT_CONFIGS_DEPS !== undefined
+      ? process.env.SCOUT_CONFIGS_DEPS.split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : ['build_scout_tests'];
+
   const scoutCiRunGroups = modulesWithTests.map((module) => {
     // Check if any config in this module uses parallel workers
     const usesParallelWorkers = module.configs.some((config) => config.usesParallelWorkers);
@@ -67,7 +74,7 @@ export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
       {
         group: 'Scout Configs',
         key: 'scout-configs',
-        depends_on: ['build_scout_tests'],
+        depends_on: SCOUT_CONFIGS_DEPS,
         steps: scoutCiRunGroups.map(
           ({ label, key, group, agents }): BuildkiteStep => ({
             label,

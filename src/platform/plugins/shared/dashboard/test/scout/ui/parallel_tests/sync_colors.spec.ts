@@ -94,7 +94,7 @@ const createBaseXYCharts = async (
   await pageObjects.dashboard.waitForPanelsToLoad(2);
 };
 
-spaceTest.describe('Sync colors', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Sync colors', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     await scoutSpace.savedObjects.load(LENS_BASIC_KIBANA_ARCHIVE);

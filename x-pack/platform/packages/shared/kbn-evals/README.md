@@ -138,7 +138,7 @@ If you want local traces available for trace-based evaluators, run EDOT locally 
 
 ```bash
 node scripts/edot_collector.js
-node scripts/scout.js start-server --stateful --config-dir evals_tracing
+node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_tracing
 node scripts/evals run --suite <suite-id> --evaluation-connector-id <connector-id>
 ```
 
@@ -181,13 +181,13 @@ export default createPlaywrightEvalsConfig({ testDir: __dirname });
 Start scout:
 
 ```bash
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 ```
 
 If you want OTLP trace export enabled for evals, use the custom Scout config:
 
 ```bash
-node scripts/scout.js start-server --stateful --config-dir evals_tracing
+node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet evals_tracing
 ```
 
 Now run the tests exactly like a normal Scout/Playwright suite in another terminal:
@@ -534,7 +534,7 @@ To do this, you need to create (or override) a configuration file at `.scout/ser
 
 Then you can run the evaluations as normal. The Playwright tests will use the provided configuration details to target your Kibana instance.
 
-> **Note:** Running the Scout server with `node scripts/scout.js start-server --stateful` will override any manual configuration in `.scout/servers/local.json` so you may need to update this file every time you want to switch between the two.
+> **Note:** Running the Scout server with `node scripts/scout.js start-server --arch stateful --domain classic` will override any manual configuration in `.scout/servers/local.json` so you may need to update this file every time you want to switch between the two.
 
 ## Executor selection (Phoenix vs in-Kibana)
 

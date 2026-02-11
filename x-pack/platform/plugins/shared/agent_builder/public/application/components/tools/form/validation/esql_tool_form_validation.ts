@@ -8,6 +8,7 @@
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { validateQuery } from '@kbn/esql-language';
 import { i18n } from '@kbn/i18n';
+
 import type { EsqlToolFieldTypes } from '@kbn/agent-builder-common/tools';
 import { EsqlToolFieldType, ToolType } from '@kbn/agent-builder-common/tools';
 import { z } from '@kbn/zod';
@@ -52,6 +53,12 @@ const esqlI18nMessages = {
         defaultMessage: 'Duplicate parameter: "{name}".',
         values: { name },
       }),
+    defaultValueRequiredError: i18n.translate(
+      'xpack.agentBuilder.tools.newTool.validation.params.defaultValueRequiredError',
+      {
+        defaultMessage: 'Default value is required for optional parameters.',
+      }
+    ),
   },
 };
 
@@ -90,10 +97,13 @@ export const esqlFormValidationSchema = z
           ),
           source: z.nativeEnum(EsqlParamSource),
           optional: z.boolean(),
+          defaultValue: z
+            .union([z.string(), z.number(), z.boolean(), z.array(z.string()), z.array(z.number())])
+            .optional(),
         })
       )
       .superRefine((params, ctx) => {
-        params.forEach(({ name }, index) => {
+        params.forEach(({ name, optional, defaultValue }, index) => {
           const otherParamNames = new Set(
             params.filter((_, i) => i !== index).map((param) => param.name)
           );
@@ -103,6 +113,19 @@ export const esqlFormValidationSchema = z
               code: z.ZodIssueCode.custom,
               message: esqlI18nMessages.params.duplicateError(name),
               path: [index, 'name'],
+            });
+          }
+
+          // Validate default value is provided for optional parameters
+          if (
+            optional &&
+            (defaultValue == null ||
+              (typeof defaultValue === 'string' && defaultValue.trim() === ''))
+          ) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: esqlI18nMessages.params.defaultValueRequiredError,
+              path: [index, 'defaultValue'],
             });
           }
         });

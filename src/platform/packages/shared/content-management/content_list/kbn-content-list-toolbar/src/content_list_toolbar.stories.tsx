@@ -1,0 +1,390 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { useMemo, useState } from 'react';
+import type { Meta, StoryObj } from '@storybook/react';
+import {
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  EuiText,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  EuiButtonIcon,
+  EuiCallOut,
+} from '@elastic/eui';
+import {
+  ContentListProvider,
+  useContentListItems,
+  useContentListSort,
+  useContentListConfig,
+} from '@kbn/content-list-provider';
+import type { FindItemsParams, FindItemsResult } from '@kbn/content-list-provider';
+import { MOCK_DASHBOARDS, createMockFindItems } from '@kbn/content-list-mock-data/storybook';
+import { ContentListToolbar } from './content_list_toolbar';
+
+// =============================================================================
+// Mock Data & Helpers
+// =============================================================================
+
+/**
+ * Creates a mock `findItems` function with configurable behavior.
+ *
+ * Supports:
+ * - Sorting (locale-aware for strings).
+ * - Configurable delay for loading states.
+ */
+const createStoryFindItems = (options?: { delay?: number }) => {
+  const { delay = 0 } = options ?? {};
+
+  return async (params: FindItemsParams): Promise<FindItemsResult> => {
+    // Simulate network delay.
+    if (delay > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+
+    // Use mock findItems for sorting logic.
+    const mockFindItems = createMockFindItems({ items: MOCK_DASHBOARDS });
+    const result = await mockFindItems({
+      searchQuery: params.searchQuery,
+      filters: {},
+      sort: params.sort ?? { field: 'title', direction: 'asc' },
+      page: params.page,
+    });
+
+    // Transform to ContentListItem format.
+    return {
+      items: result.items.map((item) => ({
+        id: item.id,
+        title: item.attributes.title,
+        description: item.attributes.description,
+        type: item.type,
+        updatedAt: item.updatedAt ? new Date(item.updatedAt) : undefined,
+      })),
+      total: result.total,
+    };
+  };
+};
+
+// =============================================================================
+// State Diagnostic Panel
+// =============================================================================
+
+interface StateDiagnosticPanelProps {
+  /** Whether the panel is open by default. */
+  defaultOpen?: boolean;
+  /** Whether declarative configuration is being used. */
+  useDeclarativeConfig?: boolean;
+}
+
+/**
+ * Collapsible diagnostic panel to visualize the current provider state.
+ */
+const StateDiagnosticPanel = ({
+  defaultOpen = false,
+  useDeclarativeConfig = false,
+}: StateDiagnosticPanelProps) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const { items, totalItems, isLoading } = useContentListItems();
+  const { field: sortField, direction: sortDirection } = useContentListSort();
+  const config = useContentListConfig();
+
+  // Generate JSX code based on current configuration.
+  const toolbarJsx = useMemo(() => {
+    if (useDeclarativeConfig) {
+      return `<ContentListToolbar>
+  <ContentListToolbar.Filters>
+    <ContentListToolbar.Filters.Sort />
+  </ContentListToolbar.Filters>
+</ContentListToolbar>`;
+    }
+    return `<ContentListToolbar />`;
+  }, [useDeclarativeConfig]);
+
+  return (
+    <>
+      <EuiSpacer size="l" />
+      <EuiPanel color="subdued" hasBorder paddingSize={isOpen ? 'm' : 's'}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType={isOpen ? 'arrowDown' : 'arrowRight'}
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label={isOpen ? 'Collapse diagnostic panel' : 'Expand diagnostic panel'}
+              size="s"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h3>State Diagnostic Panel</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">
+                  {items.length}/{totalItems} items
+                </EuiBadge>
+              </EuiFlexItem>
+              {isLoading && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="primary">Loading...</EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        {isOpen && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="s" wrap>
+              <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                <EuiTitle size="xxs">
+                  <h3>Current Sort</h3>
+                </EuiTitle>
+                <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                  {JSON.stringify({ field: sortField, direction: sortDirection }, null, 2)}
+                </EuiCodeBlock>
+              </EuiFlexItem>
+              <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                <EuiTitle size="xxs">
+                  <h3>Sorting Config</h3>
+                </EuiTitle>
+                <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+                  {JSON.stringify(config.features.sorting, null, 2)}
+                </EuiCodeBlock>
+              </EuiFlexItem>
+              <EuiFlexItem grow={1} style={{ minWidth: 200 }}>
+                <EuiTitle size="xxs">
+                  <h3>Toolbar JSX</h3>
+                </EuiTitle>
+                <EuiCodeBlock language="tsx" fontSize="s" paddingSize="s">
+                  {toolbarJsx}
+                </EuiCodeBlock>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
+      </EuiPanel>
+    </>
+  );
+};
+
+/**
+ * Simple item list to show sorted results.
+ */
+const ItemList = () => {
+  const { items, isLoading } = useContentListItems();
+
+  if (isLoading) {
+    return <EuiText size="s">Loading...</EuiText>;
+  }
+
+  return (
+    <EuiPanel hasBorder paddingSize="m">
+      <EuiTitle size="xxs">
+        <h3>Items (sorted)</h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      {items.map((item, index) => (
+        <EuiText key={item.id} size="s">
+          {index + 1}. {item.title}
+        </EuiText>
+      ))}
+    </EuiPanel>
+  );
+};
+
+// =============================================================================
+// Storybook Meta
+// =============================================================================
+
+const meta: Meta = {
+  title: 'Content Management/Content List/Toolbar',
+  decorators: [
+    (Story) => (
+      <div style={{ padding: '20px', maxWidth: '1200px' }}>
+        <Story />
+      </div>
+    ),
+  ],
+};
+
+export default meta;
+
+// =============================================================================
+// Playground Story
+// =============================================================================
+
+interface PlaygroundArgs {
+  entityName: string;
+  entityNamePlural: string;
+  searchPlaceholder: string;
+  hasSorting: boolean;
+  useDeclarativeConfig: boolean;
+  showDiagnostics: boolean;
+}
+
+type PlaygroundStory = StoryObj<PlaygroundArgs>;
+
+/**
+ * Wrapper component for the Playground story.
+ */
+const PlaygroundStoryWrapper = ({ args }: { args: PlaygroundArgs }) => {
+  const labels = useMemo(
+    () => ({
+      entity: args.entityName,
+      entityPlural: args.entityNamePlural,
+      searchPlaceholder: args.searchPlaceholder,
+    }),
+    [args.entityName, args.entityNamePlural, args.searchPlaceholder]
+  );
+
+  const dataSource = useMemo(() => ({ findItems: createStoryFindItems() }), []);
+
+  const features = useMemo(
+    () =>
+      args.hasSorting
+        ? {
+            sorting: {
+              initialSort: { field: 'title', direction: 'asc' as const },
+              fields: [
+                { field: 'title', name: 'Name' },
+                {
+                  field: 'updatedAt',
+                  name: 'Last updated',
+                  ascLabel: 'Old-Recent',
+                  descLabel: 'Recent-Old',
+                },
+              ],
+            },
+          }
+        : {},
+    [args.hasSorting]
+  );
+
+  // Key forces re-mount when configuration changes.
+  const key = `${args.hasSorting}-${args.useDeclarativeConfig}`;
+
+  // Destructure Filters from ContentListToolbar for compound component usage.
+  const { Filters } = ContentListToolbar;
+
+  return (
+    <ContentListProvider
+      key={key}
+      id="playground"
+      labels={labels}
+      dataSource={dataSource}
+      features={features}
+    >
+      <EuiTitle size="s">
+        <h2>ContentListToolbar</h2>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+
+      {args.useDeclarativeConfig ? (
+        <>
+          <EuiCallOut
+            announceOnMount
+            title="Declarative Configuration"
+            color="primary"
+            iconType="controlsHorizontal"
+            size="s"
+          >
+            <p>
+              Using <code>{'<Filters>'}</code> children to explicitly configure which filters appear
+              and in what order.
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+          <ContentListToolbar>
+            <Filters>
+              <Filters.Sort />
+            </Filters>
+          </ContentListToolbar>
+        </>
+      ) : (
+        <>
+          <EuiCallOut
+            announceOnMount
+            title="Smart Defaults"
+            color="success"
+            iconType="checkInCircleFilled"
+            size="s"
+          >
+            <p>
+              No children provided—toolbar auto-renders filters based on provider configuration.
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+          <ContentListToolbar />
+        </>
+      )}
+
+      <EuiSpacer size="m" />
+      <ItemList />
+      {args.showDiagnostics && (
+        <StateDiagnosticPanel defaultOpen useDeclarativeConfig={args.useDeclarativeConfig} />
+      )}
+    </ContentListProvider>
+  );
+};
+
+/**
+ * Interactive playground to explore toolbar features and configurations.
+ *
+ * The toolbar uses `EuiSearchBar` with integrated search and filters.
+ * Use the controls panel to toggle different features and observe behavior.
+ */
+export const Toolbar: PlaygroundStory = {
+  args: {
+    useDeclarativeConfig: false,
+    hasSorting: true,
+    showDiagnostics: true,
+    entityName: 'dashboard',
+    entityNamePlural: 'dashboards',
+    searchPlaceholder: 'Search dashboards...',
+  },
+  argTypes: {
+    useDeclarativeConfig: {
+      control: 'boolean',
+      description: 'Use declarative <Filters> configuration instead of smart defaults.',
+      table: { category: 'Configuration' },
+    },
+    entityName: {
+      control: 'text',
+      description: 'Singular entity name for display.',
+      table: { category: 'Entity' },
+    },
+    entityNamePlural: {
+      control: 'text',
+      description: 'Plural entity name for display.',
+      table: { category: 'Entity' },
+    },
+    searchPlaceholder: {
+      control: 'text',
+      description: 'Placeholder text for the search box.',
+      table: { category: 'Labels' },
+    },
+    hasSorting: {
+      control: 'boolean',
+      description: 'Enable sorting in provider config.',
+      table: { category: 'Features' },
+    },
+    showDiagnostics: {
+      control: 'boolean',
+      description: 'Show state diagnostic panel.',
+      table: { category: 'Debug' },
+    },
+  },
+  render: (args) => <PlaygroundStoryWrapper args={args} />,
+};

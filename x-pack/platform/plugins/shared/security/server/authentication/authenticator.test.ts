@@ -39,6 +39,7 @@ import {
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { userProfileMock } from '../../common/model/user_profile.mock';
+import { LogoutReason } from '../../common/types';
 import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
@@ -274,31 +275,53 @@ describe('Authenticator', () => {
         );
       });
 
-      it('points to a custom URL if `customLogoutURL` is specified', () => {
-        const authenticationProviderMock =
-          jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
-        authenticationProviderMock.mockClear();
-        new Authenticator(
-          getMockOptions({
-            selector: { enabled: false },
-            providers: { saml: { saml1: { order: 0, realm: 'realm' } } },
-            customLogoutURL: 'https://some-logout-origin/logout',
-          })
-        );
-        const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
-
-        expect(getLoggedOutURL(httpServerMock.createKibanaRequest())).toBe(
-          'https://some-logout-origin/logout'
-        );
-
-        // We don't forward any Kibana specific query string parameters to the external logout URL.
-        expect(
-          getLoggedOutURL(
-            httpServerMock.createKibanaRequest({
-              query: { next: '/app/ml/encode me', msg: 'SESSION_EXPIRED' },
+      describe('custom URL', () => {
+        it('points to a custom URL if `customLogoutURL` is specified and logout reason is not SESSION_EXPIRED', () => {
+          const authenticationProviderMock =
+            jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
+          authenticationProviderMock.mockClear();
+          new Authenticator(
+            getMockOptions({
+              selector: { enabled: false },
+              providers: { saml: { saml1: { order: 0, realm: 'realm' } } },
+              customLogoutURL: 'https://some-logout-origin/logout',
             })
-          )
-        ).toBe('https://some-logout-origin/logout');
+          );
+          const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
+
+          expect(getLoggedOutURL(httpServerMock.createKibanaRequest())).toBe(
+            'https://some-logout-origin/logout'
+          );
+
+          // We don't forward any Kibana specific query string parameters to the external logout URL.
+          expect(
+            getLoggedOutURL(
+              httpServerMock.createKibanaRequest({
+                query: { next: '/app/ml/encode me', msg: LogoutReason.LOGGED_OUT },
+              })
+            )
+          ).toBe('https://some-logout-origin/logout');
+        });
+
+        it('does not point to a custom URL if `customLogoutURL` is specified and logout reason is SESSION_EXPIRED', () => {
+          const authenticationProviderMock =
+            jest.requireMock(`./providers/saml`).SAMLAuthenticationProvider;
+          authenticationProviderMock.mockClear();
+          new Authenticator(
+            getMockOptions({
+              selector: { enabled: false },
+              providers: { saml: { saml1: { order: 0, realm: 'realm' } } },
+              customLogoutURL: 'https://some-logout-origin/logout',
+            })
+          );
+          const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
+
+          expect(
+            getLoggedOutURL(
+              httpServerMock.createKibanaRequest({ query: { msg: LogoutReason.SESSION_EXPIRED } })
+            )
+          ).toBe('/mock-server-basepath/security/logged_out?msg=SESSION_EXPIRED');
+        });
       });
     });
 

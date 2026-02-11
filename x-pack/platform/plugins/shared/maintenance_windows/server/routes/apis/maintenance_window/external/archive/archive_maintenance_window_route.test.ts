@@ -89,7 +89,7 @@ describe('archiveMaintenanceWindowRoute', () => {
         id: 'test-id',
         schedule: {
           custom: {
-            duration: '60m',
+            duration: '1h',
             recurring: {
               every: '1w',
               occurrences: 2,

@@ -179,6 +179,7 @@ export const configSchema = schema.object({
       max: schema.maybe(schema.number({ min: MIN_QUEUED_MAX, defaultValue: DEFAULT_QUEUED_MAX })),
     })
   ),
+  // @deprecated: This config is deprecated and will be removed in the future in favor of the new Usage API plugin.
   usage: schema.maybe(
     schema.object({
       url: schema.maybe(schema.string()),

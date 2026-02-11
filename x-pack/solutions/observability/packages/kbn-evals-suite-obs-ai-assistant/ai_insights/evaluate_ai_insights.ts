@@ -8,6 +8,8 @@
 import {
   evaluate as base,
   createQuantitativeCorrectnessEvaluators,
+  createSpanLatencyEvaluator,
+  getCurrentTraceId,
   type EvaluationDataset,
   type Example,
 } from '@kbn/evals';
@@ -31,7 +33,7 @@ export const evaluate = base.extend<
 >({
   aiInsightClient: [({ fetch }, use) => use(new AiInsightClient(fetch)), { scope: 'worker' }],
   evaluateDataset: [
-    ({ evaluators, phoenixClient }, use) => {
+    ({ evaluators, executorClient, traceEsClient, log }, use) => {
       use(
         async <TPayload>({
           getInsight,
@@ -40,7 +42,7 @@ export const evaluate = base.extend<
           getInsight: InsightFetcher<TPayload>;
           dataset: { name: string; description: string; examples: AiInsightExample<TPayload>[] };
         }) => {
-          await phoenixClient.runExperiment(
+          await executorClient.runExperiment(
             {
               dataset: { name, description, examples } satisfies EvaluationDataset,
               task: async ({ input, output, metadata }) => {
@@ -51,14 +53,22 @@ export const evaluate = base.extend<
                   output: { messages: [{ message: response.summary }] },
                   metadata,
                 });
+                const traceId = getCurrentTraceId();
                 return {
                   summary: response.summary,
                   context: response.context,
                   correctnessAnalysis: correctnessResult?.metadata,
+                  traceId,
                 };
               },
             },
-            createQuantitativeCorrectnessEvaluators()
+            [
+              ...createQuantitativeCorrectnessEvaluators(),
+              evaluators.traceBasedEvaluators.inputTokens,
+              evaluators.traceBasedEvaluators.outputTokens,
+              evaluators.traceBasedEvaluators.cachedTokens,
+              createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
+            ]
           );
         }
       );

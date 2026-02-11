@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-oblt';
+import { globalSetupHook, tags } from '@kbn/scout-oblt';
 
 globalSetupHook(
   'Setup environment for SLO tests',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   async ({ sloData }) => {
     await sloData.generateSloData();
     await sloData.addSLO();

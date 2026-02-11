@@ -131,6 +131,35 @@ describe('FROM Autocomplete', () => {
       );
       await fromExpectSuggestions('from *,/', expectedSuggestions, mockCallbacks);
     });
+
+    test('suggests views from context.views alongside sources', async () => {
+      const contextWithViews = {
+        ...mockContext,
+        views: [
+          { name: 'my_saved_view', query: 'FROM logs | LIMIT 10' },
+          { name: 'my-view', query: 'FROM metrics' },
+        ],
+      };
+      const expectedFromSources = visibleIndices;
+      const expectedFromViews = ['my_saved_view', 'my-view'];
+      await fromExpectSuggestions(
+        'from ',
+        [...expectedFromSources, ...expectedFromViews, '(FROM $0)'],
+        mockCallbacks,
+        contextWithViews
+      );
+      // View names appear when typing (fragment "my_")
+      const getSuggestions = async (query: string) => {
+        const correctedQuery = correctQuerySyntax(query);
+        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
+        const cursorPosition = query.length;
+        const { command } = findAstPosition(root, cursorPosition);
+        return autocomplete(query, command!, mockCallbacks, contextWithViews, cursorPosition);
+      };
+      const suggestions = (await getSuggestions('FROM my_')).map((s) => s.text);
+      expect(suggestions).toContain('my_saved_view');
+      expect(suggestions).toContain('my-view');
+    });
   });
 
   describe('... METADATA <fields>', () => {

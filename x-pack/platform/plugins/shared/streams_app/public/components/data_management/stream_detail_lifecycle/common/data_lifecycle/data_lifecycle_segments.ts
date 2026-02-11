@@ -96,12 +96,21 @@ const calculateGrowValues = (
   return durations.map((duration) => normalizeToGrowValue(duration, maxDuration));
 };
 
-export const buildPhaseTimelineSegments = (phases: SegmentPhase[]): TimelineSegment[] =>
-  phases.map((phase) => ({
-    grow: phase.grow,
-    leftValue: phase.min_age,
-    isDelete: phase.isDelete,
-  }));
+export const buildPhaseTimelineSegments = (phases: SegmentPhase[]): TimelineSegment[] => {
+  const nonDeletePhases = phases.filter((phase) => !phase.isDelete);
+  const secondMinAge = nonDeletePhases.length > 1 ? nonDeletePhases[1]?.min_age : undefined;
+
+  return phases.map((phase, index) => {
+    const isFirst = index === 0;
+    const leftValue = isFirst && secondMinAge ? getZeroLabel(secondMinAge) : phase.min_age;
+
+    return {
+      grow: phase.grow,
+      leftValue,
+      isDelete: phase.isDelete,
+    };
+  });
+};
 
 export const buildDslSegments = (
   phases: SegmentPhase[],

@@ -23,6 +23,7 @@ import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachmen
 import type { SkillServiceSetup, SkillServiceStart } from './skills';
 import type { TrackingService } from '../telemetry/tracking_service';
 import type { AnalyticsService } from '../telemetry';
+import type { AuditLogService } from '../audit';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -39,6 +40,7 @@ export interface InternalStartServices {
   conversations: ConversationService;
   chat: ChatService;
   runnerFactory: RunnerFactory;
+  auditLogService: AuditLogService;
 }
 
 export interface ServiceSetupDeps {

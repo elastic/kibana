@@ -19,6 +19,7 @@ import { ConversationServiceImpl } from './conversation';
 import { createChatService } from './chat';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { type SkillService, createSkillService } from './skills';
+import { AuditLogService } from '../audit';
 
 interface ServiceInstances {
   tools: ToolsService;
@@ -121,6 +122,11 @@ export class ServiceManager {
       spaces,
     });
 
+    const auditLogService = new AuditLogService({
+      security,
+      logger: logger.get('audit'),
+    });
+
     const chat = createChatService({
       logger: logger.get('chat'),
       inference,
@@ -139,6 +145,7 @@ export class ServiceManager {
       skills: skillsServiceStart,
       conversations,
       runnerFactory,
+      auditLogService,
       chat,
     };
 

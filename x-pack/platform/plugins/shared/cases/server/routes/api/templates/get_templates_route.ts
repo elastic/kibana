@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import type { ParsedTemplate } from '../../../../common/types/domain/template/v1';
 import { INTERNAL_TEMPLATES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { mockTemplates } from './mock_data';
 import { parseTemplate } from './parse_template';
 
 /**
@@ -29,17 +26,10 @@ export const getTemplatesRoute = createCasesRoute({
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
-      await caseContext.getCasesClient();
+      const casesClient = await caseContext.getCasesClient();
 
-      const { includeDeleted } = request.query as { includeDeleted: boolean };
-
-      const filteredTemplates = includeDeleted
-        ? mockTemplates
-        : mockTemplates.filter((t) => t.deletedAt === null);
-
-      const parsedTemplates: ParsedTemplate[] = filteredTemplates.map((template) =>
-        parseTemplate(template)
-      );
+      const templates = await casesClient.templates.getAllTemplates();
+      const parsedTemplates = templates.map((template) => parseTemplate(template.attributes));
 
       return response.ok({
         body: parsedTemplates,

@@ -18,6 +18,7 @@ import {
 } from '@kbn/esql-language';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import type { ESQLTelemetryCallbacks, ESQLCallbacks } from '@kbn/esql-types';
+import { PromQLLang } from '../promql';
 import { monaco } from '../../monaco_imports';
 import type { CustomLangModuleType } from '../../types';
 import { ESQL_LANG_ID } from './lib/constants';
@@ -51,6 +52,10 @@ export type ESQLDependencies = ESQLCallbacks &
 export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
+    // PromQL can be embedded in ES|QL querys.
+    // We need to manually trigger its language loading for it to work.
+    await PromQLLang.onLanguage?.();
+
     const language = monarch.create({
       ...monarchDefinitions,
       functions: esqlFunctionNames,

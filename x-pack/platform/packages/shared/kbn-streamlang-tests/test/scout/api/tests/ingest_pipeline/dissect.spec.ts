@@ -6,13 +6,14 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { DissectProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Dissect Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should correctly parse a log line with the dissect processor', async ({ testBed }) => {
       const indexName = 'stream-e2e-test-dissect';

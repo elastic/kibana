@@ -16,6 +16,7 @@
     "@kbn/use-observable",
     "@kbn/core-chrome-layout-utils",
     "@kbn/core-chrome-layout-components",
+    "@kbn/core-chrome-layout-constants",
     "@kbn/core-chrome-sidebar",
     "@kbn/core-chrome-sidebar-context",
   ]

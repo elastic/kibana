@@ -233,10 +233,10 @@ export const TableSection = React.memo(
     );
 
     const groupTakeActionItems: GroupTakeActionItems = useCallback(
-      ({ selectedGroup, groupBucket }) => {
+      ({ selectedGroup, groupBucket, closePopover }) => {
         const attack = getAttack(selectedGroup, groupBucket);
         if (!attack) return;
-        return <AttacksGroupTakeActionItems attack={attack} />;
+        return <AttacksGroupTakeActionItems attack={attack} closePopover={closePopover} />;
       },
       [getAttack]
     );

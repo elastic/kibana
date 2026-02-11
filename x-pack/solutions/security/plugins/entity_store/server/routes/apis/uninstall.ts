@@ -7,6 +7,7 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
+import { ENTITY_STORE_ROUTES } from '../../../common';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
@@ -19,7 +20,7 @@ const bodySchema = z.object({
 export function registerUninstall(router: EntityStorePluginRouter) {
   router.versioned
     .post({
-      path: '/internal/security/entity-store/uninstall',
+      path: ENTITY_STORE_ROUTES.UNINSTALL,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

@@ -27,6 +27,15 @@ jest.mock('@kbn/data-catalog-plugin/common/workflow_loader', () => ({
   loadWorkflows: (...args: unknown[]) => mockLoadWorkflows(...args),
 }));
 
+const mockGetNamedMcpTools = jest.fn();
+const mockBulkCreateMcpTools = jest.fn();
+jest.mock('@kbn/agent-builder-plugin/server/services/tools/tool_types/mcp/tool_type', () => ({
+  getNamedMcpTools: (...args: unknown[]) => mockGetNamedMcpTools(...args),
+}));
+jest.mock('@kbn/agent-builder-plugin/server/services/tools/utils', () => ({
+  bulkCreateMcpTools: (...args: unknown[]) => mockBulkCreateMcpTools(...args),
+}));
+
 const mockConnectorSpecs = {
   customConnectorWithBearerType: {
     metadata: {
@@ -158,7 +167,7 @@ describe('createConnectorAndRelatedResources', () => {
       id: 'connector-1',
       type: DATA_SOURCE_SAVED_OBJECT_TYPE,
       attributes: {
-        name: 'My Test Connector',
+        name: 'my-data-source',
         type: 'test_type',
         workflowIds: ['workflow-1'],
         toolIds: ['tool-1'],
@@ -166,7 +175,7 @@ describe('createConnectorAndRelatedResources', () => {
       },
     };
     const mockDataSource = {
-      stackConnector: { type: actionTypeId, config: {} },
+      stackConnectors: [{ type: actionTypeId, config: {} }],
       workflows: { directory: '/path/to/workflows' },
     } as Partial<DataSource>;
 
@@ -186,7 +195,7 @@ tags:
     mockSavedObjectsClient.create.mockResolvedValue(mockSavedObject as SavedObject);
 
     const result = await createDataSourceAndRelatedResources({
-      name: 'My Test Connector',
+      name: 'my-data-source',
       type: 'test_type',
       credentials: 'secret-token-123',
       savedObjectsClient: mockSavedObjectsClient,
@@ -201,7 +210,7 @@ tags:
     expect(result).toBe('connector-1');
     expect(mockActionsClient.create).toHaveBeenCalledWith({
       action: expect.objectContaining({
-        name: ".notion stack connector for data connector 'My Test Connector'",
+        name: 'my-data-source',
         actionTypeId,
         secrets: expect.objectContaining({
           authType: 'bearer',
@@ -215,13 +224,13 @@ tags:
       mockRequest
     );
     const createdYaml = mockWorkflowManagement.management.createWorkflow.mock.calls[0][0].yaml;
-    expect(createdYaml).toContain('name: my-test-connector.sources.notion.search');
+    expect(createdYaml).toContain('name: my-data-source.sources.notion.search');
     expect(createdYaml).toContain('description: Search Notion content');
     expect(createdYaml).toContain('tags:');
     expect(createdYaml).toMatch(/-\s*agent-builder-tool/);
     expect(mockToolRegistry.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'test_type.my-test-connector.search',
+        id: 'test_type.my-data-source.search',
         type: 'workflow',
         description: 'Search Notion content',
         tags: ['data-source', 'test_type'],
@@ -233,7 +242,7 @@ tags:
     expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
       DATA_SOURCE_SAVED_OBJECT_TYPE,
       expect.objectContaining({
-        name: 'My Test Connector',
+        name: 'my-data-source',
         type: 'test_type',
         workflowIds: ['workflow-1'],
         toolIds: ['tool-1'],
@@ -251,7 +260,7 @@ tags:
       attributes: { workflowIds: ['workflow-1'], toolIds: [], kscIds: ['ksc-1'] },
     };
     const mockDataSource = {
-      stackConnector: { type: actionTypeId, config: {} },
+      stackConnectors: [{ type: actionTypeId, config: {} }],
       workflows: { directory: '/path/to/workflows' },
     } as Partial<DataSource>;
 
@@ -280,6 +289,303 @@ tags:
     });
 
     expect(mockToolRegistry.create).not.toHaveBeenCalled();
+  });
+
+  describe('MCP tool importing', () => {
+    beforeEach(() => {
+      mockGetNamedMcpTools.mockReset();
+      mockBulkCreateMcpTools.mockReset();
+    });
+
+    it('should import MCP tools when importedTools are provided', async () => {
+      const actionTypeId = '.mcp';
+      const mockStackConnector = {
+        id: 'mcp-connector-1',
+        name: '.mcp',
+        actionTypeId,
+      };
+      const mockWorkflow = {
+        id: 'workflow-1',
+        name: 'Test Workflow',
+      };
+      const mockSavedObject = {
+        id: 'connector-1',
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        attributes: {
+          name: 'My MCP Connector',
+          type: 'test_type',
+          workflowIds: ['workflow-1'],
+          toolIds: ['mcp-tool-1', 'mcp-tool-2'],
+          kscIds: ['mcp-connector-1'],
+        },
+      };
+      const mockDataSource = {
+        stackConnectors: [
+          {
+            type: actionTypeId,
+            config: {
+              serverUrl: 'https://api.example.com/mcp/',
+              hasAuth: true,
+              authType: 'bearer',
+            },
+            importedTools: [
+              { name: 'get_file_contents', description: 'Get file contents' },
+              { name: 'list_issues', description: 'List issues' },
+            ],
+          },
+        ],
+        workflows: { directory: '/path/to/workflows' },
+      } as Partial<DataSource>;
+
+      mockLoadWorkflows.mockResolvedValue([
+        {
+          content: 'name: test-workflow',
+          shouldGenerateABTool: false,
+        },
+      ]);
+
+      mockGetNamedMcpTools.mockResolvedValue([
+        { name: 'get_file_contents', description: 'Get file contents from repo' },
+        { name: 'list_issues', description: 'List repository issues' },
+      ]);
+
+      mockBulkCreateMcpTools.mockResolvedValue({
+        results: [
+          { toolId: 'mcp-tool-1', mcpToolName: 'get_file_contents', skipped: false },
+          { toolId: 'mcp-tool-2', mcpToolName: 'list_issues', skipped: false },
+        ],
+        summary: {
+          total: 2,
+          created: 2,
+          skipped: 0,
+          failed: 0,
+        },
+      });
+
+      mockActionsClient.create.mockResolvedValue(mockStackConnector);
+      mockWorkflowManagement.management.createWorkflow.mockResolvedValue(mockWorkflow);
+      mockSavedObjectsClient.create.mockResolvedValue(mockSavedObject as SavedObject);
+
+      const result = await createDataSourceAndRelatedResources({
+        name: 'My MCP Connector',
+        type: 'test_type',
+        credentials: 'secret-token-123',
+        savedObjectsClient: mockSavedObjectsClient,
+        request: mockRequest,
+        logger: mockLogger,
+        workflowManagement: mockWorkflowManagement as any,
+        actions: mockActions as any,
+        dataSource: mockDataSource as any,
+        agentBuilder: mockAgentBuilder as any,
+      });
+
+      expect(result).toBe('connector-1');
+      expect(mockGetNamedMcpTools).toHaveBeenCalledWith({
+        actions: mockActions,
+        request: mockRequest,
+        connectorId: 'mcp-connector-1',
+        toolNames: ['get_file_contents', 'list_issues'],
+        logger: mockLogger,
+      });
+      expect(mockBulkCreateMcpTools).toHaveBeenCalledWith({
+        registry: mockToolRegistry,
+        actions: mockActions,
+        request: mockRequest,
+        connectorId: 'mcp-connector-1',
+        tools: [
+          {
+            name: 'get_file_contents',
+            description: 'Get file contents from repo Get file contents',
+          },
+          {
+            name: 'list_issues',
+            description: 'List repository issues List issues',
+          },
+        ],
+        namespace: 'My MCP Connector',
+      });
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+        DATA_SOURCE_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          toolIds: ['mcp-tool-1', 'mcp-tool-2'],
+        })
+      );
+    });
+
+    it('should not import MCP tools when importedTools is empty', async () => {
+      const actionTypeId = '.mcp';
+      const mockStackConnector = {
+        id: 'mcp-connector-1',
+        name: '.mcp',
+        actionTypeId,
+      };
+      const mockWorkflow = {
+        id: 'workflow-1',
+        name: 'Test Workflow',
+      };
+      const mockSavedObject = {
+        id: 'connector-1',
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        attributes: {
+          name: 'My MCP Connector',
+          type: 'test_type',
+          workflowIds: ['workflow-1'],
+          toolIds: [],
+          kscIds: ['mcp-connector-1'],
+        },
+      };
+      const mockDataSource = {
+        stackConnectors: [
+          {
+            type: actionTypeId,
+            config: {
+              serverUrl: 'https://api.example.com/mcp/',
+              hasAuth: true,
+              authType: 'bearer',
+            },
+            importedTools: [],
+          },
+        ],
+        workflows: { directory: '/path/to/workflows' },
+      } as Partial<DataSource>;
+
+      mockLoadWorkflows.mockResolvedValue([
+        {
+          content: 'name: test-workflow',
+          shouldGenerateABTool: false,
+        },
+      ]);
+
+      mockActionsClient.create.mockResolvedValue(mockStackConnector);
+      mockWorkflowManagement.management.createWorkflow.mockResolvedValue(mockWorkflow);
+      mockSavedObjectsClient.create.mockResolvedValue(mockSavedObject as SavedObject);
+
+      const result = await createDataSourceAndRelatedResources({
+        name: 'My MCP Connector',
+        type: 'test_type',
+        credentials: 'secret-token-123',
+        savedObjectsClient: mockSavedObjectsClient,
+        request: mockRequest,
+        logger: mockLogger,
+        workflowManagement: mockWorkflowManagement as any,
+        actions: mockActions as any,
+        dataSource: mockDataSource as any,
+        agentBuilder: mockAgentBuilder as any,
+      });
+
+      expect(result).toBe('connector-1');
+      expect(mockGetNamedMcpTools).not.toHaveBeenCalled();
+      expect(mockBulkCreateMcpTools).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+        DATA_SOURCE_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          toolIds: [],
+        })
+      );
+    });
+
+    it('should throw error when no MCP tools are found', async () => {
+      const actionTypeId = '.mcp';
+      const mockStackConnector = {
+        id: 'mcp-connector-1',
+        name: '.mcp',
+        actionTypeId,
+      };
+      const mockDataSource = {
+        stackConnectors: [
+          {
+            type: actionTypeId,
+            config: {
+              serverUrl: 'https://api.example.com/mcp/',
+              hasAuth: true,
+              authType: 'bearer',
+            },
+            importedTools: [{ name: 'nonexistent_tool', description: 'Tool that does not exist' }],
+          },
+        ],
+        workflows: { directory: '/path/to/workflows' },
+      } as Partial<DataSource>;
+
+      mockLoadWorkflows.mockResolvedValue([
+        {
+          content: 'name: test-workflow',
+          shouldGenerateABTool: false,
+        },
+      ]);
+
+      mockGetNamedMcpTools.mockResolvedValue(undefined);
+      mockActionsClient.create.mockResolvedValue(mockStackConnector);
+
+      await expect(
+        createDataSourceAndRelatedResources({
+          name: 'My MCP Connector',
+          type: 'test_type',
+          credentials: 'secret-token-123',
+          savedObjectsClient: mockSavedObjectsClient,
+          request: mockRequest,
+          logger: mockLogger,
+          workflowManagement: mockWorkflowManagement as any,
+          actions: mockActions as any,
+          dataSource: mockDataSource as any,
+          agentBuilder: mockAgentBuilder as any,
+        })
+      ).rejects.toThrow('No imported connector tools found for My MCP Connector');
+    });
+
+    it('should throw error when bulk creating MCP tools fails', async () => {
+      const actionTypeId = '.mcp';
+      const mockStackConnector = {
+        id: 'mcp-connector-1',
+        name: '.mcp',
+        actionTypeId,
+      };
+      const mockDataSource = {
+        stackConnectors: [
+          {
+            type: actionTypeId,
+            config: {
+              serverUrl: 'https://api.example.com/mcp/',
+              hasAuth: true,
+              authType: 'bearer',
+            },
+            importedTools: [{ name: 'get_file_contents', description: 'Get file contents' }],
+          },
+        ],
+        workflows: { directory: '/path/to/workflows' },
+      } as Partial<DataSource>;
+
+      mockLoadWorkflows.mockResolvedValue([
+        {
+          content: 'name: test-workflow',
+          shouldGenerateABTool: false,
+        },
+      ]);
+
+      mockGetNamedMcpTools.mockResolvedValue([
+        { name: 'get_file_contents', description: 'Get file contents from repo' },
+      ]);
+
+      mockBulkCreateMcpTools.mockRejectedValue(new Error('Failed to create tools'));
+
+      mockActionsClient.create.mockResolvedValue(mockStackConnector);
+
+      await expect(
+        createDataSourceAndRelatedResources({
+          name: 'My MCP Connector',
+          type: 'test_type',
+          credentials: 'secret-token-123',
+          savedObjectsClient: mockSavedObjectsClient,
+          request: mockRequest,
+          logger: mockLogger,
+          workflowManagement: mockWorkflowManagement as any,
+          actions: mockActions as any,
+          dataSource: mockDataSource as any,
+          agentBuilder: mockAgentBuilder as any,
+        })
+      ).rejects.toThrow(
+        'Error bulk importing MCP tools for My MCP Connector: Error: Failed to create tools'
+      );
+    });
   });
 });
 

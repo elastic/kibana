@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import type { DataStreamResponse } from '../../../../../../common';
 import { STATUS_COLOR_MAP, STATUS_ICON_MAP, STATUS_TEXT_MAP } from './constants';
+import * as i18n from '../translations';
 
 interface StatusProps {
   status: DataStreamResponse['status'];
@@ -16,7 +17,7 @@ interface StatusProps {
 
 export const Status = ({ status, isDeleting = false }: StatusProps) => {
   const isSpinnerShown = isDeleting || status === 'pending' || status === 'processing';
-  const displayText = isDeleting ? 'Deleting...' : STATUS_TEXT_MAP[status];
+  const displayText = isDeleting ? i18n.STATUS_LABELS.deleting : STATUS_TEXT_MAP[status];
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>

@@ -15,6 +15,7 @@ export {
   isDerivativeAgg,
   isSumBucketAgg,
   isTermsWithAggregation,
+  isFilterWithAggregations,
 } from './inventory_models';
 
 export {

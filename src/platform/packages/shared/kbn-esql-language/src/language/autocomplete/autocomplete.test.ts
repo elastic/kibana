@@ -34,7 +34,7 @@ import {
   TIME_PICKER_SUGGESTION,
 } from './__tests__/helpers';
 import { suggest } from './autocomplete';
-import { editorExtensions } from '../../__tests__/language/helpers';
+import { editorExtensions, views } from '../../__tests__/language/helpers';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
 
 const getRecommendedQueriesSuggestionsFromTemplates = (
@@ -306,7 +306,7 @@ describe('autocomplete', () => {
     });
 
     // FROM source
-    testSuggestions('FROM k/', ['index1', 'index2'], undefined, [
+    testSuggestions('FROM k/', ['index1', 'index2', ...views.map((v) => v.name)], undefined, [
       ,
       [
         { name: 'index1', hidden: false },
@@ -593,6 +593,7 @@ describe('autocomplete', () => {
           withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
           withAutoSuggest({ text: 'index1' } as ISuggestionItem),
           withAutoSuggest({ text: 'index2' } as ISuggestionItem),
+          ...views.map((v) => withAutoSuggest({ text: v.name } as ISuggestionItem)),
         ],
         undefined,
         [
@@ -609,6 +610,7 @@ describe('autocomplete', () => {
         [
           withAutoSuggest({ text: 'index1' } as ISuggestionItem),
           withAutoSuggest({ text: 'index2' } as ISuggestionItem),
+          ...views.map((v) => withAutoSuggest({ text: v.name } as ISuggestionItem)),
         ],
         undefined,
         [

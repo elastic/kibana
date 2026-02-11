@@ -26,32 +26,38 @@ export const githubDataSource: DataSource = {
     oauthBaseUrl: 'https://localhost:8052', // update once EARS deploys to QA
   },
 
-  stackConnector: {
-    type: '.mcp',
-    config: {
-      serverUrl: 'https://api.githubcopilot.com/mcp/',
-      hasAuth: true,
-      authType: MCPAuthType.Bearer,
+  stackConnectors: [
+    {
+      type: '.mcp',
+      config: {
+        serverUrl: 'https://api.githubcopilot.com/mcp/',
+        hasAuth: true,
+        authType: MCPAuthType.Bearer,
+      },
+      // can add additional description to the tools here if needed
+      importedTools: [
+        { name: 'get_commit' },
+        { name: 'get_label' },
+        { name: 'get_latest_release' },
+        { name: 'get_me' },
+        { name: 'get_tag' },
+        { name: 'get_team_members' },
+        { name: 'get_teams' },
+        { name: 'list_branches' },
+        { name: 'list_commits' },
+        { name: 'list_issue_types' },
+        { name: 'list_issues' },
+        { name: 'list_pull_requests' },
+        { name: 'list_releases' },
+        { name: 'list_tags' },
+        { name: 'pull_request_read' },
+      ],
     },
-    importedTools: [
-      'get_commit',
-      'get_file_contents',
-      'get_label',
-      'get_latest_release',
-      'get_me',
-      'get_tag',
-      'get_team_members',
-      'get_teams',
-      'list_branches',
-      'list_commits',
-      'list_issue_types',
-      'list_issues',
-      'list_pull_requests',
-      'list_releases',
-      'list_tags',
-      'pull_request_read',
-    ],
-  },
+    {
+      type: '.github',
+      config: {},
+    },
+  ],
 
   workflows: {
     directory: __dirname + '/workflows',

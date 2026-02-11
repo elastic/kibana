@@ -7,8 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Phases, PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
-import type { IngestStreamLifecycleILM } from '@kbn/streams-schema';
+import type { IlmPolicyPhases, IngestStreamLifecycleILM, IlmPolicy } from '@kbn/streams-schema';
 import { isIlmLifecycle } from '@kbn/streams-schema';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
@@ -34,7 +33,7 @@ interface IlmOptionData {
 }
 
 interface ModalOptions {
-  getIlmPolicies: () => Promise<PolicyFromES[]>;
+  getIlmPolicies: () => Promise<IlmPolicy[]>;
   initialValue: IngestStreamLifecycleAll;
   setLifecycle: (lifecycle: IngestStreamLifecycleILM) => void;
   setSaveButtonDisabled: (isDisabled: boolean) => void;
@@ -42,7 +41,7 @@ interface ModalOptions {
 }
 
 export function getPhaseDescription(
-  phases: Phases,
+  phases: IlmPolicyPhases,
   phaseToIndicatorColors: { hot: string; warm: string; cold: string; frozen: string }
 ): PhaseProps[] {
   const desc: PhaseProps[] = [];
@@ -129,12 +128,12 @@ export function IlmField({
     getIlmPolicies()
       .then((ilmPolicies) => {
         const policyOptions = ilmPolicies.map(
-          ({ name, policy }): EuiSelectableOption<IlmOptionData> => ({
+          ({ name, phases }): EuiSelectableOption<IlmOptionData> => ({
             label: `${name}`,
             searchableLabel: name,
             checked: selectedPolicy === name ? 'on' : undefined,
             data: {
-              phases: getPhaseDescription(policy.phases, phaseToIndicatorColors),
+              phases: getPhaseDescription(phases, phaseToIndicatorColors),
             },
             'data-test-subj': `ilmPolicy-${name}`,
           })

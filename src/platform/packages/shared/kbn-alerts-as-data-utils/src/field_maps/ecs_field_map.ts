@@ -10,7 +10,10 @@
 import { EcsFlat } from '@elastic/ecs';
 import type { EcsMetadata, FieldMap } from './types';
 
-const EXCLUDED_TYPES = ['constant_keyword'];
+// These field types cause Elasticsearch "invalid composite mappings" errors when composing
+// index templates. constant_keyword conflicts with keyword overrides, while nested/flattened
+// types cannot be mixed with object mappings in component template composition.
+const EXCLUDED_TYPES = ['constant_keyword', 'nested', 'flattened'];
 
 // ECS fields that have reached Stage 2 in the RFC process
 // are included in the generated Yaml but are still considered
@@ -48,10 +51,24 @@ const EXPERIMENTAL_FIELDS = [
   'process.io.bytes',
 ];
 
+// Child fields of excluded parent types must also be excluded to prevent mapping conflicts.
+// E.g., if threat.enrichments is nested, all threat.enrichments.* children are also excluded.
+const EXCLUDED_PARENT_PATHS = Object.entries(EcsFlat)
+  .filter(([_, value]) => EXCLUDED_TYPES.includes(value.type))
+  .map(([key]) => key + '.');
+
+// Check if a field is a child of an excluded parent
+const isChildOfExcludedParent = (fieldKey: string): boolean => {
+  return EXCLUDED_PARENT_PATHS.some((parentPath) => fieldKey.startsWith(parentPath));
+};
+
 export const ecsFieldMap: FieldMap = Object.fromEntries(
   Object.entries(EcsFlat)
     .filter(
-      ([key, value]) => !EXCLUDED_TYPES.includes(value.type) && !EXPERIMENTAL_FIELDS.includes(key)
+      ([key, value]) =>
+        !EXCLUDED_TYPES.includes(value.type) &&
+        !EXPERIMENTAL_FIELDS.includes(key) &&
+        !isChildOfExcludedParent(key)
     )
     .map(([key, _]) => {
       const value: EcsMetadata = EcsFlat[key as keyof typeof EcsFlat];
@@ -70,3 +87,16 @@ export const ecsFieldMap: FieldMap = Object.fromEntries(
 );
 
 export type EcsFieldMap = typeof ecsFieldMap;
+
+/**
+ * A Set containing the names of ECS fields that have type 'nested'.
+ * This is exported separately from ecsFieldMap because nested fields are excluded
+ * from ecsFieldMap to prevent Elasticsearch composite mapping conflicts, but some
+ * code (like traverseAndMutateDoc) still needs to know which fields are nested
+ * to properly validate alert documents.
+ */
+export const ecsNestedFieldNames: ReadonlySet<string> = new Set(
+  Object.entries(EcsFlat)
+    .filter(([_, value]) => value.type === 'nested')
+    .map(([key]) => key)
+);

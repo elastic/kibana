@@ -18,7 +18,7 @@ import { COMMON_HEADERS } from '../constants';
 
 const transformIds = ['bulk_stop_test_1', 'bulk_stop_test_2'];
 
-apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('/internal/transform/stop_transforms', { tag: tags.stateful.all }, () => {
   let transformManagerCookieHeader: CookieHeader;
 
   apiTest.beforeAll(async ({ samlAuth }) => {

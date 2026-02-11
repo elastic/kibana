@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { omit, pick } from 'lodash';
-import stringify from 'json-stable-stringify';
 import {
   EuiSpacer,
   EuiPanel,
@@ -21,6 +20,7 @@ import { normalizeMachineLearningJobIds } from '../../../../../common/detection_
 import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { DiffView } from './json_diff/diff_view';
+import { stringifyWithExpandedEmpties } from './three_way_diff/comparison_side/utils';
 
 /* Inclding these properties in diff display might be confusing to users. */
 const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
@@ -59,9 +59,6 @@ const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
   /* Technical property that changes at rule runtime. */
   'execution_summary',
 ];
-
-const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
-  stringify(jsObject, { space: 2 });
 
 /**
  * Normalizes the rule object, making it suitable for comparison with another normalized rule.
@@ -144,8 +141,8 @@ export const RuleDiffTab = ({
     );
 
     return [
-      sortAndStringifyJson(visibleOldRuleProperties),
-      sortAndStringifyJson(visibleNewRuleProperties),
+      stringifyWithExpandedEmpties(visibleOldRuleProperties),
+      stringifyWithExpandedEmpties(visibleNewRuleProperties),
     ];
   }, [oldRule, newRule]);
 

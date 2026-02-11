@@ -90,7 +90,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.user.public_key',
       {
         defaultMessage:
-          'PEM-encoded public key used to verify the user artifact manifest signature.',
+          'Deprecated, do not use. PEM-encoded public key used to verify the user artifact manifest signature.',
       }
     ),
   },
@@ -331,7 +331,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.user.public_key',
       {
         defaultMessage:
-          'PEM-encoded public key used to verify the user artifact manifest signature.',
+          'Deprecated, do not use. PEM-encoded public key used to verify the user artifact manifest signature.',
       }
     ),
   },
@@ -447,12 +447,11 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'mac.advanced.ransomware.diagnostic',
-    first_supported_version: '9.2.0',
+    first_supported_version: '9.2',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.ransomware.diagnostic',
       {
-        defaultMessage:
-          'Set this to false to disable diagnostic ransomware protection. Default: true.',
+        defaultMessage: 'Enable diagnostic ransomware protection. Default: true.',
       }
     ),
   },
@@ -463,24 +462,24 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.device_control.filter_images',
       {
         defaultMessage:
-          "A value of 'false' disables the filtering of file backed images and CD-ROM volumes. Default: true.",
+          'Filter out file backed images and CD-ROM volumes from consideration by device control. Default: true.',
       }
     ),
   },
   {
     key: 'mac.advanced.events.populate_file_data',
-    first_supported_version: '9.2.0',
+    first_supported_version: '9.2',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.populate_file_data',
       {
         defaultMessage:
-          'Set this to false to disable collection of header bytes on file events. Default: true.',
+          'Enable collection of entropy and header bytes in file events. Default: true.',
       }
     ),
   },
   {
     key: 'linux.advanced.events.populate_file_data',
-    first_supported_version: '9.3.0',
+    first_supported_version: '9.3',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.populate_file_data',
       {
@@ -638,7 +637,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.user.public_key',
       {
         defaultMessage:
-          'PEM-encoded public key used to verify the user artifact manifest signature.',
+          'Deprecated, do not use. PEM-encoded public key used to verify the user artifact manifest signature.',
       }
     ),
   },
@@ -868,7 +867,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.fileaccess',
       {
         defaultMessage:
-          'Report limited file access (read) events. Paths are not user-configurable. Default value is true.',
+          "Enable kernel file access events. 'false' disables them even if they are needed by other features. Default: true.",
       }
     ),
   },
@@ -973,7 +972,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.device_control.filter_images',
       {
         defaultMessage:
-          "A value of 'false' disables the filtering of file backed images and CD-ROM volumes. Default: true.",
+          'Filter out file backed images and CD-ROM volumes from consideration by device control. Default: true.',
       }
     ),
   },
@@ -984,7 +983,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.ransomware.dump_process',
       {
         defaultMessage:
-          "A value of 'false' disables the generation of a memory dump of the Ransomware process. This is ignored if the canary protection is off. Default: true.",
+          'Enable the generation of a memory dump of the ransomware process. This is ignored if the canary protection is off. Default: true.',
       }
     ),
   },
@@ -1083,7 +1082,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.memory_protection.shellcode_enhanced_pe_parsing',
       {
         defaultMessage:
-          'Collect 4MB of memory surrounding detected shellcode regions. Warning: enabling this value may significantly increase the amount of data stored in Elasticsearch. Default: false.',
+          'Attempt to identify and extract PE metadata from injected shellcode, including Authenticode signatures and version resource information. Default: true.',
       }
     ),
   },
@@ -1170,7 +1169,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.etw',
       {
-        defaultMessage: 'Deprecated.',
+        defaultMessage: 'Deprecated, do not use.',
       }
     ),
   },
@@ -1225,7 +1224,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.kernel.capture_mode',
       {
         defaultMessage:
-          "Control whether kprobes, eBPF or Quark is used to gather data. Options are 'kprobe', 'ebpf', 'quark' or 'auto'. 'auto' uses 'quark' if possible (and supported), then tries legacy 'ebpf', and otherwise it uses 'kprobe'. 'quark' is supported by Endpoint versions 9.3 and newer. Default: auto.",
+          "Control whether kprobes, eBPF or Quark is used to gather data. Options are 'kprobe', 'ebpf', 'quark' or 'auto'. 'auto uses quark if possible (and supported), then tries legacy ebpf, and otherwise it uses kprobe. Quark is supported by Elastic Defend versions 9.3 and newer. Default: auto.",
       }
     ),
   },
@@ -1351,7 +1350,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'linux.advanced.fanotify.enable_ns_jumping',
-    first_supported_version: '9.3.0',
+    first_supported_version: '9.3',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.fanotify.enable_ns_jumping',
       {
@@ -1367,7 +1366,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.context_manipulation_detection',
       {
         defaultMessage:
-          "Detect injection based on thread context manipulation (e.g. 'SetThreadContext') as a part of memory protection. Default: true",
+          "Detect injection based on thread context manipulation (for example, 'SetThreadContext') as a part of memory protection. Default: true.",
       }
     ),
   },
@@ -1400,7 +1399,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.capture_env_vars',
       {
         defaultMessage:
-          'Provide a comma-separated list of up to five environment variables to capture in process create events. Default: none.',
+          'Provide a comma-separated list of up to five environment variables to capture in process creation events. Default: none.',
       }
     ),
   },
@@ -1495,7 +1494,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.callstacks.use_hardware',
       {
         defaultMessage:
-          'Use hardware callstacks (e.g. Intel CET) if supported by the OS and CPU. Default: true.',
+          'Use hardware callstacks (for example, Intel CET) if supported by the OS and CPU. Default: true.',
       }
     ),
   },
@@ -1781,7 +1780,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.ppl.harden_am_images',
       {
         defaultMessage:
-          "Apply the windows.advanced.kernel.ppl.harden_images mitigation to Anti-Malware PPL as well. Disable this if third-party Anti-Malware is blocked from loading DLLs over the network. If this happens, there will be Event ID 8 events in the 'Microsoft-Windows-Security-Mitigations/Kernel Mode' event log.  Default: true.",
+          "Apply the windows.advanced.kernel.ppl.harden_images mitigation to Anti-Malware PPL as well. Disable this if third-party Anti-Malware is blocked from loading DLLs over the network. If this happens, there will be Event ID 8 events in the 'Microsoft-Windows-Security-Mitigations/Kernel Mode' event log. Default: true.",
       }
     ),
   },
@@ -1829,7 +1828,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.events.image_load.origin_info_collection',
-    first_supported_version: '8.19.0',
+    first_supported_version: '8.19',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.image_load.origin_info_collection',
       {
@@ -1895,7 +1894,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'linux.advanced.file_cache.file_object_cache_size',
-    first_supported_version: '8.12.0',
+    first_supported_version: '8.12',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.file_cache.file_object_cache_size',
       {
@@ -1906,7 +1905,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'mac.advanced.file_cache.file_object_cache_size',
-    first_supported_version: '8.12.0',
+    first_supported_version: '8.12',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.file_cache.file_object_cache_size',
       {
@@ -1917,7 +1916,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.file_cache.file_object_cache_size',
-    first_supported_version: '8.12.0',
+    first_supported_version: '8.12',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.file_cache.file_object_cache_size',
       {
@@ -1928,7 +1927,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.utilization_limits.resident_memory_target_mb',
-    first_supported_version: '8.12.0',
+    first_supported_version: '8.12',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.resident_memory_target_mb',
       {
@@ -1991,7 +1990,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.events.process.creation_flags',
-    first_supported_version: '8.13.0',
+    first_supported_version: '8.13',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process.creation_flags',
       {
@@ -2002,7 +2001,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.events.process.origin_info_collection',
-    first_supported_version: '8.19.0',
+    first_supported_version: '8.19',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process.origin_info_collection',
       {
@@ -2024,34 +2023,34 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.flags',
-    first_supported_version: '8.13.0',
+    first_supported_version: '8.13',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.flags',
       {
         defaultMessage:
-          'A comma-separated list of feature flags. Currently no feature flags are supported.',
+          'Provide a comma-separated list of feature flags. Currently no feature flags are supported.',
       }
     ),
   },
   {
     key: 'mac.advanced.flags',
-    first_supported_version: '8.16.0',
+    first_supported_version: '8.16',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.flags',
       {
         defaultMessage:
-          'A comma-separated list of feature flags. Currently no feature flags are supported.',
+          'Provide a comma-separated list of feature flags. Currently no feature flags are supported.',
       }
     ),
   },
   {
     key: 'linux.advanced.flags',
-    first_supported_version: '8.16.0',
+    first_supported_version: '8.16',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.flags',
       {
         defaultMessage:
-          'A comma-separated list of feature flags. Currently no feature flags are supported.',
+          'Provide a comma-separated list of feature flags. Currently no feature flags are supported.',
       }
     ),
   },
@@ -2095,7 +2094,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.event_on_access.file_paths',
       {
         defaultMessage:
-          "Provide a comma-separated list of additional wildcard patterns that will be monitored for read access. At most one match per pattern per process will be reported. If possible, drive letters will be converted to NT paths (e.g. 'DeviceHarddiskVolume4'), but conversion will fail for per-user drives, such as network drives. Put only commas (no spaces) between entries. Wildcard matching is case-insensitive. Check Microsoft FsRtlIsNameInExpression documentation for wildcard matching rules. Default: none.",
+          "Provide a comma-separated list of additional wildcard patterns that will be monitored for read access. At most one match per pattern per process will be reported. If possible, drive letters will be converted to NT paths (for example, '\\Device\\HarddiskVolume4'), but conversion will fail for per-user drives, such as network drives. Put only commas (no spaces) between entries. Wildcard matching is case-insensitive. Check Microsoft FsRtlIsNameInExpression documentation for wildcard matching rules. Default: none.",
       }
     ),
   },
@@ -2106,7 +2105,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.event_on_access.registry_paths',
       {
         defaultMessage:
-          'Comma-separated list of registry paths that will be monitored for read access. These must be NT paths (e.g. \\\\REGISTRY\\\\MACHINE\\\\SOFTWARE\\\\Microsoft\\\\...). Endpoint will report at most one match per pattern per process. Put only commas (no spaces) between entries. Wildcard matching is case-insensitive. See Microsoft FsRtlIsNameInExpression documentation for wildcard matching rules.',
+          'Provide a comma-separated list of registry paths that will be monitored for read access. These must be NT paths (for example, \\REGISTRY\\MACHINE\\SOFTWARE\\Microsoft\\...). At most one match per pattern per process will be reported. Only commas (no spaces) should be used between entries. Wildcard matching is case-insensitive. See Microsoft FsRtlIsNameInExpression documentation for wildcard matching rules. Default: none.',
       }
     ),
   },
@@ -2117,7 +2116,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.event_on_access.file_paths',
       {
         defaultMessage:
-          'Comma-separated list of additional wildcard patterns that will be monitored for read access. Put only commas (no spaces) between entries. Wildcard matching is case-insensitive.',
+          'Provide a comma-separated list of additional wildcard patterns that will be monitored for read access. Put only commas (no spaces) between entries. Wildcard matching is case-insensitive. Default: none.',
       }
     ),
   },
@@ -2200,7 +2199,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.events.file.origin_info_collection',
-    first_supported_version: '8.19.0',
+    first_supported_version: '8.19',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.file.origin_info_collection',
       {
@@ -2365,7 +2364,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.events.security.provider_etw',
-    first_supported_version: '8.19.0',
+    first_supported_version: '8.19',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.security.provider_etw',
       {
@@ -2376,12 +2375,12 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.events.security.event_disabled',
-    first_supported_version: '9.2.0',
+    first_supported_version: '9.2',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.security.event_disabled',
       {
         defaultMessage:
-          'A comma separated list of security event IDs to selectively disable. example: 4624,4800,4801',
+          "Provide a comma-separated list of security event IDs to selectively disable. An example is '4624,4800,4801'. Default: none.",
       }
     ),
   },
@@ -2392,7 +2391,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.firewall_anti_tamper',
       {
         defaultMessage:
-          'Controls whether the firewall anti tamper plugin is enabled. This value will only take effect if tamper protection is enabled. Allowed values are prevent, detect, and off. Default: prevent.',
+          "Enable firewall anti tamper prevention or detection. Tamper protetion must also be enabled. Allowed values are 'prevent', 'detect', and 'off'. Default: prevent`.",
       }
     ),
   },
@@ -2545,8 +2544,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.scan_on_network_event',
       {
-        defaultMessage:
-          'Allow Memory Protection to perform memory scans in response to network activity. Default: true',
+        defaultMessage: 'Scan for memory threats in response to network activity. Default: true.',
       }
     ),
   },
@@ -2556,8 +2554,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.memory_protection.scan_on_network_event',
       {
-        defaultMessage:
-          'Allow Memory Protection to perform memory scans in response to network activity. Default: true',
+        defaultMessage: 'Scan for memory threats in response to network activity. Default: true.',
       }
     ),
   },
@@ -2567,8 +2564,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.scan_on_network_event',
       {
-        defaultMessage:
-          'Allow Memory Protection to perform memory scans in response to network activity. Default: true',
+        defaultMessage: 'Scan for memory threats in response to network activity. Default: true.',
       }
     ),
   },
@@ -2578,8 +2574,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.scan_on_api_event',
       {
-        defaultMessage:
-          'Allow Memory Protection to perform memory scans in response to API events. Default: true',
+        defaultMessage: 'Scan for memory threats in response to API events. Default: true.',
       }
     ),
   },
@@ -2589,8 +2584,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.memory_protection.scan_on_image_load_event',
       {
-        defaultMessage:
-          'Allow Memory Protection to perform memory scans in response to image loads. Default: true',
+        defaultMessage: 'Scan for memory threats in response to image loads. Default: true.',
       }
     ),
   },
@@ -2601,7 +2595,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.mitigations.policies.redirection_guard',
       {
         defaultMessage:
-          'Set to false to opt out of Windows Redirection Guard on Win10/Win11 21H2 and later. Default: true.',
+          'Enable Windows Redirection Guard on Win10/Win11 21H2 and later. Default: true.',
       }
     ),
   },
@@ -2612,7 +2606,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.agent.orphaned_remediation',
       {
         defaultMessage:
-          'Attempt to start Agent service when Endpoint becomes orphaned. Default: false.',
+          'Attempt to start Elastic Agent service when Elastic Defend becomes orphaned. Default: false.',
       }
     ),
   },
@@ -2623,7 +2617,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.agent.orphaned_remediation',
       {
         defaultMessage:
-          'Attempt to start Agent service when Endpoint becomes orphaned. Default: false.',
+          'Attempt to start Elastic Agent service when Elastic Defend becomes orphaned. Default: false.',
       }
     ),
   },
@@ -2634,7 +2628,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.agent.orphaned_remediation',
       {
         defaultMessage:
-          'Should Endpoint attempt to start Agent service when becoming orphaned. Default: false.',
+          'Attempt to start Elastic Agent service when Elastic Defend becomes orphaned. Default: false.',
       }
     ),
   },
@@ -2645,7 +2639,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.utilization_limits.free_disk_space_gb',
       {
         defaultMessage:
-          'Keep at least gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
+          'Keep at least the specified number of gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
       }
     ),
   },
@@ -2656,7 +2650,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.utilization_limits.free_disk_space_gb',
       {
         defaultMessage:
-          'Keep at least gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
+          'Keep at least the specified number of gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
       }
     ),
   },
@@ -2667,7 +2661,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.free_disk_space_gb',
       {
         defaultMessage:
-          'Keep at least gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
+          'Keep at least the specified number of gigabytes of free space on the volume where Endpoint is installed. If free space falls below this threshold, certain features, such as response actions that require additional storage space, will no longer function. Default: no limit.',
       }
     ),
   },
@@ -2755,7 +2749,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.response_actions.get_file.upload_streams_count',
       {
         defaultMessage:
-          'Number of parallel streams per upload for get-file response action. Default: 1.',
+          'Maximum number of upload streams for get-file response action. Default: 1.',
       }
     ),
   },
@@ -2766,7 +2760,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.response_actions.get_file.upload_streams_count',
       {
         defaultMessage:
-          'Number of parallel streams per upload for get-file response action. Default: 1.',
+          'Maximum number of upload streams for get-file response action. Default: 1.',
       }
     ),
   },
@@ -2786,7 +2780,8 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.script_max_size',
       {
-        defaultMessage: 'Maximum size of script being captured in bytes. Default 1024.',
+        defaultMessage:
+          'Maximum size of scripts captured by mac.advanced.events.script_capturein bytes. Default 1024.',
       }
     ),
   },

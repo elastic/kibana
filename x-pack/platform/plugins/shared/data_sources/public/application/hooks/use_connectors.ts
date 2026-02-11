@@ -17,10 +17,13 @@ import { queryKeys } from '../query_keys';
  * Transforms a data source type from the registry to our internal Connector type
  */
 const transformDataSourceType = (dataSources: DataSource): Connector => {
+  // Use the first stack connector's type at least for right now
+  const connectorType = dataSources.stackConnectors?.[0]?.type;
+
   return {
     id: dataSources.id,
     name: dataSources.name,
-    type: dataSources.stackConnector.type,
+    type: connectorType,
     iconType: dataSources.iconType,
     category: 'popular',
   };

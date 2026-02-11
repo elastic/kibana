@@ -13,6 +13,7 @@ import type {
   ChatAgentEvent,
   AgentCapabilities,
   AgentConfigurationOverrides,
+  ConversationAction,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { AgentsServiceStart } from '../../agents';
@@ -30,6 +31,7 @@ export const executeAgent$ = ({
   defaultConnectorId,
   browserApiTools,
   configurationOverrides,
+  action,
 }: {
   agentId: string;
   request: KibanaRequest;
@@ -43,6 +45,7 @@ export const executeAgent$ = ({
   defaultConnectorId?: string;
   browserApiTools?: BrowserApiToolMetadata[];
   configurationOverrides?: AgentConfigurationOverrides;
+  action?: ConversationAction;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     agentService
@@ -59,6 +62,7 @@ export const executeAgent$ = ({
           configurationOverrides,
           structuredOutput,
           outputSchema,
+          action,
         },
         onEvent: (event) => {
           observer.next(event);

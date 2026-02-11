@@ -152,8 +152,6 @@
     "@kbn/palettes",
     "@kbn/field-formats-plugin",
     "@kbn/datemath",
-    "@kbn/global-search-plugin",
-    "@kbn/global-search-test-plugin",
     "@kbn/data-usage-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/response-ops-rule-params",
@@ -181,6 +179,7 @@
     "@kbn/dashboard-plugin",
     "@kbn/automatic-import-v2-plugin",
     "@kbn/connector-specs",
-    "@kbn/ftr-llm-proxy"
+    "@kbn/ftr-llm-proxy",
+    "@kbn/dev-cli-runner"
   ]
 }

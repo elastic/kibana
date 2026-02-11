@@ -17,20 +17,25 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   SHOW_REQUEST_MODAL_SUBTITLE,
   SHOW_REQUEST_MODAL_TITLE,
   RULE_FLYOUT_FOOTER_BACK_TEXT,
   RULE_FLYOUT_HEADER_BACK_TEXT,
 } from '../translations';
-import { RequestCodeBlock } from '../components';
+import { RequestCodeBlock, ShowRequestTabs } from '../components';
+import type { ShowRequestActivePage } from '../types';
+import { useRuleFormState } from '../hooks';
 
 interface RuleFlyoutShowRequestProps {
-  isEdit: boolean;
   onClose: () => void;
 }
-export const RuleFlyoutShowRequest = ({ isEdit, onClose }: RuleFlyoutShowRequestProps) => {
+
+export const RuleFlyoutShowRequest = ({ onClose }: RuleFlyoutShowRequestProps) => {
+  const [activeTab, setActiveTab] = useState<ShowRequestActivePage>('create');
+  const { id } = useRuleFormState();
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -45,17 +50,20 @@ export const RuleFlyoutShowRequest = ({ isEdit, onClose }: RuleFlyoutShowRequest
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="xs" data-test-subj="ruleFlyoutShowRequestTitle">
-              <h4 id="flyoutTitle">{SHOW_REQUEST_MODAL_TITLE(isEdit)}</h4>
+              <h4 id="flyoutTitle">{SHOW_REQUEST_MODAL_TITLE(activeTab)}</h4>
             </EuiTitle>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <p>
-          <EuiText color="subdued">{SHOW_REQUEST_MODAL_SUBTITLE(isEdit)}</EuiText>
+          <EuiText color="subdued">{SHOW_REQUEST_MODAL_SUBTITLE(activeTab)}</EuiText>
         </p>
         <EuiSpacer />
-        <RequestCodeBlock isEdit={isEdit} data-test-subj="flyoutRequestCodeBlock" />
+
+        {id && <ShowRequestTabs activeTab={activeTab} onTabChange={setActiveTab} />}
+
+        <RequestCodeBlock data-test-subj="flyoutRequestCodeBlock" activeTab={activeTab} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButtonEmpty

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 import { DATE_WITH_POD_DATA } from '../../fixtures/constants';
@@ -13,7 +14,7 @@ const KUBERNETES_PACKAGE_NAME = 'kubernetes';
 
 test.describe.serial(
   'Infrastructure Inventory - K8s Integration Links Navigation',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ log, apiServices }) => {
       // Start with a clean state - ensure kubernetes is NOT installed

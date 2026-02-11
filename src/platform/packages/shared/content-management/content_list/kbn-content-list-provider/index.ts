@@ -32,6 +32,8 @@ export type { ContentListItem, ContentListItemConfig } from './src/item';
 export type {
   ContentListFeatures,
   ContentListSupports,
+  SortField,
+  SortOption,
   SortingConfig,
   UseContentListSortReturn,
 } from './src/features';

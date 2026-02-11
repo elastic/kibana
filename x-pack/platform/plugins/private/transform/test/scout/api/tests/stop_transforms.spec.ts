@@ -16,7 +16,7 @@ import { COMMON_HEADERS } from '../constants';
 
 const transformId = 'transform-test-stop';
 
-apiTest.describe('/internal/transform/stop_transforms', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('/internal/transform/stop_transforms', { tag: tags.stateful.all }, () => {
   apiTest.beforeEach(async ({ esClient, apiServices }) => {
     // to test stopping transforms we create a slow continuous transform so it doesn't stop automatically
     const config = {

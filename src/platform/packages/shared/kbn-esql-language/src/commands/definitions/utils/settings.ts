@@ -16,7 +16,7 @@ import {
   withAutoSuggest,
 } from '../../../..';
 import { UnmappedFieldsStrategy, type ISuggestionItem } from '../../registry/types';
-import { SuggestionCategory } from '../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 import { EsqlSettingNames, settings } from '../generated/settings';
 
 export function getSettingsCompletionItems(isServerless?: boolean): ISuggestionItem[] {

@@ -9,6 +9,7 @@ import Path from 'path';
 import { node } from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import kbnDatemath from '@kbn/datemath';
+import { tags } from '@kbn/scout';
 import type { ScoutTestConfig } from '@kbn/scout';
 import type { KbnClient } from '@kbn/scout';
 import type { StreamlangDSL } from '@kbn/streamlang';
@@ -31,7 +32,7 @@ import {
  * Tests the quality of complete pipeline generation (parsing + normalization)
  * using real LogHub log samples.
  *
- * @tags @ess
+ * @tags @local-stateful-classic @cloud-stateful-classic
  */
 
 evaluate.describe.configure({ timeout: 600_000 });
@@ -506,7 +507,7 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
    * Run tests for each dataset.
    */
   PIPELINE_SUGGESTION_DATASETS.forEach((dataset) => {
-    evaluate.describe(dataset.name, { tag: '@ess' }, () => {
+    evaluate.describe(dataset.name, { tag: tags.stateful.classic }, () => {
       evaluate.beforeAll(async ({ apiServices }) => {
         await apiServices.streams.enable();
       });

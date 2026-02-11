@@ -6,13 +6,14 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { MathProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Math Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     // === Basic Arithmetic ===
     apiTest('should compute multiplication of fields', async ({ testBed }) => {

@@ -204,10 +204,17 @@ export const YourTrialCompanionTODOItem: React.FC<YourTrialCompanionTODOItemProp
   );
 };
 
-function completedTODOs(todoList: NBATODOItem[], open: Milestone[]): Milestone[] {
+export function completedTODOs(todoList: NBATODOItem[], open: Milestone[]): Milestone[] {
   return todoList
     .map((item) => item.milestoneId)
     .filter((milestoneId) => !open.includes(milestoneId));
+}
+
+export function openTODOs(todoItems: NBATODOItem[], completed: Milestone[]): Milestone[] {
+  return difference(
+    todoItems.map((v) => v.milestoneId),
+    completed
+  );
 }
 
 export const YourTrialCompanion: React.FC<YourTrialCompanionProps> = ({
@@ -218,7 +225,7 @@ export const YourTrialCompanion: React.FC<YourTrialCompanionProps> = ({
   const accordionId = useGeneratedHtmlId({ prefix: 'yourTrialCompanionAccordion' });
   const { euiTheme } = useEuiTheme();
   const completed = completedTODOs(todoItems, open);
-  const showDismiss = difference(open, completed).length === 0;
+  const showDismiss = openTODOs(todoItems, completed).length === 0;
   const [expandedItemId, setExpandedItemId] = useState<Milestone | null>(null);
   const styles = css({
     zIndex: euiTheme.levels.header,

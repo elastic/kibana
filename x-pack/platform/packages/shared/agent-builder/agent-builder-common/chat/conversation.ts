@@ -270,3 +270,5 @@ export interface ConversationInternalState {
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
+
+export type ConversationAction = 'regenerate';

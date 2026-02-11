@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import moment from 'moment';
 import type { ErrorInsightParams } from '../src/clients/ai_insight_client';
 import {
@@ -16,7 +17,7 @@ import { evaluate } from './evaluate_ai_insights';
 
 const INDEX_REFRESH_WAIT_MS = 2500;
 
-evaluate.describe('APM Error AI Insights', { tag: '@svlOblt' }, () => {
+evaluate.describe('APM Error AI Insights', { tag: tags.serverless.observability.complete }, () => {
   let errorId: string;
   const serviceName = 'payment';
   let start: string;

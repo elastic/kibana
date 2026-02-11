@@ -18,11 +18,6 @@ import { ActionsMenuGroup, createPublicStepDefinition } from '../../step_registr
 
 export const AiClassifyStepDefinition = createPublicStepDefinition({
   ...AiClassifyStepCommonDefinition,
-  editorHandlers: {
-    dynamicSchema: {
-      getOutputSchema: ({ input }) => buildStructuredOutputSchema(input),
-    },
-  },
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/sparkles').then(({ icon }) => ({
       default: icon,
@@ -114,5 +109,18 @@ When \`allowMultipleCategories\` is true, the output includes a \`categories\` a
       reason: "{{ steps.classify_severity.output.rationale }}"
 \`\`\``,
     ],
+  },
+  editorHandlers: {
+    config: {
+      'connector-id': {
+        connectorIdSelection: {
+          connectorTypes: ['inference.unified_completion', 'bedrock', 'gen-ai', 'gemini'],
+          enableCreation: false,
+        },
+      },
+    },
+    dynamicSchema: {
+      getOutputSchema: ({ input }) => buildStructuredOutputSchema(input),
+    },
   },
 });

@@ -1,17 +1,24 @@
 {
-  "lastModified": "2025-12-03T19:03:17.159Z",
-  "sha1": "940ba749df0283440c284d01665e9a21e9fa3412",
+  "lastModified": "2026-02-09T13:21:42.243Z",
+  "sha1": "116b63b2ba9c94a191c676f5282614fe83b6fe70",
   "tests": [
     {
       "id": "d3b5a0b3b6b9628-a2c82aac53380fa",
       "title": "POST api/painless_lab/execute with specific cluster privileges should execute a valid painless script using cluster:admin/scripts/painless/execute credentials",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api_custom_cluster_privileges.spec.ts",
-        "line": 15,
+        "line": 16,
         "column": 12
       }
     },
@@ -20,11 +27,18 @@
       "title": "POST api/painless_lab/execute with specific cluster privileges should execute a valid painless script using cluster:admin credentials",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api_custom_cluster_privileges.spec.ts",
-        "line": 38,
+        "line": 39,
         "column": 12
       }
     },
@@ -33,11 +47,18 @@
       "title": "POST api/painless_lab/execute with specific cluster privileges should return an unauthorized status code when using monitor cluster credentials",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api_custom_cluster_privileges.spec.ts",
-        "line": 60,
+        "line": 61,
         "column": 12
       }
     },
@@ -46,11 +67,18 @@
       "title": "POST api/painless_lab/execute with specific cluster privileges should return an unauthorized status code when using both cluster and Kibana privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api_custom_cluster_privileges.spec.ts",
-        "line": 79,
+        "line": 80,
         "column": 12
       }
     },
@@ -59,11 +87,12 @@
       "title": "[search serverless] POST api/painless_lab/execute should return 404",
       "expectedStatus": "passed",
       "tags": [
-        "@svlSearch"
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api_disabled.spec.ts",
-        "line": 20,
+        "line": 21,
         "column": 12
       }
     },
@@ -72,13 +101,16 @@
       "title": "POST api/painless_lab/execute should execute a valid painless script using admin credentials",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSecurity",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api.spec.ts",
-        "line": 21,
+        "line": 28,
         "column": 12
       }
     },
@@ -87,13 +119,16 @@
       "title": "POST api/painless_lab/execute should return error response for invalid painless script",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSecurity",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/painless_lab/test/scout/api/tests/execute_api.spec.ts",
-        "line": 39,
+        "line": 46,
         "column": 12
       }
     }

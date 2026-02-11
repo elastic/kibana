@@ -39,3 +39,12 @@ export interface ResolveIndexResponse {
   aliases?: ResolveIndexResponseItem[];
   data_streams?: ResolveIndexResponseItem[];
 }
+
+export interface EsqlView {
+  name: string;
+  query: string;
+}
+
+export interface EsqlViewsResult {
+  views: EsqlView[];
+}

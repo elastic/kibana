@@ -9,13 +9,13 @@ import { renderHook } from '@testing-library/react';
 import dateMath from '@elastic/datemath';
 import type { Moment } from 'moment';
 import { useAttacksVolumeData } from './use_attacks_volume_data';
-import { useAttackIds } from './use_attack_ids';
+import { useAlertsAggregation } from '../common/use_alerts_aggregation';
 import { useAttackTimestamps } from './use_attack_timestamps';
 import { parseAttacksVolumeData } from './helpers';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 
-jest.mock('./use_attack_ids', () => ({
-  useAttackIds: jest.fn(),
+jest.mock('../common/use_alerts_aggregation', () => ({
+  useAlertsAggregation: jest.fn(),
 }));
 
 jest.mock('./use_attack_timestamps', () => ({
@@ -29,6 +29,10 @@ jest.mock('./helpers', () => ({
 
 jest.mock('../../../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn(),
+}));
+
+jest.mock('./aggregations', () => ({
+  getAttacksVolumeAggregations: jest.fn(() => ({ some: 'agg' })),
 }));
 
 describe('useAttacksVolumeData', () => {
@@ -50,9 +54,15 @@ describe('useAttacksVolumeData', () => {
   });
 
   it('orchestrates fetching and parsing of data', () => {
-    (useAttackIds as jest.Mock).mockReturnValue({
-      attackIds: ['1', '2'],
-      isLoading: false,
+    (useAlertsAggregation as jest.Mock).mockReturnValue({
+      data: {
+        aggregations: {
+          attacks: {
+            buckets: [{ key: '1' }, { key: '2' }],
+          },
+        },
+      },
+      loading: false,
       refetch: mockRefetchAgg,
     });
     (useAttackTimestamps as jest.Mock).mockReturnValue({
@@ -75,9 +85,9 @@ describe('useAttacksVolumeData', () => {
   });
 
   it('indicates loading when aggregation query is loading', () => {
-    (useAttackIds as jest.Mock).mockReturnValue({
-      attackIds: [],
-      isLoading: true,
+    (useAlertsAggregation as jest.Mock).mockReturnValue({
+      data: undefined,
+      loading: true,
       refetch: mockRefetchAgg,
     });
     (useAttackTimestamps as jest.Mock).mockReturnValue({
@@ -91,9 +101,15 @@ describe('useAttacksVolumeData', () => {
   });
 
   it('indicates loading when details query is loading and attack IDs exist', () => {
-    (useAttackIds as jest.Mock).mockReturnValue({
-      attackIds: ['1'],
-      isLoading: false,
+    (useAlertsAggregation as jest.Mock).mockReturnValue({
+      data: {
+        aggregations: {
+          attacks: {
+            buckets: [{ key: '1' }],
+          },
+        },
+      },
+      loading: false,
       refetch: mockRefetchAgg,
     });
     (useAttackTimestamps as jest.Mock).mockReturnValue({
@@ -107,9 +123,9 @@ describe('useAttacksVolumeData', () => {
   });
 
   it('calls both refetch functions when refetch is called', () => {
-    (useAttackIds as jest.Mock).mockReturnValue({
-      attackIds: [],
-      isLoading: false,
+    (useAlertsAggregation as jest.Mock).mockReturnValue({
+      data: undefined,
+      loading: false,
       refetch: mockRefetchAgg,
     });
     (useAttackTimestamps as jest.Mock).mockReturnValue({

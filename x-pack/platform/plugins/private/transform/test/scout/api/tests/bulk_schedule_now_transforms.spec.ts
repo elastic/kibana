@@ -16,7 +16,7 @@ import { generateTransformConfig } from '../helpers/transform_config';
 import { transformApiTest as apiTest } from '../fixtures';
 import { COMMON_HEADERS } from '../constants';
 
-apiTest.describe('bulk schedule_now_transforms', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('bulk schedule_now_transforms', { tag: tags.stateful.all }, () => {
   const transformIds = ['bulk_schedule_now_test_1', 'bulk_schedule_now_test_2'];
   let transformManagerCookieHeader: CookieHeader;
 

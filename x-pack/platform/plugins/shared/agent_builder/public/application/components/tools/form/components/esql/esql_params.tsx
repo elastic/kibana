@@ -65,6 +65,7 @@ const EsqlParamActions: React.FC<EsqlParamActionsProps> = ({ onAppend, onReplace
               type: EsqlToolFieldType.STRING,
               source: EsqlParamSource.Inferred,
               optional: false,
+              defaultValue: undefined,
             };
       }
     );
@@ -174,6 +175,7 @@ export const EsqlParams = () => {
         type: EsqlToolFieldType.STRING,
         source: EsqlParamSource.Custom,
         optional: false,
+        defaultValue: undefined,
       });
     },
     [appendParamField]
@@ -248,10 +250,10 @@ export const EsqlParams = () => {
                 <EuiTable compressed>
                   <EuiTableHeader>
                     <EuiTableHeaderCell width="24px" />
-                    <EuiTableHeaderCell width="25%">
+                    <EuiTableHeaderCell width="20%">
                       {i18nMessages.paramNameLabel}
                     </EuiTableHeaderCell>
-                    <EuiTableHeaderCell width="50%">
+                    <EuiTableHeaderCell width="40%">
                       {i18nMessages.paramDescriptionLabel}
                     </EuiTableHeaderCell>
                     <EuiTableHeaderCell width="128px">
@@ -259,6 +261,9 @@ export const EsqlParams = () => {
                     </EuiTableHeaderCell>
                     <EuiTableHeaderCell width="64px" align="center">
                       {i18nMessages.optionalParamLabel}
+                    </EuiTableHeaderCell>
+                    <EuiTableHeaderCell width="15%">
+                      {i18nMessages.defaultValueLabel}
                     </EuiTableHeaderCell>
                     <EuiTableHeaderCell width="36px" />
                   </EuiTableHeader>

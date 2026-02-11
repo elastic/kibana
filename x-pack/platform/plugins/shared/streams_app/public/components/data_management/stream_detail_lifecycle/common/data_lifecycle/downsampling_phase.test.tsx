@@ -17,7 +17,7 @@ describe('DownsamplingPhase', () => {
   };
 
   it('should open popover on click', () => {
-    render(<DownsamplingPhase downsample={downsample} stepNumber={1} />);
+    render(<DownsamplingPhase downsample={downsample} stepNumber={1} canManageLifecycle />);
 
     const button = screen.getByTestId('downsamplingPhase-1h-label');
     fireEvent.click(button);
@@ -28,7 +28,14 @@ describe('DownsamplingPhase', () => {
   });
 
   it('should display phase name in popover for ILM', () => {
-    render(<DownsamplingPhase downsample={downsample} stepNumber={1} phaseName="hot" />);
+    render(
+      <DownsamplingPhase
+        downsample={downsample}
+        stepNumber={1}
+        phaseName="hot"
+        canManageLifecycle
+      />
+    );
 
     const button = screen.getByTestId('downsamplingPhase-1h-label');
     fireEvent.click(button);
@@ -38,7 +45,7 @@ describe('DownsamplingPhase', () => {
   });
 
   it('should display correct step number', () => {
-    render(<DownsamplingPhase downsample={downsample} stepNumber={2} />);
+    render(<DownsamplingPhase downsample={downsample} stepNumber={2} canManageLifecycle />);
 
     const button = screen.getByTestId('downsamplingPhase-1h-label');
     fireEvent.click(button);

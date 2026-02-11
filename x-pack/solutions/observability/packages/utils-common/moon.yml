@@ -19,6 +19,7 @@ project:
     sourceRoot: x-pack/solutions/observability/packages/utils-common
 dependsOn:
   - '@kbn/es-query'
+  - '@kbn/std'
 tags:
   - shared-common
   - package

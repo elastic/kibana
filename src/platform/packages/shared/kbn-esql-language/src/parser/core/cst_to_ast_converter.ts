@@ -17,10 +17,10 @@ import { nonNullable, unescapeColumn } from './helpers';
 import { firstItem, lastItem, resolveItem, singleItems } from '../../ast/visitor/utils';
 import { type AstNodeParserFields, Builder } from '../../ast/builder';
 import { type ArithmeticUnaryContext } from '../antlr/esql_parser';
-import { PromQLParser } from '../../promql/parser/parser';
+import { PromQLParser } from '../../embedded_languages/promql/parser/parser';
 import type { AstNodeTemplate } from '../../ast/builder';
 import type { Parser } from './parser';
-import type { PromQLAstQueryExpression } from '../../promql/types';
+import type { PromQLAstQueryExpression } from '../../embedded_languages/promql/types';
 
 const textExistsAndIsValid = (text: string | undefined): text is string =>
   !!(text && !/<missing /.test(text));

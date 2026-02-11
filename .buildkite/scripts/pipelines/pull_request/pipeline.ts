@@ -59,19 +59,12 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       return;
     }
 
-    if (GITHUB_PR_LABELS.includes('ci:beta-faster-pr-build')) {
-      await runPreBuild();
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base_merged_phases.yml', false));
-    } else {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/pick_test_groups.yml'));
-    }
+    await runPreBuild();
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
     if (prHasFIPSLabel()) {
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml'));
     }
-
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
 
     if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
@@ -527,36 +520,11 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/check_saved_objects.yml'));
     }
 
-    if (
-      (await doAnyChangesMatch([
-        /^packages\/kbn-babel-preset/,
-        /^packages\/kbn-repo-file-maps/,
-        /^src\/platform\/packages\/private\/kbn-babel-transform/,
-        /^src\/platform\/packages\/private\/kbn-import-resolver/,
-        /^src\/platform\/packages\/private\/kbn-jest-serializers/,
-        /^src\/platform\/packages\/private\/kbn-repo-packages/,
-        /^src\/platform\/packages\/shared\/kbn-babel-register/,
-        /^src\/platform\/packages\/shared\/kbn-jest-benchmarks/,
-        /^src\/platform\/packages\/shared\/kbn-repo-info/,
-        /^src\/platform\/packages\/shared\/kbn-test/,
-        /^src\/setup_node_env/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:bench-jest')
-    ) {
+    if (GITHUB_PR_LABELS.includes('ci:bench-jest')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml'));
     }
 
-    if (
-      (await doAnyChangesMatch([
-        /^src\/platform\/packages\/shared\/kbn-es/,
-        /^src\/platform\/packages\/shared\/kbn-ftr-benchmarks/,
-        /^src\/platform\/packages\/shared\/kbn-ftr-common-functional-services/,
-        /^src\/platform\/packages\/shared\/kbn-ftr-common-functional-ui-services/,
-        /^src\/platform\/packages\/shared\/kbn-test/,
-        /^src\/setup_node_env/,
-      ])) ||
-      GITHUB_PR_LABELS.includes('ci:bench-ftr')
-    ) {
+    if (GITHUB_PR_LABELS.includes('ci:bench-ftr')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ftr_bench.yml'));
     }
 

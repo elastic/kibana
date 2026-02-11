@@ -1,18 +1,19 @@
 {
-  "lastModified": "2026-01-30T09:08:40.048Z",
-  "sha1": "84af36db19fd0a9023c112feeaefbf67229cf311",
+  "lastModified": "2026-02-04T19:00:09.973Z",
+  "sha1": "90bd13f6210737e4784c51c7176f13a07fcd1b80",
   "tests": [
     {
       "id": "405beff6794306f-a54347ac1e57e7e",
       "title": "Profiling is not setup and no data is loaded Admin users",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_no_setup.spec.ts",
-        "line": 24,
-        "column": 10
+        "line": 28,
+        "column": 12
       }
     },
     {
@@ -20,12 +21,13 @@
       "title": "Profiling is not setup and no data is loaded Viewer users",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_no_setup.spec.ts",
-        "line": 38,
-        "column": 10
+        "line": 42,
+        "column": 12
       }
     },
     {
@@ -33,12 +35,13 @@
       "title": "APM integration not installed but setup completed Admin user",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 24,
-        "column": 10
+        "line": 28,
+        "column": 12
       }
     },
     {
@@ -46,12 +49,13 @@
       "title": "APM integration not installed but setup completed Viewer user",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 39,
-        "column": 10
+        "line": 43,
+        "column": 12
       }
     },
     {
@@ -59,11 +63,12 @@
       "title": "Profiling is setup and data is loaded Admin user",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_data.spec.ts",
-        "line": 22,
+        "line": 23,
         "column": 10
       }
     },
@@ -72,11 +77,12 @@
       "title": "Profiling is setup and data is loaded Viewer user",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_data.spec.ts",
-        "line": 36,
+        "line": 37,
         "column": 10
       }
     },
@@ -85,11 +91,12 @@
       "title": "Collector integration is not installed collector integration missing",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_integrations.spec.ts",
-        "line": 23,
+        "line": 24,
         "column": 10
       }
     },
@@ -98,11 +105,12 @@
       "title": "Collector integration is not installed Symbolizer integration is not installed",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_integrations.spec.ts",
-        "line": 51,
+        "line": 52,
         "column": 10
       }
     }

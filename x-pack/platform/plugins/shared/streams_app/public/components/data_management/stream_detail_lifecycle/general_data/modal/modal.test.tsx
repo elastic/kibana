@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Streams } from '@kbn/streams-schema';
-import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
+import type { IlmPolicy } from '@kbn/streams-schema';
 import { EditLifecycleModal } from './modal';
 
 jest.mock('../../../../../hooks/use_kibana');
@@ -89,10 +89,7 @@ describe('EditLifecycleModal', () => {
     mockUseKibana.mockReturnValue({
       isServerless: false,
     } as any);
-    mockGetIlmPolicies.mockResolvedValue([
-      { name: 'policy1' },
-      { name: 'policy2' },
-    ] as PolicyFromES[]);
+    mockGetIlmPolicies.mockResolvedValue([{ name: 'policy1' }, { name: 'policy2' }] as IlmPolicy[]);
   });
 
   describe('Modal Structure', () => {

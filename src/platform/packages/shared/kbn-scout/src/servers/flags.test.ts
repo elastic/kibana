@@ -11,83 +11,88 @@ import { FlagsReader } from '@kbn/dev-cli-runner';
 import { parseServerFlags } from './flags';
 
 describe('parseServerFlags', () => {
-  it(`should throw an error with '--stateful' flag as string value`, () => {
+  it(`should throw an error with incorrect '--arch' flag`, () => {
     const flags = new FlagsReader({
-      stateful: 'true',
+      location: 'cloud',
+      arch: 'agentic',
+      domain: 'security_complete',
       logToFile: false,
-    });
-
-    expect(() => parseServerFlags(flags)).toThrow('expected --stateful to be a boolean');
-  });
-
-  it(`should throw an error with '--serverless' flag as boolean`, () => {
-    const flags = new FlagsReader({
-      serverless: true,
-      logToFile: false,
-    });
-
-    expect(() => parseServerFlags(flags)).toThrow('expected --serverless to be a string');
-  });
-
-  it(`should throw an error with incorrect '--serverless' flag`, () => {
-    const flags = new FlagsReader({
-      serverless: 'a',
-      logToFile: false,
+      headed: false,
     });
 
     expect(() => parseServerFlags(flags)).toThrow(
-      'invalid --serverless, expected one of "es", "oblt", "oblt-logs-essentials", "security"'
+      /Scout test target validation discovered 1 issue\(s\):\n - arch/
     );
   });
 
   it(`should parse with correct config and serverless flags`, () => {
     const flags = new FlagsReader({
-      stateful: false,
-      serverless: 'oblt',
+      location: 'local',
+      arch: 'serverless',
+      domain: 'observability_complete',
+      headed: false,
       logToFile: false,
+      serverConfigSet: 'default',
     });
     const result = parseServerFlags(flags);
 
     expect(result).toEqual({
-      mode: 'serverless=oblt',
       esFrom: undefined,
       installDir: undefined,
-      configDir: undefined,
       logsDir: undefined,
+      serverConfigSet: 'default',
+      testTarget: {
+        arch: 'serverless',
+        domain: 'observability_complete',
+        location: 'local',
+      },
     });
   });
 
   it(`should parse with correct config and stateful flags`, () => {
     const flags = new FlagsReader({
-      stateful: true,
-      logToFile: false,
+      location: 'cloud',
+      arch: 'stateful',
+      domain: 'observability_complete',
       esFrom: 'snapshot',
+      logToFile: false,
+      serverConfigSet: 'default',
     });
     const result = parseServerFlags(flags);
 
     expect(result).toEqual({
-      mode: 'stateful',
       esFrom: 'snapshot',
       installDir: undefined,
-      configDir: undefined,
       logsDir: undefined,
+      serverConfigSet: 'default',
+      testTarget: {
+        arch: 'stateful',
+        domain: 'observability_complete',
+        location: 'cloud',
+      },
     });
   });
 
-  it(`should parse config-dir flag`, () => {
+  it(`should parse serverConfigSet flag`, () => {
     const flags = new FlagsReader({
-      stateful: true,
+      location: 'cloud',
+      arch: 'stateful',
+      domain: 'classic',
       logToFile: false,
-      'config-dir': 'uiam_local',
+      serverConfigSet: 'uiam_local',
     });
     const result = parseServerFlags(flags);
 
     expect(result).toEqual({
-      mode: 'stateful',
       esFrom: undefined,
       installDir: undefined,
-      configDir: 'uiam_local',
       logsDir: undefined,
+      serverConfigSet: 'uiam_local',
+      testTarget: {
+        arch: 'stateful',
+        domain: 'classic',
+        location: 'cloud',
+      },
     });
   });
 });

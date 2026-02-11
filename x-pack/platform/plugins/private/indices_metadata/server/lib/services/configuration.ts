@@ -76,14 +76,31 @@ export class ConfigurationService {
       } as LogMeta);
       return IndicesMetadataConfigurationSchema.validate(artifact.data);
     } catch (error) {
+      const cause = error.cause;
+      const code = error.code;
+      const message = error.message;
+
       if (error instanceof ManifestNotFoundError) {
-        this.logger.warn('Indices metadata configuration manifest not found');
+        this.logger.warn('Indices metadata configuration manifest not found', { error });
       } else if (error instanceof ArtifactNotFoundError) {
-        this.logger.warn('Indices metadata configuration artifact not found');
-      } else {
-        this.logger.error(`Failed to get indices metadata configuration: ${error}`, {
+        this.logger.warn('Indices metadata configuration artifact not found', { error });
+      } else if (cause && cause instanceof AggregateError) {
+        this.logger.error(`AggregateError while getting indices metadata configuration: ${cause}`, {
           error,
+          code,
+          message,
+          cause,
         } as LogMeta);
+      } else {
+        this.logger.error(
+          `Unexpected error while getting indices metadata configuration: ${error}`,
+          {
+            error,
+            code,
+            message,
+            cause,
+          } as LogMeta
+        );
       }
       return undefined;
     }

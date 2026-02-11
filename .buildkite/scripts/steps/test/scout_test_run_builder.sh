@@ -17,19 +17,21 @@ buildkite-agent artifact upload "scout_playwright_configs.json"
 
 echo '--- Running Scout API Integration Tests'
 node scripts/scout.js run-tests \
---stateful \
---config src/platform/packages/shared/kbn-scout/test/scout/api/playwright.config.ts \
---kibana-install-dir "$KIBANA_BUILD_LOCATION"
+  --location local \
+  --arch stateful \
+  --domain classic \
+  --config src/platform/packages/shared/kbn-scout/test/scout/api/playwright.config.ts \
+  --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
 
 echo '--- Checking EUI Website Availability'
 eui_check_exit=0
 ts-node src/platform/packages/shared/kbn-scout/test/scout/scripts/check_eui_availability.ts || eui_check_exit=$?
 if [ "$eui_check_exit" -eq 0 ]; then
   echo '--- Running Scout EUI Helpers Tests'
-  SCOUT_TARGET_TYPE='local' SCOUT_TARGET_MODE='serverless=security' \
+  SCOUT_TARGET_LOCATION='local' SCOUT_TARGET_ARCH='serverless' SCOUT_TARGET_DOMAIN='security_complete' \
   "${KIBANA_DIR:-$(pwd)}/node_modules/.bin/playwright" test \
     --project local \
-    --grep @svlSecurity \
+    --grep serverless-security_complete \
     --config src/platform/packages/shared/kbn-scout/test/scout/ui/playwright.config.ts
 else
   echo 'EUI website is not available - skipping EUI Helpers Tests'
