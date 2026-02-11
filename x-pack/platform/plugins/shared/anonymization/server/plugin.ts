@@ -12,6 +12,7 @@ import type {
   Plugin,
   Logger,
 } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { resolveEffectivePolicy } from '@kbn/anonymization-common';
 import type {
   EncryptedSavedObjectsPluginSetup,
@@ -38,6 +39,10 @@ interface AnonymizationSetupDeps {
 interface AnonymizationStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
+
+const anonymizationSaltSchemaV1 = schema.object({
+  salt: schema.string(),
+});
 
 export class AnonymizationPlugin
   implements
@@ -72,6 +77,15 @@ export class AnonymizationPlugin
       mappings: {
         dynamic: false,
         properties: {},
+      },
+      modelVersions: {
+        1: {
+          changes: [],
+          schemas: {
+            forwardCompatibility: anonymizationSaltSchemaV1.extends({}, { unknowns: 'ignore' }),
+            create: anonymizationSaltSchemaV1,
+          },
+        },
       },
     });
 
