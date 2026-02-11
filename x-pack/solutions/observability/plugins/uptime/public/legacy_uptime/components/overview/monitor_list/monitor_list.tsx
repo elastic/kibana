@@ -226,7 +226,7 @@ export const MonitorListComponent: ({
       <EuiBasicTable
         aria-label={labels.getDescriptionLabel(items.length)}
         tableCaption={i18n.translate('xpack.uptime.monitorList.monitorListCaption', {
-          defaultMessage: 'Monitor overview',
+          defaultMessage: 'Monitors list',
         })}
         error={error?.body?.message || error?.message}
         loading={loading || isPending}
