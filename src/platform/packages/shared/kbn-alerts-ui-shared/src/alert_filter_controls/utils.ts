@@ -10,10 +10,11 @@
 import { isEmpty, isEqual, pick } from 'lodash';
 import type { ControlGroupRuntimeState } from '@kbn/control-group-renderer';
 import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
+import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import type { FilterControlConfig } from './types';
 
 export const getPanelsInOrderFromControlsState = (controlState: ControlGroupRuntimeState) => {
-  const panels = controlState.initialChildControlState ?? {};
+  const panels = convertCamelCasedKeysToSnakeCase(controlState.initialChildControlState) ?? {};
   return Object.values(panels).sort((a, b) => a.order - b.order);
 };
 

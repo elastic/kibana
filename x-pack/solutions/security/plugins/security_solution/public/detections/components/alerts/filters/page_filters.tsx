@@ -13,6 +13,7 @@ import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_cont
 import { useHistory } from 'react-router-dom';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
+import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
@@ -81,10 +82,10 @@ export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
       }),
     [history]
   );
-  const filterControlsUrlState = useMemo(
-    () => urlStorage.get<FilterControlConfig[] | undefined>(URL_PARAM_KEY.pageFilter) ?? undefined,
-    [urlStorage]
-  );
+  const filterControlsUrlState = useMemo(() => {
+    const pageFilters = urlStorage.get<FilterControlConfig[] | undefined>(URL_PARAM_KEY.pageFilter);
+    return pageFilters ? pageFilters.map(convertCamelCasedKeysToSnakeCase) : undefined;
+  }, [urlStorage]);
 
   const setFilterControlsUrlState = useCallback(
     (newFilterControls: FilterControlConfig[]) => {
