@@ -215,6 +215,19 @@ export const SCHEMA_SEARCH_MODEL_VERSION_10 = SCHEMA_SEARCH_MODEL_VERSION_8.exte
   tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_10, { minSize: 1 }),
 });
 
+const DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_11 =
+  DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10.extends({
+    hideDataTable: schema.boolean({ defaultValue: false }),
+  });
+
+const SCHEMA_DISCOVER_SESSION_TAB_VERSION_11 = SCHEMA_DISCOVER_SESSION_TAB_VERSION_10.extends({
+  attributes: DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_11,
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_11 = SCHEMA_SEARCH_MODEL_VERSION_10.extends({
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_11, { minSize: 1 }),
+});
+
 const { tabs: tabsV10, ...restV10Props } = SCHEMA_SEARCH_MODEL_VERSION_10.getPropSchemas();
 
 export const SCHEMA_SEARCH_MODEL_VERSION_10_SO_API_WORKAROUND = schema.object({
@@ -222,7 +235,14 @@ export const SCHEMA_SEARCH_MODEL_VERSION_10_SO_API_WORKAROUND = schema.object({
   tabs: schema.maybe(tabsV10),
 });
 
+const { tabs: tabsV11, ...restV11Props } = SCHEMA_SEARCH_MODEL_VERSION_11.getPropSchemas();
+
+export const SCHEMA_SEARCH_MODEL_VERSION_11_SO_API_WORKAROUND = schema.object({
+  ...restV11Props,
+  tabs: schema.maybe(tabsV11),
+});
+
 export type DiscoverSessionTabAttributes = TypeOf<
-  typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10
+  typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_11
 >;
-export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_10>;
+export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_11>;

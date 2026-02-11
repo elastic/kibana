@@ -23,6 +23,7 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import { act } from 'react-dom/test-utils';
 import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { DiscoverServices } from '../../build_services';
+import { internalStateActions } from '../../application/main/state_management/redux';
 
 describe('Document view mode toggle component', () => {
   const mountComponent = async ({
@@ -68,8 +69,14 @@ describe('Document view mode toggle component', () => {
       result: 10,
     }) as DataTotalHits$;
 
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.setAppState)({
+        appState: { viewMode, hideDataTable: false },
+      })
+    );
+
     const component = mountWithIntl(
-      <DiscoverTestProvider services={services}>
+      <DiscoverTestProvider services={services} stateContainer={stateContainer}>
         <DocumentViewModeToggle
           viewMode={viewMode}
           isEsqlMode={isEsqlMode}

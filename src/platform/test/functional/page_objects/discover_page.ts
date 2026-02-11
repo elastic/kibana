@@ -423,6 +423,19 @@ export class DiscoverPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  public async isTableVisible() {
+    return await this.testSubjects.exists('discoverDocTable');
+  }
+
+  public async toggleTableVisibility() {
+    if (await this.isTableVisible()) {
+      await this.testSubjects.click('dscHideTableButton');
+    } else {
+      await this.testSubjects.click('dscShowTableButton');
+    }
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   public async getHistogramHeight() {
     const histogram = await this.testSubjects.find('unifiedHistogramResizablePanelFixed');
     return (await histogram.getSize()).height;

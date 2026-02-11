@@ -10,7 +10,10 @@
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
-import { extractTabsBackfillFn } from '../../common/service/extract_tabs';
+import {
+  extractTabsBackfillFn,
+  hideDataTableBackfillFn,
+} from '../../common/service/extract_tabs';
 import { getAllMigrations } from './search_migrations';
 import { SavedSearchTypeDisplayName } from '../../common/constants';
 import {
@@ -25,6 +28,7 @@ import {
   SCHEMA_SEARCH_MODEL_VERSION_8,
   SCHEMA_SEARCH_MODEL_VERSION_9_SO_API_WORKAROUND,
   SCHEMA_SEARCH_MODEL_VERSION_10_SO_API_WORKAROUND,
+  SCHEMA_SEARCH_MODEL_VERSION_11_SO_API_WORKAROUND,
 } from './schema';
 
 export function getSavedSearchObjectType(
@@ -131,6 +135,21 @@ export function getSavedSearchObjectType(
             { unknowns: 'ignore' }
           ),
           create: SCHEMA_SEARCH_MODEL_VERSION_10_SO_API_WORKAROUND,
+        },
+      },
+      11: {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: hideDataTableBackfillFn,
+          },
+        ],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_11_SO_API_WORKAROUND.extends(
+            {},
+            { unknowns: 'ignore' }
+          ),
+          create: SCHEMA_SEARCH_MODEL_VERSION_11_SO_API_WORKAROUND,
         },
       },
     },

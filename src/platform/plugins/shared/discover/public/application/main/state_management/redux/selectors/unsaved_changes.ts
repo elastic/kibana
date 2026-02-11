@@ -215,6 +215,7 @@ const TAB_COMPARATORS: TabComparators = {
   columns: fieldComparator('columns', []),
   grid: fieldComparator('grid', {}),
   hideChart: fieldComparator('hideChart', false),
+  hideDataTable: fieldComparator('hideDataTable', false),
   // isTextBasedQuery is derived from the query itself and can be ignored
   isTextBasedQuery: NOOP_COMPARATOR,
   // usesAdHocDataView is derived from the data view itself and can be ignored

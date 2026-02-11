@@ -189,7 +189,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             totalHits,
           });
         });
+
       }
+
+      it('table can be toggled in document level view', async () => {
+        expect(await discover.isTableVisible()).to.be(true);
+        await testSubjects.existOrFail('dscHideTableButton');
+        await testSubjects.missingOrFail('dscShowTableButton');
+
+        await discover.toggleTableVisibility();
+        expect(await discover.isTableVisible()).to.be(false);
+        await testSubjects.existOrFail('dscShowTableButton');
+        await testSubjects.missingOrFail('dscHideTableButton');
+
+        await discover.toggleTableVisibility();
+        expect(await discover.isTableVisible()).to.be(true);
+        await testSubjects.existOrFail('dscHideTableButton');
+        await testSubjects.missingOrFail('dscShowTableButton');
+      });
     }
 
     describe('time based data view', function () {

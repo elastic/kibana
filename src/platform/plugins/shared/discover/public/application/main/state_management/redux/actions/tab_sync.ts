@@ -101,7 +101,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       // Set the default profile state only if not loading a saved search,
       // to avoid overwriting saved search state
       if (!currentSavedSearch.id) {
-        const { breakdownField, columns, rowHeight, hideChart } = getCurrentUrlState(
+        const { breakdownField, columns, rowHeight, hideChart, hideDataTable } = getCurrentUrlState(
           urlStateStorage,
           services
         );
@@ -115,6 +115,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
               rowHeight: rowHeight === undefined,
               breakdownField: breakdownField === undefined,
               hideChart: hideChart === undefined,
+              hideDataTable: hideDataTable === undefined,
             },
           })
         );

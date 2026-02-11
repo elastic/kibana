@@ -42,6 +42,7 @@ export const toSavedSearchAttributes = (
     description: savedSearch.description ?? '',
     grid: savedSearch.grid ?? {},
     hideChart: savedSearch.hideChart ?? false,
+    hideDataTable: savedSearch.hideDataTable ?? false,
     viewMode: savedSearch.viewMode,
     hideAggregatedPreview: savedSearch.hideAggregatedPreview,
     rowHeight: savedSearch.rowHeight,
