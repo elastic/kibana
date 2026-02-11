@@ -371,8 +371,10 @@ export class StreamsApp {
         throw new Error('MonacoEnvironment.monaco.editor is not available');
       }
 
-      const values: string[] = editorApi.getModels().map((model: any) => model.getValue() as string);
-      return values.findIndex((value) => value.trim().startsWith('{') && value.includes('\"field\"'));
+      const values: string[] = editorApi
+        .getModels()
+        .map((model: any) => model.getValue() as string);
+      return values.findIndex((value) => value.trim().startsWith('{') && value.includes('"field"'));
     });
 
     await this.kibanaMonacoEditor.setCodeEditorValue(
@@ -479,9 +481,9 @@ export class StreamsApp {
     }
 
     // Wait for the processor configuration panel to be ready before interacting with inputs.
-    await expect(this.page.getByTestId('streamsAppProcessorConfigurationSaveProcessorButton')).toBeVisible(
-      { timeout: 30000 }
-    );
+    await expect(
+      this.page.getByTestId('streamsAppProcessorConfigurationSaveProcessorButton')
+    ).toBeVisible({ timeout: 30000 });
   }
 
   async clickAddCondition(handleContextMenuClick: boolean = true) {
@@ -500,9 +502,9 @@ export class StreamsApp {
     }
 
     // Wait for the condition configuration panel to be ready before interacting.
-    await expect(this.page.getByTestId('streamsAppConditionConfigurationSaveConditionButton')).toBeVisible(
-      { timeout: 30000 }
-    );
+    await expect(
+      this.page.getByTestId('streamsAppConditionConfigurationSaveConditionButton')
+    ).toBeVisible({ timeout: 30000 });
   }
   async getProcessorPatternText() {
     return await this.page.getByTestId('fullText').locator('.euiText').textContent();
@@ -729,9 +731,7 @@ export class StreamsApp {
 
     // `readySignal` can legitimately match multiple elements (e.g. both create buttons),
     // so avoid strict-locator assertions like `toBeVisible()` which require a single match.
-    await expect
-      .poll(async () => readySignal.count(), { timeout: 60_000 })
-      .toBeGreaterThan(0);
+    await expect.poll(async () => readySignal.count(), { timeout: 60_000 }).toBeGreaterThan(0);
   }
 
   async saveStepsListChanges() {

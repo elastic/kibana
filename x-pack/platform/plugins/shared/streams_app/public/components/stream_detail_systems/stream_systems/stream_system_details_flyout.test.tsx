@@ -105,8 +105,9 @@ describe('StreamSystemDetailsFlyout', () => {
     await user.click(screen.getByTestId('system_identification_existing_save_filter_button'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('system_identification_existing_save_changes_button')).toBeDisabled();
+      expect(
+        screen.getByTestId('system_identification_existing_save_changes_button')
+      ).toBeDisabled();
     });
   });
 });
-

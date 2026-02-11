@@ -86,9 +86,9 @@ describe('streamRoutingMachine condition editor validity', () => {
       )
     ).toBe(true);
 
-    expect(
-      actor.getSnapshot().value
-    ).toEqual({ ready: { ingestMode: { editingRule: 'changing' } } });
+    expect(actor.getSnapshot().value).toEqual({
+      ready: { ingestMode: { editingRule: 'changing' } },
+    });
 
     expect(actor.getSnapshot().can({ type: 'routingRule.save' })).toBe(true);
 
@@ -101,4 +101,3 @@ describe('streamRoutingMachine condition editor validity', () => {
     expect(actor.getSnapshot().can({ type: 'routingRule.save' })).toBe(true);
   });
 });
-

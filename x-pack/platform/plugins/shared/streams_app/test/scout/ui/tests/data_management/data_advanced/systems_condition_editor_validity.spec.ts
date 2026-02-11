@@ -64,15 +64,20 @@ test.describe('Stream systems - condition editor validity', { tag: ['@ess', '@sv
     await pageObjects.streams.fillConditionEditorWithSyntax(
       '{"field":"service.name","eq":"updated"}'
     );
-    await expect(page.getByTestId('system_identification_existing_save_changes_button')).toBeEnabled();
+    await expect(
+      page.getByTestId('system_identification_existing_save_changes_button')
+    ).toBeEnabled();
 
     await pageObjects.streams.fillConditionEditorWithSyntax('{');
-    await expect(page.getByTestId('system_identification_existing_save_changes_button')).toBeDisabled();
+    await expect(
+      page.getByTestId('system_identification_existing_save_changes_button')
+    ).toBeDisabled();
 
     await pageObjects.streams.fillConditionEditorWithSyntax(
       '{"field":"service.name","eq":"updated-again"}'
     );
-    await expect(page.getByTestId('system_identification_existing_save_changes_button')).toBeEnabled();
+    await expect(
+      page.getByTestId('system_identification_existing_save_changes_button')
+    ).toBeEnabled();
   });
 });
-

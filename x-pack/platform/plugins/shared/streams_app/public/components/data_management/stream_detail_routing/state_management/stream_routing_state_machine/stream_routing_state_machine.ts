@@ -136,10 +136,24 @@ export const streamRoutingMachine = setup({
     notifyQueryStreamSuccess: getPlaceholderFor(createQueryStreamSuccessNotifier),
   },
   guards: {
-    canForkStream: and(['hasManagePrivileges', 'isValidRouting', 'isValidChild', 'isConditionEditorValid']),
+    canForkStream: and([
+      'hasManagePrivileges',
+      'isValidRouting',
+      'isValidChild',
+      'isConditionEditorValid',
+    ]),
     canReorderRules: and(['hasManagePrivileges', 'hasMultipleRoutingRules']),
-    canUpdateStream: and(['hasManagePrivileges', 'isValidRouting', 'hasRoutingChanges', 'isConditionEditorValid']),
-    canSaveSuggestion: and(['hasManagePrivileges', 'isValidEditedSuggestion', 'isConditionEditorValid']),
+    canUpdateStream: and([
+      'hasManagePrivileges',
+      'isValidRouting',
+      'hasRoutingChanges',
+      'isConditionEditorValid',
+    ]),
+    canSaveSuggestion: and([
+      'hasManagePrivileges',
+      'isValidEditedSuggestion',
+      'isConditionEditorValid',
+    ]),
     hasMultipleRoutingRules: ({ context }) => context.routing.length > 1,
     hasManagePrivileges: ({ context }) => context.definition.privileges.manage,
     hasSimulatePrivileges: ({ context }) => context.definition.privileges.simulate,
