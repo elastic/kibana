@@ -38,6 +38,8 @@ const createAppMock = <TState = undefined, TActions = undefined>(): jest.Mocked<
     actions: {} as unknown as jest.Mocked<SidebarApp<TState, TActions>>['actions'],
     getState: jest.fn().mockReturnValue({} as TState),
     getState$: jest.fn().mockReturnValue(new BehaviorSubject<TState>({} as TState)),
+    getStatus: jest.fn().mockReturnValue('available'),
+    getStatus$: jest.fn().mockReturnValue(new BehaviorSubject('available')),
   };
 };
 
