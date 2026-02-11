@@ -26,7 +26,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { AssetManager } from './domain/asset_manager';
 import type { FeatureFlags } from './infra/feature_flags';
 import type { LogsExtractionClient } from './domain/logs_extraction_client';
-import type { EntityManager } from './domain/entity_manager';
+import type { CRUDClient } from './domain/crud_client';
 
 export interface EntityStoreSetupPlugins {
   taskManager: TaskManagerSetupContract;
@@ -46,7 +46,7 @@ export interface EntityStoreApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   logger: Logger;
   assetManager: AssetManager;
-  entityManager: EntityManager;
+  entityManager: CRUDClient;
   featureFlags: FeatureFlags;
   logsExtractionClient: LogsExtractionClient;
 }

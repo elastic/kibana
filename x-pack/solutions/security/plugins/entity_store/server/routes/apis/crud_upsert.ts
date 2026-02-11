@@ -13,6 +13,11 @@ import { wrapMiddlewares } from '../middleware';
 import { EntityStoreNotInstalledError } from '../../domain/errors';
 import { Entity } from '../../../common/domain/definitions/entity.gen';
 import { z } from '@kbn/zod';
+import { EntityType } from '@kbn/entity-store/common/domain/definitions/entity_schema';
+
+const paramsSchema = z.object({
+  entityType: EntityType,
+}).required();
 
 const querySchema = z.object({
   force: BooleanFromString.optional().default(false),
@@ -21,7 +26,7 @@ const querySchema = z.object({
 export function registerCRUDUpsert(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: '/api/entity-store/entities',
+      path: '/api/entity-store/entities/{entityType}',
       access: 'public',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
@@ -30,10 +35,11 @@ export function registerCRUDUpsert(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1, // TODO: KUBA: SHould it be public? Really?
+        version: API_VERSIONS.public.v1, // TODO(kuba): public or internal?
         validate: {
           request: {
             body: buildRouteValidationWithZod(Entity),
+            params: buildRouteValidationWithZod(paramsSchema),
             query: buildRouteValidationWithZod(querySchema),
           },
         },
@@ -48,7 +54,7 @@ export function registerCRUDUpsert(router: EntityStorePluginRouter) {
         }
 
         try {
-          await entityManager.upsertEntity(req.body, req.query.force);
+          await entityManager.upsertEntity(req.params.entityType, req.body, req.query.force);
         } catch (error) {
           logger.error(error);
           throw error;

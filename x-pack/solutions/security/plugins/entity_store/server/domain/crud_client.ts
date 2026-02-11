@@ -24,7 +24,12 @@ interface EntityManagerDependencies {
   namespace: string;
 }
 
-export class EntityManager {
+interface BulkObject {
+    type: EntityType,
+    document: Entity,
+}
+
+export class CRUDClient {
   private readonly logger: Logger;
   private readonly esClient: ElasticsearchClient;
   private readonly namespace: string;
@@ -43,12 +48,8 @@ export class EntityManager {
     return id;
   }
 
-  public async upsertEntity(document: Entity, force: boolean): Promise<void> {
-    const entityType = document.entity?.type;
-    if (entityType == null) {
-      throw new BadCRUDRequestError('', 'entity.type is required');
-    }
-    const rawId = this.getEntityId(entityType as EntityType, document);
+  public async upsertEntity(entityType: EntityType, document: Entity, force: boolean): Promise<void> {
+    const rawId = this.getEntityId(entityType, document);
     const id: string = createHash('md5').update(rawId).digest('hex');
     this.logger.info(`Upserting entity ID ${id}`);
     
@@ -61,7 +62,7 @@ export class EntityManager {
 
     if (!force) {
       const flat = getFlattenedObject(document);
-      const definition = getEntityDefinition(entityType as EntityType, this.namespace);
+      const definition = getEntityDefinition(entityType, this.namespace);
       const fieldDescriptions = getFieldDescriptions(id, flat, definition);
       assertOnlyNonForcedAttributesInReq(id, fieldDescriptions);
     }
@@ -89,8 +90,8 @@ export class EntityManager {
     }
   }
 
-  public async upsertEntitiesBulk(documents: Entity[], force: boolean) {
-    await Promise.all(documents.map((document) => this.upsertEntity(document, force)));
+    public async upsertEntitiesBulk(objects: BulkObject[], force: boolean) {
+    await Promise.all(objects.map((obj) => this.upsertEntity(obj.type, obj.document, force)));
   }
 
   public async deleteEntity(id: string) {

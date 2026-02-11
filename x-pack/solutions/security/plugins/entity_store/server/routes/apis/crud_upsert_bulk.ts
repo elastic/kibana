@@ -13,8 +13,13 @@ import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { EntityStoreNotInstalledError } from '../../domain/errors';
 import { Entity } from '../../../common/domain/definitions/entity.gen';
+import { EntityType } from '@kbn/entity-store/common/domain/definitions/entity_schema';
 
-const bodySchema = z.array(Entity);
+const bodySchema = z.array(z.object({
+  type: EntityType,
+  document: Entity
+}));
+
 const querySchema = z.object({
   force: BooleanFromString.optional().default(false),
 });
