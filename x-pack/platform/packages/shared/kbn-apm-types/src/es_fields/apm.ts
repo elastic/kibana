@@ -147,6 +147,7 @@ export const METRICSET_INTERVAL = 'metricset.interval';
 
 export const LABEL_NAME = 'labels.name';
 export const LABEL_GC = 'labels.gc';
+export const LABEL_TYPE = 'labels.type';
 export const LABEL_TELEMETRY_AUTO_VERSION = 'labels.telemetry_auto_version';
 export const LABEL_LIFECYCLE_STATE = 'labels.lifecycle_state';
 
@@ -183,17 +184,27 @@ export const FAAS_BILLED_DURATION = 'faas.billed_duration';
 export const METRIC_OTEL_SYSTEM_CPU_UTILIZATION = 'system.cpu.utilization';
 export const METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION = 'system.memory.utilization';
 
-// OTel JVM metrics
-export const METRIC_OTEL_JVM_PROCESS_CPU_PERCENT = 'metrics.jvm.cpu.recent_utilization';
-export const METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE = 'metrics.jvm.memory.used';
-export const METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED = 'metrics.jvm.memory.committed';
-export const METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT = 'metrics.jvm.memory.limit';
-export const METRIC_OTEL_JVM_PROCESS_THREADS_COUNT = 'metrics.jvm.thread.count';
-export const METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT = 'metrics.jvm.system.cpu.utilization';
-export const METRIC_OTEL_JVM_GC_DURATION = 'metrics.jvm.gc.duration';
+// OTel JVM metrics - experimental semconv (process.runtime.jvm.*)
+export const METRIC_OTEL_JVM_PROCESS_CPU_PERCENT = 'process.runtime.jvm.cpu.utilization';
+export const METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE = 'process.runtime.jvm.memory.usage';
+export const METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED = 'process.runtime.jvm.memory.committed';
+export const METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT = 'process.runtime.jvm.memory.limit';
+export const METRIC_OTEL_JVM_PROCESS_THREADS_COUNT = 'process.runtime.jvm.threads.count';
+export const METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT = 'process.runtime.jvm.system.cpu.utilization';
+export const METRIC_OTEL_JVM_GC_DURATION = 'process.runtime.jvm.gc.duration';
+
+// OTel JVM metrics - stable semconv (jvm.*)
+// https://opentelemetry.io/docs/specs/semconv/runtime/jvm-metrics/
+export const METRIC_OTEL_JVM_CPU_PERCENT = 'metrics.jvm.cpu.recent_utilization';
+export const METRIC_OTEL_JVM_MEMORY_USED = 'metrics.jvm.memory.used';
+export const METRIC_OTEL_JVM_MEMORY_COMMITTED = 'metrics.jvm.memory.committed';
+export const METRIC_OTEL_JVM_MEMORY_LIMIT = 'metrics.jvm.memory.limit';
+export const METRIC_OTEL_JVM_THREAD_COUNT = 'metrics.jvm.thread.count';
+export const METRIC_OTEL_JVM_SYSTEM_CPU = 'metrics.jvm.system.cpu.utilization';
+export const METRIC_OTEL_JVM_GC_DURATION_SECONDS = 'metrics.jvm.gc.duration';
 export const ATTRIBUTE_OTEL_JVM_MEMORY_TYPE = 'attributes.jvm.memory.type';
-export const VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP = 'heap';
-export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
+export const VALUE_OTEL_JVM_MEMORY_TYPE_HEAP = 'heap';
+export const VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP = 'non_heap';
 
 // OpenTelemetry semconv fields for AgentName https://opentelemetry.io/docs/specs/semconv/resource/#telemetry-sdk
 export const TELEMETRY_SDK_NAME = 'telemetry.sdk.name';

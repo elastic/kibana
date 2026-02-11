@@ -19,6 +19,7 @@ import type {
   ObservabilityAgentBuilderPluginSetupDependencies,
 } from '../../types';
 import { getToolHandler as getLogGroups } from '../../tools/get_log_groups/handler';
+import { getToolHandler as getRuntimeMetrics } from '../../tools/get_runtime_metrics/handler';
 import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 
 /**
@@ -89,7 +90,7 @@ const START_TIME_OFFSETS = {
   downstream: 24 * 60, // 24 hours
   logs: 15,
   changePoints: 6 * 60, // 6 hours
-  applicationMetrics: 15,
+  runtimeMetrics: 15,
 } as const;
 
 async function fetchAlertContext({
@@ -128,11 +129,6 @@ async function fetchAlertContext({
     {
       key: 'apmDownstreamDependencies' as const,
       startOffset: START_TIME_OFFSETS.downstream,
-      params: { serviceName, serviceEnvironment },
-    },
-    {
-      key: 'apmApplicationMetrics' as const, // Currently JVM only; will expand to other runtimes
-      startOffset: START_TIME_OFFSETS.applicationMetrics,
       params: { serviceName, serviceEnvironment },
     },
     {
@@ -176,6 +172,30 @@ async function fetchAlertContext({
     }
   }
 
+  async function fetchRuntimeMetrics() {
+    try {
+      const start = getStart(START_TIME_OFFSETS.runtimeMetrics);
+      const end = alertStart;
+      const result = await getRuntimeMetrics({
+        core,
+        plugins,
+        request,
+        logger,
+        serviceName,
+        serviceEnvironment,
+        start,
+        end,
+      });
+
+      return result.nodes.length > 0
+        ? { key: 'runtimeMetrics' as const, start, end, data: result.nodes }
+        : null;
+    } catch (err) {
+      logger.debug(`AI insight: runtimeMetrics failed: ${err}`);
+      return null;
+    }
+  }
+
   const allFetchers = [
     ...fetchConfigs.map(async (config) => {
       try {
@@ -194,6 +214,7 @@ async function fetchAlertContext({
       }
     }),
     fetchLogGroups(),
+    fetchRuntimeMetrics(),
   ];
 
   const results = await Promise.all(allFetchers);
@@ -242,7 +263,7 @@ function generateAlertSummary({
     - Keep it concise (~100–150 words total).
 
     Available signals (use what's relevant and available):
-    - Application metrics: CPU, memory, thread saturation — indicates internal resource pressure
+    - Runtime metrics: CPU, memory, GC duration, thread count — indicates internal resource pressure
     - Downstream dependencies: latency/errors in called services — indicates external issues
     - Change points: sudden shifts in throughput/latency/failure rate — shows when problems started
     - Log categories: error messages and exception patterns

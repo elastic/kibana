@@ -12,7 +12,6 @@ import { parseDatemath } from '../utils/time';
 import { getApmServiceSummary } from './get_apm_service_summary';
 import { getApmDownstreamDependencies } from './get_apm_downstream_dependencies';
 import { getServicesItems } from '../../routes/services/get_services/get_services_items';
-import { getServiceNodes } from '../../routes/metrics/get_service_nodes';
 import { ApmDocumentType } from '../../../common/document_type';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getExitSpanChangePoints, getServiceChangePoints } from './get_change_points';
@@ -79,21 +78,6 @@ export function registerDataProviders({
           start,
           end,
         },
-      });
-    }
-  );
-
-  observabilityAgentBuilder.registerDataProvider(
-    'apmApplicationMetrics',
-    async ({ request, serviceName, serviceEnvironment, start, end, kuery }) => {
-      const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
-      return getServiceNodes({
-        kuery: kuery ?? '',
-        apmEventClient,
-        serviceName,
-        environment: serviceEnvironment || ENVIRONMENT_ALL.value,
-        start: parseDatemath(start),
-        end: parseDatemath(end),
       });
     }
   );
