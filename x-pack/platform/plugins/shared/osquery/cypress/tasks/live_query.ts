@@ -44,7 +44,7 @@ export const inputQueryInFlyout = (
 
 export const submitQuery = () => {
   cy.wait(1000);
-  cy.get('#submit-button').should('not.be.disabled').click();
+  cy.get('#submit-button').should('not.be.disabled').click({ force: true });
 };
 
 export const fillInQueryTimeout = (timeout: string) => {

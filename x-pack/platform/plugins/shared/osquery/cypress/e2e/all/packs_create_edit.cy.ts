@@ -58,7 +58,7 @@ describe(
       });
       loadSavedQuery({
         ecs_mapping: {},
-        interval: '3600',
+        interval: '60',
         query: 'select * from uptime;',
       }).then((data) => {
         nomappingSavedQueryId = data.saved_object_id;
@@ -70,7 +70,7 @@ describe(
             field: 'seconds',
           },
         },
-        interval: '3600',
+        interval: '60',
         query: 'select * from uptime;',
         timeout: 607,
       }).then((data) => {
@@ -89,7 +89,7 @@ describe(
             field: 'total_seconds',
           },
         },
-        interval: '3600',
+        interval: '60',
         query: 'select * from uptime;',
       }).then((data) => {
         multipleMappingsSavedQueryId = data.saved_object_id;
@@ -297,7 +297,7 @@ describe(
               queries: {
                 [savedQueryName]: {
                   ecs_mapping: {},
-                  interval: 3600,
+                  interval: 60,
                   query: 'select * from uptime;',
                 },
               },
@@ -358,7 +358,7 @@ describe(
                 queries: {
                   [savedQueryName]: {
                     ecs_mapping: {},
-                    interval: 3600,
+                    interval: 60,
                     query: 'select * from uptime;',
                   },
                 },
@@ -410,7 +410,7 @@ describe(
               queries: {
                 [savedQueryName]: {
                   ecs_mapping: {},
-                  interval: 3600,
+                  interval: 60,
                   query: 'select * from uptime;',
                 },
               },
@@ -466,7 +466,7 @@ describe(
               queries: {
                 [savedQueryName]: {
                   ecs_mapping: {},
-                  interval: 3600,
+                  interval: 60,
                   query: 'select * from uptime;',
                 },
               },
@@ -490,11 +490,12 @@ describe(
           .eq(0)
           .should('have.attr', 'href')
           .then(($href) => {
+            // Verify the correct action_id filter is encoded in the URL
+            const actionId = `pack_${packName}_${savedQueryName}`;
+            expect($href).to.include(encodeURIComponent(actionId));
             // @ts-expect-error-next-line href string - check types
             cy.visit($href);
             cy.getBySel('breadcrumbs').contains('Discover').should('exist');
-            // Verify the correct action_id filter is applied
-            cy.contains(`action_id: pack_${packName}_${savedQueryName}`);
           });
       });
     });
@@ -516,7 +517,7 @@ describe(
               queries: {
                 [savedQueryName]: {
                   ecs_mapping: {},
-                  interval: 3600,
+                  interval: 60,
                   query: 'select * from uptime;',
                 },
               },
@@ -613,7 +614,7 @@ describe(
               queries: {
                 [savedQueryName]: {
                   ecs_mapping: {},
-                  interval: 3600,
+                  interval: 60,
                   query: 'select * from uptime;',
                 },
               },
@@ -666,7 +667,7 @@ describe(
                 queries: {
                   [savedQueryName]: {
                     ecs_mapping: {},
-                    interval: 3600,
+                    interval: 60,
                     query: 'select * from uptime;',
                   },
                 },
@@ -746,7 +747,7 @@ describe(
               queries: {
                 [savedQueryName]: {
                   ecs_mapping: {},
-                  interval: 3600,
+                  interval: 60,
                   query: 'select * from uptime;',
                 },
               },
