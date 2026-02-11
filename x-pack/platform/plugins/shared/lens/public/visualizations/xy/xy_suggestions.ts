@@ -251,7 +251,9 @@ function getSuggestionsForLayer({
 }): VisualizationSuggestion<XYState> | Array<VisualizationSuggestion<XYState>> {
   const title = getSuggestionTitle(yValues, xValue, tableLabel);
   const seriesType: SeriesType =
-    requestedSeriesType || getSeriesType(currentState, layerId, xValue);
+    requestedSeriesType ||
+    getPreferredSeriesTypeForTimeSeriesQuery(query, xValue) ||
+    getSeriesType(currentState, layerId, xValue);
 
   const splitBy = splitByColumns && splitByColumns.length > 0 ? splitByColumns : undefined;
 
@@ -269,7 +271,6 @@ function getSuggestionsForLayer({
     mainPalette: splitBy ? mainPalette : undefined,
     allowMixed,
   };
-
   // handles the simplest cases, acting as a chart switcher
   if (!currentState && changeType === 'unchanged') {
     // For TS/PromQL time series, prefer line as the visible default; otherwise bar_stacked
