@@ -100,10 +100,7 @@ export async function generateSignificantEvents({
 
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
 
-  logger.trace('Fetching field caps for unmapped field validation');
-  const fieldCapsResponse = await withSpan('field_caps_for_significant_events', () =>
-    esClient.fieldCaps({ index: stream.name, fields: '*' })
-  );
+  const fieldCapsResponse = await esClient.fieldCaps({ index: stream.name, fields: '*' });
   const mappedFields = new Set(Object.keys(fieldCapsResponse.fields));
 
   logger.trace('Generating significant events via reasoning agent');
@@ -147,7 +144,7 @@ export async function generateSignificantEvents({
                 status: 'Failed to add',
                 error: `Query references unmapped fields: ${unmappedFields.join(
                   ', '
-                )}. Use only fields that exist in the index.`,
+                )}. Use only fields that are tagged with (mapped) in the dataset_analysis.`,
               };
             }
 
