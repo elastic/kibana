@@ -9,6 +9,7 @@
 
 import { BehaviorSubject, map } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import deepEqual from 'fast-deep-equal';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import type { DrilldownsManager, DrilldownActionState } from './types';
 import { createAction } from './create_action';
@@ -44,7 +45,7 @@ export function initializeDrilldownsManager(
     api: { ...api },
     cleanup: deleteActions,
     comparators: {
-      drilldowns: 'deepEquality',
+      drilldowns: (a, b) => deepEqual(a ?? [], b ?? []),
     } as StateComparators<SerializedDrilldowns>,
     anyStateChange$: drilldowns$.pipe(map(() => undefined)),
     getLatestState: () => ({
