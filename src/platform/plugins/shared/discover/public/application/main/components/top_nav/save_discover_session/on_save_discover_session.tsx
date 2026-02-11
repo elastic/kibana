@@ -45,8 +45,10 @@ export const onSaveDiscoverSession = async ({
   if (services.embeddableEditor.isByValueEditor()) {
     const savedSearch = state.savedSearchState.getState();
     const currentTab = state.getCurrentTab();
-    const currentDataView =
-      selectTabRuntimeState(state.runtimeStateManager, currentTab.id).currentDataView$.getValue();
+    const currentDataView = selectTabRuntimeState(
+      state.runtimeStateManager,
+      currentTab.id
+    ).currentDataView$.getValue();
     const searchSource = createSearchSource({
       dataView: currentDataView,
       appState: currentTab.appState,
