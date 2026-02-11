@@ -40,6 +40,10 @@ describe('useUnsavedChanges', () => {
         initialInternalState: {
           serializedSearchSource: { index: dataViewWithTimefieldMock.id },
         },
+        appState: {
+          // Include the default sort that gets applied during initialization for a data view with a time field
+          sort: [['timestamp', 'desc']],
+        },
       }),
       services,
     });
@@ -140,9 +144,7 @@ describe('useUnsavedChanges', () => {
     expect(internalState.getState().tabs.unsavedIds).toEqual([newTab.id]);
   });
 
-  // TODO: This test needs to be updated to account for URL state sync during initializeSingleTab,
-  // which causes the sort to be overwritten by the URL state before resetAppState is applied.
-  it.skip('should detect changes when persisted discover session changes', async () => {
+  it('should detect changes when persisted discover session changes', async () => {
     const { internalState, initializeSingleTab, addNewTab, saveDiscoverSession } = await setup();
     expect(internalState.getState().hasUnsavedChanges).toBe(false);
     expect(internalState.getState().tabs.unsavedIds).toEqual([]);
