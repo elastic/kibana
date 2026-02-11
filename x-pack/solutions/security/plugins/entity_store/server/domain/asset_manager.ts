@@ -9,12 +9,6 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { getEntityDefinition } from './definitions/registry';
-import {
-  ALL_ENTITY_TYPES,
-  type EntityType,
-  type ManagedEntityDefinition,
-} from './definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
 import type {
@@ -40,6 +34,9 @@ import {
 } from './assets/component_templates';
 import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
 import type { LogsExtractionClient } from './logs_extraction_client';
+import { EntityType } from '@kbn/entity-store/common';
+import { ALL_ENTITY_TYPES, ManagedEntityDefinition } from '@kbn/entity-store/common/domain/definitions/entity_schema';
+import { getEntityDefinition } from '@kbn/entity-store/common/domain/definitions/registry';
 
 interface AssetManagerDependencies {
   logger: Logger;
@@ -177,7 +174,7 @@ export class AssetManager {
     }
     return true;
   }
-  
+
   public async getStatus(withComponents: boolean = false): Promise<GetStatusResult> {
     try {
       const engines = await this.engineDescriptorClient.getAll();
