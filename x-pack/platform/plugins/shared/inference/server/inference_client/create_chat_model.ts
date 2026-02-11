@@ -10,9 +10,12 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { InferenceChatModel, type InferenceChatModelParams } from '@kbn/inference-langchain';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AnonymizationRule, ChatCompleteAnonymizationTarget } from '@kbn/inference-common';
+import type {
+  AnonymizationRule,
+  ChatCompleteAnonymizationTarget,
+  InferenceCallbacks,
+} from '@kbn/inference-common';
 import type { EffectivePolicy } from '@kbn/anonymization-common';
-import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
 import { getConnectorById } from '../util/get_connector_by_id';
 import { createClient } from './create_client';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';

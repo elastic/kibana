@@ -14,9 +14,9 @@ import type {
   InferenceClient,
   AnonymizationRule,
   ChatCompleteAnonymizationTarget,
+  InferenceCallbacks,
 } from '@kbn/inference-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { InferenceCallbacks } from '@kbn/inference-common/src/chat_complete';
 import type { EffectivePolicy } from '@kbn/anonymization-common';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
