@@ -11,10 +11,30 @@ import type { Document, Node } from 'yaml';
 import { isAlias, isCollection, isDocument, isMap, isPair, isScalar, isSeq, visit } from 'yaml';
 import { InvalidYamlSyntaxError } from '../errors';
 
+export interface YamlDocumentError {
+  message: string;
+  /** Character offset range [start, valueEnd, nodeEnd] from the YAML node, if available */
+  range?: [number, number, number];
+}
+
 export function getYamlDocumentErrors(document: Document): InvalidYamlSyntaxError[] {
-  const errors: InvalidYamlSyntaxError[] = [];
+  return getYamlDocumentErrorsDetailed(document).map(
+    (err) => new InvalidYamlSyntaxError(err.message)
+  );
+}
+
+/**
+ * Returns detailed errors with range information for use in editor validation.
+ * Detects:
+ * - Non-scalar keys (e.g. flow mappings used as keys)
+ * - Flow mapping/sequence values (e.g. `comment: {{ inputs.comment }}`)
+ */
+export function getYamlDocumentErrorsDetailed(document: Document): YamlDocumentError[] {
+  const errors: YamlDocumentError[] = [];
   if (document.errors.length > 0) {
-    errors.push(new InvalidYamlSyntaxError(document.errors.map((err) => err.message).join(', ')));
+    errors.push({
+      message: document.errors.map((err) => err.message).join(', '),
+    });
   }
 
   // Visit all pairs, and check if there're any non-scalar keys
@@ -22,6 +42,24 @@ export function getYamlDocumentErrors(document: Document): InvalidYamlSyntaxErro
   visit(document, {
     Pair(_, pair) {
       if (isScalar(pair.key)) {
+        // Check for flow mapping/sequence values (e.g. `comment: {{ inputs.comment }}`)
+        const value = pair.value as Node | null;
+        if (value && (isMap(value) || isSeq(value))) {
+          const collection = value as {
+            flow?: boolean;
+            range?: [number, number, number] | null;
+          };
+          if (collection.flow) {
+            const nodeType = isMap(value) ? 'mapping' : 'sequence';
+            errors.push({
+              message: `Flow ${nodeType} syntax is not allowed. For template expressions, use quotes, e.g. "{{ inputs.comment }}"`,
+              range: collection.range ?? undefined,
+            });
+            // Skip visiting children of the flow collection to avoid
+            // duplicate errors (e.g. non-scalar keys inside {{ }})
+            return visit.SKIP;
+          }
+        }
         return;
       }
       let actualType = 'unknown';
@@ -39,13 +77,10 @@ export function getYamlDocumentErrors(document: Document): InvalidYamlSyntaxErro
       } else if (isCollection(pair.key)) {
         actualType = 'collection';
       }
-      errors.push(
-        new InvalidYamlSyntaxError(
-          `Invalid key type: ${actualType} in ${range ? `range ${range}` : ''}`
-        )
-      );
-
-      return visit.BREAK;
+      errors.push({
+        message: `Invalid key type: ${actualType} in ${range ? `range ${range}` : ''}`,
+        range: range ?? undefined,
+      });
     },
   });
 

@@ -19,6 +19,7 @@ import { validateJsonSchemaDefaults } from './validate_json_schema_defaults';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateVariables as validateVariablesInternal } from './validate_variables';
+import { validateYamlSyntax } from './validate_yaml_syntax';
 import { getPropertyHandler } from '../../../../common/schema';
 import { selectWorkflowGraph, selectYamlDocument } from '../../../entities/workflows/store';
 import {
@@ -123,6 +124,7 @@ export function useYamlValidation(
         ...validateLiquidTemplate(model.getValue()),
         ...validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
         ...(customPropertyItems ? await validateCustomProperties(customPropertyItems) : []),
+        ...(lineCounter ? validateYamlSyntax(yamlDocument, lineCounter) : []),
       ];
 
       // Only run validations that require workflowDefinition if it's available
