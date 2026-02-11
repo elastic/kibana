@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, screen } from '@testing-library/react';
+import { act, screen, within } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { TabularPage } from './tabular_page';
@@ -304,29 +304,37 @@ describe('When the tabular page is loaded', () => {
   it('should show task type badges in the endpoint column for all rows', () => {
     renderTabularPageWithProviders();
 
-    const rows = screen.getAllByRole('row');
-    // Row 1: .elser-2-elastic → sparse_embedding
-    expect(rows[1]).toHaveTextContent('sparse_embedding');
-    // Row 2: .elser-2-elasticsearch → sparse_embedding
-    expect(rows[2]).toHaveTextContent('sparse_embedding');
-    // Row 3: .multilingual-e5-small-elasticsearch → text_embedding
-    expect(rows[3]).toHaveTextContent('text_embedding');
-    // Row 4: .multilingual-embed-v1-elastic → text_embedding
-    expect(rows[4]).toHaveTextContent('text_embedding');
-    // Row 5: .rerank-v1-elastic → rerank
-    expect(rows[5]).toHaveTextContent('rerank');
-    // Row 6: .sparkles → chat_completion
-    expect(rows[6]).toHaveTextContent('chat_completion');
-    // Row 7: custom-inference-id → sparse_embedding
-    expect(rows[7]).toHaveTextContent('sparse_embedding');
-    // Row 8: elastic-rerank → rerank
-    expect(rows[8]).toHaveTextContent('rerank');
-    // Row 9: local-model → sparse_embedding
-    expect(rows[9]).toHaveTextContent('sparse_embedding');
-    // Row 10: my-elser-model-05 → sparse_embedding
-    expect(rows[10]).toHaveTextContent('sparse_embedding');
-    // Row 11: third-party-model → sparse_embedding
-    expect(rows[11]).toHaveTextContent('sparse_embedding');
+    const endpointCells = screen.getAllByTestId('endpointCell');
+
+    // Every endpoint cell should contain a task type badge
+    endpointCells.forEach((cell) => {
+      expect(within(cell).queryByTestId(/^table-column-task-type-/)).toBeInTheDocument();
+    });
+
+    // Verify specific endpoints have the correct task types by locating cells by content
+    const findEndpointCell = (endpointId: string) => {
+      const cell = endpointCells.find((c) => c.textContent?.includes(endpointId));
+      expect(cell).toBeDefined();
+      return within(cell!);
+    };
+
+    findEndpointCell('.elser-2-elastic').getByTestId('table-column-task-type-sparse_embedding');
+    findEndpointCell('.elser-2-elasticsearch').getByTestId(
+      'table-column-task-type-sparse_embedding'
+    );
+    findEndpointCell('.multilingual-e5-small-elasticsearch').getByTestId(
+      'table-column-task-type-text_embedding'
+    );
+    findEndpointCell('.multilingual-embed-v1-elastic').getByTestId(
+      'table-column-task-type-text_embedding'
+    );
+    findEndpointCell('.rerank-v1-elastic').getByTestId('table-column-task-type-rerank');
+    findEndpointCell('.sparkles').getByTestId('table-column-task-type-chat_completion');
+    findEndpointCell('custom-inference-id').getByTestId('table-column-task-type-sparse_embedding');
+    findEndpointCell('elastic-rerank').getByTestId('table-column-task-type-rerank');
+    findEndpointCell('local-model').getByTestId('table-column-task-type-sparse_embedding');
+    findEndpointCell('my-elser-model-05').getByTestId('table-column-task-type-sparse_embedding');
+    findEndpointCell('third-party-model').getByTestId('table-column-task-type-sparse_embedding');
   });
 
   it('should display endpoint stats with correct counts', () => {
