@@ -31,6 +31,14 @@ export class UnionType<RTS extends Array<Type<any>>, T> extends Type<T> {
     this.typeOptions = options;
   }
 
+  /**
+   * @internal
+   * Exposes the union member types for other schema types.
+   */
+  public getTypes(): RTS {
+    return this.unionTypes;
+  }
+
   public extendsDeep(options: ExtendsDeepOptions) {
     return new UnionType(
       this.unionTypes.map((t) => t.extendsDeep(options)),

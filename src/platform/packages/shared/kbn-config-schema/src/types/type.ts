@@ -171,6 +171,17 @@ export abstract class Type<V> {
   }
 
   /**
+   * @internal
+   * Returns the expected literal value for this type (if any).
+   *
+   * Used by other schema types that need to derive behavior from literal values
+   * (e.g. `schema.discriminatedUnion()` discriminators).
+   */
+  public getExpectedValue(): unknown {
+    return undefined;
+  }
+
+  /**
    * Validates the provided value against this schema.
    * If valid, the resulting output will be returned, otherwise an exception will be thrown.
    */

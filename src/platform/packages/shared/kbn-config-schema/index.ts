@@ -169,7 +169,23 @@ function oneOf<A, B, C, D, E, F, G, H, I, J, K, L>(
     Type<L>
   ],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K | L>
-): Type<A | B | C | D | E | F | G | H | I | J | K | L>;
+): UnionType<
+  [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>,
+    Type<L>
+  ],
+  A | B | C | D | E | F | G | H | I | J | K | L
+>;
 function oneOf<A, B, C, D, E, F, G, H, I, J, K>(
   types: [
     Type<A>,
@@ -185,47 +201,87 @@ function oneOf<A, B, C, D, E, F, G, H, I, J, K>(
     Type<K>
   ],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J | K>
-): Type<A | B | C | D | E | F | G | H | I | J | K>;
+): UnionType<
+  [
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>,
+    Type<K>
+  ],
+  A | B | C | D | E | F | G | H | I | J | K
+>;
 function oneOf<A, B, C, D, E, F, G, H, I, J>(
   types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>, Type<I>, Type<J>],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I | J>
-): Type<A | B | C | D | E | F | G | H | I | J>;
+): UnionType<
+  [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>, Type<I>, Type<J>],
+  A | B | C | D | E | F | G | H | I | J
+>;
 function oneOf<A, B, C, D, E, F, G, H, I>(
   types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>, Type<I>],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H | I>
-): Type<A | B | C | D | E | F | G | H | I>;
+): UnionType<
+  [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>, Type<I>],
+  A | B | C | D | E | F | G | H | I
+>;
 function oneOf<A, B, C, D, E, F, G, H>(
   types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>],
   options?: UnionTypeOptions<A | B | C | D | E | F | G | H>
-): Type<A | B | C | D | E | F | G | H>;
+): UnionType<
+  [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>, Type<H>],
+  A | B | C | D | E | F | G | H
+>;
 function oneOf<A, B, C, D, E, F, G>(
   types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>],
   options?: UnionTypeOptions<A | B | C | D | E | F | G>
-): Type<A | B | C | D | E | F | G>;
+): UnionType<
+  [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>, Type<G>],
+  A | B | C | D | E | F | G
+>;
 function oneOf<A, B, C, D, E, F>(
   types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>],
   options?: UnionTypeOptions<A | B | C | D | E | F>
-): Type<A | B | C | D | E | F>;
+): UnionType<[Type<A>, Type<B>, Type<C>, Type<D>, Type<E>, Type<F>], A | B | C | D | E | F>;
 function oneOf<A, B, C, D, E>(
   types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>],
   options?: UnionTypeOptions<A | B | C | D | E>
-): Type<A | B | C | D | E>;
+): UnionType<[Type<A>, Type<B>, Type<C>, Type<D>, Type<E>], A | B | C | D | E>;
 function oneOf<A, B, C, D>(
   types: [Type<A>, Type<B>, Type<C>, Type<D>],
   options?: UnionTypeOptions<A | B | C | D>
-): Type<A | B | C | D>;
+): UnionType<[Type<A>, Type<B>, Type<C>, Type<D>], A | B | C | D>;
 function oneOf<A, B, C>(
   types: [Type<A>, Type<B>, Type<C>],
   options?: UnionTypeOptions<A | B | C>
-): Type<A | B | C>;
-function oneOf<A, B>(types: [Type<A>, Type<B>], options?: UnionTypeOptions<A | B>): Type<A | B>;
-function oneOf<A>(types: [Type<A>], options?: UnionTypeOptions<A>): Type<A>;
+): UnionType<[Type<A>, Type<B>, Type<C>], A | B | C>;
+function oneOf<A, B>(
+  types: [Type<A>, Type<B>],
+  options?: UnionTypeOptions<A | B>
+): UnionType<[Type<A>, Type<B>], A | B>;
+function oneOf<A>(types: [Type<A>], options?: UnionTypeOptions<A>): UnionType<[Type<A>], A>;
 function oneOf<RTS extends Array<Type<any>>>(
   types: RTS,
   options?: UnionTypeOptions<any>
-): Type<any> {
+): UnionType<RTS, any> {
   return new UnionType(types, options);
 }
+
+type DiscriminatedUnionBranchResult<Branch> = Branch extends ObjectType<infer P>
+  ? ObjectResultType<P>
+  : Branch extends UnionType<any, infer V>
+  ? V
+  : never;
+
+type DiscriminatedUnionResult<Branches extends ReadonlyArray<any>> = DiscriminatedUnionBranchResult<
+  Branches[number]
+>;
 
 function discriminatedUnion<
   Discriminator extends string,
@@ -452,11 +508,19 @@ function discriminatedUnion<
   types: [ObjectType<A>],
   options?: UnionTypeOptions<ObjectResultType<A>>
 ): Type<ObjectResultType<A>>;
-function discriminatedUnion<Discriminator extends string, RTS extends Array<ObjectType<any>>>(
+function discriminatedUnion<
+  Discriminator extends string,
+  Branches extends ReadonlyArray<ObjectType<any> | UnionType<any, any>>
+>(
   discriminator: Discriminator,
-  types: RTS,
-  options?: UnionTypeOptions<any>
-): Type<ObjectResultType<any>> {
+  types: Branches,
+  options?: UnionTypeOptions<DiscriminatedUnionResult<Branches>>
+): Type<DiscriminatedUnionResult<Branches>>;
+
+function discriminatedUnion<
+  Discriminator extends string,
+  RTS extends Array<ObjectType<any> | UnionType<any, any>>
+>(discriminator: Discriminator, types: RTS, options?: UnionTypeOptions<any>): Type<any> {
   return new DiscriminatedUnionType(discriminator, types, options);
 }
 

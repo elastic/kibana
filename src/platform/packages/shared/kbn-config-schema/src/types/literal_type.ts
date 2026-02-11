@@ -25,4 +25,9 @@ export class LiteralType<T> extends Type<T> {
         return `expected value to equal [${this.expectedValue}]`;
     }
   }
+
+  /** @internal */
+  public getExpectedValue(): T {
+    return this.expectedValue;
+  }
 }
