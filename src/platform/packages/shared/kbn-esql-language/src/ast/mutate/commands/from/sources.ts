@@ -13,7 +13,7 @@ import { Visitor } from '../../../visitor';
 import * as generic from '../../generic';
 import * as util from '../../util';
 import type { Predicate } from '../../types';
-import { isSubQuery } from '../../../utils/is';
+import { isSubQuery } from '../../../is';
 
 export const list = (
   ast: ESQLAstQueryExpression | ESQLCommand<'from'>

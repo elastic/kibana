@@ -9,7 +9,7 @@
 
 import { parse } from '..';
 import type { ESQLAstQueryExpression, ESQLParens } from '../../types';
-import { isParens, isSubQuery } from '../../ast/utils/is';
+import { isParens, isSubQuery } from '../../ast/is';
 
 describe('FROM', () => {
   describe('correctly formatted', () => {

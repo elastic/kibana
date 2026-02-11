@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BinaryExpressionGroup } from '../ast/utils/grouping';
-import { binaryExpressionGroup, unaryExpressionGroup } from '../ast/utils/grouping';
-import { isBinaryExpression, isIdentifier, isParamLiteral } from '../ast/utils/is';
+import { BinaryExpressionGroup } from '../ast/grouping';
+import { binaryExpressionGroup, unaryExpressionGroup } from '../ast/grouping';
+import { isBinaryExpression, isIdentifier, isParamLiteral } from '../ast/is';
 import type { ESQLAstBaseItem, ESQLAstQueryExpression, ESQLMap } from '../types';
 import type {
   CommandOptionVisitorContext,

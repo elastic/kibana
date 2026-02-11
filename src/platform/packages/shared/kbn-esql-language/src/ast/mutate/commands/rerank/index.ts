@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isStringLiteral } from '../../../utils/is';
+import { isStringLiteral } from '../../../is';
 import { Builder } from '../../../builder';
 import type {
   ESQLAstQueryExpression,

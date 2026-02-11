@@ -8,7 +8,7 @@
  */
 
 import { isBinaryExpression, isUnaryExpression } from './is';
-import type { ESQLAstNode } from '../../types';
+import type { ESQLAstNode } from '../types';
 
 /**
  * The group name of a binary expression. Groups are ordered by precedence.

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isAssignment, isColumn } from '../../../ast/utils/is';
+import { isAssignment, isColumn } from '../../../ast/is';
 import { getExpressionType } from '../../definitions/utils';
 import type { ESQLAstItem, ESQLCommand } from '../../../types';
 import type { ESQLColumnData, ESQLUserDefinedColumn } from '../types';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstComment, ESQLLocation, ESQLSingleAstItem } from '../../types';
+import type { ESQLAstComment, ESQLLocation, ESQLSingleAstItem } from '../types';
 
 export const within = (
   inner: number | { location: ESQLLocation },

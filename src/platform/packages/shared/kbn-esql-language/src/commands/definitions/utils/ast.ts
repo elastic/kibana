@@ -8,7 +8,7 @@
  */
 
 import { EDITOR_MARKER } from '../constants';
-import { isColumn, isIdentifier, isList, isOptionNode, isSource } from '../../../ast/utils/is';
+import { isColumn, isIdentifier, isList, isOptionNode, isSource } from '../../../ast/is';
 import type {
   ESQLFunction,
   ESQLSingleAstItem,

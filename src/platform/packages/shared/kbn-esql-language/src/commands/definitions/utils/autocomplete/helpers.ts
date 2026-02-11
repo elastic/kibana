@@ -14,7 +14,7 @@ import type {
 import { ESQLVariableType } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { isLiteral } from '../../../../ast/utils/is';
+import { isLiteral } from '../../../../ast/is';
 import type {
   GetColumnsByTypeFn,
   ICommandCallbacks,

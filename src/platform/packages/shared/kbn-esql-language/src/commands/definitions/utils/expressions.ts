@@ -13,7 +13,7 @@ import {
   isInlineCast,
   isLiteral,
   isParamLiteral,
-} from '../../../ast/utils/is';
+} from '../../../ast/is';
 import type { ESQLAstItem, ESQLFunction, ESQLSingleAstItem } from '../../../types';
 import { lastItem } from '../../../ast/visitor/utils';
 import type {

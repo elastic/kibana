@@ -8,9 +8,9 @@
  */
 
 // Core AST utilities
-export * from './utils/is';
-export * from './utils/location';
-export * from './utils/grouping';
+export * from './is';
+export * from './location';
+export * from './grouping';
 
 // AST manipulation tools
 export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './builder';

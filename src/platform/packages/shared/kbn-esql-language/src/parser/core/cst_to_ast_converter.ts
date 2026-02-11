@@ -10,7 +10,7 @@
 import type * as antlr from 'antlr4';
 import * as cst from '../antlr/esql_parser';
 import type * as ast from '../../types';
-import { isCommand, isStringLiteral } from '../../ast/utils/is';
+import { isCommand, isStringLiteral } from '../../ast/is';
 import { LeafPrinter } from '../../pretty_print';
 import { getPosition } from './tokens';
 import { nonNullable, unescapeColumn } from './helpers';

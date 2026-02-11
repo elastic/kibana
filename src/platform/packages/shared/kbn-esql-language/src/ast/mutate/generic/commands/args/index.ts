@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isOptionNode, isSubQuery } from '../../../../utils/is';
+import { isOptionNode, isSubQuery } from '../../../../is';
 import type {
   ESQLAstQueryExpression,
   ESQLCommand,

@@ -16,7 +16,7 @@ import {
   isInlineCast,
   isLiteral,
   isParamLiteral,
-} from '../../../../ast/utils/is';
+} from '../../../../ast/is';
 import { getLocationInfo } from '../../../registry/location';
 import type { ICommandCallbacks, ICommandContext, Location } from '../../../registry/types';
 import type {

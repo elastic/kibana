@@ -23,7 +23,7 @@ import type {
   ParametrizedComposerQueryTag,
 } from './types';
 import type { ESQLSource } from '../types';
-import { isSource } from '../ast/utils/is';
+import { isSource } from '../ast/is';
 
 const esqlTag = ((templateOrQueryOrParamValues: any, ...maybeHoles: ComposerQueryTagHole[]) => {
   const tagOrGeneratorWithParams = (initialParamValues?: Record<string, unknown>) =>

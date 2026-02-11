@@ -11,7 +11,7 @@ import { Walker } from '../../../ast/walker';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import type { ICommandContext, ICommandCallbacks } from '../types';
 import { errors } from '../../definitions/utils';
-import { isSubQuery } from '../../../ast/utils/is';
+import { isSubQuery } from '../../../ast/is';
 
 export const validate = (
   command: ESQLAstAllCommands,

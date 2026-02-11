@@ -9,7 +9,7 @@
 
 import { Builder } from '../../ast/builder';
 import { BasicPrettyPrinter, LeafPrinter } from '../../pretty_print';
-import { isProperNode } from '../../ast/utils/is';
+import { isProperNode } from '../../ast/is';
 import { SynthNode } from './synth_node';
 import { SynthLiteralFragment } from './synth_literal_fragment';
 import type {

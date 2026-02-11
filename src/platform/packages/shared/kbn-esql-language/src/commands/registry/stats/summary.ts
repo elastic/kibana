@@ -17,7 +17,7 @@ import type {
 } from '../../../ast/visitor';
 import { Visitor } from '../../../ast/visitor';
 import { singleItems } from '../../../ast';
-import { isAssignment, isColumn, isParamLiteral, isWhereExpression } from '../../../ast/utils/is';
+import { isAssignment, isColumn, isParamLiteral, isWhereExpression } from '../../../ast/is';
 import type { ESQLColumn, ESQLCommand } from '../../../types';
 import type { ESQLCommandSummary, FieldSummary } from '../types';
 import { getColumnName } from '../../definitions/utils/columns';

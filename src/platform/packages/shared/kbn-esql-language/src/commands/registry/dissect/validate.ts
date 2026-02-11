@@ -8,7 +8,7 @@
  */
 import type { EsqlFieldType } from '@kbn/esql-types';
 import { getMessageFromId } from '../../definitions/utils/errors';
-import { isLiteral, isInlineCast, isOptionNode } from '../../../ast/utils/is';
+import { isLiteral, isInlineCast, isOptionNode } from '../../../ast/is';
 import type {
   ESQLColumn,
   ESQLAstAllCommands,

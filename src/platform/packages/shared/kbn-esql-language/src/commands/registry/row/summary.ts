@@ -9,7 +9,7 @@
 
 import type { ESQLCommand } from '../../../types';
 import type { ESQLCommandSummary } from '../types';
-import { isAssignment, isColumn } from '../../../ast/utils/is';
+import { isAssignment, isColumn } from '../../../ast/is';
 
 export const summary = (command: ESQLCommand, query: string): ESQLCommandSummary => {
   const newColumns: string[] = [];

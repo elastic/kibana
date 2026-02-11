@@ -8,7 +8,7 @@
  */
 
 import { isPromqlNode } from './is';
-import type { PromQLAstNode, PromQLAstQueryExpression, PromQLPositionResult } from '../../types';
+import type { PromQLAstNode, PromQLAstQueryExpression, PromQLPositionResult } from '../types';
 
 export function* childrenOfPromqlNode(node: PromQLAstNode): Iterable<PromQLAstNode> {
   if (!isPromqlNode(node)) {

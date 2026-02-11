@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isPromqlNode } from '../../embedded_languages/promql/ast/utils/is';
-import { childrenOfPromqlNode } from '../../embedded_languages/promql/ast/utils/traversal';
+import { isPromqlNode } from '../../embedded_languages/promql/ast/is';
+import { childrenOfPromqlNode } from '../../embedded_languages/promql/ast/traversal';
 import type { PromQLAstNode } from '../../embedded_languages/promql/types';
 import type {
   ESQLAstExpression,

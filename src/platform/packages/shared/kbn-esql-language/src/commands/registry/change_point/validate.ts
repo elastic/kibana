@@ -14,7 +14,7 @@ import type {
   ESQLAstChangePointCommand,
   ESQLMessage,
 } from '../../../types';
-import { isColumn, isOptionNode } from '../../../ast/utils/is';
+import { isColumn, isOptionNode } from '../../../ast/is';
 import type { SupportedDataType } from '../../definitions/types';
 import { isNumericType } from '../../definitions/types';
 import type { ICommandContext, ICommandCallbacks } from '../types';

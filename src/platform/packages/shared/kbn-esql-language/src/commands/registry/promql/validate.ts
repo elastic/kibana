@@ -16,7 +16,7 @@ import type {
   ESQLMessage,
 } from '../../../types';
 import { Walker } from '../../../ast';
-import { isIdentifier, isList, isSource } from '../../../ast/utils/is';
+import { isIdentifier, isList, isSource } from '../../../ast/is';
 import type { ICommandContext } from '../types';
 import { getMessageFromId } from '../../definitions/utils';
 import {

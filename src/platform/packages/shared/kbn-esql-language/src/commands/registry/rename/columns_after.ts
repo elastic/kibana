@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import uniqBy from 'lodash/uniqBy';
-import { isColumn, isFunctionExpression } from '../../../ast/utils/is';
+import { isColumn, isFunctionExpression } from '../../../ast/is';
 import type { ESQLAstBaseItem, ESQLCommand, ESQLFunction } from '../../../types';
 import type { ESQLColumnData } from '../types';
 

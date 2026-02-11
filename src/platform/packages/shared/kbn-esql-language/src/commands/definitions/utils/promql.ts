@@ -17,7 +17,7 @@ import {
 import { promqlFunctionDefinitions } from '../generated/promql_functions';
 import { buildFunctionDocumentation } from './documentation';
 import { withAutoSuggest } from './autocomplete/helpers';
-import { isIdentifier, isList, isSource } from '../../../ast/utils/is';
+import { isIdentifier, isList, isSource } from '../../../ast/is';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting';
 import { techPreviewLabel } from './shared';
 

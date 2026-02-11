@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isProperNode } from '../../../../ast/utils/is';
-import type { PromQLAstNode } from '../../types';
+import { isProperNode } from '../../../ast/is';
+import type { PromQLAstNode } from '../types';
 
 export const isPromqlNode = (node: unknown): node is PromQLAstNode =>
   isProperNode(node) && 'dialect' in node && node.dialect === 'promql';

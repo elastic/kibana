@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isLiteral } from '../../../../ast/utils/is';
+import { isLiteral } from '../../../../ast/is';
 import { getExpressionType } from '..';
 import type { UnmappedFieldsStrategy } from '../../../registry/types';
 import { type ESQLColumnData } from '../../../registry/types';

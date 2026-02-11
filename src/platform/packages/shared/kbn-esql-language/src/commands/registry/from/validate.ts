@@ -13,7 +13,7 @@ import type {
   ESQLSource,
   ESQLAstAllCommands,
 } from '../../../types';
-import { isColumn, isOptionNode, isSource } from '../../../ast/utils/is';
+import { isColumn, isOptionNode, isSource } from '../../../ast/is';
 import type { ICommandContext } from '../types';
 import { METADATA_FIELDS } from '../options/metadata';
 import { getMessageFromId } from '../../definitions/utils';

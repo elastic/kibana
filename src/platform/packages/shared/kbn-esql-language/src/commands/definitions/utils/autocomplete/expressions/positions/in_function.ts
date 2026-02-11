@@ -13,7 +13,7 @@ import { getFunctionDefinition } from '../../../functions';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import type { ESQLFunction, ESQLSingleAstItem } from '../../../../../../types';
 import { SignatureAnalyzer } from '../signature_analyzer';
-import { within } from '../../../../../../ast/utils/location';
+import { within } from '../../../../../../ast/location';
 
 /** Matches comma followed by optional whitespace at end of text */
 const STARTING_NEW_PARAM_REGEX = /,\s*$/;

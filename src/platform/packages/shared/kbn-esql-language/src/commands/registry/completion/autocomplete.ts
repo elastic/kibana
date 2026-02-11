@@ -8,7 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { isFunctionExpression, isLiteral } from '../../../ast/utils/is';
+import { isFunctionExpression, isLiteral } from '../../../ast/is';
 import { suggestForExpression } from '../../definitions/utils';
 import type * as ast from '../../../types';
 import type { MapParameters } from '../../definitions/utils/autocomplete/map_expression';

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isFunctionExpression, isOptionNode } from '../../ast/utils/is';
-import { within } from '../../ast/utils/location';
+import { isFunctionExpression, isOptionNode } from '../../ast/is';
+import { within } from '../../ast/location';
 import type { ESQLAst, ESQLAstAllCommands, ESQLSingleAstItem } from '../../types';
 import { Walker } from '../../ast/walker';
 import { Location } from './types';

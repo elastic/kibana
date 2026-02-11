@@ -8,7 +8,7 @@
  */
 import { getExpressionType, getMessageFromId } from '../../definitions/utils';
 import { settings } from '../../definitions/generated/settings';
-import { isBinaryExpression, isIdentifier, isLiteral, isMap } from '../../../ast/utils/is';
+import { isBinaryExpression, isIdentifier, isLiteral, isMap } from '../../../ast/is';
 import type {
   ESQLAstAllCommands,
   ESQLCommand,

@@ -8,8 +8,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
-import { within } from '../../../ast/utils/location';
-import { isOptionNode } from '../../../ast/utils/is';
+import { within } from '../../../ast/location';
+import { isOptionNode } from '../../../ast/is';
 import { buildFieldsDefinitionsWithMetadata } from '../../definitions/utils';
 import type {
   ESQLAstAllCommands,

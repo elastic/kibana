@@ -11,7 +11,7 @@ import type { ISuggestionItem } from '../../../../../registry/types';
 import { isParameterType } from '../../../../types';
 import { getTimeUnitLiterals } from '../../../literals';
 import type { ExpressionContext } from '../types';
-import { isLiteral, isFunctionExpression } from '../../../../../../ast/utils/is';
+import { isLiteral, isFunctionExpression } from '../../../../../../ast/is';
 import { isNumericType, FunctionDefinitionTypes } from '../../../../types';
 import { commaCompleteItem } from '../../../../../registry/complete_items';
 import { getExpressionType } from '../../../expressions';

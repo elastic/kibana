@@ -11,7 +11,7 @@ import { EsqlQuery } from '../../../composer/query';
 import * as fixtures from '../../../__tests__/fixtures';
 import { Walker } from '../walker';
 import type { ESQLAstExpression, ESQLProperNode } from '../../../types';
-import { isProperNode } from '../../utils/is';
+import { isProperNode } from '../../is';
 
 interface JsonWalkerOptions {
   visitObject?: (node: Record<string, unknown>) => void;

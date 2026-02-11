@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as types from '../../types';
-import type { ESQLInlineCast, ESQLProperNode } from '../../types';
-import { Walker } from '../walker';
+import type * as types from '../types';
+import type { ESQLInlineCast, ESQLProperNode } from '../types';
+import { Walker } from './walker';
 
 export const isProperNode = (node: unknown): node is types.ESQLProperNode =>
   !!node &&
