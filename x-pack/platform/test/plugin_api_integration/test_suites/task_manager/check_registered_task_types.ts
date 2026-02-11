@@ -107,6 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:connector_usage_reporting',
         'actions_telemetry',
         'ad_hoc_run-backfill',
+        'agent-builder:run-agent',
         'alert-deletion',
         'alerting:.es-query',
         'alerting:.geo-containment',
