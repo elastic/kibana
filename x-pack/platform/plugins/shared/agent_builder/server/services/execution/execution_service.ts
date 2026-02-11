@@ -18,6 +18,8 @@ import {
   agentBuilderDefaultAgentId,
   createAgentBuilderError,
   createInternalError,
+  createRequestAbortedError,
+  isRoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -159,41 +161,50 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             return true;
           }
 
-          const isTerminal =
-            execution.status === ExecutionStatus.completed ||
-            execution.status === ExecutionStatus.failed ||
-            execution.status === ExecutionStatus.aborted;
+          if (execution.status === ExecutionStatus.failed) {
+            const err = execution.error
+              ? createAgentBuilderError(
+                  execution.error.code,
+                  execution.error.message,
+                  execution.error.meta
+                )
+              : createInternalError(`Execution ${executionId} failed`);
+            observer.error(err);
+            return true;
+          }
 
-          if (isTerminal) {
-            // Drain any remaining events that may not yet be searchable due to
-            // ES near-real-time indexing. Retry a few times with a short delay.
-            for (let retry = 0; retry < FOLLOW_TERMINAL_READ_MAX_RETRIES; retry++) {
+          if (execution.status === ExecutionStatus.aborted) {
+            observer.error(createRequestAbortedError('request was aborted'));
+            return true;
+          }
+
+          if (execution.status === ExecutionStatus.completed) {
+            // Drain remaining events that may not yet be searchable due to
+            // ES near-real-time indexing. Retry until we receive a roundComplete
+            // event (the last meaningful event), or exhaust retries.
+            let receivedRoundComplete = events.some((e) => isRoundCompleteEvent(e.event));
+
+            for (
+              let retry = 0;
+              !receivedRoundComplete && retry < FOLLOW_TERMINAL_READ_MAX_RETRIES;
+              retry++
+            ) {
               const finalEvents = await eventsClient.readEvents(executionId, lastEventNumber);
               for (const eventDoc of finalEvents) {
                 observer.next(eventDoc.event);
                 if (eventDoc.eventNumber > lastEventNumber) {
                   lastEventNumber = eventDoc.eventNumber;
                 }
+                if (isRoundCompleteEvent(eventDoc.event)) {
+                  receivedRoundComplete = true;
+                }
               }
-              if (finalEvents.length > 0 || retry === FOLLOW_TERMINAL_READ_MAX_RETRIES - 1) {
+              if (receivedRoundComplete || finalEvents.length > 0) {
                 break;
               }
               await new Promise<void>((resolve) =>
                 setTimeout(resolve, FOLLOW_TERMINAL_READ_RETRY_DELAY_MS)
               );
-            }
-
-            if (execution.status === ExecutionStatus.failed) {
-              const err = execution.error
-                ? createAgentBuilderError(
-                    execution.error.code,
-                    execution.error.message,
-                    execution.error.meta
-                  )
-                : createInternalError(`Execution ${executionId} failed`);
-              observer.error(err);
-            } else if (execution.status === ExecutionStatus.aborted) {
-              observer.error(new Error(`Execution ${executionId} was aborted`));
             }
 
             return true;
