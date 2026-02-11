@@ -166,6 +166,14 @@ export function registerChatRoutes({
         }
       )
     ),
+    action: schema.maybe(
+      schema.oneOf([schema.literal('regenerate')], {
+        meta: {
+          description:
+            'The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.',
+        },
+      })
+    ),
   });
 
   const validateAttachments = async ({
@@ -185,6 +193,12 @@ export function registerChatRoutes({
       }
     }
     return results;
+  };
+
+  const validateAction = (payload: ChatRequestBodyPayload) => {
+    if (payload.action === 'regenerate' && !payload.conversation_id) {
+      throw createBadRequestError('conversation_id is required when action is regenerate');
+    }
   };
 
   const validateConfigurationOverrides = async ({
@@ -230,6 +244,7 @@ export function registerChatRoutes({
       capabilities,
       browser_api_tools: browserApiTools,
       configuration_overrides: configurationOverrides,
+      action,
     } = payload;
 
     const { events$ } = await executionService.executeAgent({
@@ -296,6 +311,7 @@ export function registerChatRoutes({
           : [];
 
         await validateConfigurationOverrides({ payload, request });
+        validateAction(payload);
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
@@ -377,6 +393,7 @@ export function registerChatRoutes({
           : [];
 
         await validateConfigurationOverrides({ payload, request });
+        validateAction(payload);
 
         const abortController = new AbortController();
         request.events.aborted$.subscribe(() => {
