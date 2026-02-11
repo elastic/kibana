@@ -127,5 +127,7 @@ steps:
     build:
       env:
         ES_SNAPSHOT_MANIFEST: '$ES_SNAPSHOT_MANIFEST'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        REPORT_FAILED_TESTS_TO_GITHUB: 'false'
       branch: '$BUILDKITE_BRANCH'
 EOF
