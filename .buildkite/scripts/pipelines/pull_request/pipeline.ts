@@ -60,6 +60,8 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       return;
     }
 
+    await runPreBuild();
+
     /**
      * Start FTR bench early to avoid blocking the build.
      * It doesn't have dependencies on other steps and builds it's own distributions.
@@ -98,7 +100,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml'));
     }
 
-    await runPreBuild();
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml'));
 
     if (prHasFIPSLabel()) {
