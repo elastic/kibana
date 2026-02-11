@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/anonymization-common'
 type: unknown
 owners:
-  defaultOwner: '@elastic/security-generative-ai'
+  defaultOwner: '@elastic/workchat-eng'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/anonymization-common'
   description: Moon project for @kbn/anonymization-common
   channel: ''
-  owner: '@elastic/security-generative-ai'
+  owner: '@elastic/workchat-eng'
   metadata:
     sourceRoot: x-pack/platform/packages/shared/ai-infra/anonymization-common
 dependsOn:
