@@ -234,27 +234,27 @@ test.describe(
       pageObjects,
     }) => {
       // Create a parent stream with a child
-      await apiServices.streams.forkStream('logs', 'logs.parent', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.parent', {
         field: 'service.name',
         eq: 'parent',
       });
 
       // Create a child under the parent
-      await apiServices.streams.forkStream('logs.parent', 'logs.parent.child1', {
+      await apiServices.streams.forkStream('logs.otel.parent', 'logs.otel.parent.child1', {
         field: 'severity_text',
         eq: 'info',
       });
 
-      await apiServices.streams.forkStream('logs.parent', 'logs.parent.child2', {
+      await apiServices.streams.forkStream('logs.otel.parent', 'logs.otel.parent.child2', {
         field: 'severity_text',
         eq: 'warn',
       });
 
-      await pageObjects.streams.gotoPartitioningTab('logs');
+      await pageObjects.streams.gotoPartitioningTab('logs.otel');
 
-      // Should see +2 badge on logs.parent indicating it has 2 children
+      // Should see +2 badge on logs.otel.parent indicating it has 2 children
       const childCountBadge = page
-        .locator('[data-test-subj="routingRule-logs.parent"]')
+        .locator('[data-test-subj="routingRule-logs.otel.parent"]')
         .getByTestId('streamsAppRoutingRuleChildCountBadge');
       await expect(childCountBadge).toBeVisible();
       await expect(childCountBadge).toHaveText('+2');
