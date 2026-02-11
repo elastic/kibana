@@ -262,6 +262,13 @@ export interface Conversation {
  */
 export interface ConversationInternalState {
   prompt?: PromptStorageState;
+  /**
+   * Dynamic tool IDs that were added during conversation rounds.
+   * These tools are persisted across rounds so they remain available.
+   */
+  dynamic_tool_ids?: string[];
 }
 
 export type ConversationWithoutRounds = Omit<Conversation, 'rounds'>;
+
+export type ConversationAction = 'regenerate';
