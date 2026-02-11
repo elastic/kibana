@@ -7,6 +7,7 @@
 
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { CoreStart } from '@kbn/core/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type {
   ConcreteTaskInstance,
@@ -27,10 +28,11 @@ import type { HeartbeatConfig } from '../../common/runtime_types';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
 import type { SyntheticsServerSetup } from '../types';
+import { getSyntheticsDynamicSettings } from '../saved_objects/synthetics_settings';
 
 const TASK_TYPE = 'Synthetics:Sync-Private-Location-Monitors';
 export const PRIVATE_LOCATIONS_SYNC_TASK_ID = `${TASK_TYPE}-single-instance`;
-const TASK_SCHEDULE = '60m';
+export const DEFAULT_TASK_SCHEDULE = '5m';
 
 export interface SyncTaskState extends Record<string, unknown> {
   lastStartedAt: string;
@@ -38,6 +40,7 @@ export interface SyncTaskState extends Record<string, unknown> {
   maxCleanUpRetries: number;
   disableAutoSync?: boolean;
   privateLocationId?: string;
+  syncInterval?: string;
 }
 
 export type CustomTaskInstance = Omit<ConcreteTaskInstance, 'state'> & {
@@ -99,6 +102,10 @@ export class SyncPrivateLocationMonitorsTask {
     }
     const taskState = this.getNewTaskState({ taskInstance });
 
+    // Resolve the sync interval from dynamic settings, falling back to task state, then default
+    const resolvedInterval = await this.resolveSyncInterval(savedObjects, taskInstance);
+    taskState.syncInterval = resolvedInterval;
+
     try {
       const soClient = savedObjects.createInternalRepository([
         MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
@@ -125,7 +132,7 @@ export class SyncPrivateLocationMonitorsTask {
       const defaultState = {
         state: taskState,
         schedule: {
-          interval: TASK_SCHEDULE,
+          interval: resolvedInterval,
         },
       };
 
@@ -139,7 +146,7 @@ export class SyncPrivateLocationMonitorsTask {
         return {
           state: taskState,
           schedule: {
-            interval: TASK_SCHEDULE,
+            interval: resolvedInterval,
           },
         };
       }
@@ -214,7 +221,7 @@ export class SyncPrivateLocationMonitorsTask {
         error,
         state: taskState,
         schedule: {
-          interval: TASK_SCHEDULE,
+          interval: resolvedInterval,
         },
       };
     }
@@ -222,7 +229,7 @@ export class SyncPrivateLocationMonitorsTask {
     return {
       state: taskState,
       schedule: {
-        interval: TASK_SCHEDULE,
+        interval: resolvedInterval,
       },
     };
   }
@@ -235,7 +242,30 @@ export class SyncPrivateLocationMonitorsTask {
       hasAlreadyDoneCleanup: taskInstance.state.hasAlreadyDoneCleanup || false,
       maxCleanUpRetries: taskInstance.state.maxCleanUpRetries || 3,
       disableAutoSync: taskInstance.state.disableAutoSync ?? false,
+      syncInterval: taskInstance.state.syncInterval,
     };
+  }
+
+  async resolveSyncInterval(
+    savedObjects: Pick<CoreStart['savedObjects'], 'createInternalRepository'>,
+    taskInstance: CustomTaskInstance
+  ): Promise<string> {
+    try {
+      const soClient = savedObjects.createInternalRepository();
+      const dynamicSettings = await getSyntheticsDynamicSettings(soClient);
+      const { privateLocationsSyncInterval } = dynamicSettings;
+      if (privateLocationsSyncInterval && privateLocationsSyncInterval >= 3) {
+        this.debugLog(`Using configured sync interval: ${privateLocationsSyncInterval}m`);
+        return `${privateLocationsSyncInterval}m`;
+      }
+    } catch (error) {
+      this.debugLog(
+        `Failed to read dynamic settings for sync interval, using fallback: ${error.message}`
+      );
+    }
+
+    // Fall back to persisted task state, then the default
+    return taskInstance.state.syncInterval ?? DEFAULT_TASK_SCHEDULE;
   }
 
   start = async () => {
@@ -247,7 +277,7 @@ export class SyncPrivateLocationMonitorsTask {
       id: PRIVATE_LOCATIONS_SYNC_TASK_ID,
       state: {},
       schedule: {
-        interval: TASK_SCHEDULE,
+        interval: DEFAULT_TASK_SCHEDULE,
       },
       taskType: TASK_TYPE,
       params: {},

@@ -18,4 +18,5 @@ export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings = {
   },
   defaultTLSRuleEnabled: true,
   defaultStatusRuleEnabled: true,
+  privateLocationsSyncInterval: 5,
 };
