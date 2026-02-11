@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Streams, isIlmLifecycle } from '@kbn/streams-schema';
 import { z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers';
 import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
