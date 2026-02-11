@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/jest-serializers'
   - '@kbn/apm-utils'
+  - '@kbn/std'
 tags:
   - test-helper
   - package

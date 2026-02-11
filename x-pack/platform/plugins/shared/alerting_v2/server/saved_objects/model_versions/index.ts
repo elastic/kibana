@@ -6,3 +6,4 @@
  */
 
 export { ruleModelVersions } from './rule_model_versions';
+export { notificationPolicyModelVersions } from './notification_policy_model_versions';
