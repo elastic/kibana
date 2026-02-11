@@ -86,8 +86,6 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
       dependenciesInventoryPage: createLazyPageObject(DependenciesInventoryPage, page, kbnUrl),
       dependencyDetailsPage: createLazyPageObject(DependencyDetailsPage, page, kbnUrl),
       serviceGroupsPage: createLazyPageObject(ServiceGroupsPage, page, kbnUrl),
-      serviceDetailsPage: createLazyPageObject(ServiceDetailsPage, page, kbnUrl),
-      dependencyDetailsPage: createLazyPageObject(DependencyDetailsPage, page, kbnUrl),
     };
 
     await use(extendedPageObjects);
