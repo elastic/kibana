@@ -276,8 +276,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
                   content={
                     !item.valid
                       ? i18n.translate('workflows.workflowList.invalid', {
-                        defaultMessage: 'Fix errors to enable workflow',
-                      })
+                          defaultMessage: 'Fix errors to enable workflow',
+                        })
                       : undefined
                   }
                 >
@@ -288,11 +288,11 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
                     label={
                       item.enabled
                         ? i18n.translate('workflows.workflowList.enabled', {
-                          defaultMessage: 'Enabled',
-                        })
+                            defaultMessage: 'Enabled',
+                          })
                         : i18n.translate('workflows.workflowList.disabled', {
-                          defaultMessage: 'Disabled',
-                        })
+                            defaultMessage: 'Disabled',
+                          })
                     }
                     showLabel={false}
                   />
