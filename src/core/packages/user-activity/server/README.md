@@ -8,7 +8,7 @@ Use `trackUserAction` to record user actions:
 
 ```ts
 core.userActivity.trackUserAction({
-  event: { action: 'create', type: 'creation' },
+  event: { action: 'dashboard_created', type: 'creation' },
   object: { id: 'dash-123', name: 'My Dashboard', type: 'dashboard', tags: ['production'] },
 });
 ```
@@ -18,7 +18,7 @@ You can optionally provide a custom message:
 ```ts
 core.userActivity.trackUserAction({
   message: 'User duplicated dashboard',
-  event: { action: 'duplicate', type: 'creation' },
+  event: { action: 'dashboard_copied', type: 'creation' },
   object: { id: 'dash-456', name: 'Copy of My Dashboard', type: 'dashboard', tags: [] },
 });
 ```
@@ -56,7 +56,8 @@ The following context is automatically added to every log entry by Kibana's HTTP
 | `user.username` | Username |
 | `user.email` | Email address |
 | `user.roles` | Array of roles |
-| `user.ip` | IP address |
+| `client.ip` | IP address |
+| `client.address` | IP address (OTel compliance) |
 | `session.id` | Session ID |
 | `kibana.space.id` | Current space ID |
 | `http.request.referrer` | Referrer |

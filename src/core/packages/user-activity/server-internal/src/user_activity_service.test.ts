@@ -148,7 +148,8 @@ describe('UserActivityService', () => {
 
     it('sets user context', () => {
       service.setInjectedContext({
-        user: { id: 'user-1', username: 'testuser', ip: '127.0.0.1' },
+        user: { id: 'user-1', username: 'testuser' },
+        client: { ip: '127.0.0.1', address: '127.0.0.1' },
       });
 
       service.trackUserAction({
@@ -159,7 +160,8 @@ describe('UserActivityService', () => {
 
       const logCalls = loggingSystemMock.collect(core.logger).info;
       expect(logCalls[0][1]).toMatchObject({
-        user: { id: 'user-1', username: 'testuser', ip: '127.0.0.1' },
+        user: { id: 'user-1', username: 'testuser' },
+        client: { ip: '127.0.0.1', address: '127.0.0.1' },
       });
     });
 

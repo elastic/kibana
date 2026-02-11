@@ -624,16 +624,22 @@ export class HttpServer {
 
       const user = this.authState.get<AuthenticatedUser>(request).state ?? null;
       const { redactedSessionId } = request.app as KibanaRequestState;
+      const remoteAddress = request.info.remoteAddress;
       userActivity?.setInjectedContext({
+        client: remoteAddress
+          ? {
+              ip: remoteAddress,
+              address: remoteAddress,
+            }
+          : undefined,
         user: user
           ? {
-              ip: request.info.remoteAddress,
               id: user.profile_uid,
               username: user.username,
               email: user.email,
               roles: user.roles ? [...user.roles] : undefined,
             }
-          : { ip: request.info.remoteAddress },
+          : undefined,
         session: {
           id: redactedSessionId,
         },

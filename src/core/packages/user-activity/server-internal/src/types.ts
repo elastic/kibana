@@ -14,25 +14,39 @@ import type {
 
 /** @internal */
 export interface SessionContext {
+  /** Redacted session id. */
   id?: string;
 }
 
 /** @internal */
 export interface SpaceContext {
+  /** Kibana space id. */
   id?: string;
 }
 
 /** @internal */
 export interface UserContext {
+  /** User profile id. */
   id?: string;
+  /** Username. */
   username?: string;
+  /** User email address. */
   email?: string;
+  /** User roles. */
   roles?: string[];
+}
+
+/** @internal */
+export interface ClientContext {
+  /** Client IP address. */
   ip?: string;
+  /** Copy of {@link ClientContext.ip} for OTel compliance. */
+  address?: string;
 }
 
 /** @internal */
 export interface HttpRequestContext {
+  /** HTTP referrer. */
   referrer?: string;
 }
 
@@ -41,13 +55,19 @@ export interface HttpRequestContext {
  * @internal
  */
 export interface InjectedContext {
+  /** Client information. */
+  client?: ClientContext;
+  /** HTTP request information. */
   http?: {
     request?: HttpRequestContext;
   };
+  /** Session information. */
   session?: SessionContext;
+  /** Kibana-specific information. */
   kibana?: {
     space?: SpaceContext;
   };
+  /** User information. */
   user?: UserContext;
 }
 

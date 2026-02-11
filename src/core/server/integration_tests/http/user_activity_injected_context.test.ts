@@ -120,12 +120,15 @@ describe('user activity injected context', () => {
       kibana: { space: { id: 'myspace' } },
       http: { request: { referrer } },
       session: { id: 'some-redacted-sid' },
+      client: {
+        ip: expect.any(String),
+        address: expect.any(String),
+      },
       user: {
         id: 'test_profile_uid',
         username: 'test_user',
         email: 'test_user@example.com',
         roles: ['superuser'],
-        ip: expect.any(String),
       },
     });
   });

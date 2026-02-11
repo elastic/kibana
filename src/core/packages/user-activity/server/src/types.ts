@@ -12,9 +12,13 @@
  * @public
  */
 export interface UserActivityObject {
+  /** Unique object identifier. */
   id: string;
+  /** Object name. */
   name: string;
+  /** Object type (for example, 'dashboard', 'case', 'rule'). */
   type: string;
+  /** List of tags assigned to the object. */
   tags: string[];
 }
 
@@ -49,6 +53,7 @@ export type UserActivityEventType =
 export interface UserActivityEvent {
   /** Descriptive action name, e.g., 'view_dashboard', 'edit_case', 'save_search' */
   action: string;
+  /** Event type {@link UserActivityEventType}. */
   type: UserActivityEventType;
 }
 
@@ -56,7 +61,9 @@ export interface UserActivityEvent {
 export interface TrackUserActionParams {
   /** Custom log message. If omitted, a default message is generated. */
   message?: string;
+  /** Event attributes written to the log entry. */
   event: UserActivityEvent;
+  /** Object attributes written to the log entry. */
   object: UserActivityObject;
 }
 

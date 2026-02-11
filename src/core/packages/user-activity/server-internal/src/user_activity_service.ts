@@ -102,6 +102,7 @@ export class UserActivityService
     const current = this.injectedContextAsyncStorage.getStore() ?? {};
 
     this.injectedContextAsyncStorage.enterWith({
+      client: { ...current.client, ...newContext.client },
       session: { ...current.session, ...newContext.session },
       kibana: {
         space: { ...current.kibana?.space, ...newContext.kibana?.space },
