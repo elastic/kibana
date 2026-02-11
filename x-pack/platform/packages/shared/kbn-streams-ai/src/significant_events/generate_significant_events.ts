@@ -100,15 +100,24 @@ export async function generateSignificantEvents({
 
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
 
-  const fieldCapsResponse = await esClient.fieldCaps({
-    index: stream.name,
-    fields: '*',
-    index_filter: {
-      bool: {
-        filter: dateRangeQuery(start, end),
+  let fieldCapsResponse;
+  try {
+    fieldCapsResponse = await esClient.fieldCaps({
+      index: stream.name,
+      fields: '*',
+      index_filter: {
+        bool: {
+          filter: dateRangeQuery(start, end),
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    throw new Error(
+      `Failure to retrieve mappings to determine field eligibility: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
   const mappedFields = new Set(Object.keys(fieldCapsResponse.fields));
 
   logger.trace('Generating significant events via reasoning agent');

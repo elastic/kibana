@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getUnmappedFields } from './generate_significant_events';
+import { getUnmappedFields, generateSignificantEvents } from './generate_significant_events';
 
 describe('getUnmappedFields', () => {
   const mappedFields = new Set([
@@ -154,5 +154,61 @@ describe('add_queries field validation (integration via getKqlFieldNamesFromExpr
     const fieldNames = getKqlFieldNamesFromExpression('fake_timestamp >= "2024-01-01"');
     const unmapped = getUnmappedFields(fieldNames, mappedFields);
     expect(unmapped).toEqual(['fake_timestamp']);
+  });
+});
+
+describe('generateSignificantEvents', () => {
+  it('throws an augmented error when esClient.fieldCaps fails', async () => {
+    const esClient = {
+      fieldCaps: jest.fn().mockRejectedValue(new Error('index_not_found_exception')),
+    };
+
+    const logger = {
+      debug: jest.fn(),
+      trace: jest.fn(),
+    };
+
+    await expect(
+      generateSignificantEvents({
+        stream: { name: 'test-stream' } as any,
+        features: [],
+        start: Date.now() - 3600000,
+        end: Date.now(),
+        esClient: esClient as any,
+        inferenceClient: {} as any,
+        signal: new AbortController().signal,
+        logger: logger as any,
+        systemPrompt: '',
+      })
+    ).rejects.toThrow(
+      'Failure to retrieve mappings to determine field eligibility: index_not_found_exception'
+    );
+  });
+
+  it('throws an augmented error when esClient.fieldCaps fails with a non-Error value', async () => {
+    const esClient = {
+      fieldCaps: jest.fn().mockRejectedValue('connection timeout'),
+    };
+
+    const logger = {
+      debug: jest.fn(),
+      trace: jest.fn(),
+    };
+
+    await expect(
+      generateSignificantEvents({
+        stream: { name: 'test-stream' } as any,
+        features: [],
+        start: Date.now() - 3600000,
+        end: Date.now(),
+        esClient: esClient as any,
+        inferenceClient: {} as any,
+        signal: new AbortController().signal,
+        logger: logger as any,
+        systemPrompt: '',
+      })
+    ).rejects.toThrow(
+      'Failure to retrieve mappings to determine field eligibility: connection timeout'
+    );
   });
 });
