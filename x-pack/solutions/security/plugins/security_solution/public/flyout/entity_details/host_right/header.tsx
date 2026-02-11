@@ -68,28 +68,30 @@ export const HostPanelHeader = ({ hostName, lastSeen }: HostPanelHeaderProps) =>
             <FlyoutTitle title={hostName} iconType={'storage'} isLink />
           </SecuritySolutionLinkAnchor>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {isLoading ? (
-                <EuiSkeletonText
-                  lines={1}
-                  size="xs"
-                  data-test-subj="host-panel-header-observed-badge-loading"
-                />
-              ) : (
-                lastSeenDateFormatted && (
+        {isLoading ? (
+          <EuiFlexItem grow={true}>
+            <EuiSkeletonText
+              lines={1}
+              size="xs"
+              data-test-subj="host-panel-header-observed-badge-loading"
+            />
+          </EuiFlexItem>
+        ) : (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                {lastSeenDateFormatted && (
                   <EuiBadge data-test-subj="host-panel-header-observed-badge" color="hollow">
                     <FormattedMessage
                       id="xpack.securitySolution.flyout.entityDetails.host.observedBadge"
                       defaultMessage="Observed"
                     />
                   </EuiBadge>
-                )
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </FlyoutHeader>
   );

@@ -85,38 +85,40 @@ export const UserPanelHeader = ({ userName, managedUser, lastSeen }: UserPanelHe
             <FlyoutTitle title={userName} iconType={'user'} isLink />
           </SecuritySolutionLinkAnchor>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {isLoading ? (
-                <EuiSkeletonText
-                  lines={1}
-                  size="xs"
-                  data-test-subj="user-panel-header-observed-badge-loading"
-                />
-              ) : (
-                observedUserLastSeenDate && (
+        {isLoading ? (
+          <EuiFlexItem grow={true}>
+            <EuiSkeletonText
+              lines={1}
+              size="xs"
+              data-test-subj="user-panel-header-observed-badge-loading"
+            />
+          </EuiFlexItem>
+        ) : (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                {observedUserLastSeenDate && (
                   <EuiBadge data-test-subj="user-panel-header-observed-badge" color="hollow">
                     <FormattedMessage
                       id="xpack.securitySolution.flyout.entityDetails.user.observedBadge"
                       defaultMessage="Observed"
                     />
                   </EuiBadge>
-                )
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {isManaged && (
-                <EuiBadge data-test-subj="user-panel-header-managed-badge" color="hollow">
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.user.managedBadge"
-                    defaultMessage="Managed"
-                  />
-                </EuiBadge>
-              )}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {isManaged && (
+                  <EuiBadge data-test-subj="user-panel-header-managed-badge" color="hollow">
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.user.managedBadge"
+                      defaultMessage="Managed"
+                    />
+                  </EuiBadge>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </FlyoutHeader>
   );
