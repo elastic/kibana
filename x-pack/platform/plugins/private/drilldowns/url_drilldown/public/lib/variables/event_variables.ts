@@ -27,7 +27,6 @@ import {
 import type { RowClickContext } from '@kbn/ui-actions-plugin/public';
 import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
-import type { BaseActionFactoryContext } from '@kbn/ui-actions-enhanced-plugin/public/dynamic_actions';
 import type { Primitive } from './util';
 import { deleteUndefinedKeys, toPrimitiveOrUndefined } from './util';
 
@@ -281,11 +280,7 @@ const selectRangeVariables: readonly UrlTemplateEditorVariable[] = [
   },
 ];
 
-export const getEventVariableList = (
-  context: BaseActionFactoryContext
-): UrlTemplateEditorVariable[] => {
-  const [trigger] = context.triggers;
-
+export const getEventVariableList = (trigger?: string): UrlTemplateEditorVariable[] => {
   switch (trigger) {
     case VALUE_CLICK_TRIGGER:
       return [...valueClickVariables];
