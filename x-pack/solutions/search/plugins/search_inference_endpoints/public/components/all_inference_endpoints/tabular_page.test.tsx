@@ -300,40 +300,31 @@ describe('When the tabular page is loaded', () => {
     expect(rows[11]).not.toHaveTextContent(techPreview);
   });
 
-  it('should show task type badges in the endpoint column for all rows', () => {
+  it('should show the correct task type badge for each endpoint', () => {
     renderTabularPageWithProviders();
 
-    const endpointCells = screen.getAllByTestId('endpointCell');
-
-    // Every endpoint cell should contain a task type badge
-    endpointCells.forEach((cell) => {
-      expect(within(cell).queryByTestId(/^table-column-task-type-/)).toBeInTheDocument();
-    });
-
-    // Verify specific endpoints have the correct task types by locating cells by content
-    const findEndpointCell = (endpointId: string) => {
-      const cell = endpointCells.find((c) => c.textContent?.includes(endpointId));
-      expect(cell).toBeDefined();
-      return within(cell!);
+    const expectedTaskTypes: Record<string, string> = {
+      '.elser-2-elastic': 'sparse_embedding',
+      '.elser-2-elasticsearch': 'sparse_embedding',
+      '.multilingual-e5-small-elasticsearch': 'text_embedding',
+      '.multilingual-embed-v1-elastic': 'text_embedding',
+      '.rerank-v1-elastic': 'rerank',
+      '.sparkles': 'chat_completion',
+      'custom-inference-id': 'sparse_embedding',
+      'elastic-rerank': 'rerank',
+      'local-model': 'sparse_embedding',
+      'my-elser-model-05': 'sparse_embedding',
+      'third-party-model': 'sparse_embedding',
     };
 
-    findEndpointCell('.elser-2-elastic').getByTestId('table-column-task-type-sparse_embedding');
-    findEndpointCell('.elser-2-elasticsearch').getByTestId(
-      'table-column-task-type-sparse_embedding'
-    );
-    findEndpointCell('.multilingual-e5-small-elasticsearch').getByTestId(
-      'table-column-task-type-text_embedding'
-    );
-    findEndpointCell('.multilingual-embed-v1-elastic').getByTestId(
-      'table-column-task-type-text_embedding'
-    );
-    findEndpointCell('.rerank-v1-elastic').getByTestId('table-column-task-type-rerank');
-    findEndpointCell('.sparkles').getByTestId('table-column-task-type-chat_completion');
-    findEndpointCell('custom-inference-id').getByTestId('table-column-task-type-sparse_embedding');
-    findEndpointCell('elastic-rerank').getByTestId('table-column-task-type-rerank');
-    findEndpointCell('local-model').getByTestId('table-column-task-type-sparse_embedding');
-    findEndpointCell('my-elser-model-05').getByTestId('table-column-task-type-sparse_embedding');
-    findEndpointCell('third-party-model').getByTestId('table-column-task-type-sparse_embedding');
+    const endpointCells = screen.getAllByTestId('endpointCell');
+    expect(endpointCells).toHaveLength(Object.keys(expectedTaskTypes).length);
+
+    for (const [endpointId, taskType] of Object.entries(expectedTaskTypes)) {
+      const cell = endpointCells.find((c) => c.textContent?.includes(endpointId));
+      expect(cell).toBeDefined();
+      expect(within(cell!).getByTestId(`table-column-task-type-${taskType}`)).toBeInTheDocument();
+    }
   });
 
   it('should display endpoint stats with correct counts', () => {
