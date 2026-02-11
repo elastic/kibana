@@ -78,7 +78,10 @@ export class DatePicker {
       await expect
         .poll(
           async () => {
-            await showBtn.click();
+            await showBtn.click({
+              timeout: 1000,
+              button: 'middle',
+            });
             const absoluteTab = this.page.testSubj.locator('superDatePickerAbsoluteTab');
             // Wait for the absolute tab to appear, but don't throw if it doesn't
             await absoluteTab.waitFor({ state: 'visible', timeout: 2500 }).catch(() => {});
