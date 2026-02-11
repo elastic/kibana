@@ -28,12 +28,6 @@ export interface DrilldownManagerDeps {
   triggers: string[];
 
   /**
-   * Special opaque context object provided by the place from where the
-   * Drilldown Manager was opened.
-   */
-  // placeContext: ActionFactoryPlaceContext<BaseActionFactoryContext>;
-
-  /**
    * Initial drilldown state.
    */
   initialState?: Partial<DrilldownState>;
@@ -48,11 +42,6 @@ export class DrilldownManager {
    * Drilldown definition.
    */
   public readonly factory: DrilldownFactory;
-
-  /**
-   * Opaque action factory context object excluding the `triggers` attribute.
-   */
-  // public readonly placeContext: ActionFactoryPlaceContext<BaseActionFactoryContext>;
 
   /**
    * User entered name of this drilldown.
@@ -189,18 +178,6 @@ export class DrilldownManager {
       type: this.factory.type,
     };
   }
-
-  /**
-   * Returns a list of all triggers from which user can pick in UI, for this
-   * specific drilldown.
-   */
-  /*
-  public getAllDrilldownTriggers(): string[] {
-    const uiTriggers = this.factory.supportedTriggers.filter((trigger) =>
-      this.placeTriggers.includes(trigger)
-    );
-    return uiTriggers;
-  }*/
 
   public isValid(): boolean {
     if (!this.name$.getValue()) return false;
