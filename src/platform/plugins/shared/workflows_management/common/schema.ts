@@ -129,7 +129,9 @@ function convertDynamicConnectorsToContractsInternal(
       const connectorTypeName = connectorType.actionTypeId.replace(/^\./, '');
 
       // If the connector has a system connector associated, it can be executed without a connector-id
-      const hasConnectorId = SystemConnectorsMap.has(connectorType.actionTypeId) ? 'optional' : 'required';
+      const hasConnectorId = SystemConnectorsMap.has(connectorType.actionTypeId)
+        ? 'optional'
+        : 'required';
 
       // If the connector has sub-actions, create separate contracts for each sub-action
       if (connectorType.subActions && connectorType.subActions.length > 0) {
