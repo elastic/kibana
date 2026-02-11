@@ -257,7 +257,7 @@ export function setupSavedObjects(
             ':templateId',
             encodeURIComponent(savedObject.id)
           )}`,
-          uiCapabilitiesPath: '',
+          uiCapabilitiesPath: 'management.insightsAndAlerting.triggersActions',
         };
       },
     },
