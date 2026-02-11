@@ -13,7 +13,7 @@ import { buildDocumentation } from '../definitions/utils/documentation';
 import { TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
 import { withAutoSuggest } from '../definitions/utils/autocomplete/helpers';
 import { techPreviewLabel } from '../definitions/utils/shared';
-import { SuggestionCategory } from '../../shared/sorting/types';
+import { SuggestionCategory } from '../../language/autocomplete/utils/sorting/types';
 import {
   ESQL_STRING_TYPES,
   ESQL_COMMON_NUMERIC_TYPES,

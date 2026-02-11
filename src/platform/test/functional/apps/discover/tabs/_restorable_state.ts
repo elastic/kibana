@@ -563,7 +563,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await browser.clearLocalStorage();
       });
 
-      describe('classic view', () => {
+      describe('classic view table tab', () => {
         it('should restore state for searchValue, pinnedFields when switching tabs', async () => {
           /* Tab 1 settings: 
           // searchValue: "geo", 
@@ -796,7 +796,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('ES|QL view', () => {
+      describe('ES|QL view table tab', () => {
         it('should restore state for hideNullValues', async () => {
           /* Tab 1 settings: 
           // hideNullValues toggle off,
@@ -842,6 +842,99 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await hideNullValuesSwitchTab1AfterSwitch.getAttribute('aria-checked')).to.be(
             'false'
           );
+        });
+      });
+
+      describe('source tab', () => {
+        it('should restore state for jsonValue and skip refetching', async () => {
+          await dataGrid.clickRowToggle({ rowIndex: 0 });
+          await discover.isShowingDocViewer();
+          await dataGrid.clickDocViewerTab('doc_view_source');
+
+          await retry.waitFor('JSON content to load', async () => {
+            const jsonContent = await monacoEditor.getCodeEditorValue();
+            return jsonContent.length > 0 && jsonContent.includes('"_id"');
+          });
+          const originalJsonContent = await monacoEditor.getCodeEditorValue();
+
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
+
+          await dataGrid.clickRowToggle({ rowIndex: 1 });
+          await discover.isShowingDocViewer();
+          await dataGrid.clickDocViewerTab('doc_view_source');
+
+          await retry.waitFor('JSON content to load in tab 2', async () => {
+            const jsonContent = await monacoEditor.getCodeEditorValue();
+            return jsonContent.length > 0 && jsonContent.includes('"_id"');
+          });
+          const tab2JsonContent = await monacoEditor.getCodeEditorValue();
+
+          expect(tab2JsonContent).to.not.eql(originalJsonContent);
+
+          await discover.expectSearchRequestCount('ese', 0, async () => {
+            await unifiedTabs.selectTab(0);
+            await discover.waitUntilTabIsLoaded();
+          });
+
+          await retry.waitFor('JSON content to be restored', async () => {
+            const restoredJsonContent = await monacoEditor.getCodeEditorValue();
+            return restoredJsonContent === originalJsonContent;
+          });
+
+          await discover.expectSearchRequestCount('ese', 0, async () => {
+            await unifiedTabs.selectTab(1);
+            await discover.waitUntilTabIsLoaded();
+          });
+
+          await retry.waitFor('Tab 2 JSON content to be restored', async () => {
+            const restoredTab2Json = await monacoEditor.getCodeEditorValue();
+            return restoredTab2Json === tab2JsonContent;
+          });
+        });
+
+        it('should restore state for viewerScrollTop', async () => {
+          await dataGrid.clickRowToggle({ rowIndex: 0 });
+          await discover.isShowingDocViewer();
+          await dataGrid.clickDocViewerTab('doc_view_source');
+
+          await retry.waitFor('JSON content to load', async () => {
+            const jsonContent = await monacoEditor.getCodeEditorValue();
+            return jsonContent.length > 0 && jsonContent.includes('"_id"');
+          });
+
+          const scrollAmount = 200;
+          await monacoEditor.setScrollTop(scrollAmount);
+
+          await retry.waitFor('scroll position to be applied', async () => {
+            const scrollTop = await monacoEditor.getScrollTop();
+            return scrollTop >= scrollAmount;
+          });
+
+          const tab1ScrollTop = await monacoEditor.getScrollTop();
+
+          await unifiedTabs.createNewTab();
+          await discover.waitUntilTabIsLoaded();
+
+          await dataGrid.clickRowToggle({ rowIndex: 0 });
+          await discover.isShowingDocViewer();
+          await dataGrid.clickDocViewerTab('doc_view_source');
+
+          await retry.waitFor('JSON content to load in tab 2', async () => {
+            const jsonContent = await monacoEditor.getCodeEditorValue();
+            return jsonContent.length > 0 && jsonContent.includes('"_id"');
+          });
+
+          const tab2ScrollTop = await monacoEditor.getScrollTop();
+          expect(tab2ScrollTop).to.eql(0);
+
+          await unifiedTabs.selectTab(0);
+          await discover.waitUntilTabIsLoaded();
+
+          await retry.waitFor('scroll position to be restored', async () => {
+            const restoredScrollTop = await monacoEditor.getScrollTop();
+            return restoredScrollTop === tab1ScrollTop;
+          });
         });
       });
     });
