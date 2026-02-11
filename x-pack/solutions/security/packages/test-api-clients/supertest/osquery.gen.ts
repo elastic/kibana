@@ -29,13 +29,6 @@ import type {
   GetAgentsRequestQueryInput,
 } from '@kbn/osquery-plugin/common/api/fleet_wrapper/fleet_wrapper.gen';
 import type {
-  OsqueryCreateLiveQueryRequestBodyInput,
-  OsqueryFindLiveQueriesRequestQueryInput,
-  OsqueryGetLiveQueryDetailsRequestParamsInput,
-  OsqueryGetLiveQueryResultsRequestQueryInput,
-  OsqueryGetLiveQueryResultsRequestParamsInput,
-} from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
-import type {
   OsqueryCopyPacksRequestParamsInput,
   OsqueryCreatePacksRequestBodyInput,
   OsqueryDeletePacksRequestParamsInput,
@@ -53,6 +46,13 @@ import type {
   OsqueryUpdateSavedQueryRequestParamsInput,
   OsqueryUpdateSavedQueryRequestBodyInput,
 } from '@kbn/osquery-plugin/common/api/saved_query/saved_query.gen';
+import type {
+  OsqueryCreateLiveQueryRequestBodyInput,
+  OsqueryFindLiveQueriesRequestQueryInput,
+  OsqueryGetLiveQueryDetailsRequestParamsInput,
+  OsqueryGetLiveQueryResultsRequestQueryInput,
+  OsqueryGetLiveQueryResultsRequestParamsInput,
+} from '@kbn/osquery-plugin/common/api/live_query/live_queries.gen';
 import type {
   ReadAssetsStatusRequestQueryInput,
   UpdateAssetsStatusRequestQueryInput,
