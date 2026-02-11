@@ -13,7 +13,8 @@ import { tags } from '@kbn/scout';
 import type { ScoutTestConfig } from '@kbn/scout';
 import type { KbnClient } from '@kbn/scout';
 import type { StreamlangDSL } from '@kbn/streamlang';
-import type { ProcessingSimulationResponse, FlattenRecord } from '@kbn/streams-schema';
+import { TaskStatus } from '@kbn/streams-schema';
+import type { ProcessingSimulationResponse, FlattenRecord, TaskResult } from '@kbn/streams-schema';
 import { extractGrokPatternDangerouslySlow } from '@kbn/grok-heuristics';
 import { groupMessagesByPattern as groupMessagesByDissectPattern } from '@kbn/dissect-heuristics';
 import { evaluate } from '../src/evaluate';
@@ -181,57 +182,74 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
   }
 
   /**
-   * Parse SSE response from pipeline suggestion endpoint.
-   * SSE format:
-   *   event: suggested_processing_pipeline
-   *   data: {"pipeline": {...}}
-   * OR
-   *   data: {"type": "error", "message": "..."}
+   * Poll the pipeline suggestion background task until it finishes.
    */
-  function parseSSEResponse(responseText: string): StreamlangDSL | null {
-    try {
-      const allLines = responseText.split('\n');
-      const dataLines = allLines.filter((line) => line.startsWith('data: '));
-      const eventLines = allLines.filter((line) => line.startsWith('event: '));
+  type PipelineSuggestionTaskStatus = TaskResult<{ pipeline: StreamlangDSL | null }>;
+  type CompletedPipelineSuggestionTaskStatus = PipelineSuggestionTaskStatus & {
+    status: TaskStatus.Completed | TaskStatus.Acknowledged;
+    pipeline: StreamlangDSL | null;
+  };
 
-      if (dataLines.length === 0) {
-        // eslint-disable-next-line no-console
-        console.error('No SSE data lines found in response');
-        return null;
+  async function waitForPipelineSuggestionResult(params: {
+    kbnClient: KbnClient;
+    streamName: string;
+    scheduleParams: {
+      connectorId: string;
+      documents: FlattenRecord[];
+      extractedPatterns: ReturnType<typeof extractPatterns>;
+    };
+    timeoutMs?: number;
+    pollIntervalMs?: number;
+  }): Promise<CompletedPipelineSuggestionTaskStatus> {
+    const timeoutMs = params.timeoutMs ?? 300_000;
+    const pollIntervalMs = params.pollIntervalMs ?? 1_000;
+
+    const startedAt = Date.now();
+    let rescheduled = false;
+
+    while (true) {
+      const statusResponse = await params.kbnClient.request({
+        method: 'POST',
+        path: `/internal/streams/${params.streamName}/_pipeline_suggestion/_status`,
+      });
+
+      const result = statusResponse.data as PipelineSuggestionTaskStatus;
+
+      if (result.status === TaskStatus.Completed || result.status === TaskStatus.Acknowledged) {
+        return result as CompletedPipelineSuggestionTaskStatus;
       }
 
-      // Check for error events in data
-      for (const line of dataLines) {
-        const data = JSON.parse(line.slice(6));
-        if (data.type === 'error') {
-          // eslint-disable-next-line no-console
-          console.error('Pipeline suggestion error:', data.message || data.error);
-          return null;
+      if (result.status === TaskStatus.Failed) {
+        throw new Error(result.error ?? 'Pipeline suggestion task failed');
+      }
+
+      if (result.status === TaskStatus.Stale) {
+        // Occasionally the task can be detected as stale (e.g. server restart).
+        // Try a single re-schedule to make the eval resilient.
+        if (!rescheduled) {
+          rescheduled = true;
+          await params.kbnClient.request({
+            method: 'POST',
+            path: `/internal/streams/${params.streamName}/_pipeline_suggestion/_task`,
+            body: {
+              action: 'schedule' as const,
+              connectorId: params.scheduleParams.connectorId,
+              documents: params.scheduleParams.documents,
+              extractedPatterns: params.scheduleParams.extractedPatterns,
+            },
+          });
+        } else {
+          throw new Error('Pipeline suggestion task became stale after reschedule');
         }
       }
 
-      // Find the suggested_processing_pipeline event
-      const eventIndex = eventLines.findIndex((line) =>
-        line.includes('suggested_processing_pipeline')
-      );
-
-      if (eventIndex === -1) {
-        // eslint-disable-next-line no-console
-        console.error('No suggested_processing_pipeline event found');
-        return null;
+      if (Date.now() - startedAt > timeoutMs) {
+        throw new Error(
+          `Timed out waiting for pipeline suggestion task (last status: ${result.status})`
+        );
       }
 
-      // Get corresponding data line (should be after the event line in the original text)
-      // Find the data line that comes after this event line
-      const lastDataLine = dataLines[dataLines.length - 1];
-      const parsed = JSON.parse(lastDataLine.slice(6));
-
-      // Response format: {"pipeline": {...}}
-      return parsed.pipeline || null;
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to parse SSE response:', err);
-      return null;
+      await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
     }
   }
 
@@ -301,31 +319,48 @@ evaluate.describe('Pipeline suggestion quality evaluation', () => {
       // Extract patterns
       const extractedPatterns = extractPatterns(documents);
 
-      // Call suggest_processing_pipeline route
-      const pipelineResponse = await kbnClient.request({
+      // Schedule pipeline suggestion background task
+      await kbnClient.request({
         method: 'POST',
-        path: `/internal/streams/${input.stream_name}/_suggest_processing_pipeline`,
+        path: `/internal/streams/${input.stream_name}/_pipeline_suggestion/_task`,
         body: {
-          connector_id: connector.id,
+          action: 'schedule' as const,
+          connectorId: connector.id,
           documents,
-          extracted_patterns: extractedPatterns,
+          extractedPatterns,
         },
       });
 
-      // Parse SSE response
-      const suggestedPipeline = parseSSEResponse(pipelineResponse.data as string);
+      const taskResult = await waitForPipelineSuggestionResult({
+        kbnClient,
+        streamName: input.stream_name,
+        scheduleParams: {
+          connectorId: connector.id,
+          documents,
+          extractedPatterns,
+        },
+      });
+
+      const suggestedPipeline = taskResult.pipeline ?? null;
+
+      // Best-effort cleanup to avoid leaving completed tasks around
+      await kbnClient
+        .request({
+          method: 'POST',
+          path: `/internal/streams/${input.stream_name}/_pipeline_suggestion/_task`,
+          body: { action: 'acknowledge' as const },
+        })
+        .catch(() => undefined);
 
       // Check if pipeline suggestion failed
       if (!suggestedPipeline) {
-        // Log first 1000 chars of response for debugging
-        const responsePreview = (pipelineResponse.data as string).slice(0, 1000);
         // Log sample of documents to check format
         const sampleDoc = documents[0];
         const bodyPreview = (sampleDoc['body.text'] as string | undefined)?.slice(0, 200);
 
         throw new Error(
           `Pipeline suggestion returned null for ${input.stream_name}. ` +
-            `Response preview: ${responsePreview}. ` +
+            `Task status: ${taskResult.status}. ` +
             `Sample document body.text: ${bodyPreview}. ` +
             `Document count: ${documents.length}`
         );

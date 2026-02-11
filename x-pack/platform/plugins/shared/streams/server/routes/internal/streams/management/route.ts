@@ -7,12 +7,10 @@
 
 import { pipelineSuggestionTaskRoutes } from './pipeline_suggestion_task_route';
 import { suggestPartitionsRoute } from './suggest_partitions_route';
-import { suggestProcessingPipelineRoute } from './suggest_processing_pipeline_route';
 import { unmanagedAssetsRoute } from './unmanaged_assets_route';
 
 export const internalManagementRoutes = {
   ...unmanagedAssetsRoute,
   ...suggestPartitionsRoute,
-  ...suggestProcessingPipelineRoute,
   ...pipelineSuggestionTaskRoutes,
 };

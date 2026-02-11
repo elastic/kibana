@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { flattenRecord, TaskStatus } from '@kbn/streams-schema';
+import type { TaskResult } from '@kbn/streams-schema';
 import type {
   PipelineSuggestionTaskParams,
   PipelineSuggestionTaskPayload,
@@ -17,7 +18,6 @@ import {
   getFeaturesIdentificationTaskId,
 } from '../../../../lib/tasks/task_definitions/features_identification';
 import { SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE } from '../../../../lib/tasks/task_definitions/significant_events_queries_generation';
-import type { TaskResult } from '../../../../lib/tasks/types';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { SuggestionBulkStatusItem } from '../../../../../common';
 import { createServerRoute } from '../../../create_server_route';

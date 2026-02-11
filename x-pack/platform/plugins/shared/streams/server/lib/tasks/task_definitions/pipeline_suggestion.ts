@@ -8,6 +8,7 @@
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import { suggestProcessingPipeline } from '@kbn/streams-ai';
+import { Streams } from '@kbn/streams-schema';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import type { StreamlangDSL, GrokProcessor, DissectProcessor } from '@kbn/streamlang';
 import {
@@ -84,6 +85,9 @@ export function createStreamsPipelineSuggestionTask(taskContext: TaskContext) {
 
               try {
                 const stream = await streamsClient.getStream(streamName);
+                if (!Streams.ingest.all.Definition.is(stream)) {
+                  throw new Error('Processing suggestions are only available for ingest streams');
+                }
                 const abortController = runContext.abortController;
                 let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
 
