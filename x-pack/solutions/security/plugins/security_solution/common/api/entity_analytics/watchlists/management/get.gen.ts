@@ -21,9 +21,9 @@ import { WatchlistObject } from './common.gen';
 export type GetWatchlistRequestParams = z.infer<typeof GetWatchlistRequestParams>;
 export const GetWatchlistRequestParams = z.object({
   /**
-   * Unique name for the watchlist
+   * Unique ID of the watchlist
    */
-  name: z.string(),
+  id: z.string(),
 });
 export type GetWatchlistRequestParamsInput = z.input<typeof GetWatchlistRequestParams>;
 

@@ -14,9 +14,12 @@ components:
         - managed
 
       properties:
+        id: 
+          type: string
+          description: The unique ID of the watchlist
         name:
           type: string
-          description: Unique name of the watchlist
+          description: The name of the watchlist
         description:
           type: string
           description: Description of the watchlist

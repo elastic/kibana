@@ -6,19 +6,19 @@ info:
   version: "2026-01-28"
 
 paths:
-  /api/entity_analytics/watchlists/management/{name}:
+  /api/entity_analytics/watchlists/{id}:
     put:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: UpdateWatchlist
       summary: Update an existing watchlist
       parameters:
-        - name: name
+        - name: id
           in: path
           required: true
           schema:
             type: string
-          description: The name of the watchlist to update
+          description: The ID of the watchlist to update
       requestBody:
         required: true
         content:

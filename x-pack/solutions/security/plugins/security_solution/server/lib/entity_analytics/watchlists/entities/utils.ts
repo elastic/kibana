@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const ENTITY_ANALYTICS_WATCHLISTS_PREFIX = 'entity-analytics.watchlists';
+export const ENTITY_ANALYTICS_WATCHLISTS_PREFIX = '.entity-analytics.watchlists';
 
 export const getIndexForWatchlist = (watchlistName: string, namespace: string) =>
   `${ENTITY_ANALYTICS_WATCHLISTS_PREFIX}.${watchlistName}-${namespace}`;

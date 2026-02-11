@@ -27,7 +27,7 @@ export const getWatchlistRoute = (router: EntityAnalyticsRoutesDeps['router'], l
   router.versioned
     .get({
       access: 'public',
-      path: `${WATCHLISTS_MANAGEMENT_URL}/{name}`,
+      path: `${WATCHLISTS_MANAGEMENT_URL}/{id}`,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -56,7 +56,7 @@ export const getWatchlistRoute = (router: EntityAnalyticsRoutesDeps['router'], l
               soClient: getRequestSavedObjectClient(core),
               esClient: core.elasticsearch.client.asCurrentUser,
             });
-            const body = await watchlistClient.get(request.params.name);
+            const body = await watchlistClient.get(request.params.id);
             return response.ok({ body });
           } catch (e) {
             const error = transformError(e);

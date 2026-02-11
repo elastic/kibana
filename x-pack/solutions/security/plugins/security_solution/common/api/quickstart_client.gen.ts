@@ -984,7 +984,7 @@ For detailed information on Kibana actions and alerting, and additional API call
     this.log.info(`${new Date().toISOString()} Calling API CreateWatchlist`);
     return this.kbnClient
       .request<CreateWatchlistResponse>({
-        path: '/api/entity_analytics/watchlists/management',
+        path: '/api/entity_analytics/watchlists',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2026-01-28',
         },
@@ -2161,7 +2161,7 @@ finalize it.
     this.log.info(`${new Date().toISOString()} Calling API GetWatchlist`);
     return this.kbnClient
       .request<GetWatchlistResponse>({
-        path: replaceParams('/api/entity_analytics/watchlists/management/{name}', props.params),
+        path: replaceParams('/api/entity_analytics/watchlists/{id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2026-01-28',
         },
@@ -2450,7 +2450,7 @@ providing you with the most current and effective threat detection capabilities.
     this.log.info(`${new Date().toISOString()} Calling API ListWatchlists`);
     return this.kbnClient
       .request<ListWatchlistsResponse>({
-        path: '/api/entity_analytics/watchlists/management/list',
+        path: '/api/entity_analytics/watchlists/list',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2026-01-28',
         },
@@ -3257,7 +3257,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     this.log.info(`${new Date().toISOString()} Calling API UpdateWatchlist`);
     return this.kbnClient
       .request<UpdateWatchlistResponse>({
-        path: replaceParams('/api/entity_analytics/watchlists/management/{name}', props.params),
+        path: replaceParams('/api/entity_analytics/watchlists/{id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2026-01-28',
         },

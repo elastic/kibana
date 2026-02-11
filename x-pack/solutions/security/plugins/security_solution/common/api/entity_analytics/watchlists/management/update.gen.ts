@@ -21,16 +21,16 @@ import { WatchlistObject } from './common.gen';
 export type UpdateWatchlistRequestParams = z.infer<typeof UpdateWatchlistRequestParams>;
 export const UpdateWatchlistRequestParams = z.object({
   /**
-   * The name of the watchlist to update
+   * The ID of the watchlist to update
    */
-  name: z.string(),
+  id: z.string(),
 });
 export type UpdateWatchlistRequestParamsInput = z.input<typeof UpdateWatchlistRequestParams>;
 
 export type UpdateWatchlistRequestBody = z.infer<typeof UpdateWatchlistRequestBody>;
 export const UpdateWatchlistRequestBody = z.object({
   /**
-   * Unique name for the watchlist
+   * Unique name of the watchlist
    */
   name: z.string(),
   /**

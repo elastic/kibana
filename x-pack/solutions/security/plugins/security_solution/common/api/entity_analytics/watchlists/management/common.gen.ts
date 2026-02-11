@@ -19,7 +19,11 @@ import { z } from '@kbn/zod';
 export type WatchlistObject = z.infer<typeof WatchlistObject>;
 export const WatchlistObject = z.object({
   /**
-   * Unique name of the watchlist
+   * The unique ID of the watchlist
+   */
+  id: z.string().optional(),
+  /**
+   * The name of the watchlist
    */
   name: z.string(),
   /**
@@ -35,11 +39,11 @@ export const WatchlistObject = z.object({
    */
   riskModifier: z.number(),
   /**
-   * Timestamp when the watchlist was created
+   * Timestamp indicating when the watchlist was created
    */
   createdAt: z.string().datetime().optional(),
   /**
-   * Timestamp when the watchlist was last updated
+   * Timestamp indicating when the watchlist was last updated
    */
   updatedAt: z.string().datetime().optional(),
 });

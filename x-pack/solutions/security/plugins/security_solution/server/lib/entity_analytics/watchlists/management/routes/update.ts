@@ -30,7 +30,7 @@ export const updateWatchlistRoute = (
   router.versioned
     .put({
       access: 'public',
-      path: `${WATCHLISTS_MANAGEMENT_URL}/{name}`,
+      path: `${WATCHLISTS_MANAGEMENT_URL}/{id}`,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -60,9 +60,9 @@ export const updateWatchlistRoute = (
               esClient: core.elasticsearch.client.asCurrentUser,
               logger,
             });
-            const { name } = request.params;
+            const { id } = request.params;
             // update returns attributes only, need to fetch full object for response
-            const updated = await watchlistClient.update(name, request.body);
+            const updated = await watchlistClient.update(id, request.body);
 
             return response.ok({ body: updated });
           } catch (e) {
