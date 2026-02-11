@@ -16,6 +16,7 @@ import {
   createAlertsIndex,
   waitForRulePartialFailure,
   getRuleForAlertTesting,
+  waitForRuleSuccess,
 } from '@kbn/detections-response-ftr-services';
 import { createRuleWithAuth, getThresholdRuleForAlertTesting } from '../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
@@ -54,15 +55,16 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     context('when all indices exist but user cannot read host_alias', () => {
-      const indexTestCases = [
-        ['host_alias'],
+      const noReadableIndicesTestCases = [['host_alias'], ['host_alias*']];
+
+      const mixedReadabilityTestCases = [
         ['host_alias', 'auditbeat-8.0.0'],
-        ['host_alias*'],
         ['host_alias*', 'auditbeat-*'],
+        ['auditbeat-8.0.0', 'auditbeat-*'],
       ];
 
-      indexTestCases.forEach((index) => {
-        it(`sets rule status to partial failure for KQL rule with index param: ${index}`, async () => {
+      noReadableIndicesTestCases.forEach((index) => {
+        it(`warns when no indices match the index pattern`, async () => {
           const rule = {
             ...getRuleForAlertTesting(index),
             query: 'process.executable: "/usr/bin/sudo"',
@@ -86,15 +88,62 @@ export default ({ getService }: FtrProviderContext) => {
 
           // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
           expect(body?.execution_summary?.last_execution.message).to.contain(
-            `This rule's API key is unable to access all indices that match the ["${index[0]}"] pattern. To learn how to update and manage API keys, refer to https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts/alerting-setup#alerting-authorization`
+            `No matching indices found for rule ${rule.name}. This warning will continue to appear until a matching index is created or this rule is disabled.`
           );
+
+          await deleteUserAndRole(getService, ROLES.detections_admin);
+        });
+      });
+
+      mixedReadabilityTestCases.forEach((index) => {
+        it(`sets rule status to partial failure for KQL rule with index param: ${index}`, async () => {
+          const rule = {
+            ...getRuleForAlertTesting(index),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
+          await createUserAndRole(getService, ROLES.detections_admin);
+          const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
+            user: ROLES.detections_admin,
+            pass: 'changeme',
+          });
+          await waitForRuleSuccess({
+            supertest,
+            log,
+            id,
+          });
 
           await deleteUserAndRole(getService, ROLES.detections_admin);
         });
       });
     });
 
-    context('when some specified indices do not exist, but user can read all others', () => {});
+    context('when some specified indices do not exist, but user can read all others', () => {
+      const mixedExistenceTestCases = [
+        ['auditbeat-8.0.0', 'non-existent-index'],
+        ['auditbeat-*', 'non-existent-index'],
+      ];
+
+      mixedExistenceTestCases.forEach((index) => {
+        it(`sets rule status to partial failure for KQL rule with index param: ${index}`, async () => {
+          const rule = {
+            ...getRuleForAlertTesting(index),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
+          await createUserAndRole(getService, ROLES.detections_admin);
+          const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
+            user: ROLES.detections_admin,
+            pass: 'changeme',
+          });
+          await waitForRuleSuccess({
+            supertest,
+            log,
+            id,
+          });
+
+          await deleteUserAndRole(getService, ROLES.detections_admin);
+        });
+      });
+    });
 
     describe('when no specified indices exist', () => {
       describe('for a query rule', () => {
@@ -153,23 +202,11 @@ export default ({ getService }: FtrProviderContext) => {
             user: ROLES.detections_admin,
             pass: 'changeme',
           });
-          await waitForRulePartialFailure({
+          await waitForRuleSuccess({
             supertest,
             log,
             id,
           });
-          const { body } = await supertest
-            .get(DETECTION_ENGINE_RULES_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
-            .query({ id })
-            .expect(200);
-
-          // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
-          expect(body?.execution_summary?.last_execution.message).to.contain(
-            `This rule's API key is unable to access all indices that match the ["${index[0]}"] pattern. To learn how to update and manage API keys, refer to https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts/alerting-setup#alerting-authorization`
-          );
-
           await deleteUserAndRole(getService, ROLES.detections_admin);
         });
       });
