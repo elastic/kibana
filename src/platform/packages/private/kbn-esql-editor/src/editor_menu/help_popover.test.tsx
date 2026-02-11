@@ -73,8 +73,6 @@ describe('HelpPopover', () => {
     await userEvent.click(screen.getByTestId('esql-help-popover-button'));
     expect(screen.getByTestId('esql-quick-reference')).toBeInTheDocument();
     expect(screen.queryByTestId('esql-recommended-queries')).not.toBeInTheDocument();
-    expect(screen.getByTestId('esql-about')).toBeInTheDocument();
-    expect(screen.getByTestId('esql-feedback')).toBeInTheDocument();
   });
 
   it('should have recommended queries if a dataview is available', async () => {

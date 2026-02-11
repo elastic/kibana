@@ -23,7 +23,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FEEDBACK_LINK } from '@kbn/esql-utils';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { type RecommendedQuery, REGISTRY_EXTENSIONS_ROUTE, QuerySource } from '@kbn/esql-types';
 import { getRecommendedQueriesTemplates } from '@kbn/esql-language/src/commands/registry/options/recommended_queries';
@@ -40,11 +39,8 @@ export const HelpPopover: React.FC<{
 }> = ({ onESQLDocsFlyoutVisibilityChanged }) => {
   const kibana = useKibana<ESQLEditorDeps>();
   const { core, data } = kibana.services;
-  const { docLinks, http, chrome, analytics, notifications } = core;
-  const isFeedbackEnabled = useMemo(
-    () => notifications?.feedback?.isEnabled?.() ?? false,
-    [notifications]
-  );
+  const { docLinks, http, chrome, analytics } = core;
+
   const { euiTheme } = useEuiTheme();
   const actions = useEsqlEditorActions();
 
@@ -194,38 +190,17 @@ export const HelpPopover: React.FC<{
         items: [
           {
             name: i18n.translate('esqlEditor.menu.quickReference', {
-              defaultMessage: 'Quick Reference',
+              defaultMessage: 'Help',
             }),
             icon: 'documentation',
             renderItem: () => (
               <EuiContextMenuItem
                 key="quickReference"
-                icon="documentation"
                 data-test-subj="esql-quick-reference"
                 onClick={() => toggleLanguageComponent()}
               >
                 {i18n.translate('esqlEditor.menu.quickReference', {
-                  defaultMessage: 'Quick Reference',
-                })}
-              </EuiContextMenuItem>
-            ),
-          },
-          {
-            name: i18n.translate('esqlEditor.menu.documentation', {
-              defaultMessage: 'Documentation',
-            }),
-            icon: 'info',
-            renderItem: () => (
-              <EuiContextMenuItem
-                key="about"
-                icon="info"
-                data-test-subj="esql-about"
-                target="_blank"
-                href={docLinks.links.query.queryESQL}
-                onClick={() => setIsESQLMenuPopoverOpen(false)}
-              >
-                {i18n.translate('esqlEditor.menu.documentation', {
-                  defaultMessage: 'Documentation',
+                  defaultMessage: 'Help',
                 })}
               </EuiContextMenuItem>
             ),
@@ -236,33 +211,8 @@ export const HelpPopover: React.FC<{
                   name: i18n.translate('esqlEditor.menu.exampleQueries', {
                     defaultMessage: 'Recommended queries',
                   }),
-                  icon: 'nested',
                   panel: 1,
                   'data-test-subj': 'esql-recommended-queries',
-                },
-              ]
-            : []),
-          ...(isFeedbackEnabled
-            ? [
-                {
-                  name: i18n.translate('esqlEditor.menu.feedback', {
-                    defaultMessage: 'Submit feedback',
-                  }),
-                  icon: 'editorComment',
-                  renderItem: () => (
-                    <EuiContextMenuItem
-                      key="feedback"
-                      icon="editorComment"
-                      data-test-subj="esql-feedback"
-                      target="_blank"
-                      href={FEEDBACK_LINK}
-                      onClick={() => setIsESQLMenuPopoverOpen(false)}
-                    >
-                      {i18n.translate('esqlEditor.menu.feedback', {
-                        defaultMessage: 'Submit feedback',
-                      })}
-                    </EuiContextMenuItem>
-                  ),
                 },
               ]
             : []),
@@ -297,8 +247,6 @@ export const HelpPopover: React.FC<{
     actions,
     adHocDataview?.name,
     categorizationField,
-    docLinks.links.query.queryESQL,
-    isFeedbackEnabled,
     queryForRecommendedQueries,
     solutionsRecommendedQueries,
     timeFieldName,
