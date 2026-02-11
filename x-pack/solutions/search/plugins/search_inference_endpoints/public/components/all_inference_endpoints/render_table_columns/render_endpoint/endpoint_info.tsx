@@ -7,6 +7,7 @@
 
 import {
   EuiBadge,
+  EuiBadgeGroup,
   EuiBetaBadge,
   EuiButtonIcon,
   EuiCopy,
@@ -112,42 +113,36 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
+        <EuiBadgeGroup gutterSize="xs">
           {taskType != null && (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18n.TASK_TYPE_TOOLTIPS[taskType] ?? taskType}>
-                <EuiBadge
-                  tabIndex={0}
-                  data-test-subj={`table-column-task-type-${taskType}`}
-                  color="hollow"
-                >
-                  {taskType}
-                </EuiBadge>
-              </EuiToolTip>
-            </EuiFlexItem>
+            <EuiToolTip content={i18n.TASK_TYPE_TOOLTIPS[taskType] ?? taskType}>
+              <EuiBadge
+                tabIndex={0}
+                data-test-subj={`table-column-task-type-${taskType}`}
+                color="hollow"
+              >
+                {taskType}
+              </EuiBadge>
+            </EuiToolTip>
           )}
           {isPreconfigured && (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={i18n.PRECONFIGURED_TOOLTIP}>
-                <EuiBadge tabIndex={0} data-test-subj="preconfiguredBadge" color="hollow">
-                  {i18n.PRECONFIGURED_LABEL}
-                </EuiBadge>
-              </EuiToolTip>
-            </EuiFlexItem>
+            <EuiToolTip content={i18n.PRECONFIGURED_TOOLTIP}>
+              <EuiBadge tabIndex={0} data-test-subj="preconfiguredBadge" color="hollow">
+                {i18n.PRECONFIGURED_LABEL}
+              </EuiBadge>
+            </EuiToolTip>
           )}
           {isTechPreview && (
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={i18n.TECH_PREVIEW_LABEL}
-                tooltipContent={i18n.TECH_PREVIEW_TOOLTIP}
-                size="s"
-                color="subdued"
-                alignment="middle"
-                data-test-subj="techPreviewBadge"
-              />
-            </EuiFlexItem>
+            <EuiBetaBadge
+              label={i18n.TECH_PREVIEW_LABEL}
+              tooltipContent={i18n.TECH_PREVIEW_TOOLTIP}
+              size="s"
+              color="subdued"
+              alignment="middle"
+              data-test-subj="techPreviewBadge"
+            />
           )}
-        </EuiFlexGroup>
+        </EuiBadgeGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
