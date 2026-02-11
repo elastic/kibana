@@ -59,7 +59,7 @@ function getImpactProperties(impact: FormattedChangePoint['impact']): {
 }
 
 export function formatChangePoint(
-  item: Omit<SignificantEventItem, 'stream_name'>
+  item: Omit<SignificantEventItem, 'stream_name' | 'rule_backed'>
 ): FormattedChangePoint | undefined {
   const type = Object.keys(item.change_points.type)[0] as keyof typeof item.change_points.type;
 
