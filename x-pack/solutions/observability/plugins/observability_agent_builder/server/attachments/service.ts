@@ -17,9 +17,10 @@ import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/dat
 const GET_SERVICE_DETAILS_TOOL_ID = 'get_service_details';
 
 const serviceDataSchema = z.object({
-  serviceId: z.string(),
   serviceName: z.string(),
   environment: z.string(),
+  start: z.string(),
+  end: z.string(),
 });
 
 export type ServiceAttachmentData = z.infer<typeof serviceDataSchema>;
@@ -46,28 +47,57 @@ export function createServiceAttachmentType({
       return { valid: false, error: parsed.error.message };
     },
     format: (attachment) => {
-      const { serviceId, serviceName, environment } = attachment.data;
+      const { serviceName, environment, start, end } = attachment.data;
 
       return {
         getRepresentation: () => ({
           type: 'text',
-          value: `Observability Service ID: ${serviceId}. Use the ${GET_SERVICE_DETAILS_TOOL_ID} tool to fetch the full service details.`,
+          value: `Observability Service Name: ${serviceName}. Use the ${GET_SERVICE_DETAILS_TOOL_ID} tool to fetch the full service details.`,
         }),
         getBoundedTools: () => [
           {
             id: GET_SERVICE_DETAILS_TOOL_ID,
             type: ToolType.builtin,
-            description: `Fetch the full service details for service ${serviceId}.`,
+            description: `Fetch the full service details for service ${serviceName}.`,
             schema: z.object({}),
             handler: async (_args, context) => {
-              return {
-                results: [
-                  {
-                    type: ToolResultType.other,
-                    data: {},
-                  },
-                ],
-              };
+              try {
+                const serviceDetails = await dataRegistry.getData('apmServiceSummary', {
+                  request: context.request,
+                  serviceName,
+                  serviceEnvironment: environment,
+                  start,
+                  end,
+                });
+
+                if (!serviceDetails) {
+                  throw new Error('Service details not found');
+                }
+
+                return {
+                  results: [
+                    {
+                      type: ToolResultType.other,
+                      data: serviceDetails,
+                    },
+                  ],
+                };
+              } catch (error) {
+                logger.error(`Failed to fetch service details for attachment: ${error?.message}`);
+                logger.debug(error);
+
+                return {
+                  results: [
+                    {
+                      type: ToolResultType.error,
+                      data: {
+                        message: `Failed to fetch service details: ${error.message}`,
+                        stack: error.stack,
+                      },
+                    },
+                  ],
+                };
+              }
             },
           },
         ],
@@ -76,7 +106,7 @@ export function createServiceAttachmentType({
     getTools: () => [],
     getAgentDescription: () =>
       dedent(
-        `An Observability service attachment. The service ID is provided - use the ${GET_SERVICE_DETAILS_TOOL_ID} tool to fetch the full service details.`
+        `An Observability service attachment. The service name, environment and the time range is provided - use the ${GET_SERVICE_DETAILS_TOOL_ID} tool to fetch the full service details.`
       ),
   };
 }

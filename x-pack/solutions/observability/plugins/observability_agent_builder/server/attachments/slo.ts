@@ -63,11 +63,15 @@ export function createSloAttachmentType({
                   remoteName,
                 });
 
+                if (!sloDetails) {
+                  throw new Error('SLO details not found');
+                }
+
                 return {
                   results: [
                     {
                       type: ToolResultType.other,
-                      data: sloDetails as Record<string, unknown>,
+                      data: sloDetails,
                     },
                   ],
                 };
