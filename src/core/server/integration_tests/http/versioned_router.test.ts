@@ -15,6 +15,7 @@ import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import type { HandlerResolutionStrategy } from '@kbn/core-http-router-server-internal';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { createConfigService } from '@kbn/core-http-server-mocks';
 import type { HttpConfigType, HttpService } from '@kbn/core-http-server-internal';
@@ -27,6 +28,7 @@ let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;
 
 interface AdditionalOptions {
+  versionResolution?: HandlerResolutionStrategy;
   useVersionResolutionStrategyForInternalPaths?: string[];
 }
 
@@ -39,7 +41,7 @@ describe('Routing versioned requests', () => {
     await server?.stop(); // stop the already started server
     const serverConfig: Partial<HttpConfigType> = {
       versioned: {
-        versionResolution: cliArgs.dev ? 'none' : cliArgs.serverless ? 'newest' : 'oldest',
+        versionResolution: options.versionResolution ?? (cliArgs.serverless ? 'newest' : 'oldest'),
         strictClientVersionCheck: !cliArgs.serverless,
         useVersionResolutionStrategyForInternalPaths:
           options.useVersionResolutionStrategyForInternalPaths ?? [],
@@ -363,47 +365,6 @@ describe('Routing versioned requests', () => {
     ).resolves.toMatch('v1');
   });
 
-  it('requires version headers to be set for internal and public endpoints when in dev', async () => {
-    await setupServer({ dev: true });
-    router.versioned
-      .get({
-        path: '/my-path',
-        security: { authz: { enabled: false, reason: '' } },
-        access: 'public',
-      })
-      .addVersion({ version: '2023-10-31', validate: false }, async (ctx, req, res) => res.ok());
-
-    router.versioned
-      .get({
-        path: '/my-internal-path',
-        security: { authz: { enabled: false, reason: '' } },
-        access: 'internal',
-      })
-      .addVersion({ version: '1', validate: false }, async (ctx, req, res) => res.ok());
-
-    await server.start();
-
-    await expect(
-      supertest
-        .get('/my-path')
-        .unset('Elastic-Api-Version')
-        .expect(400)
-        .then(({ body }) => body.message)
-    ).resolves.toMatch(/Please specify.+version/);
-
-    await supertest.get('/my-path').set('Elastic-Api-Version', '2023-10-31').expect(200);
-
-    await expect(
-      supertest
-        .get('/my-internal-path')
-        .unset('Elastic-Api-Version')
-        .expect(400)
-        .then(({ body }) => body.message)
-    ).resolves.toMatch(/Please specify.+version/);
-
-    await supertest.get('/my-internal-path').set('Elastic-Api-Version', '1').expect(200);
-  });
-
   it('errors when no handler could be found', async () => {
     router.versioned.get({
       path: '/my-path',
@@ -608,10 +569,9 @@ describe('Routing versioned requests', () => {
       }
     });
   });
-
   it('defaults version parameters for select internal paths', async () => {
     await setupServer(
-      {},
+      { dev: false },
       { useVersionResolutionStrategyForInternalPaths: ['/my_path_to_bypass/{id?}'] }
     );
 
@@ -637,13 +597,34 @@ describe('Routing versioned requests', () => {
     await server.start();
 
     await supertest.get('/my_path_to_bypass/123').expect(200);
-    const response = await supertest.get('/my_other_path').expect(400);
+    await supertest.get('/my_other_path').expect(200);
+  });
 
-    expect(response).toMatchObject({
-      status: 400,
-      body: {
-        message: expect.stringContaining('Please specify a version'),
-      },
-    });
+  it('can default version parameters for internal paths when in dev', async () => {
+    await setupServer({ dev: true }, { versionResolution: 'newest' });
+
+    router.versioned
+      .get({
+        path: '/my_path',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'internal',
+      })
+      .addVersion({ validate: false, version: '1' }, async (ctx, req, res) => {
+        return res.ok({ body: { ok: true } });
+      });
+    router.versioned
+      .get({
+        path: '/my_other_path',
+        security: { authz: { enabled: false, reason: '' } },
+        access: 'internal',
+      })
+      .addVersion({ validate: false, version: '1' }, async (ctx, req, res) => {
+        return res.ok({ body: { ok: true } });
+      });
+
+    await server.start();
+
+    await supertest.get('/my_path');
+    await supertest.get('/my_other_path').expect(200);
   });
 });
