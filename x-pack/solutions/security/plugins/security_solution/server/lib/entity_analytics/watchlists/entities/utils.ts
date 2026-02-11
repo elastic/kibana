@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-export * from './asset_criticality';
-export * from './risk_engine';
-export * from './entity_store';
-export * from './monitoring';
+export const ENTITY_ANALYTICS_WATCHLISTS_PREFIX = 'entity-analytics.watchlists';
 
-export * from './watchlists';
+export const getIndexForWatchlist = (watchlistName: string, namespace: string) =>
+  `${ENTITY_ANALYTICS_WATCHLISTS_PREFIX}.${watchlistName}-${namespace}`;

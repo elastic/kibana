@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export * from './asset_criticality';
-export * from './risk_engine';
-export * from './entity_store';
-export * from './monitoring';
+export * from './create.gen';
+export * from './get.gen';
+export * from './list.gen';
 
-export * from './watchlists';
+export * from './update.gen';
