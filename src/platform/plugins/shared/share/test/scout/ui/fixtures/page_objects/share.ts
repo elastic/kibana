@@ -18,9 +18,7 @@ export class SharePageObject {
   }
 
   async waitForErrorPrompt() {
-    await this.page.testSubj
-      .locator('redirectErrorEmptyPromptBody')
-      .waitFor({ state: 'visible', timeout: 5000 });
+    await this.page.testSubj.locator('redirectErrorEmptyPromptBody').waitFor({ state: 'visible' });
   }
 
   async clickBackToHomeButton() {
