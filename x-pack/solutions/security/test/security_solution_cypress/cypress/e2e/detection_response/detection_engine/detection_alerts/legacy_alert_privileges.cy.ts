@@ -221,9 +221,9 @@ describe('Legacy Alerts Privileges', { tags: ['@ess'] }, () => {
 
     it('should be able to acknowledge alerts', () => {
       markAcknowledgedFirstAlert();
+      assertSuccessToast('Successfully marked 1 alert as acknowledged.');
       goToAcknowledgedAlerts();
-      waitForAlerts();
-      cy.get('[data-test-subj="alertsTable"]').should('contain.text', 'acknowledged');
+      waitForAlertsToPopulate(1);
     });
 
     it('should be able to close alerts', () => {
