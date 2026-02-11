@@ -64,7 +64,8 @@
       "productDocBase",
       "telemetry",
       "elasticAssistantSharedState",
-      "share"
+      "share",
+      "entityStore"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",

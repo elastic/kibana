@@ -423,6 +423,11 @@ ${buildEnrichedEntityFieldsEsql()}
   docs = VALUES(docData),
   sourceIps = MV_DEDUPE(VALUES(sourceIps)),
   sourceCountryCodes = MV_DEDUPE(VALUES(sourceCountryCodes)),
+  // label node ID based on document IDs - ensures deduplication by documents, not actor-target pairs
+  labelNodeId = CASE(
+    MV_COUNT(VALUES(_id)) == 1, TO_STRING(VALUES(_id)),
+    MD5(MV_CONCAT(MV_SORT(VALUES(_id)), ","))
+  ),
   // actor attributes
   actorNodeId = CASE(
     // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple

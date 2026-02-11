@@ -51,6 +51,7 @@
     "@kbn/elastic-assistant",
     "@kbn/kibana-utils-plugin",
     "@kbn/ingest-pipelines-plugin",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/code-editor"
   ]
 }
