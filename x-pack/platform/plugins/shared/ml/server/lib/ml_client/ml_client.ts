@@ -37,6 +37,8 @@ export function getMlClient(
   const mlClient = client.asInternalUser.ml;
 
   const mlClientWithSecondaryAuth = () => {
+    // if security is disabled, the asSecondaryAuthUser will throw an error,
+    // In which case we need to use the internal user client without secondary auth.
     if (mlLicense.isSecurityEnabled()) {
       return client.asSecondaryAuthUser.ml;
     }
