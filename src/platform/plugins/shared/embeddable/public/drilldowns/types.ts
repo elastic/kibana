@@ -20,7 +20,7 @@ export type DrilldownDefinition<
   TDrilldownState extends DrilldownState = DrilldownState,
   // Drilldown action execution context, i.e. context from on_filter trigger
   ExecutionContext extends object = object,
-  // Drilldown setup context, i.e. context from CONTEXT_MENU_TRIGGER
+  // Drilldown setup context, i.e. context from open_context_menu trigger
   SetupContext extends object = object
 > = {
   /**
@@ -104,7 +104,10 @@ export type DrilldownDefinition<
     /**
      * Compatibility check during drilldown execution
      */
-    isCompatible?: (drilldownState: TDrilldownState, context: ExecutionContext) => Promise<boolean>;
+    isCompatible?: (
+      drilldownState: TDrilldownState,
+      context: ExecutionContext
+    ) => Promise<boolean>;
 
     MenuItem?: FC<{
       drilldownState: TDrilldownState;
