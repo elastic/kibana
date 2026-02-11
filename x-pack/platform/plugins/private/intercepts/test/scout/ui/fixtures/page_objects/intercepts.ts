@@ -30,7 +30,6 @@ export class InterceptsPageObject {
   async waitForInterceptDisplayed(triggerId: string) {
     await this.page.testSubj.waitForSelector(`intercept-${triggerId}`, {
       state: 'visible',
-      timeout: 10000,
     });
   }
 
@@ -50,7 +49,7 @@ export class InterceptsPageObject {
   async isProgressionButtonVisible(): Promise<boolean> {
     try {
       const locator = this.page.testSubj.locator('productInterceptProgressionButton');
-      await locator.waitFor({ state: 'visible', timeout: 5000 });
+      await locator.waitFor({ state: 'visible' });
       return true;
     } catch {
       return false;
