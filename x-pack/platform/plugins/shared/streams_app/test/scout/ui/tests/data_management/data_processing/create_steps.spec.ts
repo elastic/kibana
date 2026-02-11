@@ -20,6 +20,8 @@ test.describe('Stream data processing - creating steps', { tag: ['@ess', '@svlOb
     await apiServices.streams.clearStreamProcessors('logs-generic-default');
 
     await pageObjects.streams.gotoProcessingTab('logs-generic-default');
+    // Ensure the interactive mode + simulator have finished initializing before interacting.
+    await pageObjects.streams.waitForModifiedFieldsDetection();
   });
 
   test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
