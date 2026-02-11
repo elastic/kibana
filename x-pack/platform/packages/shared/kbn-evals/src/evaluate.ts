@@ -38,7 +38,11 @@ function isElasticCloudEsUrl(esUrl: string): boolean {
   try {
     const withProtocol = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(esUrl) ? esUrl : `https://${esUrl}`;
     const hostname = new URL(withProtocol).hostname.replace(/\.$/, '').toLowerCase();
-    return hostname === 'elastic-cloud.com' || hostname.endsWith('.elastic-cloud.com');
+    return (
+      hostname === 'elastic-cloud.com' ||
+      hostname.endsWith('.elastic-cloud.com') ||
+      hostname.endsWith('elastic.cloud')
+    );
   } catch {
     return false;
   }

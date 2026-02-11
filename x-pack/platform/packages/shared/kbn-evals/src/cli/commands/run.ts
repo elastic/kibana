@@ -61,7 +61,9 @@ export const runSuiteCmd: Command<void> = {
       'evaluation-connector-id',
       'repetitions',
       'trace-es-url',
+      'trace-es-api-key',
       'evaluations-es-url',
+      'evaluations-es-api-key',
       'phoenix-base-url',
       'phoenix-api-key',
     ],
@@ -114,9 +116,19 @@ export const runSuiteCmd: Command<void> = {
       envOverrides.TRACING_ES_URL = traceEsUrl;
     }
 
+    const traceEsApiKey = flagsReader.string('trace-es-api-key');
+    if (traceEsApiKey) {
+      envOverrides.TRACING_ES_API_KEY = traceEsApiKey;
+    }
+
     const evaluationsEsUrl = flagsReader.string('evaluations-es-url');
     if (evaluationsEsUrl) {
       envOverrides.EVALUATIONS_ES_URL = evaluationsEsUrl;
+    }
+
+    const evaluationsEsApiKey = flagsReader.string('evaluations-es-api-key');
+    if (evaluationsEsApiKey) {
+      envOverrides.EVALUATIONS_ES_API_KEY = evaluationsEsApiKey;
     }
 
     const phoenixBaseUrl = flagsReader.string('phoenix-base-url');

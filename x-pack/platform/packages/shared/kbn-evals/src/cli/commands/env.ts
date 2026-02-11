@@ -45,9 +45,19 @@ const ENV_DOCS = [
     example: 'TRACING_ES_URL=http://elastic:changeme@localhost:9200',
   },
   {
+    name: 'TRACING_ES_API_KEY',
+    description: 'API key for authenticating with the tracing Elasticsearch cluster.',
+    example: 'TRACING_ES_API_KEY=...',
+  },
+  {
     name: 'EVALUATIONS_ES_URL',
     description: 'Elasticsearch URL where evaluation results are exported.',
     example: 'EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200',
+  },
+  {
+    name: 'EVALUATIONS_ES_API_KEY',
+    description: 'API key for authenticating with the evaluations Elasticsearch cluster.',
+    example: 'EVALUATIONS_ES_API_KEY=...',
   },
   {
     name: 'SELECTED_EVALUATORS',
