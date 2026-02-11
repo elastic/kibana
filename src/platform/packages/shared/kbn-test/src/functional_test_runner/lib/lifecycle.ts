@@ -28,6 +28,8 @@ export class Lifecycle {
   public readonly beforeTestSuite = new LifecyclePhase<[Suite]>(this.sub);
   /** lifecycle phase that runs handlers before each test */
   public readonly beforeEachTest = new LifecyclePhase<[Test]>(this.sub);
+  /** lifecycle phase that runs handlers after each test */
+  public readonly afterEachTest = new LifecyclePhase<[Test]>(this.sub);
   /** lifecycle phase that runs handlers after each suite */
   public readonly afterTestSuite = new LifecyclePhase<[Suite]>(this.sub);
   /** lifecycle phase that runs handlers after a test fails */

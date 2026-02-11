@@ -27,6 +27,11 @@ import type { RunTestsOptions } from './flags';
  * Run servers and tests for each config
  */
 export async function runTests(log: ToolingLog, options: RunTestsOptions) {
+  if (options.browserCoverage !== undefined) {
+    // 'auto' is default when flag is present without value, 'manual' for explicit manual mode
+    process.env.TEST_BROWSER_COVERAGE = options.browserCoverage || 'auto';
+  }
+
   if (!process.env.CI) {
     log.warning('❗️❗️❗️');
     log.warning('❗️❗️❗️');
