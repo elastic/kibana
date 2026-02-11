@@ -7,12 +7,17 @@
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { AgentExecution, AgentExecutionParams, SerializedExecutionError } from '../types';
+import type { AgentExecution, SerializedExecutionError } from '../types';
 import { ExecutionStatus } from '../types';
 import type { AgentExecutionProperties, AgentExecutionStorage } from './agent_execution_storage';
 import { createStorage } from './agent_execution_storage';
 
 type Document = SearchHit<AgentExecutionProperties>;
+
+type CreateExecutionParams = Pick<
+  AgentExecution,
+  'executionId' | 'agentId' | 'spaceId' | 'agentParams'
+>;
 
 const fromEs = (doc: Document): AgentExecution => {
   const source = doc._source!;
@@ -32,12 +37,7 @@ const fromEs = (doc: Document): AgentExecution => {
  */
 export interface AgentExecutionClient {
   /** Create a new execution document. */
-  create(execution: {
-    executionId: string;
-    agentId: string;
-    spaceId: string;
-    agentParams: AgentExecutionParams;
-  }): Promise<AgentExecution>;
+  create(execution: CreateExecutionParams): Promise<AgentExecution>;
 
   /** Get an execution document by id. Returns undefined if not found. */
   get(executionId: string): Promise<AgentExecution | undefined>;
@@ -73,12 +73,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     agentId,
     spaceId,
     agentParams,
-  }: {
-    executionId: string;
-    agentId: string;
-    spaceId: string;
-    agentParams: AgentExecutionParams;
-  }): Promise<AgentExecution> {
+  }: CreateExecutionParams): Promise<AgentExecution> {
     const now = new Date().toISOString();
     const document: AgentExecutionProperties = {
       execution_id: executionId,
