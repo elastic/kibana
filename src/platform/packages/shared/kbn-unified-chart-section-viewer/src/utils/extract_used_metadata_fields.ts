@@ -7,6 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { extractFilters } from './extract_filters';
-export { extractWhereCommand } from './extract_where_command';
-export { extractUsedMetadataFields } from './extract_used_metadata_fields';
+export const extractUsedMetadataFields = ({
+  metadataFields,
+  filters,
+}: {
+  metadataFields: readonly string[];
+  filters: readonly string[];
+}): string[] => {
+  if (!metadataFields.length || !filters.length) {
+    return [];
+  }
+
+  return metadataFields.filter((field) => {
+    const re = new RegExp(`\\b${field}\\b`);
+    return filters.some((filter) => re.test(filter));
+  });
+};
