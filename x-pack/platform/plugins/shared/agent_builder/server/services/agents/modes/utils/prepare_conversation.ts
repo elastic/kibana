@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { ConversationRound, ConverseInput, RoundInput } from '@kbn/agent-builder-common';
-import { createInternalError } from '@kbn/agent-builder-common';
+import type {
+  ConversationAction,
+  ConversationRound,
+  ConverseInput,
+  RoundInput,
+} from '@kbn/agent-builder-common';
+import { createBadRequestError, createInternalError } from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_REF_ACTOR,
@@ -24,12 +29,10 @@ import type {
   AttachmentRepresentation,
   AttachmentBoundedTool,
 } from '@kbn/agent-builder-server/attachments';
-import type { ToolRegistry } from '../../../tools';
 import {
   prepareAttachmentPresentation,
   type AttachmentPresentation,
 } from './attachment_presentation';
-import { cleanToolCallHistory } from './clean_tool_history';
 
 export interface ProcessedAttachment {
   attachment: Attachment;
@@ -126,45 +129,81 @@ const mergeInputAttachmentsIntoAttachmentState = async (
   }
 };
 
+/**
+ * Prepare conversation rounds and input based on the action.
+ * - 'regenerate': Strip the last round and use its input for re-execution
+ * - Default: Use rounds and input as provided
+ */
+const prepareForAction = ({
+  action,
+  previousRounds,
+  nextInput,
+}: {
+  action?: ConversationAction;
+  previousRounds: ConversationRound[];
+  nextInput: ConverseInput;
+}): { effectiveRounds: ConversationRound[]; effectiveNextInput: ConverseInput } => {
+  // Regenerate: strip the last round and use its original input
+  if (action === 'regenerate') {
+    if (previousRounds.length === 0) {
+      throw createBadRequestError('Cannot regenerate: conversation has no rounds');
+    }
+    const lastRound = previousRounds[previousRounds.length - 1];
+    // Faithfully replay the original request by copying the full stored input shape
+    const regenerateInput: ConverseInput = { ...lastRound.input };
+    // Strip the last round from previous rounds
+    return {
+      effectiveRounds: previousRounds.slice(0, -1),
+      effectiveNextInput: regenerateInput,
+    };
+  }
+
+  // Default: use rounds and input as provided
+  return { effectiveRounds: previousRounds, effectiveNextInput: nextInput };
+};
+
 export const prepareConversation = async ({
   previousRounds,
   nextInput,
   context,
-  toolRegistry,
+  action,
 }: {
   previousRounds: ConversationRound[];
   nextInput: ConverseInput;
   context: AgentHandlerContext;
-  toolRegistry?: ToolRegistry;
+  action?: ConversationAction;
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
   const formatContext = createFormatContext(context);
 
+  // Handle regenerate action: use last round's input and strip it from previous rounds
+  const { effectiveRounds, effectiveNextInput } = prepareForAction({
+    action,
+    previousRounds,
+    nextInput,
+  });
+
   // Promote any legacy per-round attachments into conversation-level versioned attachments.
   // We merge both previous rounds and next input, then strip per-round attachments so the LLM
   // only sees the v2 conversation-level attachments (via attachment presentation/tools).
-  const previousAttachments = previousRounds.flatMap(
+  const previousAttachments = effectiveRounds.flatMap(
     (round) => round.input.attachments ?? []
   ) as AttachmentInput[];
-  const nextInputAttachments = (nextInput.attachments ?? []) as AttachmentInput[];
+  const nextInputAttachments = (effectiveNextInput.attachments ?? []) as AttachmentInput[];
 
   await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, previousAttachments);
   attachmentStateManager.clearAccessTracking();
   await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, nextInputAttachments);
 
-  const strippedNextInput: ConverseInput = { ...nextInput, attachments: [] };
+  const strippedNextInput: ConverseInput = { ...effectiveNextInput, attachments: [] };
   const processedNextInput = await prepareRoundInput({
     input: strippedNextInput,
     attachmentsService,
     formatContext,
   });
 
-  const cleanedRounds = toolRegistry
-    ? await cleanToolCallHistory(previousRounds, toolRegistry)
-    : previousRounds;
-
   const processedRounds = await Promise.all(
-    cleanedRounds.map((round) => {
+    effectiveRounds.map((round) => {
       const strippedRound: ConversationRound = {
         ...round,
         input: { ...round.input, attachments: [] },

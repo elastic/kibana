@@ -97,12 +97,17 @@ describe('InternalStateStore', () => {
     const { store } = await createTestStore();
     await store.dispatch(internalStateActions.initializeTabs({ discoverSessionId: undefined }));
     const tabId = store.getState().tabs.unsafeCurrentId;
-    expect(selectTab(store.getState(), tabId).controlGroupState).toBeUndefined();
+    expect(selectTab(store.getState(), tabId).attributes.controlGroupState).toBeUndefined();
 
     store.dispatch(
-      internalStateActions.setControlGroupState({ tabId, controlGroupState: mockControlState })
+      internalStateActions.updateAttributes({
+        tabId,
+        attributes: { controlGroupState: mockControlState },
+      })
     );
-    expect(selectTab(store.getState(), tabId).controlGroupState).toEqual(mockControlState);
+    expect(selectTab(store.getState(), tabId).attributes.controlGroupState).toEqual(
+      mockControlState
+    );
   });
 
   it('should reset fieldListExistingFieldsInfo for the tabs with the same dataViewId', async () => {
