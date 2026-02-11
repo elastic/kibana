@@ -26,7 +26,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import type { AssetManager } from './domain/asset_manager';
 import type { FeatureFlags } from './infra/feature_flags';
 import type { LogsExtractionClient } from './domain/logs_extraction_client';
-import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer_task';
+import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainer_task/types';
 
 export interface EntityStoreSetupPlugins {
   taskManager: TaskManagerSetupContract;
@@ -56,13 +56,12 @@ export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{
 
 export type EntityStorePluginRouter = IRouter<EntityStoreRequestHandlerContext>;
 
-/** Registers an entity maintainer with the entity-store plugin. */
 export type RegisterEntityMaintainer = (config: RegisterEntityMaintainerConfig) => void;
 
-export type PluginStartContract = void;
+export type EntityStoreStartContract = void;
 
-export interface PluginSetupContract {
+export interface EntityStoreSetupContract {
   registerEntityMaintainer: RegisterEntityMaintainer;
 }
 
-export type EntityStoreCoreSetup = CoreSetup<EntityStoreStartPlugins, PluginStartContract>;
+export type EntityStoreCoreSetup = CoreSetup<EntityStoreStartPlugins, EntityStoreStartContract>;

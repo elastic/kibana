@@ -12,8 +12,8 @@ import type {
   EntityStoreRequestHandlerContext,
   EntityStoreSetupPlugins,
   EntityStoreStartPlugins,
-  PluginStartContract,
-  PluginSetupContract,
+  EntityStoreStartContract,
+  EntityStoreSetupContract,
 } from './types';
 import { createRequestHandlerContext } from './request_context_factory';
 import { PLUGIN_ID } from '../common';
@@ -24,8 +24,8 @@ import { EngineDescriptorType } from './domain/definitions/saved_objects';
 export class EntityStorePlugin
   implements
     Plugin<
-      PluginSetupContract,
-      PluginStartContract,
+      EntityStoreSetupContract,
+      EntityStoreStartContract,
       EntityStoreSetupPlugins,
       EntityStoreStartPlugins
     >

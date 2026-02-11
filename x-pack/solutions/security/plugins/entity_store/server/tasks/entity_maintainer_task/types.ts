@@ -9,7 +9,10 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 
 export interface EntityMaintainerWriter {}
 
-export interface EntityMaintainerState {}
+export interface EntityMaintainerState {
+  /** Set to true after the first run so setup is only executed once. */
+  setupDone: boolean;
+}
 
 export interface EntityMaintainerTaskMethodContext {
   writer: EntityMaintainerWriter;
@@ -17,15 +20,14 @@ export interface EntityMaintainerTaskMethodContext {
   soClient: SavedObjectsClientContract;
 }
 
-export interface EntityMaintainerTaskMethod {
-  (context: EntityMaintainerTaskMethodContext): Promise<void>;
-}
+// export type EntityMaintainerTaskMethod = (context: EntityMaintainerTaskMethodContext) => Promise<void>;
+export type EntityMaintainerTaskMethod = () => Promise<void>;
 
 export interface RegisterEntityMaintainerConfig {
   id: string;
   name: string;
   description?: string;
-  schedule: string;
+  interval: string;
   stateSchema: Record<string, unknown>;
   run: EntityMaintainerTaskMethod;
   setup?: EntityMaintainerTaskMethod;
