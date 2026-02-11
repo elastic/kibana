@@ -8,6 +8,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { PLUGIN_ID } from '../../../../../common';
 
 export class WorkflowEditorPage {
   public yamlEditor: Locator;
@@ -28,7 +29,7 @@ export class WorkflowEditorPage {
    * Navigate to the workflow editor for a new workflow
    */
   async gotoNewWorkflow() {
-    await this.page.gotoApp('workflows');
+    await this.page.gotoApp(PLUGIN_ID);
     await this.page.testSubj.click('createWorkflowButton');
     await this.waitForEditorToLoad();
   }
@@ -37,7 +38,7 @@ export class WorkflowEditorPage {
    * Navigate to the workflow editor for an existing workflow by ID
    */
   async gotoWorkflow(workflowId: string) {
-    await this.page.gotoApp(`workflows/${workflowId}`);
+    await this.page.gotoApp(`${PLUGIN_ID}/${workflowId}`);
     await this.waitForEditorToLoad();
   }
 

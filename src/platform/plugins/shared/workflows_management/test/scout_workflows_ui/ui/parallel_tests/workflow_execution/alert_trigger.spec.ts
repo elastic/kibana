@@ -124,7 +124,7 @@ test.describe(
       await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
       // Validate single-alert workflow executions (one alert per execution)
-      await page.gotoApp('workflows');
+      await pageObjects.workflowList.navigate();
       await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
       await page.testSubj
         .locator('workflowListTable')
@@ -177,7 +177,7 @@ test.describe(
       }
 
       // Validate multiple-alerts workflow execution (all alerts in one execution)
-      await page.gotoApp('workflows');
+      await pageObjects.workflowList.navigate();
       await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
       await page.testSubj
         .locator('workflowListTable')
@@ -263,7 +263,7 @@ test.describe(
       await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
       // Disable the target workflow from the workflows list UI
-      await page.gotoApp('workflows');
+      await pageObjects.workflowList.navigate();
       await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
 
       const toggleSwitch = pageObjects.workflowList.getWorkflowStateToggle(disabledWorkflowName);
@@ -277,7 +277,7 @@ test.describe(
       await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
       // Wait for the canary workflow to receive executions — this proves alerts propagated
-      await page.gotoApp('workflows');
+      await pageObjects.workflowList.navigate();
       await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
       await page.testSubj
         .locator('workflowListTable')
@@ -292,7 +292,7 @@ test.describe(
       // Now verify the disabled workflow has zero executions.
       // The canary already received its execution, so any alert-triggered execution
       // for the disabled workflow would have appeared by now.
-      await page.gotoApp('workflows');
+      await pageObjects.workflowList.navigate();
       await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
       await page.testSubj
         .locator('workflowListTable')

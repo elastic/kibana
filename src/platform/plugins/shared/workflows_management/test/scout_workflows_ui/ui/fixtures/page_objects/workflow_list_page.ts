@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { PLUGIN_ID } from '../../../../../common';
 
 export class WorkflowListPage {
   constructor(private readonly page: ScoutPage) {}
@@ -15,7 +16,7 @@ export class WorkflowListPage {
 
   /** Navigates to the workflows list page. */
   async navigate() {
-    await this.page.gotoApp('workflows');
+    await this.page.gotoApp(PLUGIN_ID);
   }
 
   // Workflow Locators

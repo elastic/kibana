@@ -81,7 +81,7 @@ test.describe('Workflow execution - Test runs', { tag: tags.DEPLOYMENT_AGNOSTIC 
     await pageObjects.workflowEditor.saveWorkflow();
 
     // Navigate to list and verify the workflow is disabled
-    await page.gotoApp('workflows');
+    await pageObjects.workflowList.navigate();
     await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
 
     const workflowRow = page.testSubj

@@ -36,7 +36,7 @@ test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
 
     // Now the save button should be enabled and clicking it will save the correct value
     await pageObjects.workflowEditor.saveWorkflow();
-    await page.gotoApp('workflows');
+    await pageObjects.workflowList.navigate();
     await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
 
     const workflowRow = page.testSubj
