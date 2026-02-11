@@ -15,3 +15,30 @@ export const FieldType = {
 export type FieldType = (typeof FieldType)[keyof typeof FieldType];
 
 export const fieldTypesArray = Object.keys(FieldType) as FieldType[];
+
+export const exampleTemplateDefinition = `
+name: Example template
+fields:
+  - name: severity
+    control: SELECT_BASIC
+    label: Select label
+    type: keyword
+    metadata:
+      options:
+        - low
+        - moderate
+        - high
+        - critical
+  - name: name
+    control: INPUT_TEXT
+    label: Input text label
+    type: keyword
+  - name: effort
+    control: INPUT_NUMBER
+    label: Input number label
+    type: integer
+  - name: details
+    control: TEXTAREA
+    label: Textarea label
+    type: keyword
+`.trimStart();
