@@ -9,10 +9,12 @@ import { schema } from '@kbn/config-schema';
 
 export const INDEX_PATTERN_REGEX = /^[^A-Z^\\/?"<>|\s#,]+$/;
 
+const PINNED_IDS_MAX_SIZE = 1024;
+
 export const graphRequestSchema = schema.object({
   nodesLimit: schema.maybe(schema.number()),
   showUnknownTarget: schema.maybe(schema.boolean()),
-  pinnedIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 1000 })),
+  pinnedIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: PINNED_IDS_MAX_SIZE })),
   query: schema.object({
     originEventIds: schema.arrayOf(
       schema.object({ id: schema.string(), isAlert: schema.boolean() })
