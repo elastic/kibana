@@ -92,7 +92,7 @@ describe('RenderEndpoint component tests', () => {
     renderEndpointInfo({ inferenceId: 'elastic-rerank', endpointInfo: mockProvider });
 
     expect(screen.getByText('elastic-rerank')).toBeInTheDocument();
-    expect(screen.getByText('TECH PREVIEW')).toBeInTheDocument();
+    expect(screen.getByTestId('techPreviewBadge')).toBeInTheDocument();
   });
 
   describe('task type badge', () => {
@@ -145,8 +145,9 @@ describe('RenderEndpoint component tests', () => {
         endpointInfo: mockProvider,
       });
 
-      expect(screen.getByTestId('preconfiguredBadge')).toBeInTheDocument();
-      expect(screen.getByText('PRECONFIGURED')).toBeInTheDocument();
+      const badge = screen.getByTestId('preconfiguredBadge');
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveTextContent('PRECONFIGURED');
     });
 
     it('does not render preconfigured badge for non-preconfigured endpoints', () => {
@@ -177,8 +178,8 @@ describe('RenderEndpoint component tests', () => {
       renderEndpointInfo({ inferenceId: '.rerank-v1-elastic', endpointInfo: mockProvider });
 
       expect(screen.getByTestId('table-column-task-type-rerank')).toBeInTheDocument();
-      expect(screen.getByText('PRECONFIGURED')).toBeInTheDocument();
-      expect(screen.getByText('TECH PREVIEW')).toBeInTheDocument();
+      expect(screen.getByTestId('preconfiguredBadge')).toBeInTheDocument();
+      expect(screen.getByTestId('techPreviewBadge')).toBeInTheDocument();
     });
 
     it('renders task type and preconfigured badges without tech preview for a preconfigured non-reranker endpoint', () => {
@@ -197,8 +198,8 @@ describe('RenderEndpoint component tests', () => {
       });
 
       expect(screen.getByTestId('table-column-task-type-sparse_embedding')).toBeInTheDocument();
-      expect(screen.getByText('PRECONFIGURED')).toBeInTheDocument();
-      expect(screen.queryByText('TECH PREVIEW')).not.toBeInTheDocument();
+      expect(screen.getByTestId('preconfiguredBadge')).toBeInTheDocument();
+      expect(screen.queryByTestId('techPreviewBadge')).not.toBeInTheDocument();
     });
 
     it('renders only the task type badge for a non-preconfigured, non-tech-preview endpoint', () => {
@@ -212,8 +213,8 @@ describe('RenderEndpoint component tests', () => {
       renderEndpointInfo({ inferenceId: 'custom-endpoint', endpointInfo: mockProvider });
 
       expect(screen.getByTestId('table-column-task-type-text_embedding')).toBeInTheDocument();
-      expect(screen.queryByText('PRECONFIGURED')).not.toBeInTheDocument();
-      expect(screen.queryByText('TECH PREVIEW')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('preconfiguredBadge')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('techPreviewBadge')).not.toBeInTheDocument();
     });
   });
 
@@ -259,7 +260,7 @@ describe('RenderEndpoint component tests', () => {
         endpointInfo: mockProvider,
       });
 
-      const badge = screen.getByText('PRECONFIGURED');
+      const badge = screen.getByTestId('preconfiguredBadge');
       fireEvent.mouseOver(badge);
 
       await waitFor(() => {
@@ -281,7 +282,7 @@ describe('RenderEndpoint component tests', () => {
 
       renderEndpointInfo({ inferenceId: 'elastic-rerank', endpointInfo: mockProvider });
 
-      const badge = screen.getByText('TECH PREVIEW');
+      const badge = screen.getByTestId('techPreviewBadge');
       fireEvent.mouseOver(badge);
 
       await waitFor(() => {

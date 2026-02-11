@@ -113,17 +113,19 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs" alignItems="center" wrap responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={i18n.TASK_TYPE_TOOLTIPS[taskType] ?? taskType}>
-              <EuiBadge
-                tabIndex={0}
-                data-test-subj={`table-column-task-type-${taskType}`}
-                color="hollow"
-              >
-                {taskType}
-              </EuiBadge>
-            </EuiToolTip>
-          </EuiFlexItem>
+          {taskType != null && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={i18n.TASK_TYPE_TOOLTIPS[taskType] ?? taskType}>
+                <EuiBadge
+                  tabIndex={0}
+                  data-test-subj={`table-column-task-type-${taskType}`}
+                  color="hollow"
+                >
+                  {taskType}
+                </EuiBadge>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
           {isPreconfigured && (
             <EuiFlexItem grow={false}>
               <EuiToolTip content={i18n.PRECONFIGURED_TOOLTIP}>
@@ -141,6 +143,7 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
                 size="s"
                 color="subdued"
                 alignment="middle"
+                data-test-subj="techPreviewBadge"
               />
             </EuiFlexItem>
           )}
