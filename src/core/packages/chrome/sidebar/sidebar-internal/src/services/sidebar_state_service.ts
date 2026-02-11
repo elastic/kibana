@@ -82,9 +82,7 @@ export class SidebarStateService {
     }
 
     if (!this.registry.isOpenable(appId)) {
-      throw new Error(
-        `[Sidebar State] Cannot open sidebar. App is unavailable: ${appId}`
-      );
+      throw new Error(`[Sidebar State] Cannot open sidebar. App is unavailable: ${appId}`);
     }
 
     this.currentAppId$.next(appId);
