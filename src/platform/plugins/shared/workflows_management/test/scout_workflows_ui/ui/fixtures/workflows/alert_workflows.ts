@@ -203,6 +203,12 @@ inputs:
   required:
     - "alerts"
 steps:
+  - name: delete_index
+    type: elasticsearch.indices.delete
+    with:
+      index: "{{consts.alerts_index_name}}"
+    on-failure:
+      continue: true
   - name: create_ingest_pipeline
     type: elasticsearch.request
     on-failure:
