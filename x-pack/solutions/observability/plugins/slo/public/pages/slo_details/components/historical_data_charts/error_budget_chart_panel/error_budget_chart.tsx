@@ -8,28 +8,28 @@
 import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import type { ChartData } from '../../../../../typings/slo';
 import { getSloChartState } from '../../../utils/is_slo_failed';
 import type { TimeBounds } from '../../../types';
 import { WideChart } from '../../wide_chart';
 import { useErrorBudgetChart } from './hooks/use_error_budget_chart';
+import { useSloDetailsContext } from '../../slo_details_context';
 
 export interface Props {
   data: ChartData[];
   isLoading: boolean;
-  slo: SLOWithSummaryResponse;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function ErrorBudgetChart({ data, isLoading, slo, onBrushed }: Props) {
+export function ErrorBudgetChart({ data, isLoading, onBrushed }: Props) {
+  const { slo } = useSloDetailsContext();
   const {
     isSloFailed,
     lastErrorBudgetRemaining,
     errorBudgetTimeRemainingFormatted,
     percentFormat,
-  } = useErrorBudgetChart({ data, slo });
+  } = useErrorBudgetChart({ data });
 
   return (
     <>

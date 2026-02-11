@@ -9,7 +9,6 @@ import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { i18n } from '@kbn/i18n';
 import kbnRison from '@kbn/rison';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../../../common/constants';
 import { useFetchSloHealth } from '../../../hooks/use_fetch_slo_health';
@@ -17,8 +16,10 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { usePermissions } from '../../../hooks/use_permissions';
 import { useRepairSlo } from '../../../hooks/use_repair_slo';
 import { ContentWithInspectCta } from './health_callout/content_with_inspect_cta';
+import { useSloDetailsContext } from './slo_details_context';
 
-export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
+export function SloHealthCallout() {
+  const { slo } = useSloDetailsContext();
   const { isLoading, isError, data } = useFetchSloHealth({ list: [slo] });
 
   const {

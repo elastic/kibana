@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { buildSlo } from '../../../data/slo/slo';
 import type { Props } from './slo_details';
 import { SloDetails as Component } from './slo_details';
+import { SloDetailsContextProvider } from './slo_details_context';
 
 export default {
   component: Component,
@@ -17,11 +19,19 @@ export default {
 };
 
 const defaultProps: Props = {
-  slo: buildSlo(),
-  isAutoRefreshing: false,
   selectedTabId: 'overview',
 };
 
+const contextValue = {
+  slo: buildSlo(),
+  isAutoRefreshing: false,
+  isFlyout: false,
+};
+
 export const SloDetails = {
-  args: defaultProps,
+  render: () => (
+    <SloDetailsContextProvider value={contextValue}>
+      <Component {...defaultProps} />
+    </SloDetailsContextProvider>
+  ),
 };

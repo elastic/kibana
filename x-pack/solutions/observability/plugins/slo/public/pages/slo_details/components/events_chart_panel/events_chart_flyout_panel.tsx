@@ -13,11 +13,13 @@ import { getDiscoverLink } from '../../utils/discover_links/get_discover_link';
 import { useEventsChartPanel } from './hooks/use_events_chart_panel';
 import { SloFlyoutPanel } from '../../shared_flyout/flyout_panel';
 import type { EventsChartPanelProps } from './types';
+import { useSloDetailsContext } from '../slo_details_context';
 
-export function EventsChartFlyoutPanel({ slo, range, onBrushed }: EventsChartPanelProps) {
+export function EventsChartFlyoutPanel({ range, onBrushed }: EventsChartPanelProps) {
+  const { slo } = useSloDetailsContext();
   const { discover, uiSettings } = useKibana().services;
 
-  const { getChart, getChartTitle } = useEventsChartPanel({ slo, range, onBrushed });
+  const { getChart, getChartTitle } = useEventsChartPanel({ range, onBrushed });
 
   return (
     <SloFlyoutPanel

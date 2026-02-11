@@ -21,16 +21,17 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { getDiscoverLink } from '../../utils/discover_links/get_discover_link';
 import type { EventsChartPanelProps } from './types';
 import { useEventsChartPanel } from './hooks/use_events_chart_panel';
+import { useSloDetailsContext } from '../slo_details_context';
 
 export function EventsChartPagePanel({
-  slo,
   range,
   hideRangeDurationLabel = false,
   onBrushed,
 }: EventsChartPanelProps) {
+  const { slo } = useSloDetailsContext();
   const { discover, uiSettings } = useKibana().services;
 
-  const { getChart, getChartTitle } = useEventsChartPanel({ slo, range, onBrushed });
+  const { getChart, getChartTitle } = useEventsChartPanel({ range, onBrushed });
 
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="eventsChartPanel">

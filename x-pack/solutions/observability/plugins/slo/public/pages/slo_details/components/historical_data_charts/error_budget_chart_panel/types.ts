@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { ChartData } from '../../../../../typings/slo';
 import type { TimeBounds } from '../../../types';
 
 export interface ErrorBudgetChartPanelProps {
   data: ChartData[];
   isLoading: boolean;
-  slo: SLOWithSummaryResponse;
   onBrushed?: (timeBounds: TimeBounds) => void;
   hideHeaderDurationLabel?: boolean;
 }

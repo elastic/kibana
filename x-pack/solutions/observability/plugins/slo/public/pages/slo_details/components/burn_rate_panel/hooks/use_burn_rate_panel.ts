@@ -6,12 +6,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import type { BurnRateWindow } from '../../../hooks/use_fetch_burn_rate_windows';
 import { useFetchBurnRateWindows } from '../../../hooks/use_fetch_burn_rate_windows';
 import { useFetchSloBurnRates } from '../../../../../hooks/use_fetch_slo_burn_rates';
 import { getStatus } from '../utils';
+import { useSloDetailsContext } from '../../slo_details_context';
 
 const longWindowName = (window: string) => `${window}_LONG`;
 const shortWindowName = (window: string) => `${window}_SHORT`;
@@ -30,11 +30,8 @@ const toPayload = (
   ]);
 };
 
-export function useBurnRatePanel(opts: {
-  slo: SLOWithSummaryResponse;
-  isAutoRefreshing?: boolean;
-}) {
-  const { slo, isAutoRefreshing } = opts;
+export function useBurnRatePanel() {
+  const { slo, isAutoRefreshing } = useSloDetailsContext();
 
   const burnRateWindows = useFetchBurnRateWindows(slo);
   const [selectedWindow, setSelectedWindow] = useState(burnRateWindows[0]);

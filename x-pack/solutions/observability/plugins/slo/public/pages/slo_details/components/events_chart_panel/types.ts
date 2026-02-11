@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { GetPreviewDataResponse } from '@kbn/slo-schema';
 import type { TimeBounds } from '../../types';
 
 export type GetPreviewDataResponseResults = GetPreviewDataResponse['results'];
 
 export interface EventsChartPanelProps {
-  slo: SLOWithSummaryResponse;
   range: { from: Date; to: Date };
   hideRangeDurationLabel?: boolean;
   onBrushed?: (timeBounds: TimeBounds) => void;

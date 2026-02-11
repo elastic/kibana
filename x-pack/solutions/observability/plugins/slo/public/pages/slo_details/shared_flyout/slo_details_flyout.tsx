@@ -37,6 +37,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { SloOverviewDetailsFlyoutFooter } from '../../../embeddable/slo/common/slo_overview_details';
 import { useSloDetailsTabs } from '../hooks/use_slo_details_tabs';
 import { SloDetails } from '../components/slo_details';
+import { SloDetailsContextProvider } from '../components/slo_details_context';
 import { SloRemoteBadge } from '../../slos/components/badges/slo_remote_badge';
 import { SloTagsBadge } from '../../../components/slo/slo_badges/slo_tags_badge';
 
@@ -235,7 +236,11 @@ export default function SLODetailsFlyout({
       return null;
     }
 
-    return <SloDetails slo={slo} isAutoRefreshing={false} selectedTabId={selectedTabId} isFlyout />;
+    return (
+      <SloDetailsContextProvider value={{ slo, isAutoRefreshing: false, isFlyout: true }}>
+        <SloDetails selectedTabId={selectedTabId} />
+      </SloDetailsContextProvider>
+    );
   }, [sloId, isError, isNotFound, isLoading, slo, selectedTabId]);
 
   const renderFooter = useCallback(() => {

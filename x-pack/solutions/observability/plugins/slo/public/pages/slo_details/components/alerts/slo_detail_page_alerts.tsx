@@ -10,11 +10,13 @@ import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import React, { Fragment } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
-import type { SloDetailsAlertsProps } from '.';
+import { useSloDetailsContext } from '../slo_details_context';
 
-export function SloDetailsPageAlerts({ slo }: SloDetailsAlertsProps) {
+export function SloDetailsPageAlerts() {
+  const { slo } = useSloDetailsContext();
   const { data, http, notifications, fieldFormats, application, licensing, cases, settings } =
     useKibana().services;
+
   return (
     <Fragment>
       <EuiSpacer size="l" />

@@ -10,8 +10,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import type { ErrorRatePanelProps } from './types';
+import { useSloDetailsContext } from '../slo_details_context';
 
-export function ErrorRatePagePanel({ slo, dataTimeRange, onBrushed }: ErrorRatePanelProps) {
+export function ErrorRatePagePanel({ dataTimeRange, onBrushed }: ErrorRatePanelProps) {
+  const { slo } = useSloDetailsContext();
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="errorRatePanel">
       <EuiFlexGroup direction="column" gutterSize="m">

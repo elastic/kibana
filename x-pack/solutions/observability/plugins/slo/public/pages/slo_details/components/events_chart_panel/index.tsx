@@ -9,12 +9,11 @@ import React from 'react';
 import type { EventsChartPanelProps } from './types';
 import { EventsChartFlyoutPanel } from './events_chart_flyout_panel';
 import { EventsChartPagePanel } from './events_chart_page_panel';
+import { useSloDetailsContext } from '../slo_details_context';
 
-interface Props extends EventsChartPanelProps {
-  isFlyout?: boolean;
-}
+export function EventsChartPanel(props: EventsChartPanelProps) {
+  const { isFlyout } = useSloDetailsContext();
 
-export function EventsChartPanel({ isFlyout, ...props }: Props) {
   if (isFlyout) {
     return <EventsChartFlyoutPanel {...props} />;
   }

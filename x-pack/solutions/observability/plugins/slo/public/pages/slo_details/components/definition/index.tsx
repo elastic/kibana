@@ -8,16 +8,14 @@
 import React from 'react';
 import { SloDetailsFlyoutDefinition } from './flyout_definition';
 import { SloDetailsPageDefinition } from './page_definition';
-import type { SloDetailsDefinitionProps } from './types';
+import { useSloDetailsContext } from '../slo_details_context';
 
-interface Props extends SloDetailsDefinitionProps {
-  isFlyout?: boolean;
-}
+export function SloDetailsDefinition() {
+  const { isFlyout } = useSloDetailsContext();
 
-export function SloDetailsDefinition({ slo, isFlyout }: Props) {
   if (isFlyout) {
-    return <SloDetailsFlyoutDefinition slo={slo} />;
+    return <SloDetailsFlyoutDefinition />;
   }
 
-  return <SloDetailsPageDefinition slo={slo} />;
+  return <SloDetailsPageDefinition />;
 }

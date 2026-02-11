@@ -10,9 +10,10 @@ import React from 'react';
 import { DashboardsPanel } from './dashboards_panel';
 import { IndicatorPanel } from './indicator_panel';
 import { SettingsPanel } from './settings_panel';
-import type { SloDetailsDefinitionProps } from './types';
+import { useSloDetailsContext } from '../slo_details_context';
 
-export function SloDetailsPageDefinition({ slo }: SloDetailsDefinitionProps) {
+export function SloDetailsPageDefinition() {
+  const { slo } = useSloDetailsContext();
   return (
     <EuiFlexGroup
       direction={'row'}

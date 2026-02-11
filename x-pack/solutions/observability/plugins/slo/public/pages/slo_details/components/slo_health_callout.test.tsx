@@ -16,6 +16,7 @@ import { useRepairSlo } from '../../../hooks/use_repair_slo';
 import { usePermissions } from '../../../hooks/use_permissions';
 import { render } from '../../../utils/test_helper';
 import { useKibana } from '../../../hooks/use_kibana';
+import { SloDetailsContextProvider } from './slo_details_context';
 import { cloneDeep } from 'lodash';
 import { baseSlo } from '../../../data/slo';
 import {
@@ -104,7 +105,11 @@ describe('SloHealthCallout', () => {
   });
 
   const renderComponent = (slo = mockSlo) => {
-    return render(<SloHealthCallout slo={slo} />);
+    return render(
+      <SloDetailsContextProvider value={{ slo, isAutoRefreshing: false, isFlyout: false }}>
+        <SloHealthCallout />
+      </SloDetailsContextProvider>
+    );
   };
 
   it('should not render when SLO health is loading', () => {

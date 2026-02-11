@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import { toDuration, toMinutes } from '../../../../../../utils/slo/duration';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { isSloFailed } from '../../../../utils/is_slo_failed';
 import type { ChartData } from '../../../../../../typings/slo';
+import { useSloDetailsContext } from '../../../slo_details_context';
 
 function formatTime(minutes: number) {
   if (minutes > 59) {
@@ -29,11 +29,11 @@ function formatTime(minutes: number) {
 
 interface Input {
   data: ChartData[];
-  slo: SLOWithSummaryResponse;
 }
 
-export function useErrorBudgetChart({ data, slo }: Input) {
+export function useErrorBudgetChart({ data }: Input) {
   const { uiSettings, executionContext } = useKibana().services;
+  const { slo } = useSloDetailsContext();
 
   const executionContextName = executionContext.get().name;
   const isDashboardContext = executionContextName === 'dashboards';

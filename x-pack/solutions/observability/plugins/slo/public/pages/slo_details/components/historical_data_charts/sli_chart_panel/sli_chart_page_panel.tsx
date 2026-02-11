@@ -8,31 +8,22 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import type { ChartData } from '../../../../../typings/slo';
 import { getSloChartState, isSloFailed } from '../../../utils/is_slo_failed';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../../../utils/slo/labels';
-import type { TimeBounds } from '../../../types';
 import { WideChart } from '../../wide_chart';
-
-export interface Props {
-  data: ChartData[];
-  isLoading: boolean;
-  slo: SLOWithSummaryResponse;
-  onBrushed?: (timeBounds: TimeBounds) => void;
-  hideHeaderDurationLabel?: boolean;
-}
+import { useSloDetailsContext } from '../../slo_details_context';
+import type { SliChartPanelProps } from './types';
 
 export function SliChartPagePanel({
   data,
   isLoading,
-  slo,
   onBrushed,
   hideHeaderDurationLabel = false,
-}: Props) {
+}: SliChartPanelProps) {
+  const { slo } = useSloDetailsContext();
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const isSloFailedStatus = isSloFailed(slo.summary.status);

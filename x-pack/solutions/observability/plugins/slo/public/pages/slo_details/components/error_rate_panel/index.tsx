@@ -9,12 +9,11 @@ import React from 'react';
 import { ErrorRateFlyoutPanel } from './error_rate_flyout_panel';
 import { ErrorRatePagePanel } from './error_rate_page_panel';
 import type { ErrorRatePanelProps } from './types';
+import { useSloDetailsContext } from '../slo_details_context';
 
-interface Props extends ErrorRatePanelProps {
-  isFlyout?: boolean;
-}
+export function ErrorRatePanel(props: ErrorRatePanelProps) {
+  const { isFlyout } = useSloDetailsContext();
 
-export function ErrorRatePanel({ isFlyout, ...props }: Props) {
   if (isFlyout) {
     return <ErrorRateFlyoutPanel {...props} />;
   }

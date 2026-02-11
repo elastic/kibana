@@ -6,18 +6,16 @@
  */
 
 import React from 'react';
-import type { BurnRatePanelProps } from './types';
 import { BurnRateFlyoutPanel } from './burn_rate_flyout_panel';
 import { BurnRatePagePanel } from './burn_rate_page_panel';
+import { useSloDetailsContext } from '../slo_details_context';
 
-interface Props extends BurnRatePanelProps {
-  isFlyout?: boolean;
-}
+export function BurnRatePanel() {
+  const { isFlyout } = useSloDetailsContext();
 
-export function BurnRatePanel({ isFlyout, ...props }: Props) {
   if (isFlyout) {
-    return <BurnRateFlyoutPanel {...props} />;
+    return <BurnRateFlyoutPanel />;
   }
 
-  return <BurnRatePagePanel {...props} />;
+  return <BurnRatePagePanel />;
 }

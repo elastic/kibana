@@ -13,6 +13,7 @@ import { render } from '../../../../../utils/test_helper';
 import { buildSlo } from '../../../../../data/slo/slo';
 import { SliChartPanel } from '.';
 import type { ChartData } from '../../../../../typings/slo';
+import { SloDetailsContextProvider } from '../../slo_details_context';
 
 jest.mock('../../../../../hooks/use_kibana');
 
@@ -46,7 +47,9 @@ describe('SliChartPanel', () => {
     it('renders the SLI chart panel', () => {
       const slo = buildSlo();
       render(
-        <SliChartPanel isFlyout={isFlyout} data={mockChartData} isLoading={false} slo={slo} />
+        <SloDetailsContextProvider value={{ slo, isAutoRefreshing: false, isFlyout }}>
+          <SliChartPanel data={mockChartData} isLoading={false} />
+        </SloDetailsContextProvider>
       );
 
       expect(screen.queryByTestId('sliChartPanel')).toBeTruthy();
@@ -59,12 +62,9 @@ describe('SliChartPanel', () => {
         { key: new Date('2024-01-04').getTime(), value: 0.95 },
       ];
       render(
-        <SliChartPanel
-          isFlyout={isFlyout}
-          data={chartDataWithObservedValue}
-          isLoading={false}
-          slo={slo}
-        />
+        <SloDetailsContextProvider value={{ slo, isAutoRefreshing: false, isFlyout }}>
+          <SliChartPanel data={chartDataWithObservedValue} isLoading={false} />
+        </SloDetailsContextProvider>
       );
 
       // Should display the observed value from the last data point (95.0%)
@@ -79,7 +79,9 @@ describe('SliChartPanel', () => {
         { key: new Date('2024-01-04').getTime(), value: -1 }, // NO_DATA indicator
       ];
       render(
-        <SliChartPanel isFlyout={isFlyout} data={chartDataWithNoData} isLoading={false} slo={slo} />
+        <SloDetailsContextProvider value={{ slo, isAutoRefreshing: false, isFlyout }}>
+          <SliChartPanel data={chartDataWithNoData} isLoading={false} />
+        </SloDetailsContextProvider>
       );
 
       // Should display '-' for NO_DATA
@@ -103,7 +105,11 @@ describe('SliChartPanel', () => {
         },
       });
       // Empty data array - component should use slo.summary.status
-      render(<SliChartPanel isFlyout={isFlyout} data={[]} isLoading={false} slo={slo} />);
+      render(
+        <SloDetailsContextProvider value={{ slo, isAutoRefreshing: false, isFlyout }}>
+          <SliChartPanel data={[]} isLoading={false} />
+        </SloDetailsContextProvider>
+      );
 
       // Should display '-' for NO_DATA
       expect(screen.getByText('-')).toBeTruthy();
@@ -131,12 +137,9 @@ describe('SliChartPanel', () => {
         { key: new Date('2024-01-04').getTime(), value: 0.92 },
       ];
       render(
-        <SliChartPanel
-          isFlyout={isFlyout}
-          data={chartDataWithObservedValue}
-          isLoading={false}
-          slo={slo}
-        />
+        <SloDetailsContextProvider value={{ slo, isAutoRefreshing: false, isFlyout }}>
+          <SliChartPanel data={chartDataWithObservedValue} isLoading={false} />
+        </SloDetailsContextProvider>
       );
 
       // Should display the observed value from data (92.0%), not the summary value (98.0%)

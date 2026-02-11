@@ -13,12 +13,10 @@ import { useKibana } from '../../../../../hooks/use_kibana';
 import type { ErrorBudgetChartPanelProps } from './types';
 import { ErrorBudgetChartFlyoutPanel } from './error_budget_chart_flyout_panel';
 import { ErrorBudgetChartPagePanel as ErrorBudgetChartPagePanel } from './error_budget_chart_page_panel';
+import { useSloDetailsContext } from '../../slo_details_context';
 
-interface Props extends ErrorBudgetChartPanelProps {
-  isFlyout?: boolean;
-}
-
-export function ErrorBudgetChartPanel({ isFlyout, ...props }: Props) {
+export function ErrorBudgetChartPanel(props: ErrorBudgetChartPanelProps) {
+  const { slo, isFlyout } = useSloDetailsContext();
   const { embeddable } = useKibana().services;
 
   const handleAttachToDashboardSave: SaveModalDashboardProps['onSave'] = useCallback(
@@ -27,8 +25,8 @@ export function ErrorBudgetChartPanel({ isFlyout, ...props }: Props) {
       const embeddableInput = {
         title: newTitle,
         description: newDescription,
-        sloId: props.slo.id,
-        sloInstanceId: props.slo.instanceId,
+        sloId: slo.id,
+        sloInstanceId: slo.instanceId,
       };
 
       const state = {
@@ -43,7 +41,7 @@ export function ErrorBudgetChartPanel({ isFlyout, ...props }: Props) {
         path,
       });
     },
-    [embeddable, props.slo.id, props.slo.instanceId]
+    [embeddable, slo.id, slo.instanceId]
   );
 
   if (isFlyout) {

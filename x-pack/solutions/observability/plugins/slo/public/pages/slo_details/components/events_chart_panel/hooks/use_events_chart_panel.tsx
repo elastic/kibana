@@ -8,19 +8,19 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart } from '@elastic/eui';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useGetPreviewData } from '../../../../../hooks/use_get_preview_data';
 import { MetricTimesliceEventsChart } from '../metric_timeslice_events_chart';
 import { GoodBadEventsChart } from '../good_bad_events_chart';
 import type { TimeBounds } from '../../../types';
+import { useSloDetailsContext } from '../../slo_details_context';
 
 interface Input {
-  slo: SLOWithSummaryResponse;
   range: { from: Date; to: Date };
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function useEventsChartPanel({ slo, range, onBrushed }: Input) {
+export function useEventsChartPanel({ range, onBrushed }: Input) {
+  const { slo } = useSloDetailsContext();
   const { isLoading, data } = useGetPreviewData({
     range,
     isValid: true,

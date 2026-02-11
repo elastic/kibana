@@ -13,7 +13,7 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import { useAlertsUrl } from '../../../../hooks/use_alerts_url';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { SloFlyoutPanel } from '../../shared_flyout/flyout_panel';
-import type { SloDetailsAlertsProps } from '.';
+import { useSloDetailsContext } from '../slo_details_context';
 
 const PANEL_TITLE = i18n.translate('xpack.slo.sloDetailsFlyout.alerts.alertsLabel', {
   defaultMessage: 'Alerts',
@@ -22,7 +22,8 @@ const ALERTS_LINK_TEXT = i18n.translate('xpack.slo.sloDetailsFlyout.alerts.alert
   defaultMessage: 'Open in Alerts',
 });
 
-export function SloDetailsFlyoutAlerts({ slo }: SloDetailsAlertsProps) {
+export function SloDetailsFlyoutAlerts() {
+  const { slo } = useSloDetailsContext();
   const { data, http, notifications, fieldFormats, application, licensing, cases, settings } =
     useKibana().services;
 

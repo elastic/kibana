@@ -25,15 +25,16 @@ import { useSliChartPanel } from './hooks/use_sli_chart_panel';
 import { SloFlyoutPanel } from '../../../shared_flyout/flyout_panel';
 import type { SliChartPanelProps } from './types';
 import { CHART_PANEL_WIDTH_BREAKPOINT } from '../../../shared_flyout/constants';
+import { useSloDetailsContext } from '../../slo_details_context';
 
 export function SliChartFlyoutPanel({
   data,
   isLoading,
-  slo,
   onBrushed,
   hideHeaderDurationLabel = false,
 }: SliChartPanelProps) {
-  const { isSloFailed, hasNoData, observedValue, percentFormat } = useSliChartPanel({ data, slo });
+  const { slo } = useSloDetailsContext();
+  const { isSloFailed, hasNoData, observedValue, percentFormat } = useSliChartPanel({ data });
 
   return (
     <SloFlyoutPanel
