@@ -36,14 +36,10 @@ export class WorkflowExecutionPage {
    * @param timeout - The timeout in milliseconds
    */
   async waitForExecutionStatus(status: 'completed' | 'failed', timeout: number) {
-    const expectedPanel = this.page.locator(
-      `[data-test-subj="workflowExecutionPanel"][data-execution-status="${status}"]`
-    );
+    const expectedPanel = this.executionPanel.locator(`[data-execution-status="${status}"]`);
 
     if (status === 'completed') {
-      const failedPanel = this.page.locator(
-        `[data-test-subj="workflowExecutionPanel"][data-execution-status="failed"]`
-      );
+      const failedPanel = this.executionPanel.locator(`[data-execution-status="failed"]`);
 
       // Race: wait for either 'completed' or 'failed' — whichever comes first
       const winner = await Promise.race([
