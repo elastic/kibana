@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/anonymization-plugin",
-  "owner": ["@elastic/workchat-eng"],
+  "owner": ["@elastic/workchat-eng", "@elastic/security-generative-ai", "@elastic/security-threat-hunting"],
   "group": "platform",
   "visibility": "shared",
   "plugin": {
