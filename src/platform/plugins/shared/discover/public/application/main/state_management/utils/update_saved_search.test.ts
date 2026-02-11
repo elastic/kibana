@@ -12,7 +12,6 @@ import { discoverServiceMock } from '../../../../__mocks__/services';
 import type { Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { updateSavedSearch } from './update_saved_search';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { TabStateGlobalState } from '../redux';
 
 describe('updateSavedSearch', () => {
@@ -73,62 +72,6 @@ describe('updateSavedSearch', () => {
     });
     expect(savedSearch.searchSource.getField('query')).toEqual(query);
     expect(savedSearch.searchSource.getField('filter')).toEqual([globalFilter, appFilter]);
-  });
-
-  it('should set time range is timeRestore is enabled', async () => {
-    const savedSearch: SavedSearch = {
-      ...savedSearchMock,
-      searchSource: savedSearchMock.searchSource.createCopy(),
-      timeRestore: true,
-    };
-    updateSavedSearch({
-      savedSearch,
-      dataView: undefined,
-      globalState: {
-        ...globalState,
-        timeRange: {
-          from: 'now-666m',
-          to: 'now',
-        },
-      },
-      services: discoverServiceMock,
-      appState: {
-        query,
-        filters: [appFilter],
-      },
-    });
-    expect(savedSearch.timeRange).toEqual({
-      from: 'now-666m',
-      to: 'now',
-    });
-  });
-
-  it('should not set time range if timeRestore is not enabled', async () => {
-    const savedSearch: SavedSearch = {
-      ...savedSearchMock,
-      searchSource: savedSearchMock.searchSource.createCopy(),
-      timeRestore: false,
-    };
-    updateSavedSearch({
-      savedSearch,
-      dataView: undefined,
-      globalState: {
-        ...globalState,
-        timeRange: {
-          from: 'now-666m',
-          to: 'now',
-        },
-      },
-      services: discoverServiceMock,
-      appState: {
-        query,
-        filters: [appFilter],
-      },
-    });
-    expect(savedSearch.timeRange).not.toEqual({
-      from: 'now-666m',
-      to: 'now',
-    });
   });
 
   it('should pass breakdownField if state has breakdownField', async () => {
