@@ -31,12 +31,7 @@ import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
 import { useEventDetailsPopover } from '../popovers/details/use_event_details_popover';
 import type { DocumentAnalysisOutput } from '../node/label_node/analyze_documents';
 import { analyzeDocuments } from '../node/label_node/analyze_documents';
-import {
-  DOC_ID,
-  EVENT_ID,
-  GRAPH_NODES_LIMIT,
-  TOGGLE_SEARCH_BAR_STORAGE_KEY,
-} from '../../common/constants';
+import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
 import {
@@ -299,7 +294,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
 
     const pinnedIds = useMemo(() => {
       return getFilterValues(searchFilters, [
-        DOC_ID,
         ...GRAPH_ACTOR_ENTITY_FIELDS,
         ...GRAPH_TARGET_ENTITY_FIELDS,
       ]).map(String);
