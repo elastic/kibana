@@ -82,6 +82,17 @@ steps:
     expect(results[0].owner).toBe('yaml-syntax-validation');
   });
 
+  it('should allow empty flow mappings', () => {
+    const { doc, lineCounter } = parseWithLineCounter(`name: Test Workflow
+steps:
+  - name: step1
+    action: test
+    config: {}`);
+
+    const results = validateYamlSyntax(doc, lineCounter);
+    expect(results).toHaveLength(0);
+  });
+
   it('should not flag quoted template expressions', () => {
     const { doc, lineCounter } = parseWithLineCounter(`name: Test Workflow
 steps:

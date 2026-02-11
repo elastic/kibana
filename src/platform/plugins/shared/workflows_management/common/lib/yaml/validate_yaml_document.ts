@@ -50,8 +50,11 @@ export function getYamlDocumentErrorsDetailed(document: Document): YamlDocumentE
           const collection = value as {
             flow?: boolean;
             range?: [number, number, number] | null;
+            items?: unknown[];
           };
-          if (collection.flow) {
+          // Only flag non-empty flow mappings. Empty `{}` is a common pattern
+          // for representing empty objects and should remain allowed.
+          if (collection.flow && collection.items && collection.items.length > 0) {
             errors.push({
               message: `Flow mapping syntax is not allowed. For template expressions, use quotes, e.g. "{{ inputs.comment }}"`,
               range: collection.range ?? undefined,

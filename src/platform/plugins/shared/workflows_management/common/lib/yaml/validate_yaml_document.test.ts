@@ -24,7 +24,7 @@ steps:
     expect(errors).toHaveLength(0);
   });
 
-  it('should detect non-scalar keys (flow mapping as key)', () => {
+  it('should detect unquoted template expressions as flow mappings', () => {
     const yaml = `name: Test Workflow
 steps:
   - name: step1
@@ -34,7 +34,7 @@ steps:
     const doc = parseDocument(yaml);
     const errors = getYamlDocumentErrors(doc);
     expect(errors.length).toBeGreaterThan(0);
-    expect(errors[0].message).toContain('Invalid key type: map');
+    expect(errors[0].message).toContain('Flow mapping syntax is not allowed');
   });
 
   it('should return no errors for quoted template expressions', () => {
@@ -111,6 +111,17 @@ steps:
     expect(errors[0].message).toContain('Flow mapping syntax is not allowed');
   });
 
+  it('should allow empty flow mappings', () => {
+    const yaml = `name: Test Workflow
+steps:
+  - name: step1
+    action: test
+    config: {}`;
+    const doc = parseDocument(yaml);
+    const errors = getYamlDocumentErrorsDetailed(doc);
+    expect(errors).toHaveLength(0);
+  });
+
   it('should not flag block-style mappings', () => {
     const yaml = `name: Test Workflow
 steps:
@@ -145,7 +156,7 @@ steps:
     expect(errors).toHaveLength(0);
   });
 
-  it('should detect non-scalar keys with range', () => {
+  it('should detect unquoted template expressions as flow mappings with range', () => {
     const yaml = `name: Test Workflow
 steps:
   - name: step1
@@ -154,7 +165,7 @@ steps:
     const doc = parseDocument(yaml);
     const errors = getYamlDocumentErrorsDetailed(doc);
     expect(errors.length).toBeGreaterThan(0);
-    expect(errors[0].message).toContain('Invalid key type: map');
+    expect(errors[0].message).toContain('Flow mapping syntax is not allowed');
     expect(errors[0].range).toBeDefined();
   });
 

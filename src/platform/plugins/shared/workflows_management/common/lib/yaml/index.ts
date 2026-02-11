@@ -26,7 +26,4 @@ export { correctYamlSyntax } from './correct_yaml_syntax';
 export { stringifyWorkflowDefinition } from './stringify_workflow_definition';
 export { updateYamlField } from './update_yaml_field';
 export { affectsYamlMetadata, updateWorkflowYamlFields } from './update_workflow_yaml_fields';
-export {
-  getYamlDocumentErrorsDetailed,
-  type YamlDocumentError,
-} from './validate_yaml_document';
+export { getYamlDocumentErrorsDetailed, type YamlDocumentError } from './validate_yaml_document';
