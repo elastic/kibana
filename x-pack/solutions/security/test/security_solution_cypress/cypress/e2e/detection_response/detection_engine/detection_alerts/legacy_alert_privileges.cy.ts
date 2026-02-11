@@ -229,7 +229,7 @@ describe('Legacy Alerts Privileges', { tags: ['@ess'] }, () => {
     it('should be able to close alerts', () => {
       selectNumberOfAlerts(3);
       closeAlerts();
-      assertSuccessToast('Successfully closed 3 alerts.', '');
+      assertSuccessToast('Successfully closed 3 alerts.');
     });
 
     it('should be able to open closed alerts', () => {
@@ -271,7 +271,7 @@ describe('Legacy Alerts Privileges', { tags: ['@ess'] }, () => {
     it('should be able to close alerts', () => {
       selectNumberOfAlerts(2);
       closeAlerts();
-      assertSuccessToast('Successfully closed 2 alerts.', '');
+      assertSuccessToast('Successfully closed 2 alerts.');
     });
 
     it('should be able to assign alerts', () => {
