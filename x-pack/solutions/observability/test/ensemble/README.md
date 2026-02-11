@@ -4,15 +4,9 @@ Automated end-to-end testing for Observability products. These workflows use [En
 
 ## Prerequisites
 
-Install [Ensemble CLI](https://ensemble.elastic.dev):
-```bash
-gh extension install elastic/ensemble
-```
-
-GCP auth (for cluster creation):
-```bash
-gcloud auth application-default login
-```
+- [Ensemble CLI](https://ensemble.elastic.dev) installed
+- [GitHub CLI](https://cli.github.com/) (`gh`) authenticated
+- GCP auth: `gcloud auth application-default login` (for cluster creation)
 
 ---
 
