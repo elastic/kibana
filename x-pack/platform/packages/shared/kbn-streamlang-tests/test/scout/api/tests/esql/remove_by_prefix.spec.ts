@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { RemoveByPrefixProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -36,7 +36,7 @@ apiTest.describe(
 
         expect(esqlResult.documents).toHaveLength(1);
         // The parent field itself is not removed, only nested fields would be
-        expect(esqlResult.documents[0]).toHaveProperty('temp_field');
+        expect(esqlResult.documents[0]?.temp_field).toBeDefined();
         expect(esqlResult.documents[0]).toStrictEqual(
           expect.objectContaining({ message: 'keep-this', temp_field: 'to-be-kept' })
         );
