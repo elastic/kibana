@@ -18,33 +18,9 @@ export const COMMON_HEADERS = {
 export const ES_ARCHIVE_BASIC_INDEX =
   'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
-export const ES_ARCHIVE_CONFLICTS =
-  'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/conflicts';
-
-export const KBN_ARCHIVE_SAVED_OBJECTS_BASIC =
-  'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json';
-
-export const KBN_ARCHIVE_SAVED_OBJECTS_RELATIONSHIPS =
-  'src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json';
-
 export const DATA_VIEW_PATH_LEGACY = 'api/index_patterns/index_pattern';
 export const DATA_VIEW_PATH = 'api/data_views/data_view';
 export const SERVICE_PATH_LEGACY = 'api/index_patterns';
 export const SERVICE_PATH = 'api/data_views';
 export const SERVICE_KEY_LEGACY = 'index_pattern';
 export const SERVICE_KEY = 'data_view';
-
-export const configArray = [
-  {
-    name: 'legacy index pattern api',
-    path: DATA_VIEW_PATH_LEGACY,
-    basePath: SERVICE_PATH_LEGACY,
-    serviceKey: SERVICE_KEY_LEGACY,
-  },
-  {
-    name: 'data view api',
-    path: DATA_VIEW_PATH,
-    basePath: SERVICE_PATH,
-    serviceKey: SERVICE_KEY,
-  },
-];

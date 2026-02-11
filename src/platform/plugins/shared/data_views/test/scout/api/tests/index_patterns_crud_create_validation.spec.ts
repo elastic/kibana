@@ -9,10 +9,10 @@
 
 import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { COMMON_HEADERS, DATA_VIEW_PATH, SERVICE_KEY } from '../fixtures/constants';
+import { COMMON_HEADERS, DATA_VIEW_PATH_LEGACY, SERVICE_KEY_LEGACY } from '../fixtures/constants';
 
 apiTest.describe(
-  `POST ${DATA_VIEW_PATH} - validation (data view api)`,
+  `POST ${DATA_VIEW_PATH_LEGACY} - validation (legacy index pattern api)`,
   { tag: tags.DEPLOYMENT_AGNOSTIC },
   () => {
     let adminApiCredentials: RoleApiCredentials;
@@ -22,9 +22,9 @@ apiTest.describe(
     });
 
     apiTest(
-      `returns error when ${SERVICE_KEY} object is not provided`,
+      `returns error when ${SERVICE_KEY_LEGACY} object is not provided`,
       async ({ apiClient }) => {
-        const response = await apiClient.post(DATA_VIEW_PATH, {
+        const response = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
           headers: {
             ...COMMON_HEADERS,
             ...adminApiCredentials.apiKeyHeader,
@@ -41,27 +41,30 @@ apiTest.describe(
       }
     );
 
-    apiTest(`returns error on empty ${SERVICE_KEY} object`, async ({ apiClient }) => {
-      const response = await apiClient.post(DATA_VIEW_PATH, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-        body: {
-          [SERVICE_KEY]: {},
-        },
-      });
+    apiTest(
+      `returns error on empty ${SERVICE_KEY_LEGACY} object`,
+      async ({ apiClient }) => {
+        const response = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: {
+            [SERVICE_KEY_LEGACY]: {},
+          },
+        });
 
-      expect(response.statusCode).toBe(400);
-      expect(response.body.statusCode).toBe(400);
-      expect(response.body.message).toBe(
-        `[request body.${SERVICE_KEY}.title]: expected value of type [string] but got [undefined]`
-      );
-    });
+        expect(response.statusCode).toBe(400);
+        expect(response.body.statusCode).toBe(400);
+        expect(response.body.message).toBe(
+          `[request body.${SERVICE_KEY_LEGACY}.title]: expected value of type [string] but got [undefined]`
+        );
+      }
+    );
 
     apiTest('returns error when "override" parameter is not a boolean', async ({ apiClient }) => {
-      const response = await apiClient.post(DATA_VIEW_PATH, {
+      const response = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
         headers: {
           ...COMMON_HEADERS,
           ...adminApiCredentials.apiKeyHeader,
@@ -69,7 +72,7 @@ apiTest.describe(
         responseType: 'json',
         body: {
           override: 123,
-          [SERVICE_KEY]: {
+          [SERVICE_KEY_LEGACY]: {
             title: 'foo',
           },
         },
@@ -85,7 +88,7 @@ apiTest.describe(
     apiTest(
       'returns error when "refresh_fields" parameter is not a boolean',
       async ({ apiClient }) => {
-        const response = await apiClient.post(DATA_VIEW_PATH, {
+        const response = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
           headers: {
             ...COMMON_HEADERS,
             ...adminApiCredentials.apiKeyHeader,
@@ -93,7 +96,7 @@ apiTest.describe(
           responseType: 'json',
           body: {
             refresh_fields: 123,
-            [SERVICE_KEY]: {
+            [SERVICE_KEY_LEGACY]: {
               title: 'foo',
             },
           },
@@ -109,7 +112,7 @@ apiTest.describe(
 
     apiTest('returns an error when unknown runtime field type', async ({ apiClient }) => {
       const title = 'basic_index*';
-      const response = await apiClient.post(DATA_VIEW_PATH, {
+      const response = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
         headers: {
           ...COMMON_HEADERS,
           ...adminApiCredentials.apiKeyHeader,
@@ -117,7 +120,7 @@ apiTest.describe(
         responseType: 'json',
         body: {
           override: true,
-          [SERVICE_KEY]: {
+          [SERVICE_KEY_LEGACY]: {
             title,
             runtimeFieldMap: {
               runtimeFoo: {
