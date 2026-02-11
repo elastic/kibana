@@ -144,11 +144,6 @@ const stateSchemaV6 = stateSchemaV5.extends({
 });
 
 const stateSchemaV7 = stateSchemaV6.extends({
-  count_rules_installed_by_integrations: schema.number(),
-  count_rules_installed_by_integrations_by_type: schema.recordOf(schema.string(), schema.number()),
-});
-
-const stateSchemaV8 = stateSchemaV7.extends({
   count_rules_with_elasticagent_tag: schema.number(),
   count_rules_with_elasticagent_tag_by_type: schema.recordOf(schema.string(), schema.number()),
 });
@@ -289,24 +284,15 @@ export const stateSchemaByVersion = {
   7: {
     up: (state: Record<string, unknown>) => ({
       ...stateSchemaByVersion[6].up(state),
-      count_rules_installed_by_integrations: state.count_rules_installed_by_integrations || 0,
-      count_rules_installed_by_integrations_by_type:
-        state.count_rules_installed_by_integrations_by_type || {},
-    }),
-    schema: stateSchemaV7,
-  },
-  8: {
-    up: (state: Record<string, unknown>) => ({
-      ...stateSchemaByVersion[7].up(state),
       count_rules_with_elasticagent_tag: state.count_rules_with_elasticagent_tag || 0,
       count_rules_with_elasticagent_tag_by_type:
         state.count_rules_with_elasticagent_tag_by_type || {},
     }),
-    schema: stateSchemaV8,
+    schema: stateSchemaV7,
   },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[8].schema;
+const latestTaskStateSchema = stateSchemaByVersion[7].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
@@ -349,8 +335,6 @@ export const emptyState: LatestTaskStateSchema = {
     warning: 0,
   },
   count_rules_with_tags: 0,
-  count_rules_installed_by_integrations: 0,
-  count_rules_installed_by_integrations_by_type: {},
   count_rules_with_elasticagent_tag: 0,
   count_rules_with_elasticagent_tag_by_type: {},
   count_rules_by_notify_when: {

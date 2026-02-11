@@ -341,8 +341,6 @@ export function createAlertingUsageCollector(
             on_throttle_interval: 0,
           },
           count_rules_with_tags: 0,
-          count_rules_installed_by_integrations: 0,
-          count_rules_installed_by_integrations_by_type: {},
           count_rules_with_elasticagent_tag: 0,
           count_rules_with_elasticagent_tag_by_type: {},
           count_rules_snoozed: 0,
@@ -443,13 +441,6 @@ export function createAlertingUsageCollector(
       count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: byTaskStatusSchemaByType,
       count_rules_by_execution_status: byStatusSchema,
       count_rules_with_tags: { type: 'long' },
-      count_rules_installed_by_integrations: {
-        type: 'long',
-        _meta: {
-          description: 'Total count of rules installed by integrations',
-        },
-      },
-      count_rules_installed_by_integrations_by_type: byTypeSchema,
       count_rules_with_elasticagent_tag: {
         type: 'long',
         _meta: {

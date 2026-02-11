@@ -171,10 +171,6 @@ export function telemetryTaskRunner(
                 count_rules_by_execution_status:
                   totalCountAggregations.count_rules_by_execution_status,
                 count_rules_with_tags: totalCountAggregations.count_rules_with_tags,
-                count_rules_installed_by_integrations:
-                  totalCountAggregations.count_rules_installed_by_integrations,
-                count_rules_installed_by_integrations_by_type:
-                  totalCountAggregations.count_rules_installed_by_integrations_by_type,
                 count_rules_with_elasticagent_tag:
                   totalCountAggregations.count_rules_with_elasticagent_tag,
                 count_rules_with_elasticagent_tag_by_type:

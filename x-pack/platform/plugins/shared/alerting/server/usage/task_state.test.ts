@@ -931,43 +931,8 @@ describe('telemetry task state', () => {
 
   describe('v7', () => {
     const v7 = stateSchemaByVersion[7];
-    it('should add count_rules_installed_by_integrations fields when running the up migration', () => {
-      const result = v7.up({});
-      expect(result).toHaveProperty('count_rules_installed_by_integrations', 0);
-      expect(result).toHaveProperty('count_rules_installed_by_integrations_by_type', {});
-    });
-
-    it(`shouldn't overwrite properties when running the up migration`, () => {
-      const state = {
-        count_rules_installed_by_integrations: 5,
-        count_rules_installed_by_integrations_by_type: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          logs__alert__document__count: 3,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          metrics__alert__threshold: 2,
-        },
-      };
-      const result = v7.up(cloneDeep(state));
-      expect(result.count_rules_installed_by_integrations).toEqual(5);
-      expect(result.count_rules_installed_by_integrations_by_type).toEqual({
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        logs__alert__document__count: 3,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        metrics__alert__threshold: 2,
-      });
-    });
-
-    it('should drop unknown properties when running the up migration', () => {
-      const state = { foo: true };
-      const result = v7.up(state);
-      expect(result).not.toHaveProperty('foo');
-    });
-  });
-
-  describe('v8', () => {
-    const v8 = stateSchemaByVersion[8];
     it('should add count_rules_with_elasticagent_tag fields when running the up migration', () => {
-      const result = v8.up({});
+      const result = v7.up({});
       expect(result).toHaveProperty('count_rules_with_elasticagent_tag', 0);
       expect(result).toHaveProperty('count_rules_with_elasticagent_tag_by_type', {});
     });
@@ -982,7 +947,7 @@ describe('telemetry task state', () => {
           metrics__alert__threshold: 2,
         },
       };
-      const result = v8.up(cloneDeep(state));
+      const result = v7.up(cloneDeep(state));
       expect(result.count_rules_with_elasticagent_tag).toEqual(5);
       expect(result.count_rules_with_elasticagent_tag_by_type).toEqual({
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -994,7 +959,7 @@ describe('telemetry task state', () => {
 
     it('should drop unknown properties when running the up migration', () => {
       const state = { foo: true };
-      const result = v8.up(state);
+      const result = v7.up(state);
       expect(result).not.toHaveProperty('foo');
     });
   });
