@@ -48,7 +48,7 @@ test.describe(
           indices: [
             {
               names: [TEST_ALERTS_INDEX],
-              privileges: ['write', 'read', 'view_index_metadata', 'create_index'],
+              privileges: ['write', 'read', 'view_index_metadata', 'create_index', 'delete_index'],
             },
           ],
         },
@@ -62,7 +62,7 @@ test.describe(
       });
     });
 
-    test.afterAll(async ({ scoutSpace, apiServices }) => {
+    test.afterEach(async ({ scoutSpace, apiServices }) => {
       await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
     });
 
