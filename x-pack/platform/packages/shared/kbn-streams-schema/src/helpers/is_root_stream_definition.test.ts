@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isRootStreamDefinition } from './is_root';
+import { isRootStreamDefinition } from './is_root_stream_definition';
 
 describe('isRootStreamDefinition', () => {
   it('returns true for a valid root wired stream definition (logs)', () => {
