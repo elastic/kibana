@@ -29,7 +29,10 @@ git show base OAS → bump diff → parse → filter to TF APIs → apply allowl
 4. **`src/allowlist/`** - Escape hatch for approved breaking changes
    - `load_allowlist.ts` - Loads and validates `allowlist.json`
 
-5. **`scripts/`** - CLI entry point
+5. **`src/input/`** - OAS file loading (exported as public API)
+   - `load_oas.ts` - Reads and validates OpenAPI spec YAML files
+
+6. **`scripts/`** - CLI entry point
    - `check_contracts.ts` - Orchestrates the full pipeline
 
 ## Breaking Change Rules
@@ -92,6 +95,7 @@ node scripts/check_api_contracts.js \
 - `--distribution` (required) - `stack` or `serverless`
 - `--specPath` - Path to current OAS file (auto-detected from distribution)
 - `--baseBranch` - Branch to compare against (default: `main`)
+- `--mergeBase` - Merge base commit SHA (used in CI, skips remote resolution)
 - `--allowlistPath` - Override allowlist path
 - `--terraformApisPath` - Override TF API inventory path
 
@@ -108,13 +112,13 @@ cd oas_docs && npm install && cd ..
 
 ## Troubleshooting
 
-### "No base OAS found on origin/{branch} - skipping check"
+### "No base OAS found - skipping check"
 
 The base branch OAS file isn't available. This happens on:
 - First PR to a new branch before `oas_docs/output/` is committed
 - Shallow clones missing the base ref
 
-The script tries `git fetch origin {branch} --depth=1` as a fallback.
+The script auto-detects the `elastic/kibana` remote (falls back to `origin`) and tries `git fetch {remote} {branch} --depth=1` as a fallback. If `--mergeBase` is provided, remote resolution is skipped entirely.
 
 ### bump-cli not found
 

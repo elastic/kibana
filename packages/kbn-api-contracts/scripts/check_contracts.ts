@@ -24,6 +24,7 @@ interface CheckContractsOptions {
   distribution: Distribution;
   specPath: string;
   baseBranch: string;
+  mergeBase?: string;
   allowlistPath?: string;
   terraformApisPath?: string;
 }
@@ -42,32 +43,72 @@ const validateDistribution = (distribution: string | undefined): Distribution =>
   return distribution as Distribution;
 };
 
-const getBaseOasPath = (specPath: string, baseBranch: string): string | null => {
+const resolveElasticRemote = (): string => {
+  try {
+    const remoteOutput = execSync('git remote -v', {
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    const match = remoteOutput
+      .split('\n')
+      .find(
+        (line) =>
+          line.toLowerCase().includes('github.com/elastic/kibana') ||
+          line.toLowerCase().includes('github.com:elastic/kibana')
+      );
+    if (match) {
+      return match.split(/\t|\s/)[0];
+    }
+  } catch {
+    // fall through
+  }
+  return 'origin';
+};
+
+const getBaseOasFromMergeBase = (specPath: string, mergeBase: string): string | null => {
   mkdirSync(TMP_DIR, { recursive: true });
   const tmpPath = resolve(TMP_DIR, `base-${Date.now()}.yaml`);
 
   try {
-    // git show retrieves the file content directly
-    const baseContent = execSync(`git show origin/${baseBranch}:${specPath}`, {
+    const baseContent = execSync(`git show ${mergeBase}:${specPath}`, {
       encoding: 'utf-8',
       stdio: ['pipe', 'pipe', 'pipe'],
     });
     writeFileSync(tmpPath, baseContent);
     return tmpPath;
   } catch {
-    // Try fetching if git show fails (stale refs)
+    return null;
+  }
+};
+
+const getBaseOasFromRemote = (
+  specPath: string,
+  baseBranch: string,
+  remote: string
+): string | null => {
+  mkdirSync(TMP_DIR, { recursive: true });
+  const tmpPath = resolve(TMP_DIR, `base-${Date.now()}.yaml`);
+
+  try {
+    const baseContent = execSync(`git show ${remote}/${baseBranch}:${specPath}`, {
+      encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    writeFileSync(tmpPath, baseContent);
+    return tmpPath;
+  } catch {
     try {
-      execSync(`git fetch origin ${baseBranch} --depth=1`, {
+      execSync(`git fetch ${remote} ${baseBranch} --depth=1`, {
         stdio: ['pipe', 'pipe', 'pipe'],
       });
-      const baseContent = execSync(`git show origin/${baseBranch}:${specPath}`, {
+      const baseContent = execSync(`git show ${remote}/${baseBranch}:${specPath}`, {
         encoding: 'utf-8',
         stdio: ['pipe', 'pipe', 'pipe'],
       });
       writeFileSync(tmpPath, baseContent);
       return tmpPath;
     } catch {
-      return null; // Basebranch doesn't have this file yet
+      return null;
     }
   }
 };
@@ -89,17 +130,26 @@ run(
       distribution,
       specPath: (flags.specPath as string) || getDefaultSpecPath(distribution),
       baseBranch: (flags.baseBranch as string) || 'main',
+      mergeBase: (flags.mergeBase as string) || undefined,
       allowlistPath: flags.allowlistPath as string | undefined,
       terraformApisPath: flags.terraformApisPath as string | undefined,
     };
 
     log.info(`Checking ${opts.distribution} API contracts...`);
     log.info(`Current spec: ${opts.specPath}`);
-    log.info(`Base branch: ${opts.baseBranch}`);
 
-    const basePath = getBaseOasPath(opts.specPath, opts.baseBranch);
+    let basePath: string | null;
+    if (opts.mergeBase) {
+      log.info(`Using merge base: ${opts.mergeBase}`);
+      basePath = getBaseOasFromMergeBase(opts.specPath, opts.mergeBase);
+    } else {
+      const remote = resolveElasticRemote();
+      log.info(`Base: ${remote}/${opts.baseBranch}`);
+      basePath = getBaseOasFromRemote(opts.specPath, opts.baseBranch, remote);
+    }
+
     if (!basePath) {
-      log.warning(`No base OAS found on origin/${opts.baseBranch} - skipping check`);
+      log.warning('No base OAS found - skipping check');
       return;
     }
 
@@ -150,22 +200,33 @@ run(
   {
     description: 'Check API contracts for breaking changes affecting Terraform provider APIs',
     flags: {
-      string: ['distribution', 'specPath', 'baseBranch', 'allowlistPath', 'terraformApisPath'],
+      string: [
+        'distribution',
+        'specPath',
+        'baseBranch',
+        'mergeBase',
+        'allowlistPath',
+        'terraformApisPath',
+      ],
       help: `
         --distribution       Required. Either "stack" or "serverless"
         --specPath           Path to the current OpenAPI spec (default: oas_docs/output/kibana*.yaml)
         --baseBranch         Base branch to compare against (default: main)
+        --mergeBase          Merge base commit SHA (used in CI, skips remote resolution)
         --allowlistPath      Override allowlist path (default: packages/kbn-api-contracts/allowlist.json)
         --terraformApisPath  Override Terraform provider APIs config path
 
         Examples:
-          # Check serverless contracts against main
-          node scripts/check_contracts.ts --distribution serverless
+          # CI: check using merge base SHA
+          node scripts/check_contracts.ts --distribution stack --mergeBase abc123
 
-          # Check stack contracts against main
+          # Local: check stack contracts against main (auto-detects elastic/kibana remote)
           node scripts/check_contracts.ts --distribution stack
 
-          # Check against a different base branch
+          # Local: check serverless contracts against main
+          node scripts/check_contracts.ts --distribution serverless
+
+          # Local: check against a specific branch
           node scripts/check_contracts.ts --distribution stack --baseBranch 9.3
       `,
     },

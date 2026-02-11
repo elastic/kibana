@@ -99,6 +99,13 @@ describe('check_contracts', () => {
     baseBranch: 'main',
   };
 
+  const gitRemoteOutput = [
+    'upstream\tgit@github.com:elastic/kibana.git (fetch)',
+    'upstream\tgit@github.com:elastic/kibana.git (push)',
+    'origin\tgit@github.com:myuser/kibana.git (fetch)',
+    'origin\tgit@github.com:myuser/kibana.git (push)',
+  ].join('\n');
+
   it('throws if distribution is missing', async () => {
     await expect(
       runCallback({ flags: { ...defaultFlags, distribution: undefined }, log: mockLog })
@@ -118,7 +125,7 @@ describe('check_contracts', () => {
 
     await runCallback({ flags: defaultFlags, log: mockLog });
 
-    expect(mockLog.warning).toHaveBeenCalledWith(expect.stringContaining('No base OAS found'));
+    expect(mockLog.warning).toHaveBeenCalledWith('No base OAS found - skipping check');
     expect(mockRunBumpDiff).not.toHaveBeenCalled();
   });
 
@@ -201,29 +208,97 @@ describe('check_contracts', () => {
     expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining('kibana.serverless.yaml'));
   });
 
-  it('fetches base branch when git show fails initially', async () => {
-    let callCount = 0;
-    mockExecSync.mockImplementation((cmd: string) => {
-      if (typeof cmd === 'string' && cmd.startsWith('git show')) {
-        callCount++;
-        if (callCount === 1) throw new Error('not found');
-        return 'openapi: 3.0.0';
-      }
-      if (typeof cmd === 'string' && cmd.startsWith('git fetch')) {
-        return '';
-      }
-      return '';
+  describe('merge base (CI path)', () => {
+    it('uses git show with merge base SHA when --mergeBase is provided', async () => {
+      mockRunBumpDiff.mockReturnValue([]);
+      mockParseBumpDiff.mockReturnValue([]);
+
+      await runCallback({
+        flags: { ...defaultFlags, mergeBase: 'abc123def' },
+        log: mockLog,
+      });
+
+      expect(mockExecSync).toHaveBeenCalledWith(
+        'git show abc123def:oas_docs/output/kibana.yaml',
+        expect.any(Object)
+      );
+      expect(mockLog.info).toHaveBeenCalledWith('Using merge base: abc123def');
     });
 
-    mockRunBumpDiff.mockReturnValue([]);
-    mockParseBumpDiff.mockReturnValue([]);
+    it('does not resolve remote when mergeBase is provided', async () => {
+      mockRunBumpDiff.mockReturnValue([]);
+      mockParseBumpDiff.mockReturnValue([]);
 
-    await runCallback({ flags: defaultFlags, log: mockLog });
+      await runCallback({
+        flags: { ...defaultFlags, mergeBase: 'abc123def' },
+        log: mockLog,
+      });
 
-    expect(mockExecSync).toHaveBeenCalledWith(
-      expect.stringContaining('git fetch origin main'),
-      expect.any(Object)
-    );
+      expect(mockExecSync).not.toHaveBeenCalledWith('git remote -v', expect.any(Object));
+    });
+  });
+
+  describe('remote resolution (local dev path)', () => {
+    it('resolves elastic/kibana remote from git remote -v', async () => {
+      mockExecSync.mockImplementation((cmd: string) => {
+        if (cmd === 'git remote -v') return gitRemoteOutput;
+        return 'openapi: 3.0.0';
+      });
+      mockRunBumpDiff.mockReturnValue([]);
+      mockParseBumpDiff.mockReturnValue([]);
+
+      await runCallback({ flags: defaultFlags, log: mockLog });
+
+      expect(mockExecSync).toHaveBeenCalledWith(
+        'git show upstream/main:oas_docs/output/kibana.yaml',
+        expect.any(Object)
+      );
+      expect(mockLog.info).toHaveBeenCalledWith('Base: upstream/main');
+    });
+
+    it('falls back to origin when elastic/kibana remote is not found', async () => {
+      const noElasticRemotes = [
+        'origin\tgit@github.com:myuser/kibana.git (fetch)',
+        'origin\tgit@github.com:myuser/kibana.git (push)',
+      ].join('\n');
+
+      mockExecSync.mockImplementation((cmd: string) => {
+        if (cmd === 'git remote -v') return noElasticRemotes;
+        return 'openapi: 3.0.0';
+      });
+      mockRunBumpDiff.mockReturnValue([]);
+      mockParseBumpDiff.mockReturnValue([]);
+
+      await runCallback({ flags: defaultFlags, log: mockLog });
+
+      expect(mockExecSync).toHaveBeenCalledWith(
+        'git show origin/main:oas_docs/output/kibana.yaml',
+        expect.any(Object)
+      );
+    });
+
+    it('fetches remote branch when git show fails initially', async () => {
+      let showCount = 0;
+      mockExecSync.mockImplementation((cmd: string) => {
+        if (cmd === 'git remote -v') return gitRemoteOutput;
+        if (typeof cmd === 'string' && cmd.startsWith('git show')) {
+          showCount++;
+          if (showCount === 1) throw new Error('not found');
+          return 'openapi: 3.0.0';
+        }
+        if (typeof cmd === 'string' && cmd.startsWith('git fetch')) return '';
+        return '';
+      });
+      mockRunBumpDiff.mockReturnValue([]);
+      mockParseBumpDiff.mockReturnValue([]);
+
+      await runCallback({ flags: defaultFlags, log: mockLog });
+
+      expect(mockExecSync).toHaveBeenCalledWith(
+        expect.stringContaining('git fetch upstream main'),
+        expect.any(Object)
+      );
+    });
   });
 
   it('cleans up temp files even on error', async () => {
