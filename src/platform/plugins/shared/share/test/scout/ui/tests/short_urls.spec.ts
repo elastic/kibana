@@ -11,7 +11,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-test.describe('Short URLs', { tag: tags.ESS_ONLY }, () => {
+test.describe('Short URLs', { tag: tags.stateful.classic }, () => {
   test('shows Page for missing short URL', async ({ page, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('home');
