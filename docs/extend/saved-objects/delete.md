@@ -1,5 +1,7 @@
 # Delete [saved-objects-delete]
 
+This page describes how to **remove a Saved Object type** (unregister the type definition from your plugin). It does not cover deleting Saved Object instances via the client.
+
 ## Removing a Saved Object type
 
 When you remove a Saved Object type from your plugin, you must ensure its name cannot be reused later.

@@ -29,6 +29,7 @@ toc:
         children:
           - file: saved-objects/structure.md
           - file: saved-objects/create.md
+          - file: saved-objects/use.md
           - file: saved-objects/update.md
           - file: saved-objects/validate.md
           - file: saved-objects/delete.md

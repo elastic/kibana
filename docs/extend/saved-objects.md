@@ -5,7 +5,9 @@ mapped_pages:
 
 # Saved Objects [saved-objects]
 
-`Saved Objects` allow {{kib}} plugins to use {{es}} like a primary database. Think of them as an Object Document Mapper for {{es}}. Once a plugin has registered one or more Saved Object types, the Saved Objects client can be used to query or perform create, read, update and delete operations on each type.
+`Saved Objects` allow {{kib}} plugins to use {{es}} like a primary database. Think of them as an Object Document Mapper for {{es}}. Once a plugin has registered one or more **Saved Object types**, the Saved Objects client can be used to query or perform create, read, update and delete operations on each type.
+
+**Terminology:** A **Saved Object type** is the schema and configuration that a plugin registers for a kind of document (name, mappings, model versions, etc.). **Saved Objects** are the document instances of that type stored in {{es}}. The sections below cover both how to define and evolve Saved Object **types** and how to perform CRUD on Saved Object instances via the Core service (see [Use](saved-objects/use.md)).
 
 ::::{note}
 The Saved Objects service is available on server side. Client side services and APIs have been deprecated for some time and will be removed in the near future.
@@ -22,9 +24,10 @@ By using Saved Objects your plugin can take advantage of the following features:
 
 This documentation is organized into the following sections:
 
-* [Structure](saved-objects/structure.md) — Main parts of a saved object type (name, index pattern, mappings, model versions) and the structure of a model version.
-* [Create](saved-objects/create.md) — How to register a new saved object type, define mappings and references, and define the initial model version.
-* [Update](saved-objects/update.md) — How to upgrade existing saved object types (legacy transition and new model versions).
-* [Validate](saved-objects/validate.md) — Testing model versions, ensuring safe type changes, and troubleshooting.
-* [Delete](saved-objects/delete.md) — Removing a Saved Object type.
-* [Migrations](saved-objects/migrations.md) — How schema and mapping changes are rolled out on Classic stack (self-hosted, Elastic Cloud Hosted) and Serverless (Elastic Cloud Serverless).
+* [Structure](saved-objects/structure.md) — Parts of a Saved Object type definition (name, index pattern, mappings, model versions) and the structure of a model version.
+* [Create](saved-objects/create.md) — Register a new Saved Object type, define mappings and references, and define the initial model version.
+* [Use](saved-objects/use.md) — Perform CRUD on Saved Object instances via the Core service (create, get, find, update, delete). Do not use the deprecated HTTP API.
+* [Update](saved-objects/update.md) — Upgrade existing Saved Object types (legacy transition and new model versions).
+* [Validate](saved-objects/validate.md) — Test model versions, ensure safe type definition changes, and troubleshoot validation failures.
+* [Delete](saved-objects/delete.md) — Remove a Saved Object type registration.
+* [Migrations](saved-objects/migrations.md) — How type schema and mapping changes are rolled out on Classic stack and Serverless.

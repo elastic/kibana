@@ -1,6 +1,6 @@
 # Update [saved-objects-update]
 
-This section describes how to upgrade existing Saved Object types: transitioning legacy types to model versions and adding new model versions to types that already use them.
+This page describes how to upgrade existing **Saved Object type** definitions: transitioning legacy types to model versions and adding new model versions to types that already use them. It does not cover updating Saved Object instances via the client.
 
 ## Version numbering
 
@@ -32,13 +32,13 @@ const myType: SavedObjectsType = {
 };
 ```
 
-## Transitioning legacy Saved Objects
+## Transitioning legacy Saved Object types
 
 If you are updating a legacy Saved Object type that does not yet use model versions, you must establish a baseline first. This is a two-step process so that Serverless can roll back safely if needed.
 
 ### The initial version PR
 
-The first PR must define the **current, existing shape** of the Saved Object.
+The first PR must define the **current, existing shape** of the type's documents.
 
 * **No mapping changes** — Do not change any existing mappings; only add the required schemas.
 * **Deploy first** — This PR must be merged and released in Serverless before you open a second PR with your real changes.

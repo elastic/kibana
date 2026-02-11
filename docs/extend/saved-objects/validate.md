@@ -1,6 +1,6 @@
 # Validate [saved-objects-validate]
 
-This section covers testing model versions, ensuring safe Saved Object type changes, and troubleshooting validation failures.
+This page covers testing model versions, ensuring safe **Saved Object type** definition changes, and troubleshooting validation failures. It applies to type definitions (the code you register), not to validating Saved Object instances at runtime.
 
 ## Testing model versions [_testing_model_versions]
 
@@ -119,9 +119,9 @@ The test bed only instantiates the parts of Core needed for the two SO repositor
 * No extensions (no security, encryption, or spaces).
 * All SO types use the same SO index.
 
-## Ensuring safe Saved Objects type changes
+## Ensuring safe Saved Object type changes
 
-Saved Objects are critical to {{kib}}. Type definition changes must meet strict safety criteria to avoid:
+Saved Object type definitions drive migrations and the shape of the Saved Objects API. Changes to them must meet strict safety criteria to avoid:
 
 * Data corruption.
 * Unsupported mapping changes.
@@ -129,9 +129,9 @@ Saved Objects are critical to {{kib}}. Type definition changes must meet strict 
 
 Validation runs automatically in CI on `pull_request` and `on-merge`. You can also run it locally.
 
-### Manually running Saved Objects checks
+### Manually running the type check
 
-Run the checks from your PR branch:
+Run the check from your PR branch:
 
 ```shell
 # Get your current commit
@@ -181,7 +181,7 @@ Providing fixtures and defining mandatory `create` and `forwardCompatibility` sc
 
 ### CI is failing for my PR
 
-CI validates Saved Object type definitions. When you add a type or change an existing one, the *Check changes in saved objects* step may fail. Use the errors below to identify the cause.
+CI validates Saved Object type definitions. When you add or change a type, the *Check changes in saved objects* step may fail. Use the errors below to identify the cause.
 
 ```shell
 ❌ Modifications have been detected in the '<soType>.migrations'. This property is deprected and no modifications are allowed.
@@ -235,7 +235,7 @@ CI validates Saved Object type definitions. When you add a type or change an exi
 ```
 
 **Problem:** A Saved Object type was removed but `removed_types.json` was not updated.
-**Solution:** Run `node scripts/check_saved_objects --baseline <mergeBase> --fix`, then commit the updated `removed_types.json`. See [Delete: Removing a Saved Object type](delete.md) for how to get the merge-base.
+**Solution:** Run `node scripts/check_saved_objects --baseline <mergeBase> --fix`, then commit the updated `removed_types.json`. See [Delete](delete.md) for how to get the merge-base.
 
 ```shell
 ❌ Cannot re-register previously removed type(s): <soType>. Please use a different name.

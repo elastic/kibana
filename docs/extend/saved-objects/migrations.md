@@ -1,6 +1,6 @@
 # Migrations [saved-objects-migrations]
 
-This section describes how changes to Saved Object schemas and mappings are rolled out, depending on the deployment architecture.
+This page describes how changes to **Saved Object type** schemas and mappings are rolled out, depending on the deployment architecture.
 
 Model versions decouple Saved Object versioning from the stack version and support both traditional upgrades (with downtime) and zero-downtime Serverless upgrades. The legacy migration API was tied to stack versions and did not meet backward-compatibility and zero-downtime requirements for Serverless, so it has been deprecated in favor of `modelVersions`.
 

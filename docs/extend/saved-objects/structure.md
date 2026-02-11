@@ -1,6 +1,6 @@
 # Structure [saved-objects-structure]
 
-A Saved Object type is defined by the `SavedObjectsType` interface. Its main parts are:
+This page describes the structure of a **Saved Object type** definition (the configuration you register), not the structure of Saved Object documents in the index. A type is defined by the `SavedObjectsType` interface. Its main parts are:
 
 * **name** — The type name, used as the internal id and potentially as part of the URL path for the public Saved Objects HTTP API. Names should follow the API URL path convention and be written in snake_case.
 * **indexPattern** — Optional. If defined, type instances are stored in the given index instead of the default one.
@@ -205,10 +205,6 @@ Starting with {{kib}} 9.3.0, all new model versions must include a `forwardCompa
 
 #### create [_create]
 
-Replaces the old `SavedObjectType.schemas` definition. It is a `@kbn/config-schema` object-type schema used to validate document attributes during `create` and `bulkCreate` operations.
-
-:::{note}
-Implementing this schema is optional but recommended; otherwise there is no validation when importing objects.
-:::
+Replaces the old `SavedObjectType.schemas` definition. It is a `@kbn/config-schema` object-type schema used to validate document attributes during `create` and `bulkCreate` operations. New model versions must include both `create` and `forwardCompatibility`; see [Validate](validate.md#saved-object-type-validation-rules).
 
 For implementation examples, see [Update: Use-case examples](update.md#use-case-examples).

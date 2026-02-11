@@ -1,6 +1,6 @@
 # Create [saved-objects-create]
 
-This section describes how to register a new Saved Object type, define its mappings and references, and define the initial model version with full validation.
+This page describes how to define and register a **Saved Object type** (the type definition), not how to create Saved Object instances via the client. It covers registering the type, defining mappings and references, and defining the initial model version with full validation.
 
 ## Registering a Saved Object type [saved-objects-type-registration]
 
@@ -65,7 +65,7 @@ Example for the `search` type:
 ```typescript
 import { SavedObjectsType } from 'src/core/server';
 // ... other imports
-export const getSavedSearchObjectType: SavedObjectsType = { <1>
+export const getSavedSearchObjectType: SavedObjectsType = {
   name: 'search',
   hidden: false,
   namespaceType: 'multiple-isolated',
@@ -80,8 +80,6 @@ export const getSavedSearchObjectType: SavedObjectsType = { <1>
   // ...other optional properties
 };
 ```
-
-1. Simplification
 
 This results in the following being applied to the `.kibana_analytics` index:
 
