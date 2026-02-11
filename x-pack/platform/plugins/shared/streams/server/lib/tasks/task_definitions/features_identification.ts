@@ -70,7 +70,7 @@ const MIN_NEW_PATTERNS = 2;
 const MAX_DISCOVERED_PATTERNS = 200;
 
 /** Target number of sample documents to return for feature identification. */
-const TARGET_SAMPLE_DOCS = 20;
+const DEFAULT_SAMPLE_SIZE = 20;
 
 /**
  * Merges previously discovered patterns with newly discovered ones, capping the
@@ -101,16 +101,17 @@ const getSampleDocuments = async ({
   start,
   end,
   excludePatterns,
+  size = DEFAULT_SAMPLE_SIZE,
 }: {
   esClient: ElasticsearchClient;
   index: string;
   start: number;
   end: number;
   excludePatterns: DiscoveredPattern[];
+  size?: number;
 }) => {
-  let resetPatterns = false;
   // Discover message patterns, excluding previously found ones
-  let result = await discoverMessagePatterns({
+  const { categories, randomSampleDocuments } = await discoverMessagePatterns({
     esClient,
     index,
     start,
@@ -118,22 +119,16 @@ const getSampleDocuments = async ({
     excludePatterns: excludePatterns.map((p) => p.pattern),
   });
 
-  // If we didn't find enough new meaningful patterns, try again without excluding patterns
-  const meaningfulCount = result.categories.filter((c) => c.isMeaningfulPattern).length;
-  if (result.categorizationField && meaningfulCount < MIN_NEW_PATTERNS) {
-    resetPatterns = true;
-    result = await discoverMessagePatterns({
-      esClient,
-      index,
-      start,
-      end,
-    });
-  }
-
-  const { categories, randomSampleDocuments, categorizationField } = result;
+  const categoryDocuments = categories.flatMap((c) => c.sampleDocuments);
+  const sampleDocuments = [
+    ...categoryDocuments,
+    ...randomSampleDocuments.slice(
+      0,
+      Math.max(0, size - categoryDocuments.length)
+    )
+  ].slice(0, size);
 
   const now = Date.now();
-
   // Only persist meaningful patterns for future exclusion
   const newPatterns: DiscoveredPattern[] = categories
     .filter((c) => c.isMeaningfulPattern)
@@ -142,23 +137,11 @@ const getSampleDocuments = async ({
       discoveredAt: now,
     }));
 
-  const updatedPatterns = mergeDiscoveredPatterns({
-    previousPatterns: excludePatterns && !resetPatterns ? excludePatterns : [],
-    newPatterns,
-  });
-
-  // Sample documents come from all categories (meaningful and not)
-  const categoryDocs = categorizationField ? categories.flatMap((c) => c.sampleDocuments) : [];
-
-  // Fill up to TARGET_SAMPLE_DOCS with random samples if categories didn't provide enough
-  const remainingSlots = Math.max(0, TARGET_SAMPLE_DOCS - categoryDocs.length);
-  const sampleDocuments = [
-    ...categoryDocs,
-    ...randomSampleDocuments.slice(0, remainingSlots),
-  ].slice(0, TARGET_SAMPLE_DOCS);
-
   return {
-    updatedPatterns,
+    updatedPatterns: newPatterns.length < MIN_NEW_PATTERNS ? [] : mergeDiscoveredPatterns({
+      previousPatterns: excludePatterns,
+      newPatterns,
+    }),
     sampleDocuments,
   };
 };
@@ -245,8 +228,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   const existing = existingFeatures.find(({ id }) => id === feature.id);
                   if (existing) {
                     taskContext.logger.debug(
-                      `Overwriting feature with id [${
-                        feature.id
+                      `Overwriting feature with id [${feature.id
                       }] since it already exists.\nExisting feature: ${JSON.stringify(
                         existing
                       )}\nNew feature: ${JSON.stringify(feature)}`

@@ -143,8 +143,6 @@ export interface DiscoverPatternsResult {
   categories: MessageCategory[];
   /** Random sample documents, used as fallback when categorization yields no results. */
   randomSampleDocuments: Array<Record<string, unknown>>;
-  /** The text field used for categorize_text, or `undefined` if no suitable field was found. */
-  categorizationField: string | undefined;
 }
 
 /**
@@ -319,5 +317,5 @@ export const discoverMessagePatterns = async ({
     (hit) => hit._source
   );
 
-  return { categories, randomSampleDocuments, categorizationField };
+  return { categories, randomSampleDocuments };
 };
