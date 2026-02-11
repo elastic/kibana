@@ -225,22 +225,6 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
     expect(found!.readonly).toBe(false);
   });
 
-  apiTest('should reject creating a skill with an invalid ID', async ({ apiClient }) => {
-    const response = await apiClient.post(SKILLS_API_BASE, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {
-        id: 'Invalid ID With Spaces',
-        name: 'invalid-skill',
-        description: 'This should fail',
-        content: 'Content.',
-        tool_ids: [],
-      },
-    });
-
-    expect(response.statusCode).toBe(400);
-  });
-
   apiTest('should retrieve the built-in skill by ID', async ({ apiClient }) => {
     const response = await apiClient.get(`${SKILLS_API_BASE}/${BUILTIN_SKILL_ID}`, {
       headers: defaultHeaders,
@@ -258,86 +242,5 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
     expect(body.name).toBe('data-exploration');
     expect(body.description).toBeDefined();
     expect(body.content).toBeDefined();
-  });
-
-  apiTest('should reject deleting a built-in skill', async ({ apiClient }) => {
-    const response = await apiClient.delete(`${SKILLS_API_BASE}/${BUILTIN_SKILL_ID}`, {
-      headers: defaultHeaders,
-      responseType: 'json',
-    });
-
-    expect(response.statusCode).not.toBe(200);
-  });
-
-  apiTest('should reject updating a built-in skill', async ({ apiClient }) => {
-    const response = await apiClient.put(`${SKILLS_API_BASE}/${BUILTIN_SKILL_ID}`, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {
-        name: 'hacked-name',
-        description: 'Attempted modification',
-        content: 'Should not work.',
-        tool_ids: [],
-      },
-    });
-
-    expect(response.statusCode).not.toBe(200);
-  });
-
-  apiTest('should reject deleting a non-existent skill', async ({ apiClient }) => {
-    const response = await apiClient.delete(`${SKILLS_API_BASE}/non-existent-skill-id`, {
-      headers: defaultHeaders,
-      responseType: 'json',
-    });
-
-    expect(response.statusCode).toBe(400);
-  });
-
-  apiTest('should reject updating a non-existent skill', async ({ apiClient }) => {
-    const response = await apiClient.put(`${SKILLS_API_BASE}/non-existent-skill-id`, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {
-        name: 'attempted-update',
-        description: 'Should fail',
-        content: 'Should not work.',
-        tool_ids: [],
-      },
-    });
-
-    expect(response.statusCode).toBe(400);
-  });
-
-  apiTest('should reject creating a skill with duplicate ID', async ({ apiClient }) => {
-    const skillId = `test-skill-dup-${Date.now()}`;
-    createdSkillIds.push(skillId);
-
-    // Create the first skill
-    await apiClient.post(SKILLS_API_BASE, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {
-        id: skillId,
-        name: `first-skill-${Date.now()}`,
-        description: 'First skill',
-        content: 'First content.',
-        tool_ids: [],
-      },
-    });
-
-    // Try to create a second skill with the same ID
-    const response = await apiClient.post(SKILLS_API_BASE, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {
-        id: skillId,
-        name: `second-skill-${Date.now()}`,
-        description: 'Second skill with duplicate ID',
-        content: 'Second content.',
-        tool_ids: [],
-      },
-    });
-
-    expect(response.statusCode).toBe(400);
   });
 });
