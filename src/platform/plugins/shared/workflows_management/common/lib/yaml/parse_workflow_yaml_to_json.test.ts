@@ -107,7 +107,7 @@ describe('parseWorkflowYamlToJSON', () => {
       })
     );
     expect(result.success).toBe(false);
-    expect(result.error?.message).toContain('Flow mapping syntax is not allowed');
+    expect(result.error?.message).toContain('Unquoted template expression');
   });
 
   describe('dynamic value filtering (${{ }} syntax)', () => {

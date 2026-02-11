@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Document, Node } from 'yaml';
+import type { Document, Node, Pair as YAMLPairType } from 'yaml';
 import { isAlias, isCollection, isDocument, isMap, isPair, isScalar, isSeq, visit } from 'yaml';
 import { InvalidYamlSyntaxError } from '../errors';
 
@@ -27,8 +27,10 @@ export function getYamlDocumentErrors(document: Document): InvalidYamlSyntaxErro
  * Returns detailed errors with range information for use in editor validation.
  * Detects:
  * - Non-scalar keys (e.g. flow mappings used as keys)
- * - Flow mapping values (e.g. `comment: {{ inputs.comment }}`)
- * Note: Flow sequences (e.g. `tags: [tag1, tag2]`) are allowed.
+ * - Double-brace flow mappings (e.g. `comment: {{ inputs.comment }}`) where
+ *   the outer flow map contains a pair with a non-scalar key (nested map).
+ * Note: Single-level flow mappings (`{ key: value }`), empty flow mappings
+ * (`{}`), and flow sequences (`[tag1, tag2]`) are all allowed.
  */
 export function getYamlDocumentErrorsDetailed(document: Document): YamlDocumentError[] {
   const errors: YamlDocumentError[] = [];
@@ -43,20 +45,24 @@ export function getYamlDocumentErrorsDetailed(document: Document): YamlDocumentE
   visit(document, {
     Pair(_, pair) {
       if (isScalar(pair.key)) {
-        // Check for flow mapping values (e.g. `comment: {{ inputs.comment }}`)
-        // Flow sequences (e.g. `tags: [tag1, tag2]`) are allowed.
+        // Detect double-brace template expressions like `{{ inputs.comment }}`.
+        // The YAML parser interprets `{{ x }}` as a flow mapping containing a
+        // nested flow mapping as a key — i.e. a Pair with a non-scalar key.
+        // We flag only this pattern; single-level flow mappings (`{ key: value }`),
+        // empty flow mappings (`{}`), and flow sequences (`[a, b]`) are allowed.
         const value = pair.value as Node | null;
         if (value && isMap(value)) {
           const collection = value as {
             flow?: boolean;
             range?: [number, number, number] | null;
-            items?: unknown[];
+            items?: YAMLPairType[];
           };
-          // Only flag non-empty flow mappings. Empty `{}` is a common pattern
-          // for representing empty objects and should remain allowed.
-          if (collection.flow && collection.items && collection.items.length > 0) {
+          const hasNonScalarKey =
+            collection.flow &&
+            collection.items?.some((item) => isPair(item) && !isScalar(item.key));
+          if (hasNonScalarKey) {
             errors.push({
-              message: `Flow mapping syntax is not allowed. For template expressions, use quotes, e.g. "{{ inputs.comment }}"`,
+              message: `Unquoted template expression. Use quotes for template expressions, e.g. "{{ inputs.comment }}"`,
               range: collection.range ?? undefined,
             });
             // Skip visiting children of the flow mapping to avoid

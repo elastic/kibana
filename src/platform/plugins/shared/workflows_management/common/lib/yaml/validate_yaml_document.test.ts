@@ -24,7 +24,7 @@ steps:
     expect(errors).toHaveLength(0);
   });
 
-  it('should detect unquoted template expressions as flow mappings', () => {
+  it('should detect unquoted double-brace template expressions', () => {
     const yaml = `name: Test Workflow
 steps:
   - name: step1
@@ -34,7 +34,7 @@ steps:
     const doc = parseDocument(yaml);
     const errors = getYamlDocumentErrors(doc);
     expect(errors.length).toBeGreaterThan(0);
-    expect(errors[0].message).toContain('Flow mapping syntax is not allowed');
+    expect(errors[0].message).toContain('Unquoted template expression');
   });
 
   it('should return no errors for quoted template expressions', () => {
@@ -62,7 +62,7 @@ steps:
     expect(errors).toHaveLength(0);
   });
 
-  it('should detect flow mapping values with range information', () => {
+  it('should allow single-level flow mappings', () => {
     const yaml = `name: Test Workflow
 steps:
   - name: step1
@@ -71,11 +71,7 @@ steps:
       comment: { key: value }`;
     const doc = parseDocument(yaml);
     const errors = getYamlDocumentErrorsDetailed(doc);
-    expect(errors.length).toBeGreaterThan(0);
-    const flowError = errors.find((e) => e.message.includes('Flow mapping'));
-    expect(flowError).toBeDefined();
-    expect(flowError!.message).toContain('Flow mapping syntax is not allowed');
-    expect(flowError!.range).toBeDefined();
+    expect(errors).toHaveLength(0);
   });
 
   it('should allow flow sequence values', () => {
@@ -98,17 +94,18 @@ steps:
     expect(errors).toHaveLength(0);
   });
 
-  it('should flag flow mapping but allow flow sequence in the same document', () => {
+  it('should flag double-brace but allow flow sequence and single-level flow mapping', () => {
     const yaml = `name: Test Workflow
 tags: [tag1, tag2]
 steps:
   - name: step1
     with:
-      comment: { key: value }`;
+      body: { key: value }
+      comment: {{ inputs.comment }}`;
     const doc = parseDocument(yaml);
     const errors = getYamlDocumentErrorsDetailed(doc);
     expect(errors).toHaveLength(1);
-    expect(errors[0].message).toContain('Flow mapping syntax is not allowed');
+    expect(errors[0].message).toContain('Unquoted template expression');
   });
 
   it('should allow empty flow mappings', () => {
@@ -156,7 +153,7 @@ steps:
     expect(errors).toHaveLength(0);
   });
 
-  it('should detect unquoted template expressions as flow mappings with range', () => {
+  it('should detect unquoted double-brace template expressions with range', () => {
     const yaml = `name: Test Workflow
 steps:
   - name: step1
@@ -165,7 +162,7 @@ steps:
     const doc = parseDocument(yaml);
     const errors = getYamlDocumentErrorsDetailed(doc);
     expect(errors.length).toBeGreaterThan(0);
-    expect(errors[0].message).toContain('Flow mapping syntax is not allowed');
+    expect(errors[0].message).toContain('Unquoted template expression');
     expect(errors[0].range).toBeDefined();
   });
 

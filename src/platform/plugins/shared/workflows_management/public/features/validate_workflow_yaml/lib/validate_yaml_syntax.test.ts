@@ -30,7 +30,25 @@ steps:
     expect(results).toHaveLength(0);
   });
 
-  it('should detect flow mapping values and return markers with line positions', () => {
+  it('should detect unquoted double-brace template expressions with line positions', () => {
+    const { doc, lineCounter } = parseWithLineCounter(`name: Test Workflow
+steps:
+  - name: step1
+    with:
+      comment: {{ inputs.comment }}`);
+
+    const results = validateYamlSyntax(doc, lineCounter);
+    expect(results.length).toBeGreaterThan(0);
+
+    const flowError = results.find((r) => r.message?.includes('Unquoted template expression'));
+    expect(flowError).toBeDefined();
+    expect(flowError!.owner).toBe('yaml-syntax-validation');
+    expect(flowError!.severity).toBe('error');
+    expect(flowError!.startLineNumber).toBeGreaterThan(0);
+    expect(flowError!.startColumn).toBeGreaterThan(0);
+  });
+
+  it('should allow single-level flow mappings', () => {
     const { doc, lineCounter } = parseWithLineCounter(`name: Test Workflow
 steps:
   - name: step1
@@ -38,14 +56,7 @@ steps:
       comment: { key: value }`);
 
     const results = validateYamlSyntax(doc, lineCounter);
-    expect(results.length).toBeGreaterThan(0);
-
-    const flowError = results.find((r) => r.message?.includes('Flow mapping'));
-    expect(flowError).toBeDefined();
-    expect(flowError!.owner).toBe('yaml-syntax-validation');
-    expect(flowError!.severity).toBe('error');
-    expect(flowError!.startLineNumber).toBeGreaterThan(0);
-    expect(flowError!.startColumn).toBeGreaterThan(0);
+    expect(results).toHaveLength(0);
   });
 
   it('should allow flow sequence values', () => {
@@ -68,17 +79,18 @@ steps:
     expect(results).toHaveLength(0);
   });
 
-  it('should flag flow mapping but allow flow sequence in same document', () => {
+  it('should flag double-brace but allow flow sequence and single-level flow mapping', () => {
     const { doc, lineCounter } = parseWithLineCounter(`name: Test Workflow
 tags: [tag1, tag2]
 steps:
   - name: step1
     with:
-      comment: { key: value }`);
+      body: { key: value }
+      comment: {{ inputs.comment }}`);
 
     const results = validateYamlSyntax(doc, lineCounter);
     expect(results).toHaveLength(1);
-    expect(results[0].message).toContain('Flow mapping');
+    expect(results[0].message).toContain('Unquoted template expression');
     expect(results[0].owner).toBe('yaml-syntax-validation');
   });
 
@@ -119,16 +131,16 @@ steps:
     expect(results).toHaveLength(0);
   });
 
-  it('should include hover message for flow mapping errors', () => {
+  it('should include hover message for double-brace errors', () => {
     const { doc, lineCounter } = parseWithLineCounter(`name: Test Workflow
 steps:
   - name: step1
     with:
-      body: { foo: bar }`);
+      comment: {{ inputs.comment }}`);
 
     const results = validateYamlSyntax(doc, lineCounter);
-    const flowError = results.find((r) => r.message?.includes('Flow mapping'));
+    const flowError = results.find((r) => r.message?.includes('Unquoted template expression'));
     expect(flowError).toBeDefined();
-    expect(flowError!.hoverMessage).toContain('Flow mapping syntax is not allowed');
+    expect(flowError!.hoverMessage).toContain('Unquoted template expression');
   });
 });
