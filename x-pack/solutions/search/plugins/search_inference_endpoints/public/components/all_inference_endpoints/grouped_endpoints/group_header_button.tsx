@@ -27,7 +27,11 @@ export const GroupByHeaderButton = ({ data, groupBy }: GroupByHeaderButtonProps)
     };
   }, [groupBy, data.groupId]);
   return (
-    <EuiFlexGroup gutterSize="m" alignItems="center">
+    <EuiFlexGroup
+      gutterSize="m"
+      alignItems="center"
+      data-test-subj={`${data.groupId}-accordion-header`}
+    >
       <EuiText>
         <strong>{data.groupLabel}</strong>
       </EuiText>

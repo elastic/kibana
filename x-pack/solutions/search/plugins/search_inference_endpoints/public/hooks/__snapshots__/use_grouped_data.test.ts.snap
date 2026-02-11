@@ -3,217 +3,361 @@
 exports[`useGroupedData should group endpoints by model_id 1`] = `
 Object {
   "data": Object {
-    ".elser_model_2": Object {
+    ".rerank-v1": Object {
       "endpoints": Array [
         Object {
-          "inference_id": "my-elser-model-04",
+          "inference_id": ".rerank-v1-elasticsearch",
           "service": "elasticsearch",
           "service_settings": Object {
-            "model_id": ".elser_model_2",
-            "num_allocations": 1,
+            "adaptive_allocations": Object {
+              "enabled": true,
+              "max_number_of_allocations": 32,
+              "min_number_of_allocations": 0,
+            },
+            "model_id": ".rerank-v1",
             "num_threads": 1,
           },
-          "task_settings": Object {},
-          "task_type": "sparse_embedding",
-        },
-        Object {
-          "inference_id": "my-elser-model-01",
-          "service": "elasticsearch",
-          "service_settings": Object {
-            "model_id": ".elser_model_2",
-            "num_allocations": 1,
-            "num_threads": 1,
+          "task_settings": Object {
+            "return_documents": true,
           },
-          "task_settings": Object {},
-          "task_type": "sparse_embedding",
-        },
-      ],
-      "groupId": ".elser_model_2",
-      "groupLabel": ".elser_model_2",
-    },
-    "amazon.titan-embed-text-v1": Object {
-      "endpoints": Array [
-        Object {
-          "inference_id": "my-amazonbedrock-model",
-          "service": "amazonbedrock",
-          "service_settings": Object {
-            "access_key": "test-access-key",
-            "model": "amazon.titan-embed-text-v1",
-            "provider": "amazontitan",
-            "region": "us-east-1",
-            "secret_key": "test-secret-key",
-          },
-          "task_settings": Object {},
-          "task_type": "text_embedding",
-        },
-      ],
-      "groupId": "amazon.titan-embed-text-v1",
-      "groupLabel": "amazon.titan-embed-text-v1",
-    },
-    "embed-english-v3.0": Object {
-      "endpoints": Array [
-        Object {
-          "inference_id": "my-cohere-model",
-          "service": "cohere",
-          "service_settings": Object {
-            "dimensions": "1024",
-            "embedding_type": "float",
-            "model_id": "embed-english-v3.0",
-            "similarity": "cosine",
-          },
-          "task_settings": Object {},
-          "task_type": "text_embedding",
-        },
-      ],
-      "groupId": "embed-english-v3.0",
-      "groupLabel": "embed-english-v3.0",
-    },
-    "gpt-4": Object {
-      "endpoints": Array [
-        Object {
-          "inference_id": "endpoint-06",
-          "service": "openai",
-          "service_settings": Object {
-            "api_key": "test-api-key",
-            "model_id": "gpt-4",
-            "organization_id": "test-org",
-            "url": "https://api.openai.com/v1",
-          },
-          "task_settings": Object {},
           "task_type": "rerank",
         },
       ],
-      "groupId": "gpt-4",
-      "groupLabel": "gpt-4",
+      "groupId": ".rerank-v1",
+      "groupLabel": "Elastic Rerank v1",
     },
-    "ibm/slate-125m-english-rtrvr": Object {
+    "anthropic-claude": Object {
       "endpoints": Array [
         Object {
-          "inference_id": "my-watsonx-model",
-          "service": "watsonxai",
+          "inference_id": ".anthropic-claude-3.7-sonnet-chat_completion",
+          "service": "elastic",
           "service_settings": Object {
-            "api_key": "test-api-key",
-            "api_version": "2024-01-01",
-            "model_id": "ibm/slate-125m-english-rtrvr",
-            "project_id": "test-project",
-            "url": "https://us-south.ml.cloud.ibm.com",
+            "model_id": "anthropic-claude-3.7-sonnet",
           },
-          "task_settings": Object {},
-          "task_type": "text_embedding",
+          "task_type": "chat_completion",
+        },
+        Object {
+          "inference_id": ".anthropic-claude-3.7-sonnet-completion",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "anthropic-claude-3.7-sonnet",
+          },
+          "task_type": "completion",
+        },
+        Object {
+          "inference_id": ".anthropic-claude-4.5-sonnet-chat_completion",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "anthropic-claude-4.5-sonnet",
+          },
+          "task_type": "chat_completion",
+        },
+        Object {
+          "inference_id": ".anthropic-claude-4.5-sonnet-completion",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "anthropic-claude-4.5-sonnet",
+          },
+          "task_type": "completion",
         },
       ],
-      "groupId": "ibm/slate-125m-english-rtrvr",
-      "groupLabel": "ibm/slate-125m-english-rtrvr",
+      "groupId": "anthropic-claude",
+      "groupLabel": "Anthropic Claude",
     },
-    "mistral-embed": Object {
+    "elser_model": Object {
       "endpoints": Array [
         Object {
-          "inference_id": "my-mistral-model",
-          "service": "mistral",
+          "chunking_settings": Object {
+            "max_chunk_size": 250,
+            "sentence_overlap": 1,
+            "strategy": "sentence",
+          },
+          "inference_id": ".elser-2-elastic",
+          "service": "elastic",
           "service_settings": Object {
-            "api_key": "test-api-key",
-            "max_input_tokens": "512",
-            "model": "mistral-embed",
-            "rate_limit": Object {
-              "requests_per_minute": 100,
+            "model_id": "elser_model_2",
+          },
+          "task_type": "sparse_embedding",
+        },
+        Object {
+          "chunking_settings": Object {
+            "max_chunk_size": 250,
+            "sentence_overlap": 1,
+            "strategy": "sentence",
+          },
+          "inference_id": ".elser-2-elasticsearch",
+          "service": "elasticsearch",
+          "service_settings": Object {
+            "adaptive_allocations": Object {
+              "enabled": true,
+              "max_number_of_allocations": 32,
+              "min_number_of_allocations": 0,
             },
+            "model_id": ".elser_model_2_linux-x86_64",
+            "num_threads": 1,
           },
-          "task_settings": Object {},
+          "task_type": "sparse_embedding",
+        },
+      ],
+      "groupId": "elser_model",
+      "groupLabel": "Elastic Learned Sparse EncodeR (ELSER)",
+    },
+    "google-gemini": Object {
+      "endpoints": Array [
+        Object {
+          "inference_id": ".google-gemini-2.5-flash-chat_completion",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "google-gemini-2.5-flash",
+          },
+          "task_type": "chat_completion",
+        },
+        Object {
+          "inference_id": ".google-gemini-2.5-flash-completion",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "google-gemini-2.5-flash",
+          },
+          "task_type": "completion",
+        },
+        Object {
+          "inference_id": ".google-gemini-2.5-pro-chat_completion",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "google-gemini-2.5-pro",
+          },
+          "task_type": "chat_completion",
+        },
+        Object {
+          "inference_id": ".google-gemini-2.5-pro-completion",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "google-gemini-2.5-pro",
+          },
+          "task_type": "completion",
+        },
+        Object {
+          "chunking_settings": Object {
+            "max_chunk_size": 250,
+            "sentence_overlap": 1,
+            "strategy": "sentence",
+          },
+          "inference_id": ".google-gemini-embedding-001",
+          "service": "elastic",
+          "service_settings": Object {
+            "dimensions": 768,
+            "model_id": "google-gemini-embedding-001",
+            "similarity": "cosine",
+          },
           "task_type": "text_embedding",
         },
       ],
-      "groupId": "mistral-embed",
-      "groupLabel": "mistral-embed",
+      "groupId": "google-gemini",
+      "groupLabel": "Google Gemini",
     },
-    "text-embedding-004": Object {
+    "gp-llm-v2": Object {
       "endpoints": Array [
         Object {
-          "inference_id": "my-googleaistudio-model",
-          "service": "googleaistudio",
+          "inference_id": ".gp-llm-v2-chat_completion",
+          "service": "elastic",
           "service_settings": Object {
-            "model_id": "text-embedding-004",
-            "rate_limit": Object {
-              "requests_per_minute": 100,
+            "model_id": "gp-llm-v2",
+          },
+          "task_type": "chat_completion",
+        },
+        Object {
+          "inference_id": ".gp-llm-v2-completion",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "gp-llm-v2",
+          },
+          "task_type": "completion",
+        },
+      ],
+      "groupId": "gp-llm-v2",
+      "groupLabel": "gp-llm-v2",
+    },
+    "jina": Object {
+      "endpoints": Array [
+        Object {
+          "chunking_settings": Object {
+            "max_chunk_size": 250,
+            "sentence_overlap": 1,
+            "strategy": "sentence",
+          },
+          "inference_id": ".jina-embeddings-v3",
+          "service": "elastic",
+          "service_settings": Object {
+            "dimensions": 1024,
+            "model_id": "jina-embeddings-v3",
+            "similarity": "cosine",
+          },
+          "task_type": "text_embedding",
+        },
+        Object {
+          "inference_id": ".jina-reranker-v2-base-multilingual",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "jina-reranker-v2-base-multilingual",
+          },
+          "task_type": "rerank",
+        },
+        Object {
+          "inference_id": ".jina-reranker-v3",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "jina-reranker-v3",
+          },
+          "task_type": "rerank",
+        },
+      ],
+      "groupId": "jina",
+      "groupLabel": "Jina AI",
+    },
+    "multilingual-e5": Object {
+      "endpoints": Array [
+        Object {
+          "chunking_settings": Object {
+            "max_chunk_size": 250,
+            "sentence_overlap": 1,
+            "strategy": "sentence",
+          },
+          "inference_id": ".multilingual-e5-small-elasticsearch",
+          "service": "elasticsearch",
+          "service_settings": Object {
+            "adaptive_allocations": Object {
+              "enabled": true,
+              "max_number_of_allocations": 32,
+              "min_number_of_allocations": 0,
             },
+            "model_id": ".multilingual-e5-small_linux-x86_64",
+            "num_threads": 1,
           },
-          "task_settings": Object {},
           "task_type": "text_embedding",
         },
       ],
-      "groupId": "text-embedding-004",
-      "groupLabel": "text-embedding-004",
+      "groupId": "multilingual-e5",
+      "groupLabel": "E5",
     },
-    "text-embedding-ada-002": Object {
+    "openai-gpt": Object {
       "endpoints": Array [
         Object {
-          "inference_id": "my-openai-model-05",
-          "service": "openai",
+          "inference_id": ".openai-gpt-4.1-chat_completion",
+          "service": "elastic",
           "service_settings": Object {
-            "api_key": "test-api-key",
-            "model_id": "text-embedding-ada-002",
-            "organization_id": "test-org",
-            "url": "https://api.openai.com/v1",
+            "model_id": "openai-gpt-4.1",
           },
-          "task_settings": Object {},
-          "task_type": "text_embedding",
+          "task_type": "chat_completion",
+        },
+        Object {
+          "inference_id": ".openai-gpt-4.1-completion",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "openai-gpt-4.1",
+          },
+          "task_type": "completion",
+        },
+        Object {
+          "inference_id": ".openai-gpt-4.1-mini-chat_completion",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "openai-gpt-4.1-mini",
+          },
+          "task_type": "chat_completion",
+        },
+        Object {
+          "inference_id": ".openai-gpt-4.1-mini-completion",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "openai-gpt-4.1-mini",
+          },
+          "task_type": "completion",
+        },
+        Object {
+          "inference_id": ".openai-gpt-5.2-chat_completion",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "openai-gpt-5.2",
+          },
+          "task_type": "chat_completion",
+        },
+        Object {
+          "inference_id": ".openai-gpt-5.2-completion",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "openai-gpt-5.2",
+          },
+          "task_type": "completion",
+        },
+        Object {
+          "inference_id": ".openai-gpt-oss-120b-chat_completion",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "openai-gpt-oss-120b",
+          },
+          "task_type": "chat_completion",
+        },
+        Object {
+          "inference_id": ".openai-gpt-oss-120b-completion",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "openai-gpt-oss-120b",
+          },
+          "task_type": "completion",
         },
       ],
-      "groupId": "text-embedding-ada-002",
-      "groupLabel": "text-embedding-ada-002",
+      "groupId": "openai-gpt",
+      "groupLabel": "OpenAI GPT",
     },
-    "unknown_model": Object {
+    "openai-text-embedding": Object {
       "endpoints": Array [
         Object {
-          "inference_id": "my-azureaistudio-model",
-          "service": "azureaistudio",
-          "service_settings": Object {
-            "embedding_type": "float",
-            "provider": "openai",
-            "target": "https://test.azureaistudio.com",
+          "chunking_settings": Object {
+            "max_chunk_size": 250,
+            "sentence_overlap": 1,
+            "strategy": "sentence",
           },
-          "task_settings": Object {},
+          "inference_id": ".openai-text-embedding-3-large",
+          "service": "elastic",
+          "service_settings": Object {
+            "dimensions": 3072,
+            "model_id": "openai-text-embedding-3-large",
+            "similarity": "cosine",
+          },
           "task_type": "text_embedding",
         },
         Object {
-          "inference_id": "my-azureopenai-model",
-          "service": "azureopenai",
-          "service_settings": Object {
-            "api_version": "2023-05-15",
-            "deployment_id": "test-deployment",
-            "resource_name": "test-resource",
+          "chunking_settings": Object {
+            "max_chunk_size": 250,
+            "sentence_overlap": 1,
+            "strategy": "sentence",
           },
-          "task_settings": Object {},
-          "task_type": "text_embedding",
-        },
-        Object {
-          "inference_id": "my-huggingface-model",
-          "service": "hugging_face",
+          "inference_id": ".openai-text-embedding-3-small",
+          "service": "elastic",
           "service_settings": Object {
-            "api_key": "test-api-key",
-            "url": "https://api-inference.huggingface.co",
+            "dimensions": 1536,
+            "model_id": "openai-text-embedding-3-small",
+            "similarity": "cosine",
           },
-          "task_settings": Object {},
-          "task_type": "text_embedding",
-        },
-        Object {
-          "inference_id": "my-alibabacloud-model",
-          "service": "alibabacloud-ai-search",
-          "service_settings": Object {
-            "api_key": "test-api-key",
-            "host": "test-host.aliyuncs.com",
-            "http_schema": "https",
-            "rate_limit": Object {
-              "requests_per_minute": 100,
-            },
-            "service_id": "test-service",
-            "workspace": "default",
-          },
-          "task_settings": Object {},
           "task_type": "text_embedding",
         },
       ],
-      "groupId": "unknown_model",
-      "groupLabel": "unknown_model",
+      "groupId": "openai-text-embedding",
+      "groupLabel": "OpenAI Text Embedding",
+    },
+    "rainbow-sprinkles": Object {
+      "endpoints": Array [
+        Object {
+          "inference_id": ".rainbow-sprinkles-elastic",
+          "service": "elastic",
+          "service_settings": Object {
+            "model_id": "rainbow-sprinkles",
+          },
+          "task_type": "chat_completion",
+        },
+      ],
+      "groupId": "rainbow-sprinkles",
+      "groupLabel": "Elastic Inference Service",
     },
   },
 }
