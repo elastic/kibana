@@ -741,6 +741,8 @@ export class AlertingPlugin {
       isServerless: this.isServerless,
       apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
       isUiamEnabled: this.isUiamEnabled,
+      getScopedClusterClientWithApiKey:
+        core.security.authc.apiKeys.uiam?.getScopedClusterClientWithApiKey,
     });
 
     this.eventLogService!.registerSavedObjectProvider(

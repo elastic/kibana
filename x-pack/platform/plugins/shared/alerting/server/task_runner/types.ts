@@ -13,6 +13,7 @@ import type {
   SavedObjectsServiceStart,
   ElasticsearchServiceStart,
   UiSettingsServiceStart,
+  IScopedClusterClient,
 } from '@kbn/core/server';
 import type { ConcreteTaskInstance, DecoratedError } from '@kbn/task-manager-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -81,6 +82,7 @@ export interface RunRuleResult {
 
 export interface RunRuleParams<Params extends RuleTypeParams> {
   apiKey: RawRule['apiKey'];
+  uiamApiKey?: RawRule['uiamApiKey'];
   fakeRequest: KibanaRequest;
   rule: SanitizedRule<Params>;
   validatedParams: Params;
@@ -198,6 +200,7 @@ export interface TaskRunnerContext {
   uiSettings: UiSettingsServiceStart;
   usageCounter?: UsageCounter;
   getEventLogClient: (request: KibanaRequest) => IEventLogClient;
+  getScopedClusterClientWithApiKey?: (apiKey: string) => IScopedClusterClient | null;
   isServerless: boolean;
   isUiamEnabled?: boolean;
 }

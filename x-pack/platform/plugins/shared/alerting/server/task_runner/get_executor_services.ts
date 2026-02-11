@@ -26,7 +26,7 @@ import type {
   PublicRuleResultService,
 } from '../types';
 import { withAlertingSpan } from './lib';
-import type { AsyncSearchClient, TaskRunnerContext } from './types';
+import { ApiKeyType, type AsyncSearchClient, type TaskRunnerContext } from './types';
 import { wrapAsyncSearchClient } from '../lib/wrap_async_search_client';
 
 interface GetExecutorServicesOpts {
@@ -38,6 +38,7 @@ interface GetExecutorServicesOpts {
   ruleResultService: RuleResultService;
   ruleData: { name: string; alertTypeId: string; id: string; spaceId: string };
   ruleTaskTimeout?: string;
+  uiamApiKey?: string | null;
 }
 
 export interface ExecutorServices {
@@ -54,7 +55,8 @@ export interface ExecutorServices {
 }
 
 export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServices => {
-  const { context, abortController, fakeRequest, logger, ruleData, ruleTaskTimeout } = opts;
+  const { context, abortController, fakeRequest, logger, ruleData, ruleTaskTimeout, uiamApiKey } =
+    opts;
 
   const wrappedClientOptions = {
     rule: ruleData,
@@ -64,7 +66,28 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
     requestTimeout: getEsRequestTimeout(logger, ruleTaskTimeout),
   };
 
-  const scopedClusterClient = context.elasticsearch.client.asScoped(fakeRequest);
+  const shouldUseUiamApiKey =
+    context.isServerless && context.isUiamEnabled && context.apiKeyType === ApiKeyType.UIAM;
+
+  let scopedClusterClient;
+  if (shouldUseUiamApiKey) {
+    if (!uiamApiKey) {
+      scopedClusterClient = context.elasticsearch.client.asScoped(fakeRequest);
+      logger.warn(
+        'UIAM API key is not provided to create scoped cluster client, falling back to regular scoped cluster client.'
+      );
+    } else if (!context.getScopedClusterClientWithApiKey) {
+      scopedClusterClient = context.elasticsearch.client.asScoped(fakeRequest);
+      logger.warn(
+        'getScopedClusterClientWithApiKey is not available in context, falling back to regular scoped cluster client.'
+      );
+    } else {
+      const [_, apiKey] = Buffer.from(uiamApiKey, 'base64').toString('utf8').split(':');
+      scopedClusterClient = context.getScopedClusterClientWithApiKey(apiKey)!;
+    }
+  } else {
+    scopedClusterClient = context.elasticsearch.client.asScoped(fakeRequest);
+  }
   const wrappedScopedClusterClient = createWrappedScopedClusterClientFactory({
     ...wrappedClientOptions,
     scopedClusterClient,

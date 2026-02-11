@@ -109,6 +109,7 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
 
   return {
     apiKey,
+    uiamApiKey,
     fakeRequest,
     rule,
     validatedParams,
@@ -157,9 +158,19 @@ export function getFakeKibanaRequest(
 ) {
   const requestHeaders: Headers = {};
 
-  if (context.isUiamEnabled && context.apiKeyType === ApiKeyType.UIAM && uiamApiKey) {
-    const [_, uiamApiKeyValue] = Buffer.from(uiamApiKey, 'base64').toString().split(':');
-    requestHeaders.authorization = `ApiKey ${uiamApiKeyValue}`;
+  const shouldUseUiamApiKey =
+    context.isServerless && context.isUiamEnabled && context.apiKeyType === ApiKeyType.UIAM;
+
+  if (shouldUseUiamApiKey) {
+    if (!uiamApiKey) {
+      requestHeaders.authorization = `ApiKey ${apiKey}`;
+      context.logger.warn(
+        'UIAM API key is not provided to create a fake request, falling back to regular API key.'
+      );
+    } else {
+      const [_, uiamApiKeyValue] = Buffer.from(uiamApiKey, 'base64').toString().split(':');
+      requestHeaders.authorization = `ApiKey ${uiamApiKeyValue}`;
+    }
   } else if (apiKey) {
     requestHeaders.authorization = `ApiKey ${apiKey}`;
   }
