@@ -165,7 +165,6 @@ describe('CsvGenerator', () => {
         case 'index':
           return dataView;
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }) as any;
 
     mockLogger = loggingSystemMock.createLogger();
