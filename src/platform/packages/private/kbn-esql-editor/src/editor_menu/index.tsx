@@ -9,6 +9,7 @@
 import React, { Suspense } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { isMac } from '@kbn/shared-ux-utility';
 import { useEsqlEditorActions } from '../editor_actions_context';
 import { searchPlaceholder } from '../editor_visor';
 import { MagnifyGradientIcon } from './magnify_gradient_icon';
@@ -16,6 +17,7 @@ import {
   addStarredQueryLabel,
   helpLabel,
   hideHistoryLabel,
+  searchTooltipLabel,
   removeStarredQueryLabel,
   showHistoryLabel,
 } from './menu_i18n';
@@ -34,6 +36,7 @@ export function ESQLMenu({
 } = {}) {
   const editorActions = useEsqlEditorActions();
   const { euiTheme } = useEuiTheme();
+  const commandKey = isMac ? '⌘' : 'Ctrl';
   const onToggleVisor = editorActions?.toggleVisor;
   const onToggleHistory = editorActions?.toggleHistory;
   const onToggleStarredQuery = editorActions?.toggleStarredQuery;
@@ -55,7 +58,7 @@ export function ESQLMenu({
       `}
     >
       <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={searchPlaceholder} disableScreenReaderOutput>
+        <EuiToolTip position="top" content={searchTooltipLabel(commandKey)} disableScreenReaderOutput>
           <EuiButtonIcon
             iconType={MagnifyGradientIcon}
             size="xs"
