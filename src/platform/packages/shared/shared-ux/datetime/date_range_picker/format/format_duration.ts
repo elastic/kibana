@@ -48,6 +48,22 @@ const UNIT_MS: Record<RoundedUnit, number> = {
   minutes: MS_PER.minute,
 };
 
+/**
+ * Ordered list of unit thresholds for the duration display.
+ *
+ * 1. Order matters -- the array is searched top-to-bottom, so largest units come first.
+ * 2. Each threshold subtracts half the next-smaller unit to create a rounding boundary
+ *    (e.g. `MS_PER.year - MS_PER.month / 2` so that 11.5+ months rounds up to "1y").
+ */
+const UNIT_THRESHOLDS: Array<{ unit: RoundedUnit; threshold: number; divisor: number }> = [
+  { unit: 'years', threshold: MS_PER.year - MS_PER.month / 2, divisor: MS_PER.year },
+  { unit: 'months', threshold: MS_PER.month - MS_PER.week / 2, divisor: MS_PER.month },
+  { unit: 'weeks', threshold: MS_PER.week - MS_PER.day / 2, divisor: MS_PER.week },
+  { unit: 'days', threshold: MS_PER.day - MS_PER.hour / 2, divisor: MS_PER.day },
+  { unit: 'hours', threshold: MS_PER.hour - MS_PER.minute / 2, divisor: MS_PER.hour },
+  { unit: 'minutes', threshold: MS_PER.minute, divisor: MS_PER.minute },
+];
+
 const roundToHalf = (value: number) => Math.round(value * 2) / 2;
 
 /**
@@ -63,30 +79,13 @@ export function durationToDisplayShortText(startDate: Date, endDate: Date): stri
     return `${Math.round(diff)}${UNIT_ABBREV.milliseconds}`;
   }
 
-  let value: number;
-  let unit: RoundedUnit;
-
-  if (diff >= MS_PER.year - MS_PER.month / 2) {
-    value = diff / MS_PER.year;
-    unit = 'years';
-  } else if (diff >= MS_PER.month - MS_PER.week / 2) {
-    value = diff / MS_PER.month;
-    unit = 'months';
-  } else if (diff >= MS_PER.week - MS_PER.day / 2) {
-    value = diff / MS_PER.week;
-    unit = 'weeks';
-  } else if (diff >= MS_PER.day - MS_PER.hour / 2) {
-    value = diff / MS_PER.day;
-    unit = 'days';
-  } else if (diff >= MS_PER.hour - MS_PER.minute / 2) {
-    value = diff / MS_PER.hour;
-    unit = 'hours';
-  } else if (diff >= MS_PER.minute) {
-    value = diff / MS_PER.minute;
-    unit = 'minutes';
-  } else {
+  const matched = UNIT_THRESHOLDS.find((entry) => diff >= entry.threshold);
+  if (!matched) {
     return `${Math.floor(diff / MS_PER.second)}${UNIT_ABBREV.seconds}`;
   }
+
+  const { unit } = matched;
+  const value = diff / matched.divisor;
 
   const allowHalfStepDecimal = value < 10 && unit === 'years';
   const formattedValue = allowHalfStepDecimal ? roundToHalf(value) : Math.round(value);
