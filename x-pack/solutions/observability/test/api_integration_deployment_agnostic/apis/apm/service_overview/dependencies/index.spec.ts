@@ -13,6 +13,7 @@ import { SPANS_PER_DESTINATION_METRIC } from '@kbn/apm-synthtrace/src/lib/apm/ag
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { roundNumber } from '../../utils/common';
 import { generateData, dataConfig } from './generate_data';
+import { generateManyDependencies } from '../../dependencies/generate_many_dependencies';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
@@ -23,11 +24,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   const serviceName = 'synth-go';
 
-  async function callApi() {
+  async function callApi(serviceNameOverride?: string) {
     return await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/dependencies',
       params: {
-        path: { serviceName },
+        path: { serviceName: serviceNameOverride ?? serviceName },
         query: {
           environment: 'production',
           numBuckets: 20,
@@ -141,6 +142,23 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const expectedValue = dataConfigErroRate / (rate + dataConfigErroRate);
         expect(errorRate.value).to.be(expectedValue);
         expect(errorRate.timeseries?.every(({ y }) => y === expectedValue)).to.be(true);
+      });
+    });
+
+    describe('when a high volume of data is loaded', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        await generateManyDependencies({ apmSynthtraceEsClient, from: start, to: end });
+      });
+
+      after(() => apmSynthtraceEsClient.clean());
+
+      it('returns dependency data without error', async () => {
+        const response = await callApi('synth-java-0');
+        expect(response.status).to.be(200);
+        expect(response.body.serviceDependencies.length).to.be.greaterThan(0);
       });
     });
   });
