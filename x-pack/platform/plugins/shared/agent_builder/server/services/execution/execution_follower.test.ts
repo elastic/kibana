@@ -50,23 +50,17 @@ const createEventDoc = (eventNumber: number, event: ChatEvent): AgentExecutionEv
   event,
 });
 
-const messageChunkEvent = (text: string): ChatEvent => ({
-  type: ChatEventType.messageChunk,
-  data: { content: text },
-});
+const messageChunkEvent = (text: string): ChatEvent =>
+  ({
+    type: ChatEventType.messageChunk,
+    data: { message_id: 'm1', text_chunk: text },
+  } as ChatEvent);
 
-const roundCompleteEvent = (): ChatEvent => ({
-  type: ChatEventType.roundComplete,
-  data: {
-    round: {
-      id: 'round-1',
-      userMessage: { content: 'hello' },
-      assistantMessage: { content: 'hi' },
-      toolCalls: [],
-      attachments: [],
-    },
-  },
-});
+const roundCompleteEvent = (): ChatEvent =>
+  ({
+    type: ChatEventType.roundComplete,
+    data: { round: { id: 'round-1' } },
+  } as unknown as ChatEvent);
 
 /**
  * Collect all events emitted by the observable.
@@ -293,7 +287,7 @@ describe('followExecution$', () => {
     const { eventsClient, executionClient } = createMockClients();
 
     eventsClient.readEvents.mockResolvedValueOnce([]);
-    executionClient.get.mockResolvedValueOnce(null);
+    executionClient.get.mockResolvedValueOnce(undefined);
 
     const result = await collectEvents(
       followExecution$({

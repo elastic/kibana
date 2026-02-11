@@ -68,7 +68,8 @@ class ExecutionEventsClientImpl implements ExecutionEventsClient {
       event: event.event,
     }));
 
-    await client.create({ documents });
+    // force refresh to have the events available as soon as possible for search
+    await client.create({ documents, refresh: true });
   }
 
   async readEvents(executionId: string, since?: number): Promise<AgentExecutionEventDoc[]> {
