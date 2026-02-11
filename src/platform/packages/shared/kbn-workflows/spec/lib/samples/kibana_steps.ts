@@ -134,6 +134,29 @@ export const KIBANA_VALID_SAMPLE_STEPS = [
       type: 'user',
     },
   },
+  // Streams
+  {
+    name: 'get_streams',
+    type: 'kibana.get-streams',
+    with: {},
+  },
+  {
+    name: 'get_stream_by_name',
+    type: 'kibana.get-streams-name',
+    with: {
+      name: 'my-stream',
+    },
+  },
+  {
+    name: 'get_stream_significant_events',
+    type: 'kibana.get-streams-name-significant-events',
+    with: {
+      name: 'my-stream',
+      from: '2025-01-01T00:00:00.000Z',
+      to: '2025-01-02T00:00:00.000Z',
+      bucketSize: '1h',
+    },
+  },
 ];
 
 export const KIBANA_INVALID_SAMPLE_STEPS = [
@@ -217,5 +240,39 @@ export const KIBANA_INVALID_SAMPLE_STEPS = [
     },
     zodErrorMessage: /expected \\"alert\\"[\s\S]*expected \\"user\\"/,
     diagnosticErrorMessage: /type/,
+  },
+  // Streams
+  {
+    step: {
+      name: 'get_streams_with_invalid_fetcher',
+      type: 'kibana.get-streams',
+      with: {
+        fetcher: {
+          skip_ssl_verification: 'not_a_boolean',
+        },
+      },
+    },
+    zodErrorMessage: 'Invalid input: expected boolean, received string',
+    diagnosticErrorMessage: /Expected "boolean"/,
+  },
+  {
+    step: {
+      name: 'get_stream_by_name_without_name',
+      type: 'kibana.get-streams-name',
+      with: {},
+    },
+    zodErrorMessage: 'Invalid input: expected string, received undefined',
+    diagnosticErrorMessage: /Missing property "name"/,
+  },
+  {
+    step: {
+      name: 'get_stream_significant_events_without_required_params',
+      type: 'kibana.get-streams-name-significant-events',
+      with: {
+        name: 'my-stream',
+      },
+    },
+    zodErrorMessage: 'Invalid input: expected string, received undefined',
+    diagnosticErrorMessage: /Missing property "from"/,
   },
 ];
