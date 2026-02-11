@@ -111,7 +111,7 @@ function suggestInitialSources(
   }
 
   const sourceSuggestions = getSourceSuggestions(sources, [], innerText);
-  const viewSuggestions = buildViewsDefinitions(context?.views ?? [], [], innerText);
+  const viewSuggestions = buildViewsDefinitions(context?.views ?? [], []);
   const suggestions = [...sourceSuggestions, ...viewSuggestions];
 
   if (shouldSuggestSubquery(context)) {

@@ -98,8 +98,7 @@ export const buildSourcesDefinitions = (
  */
 export const buildViewsDefinitions = (
   views: EsqlView[],
-  alreadyUsed: string[] = [],
-  queryString?: string
+  alreadyUsed: string[] = []
 ): ISuggestionItem[] =>
   views
     .filter(({ name }) => !alreadyUsed.includes(name))
