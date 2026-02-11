@@ -23,21 +23,20 @@ export type FieldsSpec = Record<string, unknown>;
  */
 export function applyInclude(value: unknown, pick: unknown): unknown {
   const spec = normalizeFieldsSpec(pick);
-  if (typeof spec !== 'object' || spec === null || Array.isArray(spec)) {
+  if (!isPlainObject(spec)) {
     return value;
   }
   if (Array.isArray(value)) {
     return value.map((item) => applyInclude(item, spec));
   }
-  if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-    const obj = value as Record<string, unknown>;
+  if (isPlainObject(value)) {
     const result: Record<string, unknown> = {};
     for (const key of Object.keys(spec)) {
-      if (key in obj) {
+      if (key in value) {
         const childSpec = spec[key];
-        const childValue = obj[key];
-        result[key] = isNestedSpec(childSpec)
-          ? applyInclude(childValue, childSpec as FieldsSpec)
+        const childValue = value[key];
+        result[key] = isNonEmptyPlainObject(childSpec)
+          ? applyInclude(childValue, childSpec)
           : childValue;
       }
     }
@@ -46,77 +45,57 @@ export function applyInclude(value: unknown, pick: unknown): unknown {
   return value;
 }
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** Plain object with at least one key (nested spec or list-format node). */
+function isNonEmptyPlainObject(value: unknown): value is Record<string, unknown> {
+  return isPlainObject(value) && Object.keys(value).length > 0;
+}
+
 /**
  * Converts raw `pick` input (object or array format) into a single FieldsSpec.
  * Array format can mix dot-path strings and nested list nodes.
  */
 function normalizeFieldsSpec(raw: unknown): FieldsSpec {
-  if (raw !== null && typeof raw === 'object' && !Array.isArray(raw)) {
+  if (isPlainObject(raw)) {
     return raw as FieldsSpec;
   }
   if (!Array.isArray(raw)) {
     return {};
   }
-  let spec: FieldsSpec = {};
-  for (const element of raw) {
-    let partial: FieldsSpec;
-    if (typeof element === 'string') {
-      partial = pathToSpec(element);
-    } else if (isListNode(element)) {
-      partial = listFormatToSpec([element]);
-    } else {
-      partial = {};
-    }
-    spec = deepMergeSpecs(spec, partial);
-  }
-  return spec;
-}
-
-function pathToSpec(path: string): FieldsSpec {
-  const trimmed = path.trim();
-  if (trimmed === '') return {};
-  const keys = trimmed.split('.');
-  let current: FieldsSpec = {};
-  const root: FieldsSpec = current;
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i].trim();
-    if (key !== '') {
-      if (!(key in current)) {
-        (current as Record<string, unknown>)[key] = {};
-      }
-      const isLeaf = i === keys.length - 1;
-      if (!isLeaf) {
-        const next = (current as Record<string, unknown>)[key];
-        if (typeof next === 'object' && next !== null && !Array.isArray(next)) {
-          current = next as FieldsSpec;
-        }
-      }
-    }
-  }
-  return root;
-}
-
-function isListNode(value: unknown): value is Record<string, unknown> {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    !Array.isArray(value) &&
-    Object.keys(value).length > 0
+  const elementToSpec = (element: unknown): FieldsSpec => {
+    if (typeof element === 'string') return pathToSpec(element);
+    if (isNonEmptyPlainObject(element)) return listFormatToSpec([element]);
+    return {};
+  };
+  return raw.reduce<FieldsSpec>(
+    (spec, element) => deepMergeSpecs(spec, elementToSpec(element)),
+    {}
   );
 }
 
+/** Dot-path string → nested spec, e.g. 'a.b' → { a: { b: {} } }. */
+function pathToSpec(path: string): FieldsSpec {
+  const keys = path
+    .split('.')
+    .map((k) => k.trim())
+    .filter(Boolean);
+  if (keys.length === 0) return {};
+  return keys.reduceRight<FieldsSpec>((child, key) => ({ [key]: child }), {});
+}
+
+/** List format: strings and/or { key: string[] | nested nodes }. */
 function listFormatToSpec(nodes: unknown[]): FieldsSpec {
   let spec: FieldsSpec = {};
   for (const node of nodes) {
     if (typeof node === 'string') {
-      const pathSpec = pathToSpec(node);
-      spec = deepMergeSpecs(spec, pathSpec);
-    } else if (isListNode(node)) {
+      spec = deepMergeSpecs(spec, pathToSpec(node));
+    } else if (isNonEmptyPlainObject(node)) {
       for (const key of Object.keys(node)) {
         const child = node[key];
-        (spec as Record<string, unknown>)[key] = Array.isArray(child)
-          ? listFormatToSpec(child)
-          : {};
+        spec[key] = Array.isArray(child) ? listFormatToSpec(child) : {};
       }
     }
   }
@@ -127,16 +106,14 @@ function listFormatToSpec(nodes: unknown[]): FieldsSpec {
  * Recursive merge of A and B as a union of fields at the same level
  */
 function deepMergeSpecs(a: FieldsSpec, b: FieldsSpec): FieldsSpec {
-  const result = { ...a } as Record<string, unknown>;
+  const result: Record<string, unknown> = { ...a };
   for (const key of Object.keys(b)) {
-    const bVal = (b as Record<string, unknown>)[key];
+    const bVal = b[key];
     if (!(key in result)) {
       result[key] = bVal;
     } else {
       const aVal = result[key];
-      const aIsObject = typeof aVal === 'object' && aVal !== null && !Array.isArray(aVal);
-      const bIsObject = typeof bVal === 'object' && bVal !== null && !Array.isArray(bVal);
-      if (aIsObject && bIsObject) {
+      if (isPlainObject(aVal) && isPlainObject(bVal)) {
         result[key] = deepMergeSpecs(aVal as FieldsSpec, bVal as FieldsSpec);
       } else {
         result[key] = bVal;
@@ -144,13 +121,4 @@ function deepMergeSpecs(a: FieldsSpec, b: FieldsSpec): FieldsSpec {
     }
   }
   return result as FieldsSpec;
-}
-
-function isNestedSpec(value: unknown): value is FieldsSpec {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    !Array.isArray(value) &&
-    Object.keys(value as object).length > 0
-  );
 }
