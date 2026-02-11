@@ -269,30 +269,6 @@ paths:
       summary: Update a pack
       tags:
         - Security Osquery API
-  /api/osquery/packs/{id}/copy:
-    post:
-      description: >-
-        Create a copy of a query pack with a unique name by appending a `_copy`
-        suffix. If the name already exists, a numeric suffix is added (e.g.,
-        `_copy_2`). The copied pack is always created with `enabled` set to
-        `false`.
-      operationId: OsqueryCopyPacks
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            $ref: '#/components/schemas/PackId'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CopyPacksResponse'
-          description: OK
-      summary: Copy a pack
-      tags:
-        - Security Osquery API
   /api/osquery/saved_queries:
     get:
       description: Get a list of all saved queries.
@@ -414,29 +390,6 @@ paths:
       summary: Update a saved query
       tags:
         - Security Osquery API
-  /api/osquery/saved_queries/{id}/copy:
-    post:
-      description: >-
-        Create a copy of a saved query with a unique name by appending a `_copy`
-        suffix. If the name already exists, a numeric suffix is added (e.g.,
-        `_copy_2`).
-      operationId: OsqueryCopySavedQuery
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            $ref: '#/components/schemas/SavedQueryId'
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CopySavedQueryResponse'
-          description: OK
-      summary: Copy a saved query
-      tags:
-        - Security Osquery API
 components:
   schemas:
     ArrayQueries:
@@ -461,49 +414,6 @@ components:
           $ref: '#/components/schemas/SnapshotOrUndefined'
         version:
           $ref: '#/components/schemas/VersionOrUndefined'
-    CopyPacksResponse:
-      example:
-        data:
-          created_at: '2025-02-26T13:37:30.452Z'
-          created_by: elastic
-          description: My pack
-          enabled: false
-          name: my_pack_copy
-          queries:
-            ports:
-              ecs_mapping:
-                client.port:
-                  field: port
-              interval: 60
-              query: SELECT * FROM listening_ports;
-              removed: false
-              snapshot: true
-              timeout: 120
-          saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
-          shards: {}
-          updated_at: '2025-02-26T13:37:30.452Z'
-          updated_by: elastic
-      type: object
-      properties: {}
-    CopySavedQueryResponse:
-      example:
-        data:
-          created_at: '2025-02-26T13:37:30.452Z'
-          created_by: elastic
-          description: Saved query description
-          ecs_mapping:
-            host.uptime:
-              field: total_seconds
-          id: my_saved_query_copy
-          interval: '60'
-          platform: linux,darwin
-          query: select * from uptime;
-          saved_object_id: 42ba1280-2172-11ee-8523-5765fca79a3c
-          updated_at: '2025-02-26T13:37:30.452Z'
-          updated_by: elastic
-          version: 2.8.0
-      type: object
-      properties: {}
     CreateLiveQueryRequestBody:
       example:
         agent_all: true
