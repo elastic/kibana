@@ -16,6 +16,7 @@ import { PluginStart } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import { createRuleDataSchema, updateRuleDataSchema } from '@kbn/alerting-v2-schemas';
+import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
@@ -30,6 +31,92 @@ import type {
   RuleResponse,
   UpdateRuleData,
 } from './types';
+
+// Conversion helpers: API ↔ SO.
+// Today they are 1:1 mappings, but they give us a seam to evolve storage
+// independently of the public API.
+
+/**
+ * Handles nullable fields from the update schema:
+ * - `null` → `undefined` (client explicitly wants to clear the field)
+ * - `undefined` → keeps the existing value
+ * - anything else → uses the new value
+ */
+function nullToUndefined<T>(value: T | null | undefined, existing: T | undefined): T | undefined {
+  if (value === null) return undefined;
+  if (value === undefined) return existing;
+  return value;
+}
+
+function apiCreateToSoAttributes(
+  data: CreateRuleData,
+  serverFields: {
+    enabled: boolean;
+    createdBy: string | null;
+    createdAt: string;
+    updatedBy: string | null;
+    updatedAt: string;
+  }
+): RuleSavedObjectAttributes {
+  return {
+    kind: data.kind,
+    metadata: {
+      name: data.metadata.name,
+      owner: data.metadata.owner,
+      labels: data.metadata.labels,
+      time_field: data.metadata.time_field,
+    },
+    schedule: {
+      every: data.schedule.every,
+      lookback: data.schedule.lookback,
+    },
+    evaluation: {
+      query: {
+        base: data.evaluation.query.base,
+        trigger: { condition: data.evaluation.query.trigger.condition },
+      },
+    },
+    recovery_policy: data.recovery_policy,
+    state_transition: data.state_transition,
+    grouping: data.grouping,
+    no_data: data.no_data,
+    notification_policies: data.notification_policies,
+    ...serverFields,
+  };
+}
+
+function soAttributesToApiResponse(id: string, attrs: RuleSavedObjectAttributes): RuleResponse {
+  return {
+    id,
+    kind: attrs.kind,
+    metadata: {
+      name: attrs.metadata.name,
+      owner: attrs.metadata.owner,
+      labels: attrs.metadata.labels,
+      time_field: attrs.metadata.time_field,
+    },
+    schedule: {
+      every: attrs.schedule.every,
+      lookback: attrs.schedule.lookback,
+    },
+    evaluation: {
+      query: {
+        base: attrs.evaluation.query.base,
+        trigger: { condition: attrs.evaluation.query.trigger.condition },
+      },
+    },
+    recovery_policy: attrs.recovery_policy,
+    state_transition: attrs.state_transition,
+    grouping: attrs.grouping,
+    no_data: attrs.no_data,
+    notification_policies: attrs.notification_policies,
+    enabled: attrs.enabled,
+    createdBy: attrs.createdBy,
+    createdAt: attrs.createdAt,
+    updatedBy: attrs.updatedBy,
+    updatedAt: attrs.updatedAt,
+  };
+}
 
 @injectable()
 export class RulesClient {
@@ -62,21 +149,13 @@ export class RulesClient {
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    const ruleAttributes: RuleSavedObjectAttributes = {
-      name: parsed.data.name,
-      kind: parsed.data.kind,
-      tags: parsed.data.tags,
-      schedule: parsed.data.schedule,
-      enabled: parsed.data.enabled,
-      query: parsed.data.query,
-      timeField: parsed.data.timeField,
-      lookbackWindow: parsed.data.lookbackWindow,
-      groupingKey: parsed.data.groupingKey,
+    const ruleAttributes = apiCreateToSoAttributes(parsed.data, {
+      enabled: true,
       createdBy: userProfileUid,
       createdAt: nowIso,
       updatedBy: userProfileUid,
       updatedAt: nowIso,
-    };
+    });
 
     let id: string;
     try {
@@ -92,25 +171,22 @@ export class RulesClient {
       throw e;
     }
 
-    if (ruleAttributes.enabled) {
-      try {
-        await ensureRuleExecutorTaskScheduled({
-          services: { taskManager: this.taskManager },
-          input: {
-            ruleId: id,
-            spaceId,
-            schedule: { interval: ruleAttributes.schedule.custom },
-            request: this.request as unknown as CoreKibanaRequest,
-          },
-        });
-      } catch (e) {
-        await this.rulesSavedObjectService.delete({ id }).catch(() => {});
-        throw e;
-      }
+    try {
+      await ensureRuleExecutorTaskScheduled({
+        services: { taskManager: this.taskManager },
+        input: {
+          ruleId: id,
+          spaceId,
+          schedule: { interval: ruleAttributes.schedule.every },
+          request: this.request as unknown as CoreKibanaRequest,
+        },
+      });
+    } catch (e) {
+      await this.rulesSavedObjectService.delete({ id }).catch(() => {});
+      throw e;
     }
 
-    // Keep response shape identical to the previous method implementation.
-    return { id, ...ruleAttributes };
+    return soAttributesToApiResponse(id, ruleAttributes);
   }
 
   public async updateRule({
@@ -145,35 +221,59 @@ export class RulesClient {
       throw e;
     }
 
-    const wasEnabled = Boolean(existingAttrs.enabled);
-    const willBeEnabled =
-      parsed.data.enabled !== undefined ? Boolean(parsed.data.enabled) : wasEnabled;
+    // Deep-merge the update into the existing attributes.
+    // `null` in the update payload means "clear this optional field"; convert to `undefined`
+    // so the SO schema (which uses `maybe()` / `T | undefined`) accepts it.
+    const { data: updateData } = parsed;
 
     const nextAttrs: RuleSavedObjectAttributes = {
       ...existingAttrs,
-      ...parsed.data,
+      // Required top-level fields: merge, never clear.
+      kind: updateData.kind ?? existingAttrs.kind,
+      metadata: { ...existingAttrs.metadata, ...updateData.metadata },
+      schedule: { ...existingAttrs.schedule, ...updateData.schedule },
+      evaluation: updateData.evaluation
+        ? {
+            query: {
+              ...existingAttrs.evaluation.query,
+              ...updateData.evaluation.query,
+              trigger: {
+                ...existingAttrs.evaluation.query.trigger,
+                ...updateData.evaluation?.query?.trigger,
+              },
+            },
+          }
+        : existingAttrs.evaluation,
+      // Optional top-level fields: `null` → `undefined` (clear), `undefined` → keep existing.
+      recovery_policy: nullToUndefined(updateData.recovery_policy, existingAttrs.recovery_policy),
+      state_transition: nullToUndefined(
+        updateData.state_transition,
+        existingAttrs.state_transition
+      ),
+      grouping: nullToUndefined(updateData.grouping, existingAttrs.grouping),
+      no_data: nullToUndefined(updateData.no_data, existingAttrs.no_data),
+      notification_policies: nullToUndefined(
+        updateData.notification_policies,
+        existingAttrs.notification_policies
+      ),
+      // Server-managed fields — preserved as-is, not changeable via update.
+      enabled: existingAttrs.enabled,
+      createdBy: existingAttrs.createdBy,
+      createdAt: existingAttrs.createdAt,
       updatedBy: userProfileUid,
       updatedAt: nowIso,
     };
 
-    // Disable transition: remove the scheduled task.
-    if (wasEnabled && !willBeEnabled) {
-      const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
-      await this.taskManager.removeIfExists(taskId);
-    }
-
-    // If enabled, ensure task exists and schedule is up-to-date (also handles schedule changes).
-    if (willBeEnabled) {
-      await ensureRuleExecutorTaskScheduled({
-        services: { taskManager: this.taskManager },
-        input: {
-          ruleId: id,
-          spaceId,
-          schedule: { interval: nextAttrs.schedule.custom },
-          request: this.request as unknown as CoreKibanaRequest,
-        },
-      });
-    }
+    // Ensure the task schedule is up-to-date.
+    await ensureRuleExecutorTaskScheduled({
+      services: { taskManager: this.taskManager },
+      input: {
+        ruleId: id,
+        spaceId,
+        schedule: { interval: nextAttrs.schedule.every },
+        request: this.request as unknown as CoreKibanaRequest,
+      },
+    });
 
     try {
       await this.rulesSavedObjectService.update({
@@ -188,14 +288,13 @@ export class RulesClient {
       throw e;
     }
 
-    return { id, ...nextAttrs };
+    return soAttributesToApiResponse(id, nextAttrs);
   }
 
   public async getRule({ id }: { id: string }): Promise<RuleResponse> {
     try {
       const doc = await this.rulesSavedObjectService.get(id);
-      const attrs = doc.attributes;
-      return { id, ...attrs };
+      return soAttributesToApiResponse(id, doc.attributes);
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(`Rule with id "${id}" not found`);
@@ -229,10 +328,7 @@ export class RulesClient {
     const res = await this.rulesSavedObjectService.find({ page, perPage });
 
     return {
-      items: res.saved_objects.map((so) => ({
-        id: so.id,
-        ...so.attributes,
-      })),
+      items: res.saved_objects.map((so) => soAttributesToApiResponse(so.id, so.attributes)),
       total: res.total,
       page,
       perPage,

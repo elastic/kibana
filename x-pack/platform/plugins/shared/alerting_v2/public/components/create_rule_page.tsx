@@ -29,27 +29,37 @@ import { createRuleDataSchema, type CreateRuleData } from '@kbn/alerting-v2-sche
 import { YamlRuleEditor } from '@kbn/yaml-rule-editor';
 import { RulesApi } from '../services/rules_api';
 
-const DEFAULT_RULE_YAML = `name: Example rule
-kind: alert
-tags: []
+const DEFAULT_RULE_YAML = `kind: alert
+
+metadata:
+  name: Example rule
+  time_field: "@timestamp"
+
 schedule:
-  custom: 1m
-enabled: true
-query: FROM logs-* | LIMIT 1
-timeField: "@timestamp"
-lookbackWindow: 5m
-groupingKey: []`;
+  every: 1m
+  lookback: 5m
+
+evaluation:
+  query:
+    base: |
+      FROM logs-*
+      | LIMIT 1
+    trigger:
+      condition: "WHERE true"`;
 
 const DEFAULT_RULE_VALUES: CreateRuleData = {
-  name: 'Example rule',
   kind: 'alert',
-  tags: [],
-  schedule: { custom: '1m' },
-  enabled: true,
-  query: 'FROM logs-* | LIMIT 1',
-  timeField: '@timestamp',
-  lookbackWindow: '5m',
-  groupingKey: [],
+  metadata: {
+    name: 'Example rule',
+    time_field: '@timestamp',
+  },
+  schedule: { every: '1m', lookback: '5m' },
+  evaluation: {
+    query: {
+      base: 'FROM logs-*\n| LIMIT 1',
+      trigger: { condition: 'WHERE true' },
+    },
+  },
 };
 
 const getErrorMessage = (error: unknown) => {
@@ -113,19 +123,34 @@ export const CreateRulePage = () => {
           return;
         }
 
+        // Map the API response back to the create schema shape for editing.
         const nextPayload: CreateRuleData = {
-          ...DEFAULT_RULE_VALUES,
-          name: rule.name,
           kind: rule.kind ?? DEFAULT_RULE_VALUES.kind,
-          tags: rule.tags ?? DEFAULT_RULE_VALUES.tags,
-          schedule: rule.schedule?.custom
-            ? { custom: rule.schedule.custom }
-            : DEFAULT_RULE_VALUES.schedule,
-          enabled: rule.enabled ?? DEFAULT_RULE_VALUES.enabled,
-          query: rule.query ?? DEFAULT_RULE_VALUES.query,
-          timeField: rule.timeField ?? DEFAULT_RULE_VALUES.timeField,
-          lookbackWindow: rule.lookbackWindow ?? DEFAULT_RULE_VALUES.lookbackWindow,
-          groupingKey: rule.groupingKey ?? DEFAULT_RULE_VALUES.groupingKey,
+          metadata: {
+            name: rule.metadata?.name ?? DEFAULT_RULE_VALUES.metadata.name,
+            owner: rule.metadata?.owner,
+            labels: rule.metadata?.labels,
+            time_field: rule.metadata?.time_field ?? DEFAULT_RULE_VALUES.metadata.time_field,
+          },
+          schedule: {
+            every: rule.schedule?.every ?? DEFAULT_RULE_VALUES.schedule.every,
+            lookback: rule.schedule?.lookback ?? DEFAULT_RULE_VALUES.schedule.lookback,
+          },
+          evaluation: {
+            query: {
+              base: rule.evaluation?.query?.base ?? DEFAULT_RULE_VALUES.evaluation.query.base,
+              trigger: {
+                condition:
+                  rule.evaluation?.query?.trigger?.condition ??
+                  DEFAULT_RULE_VALUES.evaluation.query.trigger.condition,
+              },
+            },
+          },
+          recovery_policy: rule.recovery_policy,
+          state_transition: rule.state_transition,
+          grouping: rule.grouping,
+          no_data: rule.no_data,
+          notification_policies: rule.notification_policies,
         };
 
         setYaml(dump(nextPayload, { lineWidth: 120, noRefs: true }));

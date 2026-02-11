@@ -13,21 +13,47 @@ import type { SavedObjectsTypeMappingDefinition } from '@kbn/core-saved-objects-
 export const ruleMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
-    name: { type: 'text' },
     kind: { type: 'keyword' },
-    tags: { type: 'keyword' },
-    enabled: { type: 'boolean' },
-    schedule: {
+    metadata: {
       properties: {
-        custom: { type: 'keyword' },
+        name: { type: 'text' },
+        owner: { type: 'keyword' },
+        labels: { type: 'keyword' },
+        time_field: { type: 'keyword' },
       },
     },
+    schedule: {
+      properties: {
+        every: { type: 'keyword' },
+        lookback: { type: 'keyword' },
+      },
+    },
+    evaluation: {
+      properties: {
+        query: {
+          properties: {
+            base: { type: 'text' },
+            trigger: {
+              properties: {
+                condition: { type: 'text' },
+              },
+            },
+          },
+        },
+      },
+    },
+    // Objects that don't need to be searched/filtered are stored opaque.
+    recovery_policy: { type: 'object', enabled: false },
+    state_transition: { type: 'object', enabled: false },
+    grouping: {
+      properties: {
+        fields: { type: 'keyword' },
+      },
+    },
+    no_data: { type: 'object', enabled: false },
+    notification_policies: { type: 'object', enabled: false },
 
-    query: { type: 'text' },
-    timeField: { type: 'keyword' },
-    lookbackWindow: { type: 'keyword' },
-    groupingKey: { type: 'keyword' },
-
+    enabled: { type: 'boolean' },
     createdBy: { type: 'keyword' },
     createdAt: { type: 'date' },
     updatedBy: { type: 'keyword' },

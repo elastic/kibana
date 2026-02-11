@@ -30,7 +30,7 @@ export function registerSavedObjects({
     management: {
       importableAndExportable: false,
       getTitle(esqlRuleSavedObject: SavedObject<RuleSavedObjectAttributes>) {
-        return `Rule: [${esqlRuleSavedObject.attributes.name}]`;
+        return `Rule: [${esqlRuleSavedObject.attributes.metadata.name}]`;
       },
     },
     modelVersions: ruleModelVersions,

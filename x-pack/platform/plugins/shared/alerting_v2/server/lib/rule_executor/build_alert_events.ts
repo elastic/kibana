@@ -10,7 +10,7 @@ import type { ESQLRow } from '@kbn/es-types';
 import stringify from 'json-stable-stringify';
 
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { RuleSavedObjectAttributes } from '../../saved_objects';
+import type { RuleResponse } from '../rules_client';
 import type { AlertEvent } from '../../resources/alert_events';
 
 function sha256(value: string) {
@@ -48,7 +48,7 @@ export interface BuildAlertEventsOpts {
   ruleId: string;
   ruleVersion: number;
   spaceId: string;
-  ruleAttributes: RuleSavedObjectAttributes;
+  ruleAttributes: Pick<RuleResponse, 'grouping'>;
   esqlResponse: EsqlQueryResponse;
   /**
    * Stable identifier for this task run (used for deterministic ids to avoid duplicates on retry).
@@ -83,7 +83,7 @@ export function buildAlertEventsFromEsqlResponse({
     const rowDoc = rowToDocument(columns, row);
     const groupHash = buildGroupHash({
       rowDoc,
-      groupKeyFields: ruleAttributes.groupingKey ?? [],
+      groupKeyFields: ruleAttributes.grouping?.fields ?? [],
       get fallbackSeed(): string {
         return `${executionUuid}|row:${index}|${stringify(rowDoc)}`;
       },

@@ -16,6 +16,20 @@ import type { QueryServiceContract } from '../../services/query_service/query_se
 import { QueryServiceScopedToken } from '../../services/query_service/tokens';
 import { hasState, type StateWith } from '../type_guards';
 
+/**
+ * Returns the query to execute for this rule.
+ *
+ * Currently only `evaluation.query.base` is used. The separate
+ * `evaluation.query.trigger.condition` exists to support no-data detection
+ * in the future (the executor will need to run the base query *without*
+ * the trigger condition to distinguish "no data at all" from "data exists
+ * but doesn't match the condition"). That is not yet implemented, so the
+ * trigger condition is expected to be embedded in the base query for now.
+ */
+function buildEffectiveQuery(evaluationQuery: { base: string }): string {
+  return evaluationQuery.base.trimEnd();
+}
+
 @injectable()
 export class ExecuteRuleQueryStep implements RuleExecutionStep {
   public readonly name = 'execute_rule_query';
@@ -43,16 +57,21 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
 
     const { rule } = state;
 
+    const effectiveQuery = buildEffectiveQuery(rule.evaluation.query);
+    // Use schedule.lookback if provided, otherwise fall back to the execution interval.
+    const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
+    const timeField = rule.metadata.time_field;
+
     const queryPayload = getQueryPayload({
-      query: rule.query,
-      timeField: rule.timeField,
-      lookbackWindow: rule.lookbackWindow,
+      query: effectiveQuery,
+      timeField,
+      lookbackWindow,
     });
 
     this.logger.debug({
       message: () =>
         `[${this.name}] Executing ES|QL query for rule ${input.ruleId} - ${JSON.stringify({
-          query: rule.query,
+          query: effectiveQuery,
           filter: queryPayload.filter,
           params: queryPayload.params,
         })}`,
@@ -62,7 +81,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
 
     try {
       esqlResponse = await this.queryService.executeQuery({
-        query: rule.query,
+        query: effectiveQuery,
         filter: queryPayload.filter,
         params: queryPayload.params,
         abortSignal: input.abortSignal,
