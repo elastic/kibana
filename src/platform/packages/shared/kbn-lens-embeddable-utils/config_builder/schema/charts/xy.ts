@@ -413,6 +413,7 @@ const xyDataLayerSchemaESQL = schema.object(
     breakdown_by: schema.maybe(
       esqlColumnSchema.extends(
         {
+          color: schema.maybe(colorMappingSchema),
           collapse_by: schema.maybe(collapseBySchema),
         },
         { meta: { description: 'ES|QL column for breakdown' } }
