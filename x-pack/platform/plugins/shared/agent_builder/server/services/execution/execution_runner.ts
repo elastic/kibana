@@ -36,6 +36,7 @@ import {
 } from './utils';
 import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
+import { withConverseSpan } from '../../tracing';
 import type { AgentExecution, SerializedExecutionError } from './types';
 import type { AgentExecutionClient } from './persistence';
 
@@ -154,16 +155,18 @@ export const handleAgentExecution = async ({
     conversation.operation === 'CREATE' ? conversation.id : conversationId;
   const modelProvider = getConnectorProvider(chatModel.getConnector());
 
-  return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
-    handleCancellation(abortSignal),
-    convertErrors({
-      agentId,
-      logger,
-      analyticsService,
-      trackingService,
-      modelProvider,
-      conversationId: effectiveConversationId,
-    })
+  return withConverseSpan({ agentId, conversationId: effectiveConversationId }, () =>
+    merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
+      handleCancellation(abortSignal),
+      convertErrors({
+        agentId,
+        logger,
+        analyticsService,
+        trackingService,
+        modelProvider,
+        conversationId: effectiveConversationId,
+      })
+    )
   );
 };
 
