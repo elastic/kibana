@@ -8,10 +8,20 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import type { TextBasedDimensionEditorProps } from './dimension_editor';
 import { TextBasedDimensionEditor } from './dimension_editor';
+import type { FieldSelectProps } from './field_select';
 
 // Mock fetchFieldsFromESQLExpression
 jest.mock('./fetch_fields_from_esql_expression', () => ({
   fetchFieldsFromESQLExpression: jest.fn(),
+}));
+
+let capturedOnChoose: FieldSelectProps['onChoose'] | undefined;
+
+jest.mock('./field_select', () => ({
+  FieldSelect: (props: FieldSelectProps) => {
+    capturedOnChoose = props.onChoose;
+    return <div data-test-subj="text-based-dimension-field" />;
+  },
 }));
 
 const { fetchFieldsFromESQLExpression } = jest.requireMock('./fetch_fields_from_esql_expression');
@@ -50,6 +60,7 @@ describe('TextBasedDimensionEditor', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    capturedOnChoose = undefined;
 
     fetchFieldsFromESQLExpression.mockResolvedValue({
       columns: [
@@ -76,5 +87,54 @@ describe('TextBasedDimensionEditor', () => {
     });
 
     expect(screen.getByTestId('text-based-dimension-field')).toBeInTheDocument();
+  });
+
+  it('should set inMetricDimension when selecting a field in a metric dimension', async () => {
+    const setState = jest.fn();
+    render(
+      <TextBasedDimensionEditor {...defaultProps} isMetricDimension={true} setState={setState} />
+    );
+
+    await waitFor(() => {
+      expect(capturedOnChoose).toBeDefined();
+    });
+
+    capturedOnChoose!({ type: 'field', field: 'Field Two' });
+
+    expect(setState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        layers: expect.objectContaining({
+          layer1: expect.objectContaining({
+            columns: [
+              expect.objectContaining({
+                columnId: 'dim1',
+                fieldName: 'Field Two',
+                inMetricDimension: true,
+              }),
+            ],
+          }),
+        }),
+      })
+    );
+  });
+
+  it('should not set inMetricDimension when selecting a field in a non-metric dimension', async () => {
+    const setState = jest.fn();
+    render(
+      <TextBasedDimensionEditor {...defaultProps} isMetricDimension={false} setState={setState} />
+    );
+
+    await waitFor(() => {
+      expect(capturedOnChoose).toBeDefined();
+    });
+
+    capturedOnChoose!({ type: 'field', field: 'Field One' });
+
+    expect(setState).toHaveBeenCalledTimes(1);
+    const newState = setState.mock.calls[0][0];
+    const newColumn = newState.layers.layer1.columns[0];
+    expect(newColumn.columnId).toBe('dim1');
+    expect(newColumn.fieldName).toBe('Field One');
+    expect(newColumn.inMetricDimension).toBeUndefined();
   });
 });
