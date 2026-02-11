@@ -46,6 +46,8 @@ type GetTotalCountsResults = Pick<
   | 'count_rules_with_tags'
   | 'count_rules_installed_by_integrations'
   | 'count_rules_installed_by_integrations_by_type'
+  | 'count_rules_with_elasticagent_tag'
+  | 'count_rules_with_elasticagent_tag_by_type'
   | 'count_rules_snoozed'
   | 'count_rules_snoozed_by_type'
   | 'count_rules_muted'
@@ -451,6 +453,13 @@ export async function getTotalCountAggregations({
           aggregations.sum_rules_installed_by_integrations_by_type.by_alert_type.buckets
         ),
       },
+      count_rules_with_elasticagent_tag:
+        aggregations.sum_rules_installed_by_integrations.value ?? 0,
+      count_rules_with_elasticagent_tag_by_type: {
+        ...parseSimpleRuleTypeBucket(
+          aggregations.sum_rules_installed_by_integrations_by_type.by_alert_type.buckets
+        ),
+      },
       count_rules_by_notify_when: countRulesByNotifyWhen,
       count_rules_snoozed: aggregations.sum_rules_snoozed.value ?? 0,
       count_rules_snoozed_by_type: {
@@ -508,6 +517,8 @@ export async function getTotalCountAggregations({
       count_rules_with_tags: 0,
       count_rules_installed_by_integrations: 0,
       count_rules_installed_by_integrations_by_type: {},
+      count_rules_with_elasticagent_tag: 0,
+      count_rules_with_elasticagent_tag_by_type: {},
       count_rules_snoozed: 0,
       count_rules_muted: 0,
       count_rules_with_muted_alerts: 0,
