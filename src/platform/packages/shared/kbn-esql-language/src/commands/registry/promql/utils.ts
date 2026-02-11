@@ -10,14 +10,17 @@
 import { within } from '../../../ast/location';
 import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '../../../types';
 import { findFinalWord } from '../../definitions/utils/autocomplete/helpers';
-import { childrenOfPromqlNode, findPromqlAstPosition } from '../../../promql/traversal';
-import { PromQLParser } from '../../../promql';
+import {
+  childrenOfPromqlNode,
+  findPromqlAstPosition,
+} from '../../../embedded_languages/promql/ast/traversal';
+import { PromQLParser } from '../../../embedded_languages/promql';
 import type {
   PromQLAstNode,
   PromQLAstQueryExpression,
   PromQLFunction,
   PromQLPositionResult,
-} from '../../../promql/types';
+} from '../../../embedded_languages/promql/types';
 import {
   getPromqlFunctionDefinition,
   isPromqlAcrossSeriesFunction,
@@ -537,7 +540,50 @@ function getParamZonePosition(commandText: string): PromqlPosition {
     return { type: 'after_param_keyword' };
   }
 
+  // Check if cursor is inside an open paren for query context (e.g., "PROMQL (" or "col0 = (")
+  if (isInsideQueryParen(commandText)) {
+    return { type: 'after_open_paren' };
+  }
+
   return { type: 'after_command' };
+}
+
+/**
+ * Detects if cursor is inside an open paren that starts a query context.
+ * Handles cases like "PROMQL (" or "PROMQL col0 = (" where the AST doesn't
+ * have a query node yet because the content is empty.
+ */
+function isInsideQueryParen(commandText: string): boolean {
+  const trimmed = commandText.trimEnd();
+
+  // Check for "(" or "= (" at the end, indicating start of query expression
+  if (trimmed.endsWith('(') || trimmed.endsWith('= (')) {
+    // Count open and close parens to ensure we're inside an unclosed paren
+    let depth = 0;
+    let inQuote: string | null = null;
+
+    for (const char of trimmed) {
+      if (inQuote) {
+        if (char === inQuote) {
+          inQuote = null;
+        }
+        continue;
+      }
+
+      if (char === '"' || char === "'") {
+        inQuote = char;
+      } else if (char === '(') {
+        depth++;
+      } else if (char === ')') {
+        depth--;
+      }
+    }
+
+    // If we have unclosed parens, we're inside query context
+    return depth > 0;
+  }
+
+  return false;
 }
 
 /** Extracts the trailing identifier from text (e.g., "start" from "end=value start"). */

@@ -6,7 +6,7 @@
  */
 
 import { generateLongIdWithSeed } from '@kbn/synthtrace-client/src/lib/utils/generate_id';
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 
 test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
@@ -28,7 +28,7 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
       await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
         testData.SERVICE_OPBEANS_NODE
       );
-      await expect(page.getByTestId('apmErrorGroupListEmptyState')).toBeVisible({
+      await expect(page.locator('td').getByTestId('apmErrorGroupListEmptyState')).toBeVisible({
         timeout: testData.EXTENDED_TIMEOUT,
       });
     });
@@ -198,7 +198,7 @@ test.describe('Errors', { tag: ['@ess', '@svlOblt'] }, () => {
     await test.step('typing non-matching text hides results', async () => {
       await errorsPage.tableSearchInput.fill('nonexistent error message');
       await expect(page.getByText(testData.ERROR_MESSAGE)).toBeHidden();
-      await expect(page.getByTestId('apmErrorGroupListEmptyState')).toBeVisible({
+      await expect(page.locator('td').getByTestId('apmErrorGroupListEmptyState')).toBeVisible({
         timeout: testData.EXTENDED_TIMEOUT,
       });
     });

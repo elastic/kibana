@@ -9,6 +9,7 @@ import { RuleResourceRetriever } from './rule_resource_retriever'; // Adjust pat
 import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
 import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
+import type { ExperimentalFeatures } from '../../../../../../common';
 
 jest.mock('../../data/rule_migrations_data_service');
 jest.mock('../../../../../../common/siem_migrations/rules/resources');
@@ -27,7 +28,12 @@ describe('RuleResourceRetriever', () => {
       resources: { searchBatches: jest.fn().mockReturnValue({ next: jest.fn(() => []) }) },
     } as unknown as jest.Mocked<RuleMigrationsDataClient>;
 
-    retriever = new RuleResourceRetriever('mockMigrationId', mockDataClient.resources);
+    retriever = new RuleResourceRetriever('mockMigrationId', {
+      resourcesDataClient: mockDataClient.resources,
+      experimentalFeatures: {
+        splunkV2DashboardsEnabled: false,
+      } as unknown as ExperimentalFeatures,
+    });
 
     MockResourceIdentifier.mockImplementation(() => ({
       fromOriginal: jest.fn().mockReturnValue([]),

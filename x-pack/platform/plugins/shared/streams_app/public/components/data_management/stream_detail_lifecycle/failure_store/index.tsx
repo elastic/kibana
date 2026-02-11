@@ -80,11 +80,10 @@ export const StreamDetailFailureStore = ({
         }),
       });
     } catch (error) {
-      notifications.toasts.addError(error, {
+      notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate('xpack.streams.streamDetailFailureStore.updateFailureStoreFailed', {
           defaultMessage: "We couldn't update the failure store settings.",
         }),
-        toastMessage: getFormattedError(error).message,
       });
     } finally {
       closeModal();
@@ -146,7 +145,7 @@ export const StreamDetailFailureStore = ({
                 )}
               />
             )}
-            {data.isLoading || failureStoreEnabled ? (
+            {failureStoreEnabled ? (
               <FailureStoreInfo
                 openModal={setIsFailureStoreModalOpen}
                 definition={definition}
