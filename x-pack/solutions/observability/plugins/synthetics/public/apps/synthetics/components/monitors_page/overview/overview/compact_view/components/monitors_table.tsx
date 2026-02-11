@@ -76,7 +76,7 @@ export const MonitorsTable = ({
       data-test-subj="syntheticsCompactViewTable"
       tableLayout="auto"
       tableCaption={i18n.translate('xpack.synthetics.monitorsTable.tableCaption', {
-        defaultMessage: 'Monitor status',
+        defaultMessage: 'Compact monitors list',
       })}
     />
   );
