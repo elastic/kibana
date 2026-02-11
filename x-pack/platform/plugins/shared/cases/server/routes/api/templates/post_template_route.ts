@@ -6,16 +6,11 @@
  */
 
 import yaml from 'js-yaml';
-import {
-  type Template,
-  CreateTemplateInputSchema,
-} from '../../../../common/types/domain/template/v1';
+import { CreateTemplateInputSchema } from '../../../../common/types/domain/template/v1';
 import { INTERNAL_TEMPLATES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { mockTemplates } from './mock_data';
 import { parseTemplate } from './parse_template';
 
 /**
@@ -33,7 +28,7 @@ export const postTemplateRoute = createCasesRoute({
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
-      await caseContext.getCasesClient();
+      const casesClient = await caseContext.getCasesClient();
 
       const input = CreateTemplateInputSchema.parse(request.body);
 
@@ -46,21 +41,8 @@ export const postTemplateRoute = createCasesRoute({
         });
       }
 
-      // Generate new template ID and create template
-      const newTemplateId = `template-${Date.now()}`;
-      const newTemplate: Template = {
-        templateId: newTemplateId,
-        name: input.name,
-        owner: input.owner,
-        definition: input.definition,
-        templateVersion: 1,
-        deletedAt: null,
-      };
-
-      // Add to mock store
-      mockTemplates.push(newTemplate);
-
-      const parsedTemplate = parseTemplate(newTemplate);
+      const template = await casesClient.templates.createTemplate(input);
+      const parsedTemplate = parseTemplate(template.attributes);
 
       return response.ok({
         body: parsedTemplate,
