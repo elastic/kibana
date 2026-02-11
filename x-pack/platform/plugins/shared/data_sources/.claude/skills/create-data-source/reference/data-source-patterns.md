@@ -175,10 +175,12 @@ export const ConnectorIconsMap: Map<
 
 ## MCP Connector Pattern
 
-For data sources using the MCP connector:
+For data sources using the MCP connector. **Do NOT run the scaffold generator** — MCP data sources reuse the existing `.mcp` connector type and don't need a connector spec. Instead, manually create just the icon, CODEOWNERS entry, and documentation (see SKILL.md Step 1, Option A).
 
 ```typescript
-import { MCPAuthType } from '@kbn/data-catalog-plugin';
+import { i18n } from '@kbn/i18n';
+import { MCPAuthType } from '@kbn/connector-schemas/mcp';
+import type { DataSource } from '@kbn/data-catalog-plugin';
 
 export const mcpBasedDataSource: DataSource = {
   id: 'mcp-source',
@@ -189,19 +191,22 @@ export const mcpBasedDataSource: DataSource = {
 
   iconType: '.mcp-source',
 
-  stackConnector: {
-    type: '.mcp',
-    config: {
-      serverUrl: 'https://mcp-server-url.example.com',
-      hasAuth: true,
-      authType: MCPAuthType.Bearer,  // Options: Bearer, ApiKey, Basic, None
+  stackConnectors: [
+    {
+      type: '.mcp',
+      config: {
+        serverUrl: 'https://mcp-server-url.example.com',
+        hasAuth: true,
+        authType: MCPAuthType.Bearer,  // Options: Bearer, ApiKey, Basic, None
+      },
+      // Each tool is an object with a `name` key; can add `description` override
+      importedTools: [
+        { name: 'search' },
+        { name: 'get_item' },
+        { name: 'list_items' },
+      ],
     },
-    importedTools: [
-      'search',
-      'get_item',
-      'list_items',
-    ],
-  },
+  ],
 
   workflows: {
     directory: __dirname + '/workflows',
@@ -298,13 +303,24 @@ auth: {
 
 ## Critical ID Alignment
 
+### Custom Connector Data Sources
+
 The following IDs **MUST all match exactly**:
 
-1. `ConnectorSpec.metadata.id` in the connector spec 
+1. `ConnectorSpec.metadata.id` in the connector spec
 2. `DataSource.iconType` in data_type.ts
-3. `DataSource.stackConnector.type` in data_type.ts 
+3. `DataSource.stackConnector.type` in data_type.ts
 4. Key in `ConnectorIconsMap` in connector_icons_map.ts
 
 **Before choosing an ID**, search for existing connectors using that ID.
 
 If a connector already exists with that ID (existing `.servicenow`), use a unique variant (like `.servicenow_search`).
+
+### MCP Data Sources
+
+MCP data sources don't have a connector spec (they reuse `.mcp`). The following must be consistent:
+
+1. `DataSource.iconType` in data_type.ts
+2. Key in `ConnectorIconsMap` in connector_icons_map.ts
+
+The `stackConnectors[].type` is always `.mcp` — it does not need to match the icon key.
