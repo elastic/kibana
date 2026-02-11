@@ -25,11 +25,7 @@ type ApmTransactionRuleDataResult = {
   };
 } | null;
 
-const TRANSACTION_GROUP_BY_FIELDS = [
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-  TRANSACTION_NAME,
-] as const;
+const TRANSACTION_GROUP_BY_FIELDS = [SERVICE_NAME, TRANSACTION_TYPE, TRANSACTION_NAME] as const;
 
 export const apmTransactionAlertFieldsToKqlQuery = (alert: TopAlert): string => {
   const { fields } = alert as TopAlert<ObservabilityApmAlert>;

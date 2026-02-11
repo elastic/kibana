@@ -17,7 +17,7 @@ import {
 import type { TopAlert } from '../../../../../typings/alerts';
 import { getApmErrorCountRuleData } from './apm_error_count_rule';
 
-describe('getApmErrorCountRuleData', () => {  
+describe('getApmErrorCountRuleData', () => {
   const mockAlert: TopAlert = {
     fields: {
       [ALERT_INDEX_PATTERN]: 'logs-apm.error-*',
