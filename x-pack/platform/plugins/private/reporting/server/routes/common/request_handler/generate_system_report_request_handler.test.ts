@@ -112,6 +112,10 @@ describe('GenerateSystemReportRequestHandler', () => {
     );
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('Enqueue Job', () => {
     test('creates a system report object to queue', async () => {
       const report = await requestHandler.enqueueJob(mockRequestParams);

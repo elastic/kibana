@@ -35,7 +35,7 @@ export const authorizedUserPreRouting = <P, Q, B>(
     } catch (err) {
       logger.error(err);
       if (err instanceof Boom.Boom) {
-        return res.customError({
+        return res.custom({
           statusCode: err.output.statusCode,
           body: err.output.payload.message,
         });
