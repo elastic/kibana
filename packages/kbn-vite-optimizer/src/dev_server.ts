@@ -148,7 +148,11 @@ export interface DevServer {
  * Create Vite plugin for serving plugin source files as ESM
  * No bundling - just transformation
  */
-function kbnPluginRoutesPlugin(plugins: PluginInfo[], repoRoot: string, log: { info(msg: string): void; warn(msg: string): void; error(msg: string): void }): Plugin {
+function kbnPluginRoutesPlugin(
+  plugins: PluginInfo[],
+  repoRoot: string,
+  log: { info(msg: string): void; warn(msg: string): void; error(msg: string): void }
+): Plugin {
   const pluginMap = new Map(plugins.map((p) => [p.id, p]));
 
   // Cache resolved file paths — plugin source files don't move at runtime.
@@ -340,17 +344,23 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
   const pc = await dynamicImport('picocolors').then((m: any) => m.default || m);
   const fmtTime = () => {
     const d = new Date();
-    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}.${String(d.getMilliseconds()).padStart(3, '0')}`;
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(
+      2,
+      '0'
+    )}:${String(d.getSeconds()).padStart(2, '0')}.${String(d.getMilliseconds()).padStart(3, '0')}`;
   };
   const logPrefix = ` np bld    log   `;
   const coloredName = pc.magentaBright('@kbn/vite-optimizer');
   const log = {
     // eslint-disable-next-line no-console
-    info: (msg: string) => console.log(`${logPrefix}[${fmtTime()}] [${pc.green('info')}][${coloredName}] ${msg}`),
+    info: (msg: string) =>
+      console.log(`${logPrefix}[${fmtTime()}] [${pc.green('info')}][${coloredName}] ${msg}`),
     // eslint-disable-next-line no-console
-    warn: (msg: string) => console.log(`${logPrefix}[${fmtTime()}] [${pc.yellow('warning')}][${coloredName}] ${msg}`),
+    warn: (msg: string) =>
+      console.log(`${logPrefix}[${fmtTime()}] [${pc.yellow('warning')}][${coloredName}] ${msg}`),
     // eslint-disable-next-line no-console
-    error: (msg: string) => console.error(`${logPrefix}[${fmtTime()}] [${pc.red('error')}][${coloredName}] ${msg}`),
+    error: (msg: string) =>
+      console.error(`${logPrefix}[${fmtTime()}] [${pc.red('error')}][${coloredName}] ${msg}`),
   };
 
   const [vite, kbnViteConfig, reactPlugin] = await Promise.all([
@@ -397,7 +407,9 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
     }
   }
 
-  log.info(`Pre-analyzing ${pluginEntryPoints.length} plugin entry points for dependency discovery`);
+  log.info(
+    `Pre-analyzing ${pluginEntryPoints.length} plugin entry points for dependency discovery`
+  );
 
   const server = await vite.createServer({
     root: repoRoot,
@@ -429,6 +441,12 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
         // Spread @kbn/* and plugin aliases as array entries
         ...Object.entries(kbnAliases).map(([find, replacement]) => ({ find, replacement })),
         ...Object.entries(pluginAliases).map(([find, replacement]) => ({ find, replacement })),
+        // Use lodash-es (ESM) instead of lodash (CJS) for browser builds.
+        // lodash's CJS `module.exports = _` pattern can't be statically analyzed
+        // into named exports by Rolldown, so `import { pick } from 'lodash'` fails.
+        // lodash-es has proper ESM named exports. Only matches the bare 'lodash'
+        // specifier — deep imports like 'lodash/fp' and 'lodash/set' are unaffected.
+        { find: /^lodash$/, replacement: 'lodash-es' },
         // Provide browser-compatible polyfills for Node.js modules
         { find: 'os', replacement: 'os-browserify/browser' },
         { find: 'path', replacement: 'path-browserify' },
@@ -441,7 +459,6 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
     },
 
     plugins: [
-
       // TypeScript/JSX transform — replaces Vite's built-in OXC transform to
       // bypass expensive tsconfck tsconfig resolution (replaceTokens hotspot).
       kbnBrowserTransformPlugin(),
@@ -469,10 +486,7 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
             // to the global object throughout the entire IIFE.
             const globalRef =
               "typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : {}";
-            const fixed = contents.replace(
-              /\}\(\);?\s*$/,
-              `}.call(${globalRef});`
-            );
+            const fixed = contents.replace(/\}\(\);?\s*$/, `}.call(${globalRef});`);
             return { code: fixed, map: null };
           }
           return null;
@@ -779,7 +793,7 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
         '@elastic/monaco-esql/lib/definitions',
 
         // --- Lodash (main + sub-paths) ---
-        'lodash',
+        'lodash-es', // bare 'lodash' is aliased to 'lodash-es' (see resolve.alias)
         'lodash/set',
         'lodash/setWith',
         'lodash/fp',
@@ -834,6 +848,8 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
         'xstate',
         'xstate/lib/waitFor',
         '@xstate/react',
+        'xstate5',
+        '@xstate5/react',
         'constate',
         'use-sync-external-store',
         'use-sync-external-store/shim',
@@ -842,6 +858,7 @@ export async function createDevServer(config: DevServerConfig): Promise<DevServe
         // --- DnD ---
         '@hello-pangea/dnd',
         '@hello-pangea/dnd/dist/dnd',
+        'bind-event-listener',
 
         // --- Data / query ---
         '@tanstack/react-query',
