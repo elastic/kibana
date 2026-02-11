@@ -58,15 +58,33 @@ describe('CPS project_routing on serverless ES', () => {
     serverlessES = await startES();
     client = serverlessES.getClient();
 
+    await client.indices.create({
+      index: TEST_INDEX,
+      mappings: {
+        properties: {
+          title: { type: 'text' },
+          category: { type: 'keyword' },
+          timestamp: { type: 'date' },
+          count: { type: 'integer' },
+        },
+      },
+    });
+
+    for (const doc of TEST_DOCUMENTS) {
+      await client.index({ index: TEST_INDEX, document: doc });
+    }
+
+    await client.indices.refresh({ index: TEST_INDEX });
+
     /**
-     * we assert that cps is enabled ES-side by sending a test request on _search
-     * this will allow us to both implement the tests and wait for cps to be enabled in ES
-     * this branching logic can be removed once cps is enabled in ES
+     * We assert that CPS is enabled ES-side by sending a test request with project_routing.
+     * This allows us to both implement the tests and wait for CPS to be enabled in ES.
+     * This branching logic can be removed once CPS is enabled in ES.
      */
     try {
       await client.search(
-        { index: '_all', size: 0 },
-        { querystring: { project_routing: LOCAL_PROJECT_ROUTING, allow_no_indices: true } }
+        { index: TEST_INDEX, size: 0 },
+        { querystring: { project_routing: LOCAL_PROJECT_ROUTING } }
       );
       cpsSupported = true;
     } catch (error: any) {
@@ -74,39 +92,16 @@ describe('CPS project_routing on serverless ES', () => {
         cpsSupported = false;
         console.log(
           '\n⚠️  CPS (project_routing) is not supported in this ES serverless image.\n' +
-            '   Tests will be skipped. Once CPS is available, these tests will run automatically.\n'
+            '   CPS-specific tests will be skipped. Once CPS is available, they will run automatically.\n'
         );
       } else {
         throw error;
       }
     }
-
-    if (cpsSupported) {
-      await client.indices.create({
-        index: TEST_INDEX,
-        mappings: {
-          properties: {
-            title: { type: 'text' },
-            category: { type: 'keyword' },
-            timestamp: { type: 'date' },
-            count: { type: 'integer' },
-          },
-        },
-      });
-
-      // Index test documents
-      for (const doc of TEST_DOCUMENTS) {
-        await client.index({ index: TEST_INDEX, document: doc });
-      }
-
-      await client.indices.refresh({ index: TEST_INDEX });
-    }
   });
 
   afterAll(async () => {
-    if (cpsSupported) {
-      await client?.indices.delete({ index: TEST_INDEX }).catch(() => {});
-    }
+    await client?.indices.delete({ index: TEST_INDEX }).catch(() => {});
     await serverlessES?.stop();
   });
 
@@ -120,6 +115,154 @@ describe('CPS project_routing on serverless ES', () => {
       await fn();
     });
   };
+
+  describe('baseline: requests without project_routing (no-op cases)', () => {
+    it('search works without project_routing', async () => {
+      const response = await client.search({
+        index: TEST_INDEX,
+        query: { match_all: {} },
+      });
+
+      expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
+    });
+
+    it('msearch works without project_routing', async () => {
+      const response = await client.msearch({
+        searches: [
+          { index: TEST_INDEX },
+          { query: { match_all: {} } },
+          { index: TEST_INDEX },
+          { query: { term: { category: 'alpha' } } },
+        ],
+      });
+
+      expect(response.responses.length).toBe(2);
+      expect((response.responses[0] as any).hits.hits.length).toBe(TOTAL_DOCS_COUNT);
+      expect((response.responses[1] as any).hits.hits.length).toBe(ALPHA_CATEGORY_DOCS_COUNT);
+    });
+
+    it('count works without project_routing', async () => {
+      const response = await client.count({
+        index: TEST_INDEX,
+        query: { match_all: {} },
+      });
+
+      expect(response.count).toBe(TOTAL_DOCS_COUNT);
+    });
+
+    it('PIT operations work without project_routing (PIT has its own scope)', async () => {
+      const pitResponse = await client.openPointInTime({
+        index: TEST_INDEX,
+        keep_alive: '1m',
+      });
+
+      expect(pitResponse.id).toBeDefined();
+
+      // Search using PIT - no project_routing needed
+      const searchResponse = await client.search({
+        pit: { id: pitResponse.id, keep_alive: '1m' },
+        query: { match_all: {} },
+      });
+
+      expect(searchResponse.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
+
+      await client.closePointInTime({ id: pitResponse.id });
+    });
+
+    it('index operations work without project_routing', async () => {
+      // Index a document
+      const indexResponse = await client.index({
+        index: TEST_INDEX,
+        document: { title: 'Temp doc', category: 'temp', timestamp: '2024-01-10', count: 100 },
+      });
+
+      expect(indexResponse._id).toBeDefined();
+
+      // Get the document
+      const getResponse = await client.get({
+        index: TEST_INDEX,
+        id: indexResponse._id,
+      });
+
+      expect(getResponse.found).toBe(true);
+
+      // Delete the document (cleanup)
+      await client.delete({
+        index: TEST_INDEX,
+        id: indexResponse._id,
+      });
+    });
+
+    it('bulk operations work without project_routing', async () => {
+      const bulkResponse = await client.bulk({
+        operations: [
+          { index: { _index: TEST_INDEX } },
+          { title: 'Bulk doc 1', category: 'bulk', timestamp: '2024-01-11', count: 101 },
+          { index: { _index: TEST_INDEX } },
+          { title: 'Bulk doc 2', category: 'bulk', timestamp: '2024-01-12', count: 102 },
+        ],
+      });
+
+      expect(bulkResponse.errors).toBe(false);
+      expect(bulkResponse.items.length).toBe(2);
+
+      // Cleanup
+      for (const item of bulkResponse.items) {
+        if (item.index?._id) {
+          await client.delete({ index: TEST_INDEX, id: item.index._id }).catch(() => {});
+        }
+      }
+    });
+
+    it('aggregations work without project_routing', async () => {
+      const response = await client.search({
+        index: TEST_INDEX,
+        size: 0,
+        aggs: {
+          categories: { terms: { field: 'category' } },
+          avg_count: { avg: { field: 'count' } },
+        },
+      });
+
+      expect(response.aggregations).toBeDefined();
+      expect(response.aggregations!.categories).toBeDefined();
+      expect(response.aggregations!.avg_count).toBeDefined();
+    });
+
+    it('scroll works without project_routing', async () => {
+      const scrollResponse = await client.search({
+        index: TEST_INDEX,
+        query: { match_all: {} },
+        size: 2,
+        scroll: '1m',
+      });
+
+      expect(scrollResponse._scroll_id).toBeDefined();
+      expect(scrollResponse.hits.hits.length).toBe(2);
+
+      // Continue scrolling
+      const scrollContinue = await client.scroll({
+        scroll_id: scrollResponse._scroll_id!,
+        scroll: '1m',
+      });
+
+      expect(scrollContinue.hits.hits.length).toBeGreaterThanOrEqual(0);
+
+      // Clear scroll
+      await client.clearScroll({ scroll_id: scrollResponse._scroll_id! });
+    });
+
+    it('cat APIs work without project_routing', async () => {
+      const response = await client.cat.indices({ format: 'json' });
+      expect(Array.isArray(response)).toBe(true);
+    });
+
+    it('cluster health works without project_routing', async () => {
+      const response = await client.cluster.health();
+      expect(response.cluster_name).toBeDefined();
+      expect(response.status).toBeDefined();
+    });
+  });
 
   describe('search API with project_routing', () => {
     itIfCpsSupported('accepts project_routing parameter without error', async () => {
