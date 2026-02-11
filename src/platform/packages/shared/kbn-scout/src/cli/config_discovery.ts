@@ -180,8 +180,8 @@ const splitStreamsTestsByServerRunFlags = (
   modules: ModuleDiscoveryInfo[]
 ): ModuleDiscoveryInfo[] => {
   return modules.flatMap((module) => {
-    // It is a temp workaround. Only split modules that include 'streams_app' in their name
-    if (!module.name.includes('streams_app')) {
+    // It is a temp workaround. Only split modules that include 'streams_app', 'dashboard'  in their name
+    if (!module.name.includes('streams_app') && !module.name.includes('dashboard')) {
       return [module];
     }
 

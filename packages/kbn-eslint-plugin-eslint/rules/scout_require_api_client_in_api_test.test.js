@@ -11,8 +11,10 @@ const { RuleTester } = require('eslint');
 const rule = require('./scout_require_api_client_in_api_test');
 const dedent = require('dedent');
 
-const ERROR_MSG =
+const DEFAULT_ERROR_MSG =
   'The `apiClient` fixture should be used in `apiTest` to call an endpoint and later verify response code and body.';
+const ALT_ERROR_MSG =
+  'One of `apiClient` or `esClient` fixtures should be used in `apiTest` to interact with an endpoint and later verify the response.';
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
   parserOptions: {
@@ -161,7 +163,7 @@ ruleTester.run('@kbn/eslint/scout_require_api_client_in_api_test', rule, {
           console.log(other);
         });
       `,
-      errors: [{ message: ERROR_MSG }],
+      errors: [{ message: DEFAULT_ERROR_MSG }],
     },
     // Nested apiTest inside apiTest.describe missing apiClient
     {
@@ -170,7 +172,7 @@ ruleTester.run('@kbn/eslint/scout_require_api_client_in_api_test', rule, {
           apiTest('inner missing', () => {});
         });
       `,
-      errors: [{ message: ERROR_MSG }],
+      errors: [{ message: DEFAULT_ERROR_MSG }],
     },
     // Nested blocks missing apiClient
     {
@@ -181,7 +183,7 @@ ruleTester.run('@kbn/eslint/scout_require_api_client_in_api_test', rule, {
           }
         });
       `,
-      errors: [{ message: ERROR_MSG }],
+      errors: [{ message: DEFAULT_ERROR_MSG }],
     },
     // Nested helper function missing apiClient
     {
@@ -193,7 +195,7 @@ ruleTester.run('@kbn/eslint/scout_require_api_client_in_api_test', rule, {
           helper(apiClient);
         });
       `,
-      errors: [{ message: ERROR_MSG }],
+      errors: [{ message: DEFAULT_ERROR_MSG }],
     },
     // Arrow function inside test
     {
@@ -202,7 +204,7 @@ ruleTester.run('@kbn/eslint/scout_require_api_client_in_api_test', rule, {
         const callApi = () => apiClient.get('/bar');
       });
     `,
-      errors: [{ message: ERROR_MSG }],
+      errors: [{ message: DEFAULT_ERROR_MSG }],
     },
     // External helper without apiClient usage
     {
@@ -214,7 +216,7 @@ ruleTester.run('@kbn/eslint/scout_require_api_client_in_api_test', rule, {
         externalHelper();
       });
     `,
-      errors: [{ message: ERROR_MSG }],
+      errors: [{ message: DEFAULT_ERROR_MSG }],
     },
     // Passing apiClient to a variable but never using it
     {
@@ -224,7 +226,50 @@ ruleTester.run('@kbn/eslint/scout_require_api_client_in_api_test', rule, {
         fn(apiClient);
       });
     `,
-      errors: [{ message: ERROR_MSG }],
+      errors: [{ message: DEFAULT_ERROR_MSG }],
     },
   ],
 });
+
+// --- Tests with alternativeFixtures option ---
+const altOptions = [{ alternativeFixtures: ['esClient'] }];
+
+ruleTester.run(
+  '@kbn/eslint/scout_require_api_client_in_api_test (with alternativeFixtures)',
+  rule,
+  {
+    valid: [
+      // apiClient still accepted when alternativeFixtures is configured
+      {
+        code: dedent`
+        apiTest('uses apiClient', async ({ apiClient }) => {
+          await apiClient.get('/foo');
+        });
+      `,
+        options: altOptions,
+      },
+      // Alternative fixture used instead of apiClient
+      {
+        code: dedent`
+        apiTest('uses esClient', async ({ esClient }) => {
+          await esClient.load('path/to/archive');
+        });
+      `,
+        options: altOptions,
+      },
+    ],
+
+    invalid: [
+      // Neither apiClient nor alternative fixture used
+      {
+        code: dedent`
+        apiTest('uses neither', async () => {
+          console.log('no fixture');
+        });
+      `,
+        options: altOptions,
+        errors: [{ message: ALT_ERROR_MSG }],
+      },
+    ],
+  }
+);
