@@ -20,6 +20,7 @@ import {
 import type { monaco } from '@kbn/monaco';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { UrlTemplateEditor } from '@kbn/kibana-react-plugin/public';
+import { validateUrl } from '@kbn/ui-actions-enhanced-plugin/public/drilldowns/url_drilldown/url_validation';
 import type { DrilldownEditorProps } from '@kbn/embeddable-plugin/public';
 import type { UrlDrilldownState } from '../../server';
 import {
@@ -35,7 +36,6 @@ import {
 } from './i18n';
 import { VariablePopover } from './variables/components/variable_popover';
 import { DEFAULT_ENCODE_URL, DEFAULT_OPEN_IN_NEW_TAB } from '../../common/constants';
-import { validateUrl } from './variables/url_validation/url_validation';
 
 type Props = DrilldownEditorProps<UrlDrilldownState> & {
   variables: UrlTemplateEditorVariable[];
