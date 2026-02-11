@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { filter, map, takeUntil, timer, mergeMap, Subject } from 'rxjs';
+import { catchError, exhaustMap, filter, from, map, of, tap, timer, type Subscription } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
@@ -20,32 +20,41 @@ import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { getInProgressSessionIds, setInProgressSessionIds } from './in_progress_session';
 
 export class BackgroundSearchNotifier {
-  private stop$?: Subject<void>;
+  private pollingSubscription?: Subscription;
 
   constructor(private sessionsClient: ISessionsClient, private core: CoreStart) {}
 
-  public async startPolling(interval: number) {
-    this.stop$ = new Subject();
+  public startPolling(interval: number) {
+    this.stopPolling();
 
-    timer(0, interval)
+    this.pollingSubscription = timer(0, interval)
       .pipe(
-        takeUntil(this.stop$),
         map(getInProgressSessionIds),
         filter((inProgress) => inProgress.length > 0),
-        mergeMap(async (inProgress) => ({
-          loadedStatuses: await this.sessionsClient.status(inProgress),
-          existingIds: inProgress,
-        })),
+        exhaustMap((existingIds) =>
+          from(this.sessionsClient.status(existingIds)).pipe(
+            map((loadedStatuses) => ({ loadedStatuses, existingIds })),
+            catchError(() =>
+              of({
+                loadedStatuses: { statuses: {} } as {
+                  statuses: Record<string, SearchSessionStatusResponse>;
+                },
+                existingIds,
+              })
+            )
+          )
+        ),
         map(({ loadedStatuses, existingIds }) =>
           this.groupSessions(loadedStatuses.statuses, existingIds)
         ),
-        map((sessions) => this.updateSessions(sessions))
+        tap((sessions) => this.updateSessions(sessions))
       )
       .subscribe();
   }
 
   public stopPolling() {
-    this.stop$?.next();
+    this.pollingSubscription?.unsubscribe();
+    this.pollingSubscription = undefined;
   }
 
   private groupSessions(
@@ -81,15 +90,19 @@ export class BackgroundSearchNotifier {
       deepLinkId: SEARCH_SESSIONS_MANAGEMENT_ID,
     });
 
-    completedIds.forEach(() => {
+    if (completedIds.length > 0) {
       this.core.notifications.toasts.addSuccess({
         title: i18n.translate('data.search.sessions.backgroundSearch.completedToastTitle', {
-          defaultMessage: 'Background search completed',
+          defaultMessage:
+            '{count, plural, one {Background search completed} other {Completed {count} background searches}}',
+          values: {
+            count: completedIds.length,
+          },
         }),
         text: toMountPoint(
           <FormattedMessage
             id="data.search.sessions.backgroundSearch.completedToastText"
-            defaultMessage="Background search completed. <link>View results in Background Search</link>"
+            defaultMessage="<link>View results in Background Search</link>"
             values={{
               link: (chunks: React.ReactNode) => (
                 <EuiLink href={managementUrl} data-test-subj="backgroundSearchCompletedToastLink">
@@ -101,17 +114,21 @@ export class BackgroundSearchNotifier {
           this.core
         ),
       });
-    });
+    }
 
-    failedIds.forEach(() => {
+    if (failedIds.length > 0) {
       this.core.notifications.toasts.addDanger({
         title: i18n.translate('data.search.sessions.backgroundSearch.failedToastTitle', {
-          defaultMessage: 'Background search failed',
+          defaultMessage:
+            '{count, plural, one {Background search failed} other {Failed {count} background searches}}',
+          values: {
+            count: failedIds.length,
+          },
         }),
         text: toMountPoint(
           <FormattedMessage
             id="data.search.sessions.backgroundSearch.failedToastText"
-            defaultMessage="A background search has failed. <link>Check Background Search</link>"
+            defaultMessage="<link>Check Background Search</link>"
             values={{
               link: (chunks: React.ReactNode) => (
                 <EuiLink href={managementUrl} data-test-subj="backgroundSearchFailedToastLink">
@@ -123,6 +140,6 @@ export class BackgroundSearchNotifier {
           this.core
         ),
       });
-    });
+    }
   }
 }

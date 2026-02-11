@@ -41,7 +41,7 @@ describe('BackgroundSearchNotifier', () => {
         mockGetInProgressSessionIds.mockReturnValue([]);
 
         // When
-        await backgroundSearchNotifier.startPolling(1000);
+        backgroundSearchNotifier.startPolling(1000);
         jest.advanceTimersByTime(1000);
 
         // Then
@@ -68,7 +68,7 @@ describe('BackgroundSearchNotifier', () => {
         mockGetInProgressSessionIds.mockReturnValue(['session-1', 'session-2']);
 
         // When
-        await backgroundSearchNotifier.startPolling(1000);
+        backgroundSearchNotifier.startPolling(1000);
         await jest.advanceTimersByTimeAsync(1000);
 
         // Then
@@ -101,13 +101,13 @@ describe('BackgroundSearchNotifier', () => {
           .mockReturnValueOnce([]);
 
         // When
-        await backgroundSearchNotifier.startPolling(1000);
+        backgroundSearchNotifier.startPolling(1000);
         await jest.advanceTimersByTimeAsync(1000);
         backgroundSearchNotifier.stopPolling();
 
         // Then
         expect(mockSetInProgressSessionIds).toHaveBeenCalledWith([]);
-        expect(coreStartMock.notifications.toasts.addSuccess).toHaveBeenCalledTimes(2);
+        expect(coreStartMock.notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
         expect(coreStartMock.notifications.toasts.addDanger).not.toHaveBeenCalled();
       });
     });
@@ -134,13 +134,13 @@ describe('BackgroundSearchNotifier', () => {
           .mockReturnValueOnce([]);
 
         // When
-        await backgroundSearchNotifier.startPolling(1000);
+        backgroundSearchNotifier.startPolling(1000);
         await jest.advanceTimersByTimeAsync(1000);
         backgroundSearchNotifier.stopPolling();
 
         // Then
         expect(mockSetInProgressSessionIds).toHaveBeenCalledWith([]);
-        expect(coreStartMock.notifications.toasts.addDanger).toHaveBeenCalledTimes(2);
+        expect(coreStartMock.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
         expect(coreStartMock.notifications.toasts.addSuccess).not.toHaveBeenCalled();
       });
     });
@@ -169,7 +169,7 @@ describe('BackgroundSearchNotifier', () => {
           .mockReturnValueOnce(['session-1', 'session-4']);
 
         // When
-        await backgroundSearchNotifier.startPolling(1000);
+        backgroundSearchNotifier.startPolling(1000);
         await jest.advanceTimersByTimeAsync(1000);
         backgroundSearchNotifier.stopPolling();
 
@@ -199,7 +199,7 @@ describe('BackgroundSearchNotifier', () => {
         mockGetInProgressSessionIds.mockReturnValue(['session-1', 'session-2', 'session-3']);
 
         // When
-        await backgroundSearchNotifier.startPolling(1000);
+        backgroundSearchNotifier.startPolling(1000);
         await jest.advanceTimersByTimeAsync(1000);
 
         // Then
@@ -210,6 +210,83 @@ describe('BackgroundSearchNotifier', () => {
         ]);
         expect(coreStartMock.notifications.toasts.addSuccess).not.toHaveBeenCalled();
         expect(coreStartMock.notifications.toasts.addDanger).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when status endpoint throws', () => {
+      it('should continue polling on the next tick', async () => {
+        // Given
+        const sessionsClientMock = getSessionsClientMock({
+          status: jest
+            .fn()
+            .mockRejectedValueOnce(new Error('network'))
+            .mockResolvedValueOnce({
+              statuses: {
+                'session-1': { status: 'complete' },
+              },
+            }),
+        });
+        const coreStartMock = coreMock.createStart();
+        const backgroundSearchNotifier = new BackgroundSearchNotifier(
+          sessionsClientMock,
+          coreStartMock
+        );
+        mockGetInProgressSessionIds
+          .mockReturnValueOnce(['session-1'])
+          .mockReturnValueOnce(['session-1'])
+          .mockReturnValueOnce([]);
+
+        // When
+        backgroundSearchNotifier.startPolling(1000);
+        await jest.advanceTimersByTimeAsync(1000);
+        backgroundSearchNotifier.stopPolling();
+
+        // Then
+        expect(sessionsClientMock.status).toHaveBeenCalledTimes(2);
+        expect(coreStartMock.notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
+        expect(coreStartMock.notifications.toasts.addDanger).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when status request is slow', () => {
+      it('should not overlap polling requests', async () => {
+        // Given
+        const deferred: { promise: Promise<any>; resolve: (value: any) => void } = {
+          promise: Promise.resolve(),
+          resolve: () => undefined,
+        };
+        deferred.promise = new Promise((resolve) => {
+          deferred.resolve = resolve;
+        });
+
+        const sessionsClientMock = getSessionsClientMock({
+          status: jest.fn().mockReturnValue(deferred.promise),
+        });
+        const coreStartMock = coreMock.createStart();
+        const backgroundSearchNotifier = new BackgroundSearchNotifier(
+          sessionsClientMock,
+          coreStartMock
+        );
+        mockGetInProgressSessionIds.mockReturnValue(['session-1']);
+
+        // When
+        backgroundSearchNotifier.startPolling(1000);
+        jest.advanceTimersByTime(3000);
+
+        // Then (no overlap while the first request is still in-flight)
+        expect(sessionsClientMock.status).toHaveBeenCalledTimes(1);
+
+        // When the request completes, the next tick should be able to run again
+        deferred.resolve({
+          statuses: {
+            'session-1': { status: 'in_progress' },
+          },
+        });
+        await jest.advanceTimersByTimeAsync(0);
+        await jest.advanceTimersByTimeAsync(1000);
+
+        expect(sessionsClientMock.status).toHaveBeenCalledTimes(2);
+        backgroundSearchNotifier.stopPolling();
       });
     });
   });
