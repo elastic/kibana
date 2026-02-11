@@ -98,27 +98,20 @@ export async function generateSignificantEvents({
     formattedAnalysis = formatDocumentAnalysis(analysis, { dropEmpty: true });
   }
 
-  const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
-
-  let fieldCapsResponse;
-  try {
-    fieldCapsResponse = await esClient.fieldCaps({
-      index: stream.name,
-      fields: '*',
-      index_filter: {
-        bool: {
-          filter: dateRangeQuery(start, end),
-        },
+  const fieldCapsResponse = await esClient.fieldCaps({
+    index: stream.name,
+    fields: '*',
+    index_filter: {
+      bool: {
+        filter: dateRangeQuery(start, end),
       },
-    });
-  } catch (error) {
-    throw new Error(
-      `Failure to retrieve mappings to determine field eligibility: ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-  }
+    },
+  }).catch((error) => {
+    throw new Error(`Failure to retrieve mappings to determine field eligibility: ${error.message}`);
+  });
+
   const mappedFields = new Set(Object.keys(fieldCapsResponse.fields));
+  const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
 
   logger.trace('Generating significant events via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
