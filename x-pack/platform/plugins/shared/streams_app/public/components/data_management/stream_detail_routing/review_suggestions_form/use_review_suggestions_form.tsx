@@ -23,6 +23,8 @@ export interface FetchSuggestedPartitionsParams {
   connectorId: string;
   start: number;
   end: number;
+  userPrompt?: string;
+  existingPartitions?: PartitionSuggestion[];
 }
 
 export interface PartitionSuggestion {
@@ -63,6 +65,10 @@ export function useReviewSuggestionsForm() {
               connector_id: params.connectorId,
               start: params.start,
               end: params.end,
+              ...(params.userPrompt ? { user_prompt: params.userPrompt } : {}),
+              ...(params.existingPartitions?.length
+                ? { existing_partitions: params.existingPartitions }
+                : {}),
             },
           },
         })

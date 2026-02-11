@@ -186,6 +186,11 @@ You now submit a more detailed and complete set of partitions.
 *   Use the `exists` condition to find logs that have a uniquely identifying field.
 *   The goal is **one cluster per partition** and an **empty unmatched bucket**.
 
+### **User Guidance & Refinement**
+
+*   If **user guidance** is provided, treat it as a primary input alongside the clustering data. The user has domain knowledge about their data and their instructions should strongly influence your partitioning strategy.
+*   If **current partitions** are provided, treat them as a starting point for refinement. Adjust, split, merge, or restructure them as needed based on user guidance and clustering data, but avoid discarding useful work unless it conflicts with the user's instructions or the data.
+
 ### **System Variables**
 
 The schema for the `condition` object is defined below.

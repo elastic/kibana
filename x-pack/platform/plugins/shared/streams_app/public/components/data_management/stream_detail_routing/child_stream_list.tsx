@@ -38,7 +38,7 @@ import {
 } from './state_management/stream_routing_state_machine';
 import { IdleQueryStreamEntry, CreatingQueryStreamEntry } from './query_stream_entry';
 import { ReviewSuggestionsForm } from './review_suggestions_form/review_suggestions_form';
-import { GenerateSuggestionButton } from './review_suggestions_form/generate_suggestions_button';
+import { GenerateSuggestionsPopover } from './review_suggestions_form/generate_suggestions_popover';
 import { NoSuggestionsCallout } from './review_suggestions_form/no_suggestions_callout';
 import { useReviewSuggestionsForm } from './review_suggestions_form/use_review_suggestions_form';
 import { useTimefilter } from '../../../hooks/use_timefilter';
@@ -168,12 +168,24 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
     }
   };
 
-  const getSuggestionsForStream = (connectorId: string) => {
+  const getSuggestionsForStream = (connectorId: string, userPrompt?: string) => {
     fetchSuggestions({
       streamName: definition.stream.name,
       connectorId,
       start: timeState.start,
       end: timeState.end,
+      userPrompt,
+    });
+  };
+
+  const refineSuggestionsForStream = (connectorId: string, userPrompt?: string) => {
+    fetchSuggestions({
+      streamName: definition.stream.name,
+      connectorId,
+      start: timeState.start,
+      end: timeState.end,
+      userPrompt,
+      existingPartitions: suggestions ?? undefined,
     });
   };
 
@@ -193,15 +205,12 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
         >
           {aiFeatures?.enabled && !isLoadingSuggestions && !suggestions && (
             <EuiFlexItem grow={false}>
-              <GenerateSuggestionButton
-                size="s"
-                onClick={getSuggestionsForStream}
+              <GenerateSuggestionsPopover
+                onGenerate={getSuggestionsForStream}
                 isLoading={isLoadingSuggestions}
                 isDisabled={isEditingOrReorderingStreams}
                 aiFeatures={aiFeatures}
-              >
-                {suggestPartitionsWithAIText}
-              </GenerateSuggestionButton>
+              />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
@@ -231,15 +240,12 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
       isAiEnabled={!!aiFeatures?.enabled}
     >
       {aiFeatures?.enabled && (
-        <GenerateSuggestionButton
-          size="s"
-          onClick={getSuggestionsForStream}
+        <GenerateSuggestionsPopover
+          onGenerate={getSuggestionsForStream}
           isLoading={isLoadingSuggestions}
           isDisabled={isEditingOrReorderingStreams}
           aiFeatures={aiFeatures}
-        >
-          {suggestPartitionsWithAIText}
-        </GenerateSuggestionButton>
+        />
       )}
     </NoDataEmptyPrompt>
   ) : (
@@ -329,7 +335,7 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
                   aiFeatures={aiFeatures}
                   definition={definition}
                   isLoadingSuggestions={isLoadingSuggestions}
-                  onRegenerate={getSuggestionsForStream}
+                  onRegenerate={refineSuggestionsForStream}
                   previewSuggestion={previewSuggestion}
                   rejectSuggestion={rejectSuggestion}
                   resetForm={resetForm}
@@ -463,13 +469,6 @@ const cannotManageRoutingRulesText = i18n.translate(
   'xpack.streams.streamDetailRouting.rules.onlySimulate',
   {
     defaultMessage: "You don't have sufficient privileges to create new streams, only simulate.",
-  }
-);
-
-const suggestPartitionsWithAIText = i18n.translate(
-  'xpack.streams.streamDetailRouting.childStreamList.suggestPartitions',
-  {
-    defaultMessage: 'Suggest partitions with AI',
   }
 );
 

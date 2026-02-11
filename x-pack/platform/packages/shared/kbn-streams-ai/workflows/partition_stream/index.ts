@@ -27,6 +27,8 @@ export async function partitionStream({
   end,
   maxSteps,
   signal,
+  userPrompt,
+  existingPartitions = [],
 }: {
   definition: Streams.ingest.all.Definition;
   inferenceClient: BoundInferenceClient;
@@ -36,6 +38,8 @@ export async function partitionStream({
   end: number;
   maxSteps?: number | undefined;
   signal: AbortSignal;
+  userPrompt?: string;
+  existingPartitions?: Array<{ name: string; condition: Condition }>;
 }): Promise<Array<{ name: string; condition: Condition }>> {
   const initialClusters = await clusterLogs({
     esClient,
@@ -43,7 +47,7 @@ export async function partitionStream({
     end,
     index: definition.name,
     logger,
-    partitions: [],
+    partitions: existingPartitions,
     size: 1000,
   });
 
@@ -64,6 +68,10 @@ export async function partitionStream({
       stream: definition,
       initial_clustering: JSON.stringify(initialClusters),
       condition_schema: JSON.stringify(schema),
+      ...(userPrompt ? { user_prompt: userPrompt } : {}),
+      ...(existingPartitions?.length
+        ? { existing_partitions: JSON.stringify(existingPartitions) }
+        : {}),
     },
     maxSteps,
     toolCallbacks: {

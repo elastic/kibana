@@ -11,7 +11,7 @@ import { css } from '@emotion/css';
 import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { NestedView } from '../../../nested_view';
-import { GenerateSuggestionButton } from './generate_suggestions_button';
+import { GenerateSuggestionsPopover } from './generate_suggestions_popover';
 import { SuggestedStreamPanel } from './suggested_stream_panel';
 import type {
   PartitionSuggestion,
@@ -36,7 +36,7 @@ export interface ReviewSuggestionsFormProps
     | 'updateSuggestion'
   > {
   suggestions: PartitionSuggestion[];
-  onRegenerate: (connectorId: string) => void;
+  onRegenerate: (connectorId: string, userPrompt?: string) => void;
   definition: Streams.WiredStream.GetResponse;
   aiFeatures: AIFeatures;
 }
@@ -158,20 +158,18 @@ export function ReviewSuggestionsForm({
               </NestedView>
             ))}
             <EuiSpacer size="m" />
-            <GenerateSuggestionButton
-              iconType="refresh"
-              size="s"
-              onClick={onRegenerate}
+            <GenerateSuggestionsPopover
+              onGenerate={onRegenerate}
               isLoading={isLoadingSuggestions}
               aiFeatures={aiFeatures}
-            >
-              {i18n.translate(
+              buttonLabel={i18n.translate(
                 'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
                 {
                   defaultMessage: 'Regenerate',
                 }
               )}
-            </GenerateSuggestionButton>
+              buttonIconType="refresh"
+            />
           </>
         )}
       </EuiCallOut>
