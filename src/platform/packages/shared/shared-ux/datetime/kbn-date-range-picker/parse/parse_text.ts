@@ -73,6 +73,9 @@ const getDelimiterPattern = (delimiter: string) => {
 
 /**
  * Main parsing function to transform text into a time range
+ *
+ * TODO: Move preset matching out of this function into a separate step (e.g. `matchPreset`),
+ * so this function stays focused on text parsing only.
  */
 export function textToTimeRange(text: string, options?: TimeRangeTransformOptions): TimeRange {
   const trimmed = text.trim();
