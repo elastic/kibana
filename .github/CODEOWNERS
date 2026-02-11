@@ -947,7 +947,7 @@ x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-act
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
-x-pack/platform/packages/shared/ai-infra/anonymization-common @elastic/security-generative-ai @elastic/workchat-eng @elastic/security-threat-hunting
+x-pack/platform/packages/shared/ai-infra/anonymization-common @elastic/security-generative-ai
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/inference-langchain @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks @elastic/appex-ai-infra
@@ -1074,7 +1074,7 @@ x-pack/platform/plugins/shared/ai_infra/llm_tasks @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/aiops @elastic/ml-ui
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
-x-pack/platform/plugins/shared/anonymization @elastic/security-generative-ai @elastic/workchat-eng @elastic/security-threat-hunting
+x-pack/platform/plugins/shared/anonymization @elastic/security-generative-ai
 x-pack/platform/plugins/shared/apm_sources_access @elastic/obs-presentation-team
 x-pack/platform/plugins/shared/automatic_import @elastic/integration-experience
 x-pack/platform/plugins/shared/automatic_import_v2 @elastic/integration-experience

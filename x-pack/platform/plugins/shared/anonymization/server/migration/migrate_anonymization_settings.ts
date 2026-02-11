@@ -172,11 +172,11 @@ export const migrateAnonymizationSettings = async ({
         updateDoc.rules = {
           ...(updateDoc.rules ?? {}),
           regex_rules: enabledRegexRules.map((r, i) => ({
-          id: `migrated-regex-${i}`,
-          type: 'regex',
-          entity_class: r.entityClass,
-          pattern: r.pattern,
-          enabled: true,
+            id: `migrated-regex-${i}`,
+            type: 'regex',
+            entity_class: r.entityClass,
+            pattern: r.pattern,
+            enabled: true,
           })),
         };
       }
@@ -186,11 +186,11 @@ export const migrateAnonymizationSettings = async ({
         updateDoc.rules = {
           ...(updateDoc.rules ?? {}),
           ner_rules: enabledNerRules.map((r, i) => ({
-          id: `migrated-ner-${i}`,
-          type: 'ner',
-          model_id: r.modelId,
-          allowed_entity_classes: r.allowedEntityClasses ?? [],
-          enabled: true,
+            id: `migrated-ner-${i}`,
+            type: 'ner',
+            model_id: r.modelId,
+            allowed_entity_classes: r.allowedEntityClasses ?? [],
+            enabled: true,
           })),
         };
       }
