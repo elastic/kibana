@@ -18,7 +18,7 @@ import type {
   MicrosoftDefenderEndpointSecrets,
 } from '@kbn/connector-schemas/microsoft_defender_endpoint';
 import { CONNECTOR_ID } from '@kbn/connector-schemas/microsoft_defender_endpoint';
-import type { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/shared_connector_token_client';
+import type { SharedConnectorTokenClient } from '@kbn/actions-plugin/server/lib/shared_connector_token_client';
 import { MicrosoftDefenderEndpointConnector } from './microsoft_defender_endpoint';
 import type { ConnectorInstanceMock } from '../lib/mocks';
 import { createAxiosResponseMock, createConnectorInstanceMock } from '../lib/mocks';
@@ -48,7 +48,7 @@ const createConnectorTokenMock = (overrides: Partial<ConnectorToken> = {}): Conn
 };
 
 const applyConnectorTokenClientInstanceMock = (
-  connectorTokenClient: ConnectorTokenClient
+  connectorTokenClient: SharedConnectorTokenClient
 ): void => {
   // Make connector token client a mocked class instance
   let cachedTokenMock: ConnectorToken | null = null;

@@ -91,7 +91,7 @@ import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
 import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
-import { ConnectorTokenClientFacade } from './lib/connector_token_client';
+import { ConnectorTokenClient } from './lib/connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import type { ConnectorWithOptionalDeprecation } from './application/connector/lib';
 import { isConnectorDeprecated } from './application/connector/lib';
@@ -531,7 +531,7 @@ export class ActionsPlugin
         }),
         auditLogger: this.security?.audit.asScoped(request),
         usageCounter: this.usageCounter,
-        connectorTokenClient: new ConnectorTokenClientFacade({
+        connectorTokenClient: new ConnectorTokenClient({
           unsecuredSavedObjectsClient,
           encryptedSavedObjectsClient,
           logger,
@@ -755,7 +755,7 @@ export class ActionsPlugin
       return {
         savedObjectsClient: getScopedClient(request),
         scopedClusterClient: elasticsearch.client.asScoped(request).asCurrentUser,
-        connectorTokenClient: new ConnectorTokenClientFacade({
+        connectorTokenClient: new ConnectorTokenClient({
           unsecuredSavedObjectsClient: unsecuredSavedObjectsClient(request),
           encryptedSavedObjectsClient,
           logger: this.logger,
@@ -774,7 +774,7 @@ export class ActionsPlugin
       return {
         savedObjectsClient: getSavedObjectRepository(),
         scopedClusterClient: elasticsearch.client.asInternalUser,
-        connectorTokenClient: new ConnectorTokenClientFacade({
+        connectorTokenClient: new ConnectorTokenClient({
           unsecuredSavedObjectsClient: unsecuredSavedObjectsRepository(),
           encryptedSavedObjectsClient,
           logger: this.logger,
@@ -859,7 +859,7 @@ export class ActionsPlugin
             }),
             auditLogger: security?.audit.asScoped(request),
             usageCounter,
-            connectorTokenClient: new ConnectorTokenClientFacade({
+            connectorTokenClient: new ConnectorTokenClient({
               unsecuredSavedObjectsClient,
               encryptedSavedObjectsClient,
               logger,

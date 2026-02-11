@@ -13,11 +13,11 @@ import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import type { CrowdstrikeConfig, CrowdstrikeSecrets } from '@kbn/connector-schemas/crowdstrike';
 import type { ConnectorToken } from '@kbn/actions-plugin/server/types';
-import type { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/shared_connector_token_client';
+import type { SharedConnectorTokenClient } from '@kbn/actions-plugin/server/lib/shared_connector_token_client';
 
 describe('CrowdStrikeTokenManager', () => {
   let csTokenManager: CrowdStrikeTokenManager;
-  let connectorTokenClientMock: jest.Mocked<ConnectorTokenClient>;
+  let connectorTokenClientMock: jest.Mocked<SharedConnectorTokenClient>;
   let usageCollector: ConnectorUsageCollector;
   let mockRequest: jest.Mock;
 
@@ -41,7 +41,7 @@ describe('CrowdStrikeTokenManager', () => {
     mockRequest = jest.fn();
     const mockServices = actionsMock.createServices();
     connectorTokenClientMock =
-      mockServices.connectorTokenClient as unknown as jest.Mocked<ConnectorTokenClient>;
+      mockServices.connectorTokenClient as unknown as jest.Mocked<SharedConnectorTokenClient>;
 
     // Apply connector token client mock behavior
     let cachedTokenMock: ConnectorToken | null = null;

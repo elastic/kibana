@@ -45,7 +45,7 @@ interface UpdateOrReplaceOptions {
   deleteExisting: boolean;
 }
 
-export class ConnectorTokenClient {
+export class SharedConnectorTokenClient {
   private readonly logger: Logger;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
@@ -440,6 +440,3 @@ export class ConnectorTokenClient {
     }
   }
 }
-
-// Compatibility alias for existing imports
-export { ConnectorTokenClient as SharedConnectorTokenClient };

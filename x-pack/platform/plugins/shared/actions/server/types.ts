@@ -20,7 +20,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type * as z3 from '@kbn/zod';
 import type * as z4 from '@kbn/zod/v4';
-import type { ConnectorTokenClientFacade } from './lib/connector_token_client';
+import type { ConnectorTokenClient } from './lib/connector_token_client';
 import type { ActionTypeExecutorResult, SubFeature, ActionTypeSource } from '../common';
 import type { ActionTypeRegistry } from './action_type_registry';
 import type { ActionsClient } from './actions_client';
@@ -41,7 +41,7 @@ export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefine
 export type ActionTypeConfig = Record<string, unknown>;
 export type ActionTypeSecrets = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
-export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClientFacade>;
+export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>;
 
 import type { Connector, ConnectorWithExtraFindData } from './application/connector/types';
 import type { ActionExecutionSource, ActionExecutionSourceType } from './lib';
@@ -50,13 +50,13 @@ import type { ConnectorUsageCollector } from './usage';
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: ElasticsearchClient;
-  connectorTokenClient: ConnectorTokenClientFacade;
+  connectorTokenClient: ConnectorTokenClient;
 }
 
 export interface UnsecuredServices {
   savedObjectsClient: ISavedObjectsRepository;
   scopedClusterClient: ElasticsearchClient;
-  connectorTokenClient: ConnectorTokenClientFacade;
+  connectorTokenClient: ConnectorTokenClient;
 }
 
 export interface HookServices {

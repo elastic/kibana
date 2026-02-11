@@ -8,7 +8,7 @@
 import sinon from 'sinon';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { ConnectorTokenClientFacade } from './connector_token_client';
+import { ConnectorTokenClient } from './connector_token_client';
 import type { Logger } from '@kbn/core/server';
 import type { ConnectorToken } from '../types';
 import * as allRetry from './retry_if_conflicts';
@@ -31,7 +31,7 @@ jest.mock('@kbn/core-saved-objects-utils-server', () => {
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 
-let connectorTokenClient: ConnectorTokenClientFacade;
+let connectorTokenClient: ConnectorTokenClient;
 
 let clock: sinon.SinonFakeTimers;
 
@@ -42,7 +42,7 @@ beforeEach(() => {
   clock.reset();
   jest.resetAllMocks();
   jest.restoreAllMocks();
-  connectorTokenClient = new ConnectorTokenClientFacade({
+  connectorTokenClient = new ConnectorTokenClient({
     unsecuredSavedObjectsClient,
     encryptedSavedObjectsClient,
     logger,

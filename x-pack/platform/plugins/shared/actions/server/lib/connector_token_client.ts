@@ -7,7 +7,7 @@
 
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { Logger, SavedObjectsClientContract, SavedObjectAttributes } from '@kbn/core/server';
-import { ConnectorTokenClient as SharedConnectorTokenClient } from './shared_connector_token_client';
+import { SharedConnectorTokenClient } from './shared_connector_token_client';
 import type { ConnectorToken, UserConnectorToken, UserConnectorOAuthToken } from '../types';
 import { UserConnectorTokenClient } from './user_connector_token_client';
 
@@ -48,7 +48,7 @@ interface UpdateOrReplaceOptions {
   deleteExisting: boolean;
 }
 
-export class ConnectorTokenClientFacade {
+export class ConnectorTokenClient {
   private readonly logger: Logger;
   private readonly sharedClient: SharedConnectorTokenClient;
   private readonly userClient: UserConnectorTokenClient;
@@ -284,6 +284,3 @@ export class ConnectorTokenClientFacade {
     return this.userClient;
   }
 }
-
-// Compatibility alias for existing code expecting ConnectorTokenClient name
-export { ConnectorTokenClientFacade as ConnectorTokenClient };

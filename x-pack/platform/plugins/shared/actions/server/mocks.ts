@@ -20,7 +20,7 @@ import type { PluginSetupContract, PluginStartContract } from './plugin';
 import { renderActionParameterTemplates } from './plugin';
 import type { Services, UnsecuredServices } from './types';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
-import { ConnectorTokenClientFacade } from './lib/connector_token_client';
+import { ConnectorTokenClient } from './lib/connector_token_client';
 import { unsecuredActionsClientMock } from './unsecured_actions_client/unsecured_actions_client.mock';
 export { actionsAuthorizationMock };
 export { actionsClientMock };
@@ -92,7 +92,7 @@ const createServicesMock = () => {
   > = lazyObject({
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
-    connectorTokenClient: new ConnectorTokenClientFacade({
+    connectorTokenClient: new ConnectorTokenClient({
       unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
       encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
       logger,
@@ -109,7 +109,7 @@ const createUnsecuredServicesMock = () => {
   > = lazyObject({
     savedObjectsClient: savedObjectsRepositoryMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
-    connectorTokenClient: new ConnectorTokenClientFacade({
+    connectorTokenClient: new ConnectorTokenClient({
       unsecuredSavedObjectsClient: savedObjectsRepositoryMock.create(),
       encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
       logger,
