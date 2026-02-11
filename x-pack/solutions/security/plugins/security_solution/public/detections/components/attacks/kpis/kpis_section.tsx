@@ -8,6 +8,7 @@
 import React, { memo, useMemo, useState } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { KpiPanel } from '../../alerts_kpis/common/components';
@@ -32,6 +33,8 @@ export interface KPIsSectionProps {
   assignees: AssigneesIdsSelection[];
   /** Selected connector IDs to filter by */
   selectedConnectorNames: string[];
+  /** DataView for the attacks page */
+  dataView: DataView;
 }
 
 /**
@@ -39,7 +42,7 @@ export interface KPIsSectionProps {
  * Supports view selection (Summary, Trends, Count, Treemap).
  */
 export const KPIsSection = memo(
-  ({ pageFilters, assignees, selectedConnectorNames }: KPIsSectionProps) => {
+  ({ pageFilters, assignees, selectedConnectorNames, dataView }: KPIsSectionProps) => {
     const { toggleStatus: isExpanded, setToggleStatus: setIsExpanded } = useQueryToggle(
       ATTACKS_KPI_SECTION_PANEL_ID
     );
@@ -84,11 +87,11 @@ export const KPIsSection = memo(
         return null;
       }
       if (kpiViewSelection === KpiViewSelection.Summary) {
-        return <SummaryViewContent filters={filters} query={query} />;
+        return <SummaryViewContent filters={filters} query={query} dataView={dataView} />;
       }
       // Other views are empty in this PR - content will be added in a follow-up PR
       return <EuiFlexItem />;
-    }, [isExpanded, kpiViewSelection, filters, query]);
+    }, [isExpanded, kpiViewSelection, filters, query, dataView]);
 
     return (
       <KpiPanel
