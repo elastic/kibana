@@ -13,3 +13,6 @@ export type {
   InlineActionKind,
   TriggerMatchResult,
 } from './types';
+export { getRectAtOffset } from './cursor_rect';
+export { InlineActionPopover } from './inline_action_popover';
+export type { AnchorPosition } from './inline_action_popover';

@@ -13,14 +13,15 @@ export interface MessageEditorInstance {
   _internal: {
     ref: React.RefObject<HTMLDivElement>;
     onChange: () => void;
+    /** Current inline action trigger state */
+    triggerMatch: TriggerMatchResult;
   };
   focus: () => void;
   getContent: () => string;
   setContent: (text: string) => void;
   clear: () => void;
   isEmpty: boolean;
-  /** Current inline action trigger state */
-  triggerMatch: TriggerMatchResult;
+
   /** Dismiss the active trigger menu */
   cancelTrigger: () => void;
 }
@@ -66,6 +67,7 @@ export const useMessageEditor = (): MessageEditorInstance => {
             triggerState.handleInput(ref.current);
           }
         },
+        triggerMatch: triggerState.match,
       },
       focus: () => {
         ref.current?.focus();
@@ -91,7 +93,6 @@ export const useMessageEditor = (): MessageEditorInstance => {
         }
       },
       isEmpty,
-      triggerMatch: triggerState.match,
       cancelTrigger: triggerState.dismiss,
     }),
     [isEmpty, syncIsEmpty, triggerState]

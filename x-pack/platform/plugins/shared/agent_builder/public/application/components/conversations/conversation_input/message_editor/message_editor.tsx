@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, keys, useGeneratedHtmlId, useEuiFontSize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { MessageEditorInstance } from './use_message_editor';
+import type { TriggerMatchResult, AnchorPosition } from './inline_actions';
+import { getRectAtOffset, InlineActionPopover } from './inline_actions';
 
 const EDITOR_MAX_HEIGHT = 240;
+
+const containerStyles = css`
+  position: relative;
+  flex-grow: 1;
+  height: 100%;
+`;
 
 const heightStyles = css`
   flex-grow: 1;
@@ -42,6 +50,46 @@ interface MessageEditorProps {
   'data-test-subj'?: string;
 }
 
+const useInlineActionsMenuAnchor = ({
+  triggerMatch,
+  messageEditorRef,
+  containerRef,
+}: {
+  triggerMatch: TriggerMatchResult;
+  messageEditorRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement>;
+}): AnchorPosition | null => {
+  const [anchorPosition, setAnchorPosition] = useState<AnchorPosition | null>(null);
+
+  useEffect(() => {
+    if (
+      !triggerMatch.isActive ||
+      !triggerMatch.activeTrigger ||
+      !messageEditorRef.current ||
+      !containerRef.current
+    ) {
+      setAnchorPosition(null);
+      return;
+    }
+
+    const { triggerStartOffset } = triggerMatch.activeTrigger;
+    const rect = getRectAtOffset(messageEditorRef.current, triggerStartOffset);
+    if (!rect) {
+      setAnchorPosition(null);
+      return;
+    }
+
+    const containerRect = containerRef.current.getBoundingClientRect();
+
+    setAnchorPosition({
+      left: rect.left - containerRect.left,
+      top: rect.top - containerRect.top,
+    });
+  }, [triggerMatch, messageEditorRef, containerRef]);
+
+  return anchorPosition;
+};
+
 export const MessageEditor: React.FC<MessageEditorProps> = ({
   messageEditor,
   onSubmit,
@@ -50,7 +98,13 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   'data-test-subj': dataTestSubj,
 }) => {
   const [isComposing, setIsComposing] = useState(false);
-  const { ref, onChange } = messageEditor._internal;
+  const { ref, onChange, triggerMatch } = messageEditor._internal;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const anchorPosition = useInlineActionsMenuAnchor({
+    triggerMatch,
+    messageEditorRef: ref,
+    containerRef,
+  });
   const editorId = useGeneratedHtmlId({ prefix: 'messageEditor' });
   const { euiTheme } = useEuiTheme();
   const placeholderStyles = css`
@@ -78,29 +132,36 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   };
 
   return (
-    <div
-      ref={ref}
-      id={editorId}
-      contentEditable={disabled ? 'false' : 'plaintext-only'}
-      role="textbox"
-      aria-multiline="true"
-      aria-label={editorAriaLabel}
-      aria-disabled={disabled}
-      tabIndex={0}
-      data-placeholder={placeholder}
-      data-test-subj={dataTestSubj}
-      css={editorStyles}
-      onInput={onChange}
-      onCompositionStart={handleCompositionStart}
-      onCompositionEnd={handleCompositionEnd}
-      onKeyDown={(event) => {
-        if (event.key === keys.ESCAPE) {
-          messageEditor.cancelTrigger();
-        } else if (!event.shiftKey && event.key === keys.ENTER && !isComposing) {
-          event.preventDefault();
-          onSubmit();
-        }
-      }}
-    />
+    <div ref={containerRef} css={containerStyles} data-test-subj={`${dataTestSubj}-container`}>
+      <div
+        ref={ref}
+        id={editorId}
+        contentEditable={disabled ? 'false' : 'plaintext-only'}
+        role="textbox"
+        aria-multiline="true"
+        aria-label={editorAriaLabel}
+        aria-disabled={disabled}
+        tabIndex={0}
+        data-placeholder={placeholder}
+        data-test-subj={dataTestSubj}
+        css={editorStyles}
+        onInput={onChange}
+        onCompositionStart={handleCompositionStart}
+        onCompositionEnd={handleCompositionEnd}
+        onKeyDown={(event) => {
+          if (event.key === keys.ESCAPE) {
+            messageEditor.cancelTrigger();
+          } else if (!event.shiftKey && event.key === keys.ENTER && !isComposing) {
+            event.preventDefault();
+            onSubmit();
+          }
+        }}
+      />
+      <InlineActionPopover
+        triggerMatch={triggerMatch}
+        onClose={messageEditor.cancelTrigger}
+        anchorPosition={anchorPosition}
+      />
+    </div>
   );
 };
