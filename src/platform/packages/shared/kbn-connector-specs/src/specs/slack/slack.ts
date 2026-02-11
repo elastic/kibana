@@ -12,6 +12,7 @@ import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 
 const SLACK_API_BASE = 'https://slack.com/api';
+const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Temporary: remove once OAuth UX is fully unblocked.
 
 /**
  * Slack connector using OAuth2 Authorization Code flow.
@@ -56,6 +57,36 @@ export const Slack: ConnectorSpec = {
           },
         },
       },
+      ...(ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH
+        ? ([
+            {
+              type: 'bearer',
+              defaults: {
+                token: '',
+              },
+              overrides: {
+                meta: {
+                  token: {
+                    sensitive: true,
+                    label: i18n.translate(
+                      'core.kibanaConnectorSpecs.slack.auth.temporaryManualToken.label',
+                      {
+                        defaultMessage: 'Temporary Slack user token',
+                      }
+                    ),
+                    helpText: i18n.translate(
+                      'core.kibanaConnectorSpecs.slack.auth.temporaryManualToken.helpText',
+                      {
+                        defaultMessage:
+                          'Temporary option for testing only. Paste a Slack user token (e.g. xoxp-...) here. Prefer the OAuth authorization flow when available.',
+                      }
+                    ),
+                  },
+                },
+              },
+            },
+          ] as const)
+        : []),
     ],
   },
 

@@ -38,8 +38,12 @@ describe('Slack', () => {
 
   it('should use oauth_authorization_code auth type', () => {
     expect(Slack.auth).toBeDefined();
-    expect(Slack.auth?.types).toHaveLength(1);
-    expect((Slack.auth?.types[0] as { type: string }).type).toBe('oauth_authorization_code');
+    expect(Slack.auth?.types.length).toBeGreaterThanOrEqual(1);
+    const types = (Slack.auth?.types as Array<string | { type: string }>).map((t) =>
+      typeof t === 'string' ? t : t.type
+    );
+    expect(types).toContain('oauth_authorization_code');
+    expect(types).toContain('bearer');
   });
 
   describe('searchMessages action', () => {
