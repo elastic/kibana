@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 import { getTestRunWorkflowYaml, getWorkflowWithLoopYaml } from '../../fixtures/workflows';
 
-test.describe('Workflow execution - Test runs', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+test.describe('Workflow execution - Test runs', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });
