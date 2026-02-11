@@ -35,9 +35,7 @@ describe('AutoOpsPromotionCallout', () => {
       renderWithI18n(<AutoOpsPromotionCallout {...defaultProps} />);
 
       expect(screen.getByTestId('autoOpsPromotionCallout')).toBeInTheDocument();
-      expect(
-        screen.getByText('New! Connect this cluster to AutoOps')
-      ).toBeInTheDocument();
+      expect(screen.getByText('New! Connect this cluster to AutoOps')).toBeInTheDocument();
     });
 
     test('renders Cloud Connect link with default url', () => {
@@ -54,7 +52,6 @@ describe('AutoOpsPromotionCallout', () => {
       const cloudConnectLink = screen.getByTestId('autoOpsPromotionCalloutCloudConnectLink');
       expect(cloudConnectLink).toHaveAttribute('href', '/custom/path');
     });
-
   });
 
   describe('Dismissal functionality', () => {
