@@ -37,6 +37,7 @@ export function buildWorkflowContext(
   const parentWorkflowExecutionId = workflowExecution.context?.parentWorkflowExecutionId as
     | string
     | undefined;
+  const parentDepth = workflowExecution.context?.parentDepth as number | undefined;
 
   const inputsWithDefaults = applyInputDefaults(
     workflowExecution.context?.inputs as Record<string, unknown> | undefined,
@@ -68,6 +69,7 @@ export function buildWorkflowContext(
         ? {
             workflowId: parentWorkflowId,
             executionId: parentWorkflowExecutionId,
+            depth: parentDepth !== undefined ? parentDepth + 1 : 0,
           }
         : undefined,
   };

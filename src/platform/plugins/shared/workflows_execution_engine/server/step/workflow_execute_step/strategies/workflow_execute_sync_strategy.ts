@@ -18,14 +18,20 @@ import type { StepExecutionRepository } from '../../../repositories/step_executi
 import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
-import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
-import { SUB_WORKFLOW_POLL_INTERVAL } from '../constants';
+import { getNextPollInterval } from '../constants';
+
+export interface StrategyResult {
+  status: 'completed' | 'failed' | 'waiting';
+  output?: Record<string, unknown>;
+  error?: Error;
+}
 
 interface SubWorkflowWaitState {
   workflowId: string;
   executionId: string;
   startedAt: string;
+  pollCount: number;
 }
 
 export class WorkflowExecuteSyncStrategy {
@@ -34,7 +40,6 @@ export class WorkflowExecuteSyncStrategy {
     private workflowExecutionRepository: WorkflowExecutionRepository,
     private stepExecutionRepository: StepExecutionRepository,
     private stepExecutionRuntime: StepExecutionRuntime,
-    private workflowExecutionRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
@@ -42,30 +47,29 @@ export class WorkflowExecuteSyncStrategy {
     workflow: EsWorkflow,
     inputs: Record<string, unknown>,
     spaceId: string,
-    request: KibanaRequest
-  ): Promise<void> {
+    request: KibanaRequest,
+    parentDepth: number
+  ): Promise<StrategyResult> {
     const currentState = this.stepExecutionRuntime.getCurrentStepState() as
       | SubWorkflowWaitState
       | undefined;
 
     // First execution: Schedule sub-workflow and enter wait state
     if (!currentState) {
-      await this.initiateSubWorkflowExecution(workflow, inputs, spaceId, request);
-      return;
+      return this.initiateSubWorkflowExecution(workflow, inputs, spaceId, request, parentDepth);
     }
 
     // Resume: Check sub-workflow status
-    await this.checkSubWorkflowStatus(currentState, spaceId);
+    return this.checkSubWorkflowStatus(currentState, spaceId);
   }
 
   private async initiateSubWorkflowExecution(
     workflow: EsWorkflow,
     inputs: Record<string, unknown>,
     spaceId: string,
-    request: KibanaRequest
-  ): Promise<void> {
-    this.stepExecutionRuntime.startStep();
-
+    request: KibanaRequest,
+    parentDepth: number
+  ): Promise<StrategyResult> {
     try {
       // Schedule sub-workflow execution
       const workflowExecution = this.stepExecutionRuntime.workflowExecution;
@@ -78,6 +82,7 @@ export class WorkflowExecuteSyncStrategy {
           parentWorkflowId: workflowExecution.workflowId,
           parentWorkflowExecutionId: workflowExecution.id,
           parentStepId: this.stepExecutionRuntime.node.stepId,
+          parentDepth,
         },
         request
       );
@@ -86,31 +91,33 @@ export class WorkflowExecuteSyncStrategy {
         `Started sync sub-workflow execution: ${workflowExecutionId}, entering wait state`
       );
 
-      // Save state with execution ID
+      // Save state with execution ID (pollCount 0 = first wait)
       const state: SubWorkflowWaitState = {
         workflowId: workflow.id,
         executionId: workflowExecutionId,
         startedAt: new Date().toISOString(),
+        pollCount: 0,
       };
       this.stepExecutionRuntime.setCurrentStepState(state);
 
-      // Enter wait state - this will schedule a resume task after SUB_WORKFLOW_POLL_INTERVAL
-      if (this.stepExecutionRuntime.tryEnterDelay(SUB_WORKFLOW_POLL_INTERVAL)) {
+      const firstPollInterval = getNextPollInterval(0);
+      // Enter wait state - this will schedule a resume task after firstPollInterval
+      if (this.stepExecutionRuntime.tryEnterDelay(firstPollInterval)) {
         this.workflowLogger.logDebug(
-          `Entering wait state to poll sub-workflow ${workflowExecutionId} after ${SUB_WORKFLOW_POLL_INTERVAL}`
+          `Entering wait state to poll sub-workflow ${workflowExecutionId} after ${firstPollInterval}`
         );
-        // Exit without navigating - workflow will be resumed by task manager
+        // Exit without navigating - workflow will be resumed by the handle_execution_delay logic (either in-process or task manager)
       }
+      return { status: 'waiting' };
     } catch (error) {
-      this.stepExecutionRuntime.failStep(error as Error);
-      this.workflowExecutionRuntime.navigateToNextNode();
+      return { status: 'failed', error: error as Error };
     }
   }
 
   private async checkSubWorkflowStatus(
     state: SubWorkflowWaitState,
     spaceId: string
-  ): Promise<void> {
+  ): Promise<StrategyResult> {
     try {
       // Fetch sub-workflow execution status
       const execution = await this.workflowExecutionRepository.getWorkflowExecutionById(
@@ -180,34 +187,37 @@ export class WorkflowExecuteSyncStrategy {
               message: typeof errorMessage === 'string' ? errorMessage : String(errorMessage),
             });
           }
-          this.stepExecutionRuntime.failStep(error);
-        } else {
-          // Pass the output directly as the step output (not wrapped in an object)
-          // This allows parent workflows to access child outputs via steps.<step-id>.output.field
-          // Convert JsonValue to Record<string, unknown> | undefined for finishStep
-          const stepOutput: Record<string, unknown> | undefined =
-            output === null ? undefined : (output as Record<string, unknown>);
-          this.stepExecutionRuntime.finishStep(stepOutput);
+          return { status: 'failed', error };
         }
 
-        this.workflowExecutionRuntime.navigateToNextNode();
-      } else {
-        // Still running - enter wait state again to poll after interval
-        this.workflowLogger.logDebug(
-          `Sub-workflow ${state.executionId} still ${execution.status}, polling again after ${SUB_WORKFLOW_POLL_INTERVAL}`
-        );
-
-        if (this.stepExecutionRuntime.tryEnterDelay(SUB_WORKFLOW_POLL_INTERVAL)) {
-          // Exit without navigating - workflow will be resumed by task manager
-        }
+        // Pass the output directly as the step output (not wrapped in an object)
+        const stepOutput: Record<string, unknown> | undefined =
+          output === null ? undefined : (output as Record<string, unknown>);
+        return { status: 'completed', output: stepOutput };
       }
+
+      // Still running - enter wait state again with exponential backoff
+      const nextPollCount = state.pollCount + 1;
+      const nextInterval = getNextPollInterval(nextPollCount);
+      this.stepExecutionRuntime.setCurrentStepState({
+        ...state,
+        pollCount: nextPollCount,
+      });
+      this.workflowLogger.logDebug(
+        `Sub-workflow ${state.executionId} still ${execution.status}, polling again after ${nextInterval}`
+      );
+
+      if (this.stepExecutionRuntime.tryEnterDelay(nextInterval)) {
+        // Exit without navigating - workflow will be resumed by the handle_execution_delay logic (either in-process or task manager)
+      }
+      return { status: 'waiting' };
     } catch (error) {
-      this.stepExecutionRuntime.failStep(error as Error);
-      this.workflowExecutionRuntime.navigateToNextNode();
+      return { status: 'failed', error: error as Error };
     }
   }
 
   private toExecutionModel(workflow: EsWorkflow): WorkflowExecutionEngineModel {
+    const isTestRun = !!this.stepExecutionRuntime.workflowExecution.isTestRun;
     return {
       id: workflow.id,
       name: workflow.name,
@@ -216,7 +226,7 @@ export class WorkflowExecuteSyncStrategy {
       yaml: workflow.yaml,
       // Note: spaceId is not part of EsWorkflow type, but we have it from the context
       // The execution engine will use the spaceId from the execution context
-      isTestRun: false,
+      isTestRun,
     };
   }
 

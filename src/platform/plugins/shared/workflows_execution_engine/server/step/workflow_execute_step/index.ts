@@ -9,4 +9,3 @@
 
 export { WorkflowExecuteStepImpl } from './workflow_execute_step_impl';
 export { WorkflowExecuteSyncStrategy } from './strategies/workflow_execute_sync_strategy';
-export { SUB_WORKFLOW_POLL_INTERVAL } from './constants';

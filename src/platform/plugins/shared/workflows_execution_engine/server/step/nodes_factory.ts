@@ -299,18 +299,18 @@ export class NodesFactory {
         if (!this.dependencies.request) {
           throw new Error('request is not available in dependencies');
         }
-        return new WorkflowExecuteStepImpl(
-          node as WorkflowExecuteGraphNode,
+        return new WorkflowExecuteStepImpl({
+          node: node as WorkflowExecuteGraphNode,
           stepExecutionRuntime,
-          this.workflowRuntime,
-          this.dependencies.workflowRepository,
-          this.dependencies.spaceId,
-          this.dependencies.request,
-          this.dependencies.workflowsExecutionEngine,
-          this.dependencies.workflowExecutionRepository,
-          this.dependencies.stepExecutionRepository,
-          this.workflowLogger
-        );
+          workflowExecutionRuntime: this.workflowRuntime,
+          workflowRepository: this.dependencies.workflowRepository,
+          spaceId: this.dependencies.spaceId,
+          request: this.dependencies.request,
+          workflowsExecutionEngine: this.dependencies.workflowsExecutionEngine,
+          workflowExecutionRepository: this.dependencies.workflowExecutionRepository,
+          stepExecutionRepository: this.dependencies.stepExecutionRepository,
+          workflowLogger: this.workflowLogger,
+        });
       case 'http':
         return new HttpStepImpl(
           node as HttpGraphNode,

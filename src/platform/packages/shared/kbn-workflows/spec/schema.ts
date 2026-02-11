@@ -639,6 +639,7 @@ export const WorkflowContextSchema = z.object({
     .object({
       workflowId: z.string(),
       executionId: z.string(),
+      depth: z.number().optional(),
     })
     .optional(),
 });
@@ -646,7 +647,7 @@ export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 
 export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
   // overriding record with object to avoid type mismatch when
-  // extending with actual inputs, outputs and consts of different types
+  // extending with actual inputs and consts of different types
   inputs: z.object({}),
   consts: z.object({}),
 });
@@ -684,6 +685,6 @@ export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;
 export const BaseSerializedErrorSchema = z.object({
   type: z.string(),
   message: z.string(),
-  details: z.any().optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
 });
 export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;

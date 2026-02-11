@@ -8,8 +8,35 @@
  */
 
 /**
- * Polling interval for checking sub-workflow execution status.
- * When a workflow.execute step is waiting for a sub-workflow to complete,
- * it will schedule resume tasks at this interval to check the status.
+ * Initial polling interval in milliseconds. First wait uses this (in-process for short workflows).
  */
-export const SUB_WORKFLOW_POLL_INTERVAL = '1s';
+export const INITIAL_POLL_INTERVAL = 1;
+
+/**
+ * Maximum polling interval in milliseconds. Intervals above 5s yield to Task Manager
+ * (see SHORT_DURATION_THRESHOLD in handle_execution_delay).
+ */
+export const MAX_POLL_INTERVAL = 30;
+
+/**
+ * Backoff multiplier for exponential backoff. Delays progress: 1s, 2s, 4s, 8s, 16s, 30s.
+ */
+export const BACKOFF_MULTIPLIER = 2;
+
+/**
+ * Returns the poll interval for the given poll count (exponential backoff) as a duration string.
+ * Poll count 0 = INITIAL_POLL_INTERVAL, then multiplies by BACKOFF_MULTIPLIER each time, capped at MAX_POLL_INTERVAL.
+ */
+export function getNextPollInterval(pollCount: number): string {
+  const nextInterval = Math.min(
+    INITIAL_POLL_INTERVAL * Math.pow(BACKOFF_MULTIPLIER, pollCount),
+    MAX_POLL_INTERVAL
+  );
+  return `${nextInterval}s`;
+}
+
+/**
+ * Maximum depth of nested workflow execution (workflow calling workflow).
+ * Prevents infinite recursion and unbounded Task Manager usage.
+ */
+export const MAX_WORKFLOW_DEPTH = 10;
