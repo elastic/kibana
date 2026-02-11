@@ -17,6 +17,7 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { AsApiContract } from '../../common';
 import { getBasicAuthHeader } from './get_basic_auth_header';
 import type { AuthorizationCodeOAuthRequestParams } from './request_oauth_authorization_code_token';
+import { extractOAuthAccessToken } from './extract_oauth_token';
 
 export interface OAuthTokenResponse {
   tokenType: string;
@@ -32,7 +33,8 @@ export async function requestOAuthToken<T>(
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger,
   bodyRequest: AsApiContract<T>,
-  useBasicAuth: boolean = false
+  useBasicAuth: boolean = false,
+  tokenExtractor?: string
 ): Promise<OAuthTokenResponse> {
   const axiosInstance = axios.create();
 
@@ -72,9 +74,13 @@ export async function requestOAuthToken<T>(
   });
 
   if (res.status === 200) {
+    const extractedAccessToken = extractOAuthAccessToken(res.data, tokenExtractor);
+    if (!extractedAccessToken) {
+      throw new Error('Unable to extract access token from OAuth response');
+    }
     return {
       tokenType: res.data.token_type,
-      accessToken: res.data.access_token,
+      accessToken: extractedAccessToken,
       expiresIn: res.data.expires_in,
       refreshToken: res.data.refresh_token,
       refreshTokenExpiresIn: res.data.refresh_token_expires_in,

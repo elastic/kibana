@@ -22,12 +22,15 @@ export function useOAuthAuthorize() {
     async (connectorId: string) => {
       setIsAuthorizing(true);
       try {
+        // Provide an explicit same-origin return URL so the OAuth callback can bring the user
+        // back to the exact connector flyout they initiated authorization from.
+        const returnUrl = window.location.href;
         const { authorizationUrl } = await http!.post<OAuthAuthorizeResponse>(
           `${INTERNAL_BASE_ACTION_API_PATH}/connector/${encodeURIComponent(
             connectorId
           )}/_start_oauth_flow`,
           {
-            body: JSON.stringify({}),
+            body: JSON.stringify({ returnUrl }),
           }
         );
 

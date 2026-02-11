@@ -18,6 +18,7 @@ interface OAuthConnectorSecrets {
   clientSecret?: string;
   tokenUrl?: string;
   scope?: string;
+  scopeQueryParam?: string;
 }
 
 /**
@@ -32,6 +33,7 @@ interface OAuthConnectorConfig {
   clientId?: string;
   tokenUrl?: string;
   scope?: string;
+  scopeQueryParam?: string;
 }
 
 /**
@@ -41,6 +43,7 @@ export interface OAuthConfig {
   authorizationUrl: string;
   clientId: string;
   scope?: string;
+  scopeQueryParam?: string;
 }
 
 /**
@@ -50,6 +53,7 @@ interface BuildAuthorizationUrlParams {
   baseAuthorizationUrl: string;
   clientId: string;
   scope?: string;
+  scopeQueryParam?: string;
   redirectUri: string;
   state: string;
   codeChallenge: string;
@@ -133,6 +137,7 @@ export class OAuthAuthorizationService {
     const authorizationUrl = secrets.authorizationUrl || config?.authorizationUrl;
     const clientId = secrets.clientId || config?.clientId;
     const scope = secrets.scope || config?.scope;
+    const scopeQueryParam = secrets.scopeQueryParam || config?.scopeQueryParam;
     if (!authorizationUrl || !clientId) {
       throw new Error(
         'Connector missing required OAuth configuration (authorizationUrl, clientId)'
@@ -143,6 +148,7 @@ export class OAuthAuthorizationService {
       authorizationUrl,
       clientId,
       scope,
+      scopeQueryParam,
     };
   }
 
@@ -170,7 +176,15 @@ export class OAuthAuthorizationService {
    * @returns The complete authorization URL as a string
    */
   buildAuthorizationUrl(params: BuildAuthorizationUrlParams): string {
-    const { baseAuthorizationUrl, clientId, scope, redirectUri, state, codeChallenge } = params;
+    const {
+      baseAuthorizationUrl,
+      clientId,
+      scope,
+      scopeQueryParam,
+      redirectUri,
+      state,
+      codeChallenge,
+    } = params;
 
     const authUrl = new URL(baseAuthorizationUrl);
     authUrl.searchParams.set('client_id', clientId);
@@ -181,7 +195,7 @@ export class OAuthAuthorizationService {
     authUrl.searchParams.set('code_challenge_method', 'S256');
 
     if (scope) {
-      authUrl.searchParams.set('scope', scope);
+      authUrl.searchParams.set(scopeQueryParam ?? 'scope', scope);
     }
 
     return authUrl.toString();

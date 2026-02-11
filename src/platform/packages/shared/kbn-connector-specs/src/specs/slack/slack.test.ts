@@ -42,6 +42,57 @@ describe('Slack', () => {
     expect((Slack.auth?.types[0] as { type: string }).type).toBe('oauth_authorization_code');
   });
 
+  describe('searchMessages action', () => {
+    it('should search messages with required query', async () => {
+      const mockResponse = {
+        data: {
+          ok: true,
+          messages: { matches: [], total: 0 },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.searchMessages.handler(mockContext, { query: 'hello' });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://slack.com/api/search.messages?query=hello'
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('should include optional parameters', async () => {
+      const mockResponse = {
+        data: {
+          ok: true,
+          messages: { matches: [], total: 0 },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await Slack.actions.searchMessages.handler(mockContext, {
+        query: 'test',
+        sort: 'timestamp',
+        sortDir: 'desc',
+        count: 50,
+        page: 2,
+        highlight: true,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://slack.com/api/search.messages?query=test&sort=timestamp&sort_dir=desc&count=50&page=2&highlight=true'
+      );
+    });
+
+    it('should throw error when Slack API returns error', async () => {
+      const mockResponse = { data: { ok: false, error: 'invalid_auth' } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      await expect(
+        Slack.actions.searchMessages.handler(mockContext, { query: 'test' })
+      ).rejects.toThrow('Slack API error: invalid_auth');
+    });
+  });
+
   describe('listConversations action', () => {
     it('should list conversations with defaults', async () => {
       const mockResponse = {
@@ -55,7 +106,7 @@ describe('Slack', () => {
       const result = await Slack.actions.listConversations.handler(mockContext, {});
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://slack.com/api/conversations.list?'
+        'https://slack.com/api/conversations.list?types=public_channel'
       );
       expect(result).toEqual(mockResponse.data);
     });
@@ -70,15 +121,21 @@ describe('Slack', () => {
       mockClient.get.mockResolvedValue(mockResponse);
 
       await Slack.actions.listConversations.handler(mockContext, {
-        types: 'public_channel,private_channel,im,mpim',
+        types: 'public_channel',
         excludeArchived: true,
         limit: 200,
         cursor: 'cursor123',
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://slack.com/api/conversations.list?types=public_channel%2Cprivate_channel%2Cim%2Cmpim&exclude_archived=true&limit=200&cursor=cursor123'
+        'https://slack.com/api/conversations.list?types=public_channel&exclude_archived=true&limit=200&cursor=cursor123'
       );
+    });
+
+    it('should throw when unsupported conversation types are requested', async () => {
+      await expect(
+        Slack.actions.listConversations.handler(mockContext, { types: 'private_channel' })
+      ).rejects.toThrow('Only "public_channel" is supported');
     });
 
     it('should throw error when Slack API returns error', async () => {

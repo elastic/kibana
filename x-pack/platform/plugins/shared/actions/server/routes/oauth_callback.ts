@@ -77,12 +77,14 @@ interface OAuthConnectorSecrets {
   clientSecret?: string;
   tokenUrl?: string;
   useBasicAuth?: boolean;
+  tokenExtractor?: string;
 }
 
 interface OAuthConnectorConfig {
   clientId?: string;
   tokenUrl?: string;
   useBasicAuth?: boolean;
+  tokenExtractor?: string;
 }
 
 /**
@@ -366,6 +368,7 @@ export const oauthCallbackRoute = (
           const clientSecret = secrets.clientSecret;
           const tokenUrl = secrets.tokenUrl || config?.tokenUrl;
           const useBasicAuth = secrets.useBasicAuth ?? config?.useBasicAuth ?? true; // Default to true (OAuth 2.0 recommended practice)
+          const tokenExtractor = secrets.tokenExtractor || config?.tokenExtractor;
           if (!clientId || !clientSecret || !tokenUrl) {
             throw new Error(
               'Connector missing required OAuth configuration (clientId, clientSecret, tokenUrl)'
@@ -384,7 +387,8 @@ export const oauthCallbackRoute = (
               clientSecret,
             },
             configurationUtilities,
-            useBasicAuth
+            useBasicAuth,
+            tokenExtractor
           );
           routeLogger.debug(
             `Successfully exchanged authorization code for access token for connectorId: ${oauthState.connectorId}`

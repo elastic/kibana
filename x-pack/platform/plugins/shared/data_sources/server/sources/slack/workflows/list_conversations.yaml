@@ -1,0 +1,29 @@
+version: '1'
+name: 'sources.slack.list_conversations'
+description: 'List Slack public channels available to the authorized token'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: exclude_archived
+    type: boolean
+    required: false
+    default: true
+  - name: limit
+    type: number
+    required: false
+    default: 100
+  - name: cursor
+    type: string
+    required: false
+steps:
+  - name: list-conversations
+    type: slack2.listConversations
+    connector-id: <%= stackConnectorId %>
+    with:
+      types: "public_channel"
+      excludeArchived: ${{inputs.exclude_archived}}
+      limit: ${{inputs.limit}}
+      cursor: "${{inputs.cursor}}"
+

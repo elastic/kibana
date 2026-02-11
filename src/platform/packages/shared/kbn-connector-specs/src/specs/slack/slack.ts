@@ -18,17 +18,15 @@ const SLACK_API_BASE = 'https://slack.com/api';
  *
  * Required Slack App scopes:
  * - channels:read,channels:history - to list channels and read message history
- * - groups:read,groups:history - to list private channels and read history
- * - im:read,im:history - to list DMs and read history
- * - mpim:read,mpim:history - to list group DMs and read history
  * - chat:write - for sending messages
+ * - search:read - for searching messages (requires a user token)
  */
 export const Slack: ConnectorSpec = {
   metadata: {
     id: '.slack2',
     displayName: 'Slack (v2)',
     description: i18n.translate('core.kibanaConnectorSpecs.slack.metadata.description', {
-      defaultMessage: 'List channels, fetch message history, and send messages to Slack channels',
+      defaultMessage: 'List public channels, fetch message history, and send messages to Slack channels',
     }),
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows'],
@@ -42,7 +40,9 @@ export const Slack: ConnectorSpec = {
           authorizationUrl: 'https://slack.com/oauth/v2/authorize',
           tokenUrl: 'https://slack.com/api/oauth.v2.access',
           scope:
-            'channels:read,channels:history,groups:read,groups:history,im:read,im:history,mpim:read,mpim:history,chat:write',
+            'channels:read,channels:history,chat:write,search:read',
+          scopeQueryParam: 'user_scope', // Slack OAuth v2 uses user_scope for user token scopes
+          tokenExtractor: 'slackUserToken', // extract authed_user.access_token for user-token-only scopes (e.g. search:read)
           useBasicAuth: false, // Slack uses POST body for client credentials
         },
         overrides: {
@@ -60,13 +60,140 @@ export const Slack: ConnectorSpec = {
   schema: z.object({}),
 
   actions: {
+    // https://api.slack.com/methods/search.messages
+    searchMessages: {
+      isTool: true,
+      description: i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.searchMessages.description',
+        {
+          defaultMessage: 'Search for messages in Slack (uses the authorized user token)',
+        }
+      ),
+      input: z.object({
+        query: z
+          .string()
+          .min(1)
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.query.description',
+              {
+                defaultMessage: 'Search query to find messages',
+              }
+            )
+          ),
+        sort: z
+          .enum(['score', 'timestamp'])
+          .optional()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.sort.description',
+              {
+                defaultMessage: 'Sort order: score (relevance) or timestamp',
+              }
+            )
+          ),
+        sortDir: z
+          .enum(['asc', 'desc'])
+          .optional()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.sortDir.description',
+              {
+                defaultMessage: 'Sort direction',
+              }
+            )
+          ),
+        count: z
+          .number()
+          .int()
+          .min(1)
+          .max(100)
+          .optional()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.count.description',
+              {
+                defaultMessage: 'Number of results to return (1-100)',
+              }
+            )
+          ),
+        page: z
+          .number()
+          .int()
+          .min(1)
+          .optional()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.page.description',
+              {
+                defaultMessage: 'Page number for pagination',
+              }
+            )
+          ),
+        highlight: z
+          .boolean()
+          .optional()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.highlight.description',
+              {
+                defaultMessage: 'Whether to include highlight markers in results',
+              }
+            )
+          ),
+      }),
+      handler: async (ctx, input) => {
+        const typedInput = input as {
+          query: string;
+          sort?: 'score' | 'timestamp';
+          sortDir?: 'asc' | 'desc';
+          count?: number;
+          page?: number;
+          highlight?: boolean;
+        };
+
+        const params = new URLSearchParams({ query: typedInput.query });
+        if (typedInput.sort) params.append('sort', typedInput.sort);
+        if (typedInput.sortDir) params.append('sort_dir', typedInput.sortDir);
+        if (typedInput.count) params.append('count', typedInput.count.toString());
+        if (typedInput.page) params.append('page', typedInput.page.toString());
+        if (typedInput.highlight !== undefined) {
+          params.append('highlight', typedInput.highlight ? 'true' : 'false');
+        }
+
+        try {
+          ctx.log.debug(`Slack searchMessages request`);
+          const response = await ctx.client.get(
+            `${SLACK_API_BASE}/search.messages?${params.toString()}`
+          );
+
+          if (!response.data.ok) {
+            throw new Error(`Slack API error: ${response.data.error}`);
+          }
+
+          return response.data;
+        } catch (error) {
+          const err = error as {
+            message?: string;
+            response?: { status?: number; data?: unknown };
+          };
+          ctx.log.error(
+            `Slack searchMessages failed: ${err.message}, Status: ${err.response?.status}, Data: ${JSON.stringify(
+              err.response?.data
+            )}`
+          );
+          throw error;
+        }
+      },
+    },
+
     // https://api.slack.com/methods/conversations.list
     listConversations: {
       isTool: true,
       description: i18n.translate(
         'core.kibanaConnectorSpecs.slack.actions.listConversations.description',
         {
-          defaultMessage: 'List conversations (channels, DMs, group DMs) in Slack',
+          defaultMessage: 'List public channels in Slack',
         }
       ),
       input: z.object({
@@ -78,7 +205,7 @@ export const Slack: ConnectorSpec = {
               'core.kibanaConnectorSpecs.slack.actions.listConversations.input.types.description',
               {
                 defaultMessage:
-                  'Comma-separated conversation types (e.g. public_channel,private_channel,im,mpim)',
+                  'Conversation type filter. Only "public_channel" is supported by this connector.',
               }
             )
           ),
@@ -130,7 +257,23 @@ export const Slack: ConnectorSpec = {
         const params = new URLSearchParams();
 
         if (typedInput.types) {
-          params.append('types', typedInput.types);
+          const requestedTypes = typedInput.types
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean);
+          const allowedTypes = new Set(['public_channel']);
+          const invalidTypes = requestedTypes.filter((t) => !allowedTypes.has(t));
+          if (invalidTypes.length > 0) {
+            throw new Error(
+              `Unsupported conversation types requested: ${invalidTypes.join(
+                ', '
+              )}. Only "public_channel" is supported.`
+            );
+          }
+          params.append('types', 'public_channel');
+        } else {
+          // Default to public channels only
+          params.append('types', 'public_channel');
         }
         if (typedInput.excludeArchived !== undefined) {
           params.append('exclude_archived', typedInput.excludeArchived ? 'true' : 'false');

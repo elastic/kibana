@@ -36,7 +36,8 @@ export async function requestOAuthRefreshToken(
   logger: Logger,
   params: RefreshTokenOAuthRequestParams,
   configurationUtilities: ActionsConfigurationUtilities,
-  useBasicAuth: boolean = true // Default to true (OAuth 2.0 recommended practice)
+  useBasicAuth: boolean = true, // Default to true (OAuth 2.0 recommended practice)
+  tokenExtractor?: string
 ): Promise<OAuthTokenResponse> {
   return await requestOAuthToken<RefreshTokenOAuthRequestParams>(
     tokenUrl,
@@ -44,6 +45,7 @@ export async function requestOAuthRefreshToken(
     configurationUtilities,
     logger,
     rewriteBodyRequest(params),
-    useBasicAuth
+    useBasicAuth,
+    tokenExtractor
   );
 }

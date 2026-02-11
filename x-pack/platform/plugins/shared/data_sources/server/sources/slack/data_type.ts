@@ -7,17 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataSource } from '@kbn/data-catalog-plugin';
-import {
-  generateGetConversationHistoryWorkflow,
-  generateListConversationsWorkflow,
-  generateSendMessageWorkflow,
-} from './workflows';
 
 export const slackDataSource: DataSource = {
   id: 'slack',
   name: 'Slack',
   description: i18n.translate('xpack.dataSources.slack.description', {
-    defaultMessage: 'Connect to Slack to list conversations, fetch message history, and send messages.',
+    defaultMessage:
+      'Connect to Slack to list public channels, fetch message history, and send messages.',
   }),
 
   // Must map to an icon registered in @kbn/connector-specs ConnectorIconsMap
@@ -31,15 +27,8 @@ export const slackDataSource: DataSource = {
     config: {},
   },
 
-  generateWorkflows(stackConnectorId: string) {
-    return [
-      { content: generateListConversationsWorkflow(stackConnectorId), shouldGenerateABTool: true },
-      {
-        content: generateGetConversationHistoryWorkflow(stackConnectorId),
-        shouldGenerateABTool: true,
-      },
-      { content: generateSendMessageWorkflow(stackConnectorId), shouldGenerateABTool: true },
-    ];
+  workflows: {
+    directory: __dirname + '/workflows',
   },
 };
 

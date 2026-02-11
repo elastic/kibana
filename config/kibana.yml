@@ -1,3 +1,4 @@
+server.publicBaseUrl: "https://localhost:5601"
 # For more configuration options see the configuration guide for Kibana in
 # https://www.elastic.co/guide/index.html
 
