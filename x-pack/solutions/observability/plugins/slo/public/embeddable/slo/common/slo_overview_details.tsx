@@ -126,7 +126,7 @@ export function SloOverviewDetails({
           ))}
         </EuiTabs>
         <EuiSpacer size="m" />
-        <SloDetails slo={slo} isAutoRefreshing={false} selectedTabId={selectedTabId} isFlyout />
+        <SloDetails slo={slo} isAutoRefreshing={false} selectedTabId={selectedTabId} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <SloOverviewDetailsFlyoutFooter slo={slo} onClose={onClose} />
