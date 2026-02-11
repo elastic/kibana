@@ -25,7 +25,6 @@ function isEditingFromDashboard(
   return isVizApp && hasOriginatingApp;
 }
 
-
 const NAV_TITLE = i18n.translate('xpack.serverlessSearch.nav.title', {
   defaultMessage: 'Elasticsearch',
 });
