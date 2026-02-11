@@ -148,6 +148,21 @@ A new `streams` namespace is added to Agent Builder's namespace list, and the ag
 
 **Rationale:** During testing, the agent queried documents from a stream and observed data from Feb 5th, but when subsequently calling `suggest_partitions` it passed no time range. The tool defaulted to the last 24 hours, found zero documents, and returned no suggestions. The server-side 24h default (Decision 9) is a safety net, not a substitute for accurate time ranges — data can easily be older than 24 hours. The agent instructions now make this a hard requirement rather than a soft suggestion.
 
+### 13. Mutation safety: Prerequisite checklist, few-shot examples, and severity tiers
+
+**Decision:** The agent's mutation protocol instructions are restructured using three prompt engineering techniques:
+1. **Prerequisite framing with self-verification** — Instead of "follow this protocol," the instructions frame the preview-confirm steps as a gate: "BEFORE calling ANY write tool, verify ALL of the following: ✓ preview shown, ✓ user confirmed, ✓ single tool call." The agent must self-check before acting.
+2. **Few-shot examples** — Concrete correct and incorrect examples show the agent what proper interactions look like for creating partitions and deleting streams.
+3. **Severity tiers** — Destructive operations (`delete_stream`) get additional requirements: the agent must show child streams, document counts, and warn that deletion is irreversible. This uses `query_documents` and `get_stream` to gather context before presenting the preview.
+
+**Rationale:** During testing, the agent skipped the preview-confirm-apply protocol entirely when asked "Delete all child streams of logs.android" — it immediately called `delete_stream` twice without any preview or confirmation. The previous instructions described the protocol abstractly but the LLM bypassed it. Research shows LLMs follow concrete examples far more reliably than abstract descriptions, and prerequisite framing ("you cannot do Y without first doing X") is harder to bypass than sequential protocols ("do X, then Y"). Severity tiers ensure the most dangerous operations get the strongest guardrails.
+
+**Techniques applied:**
+- Few-shot learning (show correct and incorrect behavior)
+- Self-verification checklist (validate preconditions before tool invocation)
+- Progressive disclosure (normal mutations get standard protocol, destructive operations get extra requirements)
+- Negative examples (explicitly show what WRONG behavior looks like)
+
 ## Risks / Trade-offs
 
 - **[LLM accuracy for mutations]** The agent might misinterpret user intent and propose incorrect changes (e.g. wrong stream name, wrong retention value). → *Mitigation:* The preview-confirm-apply cycle ensures the user sees exactly what will change before it's applied. The agent instructions emphasize always confirming before acting.

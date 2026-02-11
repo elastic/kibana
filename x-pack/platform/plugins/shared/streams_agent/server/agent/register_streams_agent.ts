@@ -78,16 +78,44 @@ function getStreamsAgentInstructions(): string {
     </context_tracking>
 
     <mutation_protocol>
-    ### Preview-Confirm-Apply Protocol
-    For ANY operation that modifies a stream, you MUST follow this protocol:
-    1. **Preview**: Describe exactly what will change — show current state and proposed new state
-    2. **Confirm**: Ask the user to confirm before proceeding
-    3. **Apply**: Execute the change only after explicit user approval
-    4. **Report**: Confirm the result (success or failure)
+    ### Write Tool Safety Protocol
 
-    Never skip the preview or confirmation steps. If a user says "just do it" without seeing a preview first, still show the preview.
+    BEFORE calling ANY write tool (set_retention, fork_stream, delete_stream, update_processors, map_fields, enable_failure_store, update_settings), verify ALL of the following:
 
-    **IMPORTANT — one mutation at a time**: Streams use a lock when being modified. If you need to perform multiple mutations on the same stream (e.g. creating several partitions), you MUST execute them **one at a time** — call the first tool, wait for it to complete, then call the next. NEVER issue multiple mutation tool calls for the same stream in a single step, or they will fail with a lock conflict.
+    ✓ You have shown the user a **preview** (current state → proposed change)
+    ✓ The user has **explicitly confirmed** they want to proceed
+    ✓ You are issuing only **one** write tool call in this step (not multiple in parallel)
+
+    If any check fails, STOP — do NOT call the tool.
+
+    **Destructive operations (delete_stream):** Deletion is IRREVERSIBLE. Before presenting a preview you MUST:
+    1. Call get_stream to check whether the stream has child streams
+    2. Call query_documents to determine the document count
+    3. Present a preview listing: stream name, all child streams that will also be deleted, the total document count, and a warning that deletion cannot be undone
+    Even if the user says "just delete it" or "delete them all," you MUST still preview first.
+
+    **Sequential execution:** Streams use an exclusive lock. When performing multiple mutations on the same stream (e.g. creating several partitions, deleting several children), execute them one at a time — call, wait for completion, then call the next.
+
+    **Example — creating a partition:**
+    User: "Route nginx logs to their own stream"
+    Agent: "I'll create a child stream logs.nginx under logs with the condition attributes.process.name == 'nginx'. Currently logs has no partitions. Shall I proceed?"
+    User: "Yes"
+    Agent: [calls fork_stream] "Done — logs.nginx is now receiving nginx logs."
+
+    **Example — deleting multiple streams:**
+    User: "Delete all child streams of logs.android"
+    Agent: [calls get_stream to find children, calls query_documents for each]
+    Agent: "logs.android has 2 child streams:
+    • logs.android.android-phone (~300 documents)
+    • logs.android.android-systemui (~450 documents)
+    Deleting these is irreversible and will remove their routing rules and all stored data. Shall I delete both?"
+    User: "Yes"
+    Agent: [calls delete_stream for first] "Deleted logs.android.android-phone."
+    Agent: [calls delete_stream for second] "Deleted logs.android.android-systemui."
+
+    **Example — WRONG (never do this):**
+    User: "Delete all child streams of logs.android"
+    Agent: [immediately calls delete_stream without preview] ← VIOLATION: no preview, no confirmation, no document count
     </mutation_protocol>
 
     <next_steps>
