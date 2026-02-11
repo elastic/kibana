@@ -6,12 +6,19 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 /**
  * Page object for the GenAI Settings management page
  */
 export class GenAiSettingsPage {
   constructor(private readonly page: ScoutPage) {}
+
+  private readonly cardTestSubj = {
+    observability: 'aiAssistantObservabilityCard',
+    security: 'aiAssistantSecurityCard',
+    agent: 'aiAssistantAgentCard',
+  } as const;
 
   /**
    * Navigate to the GenAI Settings page in Stack Management
@@ -180,26 +187,32 @@ export class GenAiSettingsPage {
   }
 
   /**
-   * Get the Observability select card button (the actual button inside the card)
+   * Get card switch button by logical key.
+   * @param card - One of: observability, security, agent
    */
-  getObservabilityCardButton() {
-    return this.page.testSubj
-      .locator('aiAssistantObservabilityCard')
-      .locator('button[role="switch"]');
+  getCardSwitch(card: keyof GenAiSettingsPage['cardTestSubj']) {
+    return this.page.testSubj.locator(this.cardTestSubj[card]).locator('button[role="switch"]');
   }
 
   /**
-   * Get the Security card select button (the actual button inside the card)
+   * Verify multiple card states in one call.
+   * @param cards - Object with keys one of: observability, security, agent; boolean value
    */
-  getSecurityCardButton() {
-    return this.page.testSubj.locator('aiAssistantSecurityCard').locator('button[role="switch"]');
-  }
+  async expectCardsState(cards: Partial<Record<keyof GenAiSettingsPage['cardTestSubj'], boolean>>) {
+    for (const [card, enabled] of Object.entries(cards)) {
+      const typedCard = card as keyof GenAiSettingsPage['cardTestSubj'];
+      const cardContainer = this.page.testSubj.locator(this.cardTestSubj[typedCard]);
+      await expect(cardContainer).toBeVisible();
 
-  /**
-   * Get the AI Agent card select button (the actual button inside the card)
-   */
-  getAIAgentCardButton() {
-    return this.page.testSubj.locator('aiAssistantAgentCard').locator('button[role="switch"]');
+      const cardSwitch = this.getCardSwitch(typedCard);
+      await expect(cardSwitch).toBeVisible();
+
+      if (enabled) {
+        await expect(cardSwitch).toBeEnabled();
+      } else {
+        await expect(cardSwitch).toBeDisabled();
+      }
+    }
   }
 
   /**

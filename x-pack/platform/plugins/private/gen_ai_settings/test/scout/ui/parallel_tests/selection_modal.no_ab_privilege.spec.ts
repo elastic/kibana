@@ -36,8 +36,11 @@ spaceTest.describe(
         });
 
         await spaceTest.step('verify AI Agent card button is disabled', async () => {
-          const aiAgentCardButton = pageObjects.genAiSettings.getAIAgentCardButton();
-          await expect(aiAgentCardButton).toBeDisabled();
+          await pageObjects.genAiSettings.expectCardsState({
+            observability: true,
+            security: true,
+            agent: false,
+          });
         });
       }
     );

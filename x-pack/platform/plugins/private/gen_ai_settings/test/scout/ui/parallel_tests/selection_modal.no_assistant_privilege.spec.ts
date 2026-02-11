@@ -28,19 +28,12 @@ spaceTest.describe(
           await expect(cardSelectionModal).toBeVisible();
         });
 
-        await spaceTest.step('verify Observability card is disabled', async () => {
-          const observabilityCardButton = pageObjects.genAiSettings.getObservabilityCardButton();
-          await expect(observabilityCardButton).toBeDisabled();
-        });
-
-        await spaceTest.step('verify Security card is disabled', async () => {
-          const securityCardButton = pageObjects.genAiSettings.getSecurityCardButton();
-          await expect(securityCardButton).toBeDisabled();
-        });
-
-        await spaceTest.step('verify AI Agent card is enabled', async () => {
-          const aiAgentCardButton = pageObjects.genAiSettings.getAIAgentCardButton();
-          await expect(aiAgentCardButton).toBeEnabled();
+        await spaceTest.step('verify AI Assistant cards are disabled', async () => {
+          await pageObjects.genAiSettings.expectCardsState({
+            observability: false,
+            security: false,
+            agent: true,
+          });
         });
       }
     );

@@ -39,16 +39,15 @@ spaceTest.describe('GenAI Settings - AI Selection Modal Changes', { tag: ['@ess'
       });
 
       await spaceTest.step('verify cards are enabled', async () => {
-        const observabilityCardButton = pageObjects.genAiSettings.getObservabilityCardButton();
-        await expect(observabilityCardButton).toBeEnabled();
-        const securityCardButton = pageObjects.genAiSettings.getSecurityCardButton();
-        await expect(securityCardButton).toBeEnabled();
-        const aiAgentCardButton = pageObjects.genAiSettings.getAIAgentCardButton();
-        await expect(aiAgentCardButton).toBeEnabled();
+        await pageObjects.genAiSettings.expectCardsState({
+          observability: true,
+          security: true,
+          agent: true,
+        });
       });
 
       await spaceTest.step('select AI Agent card', async () => {
-        await pageObjects.genAiSettings.getAIAgentCardButton().click();
+        await pageObjects.genAiSettings.getCardSwitch('agent').click();
         await pageObjects.genAiSettings.getSelectionModalApplyButton().click();
       });
 
