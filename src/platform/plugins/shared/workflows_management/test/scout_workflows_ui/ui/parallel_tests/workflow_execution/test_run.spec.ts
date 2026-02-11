@@ -42,7 +42,7 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
       .getByRole('button', { name: 'hello_world_step' })
       .click();
     const stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
-    await expect(stepDetails.getByTestId('jsonDataTable')).toContainText('Test run: true');
+    await expect(stepDetails.getByTestId('workflowJsonDataViewer')).toContainText('Test run: true');
   });
 
   test('should run saved workflow from editor as test run with isTestRun: true', async ({
@@ -65,7 +65,7 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
       .getByRole('button', { name: 'hello_world_step' })
       .click();
     const stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
-    await expect(stepDetails.getByTestId('jsonDataTable')).toContainText('Test run: true');
+    await expect(stepDetails.getByTestId('workflowJsonDataViewer')).toContainText('Test run: true');
   });
 
   test('should not allow running a disabled workflow, then enable and run it', async ({
@@ -106,7 +106,9 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
       .getByRole('button', { name: 'hello_world_step' })
       .click();
     const stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
-    await expect(stepDetails.getByTestId('jsonDataTable')).toContainText('Test run: false');
+    await expect(stepDetails.getByTestId('workflowJsonDataViewer')).toContainText(
+      'Test run: false'
+    );
   });
 
   test('should run individual step with custom context override', async ({ pageObjects, page }) => {
@@ -123,13 +125,13 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
     await page.keyboard.press('End');
 
     // Click the inline "run step" button
-    const runStepButton = page.testSubj.locator('runStep');
+    const runStepButton = page.testSubj.locator('workflowRunStep');
     await expect(runStepButton).toBeVisible();
     await runStepButton.click();
 
     // Set custom context in the test step modal and execute
     await pageObjects.workflowEditor.setTestStepInputs({ execution: { isTestRun: false } });
-    await page.testSubj.click('submit-step-run');
+    await page.testSubj.click('workflowSubmitStepRun');
 
     await pageObjects.workflowExecution.waitForExecutionView();
 
@@ -141,6 +143,8 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
 
     await helloWorldSteps.click();
     const stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
-    await expect(stepDetails.getByTestId('jsonDataTable')).toContainText('Test run: false');
+    await expect(stepDetails.getByTestId('workflowJsonDataViewer')).toContainText(
+      'Test run: false'
+    );
   });
 });

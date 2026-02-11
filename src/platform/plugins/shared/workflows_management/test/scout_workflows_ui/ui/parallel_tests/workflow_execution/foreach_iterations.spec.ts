@@ -78,12 +78,16 @@ test.describe(
       // eslint-disable-next-line playwright/no-nth-methods -- it's useful here, as it's a list, not a hacky workaround
       await logIterationButtons.first().click();
       let stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
-      await expect(stepDetails.getByTestId('jsonDataTable')).toContainText('Iteration is 0');
+      await expect(stepDetails.getByTestId('workflowJsonDataViewer')).toContainText(
+        'Iteration is 0'
+      );
 
       // eslint-disable-next-line playwright/no-nth-methods -- it's useful here, as it's a list, not a hacky workaround
       await logIterationButtons.last().click();
       stepDetails = page.testSubj.locator('workflowStepExecutionDetails');
-      await expect(stepDetails.getByTestId('jsonDataTable')).toContainText('Iteration is 1');
+      await expect(stepDetails.getByTestId('workflowJsonDataViewer')).toContainText(
+        'Iteration is 1'
+      );
     });
 
     test('should display scrollable step executions with many iterations', async ({

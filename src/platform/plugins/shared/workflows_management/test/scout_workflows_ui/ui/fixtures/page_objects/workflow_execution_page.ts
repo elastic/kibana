@@ -84,7 +84,7 @@ export class WorkflowExecutionPage {
       // Find the last step button in the tree — when execution fails, the last
       // executed step is the one that errored.
       const stepButtons = this.executionPanel.locator(
-        'button:has(span[data-test-subj="stepName"])'
+        'button:has(span[data-test-subj="workflowStepName"])'
       );
       const count = await stepButtons.count();
       if (count === 0) {
@@ -94,7 +94,8 @@ export class WorkflowExecutionPage {
       // eslint-disable-next-line playwright/no-nth-methods -- we need the last step (the failed one)
       const lastStep = stepButtons.nth(count - 1);
       const stepName =
-        (await lastStep.locator('span[data-test-subj="stepName"]').textContent()) ?? 'unknown';
+        (await lastStep.locator('span[data-test-subj="workflowStepName"]').textContent()) ??
+        'unknown';
       await lastStep.click();
 
       const errorJson = await this.getStepResultJson<unknown>('error');
@@ -144,7 +145,7 @@ export class WorkflowExecutionPage {
       for (const listItem of allListItems) {
         const buttonLocator = listItem.locator('> button');
         const buttonText = await buttonLocator
-          .locator('span[data-test-subj="stepName"]')
+          .locator('span[data-test-subj="workflowStepName"]')
           .textContent();
 
         if (buttonText?.trim() === currentNode) {
@@ -179,10 +180,14 @@ export class WorkflowExecutionPage {
   async getStepResultJson<TOutput = unknown>(type: 'input' | 'output' | 'error'): Promise<TOutput> {
     const workflowStepExecutionDetails = this.page.testSubj.locator('workflowStepExecutionDetails');
 
-    await workflowStepExecutionDetails.locator(`button[data-test-subj="${type}"]`).click();
-    await workflowStepExecutionDetails.locator('button[data-test-subj="json"]').click();
+    await workflowStepExecutionDetails
+      .locator(`button[data-test-subj="workflowStepTab_${type}"]`)
+      .click();
+    await workflowStepExecutionDetails
+      .locator('button[data-test-subj="workflowViewMode_json"]')
+      .click();
 
-    const jsonEditor = this.page.testSubj.locator('stepResultJsonEditor');
+    const jsonEditor = this.page.testSubj.locator('workflowStepResultJsonEditor');
     await jsonEditor.waitFor({ state: 'visible' });
 
     const uri = await jsonEditor.locator('.monaco-editor[data-uri]').getAttribute('data-uri');

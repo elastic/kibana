@@ -63,7 +63,7 @@ describe('ExecutionDataViewer', () => {
     it('should render in table view mode by default', () => {
       render(<ExecutionDataViewer data={mockData} />);
 
-      expect(screen.getByTestId('jsonDataTable')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowJsonDataViewer')).toBeInTheDocument();
       expect(screen.getByTestId('mocked-json-data-table')).toBeInTheDocument();
       expect(screen.queryByTestId('mocked-json-data-code')).not.toBeInTheDocument();
     });

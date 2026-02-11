@@ -168,7 +168,7 @@ test.describe(
         const expectedContent = isSecurityProject ? expectedSingleAlertIds[i] : 'alert';
         expect(stepOutputStr).toContain(expectedContent);
 
-        await page.testSubj.click('backToExecutionsLink');
+        await page.testSubj.click('workflowBackToExecutionsLink');
         await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
       }
 

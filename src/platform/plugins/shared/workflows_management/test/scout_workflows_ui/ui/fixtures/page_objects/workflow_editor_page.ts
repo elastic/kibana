@@ -21,7 +21,7 @@ export class WorkflowEditorPage {
     this.saveButton = this.page.testSubj.locator('saveWorkflowHeaderButton');
     this.runButton = this.page.testSubj.locator('runWorkflowHeaderButton');
     this.validationErrorsAccordion = this.page.testSubj.locator(
-      'wf-yaml-editor-validation-errors-list'
+      'workflowYamlEditorValidationErrorsList'
     );
   }
 
@@ -148,7 +148,7 @@ export class WorkflowEditorPage {
    * Wait for the test step modal to be visible
    */
   async waitForTestStepModal() {
-    await this.page.testSubj.waitForSelector('testStepModal', { state: 'visible' });
+    await this.page.testSubj.waitForSelector('workflowTestStepModal', { state: 'visible' });
   }
 
   /**

@@ -22,7 +22,7 @@ export const JsonDataCode = ({ json }: JsonDataCodeProps) => {
 
   return (
     <JSONCodeEditorCommonMemoized
-      data-test-subj="stepResultJsonEditor"
+      data-test-subj="workflowStepResultJsonEditor"
       jsonValue={formattedJson}
       onEditorDidMount={() => {}}
       height="100%"
