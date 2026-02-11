@@ -9,8 +9,7 @@
 
 import type { DatatableVisualizationState, RowHeightMode } from '@kbn/lens-common';
 import { LENS_ROW_HEIGHT_MODE, LENS_DATAGRID_DENSITY } from '@kbn/lens-common';
-import { initial } from 'lodash';
-import { TRANSPOSE_SEPARATOR, getOriginalId, isTransposeId } from '@kbn/transpose-utils';
+import { parseTransposeId } from '@kbn/transpose-utils';
 import type { DatatableState } from '../../../../schema';
 import type { ColumnIdMapping } from './columns';
 import { stripUndefined } from '../../utils';
@@ -75,29 +74,28 @@ function parseDensityToAPI(
 }
 
 /**
- * Parses split_metrics_by sorting format: value1---value2---...---metricColumnId
+ * Parses transposed metric sorting information from a column ID
+ * Transposed column IDs have format: value1---value2---...---metricColumnId
  */
-function parseSplitMetricsBySorting(
+function parseTransposedMetricSorting(
   columnId: string,
   columnIdMapping: ColumnIdMapping
 ): { values: string[]; index: number } | undefined {
-  if (!isTransposeId(columnId)) {
+  const transposeInfo = parseTransposeId(columnId);
+
+  if (!transposeInfo) {
     return undefined;
   }
 
-  const metricColumnId = getOriginalId(columnId);
-  const mapped = columnIdMapping.get(metricColumnId);
+  const mappedMetricColumn = columnIdMapping.get(transposeInfo.id);
 
-  if (!mapped || mapped.type !== 'metric') {
+  if (!mappedMetricColumn || mappedMetricColumn.type !== 'metric') {
     return undefined;
   }
-
-  // The last part is the metric column ID
-  const parts = columnId.split(TRANSPOSE_SEPARATOR);
 
   return {
-    values: initial(parts),
-    index: mapped.index,
+    values: transposeInfo.values,
+    index: mappedMetricColumn.index,
   };
 }
 
@@ -116,17 +114,13 @@ function parseSortingToAPI(
   // Old SOs can have a missing direction, so we default to asc
   const DEFAULT_DIRECTION = 'asc' as const;
 
-  // Split_metrics_by sorting (contains ---)
-  if (columnId.includes(TRANSPOSE_SEPARATOR)) {
-    const parsed = parseSplitMetricsBySorting(columnId, columnIdMapping);
-    if (!parsed) {
-      return undefined;
-    }
-
+  // Check if this is transposed metric sorting
+  const transposedSorting = parseTransposedMetricSorting(columnId, columnIdMapping);
+  if (transposedSorting) {
     return {
       column_type: 'transposed_metric',
-      index: parsed.index,
-      values: parsed.values,
+      index: transposedSorting.index,
+      values: transposedSorting.values,
       direction: direction ?? DEFAULT_DIRECTION,
     };
   }
