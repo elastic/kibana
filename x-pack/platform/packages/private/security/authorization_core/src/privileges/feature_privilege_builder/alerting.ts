@@ -112,11 +112,7 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
         ...getAlertingPrivilege(readOperations[entity], read, entity),
         ...getAlertingPrivilege(enableOperations[entity], enable, entity),
         ...getAlertingPrivilege(manualRunOperations[entity], manualRun, entity),
-        ...getAlertingPrivilege(
-          manageRuleSettingsOperations[entity],
-          manageRuleSettings,
-          entity
-        ),
+        ...getAlertingPrivilege(manageRuleSettingsOperations[entity], manageRuleSettings, entity),
       ]);
     };
 
