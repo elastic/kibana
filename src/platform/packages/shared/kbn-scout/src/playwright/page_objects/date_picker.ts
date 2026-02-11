@@ -84,11 +84,11 @@ export class DatePicker {
             });
             const absoluteTab = this.page.testSubj.locator('superDatePickerAbsoluteTab');
             // Wait for the absolute tab to appear, but don't throw if it doesn't
-            await absoluteTab.waitFor({ state: 'visible', timeout: 2500 }).catch(() => {});
+            await absoluteTab.waitFor({ state: 'visible', timeout: 500 }).catch(() => {});
             return await absoluteTab.isVisible();
           },
           {
-            timeout: 5000,
+            timeout: 10000,
             intervals: [500],
           }
         )
