@@ -1,0 +1,48 @@
+version: '1'
+name: 'sources.slack.search_messages'
+description: 'Search for messages in Slack (requires a user token with search:read)'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query
+    type: string
+    description: 'Search query to find messages'
+  - name: sort
+    type: string
+    required: false
+    default: "score"
+    description: 'Sort order: score or timestamp'
+  - name: sort_dir
+    type: string
+    required: false
+    default: "desc"
+    description: 'Sort direction: asc or desc'
+  - name: count
+    type: number
+    required: false
+    default: 20
+    description: 'Number of results to return (1-100)'
+  - name: page
+    type: number
+    required: false
+    default: 1
+    description: 'Page number for pagination'
+  - name: highlight
+    type: boolean
+    required: false
+    default: false
+    description: 'Whether to include highlight markers in results'
+steps:
+  - name: search-messages
+    type: slack2.searchMessages
+    connector-id: <%= stackConnectorId %>
+    with:
+      query: "${{inputs.query}}"
+      sort: "${{inputs.sort}}"
+      sortDir: "${{inputs.sort_dir}}"
+      count: ${{inputs.count}}
+      page: ${{inputs.page}}
+      highlight: ${{inputs.highlight}}
+
