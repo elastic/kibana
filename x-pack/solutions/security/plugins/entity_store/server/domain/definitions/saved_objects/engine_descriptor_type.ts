@@ -49,6 +49,9 @@ export const EngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
         paginationTimestamp: {
           type: 'date',
         },
+        paginationId: {
+          type: 'keyword',
+        },
         lastExecutionTimestamp: {
           type: 'date',
         },
@@ -104,6 +107,7 @@ const engineDescriptorAttributesSchema = {
     timeout: schema.string(),
     frequency: schema.string(),
     paginationTimestamp: schema.maybe(schema.string()),
+    paginationId: schema.maybe(schema.string()),
     lastExecutionTimestamp: schema.maybe(schema.string()),
   }),
   error: schema.maybe(
@@ -129,11 +133,32 @@ const version1: SavedObjectsFullModelVersion = {
   },
 };
 
+const version2: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        logExtractionState: {
+          properties: {
+            paginationId: { type: 'keyword' as const },
+          },
+        },
+      },
+    },
+  ],
+  schemas: {
+    create: schema.object(engineDescriptorAttributesSchema),
+    forwardCompatibility: schema.object(engineDescriptorAttributesSchema, {
+      unknowns: 'ignore',
+    }),
+  },
+};
+
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EngineDescriptorTypeMappings,
-  modelVersions: { 1: version1 },
+  modelVersions: { 1: version1, 2: version2 },
   hiddenFromHttpApis: true,
 };
