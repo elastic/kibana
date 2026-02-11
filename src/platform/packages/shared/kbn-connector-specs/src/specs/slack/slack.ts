@@ -77,7 +77,56 @@ export const Slack: ConnectorSpec = {
             i18n.translate(
               'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.query.description',
               {
-                defaultMessage: 'Search query to find messages',
+                defaultMessage:
+                  'Search query to find messages (supports Slack search operators; see optional constraint fields)',
+              }
+            )
+          ),
+        inChannel: z
+          .string()
+          .optional()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.inChannel.description',
+              {
+                defaultMessage:
+                  'Optional Slack search constraint. Adds `in:<channel_name>` to the query.',
+              }
+            )
+          ),
+        fromUser: z
+          .string()
+          .optional()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.fromUser.description',
+              {
+                defaultMessage:
+                  'Optional Slack search constraint. Adds `from:<@UserID>` or `from:username` to the query.',
+              }
+            )
+          ),
+        after: z
+          .string()
+          .optional()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.after.description',
+              {
+                defaultMessage:
+                  'Optional Slack search constraint. Adds `after:<date>` to the query (e.g. 2026-02-10).',
+              }
+            )
+          ),
+        before: z
+          .string()
+          .optional()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.before.description',
+              {
+                defaultMessage:
+                  'Optional Slack search constraint. Adds `before:<date>` to the query (e.g. 2026-02-10).',
               }
             )
           ),
@@ -141,18 +190,42 @@ export const Slack: ConnectorSpec = {
               }
             )
           ),
+        raw: z
+          .boolean()
+          .optional()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.raw.description',
+              {
+                defaultMessage:
+                  'Return the full raw Slack API response instead of a compact, LLM-friendly result.',
+              }
+            )
+          ),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
           query: string;
+          inChannel?: string;
+          fromUser?: string;
+          after?: string;
+          before?: string;
           sort?: 'score' | 'timestamp';
           sortDir?: 'asc' | 'desc';
           count?: number;
           page?: number;
           highlight?: boolean;
+          raw?: boolean;
         };
 
-        const params = new URLSearchParams({ query: typedInput.query });
+        const queryParts: string[] = [typedInput.query];
+        if (typedInput.inChannel) queryParts.push(`in:${typedInput.inChannel}`);
+        if (typedInput.fromUser) queryParts.push(`from:${typedInput.fromUser}`);
+        if (typedInput.after) queryParts.push(`after:${typedInput.after}`);
+        if (typedInput.before) queryParts.push(`before:${typedInput.before}`);
+        const finalQuery = queryParts.filter(Boolean).join(' ');
+
+        const params = new URLSearchParams({ query: finalQuery });
         if (typedInput.sort) params.append('sort', typedInput.sort);
         if (typedInput.sortDir) params.append('sort_dir', typedInput.sortDir);
         if (typedInput.count) params.append('count', typedInput.count.toString());
@@ -171,7 +244,78 @@ export const Slack: ConnectorSpec = {
             throw new Error(`Slack API error: ${response.data.error}`);
           }
 
-          return response.data;
+          if (typedInput.raw) {
+            return response.data;
+          }
+
+          type SlackSearchMatch = {
+            score?: number;
+            iid?: string;
+            team?: string;
+            text?: string;
+            permalink?: string;
+            user?: string;
+            username?: string;
+            ts?: string;
+            channel?: { id?: string; name?: string };
+            blocks?: unknown;
+          };
+
+          const extractMentionedUserIds = (match: SlackSearchMatch): string[] => {
+            const ids = new Set<string>();
+
+            const text = typeof match.text === 'string' ? match.text : '';
+            const re = /<@([A-Z0-9]+)(?:\\|[^>]+)?>/g;
+            for (let m = re.exec(text); m; m = re.exec(text)) {
+              if (m[1]) ids.add(m[1]);
+            }
+
+            const blocks = (match as { blocks?: unknown }).blocks;
+            const stack: unknown[] = blocks ? [blocks] : [];
+            const seen = new Set<unknown>();
+            let visited = 0;
+
+            while (stack.length > 0) {
+              const cur = stack.pop();
+              visited += 1;
+              if (visited > 5000) break;
+              if (!cur || typeof cur !== 'object') continue;
+              if (seen.has(cur)) continue;
+              seen.add(cur);
+
+              const rec = cur as Record<string, unknown>;
+              if (rec.type === 'user' && typeof rec.user_id === 'string') {
+                ids.add(rec.user_id);
+              }
+
+              for (const v of Object.values(rec)) {
+                if (Array.isArray(v)) stack.push(...v);
+                else if (v && typeof v === 'object') stack.push(v);
+              }
+            }
+
+            return Array.from(ids);
+          };
+
+          const matches: SlackSearchMatch[] =
+            (response.data?.messages?.matches as SlackSearchMatch[]) ?? [];
+
+          return {
+            ok: true,
+            query: response.data?.query ?? finalQuery,
+            total: response.data?.messages?.total,
+            pagination: response.data?.messages?.pagination,
+            matches: matches.map((m) => ({
+              score: m.score,
+              ts: m.ts,
+              team: m.team,
+              text: m.text,
+              permalink: m.permalink,
+              channel: { id: m.channel?.id, name: m.channel?.name },
+              sender: { userId: m.user, username: m.username },
+              mentionedUserIds: extractMentionedUserIds(m),
+            })),
+          };
         } catch (error) {
           const err = error as {
             message?: string;

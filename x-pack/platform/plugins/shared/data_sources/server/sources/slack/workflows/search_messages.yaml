@@ -9,6 +9,22 @@ inputs:
   - name: query
     type: string
     description: 'Search query to find messages'
+  - name: in_channel
+    type: string
+    required: false
+    description: 'Optional constraint: adds `in:<channel_name>` to the query'
+  - name: from_user
+    type: string
+    required: false
+    description: 'Optional constraint: adds `from:<@UserID>` or `from:username` to the query'
+  - name: after
+    type: string
+    required: false
+    description: 'Optional constraint: adds `after:<date>` to the query (e.g. 2026-02-10)'
+  - name: before
+    type: string
+    required: false
+    description: 'Optional constraint: adds `before:<date>` to the query (e.g. 2026-02-10)'
   - name: sort
     type: string
     required: false
@@ -34,15 +50,25 @@ inputs:
     required: false
     default: false
     description: 'Whether to include highlight markers in results'
+  - name: raw
+    type: boolean
+    required: false
+    default: false
+    description: 'Return the full raw Slack API response'
 steps:
   - name: search-messages
     type: slack2.searchMessages
     connector-id: <%= stackConnectorId %>
     with:
       query: "${{inputs.query}}"
+      inChannel: "${{inputs.in_channel}}"
+      fromUser: "${{inputs.from_user}}"
+      after: "${{inputs.after}}"
+      before: "${{inputs.before}}"
       sort: "${{inputs.sort}}"
       sortDir: "${{inputs.sort_dir}}"
       count: ${{inputs.count}}
       page: ${{inputs.page}}
       highlight: ${{inputs.highlight}}
+      raw: ${{inputs.raw}}
 

@@ -47,6 +47,7 @@ describe('Slack', () => {
       const mockResponse = {
         data: {
           ok: true,
+          query: 'hello',
           messages: { matches: [], total: 0 },
         },
       };
@@ -57,13 +58,20 @@ describe('Slack', () => {
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://slack.com/api/search.messages?query=hello'
       );
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual({
+        ok: true,
+        query: 'hello',
+        total: 0,
+        pagination: undefined,
+        matches: [],
+      });
     });
 
     it('should include optional parameters', async () => {
       const mockResponse = {
         data: {
           ok: true,
+          query: 'test',
           messages: { matches: [], total: 0 },
         },
       };
@@ -76,11 +84,33 @@ describe('Slack', () => {
         count: 50,
         page: 2,
         highlight: true,
+        inChannel: 'general',
+        fromUser: '@U123',
+        after: '2026-01-01',
+        before: '2026-02-01',
       });
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://slack.com/api/search.messages?query=test&sort=timestamp&sort_dir=desc&count=50&page=2&highlight=true'
+        'https://slack.com/api/search.messages?query=test+in%3Ageneral+from%3A%40U123+after%3A2026-01-01+before%3A2026-02-01&sort=timestamp&sort_dir=desc&count=50&page=2&highlight=true'
       );
+    });
+
+    it('should return raw Slack response when raw=true', async () => {
+      const mockResponse = {
+        data: {
+          ok: true,
+          query: 'hello',
+          messages: { matches: [{ text: 'hi' }], total: 1 },
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.searchMessages.handler(mockContext, {
+        query: 'hello',
+        raw: true,
+      });
+
+      expect(result).toEqual(mockResponse.data);
     });
 
     it('should throw error when Slack API returns error', async () => {
