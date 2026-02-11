@@ -178,7 +178,7 @@ export function registerChatRoutes({
       schema.oneOf([schema.literal('local'), schema.literal('task_manager')], {
         meta: {
           description:
-            '**Experimental; added in 9.3.0.** define how to execute the agent (local execution or via task_manager)',
+            '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)',
         },
       })
     ),
