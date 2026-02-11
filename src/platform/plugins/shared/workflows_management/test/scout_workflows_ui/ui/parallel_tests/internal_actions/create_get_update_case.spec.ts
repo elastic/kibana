@@ -37,7 +37,6 @@ test.describe(
       ...tags.stateful.classic,
       ...tags.serverless.observability.complete,
       ...tags.serverless.security.complete,
-      ...tags.serverless.search,
     ],
   },
   () => {
