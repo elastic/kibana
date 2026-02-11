@@ -9,7 +9,7 @@
 
 import type { BreakingChange } from './breaking_rules';
 
-const HTTP_METHOD_PATTERN = /^(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\s+(.+)$/;
+const HTTP_METHODS = new Set(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']);
 
 export interface BumpDiffEntry {
   id: string;
@@ -28,9 +28,12 @@ export interface BumpDiffEntry {
 }
 
 const parseOperationName = (name: string): { method?: string; path: string } => {
-  const match = name.match(HTTP_METHOD_PATTERN);
-  if (match) {
-    return { method: match[1], path: match[2] };
+  const spaceIdx = name.indexOf(' ');
+  if (spaceIdx > 0) {
+    const candidate = name.slice(0, spaceIdx);
+    if (HTTP_METHODS.has(candidate)) {
+      return { method: candidate, path: name.slice(spaceIdx + 1).trimStart() };
+    }
   }
   return { path: name };
 };

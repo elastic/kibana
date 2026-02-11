@@ -40,7 +40,7 @@ export const loadTerraformApis = (configPath?: string): TerraformApi[] => {
 };
 
 export const normalizePath = (path: string): string =>
-  path.replace(/\{[^}]+\}/g, '{param}').toLowerCase();
+  path.replace(/\{[^{}]+\}/g, '{param}').toLowerCase();
 
 export const buildTerraformApiIndex = (
   apis: TerraformApi[]
