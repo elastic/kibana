@@ -51,7 +51,6 @@ export interface ProcessedRoundInput {
   attachments: ProcessedAttachment[];
 }
 
-
 export type ProcessedConversationRound = Omit<ConversationRound, 'input'> & {
   input: ProcessedRoundInput;
 };
