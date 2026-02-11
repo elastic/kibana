@@ -32,14 +32,19 @@ steps:
      message: \${{foreach.item}}
 `;
 
+/** Index name used for alert trigger test documents. */
+export const TEST_ALERTS_INDEX = 'test-workflow-alerts-index';
+
 /**
  * Workflow that creates a security detection rule with two workflow actions:
  * one in single-alert mode (summaryMode: false) and one in summary mode
  * (summaryMode: true). Takes the target workflow IDs as inputs.
+ *
+ * Only works with the Security solution (uses the detection engine API).
  */
-export const getCreateAlertRuleWorkflowYaml = (name: string) => `
+export const getCreateSecurityAlertRuleWorkflowYaml = (name: string) => `
 name: ${name}
-description: Create alert rule
+description: Create security detection rule
 enabled: true
 triggers:
   - type: manual
@@ -51,17 +56,17 @@ inputs:
     type: string
     required: true
 consts:
-  alerts_index_name: test-security-alerts-index
+  alerts_index_name: ${TEST_ALERTS_INDEX}
 steps:
   - name: create_security_alert_rule
     type: kibana.request
     with:
       method: POST
-      path: /s/\{{workflow.spaceId}}/api/detection_engine/rules
+      path: /s/{{workflow.spaceId}}/api/detection_engine/rules
       body:
         type: query
         index:
-          - test-security-alerts-index
+          - ${TEST_ALERTS_INDEX}
         filters: []
         language: kuery
         query: "not severity: foo"
@@ -104,8 +109,80 @@ steps:
 `;
 
 /**
+ * Workflow that creates an ES|QL alert rule via the generic Kibana alerting API
+ * with two workflow actions: one per-alert (summaryMode: false) and one summary
+ * (summaryMode: true). Takes the target workflow IDs as inputs.
+ *
+ * Uses searchType: esqlQuery with groupBy: row so the rule creates one alert per
+ * document — matching the security detection engine's per-document alert behavior.
+ *
+ * Works with Observability (and ESS) — uses the standard alerting framework
+ * instead of the Security detection engine.
+ */
+export const getCreateObsAlertRuleWorkflowYaml = (name: string) => `
+name: ${name}
+description: Create ES|QL alert rule
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: wf_multiple_alerts
+    type: string
+    required: true
+  - name: wf_single_alert
+    type: string
+    required: true
+consts:
+  alerts_index_name: ${TEST_ALERTS_INDEX}
+steps:
+  - name: create_obs_alert_rule
+    type: kibana.request
+    with:
+      method: POST
+      path: /s/{{workflow.spaceId}}/api/alerting/rule
+      body:
+        name: ES|QL alert test
+        rule_type_id: .es-query
+        consumer: alerts
+        params:
+          searchType: esqlQuery
+          esqlQuery:
+            esql: "FROM ${TEST_ALERTS_INDEX} METADATA _id | KEEP _id, severity, alert_id, description, category"
+          timeWindowSize: 5
+          timeWindowUnit: m
+          threshold:
+            - 0
+          thresholdComparator: ">"
+          size: 100
+          aggType: count
+          groupBy: row
+          excludeHitsFromPreviousRun: true
+          timeField: "@timestamp"
+        schedule:
+          interval: 15s
+        actions:
+          - id: system-connector-.workflows
+            group: query matched
+            params:
+              subAction: run
+              subActionParams:
+                workflowId: "{{inputs.wf_single_alert}}"
+                summaryMode: false
+          - id: system-connector-.workflows
+            group: query matched
+            params:
+              subAction: run
+              subActionParams:
+                workflowId: "{{inputs.wf_multiple_alerts}}"
+                summaryMode: true
+        tags: []
+        alert_delay:
+          active: 1
+`;
+
+/**
  * Workflow that creates a timestamp ingest pipeline and indexes alert
- * documents, which triggers the security detection rule.
+ * documents, which triggers an alert rule monitoring the test index.
  */
 export const getTriggerAlertWorkflowYaml = (name: string) => `
 name: ${name}
@@ -115,7 +192,7 @@ triggers:
   - type: manual
 consts:
   pipeline_name: add_timestamp_if_missing
-  alerts_index_name: test-security-alerts-index
+  alerts_index_name: ${TEST_ALERTS_INDEX}
 inputs:
   type: object
   properties:

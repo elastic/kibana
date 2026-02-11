@@ -27,14 +27,71 @@ export class WorkflowExecutionPage {
 
   /**
    * Wait for the workflow execution panel to show the specified status.
+   *
+   * When expecting 'completed', this method also watches for 'failed' status
+   * so it can fail fast with a descriptive error (including the step error JSON)
+   * instead of timing out with no diagnostic info.
+   *
    * @param status - The execution status to wait for ('completed' or 'failed')
    * @param timeout - The timeout in milliseconds
    */
   async waitForExecutionStatus(status: 'completed' | 'failed', timeout: number) {
-    const panelWithStatus = this.page.locator(
+    const expectedPanel = this.page.locator(
       `[data-test-subj="workflowExecutionPanel"][data-execution-status="${status}"]`
     );
-    await panelWithStatus.waitFor({ state: 'visible', timeout });
+
+    if (status === 'completed') {
+      const failedPanel = this.page.locator(
+        `[data-test-subj="workflowExecutionPanel"][data-execution-status="failed"]`
+      );
+
+      // Race: wait for either 'completed' or 'failed' — whichever comes first
+      const winner = await Promise.race([
+        expectedPanel.waitFor({ state: 'visible', timeout }).then(() => 'completed' as const),
+        failedPanel.waitFor({ state: 'visible', timeout }).then(() => 'failed' as const),
+      ]);
+
+      if (winner === 'failed') {
+        const errorDetails = await this.extractFailedStepError();
+        throw new Error(
+          `Expected execution status "completed" but got "failed".\n\n${errorDetails}`
+        );
+      }
+    } else {
+      await expectedPanel.waitFor({ state: 'visible', timeout });
+    }
+  }
+
+  /**
+   * Clicks the last step in the execution tree (typically the failed one)
+   * and extracts the error JSON from the step details panel.
+   * Returns a formatted string for use in error messages.
+   */
+  private async extractFailedStepError(): Promise<string> {
+    try {
+      // Find the last step button in the tree — when execution fails, the last
+      // executed step is the one that errored.
+      const stepButtons = this.executionPanel.locator(
+        'button:has(span[data-test-subj="stepName"])'
+      );
+      const count = await stepButtons.count();
+      if (count === 0) {
+        return 'No steps found in execution tree.';
+      }
+
+      // eslint-disable-next-line playwright/no-nth-methods -- we need the last step (the failed one)
+      const lastStep = stepButtons.nth(count - 1);
+      const stepName =
+        (await lastStep.locator('span[data-test-subj="stepName"]').textContent()) ?? 'unknown';
+      await lastStep.click();
+
+      const errorJson = await this.getStepResultJson<unknown>('error');
+      return `Failed step: "${stepName.trim()}"\nError:\n${JSON.stringify(errorJson, null, 2)}`;
+    } catch (e) {
+      return `(could not extract step error details: ${
+        e instanceof Error ? e.message : String(e)
+      })`;
+    }
   }
 
   /**

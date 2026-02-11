@@ -20,7 +20,9 @@ export {
   getIncompleteStepTypeYaml,
 } from './console_workflows';
 export {
+  TEST_ALERTS_INDEX,
   getPrintAlertsWorkflowYaml,
-  getCreateAlertRuleWorkflowYaml,
+  getCreateSecurityAlertRuleWorkflowYaml,
+  getCreateObsAlertRuleWorkflowYaml,
   getTriggerAlertWorkflowYaml,
 } from './alert_workflows';

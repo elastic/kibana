@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { servers as defaultConfig } from '../../../default/serverless/oblt.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
-import { defaultConfig } from '../../../default/stateful/base.config';
 
 /**
  * Custom Scout server configuration for Workflows Management UI tests.
@@ -16,6 +16,9 @@ import { defaultConfig } from '../../../default/stateful/base.config';
  *
  * This config is automatically used when running tests from:
  * workflows_management/test/scout_workflows_ui/
+ *
+ * Usage:
+ *   node scripts/scout.js start-server --serverless=oblt --config-dir workflows_ui
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
