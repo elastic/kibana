@@ -9,25 +9,25 @@ import React, { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-export interface SloDetailsSettings {
+export interface SloDetailsContextType {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing: boolean;
   isFlyout: boolean;
 }
 
-const SloDetailsContext = createContext<SloDetailsSettings | undefined>(undefined);
+const SloDetailsContext = createContext<SloDetailsContextType | undefined>(undefined);
 
 export function SloDetailsContextProvider({
   children,
   value,
 }: {
   children: ReactNode;
-  value: SloDetailsSettings;
+  value: SloDetailsContextType;
 }) {
   return <SloDetailsContext.Provider value={value}>{children}</SloDetailsContext.Provider>;
 }
 
-export function useSloDetailsContext(): SloDetailsSettings {
+export function useSloDetailsContext(): SloDetailsContextType {
   const context = useContext(SloDetailsContext);
   if (context === undefined) {
     throw new Error('useSloDetailsContext must be used within a SloDetailsContextProvider');
