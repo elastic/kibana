@@ -56,7 +56,7 @@ The extracted translation files can be consumed in your application using the `@
 ```typescript
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 // Import translation files (webpack will bundle them)
 const translations = {
@@ -82,10 +82,10 @@ export const MyPluginApp = ({ lang = 'en' }) => {
   });
 
   return (
-    <IntlProvider locale={lang} messages={selectedTranslations.messages}>
+    <I18nProvider>
       {/* Your plugin components here */}
       <YourPluginComponent />
-    </IntlProvider>
+    </I18nProvider>
   );
 };
 ```

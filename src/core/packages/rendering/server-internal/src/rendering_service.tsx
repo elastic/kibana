@@ -312,6 +312,7 @@ export class RenderingService {
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl,
+          debugMode: i18nLib.getDebugMode(),
         },
         theme: {
           darkMode,

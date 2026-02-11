@@ -81,11 +81,16 @@ export class I18nService {
 
     const locale = i18nConfig.locale;
     this.log.debug(`Using locale: ${locale}`);
+    this.log.debug(`Using debug mode: ${i18nConfig.debugMode}`);
 
     const translationFiles = await getKibanaTranslationFiles(locale, pluginPaths);
 
     this.log.debug(`Using translation files: [${translationFiles.join(', ')}]`);
-    await initTranslations(locale, translationFiles);
+    await initTranslations({
+      locale,
+      translationFiles,
+      debug: i18nConfig.debugMode,
+    });
 
     const translationHash = getTranslationHash(i18n.getTranslation());
 
