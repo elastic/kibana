@@ -1,0 +1,168 @@
+openapi: 3.0.3
+info:
+  description: ''
+  title: Security Entity Analytics API (Elastic Cloud Serverless)
+  version: '2026-01-28'
+servers:
+  - url: http://{kibana_host}:{port}
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/entity_analytics/watchlists:
+    post:
+      operationId: CreateWatchlist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  description: Description of the watchlist
+                  type: string
+                managed:
+                  description: Indicates if the watchlist is managed by the system
+                  type: boolean
+                name:
+                  description: Unique name for the watchlist
+                  type: string
+                riskModifier:
+                  description: Risk score modifier associated with the watchlist
+                  type: number
+              required:
+                - name
+                - description
+                - riskModifier
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchlistObject'
+          description: Watchlist created successfully
+      summary: Create a new watchlist
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/watchlists/{id}:
+    get:
+      operationId: GetWatchlist
+      parameters:
+        - description: Unique ID of the watchlist
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchlistObject'
+          description: Watchlist details
+      summary: Get a watchlist by ID
+      tags:
+        - Security Entity Analytics API
+    put:
+      operationId: UpdateWatchlist
+      parameters:
+        - description: The ID of the watchlist to update
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  description: Description of the watchlist
+                  type: string
+                managed:
+                  description: Indicates if the watchlist is managed by the system
+                  type: boolean
+                name:
+                  description: Unique name of the watchlist
+                  type: string
+                riskModifier:
+                  description: Risk score modifier associated with the watchlist
+                  type: number
+              required:
+                - name
+                - description
+                - riskModifier
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WatchlistObject'
+          description: Watchlist updated successfully
+      summary: Update an existing watchlist
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/watchlists/list:
+    get:
+      operationId: ListWatchlists
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/WatchlistObject'
+                type: array
+          description: List of watchlists
+      summary: List all watchlists
+      tags:
+        - Security Entity Analytics API
+components:
+  schemas:
+    WatchlistObject:
+      type: object
+      properties:
+        createdAt:
+          description: Timestamp indicating when the watchlist was created
+          format: date-time
+          type: string
+        description:
+          description: Description of the watchlist
+          type: string
+        id:
+          description: The unique ID of the watchlist
+          type: string
+        managed:
+          description: Indicates if the watchlist is managed by the system
+          type: boolean
+        name:
+          description: The name of the watchlist
+          type: string
+        riskModifier:
+          description: Risk score modifier associated with the watchlist
+          type: number
+        updatedAt:
+          description: Timestamp indicating when the watchlist was last updated
+          format: date-time
+          type: string
+      required:
+        - name
+        - riskModifier
+        - managed
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+security:
+  - BasicAuth: []
+tags:
+  - description: ''
+    name: Security Entity Analytics API
+    x-displayName: Security entity analytics
