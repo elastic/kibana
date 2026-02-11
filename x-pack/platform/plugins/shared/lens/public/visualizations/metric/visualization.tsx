@@ -23,6 +23,8 @@ import type {
   Suggestion,
   UserMessage,
   FormBasedPersistedState,
+  MetricVisualizationState,
+  SecondaryTrend,
 } from '@kbn/lens-common';
 import { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
@@ -37,7 +39,6 @@ import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 import { METRIC_NUMERIC_MAX } from '../../user_messages_ids';
-import type { MetricVisualizationState, SecondaryTrend } from './types';
 import {
   getColorMode,
   getDefaultConfigForMode,

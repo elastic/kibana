@@ -6,7 +6,7 @@
  */
 
 import type { OptionalKeys } from 'utility-types';
-import type { MetricVisualizationState } from './types';
+import type { MetricVisualizationState } from '@kbn/lens-common';
 
 export const LENS_METRIC_ID = 'lnsMetric';
 

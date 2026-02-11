@@ -23,12 +23,12 @@ import type {
   OperationDescriptor,
   OperationMetadata,
   Visualization,
+  MetricVisualizationState,
 } from '@kbn/lens-common';
 import { GROUP_ID } from './constants';
 import { getMetricVisualization } from './visualization';
 import type { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
-import type { MetricVisualizationState } from './types';
 import { getDefaultConfigForMode } from './helpers';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 

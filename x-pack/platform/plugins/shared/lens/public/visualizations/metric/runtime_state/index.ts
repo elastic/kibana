@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MetricVisualizationState } from '../types';
+import type { MetricVisualizationState } from '@kbn/lens-common';
 
 export const convertToRunTimeState = (
   state: MetricVisualizationState

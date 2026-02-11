@@ -20,7 +20,7 @@ import type {
   IconPosition,
   Alignment,
   PrimaryMetricPosition,
-} from '../types';
+} from '@kbn/lens-common';
 import {
   METRIC_LAYOUT_BY_POSITION,
   legacyMetricStateDefaults,

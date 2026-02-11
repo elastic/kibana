@@ -209,6 +209,11 @@ export type {
   SecondaryTrend,
   MetricVisualizationState,
   MetricVisualizationStateOptionals,
+  TitleFontWeight,
+  PrimaryMetricFontSize,
+  IconPosition,
+  Alignment,
+  PrimaryMetricPosition,
 } from './visualizations/metric/types';
 export type {
   SharedPartitionLayerState,
