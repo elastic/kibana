@@ -42,6 +42,7 @@ const mappings: MappingsDefinition = {
     rule_id: { type: 'keyword' },
     notification_group_id: { type: 'keyword' },
     source: { type: 'keyword' },
+    reason: { type: 'text' },
   },
 };
 

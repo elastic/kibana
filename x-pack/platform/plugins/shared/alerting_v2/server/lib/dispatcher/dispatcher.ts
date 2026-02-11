@@ -85,20 +85,32 @@ export class DispatcherService implements DispatcherServiceContract {
       await executeFakeWorkflow(group);
     }
 
-    this.logger.debug({
-      message: `Dispatcher processed ${alertEpisodes.length} alert episodes: ${suppressed.length} suppressed, ${active.length} not suppressed`,
-    });
-
     const now = new Date();
     await this.storageService.bulkIndexDocs<AlertAction>({
       index: ALERT_ACTIONS_DATA_STREAM,
       docs: [
-        ...suppressed.map((episode) => this.toAction({ episode, actionType: 'suppress', now })),
+        ...suppressed.map((episode) =>
+          this.toAction({ episode, actionType: 'suppress', now, reason: episode.reason })
+        ),
         ...throttled.flatMap((group) =>
-          group.episodes.map((episode) => this.toAction({ episode, actionType: 'suppress', now }))
+          group.episodes.map((episode) =>
+            this.toAction({
+              episode,
+              actionType: 'suppress',
+              now,
+              reason: `throttled by policy ${group.policyId}`,
+            })
+          )
         ),
         ...dispatch.flatMap((group) =>
-          group.episodes.map((episode) => this.toAction({ episode, actionType: 'fire', now }))
+          group.episodes.map((episode) =>
+            this.toAction({
+              episode,
+              actionType: 'fire',
+              now,
+              reason: `dispatched by policy ${group.policyId}`,
+            })
+          )
         ),
         // This is used to determine if the group should be throttled in a following run
         ...dispatch.map((group) => ({
@@ -108,7 +120,7 @@ export class DispatcherService implements DispatcherServiceContract {
           rule_id: group.ruleId,
           group_hash: 'irrelevant', // irrelevant
           last_series_event_timestamp: now.toISOString(), // irrelevant
-          notification_group_id: group.id,
+          notification_group_id: group.id, // important to track the group for throttling
           source: 'internal',
         })),
       ],
@@ -184,6 +196,14 @@ export class DispatcherService implements DispatcherServiceContract {
         });
       }
 
+      this.logger.debug({
+        message: `Adding episode ${episode.episode_id} with group key ${JSON.stringify(
+          groupKey,
+          null,
+          2
+        )} to group ${notificationGroupId}`,
+      });
+
       groupMap.get(notificationGroupId)!.episodes.push(episode);
     }
 
@@ -214,6 +234,10 @@ export class DispatcherService implements DispatcherServiceContract {
           continue;
         }
 
+        this.logger.debug({
+          message: `Episode ${episode.episode_id} matches policy ${policyId} with matcher ${policy.matcher} but matcher is not supported yet`,
+        });
+
         // TODO: Handle matcher evaluation here
         // matched.push({ episode, policy });
       }
@@ -225,7 +249,7 @@ export class DispatcherService implements DispatcherServiceContract {
   private applySuppression(
     episodes: AlertEpisode[],
     suppressions: AlertEpisodeSuppression[]
-  ): { suppressed: AlertEpisode[]; active: AlertEpisode[] } {
+  ): { suppressed: Array<AlertEpisode & { reason: string }>; active: AlertEpisode[] } {
     const suppressionMap = new Map<string, AlertEpisodeSuppression>();
 
     for (const s of suppressions) {
@@ -236,7 +260,7 @@ export class DispatcherService implements DispatcherServiceContract {
       }
     }
 
-    const suppressed: AlertEpisode[] = [];
+    const suppressed: Array<AlertEpisode & { reason: string }> = [];
     const active: AlertEpisode[] = [];
 
     for (const ep of episodes) {
@@ -247,7 +271,10 @@ export class DispatcherService implements DispatcherServiceContract {
       const seriesSuppression = suppressionMap.get(seriesKey);
 
       if (episodeSuppression?.should_suppress || seriesSuppression?.should_suppress) {
-        suppressed.push(ep);
+        const matchingSuppression = episodeSuppression?.should_suppress
+          ? episodeSuppression
+          : seriesSuppression!;
+        suppressed.push({ ...ep, reason: getSuppressionReason(matchingSuppression) });
       } else {
         active.push(ep);
       }
@@ -330,4 +357,11 @@ export class DispatcherService implements DispatcherServiceContract {
 function isWithinInterval(lastNotifiedAt: Date, interval: string, now: Date): boolean {
   const intervalMillis = moment.duration(interval).asMilliseconds();
   return lastNotifiedAt.getTime() + intervalMillis > now.getTime();
+}
+
+function getSuppressionReason(suppression: AlertEpisodeSuppression): string {
+  if (suppression.last_snooze_action === 'snooze') return 'snooze';
+  if (suppression.last_ack_action === 'ack') return 'ack';
+  if (suppression.last_deactivate_action === 'deactivate') return 'deactivate';
+  return 'unknown suppression reason';
 }

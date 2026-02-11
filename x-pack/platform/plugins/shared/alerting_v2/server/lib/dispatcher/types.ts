@@ -23,6 +23,9 @@ export interface AlertEpisodeSuppression {
   group_hash: string;
   episode_id: string | null;
   should_suppress: boolean;
+  last_ack_action?: string | null;
+  last_deactivate_action?: string | null;
+  last_snooze_action?: string | null;
 }
 
 export interface DispatcherExecutionParams {

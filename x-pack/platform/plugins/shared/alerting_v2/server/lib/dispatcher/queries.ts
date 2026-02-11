@@ -67,7 +67,7 @@ export const getAlertEpisodeSuppressionsQuery = (alertEpisodes: AlertEpisode[]):
           last_deactivate_action == "deactivate", true,
           false
         )
-      | KEEP rule_id, group_hash, episode_id, should_suppress`.toRequest();
+      | KEEP rule_id, group_hash, episode_id, should_suppress, last_ack_action, last_deactivate_action, last_snooze_action`.toRequest();
 };
 
 export const getLastNotifiedTimestampsQuery = (
