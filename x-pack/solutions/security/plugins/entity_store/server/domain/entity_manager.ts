@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { Result } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { createHash } from 'crypto';
 import { getLatestEntitiesIndexName } from './assets/latest_index';
 import { BadCRUDRequestError, DocumentVersionConflictError, EntityNotFoundError } from './errors';
 import type { Entity } from '../../common/domain/definitions/entity.gen';
@@ -47,10 +48,17 @@ export class EntityManager {
     if (entityType == null) {
       throw new BadCRUDRequestError('', 'entity.type is required');
     }
-    const id = this.getEntityId(entityType as EntityType, document);
+    const rawId = this.getEntityId(entityType as EntityType, document);
+    const id: string = createHash('md5').update(rawId).digest('hex');
     this.logger.info(`Upserting entity ID ${id}`);
     
-    // check protected fields
+    if (!document.entity.id) {
+      document.entity.id = id;
+    }
+    if (document.entity.id !== id) {
+      throw new BadCRUDRequestError(id, `Entity ID ${document.entity.id} does not match calculated ID ${id}`);
+    }
+
     if (!force) {
       const flat = getFlattenedObject(document);
       const definition = getEntityDefinition(entityType as EntityType, this.namespace);
@@ -58,15 +66,9 @@ export class EntityManager {
       assertOnlyNonForcedAttributesInReq(id, fieldDescriptions);
     }
 
-    // TODO(kuba): 
-    // - hash ID (MD5)
-    const hashedId: string = 'TODO TODO TODO TODO';
-    // - validate entity.id
-    // - validate entity.hashedId
-
     const { result } = await this.esClient.update({
       index: getLatestEntitiesIndexName(this.namespace),
-      id: hashedId,
+      id,
       doc: document,
       doc_as_upsert: true,
     });
