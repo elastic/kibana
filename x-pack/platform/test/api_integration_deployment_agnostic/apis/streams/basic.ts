@@ -191,254 +191,252 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await disableStreams(apiClient);
       });
 
-        it(`Index a JSON document to ${rootStream}, should go to ${rootStream}`, async () => {
-          const doc = {
-            '@timestamp': '2024-01-01T00:00:00.000Z',
-            message: JSON.stringify({
-              '@timestamp': '2024-01-01T00:00:00.000Z',
-              'log.level': 'info',
-              'log.logger': 'nginx',
-              message: 'test',
-            }),
-          };
-          const response = await indexDocument(esClient, rootStream, doc);
-          expect(response.result).to.eql('created');
-          const result = await fetchDocument(esClient, rootStream, response._id);
-          expect(result._index).to.match(
-            new RegExp(`^\\.ds\\-${rootStream.replace('.', '\\.')}-.*`)
-          );
-          expect(result._source).to.eql({
-            '@timestamp': '2024-01-01T00:00:00.000Z',
-            body: {
-              text: 'test',
-            },
-            severity_text: 'info',
-            attributes: { 'log.logger': 'nginx' },
-            stream: { name: rootStream },
-          });
-        });
-
-        it('Index a doc with a stream field', async () => {
-          const doc = {
-            '@timestamp': '2024-01-01T00:00:00.000Z',
-            message: JSON.stringify({
-              '@timestamp': '2024-01-01T00:00:00.000Z',
-              'log.level': 'info',
-              'log.logger': 'nginx',
-              message: 'test',
-              stream: 'somethingelse', // a field named stream should work as well
-            }),
-          };
-          const result = await indexAndAssertTargetStream(esClient, rootStream, doc);
-          expect(result._source).to.eql({
-            '@timestamp': '2024-01-01T00:00:00.000Z',
-            body: { text: 'test' },
-            severity_text: 'info',
-            attributes: {
-              'log.logger': 'nginx',
-              stream: 'somethingelse',
-            },
-            stream: { name: rootStream },
-          });
-        });
-
-        it(`Fork ${rootStream} to ${rootStream}.nginx`, async () => {
-          const body = {
-            stream: {
-              name: `${rootStream}.nginx`,
-            },
-            where: {
-              field: 'attributes.log.logger',
-              eq: 'nginx',
-            },
-            status,
-          };
-          const response = await forkStream(apiClient, rootStream, body);
-          expect(response).to.have.property('acknowledged', true);
-        });
-
-        it(`fails to fork ${rootStream} to ${rootStream}.nginx when already forked`, async () => {
-          const body = {
-            stream: {
-              name: `${rootStream}.nginx`,
-            },
-            where: {
-              field: 'log.logger',
-              eq: 'nginx',
-            },
-            status,
-          };
-          const response = await forkStream(apiClient, rootStream, body, 409);
-          expect(response).to.have.property(
-            'message',
-            `Child stream ${rootStream}.nginx already exists`
-          );
-        });
-
-        it(`fails to fork ${rootStream} when stream name contains uppercase characters`, async () => {
-          const body = {
-            stream: {
-              name: `${rootStream}.Nginx`,
-            },
-            where: {
-              field: 'log.logger',
-              eq: 'nginx',
-            },
-            status,
-          };
-          const response = await forkStream(apiClient, rootStream, body, 400);
-          expect(response).to.have.property(
-            'message',
-            'Desired stream state is invalid: Stream name cannot contain uppercase characters.'
-          );
-        });
-
-        it(`fails to fork ${rootStream} with empty stream name`, async () => {
-          const body = {
-            stream: {
-              name: `${rootStream}.`, // empty child stream name
-            },
-            where: {
-              field: 'log.logger',
-              eq: 'nginx',
-            },
-            status,
-          };
-          const response = await forkStream(apiClient, rootStream, body, 400);
-          expect(response).to.have.property(
-            'message',
-            'Desired stream state is invalid: Stream name must not be empty.'
-          );
-        });
-
-        it(`fails to fork ${rootStream} with stream name that is over the 200 character limit`, async () => {
-          const body = {
-            stream: {
-              // child stream is 201 chars
-              name: `${rootStream}.xwdaqmsegtkamcrofcfcomnlkkkrkqtlkbqizvjvtrbwereqygqaaxmodzccqipzpwymyowrtvljtxevczoohrbpgijilsdptszgssmrkpwhvkukkgiqhvmcuzygmolyyadbxwngbkqjkretmzhgntkjkhrmltgyurufizwlelvmaqtngwhwqhxpfsuxiivxspvtwfcem`,
-            },
-            where: {
-              field: 'log.logger',
-              eq: 'nginx',
-            },
-            status,
-          };
-          const response = await forkStream(apiClient, rootStream, body, 400);
-          expect(response).to.have.property(
-            'message',
-            'Desired stream state is invalid: Stream name cannot be longer than 200 characters.'
-          );
-        });
-
-        it(`Index an Nginx access log message, should goto ${rootStream}.nginx`, async () => {
-          const doc = {
-            '@timestamp': '2024-01-01T00:00:10.000Z',
-            message: JSON.stringify({
-              '@timestamp': '2024-01-01T00:00:10.000Z',
-              'log.level': 'info',
-              'log.logger': 'nginx',
-              message: 'test',
-            }),
-          };
-          const result = await indexAndAssertTargetStream(esClient, `${rootStream}.nginx`, doc);
-          expect(result._source).to.eql({
-            '@timestamp': '2024-01-01T00:00:10.000Z',
-            body: { text: 'test' },
-            severity_text: 'info',
-            attributes: {
-              'log.logger': 'nginx',
-            },
-            stream: { name: `${rootStream}.nginx` },
-          });
-        });
-
-        it(`Index an Nginx access log message with subobjects, should goto ${rootStream}.nginx`, async () => {
-          const doc = {
-            '@timestamp': '2024-01-01T00:00:10.000Z',
-            message: 'test',
-            log: {
-              level: 'info',
-              logger: 'nginx',
-            },
-          };
-          const result = await indexAndAssertTargetStream(esClient, `${rootStream}.nginx`, doc);
-          expect(result._source).to.eql({
-            '@timestamp': '2024-01-01T00:00:10.000Z',
-            body: { text: 'test' },
-            severity_text: 'info',
-            attributes: {
-              'log.logger': 'nginx',
-            },
-            stream: { name: `${rootStream}.nginx` },
-          });
-        });
-
-        it(`Fork ${rootStream} to ${rootStream}.nginx.access`, async () => {
-          const body = {
-            stream: {
-              name: `${rootStream}.nginx.access`,
-            },
-            where: { field: 'severity_text', eq: 'info' },
-            status,
-          };
-          const response = await forkStream(apiClient, `${rootStream}.nginx`, body);
-          expect(response).to.have.property('acknowledged', true);
-        });
-
-        const accessLogDoc = {
-          '@timestamp': '2024-01-01T00:00:20.000Z',
+      it(`Index a JSON document to ${rootStream}, should go to ${rootStream}`, async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:00.000Z',
           message: JSON.stringify({
-            '@timestamp': '2024-01-01T00:00:20.000Z',
+            '@timestamp': '2024-01-01T00:00:00.000Z',
             'log.level': 'info',
             'log.logger': 'nginx',
             message: 'test',
           }),
         };
-
-        it(`Index an Nginx access log message, should goto ${rootStream}.nginx.access`, async () => {
-          const result = await indexAndAssertTargetStream(
-            esClient,
-            `${rootStream}.nginx.access`,
-            accessLogDoc
-          );
-          expect(result._source).to.eql({
-            '@timestamp': '2024-01-01T00:00:20.000Z',
-            body: { text: 'test' },
-            severity_text: 'info',
-            attributes: {
-              'log.logger': 'nginx',
-            },
-            stream: { name: `${rootStream}.nginx.access` },
-          });
-        });
-
-        it(`Does not index to ${rootStream}.nginx.access if routing is disabled`, async () => {
-          await putStream(apiClient, `${rootStream}.nginx`, {
-            ...emptyAssets,
-            stream: {
-              description: '',
-              ingest: {
-                lifecycle: { inherit: {} },
-                settings: {},
-                processing: { steps: [] },
-                wired: {
-                  fields: {},
-                  routing: [
-                    {
-                      destination: `${rootStream}.nginx.access`,
-                      where: { field: 'severity_text', eq: 'info' },
-                      status: 'disabled',
-                    },
-                  ],
-                },
-                failure_store: { inherit: {} },
-              },
-            },
-          });
-
-          await indexAndAssertTargetStream(esClient, `${rootStream}.nginx`, accessLogDoc);
+        const response = await indexDocument(esClient, rootStream, doc);
+        expect(response.result).to.eql('created');
+        const result = await fetchDocument(esClient, rootStream, response._id);
+        expect(result._index).to.match(new RegExp(`^\\.ds\\-${rootStream.replace('.', '\\.')}-.*`));
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:00.000Z',
+          body: {
+            text: 'test',
+          },
+          severity_text: 'info',
+          attributes: { 'log.logger': 'nginx' },
+          stream: { name: rootStream },
         });
       });
+
+      it('Index a doc with a stream field', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:00.000Z',
+          message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:00.000Z',
+            'log.level': 'info',
+            'log.logger': 'nginx',
+            message: 'test',
+            stream: 'somethingelse', // a field named stream should work as well
+          }),
+        };
+        const result = await indexAndAssertTargetStream(esClient, rootStream, doc);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:00.000Z',
+          body: { text: 'test' },
+          severity_text: 'info',
+          attributes: {
+            'log.logger': 'nginx',
+            stream: 'somethingelse',
+          },
+          stream: { name: rootStream },
+        });
+      });
+
+      it(`Fork ${rootStream} to ${rootStream}.nginx`, async () => {
+        const body = {
+          stream: {
+            name: `${rootStream}.nginx`,
+          },
+          where: {
+            field: 'attributes.log.logger',
+            eq: 'nginx',
+          },
+          status,
+        };
+        const response = await forkStream(apiClient, rootStream, body);
+        expect(response).to.have.property('acknowledged', true);
+      });
+
+      it(`fails to fork ${rootStream} to ${rootStream}.nginx when already forked`, async () => {
+        const body = {
+          stream: {
+            name: `${rootStream}.nginx`,
+          },
+          where: {
+            field: 'log.logger',
+            eq: 'nginx',
+          },
+          status,
+        };
+        const response = await forkStream(apiClient, rootStream, body, 409);
+        expect(response).to.have.property(
+          'message',
+          `Child stream ${rootStream}.nginx already exists`
+        );
+      });
+
+      it(`fails to fork ${rootStream} when stream name contains uppercase characters`, async () => {
+        const body = {
+          stream: {
+            name: `${rootStream}.Nginx`,
+          },
+          where: {
+            field: 'log.logger',
+            eq: 'nginx',
+          },
+          status,
+        };
+        const response = await forkStream(apiClient, rootStream, body, 400);
+        expect(response).to.have.property(
+          'message',
+          'Desired stream state is invalid: Stream name cannot contain uppercase characters.'
+        );
+      });
+
+      it(`fails to fork ${rootStream} with empty stream name`, async () => {
+        const body = {
+          stream: {
+            name: `${rootStream}.`, // empty child stream name
+          },
+          where: {
+            field: 'log.logger',
+            eq: 'nginx',
+          },
+          status,
+        };
+        const response = await forkStream(apiClient, rootStream, body, 400);
+        expect(response).to.have.property(
+          'message',
+          'Desired stream state is invalid: Stream name must not be empty.'
+        );
+      });
+
+      it(`fails to fork ${rootStream} with stream name that is over the 200 character limit`, async () => {
+        const body = {
+          stream: {
+            // child stream is 201 chars
+            name: `${rootStream}.xwdaqmsegtkamcrofcfcomnlkkkrkqtlkbqizvjvtrbwereqygqaaxmodzccqipzpwymyowrtvljtxevczoohrbpgijilsdptszgssmrkpwhvkukkgiqhvmcuzygmolyyadbxwngbkqjkretmzhgntkjkhrmltgyurufizwlelvmaqtngwhwqhxpfsuxiivxspvtwfcem`,
+          },
+          where: {
+            field: 'log.logger',
+            eq: 'nginx',
+          },
+          status,
+        };
+        const response = await forkStream(apiClient, rootStream, body, 400);
+        expect(response).to.have.property(
+          'message',
+          'Desired stream state is invalid: Stream name cannot be longer than 200 characters.'
+        );
+      });
+
+      it(`Index an Nginx access log message, should goto ${rootStream}.nginx`, async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          message: JSON.stringify({
+            '@timestamp': '2024-01-01T00:00:10.000Z',
+            'log.level': 'info',
+            'log.logger': 'nginx',
+            message: 'test',
+          }),
+        };
+        const result = await indexAndAssertTargetStream(esClient, `${rootStream}.nginx`, doc);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          body: { text: 'test' },
+          severity_text: 'info',
+          attributes: {
+            'log.logger': 'nginx',
+          },
+          stream: { name: `${rootStream}.nginx` },
+        });
+      });
+
+      it(`Index an Nginx access log message with subobjects, should goto ${rootStream}.nginx`, async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          message: 'test',
+          log: {
+            level: 'info',
+            logger: 'nginx',
+          },
+        };
+        const result = await indexAndAssertTargetStream(esClient, `${rootStream}.nginx`, doc);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:10.000Z',
+          body: { text: 'test' },
+          severity_text: 'info',
+          attributes: {
+            'log.logger': 'nginx',
+          },
+          stream: { name: `${rootStream}.nginx` },
+        });
+      });
+
+      it(`Fork ${rootStream} to ${rootStream}.nginx.access`, async () => {
+        const body = {
+          stream: {
+            name: `${rootStream}.nginx.access`,
+          },
+          where: { field: 'severity_text', eq: 'info' },
+          status,
+        };
+        const response = await forkStream(apiClient, `${rootStream}.nginx`, body);
+        expect(response).to.have.property('acknowledged', true);
+      });
+
+      const accessLogDoc = {
+        '@timestamp': '2024-01-01T00:00:20.000Z',
+        message: JSON.stringify({
+          '@timestamp': '2024-01-01T00:00:20.000Z',
+          'log.level': 'info',
+          'log.logger': 'nginx',
+          message: 'test',
+        }),
+      };
+
+      it(`Index an Nginx access log message, should goto ${rootStream}.nginx.access`, async () => {
+        const result = await indexAndAssertTargetStream(
+          esClient,
+          `${rootStream}.nginx.access`,
+          accessLogDoc
+        );
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:20.000Z',
+          body: { text: 'test' },
+          severity_text: 'info',
+          attributes: {
+            'log.logger': 'nginx',
+          },
+          stream: { name: `${rootStream}.nginx.access` },
+        });
+      });
+
+      it(`Does not index to ${rootStream}.nginx.access if routing is disabled`, async () => {
+        await putStream(apiClient, `${rootStream}.nginx`, {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              lifecycle: { inherit: {} },
+              settings: {},
+              processing: { steps: [] },
+              wired: {
+                fields: {},
+                routing: [
+                  {
+                    destination: `${rootStream}.nginx.access`,
+                    where: { field: 'severity_text', eq: 'info' },
+                    status: 'disabled',
+                  },
+                ],
+              },
+              failure_store: { inherit: {} },
+            },
+          },
+        });
+
+        await indexAndAssertTargetStream(esClient, `${rootStream}.nginx`, accessLogDoc);
+      });
+    });
 
     // Additional validation and edge case tests (run once for 'logs.otel' only)
     describe('Full flow - validation and edge cases', () => {
