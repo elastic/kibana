@@ -8,18 +8,15 @@
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { globalSetupHook } from '@kbn/scout';
 
-globalSetupHook(
-  'Setup environment for Agent Builder API tests',
-  async ({ kbnClient, log }) => {
-    log.debug('[setup] Enabling Agent Builder experimental features...');
+globalSetupHook('Setup environment for Agent Builder API tests', async ({ kbnClient, log }) => {
+  log.debug('[setup] Enabling Agent Builder experimental features...');
 
-    try {
-      await kbnClient.uiSettings.update({
-        [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
-      });
-      log.debug('[setup] Agent Builder experimental features enabled successfully');
-    } catch (error) {
-      log.debug(`[setup] Failed to enable experimental features: ${error}`);
-    }
+  try {
+    await kbnClient.uiSettings.update({
+      [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
+    });
+    log.debug('[setup] Agent Builder experimental features enabled successfully');
+  } catch (error) {
+    log.debug(`[setup] Failed to enable experimental features: ${error}`);
   }
-);
+});
