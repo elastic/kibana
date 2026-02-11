@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, expect, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { PageObjects } from '@kbn/scout';
 import {
   LENS_BASIC_DATA_VIEW,
@@ -70,16 +71,19 @@ spaceTest.describe('Panel titles (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }
     });
   });
 
-  spaceTest('blank title clears unsaved changes', async ({ page, pageObjects }) => {
+  spaceTest('blank title clears unsaved changes', async ({ page, pageObjects }, testInfo) => {
     await spaceTest.step('add markdown panel by value', async () => {
       await pageObjects.dashboard.addMarkdownPanel(PANEL_TITLES_MARKDOWN_CONTENT);
     });
 
-    await spaceTest.step('set blank title and save', async () => {
+    await spaceTest.step('save dashboard', async () => {
+      await pageObjects.dashboard.saveDashboard(`Panel titles - ${testInfo.title}`);
+    });
+
+    await spaceTest.step('set blank title', async () => {
       await pageObjects.dashboard.openCustomizePanel();
       await pageObjects.dashboard.setCustomPanelTitle('');
       await pageObjects.dashboard.saveCustomizePanel();
-      await pageObjects.dashboard.clearUnsavedChanges();
     });
 
     await spaceTest.step('verify title is empty and badge is gone', async () => {
@@ -88,24 +92,33 @@ spaceTest.describe('Panel titles (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }
     });
   });
 
-  spaceTest('custom title causes unsaved changes and saving clears it', async ({ pageObjects }) => {
-    await spaceTest.step('add markdown panel by value', async () => {
-      await pageObjects.dashboard.addMarkdownPanel(PANEL_TITLES_MARKDOWN_CONTENT);
-    });
+  spaceTest(
+    'custom title causes unsaved changes and saving clears it',
+    async ({ page, pageObjects }, testInfo) => {
+      await spaceTest.step('add markdown panel by value', async () => {
+        await pageObjects.dashboard.addMarkdownPanel(PANEL_TITLES_MARKDOWN_CONTENT);
+      });
 
-    await spaceTest.step('set custom title and save', async () => {
-      await pageObjects.dashboard.openCustomizePanel();
-      await pageObjects.dashboard.setCustomPanelTitle(PANEL_TITLES_CUSTOM_TITLE);
-      await pageObjects.dashboard.saveCustomizePanel();
-    });
+      await spaceTest.step('save dashboard', async () => {
+        await pageObjects.dashboard.saveDashboard(`Panel titles - ${testInfo.title}`);
+      });
 
-    await spaceTest.step('verify title and clear unsaved changes', async () => {
-      await expect(pageObjects.dashboard.getPanelTitlesLocator()).toHaveText(
-        PANEL_TITLES_CUSTOM_TITLE
-      );
-      await pageObjects.dashboard.clearUnsavedChanges();
-    });
-  });
+      await spaceTest.step('set custom title and save', async () => {
+        await pageObjects.dashboard.openCustomizePanel();
+        await pageObjects.dashboard.setCustomPanelTitle(PANEL_TITLES_CUSTOM_TITLE);
+        await pageObjects.dashboard.saveCustomizePanel();
+        await expect(page.testSubj.locator('dashboardUnsavedChangesBadge')).toBeVisible();
+      });
+
+      await spaceTest.step('verify title and clear unsaved changes', async () => {
+        await expect(pageObjects.dashboard.getPanelTitlesLocator()).toHaveText(
+          PANEL_TITLES_CUSTOM_TITLE
+        );
+        await pageObjects.dashboard.clearUnsavedChanges();
+        await expect(page.testSubj.locator('dashboardUnsavedChangesBadge')).toHaveCount(0);
+      });
+    }
+  );
 
   spaceTest('reset title is hidden on a by value panel', async ({ pageObjects }) => {
     await spaceTest.step('add markdown panel by value', async () => {

@@ -7,20 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, expect } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '../constants';
 
 // includes "observabilityGroup" panel group
 const DASHBOARD_PANEL_GROUP_ORDER = [
   'visualizationsGroup',
-  'controlsGroup',
   'annotation-and-navigationGroup',
   'mlGroup',
   'observabilityGroup',
-  'legacyGroup',
 ];
 
-const DASHBOARD_PANEL_TYPE_COUNT = 24;
+const DASHBOARD_PANEL_TYPE_COUNT = 21;
 
 spaceTest.describe(
   'Dashboard panel listing (includes observability group)',

@@ -14,7 +14,8 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { expect, tags } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 
 import {
   ATTRIBUTE_TITLE_KEY,
@@ -95,7 +96,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
         }
       );
 
-      expect(importResponse1.statusCode).toBe(200);
+      expect(importResponse1).toHaveStatusCode(200);
       expect(importResponse1.body.success).toBe(true);
       expect(importResponse1.body.successCount).toBe(1);
 
@@ -121,7 +122,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
         }
       );
 
-      expect(importResponse2.statusCode).toBe(200);
+      expect(importResponse2).toHaveStatusCode(200);
       expect(importResponse2.body.success).toBe(true);
       expect(importResponse2.body.successCount).toBe(1);
 
@@ -177,7 +178,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
         }
       );
 
-      expect(importResponse1.statusCode).toBe(200);
+      expect(importResponse1).toHaveStatusCode(200);
       expect(importResponse1.body.success).toBe(true);
       expect(importResponse1.body.successCount).toBe(1);
 
@@ -204,7 +205,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
         }
       );
 
-      expect(importResponse2.statusCode).toBe(200);
+      expect(importResponse2).toHaveStatusCode(200);
       expect(importResponse2.body.success).toBe(true);
       expect(importResponse2.body.successCount).toBe(1);
       expect(importResponse2.body.successResults[0].id).toBe(uniqueId);
@@ -221,7 +222,7 @@ apiTest.describe(`_import API with multiple spaces`, { tag: tags.ESS_ONLY }, () 
       });
 
       // Import should succeed and the object should exist in space 2 with the new ID
-      expect(importResponse2.statusCode).toBe(200);
+      expect(importResponse2).toHaveStatusCode(200);
       expect(importResponse2.body.success).toBe(true);
 
       // The originId should point to the original object's ID
