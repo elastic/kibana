@@ -23,6 +23,7 @@ import {
   NumberCell,
   StepwisePagination,
 } from '../shared';
+import type { DataSchemaFormat } from '../../../../common';
 import type { ContainerNodeMetricsRow } from './use_container_metrics_table';
 
 export interface ContainerMetricsTableProps {
@@ -35,12 +36,26 @@ export interface ContainerMetricsTableProps {
     from: string;
     to: string;
   };
+  schema?: DataSchemaFormat;
+  metricIndices?: string;
 }
 
 export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
-  const { data, isLoading, setCurrentPageIndex, setSortState, sortState, timerange } = props;
+  const {
+    data,
+    isLoading,
+    setCurrentPageIndex,
+    setSortState,
+    sortState,
+    timerange,
+    schema,
+    metricIndices,
+  } = props;
 
-  const columns = useMemo(() => containerNodeColumns(timerange), [timerange]);
+  const columns = useMemo(
+    () => containerNodeColumns(timerange, schema, metricIndices),
+    [timerange, schema, metricIndices]
+  );
 
   const sortSettings: EuiTableSortingType<ContainerNodeMetricsRow> = {
     enableAllColumns: true,
@@ -113,7 +128,9 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
 };
 
 function containerNodeColumns(
-  timerange: ContainerMetricsTableProps['timerange']
+  timerange: ContainerMetricsTableProps['timerange'],
+  schema?: ContainerMetricsTableProps['schema'],
+  metricIndices?: ContainerMetricsTableProps['metricIndices']
 ): Array<EuiBasicTableColumn<ContainerNodeMetricsRow>> {
   return [
     {
@@ -125,7 +142,14 @@ function containerNodeColumns(
       textOnly: true,
       render: (id: string) => {
         return (
-          <MetricsNodeDetailsLink id={id} label={id} nodeType={'container'} timerange={timerange} />
+          <MetricsNodeDetailsLink
+            id={id}
+            label={id}
+            nodeType={'container'}
+            timerange={timerange}
+            schema={schema}
+            metricIndices={metricIndices}
+          />
         );
       },
     },

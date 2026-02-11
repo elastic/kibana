@@ -23,6 +23,7 @@ import {
   NumberCell,
   StepwisePagination,
 } from '../shared';
+import type { DataSchemaFormat } from '../../../../common';
 import type { HostNodeMetricsRow } from './use_host_metrics_table';
 
 export interface HostMetricsTableProps {
@@ -35,12 +36,26 @@ export interface HostMetricsTableProps {
     from: string;
     to: string;
   };
+  schema?: DataSchemaFormat;
+  metricIndices?: string;
 }
 
 export const HostMetricsTable = (props: HostMetricsTableProps) => {
-  const { data, isLoading, setCurrentPageIndex, setSortState, sortState, timerange } = props;
+  const {
+    data,
+    isLoading,
+    setCurrentPageIndex,
+    setSortState,
+    sortState,
+    timerange,
+    schema,
+    metricIndices,
+  } = props;
 
-  const columns = useMemo(() => hostMetricsColumns(timerange), [timerange]);
+  const columns = useMemo(
+    () => hostMetricsColumns(timerange, schema, metricIndices),
+    [timerange, schema, metricIndices]
+  );
 
   const sortSettings: EuiTableSortingType<HostNodeMetricsRow> = {
     enableAllColumns: true,
@@ -110,7 +125,9 @@ export const HostMetricsTable = (props: HostMetricsTableProps) => {
 };
 
 function hostMetricsColumns(
-  timerange: HostMetricsTableProps['timerange']
+  timerange: HostMetricsTableProps['timerange'],
+  schema?: HostMetricsTableProps['schema'],
+  metricIndices?: HostMetricsTableProps['metricIndices']
 ): Array<EuiBasicTableColumn<HostNodeMetricsRow>> {
   return [
     {
@@ -121,7 +138,14 @@ function hostMetricsColumns(
       truncateText: true,
       textOnly: true,
       render: (name: string) => (
-        <MetricsNodeDetailsLink id={name} label={name} nodeType={'host'} timerange={timerange} />
+        <MetricsNodeDetailsLink
+          id={name}
+          label={name}
+          nodeType={'host'}
+          timerange={timerange}
+          schema={schema}
+          metricIndices={metricIndices}
+        />
       ),
     },
     {

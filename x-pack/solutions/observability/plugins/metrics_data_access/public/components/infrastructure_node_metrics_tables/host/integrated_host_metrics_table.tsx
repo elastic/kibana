@@ -18,7 +18,13 @@ function HookedHostMetricsTable({
   schema,
 }: UseNodeMetricsTableOptions) {
   const hostMetricsTableProps = useHostMetricsTable({ timerange, kuery, metricsClient, schema });
-  return <HostMetricsTable {...hostMetricsTableProps} />;
+  return (
+    <HostMetricsTable
+      {...hostMetricsTableProps}
+      schema={schema}
+      metricIndices={hostMetricsTableProps.metricIndices}
+    />
+  );
 }
 
 function HostMetricsTableWithProviders({

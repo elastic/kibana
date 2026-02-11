@@ -23,6 +23,7 @@ import {
   NumberCell,
   StepwisePagination,
 } from '../shared';
+import type { DataSchemaFormat } from '../../../../common';
 import type { PodNodeMetricsRow } from './use_pod_metrics_table';
 
 export interface PodMetricsTableProps {
@@ -35,12 +36,26 @@ export interface PodMetricsTableProps {
     from: string;
     to: string;
   };
+  schema?: DataSchemaFormat;
+  metricIndices?: string;
 }
 
 export const PodMetricsTable = (props: PodMetricsTableProps) => {
-  const { data, isLoading, setCurrentPageIndex, setSortState, sortState, timerange } = props;
+  const {
+    data,
+    isLoading,
+    setCurrentPageIndex,
+    setSortState,
+    sortState,
+    timerange,
+    schema,
+    metricIndices,
+  } = props;
 
-  const columns = useMemo(() => podNodeColumns(timerange), [timerange]);
+  const columns = useMemo(
+    () => podNodeColumns(timerange, schema, metricIndices),
+    [timerange, schema, metricIndices]
+  );
 
   const sorting: EuiTableSortingType<PodNodeMetricsRow> = {
     enableAllColumns: true,
@@ -108,7 +123,9 @@ export const PodMetricsTable = (props: PodMetricsTableProps) => {
 };
 
 function podNodeColumns(
-  timerange: PodMetricsTableProps['timerange']
+  timerange: PodMetricsTableProps['timerange'],
+  schema?: PodMetricsTableProps['schema'],
+  metricIndices?: PodMetricsTableProps['metricIndices']
 ): Array<EuiBasicTableColumn<PodNodeMetricsRow>> {
   return [
     {
@@ -120,7 +137,14 @@ function podNodeColumns(
       textOnly: true,
       render: (_, { id, name }) => {
         return (
-          <MetricsNodeDetailsLink id={id} label={name} nodeType={'pod'} timerange={timerange} />
+          <MetricsNodeDetailsLink
+            id={id}
+            label={name}
+            nodeType={'pod'}
+            timerange={timerange}
+            schema={schema}
+            metricIndices={metricIndices}
+          />
         );
       },
     },

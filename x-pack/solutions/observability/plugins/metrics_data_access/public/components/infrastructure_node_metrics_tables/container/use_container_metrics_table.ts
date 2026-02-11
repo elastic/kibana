@@ -96,7 +96,7 @@ export function useContainerMetricsTable({
       seriesToContainerNodeMetricsRow(series, unpackMetrics);
   }, [schema, semconvRuntime]);
 
-  const { data, isLoading } = useInfrastructureNodeMetrics<ContainerNodeMetricsRow>({
+  const { data, isLoading, metricIndices } = useInfrastructureNodeMetrics<ContainerNodeMetricsRow>({
     metricsExplorerOptions,
     timerange,
     transform,
@@ -108,6 +108,7 @@ export function useContainerMetricsTable({
   return {
     data,
     isLoading,
+    metricIndices,
     setCurrentPageIndex,
     setSortState,
     sortState,

@@ -25,7 +25,13 @@ function HookedContainerMetricsTable({
     semconvRuntime,
     metricsClient,
   });
-  return <ContainerMetricsTable {...containerMetricsTableProps} />;
+  return (
+    <ContainerMetricsTable
+      {...containerMetricsTableProps}
+      schema={schema}
+      metricIndices={containerMetricsTableProps.metricIndices}
+    />
+  );
 }
 
 function ContainerMetricsTableWithProviders({

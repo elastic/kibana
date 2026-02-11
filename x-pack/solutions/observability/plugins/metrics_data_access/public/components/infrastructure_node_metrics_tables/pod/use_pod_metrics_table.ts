@@ -114,7 +114,7 @@ export function usePodMetricsTable({
     [kuery]
   );
 
-  const { data, isLoading } = useInfrastructureNodeMetrics<PodNodeMetricsRow>({
+  const { data, isLoading, metricIndices } = useInfrastructureNodeMetrics<PodNodeMetricsRow>({
     metricsExplorerOptions: schema === 'semconv' ? podMetricsOptionsOtel : podMetricsOptions,
     timerange,
     transform: seriesToPodNodeMetricsRow,
@@ -127,6 +127,7 @@ export function usePodMetricsTable({
     currentPageIndex,
     data,
     isLoading,
+    metricIndices,
     setCurrentPageIndex,
     setSortState,
     sortState,

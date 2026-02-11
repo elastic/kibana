@@ -104,7 +104,7 @@ export function useHostMetricsTable({
     () => metricsToApiOptions(hostsMetricsQueryConfigOtel, kuery),
     [kuery]
   );
-  const { data, isLoading } = useInfrastructureNodeMetrics<HostNodeMetricsRow>({
+  const { data, isLoading, metricIndices } = useInfrastructureNodeMetrics<HostNodeMetricsRow>({
     metricsExplorerOptions: schema === 'semconv' ? hostMetricsOptionsOtel : hostMetricsOptions,
     timerange,
     transform: seriesToHostNodeMetricsRow,
@@ -116,6 +116,7 @@ export function useHostMetricsTable({
   return {
     data,
     isLoading,
+    metricIndices,
     setCurrentPageIndex,
     setSortState,
     sortState,

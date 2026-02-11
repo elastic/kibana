@@ -18,7 +18,13 @@ function HookedPodMetricsTable({
   schema,
 }: UseNodeMetricsTableOptions) {
   const podMetricsTableProps = usePodMetricsTable({ timerange, kuery, metricsClient, schema });
-  return <PodMetricsTable {...podMetricsTableProps} />;
+  return (
+    <PodMetricsTable
+      {...podMetricsTableProps}
+      schema={schema}
+      metricIndices={podMetricsTableProps.metricIndices}
+    />
+  );
 }
 
 function PodMetricsTableWithProviders({
