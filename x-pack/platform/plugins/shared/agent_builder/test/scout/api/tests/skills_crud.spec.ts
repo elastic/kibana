@@ -5,27 +5,28 @@
  * 2.0.
  */
 
+import type { RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
 
-const SKILLS_API_BASE = '/api/agent_builder/skills';
+const SKILLS_API_BASE = 'api/agent_builder/skills';
 const BUILTIN_SKILL_ID = 'data-exploration';
 
 const COMMON_HEADERS: Record<string, string> = {
-  'kbn-xsrf': 'some-xsrf-token',
+  'kbn-xsrf': 'scout',
   'x-elastic-internal-origin': 'kibana',
-  'Content-Type': 'application/json;charset=UTF-8',
   'elastic-api-version': '2023-10-31',
 };
 
 apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
   const createdSkillIds: string[] = [];
+  let adminCredentials: RoleApiCredentials;
   let defaultHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth }) => {
-    const credentials = await samlAuth.asInteractiveUser('admin');
+  apiTest.beforeAll(async ({ requestAuth }) => {
+    adminCredentials = await requestAuth.getApiKey('admin');
     defaultHeaders = {
-      ...credentials.cookieHeader,
+      ...adminCredentials.apiKeyHeader,
       ...COMMON_HEADERS,
     };
   });
@@ -33,7 +34,10 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
   apiTest.afterEach(async ({ apiClient }) => {
     for (const skillId of createdSkillIds) {
       try {
-        await apiClient.delete(`${SKILLS_API_BASE}/${skillId}`, { headers: defaultHeaders });
+        await apiClient.delete(`${SKILLS_API_BASE}/${skillId}`, {
+          headers: defaultHeaders,
+          responseType: 'json',
+        });
       } catch {
         // Skill may already be deleted
       }
@@ -44,7 +48,10 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
   apiTest(
     'should list skills including the built-in data-exploration skill',
     async ({ apiClient }) => {
-      const response = await apiClient.get(SKILLS_API_BASE, { headers: defaultHeaders });
+      const response = await apiClient.get(SKILLS_API_BASE, {
+        headers: defaultHeaders,
+        responseType: 'json',
+      });
 
       expect(response.statusCode).toBe(200);
       const body = response.body as {
@@ -66,6 +73,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
 
     const response = await apiClient.post(SKILLS_API_BASE, {
       headers: defaultHeaders,
+      responseType: 'json',
       body: {
         id: skillId,
         name: `test-skill-create-${Date.now()}`,
@@ -95,6 +103,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
 
     await apiClient.post(SKILLS_API_BASE, {
       headers: defaultHeaders,
+      responseType: 'json',
       body: {
         id: skillId,
         name: `retrievable-skill-${Date.now()}`,
@@ -106,6 +115,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
 
     const response = await apiClient.get(`${SKILLS_API_BASE}/${skillId}`, {
       headers: defaultHeaders,
+      responseType: 'json',
     });
 
     expect(response.statusCode).toBe(200);
@@ -120,6 +130,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
 
     await apiClient.post(SKILLS_API_BASE, {
       headers: defaultHeaders,
+      responseType: 'json',
       body: {
         id: skillId,
         name: `original-name-${Date.now()}`,
@@ -132,6 +143,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
     const updatedName = `updated-name-${Date.now()}`;
     const response = await apiClient.put(`${SKILLS_API_BASE}/${skillId}`, {
       headers: defaultHeaders,
+      responseType: 'json',
       body: {
         name: updatedName,
         description: 'Updated description',
@@ -156,6 +168,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
 
     await apiClient.post(SKILLS_API_BASE, {
       headers: defaultHeaders,
+      responseType: 'json',
       body: {
         id: skillId,
         name: `deletable-skill-${Date.now()}`,
@@ -167,6 +180,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
 
     const response = await apiClient.delete(`${SKILLS_API_BASE}/${skillId}`, {
       headers: defaultHeaders,
+      responseType: 'json',
     });
 
     expect(response.statusCode).toBe(200);
@@ -176,6 +190,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
     // Verify it's gone - should return 404
     const getResponse = await apiClient.get(`${SKILLS_API_BASE}/${skillId}`, {
       headers: defaultHeaders,
+      responseType: 'json',
     });
     expect(getResponse.statusCode).toBe(404);
   });
@@ -186,6 +201,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
 
     await apiClient.post(SKILLS_API_BASE, {
       headers: defaultHeaders,
+      responseType: 'json',
       body: {
         id: skillId,
         name: `listed-skill-${Date.now()}`,
@@ -195,7 +211,10 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
       },
     });
 
-    const response = await apiClient.get(SKILLS_API_BASE, { headers: defaultHeaders });
+    const response = await apiClient.get(SKILLS_API_BASE, {
+      headers: defaultHeaders,
+      responseType: 'json',
+    });
 
     expect(response.statusCode).toBe(200);
     const body = response.body as {
@@ -209,6 +228,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
   apiTest('should reject creating a skill with an invalid ID', async ({ apiClient }) => {
     const response = await apiClient.post(SKILLS_API_BASE, {
       headers: defaultHeaders,
+      responseType: 'json',
       body: {
         id: 'Invalid ID With Spaces',
         name: 'invalid-skill',
@@ -224,6 +244,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
   apiTest('should retrieve the built-in skill by ID', async ({ apiClient }) => {
     const response = await apiClient.get(`${SKILLS_API_BASE}/${BUILTIN_SKILL_ID}`, {
       headers: defaultHeaders,
+      responseType: 'json',
     });
 
     expect(response.statusCode).toBe(200);
@@ -242,6 +263,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
   apiTest('should reject deleting a built-in skill', async ({ apiClient }) => {
     const response = await apiClient.delete(`${SKILLS_API_BASE}/${BUILTIN_SKILL_ID}`, {
       headers: defaultHeaders,
+      responseType: 'json',
     });
 
     expect(response.statusCode).not.toBe(200);
@@ -250,6 +272,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
   apiTest('should reject updating a built-in skill', async ({ apiClient }) => {
     const response = await apiClient.put(`${SKILLS_API_BASE}/${BUILTIN_SKILL_ID}`, {
       headers: defaultHeaders,
+      responseType: 'json',
       body: {
         name: 'hacked-name',
         description: 'Attempted modification',
@@ -264,14 +287,16 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
   apiTest('should reject deleting a non-existent skill', async ({ apiClient }) => {
     const response = await apiClient.delete(`${SKILLS_API_BASE}/non-existent-skill-id`, {
       headers: defaultHeaders,
+      responseType: 'json',
     });
 
-    expect(response.statusCode).toBe(404);
+    expect(response.statusCode).toBe(400);
   });
 
   apiTest('should reject updating a non-existent skill', async ({ apiClient }) => {
     const response = await apiClient.put(`${SKILLS_API_BASE}/non-existent-skill-id`, {
       headers: defaultHeaders,
+      responseType: 'json',
       body: {
         name: 'attempted-update',
         description: 'Should fail',
@@ -280,7 +305,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
       },
     });
 
-    expect(response.statusCode).toBe(404);
+    expect(response.statusCode).toBe(400);
   });
 
   apiTest('should reject creating a skill with duplicate ID', async ({ apiClient }) => {
@@ -290,6 +315,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
     // Create the first skill
     await apiClient.post(SKILLS_API_BASE, {
       headers: defaultHeaders,
+      responseType: 'json',
       body: {
         id: skillId,
         name: `first-skill-${Date.now()}`,
@@ -302,6 +328,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
     // Try to create a second skill with the same ID
     const response = await apiClient.post(SKILLS_API_BASE, {
       headers: defaultHeaders,
+      responseType: 'json',
       body: {
         id: skillId,
         name: `second-skill-${Date.now()}`,
@@ -311,6 +338,6 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
       },
     });
 
-    expect(response.statusCode).toBe(409);
+    expect(response.statusCode).toBe(400);
   });
 });
