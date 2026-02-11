@@ -77,7 +77,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "fleet-uninstall-tokens": "6e7d75921dcce46e566f175eab1b0e3825fe565f20cdb3c984e7037934d61e23",
         "ingest-download-sources": "23eb3cf789fe13b4899215c6f919705b8a44b89f8feba7181e1f5db3c7699d40",
         "ingest-outputs": "d66716d5333484a25c57f7917bead5ac2576ec57a4b9eb61701b573f35ab62ad",
-        "oauth_state": "a7f039d0d00612a4228213d3983c86245c09ef7683efed147ea0b3511cfa2f66",
+        "oauth_state": "192a6c868fd863d8d14c33cc3357a3c61de3acca48b4a8ccb3a5e29ba465f4d7",
         "privmon-api-key": "7d7b76b3bc5287a784518731ba66d4f761052177fc04b1a85e5605846ab9de42",
         "synthetics-monitor": "f1c060b7be3b30187c4adcb35d74f1fa8a4290bd7faf04fec869de2aa387e21b",
         "synthetics-monitor-multi-space": "39c4c6abd28c4173f77c1c89306e92b6b92492c0029274e10620a170be4d4a67",
