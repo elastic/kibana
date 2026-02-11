@@ -9,6 +9,7 @@
 * [PagerDuty](/reference/connectors-kibana/pagerduty-data-source.md): Access incidents, escalation policies, schedules, on-calls, users, and teams in PagerDuty.
 * [Sharepoint online](/reference/connectors-kibana/sharepoint-online-action-type.md): Search across SharePoint sites, pages, and content using the Microsoft Graph API.
 * [Slack (v2)](/reference/connectors-kibana/slack-v2-action-type.md): Search and send messages via Slack.
+* [Tavily](/reference/connectors-kibana/tavily-action-type.md): Search the web and extract content from web pages.
 * [Zoom](/reference/connectors-kibana/zoom-action-type.md): Access Zoom meetings, recordings, transcripts, and participants.
 * [Zendesk](/reference/connectors-kibana/zendesk-action-type.md): Search and retrieve Zendesk tickets, users, organizations, and Help Center articles via the Zendesk API.
 

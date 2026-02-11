@@ -121,4 +121,8 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
+  [
+    '.tavily',
+    lazy(() => import(/* webpackChunkName: "connectorIconTavily" */ './specs/tavily/icon')),
+  ],
 ]);
