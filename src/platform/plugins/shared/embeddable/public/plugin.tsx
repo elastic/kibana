@@ -34,10 +34,7 @@ import {
 } from './bwc/legacy_url_transform';
 import { registerDrilldown } from './drilldowns/registry';
 import { CONTEXT_MENU_TRIGGER } from '../common/constants';
-import {
-  OPEN_CREATE_DRILLDOWN_FLYOUT_ACTION_ID,
-  OPEN_MANAGE_DRILLDOWNS_FLYOUT_ACTION_ID,
-} from './ui_actions/constants';
+import { OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN } from './ui_actions/constants';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
@@ -49,23 +46,15 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
     registerTriggers(uiActions);
 
-    uiActions.addTriggerActionAsync(
-      CONTEXT_MENU_TRIGGER,
-      OPEN_CREATE_DRILLDOWN_FLYOUT_ACTION_ID,
-      async () => {
-        const { openCreateDrilldownFlyout } = await import('./async_module');
-        return openCreateDrilldownFlyout;
-      }
-    );
+    uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, OPEN_FLYOUT_ADD_DRILLDOWN, async () => {
+      const { openCreateDrilldownFlyout } = await import('./async_module');
+      return openCreateDrilldownFlyout;
+    });
 
-    uiActions.addTriggerActionAsync(
-      CONTEXT_MENU_TRIGGER,
-      OPEN_MANAGE_DRILLDOWNS_FLYOUT_ACTION_ID,
-      async () => {
-        const { openManageDrilldownsFlyout } = await import('./async_module');
-        return openManageDrilldownsFlyout;
-      }
-    );
+    uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, OPEN_FLYOUT_EDIT_DRILLDOWN, async () => {
+      const { openManageDrilldownsFlyout } = await import('./async_module');
+      return openManageDrilldownsFlyout;
+    });
 
     return {
       registerDrilldown,

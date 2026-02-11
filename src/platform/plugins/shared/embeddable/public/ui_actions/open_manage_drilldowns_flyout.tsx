@@ -27,7 +27,7 @@ import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
 import type { HasDrilldowns } from '../drilldowns/types';
-import { DRILLDOWN_ACTION_GROUP, OPEN_MANAGE_DRILLDOWNS_FLYOUT_ACTION_ID } from './constants';
+import { DRILLDOWN_ACTION_GROUP, OPEN_FLYOUT_EDIT_DRILLDOWN } from './constants';
 import { core } from '../kibana_services';
 import { apiHasDrilldowns } from '../drilldowns/api_has_drilldowns';
 import { getEmbeddableTriggers } from './get_embeddable_triggers';
@@ -47,8 +47,8 @@ const DISPLAY_NAME = i18n.translate('embeddableApi.manageDrilldownAction.display
 });
 
 export const openManageDrilldownsFlyout: ActionDefinition<EmbeddableApiContext> = {
-  id: OPEN_MANAGE_DRILLDOWNS_FLYOUT_ACTION_ID,
-  type: OPEN_MANAGE_DRILLDOWNS_FLYOUT_ACTION_ID,
+  id: OPEN_FLYOUT_EDIT_DRILLDOWN,
+  type: OPEN_FLYOUT_EDIT_DRILLDOWN,
   order: 10,
   getIconType: () => 'list',
   grouping: [DRILLDOWN_ACTION_GROUP],
