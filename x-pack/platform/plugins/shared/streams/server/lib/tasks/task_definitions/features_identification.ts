@@ -151,11 +151,11 @@ const getSampleDocuments = async ({
   const categoryDocs = categorizationField ? categories.flatMap((c) => c.sampleDocuments) : [];
 
   // Fill up to TARGET_SAMPLE_DOCS with random samples if categories didn't provide enough
-  const remainingSlots = TARGET_SAMPLE_DOCS - categoryDocs.length;
-  const sampleDocuments =
-    remainingSlots > 0
-      ? [...categoryDocs, ...randomSampleDocuments.slice(0, remainingSlots)]
-      : categoryDocs;
+  const remainingSlots = Math.max(0, TARGET_SAMPLE_DOCS - categoryDocs.length);
+  const sampleDocuments = [
+    ...categoryDocs,
+    ...randomSampleDocuments.slice(0, remainingSlots),
+  ].slice(0, TARGET_SAMPLE_DOCS);
 
   return {
     updatedPatterns,
