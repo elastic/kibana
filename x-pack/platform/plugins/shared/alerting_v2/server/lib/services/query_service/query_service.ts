@@ -100,7 +100,6 @@ export class QueryService implements QueryServiceContract {
       if (this.isReadable(response)) {
         yield* this.parseArrowStream<T>(response, context);
       } else {
-        // Test doubles often return JSON responses even when asStream=true.
         // Fall back to object rows to keep the stream contract stable.
         context.throwIfAborted();
         yield this.toRows<T>(response as EsqlQueryResponse);
@@ -162,7 +161,7 @@ export class QueryService implements QueryServiceContract {
           continue;
         }
 
-        const rows = batch.toArray().map((row) => row.toJSON() as T);
+        const rows = batch.toArray().map((row) => coerceBigInts(row.toJSON()) as T);
         yield rows;
       }
     } catch (error) {
@@ -204,7 +203,23 @@ export class QueryService implements QueryServiceContract {
         return acc;
       }, {});
 
-      return row as T;
+      return coerceBigInts(row) as T;
     });
   }
 }
+
+/**
+ * Apache Arrow returns BigInt for integer/long columns.
+ * JSON.stringify cannot serialize BigInt, so we coerce to Number
+ * at the parsing boundary. ES|QL integer values are within safe
+ * Number range.
+ */
+const coerceBigInts = (row: Record<string, unknown>): Record<string, unknown> => {
+  const coerced: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(row)) {
+    coerced[key] = typeof value === 'bigint' ? Number(value) : value;
+  }
+
+  return coerced;
+};

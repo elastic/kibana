@@ -133,6 +133,56 @@ describe('QueryService', () => {
       ]);
     });
 
+    it('coerces BigInt values to Number in streamed rows', async () => {
+      mockEsClient.esql.query.mockResolvedValue({
+        columns: [
+          { name: 'host', type: 'keyword' },
+          { name: 'cpu', type: 'long' },
+          { name: 'memory', type: 'long' },
+        ],
+        values: [
+          ['host-a', BigInt(80), BigInt(1024)],
+          ['host-b', BigInt(45), BigInt(2048)],
+        ],
+      } as unknown as EsqlQueryResponse);
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+        batches.push(batch);
+      }
+
+      expect(batches).toHaveLength(1);
+      expect(batches[0]).toEqual([
+        { host: 'host-a', cpu: 80, memory: 1024 },
+        { host: 'host-b', cpu: 45, memory: 2048 },
+      ]);
+
+      // Verify the values are Numbers, not BigInts
+      for (const row of batches[0]) {
+        expect(typeof row.cpu).toBe('number');
+        expect(typeof row.memory).toBe('number');
+      }
+    });
+
+    it('produces JSON-serializable rows when source contains BigInt', async () => {
+      mockEsClient.esql.query.mockResolvedValue({
+        columns: [
+          { name: 'host', type: 'keyword' },
+          { name: 'count', type: 'long' },
+        ],
+        values: [['host-a', BigInt(99)]],
+      } as unknown as EsqlQueryResponse);
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+        batches.push(batch);
+      }
+
+      // Should not throw "Do not know how to serialize a BigInt"
+      expect(() => JSON.stringify(batches[0])).not.toThrow();
+      expect(JSON.parse(JSON.stringify(batches[0]))).toEqual([{ host: 'host-a', count: 99 }]);
+    });
+
     it('passes abort signal to ES client', async () => {
       const mockResponse: EsqlQueryResponse = {
         columns: [{ name: 'host', type: 'keyword' }],
