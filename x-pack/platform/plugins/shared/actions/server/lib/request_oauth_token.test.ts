@@ -145,6 +145,8 @@ describe('requestOAuthToken', () => {
 
   test('sends Basic Auth header and removes credentials from body when useBasicAuth is true', async () => {
     const configurationUtilities = actionsConfigMock.create();
+    const clientId = 'my-client';
+    const clientSecret = 'my-secret';
     axiosInstanceMock.mockReturnValueOnce({
       status: 200,
       data: {
@@ -160,8 +162,8 @@ describe('requestOAuthToken', () => {
       configurationUtilities,
       mockLogger,
       {
-        client_id: 'my-client',
-        client_secret: 'my-secret',
+        client_id: clientId,
+        client_secret: clientSecret,
         some_additional_param: 'value',
       },
       true
@@ -176,9 +178,11 @@ describe('requestOAuthToken', () => {
     expect(requestConfig.data).toContain('some_additional_param=value');
 
     // Should have Basic Auth header
+    const encoded = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    const expectedHeader = `Basic ${encoded}`;
     expect(requestConfig.headers).toEqual(
       expect.objectContaining({
-        Authorization: expect.stringMatching(/^Basic /),
+        Authorization: expectedHeader,
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
       })
     );
@@ -186,6 +190,8 @@ describe('requestOAuthToken', () => {
 
   test('includes credentials in body and no Basic Auth header when useBasicAuth is false', async () => {
     const configurationUtilities = actionsConfigMock.create();
+    const clientId = 'my-client';
+    const clientSecret = 'my-secret';
     axiosInstanceMock.mockReturnValueOnce({
       status: 200,
       data: {
@@ -201,8 +207,8 @@ describe('requestOAuthToken', () => {
       configurationUtilities,
       mockLogger,
       {
-        client_id: 'my-client',
-        client_secret: 'my-secret',
+        client_id: clientId,
+        client_secret: clientSecret,
         some_additional_param: 'value',
       },
       false
@@ -211,8 +217,8 @@ describe('requestOAuthToken', () => {
     const requestConfig = axiosInstanceMock.mock.calls[0][1];
 
     // Body should contain client_id and client_secret
-    expect(requestConfig.data).toContain('client_id=my-client');
-    expect(requestConfig.data).toContain('client_secret=my-secret');
+    expect(requestConfig.data).toContain(`client_id=${clientId}`);
+    expect(requestConfig.data).toContain(`client_secret=${clientSecret}`);
     expect(requestConfig.data).toContain('grant_type=authorization_code');
 
     // Should NOT have Basic Auth header
