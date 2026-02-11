@@ -6,7 +6,6 @@
  */
 
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
-import type { ChatEvent } from '@kbn/agent-builder-common';
 import type { AgentExecutionEventDoc } from '../types';
 import type {
   ExecutionEventsDataStreamClient,
@@ -99,7 +98,7 @@ class ExecutionEventsClientImpl implements ExecutionEventsClient {
         eventNumber: source.event_number,
         agentId: source.agent_id,
         spaceId: source.space_id,
-        event: source.event as ChatEvent,
+        event: source.event,
       };
     });
   }
