@@ -23,7 +23,7 @@ tags:
   - shared-common
   - package
   - dev
-  - group-observability
+  - group-platform
   - private
 fileGroups:
   src:
