@@ -36,15 +36,14 @@ export const ManagementLandingPage = ({
     chromeStyle,
     coreStart,
     cloud,
-    hasEnterpriseLicense,
+    isAirGapped,
   } = useAppContext();
   setBreadcrumbs();
 
   // Check if cloud services are available
   const isCloudEnabled = cloud?.isCloudEnabled || false;
-  // AutoOps promotion callout should only be shown for self-managed instances with an enterprise license
-  const shouldShowAutoOpsPromotion = !isCloudEnabled && hasEnterpriseLicense;
-  const learnMoreLink = coreStart.docLinks.links.cloud.connectToAutoops;
+  // AutoOps promotion callout should only be shown for self-managed, non-air-gapped instances
+  const shouldShowAutoOpsPromotion = !isCloudEnabled && !isAirGapped;
   const cloudConnectUrl = coreStart.application.getUrlForApp('cloud_connect');
   const handleConnectClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -89,7 +88,6 @@ export const ManagementLandingPage = ({
               `}
             >
               <AutoOpsPromotionCallout
-                learnMoreLink={learnMoreLink}
                 cloudConnectUrl={cloudConnectUrl}
                 onConnectClick={handleConnectClick}
                 hasCloudConnectPermission={hasCloudConnectPermission}

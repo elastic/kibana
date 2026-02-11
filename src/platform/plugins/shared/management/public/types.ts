@@ -113,7 +113,7 @@ export interface AppDependencies {
   chromeStyle?: ChromeStyle;
   coreStart: CoreStart;
   cloud?: { isCloudEnabled: boolean; baseUrl?: string };
-  hasEnterpriseLicense: boolean;
+  isAirGapped: boolean;
 }
 
 export interface ConfigSchema {
