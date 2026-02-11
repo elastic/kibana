@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React from 'react';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { IExternalUrl, ThemeServiceStart } from '@kbn/core/public';
-import {
-  CONTEXT_MENU_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-  type ChartActionContext,
-  type DrilldownDefinition,
-  type DrilldownEditorProps,
+import type {
+  ChartActionContext,
+  DrilldownDefinition,
+  DrilldownEditorProps,
 } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { UrlDrilldownGlobalScope } from '@kbn/ui-actions-enhanced-plugin/public';
@@ -24,11 +21,6 @@ import {
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { getInheritedViewMode } from '@kbn/presentation-publishing';
-import { EuiText, EuiTextBlockTruncate } from '@elastic/eui';
-import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/common';
-import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-browser';
 import {
   DEFAULT_ENCODE_URL,
   DEFAULT_OPEN_IN_NEW_TAB,
@@ -37,8 +29,6 @@ import {
 import type { UrlDrilldownState } from '../../server';
 import { getEventScopeValues } from './variables/event_variables';
 import { getContextScopeValues } from './variables/context_variables';
-import { getGlobalVariableList } from './variables/global_variables';
-import { UrlDrilldownEditor } from './editor';
 
 type UrlDrilldownContext = ChartActionContext & EmbeddableApiContext;
 
@@ -118,31 +108,6 @@ export function getUrlDrilldown(deps: {
     return url;
   }
 
-  function getVariableList(): UrlTemplateEditorVariable[] {
-    // context: ActionFactoryContext
-    // const eventVariables = getEventVariableList(context);
-    // const contextVariables = getContextVariableList(context);
-    const globalVariables = getGlobalVariableList(deps.getGlobalScope());
-
-    // return [...eventVariables, ...contextVariables, ...globalVariables];
-    return [...globalVariables];
-  }
-
-  function getExampleUrl(trigger?: string): string {
-    switch (trigger) {
-      case SELECT_RANGE_TRIGGER:
-        return 'https://www.example.com/?from={{event.from}}&to={{event.to}}';
-      case CONTEXT_MENU_TRIGGER:
-      case IMAGE_CLICK_TRIGGER:
-        return 'https://www.example.com/?panel={{context.panel.title}}';
-      case ROW_CLICK_TRIGGER:
-        return 'https://www.example.com/keys={{event.keys}}&values={{event.values}}';
-      case VALUE_CLICK_TRIGGER:
-      default:
-        return 'https://www.example.com/?{{event.key}}={{event.value}}';
-    }
-  }
-
   return {
     displayName: i18n.translate('xpack.urlDrilldown.DisplayName', {
       defaultMessage: 'Go to URL',
@@ -182,66 +147,10 @@ export function getUrlDrilldown(deps: {
           return false;
         }
       },
-      MenuItem: ({ drilldownState, context }) => {
-        const [title, setTitle] = React.useState(drilldownState.label);
-        const [error, setError] = React.useState<string | undefined>();
-        useEffect(() => {
-          const variables = getRuntimeVariables(context);
-          urlDrilldownCompileUrl(title, variables, false)
-            .then((result) => {
-              if (title !== result) setTitle(result);
-            })
-            .catch(() => {});
-
-          // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, []);
-
-        useEffect(() => {
-          buildUrl(drilldownState, context).catch((e) => {
-            setError(e.message);
-          });
-          // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, []);
-
-        return (
-          /* title is used as a tooltip, EuiToolTip doesn't work in this context menu due to hacky zIndex */
-          <span title={error}>
-            {title}
-            {/* note: ideally we'd use EuiIconTip for the error, but it doesn't play well with this context menu*/}
-            {error ? (
-              <EuiText color={'danger'} size={'xs'}>
-                <EuiTextBlockTruncate lines={3} data-test-subj={'urlDrilldown-error'}>
-                  {error}
-                </EuiTextBlockTruncate>
-              </EuiText>
-            ) : null}
-          </span>
-        );
-      },
     },
     setup: {
       Editor: (props: DrilldownEditorProps<UrlDrilldownState>) => {
-        const [variables, exampleUrl] = useMemo(
-          () => [getVariableList(), getExampleUrl(props.state.trigger)],
-          [props.state]
-        );
-
-        return (
-          <KibanaContextProvider
-            services={{
-              settings: deps.settings,
-              theme: deps.theme(),
-            }}
-          >
-            <UrlDrilldownEditor
-              {...props}
-              variables={variables}
-              exampleUrl={exampleUrl}
-              syntaxHelpDocsLink={deps.getSyntaxHelpDocsLink()}
-              variablesHelpDocsLink={deps.getVariablesHelpDocsLink()}
-            />
-          </KibanaContextProvider>
-        );
+        return <div>Editor placeholder</div>;
       },
       getInitialState: () => ({
         open_in_new_tab: DEFAULT_OPEN_IN_NEW_TAB,
