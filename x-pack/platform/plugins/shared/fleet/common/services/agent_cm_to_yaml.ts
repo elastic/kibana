@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { stringify } from 'yaml';
 import { Document, isScalar } from 'yaml';
 import type { Pair } from 'yaml';
 
@@ -13,10 +12,7 @@ import type { FullAgentConfigMap } from '../types/models/agent_cm';
 
 const CM_KEYS_ORDER = ['apiVersion', 'kind', 'metadata', 'data'];
 
-export const fullAgentConfigMapToYaml = (
-  policy: FullAgentConfigMap,
-  toYaml: typeof stringify
-): string => {
+export const fullAgentConfigMapToYaml = (policy: FullAgentConfigMap): string => {
   const doc = new Document(policy, {
     sortMapEntries: (a: Pair, b: Pair) => {
       if (!isScalar(a.key) || !isScalar(b.key)) {

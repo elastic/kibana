@@ -8,7 +8,6 @@ import apm from 'elastic-apm-node';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import { groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
-import { stringify } from 'yaml';
 import pMap from 'p-map';
 import { lt, minVersion, gt } from 'semver';
 import type {
@@ -2113,7 +2112,7 @@ class AgentPolicyService {
         },
       };
 
-      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap, stringify);
+      const configMapYaml = fullAgentConfigMapToYaml(fullAgentConfigMap);
       const updateManifestVersion = elasticAgentStandaloneManifest.replace('VERSION', agentVersion);
       const fixedAgentYML = configMapYaml.replace('agent.yml:', 'agent.yml: |-');
       return [fixedAgentYML, updateManifestVersion].join('\n');
