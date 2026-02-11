@@ -26,7 +26,7 @@ describe('CreateTemplatePreview', () => {
 
       useEffect(() => {
         form.setValue('definition', definition);
-      }, [definition, form]);
+      }, [form]);
 
       return (
         <FormProvider {...form}>
