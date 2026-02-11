@@ -154,6 +154,12 @@ export async function createClassicStreams(
  * Create a large number of unmanaged Elasticsearch data streams directly via the ES API.
  * This bypasses the Kibana Streams backend global lock, enabling fast creation of thousands
  * of data streams. The Streams listing page auto-discovers these as unmanaged classic streams.
+ *
+ * Uses the ES _bulk API to auto-create data streams via indexing. When a bulk request targets
+ * a non-existent data stream that matches an index template, ES auto-creates it. Crucially,
+ * ES batches auto-create operations within a single bulk call into a single cluster state
+ * update, making this dramatically faster than individual createDataStream() calls which each
+ * trigger separate cluster state updates and overwhelm the master node.
  */
 export async function createBulkDataStreams(
   es: Client,
@@ -161,7 +167,7 @@ export async function createBulkDataStreams(
   count: number,
   prefix: string = 'logs-perf-classic'
 ) {
-  log.info(`Creating ${count} unmanaged data streams with prefix '${prefix}' via ES API...`);
+  log.info(`Creating ${count} unmanaged data streams with prefix '${prefix}' via ES bulk API...`);
 
   // 1. Raise the max shards per node limit (default 1000 is too low for 5000 data streams)
   await es.cluster.putSettings({
@@ -180,27 +186,23 @@ export async function createBulkDataStreams(
   });
   log.info('  Index template created');
 
-  // 2. Create data streams in parallel batches
-  const BATCH_SIZE = 50;
+  // 3. Auto-create data streams via bulk indexing.
+  //    Each bulk request creates up to BULK_BATCH_SIZE data streams by indexing a seed document.
+  //    ES batches the auto-create cluster state changes within a single bulk call, avoiding
+  //    the master node task queue congestion that individual createDataStream() calls cause.
+  const BULK_BATCH_SIZE = 250;
   const names = Array.from({ length: count }, (_, i) => `${prefix}-${String(i).padStart(5, '0')}`);
+  const timestamp = new Date().toISOString();
 
   let created = 0;
-  for (let i = 0; i < names.length; i += BATCH_SIZE) {
-    const batch = names.slice(i, i + BATCH_SIZE);
-    await Promise.all(
-      batch.map((name) =>
-        es.indices.createDataStream({ name }).catch((error) => {
-          // Ignore 'resource_already_exists_exception' for idempotency
-          if (
-            error?.meta?.body?.error?.type === 'resource_already_exists_exception' ||
-            error?.meta?.statusCode === 400
-          ) {
-            return;
-          }
-          throw error;
-        })
-      )
-    );
+  for (let i = 0; i < names.length; i += BULK_BATCH_SIZE) {
+    const batch = names.slice(i, i + BULK_BATCH_SIZE);
+    const operations = batch.flatMap((name) => [
+      { create: { _index: name } },
+      { '@timestamp': timestamp, message: 'init' },
+    ]);
+
+    await es.bulk({ operations, refresh: false });
     created += batch.length;
 
     if (created % 500 === 0 || created === count) {
