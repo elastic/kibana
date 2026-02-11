@@ -301,6 +301,34 @@ describe('When the tabular page is loaded', () => {
     expect(rows[11]).not.toHaveTextContent(techPreview);
   });
 
+  it('should show task type badges in the endpoint column for all rows', () => {
+    renderTabularPageWithProviders();
+
+    const rows = screen.getAllByRole('row');
+    // Row 1: .elser-2-elastic → sparse_embedding
+    expect(rows[1]).toHaveTextContent('sparse_embedding');
+    // Row 2: .elser-2-elasticsearch → sparse_embedding
+    expect(rows[2]).toHaveTextContent('sparse_embedding');
+    // Row 3: .multilingual-e5-small-elasticsearch → text_embedding
+    expect(rows[3]).toHaveTextContent('text_embedding');
+    // Row 4: .multilingual-embed-v1-elastic → text_embedding
+    expect(rows[4]).toHaveTextContent('text_embedding');
+    // Row 5: .rerank-v1-elastic → rerank
+    expect(rows[5]).toHaveTextContent('rerank');
+    // Row 6: .sparkles → chat_completion
+    expect(rows[6]).toHaveTextContent('chat_completion');
+    // Row 7: custom-inference-id → sparse_embedding
+    expect(rows[7]).toHaveTextContent('sparse_embedding');
+    // Row 8: elastic-rerank → rerank
+    expect(rows[8]).toHaveTextContent('rerank');
+    // Row 9: local-model → sparse_embedding
+    expect(rows[9]).toHaveTextContent('sparse_embedding');
+    // Row 10: my-elser-model-05 → sparse_embedding
+    expect(rows[10]).toHaveTextContent('sparse_embedding');
+    // Row 11: third-party-model → sparse_embedding
+    expect(rows[11]).toHaveTextContent('sparse_embedding');
+  });
+
   it('should display endpoint stats with correct counts', () => {
     renderTabularPageWithProviders();
 

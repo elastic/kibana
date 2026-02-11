@@ -163,6 +163,86 @@ describe('RenderEndpoint component tests', () => {
     });
   });
 
+  describe('multiple badges together', () => {
+    it('renders task type, preconfigured, and tech preview badges for a preconfigured reranker endpoint', () => {
+      const mockProvider = {
+        inference_id: '.rerank-v1-elastic',
+        task_type: 'rerank',
+        service: 'elastic',
+        service_settings: {
+          model_id: 'rerank-v1',
+        },
+      } as any;
+
+      renderEndpointInfo({ inferenceId: '.rerank-v1-elastic', endpointInfo: mockProvider });
+
+      expect(screen.getByTestId('table-column-task-type-rerank')).toBeInTheDocument();
+      expect(screen.getByText('PRECONFIGURED')).toBeInTheDocument();
+      expect(screen.getByText('TECH PREVIEW')).toBeInTheDocument();
+    });
+
+    it('renders task type and preconfigured badges without tech preview for a preconfigured non-reranker endpoint', () => {
+      const mockProvider = {
+        inference_id: '.elser-2-elasticsearch',
+        task_type: 'sparse_embedding',
+        service: 'elasticsearch',
+        service_settings: {
+          model_id: '.elser_model_2',
+        },
+      } as any;
+
+      renderEndpointInfo({
+        inferenceId: '.elser-2-elasticsearch',
+        endpointInfo: mockProvider,
+      });
+
+      expect(screen.getByTestId('table-column-task-type-sparse_embedding')).toBeInTheDocument();
+      expect(screen.getByText('PRECONFIGURED')).toBeInTheDocument();
+      expect(screen.queryByText('TECH PREVIEW')).not.toBeInTheDocument();
+    });
+
+    it('renders only the task type badge for a non-preconfigured, non-tech-preview endpoint', () => {
+      const mockProvider = {
+        inference_id: 'custom-endpoint',
+        task_type: 'text_embedding',
+        service: 'openai',
+        service_settings: {},
+      } as any;
+
+      renderEndpointInfo({ inferenceId: 'custom-endpoint', endpointInfo: mockProvider });
+
+      expect(screen.getByTestId('table-column-task-type-text_embedding')).toBeInTheDocument();
+      expect(screen.queryByText('PRECONFIGURED')).not.toBeInTheDocument();
+      expect(screen.queryByText('TECH PREVIEW')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('tooltip content', () => {
+    it.each([
+      ['text_embedding', 'Converts text into dense vector representations for semantic search'],
+      ['sparse_embedding', 'Converts text into sparse vector representations for semantic search'],
+      ['rerank', 'Re-ranks search results by relevance'],
+      ['completion', 'Generates text completions from a given input'],
+      ['chat_completion', 'Generates conversational responses from a chat input'],
+    ])('shows correct tooltip for %s task type', async (taskType, expectedTooltip) => {
+      const mockProvider = {
+        inference_id: 'test-endpoint',
+        task_type: taskType,
+        service: 'elasticsearch',
+        service_settings: {},
+      } as any;
+
+      renderEndpointInfo({ inferenceId: 'test-endpoint', endpointInfo: mockProvider });
+
+      const badge = screen.getByTestId(`table-column-task-type-${taskType}`);
+      fireEvent.mouseOver(badge);
+
+      await waitFor(() => {
+        expect(screen.getByText(expectedTooltip)).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('copy to clipboard functionality', () => {
     const mockProvider = {
       inference_id: 'test-endpoint',
