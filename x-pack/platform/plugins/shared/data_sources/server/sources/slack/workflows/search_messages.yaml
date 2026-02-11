@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.slack.search_messages'
-description: 'Search for messages in Slack (requires a user token with search:read)'
+description: 'Search Slack messages and return compact results (text, channel, sender, mentions, permalink). Requires a user token with search:read.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -8,53 +8,53 @@ triggers:
 inputs:
   - name: query
     type: string
-    description: 'Search query to find messages'
+    description: 'Search query. You can include Slack search operators directly (e.g. in:#general from:@user after:2026-02-10).'
   - name: in_channel
     type: string
     required: false
-    description: 'Optional constraint: adds `in:<channel_name>` to the query'
+    description: 'Optional constraint. Appends `in:<channel_name>` to the query (e.g. general).'
   - name: from_user
     type: string
     required: false
-    description: 'Optional constraint: adds `from:<@UserID>` or `from:username` to the query'
+    description: 'Optional constraint. Appends `from:<@UserID>` or `from:username` to the query.'
   - name: after
     type: string
     required: false
-    description: 'Optional constraint: adds `after:<date>` to the query (e.g. 2026-02-10)'
+    description: 'Optional constraint. Appends `after:<date>` to the query (e.g. 2026-02-10).'
   - name: before
     type: string
     required: false
-    description: 'Optional constraint: adds `before:<date>` to the query (e.g. 2026-02-10)'
+    description: 'Optional constraint. Appends `before:<date>` to the query (e.g. 2026-02-10).'
   - name: sort
     type: string
     required: false
     default: "score"
-    description: 'Sort order: score or timestamp'
+    description: 'Sort order. Valid values: score, timestamp.'
   - name: sort_dir
     type: string
     required: false
     default: "desc"
-    description: 'Sort direction: asc or desc'
+    description: 'Sort direction. Valid values: asc, desc.'
   - name: count
     type: number
     required: false
     default: 20
-    description: 'Number of results to return (1-100)'
+    description: 'Results per page (1-100).'
   - name: page
     type: number
     required: false
     default: 1
-    description: 'Page number for pagination'
+    description: 'Page number (1-indexed).'
   - name: highlight
     type: boolean
     required: false
     default: false
-    description: 'Whether to include highlight markers in results'
+    description: 'Include highlight markers in returned message text.'
   - name: raw
     type: boolean
     required: false
     default: false
-    description: 'Return the full raw Slack API response'
+    description: 'If true, return the full raw Slack API response (very verbose). If false, return compact results.'
 steps:
   - name: search-messages
     type: slack2.searchMessages

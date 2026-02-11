@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.slack.list_conversations'
-description: 'List Slack public channels available to the authorized token'
+description: 'List Slack public channels available to the authorized token.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -10,13 +10,16 @@ inputs:
     type: boolean
     required: false
     default: true
+    description: 'If true, exclude archived channels.'
   - name: limit
     type: number
     required: false
     default: 100
+    description: 'Maximum number of channels to return (1-1000).'
   - name: cursor
     type: string
     required: false
+    description: 'Pagination cursor from a previous response.'
 steps:
   - name: list-conversations
     type: slack2.listConversations

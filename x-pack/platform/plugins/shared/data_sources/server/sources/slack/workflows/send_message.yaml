@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.slack.send_message'
-description: 'Send a message to a Slack channel'
+description: 'Send a message to a Slack channel.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -8,18 +8,22 @@ triggers:
 inputs:
   - name: channel
     type: string
-    description: 'Channel ID, user ID, or conversation ID'
+    description: 'Channel ID to send the message to (e.g. C123...).'
   - name: text
     type: string
+    description: 'Message text.'
   - name: thread_ts
     type: string
     required: false
+    description: 'Optional thread timestamp to reply in a thread.'
   - name: unfurl_links
     type: boolean
     required: false
+    description: 'If true, enable unfurling of primarily text-based content.'
   - name: unfurl_media
     type: boolean
     required: false
+    description: 'If true, enable unfurling of media content.'
 steps:
   - name: send-message
     type: slack2.sendMessage

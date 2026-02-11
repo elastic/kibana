@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.slack.get_conversation_history'
-description: 'Fetch message history for a specific Slack conversation'
+description: 'Fetch message history for a specific Slack channel (public channels only).'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -8,26 +8,29 @@ triggers:
 inputs:
   - name: channel
     type: string
-    description: 'Conversation ID (e.g. C123..., G123..., D123...)'
+    description: 'Channel ID (e.g. C123...).'
   - name: oldest
     type: string
     required: false
-    description: 'Start of time range (Unix timestamp as string)'
+    description: 'Start of time range (Unix timestamp as string).'
   - name: latest
     type: string
     required: false
-    description: 'End of time range (Unix timestamp as string)'
+    description: 'End of time range (Unix timestamp as string).'
   - name: inclusive
     type: boolean
     required: false
     default: false
+    description: 'If true, include messages with oldest/latest timestamps.'
   - name: limit
     type: number
     required: false
     default: 100
+    description: 'Maximum number of messages to return (1-1000).'
   - name: cursor
     type: string
     required: false
+    description: 'Pagination cursor from a previous response.'
 steps:
   - name: get-conversation-history
     type: slack2.getConversationHistory
