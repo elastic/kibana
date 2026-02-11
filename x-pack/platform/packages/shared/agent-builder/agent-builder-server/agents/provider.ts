@@ -13,6 +13,7 @@ import type {
   ChatAgentEvent,
   AgentCapabilities,
   AgentConfigurationOverrides,
+  ConversationAction,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -50,6 +51,16 @@ export interface AgentHandlerParams {
 export interface AgentHandlerReturn {
   /** The plain result of the agent */
   result: AgentResponse;
+}
+
+/**
+ * Experimental features configuration for agent builder.
+ */
+export interface ExperimentalFeatures {
+  /** Whether the filestore feature is enabled */
+  filestore: boolean;
+  /** Whether the skills feature is enabled */
+  skills: boolean;
 }
 
 export interface AgentHandlerContext {
@@ -129,6 +140,11 @@ export interface AgentHandlerContext {
    * File store to access data from the agent's virtual filesystem
    */
   filestore: IFileStore;
+  /**
+   * Experimental features configuration for this agent execution.
+   * Determined by the UI setting at the start of execution.
+   */
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**
@@ -170,6 +186,10 @@ export interface AgentParams {
    * These override the stored agent configuration for this execution only.
    */
   configurationOverrides?: AgentConfigurationOverrides;
+  /**
+   * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
+   */
+  action?: ConversationAction;
 }
 
 export interface AgentResponse {

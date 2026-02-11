@@ -8,7 +8,11 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
 import { of, forkJoin, switchMap } from 'rxjs';
-import { type Conversation, type RoundCompleteEvent } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  RoundCompleteEvent,
+  ConversationAction,
+} from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 
@@ -58,11 +62,13 @@ export const updateConversation$ = ({
   conversation,
   title$,
   roundCompletedEvents$,
+  action,
 }: {
   conversation: Conversation;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
   conversationClient: ConversationClient;
+  action?: ConversationAction;
 }) => {
   return forkJoin({
     title: title$,
@@ -70,7 +76,9 @@ export const updateConversation$ = ({
   }).pipe(
     switchMap(({ title, roundCompletedEvent }) => {
       const { round, resumed = false, conversation_state } = roundCompletedEvent.data;
-      const updatedRound = resumed
+      // Replace last round when resumed (HITL flow), regenerate action is requested
+      const shouldReplaceLastRound = resumed || action === 'regenerate';
+      const updatedRound = shouldReplaceLastRound
         ? [...conversation.rounds.slice(0, -1), round]
         : [...conversation.rounds, round];
 
@@ -108,8 +116,9 @@ export type ConversationOperation = 'CREATE' | 'UPDATE';
 export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
 
 /**
- * Get a conversation by ID, or create a placeholder for new conversations
- * Also determines the operation type (CREATE or UPDATE) based on the same logic
+ * Get a conversation by ID, or create a placeholder for new conversations.
+ * Determines the operation type (CREATE or UPDATE) based on conversationId presence.
+ * Note: Validation and manipulation for regenerate is handled in runDefaultAgentMode.
  */
 export const getConversation = async ({
   agentId,
