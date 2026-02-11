@@ -70,7 +70,8 @@ const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ act
 ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
 const ActionsTableComponent = () => {
-  const permissions = useKibana().services.application.capabilities.osquery;
+  const { application, http } = useKibana().services;
+  const permissions = application.capabilities.osquery;
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { push } = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
@@ -311,19 +312,38 @@ const ActionsTableComponent = () => {
     const actionCaseIds = action?.case_ids;
     if (!actionCaseIds?.length || !casesMap) return <>-</>;
 
-    const caseNames = actionCaseIds
-      .map((id) => casesMap.get(id)?.title)
+    const resolvedCases = actionCaseIds
+      .map((id) => casesMap.get(id))
       .filter(Boolean);
 
-    if (caseNames.length === 0) return <>-</>;
-    if (caseNames.length === 1) return <>{caseNames[0]}</>;
+    if (resolvedCases.length === 0) return <>-</>;
+
+    const CaseLink = ({ caseInfo }: { caseInfo: { id: string; title: string } }) => (
+      <a
+        href={http?.basePath?.prepend(`/app/security/cases/${caseInfo.id}`) ?? '#'}
+        onClick={(e) => {
+          e.preventDefault();
+          application?.navigateToUrl(
+            http?.basePath?.prepend(`/app/security/cases/${caseInfo.id}`) ?? ''
+          );
+        }}
+      >
+        {caseInfo.title}
+      </a>
+    );
+
+    if (resolvedCases.length === 1) return <CaseLink caseInfo={resolvedCases[0]!} />;
+
+    const tooltipContent = resolvedCases.map((c) => c!.title).join(', ');
 
     return (
-      <EuiToolTip content={caseNames.join(', ')}>
-        <>{caseNames[0]} +{caseNames.length - 1}</>
+      <EuiToolTip content={tooltipContent}>
+        <span>
+          <CaseLink caseInfo={resolvedCases[0]!} /> +{resolvedCases.length - 1}
+        </span>
       </EuiToolTip>
     );
-  }, [casesMap]);
+  }, [casesMap, http, application]);
 
   const renderRunByColumn = useCallback((_: unknown, item: SearchHit) => {
     const action = item._source as ActionDetails;
