@@ -300,10 +300,19 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await disableStreams(apiClient);
     });
 
-    it('should allow deletion of legacy logs root stream', async () => {
+    it('should allow deletion of legacy logs root stream and disable it in ES', async () => {
+      // Verify stream is enabled before deletion
+      const statusBefore = await apiClient.fetch('GET /api/streams/_status').expect(200);
+      expect(statusBefore.body.logs).to.be(true);
+
+      // Delete the stream
       const response = await deleteStream(apiClient, 'logs', 200);
       expect(response).to.have.property('acknowledged', true);
       expect(response).to.have.property('result', 'deleted');
+
+      // Verify stream is no longer enabled in ES
+      const statusAfter = await apiClient.fetch('GET /api/streams/_status').expect(200);
+      expect(statusAfter.body.logs).to.be(false);
     });
 
     it('should NOT allow deletion of logs.otel root stream', async () => {

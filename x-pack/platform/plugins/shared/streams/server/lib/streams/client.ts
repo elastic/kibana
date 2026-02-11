@@ -870,7 +870,10 @@ export class StreamsClient {
       await this.ensureStream(name);
     }
 
-    if (Streams.WiredStream.Definition.is(definition) && getParentId(name) === undefined) {
+    const isRootStream =
+      Streams.WiredStream.Definition.is(definition) && getParentId(name) === undefined;
+
+    if (isRootStream) {
       // Only allow deletion of the legacy 'logs' root stream
       // logs.otel and logs.ecs remain protected
       if (name !== LOGS_ROOT_STREAM_NAME) {
@@ -878,10 +881,26 @@ export class StreamsClient {
       }
     }
 
+    // Delete from Kibana
     await State.attemptChanges([{ type: 'delete', name }], {
       ...this.dependencies,
       streamsClient: this,
     });
+
+    // For root streams, also disable in Elasticsearch
+    if (isRootStream) {
+      try {
+        await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+          method: 'POST',
+          path: `_streams/${name}/_disable`,
+        });
+      } catch (error) {
+        // Log but don't fail - stream might not exist in ES or already be disabled
+        this.dependencies.logger.warn(
+          `Failed to disable stream ${name} in Elasticsearch after deletion: ${error.message}`
+        );
+      }
+    }
 
     return { acknowledged: true, result: 'deleted' };
   }
