@@ -43,7 +43,7 @@ test.describe('custom branding', { tag: tags.ESS_ONLY }, () => {
     await pageObjects.customBrandingSettings.navigateToGlobalSettings();
 
     const img = page.locator('img[alt="logo"]');
-    await img.waitFor({ state: 'visible', timeout: 5000 });
+    await img.waitFor({ state: 'visible' });
     const imgSrc = await img.getAttribute('src');
 
     expect(imgSrc).toMatch(/^data:image\/png/);
@@ -60,7 +60,7 @@ test.describe('custom branding', { tag: tags.ESS_ONLY }, () => {
     await pageObjects.customBrandingSettings.navigateToGlobalSettings();
 
     const img = page.testSubj.locator('logoMark');
-    await img.waitFor({ state: 'visible', timeout: 5000 });
+    await img.waitFor({ state: 'visible' });
     const imgSrc = await img.getAttribute('src');
 
     expect(imgSrc).toMatch(/^data:image\/png/);

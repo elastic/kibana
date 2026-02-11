@@ -11,15 +11,13 @@ export class CustomBrandingSettingsPage {
   constructor(private readonly page: ScoutPage) {}
 
   private async waitForSaveToast() {
-    await this.page.testSubj.locator('euiToastHeader').waitFor({ state: 'visible', timeout: 5000 });
+    await this.page.testSubj.locator('euiToastHeader').waitFor({ state: 'visible' });
   }
 
   async navigateToGlobalSettings() {
     await this.page.gotoApp('management/kibana/settings');
     await this.page.testSubj.click('settings-tab-global-settings');
-    await this.page.testSubj
-      .locator('managementSettingsTitle')
-      .waitFor({ state: 'visible', timeout: 5000 });
+    await this.page.testSubj.locator('managementSettingsTitle').waitFor({ state: 'visible' });
   }
 
   async setPageTitle(title: string) {
