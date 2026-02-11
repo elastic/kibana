@@ -10,7 +10,7 @@ import { render, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import { I18nProvider } from '@kbn/i18n-react';
-import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -18,9 +18,7 @@ import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/
 
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
 
-import type { PivotAggsConfigDict, PivotGroupByConfigDict } from '../../../../common';
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../common';
-import type { SearchItems } from '../../../../hooks/use_search_items';
 
 import { getAggNameConflictToastMessages } from './common';
 import { StepDefineForm } from './step_define_form';
@@ -28,6 +26,9 @@ import { StepDefineForm } from './step_define_form';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 
 jest.mock('../../../../app_dependencies');
+jest.mock('@kbn/saved-objects-finder-plugin/public', () => ({
+  SavedObjectFinder: ({ children }: any) => <div>{children}</div>,
+}));
 
 const startMock = coreMock.createStart();
 
@@ -39,7 +40,7 @@ const getMockedDatePickerDependencies = () => {
       },
     },
     notifications: {},
-  } as unknown as DatePickerDependencies;
+  } as any;
 };
 
 const createMockWebStorage = () => ({
@@ -68,7 +69,7 @@ describe('Transform: <DefinePivotForm />', () => {
       dataView: {
         getIndexPattern: () => 'the-data-view-index-pattern',
         fields: [] as any[],
-      } as SearchItems['dataView'],
+      } as any,
     };
 
     // mock services for QueryStringInput
@@ -87,7 +88,7 @@ describe('Transform: <DefinePivotForm />', () => {
         <QueryClientProvider client={queryClient}>
           <KibanaContextProvider services={services}>
             <DatePickerContextProvider {...getMockedDatePickerDependencies()}>
-              <StepDefineForm onChange={mockOnChange} searchItems={searchItems as SearchItems} />
+              <StepDefineForm onChange={mockOnChange} searchItems={searchItems as any} />
             </DatePickerContextProvider>
           </KibanaContextProvider>
         </QueryClientProvider>
@@ -99,7 +100,7 @@ describe('Transform: <DefinePivotForm />', () => {
     // Assert
 
     await waitFor(() => {
-      expect(getByText('Data view')).toBeInTheDocument();
+      expect(getByText('Select data source')).toBeInTheDocument();
       expect(getByText(searchItems.dataView.getIndexPattern())).toBeInTheDocument();
       expect(mockOnChange).toBeCalled();
     });
@@ -108,7 +109,7 @@ describe('Transform: <DefinePivotForm />', () => {
 
 describe('Transform: isAggNameConflict()', () => {
   test('detect aggregation name conflicts', () => {
-    const aggList: PivotAggsConfigDict = {
+    const aggList: any = {
       'the-agg-name': {
         agg: PIVOT_SUPPORTED_AGGS.AVG,
         field: 'the-field-name',
@@ -123,7 +124,7 @@ describe('Transform: isAggNameConflict()', () => {
       },
     };
 
-    const groupByList: PivotGroupByConfigDict = {
+    const groupByList: any = {
       'the-group-by-agg-name': {
         agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
         field: 'the-field-name',

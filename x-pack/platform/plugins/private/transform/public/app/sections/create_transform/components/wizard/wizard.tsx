@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, useRef, useState, createContext, useMemo } from 'react';
+import React, { type FC, useEffect, useRef, useState, createContext, useMemo } from 'react';
 import { pick } from 'lodash';
 
 import type { EuiStepStatus } from '@elastic/eui';
@@ -25,6 +25,7 @@ import { FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
 
 import { useEnabledFeatures } from '../../../../serverless_context';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
+import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
 
 import { getCreateTransformRequestBody } from '../../../../common';
 import type { SearchItems } from '../../../../hooks/use_search_items';
@@ -45,6 +46,8 @@ import {
   StepDetailsSummary,
 } from '../step_details';
 import { WizardNav } from '../wizard_nav';
+import { TransformFunctionSelector } from '../step_define/transform_function_selector';
+import { SourceDataSelector } from '../step_define/source_data_selector';
 
 import { TRANSFORM_STORAGE_KEYS } from './storage';
 
@@ -68,8 +71,9 @@ interface DefinePivotStepProps {
   isCurrentStep: boolean;
   stepDefineState: StepDefineExposedState;
   setCurrentStep: React.Dispatch<React.SetStateAction<WIZARD_STEPS>>;
-  setStepDefineState: React.Dispatch<React.SetStateAction<StepDefineExposedState>>;
+  setStepDefineState: (s: StepDefineExposedState) => void;
   searchItems: SearchItems;
+  onSelectSavedObjectId?: (savedObjectId: string) => void;
 }
 
 const StepDefine: FC<DefinePivotStepProps> = ({
@@ -78,6 +82,7 @@ const StepDefine: FC<DefinePivotStepProps> = ({
   setCurrentStep,
   setStepDefineState,
   searchItems,
+  onSelectSavedObjectId,
 }) => {
   const definePivotRef = useRef(null);
 
@@ -90,6 +95,7 @@ const StepDefine: FC<DefinePivotStepProps> = ({
             onChange={setStepDefineState}
             overrides={{ ...stepDefineState }}
             searchItems={searchItems}
+            onSelectSavedObjectId={onSelectSavedObjectId}
           />
           <WizardNav
             next={() => setCurrentStep(WIZARD_STEPS.DETAILS)}
@@ -106,7 +112,8 @@ const StepDefine: FC<DefinePivotStepProps> = ({
 
 interface WizardProps {
   cloneConfig?: TransformConfigUnion;
-  searchItems: SearchItems;
+  searchItems?: SearchItems;
+  onSelectSavedObjectId?: (savedObjectId: string) => void;
 }
 
 export const CreateTransformWizardContext = createContext<{
@@ -117,165 +124,265 @@ export const CreateTransformWizardContext = createContext<{
   runtimeMappings: undefined,
 });
 
-export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
-  const { showNodeInfo } = useEnabledFeatures();
-  const appDependencies = useAppDependencies();
-  const { uiSettings, data, fieldFormats, charts } = appDependencies;
-  const { dataView } = searchItems;
+export const Wizard: FC<WizardProps> = React.memo(
+  ({ cloneConfig, searchItems, onSelectSavedObjectId }) => {
+    const { showNodeInfo } = useEnabledFeatures();
+    const appDependencies = useAppDependencies();
+    const { uiSettings, data, fieldFormats, charts } = appDependencies;
+    const dataView = searchItems?.dataView;
+    const sourceId = searchItems?.savedSearch?.id ?? searchItems?.dataView?.id;
 
-  // The current WIZARD_STEP
-  const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
+    // The current WIZARD_STEP
+    const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
 
-  // The DEFINE state
-  const [stepDefineState, setStepDefineState] = useState(
-    applyTransformConfigToDefineState(getDefaultStepDefineState(searchItems), cloneConfig, dataView)
-  );
+    const [pendingTransformFunction, setPendingTransformFunction] = useState<
+      StepDefineExposedState['transformFunction']
+    >(TRANSFORM_FUNCTION.PIVOT);
 
-  // The DETAILS state
-  const [stepDetailsState, setStepDetailsState] = useState(
-    applyTransformConfigToDetailsState(getDefaultStepDetailsState(), cloneConfig)
-  );
+    // The DEFINE state
+    const [stepDefineState, setStepDefineState] = useState<StepDefineExposedState | null>(null);
+    const prevSourceId = useRef<string | undefined>(undefined);
 
-  // The CREATE state
-  const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
+    useEffect(() => {
+      if (searchItems === undefined || dataView === undefined || stepDefineState !== null) {
+        return;
+      }
 
-  const transformConfig = getCreateTransformRequestBody(
-    dataView,
-    stepDefineState,
-    stepDetailsState
-  );
+      const initialDefineState = applyTransformConfigToDefineState(
+        getDefaultStepDefineState(searchItems),
+        cloneConfig,
+        dataView
+      );
 
-  const stepDefine = useMemo(() => {
-    return {
-      title: i18n.translate('xpack.transform.transformsWizard.stepConfigurationTitle', {
-        defaultMessage: 'Configuration',
-      }),
-      children: (
-        <StepDefine
-          isCurrentStep={currentStep === WIZARD_STEPS.DEFINE}
-          stepDefineState={stepDefineState}
-          setCurrentStep={setCurrentStep}
-          setStepDefineState={setStepDefineState}
-          searchItems={searchItems}
-        />
-      ),
+      setStepDefineState(
+        cloneConfig
+          ? initialDefineState
+          : {
+              ...initialDefineState,
+              transformFunction: pendingTransformFunction,
+            }
+      );
+    }, [cloneConfig, dataView, pendingTransformFunction, searchItems, stepDefineState]);
+
+    useEffect(() => {
+      if (sourceId === undefined) {
+        prevSourceId.current = sourceId;
+        return;
+      }
+
+      if (prevSourceId.current !== undefined && prevSourceId.current !== sourceId) {
+        // When the source changes, keep as much as possible but ensure we stay on step 1.
+        setCurrentStep(WIZARD_STEPS.DEFINE);
+
+        // If the source is a Discover session, adopt its combined query for previews/config.
+        if (searchItems?.savedSearch !== undefined) {
+          setStepDefineState((prev) => {
+            if (prev === null) return prev;
+            return {
+              ...prev,
+              searchString: undefined,
+              searchLanguage: prev.searchLanguage,
+              searchQuery: searchItems.combinedQuery,
+            };
+          });
+        }
+      }
+
+      prevSourceId.current = sourceId;
+    }, [searchItems, sourceId]);
+
+    // The DETAILS state
+    const [stepDetailsState, setStepDetailsState] = useState(
+      applyTransformConfigToDetailsState(getDefaultStepDetailsState(), cloneConfig)
+    );
+
+    // The CREATE state
+    const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
+
+    const isWizardInitialized = dataView !== undefined && stepDefineState !== null;
+
+    const transformConfig = useMemo(() => {
+      if (!isWizardInitialized) {
+        return null;
+      }
+
+      return getCreateTransformRequestBody(dataView!, stepDefineState, stepDetailsState);
+    }, [dataView, isWizardInitialized, stepDefineState, stepDetailsState]);
+
+    const stepDefine = useMemo(() => {
+      return {
+        title: i18n.translate('xpack.transform.transformsWizard.stepConfigurationTitle', {
+          defaultMessage: 'Configuration',
+        }),
+        children: (
+          <>
+            {!isWizardInitialized && (
+              <>
+                <TransformFunctionSelector
+                  selectedFunction={pendingTransformFunction}
+                  onChange={setPendingTransformFunction}
+                />
+
+                <SourceDataSelector
+                  searchItems={searchItems}
+                  onSelectSavedObjectId={onSelectSavedObjectId}
+                />
+              </>
+            )}
+
+            {isWizardInitialized && searchItems !== undefined && (
+              <StepDefine
+                isCurrentStep={currentStep === WIZARD_STEPS.DEFINE}
+                stepDefineState={stepDefineState}
+                setCurrentStep={setCurrentStep}
+                setStepDefineState={(s) => setStepDefineState(s)}
+                searchItems={searchItems}
+                onSelectSavedObjectId={onSelectSavedObjectId}
+                key={sourceId}
+              />
+            )}
+          </>
+        ),
+      };
+    }, [
+      currentStep,
+      isWizardInitialized,
+      onSelectSavedObjectId,
+      pendingTransformFunction,
+      searchItems,
+      setCurrentStep,
+      stepDefineState,
+      sourceId,
+    ]);
+
+    const stepDetails = useMemo(() => {
+      return {
+        title: i18n.translate('xpack.transform.transformsWizard.stepDetailsTitle', {
+          defaultMessage: 'Transform details',
+        }),
+        children: (
+          <>
+            {currentStep === WIZARD_STEPS.DETAILS &&
+            isWizardInitialized &&
+            searchItems !== undefined ? (
+              <StepDetailsForm
+                onChange={setStepDetailsState}
+                overrides={stepDetailsState}
+                searchItems={searchItems}
+                stepDefineState={stepDefineState}
+              />
+            ) : (
+              <StepDetailsSummary {...stepDetailsState} />
+            )}
+            {currentStep === WIZARD_STEPS.DETAILS && (
+              <WizardNav
+                previous={() => {
+                  setCurrentStep(WIZARD_STEPS.DEFINE);
+                }}
+                next={() => setCurrentStep(WIZARD_STEPS.CREATE)}
+                nextActive={isWizardInitialized ? stepDetailsState.valid : false}
+              />
+            )}
+          </>
+        ),
+        status: currentStep >= WIZARD_STEPS.DETAILS ? undefined : ('incomplete' as EuiStepStatus),
+      };
+    }, [
+      currentStep,
+      isWizardInitialized,
+      setStepDetailsState,
+      stepDetailsState,
+      searchItems,
+      stepDefineState,
+    ]);
+
+    const stepCreate = useMemo(() => {
+      return {
+        title: i18n.translate('xpack.transform.transformsWizard.stepCreateTitle', {
+          defaultMessage: 'Create',
+        }),
+        children: (
+          <>
+            {currentStep === WIZARD_STEPS.CREATE && transformConfig !== null ? (
+              <StepCreateForm
+                createDataView={stepDetailsState.createDataView}
+                transformId={stepDetailsState.transformId}
+                transformConfig={transformConfig}
+                onChange={setStepCreateState}
+                overrides={stepCreateState}
+                timeFieldName={stepDetailsState.dataViewTimeField}
+              />
+            ) : (
+              <StepCreateSummary />
+            )}
+            {currentStep === WIZARD_STEPS.CREATE && !stepCreateState.created && (
+              <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.DETAILS)} />
+            )}
+          </>
+        ),
+        status: currentStep >= WIZARD_STEPS.CREATE ? undefined : ('incomplete' as EuiStepStatus),
+      };
+    }, [
+      currentStep,
+      setCurrentStep,
+      stepDetailsState.createDataView,
+      stepDetailsState.transformId,
+      transformConfig,
+      setStepCreateState,
+      stepCreateState,
+      stepDetailsState.dataViewTimeField,
+    ]);
+
+    const stepsConfig = [stepDefine, stepDetails, stepCreate];
+
+    const datePickerDeps: DatePickerDependencies = {
+      ...pick(appDependencies, [
+        'data',
+        'http',
+        'notifications',
+        'theme',
+        'uiSettings',
+        'userProfile',
+        'i18n',
+      ]),
+      uiSettingsKeys: UI_SETTINGS,
+      showFrozenDataTierChoice: showNodeInfo,
     };
-  }, [currentStep, stepDefineState, setCurrentStep, setStepDefineState, searchItems]);
 
-  const stepDetails = useMemo(() => {
-    return {
-      title: i18n.translate('xpack.transform.transformsWizard.stepDetailsTitle', {
-        defaultMessage: 'Transform details',
+    const fieldStatsServices: FieldStatsServices = useMemo(
+      () => ({
+        uiSettings,
+        dataViews: data.dataViews,
+        data,
+        fieldFormats,
+        charts,
       }),
-      children: (
-        <>
-          {currentStep === WIZARD_STEPS.DETAILS ? (
-            <StepDetailsForm
-              onChange={setStepDetailsState}
-              overrides={stepDetailsState}
-              searchItems={searchItems}
-              stepDefineState={stepDefineState}
-            />
-          ) : (
-            <StepDetailsSummary {...stepDetailsState} />
-          )}
-          {currentStep === WIZARD_STEPS.DETAILS && (
-            <WizardNav
-              previous={() => {
-                setCurrentStep(WIZARD_STEPS.DEFINE);
-              }}
-              next={() => setCurrentStep(WIZARD_STEPS.CREATE)}
-              nextActive={stepDetailsState.valid}
-            />
-          )}
-        </>
-      ),
-      status: currentStep >= WIZARD_STEPS.DETAILS ? undefined : ('incomplete' as EuiStepStatus),
-    };
-  }, [currentStep, setStepDetailsState, stepDetailsState, searchItems, stepDefineState]);
+      [uiSettings, data, fieldFormats, charts]
+    );
 
-  const stepCreate = useMemo(() => {
-    return {
-      title: i18n.translate('xpack.transform.transformsWizard.stepCreateTitle', {
-        defaultMessage: 'Create',
-      }),
-      children: (
-        <>
-          {currentStep === WIZARD_STEPS.CREATE ? (
-            <StepCreateForm
-              createDataView={stepDetailsState.createDataView}
-              transformId={stepDetailsState.transformId}
-              transformConfig={transformConfig}
-              onChange={setStepCreateState}
-              overrides={stepCreateState}
-              timeFieldName={stepDetailsState.dataViewTimeField}
-            />
-          ) : (
-            <StepCreateSummary />
-          )}
-          {currentStep === WIZARD_STEPS.CREATE && !stepCreateState.created && (
-            <WizardNav previous={() => setCurrentStep(WIZARD_STEPS.DETAILS)} />
-          )}
-        </>
-      ),
-      status: currentStep >= WIZARD_STEPS.CREATE ? undefined : ('incomplete' as EuiStepStatus),
-    };
-  }, [
-    currentStep,
-    setCurrentStep,
-    stepDetailsState.createDataView,
-    stepDetailsState.transformId,
-    transformConfig,
-    setStepCreateState,
-    stepCreateState,
-    stepDetailsState.dataViewTimeField,
-  ]);
+    const steps = <EuiSteps css={styles.steps} steps={stepsConfig} />;
 
-  const stepsConfig = [stepDefine, stepDetails, stepCreate];
+    if (!isWizardInitialized || transformConfig === null) {
+      return steps;
+    }
 
-  const datePickerDeps: DatePickerDependencies = {
-    ...pick(appDependencies, [
-      'data',
-      'http',
-      'notifications',
-      'theme',
-      'uiSettings',
-      'userProfile',
-      'i18n',
-    ]),
-    uiSettingsKeys: UI_SETTINGS,
-    showFrozenDataTierChoice: showNodeInfo,
-  };
-
-  const fieldStatsServices: FieldStatsServices = useMemo(
-    () => ({
-      uiSettings,
-      dataViews: data.dataViews,
-      data,
-      fieldFormats,
-      charts,
-    }),
-    [uiSettings, data, fieldFormats, charts]
-  );
-
-  return (
-    <FieldStatsFlyoutProvider
-      dataView={dataView}
-      fieldStatsServices={fieldStatsServices}
-      timeRangeMs={stepDefineState.timeRangeMs}
-      dslQuery={transformConfig.source.query}
-    >
-      <CreateTransformWizardContext.Provider
-        value={{ dataView, runtimeMappings: stepDefineState.runtimeMappings }}
+    return (
+      <FieldStatsFlyoutProvider
+        dataView={dataView}
+        fieldStatsServices={fieldStatsServices}
+        timeRangeMs={stepDefineState.timeRangeMs}
+        dslQuery={transformConfig.source.query}
       >
-        <UrlStateProvider>
-          <StorageContextProvider storage={localStorage} storageKeys={TRANSFORM_STORAGE_KEYS}>
-            <DatePickerContextProvider {...datePickerDeps}>
-              <EuiSteps css={styles.steps} steps={stepsConfig} />
-            </DatePickerContextProvider>
-          </StorageContextProvider>
-        </UrlStateProvider>
-      </CreateTransformWizardContext.Provider>
-    </FieldStatsFlyoutProvider>
-  );
-});
+        <CreateTransformWizardContext.Provider
+          value={{ dataView, runtimeMappings: stepDefineState.runtimeMappings }}
+        >
+          <UrlStateProvider>
+            <StorageContextProvider storage={localStorage} storageKeys={TRANSFORM_STORAGE_KEYS}>
+              <DatePickerContextProvider {...datePickerDeps}>{steps}</DatePickerContextProvider>
+            </StorageContextProvider>
+          </UrlStateProvider>
+        </CreateTransformWizardContext.Provider>
+      </FieldStatsFlyoutProvider>
+    );
+  }
+);

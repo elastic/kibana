@@ -77,6 +77,7 @@ import { useStepDefineForm } from './hooks/use_step_define_form';
 import { TransformFunctionSelector } from './transform_function_selector';
 import { LatestFunctionForm } from './latest_function_form';
 import { PivotFunctionForm } from './pivot_function_form';
+import { SourceDataSelector } from './source_data_selector';
 
 const ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG = false;
 
@@ -99,6 +100,7 @@ export interface StepDefineFormProps {
   overrides?: StepDefineExposedState;
   onChange(s: StepDefineExposedState): void;
   searchItems: SearchItems;
+  onSelectSavedObjectId?: (savedObjectId: string) => void;
 }
 
 export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
@@ -310,15 +312,10 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
 
         <ConfigSectionTitle title="Source data" />
 
-        {searchItems.savedSearch === undefined && (
-          <EuiFormRow
-            label={i18n.translate('xpack.transform.stepDefineForm.dataViewLabel', {
-              defaultMessage: 'Data view',
-            })}
-          >
-            <span>{indexPattern}</span>
-          </EuiFormRow>
-        )}
+        <SourceDataSelector
+          searchItems={searchItems}
+          onSelectSavedObjectId={props.onSelectSavedObjectId}
+        />
 
         {hasValidTimeField && (
           <EuiFormRow

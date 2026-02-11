@@ -19,7 +19,7 @@ import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 
 import { Wizard } from './components/wizard';
 
-type Props = RouteComponentProps<{ savedObjectId: string }>;
+type Props = RouteComponentProps<{ savedObjectId?: string }>;
 export const CreateTransformSection: FC<Props> = ({ match }) => {
   // Set breadcrumb and page title
   useEffect(() => {
@@ -29,7 +29,9 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
 
   const { esTransform } = useDocumentationLinks();
 
-  const { error: searchItemsError, searchItems } = useSearchItems(match.params.savedObjectId);
+  const { error: searchItemsError, searchItems, setSavedObjectId } = useSearchItems(
+    match.params.savedObjectId
+  );
 
   const docsLink = (
     <EuiButtonEmpty
@@ -80,7 +82,7 @@ export const CreateTransformSection: FC<Props> = ({ match }) => {
             <EuiSpacer size="l" />
           </>
         )}
-        {searchItems !== undefined && <Wizard searchItems={searchItems} />}
+        <Wizard searchItems={searchItems} onSelectSavedObjectId={setSavedObjectId} />
       </EuiPageTemplate.Section>
     </CapabilitiesWrapper>
   );
