@@ -118,7 +118,13 @@ describe('rulePageShowRequestModal', () => {
     expect(screen.getByTestId('showRequestUpdateTab')).toBeInTheDocument();
     expect(screen.getByTestId('showRequestCreateTab')).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByTestId('showRequestUpdateTab')).toHaveAttribute('aria-selected', 'false');
+    expect(screen.getByTestId('modalSubtitle').textContent).toBe(
+      'This Kibana request will create this rule.'
+    );
     expect(screen.getByTestId('modalHeaderTitle').textContent).toBe('Create alerting rule request');
+    expect(screen.getByTestId('modalRequestCodeBlock').textContent).toContain(
+      'POST kbn:/api/alerting/rule'
+    );
   });
 
   test('renders update request correctly for existing rule', async () => {
@@ -131,6 +137,8 @@ describe('rulePageShowRequestModal', () => {
     render(<RulePageShowRequestModal />);
 
     await userEvent.click(await screen.findByTestId('showRequestUpdateTab'));
+    expect(screen.getByTestId('showRequestCreateTab')).toHaveAttribute('aria-selected', 'false');
+    expect(screen.getByTestId('showRequestUpdateTab')).toHaveAttribute('aria-selected', 'true');
 
     expect(screen.getByTestId('modalHeaderTitle').textContent).toBe('Update alerting rule request');
     expect(screen.getByTestId('modalSubtitle').textContent).toBe(

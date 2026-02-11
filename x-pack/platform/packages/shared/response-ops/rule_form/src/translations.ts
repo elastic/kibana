@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { ShowRequestActivePage } from './types';
 
 export const DOC_LINK_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDefinition.docLinkTitle',
@@ -817,7 +818,7 @@ export const SHOW_REQUEST_MODAL_UPDATE_TAB = i18n.translate(
   }
 );
 
-export const SHOW_REQUEST_MODAL_SUBTITLE = (mode: string) =>
+export const SHOW_REQUEST_MODAL_SUBTITLE = (mode: ShowRequestActivePage) =>
   i18n.translate('responseOpsRuleForm.ruleForm.showRequestModal.subheadingTitle', {
     defaultMessage: 'This Kibana request will {requestType} this rule.',
     values: {
@@ -839,7 +840,7 @@ export const SHOW_REQUEST_MODAL_TITLE_CREATE = i18n.translate(
   }
 );
 
-export const SHOW_REQUEST_MODAL_TITLE = (mode: string) =>
+export const SHOW_REQUEST_MODAL_TITLE = (mode: ShowRequestActivePage) =>
   i18n.translate('responseOpsRuleForm.ruleForm.showRequestModal.headerTitle', {
     defaultMessage: '{requestType} alerting rule request',
     values: {
