@@ -126,7 +126,7 @@ export function setupSavedObjects(
       getInAppUrl: (savedObject: SavedObject<RawRule>) => {
         return {
           path: `${triggersActionsRoute}${getRuleDetailsRoute(encodeURIComponent(savedObject.id))}`,
-          uiCapabilitiesPath: '',
+          uiCapabilitiesPath: 'management.insightsAndAlerting.triggersActions',
         };
       },
       onImport(ruleSavedObjects) {
@@ -257,7 +257,7 @@ export function setupSavedObjects(
             ':templateId',
             encodeURIComponent(savedObject.id)
           )}`,
-          uiCapabilitiesPath: 'management.insightsAndAlerting.triggersActions',
+          uiCapabilitiesPath: '',
         };
       },
     },
