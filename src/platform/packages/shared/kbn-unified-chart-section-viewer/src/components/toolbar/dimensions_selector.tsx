@@ -241,6 +241,7 @@ export const DimensionsSelector = ({
           padding: 8px 0;
         `}
         justifyContent="spaceBetween"
+        alignItems="center"
       >
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
