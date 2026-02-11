@@ -78,6 +78,7 @@ interface UseEsqlCallbacksParams {
   memoizedHistoryStarredItems: MemoizedHistoryStarredItems;
   favoritesClient: FavoritesClient<StarredQueryMetadata>;
   getJoinIndicesCallback: Required<ESQLCallbacks>['getJoinIndices'];
+  isResourceBrowserEnabled: () => Promise<boolean>;
 }
 
 export const useEsqlCallbacks = ({
@@ -99,6 +100,7 @@ export const useEsqlCallbacks = ({
   memoizedHistoryStarredItems,
   favoritesClient,
   getJoinIndicesCallback,
+  isResourceBrowserEnabled,
 }: UseEsqlCallbacksParams): ESQLCallbacks => {
   const getSources = useCallback(async () => {
     clearCacheWhenOld(dataSourcesCache, minimalQueryRef.current);
@@ -256,6 +258,7 @@ export const useEsqlCallbacks = ({
       canCreateLookupIndex,
       isServerless,
       getKqlSuggestions,
+      isResourceBrowserEnabled,
     }),
     [
       getSources,
@@ -275,6 +278,7 @@ export const useEsqlCallbacks = ({
       canCreateLookupIndex,
       isServerless,
       getKqlSuggestions,
+      isResourceBrowserEnabled,
     ]
   );
 };

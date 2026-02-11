@@ -18,7 +18,7 @@ import {
   TEST_DASHBOARD_ID,
 } from '../fixtures';
 
-apiTest.describe('dashboards - create', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('dashboards - create', { tag: tags.stateful.classic }, () => {
   let editorCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
