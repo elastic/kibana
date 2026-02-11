@@ -51,6 +51,9 @@ jest.mock('./task/abort_monitor', () => ({
 }));
 
 const mockTaskManagerSchedule = jest.fn();
+const mockUiSettingsGet = jest.fn();
+const mockGetScopedClient = jest.fn();
+const mockAsScopedToClient = jest.fn();
 
 import { createAgentExecutionService } from './execution_service';
 
@@ -62,6 +65,14 @@ describe('AgentExecutionService', () => {
     schedule: mockTaskManagerSchedule,
   } as any;
 
+  const uiSettings = {
+    asScopedToClient: mockAsScopedToClient,
+  } as any;
+
+  const savedObjects = {
+    getScopedClient: mockGetScopedClient,
+  } as any;
+
   const service = createAgentExecutionService({
     logger,
     elasticsearch,
@@ -70,8 +81,8 @@ describe('AgentExecutionService', () => {
     inference: {} as any,
     conversationService: {} as any,
     agentService: {} as any,
-    uiSettings: {} as any,
-    savedObjects: {} as any,
+    uiSettings,
+    savedObjects,
   });
 
   beforeEach(() => {
@@ -84,6 +95,10 @@ describe('AgentExecutionService', () => {
       spaceId: 'default',
       agentParams: { nextInput: { message: 'hello' } },
     });
+    // Default: UI setting returns false (run locally)
+    mockGetScopedClient.mockReturnValue({});
+    mockAsScopedToClient.mockReturnValue({ get: mockUiSettingsGet });
+    mockUiSettingsGet.mockResolvedValue(false);
   });
 
   describe('executeAgent (TM mode)', () => {
@@ -205,6 +220,108 @@ describe('AgentExecutionService', () => {
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       expect(receivedEvents).toEqual([fakeEvent]);
+    });
+  });
+
+  describe('executeAgent (auto-detection)', () => {
+    it('should run locally when request.isFakeRequest is true', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      // Simulate a fakeRequest (running on TM already)
+      Object.defineProperty(request, 'isFakeRequest', { value: true });
+
+      mockHandleAgentExecution.mockResolvedValue(of());
+      mockCollectAndWriteEvents.mockResolvedValue(undefined);
+
+      const result = await service.executeAgent({
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        // useTaskManager NOT provided -> auto-detect
+      });
+
+      expect(result.executionId).toBeDefined();
+      // Should NOT schedule a TM task
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+      // Should have updated status to running (local path)
+      expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
+        result.executionId,
+        ExecutionStatus.running
+      );
+      // Should NOT have checked UI settings
+      expect(mockGetScopedClient).not.toHaveBeenCalled();
+    });
+
+    it('should run on TM when UI setting is true', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockUiSettingsGet.mockResolvedValue(true);
+
+      const result = await service.executeAgent({
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        // useTaskManager NOT provided -> auto-detect
+      });
+
+      expect(result.executionId).toBeDefined();
+      // Should have scheduled a TM task
+      expect(mockTaskManagerSchedule).toHaveBeenCalled();
+      // Should NOT have called handleAgentExecution (remote path)
+      expect(mockHandleAgentExecution).not.toHaveBeenCalled();
+    });
+
+    it('should run locally when UI setting is false', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockUiSettingsGet.mockResolvedValue(false);
+
+      mockHandleAgentExecution.mockResolvedValue(of());
+      mockCollectAndWriteEvents.mockResolvedValue(undefined);
+
+      const result = await service.executeAgent({
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        // useTaskManager NOT provided -> auto-detect
+      });
+
+      expect(result.executionId).toBeDefined();
+      // Should NOT schedule a TM task
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+      // Should have run locally
+      expect(mockHandleAgentExecution).toHaveBeenCalled();
+    });
+
+    it('should honour explicit useTaskManager=true even when isFakeRequest is true', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      Object.defineProperty(request, 'isFakeRequest', { value: true });
+
+      const result = await service.executeAgent({
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: true,
+      });
+
+      expect(result.executionId).toBeDefined();
+      // Should have scheduled a TM task despite fakeRequest
+      expect(mockTaskManagerSchedule).toHaveBeenCalled();
+    });
+
+    it('should honour explicit useTaskManager=false even when UI setting is true', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockUiSettingsGet.mockResolvedValue(true);
+
+      mockHandleAgentExecution.mockResolvedValue(of());
+      mockCollectAndWriteEvents.mockResolvedValue(undefined);
+
+      const result = await service.executeAgent({
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: false,
+      });
+
+      expect(result.executionId).toBeDefined();
+      // Should NOT schedule a TM task
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+      // Should have run locally
+      expect(mockHandleAgentExecution).toHaveBeenCalled();
+      // Should NOT have checked UI settings
+      expect(mockGetScopedClient).not.toHaveBeenCalled();
     });
   });
 

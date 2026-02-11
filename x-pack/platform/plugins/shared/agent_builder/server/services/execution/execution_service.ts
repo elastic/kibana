@@ -12,12 +12,14 @@ import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   createAgentBuilderError,
   createInternalError,
 } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type {
   AgentExecutionService,
@@ -57,6 +59,8 @@ export const createAgentExecutionService = (
   return new AgentExecutionServiceImpl(deps);
 };
 
+const noop = () => {};
+
 class AgentExecutionServiceImpl implements AgentExecutionService {
   private readonly deps: AgentExecutionServiceDeps;
   private readonly logger: Logger;
@@ -69,7 +73,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   async executeAgent({
     request,
     params,
-    useTaskManager = false,
+    useTaskManager,
     abortSignal,
   }: ExecuteAgentParams): Promise<ExecuteAgentResult> {
     const executionId = uuidv4();
@@ -87,9 +91,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     // Wire up external abort signal to execution abort
     if (abortSignal) {
       const onAbort = () => {
-        this.abortExecution(executionId).catch(() => {
-          // best-effort abort
-        });
+        this.abortExecution(executionId).catch(noop);
       };
       if (abortSignal.aborted) {
         onAbort();
@@ -98,7 +100,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }
     }
 
-    if (useTaskManager) {
+    const runOnTM = await this.shouldUseTaskManager(request, useTaskManager);
+    if (runOnTM) {
       return this.executeRemote({ executionId, agentId, request });
     } else {
       return this.executeLocally({ execution, request });
@@ -354,6 +357,28 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       .finally(() => {
         abortMonitor.stop();
       });
+  }
+
+  /**
+   * Determine whether execution should run on a Task Manager node.
+   *
+   * 1. If `useTaskManager` is explicitly provided, honour it.
+   * 2. If the request is a fakeRequest (already running on TM), run locally.
+   * 3. Otherwise, read the experimental-features UI setting.
+   */
+  private async shouldUseTaskManager(
+    request: KibanaRequest,
+    useTaskManager?: boolean
+  ): Promise<boolean> {
+    if (useTaskManager !== undefined) {
+      return useTaskManager;
+    }
+    if (request.isFakeRequest) {
+      return false;
+    }
+    const soClient = this.deps.savedObjects.getScopedClient(request);
+    const uiSettingsClient = this.deps.uiSettings.asScopedToClient(soClient);
+    return uiSettingsClient.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
   }
 
   private createExecutionClient(): AgentExecutionClient {

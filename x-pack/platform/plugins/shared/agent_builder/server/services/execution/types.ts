@@ -118,7 +118,12 @@ export interface ExecuteAgentParams {
   params: AgentExecutionParams;
   /** Optional abort signal. When aborted, the execution will be cancelled. */
   abortSignal?: AbortSignal;
-  /** When true, schedule execution on a Task Manager node. When false (default), execute locally on the current node. */
+  /**
+   * Controls whether execution runs on a Task Manager node.
+   * - `true`: schedule on TM.
+   * - `false`: run locally.
+   * - `undefined` (default): auto-decide based on context (already on TM -> local; otherwise check the experimental features UI setting).
+   */
   useTaskManager?: boolean;
 }
 
