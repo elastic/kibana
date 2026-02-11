@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/encrypted-saved-objects-plugin'
   - '@kbn/features-plugin'
   - '@kbn/i18n'
+  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod
