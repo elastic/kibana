@@ -6,7 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Observable, shareReplay } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { shareReplay } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
@@ -14,21 +15,15 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import {
-  agentBuilderDefaultAgentId,
-  createAgentBuilderError,
-  createInternalError,
-  createRequestAbortedError,
-  isRoundCompleteEvent,
-} from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type {
   AgentExecutionService,
+  AgentExecution,
   ExecuteAgentParams,
   ExecuteAgentResult,
   FollowExecutionOptions,
-  AgentExecution,
 } from './types';
 import { ExecutionStatus } from './types';
 import { taskTypes } from './task';
@@ -45,11 +40,7 @@ import {
   type AgentExecutionDeps,
 } from './execution_runner';
 import { AbortMonitor } from './task/abort_monitor';
-import {
-  FOLLOW_POLL_INTERVAL_MS,
-  FOLLOW_TERMINAL_READ_MAX_RETRIES,
-  FOLLOW_TERMINAL_READ_RETRY_DELAY_MS,
-} from './constants';
+import { followExecution$ } from './execution_follower';
 
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   elasticsearch: ElasticsearchServiceStart;
@@ -133,112 +124,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }
 
   followExecution(executionId: string, options?: FollowExecutionOptions): Observable<ChatEvent> {
-    const eventsClient = this.createEventsClient();
-    const executionClient = this.createExecutionClient();
-    let lastEventNumber = options?.since ?? 0;
-
-    return new Observable<ChatEvent>((observer) => {
-      let stopped = false;
-
-      const poll = async (): Promise<boolean> => {
-        if (stopped) {
-          return true;
-        }
-
-        try {
-          const events = await eventsClient.readEvents(executionId, lastEventNumber);
-
-          for (const eventDoc of events) {
-            observer.next(eventDoc.event);
-            if (eventDoc.eventNumber > lastEventNumber) {
-              lastEventNumber = eventDoc.eventNumber;
-            }
-          }
-
-          const execution = await executionClient.get(executionId);
-          if (!execution) {
-            observer.error(new Error(`Execution ${executionId} not found`));
-            return true;
-          }
-
-          if (execution.status === ExecutionStatus.failed) {
-            const err = execution.error
-              ? createAgentBuilderError(
-                  execution.error.code,
-                  execution.error.message,
-                  execution.error.meta
-                )
-              : createInternalError(`Execution ${executionId} failed`);
-            observer.error(err);
-            return true;
-          }
-
-          if (execution.status === ExecutionStatus.aborted) {
-            observer.error(createRequestAbortedError('request was aborted'));
-            return true;
-          }
-
-          if (execution.status === ExecutionStatus.completed) {
-            // Drain remaining events that may not yet be searchable due to
-            // ES near-real-time indexing. Retry until we receive a roundComplete
-            // event (the last meaningful event), or exhaust retries.
-            let receivedRoundComplete = events.some((e) => isRoundCompleteEvent(e.event));
-
-            for (
-              let retry = 0;
-              !receivedRoundComplete && retry < FOLLOW_TERMINAL_READ_MAX_RETRIES;
-              retry++
-            ) {
-              const finalEvents = await eventsClient.readEvents(executionId, lastEventNumber);
-              for (const eventDoc of finalEvents) {
-                observer.next(eventDoc.event);
-                if (eventDoc.eventNumber > lastEventNumber) {
-                  lastEventNumber = eventDoc.eventNumber;
-                }
-                if (isRoundCompleteEvent(eventDoc.event)) {
-                  receivedRoundComplete = true;
-                }
-              }
-              if (receivedRoundComplete || finalEvents.length > 0) {
-                break;
-              }
-              await new Promise<void>((resolve) =>
-                setTimeout(resolve, FOLLOW_TERMINAL_READ_RETRY_DELAY_MS)
-              );
-            }
-
-            return true;
-          }
-
-          return false;
-        } catch (err) {
-          observer.error(err);
-          return true;
-        }
-      };
-
-      const runPollingLoop = async () => {
-        let done = false;
-        while (!done && !stopped) {
-          done = await poll();
-          if (!done) {
-            await new Promise<void>((resolve) => setTimeout(resolve, FOLLOW_POLL_INTERVAL_MS));
-          }
-        }
-        if (!stopped) {
-          observer.complete();
-        }
-      };
-
-      runPollingLoop().catch((err) => {
-        if (!stopped) {
-          observer.error(err);
-        }
-      });
-
-      return () => {
-        stopped = true;
-      };
+    return followExecution$({
+      executionId,
+      eventsClient: this.createEventsClient(),
+      executionClient: this.createExecutionClient(),
+      since: options?.since,
     });
   }
 

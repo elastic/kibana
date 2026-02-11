@@ -10,7 +10,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import { isAgentBuilderError, AgentBuilderErrorCode } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from './types';
 import type { AgentExecutionClient } from './persistence';
 import type { ExecutionEventsClient } from './persistence';
@@ -367,136 +366,39 @@ describe('AgentExecutionService', () => {
   });
 
   describe('followExecution', () => {
-    it('should emit events and complete when execution finishes', (done) => {
-      const events = [
-        {
-          '@timestamp': Date.now(),
-          agentExecutionId: 'exec-1',
-          eventNumber: 1,
-          agentId: 'agent-1',
-          spaceId: 'default',
-          event: { type: 'message_chunk', data: { message_id: 'm1', text_chunk: 'hello' } },
-        },
-      ];
+    // Detailed behavior is tested in execution_follower.test.ts.
+    // This smoke test verifies that service.followExecution delegates correctly.
+    it('should delegate to followExecution$ and return an observable', (done) => {
+      const eventDoc = {
+        '@timestamp': Date.now(),
+        agentExecutionId: 'exec-1',
+        eventNumber: 1,
+        agentId: 'agent-1',
+        spaceId: 'default',
+        event: { type: 'message_chunk', data: { message_id: 'm1', text_chunk: 'hello' } },
+      };
 
-      mockEventsClient.readEvents
-        .mockResolvedValueOnce(events as any)
-        .mockResolvedValueOnce([] as any)
-        .mockResolvedValue([] as any);
-
-      mockExecutionClient.get
-        .mockResolvedValueOnce({
-          executionId: 'exec-1',
-          '@timestamp': new Date().toISOString(),
-          status: ExecutionStatus.running,
-          agentId: 'agent-1',
-          spaceId: 'default',
-          agentParams: { nextInput: { message: 'test' } },
-        })
-        .mockResolvedValue({
-          executionId: 'exec-1',
-          '@timestamp': new Date().toISOString(),
-          status: ExecutionStatus.completed,
-          agentId: 'agent-1',
-          spaceId: 'default',
-          agentParams: { nextInput: { message: 'test' } },
-        });
+      mockEventsClient.readEvents.mockResolvedValueOnce([eventDoc] as any);
+      mockExecutionClient.get.mockResolvedValueOnce({
+        executionId: 'exec-1',
+        '@timestamp': new Date().toISOString(),
+        status: ExecutionStatus.failed,
+        agentId: 'agent-1',
+        spaceId: 'default',
+        agentParams: { nextInput: { message: 'test' } },
+      });
 
       const receivedEvents: any[] = [];
 
       service.followExecution('exec-1').subscribe({
-        next: (event) => {
-          receivedEvents.push(event);
-        },
-        complete: () => {
-          expect(receivedEvents.length).toBeGreaterThanOrEqual(1);
-          expect(receivedEvents[0]).toEqual(events[0].event);
+        next: (event) => receivedEvents.push(event),
+        error: () => {
+          // We expect an error (failed status) — just verify events were emitted before it
+          expect(receivedEvents).toHaveLength(1);
+          expect(receivedEvents[0]).toEqual(eventDoc.event);
           done();
         },
-        error: done.fail,
-      });
-    });
-
-    it('should emit an AgentBuilderError when execution fails with a persisted error', (done) => {
-      mockEventsClient.readEvents.mockResolvedValue([] as any);
-
-      mockExecutionClient.get.mockResolvedValue({
-        executionId: 'exec-1',
-        '@timestamp': new Date().toISOString(),
-        status: ExecutionStatus.failed,
-        agentId: 'agent-1',
-        spaceId: 'default',
-        agentParams: { nextInput: { message: 'test' } },
-        error: {
-          code: AgentBuilderErrorCode.agentNotFound,
-          message: 'Agent my-agent not found',
-          meta: { agentId: 'my-agent' },
-        },
-      });
-
-      service.followExecution('exec-1').subscribe({
-        next: () => {},
-        complete: () => {
-          done.fail('Expected an error, not completion');
-        },
-        error: (err) => {
-          expect(isAgentBuilderError(err)).toBe(true);
-          expect(err.code).toBe(AgentBuilderErrorCode.agentNotFound);
-          expect(err.message).toBe('Agent my-agent not found');
-          expect(err.meta).toEqual(expect.objectContaining({ agentId: 'my-agent' }));
-          done();
-        },
-      });
-    });
-
-    it('should emit an internalError when execution fails without a persisted error', (done) => {
-      mockEventsClient.readEvents.mockResolvedValue([] as any);
-
-      mockExecutionClient.get.mockResolvedValue({
-        executionId: 'exec-1',
-        '@timestamp': new Date().toISOString(),
-        status: ExecutionStatus.failed,
-        agentId: 'agent-1',
-        spaceId: 'default',
-        agentParams: { nextInput: { message: 'test' } },
-        // no error field
-      });
-
-      service.followExecution('exec-1').subscribe({
-        next: () => {},
-        complete: () => {
-          done.fail('Expected an error, not completion');
-        },
-        error: (err) => {
-          expect(isAgentBuilderError(err)).toBe(true);
-          expect(err.code).toBe(AgentBuilderErrorCode.internalError);
-          expect(err.message).toBe('Execution exec-1 failed');
-          done();
-        },
-      });
-    });
-
-    it('should emit an error when execution is aborted', (done) => {
-      mockEventsClient.readEvents.mockResolvedValue([] as any);
-
-      mockExecutionClient.get.mockResolvedValue({
-        executionId: 'exec-1',
-        '@timestamp': new Date().toISOString(),
-        status: ExecutionStatus.aborted,
-        agentId: 'agent-1',
-        spaceId: 'default',
-        agentParams: { nextInput: { message: 'test' } },
-      });
-
-      service.followExecution('exec-1').subscribe({
-        next: () => {},
-        complete: () => {
-          done.fail('Expected an error, not completion');
-        },
-        error: (err) => {
-          expect(err.message).toBe('Execution exec-1 was aborted');
-          done();
-        },
+        complete: () => done.fail('Expected an error, not completion'),
       });
     });
   });
