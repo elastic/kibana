@@ -55,9 +55,7 @@ export function filterStreamsByQuery(
   streams.forEach((s) => nameToStream.set(s.stream.name, s));
 
   // Find all streams that match the query (by name)
-  const matching = streams.filter(
-    (s) => s.stream.name.toLowerCase().includes(lowerQuery)
-  );
+  const matching = streams.filter((s) => s.stream.name.toLowerCase().includes(lowerQuery));
   const resultSet = new Map<string, ListStreamDetail>();
   for (const stream of matching) {
     // Add the match

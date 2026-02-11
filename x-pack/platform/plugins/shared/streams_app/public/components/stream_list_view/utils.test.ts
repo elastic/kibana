@@ -25,10 +25,7 @@ const createStream = (name: string, retention: string | undefined): ListStreamDe
   } as unknown as ListStreamDetail;
 };
 
-const createIngestStream = (
-  name: string,
-  options?: { tags?: string[] }
-): ListStreamDetail => {
+const createIngestStream = (name: string, options?: { tags?: string[] }): ListStreamDetail => {
   return {
     stream: {
       name,

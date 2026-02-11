@@ -77,7 +77,8 @@ export const StreamTagsPanel: React.FC<StreamTagsPanelProps> = ({
   const [isUpdating, setIsUpdating] = useState(false);
 
   const updateStream = useUpdateStreams(definition.stream.name);
-  const canManage = Streams.ingest.all.GetResponse.is(definition) && definition.privileges.manage === true;
+  const canManage =
+    Streams.ingest.all.GetResponse.is(definition) && definition.privileges.manage === true;
 
   const onStartEditing = useCallback(() => {
     setTags(definition.stream.tags ?? []);

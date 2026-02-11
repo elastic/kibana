@@ -149,7 +149,8 @@ export function Wrapper({
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup direction="column" gutterSize="none">
                   <EuiFlexItem grow={false}>
-                    {Streams.ingest.all.GetResponse.is(definition) && definition.stream.description ? (
+                    {Streams.ingest.all.GetResponse.is(definition) &&
+                    definition.stream.description ? (
                       <EuiToolTip content={definition.stream.description}>
                         <span data-test-subj="streamName">{streamId}</span>
                       </EuiToolTip>

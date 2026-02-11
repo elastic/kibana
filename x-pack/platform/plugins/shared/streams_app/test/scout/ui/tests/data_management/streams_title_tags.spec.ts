@@ -10,10 +10,7 @@ import { generateLogsData } from '../../fixtures/generators';
 
 const TEST_STREAM_NAME = 'logs-test-title-tags';
 
-test.describe.serial(
-  'Stream tags - Advanced Settings',
-  { tag: ['@ess', '@svlOblt'] },
-  () => {
+test.describe.serial('Stream tags - Advanced Settings', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ logsSynthtraceEsClient }) => {
     const currentTime = Date.now();
     // Generate 10 logs over the last 5 minutes to create a classic stream

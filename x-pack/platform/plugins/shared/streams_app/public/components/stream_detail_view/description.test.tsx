@@ -122,4 +122,3 @@ describe('StreamDescription (stream detail header)', () => {
     expect(screen.getByText('Saved')).toBeInTheDocument();
   });
 });
-
