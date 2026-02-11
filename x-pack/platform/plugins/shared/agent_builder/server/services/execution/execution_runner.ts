@@ -234,8 +234,6 @@ export const serializeExecutionError = (error: unknown): SerializedExecutionErro
   return { code: AgentBuilderErrorCode.internalError, message };
 };
 
-// --- Internal helpers ---
-
 const executeAgent = ({
   agentId,
   request,
