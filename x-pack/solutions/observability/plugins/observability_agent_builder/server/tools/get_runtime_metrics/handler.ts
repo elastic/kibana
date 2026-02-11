@@ -6,8 +6,9 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { kqlQuery } from '@kbn/observability-utils-server/es/queries/kql_query';
+import { rangeQuery } from '@kbn/observability-utils-server/es/queries/range_query';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
 import {
   SERVICE_NAME,
   SERVICE_NODE_NAME,
