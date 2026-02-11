@@ -43,7 +43,7 @@ export function CreateStreamConfirmationModal({
   const modalTitleId = useGeneratedHtmlId();
   const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const isForking = useStreamsRoutingSelector((snapshot) =>
-    snapshot.matches({ ready: { reviewSuggestedRule: 'forking' } })
+    snapshot.matches({ ready: { ingestMode: { reviewSuggestedRule: 'forking' } } })
   );
   const { cancelChanges, forkStream } = useStreamRoutingEvents();
 
