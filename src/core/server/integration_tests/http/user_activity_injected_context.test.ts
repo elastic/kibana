@@ -90,7 +90,7 @@ describe('user activity injected context', () => {
       async (context, request, response) => {
         userActivity.trackUserAction({
           message: 'ua-test',
-          event: { action: 'ua_test_action', type: 'user' },
+          event: { action: 'ua_test_action' as any, type: 'user' },
           object: { id: 'obj-1', name: 'Test Object', type: 'test', tags: ['tag-a'] },
         });
         return response.ok({ body: { ok: true } });

@@ -54,7 +54,7 @@ export type UserActivityEventType =
  */
 export interface UserActivityEvent {
   /** Descriptive action name, e.g., 'view_dashboard', 'edit_case', 'save_search' */
-  action: string;
+  action: UserActivityActionId;
   /** Event type {@link UserActivityEventType}. */
   type: UserActivityEventType;
 }
