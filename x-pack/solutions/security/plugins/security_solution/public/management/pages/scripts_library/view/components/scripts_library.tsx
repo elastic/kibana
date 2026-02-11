@@ -26,6 +26,7 @@ import type { ScriptsLibraryUrlParams } from './scripts_library_url_params';
 import { useScriptsLibraryUrlParams } from './scripts_library_url_params';
 import { EndpointScriptFlyout } from './flyout';
 import { EndpointScriptDeleteModal } from './script_delete_modal';
+import { DiscardChangesModal } from './discard_changes_modal';
 
 interface ScriptsLibraryProps {
   'data-test-subj'?: string;
@@ -60,6 +61,7 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
   const [selectedItemForDelete, setSelectedItemForDelete] = useState<undefined | EndpointScript>(
     undefined
   );
+  const [showDiscardChangesModal, setShowDiscardChangesModal] = useState(false);
 
   const safePaging = useMemo(
     () => ({
@@ -166,7 +168,7 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
     [history, queryParams]
   );
 
-  const onCloseFlyout = useCallback(() => {
+  const onConfirmCloseFlyout = useCallback(() => {
     setSelectedItemForFlyout(undefined);
     history.push(
       getScriptsLibraryPath({
@@ -179,21 +181,32 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
     );
   }, [history, queryParams]);
 
+  const onCloseFlyout = useCallback(
+    (hasFormChanged: boolean) => {
+      if (!hasFormChanged) {
+        onConfirmCloseFlyout();
+      } else {
+        setShowDiscardChangesModal(true);
+      }
+    },
+    [onConfirmCloseFlyout]
+  );
+
   const onDeleteModalSuccess = useCallback(() => {
-    onCloseFlyout();
+    onConfirmCloseFlyout();
     setSelectedItemForDelete(undefined);
     reFetchEndpointScriptsList();
-  }, [onCloseFlyout, reFetchEndpointScriptsList]);
+  }, [onConfirmCloseFlyout, reFetchEndpointScriptsList]);
 
   const onDeleteModalCancel = useCallback(() => {
     setSelectedItemForDelete(undefined);
   }, []);
 
   const onSuccessCreateOrEdit = useCallback(() => {
-    onCloseFlyout();
+    onConfirmCloseFlyout();
     setSelectedItemForFlyout(undefined);
     reFetchEndpointScriptsList();
-  }, [onCloseFlyout, reFetchEndpointScriptsList]);
+  }, [onConfirmCloseFlyout, reFetchEndpointScriptsList]);
 
   useEffect(() => {
     if (!isFetching && scriptsLibraryFetchError) {
@@ -233,6 +246,19 @@ export const ScriptsLibrary = memo<ScriptsLibraryProps>(({ 'data-test-subj': dat
           show={showFromUrl as Exclude<Required<ScriptsLibraryUrlParams>['show'], 'delete'>}
           scriptItem={selectedItemForFlyout}
           data-test-subj={getTestId(`endpointScriptFlyout-${showFromUrl}`)}
+        />
+      )}
+
+      {showDiscardChangesModal && (
+        <DiscardChangesModal
+          show={
+            showFromUrl as Exclude<Required<ScriptsLibraryUrlParams>['show'], 'delete' | 'details'>
+          }
+          onCancel={() => setShowDiscardChangesModal(false)}
+          onConfirm={() => {
+            setShowDiscardChangesModal(false);
+            onConfirmCloseFlyout();
+          }}
         />
       )}
 

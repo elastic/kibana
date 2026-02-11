@@ -115,6 +115,63 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
       }
     ),
   },
+
+  discardChangesModal: {
+    edit: {
+      title: i18n.translate(
+        'xpack.securitySolution.scriptsLibrary.table.discardChangesModal.title',
+        {
+          defaultMessage: 'Discard script changes?',
+        }
+      ),
+      body: i18n.translate(
+        'xpack.securitySolution.scriptsLibrary.table.discardChangesModal.bodyText',
+        {
+          defaultMessage: 'You will lose all unsaved changes made to this script.',
+        }
+      ),
+      discardButtonLabel: i18n.translate(
+        'xpack.securitySolution.scriptsLibrary.table.discardChangesModal.discardButtonLabel',
+        {
+          defaultMessage: 'Discard changes',
+        }
+      ),
+      cancelButtonLabel: i18n.translate(
+        'xpack.securitySolution.scriptsLibrary.table.discardChangesModal.cancelButtonLabel',
+        {
+          defaultMessage: 'Keep editing',
+        }
+      ),
+    },
+    upload: {
+      title: i18n.translate(
+        'xpack.securitySolution.scriptsLibrary.table.discardChangesModal.uploadTitle',
+        {
+          defaultMessage: 'Discard script upload?',
+        }
+      ),
+      body: i18n.translate(
+        'xpack.securitySolution.scriptsLibrary.table.discardChangesModal.uploadBodyText',
+        {
+          defaultMessage:
+            'You will lose all information entered and the selected file will not be uploaded.',
+        }
+      ),
+      discardButtonLabel: i18n.translate(
+        'xpack.securitySolution.scriptsLibrary.table.discardChangesModal.uploadDiscardButtonLabel',
+        {
+          defaultMessage: 'Discard upload',
+        }
+      ),
+      cancelButtonLabel: i18n.translate(
+        'xpack.securitySolution.scriptsLibrary.table.discardChangesModal.uploadCancelButtonLabel',
+        {
+          defaultMessage: 'Keep uploading',
+        }
+      ),
+    },
+  },
+
   flyout: {
     editHeader: i18n.translate('xpack.securitySolution.scriptsLibrary.table.flyout.headerTitle', {
       defaultMessage: 'Edit script',

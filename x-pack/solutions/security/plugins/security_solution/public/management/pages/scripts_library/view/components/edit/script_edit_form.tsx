@@ -67,9 +67,11 @@ export interface EndpointScriptEditFormProps {
     | ReturnType<typeof usePostEndpointScript>['error'];
   onChange: ({
     script,
+    hasFormChanged,
     isValid,
   }: {
     script: EditableScriptFields & { file?: File; fileName?: string; fileSize?: number };
+    hasFormChanged: boolean;
     isValid: boolean;
   }) => void;
   scriptItem?: EndpointScript & { file?: File };
@@ -314,9 +316,10 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
     useEffect(() => {
       onChange({
         script: draftScript,
+        hasFormChanged,
         isValid: hasValidFormData,
       });
-    }, [draftScript, hasValidFormData, onChange]);
+    }, [draftScript, hasFormChanged, hasValidFormData, onChange]);
 
     return (
       <EuiForm

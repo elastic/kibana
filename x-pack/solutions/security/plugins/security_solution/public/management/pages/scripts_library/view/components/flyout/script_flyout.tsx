@@ -37,8 +37,9 @@ type ScriptFormStateItem =
 
 const createFormState = (
   scriptItem?: EndpointScript
-): { isValid: boolean; scriptItem: ScriptFormStateItem } => ({
+): { isValid: boolean; hasFormChanged: boolean; scriptItem: ScriptFormStateItem } => ({
   isValid: false,
+  hasFormChanged: false, // used for tracking unsaved changes to show discard changes modal
   scriptItem:
     scriptItem ??
     ({
@@ -48,7 +49,7 @@ const createFormState = (
     } as const),
 });
 export interface EndpointScriptFlyoutProps {
-  onCloseFlyout: () => void;
+  onCloseFlyout: (hasFormChanged: boolean) => void;
   onClickAction: UseScriptActionItemsProps['onClickAction'];
   onSuccess: () => void;
   queryParams: ListScriptsRequestQuery;
@@ -96,11 +97,16 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
     });
 
     const onChange = useCallback(
-      ({ script, isValid }: Parameters<EndpointScriptEditFlyoutProps['onChange']>[number]) => {
+      ({
+        script,
+        hasFormChanged,
+        isValid,
+      }: Parameters<EndpointScriptEditFlyoutProps['onChange']>[number]) => {
         if (isMounted()) {
           setFormState((prevState) => ({
             ...prevState,
             isValid,
+            hasFormChanged,
             scriptItem: {
               ...prevState.scriptItem,
               ...script,
@@ -141,6 +147,11 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
     const onSubmit = useCallback(() => {
       submitScriptData(formState.scriptItem).then(onSuccessSubmit);
     }, [formState.scriptItem, onSuccessSubmit, submitScriptData]);
+
+    const onCloseFlyoutHandler = useCallback(
+      () => onCloseFlyout(formState.hasFormChanged),
+      [formState.hasFormChanged, onCloseFlyout]
+    );
 
     // fetch script data if needed for edit or view
     useEffect(() => {
@@ -191,7 +202,7 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
       <EuiFlyout
         id={`endpointScriptFlyout-${scriptItem?.id}`}
         aria-labelledby={getTestId('flyout')}
-        onClose={onCloseFlyout}
+        onClose={onCloseFlyoutHandler}
         ownFocus
         size={680}
         paddingSize="l"
@@ -215,7 +226,7 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
             isDisabled={!formState.isValid || isSubmittingData}
             isSubmittingData={isSubmittingData}
             onChange={onChange}
-            onClose={onCloseFlyout}
+            onClose={onCloseFlyoutHandler}
             onSubmit={onSubmit}
             scriptItem={formState.scriptItem as EndpointScript}
             show={show as Extract<Required<ScriptsLibraryUrlParams>['show'], 'edit' | 'create'>}
