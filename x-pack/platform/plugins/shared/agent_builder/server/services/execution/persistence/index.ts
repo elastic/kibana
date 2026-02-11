@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-export {
-  createAgentExecutionClient,
-  type AgentExecutionClient,
-} from './agent_execution_client';
-export {
-  createExecutionEventsClient,
-  type ExecutionEventsClient,
-} from './execution_events_client';
+export { createAgentExecutionClient, type AgentExecutionClient } from './agent_execution_client';
+export { createExecutionEventsClient, type ExecutionEventsClient } from './execution_events_client';
 export { registerExecutionEventsDataStream } from './execution_events_storage';
