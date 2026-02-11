@@ -162,11 +162,6 @@ const createConversationActions = ({
         })
       );
     },
-    /**
-     * Optimistically clears the last round's response when resending.
-     * We trust that the backend has persisted the cleared state before emitting the event.
-     * Streaming will then update this state with the new response chunks.
-     */
     clearLastRoundResponse: () => {
       setCurrentRound((round) => {
         round.response.message = '';
