@@ -44,6 +44,7 @@ import type { CallbackIds } from './services/app_context';
 import { appContextService } from './services/app_context';
 import { removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
 import { getAttackDiscoveryScheduleType } from './lib/attack_discovery/schedules/register_schedule/definition';
+import { getAttackPromotionRuleType } from './lib/attack_discovery/schedules/promote_attack/definition';
 import type { ConfigSchema } from './config_schema';
 import { attackDiscoveryAlertFieldMap } from './lib/attack_discovery/schedules/fields';
 import { ATTACK_DISCOVERY_ALERTS_CONTEXT } from './lib/attack_discovery/schedules/constants';
@@ -272,6 +273,9 @@ export class ElasticAssistantPlugin
         telemetry: core.analytics,
       })
     );
+
+    // Register the Attack Promotion rule type
+    plugins.alerting.registerType(getAttackPromotionRuleType());
 
     // Initialize the `default` index for ad-hoc generated Attack discoveries
     const { ruleDataService } = plugins.ruleRegistry;

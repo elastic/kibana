@@ -59,6 +59,7 @@ import type {
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { CheckPrivileges, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SecurityRequestHandlerContext } from '@kbn/core-security-server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
 import type {
@@ -197,6 +198,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
 export type ElasticAssistantRequestHandlerContext = CustomRequestHandlerContext<{
   elasticAssistant: ElasticAssistantApiRequestHandlerContext;
   licensing: LicensingApiRequestHandlerContext;
+  security: SecurityRequestHandlerContext;
 }>;
 
 export type ElasticAssistantPluginRouter = IRouter<ElasticAssistantRequestHandlerContext>;

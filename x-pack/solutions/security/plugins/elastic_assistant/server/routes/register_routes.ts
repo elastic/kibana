@@ -11,6 +11,7 @@ import { findSecurityAIPromptsRoute } from './security_ai_prompts/find_prompts';
 import { findAlertSummaryRoute } from './alert_summary/find_route';
 import { findAttackDiscoveriesRoute } from './attack_discovery/public/get/find_attack_discoveries';
 import { postAttackDiscoveryGenerateRoute } from './attack_discovery/public/post/post_attack_discovery_generate';
+import { postAttackDiscoveryPromoteRoute } from './attack_discovery/promote/post_attack_discovery_promote';
 import { postAttackDiscoveryBulkRoute } from './attack_discovery/public/post/post_attack_discovery_bulk';
 import type { ElasticAssistantPluginRouter } from '../types';
 import { createConversationRoute } from './user_conversations/create_route';
@@ -132,6 +133,7 @@ export const registerRoutes = (
   postAttackDiscoveryGenerationsDismissRoute(router);
 
   postAttackDiscoveryGenerateRoute(router);
+  postAttackDiscoveryPromoteRoute(router);
 
   getMissingIndexPrivilegesInternalRoute(router);
 

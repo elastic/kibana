@@ -24,6 +24,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import * as i18n from './translations';
 import { useAttackDiscoveryBulk } from '../../../../../../use_attack_discovery_bulk';
 import { useInvalidateFindAttackDiscoveries } from '../../../../../../use_find_attack_discoveries';
+import { usePromoteAttackDiscovery } from '../../../../../../use_promote_attack_discovery';
 import { isAttackDiscoveryAlert } from '../../../../../../utils/is_attack_discovery_alert';
 
 const LIST_PROPS = {
@@ -145,6 +146,7 @@ const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
   );
 
   const { mutateAsync: attackDiscoveryBulk } = useAttackDiscoveryBulk();
+  const { mutateAsync: promoteAttackDiscovery } = usePromoteAttackDiscovery();
 
   const onSelectableChange = useCallback(
     async (newOptions: EuiSelectableOption[]) => {
@@ -153,13 +155,15 @@ const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
       if (isAttackDiscoveryAlert(attackDiscovery)) {
         const visibility = newOptions[0].checked === 'on' ? 'not_shared' : 'shared';
 
-        await attackDiscoveryBulk({
-          ids: [attackDiscovery.id],
-          visibility,
-        });
+        // await attackDiscoveryBulk({
+        //   ids: [attackDiscovery.id],
+        //   visibility,
+        // });
 
         // disable all options if the new visibility is 'shared'
         if (visibility === 'shared') {
+          await promoteAttackDiscovery({ attackIds: [attackDiscovery.id] });
+
           setItems(
             newOptions.map((item) => ({
               ...item,
@@ -171,7 +175,7 @@ const SharedBadgeComponent: React.FC<Props> = ({ attackDiscovery }) => {
         invalidateFindAttackDiscoveries();
       }
     },
-    [attackDiscovery, attackDiscoveryBulk, invalidateFindAttackDiscoveries]
+    [attackDiscovery, attackDiscoveryBulk, invalidateFindAttackDiscoveries, promoteAttackDiscovery]
   );
 
   const allItemsDisabled = useMemo(() => items.every((item) => item.disabled), [items]);

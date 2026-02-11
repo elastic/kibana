@@ -85,6 +85,7 @@ export const DEFEND_INSIGHTS_BY_ID = `${DEFEND_INSIGHTS}/{id}`;
 
 // Attack Discovery
 export const ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID = 'attack-discovery' as const;
+export const ATTACK_DISCOVERY_PROMOTE_ATTACK_RULE_TYPE_ID = 'security.attack.promotion' as const;
 export const ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID = 'siem' as const;
 
 // Attack discovery public API
@@ -110,6 +111,7 @@ export const ATTACK_DISCOVERY_INTERNAL =
   `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/attack_discovery` as const;
 export const ATTACK_DISCOVERY_INTERNAL_MISSING_PRIVILEGES =
   `${ATTACK_DISCOVERY_INTERNAL}/_missing_privileges` as const;
+export const ATTACK_DISCOVERY_INTERNAL_PROMOTE = `${ATTACK_DISCOVERY_INTERNAL}/_promote` as const;
 
 /** A fake `kibana.alert.rule.uuid` for ad hock rules */
 export const ATTACK_DISCOVERY_AD_HOC_RULE_ID = 'attack_discovery_ad_hoc_rule_id' as const;
