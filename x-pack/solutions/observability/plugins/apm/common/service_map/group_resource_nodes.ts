@@ -57,30 +57,41 @@ function groupConnections({
   return Array.from(groups.values()).filter(({ targets }) => targets.length >= MINIMUM_GROUP_SIZE);
 }
 
+function getGroupedNodeIds(
+  groupedConnections: ReturnType<typeof groupConnections>
+): Set<string> {
+  const groupedNodeIds = new Set<string>();
+  for (const { targets } of groupedConnections) {
+    for (const target of targets) {
+      groupedNodeIds.add(target);
+    }
+  }
+  return groupedNodeIds;
+}
+
 function getUngroupedNodesAndEdges({
   nodesMap,
   edgesMap,
   groupedConnections,
+  groupedNodeIds,
 }: {
   nodesMap: Map<string, { data: ConnectionNode }>;
   edgesMap: Map<string, { data: ConnectionEdge }>;
   groupedConnections: ReturnType<typeof groupConnections>;
+  groupedNodeIds: Set<string>;
 }) {
   const ungroupedEdges = new Map(edgesMap);
   const ungroupedNodes = new Map(nodesMap);
 
-  // Build the set of all grouped node IDs and edge IDs to remove
-  const groupedNodeIds = new Set<string>();
   const groupedEdgeIds = new Set<string>();
 
   for (const { sources, targets } of groupedConnections) {
-    targets.forEach((target) => {
+    for (const target of targets) {
       ungroupedNodes.delete(target);
-      groupedNodeIds.add(target);
-      sources.forEach((source) => {
+      for (const source of sources) {
         groupedEdgeIds.add(getEdgeId(source, target));
-      });
-    });
+      }
+    }
   }
 
   for (const [edgeId, { data }] of ungroupedEdges) {
@@ -136,10 +147,18 @@ function groupNodes({
 
 function groupEdges({
   groupedConnections,
+  edgesMap,
+  groupedNodeIds,
 }: {
   groupedConnections: ReturnType<typeof groupConnections>;
+  edgesMap: Map<string, { data: ConnectionEdge }>;
+  groupedNodeIds: Set<string>;
 }) {
-  return groupedConnections.flatMap(({ id, sources }) =>
+  const nodeToGroup = new Map<string, string>();
+  const outgoingEdgeKeys = new Set<string>();
+  const outgoingEdges: GroupedEdge[] = [];
+  
+  const incomingEdges = groupedConnections.flatMap(({ id, sources }) =>
     sources.map(
       (source): GroupedEdge => ({
         data: {
@@ -150,6 +169,34 @@ function groupEdges({
       })
     )
   );
+
+ 
+  for (const { id: groupId, targets } of groupedConnections) {
+    for (const target of targets) {
+      nodeToGroup.set(target, groupId);
+    }
+  }
+
+  for (const [, { data }] of edgesMap) {
+    const groupId = nodeToGroup.get(data.source);
+    
+    if (groupId && !groupedNodeIds.has(data.target)) {
+      const edgeKey = `${groupId}~>${data.target}`;
+      
+      if (!outgoingEdgeKeys.has(edgeKey)) {
+        outgoingEdgeKeys.add(edgeKey);
+        outgoingEdges.push({
+          data: {
+            id: edgeKey,
+            source: groupId,
+            target: data.target,
+          },
+        });
+      }
+    }
+  }
+
+  return [...incomingEdges, ...outgoingEdges];
 }
 
 export function groupResourceNodes({
@@ -166,14 +213,17 @@ export function groupResourceNodes({
   );
 
   const groupedConnections = groupConnections({ edgesMap, groupableNodeIds });
+  const groupedNodeIds = getGroupedNodeIds(groupedConnections);
+
   const { ungroupedEdges, ungroupedNodes } = getUngroupedNodesAndEdges({
     nodesMap,
     edgesMap,
     groupedConnections,
+    groupedNodeIds,
   });
 
   const groupedNodes = groupNodes({ nodesMap, groupedConnections });
-  const groupedEdges = groupEdges({ groupedConnections });
+  const groupedEdges = groupEdges({ groupedConnections, edgesMap, groupedNodeIds });
 
   return {
     elements: [

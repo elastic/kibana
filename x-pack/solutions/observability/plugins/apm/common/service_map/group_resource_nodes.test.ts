@@ -461,6 +461,12 @@ describe('groupResourceNodes', () => {
         expect(nodeIds.has(edge.data.source)).toBe(true);
         expect(nodeIds.has(edge.data.target)).toBe(true);
       }
+
+      // The group node should have an outgoing edge to consumer-service
+      const groupId = groupedNodes[0].data.id;
+      const outgoingFromGroup = edges.filter((e) => e.data.source === groupId);
+      expect(outgoingFromGroup).toHaveLength(1);
+      expect(outgoingFromGroup[0].data.target).toBe(consumerNode.data.id);
     });
 
     it('should not leave orphaned edges when a grouped node is the source of an edge', () => {
@@ -492,13 +498,23 @@ describe('groupResourceNodes', () => {
 
       const result = groupResourceNodes({ elements });
 
-      // The outgoing edge from the now-grouped node should be removed
+      // No orphaned edges
       const allNodeIds = new Set(result.elements.filter((e) => !isEdge(e)).map((e) => e.data.id));
       const orphanedEdges = result.elements
         .filter(isEdge)
         .filter((el) => !allNodeIds.has(el.data.source) || !allNodeIds.has(el.data.target));
-
       expect(orphanedEdges).toHaveLength(0);
+
+      // The group node should have an outgoing edge to the downstream service
+      const groupedNodes = result.elements.filter(
+        (p): p is GroupedNode => 'groupedConnections' in p.data
+      );
+      expect(groupedNodes).toHaveLength(1);
+      const groupId = groupedNodes[0].data.id;
+      const outgoingFromGroup = result.elements
+        .filter(isEdge)
+        .filter((e) => e.data.source === groupId && e.data.target === downstreamNode.data.id);
+      expect(outgoingFromGroup).toHaveLength(1);
     });
   });
 

@@ -325,7 +325,7 @@ describe('groupReactFlowNodes', () => {
   });
 
   describe('outgoing edges from grouped nodes', () => {
-    it('removes outgoing edges from grouped messaging exit span nodes', () => {
+    it('replaces outgoing edges from grouped nodes with edges from the group node', () => {
       const nodes = [
         createServiceNode('order-service'),
         createServiceNode('consumer-service'),
@@ -357,9 +357,16 @@ describe('groupReactFlowNodes', () => {
         expect(nodeIds.has(edge.source)).toBe(true);
         expect(nodeIds.has(edge.target)).toBe(true);
       }
+
+      // The group node should have an outgoing edge to consumer-service
+      const groupId = groupedNodes[0].id;
+      const outgoingFromGroup = result.edges.filter(
+        (e) => e.source === groupId && e.target === 'consumer-service'
+      );
+      expect(outgoingFromGroup).toHaveLength(1);
     });
 
-    it('does not leave orphaned edges when a single grouped node has outgoing edges', () => {
+    it('creates outgoing edges from group node when a grouped node has downstream connections', () => {
       const nodes = [
         createServiceNode('api-service'),
         createServiceNode('downstream'),
@@ -386,6 +393,14 @@ describe('groupReactFlowNodes', () => {
         (e) => !nodeIds.has(e.source) || !nodeIds.has(e.target)
       );
       expect(orphanedEdges).toHaveLength(0);
+
+      // The group node should connect to downstream
+      const groupedNodes = result.nodes.filter((n) => n.type === 'groupedResources');
+      expect(groupedNodes).toHaveLength(1);
+      const outgoingFromGroup = result.edges.filter(
+        (e) => e.source === groupedNodes[0].id && e.target === 'downstream'
+      );
+      expect(outgoingFromGroup).toHaveLength(1);
     });
 
     it('preserves outgoing edges from non-grouped nodes', () => {
