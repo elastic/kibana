@@ -17,14 +17,14 @@ import { DrilldownList } from '../drilldown_list';
 import { TemplatePicker } from '../template_picker';
 
 export const txtCreateNew = i18n.translate(
-  'uiActionsEnhanced.drilldowns.containers.DrilldownManager.createNew',
+  'embeddableApi.drilldowns.containers.DrilldownManager.createNew',
   {
     defaultMessage: 'Create new',
   }
 );
 
 export const txtManage = i18n.translate(
-  'uiActionsEnhanced.drilldowns.containers.DrilldownManager.manage',
+  'embeddableApi.drilldowns.containers.DrilldownManager.manage',
   {
     defaultMessage: 'Manage',
   }

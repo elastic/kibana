@@ -18,7 +18,7 @@ import { DrilldownStateForm } from '../drilldown_state_form';
 import { ButtonSubmit } from '../../components/button_submit';
 
 const txtCreateDrilldown = i18n.translate(
-  'uiActionsEnhanced.drilldowns.containers.createDrilldownForm.title',
+  'embeddableApi.drilldowns.containers.createDrilldownForm.title',
   {
     defaultMessage: 'Create Drilldown',
     description: 'Drilldowns flyout title for new drilldown form.',
@@ -26,7 +26,7 @@ const txtCreateDrilldown = i18n.translate(
 );
 
 const txtCreateDrilldownButton = i18n.translate(
-  'uiActionsEnhanced.drilldowns.containers.createDrilldownForm.primaryButton',
+  'embeddableApi.drilldowns.containers.createDrilldownForm.primaryButton',
   {
     defaultMessage: 'Create drilldown',
     description: 'Primary button on new drilldown creation form.',

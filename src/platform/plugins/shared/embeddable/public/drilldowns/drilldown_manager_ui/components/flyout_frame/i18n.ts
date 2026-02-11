@@ -10,14 +10,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const txtClose = i18n.translate(
-  'uiActionsEnhanced.drilldowns.components.FlyoutFrame.CloseButtonLabel',
+  'embeddableApi.drilldowns.components.FlyoutFrame.CloseButtonLabel',
   {
     defaultMessage: 'Close',
   }
 );
 
 export const txtBack = i18n.translate(
-  'uiActionsEnhanced.drilldowns.components.FlyoutFrame.BackButtonLabel',
+  'embeddableApi.drilldowns.components.FlyoutFrame.BackButtonLabel',
   {
     defaultMessage: 'Back',
   }

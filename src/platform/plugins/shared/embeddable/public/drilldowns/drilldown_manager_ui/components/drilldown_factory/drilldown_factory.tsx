@@ -19,13 +19,13 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 const txtDrilldownAction = i18n.translate(
-  'uiActionsEnhanced.components.DrilldownForm.drilldownAction',
+  'embeddableApi.components.DrilldownForm.drilldownAction',
   {
     defaultMessage: 'Action',
   }
 );
 
-const txtChangeButton = i18n.translate('uiActionsEnhanced.components.DrilldownForm.changeButton', {
+const txtChangeButton = i18n.translate('embeddableApi.components.DrilldownForm.changeButton', {
   defaultMessage: 'Change',
 });
 

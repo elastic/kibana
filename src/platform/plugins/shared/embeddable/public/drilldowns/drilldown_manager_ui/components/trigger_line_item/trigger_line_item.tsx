@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { TextWithIcon } from '../text_with_icon';
 
 export const txtIncompatibleTooltip = i18n.translate(
-  'uiActionsEnhanced.components.TriggerLineItem.incompatibleTooltip',
+  'embeddableApi.components.TriggerLineItem.incompatibleTooltip',
   {
     defaultMessage: 'This trigger type not supported by this panel',
   }

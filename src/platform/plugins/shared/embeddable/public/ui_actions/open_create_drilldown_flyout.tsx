@@ -53,7 +53,7 @@ export const openCreateDrilldownFlyout: ActionDefinition<EmbeddableApiContext> =
   getIconType: () => 'plusInCircle',
   grouping: [DRILLDOWN_ACTION_GROUP],
   getDisplayName: () =>
-    i18n.translate('embeddable.createDrilldownAction.displayName', {
+    i18n.translate('embeddableApi.createDrilldownAction.displayName', {
       defaultMessage: 'Create drilldown',
     }),
   isCompatible: async ({ embeddable }: EmbeddableApiContext) => {

@@ -42,7 +42,7 @@ export type ManageDrilldownActionApi = CanAccessViewMode &
 const isApiCompatible = (api: unknown | null): api is ManageDrilldownActionApi =>
   apiHasDrilldowns(api) && apiCanAccessViewMode(api) && apiHasSupportedTriggers(api);
 
-const DISPLAY_NAME = i18n.translate('embeddable.manageDrilldownAction.displayName', {
+const DISPLAY_NAME = i18n.translate('embeddableApi.manageDrilldownAction.displayName', {
   defaultMessage: 'Manage drilldowns',
 });
 

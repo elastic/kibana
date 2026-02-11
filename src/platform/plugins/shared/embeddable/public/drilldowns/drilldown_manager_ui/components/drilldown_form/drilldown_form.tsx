@@ -15,20 +15,20 @@ import type { TriggerPickerProps } from '../trigger_picker';
 import { TriggerPicker } from '../trigger_picker';
 
 const txtNameOfDrilldown = i18n.translate(
-  'uiActionsEnhanced.components.DrilldownForm.nameOfDrilldown',
+  'embeddableApi.components.DrilldownForm.nameOfDrilldown',
   {
     defaultMessage: 'Name',
   }
 );
 
 const txtUntitledDrilldown = i18n.translate(
-  'uiActionsEnhanced.components.DrilldownForm.untitledDrilldown',
+  'embeddableApi.components.DrilldownForm.untitledDrilldown',
   {
     defaultMessage: 'Untitled drilldown',
   }
 );
 
-const txtTrigger = i18n.translate('uiActionsEnhanced.components.DrilldownForm.trigger', {
+const txtTrigger = i18n.translate('embeddableApi.components.DrilldownForm.trigger', {
   defaultMessage: 'Trigger',
 });
 

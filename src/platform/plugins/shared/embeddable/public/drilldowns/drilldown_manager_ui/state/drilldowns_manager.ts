@@ -347,7 +347,6 @@ export class DrilldownsManager {
 
     const state = new DrilldownManager({
       factory,
-      // placeContext: this.getActionFactoryContext(),
       triggers,
       initialState: drilldownState,
     });

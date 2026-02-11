@@ -10,28 +10,28 @@
 import { i18n } from '@kbn/i18n';
 
 export const txtCreateDrilldown = i18n.translate(
-  'uiActionsEnhanced.components.DrilldownTable.createDrilldownButtonLabel',
+  'embeddableApi.components.DrilldownTable.createDrilldownButtonLabel',
   {
     defaultMessage: 'Create new',
   }
 );
 
 export const txtEditDrilldown = i18n.translate(
-  'uiActionsEnhanced.components.DrilldownTable.editDrilldownButtonLabel',
+  'embeddableApi.components.DrilldownTable.editDrilldownButtonLabel',
   {
     defaultMessage: 'Edit',
   }
 );
 
 export const txtCloneDrilldown = i18n.translate(
-  'uiActionsEnhanced.components.DrilldownTable.copyDrilldownButtonLabel',
+  'embeddableApi.components.DrilldownTable.copyDrilldownButtonLabel',
   {
     defaultMessage: 'Copy',
   }
 );
 
 export const txtDeleteDrilldowns = (count: number) =>
-  i18n.translate('uiActionsEnhanced.components.DrilldownTable.deleteDrilldownsButtonLabel', {
+  i18n.translate('embeddableApi.components.DrilldownTable.deleteDrilldownsButtonLabel', {
     defaultMessage: 'Delete ({count})',
     values: {
       count,
@@ -39,28 +39,28 @@ export const txtDeleteDrilldowns = (count: number) =>
   });
 
 export const txtSelectDrilldown = i18n.translate(
-  'uiActionsEnhanced.components.DrilldownTable.selectThisDrilldownCheckboxLabel',
+  'embeddableApi.components.DrilldownTable.selectThisDrilldownCheckboxLabel',
   {
     defaultMessage: 'Select this drilldown',
   }
 );
 
 export const txtName = i18n.translate(
-  'uiActionsEnhanced.components.DrilldownTable.nameColumnTitle',
+  'embeddableApi.components.DrilldownTable.nameColumnTitle',
   {
     defaultMessage: 'Name',
   }
 );
 
 export const txtAction = i18n.translate(
-  'uiActionsEnhanced.components.DrilldownTable.actionColumnTitle',
+  'embeddableApi.components.DrilldownTable.actionColumnTitle',
   {
     defaultMessage: 'Action',
   }
 );
 
 export const txtTrigger = i18n.translate(
-  'uiActionsEnhanced.components.DrilldownTable.triggerColumnTitle',
+  'embeddableApi.components.DrilldownTable.triggerColumnTitle',
   {
     defaultMessage: 'Trigger',
   }

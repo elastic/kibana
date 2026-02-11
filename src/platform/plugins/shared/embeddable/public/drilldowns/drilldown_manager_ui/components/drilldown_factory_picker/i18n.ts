@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const txtInsufficientLicenseLevel = i18n.translate(
-  'uiActionsEnhanced.components.actionWizard.insufficientLicenseLevelTooltip',
+  'embeddableApi.components.actionWizard.insufficientLicenseLevelTooltip',
   {
     defaultMessage: 'Insufficient license level',
   }

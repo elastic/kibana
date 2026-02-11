@@ -55,11 +55,6 @@ export interface PublicDrilldownsManagerProps extends HasDrilldowns {
   triggers: string[];
 
   /**
-   * Extra action factory context passed into action factories CollectConfig, getIconType, getDisplayName and etc...
-   */
-  // placeContext?: ActionFactoryPlaceContext<BaseActionFactoryContext>;
-
-  /**
    * List of drilldown templates, which will be displayed to user for fast
    * drilldown creation flow.
    */
