@@ -66,6 +66,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     request,
     params,
     useTaskManager = false,
+    abortSignal,
   }: ExecuteAgentParams): Promise<ExecuteAgentResult> {
     const executionId = uuidv4();
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
@@ -78,6 +79,20 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       spaceId,
       agentParams: params,
     });
+
+    // Wire up external abort signal to execution abort
+    if (abortSignal) {
+      const onAbort = () => {
+        this.abortExecution(executionId).catch(() => {
+          // best-effort abort
+        });
+      };
+      if (abortSignal.aborted) {
+        onAbort();
+      } else {
+        abortSignal.addEventListener('abort', onAbort, { once: true });
+      }
+    }
 
     if (useTaskManager) {
       return this.executeRemote({ executionId, agentId, request });

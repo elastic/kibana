@@ -26,7 +26,7 @@ import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api
 import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { AttachmentServiceStart } from '../services/attachments';
-import type { AgentExecutionService, AgentExecutionParams } from '../services/execution';
+import type { AgentExecutionService } from '../services/execution';
 import { validateToolSelection } from '../services/agents/persisted/client/utils';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
@@ -209,13 +209,19 @@ export function registerChatRoutes({
     }
   };
 
-  const buildExecutionParams = ({
+  const executeAgent = async ({
     payload,
     attachments,
+    request,
+    abortSignal,
+    executionService,
   }: {
     payload: Omit<ChatRequestBodyPayload, 'attachments'>;
     attachments: AttachmentInput[];
-  }): AgentExecutionParams => {
+    request: KibanaRequest;
+    abortSignal: AbortSignal;
+    executionService: AgentExecutionService;
+  }) => {
     const {
       agent_id: agentId,
       connector_id: connectorId,
@@ -227,40 +233,22 @@ export function registerChatRoutes({
       configuration_overrides: configurationOverrides,
     } = payload;
 
-    return {
-      agentId,
-      connectorId,
-      conversationId,
-      capabilities,
-      browserApiTools,
-      configurationOverrides,
-      nextInput: {
-        message: input,
-        prompts,
-        attachments,
+    const { events$ } = await executionService.executeAgent({
+      request,
+      abortSignal,
+      params: {
+        agentId,
+        connectorId,
+        conversationId,
+        capabilities,
+        browserApiTools,
+        configurationOverrides,
+        nextInput: {
+          message: input,
+          prompts,
+          attachments,
+        },
       },
-    };
-  };
-
-  const executeAgent = async ({
-    payload,
-    attachments,
-    request,
-    executionService,
-  }: {
-    payload: Omit<ChatRequestBodyPayload, 'attachments'>;
-    attachments: AttachmentInput[];
-    request: KibanaRequest;
-    executionService: AgentExecutionService;
-  }) => {
-    const params = buildExecutionParams({ payload, attachments });
-    const { executionId, events$ } = await executionService.executeAgent({ request, params });
-
-    // When the request is aborted, abort the execution
-    request.events.aborted$.subscribe(() => {
-      executionService.abortExecution(executionId).catch(() => {
-        // best effort abort
-      });
     });
 
     return events$;
@@ -310,10 +298,16 @@ export function registerChatRoutes({
 
         await validateConfigurationOverrides({ payload, request });
 
+        const abortController = new AbortController();
+        request.events.aborted$.subscribe(() => {
+          abortController.abort();
+        });
+
         const chatEvents$ = await executeAgent({
           payload,
           attachments,
           request,
+          abortSignal: abortController.signal,
           executionService,
         });
 
@@ -385,16 +379,17 @@ export function registerChatRoutes({
 
         await validateConfigurationOverrides({ payload, request });
 
+        const abortController = new AbortController();
+        request.events.aborted$.subscribe(() => {
+          abortController.abort();
+        });
+
         const chatEvents$ = await executeAgent({
           payload,
           attachments,
           request,
+          abortSignal: abortController.signal,
           executionService,
-        });
-
-        const abortController = new AbortController();
-        request.events.aborted$.subscribe(() => {
-          abortController.abort();
         });
 
         return response.ok({

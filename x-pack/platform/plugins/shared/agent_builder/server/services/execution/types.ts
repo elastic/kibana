@@ -101,6 +101,8 @@ export interface ExecuteAgentParams {
   request: KibanaRequest;
   /** Execution parameters (serializable). */
   params: AgentExecutionParams;
+  /** Optional abort signal. When aborted, the execution will be cancelled. */
+  abortSignal?: AbortSignal;
   /** When true, schedule execution on a Task Manager node. When false (default), execute locally on the current node. */
   useTaskManager?: boolean;
 }
