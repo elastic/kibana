@@ -8,6 +8,7 @@
  */
 
 import type { Command } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import Fsp from 'fs/promises';
 import inquirer from 'inquirer';
@@ -28,7 +29,30 @@ import {
   getScoutPackageImport,
 } from '../generator_content';
 
-type TestType = 'ui' | 'api' | 'both';
+const TEST_TYPES = ['ui', 'api', 'both'] as const;
+type TestType = (typeof TEST_TYPES)[number];
+
+function normalizeScoutRoot(scoutRootRaw: string): string {
+  const normalized = scoutRootRaw.trim().replace(/\\/g, '/');
+  const stripped = normalized.startsWith('test/') ? normalized.slice('test/'.length) : normalized;
+
+  if (!stripped) {
+    throw createFlagError(`--scout-root cannot be empty`);
+  }
+
+  if (stripped.includes('/')) {
+    throw createFlagError(`--scout-root must be a directory name under "test/" (e.g. "scout")`);
+  }
+
+  if (!/^scout(?:_[a-z0-9_]+)?$/.test(stripped)) {
+    throw createFlagError(
+      `--scout-root must match "scout" or "scout_<configSet>", got "${stripped}"`
+    );
+  }
+
+  return stripped;
+}
+
 async function validatePath(input: string): Promise<boolean | string> {
   const normalizedPath = input.trim();
   if (!normalizedPath) {
@@ -69,16 +93,15 @@ async function pathExists(targetPath: string): Promise<boolean> {
 
 async function createDirectoryStructure(
   basePath: string,
-  testType: TestType,
-  uiParallel: boolean,
-  log: any
+  opts: { scoutRoot: string; generateApi: boolean; generateUi: boolean; uiParallel: boolean }
 ): Promise<void> {
   const fullBasePath = Path.resolve(REPO_ROOT, basePath);
+  const scoutRootDir = Path.resolve(fullBasePath, 'test', opts.scoutRoot);
   const scoutPackage = getScoutPackageImport(basePath);
   const copyrightHeader = getCopyrightHeader(basePath);
 
-  if (testType === 'api' || testType === 'both') {
-    const apiTestDir = Path.resolve(fullBasePath, 'test/scout/api');
+  if (opts.generateApi) {
+    const apiTestDir = Path.resolve(scoutRootDir, 'api');
     const apiFixturesDir = Path.resolve(apiTestDir, 'fixtures');
     const apiTestsDir = Path.resolve(apiTestDir, 'tests');
     const apiConfigPath = Path.resolve(apiTestDir, 'playwright.config.ts');
@@ -104,8 +127,8 @@ async function createDirectoryStructure(
     await Fsp.writeFile(apiExampleSpecPath, apiSpecContent);
   }
 
-  if (testType === 'ui' || testType === 'both') {
-    const uiTestDir = Path.resolve(fullBasePath, 'test/scout/ui');
+  if (opts.generateUi) {
+    const uiTestDir = Path.resolve(scoutRootDir, 'ui');
     const uiFixturesDir = Path.resolve(uiTestDir, 'fixtures');
     const uiPageObjectsDir = Path.resolve(uiFixturesDir, 'page_objects');
     const uiPageObjectsIndexPath = Path.resolve(uiPageObjectsDir, 'index.ts');
@@ -113,7 +136,7 @@ async function createDirectoryStructure(
     const uiConstantsPath = Path.resolve(uiFixturesDir, 'constants.ts');
     const uiFixturesIndexPath = Path.resolve(uiFixturesDir, 'index.ts');
 
-    if (uiParallel) {
+    if (opts.uiParallel) {
       const uiParallelTestsDir = Path.resolve(uiTestDir, 'parallel_tests');
       const uiConfigPath = Path.resolve(uiTestDir, 'parallel.playwright.config.ts');
       const uiParallelSpecPathOne = Path.resolve(uiParallelTestsDir, 'example_one.spec.ts');
@@ -206,45 +229,88 @@ export const generateCmd: Command<void> = {
   description: `
   Generate Scout test directory structure for a plugin or package.
 
-  This command interactively prompts for:
-  - Relative path to plugin or package (e.g., x-pack/platform/plugins/shared/maps)
-  - Test type: ui, api, or both (default: api)
-  - For UI tests: whether tests can run in parallel (default: yes)
+  Interactive prompts are used by default. To run non-interactively, pass --path
+  (and optionally --type / --scout-root / --no-ui-parallel / --force).
 
   It creates the appropriate directory structure and Playwright config files.
   `,
-  flags: {},
-  run: async ({ log }) => {
+  flags: {
+    string: ['path', 'type', 'scout-root'],
+    boolean: ['force', 'ui-parallel'],
+    alias: {
+      p: 'path',
+      t: 'type',
+      y: 'force',
+    },
+    default: {
+      'ui-parallel': true,
+    },
+    help: `
+    --path             Relative path to the plugin or package (e.g. x-pack/platform/plugins/shared/maps)
+    --type             Test type to generate: api | ui | both
+    --scout-root       Directory name under <path>/test/ (default: scout). Example: scout_uiam_local
+    --ui-parallel      For UI scaffolds, generate parallel tests (default: true). Use --no-ui-parallel for sequential.
+    --force            If some Scout directories already exist, generate only the missing sections without prompting
+  `,
+    examples: `
+    node scripts/scout.js generate --path x-pack/platform/plugins/shared/maps --type api
+    node scripts/scout.js generate --path x-pack/platform/plugins/shared/maps --type ui --no-ui-parallel
+    node scripts/scout.js generate --path x-pack/platform/plugins/shared/security --type both --scout-root scout_uiam_local --force
+  `,
+  },
+  run: async ({ flagsReader, log }) => {
+    const positionals = flagsReader.getPositionals();
+
+    const pathFromFlag = flagsReader.string('path');
+    const pathFromPositional = positionals[0];
+    if (pathFromFlag && pathFromPositional) {
+      throw createFlagError(
+        `Provide the path either as a positional argument or via --path, not both`
+      );
+    }
+
+    const isNonInteractive = Boolean(pathFromFlag || pathFromPositional);
+
     let relativePath: string = '';
 
-    while (true) {
-      const pathResult = await inquirer.prompt<{ path: string }>({
-        type: 'input',
-        name: 'path',
-        message:
-          'What is the relative path to the plugin or package? (e.g., x-pack/platform/plugins/shared/maps):',
-        validate: async (input) => {
-          const result = await validatePath(input);
-          if (result === true) {
-            return true;
-          }
-          return result as string;
-        },
-      });
-
-      relativePath = pathResult.path.trim();
+    if (isNonInteractive) {
+      relativePath = (pathFromFlag ?? pathFromPositional)?.trim() ?? '';
       const validationResult = await validatePath(relativePath);
-      if (validationResult === true) {
-        break;
-      } else {
-        log.error(validationResult as string);
+      if (validationResult !== true) {
+        throw createFlagError(validationResult as string);
+      }
+    } else {
+      while (true) {
+        const pathResult = await inquirer.prompt<{ path: string }>({
+          type: 'input',
+          name: 'path',
+          message:
+            'What is the relative path to the plugin or package? (e.g., x-pack/platform/plugins/shared/maps):',
+          validate: async (input) => {
+            const result = await validatePath(input);
+            if (result === true) {
+              return true;
+            }
+            return result as string;
+          },
+        });
+
+        relativePath = pathResult.path.trim();
+        const validationResult = await validatePath(relativePath);
+        if (validationResult === true) {
+          break;
+        } else {
+          log.error(validationResult as string);
+        }
       }
     }
 
     log.info(`Validated path: ${relativePath}`);
 
     const basePath = Path.resolve(REPO_ROOT, relativePath);
-    const scoutDir = Path.resolve(basePath, 'test/scout');
+    const scoutRoot = normalizeScoutRoot(flagsReader.string('scout-root') ?? 'scout');
+
+    const scoutDir = Path.resolve(basePath, 'test', scoutRoot);
     const apiDir = Path.resolve(scoutDir, 'api');
     const uiDir = Path.resolve(scoutDir, 'ui');
 
@@ -254,38 +320,51 @@ export const generateCmd: Command<void> = {
 
     if (apiDirExists && uiDirExists) {
       log.warning(
-        'Both test/scout/api and test/scout/ui already exist. The generator will not modify existing sub-directories.'
+        `Both test/${scoutRoot}/api and test/${scoutRoot}/ui already exist. The generator will not modify existing sub-directories.`
       );
       return;
     }
 
+    const force = flagsReader.boolean('force');
     if (scoutDirExists || apiDirExists || uiDirExists) {
       const existingDirs: string[] = [];
       if (apiDirExists) {
-        existingDirs.push('test/scout/api');
+        existingDirs.push(`test/${scoutRoot}/api`);
       }
       if (uiDirExists) {
-        existingDirs.push('test/scout/ui');
+        existingDirs.push(`test/${scoutRoot}/ui`);
+      }
+      if (existingDirs.length === 0 && scoutDirExists) {
+        existingDirs.push(`test/${scoutRoot}`);
       }
       log.warning(
         `Existing Scout test directories found: ${existingDirs.join(
           ', '
         )}. The generator will not modify existing sub-directories.`
       );
-      const continueResult = await inquirer.prompt<{ proceed: boolean }>({
-        type: 'list',
-        name: 'proceed',
-        message: 'Do you want to continue and generate only missing sections?',
-        default: false,
-        choices: [
-          { name: 'No', value: false },
-          { name: 'Yes', value: true },
-        ],
-      });
 
-      if (!continueResult.proceed) {
-        log.info('Aborted.');
-        return;
+      if (!force) {
+        if (isNonInteractive) {
+          throw createFlagError(
+            `Rerun with --force to generate only the missing sections under test/${scoutRoot}/`
+          );
+        }
+
+        const continueResult = await inquirer.prompt<{ proceed: boolean }>({
+          type: 'list',
+          name: 'proceed',
+          message: 'Do you want to continue and generate only missing sections?',
+          default: false,
+          choices: [
+            { name: 'No', value: false },
+            { name: 'Yes', value: true },
+          ],
+        });
+
+        if (!continueResult.proceed) {
+          log.info('Aborted.');
+          return;
+        }
       }
     }
 
@@ -297,52 +376,83 @@ export const generateCmd: Command<void> = {
       return;
     }
 
-    const testTypeChoices: Array<{ name: string; value: TestType }> = [];
-    if (apiMissing) {
-      testTypeChoices.push({ name: 'API tests', value: 'api' });
-    }
-    if (uiMissing) {
-      testTypeChoices.push({ name: 'UI tests', value: 'ui' });
-    }
-    if (apiMissing && uiMissing) {
-      testTypeChoices.push({ name: 'Both API and UI tests', value: 'both' });
+    const requestedType = flagsReader.enum('type', TEST_TYPES) as TestType | undefined;
+
+    let testType: TestType;
+    if (requestedType) {
+      if (requestedType === 'api' && !apiMissing) {
+        throw createFlagError(
+          `test/${scoutRoot}/api already exists. The generator will not modify existing sub-directories.`
+        );
+      }
+      if (requestedType === 'ui' && !uiMissing) {
+        throw createFlagError(
+          `test/${scoutRoot}/ui already exists. The generator will not modify existing sub-directories.`
+        );
+      }
+      testType = requestedType;
+    } else if (isNonInteractive) {
+      testType = apiMissing ? 'api' : 'ui';
+    } else {
+      const testTypeChoices: Array<{ name: string; value: TestType }> = [];
+      if (apiMissing) {
+        testTypeChoices.push({ name: 'API tests', value: 'api' });
+      }
+      if (uiMissing) {
+        testTypeChoices.push({ name: 'UI tests', value: 'ui' });
+      }
+      if (apiMissing && uiMissing) {
+        testTypeChoices.push({ name: 'Both API and UI tests', value: 'both' });
+      }
+
+      const testTypeResult = await inquirer.prompt<{ testType: TestType }>({
+        type: 'list',
+        name: 'testType',
+        message: 'What type of tests do you plan to add?',
+        default: apiMissing ? 'api' : 'ui',
+        choices: testTypeChoices,
+      });
+      testType = testTypeResult.testType;
     }
 
-    const testTypeResult = await inquirer.prompt<{ testType: TestType }>({
-      type: 'list',
-      name: 'testType',
-      message: 'What type of tests do you plan to add?',
-      default: apiMissing ? 'api' : 'ui',
-      choices: testTypeChoices,
-    });
-
-    const testType = testTypeResult.testType;
     log.info(`Selected test type: ${testType}`);
 
+    const shouldGenerateApi = apiMissing && (testType === 'api' || testType === 'both');
+    const shouldGenerateUi = uiMissing && (testType === 'ui' || testType === 'both');
+
     let uiParallel = false;
-    if (testType === 'ui' || testType === 'both') {
-      const parallelResult = await inquirer.prompt<{ parallel: boolean }>({
-        type: 'list',
-        name: 'parallel',
-        message:
-          'Is it possible to design UI tests to run in parallel against the same cluster (e.g., in isolated Kibana spaces)?',
-        default: true,
-        choices: [
-          { name: 'Yes', value: true },
-          { name: 'No', value: false },
-        ],
-      });
-      uiParallel = parallelResult.parallel;
+    if (shouldGenerateUi) {
+      if (isNonInteractive) {
+        uiParallel = flagsReader.boolean('ui-parallel');
+      } else {
+        const parallelResult = await inquirer.prompt<{ parallel: boolean }>({
+          type: 'list',
+          name: 'parallel',
+          message:
+            'Is it possible to design UI tests to run in parallel against the same cluster (e.g., in isolated Kibana spaces)?',
+          default: true,
+          choices: [
+            { name: 'Yes', value: true },
+            { name: 'No', value: false },
+          ],
+        });
+        uiParallel = parallelResult.parallel;
+      }
       log.info(`UI tests parallel: ${uiParallel}`);
     }
 
     log.info('Creating directory structure...');
-    await createDirectoryStructure(relativePath, testType, uiParallel, log);
+    await createDirectoryStructure(relativePath, {
+      scoutRoot,
+      generateApi: shouldGenerateApi,
+      generateUi: shouldGenerateUi,
+      uiParallel,
+    });
 
     log.success(
       `Successfully generated Scout test structure for ${Path.posix.join(
         relativePath.replace(/\\\\/g, '/'),
-        'test/scout'
+        `test/${scoutRoot}`
       )}`
     );
     log.write('\n');
