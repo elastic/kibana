@@ -30,7 +30,7 @@ export const useRuleHealth = (
   const { addError } = useAppToasts();
 
   return useGetRuleHealthQuery(queryArgs, {
-    onError: (error: Error) => addError(error, { title: i18n.SPACE_RULES_HEALTH_FETCH_FAILURE }),
+    onError: (error: Error) => addError(error, { title: i18n.RULE_HEALTH_FETCH_FAILURE }),
     ...queryOptions,
   });
 };
