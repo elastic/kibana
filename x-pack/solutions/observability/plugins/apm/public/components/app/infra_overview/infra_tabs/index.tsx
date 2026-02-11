@@ -45,12 +45,12 @@ export function InfraTabs() {
         return callApmApi('GET /internal/apm/services/{serviceName}/infrastructure_attributes', {
           params: {
             path: { serviceName },
-            schema,
             query: {
               environment,
               kuery,
               start,
               end,
+              schema,
             },
           },
         });

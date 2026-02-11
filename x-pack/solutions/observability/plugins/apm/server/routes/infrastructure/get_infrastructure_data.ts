@@ -78,11 +78,51 @@ export const getInfrastructureData = async ({
     { skipProcessorEventFilter: true }
   );
 
+  let containerIds: string[] =
+    response.aggregations?.containerIds?.buckets.map((bucket) => bucket.key as string) ?? [];
+  const hostNames =
+    response.aggregations?.hostNames?.buckets.map((bucket) => bucket.key as string) ?? [];
+  const podNames =
+    response.aggregations?.podNames?.buckets.map((bucket) => bucket.key as string) ?? [];
+
+  if (podNames.length > 0 && schema === 'semconv') {
+    const containersByPodResponse = await apmEventClient.search(
+      'get_container_ids_by_pod_names',
+      {
+        apm: {
+          events: [ProcessorEvent.metric],
+        },
+        track_total_hits: false,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              ...rangeQuery(start, end),
+              ...kqlQuery(kuery),
+              { terms: { [k8sFilterField]: podNames } },
+            ],
+          },
+        },
+        aggs: {
+          containerIds: {
+            terms: {
+              field: CONTAINER_ID,
+              size: 500,
+            },
+          },
+        },
+      },
+      { skipProcessorEventFilter: true }
+    );
+    containerIds =
+      containersByPodResponse.aggregations?.containerIds?.buckets.map(
+        (bucket) => bucket.key as string
+      ) ?? [];
+  }
+
   return {
-    containerIds:
-      response.aggregations?.containerIds?.buckets.map((bucket) => bucket.key as string) ?? [],
-    hostNames:
-      response.aggregations?.hostNames?.buckets.map((bucket) => bucket.key as string) ?? [],
-    podNames: response.aggregations?.podNames?.buckets.map((bucket) => bucket.key as string) ?? [],
+    containerIds,
+    hostNames,
+    podNames,
   };
 };

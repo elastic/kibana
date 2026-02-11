@@ -43,8 +43,14 @@ function getUnpackMetricsForSchema(
   if (schema === 'semconv') {
     if (semconvRuntime === 'k8s') {
       return (row) => {
-        const cpuUtilization = unpackMetricSemconvK8s(row, 'metrics.k8s.container.cpu_utilization');
-        const memoryUsage = unpackMetricSemconvK8s(row, 'metrics.k8s.container.memory.request');
+        const cpuUtilization = unpackMetricSemconvK8s(
+          row,
+          'metrics.k8s.container.cpu_limit_utilization'
+        );
+        const memoryUsage = unpackMetricSemconvK8s(
+          row,
+          'metrics.k8s.container.memory_limit_utilization'
+        );
         return {
           averageCpuUsagePercent:
             cpuUtilization !== null ? scaleUpPercentage(cpuUtilization) : null,

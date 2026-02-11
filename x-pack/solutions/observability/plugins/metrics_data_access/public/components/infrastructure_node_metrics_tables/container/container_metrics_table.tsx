@@ -10,7 +10,7 @@ import type {
   EuiBasicTableColumn,
   EuiTableSortingType,
 } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
 import type { SortState, NodeMetricsTableData } from '../shared';
@@ -24,6 +24,7 @@ import {
   StepwisePagination,
 } from '../shared';
 import type { DataSchemaFormat } from '../../../../common';
+import type { ContainerSemconvRuntime } from './container_metrics_configs';
 import type { ContainerNodeMetricsRow } from './use_container_metrics_table';
 
 export interface ContainerMetricsTableProps {
@@ -38,6 +39,8 @@ export interface ContainerMetricsTableProps {
   };
   schema?: DataSchemaFormat;
   metricIndices?: string;
+  /** When schema is 'semconv', used to choose correct unit for memory (e.g. % for k8s, MB for docker). */
+  semconvRuntime?: ContainerSemconvRuntime;
 }
 
 export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
@@ -50,11 +53,12 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
     timerange,
     schema,
     metricIndices,
+    semconvRuntime,
   } = props;
 
   const columns = useMemo(
-    () => containerNodeColumns(timerange, schema, metricIndices),
-    [timerange, schema, metricIndices]
+    () => containerNodeColumns(timerange, schema, metricIndices, semconvRuntime),
+    [timerange, schema, metricIndices, semconvRuntime]
   );
 
   const sortSettings: EuiTableSortingType<ContainerNodeMetricsRow> = {
@@ -130,8 +134,10 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
 function containerNodeColumns(
   timerange: ContainerMetricsTableProps['timerange'],
   schema?: ContainerMetricsTableProps['schema'],
-  metricIndices?: ContainerMetricsTableProps['metricIndices']
+  metricIndices?: ContainerMetricsTableProps['metricIndices'],
+  semconvRuntime?: ContainerMetricsTableProps['semconvRuntime']
 ): Array<EuiBasicTableColumn<ContainerNodeMetricsRow>> {
+  const memoryUnit = schema === 'semconv' && semconvRuntime === 'k8s' ? '%' : ' MB';
   return [
     {
       name: i18n.translate('xpack.metricsData.metricsTable.container.idColumnHeader', {
@@ -154,11 +160,33 @@ function containerNodeColumns(
       },
     },
     {
-      name: i18n.translate(
-        'xpack.metricsData.metricsTable.container.averageCpuUsagePercentColumnHeader',
-        {
-          defaultMessage: 'CPU usage (avg.)',
-        }
+      name: (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate(
+              'xpack.metricsData.metricsTable.container.averageCpuUsagePercentColumnHeader',
+              {
+                defaultMessage: 'CPU usage (avg.)',
+              }
+            )}
+          </EuiFlexItem>
+          {schema === 'semconv' ? (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.metricsData.metricsTable.container.metricsOptionalTooltip',
+                  {
+                    defaultMessage:
+                      '{metricName} is optional and may not appear for all containers. Visibility depends on your container metrics collection setup.',
+                    values: {
+                      metricName: 'metrics.container.cpu_limit_utilization',
+                    },
+                  }
+                )}
+              />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       ),
       field: 'averageCpuUsagePercent',
       align: 'right',
@@ -167,16 +195,38 @@ function containerNodeColumns(
       ),
     },
     {
-      name: i18n.translate(
-        'xpack.metricsData.metricsTable.container.averageMemoryUsageMegabytesColumnHeader',
-        {
-          defaultMessage: 'Memory usage(avg.)',
-        }
+      name: (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate(
+              'xpack.metricsData.metricsTable.container.averageMemoryUsageMegabytesColumnHeader',
+              {
+                defaultMessage: 'Memory usage(avg.)',
+              }
+            )}
+          </EuiFlexItem>
+          {schema === 'semconv' ? (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.metricsData.metricsTable.container.metricsOptionalTooltip',
+                  {
+                    defaultMessage:
+                      '{metricName} is optional and may not appear for all containers. Visibility depends on your container metrics collection setup.',
+                    values: {
+                      metricName: 'metrics.container.memory_limit_utilization',
+                    },
+                  }
+                )}
+              />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       ),
       field: 'averageMemoryUsageMegabytes',
       align: 'right',
       render: (averageMemoryUsageMegabytes: number) => (
-        <NumberCell value={averageMemoryUsageMegabytes} unit=" MB" />
+        <NumberCell value={averageMemoryUsageMegabytes} unit={memoryUnit} />
       ),
     },
   ];

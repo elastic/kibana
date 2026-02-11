@@ -101,9 +101,11 @@ describe('useContainerMetricsTable hook', () => {
         metricsExplorerOptions: expect.objectContaining({
           kuery,
           metrics: expect.arrayContaining([
-            expect.objectContaining({ field: 'metrics.k8s.container.cpu_utilization' }),
             expect.objectContaining({
-              field: 'metrics.k8s.container.memory.request',
+              field: 'metrics.k8s.container.cpu_limit_utilization',
+            }),
+            expect.objectContaining({
+              field: 'metrics.k8s.container.memory_limit_utilization',
             }),
           ]),
         }),

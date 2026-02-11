@@ -30,6 +30,7 @@ function HookedContainerMetricsTable({
       {...containerMetricsTableProps}
       schema={schema}
       metricIndices={containerMetricsTableProps.metricIndices}
+      semconvRuntime={semconvRuntime}
     />
   );
 }

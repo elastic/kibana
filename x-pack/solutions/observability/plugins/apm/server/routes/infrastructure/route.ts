@@ -18,8 +18,7 @@ const infrastructureRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([kueryRt, rangeRt, environmentRt]),
-    schema: t.union([t.string, t.undefined]),
+    query: t.intersection([kueryRt, rangeRt, environmentRt, t.partial({ schema: t.string })]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
@@ -35,15 +34,14 @@ const infrastructureRoute = createApmServerRoute({
 
     const {
       path: { serviceName },
-      query: { environment, kuery, start, end },
-      schema = 'ecs',
+      query: { environment, kuery, start, end, schema },
     } = params;
 
     const infrastructureData = await getInfrastructureData({
       apmEventClient,
       serviceName,
       environment,
-      schema,
+      schema: schema ?? 'ecs',
       kuery,
       start,
       end,

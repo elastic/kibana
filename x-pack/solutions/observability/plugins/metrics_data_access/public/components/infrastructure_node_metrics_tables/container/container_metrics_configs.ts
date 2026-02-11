@@ -53,21 +53,21 @@ const containerMetricsQueryConfigSemconvDocker: MetricsQueryOptions<ContainerMet
 
 // --- SemConv K8s (Kubernetes container metrics) ---
 type ContainerMetricsFieldSemconvK8s =
-  | 'metrics.k8s.container.cpu_utilization'
-  | 'metrics.k8s.container.memory.request';
+  | 'metrics.k8s.container.cpu_limit_utilization'
+  | 'metrics.k8s.container.memory_limit_utilization';
 
 const containerMetricsQueryConfigSemconvK8s: MetricsQueryOptions<ContainerMetricsFieldSemconvK8s> =
   {
     sourceFilter: '',
     groupByField: 'container.id',
     metricsMap: {
-      'metrics.k8s.container.cpu_utilization': {
+      'metrics.k8s.container.cpu_limit_utilization': {
         aggregation: 'avg',
-        field: 'metrics.k8s.container.cpu_utilization',
+        field: 'metrics.k8s.container.cpu_limit_utilization',
       },
-      'metrics.k8s.container.memory.request': {
+      'metrics.k8s.container.memory_limit_utilization': {
         aggregation: 'avg',
-        field: 'metrics.k8s.container.memory.request',
+        field: 'metrics.k8s.container.memory_limit_utilization',
       },
     },
   };
