@@ -28,10 +28,10 @@ export const withDiagnoseButton = <P extends Partial<WithDiagnoseButtonProps>>(
   WrappedComponent: React.ComponentType<P>
 ): React.ComponentType<P> => {
   function ComponentWithDiagnoseButton(props: P) {
-    const { showDiagnoseButton, onDiagnoseClick, ...rest } = props;
+    const { showDiagnoseButton, onDiagnoseClick } = props;
     return (
       <>
-        <WrappedComponent {...rest} />
+        <WrappedComponent {...props} />
         {showDiagnoseButton && (
           <>
             <EuiHorizontalRule margin="s" />
@@ -39,7 +39,7 @@ export const withDiagnoseButton = <P extends Partial<WithDiagnoseButtonProps>>(
               <EuiFlexGroup gutterSize="none" responsive={false} direction="column">
                 <EuiFlexItem>
                   <EuiText size="s">
-                    <EuiIcon type="crossInCircle" color="warning" size="m" />{' '}
+                    <EuiIcon type="crossInCircle" color="warning" size="m" aria-hidden={true} />{' '}
                     <strong>
                       {i18n.translate('xpack.apm.serviceMap.diagnosisTitle', {
                         defaultMessage: 'Missing connection?',
