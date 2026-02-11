@@ -32,7 +32,7 @@ import { TIME_SYSTEM_PARAMS } from './literals';
 import { isMarkerNode } from './ast';
 import { getUnmappedFieldType } from './settings';
 import { getPromqlFunctionDefinition, normalizePromqlReturnType } from './promql';
-import type { PromQLAstExpression } from '../../../promql/types';
+import type { PromQLAstExpression } from '../../../embedded_languages/promql/types';
 
 // #region type detection
 
