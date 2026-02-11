@@ -20,7 +20,7 @@ import {
   getWebhookServer,
 } from '@kbn/actions-simulators-plugin/server/plugin';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-import { getEventLog } from '../../../../../common/lib';
+import { getEventLog, ObjectRemover } from '../../../../../common/lib';
 
 const defaultValues: Record<string, any> = {
   headers: null,
@@ -40,6 +40,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
   const retry = getService('retry');
+  const objectRemover = new ObjectRemover(supertest);
 
   async function createWebhookAction(
     webhookSimulatorURL: string,
@@ -71,6 +72,8 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       })
       .expect(200);
 
+    objectRemover.add('default', createdAction.id, 'connector', 'actions', false);
+
     return createdAction.id;
   }
 
@@ -101,7 +104,11 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       );
     });
 
-    it('should return 200 when creating a webhook action successfully', async () => {
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
+
+    it('should return 200 when creating a webhook connector successfully with default method', async () => {
       const { body: createdAction } = await supertest
         .post('/api/actions/connector')
         .set('kbn-xsrf', 'test')
@@ -130,6 +137,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           ...defaultValues,
           url: webhookSimulatorURL,
         },
+        is_connector_type_deprecated: false,
       });
 
       expect(typeof createdAction.id).to.be('string');
@@ -150,8 +158,54 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           ...defaultValues,
           url: webhookSimulatorURL,
         },
+        is_connector_type_deprecated: false,
       });
     });
+
+    for (const method of ['post', 'put', 'patch', 'get', 'delete']) {
+      it(`should return 200 when creating a webhook connector successfully with ${method} method`, async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'test')
+          .send({
+            name: 'A generic Webhook action',
+            connector_type_id: '.webhook',
+            secrets: {
+              user: 'username',
+              password: 'mypassphrase',
+            },
+            config: {
+              url: webhookSimulatorURL,
+              method,
+            },
+          })
+          .expect(200);
+
+        const expectedResult = {
+          id: createdAction.id,
+          is_preconfigured: false,
+          is_system_action: false,
+          is_deprecated: false,
+          name: 'A generic Webhook action',
+          connector_type_id: '.webhook',
+          is_missing_secrets: false,
+          config: {
+            ...defaultValues,
+            url: webhookSimulatorURL,
+            method,
+          },
+          is_connector_type_deprecated: false,
+        };
+
+        expect(createdAction).to.eql(expectedResult);
+
+        const { body: fetchedAction } = await supertest
+          .get(`/api/actions/connector/${createdAction.id}`)
+          .expect(200);
+
+        expect(fetchedAction).to.eql(expectedResult);
+      });
+    }
 
     it('should remove headers when a webhook is updated', async () => {
       const { body: createdAction } = await supertest
@@ -188,6 +242,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
             someHeader: '123',
           },
         },
+        is_connector_type_deprecated: false,
       });
 
       await supertest
@@ -227,6 +282,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
             someOtherHeader: '456',
           },
         },
+        is_connector_type_deprecated: false,
       });
     });
 
@@ -295,6 +351,58 @@ export default function webhookTest({ getService }: FtrProviderContext) {
             body: 'success_put_method',
           },
         })
+        .expect(200);
+
+      expect(proxyHaveBeenCalled).to.equal(true);
+      expect(result.status).to.eql('ok');
+    });
+
+    it('should support the PATCH method against webhook target', async () => {
+      const webhookActionId = await createWebhookAction(
+        webhookSimulatorURL,
+        { method: 'patch' },
+        kibanaURL
+      );
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${webhookActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({
+          params: {
+            body: 'success_patch_method',
+          },
+        })
+        .expect(200);
+
+      expect(proxyHaveBeenCalled).to.equal(true);
+      expect(result.status).to.eql('ok');
+    });
+
+    it('should support the GET method against webhook target', async () => {
+      const webhookActionId = await createWebhookAction(
+        webhookSimulatorURL,
+        { method: 'get' },
+        kibanaURL
+      );
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${webhookActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({ params: {} })
+        .expect(200);
+
+      expect(proxyHaveBeenCalled).to.equal(true);
+      expect(result.status).to.eql('ok');
+    });
+
+    it('should support the DELETE method against webhook target', async () => {
+      const webhookActionId = await createWebhookAction(
+        webhookSimulatorURL,
+        { method: 'delete' },
+        kibanaURL
+      );
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${webhookActionId}/_execute`)
+        .set('kbn-xsrf', 'test')
+        .send({ params: {} })
         .expect(200);
 
       expect(proxyHaveBeenCalled).to.equal(true);
@@ -484,7 +592,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'test')
           .expect(400);
 
-        expect(result.message).to.match(/Connector must be a webhook or cases webhook/);
+        expect(result.message).to.match(
+          /Connector must be one of the following types: \.webhook, \.cases-webhook, \.mcp/
+        );
       });
     });
 
@@ -576,9 +686,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        // waits enough for the token to be expired
+        // waits enough for the token to be expired plus some buffer
         await new Promise((resolve) =>
-          setTimeout(() => resolve(true), oauth2Server.getTokenExpirationTime() * 1000)
+          setTimeout(resolve, oauth2Server.getTokenExpirationTime() * 2 * 1000)
         );
 
         // this second call should trigger a second call to the auth server because

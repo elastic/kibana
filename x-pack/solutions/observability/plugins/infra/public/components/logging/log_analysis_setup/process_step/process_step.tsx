@@ -76,7 +76,13 @@ export const ProcessStep: React.FunctionComponent<ProcessStepProps> = ({
           />
           <EuiSpacer />
           {setupStatus.reasons.map((errorMessage, i) => (
-            <EuiCallOut key={i} color="danger" iconType="warning" title={errorCalloutTitle}>
+            <EuiCallOut
+              announceOnMount
+              key={i}
+              color="danger"
+              iconType="warning"
+              title={errorCalloutTitle}
+            >
               <EuiCode transparentBackground>{errorMessage}</EuiCode>
             </EuiCallOut>
           ))}

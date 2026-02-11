@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { Global, css } from '@emotion/react';
-import { layoutVar, layoutVarName } from '@kbn/core-chrome-layout-constants';
+import { layoutVarName } from '@kbn/core-chrome-layout-constants';
 import { useLayoutState } from './layout_state_context';
 
 /**
@@ -26,33 +26,39 @@ export const LayoutGlobalCSS = () => {
     sidebarWidth,
     applicationTopBarHeight,
     applicationBottomBarHeight,
+    applicationMarginBottom,
+    applicationMarginRight,
   } = useLayoutState();
+
+  // Pre-calculate composite values for simplified CSS expressions
+  const headerAndBannerHeight = bannerHeight + headerHeight;
+  const applicationBottom = footerHeight + applicationMarginBottom;
+  const applicationRight = applicationMarginRight + sidebarWidth;
+  const applicationHorizontalOffset = navigationWidth + applicationRight;
+  const contentTop = headerAndBannerHeight + applicationTopBarHeight;
+  const contentBottom = applicationBottom + applicationBottomBarHeight;
 
   const banner = css`
     ${layoutVarName('banner.top')}: 0;
     ${layoutVarName('banner.left')}: 0;
     ${layoutVarName('banner.height')}: ${bannerHeight}px;
     ${layoutVarName('banner.width')}: 100vw;
-    ${layoutVarName('banner.bottom')}: calc(100vh - ${layoutVar('banner.height')});
+    ${layoutVarName('banner.bottom')}: calc(100vh - ${bannerHeight}px);
     ${layoutVarName('banner.right')}: 0;
   `;
 
   const header = css`
-    ${layoutVarName('header.top')}: ${layoutVar('banner.height')};
-    ${layoutVarName('header.left')}: ${navigationWidth}px;
-    ${layoutVarName('header.right')}: ${sidebarWidth}px;
+    ${layoutVarName('header.top')}: ${bannerHeight}px;
+    ${layoutVarName('header.left')}: 0;
+    ${layoutVarName('header.right')}: 0;
     ${layoutVarName('header.height')}: ${headerHeight}px;
-    ${layoutVarName('header.width')}: calc(
-      100vw - ${layoutVar('header.left')} - ${layoutVar('header.right')}
-    );
-    ${layoutVarName('header.bottom')}: calc(
-      100vh - ${layoutVar('banner.height')} + ${layoutVar('header.height')}
-    );
+    ${layoutVarName('header.width')}: 100vw;
+    ${layoutVarName('header.bottom')}: calc(100vh - ${headerAndBannerHeight}px);
   `;
 
   const footer = css`
     ${layoutVarName('footer.height')}: ${footerHeight}px;
-    ${layoutVarName('footer.top')}: calc(100vh - ${layoutVar('footer.height')});
+    ${layoutVarName('footer.top')}: calc(100vh - ${footerHeight}px);
     ${layoutVarName('footer.bottom')}: 0;
     ${layoutVarName('footer.left')}: 0;
     ${layoutVarName('footer.right')}: 0;
@@ -60,81 +66,65 @@ export const LayoutGlobalCSS = () => {
   `;
 
   const navigation = css`
-    ${layoutVarName('navigation.top')}: ${layoutVar('banner.height')};
-    ${layoutVarName('navigation.bottom')}: ${layoutVar('footer.height')};
+    ${layoutVarName('navigation.top')}: ${headerAndBannerHeight}px;
+    ${layoutVarName('navigation.bottom')}: ${footerHeight}px;
     ${layoutVarName('navigation.left')}: 0;
     ${layoutVarName('navigation.right')}: calc(100vw - ${navigationWidth}px);
-    ${layoutVarName('navigation.height')}: calc(
-      100vh - ${layoutVar('navigation.top')} - ${layoutVar('navigation.bottom')}
-    );
+    ${layoutVarName('navigation.height')}: calc(100vh - ${headerAndBannerHeight + footerHeight}px);
     ${layoutVarName('navigation.width')}: ${navigationWidth}px;
   `;
 
   const sidebar = css`
-    ${layoutVarName('sidebar.top')}: ${layoutVar('banner.height')};
-    ${layoutVarName('sidebar.bottom')}: ${layoutVar('footer.height')};
+    ${layoutVarName('sidebar.top')}: ${headerAndBannerHeight}px;
+    ${layoutVarName('sidebar.bottom')}: ${footerHeight}px;
     ${layoutVarName('sidebar.right')}: 0;
     ${layoutVarName('sidebar.left')}: calc(100vw - ${sidebarWidth}px);
-    ${layoutVarName('sidebar.height')}: calc(
-      100vh - ${layoutVar('sidebar.top')} - ${layoutVar('sidebar.bottom')}
-    );
+    ${layoutVarName('sidebar.height')}: calc(100vh - ${headerAndBannerHeight + footerHeight}px);
     ${layoutVarName('sidebar.width')}: ${sidebarWidth}px;
   `;
 
   const application = css`
-    ${layoutVarName('application.top')}: calc(
-      ${layoutVar('banner.height')} + ${layoutVar('header.height')}
-    );
-    ${layoutVarName('application.bottom')}: ${layoutVar('footer.height')};
+    ${layoutVarName('application.marginBottom')}: ${applicationMarginBottom}px;
+    ${layoutVarName('application.marginRight')}: ${applicationMarginRight}px;
+    ${layoutVarName('application.top')}: ${headerAndBannerHeight}px;
+    ${layoutVarName('application.bottom')}: ${applicationBottom}px;
     ${layoutVarName('application.left')}: ${navigationWidth}px;
-    ${layoutVarName('application.right')}: ${sidebarWidth}px;
-    ${layoutVarName('application.height')}: calc(
-      100vh - ${layoutVar('application.top')} - ${layoutVar('application.bottom')}
-    );
-    ${layoutVarName('application.width')}: calc(
-      100vw - ${layoutVar('application.left')} - ${layoutVar('application.right')}
-    );
+    ${layoutVarName('application.right')}: ${applicationRight}px;
+    ${layoutVarName('application.height')}: calc(100vh - ${headerAndBannerHeight +
+    applicationBottom}px);
+    ${layoutVarName('application.width')}: calc(100vw - ${applicationHorizontalOffset}px);
   `;
 
   const applicationTopBar = css`
     ${layoutVarName('application.topBar.height')}: ${applicationTopBarHeight}px;
-    ${layoutVarName('application.topBar.top')}: ${layoutVar('application.top')};
-    ${layoutVarName('application.topBar.left')}: ${layoutVar('application.left')};
-    ${layoutVarName('application.topBar.width')}: ${layoutVar('application.width')};
-    ${layoutVarName('application.topBar.right')}: ${layoutVar('application.right')};
-    ${layoutVarName('application.topBar.bottom')}: calc(
-      ${layoutVar('application.top')} + ${layoutVar('application.topBar.height')}
-    );
+    ${layoutVarName('application.topBar.top')}: ${headerAndBannerHeight}px;
+    ${layoutVarName('application.topBar.left')}: ${navigationWidth}px;
+    ${layoutVarName('application.topBar.right')}: ${applicationRight}px;
+    ${layoutVarName('application.topBar.width')}: calc(100vw - ${applicationHorizontalOffset}px);
+    ${layoutVarName('application.topBar.bottom')}: calc(100vh - ${headerAndBannerHeight +
+    applicationTopBarHeight}px);
   `;
 
   const applicationBottomBar = css`
     ${layoutVarName('application.bottomBar.height')}: ${applicationBottomBarHeight}px;
-    ${layoutVarName('application.bottomBar.top')}: calc(
-      100vh - ${layoutVar('footer.height')} - ${layoutVar('application.bottomBar.height')}
-    );
-    ${layoutVarName('application.bottomBar.left')}: ${layoutVar('application.left')};
-    ${layoutVarName('application.bottomBar.width')}: ${layoutVar('application.width')};
-    ${layoutVarName('application.bottomBar.right')}: ${layoutVar('application.right')};
-    ${layoutVarName('application.bottomBar.bottom')}: ${layoutVar('footer.height')};
+    ${layoutVarName('application.bottomBar.top')}: calc(100vh - ${footerHeight +
+    applicationBottomBarHeight}px);
+    ${layoutVarName('application.bottomBar.left')}: ${navigationWidth}px;
+    ${layoutVarName('application.bottomBar.right')}: ${applicationRight}px;
+    ${layoutVarName('application.bottomBar.width')}: calc(100vw - ${applicationHorizontalOffset}px);
+    ${layoutVarName('application.bottomBar.bottom')}: ${footerHeight}px;
   `;
 
   // The application content is the main area where the application renders its content.
   // It is not a slot, but it is styled to ensure it fits within the layout.
-  // It is positioned inside application area and takes the full height available minus that application top and bottom bars.
+  // It is positioned inside application area and takes the full height available minus the application top and bottom bars.
   const applicationContent = css`
-    ${layoutVarName('application.content.top')}: calc(
-      ${layoutVar('application.top')} + ${layoutVar('application.topBar.height')}
-    );
-    ${layoutVarName('application.content.bottom')}: calc(
-      ${layoutVar('footer.height')} + ${layoutVar('application.bottomBar.height')}
-    );
-    ${layoutVarName('application.content.left')}: ${layoutVar('application.left')};
-    ${layoutVarName('application.content.right')}: ${layoutVar('application.right')};
-    ${layoutVarName('application.content.height')}: calc(
-      ${layoutVar('application.height')} - ${layoutVar('application.topBar.height')} -
-        ${layoutVar('application.bottomBar.height')}
-    );
-    ${layoutVarName('application.content.width')}: ${layoutVar('application.width')};
+    ${layoutVarName('application.content.top')}: ${contentTop}px;
+    ${layoutVarName('application.content.bottom')}: ${contentBottom}px;
+    ${layoutVarName('application.content.left')}: ${navigationWidth}px;
+    ${layoutVarName('application.content.right')}: ${applicationRight}px;
+    ${layoutVarName('application.content.height')}: calc(100vh - ${contentTop + contentBottom}px);
+    ${layoutVarName('application.content.width')}: calc(100vw - ${applicationHorizontalOffset}px);
   `;
 
   const styles = css`

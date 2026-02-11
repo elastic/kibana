@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import type { EuiDataGridControlColumn, EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
 import { render, renderHook, screen } from '@testing-library/react';
-import { TestProviders, mockTimelineData } from '../../../../../common/mock';
+import { mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useTimelineControlColumn } from './use_timeline_control_columns';
 import { TimelineId } from '@kbn/timelines-plugin/public/store/timeline';
@@ -16,6 +16,7 @@ import type { UnifiedTimelineDataGridCellContext } from '../../types';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
 import { useTimelineUnifiedDataTableContext } from '../../unified_components/data_table/use_timeline_unified_data_table_context';
+import { BUTTON_TEST_ID } from '../../../../../common/components/header_actions/pin_event_action';
 
 jest.mock('../../../../../common/hooks/use_license', () => ({
   useLicense: jest.fn().mockReturnValue({
@@ -39,7 +40,6 @@ describe('useTimelineControlColumns', () => {
             timelineId: TimelineId.test,
             refetch: refetchMock,
             events: [],
-            pinnedEventIds: {},
             eventIdToNoteIds: {},
             onToggleShowNotes: jest.fn(),
           }),
@@ -59,7 +59,6 @@ describe('useTimelineControlColumns', () => {
             timelineId: TimelineId.test,
             refetch: refetchMock,
             events: [],
-            pinnedEventIds: {},
             eventIdToNoteIds: {},
             onToggleShowNotes: jest.fn(),
           }),
@@ -80,7 +79,6 @@ describe('useTimelineControlColumns', () => {
             timelineId: TimelineId.test,
             refetch: refetchMock,
             events: [],
-            pinnedEventIds: {},
             eventIdToNoteIds: {},
             onToggleShowNotes: jest.fn(),
           }),
@@ -150,7 +148,6 @@ describe('useTimelineControlColumns', () => {
             timelineId: TimelineId.test,
             refetch: refetchMock,
             events: mockTimelineData,
-            pinnedEventIds: {},
             eventIdToNoteIds: {},
             onToggleShowNotes: jest.fn(),
           }),
@@ -167,7 +164,7 @@ describe('useTimelineControlColumns', () => {
       );
 
       expect(await screen.findByTestId('timeline-notes-button-small')).toBeVisible();
-      expect(await screen.findByTestId('pin')).toBeVisible();
+      expect(await screen.findByTestId(BUTTON_TEST_ID)).toBeVisible();
     });
 
     it('should not render the notes and pin buttons when the user does not have the correct privilege', async () => {
@@ -183,7 +180,6 @@ describe('useTimelineControlColumns', () => {
             timelineId: TimelineId.test,
             refetch: refetchMock,
             events: mockTimelineData,
-            pinnedEventIds: {},
             eventIdToNoteIds: {},
             onToggleShowNotes: jest.fn(),
           }),
@@ -200,7 +196,7 @@ describe('useTimelineControlColumns', () => {
       );
 
       expect(await screen.queryByTestId('timeline-notes-button-small')).not.toBeInTheDocument();
-      expect(await screen.queryByTestId('pin')).not.toBeInTheDocument();
+      expect(await screen.queryByTestId(BUTTON_TEST_ID)).not.toBeInTheDocument();
     });
   });
 });

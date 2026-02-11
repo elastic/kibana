@@ -8,7 +8,7 @@
 import { ResourceIdentifier } from '../../resources';
 import type { SiemMigrationResourceBase } from '../../model/common.gen';
 import type { OriginalDashboard } from '../../model/dashboard_migration.gen';
-import { SplunkXmlDashboardParser } from '../../parsers/splunk/dashboard_xml';
+import { getSplunkDashboardXmlParser } from '../../parsers/splunk/get_dashboard_xml_parser';
 
 export class DashboardResourceIdentifier extends ResourceIdentifier<OriginalDashboard> {
   public async fromOriginal(item: OriginalDashboard): Promise<SiemMigrationResourceBase[]> {
@@ -17,8 +17,11 @@ export class DashboardResourceIdentifier extends ResourceIdentifier<OriginalDash
     if (!originalDashboardXMLString) {
       return [];
     }
-    const splunkDashboardXMLPaser = new SplunkXmlDashboardParser(originalDashboardXMLString);
+    const splunkDashboardXMLPaser = await getSplunkDashboardXmlParser(originalDashboardXMLString, {
+      experimentalFeatures: this.deps.experimentalFeatures,
+    });
     const queries: string[] = await splunkDashboardXMLPaser.extractQueries();
-    return queries.flatMap((query) => this.identifier(query));
+    const resources = await Promise.all(queries.map((query) => this.identifier(query)));
+    return resources.flat();
   }
 }

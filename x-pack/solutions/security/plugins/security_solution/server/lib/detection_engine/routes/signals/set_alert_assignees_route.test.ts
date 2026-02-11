@@ -8,18 +8,25 @@
 import { getSetAlertAssigneesRequestMock } from '../../../../../common/api/detection_engine/alert_assignees/mocks';
 import { DETECTION_ENGINE_ALERT_ASSIGNEES_URL } from '../../../../../common/constants';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
+import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 import { getSuccessfulSignalUpdateResponse } from '../__mocks__/request_responses';
 import { setAlertAssigneesRoute } from './set_alert_assignees_route';
 
 describe('setAlertAssigneesRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
-  let { context } = requestContextMock.createTools();
+  let context: SecuritySolutionRequestHandlerContextMock;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
     setAlertAssigneesRoute(server.router);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('happy path', () => {

@@ -12,7 +12,7 @@ import { ProcessorFieldSelector } from '../processor_field_selector';
 import { FieldsAccordion } from '../optional_fields_accordion';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 import { IgnoreFailureToggle } from '../ignore_toggles';
-import { IgnoreEmptyValueField, MediaTypeField, OverrideField } from './set_optional_fields';
+import { IgnoreEmptyValueField, OverrideField } from './set_optional_fields';
 import { SetValueOrCopyFromField } from './set_value_or_copy_from_field';
 
 export const SetProcessorForm = () => {
@@ -20,7 +20,6 @@ export const SetProcessorForm = () => {
     <>
       <ProcessorFieldSelector
         fieldKey="to"
-        processorType="set"
         helpText={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.setFieldHelpText',
           { defaultMessage: 'The field to insert, upsert, or update.' }
@@ -31,7 +30,10 @@ export const SetProcessorForm = () => {
       <FieldsAccordion>
         <OverrideField />
         <IgnoreEmptyValueField />
-        <MediaTypeField />
+        {/* MediaTypeField is intentionally omitted because Streamlang currently doesn't support Mustache templates.
+          Media type is only applicable for template snippets (Mustache-rendered content).
+          Re-enable <MediaTypeField /> if/when template snippet support is added. */}
+        {/* <MediaTypeField />*/}
         <EuiSpacer size="m" />
         <ProcessorConditionEditor />
       </FieldsAccordion>

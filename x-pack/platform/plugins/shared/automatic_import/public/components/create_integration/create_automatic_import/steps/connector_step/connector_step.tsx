@@ -24,7 +24,7 @@ import {
   ELASTIC_LLM_USAGE_COSTS,
   ELASTIC_LLM_THIRD_PARTY,
   ELASTIC_LLM_TOUR_PERFORMANCE,
-} from '@kbn/elastic-assistant/impl/tour/elastic_llm/translations';
+} from '@kbn/elastic-assistant/impl/tour/common/translations';
 import { isElasticManagedLlmConnector } from '@kbn/elastic-assistant/impl/connectorland/helpers';
 import {
   AuthorizationWrapper,
@@ -94,7 +94,7 @@ interface ConnectorStepProps {
 
 export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
   const { euiTheme } = useEuiTheme();
-  const { http, notifications, triggersActionsUi } = useKibana().services;
+  const { http, notifications, triggersActionsUi, settings } = useKibana().services;
   const { setConnector, completeStep } = useActions();
 
   const [connectors, setConnectors] = useState<AIConnector[]>();
@@ -110,7 +110,7 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
     isLoading,
     data: aiConnectors,
     refetch: refetchConnectors,
-  } = useLoadConnectors({ http, toasts: notifications.toasts, inferenceEnabled });
+  } = useLoadConnectors({ http, toasts: notifications.toasts, inferenceEnabled, settings });
 
   useEffect(() => {
     if (aiConnectors != null) {

@@ -11,7 +11,7 @@
 
 import React, { Fragment, lazy } from 'react';
 import { nextTick } from '@kbn/test-jest-helpers';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';

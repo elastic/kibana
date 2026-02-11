@@ -91,6 +91,7 @@ describe('SubmitErrorCallout', () => {
 
     expect(wrapper).toMatchInlineSnapshot(`
       <EuiCallOut
+        announceOnMount={true}
         color="primary"
         title={
           <Memo(MemoizedFormattedMessage)
@@ -167,6 +168,7 @@ describe('SubmitErrorCallout', () => {
 
     expect(wrapper).toMatchInlineSnapshot(`
       <EuiCallOut
+        announceOnMount={true}
         color="primary"
         title={
           <Memo(MemoizedFormattedMessage)
@@ -320,6 +322,7 @@ describe('SubmitErrorCallout', () => {
 
     expect(wrapper).toMatchInlineSnapshot(`
       <EuiCallOut
+        announceOnMount={true}
         color="primary"
         title={
           <Memo(MemoizedFormattedMessage)

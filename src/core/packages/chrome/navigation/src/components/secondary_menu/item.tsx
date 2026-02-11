@@ -8,22 +8,32 @@
  */
 
 import React from 'react';
-import type { IconType } from '@elastic/eui';
-import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import type { ReactNode } from 'react';
+import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useScrollToActive } from '../../hooks/use_scroll_to_active';
 
+import { SIDE_PANEL_CONTENT_GAP } from '@kbn/core-chrome-layout-constants';
 import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
+import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
+import { useScrollToActive } from '../../hooks/use_scroll_to_active';
+import {
+  BADGE_SPACING_OFFSET,
+  ITEM_HORIZONTAL_SPACING_OFFSET,
+  NAVIGATION_SELECTOR_PREFIX,
+  SUB_MENU_ICON_SPACING_OFFSET,
+} from '../../constants';
+import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
 
-export interface SecondaryMenuItemProps extends SecondaryMenuItem {
+export interface SecondaryMenuItemProps extends Omit<SecondaryMenuItem, 'href'> {
   children: ReactNode;
-  href: string;
+  hasSubmenu?: boolean;
+  href?: string;
   iconType?: IconType;
-  isHighlighted: boolean;
   isCurrent?: boolean;
-  key: string;
+  isHighlighted: boolean;
+  isNew?: boolean;
   onClick?: () => void;
   testSubjPrefix?: string;
 }
@@ -35,25 +45,31 @@ export interface SecondaryMenuItemProps extends SecondaryMenuItem {
 export const SecondaryMenuItemComponent = ({
   badgeType,
   children,
+  hasSubmenu,
+  href,
   iconType,
   id,
-  isHighlighted,
   isCurrent,
   isExternal,
-  testSubjPrefix = 'secondaryMenuItem',
+  isHighlighted,
+  isNew = false,
+  testSubjPrefix,
   ...props
 }: SecondaryMenuItemProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
-  const activeItemRef = useScrollToActive<HTMLLIElement>(isHighlighted);
+  const highContrastModeStyles = useHighContrastModeStyles();
+  const activeItemRef = useScrollToActive<HTMLLIElement>(isCurrent);
+  const resolvedTestSubjPrefix = testSubjPrefix ?? `${NAVIGATION_SELECTOR_PREFIX}-secondaryItem`;
+
   const iconSide = iconType ? 'left' : 'right';
   const iconProps = {
     iconSide: iconSide as 'left' | 'right',
     iconType: isExternal ? 'popout' : iconType,
-    // Ensure external links open in a new tab
     ...(isExternal && { target: '_blank' }),
   };
 
-  const styles = css`
+  const buttonStyles = css`
+    font-weight: ${isHighlighted ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular};
     // 6px comes from Figma, no token
     padding: 6px ${euiTheme.size.s};
     width: 100%;
@@ -63,8 +79,13 @@ export const SecondaryMenuItemComponent = ({
     }
 
     svg:not(.euiBetaBadge__icon) {
-      color: ${euiTheme.colors.textDisabled};
+      color: ${iconSide === 'right' ? euiTheme.colors.textDisabled : 'inherit'};
     }
+
+    --high-contrast-hover-indicator-color: ${isHighlighted
+      ? euiTheme.colors.textPrimary
+      : euiTheme.colors.textParagraph};
+    ${highContrastModeStyles};
   `;
 
   const labelAndBadgeStyles = css`
@@ -73,22 +94,53 @@ export const SecondaryMenuItemComponent = ({
     gap: ${euiTheme.size.xs};
   `;
 
+  const getMaxWidth = () => {
+    const isInSidePanel = testSubjPrefix?.includes('sidePanel');
+    let maxWidth = SIDE_PANEL_WIDTH - ITEM_HORIZONTAL_SPACING_OFFSET;
+    // Secondary item label inside side panel (narrower)
+    if (isInSidePanel) maxWidth -= SIDE_PANEL_CONTENT_GAP;
+    // Secondary item label + badge
+    if (isNew || badgeType) maxWidth -= BADGE_SPACING_OFFSET;
+    // Secondary item label + right arrow (More menu)
+    if (hasSubmenu) maxWidth -= SUB_MENU_ICON_SPACING_OFFSET;
+    return maxWidth;
+  };
+
+  const labelTextStyles = css`
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: ${getMaxWidth()}px;
+  `;
+
+  /* Always show non-new badges. Show new ones if isNew check allows it
+  badgeType might be undefined for primary items with new secondary items,
+  we still want to show the new badge in nested menu if the child item is new */
+  const getBadge = () => {
+    if (badgeType && badgeType !== 'new') return <BetaBadge type={badgeType} />;
+    if (isNew) return <BetaBadge type="new" />;
+  };
+
   const content = (
     <div css={labelAndBadgeStyles}>
-      {children}
-      {badgeType && <BetaBadge type={badgeType} />}
+      <span css={labelTextStyles} title={typeof children === 'string' ? children : undefined}>
+        {children}
+      </span>
+      {getBadge()}
     </div>
   );
 
   return (
-    <li ref={activeItemRef}>
+    <li ref={activeItemRef} role="none">
       {isHighlighted ? (
         <EuiButton
+          id={id}
           aria-current={isCurrent ? 'page' : undefined}
-          css={styles}
+          css={buttonStyles}
           data-highlighted="true"
-          data-test-subj={`${testSubjPrefix}-${id}`}
+          data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
           fullWidth
+          href={hasSubmenu ? undefined : href}
           size="s"
           textProps={false}
           {...iconProps}
@@ -98,11 +150,13 @@ export const SecondaryMenuItemComponent = ({
         </EuiButton>
       ) : (
         <EuiButtonEmpty
+          id={id}
           aria-current={isCurrent ? 'page' : undefined}
-          css={styles}
           color="text"
+          css={buttonStyles}
           data-highlighted="false"
-          data-test-subj={`${testSubjPrefix}-${id}`}
+          data-test-subj={`${resolvedTestSubjPrefix}-${id}`}
+          href={hasSubmenu ? undefined : href}
           size="s"
           textProps={false}
           {...iconProps}

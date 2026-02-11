@@ -50,6 +50,7 @@ export function TransactionTypeSelect() {
         data-test-subj="headerFilterTransactionType"
         onChange={handleChange}
         options={options}
+        compressed
         value={transactionType}
       />
     </>

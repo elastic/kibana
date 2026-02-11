@@ -18,6 +18,7 @@ import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ReactNode } from 'react';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { CloudConnectedPluginStart } from '@kbn/cloud-connect-plugin/public';
 
 export interface MonitoringStartPluginDependencies {
   navigation: NavigationStart;
@@ -29,12 +30,15 @@ export interface MonitoringStartPluginDependencies {
   fleet?: FleetStart;
   share: SharePluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  cloudConnect?: CloudConnectedPluginStart;
 }
 
 interface LegacyStartDependencies {
   element: HTMLElement;
   core: CoreStart;
   isCloud: boolean;
+  cloudBaseUrl?: string;
+  hasEnterpriseLicense: boolean;
   pluginInitializerContext: PluginInitializerContext;
   externalConfig: Array<Array<string | number> | Array<string | boolean>>;
   appMountParameters: AppMountParameters;

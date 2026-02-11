@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type {
-  AllConnectorsResponse,
+  GetAllConnectorsResponse,
   ConnectorResponse,
 } from '@kbn/actions-plugin/common/routes/connector/response';
 import { DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common';
@@ -17,7 +17,24 @@ import {
 } from '../../../../common/endpoint/constants';
 
 const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
-const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-Managed-LLM'];
+const INTERNAL_INFERENCE_CONNECTORS = [
+  'Elastic-Managed-LLM',
+  'Anthropic-Claude-Sonnet-3-7',
+  'Anthropic-Claude-Sonnet-4-5',
+  'Anthropic-Claude-Opus-4-5',
+  'Anthropic-Claude-Opus-4-6',
+  'OpenAI-GPT-OSS-120B',
+  'OpenAI-GPT-4-1',
+  'OpenAI-GPT-4-1-Mini',
+  'OpenAI-GPT-5-2',
+  'OpenAI-GPT-OSS-20B',
+  'OpenAI-o4',
+  'OpenAI-o4-Mini',
+  'Google-Gemini-2-5-Pro',
+  'Google-Gemini-2-5-Flash',
+  'Google-Gemini-3-0-Pro',
+  'Google-Gemini-3-0-Flash',
+];
 const INTERNAL_CONNECTORS = [...INTERNAL_CLOUD_CONNECTORS, ...INTERNAL_INFERENCE_CONNECTORS];
 
 export const createBedrockAIConnector = (connectorName?: string) =>
@@ -38,7 +55,7 @@ export const createBedrockAIConnector = (connectorName?: string) =>
   });
 
 export const getConnectors = () =>
-  request<AllConnectorsResponse[]>({
+  request<GetAllConnectorsResponse>({
     method: 'GET',
     url: 'api/actions/connectors',
   });

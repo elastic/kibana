@@ -32,7 +32,7 @@ export const EditActionName: FC<EditActionNameProps> = ({ isDisabled }) => {
           defaultMessage: 'You do not have permission to edit analytics jobs.',
         })}
       >
-        <>{editActionNameText}</>
+        <span tabIndex={0}>{editActionNameText}</span>
       </EuiToolTip>
     );
   }

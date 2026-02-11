@@ -13,12 +13,15 @@ import { EuiLink } from '@elastic/eui';
 
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHttp } from '../../../../common/lib/kibana';
-import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
+import type { ArtifactListPageLabels } from '../../../components/artifact_list_page';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { EventFiltersApiClient } from '../service/api_client';
 import { EventFiltersForm } from './components/form';
 import { SEARCHABLE_FIELDS } from '../constants';
-import { EventFiltersProcessDescendantIndicator } from '../../../components/artifact_entry_card/components/card_decorators/event_filters_process_descendant_indicator';
+import { ProcessDescendantsIndicator } from '../../../components/artifact_entry_card/components/card_decorators/process_descendants_indicator';
+import type { ArtifactEntryCardDecoratorProps } from '../../../components/artifact_entry_card/artifact_entry_card';
+import { EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS } from './translations';
+import { FILTER_PROCESS_DESCENDANTS_TAG } from '../../../../../common/endpoint/service/artifacts';
 
 export const ABOUT_EVENT_FILTERS = i18n.translate('xpack.securitySolution.eventFilters.aboutInfo', {
   defaultMessage:
@@ -47,7 +50,7 @@ export const RULE_NAME = i18n.translate('xpack.securitySolution.eventFilter.form
   defaultMessage: 'Endpoint Event Filtering',
 });
 
-const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
+const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageLabels = {
   pageTitle: i18n.translate('xpack.securitySolution.eventFilters.pageTitle', {
     defaultMessage: 'Event Filters',
   }),
@@ -58,6 +61,30 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   pageAddButtonTitle: i18n.translate('xpack.securitySolution.eventFilters.pageAddButtonTitle', {
     defaultMessage: 'Add event filter',
   }),
+  pageImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.eventFilters.pageImportButtonTitle',
+    {
+      defaultMessage: 'Import event filter list',
+    }
+  ),
+  pageExportButtonTitle: i18n.translate(
+    'xpack.securitySolution.eventFilters.pageExportButtonTitle',
+    {
+      defaultMessage: 'Export event filter list',
+    }
+  ),
+  pageExportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.eventFilters.exportSuccessToastTitle',
+    {
+      defaultMessage: 'Event filter list exported successfully',
+    }
+  ),
+  pageExportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.eventFilters.exportErrorToastTitle',
+    {
+      defaultMessage: 'Event filter list export failed',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.eventFilters.showingTotal', {
       defaultMessage: 'Showing {total} {total, plural, one {event filter} other {event filters}}',
@@ -140,6 +167,20 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   ),
 };
 
+export const EventFiltersCardDecorator = memo<ArtifactEntryCardDecoratorProps>(
+  ({ item, 'data-test-subj': dataTestSubj }) => {
+    return (
+      <ProcessDescendantsIndicator
+        item={item}
+        data-test-subj={dataTestSubj}
+        labels={EVENT_FILTERS_PROCESS_DESCENDANT_DECORATOR_LABELS}
+        processDescendantsTag={FILTER_PROCESS_DESCENDANTS_TAG}
+      />
+    );
+  }
+);
+EventFiltersCardDecorator.displayName = 'EventFiltersCardDecorator';
+
 export const EventFiltersList = memo(() => {
   const { canWriteEventFilters } = useUserPrivileges().endpointPrivileges;
   const http = useHttp();
@@ -156,7 +197,7 @@ export const EventFiltersList = memo(() => {
       allowCardCreateAction={canWriteEventFilters}
       allowCardEditAction={canWriteEventFilters}
       allowCardDeleteAction={canWriteEventFilters}
-      CardDecorator={EventFiltersProcessDescendantIndicator}
+      CardDecorator={EventFiltersCardDecorator}
     />
   );
 });

@@ -11,6 +11,7 @@ import { openDetailPanel } from '../../../store/actions';
 
 import { RemoteClusterTable as RemoteClusterTableComponent } from './remote_cluster_table';
 
+/** @type {import('react-redux').MapDispatchToProps<any, any>} */
 const mapDispatchToProps = (dispatch) => {
   return {
     openDetailPanel: (clusterName) => {
@@ -19,6 +20,9 @@ const mapDispatchToProps = (dispatch) => {
   };
 };
 
+/**
+ * @type {import('react-redux').ConnectedComponent<typeof RemoteClusterTableComponent, {}>}
+ */
 export const RemoteClusterTable = connect(
   undefined,
   mapDispatchToProps

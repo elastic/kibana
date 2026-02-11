@@ -45,6 +45,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           settings: {
             syncAlerts: true,
+            extractObservables: true,
           },
           owner: 'cases',
           assignees: [],

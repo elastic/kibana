@@ -18,3 +18,4 @@ export {
   getKibanaCliLoggers,
 } from './kibana_cli_args';
 export { initLogsDir } from './logs_dir';
+export { applyFipsOverrides, fipsIsEnabled } from './fips';

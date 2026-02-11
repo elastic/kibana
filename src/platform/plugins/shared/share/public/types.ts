@@ -14,10 +14,12 @@ import { type EuiCodeProps, type EuiIconProps, type EuiFlyoutProps } from '@elas
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { ILicense } from '@kbn/licensing-types';
 import type { Capabilities } from '@kbn/core/public';
+import type { TimeRange } from '@kbn/es-query';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
 import type { AnonymousAccessServiceContract } from '../common/anonymous_access';
+import type { DraftModeCalloutProps } from './components/common/draft_mode_callout';
 
 export interface ShareRegistryApiStart {
   capabilities: Capabilities;
@@ -35,9 +37,14 @@ export type InternalShareActionIntent = Exclude<ShareTypes, 'integration' | 'leg
 
 type ShareActionUserInputBase<E extends Record<string, unknown> = Record<string, unknown>> = {
   /**
-   * The title of the share action
+   * The draft mode callout content to be shown when there are unsaved changes.
+   * - `true`: Shows the default callout.
+   * - `false` or `undefined`: Shows no callout.
+   * - `DraftModeCalloutProps`:
+   *   - `message`: callout message custom content
    */
-  draftModeCallOut?: ReactNode;
+
+  draftModeCallOut?: boolean | DraftModeCalloutProps;
   helpText?: ReactNode;
   CTAButtonConfig?: {
     id: string;
@@ -151,6 +158,7 @@ export interface ExportShare
       requiresSavedState?: boolean;
       supportedLayoutOptions?: Array<'print'>;
       renderLayoutOptionSwitch?: boolean;
+      renderTotalHitsSizeWarning?: (totalHits?: number) => ReactNode | undefined;
     } & (
       | {
           generateAssetComponent?: never;
@@ -288,6 +296,10 @@ export type BrowserUrlService = UrlService<
   BrowserShortUrlClient
 >;
 
+export type ShareableUrlLocatorParams = {
+  timeRange: TimeRange | undefined;
+} & Record<string, unknown>;
+
 /**
  * @public
  * Properties of the current object to share. Registered share
@@ -335,7 +347,7 @@ export interface ShareContext {
   shareableUrlForSavedObject?: string;
   shareableUrlLocatorParams?: {
     locator: LocatorPublic<any>;
-    params: any;
+    params: ShareableUrlLocatorParams;
   };
   sharingData: { [key: string]: unknown };
   isDirty: boolean;
@@ -390,6 +402,7 @@ export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   allowShortUrl: boolean;
   onClose?: () => void;
   publicAPIEnabled?: boolean;
+  onSave?: () => Promise<void>;
 }
 
 export interface ClientConfigType {

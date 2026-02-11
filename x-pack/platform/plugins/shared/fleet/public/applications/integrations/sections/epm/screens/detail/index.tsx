@@ -426,6 +426,7 @@ export function Detail() {
         isCloud,
         isFirstTimeAgentUser,
         pkgkey,
+        prerelease,
         isAgentlessIntegration: isAgentlessIntegration(packageInfo || undefined),
         isAgentlessDefault,
       });
@@ -452,20 +453,21 @@ export function Detail() {
       services.application.navigateToApp(...navigateOptions);
     },
     [
-      agentPolicyIdFromContext,
-      hash,
       history,
+      pathname,
+      search,
+      hash,
+      agentPolicyIdFromContext,
       integration,
-      isAgentlessIntegration,
-      isAgentlessDefault,
       isCloud,
       isFirstTimeAgentUser,
+      pkgkey,
+      prerelease,
+      isAgentlessIntegration,
+      packageInfo,
+      isAgentlessDefault,
       returnAppId,
       returnPath,
-      packageInfo,
-      pathname,
-      pkgkey,
-      search,
       services.application,
     ]
   );
@@ -528,6 +530,7 @@ export function Detail() {
                           prepend={versionLabel}
                           options={versionOptions}
                           value={packageInfo.version}
+                          aria-label={versionLabel}
                           onChange={(event) =>
                             onVersionChange(event.target.value, packageInfo.name)
                           }
@@ -773,6 +776,7 @@ export function Detail() {
   const securityCallout = missingSecurityConfiguration ? (
     <>
       <EuiCallOut
+        announceOnMount
         color="warning"
         iconType="lock"
         title={

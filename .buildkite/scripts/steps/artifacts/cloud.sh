@@ -12,6 +12,17 @@ if [[ "${DRY_RUN:-}" =~ ^(true|1)$ ]]; then
   exit 0
 fi
 
+KIBANA_MEMORY_SIZE=${KIBANA_MEMORY_SIZE:-2048}
+case "$KIBANA_MEMORY_SIZE" in
+  1024|2048|4096|8192)
+    echo "--- Kibana node memory size: ${KIBANA_MEMORY_SIZE}MB"
+    ;;
+  *)
+    echo "Error: KIBANA_MEMORY_SIZE must be one of: 1024, 2048, 4096, 8192. Got: $KIBANA_MEMORY_SIZE"
+    exit 1
+    ;;
+esac
+
 echo "--- Push docker image"
 mkdir -p target
 
@@ -32,7 +43,13 @@ else
 fi
 
 echo "--- Create deployment"
-CLOUD_DEPLOYMENT_NAME="kibana-artifacts-$TAG"
+BASE_DEPLOYMENT_NAME="kibana-artifacts"
+
+if [[ $KIBANA_MEMORY_SIZE -ne 2048 ]]; then
+  CLOUD_DEPLOYMENT_NAME="$BASE_DEPLOYMENT_NAME-${KIBANA_MEMORY_SIZE}mb-$TAG"
+else
+  CLOUD_DEPLOYMENT_NAME="$BASE_DEPLOYMENT_NAME-$TAG"
+fi
 
 LOGS=$(mktemp --suffix ".json")
 DEPLOYMENT_SPEC=$(mktemp --suffix ".json")
@@ -42,7 +59,8 @@ jq '
   .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_TEST_IMAGE'" |
   .resources.kibana[0].plan.kibana.version = "'$FULL_VERSION'" |
   .resources.elasticsearch[0].plan.elasticsearch.version = "'$FULL_VERSION'" |
-  .resources.integrations_server[0].plan.integrations_server.version = "'$FULL_VERSION'"
+  .resources.integrations_server[0].plan.integrations_server.version = "'$FULL_VERSION'" |
+  .resources.kibana[0].plan.cluster_topology[0].size.value = '$KIBANA_MEMORY_SIZE'
   ' .buildkite/scripts/steps/cloud/deploy.json > "$DEPLOYMENT_SPEC"
 
 function shutdown {
@@ -57,8 +75,6 @@ trap "shutdown" EXIT
 
 ecctl deployment create --track --output json --file "$DEPLOYMENT_SPEC" > "$LOGS"
 
-CLOUD_DEPLOYMENT_USERNAME=$(jq -r --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' "$LOGS")
-CLOUD_DEPLOYMENT_PASSWORD=$(jq -r --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' "$LOGS")
 CLOUD_DEPLOYMENT_ID=$(jq -r --slurp '.[0].id' "$LOGS")
 CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' "$LOGS")
 
@@ -67,29 +83,3 @@ export CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOY
 
 echo "Kibana: $CLOUD_DEPLOYMENT_KIBANA_URL"
 echo "ES: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL"
-
-# Disable ansi color output for Node.js as we want to get plain values when executing node as a script runner below
-export FORCE_COLOR=0
-
-export TEST_KIBANA_PROTOCOL=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_KIBANA_URL).protocol.replace(':', ''))")
-export TEST_KIBANA_HOSTNAME=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_KIBANA_URL).hostname)")
-export TEST_KIBANA_PORT=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_KIBANA_URL).port || 443)")
-export TEST_KIBANA_USERNAME="$CLOUD_DEPLOYMENT_USERNAME"
-export TEST_KIBANA_PASSWORD="$CLOUD_DEPLOYMENT_PASSWORD"
-
-export TEST_ES_PROTOCOL=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_ELASTICSEARCH_URL).protocol.replace(':', ''))")
-export TEST_ES_HOSTNAME=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_ELASTICSEARCH_URL).hostname)")
-export TEST_ES_PORT=$(node -e "console.log(new URL(process.env.CLOUD_DEPLOYMENT_ELASTICSEARCH_URL).port || 443)")
-export TEST_ES_USERNAME="$CLOUD_DEPLOYMENT_USERNAME"
-export TEST_ES_PASSWORD="$CLOUD_DEPLOYMENT_PASSWORD"
-
-# Enabling ansi color output for Node.js again as we don't need to use it as a script interpreter anymore
-export FORCE_COLOR=1
-
-export TEST_BROWSER_HEADLESS=1
-
-# Error: attempted to use the "es" service to fetch Elasticsearch version info but the request failed: ConnectionError: self signed certificate in certificate chain
-export NODE_TLS_REJECT_UNAUTHORIZED=0
-
-echo "--- FTR - Reporting"
-node --no-warnings scripts/functional_test_runner.js --config x-pack/platform/test/functional/apps/visualize/config.ts --include-tag=smoke --quiet

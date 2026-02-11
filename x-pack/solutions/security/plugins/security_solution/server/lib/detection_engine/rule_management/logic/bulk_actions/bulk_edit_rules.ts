@@ -8,6 +8,7 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
+import { convertObjectKeysToCamelCase } from '../../../../../utils/object_case_converters';
 import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
 
 import type { MlAuthz } from '../../../../machine_learning/authz';
@@ -16,13 +17,14 @@ import type { RuleAlertType, RuleParams } from '../../../rule_schema';
 
 import type { IPrebuiltRuleAssetsClient } from '../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { convertAlertingRuleToRuleResponse } from '../detection_rules_client/converters/convert_alerting_rule_to_rule_response';
-import { calculateIsCustomized } from '../detection_rules_client/mergers/rule_source/calculate_is_customized';
+import { calculateExternalRuleSource } from '../detection_rules_client/mergers/rule_source/calculate_external_rule_source';
 import { bulkEditActionToRulesClientOperation } from './action_to_rules_client_operation';
 import { ruleParamsModifier } from './rule_params_modifier';
 import { splitBulkEditActions } from './split_bulk_edit_actions';
 import { validateBulkEditRule } from './validations';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import { invariant } from '../../../../../../common/utils/invariant';
+import { createDefaultInternalRuleSource } from '../detection_rules_client/mergers/rule_source/create_default_internal_rule_source';
 
 export interface BulkEditRulesArguments {
   actionsClient: ActionsClient;
@@ -99,25 +101,18 @@ export const bulkEditRules = async ({
         params: modifiedParams,
       });
 
-      let isCustomized = false;
       if (nextRule.immutable === true) {
-        isCustomized = calculateIsCustomized({
-          baseRule: baseVersionsMap.get(nextRule.rule_id),
+        const baseRule = baseVersionsMap.get(nextRule.rule_id);
+        const ruleSource = calculateExternalRuleSource({
+          baseRule,
           currentRule: convertAlertingRuleToRuleResponse(currentRule),
           nextRule,
         });
-      }
 
-      const ruleSource =
-        nextRule.immutable === true
-          ? {
-              type: 'external' as const,
-              isCustomized,
-            }
-          : {
-              type: 'internal' as const,
-            };
-      modifiedParams.ruleSource = ruleSource;
+        modifiedParams.ruleSource = convertObjectKeysToCamelCase(ruleSource);
+      } else {
+        modifiedParams.ruleSource = createDefaultInternalRuleSource();
+      }
 
       return { modifiedParams, isParamsUpdateSkipped };
     },

@@ -76,7 +76,7 @@ describe('RolesAPIClient', () => {
         transient_metadata: {
           foo: 'bar',
         },
-        _transform_error: ['kibana'],
+        _transform_error: [{ reason: 'kibana:reserved_privileges_mixed', state: [] }],
         metadata: {
           someOtherMetadata: true,
         },

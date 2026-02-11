@@ -5,23 +5,61 @@
  * 2.0.
  */
 
+import type { ParsedPanel } from '../../../../../../../../common/siem_migrations/parsers/types';
 import { generateAssistantComment } from '../../../../../common/task/util/comments';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
 import dashboardTemplate from './dashboard.json';
+
+interface DashboardSection {
+  collapsed: boolean;
+  title: string;
+  gridData: {
+    y: number;
+    i: string;
+  };
+}
 
 interface DashboardData {
   attributes: {
     title: string;
     description: string;
     panelsJSON: string;
+    sections?: Array<DashboardSection>;
   };
 }
 
+const processSections = (panels: ParsedPanel[]) => {
+  const sections: Record<string, DashboardSection> = {};
+  panels.forEach((panel) => {
+    if (panel.section && !sections[panel.section.id]) {
+      sections[panel.section.id] = {
+        collapsed: true,
+        title: panel.section.title,
+        gridData: {
+          y: 16,
+          i: panel.section.id,
+        },
+      };
+    }
+  });
+  return Object.values(sections);
+};
+
 export const getAggregateDashboardNode = (): GraphNode => {
   return async (state) => {
+    const title = state.original_dashboard.title || 'Untitled Dashboard';
+    const description = state.description || '';
+
     if (!state.translated_panels?.length) {
-      throw new Error('No panels found'); // The dashboard migration status will be set to 'failed' and the error stored in the document.
+      return {
+        elastic_dashboard: {
+          title,
+          description,
+        },
+        translation_result: MigrationTranslationResult.UNTRANSLATABLE,
+        comments: [generateAssistantComment('No panels found')],
+      };
     }
 
     // Recover original order (the translated_panels is built asynchronously so the panels are in the order they complete the translation, not the original order)
@@ -37,12 +75,10 @@ export const getAggregateDashboardNode = (): GraphNode => {
 
     // Create the dashboard object
     const dashboardData: DashboardData = structuredClone(dashboardTemplate);
-    const title = state.original_dashboard.title || 'Untitled Dashboard';
-    const description = state.description || '';
-
     dashboardData.attributes.title = title;
     dashboardData.attributes.description = description;
     dashboardData.attributes.panelsJSON = JSON.stringify(panels.map(({ data }) => data));
+    dashboardData.attributes.sections = processSections(state.parsed_original_dashboard.panels);
 
     let translationResult: MigrationTranslationResult;
 

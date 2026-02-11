@@ -151,7 +151,7 @@ export const useAwsCredentialsForm = ({
     AWS_SETUP_FORMAT.CLOUD_FORMATION;
 
   const group = options[awsCredentialsType];
-  const fields = getInputVarsFields(input, group.fields);
+  const fields = getInputVarsFields(input, group?.fields || {});
   const fieldsSnapshot = useRef({});
 
   useEffect(() => {

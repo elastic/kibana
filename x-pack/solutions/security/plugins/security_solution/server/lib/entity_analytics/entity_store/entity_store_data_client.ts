@@ -34,6 +34,7 @@ import {
   ENTITY_STORE_HISTORY_INDEX_PATTERN,
   ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   ENTITY_STORE_SOURCE_REQUIRED_ES_INDEX_PRIVILEGES,
+  ENTITY_STORE_UPDATES_INDEX_PATTERN,
 } from '../../../../common/entity_analytics/entity_store/constants';
 import { getEnabledEntityTypes } from '../../../../common/entity_analytics/utils';
 import {
@@ -73,6 +74,8 @@ import {
 import { AssetCriticalityMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 import {
   startEntityStoreFieldRetentionEnrichTask,
+  startEntityStoreHealthTask,
+  removeEntityStoreHealthTask,
   removeEntityStoreFieldRetentionEnrichTask,
   getEntityStoreFieldRetentionEnrichTaskState as getEntityStoreFieldRetentionEnrichTaskStatus,
   removeEntityStoreDataViewRefreshTask,
@@ -81,6 +84,7 @@ import {
   startEntityStoreSnapshotTask,
   removeEntityStoreSnapshotTask,
   getEntityStoreSnapshotTaskState,
+  getDataViewRefreshTaskId,
 } from './tasks';
 import {
   createEntityIndex,
@@ -100,6 +104,7 @@ import {
   createEntityResetIndex,
   deleteEntityResetIndex,
   getEntityResetIndexStatus,
+  getEntitySnapshotIndexStatus,
 } from './elasticsearch_assets';
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import {
@@ -115,6 +120,7 @@ import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import type { EntityRecord, EntityStoreConfig } from './types';
 import {
   ENTITY_ENGINE_INITIALIZATION_EVENT,
+  ENTITY_ENGINE_DELETION_EVENT,
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
 } from '../../telemetry/event_based/events';
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
@@ -123,7 +129,17 @@ import { convertToEntityManagerDefinition } from './entity_definitions/entity_ma
 import type { ApiKeyManager } from './auth/api_key';
 import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
 import { entityEngineDescriptorTypeName } from './saved_object';
+import {
+  deleteEntityUpdatesDataStreams,
+  getEntityUpdatesDataStreamStatus,
+  initEntityUpdatesDataStream,
+} from './elasticsearch_assets/updates_entity_data_stream';
 import { getEntityILMPolicyStatuses } from './elasticsearch_assets/ilm_policy_status';
+import {
+  createEntityUpdatesIndexComponentTemplate,
+  deleteEntityUpdatesIndexComponentTemplate,
+  getEntityUpdatesIndexComponentTemplateStatus,
+} from './elasticsearch_assets/updates_component_template';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -260,6 +276,12 @@ export class EntityStoreDataClient {
             esClient: this.esClient,
             namespace,
           }),
+          ...(await getEntitySnapshotIndexStatus({
+            entityType: type,
+            esClient: this.esClient,
+            namespace,
+          })),
+          getEntityUpdatesDataStreamStatus(type, this.esClient, namespace),
           ...(await getEntityILMPolicyStatuses({
             esClient: this.esClient,
             isServerless: this.isServerless,
@@ -268,8 +290,14 @@ export class EntityStoreDataClient {
             definitionId: definition.id,
             esClient: this.esClient,
           }),
+          getEntityUpdatesIndexComponentTemplateStatus(definition.id, this.esClient),
         ])
       : Promise.resolve([] as EngineComponentStatus[]);
+  }
+
+  public async isEngineRunning(type: EntityType) {
+    const engine = await this.engineClient.maybeGet(type);
+    return engine?.status === ENGINE_STATUS.STARTED;
   }
 
   public async enable(
@@ -301,7 +329,7 @@ export class EntityStoreDataClient {
     return { engines, succeeded: true };
   }
 
-  private async getEnabledEntityTypes(): Promise<EntityType[]> {
+  public async getEnabledEntityTypes(): Promise<EntityType[]> {
     const genericEntityStoreEnabled = await this.uiSettingsClient.get<boolean>(
       SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
     );
@@ -504,6 +532,12 @@ export class EntityStoreDataClient {
       });
       this.log(`debug`, entityType, `Created @platform pipeline`);
 
+      // CRUD Assets
+      await createEntityUpdatesIndexComponentTemplate(description, this.esClient);
+      this.log(`debug`, entityType, `Created entity updates index component template`);
+      await initEntityUpdatesDataStream(entityType, this.esClient, namespace);
+      this.log(`debug`, entityType, `Initialized entity updates data stream`);
+
       // finally start the entity definition now that everything is in place
       const updated = await this.start(entityType, { force: true });
 
@@ -522,6 +556,21 @@ export class EntityStoreDataClient {
         logger,
         taskManager,
       });
+
+      try {
+        await taskManager.runSoon(getDataViewRefreshTaskId(namespace));
+      } catch (e) {
+        if (e.message?.includes('as it is currently running')) {
+          this.log(
+            `debug`,
+            entityType,
+            `Data view refresh task already running for namespace ${namespace}, skipping runSoon`
+          );
+        } else {
+          throw e;
+        }
+      }
+
       this.log(`debug`, entityType, `Started entity store data view refresh task`);
 
       // this task will create daily snapshots for the historical view
@@ -533,7 +582,17 @@ export class EntityStoreDataClient {
       const duration = moment(setupEndTime).diff(moment(setupStartTime), 'seconds');
       this.options.telemetry?.reportEvent(ENTITY_ENGINE_INITIALIZATION_EVENT.eventType, {
         duration,
+        namespace,
+        entityType,
       });
+
+      // this task will report Entity Store state as telemetry events
+      await startEntityStoreHealthTask({
+        namespace,
+        logger,
+        taskManager,
+      });
+      this.log(`debug`, entityType, `Started entity store health task`);
 
       return updated;
     } catch (err) {
@@ -698,6 +757,7 @@ export class EntityStoreDataClient {
   ) {
     const { namespace, logger, appClient, dataViewsService, config } = this.options;
     const { deleteData, deleteEngine } = options;
+    const deletionStartTime = moment.utc().toISOString();
 
     const descriptor = await this.engineClient.maybeGet(entityType);
     const defaultIndexPatterns = await buildIndexPatternsByEngine(
@@ -761,6 +821,12 @@ export class EntityStoreDataClient {
       await removeEntityStoreSnapshotTask({ namespace, logger, entityType, taskManager });
       this.log('debug', entityType, `Deleted entity store snapshot task`);
 
+      // CRUD Assets
+      await deleteEntityUpdatesDataStreams(entityType, this.esClient, namespace);
+      this.log('debug', entityType, `Delete entity updates index`);
+      await deleteEntityUpdatesIndexComponentTemplate(description, this.esClient);
+      this.log('debug', entityType, `Delete entity updates index`);
+
       if (deleteData) {
         await deleteEntityIndex({
           entityType,
@@ -796,6 +862,11 @@ export class EntityStoreDataClient {
           logger,
           taskManager,
         });
+        await removeEntityStoreHealthTask({
+          namespace,
+          logger,
+          taskManager,
+        });
         this.log(
           'debug',
           entityType,
@@ -803,7 +874,16 @@ export class EntityStoreDataClient {
         );
       }
 
-      logger.info(`[Entity Store] In namespace ${namespace}: Deleted store for ${entityType}`);
+      const deletionEndTime = moment.utc().toISOString();
+      const duration = moment(deletionEndTime).diff(moment(deletionStartTime), 'seconds');
+      logger.info(
+        `[Entity Store] In namespace ${namespace}: Deleted store for ${entityType} in ${duration} seconds`
+      );
+      this.options.telemetry?.reportEvent(ENTITY_ENGINE_DELETION_EVENT.eventType, {
+        duration,
+        namespace,
+        entityType,
+      });
       return { deleted: true };
     } catch (err) {
       this.log(`error`, entityType, `Error deleting entity store: ${err.message}`);
@@ -987,6 +1067,7 @@ export class EntityStoreDataClient {
 
     // The entity store has to create the following indices
     indicesPrivileges[ENTITY_STORE_INDEX_PATTERN] = ['read', 'manage'];
+    indicesPrivileges[ENTITY_STORE_UPDATES_INDEX_PATTERN] = ['read', 'manage'];
     indicesPrivileges[RISK_SCORE_INDEX_PATTERN] = ['read', 'manage'];
     indicesPrivileges[ENTITY_STORE_HISTORY_INDEX_PATTERN] = [
       'create_index',

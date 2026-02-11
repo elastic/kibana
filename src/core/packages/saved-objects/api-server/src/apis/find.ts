@@ -134,6 +134,22 @@ export interface SavedObjectsFindOptions {
    * return client.find({ type: 'dashboard', aggs })
    * ```
    *
+   * @remarks
+   * **Security Warning:** Some Elasticsearch aggregations can return data from documents that did not match
+   * the query, potentially bypassing security restrictions like Kibana Spaces. The following aggregation
+   * patterns are problematic and **should be avoided**:
+   *
+   * - **`terms` with `min_doc_count: 0`**: Can return terms from the index that are not in matching documents,
+   *   potentially exposing data from other spaces or unauthorized documents.
+   * - **`global`**: Ignores your search filter and collects data from all documents in the index.
+   * - **`significant_terms`**: Uses a background set for comparisons that by default includes all documents in the index.
+   * - **`significant_text`**: Similar to `significant_terms`, uses background document set.
+   * - **`parent`**: Accesses parent documents which may not match filters.
+   * - **`nested`** / **`reverse_nested`**: May access nested documents outside the currentquery scope.
+   *
+   * When authoring aggregations, ensure you only use aggregation types and configurations that operate
+   * strictly within the scope of documents matching the query.
+   *
    * @alpha
    */
   aggs?: Record<string, AggregationsAggregationContainer>;

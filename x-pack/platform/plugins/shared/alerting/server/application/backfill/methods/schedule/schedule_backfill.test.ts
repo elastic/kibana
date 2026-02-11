@@ -31,6 +31,7 @@ import { RulesClient } from '../../../../rules_client';
 import type { ScheduleBackfillParam } from './types';
 import { adHocRunStatus } from '../../../../../common/constants';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { backfillInitiator } from '../../../../../common/constants';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -191,7 +192,7 @@ function getMockData(overwrites: Record<string, unknown> = {}): ScheduleBackfill
         end: '2023-11-16T08:05:00.000Z',
       },
     ],
-
+    initiator: backfillInitiator.USER,
     runActions: true,
     ...overwrites,
   };
@@ -510,13 +511,13 @@ describe('scheduleBackfill()', () => {
         // @ts-expect-error
         rulesClient.scheduleBackfill(getMockData())
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating backfill schedule parameters \\"{\\"ruleId\\":\\"1\\",\\"ranges\\":[{\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:05:00.000Z\\"}],\\"runActions\\":true}\\" - expected value of type [array] but got [Object]"`
+        `"Error validating backfill schedule parameters \\"{\\"ruleId\\":\\"1\\",\\"ranges\\":[{\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:05:00.000Z\\"}],\\"initiator\\":\\"user\\",\\"runActions\\":true}\\" - expected value of type [array] but got [Object]"`
       );
 
       await expect(
         rulesClient.scheduleBackfill([getMockData({ ruleId: 1 })])
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":1,\\"ranges\\":[{\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:05:00.000Z\\"}],\\"runActions\\":true}]\\" - [0.ruleId]: expected value of type [string] but got [number]"`
+        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":1,\\"ranges\\":[{\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:05:00.000Z\\"}],\\"initiator\\":\\"user\\",\\"runActions\\":true}]\\" - [0.ruleId]: expected value of type [string] but got [number]"`
       );
     });
 
@@ -535,7 +536,7 @@ describe('scheduleBackfill()', () => {
           }),
         ])
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":\\"1\\",\\"ranges\\":[{\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:05:00.000Z\\"}],\\"runActions\\":true},{\\"ruleId\\":\\"2\\",\\"ranges\\":[{\\"start\\":\\"2023-11-17T08:00:00.000Z\\",\\"end\\":\\"2023-11-17T08:00:00.000Z\\"}],\\"runActions\\":true}]\\" - [1]: Backfill end must be greater than backfill start"`
+        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":\\"1\\",\\"ranges\\":[{\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:05:00.000Z\\"}],\\"initiator\\":\\"user\\",\\"runActions\\":true},{\\"ruleId\\":\\"2\\",\\"ranges\\":[{\\"start\\":\\"2023-11-17T08:00:00.000Z\\",\\"end\\":\\"2023-11-17T08:00:00.000Z\\"}],\\"initiator\\":\\"user\\",\\"runActions\\":true}]\\" - [1]: Backfill end must be greater than backfill start"`
       );
 
       await expect(
@@ -552,7 +553,7 @@ describe('scheduleBackfill()', () => {
           }),
         ])
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":\\"1\\",\\"ranges\\":[{\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:05:00.000Z\\"}],\\"runActions\\":true},{\\"ruleId\\":\\"2\\",\\"ranges\\":[{\\"start\\":\\"2023-11-17T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:00:00.000Z\\"}],\\"runActions\\":true}]\\" - [1]: Backfill end must be greater than backfill start"`
+        `"Error validating backfill schedule parameters \\"[{\\"ruleId\\":\\"1\\",\\"ranges\\":[{\\"start\\":\\"2023-11-16T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:05:00.000Z\\"}],\\"initiator\\":\\"user\\",\\"runActions\\":true},{\\"ruleId\\":\\"2\\",\\"ranges\\":[{\\"start\\":\\"2023-11-17T08:00:00.000Z\\",\\"end\\":\\"2023-11-16T08:00:00.000Z\\"}],\\"initiator\\":\\"user\\",\\"runActions\\":true}]\\" - [1]: Backfill end must be greater than backfill start"`
       );
     });
 
@@ -664,5 +665,11 @@ describe('scheduleBackfill()', () => {
       expect(unsecuredSavedObjectsClient.find).toHaveBeenCalled();
       expect(backfillClient.bulkQueue).toHaveBeenCalled();
     });
+  });
+
+  test('should reject initiatorId when initiator is not system', async () => {
+    await expect(
+      rulesClient.scheduleBackfill([getMockData({ initiatorId: 'id', initiator: 'user' })])
+    ).rejects.toThrow('Initiator ID can only be used with system initiator');
   });
 });

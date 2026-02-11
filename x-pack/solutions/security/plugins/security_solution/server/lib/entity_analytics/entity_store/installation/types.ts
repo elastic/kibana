@@ -102,6 +102,7 @@ export interface EntityEngineInstallationDescriptor {
 export type FieldDescription = EntityDefinitionMetadataElement & {
   mapping: MappingProperty;
   retention: FieldRetentionOp;
+  allowAPIUpdate?: boolean;
 };
 
 export type FieldRetentionOp =

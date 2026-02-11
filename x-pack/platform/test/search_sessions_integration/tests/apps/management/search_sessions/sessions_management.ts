@@ -29,7 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('dashboard');
         log.debug('wait for dashboard landing page');
         await testSubjects.existOrFail('dashboardLandingPage', { timeout: 10000 });
-        await searchSessions.markTourDone();
       });
 
       after(async () => {
@@ -38,15 +37,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('Saves a session and verifies it in the Management app', async () => {
         log.debug('loading the "Not Delayed" dashboard');
-        await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
+        await PageObjects.dashboard.loadSavedDashboard('Delayed 5s');
         await PageObjects.dashboard.waitForRenderComplete();
-        await searchSessions.expectState('completed');
         const searchSessionName = `Session - ${uuidv4()}`;
-        await searchSessions.save({ searchSessionName });
-        await searchSessions.expectState('backgroundCompleted');
 
-        await searchSessions.openPopover();
-        await searchSessions.viewSearchSessions();
+        await searchSessions.save({ withRefresh: true, isSubmitButton: true });
+        await searchSessions.openFlyout();
+        const list = await PageObjects.searchSessionsManagement.getList();
+        await list[0].rename(searchSessionName);
+
+        await PageObjects.searchSessionsManagement.goTo();
 
         await retry.waitFor(`first item to complete`, async function () {
           const s = await PageObjects.searchSessionsManagement.getList();
@@ -69,11 +69,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessionList[0].view();
 
         // embeddable has loaded
-        await testSubjects.existOrFail('embeddablePanelHeading-SumofBytesbyExtension');
+        await testSubjects.existOrFail('embeddablePanelHeading-SumofBytesbyExtension(Delayed5s)');
         await PageObjects.dashboard.waitForRenderComplete();
-
-        // search session was restored
-        await searchSessions.expectState('restored');
       });
 
       it('Deletes a session from management', async () => {
@@ -91,11 +88,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('Should be called "Search Sessions" in the management apps sidebar', async () => {
+      it('Should be called "Background search" in the management apps sidebar', async () => {
         await PageObjects.common.navigateToApp('management');
         const searchSessionsAnchor = await testSubjects.find('search_sessions');
         const anchorText = await searchSessionsAnchor.getVisibleText();
-        expect(anchorText).to.be('Search Sessions');
+        expect(anchorText).to.be('Background Search');
       });
     });
   });

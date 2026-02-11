@@ -154,58 +154,6 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
           }
         });
 
-        it('throw an error for find maintenance window request with pagination if docs count more 10k', async () => {
-          const { body: createdMaintenanceWindow1 } = await supertest
-            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/maintenance_window`)
-            .set('kbn-xsrf', 'foo')
-            .send(createParams);
-
-          objectRemover.add(
-            space.id,
-            createdMaintenanceWindow1.id,
-            'rules/maintenance_window',
-            'alerting',
-            true
-          );
-
-          const response = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                space.id
-              )}/internal/alerting/rules/maintenance_window/_find?page=101&per_page=100`
-            )
-            .set('kbn-xsrf', 'foo')
-            .auth(user.username, user.password)
-            .send({});
-
-          switch (scenario.id) {
-            case 'no_kibana_privileges at space1':
-            case 'space_1_all at space2':
-            case 'space_1_all_with_restricted_fixture at space1':
-            case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message:
-                  'API [GET /internal/alerting/rules/maintenance_window/_find?page=101&per_page=100] is unauthorized for user, this action is granted by the Kibana privileges [read-maintenance-window]',
-                statusCode: 403,
-              });
-              break;
-            case 'global_read at space1':
-            case 'superuser at space1':
-            case 'space_1_all at space1':
-              expect(response.body).to.eql({
-                statusCode: 400,
-                error: 'Bad Request',
-                message:
-                  '[request query]: The number of documents is too high. Paginating through more than 10000 documents is not possible.',
-              });
-              break;
-            default:
-              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-          }
-        });
-
         it('should filter maintenance windows based on search text', async () => {
           const { body: createdMaintenanceWindow1 } = await supertest
             .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/maintenance_window`)

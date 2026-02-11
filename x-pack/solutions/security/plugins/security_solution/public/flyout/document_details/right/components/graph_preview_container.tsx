@@ -53,7 +53,7 @@ export const GraphPreviewContainer: React.FC = () => {
   const {
     eventIds,
     timestamp = new Date().toISOString(),
-    hasGraphRepresentation,
+    shouldShowGraph,
     isAlert,
   } = useGraphPreview({
     getFieldsData,
@@ -71,16 +71,16 @@ export const GraphPreviewContainer: React.FC = () => {
       },
     },
     options: {
-      enabled: hasGraphRepresentation,
+      enabled: shouldShowGraph,
       refetchOnWindowFocus: false,
     },
   });
 
   useEffect(() => {
-    if (hasGraphRepresentation) {
+    if (shouldShowGraph) {
       uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, GRAPH_PREVIEW);
     }
-  }, [hasGraphRepresentation, renderingId]);
+  }, [shouldShowGraph, renderingId]);
 
   return (
     <ExpandablePanel

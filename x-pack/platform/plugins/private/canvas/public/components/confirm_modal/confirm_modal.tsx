@@ -62,6 +62,7 @@ export const ConfirmModal: FunctionComponent<Props> = (props) => {
 };
 
 ConfirmModal.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   isOpen: PropTypes.bool,
   title: PropTypes.string,
   message: PropTypes.string.isRequired,

@@ -8,7 +8,7 @@
  */
 
 import { fromFiltersLensApiToLensState, fromFiltersLensStateToAPI } from './filters';
-import type { FiltersIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { FiltersIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiFiltersOperation } from '../../schema/bucket_ops';
 
 describe('Filters Transforms', () => {

@@ -141,6 +141,7 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
       {showNodeInfo && transformNodes === 0 && (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.transform.transformNodes.noTransformNodesCallOutTitle"

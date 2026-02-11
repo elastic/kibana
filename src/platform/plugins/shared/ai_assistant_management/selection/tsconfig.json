@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -21,7 +21,13 @@
     "@kbn/doc-links",
     "@kbn/core-ui-settings-common",
     "@kbn/cloud-plugin",
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/spaces-plugin",
+    "@kbn/ai-assistant-icon",
+    "@kbn/ai-assistant-common",
+    "@kbn/ai-agent-confirmation-modal",
+    "@kbn/management-settings-ids"
   ],
   "exclude": ["target/**/*"]
 }

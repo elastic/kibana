@@ -495,6 +495,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
           </EuiText>
           <EuiSpacer size="s" />
           <EuiCallOut
+            announceOnMount
             iconType="info"
             size="s"
             title={i18n.translate(

@@ -13,11 +13,11 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RecursivePartial } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { DisplayMoreOptions } from './display_more_options';
 import type {
-  JiraServiceManagementActionParams,
-  JiraServiceManagementCloseAlertParams,
-} from '../../../server/connector_types';
+  Params as JiraServiceManagementActionParams,
+  CloseAlertParams as JiraServiceManagementCloseAlertParams,
+} from '@kbn/connector-schemas/jira-service-management';
+import { DisplayMoreOptions } from './display_more_options';
 import * as i18n from './translations';
 import type { EditActionCallback } from './types';
 

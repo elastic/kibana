@@ -146,7 +146,6 @@ const createLatestIndex = async (
     const {
       template,
       _meta,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       composed_of = [],
     } = indexTemplateResponse.index_templates[0].index_template;
 

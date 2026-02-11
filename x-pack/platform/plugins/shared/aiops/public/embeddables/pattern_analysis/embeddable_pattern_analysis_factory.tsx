@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import {
-  EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
-  PATTERN_ANALYSIS_DATA_VIEW_REF_NAME,
-} from '@kbn/aiops-log-pattern-analysis/constants';
+import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
-  type SerializedPanelState,
   apiHasExecutionContext,
   apiPublishesFilters,
   fetch$,
@@ -26,32 +22,16 @@ import {
 } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import fastIsEqual from 'fast-deep-equal';
-import { cloneDeep } from 'lodash';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, distinctUntilChanged, map, merge, skipWhile } from 'rxjs';
 import { getPatternAnalysisComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import { initializePatternAnalysisControls } from './initialize_pattern_analysis_controls';
-import type { PatternAnalysisEmbeddableApi, PatternAnalysisEmbeddableState } from './types';
-import { getDataviewReferences } from '../get_dataview_references';
+import type { PatternAnalysisEmbeddableApi } from './types';
+import type { PatternAnalysisEmbeddableState } from '../../../common/embeddables/pattern_analysis/types';
 
 export type EmbeddablePatternAnalysisType = typeof EMBEDDABLE_PATTERN_ANALYSIS_TYPE;
-
-function deserializeState(serializedState?: SerializedPanelState<PatternAnalysisEmbeddableState>) {
-  const state = serializedState?.rawState
-    ? cloneDeep(serializedState?.rawState)
-    : ({} as PatternAnalysisEmbeddableState);
-  // inject the reference
-  const dataViewIdRef = serializedState?.references?.find(
-    (ref) => ref.name === PATTERN_ANALYSIS_DATA_VIEW_REF_NAME
-  );
-  // if the serializedState already contains a dataViewId, we don't want to overwrite it. (Unsaved state can cause this)
-  if (dataViewIdRef && state && !state.dataViewId) {
-    state.dataViewId = dataViewIdRef?.id;
-  }
-  return state;
-}
 
 export const getPatternAnalysisEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
@@ -60,9 +40,9 @@ export const getPatternAnalysisEmbeddableFactory = (
     type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
-      const runtimeState = deserializeState(initialState);
-      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
-      const titleManager = initializeTitleManager(initialState.rawState);
+      const runtimeState = initialState;
+      const timeRangeManager = initializeTimeRangeManager(initialState);
+      const titleManager = initializeTitleManager(initialState);
 
       const {
         patternAnalysisControlsApi,
@@ -73,23 +53,19 @@ export const getPatternAnalysisEmbeddableFactory = (
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
-        await pluginStart.data.dataViews.get(
-          runtimeState.dataViewId ?? (await pluginStart.data.dataViews.getDefaultId())
-        ),
-      ]);
+      const initialDataViewId =
+        runtimeState.dataViewId ?? (await pluginStart.data.dataViews.getDefaultId());
+      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
+        initialDataViewId ? [await pluginStart.data.dataViews.get(initialDataViewId)] : []
+      );
 
       const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
 
       function serializeState() {
-        const dataViewId = patternAnalysisControlsApi.dataViewId.getValue();
         return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...timeRangeManager.getLatestState(),
-            ...serializePatternAnalysisChartState(),
-          },
-          references: getDataviewReferences(dataViewId, PATTERN_ANALYSIS_DATA_VIEW_REF_NAME),
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...serializePatternAnalysisChartState(),
         };
       }
 
@@ -112,10 +88,11 @@ export const getPatternAnalysisEmbeddableFactory = (
           ...patternAnalysisControlsComparators,
         }),
         onReset: (lastSaved) => {
-          const lastState = deserializeState(lastSaved);
-          timeRangeManager.reinitializeState(lastSaved?.rawState);
-          titleManager.reinitializeState(lastSaved?.rawState);
-          patternAnalysisControlsApi.updateUserInput(lastState);
+          timeRangeManager.reinitializeState(lastSaved);
+          titleManager.reinitializeState(lastSaved);
+          if (lastSaved) {
+            patternAnalysisControlsApi.updateUserInput(lastSaved);
+          }
         },
       });
 
@@ -212,7 +189,7 @@ export const getPatternAnalysisEmbeddableFactory = (
           return (
             <PatternAnalysisComponent
               filtersApi={filtersApi}
-              dataViewId={dataViewId}
+              dataViewId={dataViewId ?? ''}
               fieldName={fieldName}
               minimumTimeRangeOption={minimumTimeRangeOption}
               randomSamplerMode={randomSamplerMode}

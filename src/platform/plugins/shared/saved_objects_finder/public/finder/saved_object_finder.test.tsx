@@ -727,7 +727,7 @@ describe('SavedObjectsFinder', () => {
     wrapper.instance().componentDidMount!();
     await nextTick();
 
-    expect(wrapper.find(EuiInMemoryTable).prop('message')).toEqual(noItemsMessage);
+    expect(wrapper.find(EuiInMemoryTable).prop('noItemsMessage')).toEqual(noItemsMessage);
   });
 
   describe('pagination', () => {

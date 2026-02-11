@@ -9,16 +9,20 @@
 
 const SERVERLESS_ONLY = [
   '@svlSecurity',
+  '@svlSecurityEssentials',
+  '@svlSecurityEase',
   '@svlOblt',
   '@svlLogsEssentials',
   '@svlSearch',
-  '@svlChat',
+  '@svlWorkplaceAI',
 ];
 const ESS_ONLY = ['@ess'];
-// svlChat is truly serverless only and doesn't have a stateful counterpart
+// svlWorkplaceAI is truly serverless only and doesn't have a stateful counterpart
 const DEPLOYMENT_AGNOSTIC = [
   '@ess',
   '@svlSecurity',
+  '@svlSecurityEssentials',
+  '@svlSecurityEase',
   '@svlOblt',
   '@svlLogsEssentials',
   '@svlSearch',
@@ -35,10 +39,12 @@ export const tags = {
 export const tagsByMode = {
   stateful: '@ess',
   serverless: {
-    chat: '@svlChat',
+    workplaceai: '@svlWorkplaceAI',
     es: '@svlSearch',
     oblt: '@svlOblt',
     'oblt-logs-essentials': '@svlLogsEssentials',
     security: '@svlSecurity',
+    'security-essentials': '@svlSecurityEssentials',
+    'security-ease': '@svlSecurityEase',
   },
 };

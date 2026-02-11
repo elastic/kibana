@@ -7,7 +7,7 @@
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 
 import type { RollbackPackageResponse } from '../../../common/types';
 
@@ -21,6 +21,7 @@ export interface BulkRollbackTaskParams {
   type: 'bulk_rollback';
   packages: Array<{ name: string }>;
   spaceId?: string;
+  packagePolicyIdsForCurrentUser: { [packageName: string]: string[] };
 }
 
 interface BulkRollbackTaskState {
@@ -45,11 +46,8 @@ export async function _runBulkRollbackTask({
   abortController: AbortController;
   logger: Logger;
 }) {
-  const { packages, spaceId = DEFAULT_SPACE_ID } = taskParams;
+  const { packages, spaceId = DEFAULT_SPACE_ID, packagePolicyIdsForCurrentUser } = taskParams;
   const esClient = appContextService.getInternalUserESClient();
-  const internalSoClientWithoutSpaceExtension =
-    appContextService.getInternalUserSOClientWithoutSpaceExtension();
-
   const results: BulkRollbackTaskState['results'] = [];
 
   for (const pkg of packages) {
@@ -60,7 +58,7 @@ export async function _runBulkRollbackTask({
     try {
       const response: RollbackPackageResponse = await rollbackInstallation({
         esClient,
-        savedObjectsClient: internalSoClientWithoutSpaceExtension,
+        currentUserPolicyIds: packagePolicyIdsForCurrentUser[pkg.name],
         pkgName: pkg.name,
         spaceId,
       });
@@ -84,7 +82,12 @@ export async function _runBulkRollbackTask({
 
 export async function scheduleBulkRollback(
   taskManagerStart: TaskManagerStartContract,
-  taskParams: Omit<BulkRollbackTaskParams, 'type'>
+  taskParams: Omit<BulkRollbackTaskParams, 'type'>,
+  request: KibanaRequest
 ) {
-  return scheduleBulkOperationTask(taskManagerStart, { ...taskParams, type: 'bulk_rollback' });
+  return scheduleBulkOperationTask(
+    taskManagerStart,
+    { ...taskParams, type: 'bulk_rollback' },
+    request
+  );
 }

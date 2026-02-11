@@ -20,6 +20,13 @@ export function IndexLifecyclePhaseSelect() {
     query: { indexLifecyclePhase },
   } = useApmParams('/storage-explorer');
 
+  const indexLifecyclePhaseLabel = i18n.translate(
+    'xpack.apm.storageExplorer.indexLifecyclePhase.label',
+    {
+      defaultMessage: 'Index lifecycle phase',
+    }
+  );
+
   const options = [
     {
       value: IndexLifecyclePhaseSelectOption.All,
@@ -92,9 +99,7 @@ export function IndexLifecyclePhaseSelect() {
 
   return (
     <EuiSuperSelect
-      prepend={i18n.translate('xpack.apm.storageExplorer.indexLifecyclePhase.label', {
-        defaultMessage: 'Index lifecycle phase',
-      })}
+      prepend={indexLifecyclePhaseLabel}
       options={options}
       valueOfSelected={indexLifecyclePhase}
       onChange={(value) => {
@@ -105,6 +110,7 @@ export function IndexLifecyclePhaseSelect() {
       hasDividers
       style={{ minWidth: 200 }}
       data-test-subj="storageExplorerLifecyclePhaseSelect"
+      aria-label={indexLifecyclePhaseLabel}
     />
   );
 }

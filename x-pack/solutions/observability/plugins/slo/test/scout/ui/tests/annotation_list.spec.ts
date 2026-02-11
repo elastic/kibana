@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
 test.describe('Annotations List', { tag: ['@ess'] }, () => {
-  test.beforeAll(async ({ sloData }) => {
-    await sloData.generateSloData();
-    await sloData.addSLO();
-  });
-
   test.beforeEach(async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.annotations.goto();
   });
 
   test('create an annotation', async ({ page }) => {
-    await page.click('text="Create annotation"');
+    await page.getByTestId('o11yRenderToolsRightCreateAnnotationButton').click();
     await page.getByTestId('annotationTitle').fill('Test annotation');
     await page.getByTestId('annotationTitle').blur();
     await page.getByTestId('annotationMessage').fill('Test annotation description');
@@ -28,11 +23,8 @@ test.describe('Annotations List', { tag: ['@ess'] }, () => {
     await page.getByTestId('annotationTags').click();
     await page.getByTestId('sloSelector').getByTestId('comboBoxSearchInput').click();
     await page.click('text="All SLOs"');
-    await page.click('text=Save');
+    await page.getByTestId('annotationSaveButton').click();
     await page.getByTestId('toastCloseButton').click();
-  });
-
-  test('validate annotation list', async ({ page }) => {
     await expect(
       page.locator('[data-test-subj="annotation-marker-body"]:has-text("Test annotation")')
     ).toBeVisible();
@@ -45,21 +37,17 @@ test.describe('Annotations List', { tag: ['@ess'] }, () => {
     ).toBeVisible();
   });
 
-  test('Go to slos', async ({ page }) => {
-    await page.getByTestId('observability-nav-slo-slos').click();
+  test('Go to SLOs and check that annotation is displayed', async ({ page, pageObjects }) => {
+    await pageObjects.slo.openFromSideMenu();
     await page.click('text="Test Stack SLO"');
-    await page.evaluate(() => {
-      window.scrollTo(0, document.body.scrollHeight);
-    });
-  });
+    await page.testSubj
+      .locator('sliChartPanel')
+      .locator('.echChartContent')
+      .scrollIntoViewIfNeeded();
 
-  test('check that annotation is displayed', async ({ page }) => {
-    await page.getByRole('button', { name: 'Test annotation description' }).hover();
     await expect(
-      page.locator(
-        '[data-test-subj="annotation-tooltip-description"]:has-text("Test annotation description")'
-      )
-    ).toBeVisible();
+      page.testSubj.locator('sliChartPanel').locator('[data-testid="echAnnotationMarker"]')
+    ).toHaveText('Test annotation');
   });
 
   test('update annotation', async ({ page }) => {

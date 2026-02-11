@@ -95,6 +95,7 @@ export const SearchIndexDocuments: React.FC = () => {
         <>
           {isAccessControlIndexNotFound && (
             <EuiCallOut
+              announceOnMount
               size="m"
               title={i18n.translate(
                 'xpack.contentConnectors.content.searchIndex.documents.noIndex.title',

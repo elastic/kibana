@@ -9,15 +9,15 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import * as ReactQuery from '@tanstack/react-query';
+import '@kbn/react-query/mock';
+import * as ReactQuery from '@kbn/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { queryKeyPrefix, useVirtualDataViewQuery } from './use_virtual_data_view_query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
-const { QueryClient, QueryClientProvider } = ReactQuery;
-const useQuerySpy = jest.spyOn(ReactQuery, 'useQuery');
+const { QueryClient, QueryClientProvider, useQuery } = ReactQuery;
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
@@ -49,7 +49,7 @@ describe('useVirtualDataViewQuery', () => {
 
     expect(mockDataViewsService.create).not.toHaveBeenCalled();
     rerender({ indexNames: [] });
-    expect(useQuerySpy).toHaveBeenCalledWith(
+    expect(useQuery).toHaveBeenCalledWith(
       expect.objectContaining({ enabled: false, queryKey: queryKeyPrefix.concat([]) })
     );
 

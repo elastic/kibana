@@ -81,6 +81,7 @@ export const createDefaultAlertExecutorOptions = <
     alertsClient: null,
     getDataViews: async () => dataViewPluginMocks.createStartContract(),
     getMaintenanceWindowIds: async () => ['test-id-1', 'test-id-2'],
+    getMaintenanceWindowNames: async () => ['test-name-1', 'test-name-2'],
     getSearchSourceClient: async () => searchSourceCommonMock,
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),

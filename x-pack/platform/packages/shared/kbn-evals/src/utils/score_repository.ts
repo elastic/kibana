@@ -6,50 +6,101 @@
  */
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { Model } from '@kbn/inference-common';
 import type { Client as EsClient } from '@elastic/elasticsearch';
-import { hostname } from 'os';
-import type { DatasetScoreWithStats } from './evaluation_stats';
+import type { Model } from '@kbn/inference-common';
 
-interface ModelScoreDocument {
+export interface EvaluationScoreDocument {
   '@timestamp': string;
   run_id: string;
-  model: {
+  experiment_id: string;
+
+  example: {
     id: string;
-    family: string;
-    provider: string;
+    index: number;
+    dataset: {
+      id: string;
+      name: string;
+    };
   };
-  dataset: {
-    id: string;
-    name: string;
-    examples_count: number;
+
+  task: {
+    trace_id: string | null;
+    repetition_index: number;
+    model: Model;
   };
+
   evaluator: {
     name: string;
-    stats: {
-      mean: number;
-      median: number;
-      std_dev: number;
-      min: number;
-      max: number;
-      count: number;
-      percentage: number;
-    };
-    scores: number[];
+    score: number | null;
+    label: string | null;
+    explanation: string | null;
+    metadata: Record<string, unknown> | null;
+    trace_id: string | null;
+    model: Model;
   };
-  experiments: Array<{
-    id?: string;
-  }>;
+
+  run_metadata: {
+    git_branch: string | null;
+    git_commit_sha: string | null;
+    total_repetitions: number;
+  };
+
   environment: {
     hostname: string;
   };
-  tags: string[];
+}
+
+/**
+ * Statistics for a single evaluator on a single dataset.
+ * This is the core data structure returned by ES aggregations and used throughout the reporting system.
+ */
+export interface EvaluatorStats {
+  datasetId: string;
+  datasetName: string;
+  evaluatorName: string;
+  stats: {
+    mean: number;
+    median: number;
+    stdDev: number;
+    min: number;
+    max: number;
+    count: number;
+  };
+}
+
+export interface RunStats {
+  stats: EvaluatorStats[];
+  taskModel: Model;
+  evaluatorModel: Model;
+  totalRepetitions: number;
+}
+
+interface RunStatsAggregations {
+  by_dataset?: {
+    buckets?: Array<{
+      key: string;
+      dataset_name?: { buckets?: Array<{ key: string }> };
+      by_evaluator?: {
+        buckets?: Array<{
+          key: string;
+          score_stats?: {
+            avg?: number;
+            std_deviation?: number;
+            min?: number;
+            max?: number;
+            count?: number;
+          };
+          // Captured by percentiles aggregation opposed to the extended_stats aggregation used for the above
+          score_median?: { values?: Record<string, number> };
+        }>;
+      };
+    }>;
+  };
 }
 
 const EVALUATIONS_DATA_STREAM_ALIAS = '.kibana-evaluations';
 const EVALUATIONS_DATA_STREAM_WILDCARD = '.kibana-evaluations*';
 const EVALUATIONS_DATA_STREAM_TEMPLATE = 'kibana-evaluations-template';
-
 export class EvaluationScoreRepository {
   constructor(private readonly esClient: EsClient, private readonly log: SomeDevLog) {}
 
@@ -63,55 +114,68 @@ export class EvaluationScoreRepository {
         settings: {
           number_of_shards: 1,
           number_of_replicas: 0,
-          refresh_interval: '30s',
+          refresh_interval: '5s',
           'index.hidden': true,
         },
         mappings: {
           properties: {
             '@timestamp': { type: 'date' },
             run_id: { type: 'keyword' },
-            model: {
+            experiment_id: { type: 'keyword' },
+            example: {
               type: 'object',
               properties: {
                 id: { type: 'keyword' },
-                family: { type: 'keyword' },
-                provider: { type: 'keyword' },
+                index: { type: 'integer' },
+                dataset: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'keyword' },
+                    name: { type: 'keyword' },
+                  },
+                },
               },
             },
-            dataset: {
+            task: {
               type: 'object',
               properties: {
-                id: { type: 'keyword' },
-                name: { type: 'keyword' },
-                examples_count: { type: 'integer' },
+                trace_id: { type: 'keyword' },
+                repetition_index: { type: 'integer' },
+                model: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'keyword' },
+                    family: { type: 'keyword' },
+                    provider: { type: 'keyword' },
+                  },
+                },
               },
             },
             evaluator: {
               type: 'object',
               properties: {
                 name: { type: 'keyword' },
-                stats: {
+                score: { type: 'float' },
+                label: { type: 'keyword' },
+                explanation: { type: 'text', index: false },
+                metadata: { type: 'flattened' },
+                trace_id: { type: 'keyword' },
+                model: {
                   type: 'object',
                   properties: {
-                    mean: { type: 'float' },
-                    median: { type: 'float' },
-                    std_dev: { type: 'float' },
-                    min: { type: 'float' },
-                    max: { type: 'float' },
-                    count: { type: 'integer' },
-                    percentage: { type: 'float' },
+                    id: { type: 'keyword' },
+                    family: { type: 'keyword' },
+                    provider: { type: 'keyword' },
                   },
-                },
-                scores: {
-                  type: 'float',
-                  index: false,
                 },
               },
             },
-            experiments: {
-              type: 'nested',
+            run_metadata: {
+              type: 'object',
               properties: {
-                id: { type: 'keyword' },
+                git_branch: { type: 'keyword' },
+                git_commit_sha: { type: 'keyword' },
+                total_repetitions: { type: 'integer' },
               },
             },
             environment: {
@@ -120,7 +184,6 @@ export class EvaluationScoreRepository {
                 hostname: { type: 'keyword' },
               },
             },
-            tags: { type: 'keyword' },
           },
         },
       },
@@ -131,7 +194,6 @@ export class EvaluationScoreRepository {
         .existsIndexTemplate({
           name: EVALUATIONS_DATA_STREAM_TEMPLATE,
         })
-        .then(() => true)
         .catch(() => false);
 
       if (!templateExists) {
@@ -169,87 +231,37 @@ export class EvaluationScoreRepository {
     }
   }
 
-  async exportScores({
-    datasetScoresWithStats,
-    evaluatorNames,
-    model,
-    runId,
-    tags = [],
-  }: {
-    datasetScoresWithStats: DatasetScoreWithStats[];
-    evaluatorNames: string[];
-    model: Model;
-    runId: string;
-    tags?: string[];
-  }): Promise<void> {
+  async exportScores(documents: EvaluationScoreDocument[]): Promise<void> {
     try {
       await this.ensureIndexTemplate();
       await this.ensureDatastream();
 
-      if (datasetScoresWithStats.length === 0) {
-        this.log.warning('No dataset scores found to export');
+      if (documents.length === 0) {
+        this.log.warning('No evaluation scores to export');
         return;
       }
 
-      const documents: ModelScoreDocument[] = [];
-      const timestamp = new Date().toISOString();
-
-      for (const dataset of datasetScoresWithStats) {
-        for (const evaluatorName of evaluatorNames) {
-          const stats = dataset.evaluatorStats.get(evaluatorName);
-          const scores = dataset.evaluatorScores.get(evaluatorName) || [];
-          if (!stats || stats.count === 0) {
-            continue;
-          }
-
-          const document: ModelScoreDocument = {
-            '@timestamp': timestamp,
-            run_id: runId,
-            model: {
-              id: model.id || 'unknown',
-              family: model.family,
-              provider: model.provider,
-            },
-            dataset: {
-              id: dataset.id,
-              name: dataset.name,
-              examples_count: dataset.numExamples,
-            },
-            evaluator: {
-              name: evaluatorName,
-              stats: {
-                mean: stats.mean,
-                median: stats.median,
-                std_dev: stats.stdDev,
-                min: stats.min,
-                max: stats.max,
-                count: stats.count,
-                percentage: stats.percentage,
-              },
-              scores,
-            },
-            experiments: dataset.experiments || [],
-            environment: {
-              hostname: hostname(),
-            },
-            tags,
-          };
-
-          documents.push(document);
-        }
-      }
       // Bulk index documents
       if (documents.length > 0) {
         const stats = await this.esClient.helpers.bulk({
           datasource: documents,
           onDocument: (doc) => {
+            const docId = [
+              doc.run_id,
+              doc.example.dataset.id,
+              doc.example.id,
+              doc.evaluator.name,
+              doc.task.repetition_index,
+            ].join('-');
+
             return {
               create: {
                 _index: EVALUATIONS_DATA_STREAM_ALIAS,
-                _id: `${doc.environment.hostname}-${doc.model.id}-${doc.dataset.id}-${doc.evaluator.name}-${timestamp}`,
+                _id: docId,
               },
             };
           },
+          refresh: 'wait_for',
         });
 
         // Check for bulk operation errors
@@ -262,20 +274,7 @@ export class EvaluationScoreRepository {
           );
         }
 
-        this.log.success(
-          `Successfully indexed evaluation results to a datastream: ${EVALUATIONS_DATA_STREAM_ALIAS}`
-        );
-
-        // Log summary information for easy querying
-        this.log.info(`Export details:`);
-        this.log.info(
-          `  - Query filter: environment.hostname:"${hostname()}" AND model.id:"${
-            model.id
-          }" AND run_id:"${runId}"`
-        );
-        this.log.info(`  - Timestamp: ${timestamp}`);
-        this.log.info(`  - Datasets: ${datasetScoresWithStats.map((d) => d.name).join(', ')}`);
-        this.log.info(`  - Evaluators: ${evaluatorNames.join(', ')}`);
+        this.log.debug(`Successfully indexed ${stats.successful} evaluation scores`);
       }
     } catch (error) {
       this.log.error('Failed to export scores to Elasticsearch:', error);
@@ -283,7 +282,84 @@ export class EvaluationScoreRepository {
     }
   }
 
-  async getScoresByRunId(runId: string): Promise<ModelScoreDocument[]> {
+  async getStatsByRunId(runId: string): Promise<RunStats | null> {
+    try {
+      const runQuery = { term: { run_id: runId } };
+
+      const metadataResponse = await this.esClient.search<EvaluationScoreDocument>({
+        index: EVALUATIONS_DATA_STREAM_WILDCARD,
+        query: runQuery,
+        size: 1,
+      });
+
+      // Used for metedata for the evaluation run (all score documents capture the same metadata)
+      const firstDoc = metadataResponse.hits?.hits[0]?._source;
+      if (!firstDoc) {
+        return null;
+      }
+
+      const aggResponse = await this.esClient.search({
+        index: EVALUATIONS_DATA_STREAM_WILDCARD,
+        size: 0,
+        query: runQuery,
+        aggs: {
+          by_dataset: {
+            terms: { field: 'example.dataset.id', size: 10000 },
+            aggs: {
+              dataset_name: { terms: { field: 'example.dataset.name', size: 1 } },
+              by_evaluator: {
+                terms: { field: 'evaluator.name', size: 1000 },
+                aggs: {
+                  score_stats: { extended_stats: { field: 'evaluator.score' } },
+                  score_median: { percentiles: { field: 'evaluator.score', percents: [50] } },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const aggregations = aggResponse.aggregations as RunStatsAggregations | undefined;
+      const datasetBuckets = aggregations?.by_dataset?.buckets ?? [];
+
+      const stats = datasetBuckets.flatMap((datasetBucket) => {
+        const datasetId = datasetBucket.key;
+        const datasetName = datasetBucket.dataset_name?.buckets?.[0]?.key ?? datasetId;
+        const evaluatorBuckets = datasetBucket.by_evaluator?.buckets ?? [];
+
+        return evaluatorBuckets.map((evaluatorBucket) => {
+          const scoreStats = evaluatorBucket.score_stats;
+          const median = evaluatorBucket.score_median?.values?.['50.0'];
+
+          return {
+            datasetId,
+            datasetName,
+            evaluatorName: evaluatorBucket.key,
+            stats: {
+              mean: scoreStats?.avg ?? 0,
+              median: median ?? 0,
+              stdDev: scoreStats?.std_deviation ?? 0,
+              min: scoreStats?.min ?? 0,
+              max: scoreStats?.max ?? 0,
+              count: scoreStats?.count ?? 0,
+            },
+          };
+        });
+      });
+
+      return {
+        stats,
+        taskModel: firstDoc.task.model,
+        evaluatorModel: firstDoc.evaluator.model,
+        totalRepetitions: firstDoc.run_metadata?.total_repetitions ?? 1,
+      };
+    } catch (error) {
+      this.log.error(`Failed to retrieve stats for run ID ${runId}:`, error);
+      return null;
+    }
+  }
+
+  async getScoresByRunId(runId: string): Promise<EvaluationScoreDocument[]> {
     try {
       const query = {
         bool: {
@@ -291,18 +367,22 @@ export class EvaluationScoreRepository {
         },
       };
 
-      const response = await this.esClient.search({
+      const response = await this.esClient.search<EvaluationScoreDocument>({
         index: EVALUATIONS_DATA_STREAM_WILDCARD,
         query,
         sort: [
-          { 'dataset.name': { order: 'asc' as const } },
+          { 'example.dataset.name': { order: 'asc' as const } },
+          { 'example.index': { order: 'asc' as const } },
           { 'evaluator.name': { order: 'asc' as const } },
+          { 'task.repetition_index': { order: 'asc' as const } },
         ],
-        size: 1000,
+        size: 10000,
       });
 
       const hits = response.hits?.hits || [];
-      const scores = hits.map((hit: any) => hit._source);
+      const scores = hits
+        .map((hit) => hit._source)
+        .filter((source): source is EvaluationScoreDocument => source !== undefined);
 
       this.log.info(`Retrieved ${scores.length} scores for run ID: ${runId}`);
       return scores;

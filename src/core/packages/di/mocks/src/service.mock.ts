@@ -16,12 +16,13 @@ import type {
   InternalCoreDiServiceStart,
 } from '@kbn/core-di-internal';
 import type { MethodKeysOf, PublicMethodsOf } from '@kbn/utility-types';
+import { lazyObject } from '@kbn/lazy-object';
 
 function create(): jest.Mocked<PublicMethodsOf<CoreInjectionService>> {
-  return {
+  return lazyObject({
     setup: jest.fn(createInternalSetupContract),
     start: jest.fn(createInternalStartContract),
-  };
+  });
 }
 
 function createContainer() {
@@ -36,15 +37,15 @@ function createContainer() {
 }
 
 function createSetupContract(): jest.MockedObjectDeep<CoreDiServiceSetup> {
-  return {
+  return lazyObject({
     getContainer: jest.fn().mockImplementation(once(createContainer)),
-  };
+  });
 }
 
 function createStartContract(): jest.MockedObjectDeep<CoreDiServiceStart> {
   const getContainer = once(createContainer);
 
-  return {
+  return lazyObject({
     fork: jest.fn().mockImplementation(
       once(() => {
         const container = new Container({ defaultScope: 'Singleton', parent: getContainer() });
@@ -54,7 +55,7 @@ function createStartContract(): jest.MockedObjectDeep<CoreDiServiceStart> {
       })
     ),
     getContainer: jest.fn().mockImplementation(getContainer),
-  };
+  });
 }
 
 function createInternalSetupContract(): jest.MockedObjectDeep<InternalCoreDiServiceSetup> {

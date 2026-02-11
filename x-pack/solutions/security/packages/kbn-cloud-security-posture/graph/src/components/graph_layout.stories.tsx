@@ -9,6 +9,7 @@ import React from 'react';
 import { ThemeProvider, css } from '@emotion/react';
 import type { StoryObj, Meta } from '@storybook/react';
 import type { Writable } from '@kbn/utility-types';
+import type { EdgeColor } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { GlobalStylesStorybookDecorator } from '../../.storybook/decorators';
 import type {
   EdgeViewModel,
@@ -16,6 +17,7 @@ import type {
   NodeViewModel,
   EntityNodeViewModel,
   GroupNodeViewModel,
+  RelationshipNodeViewModel,
 } from '.';
 import { Graph } from '.';
 
@@ -53,36 +55,47 @@ type Story = StoryObj<typeof Graph>;
 type EnhancedNodeViewModel =
   | EntityNodeViewModel
   | GroupNodeViewModel
-  | (LabelNodeViewModel & { source: string; target: string });
+  | (LabelNodeViewModel & { source: string; target: string })
+  | (RelationshipNodeViewModel & { source: string; target: string });
+
+// Helper to get edge color for connector nodes (label or relationship)
+const getConnectorEdgeColor = (node: LabelNodeViewModel | RelationshipNodeViewModel): EdgeColor => {
+  // Relationship nodes use 'subdued' color, label nodes use their color property
+  return node.shape === 'relationship' ? 'subdued' : node.color;
+};
 
 const extractEdges = (
   graphData: EnhancedNodeViewModel[]
 ): { nodes: NodeViewModel[]; edges: EdgeViewModel[] } => {
-  // Process nodes, transform nodes of id in the format of a(source)-b(target) to edges from a to label and from label to b
-  // If there are multiple edges from a to b, create a parent node and group the labels under it. The parent node will be a group node.
-  // Connect from a to the group node and from the group node to all the labels. and from the labels to the group again and from the group to b.
+  // Process nodes, transform connector nodes (label/relationship) to edges
+  // If there are multiple connectors from a to b, create a parent node and group them under it.
+  // The parent node will be a group node.
   const nodesMetadata: { [key: string]: { edgesIn: number; edgesOut: number } } = {};
   const edgesMetadata: {
     [key: string]: { source: string; target: string; edgesStacked: number; edges: string[] };
   } = {};
-  const labelsMetadata: {
-    [key: string]: { source: string; target: string; labelsNodes: LabelNodeViewModel[] };
+  const connectorsMetadata: {
+    [key: string]: {
+      source: string;
+      target: string;
+      connectorNodes: Array<LabelNodeViewModel | RelationshipNodeViewModel>;
+    };
   } = {};
   const nodes: { [key: string]: NodeViewModel } = {};
   const edges: EdgeViewModel[] = [];
 
   graphData.forEach((node) => {
-    if (node.shape === 'label') {
-      const labelNode: LabelNodeViewModel = { ...node, id: `${node.id}label(${node.label})` };
+    if (node.shape === 'label' || node.shape === 'relationship') {
+      const connectorNode = { ...node, id: `${node.id}connector(${node.label})` };
       const { source, target } = node;
 
-      if (labelsMetadata[node.id]) {
-        labelsMetadata[node.id].labelsNodes.push(labelNode);
+      if (connectorsMetadata[node.id]) {
+        connectorsMetadata[node.id].connectorNodes.push(connectorNode);
       } else {
-        labelsMetadata[node.id] = { source, target, labelsNodes: [labelNode] };
+        connectorsMetadata[node.id] = { source, target, connectorNodes: [connectorNode] };
       }
 
-      nodes[labelNode.id] = labelNode;
+      nodes[connectorNode.id] = connectorNode;
 
       // Set metadata
       const edgeId = node.id;
@@ -97,7 +110,7 @@ const extractEdges = (
           source,
           target,
           edgesStacked: 1,
-          edges: [labelNode.id],
+          edges: [connectorNode.id],
         };
       }
     } else {
@@ -106,70 +119,78 @@ const extractEdges = (
     }
   });
 
-  Object.values(labelsMetadata).forEach((edge) => {
-    if (edge.labelsNodes.length > 1) {
+  Object.values(connectorsMetadata).forEach((connector) => {
+    if (connector.connectorNodes.length > 1) {
       const groupNode: NodeViewModel = {
-        id: `grp(a(${edge.source})-b(${edge.target}))`,
+        id: `grp(a(${connector.source})-b(${connector.target}))`,
         shape: 'group',
       };
 
+      const firstConnectorColor = getConnectorEdgeColor(connector.connectorNodes[0]);
+
       nodes[groupNode.id] = groupNode;
       edges.push({
-        id: `a(${edge.source})-b(${groupNode.id})`,
-        source: edge.source,
-        sourceShape: nodes[edge.source].shape,
+        id: `a(${connector.source})-b(${groupNode.id})`,
+        source: connector.source,
+        sourceShape: nodes[connector.source].shape,
         target: groupNode.id,
         targetShape: groupNode.shape,
-        color: edge.labelsNodes[0].color,
+        color: firstConnectorColor,
       });
 
       edges.push({
-        id: `a(${groupNode.id})-b(${edge.target})`,
+        id: `a(${groupNode.id})-b(${connector.target})`,
         source: groupNode.id,
         sourceShape: groupNode.shape,
-        target: edge.target,
-        targetShape: nodes[edge.target].shape,
-        color: edge.labelsNodes[0].color,
+        target: connector.target,
+        targetShape: nodes[connector.target].shape,
+        color: firstConnectorColor,
       });
 
-      edge.labelsNodes.forEach((labelNode: Writable<LabelNodeViewModel>) => {
-        labelNode.parentId = groupNode.id;
+      connector.connectorNodes.forEach(
+        (connectorNode: Writable<LabelNodeViewModel | RelationshipNodeViewModel>) => {
+          connectorNode.parentId = groupNode.id;
+          const edgeColor = getConnectorEdgeColor(connectorNode);
 
-        edges.push({
-          id: `a(${groupNode.id})-b(${labelNode.id})`,
-          source: groupNode.id,
-          sourceShape: groupNode.shape,
-          target: labelNode.id,
-          targetShape: labelNode.shape,
-          color: labelNode.color,
-        });
+          edges.push({
+            id: `a(${groupNode.id})-b(${connectorNode.id})`,
+            source: groupNode.id,
+            sourceShape: groupNode.shape,
+            target: connectorNode.id,
+            targetShape: connectorNode.shape,
+            color: edgeColor,
+          });
 
-        edges.push({
-          id: `a(${labelNode.id})-b(${groupNode.id})`,
-          source: labelNode.id,
-          sourceShape: labelNode.shape,
-          target: groupNode.id,
-          targetShape: groupNode.shape,
-          color: labelNode.color,
-        });
-      });
+          edges.push({
+            id: `a(${connectorNode.id})-b(${groupNode.id})`,
+            source: connectorNode.id,
+            sourceShape: connectorNode.shape,
+            target: groupNode.id,
+            targetShape: groupNode.shape,
+            color: edgeColor,
+          });
+        }
+      );
     } else {
+      const connectorNode = connector.connectorNodes[0];
+      const edgeColor = getConnectorEdgeColor(connectorNode);
+
       edges.push({
-        id: `a(${edge.source})-b(${edge.labelsNodes[0].id})`,
-        source: edge.source,
-        sourceShape: nodes[edge.source].shape,
-        target: edge.labelsNodes[0].id,
-        targetShape: edge.labelsNodes[0].shape,
-        color: edge.labelsNodes[0].color,
+        id: `a(${connector.source})-b(${connectorNode.id})`,
+        source: connector.source,
+        sourceShape: nodes[connector.source].shape,
+        target: connectorNode.id,
+        targetShape: connectorNode.shape,
+        color: edgeColor,
       });
 
       edges.push({
-        id: `a(${edge.labelsNodes[0].id})-b(${edge.target})`,
-        source: edge.labelsNodes[0].id,
-        sourceShape: edge.labelsNodes[0].shape,
-        target: edge.target,
-        targetShape: nodes[edge.target].shape,
-        color: edge.labelsNodes[0].color,
+        id: `a(${connectorNode.id})-b(${connector.target})`,
+        source: connectorNode.id,
+        sourceShape: connectorNode.shape,
+        target: connector.target,
+        targetShape: nodes[connector.target].shape,
+        color: edgeColor,
       });
     }
   });
@@ -349,7 +370,7 @@ export const GroupWithAlertAPIMock: Story = {
         id: 'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
         label: 'google.iam.admin.v1.CreateRole',
         color: 'danger',
-        alertsCount: 1,
+        uniqueAlertsCount: 1,
         shape: 'label',
         parentId: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
       },
@@ -367,7 +388,7 @@ export const GroupWithAlertAPIMock: Story = {
         source: 'admin@example.com',
         target: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
         color: 'danger',
-        alertsCount: 1,
+        uniqueAlertsCount: 1,
         type: 'solid',
       },
       {
@@ -375,7 +396,7 @@ export const GroupWithAlertAPIMock: Story = {
         source: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
         target: 'projects/your-project-id/roles/customRole',
         color: 'danger',
-        alertsCount: 1,
+        uniqueAlertsCount: 1,
         type: 'solid',
       },
       {
@@ -384,7 +405,7 @@ export const GroupWithAlertAPIMock: Story = {
         target:
           'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
         color: 'danger',
-        alertsCount: 1,
+        uniqueAlertsCount: 1,
         type: 'solid',
       },
       {
@@ -393,7 +414,7 @@ export const GroupWithAlertAPIMock: Story = {
           'a(admin@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)',
         target: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
         color: 'danger',
-        alertsCount: 1,
+        uniqueAlertsCount: 1,
         type: 'solid',
       },
       {
@@ -487,7 +508,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     target: 'user',
     label: 'User login to OKTA',
     color: 'danger',
-    alertsCount: 1,
+    uniqueAlertsCount: 1,
     shape: 'label',
     ips: ['85.43.21.73'],
     countryCodes: ['es', 'il', 'it'],
@@ -498,7 +519,7 @@ const baseGraph: EnhancedNodeViewModel[] = [
     target: 'user',
     label: 'User login to OKTA',
     color: 'danger',
-    alertsCount: 1,
+    uniqueAlertsCount: 1,
     shape: 'label',
     ips: ['85.43.21.73'],
     countryCodes: ['es', 'il', 'it'],
@@ -596,7 +617,7 @@ export const GraphLabelOverlayCases: Story = {
         target: 'hackeruser',
         label: 'Overlay Label',
         color: 'danger',
-        alertsCount: 1,
+        uniqueAlertsCount: 1,
         shape: 'label',
       },
       {
@@ -605,7 +626,7 @@ export const GraphLabelOverlayCases: Story = {
         target: 's3',
         label: 'Overlay Label',
         color: 'danger',
-        alertsCount: 1,
+        uniqueAlertsCount: 1,
         shape: 'label',
       },
     ]),
@@ -631,7 +652,7 @@ export const GraphStackedEdgeCases: Story = {
         target: 'user',
         label: 'User login to OKTA2',
         color: 'danger',
-        alertsCount: 1,
+        uniqueAlertsCount: 1,
         shape: 'label',
         ips: ['85.43.21.73'],
         countryCodes: ['es', 'il', 'it'],
@@ -663,7 +684,7 @@ export const GraphLargeStackedEdgeCases: Story = {
           target: 'user',
           label: `User login to OKTA${idx}`,
           color: 'danger',
-          alertsCount: 1,
+          uniqueAlertsCount: 1,
           shape: 'label',
         })),
     ]),
@@ -763,7 +784,7 @@ export const GraphWithAssetInventoryData: Story = {
         target: 'user',
         label: 'User login to OKTA2',
         color: 'danger',
-        alertsCount: 1,
+        uniqueAlertsCount: 1,
         shape: 'label',
       },
     ]),
@@ -862,7 +883,7 @@ export const SingleAndGroupNodes: Story = {
         label: 'Ellipse Connection',
         color: 'primary',
         shape: 'label',
-        eventsCount: 1,
+        uniqueEventsCount: 1,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
       },
@@ -873,7 +894,7 @@ export const SingleAndGroupNodes: Story = {
         label: 'Ellipse Connection 2',
         color: 'danger',
         shape: 'label',
-        alertsCount: 1,
+        uniqueAlertsCount: 1,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
       },
@@ -915,7 +936,7 @@ export const SingleAndGroupNodes: Story = {
         label: 'Diamond Connection',
         color: 'primary',
         shape: 'label',
-        eventsCount: 2,
+        uniqueEventsCount: 2,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
       },
@@ -926,7 +947,7 @@ export const SingleAndGroupNodes: Story = {
         label: 'Diamond Connection2',
         color: 'danger',
         shape: 'label',
-        alertsCount: 2,
+        uniqueAlertsCount: 2,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
       },
@@ -978,7 +999,7 @@ export const SingleAndGroupNodes: Story = {
         label: 'Rectangle Group Label 1',
         color: 'danger',
         shape: 'label',
-        eventsCount: 1,
+        uniqueEventsCount: 1,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
       },
@@ -989,7 +1010,7 @@ export const SingleAndGroupNodes: Story = {
         label: 'Rectangle Group Label 2',
         color: 'danger',
         shape: 'label',
-        alertsCount: 2,
+        uniqueAlertsCount: 2,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
       },
@@ -1041,7 +1062,7 @@ export const SingleAndGroupNodes: Story = {
         label: 'Pentagon Group Label 1',
         color: 'primary',
         shape: 'label',
-        eventsCount: 1,
+        uniqueEventsCount: 1,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
       },
@@ -1052,7 +1073,7 @@ export const SingleAndGroupNodes: Story = {
         label: 'Pentagon Group Label 2',
         color: 'primary',
         shape: 'label',
-        eventsCount: 2,
+        uniqueEventsCount: 2,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
       },
@@ -1063,11 +1084,309 @@ export const SingleAndGroupNodes: Story = {
         label: 'Pentagon Group Label 3',
         color: 'primary',
         shape: 'label',
-        eventsCount: 2,
-        alertsCount: 2,
+        uniqueEventsCount: 2,
+        uniqueAlertsCount: 2,
         ips: ['82.45.27.31'],
         countryCodes: ['US', 'IT'],
       },
     ]),
+  },
+};
+
+/**
+ * Story: Events and Relationships Combined
+ * Demonstrates a realistic AWS/cloud scenario with both:
+ * - Event connections (label nodes): Actions performed by a user (ConsoleLogin, AssumeRole)
+ * - Relationship connections (relationship nodes): Static ownership/access relationships
+ *
+ * Scenario: A user logs into a host, assumes a role, and has ownership/access relationships to multiple hosts
+ */
+export const EventsAndEntityRelationships: Story = {
+  args: {
+    ...extractEdges([
+      // Entity nodes
+      {
+        id: 'user-john',
+        label: 'john.doe@company.com',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'host-prod-1',
+        label: 'prod-ec2-instance-01',
+        color: 'primary',
+        shape: 'pentagon',
+        icon: 'compute',
+      },
+      {
+        id: 'host-prod-2',
+        label: 'prod-ec2-instance-02',
+        color: 'primary',
+        shape: 'pentagon',
+        icon: 'compute',
+      },
+      {
+        id: 'iam-role',
+        label: 'AdminRole',
+        color: 'primary',
+        shape: 'hexagon',
+        icon: 'key',
+      },
+
+      // Event edges (activity-based) - Actions performed by the user
+      {
+        id: 'evt-console-login',
+        source: 'user-john',
+        target: 'host-prod-1',
+        label: 'ConsoleLogin',
+        color: 'primary',
+        shape: 'label',
+        uniqueEventsCount: 3,
+      },
+      {
+        id: 'evt-assume-role',
+        source: 'user-john',
+        target: 'iam-role',
+        label: 'AssumeRole',
+        color: 'primary',
+        shape: 'label',
+        uniqueEventsCount: 1,
+      },
+
+      // Relationship edges (static/configuration-based) - Ownership and access permissions
+      {
+        id: 'rel-user-owns-host1',
+        source: 'user-john',
+        target: 'host-prod-1',
+        label: 'Owns',
+        shape: 'relationship',
+      },
+      {
+        id: 'rel-user-owns-host2',
+        source: 'user-john',
+        target: 'host-prod-2',
+        label: 'Owns',
+        shape: 'relationship',
+      },
+      {
+        id: 'rel-user-access-host1',
+        source: 'user-john',
+        target: 'host-prod-1',
+        label: 'Has Access',
+        shape: 'relationship',
+      },
+    ]),
+  },
+};
+
+export const EventsAndRelationshipsStacked: Story = {
+  args: {
+    ...extractEdges([
+      // Entity nodes
+      {
+        id: 'user-john',
+        label: 'john.doe@company.com',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'host-prod-1',
+        label: 'prod-ec2-instance-01',
+        color: 'primary',
+        shape: 'pentagon',
+        icon: 'compute',
+      },
+      // Relationship edges (static/configuration-based) - Ownership and access permissions
+      // Nodes with the same id + same source/target will be stacked together
+      {
+        id: 'a(user-john)-b(host-prod-1)',
+        source: 'user-john',
+        target: 'host-prod-1',
+        label: 'Owns',
+        shape: 'relationship',
+      },
+      {
+        id: 'a(user-john)-b(host-prod-1)',
+        source: 'user-john',
+        target: 'host-prod-1',
+        label: 'Has Access',
+        shape: 'relationship',
+      },
+      {
+        id: 'a(user-john)-b(host-prod-1)',
+        source: 'user-john',
+        target: 'host-prod-1',
+        label: 'ConsoleLogin',
+        shape: 'label',
+        color: 'primary',
+      },
+      {
+        id: 'a(user-john)-b(host-prod-1)',
+        source: 'user-john',
+        target: 'host-prod-1',
+        label: 'DescribeInstance',
+        shape: 'label',
+        color: 'primary',
+      },
+
+      // Additional entity nodes for multi-user ownership scenario
+      {
+        id: 'user-1',
+        label: 'user-1@company.com',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'user-2',
+        label: 'user-2@company.com',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'hosts-group',
+        label: 'hosts',
+        color: 'primary',
+        shape: 'pentagon',
+        icon: 'compute',
+        count: 3,
+      },
+
+      // Connect subgraphs: user-john supervises user-1 and user-2
+      {
+        id: 'a(user-john)-b(user-1)',
+        source: 'user-john',
+        target: 'user-1',
+        label: 'Supervises',
+        shape: 'relationship',
+      },
+      {
+        id: 'a(user-john)-b(user-2)',
+        source: 'user-john',
+        target: 'user-2',
+        label: 'Supervises',
+        shape: 'relationship',
+      },
+
+      // user-1 owns and has access to hosts (stacked)
+      {
+        id: 'a(user-1)-b(hosts-group)',
+        source: 'user-1',
+        target: 'hosts-group',
+        label: 'Owns',
+        shape: 'relationship',
+      },
+      {
+        id: 'a(user-1)-b(hosts-group)',
+        source: 'user-1',
+        target: 'hosts-group',
+        label: 'Has Access',
+        shape: 'relationship',
+      },
+
+      // user-2 owns and has access to the same hosts (stacked)
+      {
+        id: 'a(user-2)-b(hosts-group)',
+        source: 'user-2',
+        target: 'hosts-group',
+        label: 'Owns',
+        shape: 'relationship',
+      },
+      {
+        id: 'a(user-2)-b(hosts-group)',
+        source: 'user-2',
+        target: 'hosts-group',
+        label: 'Has Access',
+        shape: 'relationship',
+      },
+    ]),
+  },
+};
+
+/**
+ * This story tests the fan-out layout with three target nodes
+ * to verify proper distribution when there are more than two targets.
+ *
+ * Graph structure:
+ *   Actor → Label → Target1
+ *                ├─→ Target2
+ *                └─→ Target3
+ */
+export const FanOutThreeTargets: Story = {
+  args: {
+    ...meta.args,
+    nodes: [
+      {
+        id: 'actor',
+        label: 'actor@example.com',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'target1',
+        label: 'Target Identity 1',
+        color: 'primary',
+        shape: 'ellipse',
+        icon: 'user',
+      },
+      {
+        id: 'target2',
+        label: 'Target Storage 2',
+        color: 'primary',
+        shape: 'hexagon',
+        icon: 'storage',
+      },
+      {
+        id: 'target3',
+        label: 'Target Resource 3',
+        color: 'primary',
+        shape: 'rectangle',
+        icon: 'question',
+      },
+      {
+        id: 'label',
+        label: 'MultiTargetAction',
+        color: 'primary',
+        shape: 'label',
+      },
+    ],
+    edges: [
+      {
+        id: 'a(actor)-b(label)',
+        source: 'actor',
+        sourceShape: 'ellipse',
+        target: 'label',
+        targetShape: 'label',
+        color: 'primary',
+      },
+      {
+        id: 'a(label)-b(target1)',
+        source: 'label',
+        sourceShape: 'label',
+        target: 'target1',
+        targetShape: 'ellipse',
+        color: 'primary',
+      },
+      {
+        id: 'a(label)-b(target2)',
+        source: 'label',
+        sourceShape: 'label',
+        target: 'target2',
+        targetShape: 'hexagon',
+        color: 'primary',
+      },
+      {
+        id: 'a(label)-b(target3)',
+        source: 'label',
+        sourceShape: 'label',
+        target: 'target3',
+        targetShape: 'rectangle',
+        color: 'primary',
+      },
+    ],
   },
 };

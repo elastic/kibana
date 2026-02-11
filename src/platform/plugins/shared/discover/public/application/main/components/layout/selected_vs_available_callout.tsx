@@ -31,6 +31,7 @@ export const SelectedVSAvailableCallout = ({
         selectedColumns.length > 0 &&
         selectedColumns.length < esqlQueryColumns.length && (
           <EuiCallOut
+            announceOnMount
             color="primary"
             data-test-subj="dscSelectedColumnsCallout"
             iconType="info"

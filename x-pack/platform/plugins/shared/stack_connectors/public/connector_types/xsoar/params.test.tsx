@@ -12,9 +12,10 @@ import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/typ
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
 import XSOARParamsFields from './params';
 import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_sub_action';
-import { SUB_ACTION } from '../../../common/xsoar/constants';
-import type { ExecutorParams, XSOARRunActionParams } from '../../../common/xsoar/types';
 import * as translations from './translations';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
+import type { ExecutorParams, XSOARRunActionParams } from '@kbn/connector-schemas/xsoar';
+import { SUB_ACTION } from '@kbn/connector-schemas/xsoar/constants';
 
 interface Result {
   isLoading: boolean;
@@ -180,16 +181,11 @@ describe('XSOARParamsFields renders', () => {
     subAction: SUB_ACTION.RUN,
     subActionParams,
   };
-  const connector: ActionConnector = {
-    secrets: {},
-    config: {},
+  const connector: ActionConnector = createMockActionConnector({
     id: 'test',
     actionTypeId: '.test',
     name: 'Test',
-    isPreconfigured: false,
-    isDeprecated: false,
-    isSystemAction: false as const,
-  };
+  });
 
   const editAction = jest.fn();
   const defaultProps = {

@@ -29,7 +29,7 @@ exports[`it renders without crashing 1`] = `
           },
         ]
       }
-      placeholder="Add an action…"
+      placeholder="Add a privilege…"
       selectedOptions={Array []}
       singleSelection={false}
       sortMatchesBy="none"

@@ -25,26 +25,32 @@ const tab1 = getTabStateMock({
   duplicatedFromId: '0',
   initialInternalState: {
     serializedSearchSource: { index: 'test-data-view-1' },
+  },
+  attributes: {
     visContext: { foo: 'bar' },
+    controlGroupState: undefined,
   },
   globalState: {
     timeRange: { from: 'now-7d', to: 'now' },
     refreshInterval: { pause: true, value: 500 },
   },
-  initialAppState: { columns: ['column1'] },
+  appState: { columns: ['column1'] },
 });
 const tab2 = getTabStateMock({
   id: '2',
   label: 'Tab 2',
   initialInternalState: {
     serializedSearchSource: { index: 'test-data-view-2' },
+  },
+  attributes: {
     visContext: { bar: 'foo' },
+    controlGroupState: undefined,
   },
   globalState: {
     timeRange: { from: 'now-15m', to: 'now' },
     refreshInterval: { pause: false, value: 1000 },
   },
-  initialAppState: { columns: ['column2'] },
+  appState: { columns: ['column2'] },
 });
 
 describe('tab mapping utils', () => {
@@ -56,26 +62,7 @@ describe('tab mapping utils', () => {
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
-          "controlGroupState": undefined,
-          "dataRequestParams": Object {
-            "searchSessionId": undefined,
-            "timeRangeAbsolute": undefined,
-            "timeRangeRelative": undefined,
-          },
-          "duplicatedFromId": "0",
-          "esqlVariables": undefined,
-          "globalState": Object {
-            "refreshInterval": Object {
-              "pause": true,
-              "value": 500,
-            },
-            "timeRange": Object {
-              "from": "now-7d",
-              "to": "now",
-            },
-          },
-          "id": "2",
-          "initialAppState": Object {
+          "appState": Object {
             "breakdownField": undefined,
             "columns": Array [
               "column2",
@@ -90,6 +77,7 @@ describe('tab mapping utils', () => {
             "headerRowHeight": undefined,
             "hideAggregatedPreview": undefined,
             "hideChart": false,
+            "interval": undefined,
             "query": undefined,
             "rowHeight": undefined,
             "rowsPerPage": undefined,
@@ -97,18 +85,53 @@ describe('tab mapping utils', () => {
             "sort": Array [],
             "viewMode": undefined,
           },
-          "initialInternalState": Object {
-            "controlGroupJson": undefined,
-            "serializedSearchSource": Object {
-              "index": "test-data-view-2",
-            },
+          "attributes": Object {
+            "controlGroupState": undefined,
             "visContext": Object {
               "bar": "foo",
             },
           },
+          "cascadedDocumentsState": Object {
+            "availableCascadeGroups": Array [],
+            "selectedCascadeGroups": Array [],
+          },
+          "dataRequestParams": Object {
+            "isSearchSessionRestored": false,
+            "searchSessionId": undefined,
+            "timeRangeAbsolute": undefined,
+            "timeRangeRelative": undefined,
+          },
+          "duplicatedFromId": "0",
+          "esqlVariables": Array [],
+          "expandedDoc": undefined,
+          "forceFetchOnSelect": false,
+          "globalState": Object {
+            "refreshInterval": Object {
+              "pause": true,
+              "value": 500,
+            },
+            "timeRange": Object {
+              "from": "now-7d",
+              "to": "now",
+            },
+          },
+          "id": "2",
+          "initialInternalState": Object {
+            "serializedSearchSource": Object {
+              "index": "test-data-view-2",
+            },
+          },
+          "initializationState": Object {
+            "initializationStatus": "NotStarted",
+          },
           "isDataViewLoading": false,
           "label": "Tab 2",
           "overriddenVisContextAfterInvalidation": undefined,
+          "previousAppState": Object {
+            "columns": Array [
+              "column1",
+            ],
+          },
           "resetDefaultProfileState": Object {
             "breakdownField": false,
             "columns": false,
@@ -125,26 +148,7 @@ describe('tab mapping utils', () => {
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
-          "controlGroupState": undefined,
-          "dataRequestParams": Object {
-            "searchSessionId": undefined,
-            "timeRangeAbsolute": undefined,
-            "timeRangeRelative": undefined,
-          },
-          "duplicatedFromId": "0",
-          "esqlVariables": undefined,
-          "globalState": Object {
-            "refreshInterval": Object {
-              "pause": false,
-              "value": 1000,
-            },
-            "timeRange": Object {
-              "from": "now-15m",
-              "to": "now",
-            },
-          },
-          "id": "2",
-          "initialAppState": Object {
+          "appState": Object {
             "breakdownField": undefined,
             "columns": Array [
               "column2",
@@ -159,6 +163,7 @@ describe('tab mapping utils', () => {
             "headerRowHeight": undefined,
             "hideAggregatedPreview": undefined,
             "hideChart": false,
+            "interval": undefined,
             "query": undefined,
             "rowHeight": undefined,
             "rowsPerPage": undefined,
@@ -166,18 +171,53 @@ describe('tab mapping utils', () => {
             "sort": Array [],
             "viewMode": undefined,
           },
-          "initialInternalState": Object {
-            "controlGroupJson": undefined,
-            "serializedSearchSource": Object {
-              "index": "test-data-view-2",
-            },
+          "attributes": Object {
+            "controlGroupState": undefined,
             "visContext": Object {
               "bar": "foo",
             },
           },
+          "cascadedDocumentsState": Object {
+            "availableCascadeGroups": Array [],
+            "selectedCascadeGroups": Array [],
+          },
+          "dataRequestParams": Object {
+            "isSearchSessionRestored": false,
+            "searchSessionId": undefined,
+            "timeRangeAbsolute": undefined,
+            "timeRangeRelative": undefined,
+          },
+          "duplicatedFromId": "0",
+          "esqlVariables": Array [],
+          "expandedDoc": undefined,
+          "forceFetchOnSelect": false,
+          "globalState": Object {
+            "refreshInterval": Object {
+              "pause": false,
+              "value": 1000,
+            },
+            "timeRange": Object {
+              "from": "now-15m",
+              "to": "now",
+            },
+          },
+          "id": "2",
+          "initialInternalState": Object {
+            "serializedSearchSource": Object {
+              "index": "test-data-view-2",
+            },
+          },
+          "initializationState": Object {
+            "initializationStatus": "NotStarted",
+          },
           "isDataViewLoading": false,
           "label": "Tab 2",
           "overriddenVisContextAfterInvalidation": undefined,
+          "previousAppState": Object {
+            "columns": Array [
+              "column1",
+            ],
+          },
           "resetDefaultProfileState": Object {
             "breakdownField": false,
             "columns": false,
@@ -206,6 +246,7 @@ describe('tab mapping utils', () => {
       expect(savedSearch).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
+          "chartInterval": undefined,
           "columns": Array [
             "column1",
           ],
@@ -276,6 +317,7 @@ describe('tab mapping utils', () => {
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
+          "chartInterval": undefined,
           "columns": Array [
             "column1",
           ],
@@ -309,6 +351,7 @@ describe('tab mapping utils', () => {
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
+          "chartInterval": undefined,
           "columns": Array [
             "column1",
           ],
@@ -357,6 +400,7 @@ describe('tab mapping utils', () => {
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
           "breakdownField": undefined,
+          "chartInterval": undefined,
           "columns": Array [
             "default_column",
           ],

@@ -11,7 +11,7 @@ import {
   type SynthtraceGenerator,
   type ApmSynthtracePipelines,
   ApmSynthtracePipelineSchema,
-} from '@kbn/apm-synthtrace-client';
+} from '@kbn/synthtrace-client';
 
 export const synthtrace = {
   index: <TFields extends ApmFields | ApmOtelFields>(

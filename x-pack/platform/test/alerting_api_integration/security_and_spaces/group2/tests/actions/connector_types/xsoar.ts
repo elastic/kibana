@@ -78,6 +78,7 @@ export default function xsoarTest({ getService }: FtrProviderContext) {
           connector_type_id: connectorTypeId,
           is_missing_secrets: false,
           config,
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -96,8 +97,7 @@ export default function xsoarTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [url]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type config: Field \"url\": Required`,
             });
           });
       });
@@ -120,7 +120,7 @@ export default function xsoarTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error validating url: target url "http://xsoar.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: error validating url: target url "http://xsoar.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -139,8 +139,7 @@ export default function xsoarTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [apiKey]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type secrets: Field \"apiKey\": Required`,
             });
           });
       });
@@ -226,8 +225,7 @@ export default function xsoarTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message:
-              'Request validation failed (Error: [name]: expected value of type [string] but got [undefined])',
+            service_message: `Request validation failed (Field \"name\": Required)`,
           });
         });
       });

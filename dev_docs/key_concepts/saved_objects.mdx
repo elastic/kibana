@@ -43,6 +43,10 @@ an attribute). If that happens, you should write a new model version to upgrade 
 
 Saved Objects can be secured using Kibana's Privileges model, unlike data that comes from data indices, which is secured using Elasticsearch's Privileges model.
 
+### Aggregation security
+
+When using the `find` or `search` methods with aggregations, be aware that certain Elasticsearch aggregation types can bypass query restrictions and return data from documents the user should not have access to. See <DocLink id="kibDevTutorialSavedObjectsSearch" section="security-considerations-for-aggregations" text="Security considerations for aggregations" /> for details on which aggregations to avoid.
+
 ### Space awareness
 
 Saved Objects are "space aware". They exist in the space they were created in, and any spaces they have been shared with.

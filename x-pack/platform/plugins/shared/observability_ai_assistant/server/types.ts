@@ -26,6 +26,7 @@ import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plu
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { ObservabilityAIAssistantService } from './service';
 
 export interface ObservabilityAIAssistantServerSetup {
@@ -54,6 +55,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   alerting: AlertingServerSetup;
   inference: InferenceServerSetup;
   productDocBase: ProductDocBaseStartContract;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface ObservabilityAIAssistantPluginStartDependencies {

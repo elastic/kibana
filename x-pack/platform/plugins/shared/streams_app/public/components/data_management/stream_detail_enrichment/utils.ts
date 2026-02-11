@@ -5,51 +5,83 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
-import type { FlattenRecord } from '@kbn/streams-schema';
-import { isSchema } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
-import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
-import { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
+  ConcatProcessor,
+  ConvertProcessor,
   GrokProcessor,
+  JoinProcessor,
+  LowercaseProcessor,
+  MathProcessor,
   ProcessorType,
+  RedactProcessor,
+  ReplaceProcessor,
+  StreamlangConditionBlockWithUIAttributes,
+  StreamlangDSL,
   StreamlangProcessorDefinition,
   StreamlangProcessorDefinitionWithUIAttributes,
   StreamlangStepWithUIAttributes,
-  StreamlangWhereBlockWithUIAttributes,
+  TrimProcessor,
 } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
   conditionSchema,
   convertStepToUIDefinition,
   streamlangProcessorSchema,
+  stripCustomIdentifiers,
 } from '@kbn/streamlang';
-import { isWhereBlock } from '@kbn/streamlang/types/streamlang';
+import { isConditionBlock } from '@kbn/streamlang/types/streamlang';
+import type { FlattenRecord } from '@kbn/streams-schema';
+import { Streams, isSchema, type FieldDefinition } from '@kbn/streams-schema';
+import type { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
+import { countBy, isEmpty, mapValues, orderBy } from 'lodash';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
-import type {
-  DissectFormState,
-  GrokFormState,
-  ProcessorFormState,
-  DateFormState,
-  ManualIngestPipelineFormState,
-  EnrichmentDataSourceWithUIAttributes,
-  SetFormState,
-  WhereBlockFormState,
-} from './types';
+import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
 import { configDrivenProcessors } from './steps/blocks/action/config_driven';
 import type {
   ConfigDrivenProcessorType,
   ConfigDrivenProcessors,
 } from './steps/blocks/action/config_driven/types';
-import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
-import type { ProcessorResources } from './state_management/steps_state_machine';
+import type {
+  ConcatFormState,
+  ConditionBlockFormState,
+  ConvertFormState,
+  DateFormState,
+  DissectFormState,
+  DropFormState,
+  EnrichmentDataSourceWithUIAttributes,
+  GrokFormState,
+  JoinFormState,
+  LowercaseFormState,
+  ManualIngestPipelineFormState,
+  MathFormState,
+  ProcessorFormState,
+  RedactFormState,
+  ReplaceFormState,
+  SetFormState,
+  TrimFormState,
+  UppercaseFormState,
+} from './types';
 
 /**
  * These are processor types with specialised UI. Other processor types are handled by a generic config-driven UI.
  */
-export const SPECIALISED_TYPES = ['date', 'dissect', 'grok', 'set'];
+export const SPECIALISED_TYPES = [
+  'convert',
+  'date',
+  'dissect',
+  'grok',
+  'math',
+  'set',
+  'replace',
+  'redact',
+  'drop_document',
+  'uppercase',
+  'lowercase',
+  'trim',
+  'join',
+  'concat',
+];
 
 interface FormStateDependencies {
   grokCollection: StreamEnrichmentContextType['grokCollection'];
@@ -61,7 +93,7 @@ interface RecalcColumnWidthsParams {
   visibleColumns: string[];
 }
 
-const PRIORITIZED_CONTENT_FIELDS = [
+export const PRIORITIZED_CONTENT_FIELDS = [
   'message',
   'body.text',
   'error.message',
@@ -80,7 +112,7 @@ const PRIORITIZED_DATE_FIELDS = [
   'attributes.custom.timestamp',
 ];
 
-const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: string[]) => {
+export const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: string[]) => {
   // Count occurrences of well-known text fields in the sample documents
   const acceptableDefaultFields = sampleDocs.flatMap((doc) =>
     Object.keys(doc).filter((key) => prioritizedFields.includes(key))
@@ -101,6 +133,37 @@ const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: str
   return mostCommonField ? mostCommonField[0] : '';
 };
 
+/**
+ * Checks if the sample documents have valid message fields with actual content
+ * that can be used for pipeline suggestion generation.
+ */
+export const hasValidMessageFieldsForSuggestion = (sampleDocs: FlattenRecord[]): boolean => {
+  if (!sampleDocs || sampleDocs.length === 0) {
+    return false;
+  }
+
+  // Check if any of the prioritized content fields exist with non-empty values
+  const docsWithValidFields = sampleDocs.filter((doc) => {
+    return PRIORITIZED_CONTENT_FIELDS.some((fieldName) => {
+      const value = doc[fieldName];
+      return value !== undefined && value !== null && String(value).trim().length > 0;
+    });
+  });
+
+  // Require at least 50% of documents to have valid message fields
+  return docsWithValidFields.length >= sampleDocs.length * 0.5;
+};
+
+const defaultConvertProcessorFormState = (): ConvertFormState => ({
+  action: 'convert' as const,
+  from: '',
+  to: '',
+  type: 'string',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultDateProcessorFormState = (sampleDocs: FlattenRecord[]): DateFormState => ({
   action: 'date',
   from: getDefaultTextField(sampleDocs, PRIORITIZED_DATE_FIELDS),
@@ -120,6 +183,12 @@ const defaultDissectProcessorFormState = (sampleDocs: FlattenRecord[]): DissectF
   where: ALWAYS_CONDITION,
 });
 
+const defaultDropProcessorFormState = (): DropFormState => ({
+  action: 'drop_document',
+  where: ALWAYS_CONDITION,
+  ignore_failure: true,
+});
+
 const defaultGrokProcessorFormState: (
   sampleDocs: FlattenRecord[],
   formStateDependencies: FormStateDependencies
@@ -129,7 +198,7 @@ const defaultGrokProcessorFormState: (
 ) => ({
   action: 'grok',
   from: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
-  patterns: [new DraftGrokExpression(formStateDependencies.grokCollection, '')],
+  patterns: [{ value: '' }],
   ignore_failure: true,
   ignore_missing: true,
   where: ALWAYS_CONDITION,
@@ -151,6 +220,77 @@ const defaultSetProcessorFormState = (): SetFormState => ({
   where: ALWAYS_CONDITION,
 });
 
+const defaultReplaceProcessorFormState = (): ReplaceFormState => ({
+  action: 'replace' as const,
+  from: '',
+  pattern: '',
+  replacement: '',
+  ignore_missing: true,
+  ignore_failure: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultRedactProcessorFormState = (sampleDocs: FlattenRecord[]): RedactFormState => ({
+  action: 'redact' as const,
+  from: getDefaultTextField(sampleDocs, PRIORITIZED_CONTENT_FIELDS),
+  patterns: [{ value: '' }], // Start with one empty pattern field (required validation will catch if not filled)
+  ignore_missing: true,
+  ignore_failure: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultUppercaseProcessorFormState = (): UppercaseFormState => ({
+  action: 'uppercase' as const,
+  from: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultLowercaseProcessorFormState = (): LowercaseFormState => ({
+  action: 'lowercase' as const,
+  from: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultTrimProcessorFormState = (): TrimFormState => ({
+  action: 'trim' as const,
+  from: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultJoinProcessorFormState = (): JoinFormState => ({
+  action: 'join' as const,
+  from: [],
+  to: '',
+  delimiter: ',',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultMathProcessorFormState = (): MathFormState => ({
+  action: 'math' as const,
+  expression: '',
+  to: '',
+  ignore_failure: true,
+  ignore_missing: false,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultConcatProcessorFormState = (): ConcatFormState => ({
+  action: 'concat' as const,
+  from: [],
+  to: '',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -162,11 +302,21 @@ const defaultProcessorFormStateByType: Record<
   ProcessorType,
   (sampleDocs: FlattenRecord[], formStateDependencies: FormStateDependencies) => ProcessorFormState
 > = {
+  convert: defaultConvertProcessorFormState,
   date: defaultDateProcessorFormState,
   dissect: defaultDissectProcessorFormState,
+  drop_document: defaultDropProcessorFormState,
   grok: defaultGrokProcessorFormState,
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
+  math: defaultMathProcessorFormState,
+  replace: defaultReplaceProcessorFormState,
+  redact: defaultRedactProcessorFormState,
+  uppercase: defaultUppercaseProcessorFormState,
+  lowercase: defaultLowercaseProcessorFormState,
+  trim: defaultTrimProcessorFormState,
   set: defaultSetProcessorFormState,
+  join: defaultJoinProcessorFormState,
+  concat: defaultConcatProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -183,26 +333,38 @@ export const getFormStateFromActionStep = (
 ): ProcessorFormState => {
   if (!step) return defaultGrokProcessorFormState(sampleDocuments, formStateDependencies);
 
+  // Handle grok separately to convert patterns from string[] to { value: string }[]
   if (step.action === 'grok') {
-    const { customIdentifier, parentId, ...restStep } = step;
+    const { customIdentifier, parentId, patterns, ...restStep } = step;
+    return structuredClone({
+      ...restStep,
+      patterns: patterns.map((p) => ({ value: p })),
+    }) as GrokFormState;
+  }
 
-    const clone: GrokFormState = structuredClone({
-      ...omit(restStep, 'patterns'),
-      patterns: [],
-    });
-
-    clone.patterns = step.patterns.map(
-      (pattern) => new DraftGrokExpression(formStateDependencies.grokCollection, pattern)
-    );
-
-    return clone;
+  if (step.action === 'redact') {
+    const { customIdentifier, parentId, patterns, ...restStep } = step;
+    // Convert string[] patterns to RedactPatternWrapper[] for useFieldArray compatibility
+    return {
+      ...structuredClone(restStep),
+      patterns: patterns.map((pattern) => ({ value: pattern })),
+    };
   }
 
   if (
     step.action === 'dissect' ||
     step.action === 'manual_ingest_pipeline' ||
     step.action === 'date' ||
-    step.action === 'set'
+    step.action === 'drop_document' ||
+    step.action === 'set' ||
+    step.action === 'convert' ||
+    step.action === 'replace' ||
+    step.action === 'math' ||
+    step.action === 'uppercase' ||
+    step.action === 'lowercase' ||
+    step.action === 'trim' ||
+    step.action === 'join' ||
+    step.action === 'concat'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -220,21 +382,21 @@ export const getFormStateFromActionStep = (
   throw new Error(`Form state for processor type "${step.action}" is not implemented.`);
 };
 
-export const getFormStateFromWhereStep = (
-  step: StreamlangWhereBlockWithUIAttributes
-): WhereBlockFormState => {
+export const getFormStateFromConditionStep = (
+  step: StreamlangConditionBlockWithUIAttributes
+): ConditionBlockFormState => {
   return structuredClone({
     ...step,
   });
 };
 
-export const convertWhereBlockFormStateToConfiguration = (
-  formState: WhereBlockFormState
+export const convertConditionBlockFormStateToConfiguration = (
+  formState: ConditionBlockFormState
 ): {
-  whereDefinition: StreamlangWhereBlockWithUIAttributes;
+  conditionBlockDefinition: StreamlangConditionBlockWithUIAttributes;
 } => {
   return {
-    whereDefinition: {
+    conditionBlockDefinition: {
       ...formState,
     },
   };
@@ -244,25 +406,24 @@ export const convertFormStateToProcessor = (
   formState: ProcessorFormState
 ): {
   processorDefinition: StreamlangProcessorDefinition;
-  processorResources?: ProcessorResources;
 } => {
+  const description = 'description' in formState ? formState.description : undefined;
+
   if ('action' in formState) {
     if (formState.action === 'grok') {
-      const { patterns, from, ignore_failure, ignore_missing } = formState;
+      const { patterns, pattern_definitions, from, ignore_failure, ignore_missing } = formState;
 
       return {
         processorDefinition: {
           action: 'grok',
           where: formState.where,
-          patterns: patterns
-            .map((pattern) => pattern.getExpression().trim())
-            .filter((pattern) => !isEmpty(pattern)),
+          description,
+          // Convert { value: string }[] to flat string[]
+          patterns: patterns.map((p) => p.value.trim()).filter((pattern) => !isEmpty(pattern)),
+          pattern_definitions,
           from,
           ignore_failure,
           ignore_missing,
-        },
-        processorResources: {
-          grokExpressions: patterns,
         },
       };
     }
@@ -274,6 +435,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'dissect',
           where: formState.where,
+          description,
           from,
           pattern,
           append_separator: isEmpty(append_separator) ? undefined : append_separator,
@@ -290,6 +452,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'manual_ingest_pipeline',
           where: formState.where,
+          description,
           processors,
           ignore_failure,
         },
@@ -297,17 +460,32 @@ export const convertFormStateToProcessor = (
     }
 
     if (formState.action === 'date') {
-      const { from, formats, ignore_failure, to, output_format } = formState;
+      const { from, formats, ignore_failure, to, output_format, timezone, locale } = formState;
 
       return {
         processorDefinition: {
           action: 'date',
           where: formState.where,
+          description,
           from,
           formats,
           ignore_failure,
           to: isEmpty(to) ? undefined : to,
           output_format: isEmpty(output_format) ? undefined : output_format,
+          timezone: isEmpty(timezone) ? undefined : timezone,
+          locale: isEmpty(locale) ? undefined : locale,
+        },
+      };
+    }
+
+    if (formState.action === 'drop_document') {
+      const { where, ignore_failure } = formState;
+      return {
+        processorDefinition: {
+          action: 'drop_document',
+          where,
+          ignore_failure,
+          description,
         },
       };
     }
@@ -329,6 +507,7 @@ export const convertFormStateToProcessor = (
         processorDefinition: {
           action: 'set',
           where: formState.where,
+          description,
           to,
           ...getValueOrCopyFrom(),
           override,
@@ -337,11 +516,172 @@ export const convertFormStateToProcessor = (
       };
     }
 
+    if (formState.action === 'convert') {
+      const { from, type, to, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'convert',
+          from,
+          type,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as ConvertProcessor,
+      };
+    }
+
+    if (formState.action === 'replace') {
+      const { from, pattern, replacement, to, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'replace',
+          from,
+          pattern: isEmpty(pattern) ? '' : pattern,
+          replacement: isEmpty(replacement) ? '' : replacement,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as ReplaceProcessor,
+      };
+    }
+
+    if (formState.action === 'redact') {
+      const {
+        from,
+        patterns,
+        pattern_definitions,
+        prefix,
+        suffix,
+        ignore_failure,
+        ignore_missing,
+      } = formState;
+
+      // Convert RedactPatternWrapper[] back to string[] and filter empty values
+      const patternsArray = Array.isArray(patterns)
+        ? patterns.map((p) => p.value).filter((p) => !isEmpty(p))
+        : [];
+
+      return {
+        processorDefinition: {
+          action: 'redact',
+          from,
+          patterns: patternsArray,
+          pattern_definitions: isEmpty(pattern_definitions) ? undefined : pattern_definitions,
+          prefix: isEmpty(prefix) ? undefined : prefix,
+          suffix: isEmpty(suffix) ? undefined : suffix,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as RedactProcessor,
+      };
+    }
+
+    if (formState.action === 'math') {
+      const { expression, to, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'math',
+          expression,
+          to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as MathProcessor,
+      };
+    }
+
+    if (formState.action === 'uppercase') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'uppercase',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        },
+      };
+    }
+
+    if (formState.action === 'lowercase') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'lowercase',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as LowercaseProcessor,
+      };
+    }
+
+    if (formState.action === 'trim') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'trim',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as TrimProcessor,
+      };
+    }
+
+    if (formState.action === 'join') {
+      const { delimiter, from, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'join',
+          delimiter,
+          from,
+          to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as JoinProcessor,
+      };
+    }
+
+    if (formState.action === 'concat') {
+      const { from, to, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'concat',
+          from,
+          to,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as ConcatProcessor,
+      };
+    }
+
     if (configDrivenProcessors[formState.action]) {
       return {
-        processorDefinition: configDrivenProcessors[formState.action].convertFormStateToConfig(
-          formState as any
-        ),
+        processorDefinition: {
+          ...configDrivenProcessors[formState.action].convertFormStateToConfig(formState as any),
+          description,
+        },
       };
     }
   }
@@ -422,17 +762,7 @@ export const recalcColumnWidths = ({
   return next;
 };
 
-// Valid step for simulation
-export const isValidStep = (step: StreamlangStepWithUIAttributes) => {
-  // Where
-  if (isWhereBlock(step)) {
-    return isSchema(conditionSchema, step.where);
-  } else {
-    // Action
-    return isSchema(streamlangProcessorSchema, step);
-  }
-};
-
+// Get valid steps for simulation
 // This will return valid action blocks, and valid where blocks, where
 // where blocks are invalid all their children are also skipped.
 export const getValidSteps = (
@@ -442,20 +772,29 @@ export const getValidSteps = (
 
   // Helper to recursively skip invalid where blocks and their children
   function processStep(step: StreamlangStepWithUIAttributes): boolean {
-    if (isWhereBlock(step)) {
+    if (isConditionBlock(step)) {
       // If the where block is invalid, skip it and all its children
-      if (!isSchema(conditionSchema, step.where)) {
+      if (!isSchema(conditionSchema, step.condition)) {
         return false;
       }
+
+      // Valid but has no children (compilation of this step would be pointless)
+      const hasChildren = steps.some((s) => s.parentId === step.customIdentifier);
+      if (!hasChildren) {
+        return false;
+      }
+
+      // Valid where block with children
       validSteps.push(step);
       return true;
     } else {
-      // Action step: check validity
-      if (isSchema(streamlangProcessorSchema, step)) {
-        validSteps.push(step);
-        return true;
+      // Action step: check schema validity
+      if (!isSchema(streamlangProcessorSchema, step)) {
+        return false;
       }
-      return false;
+
+      validSteps.push(step);
+      return true;
     }
   }
 
@@ -472,7 +811,7 @@ export const getValidSteps = (
     const isValid = processStep(step);
 
     // If this is an invalid where block, add its id to skipParentIds
-    if (isWhereBlock(step) && !isValid) {
+    if (isConditionBlock(step) && !isValid) {
       skipParentIds.add(step.customIdentifier);
     }
   }
@@ -482,4 +821,38 @@ export const getValidSteps = (
 export const getStepPanelColour = (stepIndex: number) => {
   const isEven = stepIndex % 2 === 0;
   return isEven ? 'subdued' : undefined;
+};
+
+export const buildUpsertStreamRequestPayload = (
+  definition: Streams.ingest.all.GetResponse,
+  dsl: StreamlangDSL,
+  fields?: FieldDefinition
+): { ingest: IngestUpsertRequest } => {
+  const dslWithStrippedIds = stripCustomIdentifiers(dsl);
+
+  return Streams.WiredStream.GetResponse.is(definition)
+    ? {
+        ingest: {
+          ...definition.stream.ingest,
+          processing: dslWithStrippedIds,
+          ...(fields && {
+            wired: {
+              ...definition.stream.ingest.wired,
+              fields,
+            },
+          }),
+        },
+      }
+    : {
+        ingest: {
+          ...definition.stream.ingest,
+          processing: dslWithStrippedIds,
+          ...(fields && {
+            classic: {
+              ...definition.stream.ingest.classic,
+              field_overrides: fields,
+            },
+          }),
+        },
+      };
 };

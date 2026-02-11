@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { HasLibraryTransforms, SerializedPanelState } from '@kbn/presentation-publishing';
-import { extractReferences } from '../../common/migrations/references';
+import type { HasLibraryTransforms } from '@kbn/presentation-publishing';
 import { getCore, getCoreOverlays } from '../kibana_services';
-import type { MapAttributes } from '../../common/content_management';
+import type { MapAttributes } from '../../server';
 import { checkForDuplicateTitle, getMapClient } from '../content_management';
 import { MAP_EMBEDDABLE_NAME } from '../../common/constants';
 import type { MapByValueState, MapByReferenceState, MapEmbeddableState } from '../../common';
@@ -31,8 +30,8 @@ export function getByValueState(state: MapEmbeddableState | undefined, attribute
 
 export function initializeLibraryTransforms(
   isByReference: boolean,
-  serializeByReference: (libraryId: string) => SerializedPanelState<MapByReferenceState>,
-  serializeByValue: () => SerializedPanelState<MapByValueState>
+  serializeByReference: (libraryId: string) => MapByReferenceState,
+  serializeByValue: () => MapByValueState
 ): HasLibraryTransforms<MapByReferenceState, MapByValueState> {
   return {
     canLinkToLibrary: async () => {
@@ -44,17 +43,13 @@ export function initializeLibraryTransforms(
     },
     saveToLibrary: async (title: string) => {
       const state = serializeByValue();
-      const { attributes, references } = extractReferences({
-        attributes: state.rawState.attributes,
-      });
       const {
         item: { id: savedObjectId },
       } = await getMapClient().create({
         data: {
-          ...attributes,
+          ...state.attributes,
           title,
         },
-        options: { references },
       });
       return savedObjectId;
     },

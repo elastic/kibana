@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { getWebhookSecretHeadersKeyRoute } from './get_webhook_secret_headers_key';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { getWebhookSecretHeadersKeyRoute } from './get_webhook_secret_headers_key';
 import Boom from '@hapi/boom';
 
 describe('getWebhookSecretHeadersKeyRoute', () => {
@@ -64,7 +64,7 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
     });
   });
 
-  it('throws error if the connector is not webhook', async () => {
+  it('throws error if the connector is not an allowed type', async () => {
     getWebhookSecretHeadersKeyRoute(router, getStartServices);
 
     const routeHandler = router.get.mock.calls[0][1];
@@ -107,7 +107,9 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
     await routeHandler({}, mockRequest, mockResponse);
 
     expect(mockResponse.badRequest).toHaveBeenCalledWith({
-      body: { message: 'Connector must be a webhook or cases webhook' },
+      body: {
+        message: 'Connector must be one of the following types: .webhook, .cases-webhook, .mcp',
+      },
     });
   });
 

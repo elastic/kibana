@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type {
   CreateSLOParams,
   HistogramIndicator,
@@ -23,13 +22,10 @@ import type {
   KQLCustomIndicator,
   MetricCustomIndicator,
   SLODefinition,
-  StoredSLODefinition,
 } from '../../domain/models';
 import { Duration, DurationUnit } from '../../domain/models';
-import { SO_SLO_TYPE } from '../../saved_objects';
 import { twoMinute } from './duration';
 import { sevenDaysRolling, weeklyCalendarAligned } from './time_window';
-import { toStoredSLO } from '../slo_repository';
 
 export const createAPMTransactionErrorRateIndicator = (
   params: Partial<APMTransactionErrorRateIndicator['params']> = {}
@@ -188,17 +184,6 @@ export const createSLOParams = (params: Partial<CreateSLOParams> = {}): CreateSL
   ...params,
 });
 
-export const aStoredSLO = (slo: SLODefinition): SavedObject<StoredSLODefinition> => {
-  const { storedSLO } = toStoredSLO(slo);
-
-  return {
-    id: slo.id,
-    attributes: storedSLO,
-    type: SO_SLO_TYPE,
-    references: [],
-  };
-};
-
 export const createSLO = (params: Partial<SLODefinition> = {}): SLODefinition => {
   const now = new Date();
   return cloneDeep({
@@ -210,6 +195,7 @@ export const createSLO = (params: Partial<SLODefinition> = {}): SLODefinition =>
     createdBy: 'irrelevant',
     updatedBy: 'irrelevant',
     version: SLO_MODEL_VERSION,
+    enabled: true,
     ...params,
   });
 };

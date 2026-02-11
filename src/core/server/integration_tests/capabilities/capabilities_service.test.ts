@@ -14,6 +14,7 @@ import { getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import type { CapabilitiesSetup } from '@kbn/core-capabilities-server';
 import { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
 import type {
@@ -37,7 +38,10 @@ describe('CapabilitiesService', () => {
 
   beforeEach(async () => {
     server = createInternalHttpService();
-    httpPreboot = await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    httpPreboot = await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
     httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract(),
       executionContext: executionContextServiceMock.createInternalSetupContract(),

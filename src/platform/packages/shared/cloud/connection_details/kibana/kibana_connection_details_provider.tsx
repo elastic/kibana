@@ -16,6 +16,8 @@ import { ConnectionDetailsOptsProvider } from '../context';
 import type { ConnectionDetailsOpts } from '../types';
 import { useAsyncMemo } from '../hooks/use_async_memo';
 
+const SEARCH_API_KEYS_PATH = '/internal/search_api_keys';
+
 const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
   const { options, start } = props;
   const { http, docLinks, analytics } = start.core;
@@ -67,7 +69,22 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
           },
         };
       },
-      hasPermission: async () => true,
+      hasPermission: async () => {
+        if (!http) return false;
+
+        try {
+          await http.post(SEARCH_API_KEYS_PATH);
+          return true;
+        } catch (err) {
+          // 400 means user has permission but project already has API keys
+          if (err?.response?.status === 400) {
+            return true;
+          }
+          // 403 means user doesn't have permission to manage API keys
+          // Any other error, assume no permission
+          return false;
+        }
+      },
       ...options?.apiKeys,
     },
     onTelemetryEvent: (event) => {
@@ -115,6 +132,7 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
         }
       }
     },
+    defaultTabId: options?.defaultTabId ?? undefined,
   };
 
   return result;

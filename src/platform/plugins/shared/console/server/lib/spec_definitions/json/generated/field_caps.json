@@ -16,7 +16,7 @@
       "fields": [],
       "ignore_unavailable": "__flag__",
       "include_unmapped": "__flag__",
-      "filters": "",
+      "filters": [],
       "types": "",
       "include_empty_fields": "__flag__"
     },

@@ -92,7 +92,7 @@ RUN microdnf install --setopt=tsflags=nodocs -y \
       microdnf clean all
 {{/ubi}}
 {{#wolfi}}
-RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates
+RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates{{#serverless}} libjemalloc2 mimalloc2{{/serverless}}
 {{/wolfi}}
 
 # Bring in Kibana from the initial stage.
@@ -143,7 +143,7 @@ RUN find / -xdev -perm -4000 -exec chmod u-s {} +
 
 # Provide a non-root user to run the process.
 RUN groupadd --gid 1000 kibana && \
-    useradd --uid 1000 --gid 1000 -G 0 \
+    useradd --uid 1000 --gid 1000{{^serverless}} -G 0{{/serverless}} \
       --home-dir /usr/share/kibana --no-create-home \
       kibana
 

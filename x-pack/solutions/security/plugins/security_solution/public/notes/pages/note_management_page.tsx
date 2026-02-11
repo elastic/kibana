@@ -19,6 +19,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { css } from '@emotion/react';
 import { DeleteNoteButtonIcon } from '../components/delete_note_button';
 import { Title } from '../../common/components/header_page/title';
+import { useSuggestUsers } from '../../common/components/user_profiles/use_suggest_users';
 // TODO unify this type from the api with the one in public/common/lib/note
 import type { Note } from '../../../common/api/timeline';
 import { FormattedRelativePreferenceDate } from '../../common/components/formatted_date';
@@ -48,6 +49,7 @@ import * as i18n from './translations';
 import { OpenFlyoutButtonIcon } from '../components/open_flyout_button';
 import { OpenTimelineButtonIcon } from '../components/open_timeline_button';
 import { NoteContent } from '../components/note_content';
+import { useLicense } from '../../common/hooks/use_license';
 
 const columns: Array<EuiBasicTableColumn<Note>> = [
   {
@@ -119,21 +121,36 @@ const pageSizeOptions = [10, 25, 50, 100];
 export const NoteManagementPage = () => {
   const dispatch = useDispatch();
   const notes = useSelector(selectAllNotes);
+  const isPlatinumPlus = useLicense().isPlatinumPlus();
   const notesReversed = useSelector(selectAllReversed);
   const pagination = useSelector(selectNotesPagination);
   const sort = useSelector(selectNotesTableSort);
   const notesSearch = useSelector(selectNotesTableSearch);
   const notesCreatedByFilter = useSelector(selectNotesTableCreatedByFilter);
   const notesAssociatedFilter = useSelector(selectNotesTableAssociatedFilter);
+  const { data: suggestedUsers } = useSuggestUsers({ searchTerm: '', enabled: isPlatinumPlus });
   const pendingDeleteIds = useSelector(selectNotesTablePendingDeleteIds);
   const isDeleteModalVisible = pendingDeleteIds.length > 0;
   const fetchNotesStatus = useSelector(selectFetchNotesStatus);
   const fetchLoading = fetchNotesStatus === ReqStatus.Loading;
   const fetchError = fetchNotesStatus === ReqStatus.Failed;
   const fetchErrorData = useSelector(selectFetchNotesError);
+
+  // This is a workaround for the server-side 'text' field type which tokenizes values,
+  // causing partial matches (e.g., "Test" matches "Test Engineer").
   const tableNotes = useMemo(() => {
-    return sort.direction === 'asc' ? notes : notesReversed;
-  }, [notes, notesReversed, sort.direction]);
+    const sortedNotes = sort.direction === 'asc' ? notes : notesReversed;
+    if (notesCreatedByFilter && suggestedUsers) {
+      const selectedUser = suggestedUsers.find((user) => user.uid === notesCreatedByFilter);
+      if (selectedUser) {
+        const label =
+          selectedUser.user.full_name || selectedUser.user.email || selectedUser.user.username;
+        return sortedNotes.filter((note) => note.createdBy === label);
+      }
+    }
+    return sortedNotes;
+  }, [notes, notesReversed, sort.direction, notesCreatedByFilter, suggestedUsers]);
+
   const fetchData = useCallback(() => {
     dispatch(
       fetchNotes({
@@ -234,6 +251,7 @@ export const NoteManagementPage = () => {
       <EuiSpacer size="m" />
       <NotesUtilityBar />
       <EuiBasicTable
+        tableCaption={i18n.NOTES}
         items={tableNotes}
         pagination={currentPagination}
         columns={columns}

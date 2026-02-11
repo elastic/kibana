@@ -8,22 +8,22 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import type { TheHiveConnector } from './types';
-import { THEHIVE_CONNECTOR_ID, SUB_ACTION, THEHIVE_TITLE } from '../../../common/thehive/constants';
+import { CONNECTOR_ID, SUB_ACTION, CONNECTOR_NAME } from '@kbn/connector-schemas/thehive/constants';
 import type {
   ExecutorParams,
   ExecutorSubActionPushParams,
   ExecutorSubActionCreateAlertParams,
-} from '../../../common/thehive/types';
+} from '@kbn/connector-schemas/thehive';
+import type { TheHiveConnector } from './types';
 
 export function getConnectorType(): TheHiveConnector {
   return {
-    id: THEHIVE_CONNECTOR_ID,
+    id: CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.thehive.descriptionText', {
       defaultMessage: 'Create cases and alerts in TheHive',
     }),
-    actionTypeTitle: THEHIVE_TITLE,
+    actionTypeTitle: CONNECTOR_NAME,
     validateParams: async (
       actionParams: ExecutorParams
     ): Promise<GenericValidationResult<unknown>> => {

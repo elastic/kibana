@@ -11,7 +11,7 @@ import { useLoadRuleAggregationsQuery as useLoadRuleAggregations } from './use_l
 import type { RuleStatus } from '../../types';
 import { useKibana } from '../../common/lib/kibana';
 import type { IToasts } from '@kbn/core-notifications-browser';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../lib/rule_api/aggregate_kuery_filter', () => ({

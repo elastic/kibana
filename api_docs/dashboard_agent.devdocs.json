@@ -1,0 +1,99 @@
+{
+  "id": "dashboardAgent",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "dashboardAgent",
+      "id": "def-server.DashboardAgentPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "DashboardAgentPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/dashboard_agent/server/types.ts",
+      "lineNumber": 24,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "dashboardAgent",
+      "id": "def-server.DashboardAgentPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "DashboardAgentPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/dashboard_agent/server/types.ts",
+      "lineNumber": 27,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "dashboardAgent",
+        "id": "def-common.DASHBOARD_NAMESPACE",
+        "type": "string",
+        "tags": [],
+        "label": "DASHBOARD_NAMESPACE",
+        "description": [
+          "\nNamespace for dashboard-related tools and agents"
+        ],
+        "signature": [
+          "\"platform.dashboard\""
+        ],
+        "path": "x-pack/platform/plugins/shared/dashboard_agent/common/constants.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "dashboardAgent",
+        "id": "def-common.dashboardTools",
+        "type": "Object",
+        "tags": [],
+        "label": "dashboardTools",
+        "description": [
+          "\nIds of built-in dashboard tools.\nThese tools are registered by the dashboard_agent plugin."
+        ],
+        "signature": [
+          "{ readonly createDashboard: string; readonly updateDashboard: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/dashboard_agent/common/constants.ts",
+        "lineNumber": 30,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

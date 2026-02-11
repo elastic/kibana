@@ -159,6 +159,83 @@ export default function alertTests({ getService }: FtrProviderContext) {
       }
     });
 
+    describe('custom filter validation', () => {
+      it('rejects disallowed field: job_id', async () => {
+        const { status, body } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'Test disallowed field job_id',
+            consumer: 'alerts',
+            enabled: true,
+            rule_type_id: ALERT_TYPE_ID,
+            schedule: { interval: `${ALERT_INTERVAL_SECONDS}s` },
+            actions: [],
+            params: {
+              jobSelection: { jobIds: [AD_JOB_ID] },
+              severity: 0,
+              resultType: 'record',
+              includeInterim: true,
+              kqlQueryString: 'job_id: "test"',
+            },
+          });
+
+        expect(status).to.be(400);
+        expect(body.message).to.contain('job_id');
+        expect(body.message).to.contain('not allowed');
+      });
+    });
+
+    describe('custom filter functionality', () => {
+      it('filters alerts by partition_field_value', async () => {
+        await createAlert({
+          name: 'Test filtered alerts',
+          includeInterim: true,
+          jobSelection: {
+            jobIds: [AD_JOB_ID],
+          },
+          severity: 0,
+          lookbackInterval: undefined,
+          resultType: 'record',
+          topNBuckets: undefined,
+          kqlQueryString: 'partition_field_value: "first-key"',
+        });
+
+        await ingestAnomalousDocWithKey(BASIC_TEST_DATA_INDEX, 'first-key');
+
+        log.debug('Checking created alert instances...');
+
+        const docs = await waitForDocs(1);
+        expect(docs.length).to.be.greaterThan(0);
+      });
+
+      it('does not alert when filter does not match', async () => {
+        await createAlert({
+          name: 'Test filtered alerts no match',
+          includeInterim: true,
+          jobSelection: {
+            jobIds: [AD_JOB_ID],
+          },
+          severity: 0,
+          lookbackInterval: undefined,
+          resultType: 'record',
+          topNBuckets: undefined,
+          kqlQueryString: 'partition_field_value: "non-existent-key"',
+        });
+
+        await ingestAnomalousDocWithKey(BASIC_TEST_DATA_INDEX, 'first-key');
+
+        log.debug('Waiting for potential alerts to be created...');
+        // wait 15s - 5x alert interval
+        await sleep(ALERT_INTERVAL_SECONDS * 5 * 1000);
+
+        log.debug('Verifying no alerts were created...');
+
+        const docs = await waitForDocs(0);
+        expect(docs.length).to.be(0);
+      });
+    });
+
     async function waitForDocs(count: number): Promise<any[]> {
       return await esTestIndexToolOutput.waitForDocs(
         ES_TEST_INDEX_SOURCE,
@@ -311,6 +388,16 @@ export default function alertTests({ getService }: FtrProviderContext) {
         refresh: 'wait_for',
         index: indexName,
         body: { '@timestamp': Date.now(), value: 10 * 1000, key: sample(DOC_KEYS) },
+      });
+      log.debug('Anomalous doc indexed successfully...');
+    }
+
+    async function ingestAnomalousDocWithKey(indexName: string, key: string) {
+      log.debug(`Ingesting anomalous doc with key '${key}'...`);
+      await es.index({
+        refresh: 'wait_for',
+        index: indexName,
+        body: { '@timestamp': Date.now(), value: 10 * 1000, key },
       });
       log.debug('Anomalous doc indexed successfully...');
     }

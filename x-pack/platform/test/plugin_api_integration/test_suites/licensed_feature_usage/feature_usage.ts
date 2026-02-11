@@ -29,8 +29,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const testFeaturesResponse = {
         ...response.body,
-        features: response.body.features.filter((feature: { name: string }) =>
-          feature.name.startsWith('Test feature ')
+        features: response.body.features.filter((feature: { id: string }) =>
+          feature.id.startsWith('Test feature ')
         ),
       };
 
@@ -39,17 +39,17 @@ export default function ({ getService }: FtrProviderContext) {
           {
             last_used: null,
             license_level: 'basic',
-            name: 'Test feature A',
+            id: 'Test feature A',
           },
           {
             last_used: toISO(timeB),
             license_level: 'gold',
-            name: 'Test feature B',
+            id: 'Test feature B',
           },
           {
             last_used: toISO(timeA),
             license_level: 'platinum',
-            name: 'Test feature C',
+            id: 'Test feature C',
           },
         ],
       });

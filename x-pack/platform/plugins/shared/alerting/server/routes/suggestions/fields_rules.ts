@@ -16,7 +16,7 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
-import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 
 import { verifyAccessAndContext } from '../lib';
 import type { ILicenseState } from '../../lib';

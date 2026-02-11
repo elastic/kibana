@@ -7,37 +7,96 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import nunjucks from 'nunjucks';
+import { Liquid } from 'liquidjs';
 
 export class WorkflowTemplatingEngine {
-  constructor() {}
+  private readonly engine: Liquid;
 
-  public render(template: string, context: Record<string, any>): string {
-    return this.renderNunjucks(template, context);
+  constructor() {
+    this.engine = new Liquid({
+      strictFilters: true,
+      strictVariables: false,
+    });
+
+    // register json_parse filter that converts JSON string to object
+    this.engine.registerFilter('json_parse', (value: unknown): unknown => {
+      if (typeof value !== 'string') {
+        return value;
+      }
+      try {
+        return JSON.parse(value);
+      } catch (error) {
+        return value;
+      }
+    });
   }
 
-  private renderNunjucks(template: string, context: Record<string, any>): string {
-    const env = nunjucks.configure({
-      autoescape: true,
-    });
+  public render<T>(obj: T, context: Record<string, unknown>): T {
+    return this.renderValueRecursively(obj, context) as T;
+  }
 
-    // We can add custom functions to the Nunjucks environment here.
-    // In theory, this could be same as `keep.` functions
-    env.addGlobal('now', function (format: string = 'iso') {
-      const date = new Date();
-      if (format === 'iso') return date.toISOString();
-      if (format === 'locale') return date.toLocaleString();
-      return date;
-    });
+  public evaluateExpression(template: string, context: Record<string, unknown>): unknown {
+    let resolvedExpression = template.trim();
+    const openExpressionIndex = resolvedExpression.indexOf('{{');
+    const closeExpressionIndex = resolvedExpression.lastIndexOf('}}');
 
-    env.addFilter('json', function (value, spaces) {
-      if (value instanceof nunjucks.runtime.SafeString) {
-        value = value.toString();
+    if (openExpressionIndex === -1 || closeExpressionIndex === -1) {
+      throw new Error(`The provided expression is invalid. Got: ${template}.`);
+    }
+
+    resolvedExpression = resolvedExpression
+      .substring(openExpressionIndex + 2, closeExpressionIndex)
+      .trim();
+
+    try {
+      return this.engine.evalValueSync(resolvedExpression, context);
+    } catch (err) {
+      throw new Error(`The provided expression is invalid. Got: ${template}.`);
+    }
+  }
+
+  private renderValueRecursively(value: unknown, context: Record<string, unknown>): unknown {
+    // Handle null and undefined
+    if (value === null || value === undefined) {
+      return value;
+    }
+
+    if (typeof value === 'string' && value.startsWith('${{') && value.endsWith('}}')) {
+      // remove the first $ only as the evaluateExpression removes the {{ and }} later
+      return this.evaluateExpression(value.substring(1), context);
+    }
+
+    // Handle string values - render them using the template engine
+    if (typeof value === 'string') {
+      return this.renderString(value, context);
+    }
+
+    // Handle arrays - recursively render each element
+    if (Array.isArray(value)) {
+      return value.map((item) => this.renderValueRecursively(item, context));
+    }
+
+    // Handle objects - recursively render each property
+    if (typeof value === 'object') {
+      const renderedObject: Record<string, unknown> = {};
+      for (const [key, val] of Object.entries(value)) {
+        renderedObject[key] = this.renderValueRecursively(val, context);
       }
-      const jsonString = JSON.stringify(value, null, spaces)?.replace(/</g, '\\u003c');
-      return new nunjucks.runtime.SafeString(jsonString);
-    });
+      return renderedObject;
+    }
 
-    return env.renderString(template, context);
+    // Return primitive values as-is (numbers, booleans, etc.)
+    return value;
+  }
+
+  private renderString(template: string, context: Record<string, unknown>): string {
+    try {
+      return this.engine.parseAndRenderSync(template, context);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      // customer-facing error message without the default line number and column number
+      const customerFacingErrorMessage = errorMessage.replace(/, line:\d+, col:\d+/g, '');
+      throw new Error(customerFacingErrorMessage);
+    }
   }
 }

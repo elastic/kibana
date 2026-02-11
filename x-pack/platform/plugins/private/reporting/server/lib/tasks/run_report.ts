@@ -125,6 +125,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   }
 
   // Abstract methods
+  public abstract exportType: string;
   public abstract get TYPE(): string;
 
   public abstract getTaskDefinition(): TaskRegisterDefinition;
@@ -228,9 +229,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   ): Promise<UpdateResponse<ReportDocument>> {
     const message = `Saving execution error for ${report.jobtype} job ${report._id}`;
     const errorParsed = parseError(failedToExecuteErr);
-    const logger = this.logger.get(report._id);
     // log the error
-    errorLogger(logger, message, failedToExecuteErr);
+    errorLogger(this.logger, message, failedToExecuteErr, [report._id]);
 
     // update the report in the store
     const store = await this.opts.reporting.getStore();
@@ -268,8 +268,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     output: CompletedReportOutput,
     message: string
   ): Promise<UpdateResponse<ReportDocument>> {
-    const logger = this.logger.get(report._id);
-    logger.warn(message);
+    this.logger.warn(message, { tags: [report._id] });
 
     // update the report in the store
     const store = await this.opts.reporting.getStore();
@@ -384,6 +383,9 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     if (!exportType) {
       throw new Error(`No export type from ${task.jobtype} found to execute report`);
     }
+    // notify usage
+    exportType.notifyUsage(this.exportType);
+
     // run the report
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const request = await this.getRequestToUse({
@@ -412,9 +414,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     output: CompletedReportOutput
   ): Promise<SavedReport> {
     let docId = `/${report._index}/_doc/${report._id}`;
-    const logger = this.logger.get(report._id);
 
-    logger.debug(`Saving ${report.jobtype} to ${docId}.`);
+    this.logger.debug(`Saving ${report.jobtype} to ${docId}.`, { tags: [report._id] });
 
     const completedTime = moment();
     const docOutput = this.formatOutput(output);
@@ -428,7 +429,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
     const resp = await store.setReportCompleted(report, doc);
 
-    logger.info(`Saved ${report.jobtype} job ${docId}`);
+    this.logger.info(`Saved ${report.jobtype} job ${docId}`, { tags: [report._id] });
     report._seq_no = resp._seq_no!;
     report._primary_term = resp._primary_term!;
 
@@ -509,27 +510,25 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
           if (!report || !task) {
             this.opts.reporting.untrackReport(jobId);
-
-            const errorMessage = `Job ${jobId} could not be claimed. Exiting...`;
-            errorLogger(this.logger, errorMessage);
-
             // Throw so Task manager can clean up the failed task
-            throw new Error(errorMessage);
+            throw new Error(`Job ${jobId} could not be claimed. Exiting...`);
           }
 
           const { jobtype: jobType, attempts } = report;
-          const logger = this.logger.get(jobId);
 
           const maxAttempts = this.getMaxAttempts();
           if (maxAttempts) {
-            logger.debug(
-              `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts.maxTaskAttempts}.`
+            this.logger.debug(
+              `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts.maxTaskAttempts}.`,
+              { tags: [jobId] }
             );
           } else {
-            logger.debug(`Starting ${jobType} report ${jobId}.`);
+            this.logger.debug(`Starting ${jobType} report ${jobId}.`, { tags: [jobId] });
           }
 
-          logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`);
+          this.logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`, {
+            tags: [jobId],
+          });
 
           const eventLog = this.opts.reporting.getEventLogger(
             new Report({ ...task, _id: task.id, _index: task.index })
@@ -573,9 +572,13 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
                 stream.end();
 
-                logger.debug(`Begin waiting for the stream's pending callbacks...`);
+                this.logger.debug(`Begin waiting for the stream's pending callbacks...`, {
+                  tags: [jobId],
+                });
                 await finishedWithNoPendingCallbacks(stream);
-                logger.info(`The stream's pending callbacks have completed.`);
+                this.logger.info(`The stream's pending callbacks have completed.`, {
+                  tags: [jobId],
+                });
 
                 rep._seq_no = stream.getSeqNo()!;
                 rep._primary_term = stream.getPrimaryTerm()!;
@@ -584,7 +587,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 eventLog.logExecutionComplete({ ...(output.metrics ?? {}), byteSize });
 
                 if (output) {
-                  logger.debug(`Job output size: ${byteSize} bytes.`);
+                  this.logger.debug(`Job output size: ${byteSize} bytes.`, { tags: [jobId] });
                   // Update the job status to "completed"
                   report = await this.completeJob(rep, isNumber(atmpts) ? atmpts : rep.attempts, {
                     ...output,
@@ -602,7 +605,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 }
 
                 // untrack the report for concurrency awareness
-                logger.debug(`Stopping ${jobId}.`);
+                this.logger.debug(`Stopping ${jobId}.`, { tags: [jobId] });
               },
             });
           } catch (failedToExecuteErr) {
@@ -611,7 +614,12 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
             await this.saveExecutionError(report, failedToExecuteErr, isLastAttempt).catch(
               (failedToSaveError) => {
-                errorLogger(logger, `Error in saving execution error ${jobId}`, failedToSaveError);
+                errorLogger(
+                  this.logger,
+                  `Error in saving execution error ${jobId}`,
+                  failedToSaveError,
+                  [jobId]
+                );
               }
             );
 
@@ -619,18 +627,22 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
 
             if (isLastAttempt) {
               this.logger.info(
-                `Job ${jobId} failed on its last attempt and will not be retried. Error: ${failedToExecuteErr.message}.`
+                `Job ${jobId} failed on its last attempt and will not be retried. Error: ${failedToExecuteErr.message}.`,
+                { tags: [jobId] }
               );
             } else {
               this.logger.info(
-                `Job ${jobId} failed, but will be retried. Error: ${failedToExecuteErr.message}.`
+                `Job ${jobId} failed, but will be retried. Error: ${failedToExecuteErr.message}.`,
+                { tags: [jobId] }
               );
             }
 
             throwRetryableError(failedToExecuteErr, new Date(Date.now() + TIME_BETWEEN_ATTEMPTS));
           } finally {
             this.opts.reporting.untrackReport(jobId);
-            logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`);
+            this.logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`, {
+              tags: [jobId],
+            });
           }
         },
 
@@ -640,7 +652,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
          */
         cancel: async () => {
           if (jobId) {
-            this.logger.get(jobId).warn(`Cancelling job ${jobId}...`);
+            this.logger.warn(`Cancelling job ${jobId}...`, { tags: [jobId] });
           }
           cancellationToken.cancel();
         },

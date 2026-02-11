@@ -7,27 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SELECTED_ALERTS = (selectedAlertsFormatted: string, selectedAlerts: number) =>
-  i18n.translate('xpack.securitySolution.toolbar.bulkActions.selectedAlertsTitle', {
-    values: { selectedAlertsFormatted, selectedAlerts },
-    defaultMessage:
-      'Selected {selectedAlertsFormatted} {selectedAlerts, plural, =1 {alert} other {alerts}}',
-  });
-
-export const SELECT_ALL_ALERTS = (totalAlertsFormatted: string, totalAlerts: number) =>
-  i18n.translate('xpack.securitySolution.toolbar.bulkActions.selectAllAlertsTitle', {
-    values: { totalAlertsFormatted, totalAlerts },
-    defaultMessage:
-      'Select all {totalAlertsFormatted} {totalAlerts, plural, =1 {alert} other {alerts}}',
-  });
-
-export const CLEAR_SELECTION = i18n.translate(
-  'xpack.securitySolution.toolbar.bulkActions.clearSelectionTitle',
-  {
-    defaultMessage: 'Clear selection',
-  }
-);
-
 export const UPDATE_ALERT_STATUS_FAILED = (conflicts: number) =>
   i18n.translate('xpack.securitySolution.bulkActions.updateAlertStatusFailed', {
     values: { conflicts },
@@ -123,13 +102,6 @@ export const ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_TITLE = i18n.tra
   'xpack.securitySolution.alert.closeInfoModal.continueSuppressionTitle',
   {
     defaultMessage: "Closing alert doesn't interrupt alert suppression",
-  }
-);
-
-export const ALERT_CLOSE_INFO_MODAL_LEARN_MORE_LINK = i18n.translate(
-  'xpack.securitySolution.alert.closeInfoModal.learnMoreLink',
-  {
-    defaultMessage: 'Learn more',
   }
 );
 

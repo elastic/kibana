@@ -12,8 +12,8 @@ import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow } from '@elastic/eui';
 import { EuiFieldText } from '@elastic/eui';
-import type { D3SecurityRunActionParams } from '../../../common/d3security/types';
-import { SUB_ACTION } from '../../../common/d3security/constants';
+import type { D3SecurityRunActionParams } from '@kbn/connector-schemas/d3security';
+import { SUB_ACTION } from '@kbn/connector-schemas/d3security/constants';
 import type { D3SecurityActionParams } from './types';
 import { OptionalFieldLabel } from '../../common/optional_field_label';
 

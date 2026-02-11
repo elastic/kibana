@@ -340,7 +340,6 @@ describe('RuleToImport', () => {
   });
 
   test('defaults max signals to 100', () => {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { max_signals, ...noMaxSignals } = getImportRulesSchemaMock();
     const payload: RuleToImportInput = {
       ...noMaxSignals,
@@ -1056,6 +1055,8 @@ describe('RuleToImport', () => {
         rule_source: {
           type: 'external',
           is_customized: true,
+          customized_fields: [{ field_name: 'name' }],
+          has_base_version: true,
         },
       });
 

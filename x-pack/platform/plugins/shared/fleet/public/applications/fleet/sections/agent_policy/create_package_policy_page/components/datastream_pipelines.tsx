@@ -131,7 +131,7 @@ export const PackagePolicyEditorDatastreamPipelines: React.FunctionComponent<
             defaultMessage="Ingest pipelines perform common transformations on the ingested data. We recommend modifying only the custom ingest pipeline. These pipelines are shared between integration policies of the same integration type. Hence, any modifications to the ingest pipelines would affect all the integration policies. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink href={docLinks.links.fleet.datastreams} external={true}>
+                <EuiLink href={docLinks.links.fleet.datastreams} external={true} target="_blank">
                   <FormattedMessage
                     id="xpack.fleet.packagePolicyEdotpr.datastreamIngestPipelines.learnMoreLink"
                     defaultMessage="Learn more"
@@ -145,6 +145,12 @@ export const PackagePolicyEditorDatastreamPipelines: React.FunctionComponent<
       <EuiFlexItem grow={false}>
         <EuiBasicTable
           loading={isLoading}
+          tableCaption={i18n.translate(
+            'xpack.fleet.packagePolicyEditor.datastreamIngestPipelinesTableCaption',
+            {
+              defaultMessage: 'List of ingest pipelines',
+            }
+          )}
           items={pipelines}
           columns={[
             {

@@ -49,6 +49,7 @@ export const CreateIndexButton: React.FC = () => {
     </EuiButton>
   ) : (
     <EuiCallOut
+      announceOnMount
       title={i18n.translate('xpack.searchPlayground.createIndexCallout', {
         defaultMessage: 'You need to create an index first',
       })}

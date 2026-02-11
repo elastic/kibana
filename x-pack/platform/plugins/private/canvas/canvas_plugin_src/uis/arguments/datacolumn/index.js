@@ -7,6 +7,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 import { EuiSelect, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { sortBy } from 'lodash';
 import { getType } from '@kbn/interpreter';
@@ -139,6 +140,9 @@ const DatacolumnArgInput = ({
           options={[firstColumnOption, ...options]}
           value={mathValue.column}
           onChange={onChangeColumn}
+          aria-label={i18n.translate('xpack.canvas.datacolumn.columnSelectAriaLabel', {
+            defaultMessage: 'Column',
+          })}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

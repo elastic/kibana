@@ -50,6 +50,18 @@ export const MAX_CASES = (maxCases: number) =>
       'The results were capped at {maxCases} to maintain performance. Try limiting your search to reduce the results.',
   });
 
+export const SHOW_ALL_CASES = i18n.translate('xpack.cases.caseTable.showAllCases', {
+  defaultMessage: 'Show all cases',
+});
+
+export const LAST_30_DAYS = i18n.translate('xpack.cases.caseTable.last30Days', {
+  defaultMessage: 'Last 30 days',
+});
+
+export const CUSTOM_QUICK_SELECT_PANEL = i18n.translate('xpack.cases.caseTable.customQuickSelect', {
+  defaultMessage: 'Custom quick select',
+});
+
 export const DISMISS = i18n.translate('xpack.cases.caseTable.dismiss', {
   defaultMessage: 'Dismiss',
 });

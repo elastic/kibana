@@ -24,6 +24,7 @@
     "modulePathIgnorePatterns",
     "modulePaths",
     "notifyMode",
+    "openHandlesTimeout",
     "outputFile",
     "preset",
     "prettierPath",
@@ -88,6 +89,7 @@
     "onlyChanged",
     "onlyFailures",
     "passWithNoTests",
+    "randomize",
     "resetMocks",
     "resetModules",
     "restoreMocks",
@@ -104,7 +106,8 @@
     "version",
     "watch",
     "watchAll",
-    "watchman"
+    "watchman",
+    "workerThreads"
   ],
   "alias": {
     "b": "bail",

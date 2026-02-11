@@ -47,8 +47,8 @@ import {
   convertECSMappingToArray,
   convertECSMappingToObject,
 } from '../../../common/utils/converters';
-import ECSSchema from '../../common/schemas/ecs/v9.1.0.json';
-import osquerySchema from '../../common/schemas/osquery/v5.18.1.json';
+import ECSSchema from '../../common/schemas/ecs/v9.2.0.json';
+import osquerySchema from '../../common/schemas/osquery/v5.19.0.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
@@ -157,11 +157,15 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
         <EuiFlexItem grow={false}>
           {
             // @ts-expect-error update types
-            <FieldIcon type={typeMap[option.value.type] ?? option.value.type} />
+            <FieldIcon type={typeMap[option.value.type] ?? option.value.type} aria-hidden="true" />
           }
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <span css={fieldSpanCss} className="euiSuggestItem__label euiSuggestItem__label--expand">
+          <span
+            css={fieldSpanCss}
+            className="euiSuggestItem__label euiSuggestItem__label--expand"
+            aria-hidden="true"
+          >
             <b>{option.value.field}</b>
           </span>
         </EuiFlexItem>
@@ -478,6 +482,9 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
         options={OSQUERY_COLUMN_VALUE_TYPE_OPTIONS}
         data-test-subj={`osquery-result-type-select-${index}`}
         valueOfSelected={resultTypeField.value || OSQUERY_COLUMN_VALUE_TYPE_OPTIONS[0].value}
+        aria-label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.valueTypeSelectLabel', {
+          defaultMessage: 'Value type',
+        })}
         // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
         popoverProps={{
           panelStyle: {
@@ -557,8 +564,12 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
             rowHeight={32}
             isClearable
             singleSelection={isSingleSelection ? SINGLE_SELECTION : false}
-            idAria={idAria}
-            helpText={selectedOptions[0]?.value?.description}
+            aria-label={i18n.translate(
+              'xpack.osquery.pack.queryFlyoutForm.mappingValueFieldLabel',
+              {
+                defaultMessage: 'Value',
+              }
+            )}
             {...euiFieldProps}
             data-test-subj="osqueryColumnValueSelect"
             options={(resultTypeField.value === 'field' && euiFieldProps.options) || EMPTY_ARRAY}
@@ -689,9 +700,9 @@ interface OsqueryColumn {
   name: string;
   description: string;
   type: string;
-  hidden: boolean;
-  required: boolean;
-  index: boolean;
+  hidden?: boolean;
+  required?: boolean;
+  index?: boolean;
 }
 
 // eslint-disable-next-line react/display-name

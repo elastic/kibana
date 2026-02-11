@@ -47,6 +47,7 @@ export const getColorSpec = (
     return {
       condition: {
         selection: USER_SELECTION,
+        // @ts-expect-error upgrade typescript v5.9.3
         field: getEscapedVegaFieldName('is_outlier' ?? '00FF00'),
         type: LEGEND_TYPES.NOMINAL,
         scale: {

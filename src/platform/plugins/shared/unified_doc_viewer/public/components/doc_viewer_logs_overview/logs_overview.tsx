@@ -9,6 +9,7 @@
 
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { EuiSpacer } from '@elastic/eui';
 import {
   SERVICE_NAME_FIELD,
   SPAN_ID_FIELD,
@@ -16,16 +17,16 @@ import {
   TRANSACTION_ID_FIELD,
   getLogDocumentOverview,
 } from '@kbn/discover-utils';
-import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import type {
   ObservabilityLogsAIAssistantFeature,
+  ObservabilityLogsAIInsightFeature,
   ObservabilityStreamsFeature,
 } from '@kbn/discover-shared-plugin/public';
-import type { LogDocument, TraceIndexes } from '@kbn/discover-utils/src';
+import type { LogDocument, ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { getStacktraceFields } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
+import type { DocViewActions } from '@kbn/unified-doc-viewer/src/services/types';
 import { LogsOverviewHeader } from './logs_overview_header';
-import { LogsOverviewHighlights } from './logs_overview_highlights';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { LogsOverviewDegradedFields } from './logs_overview_degraded_fields';
@@ -36,13 +37,19 @@ import {
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
 import { TraceWaterfall } from '../observability/traces/components/trace_waterfall';
-import { DataSourcesProvider } from '../observability/traces/hooks/use_data_sources';
+import { DataSourcesProvider } from '../../hooks/use_data_sources';
+import { SimilarErrors } from './sub_components/similar_errors';
+import { hasErrorFields } from './utils/has_error_fields';
+import { DocViewerExtensionActionsProvider } from '../../hooks/use_doc_viewer_extension_actions';
 
 export type LogsOverviewProps = DocViewRenderProps & {
   renderAIAssistant?: ObservabilityLogsAIAssistantFeature['render'];
+  renderAIInsight?: ObservabilityLogsAIInsightFeature['render'];
   renderFlyoutStreamField?: ObservabilityStreamsFeature['renderFlyoutStreamField'];
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
-  indexes: TraceIndexes;
+  indexes: ObservabilityIndexes;
+  showTraceWaterfall?: boolean;
+  docViewActions?: DocViewActions;
 };
 
 export interface LogsOverviewApi {
@@ -60,17 +67,23 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       onAddColumn,
       onRemoveColumn,
       renderAIAssistant,
+      renderAIInsight,
       renderFlyoutStreamField,
       renderFlyoutStreamProcessingLink,
       indexes,
+      showTraceWaterfall = true,
+      docViewActions,
     },
     ref
   ) => {
     const { fieldFormats } = getUnifiedDocViewerServices();
     const parsedDoc = getLogDocumentOverview(hit, { dataView, fieldFormats });
     const LogsOverviewAIAssistant = renderAIAssistant;
+    const LogsOverviewAIInsight = renderAIInsight;
     const stacktraceFields = getStacktraceFields(hit as LogDocument);
     const isStacktraceAvailable = Object.values(stacktraceFields).some(Boolean);
+    const traceId = parsedDoc[TRACE_ID_FIELD];
+    const showSimilarErrors = traceId && hasErrorFields(parsedDoc);
     const qualityIssuesSectionRef = useRef<ScrollableSectionWrapperApi>(null);
     const stackTraceSectionRef = useRef<ScrollableSectionWrapperApi>(null);
     const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
@@ -94,56 +107,62 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
     );
 
     return (
-      <DataSourcesProvider indexes={indexes}>
-        <FieldActionsProvider
-          columns={columns}
-          filter={filter}
-          onAddColumn={onAddColumn}
-          onRemoveColumn={onRemoveColumn}
+      <FieldActionsProvider
+        columns={columns}
+        filter={filter}
+        onAddColumn={onAddColumn}
+        onRemoveColumn={onRemoveColumn}
+      >
+        <div
+          ref={setContainerRef}
+          css={
+            containerHeight
+              ? css`
+                  height: ${containerHeight}px;
+                  overflow: auto;
+                `
+              : undefined
+          }
         >
-          <div
-            ref={setContainerRef}
-            css={
-              containerHeight
-                ? css`
-                    height: ${containerHeight}px;
-                    overflow: auto;
-                  `
-                : undefined
-            }
-          >
-            <EuiSpacer size="m" />
-            <LogsOverviewHeader
-              formattedDoc={parsedDoc}
-              doc={hit}
-              renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
-            />
-            <EuiHorizontalRule margin="xs" />
-            <LogsOverviewHighlights
-              formattedDoc={parsedDoc}
-              doc={hit}
-              renderFlyoutStreamField={renderFlyoutStreamField}
-            />
-            <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
-            {isStacktraceAvailable && (
-              <LogsOverviewStacktraceSection
-                ref={stackTraceSectionRef}
-                hit={hit}
-                dataView={dataView}
-              />
-            )}
-            {parsedDoc[TRACE_ID_FIELD] ? (
-              <TraceWaterfall
-                traceId={parsedDoc[TRACE_ID_FIELD]}
-                docId={parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD]}
-                serviceName={parsedDoc[SERVICE_NAME_FIELD]}
-                dataView={dataView}
-              />
-            ) : null}
-            {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
-          </div>
-        </FieldActionsProvider>
-      </DataSourcesProvider>
+          <EuiSpacer size="m" />
+          <LogsOverviewHeader
+            formattedDoc={parsedDoc}
+            hit={hit}
+            renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+            filter={filter}
+            onAddColumn={onAddColumn}
+            onRemoveColumn={onRemoveColumn}
+            dataView={dataView}
+          />
+          <DataSourcesProvider indexes={indexes}>
+            <DocViewerExtensionActionsProvider actions={docViewActions}>
+              {showSimilarErrors ? <SimilarErrors hit={hit} /> : null}
+              <div>
+                {renderFlyoutStreamField && renderFlyoutStreamField({ dataView, doc: hit })}
+              </div>
+              <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
+              {isStacktraceAvailable && (
+                <LogsOverviewStacktraceSection
+                  ref={stackTraceSectionRef}
+                  hit={hit}
+                  dataView={dataView}
+                />
+              )}
+              {traceId && showTraceWaterfall ? (
+                <TraceWaterfall
+                  traceId={traceId}
+                  docId={parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD]}
+                  serviceName={parsedDoc[SERVICE_NAME_FIELD]}
+                  dataView={dataView}
+                />
+              ) : null}
+            </DocViewerExtensionActionsProvider>
+          </DataSourcesProvider>
+          {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
+          <EuiSpacer size="m" />
+          {LogsOverviewAIInsight && <LogsOverviewAIInsight doc={hit} />}
+        </div>
+      </FieldActionsProvider>
     );
   }
 );

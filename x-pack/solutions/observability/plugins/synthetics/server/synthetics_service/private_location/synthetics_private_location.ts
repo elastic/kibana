@@ -8,7 +8,7 @@ import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants/monitor_defaults';
 import {
   BROWSER_TEST_NOW_RUN,
@@ -65,7 +65,7 @@ export class SyntheticsPrivateLocation {
     return newPolicy;
   }
 
-  getPolicyId(config: HeartbeatConfig, locId: string, spaceId: string) {
+  getPolicyId(config: { origin?: string; id: string }, locId: string, spaceId: string) {
     if (config[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT) {
       return `${config.id}-${locId}`;
     }
@@ -148,7 +148,6 @@ export class SyntheticsPrivateLocation {
     if (configs.length === 0) {
       return { created: [], failed: [] };
     }
-
     const newPolicies: NewPackagePolicyWithId[] = [];
     const newPolicyTemplate = await this.buildNewPolicy();
 
@@ -270,7 +269,9 @@ export class SyntheticsPrivateLocation {
     maintenanceWindows: MaintenanceWindow[]
   ) {
     if (configs.length === 0) {
-      return {};
+      return {
+        failedUpdates: [],
+      };
     }
 
     const [newPolicyTemplate, existingPolicies] = await Promise.all([

@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { VECTOR_STYLES } from '../../../../../../common';
-import { FIELD_ORIGIN, LAYER_STYLE_TYPE } from '../../../../../../common/constants';
+import { LAYER_STYLE_TYPE } from '../../../../../../common/constants';
 import {
   labelBorderColorSchema,
   fillColorSchema,
@@ -28,30 +28,6 @@ import {
   orientationSchema,
   symbolizeAsSchema,
 } from './marker_schemas';
-
-export const fieldMetaOptions = schema.object(
-  {
-    isEnabled: schema.boolean({
-      meta: {
-        description:
-          'When set to true, dynamic style domain range and categories are calculated from entire data. Domain range and categories are fetched in seperate Elasticsearch aggregation request. Styling is consistent as users pan, zoom, and filter map. When set to false, dynamic style domain range and categories are calculated from local data and recalculated when local data changes. Styling maybe inconsistent as users pan, zoom, and filter.',
-      },
-    }),
-    sigma: schema.maybe(schema.number()),
-    percentiles: schema.maybe(schema.arrayOf(schema.number())),
-  },
-  {
-    meta: {
-      description:
-        'Use to configure how dynamic styling domain ranges and categories are calculated and mapped to feature values.',
-    },
-  }
-);
-
-export const styleField = schema.object({
-  name: schema.string(),
-  origin: schema.oneOf([schema.literal(FIELD_ORIGIN.SOURCE), schema.literal(FIELD_ORIGIN.JOIN)]),
-});
 
 export const vectorStylePropertiesSchema = schema.object({
   [VECTOR_STYLES.SYMBOLIZE_AS]: schema.maybe(symbolizeAsSchema),

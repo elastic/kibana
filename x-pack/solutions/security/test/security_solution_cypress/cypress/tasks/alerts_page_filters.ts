@@ -5,13 +5,42 @@
  * 2.0.
  */
 
-import { DEFAULT_DETECTION_PAGE_FILTERS } from '@kbn/security-solution-plugin/common/constants';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import {
   CONTROL_FRAMES,
   OPTION_LIST_LABELS,
   OPTION_LIST_VALUES,
 } from '../screens/common/filter_group';
+
+const DEFAULT_DETECTION_PAGE_FILTERS: FilterControlConfig[] = [
+  {
+    title: 'Status',
+    fieldName: 'kibana.alert.workflow_status',
+    selectedOptions: ['open'],
+    displaySettings: {
+      hideActionBar: true,
+      hideExists: true,
+    },
+    persist: true,
+  },
+  {
+    title: 'Severity',
+    fieldName: 'kibana.alert.severity',
+    selectedOptions: [],
+    displaySettings: {
+      hideActionBar: true,
+      hideExists: true,
+    },
+  },
+  {
+    title: 'User',
+    fieldName: 'user.name',
+  },
+  {
+    title: 'Host',
+    fieldName: 'host.name',
+  },
+];
 
 export const assertFilterControlsWithFilterObject = (
   filterObject: FilterControlConfig[] = DEFAULT_DETECTION_PAGE_FILTERS

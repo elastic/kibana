@@ -14,4 +14,3 @@ export { createRackAgentInstructions } from './rack_agent';
 export { createGoAgentInstructions } from './go_agent';
 export { createDotNetAgentInstructions } from './dotnet_agent';
 export { createPhpAgentInstructions } from './php_agent';
-export { createOpenTelemetryAgentInstructions } from './otel_agent';

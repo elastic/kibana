@@ -4,34 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
   EuiResizableContainer,
-  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import type { Streams } from '@kbn/streams-schema';
-import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { CoreStart } from '@kbn/core/public';
-import { useTimefilter } from '../../../hooks/use_timefilter';
+import type { Streams } from '@kbn/streams-schema';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { getTimeDifferenceInSeconds } from '@kbn/timerange';
+import React, { useEffect } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
+import type { StatefulStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { useTimefilter } from '../../../hooks/use_timefilter';
+import { ManagementBottomBar } from '../management_bottom_bar';
+import { RequestPreviewFlyout } from '../request_preview_flyout';
+import { useRequestPreviewFlyoutState } from '../request_preview_flyout/use_request_preview_flyout_state';
 import { ChildStreamList } from './child_stream_list';
+import { PreviewPanel } from './preview_panel';
 import {
   StreamRoutingContextProvider,
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
+  selectHasRoutingChanges,
 } from './state_management/stream_routing_state_machine';
-import { ManagementBottomBar } from '../management_bottom_bar';
-import { PreviewPanel } from './preview_panel';
-import type { StatefulStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
+import { buildRoutingSaveRequestPayload, routingConverter } from './utils';
+import { QueryStreamCreationProvider } from './query_stream_creation_context';
 
 interface StreamDetailRoutingProps {
   definition: Streams.WiredStream.GetResponse;
@@ -69,24 +76,30 @@ export function StreamDetailRouting(props: StreamDetailRoutingProps) {
 }
 
 export function StreamDetailRoutingImpl() {
-  const { appParams, core } = useKibana();
-
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
-  const { cancelChanges, saveChanges } = useStreamRoutingEvents();
-
-  const definition = routingSnapshot.context.definition;
-
-  const shouldDisplayBottomBar =
-    routingSnapshot.matches({ ready: { reorderingRules: 'reordering' } }) &&
-    routingSnapshot.can({ type: 'routingRule.save' });
-
   const {
+    appParams,
+    core,
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
       },
     },
   } = useKibana();
+
+  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
+  const { cancelChanges, saveChanges } = useStreamRoutingEvents();
+
+  const hasRoutingChanges = selectHasRoutingChanges(routingSnapshot.context);
+
+  const definition = routingSnapshot.context.definition;
+
+  const shouldDisplayBottomBar =
+    routingSnapshot.matches({ ready: { ingestMode: { reorderingRules: 'reordering' } } }) &&
+    routingSnapshot.can({ type: 'routingRule.save' }) &&
+    hasRoutingChanges;
+
+  const { onPageReady } = usePerformanceContext();
+  const { timeState } = useTimefilter();
 
   const streamsListFetch = useStreamsAppFetch(
     ({ signal }) => {
@@ -96,18 +109,56 @@ export function StreamDetailRoutingImpl() {
     [streamsRepositoryClient, definition] // Refetch streams when the definition changes
   );
 
+  const queryRangeSeconds = getTimeDifferenceInSeconds(timeState.timeRange);
+
+  // Telemetry for TTFMP (time to first meaningful paint)
+  useEffect(() => {
+    if (!streamsListFetch.loading && streamsListFetch.value !== undefined) {
+      const streamType = getStreamTypeFromDefinition(definition.stream);
+      onPageReady({
+        meta: {
+          description: `[ttfmp_streams_detail_partitioning] streamType: ${streamType}`,
+        },
+        customMetrics: {
+          key1: 'available_streams_count',
+          value1: streamsListFetch.value?.streams?.length ?? 0,
+          key2: 'queryRangeSeconds',
+          value2: queryRangeSeconds,
+        },
+      });
+    }
+  }, [streamsListFetch, onPageReady, definition.stream, queryRangeSeconds]);
+
   useUnsavedChangesPrompt({
     hasUnsavedChanges:
       routingSnapshot.can({ type: 'routingRule.save' }) ||
-      routingSnapshot.can({ type: 'routingRule.fork' }),
+      routingSnapshot.can({ type: 'routingRule.fork' }) ||
+      routingSnapshot.can({ type: 'suggestion.saveSuggestion' }),
     history: appParams.history,
     http: core.http,
     navigateToUrl: core.application.navigateToUrl,
     openConfirm: core.overlays.openConfirm,
+    shouldPromptOnReplace: false,
   });
 
   const availableStreams = streamsListFetch.value?.streams.map((stream) => stream.name) ?? [];
-  const isVerticalLayout = useIsWithinBreakpoints(['xs', 's']);
+  const {
+    isRequestPreviewFlyoutOpen,
+    requestPreviewFlyoutCodeContent,
+    openRequestPreviewFlyout,
+    closeRequestPreviewFlyout,
+  } = useRequestPreviewFlyoutState();
+
+  const onBottomBarViewCodeClick = () => {
+    const routing = routingSnapshot.context.routing.map(routingConverter.toAPIDefinition);
+    const body = buildRoutingSaveRequestPayload(routingSnapshot.context.definition, routing);
+
+    openRequestPreviewFlyout({
+      method: 'PUT',
+      url: `/api/streams/${routingSnapshot.context.definition.stream.name}/_ingest`,
+      body,
+    });
+  };
 
   return (
     <EuiFlexItem
@@ -123,51 +174,52 @@ export function StreamDetailRoutingImpl() {
           overflow: auto;
         `}
       >
-        <EuiPanel
-          hasShadow={false}
-          className={css`
-            display: flex;
-            max-width: 100%;
-            overflow: auto;
-            flex-grow: 1;
-          `}
-          paddingSize="none"
-        >
-          <EuiResizableContainer direction={isVerticalLayout ? 'vertical' : 'horizontal'}>
-            {(EuiResizablePanel, EuiResizableButton) => (
-              <>
-                <EuiResizablePanel
-                  initialSize={40}
-                  minSize="300px"
-                  tabIndex={0}
-                  paddingSize="l"
-                  color="subdued"
-                  className={css`
-                    overflow: auto;
-                    display: flex;
-                  `}
-                >
-                  <ChildStreamList availableStreams={availableStreams} />
-                </EuiResizablePanel>
+        <QueryStreamCreationProvider>
+          <EuiPanel
+            hasShadow={false}
+            className={css`
+              display: flex;
+              max-width: 100%;
+              overflow: auto;
+              flex-grow: 1;
+            `}
+            paddingSize="none"
+          >
+            <EuiResizableContainer>
+              {(EuiResizablePanel, EuiResizableButton) => (
+                <>
+                  <EuiResizablePanel
+                    initialSize={40}
+                    minSize="400px"
+                    tabIndex={0}
+                    paddingSize="l"
+                    className={css`
+                      overflow: auto;
+                      display: flex;
+                    `}
+                  >
+                    <ChildStreamList availableStreams={availableStreams} />
+                  </EuiResizablePanel>
 
-                <EuiResizableButton indicator="border" />
+                  <EuiResizableButton indicator="border" />
 
-                <EuiResizablePanel
-                  initialSize={60}
-                  tabIndex={0}
-                  minSize="300px"
-                  paddingSize="l"
-                  className={css`
-                    display: flex;
-                    flex-direction: column;
-                  `}
-                >
-                  <PreviewPanel />
-                </EuiResizablePanel>
-              </>
-            )}
-          </EuiResizableContainer>
-        </EuiPanel>
+                  <EuiResizablePanel
+                    initialSize={60}
+                    tabIndex={0}
+                    minSize="300px"
+                    paddingSize="l"
+                    className={css`
+                      display: flex;
+                      flex-direction: column;
+                    `}
+                  >
+                    <PreviewPanel />
+                  </EuiResizablePanel>
+                </>
+              )}
+            </EuiResizableContainer>
+          </EuiPanel>
+        </QueryStreamCreationProvider>
         {shouldDisplayBottomBar && (
           <EuiFlexItem grow={false}>
             <ManagementBottomBar
@@ -177,14 +229,21 @@ export function StreamDetailRoutingImpl() {
               onCancel={cancelChanges}
               onConfirm={saveChanges}
               isLoading={routingSnapshot.matches({
-                ready: { reorderingRules: 'updatingStream' },
+                ready: { ingestMode: { reorderingRules: 'updatingStream' } },
               })}
               disabled={!routingSnapshot.can({ type: 'routingRule.save' })}
               insufficientPrivileges={!routingSnapshot.can({ type: 'routingRule.save' })}
+              onViewCodeClick={onBottomBarViewCodeClick}
             />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      {isRequestPreviewFlyoutOpen && (
+        <RequestPreviewFlyout
+          codeContent={requestPreviewFlyoutCodeContent}
+          onClose={closeRequestPreviewFlyout}
+        />
+      )}
     </EuiFlexItem>
   );
 }

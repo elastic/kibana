@@ -7,8 +7,10 @@
 
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
-import { SYNTHETICS_MONITORS_EMBEDDABLE, SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from './constants';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from './constants';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../common/embeddables/stats_overview/constants';
 
 export const registerSyntheticsEmbeddables = (
   core: CoreSetup<ClientPluginsStart, unknown>,
@@ -21,6 +23,15 @@ export const registerSyntheticsEmbeddables = (
         './stats_overview/stats_overview_embeddable_factory'
       );
       return getStatsOverviewEmbeddableFactory(core.getStartServices);
+    }
+  );
+  pluginsSetup.embeddable.registerLegacyURLTransform(
+    SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+    async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+      const { getTransformOut } = await import(
+        '../../../common/embeddables/stats_overview/get_transform_out'
+      );
+      return getTransformOut(transformDrilldownsOut);
     }
   );
 

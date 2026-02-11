@@ -1,0 +1,68 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Instance } from '@kbn/synthtrace-client';
+import { apm } from '@kbn/synthtrace-client';
+import { pick } from 'lodash';
+describe('transactions with errors', () => {
+  let instance: Instance;
+  const timestamp = new Date('2021-01-01T00:00:00.000Z').getTime();
+
+  beforeEach(() => {
+    instance = apm
+      .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
+      .instance('instance');
+  });
+  it('generates error events', () => {
+    const events = instance
+      .transaction({ transactionName: 'GET /api' })
+      .timestamp(timestamp)
+      .errors(instance.error({ message: 'test error' }).timestamp(timestamp))
+      .serialize();
+
+    const errorEvents = events.filter((event) => event['processor.event'] === 'error');
+
+    expect(errorEvents.length).toEqual(1);
+
+    expect(
+      pick(errorEvents[0], 'processor.event', 'processor.name', 'error.exception', '@timestamp')
+    ).toEqual({
+      'processor.event': 'error',
+      'processor.name': 'error',
+      '@timestamp': timestamp,
+      'error.exception': [{ message: 'test error' }],
+    });
+  });
+
+  it('sets the transaction and trace id', () => {
+    const [transaction, error] = instance
+      .transaction({ transactionName: 'GET /api' })
+      .timestamp(timestamp)
+      .errors(instance.error({ message: 'test error' }).timestamp(timestamp))
+      .serialize();
+
+    const keys = ['transaction.id', 'trace.id', 'transaction.type'];
+
+    expect(pick(error, keys)).toEqual({
+      'transaction.id': transaction['transaction.id'],
+      'trace.id': transaction['trace.id'],
+      'transaction.type': 'request',
+    });
+  });
+
+  it('sets the error grouping key', () => {
+    const [, error] = instance
+      .transaction({ transactionName: 'GET /api' })
+      .timestamp(timestamp)
+      .errors(instance.error({ message: 'test error' }).timestamp(timestamp))
+      .serialize();
+
+    expect(error['error.grouping_key']).toMatchInlineSnapshot(`"0000000000000000000000test error"`);
+  });
+});

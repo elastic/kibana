@@ -9,17 +9,22 @@ import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
+import {
+  RULES_UI_EDIT_PRIVILEGE,
+  RULES_UI_READ_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
 import * as i18n from './translations';
 import {
   COVERAGE_OVERVIEW_PATH,
   RULES_LANDING_PATH,
   RULES_PATH,
-  SECURITY_FEATURE_ID,
+  AI_RULE_CREATION_PATH,
   SecurityPageName,
 } from '../../common/constants';
 import { NotFoundPage } from '../app/404';
 import { RulesPage } from '../detection_engine/rule_management_ui/pages/rule_management';
 import { CreateRulePage } from '../detection_engine/rule_creation_ui/pages/rule_creation';
+import { AiRuleCreationPage } from '../detection_engine/rule_creation_ui/pages/ai_rule_creation/ai_rule_creation_page';
 import { RuleDetailsPage } from '../detection_engine/rule_details_ui/pages/rule_details';
 import { EditRulePage } from '../detection_engine/rule_creation_ui/pages/rule_editing';
 import { useReadonlyHeader } from '../use_readonly_header';
@@ -36,11 +41,11 @@ import { hasCapabilities } from '../common/lib/capabilities';
 import { useKibana } from '../common/lib/kibana/kibana_react';
 
 const getRulesSubRoutes = (capabilities: Capabilities) => [
-  ...(hasCapabilities(capabilities, `${SECURITY_FEATURE_ID}.detections`) // regular detection rules are enabled
+  ...(hasCapabilities(capabilities, RULES_UI_READ_PRIVILEGE) // regular detection rules are enabled
     ? [
         {
-          path: '/rules/id/:detailName/edit',
-          main: EditRulePage,
+          path: `/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.endpointExceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
+          main: RuleDetailsPage,
           exact: true,
         },
         {
@@ -48,34 +53,38 @@ const getRulesSubRoutes = (capabilities: Capabilities) => [
           main: RulesPage,
           exact: true,
         },
-      ]
-    : []),
-  ...(hasCapabilities(capabilities, [
-    `${SECURITY_FEATURE_ID}.detections`,
-    `${SECURITY_FEATURE_ID}.external_detections`,
-  ]) // some detection capability is enabled
-    ? [
         {
-          path: `/rules/id/:detailName/:tabName(${RuleDetailTabs.alerts}|${RuleDetailTabs.exceptions}|${RuleDetailTabs.endpointExceptions}|${RuleDetailTabs.executionResults}|${RuleDetailTabs.executionEvents})`,
-          main: RuleDetailsPage,
+          path: '/rules/add_rules',
+          main: withSecurityRoutePageWrapper(AddRulesPage, SecurityPageName.rulesAdd, {
+            omitSpyRoute: true,
+          }),
           exact: true,
         },
       ]
     : []),
-  {
-    path: '/rules/create',
-    main: withSecurityRoutePageWrapper(CreateRulePage, SecurityPageName.rulesCreate, {
-      omitSpyRoute: true,
-    }),
-    exact: true,
-  },
-  {
-    path: '/rules/add_rules',
-    main: withSecurityRoutePageWrapper(AddRulesPage, SecurityPageName.rulesAdd, {
-      omitSpyRoute: true,
-    }),
-    exact: true,
-  },
+  ...(hasCapabilities(capabilities, RULES_UI_EDIT_PRIVILEGE)
+    ? [
+        {
+          path: '/rules/id/:detailName/edit',
+          main: EditRulePage,
+          exact: true,
+        },
+        {
+          path: '/rules/create',
+          main: withSecurityRoutePageWrapper(CreateRulePage, SecurityPageName.rulesCreate, {
+            omitSpyRoute: true,
+          }),
+          exact: true,
+        },
+        {
+          path: AI_RULE_CREATION_PATH,
+          main: withSecurityRoutePageWrapper(AiRuleCreationPage, SecurityPageName.aiRuleCreation, {
+            omitSpyRoute: true,
+          }),
+          exact: true,
+        },
+      ]
+    : []),
 ];
 
 const RulesContainerComponent: React.FC = () => {

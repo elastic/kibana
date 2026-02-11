@@ -43,6 +43,7 @@ import { getApiKeyManager as getApiKeyManagerPrivilegedUserMonitoring } from './
 import { getApiKeyManager as getApiKeyManagerEntityStore } from './lib/entity_analytics/entity_store/auth/api_key';
 import { monitoringEntitySourceType } from './lib/entity_analytics/privilege_monitoring/saved_objects';
 import { getSiemMigrationClients } from './lib/siem_migrations';
+import { EntityStoreCrudClient } from './lib/entity_analytics/entity_store/entity_store_crud_client';
 
 export interface IRequestContextFactory {
   create(
@@ -114,6 +115,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     const getAppClient = () => appClientFactory.create(request);
 
     const getAuditLogger = () => security?.audit.asScoped(request);
+    const getLogger = () => options.logger;
 
     const getEntityStoreApiKeyManager = () =>
       getApiKeyManagerEntityStore({
@@ -134,6 +136,36 @@ export class RequestContextFactory implements IRequestContextFactory {
         request,
         namespace: getSpaceId(),
       });
+
+    const getEntityStoreDataClient = memoize(() => {
+      // why are we defining this here, but other places we do it inline?
+      const clusterClient = coreContext.elasticsearch.client;
+      const logger = options.logger;
+
+      const soClient = coreContext.savedObjects.getClient({
+        includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
+      });
+
+      return new EntityStoreDataClient({
+        namespace: getSpaceId(),
+        clusterClient,
+        dataViewsService,
+        appClient: getAppClient(),
+        logger,
+        soClient,
+        taskManager: startPlugins.taskManager,
+        auditLogger: getAuditLogger(),
+        kibanaVersion: options.kibanaVersion,
+        config: config.entityAnalytics.entityStore,
+        experimentalFeatures: config.experimentalFeatures,
+        telemetry: core.analytics,
+        apiKeyManager: getEntityStoreApiKeyManager(),
+        security: startPlugins.security,
+        request,
+        uiSettingsClient: coreContext.uiSettings.client,
+        isServerless: options.buildFlavor === 'serverless',
+      });
+    });
 
     // List of endpoint authz for the current request's user. Will be initialized the first
     // time it is requested (see `getEndpointAuthz()` below)
@@ -172,6 +204,8 @@ export class RequestContextFactory implements IRequestContextFactory {
       getRacClient: startPlugins.ruleRegistry.getRacClientWithRequest,
 
       getAuditLogger,
+
+      getLogger,
 
       getDataViewsService: () => dataViewsService,
 
@@ -225,6 +259,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           savedObjectsClient: coreContext.savedObjects.client,
           packageService: startPlugins.fleet?.packageService,
           telemetry: core.analytics,
+          experimentalFeatures: options.config.experimentalFeatures,
         },
       }),
 
@@ -305,32 +340,13 @@ export class RequestContextFactory implements IRequestContextFactory {
           dataViewsService,
         });
       }),
-      getEntityStoreDataClient: memoize(() => {
-        // why are we defining this here, but other places we do it inline?
-        const clusterClient = coreContext.elasticsearch.client;
-        const logger = options.logger;
-
-        const soClient = coreContext.savedObjects.getClient({
-          includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
-        });
-        return new EntityStoreDataClient({
+      getEntityStoreDataClient,
+      getEntityStoreCrudClient: memoize(() => {
+        return new EntityStoreCrudClient({
+          clusterClient: coreContext.elasticsearch.client,
           namespace: getSpaceId(),
-          clusterClient,
-          dataViewsService,
-          appClient: getAppClient(),
-          logger,
-          soClient,
-          taskManager: startPlugins.taskManager,
-          auditLogger: getAuditLogger(),
-          kibanaVersion: options.kibanaVersion,
-          config: config.entityAnalytics.entityStore,
-          experimentalFeatures: config.experimentalFeatures,
-          telemetry: core.analytics,
-          apiKeyManager: getEntityStoreApiKeyManager(),
-          security: startPlugins.security,
-          request,
-          uiSettingsClient: coreContext.uiSettings.client,
-          isServerless: options.buildFlavor === 'serverless',
+          logger: options.logger,
+          dataClient: getEntityStoreDataClient(),
         });
       }),
       getAssetInventoryClient: memoize(

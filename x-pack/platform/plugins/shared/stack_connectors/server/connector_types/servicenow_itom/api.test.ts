@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { externalServiceITOMMock, itomEventParams } from '../lib/servicenow/mocks';
 import type { ExternalServiceITOM } from '../lib/servicenow/types';
 import { api, prepareParams } from './api';
-let mockedLogger: jest.Mocked<Logger>;
+const mockedLogger = loggerMock.create();
 
 describe('api_itom', () => {
   let externalService: jest.Mocked<ExternalServiceITOM>;

@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { HeaderSection } from '../../../../common/components/header_section';
@@ -39,7 +40,6 @@ import {
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useRiskSeverityColors } from '../../../../common/utils/risk_color_palette';
 
 interface HostAlertsTableProps {
@@ -109,6 +109,7 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
               columns={columns}
               loading={isLoading}
               data-test-subj="severityHostAlertsTable"
+              tableCaption={i18n.HOST_ALERTS_SECTION_TITLE}
               noItemsMessage={
                 <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
               }
@@ -163,7 +164,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
             }}
             mode={CellActionsMode.HOVER_RIGHT}
             triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-            sourcererScopeId={SourcererScopeName.detections}
+            sourcererScopeId={PageScope.alerts}
             metadata={{
               andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
             }}
@@ -194,7 +195,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                 }}
                 mode={CellActionsMode.HOVER_RIGHT}
                 triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-                sourcererScopeId={SourcererScopeName.detections}
+                sourcererScopeId={PageScope.alerts}
                 metadata={{
                   andFilters: [
                     { field: 'kibana.alert.severity', value: 'critical' },
@@ -228,7 +229,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                 }}
                 mode={CellActionsMode.HOVER_RIGHT}
                 triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-                sourcererScopeId={SourcererScopeName.detections}
+                sourcererScopeId={PageScope.alerts}
                 metadata={{
                   andFilters: [
                     { field: 'kibana.alert.severity', value: 'high' },
@@ -259,7 +260,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                 }}
                 mode={CellActionsMode.HOVER_RIGHT}
                 triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-                sourcererScopeId={SourcererScopeName.detections}
+                sourcererScopeId={PageScope.alerts}
                 metadata={{
                   andFilters: [
                     { field: 'kibana.alert.severity', value: 'medium' },
@@ -290,7 +291,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                 }}
                 mode={CellActionsMode.HOVER_RIGHT}
                 triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-                sourcererScopeId={SourcererScopeName.detections}
+                sourcererScopeId={PageScope.alerts}
                 metadata={{
                   andFilters: [
                     { field: 'kibana.alert.severity', value: 'low' },

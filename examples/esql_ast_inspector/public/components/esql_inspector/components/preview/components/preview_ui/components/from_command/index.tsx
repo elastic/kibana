@@ -9,8 +9,8 @@
 
 import * as React from 'react';
 import { EuiButton, EuiFormRow, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { ESQLSource } from '@kbn/esql-ast';
-import { Builder } from '@kbn/esql-ast';
+import type { ESQLSource } from '@kbn/esql-language';
+import { Builder } from '@kbn/esql-language';
 import { useEsqlInspector } from '../../../../../../context';
 import { useBehaviorSubject } from '../../../../../../../../hooks/use_behavior_subject';
 import { Source } from './source';

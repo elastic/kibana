@@ -18,7 +18,7 @@ import {
   defaultKibanaIndex,
   startElasticsearch,
   getAggregatedTypesCount,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 
 import {
   createBaseline,
@@ -27,7 +27,7 @@ import {
   getReindexingMigratorTestKit,
   getUpToDateBaselineTypes,
   getCompatibleBaselineTypes,
-} from '../kibana_migrator_test_kit.fixtures';
+} from '@kbn/migrator-test-kit/fixtures';
 
 describe('when upgrading to a new stack version', () => {
   let esServer: TestElasticsearchUtils['es'];

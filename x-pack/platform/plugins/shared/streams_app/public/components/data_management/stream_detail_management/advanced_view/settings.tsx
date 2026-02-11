@@ -7,10 +7,11 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isEqual, omit } from 'lodash';
+import { omit } from 'lodash';
 import type { IngestStreamSettings } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import {
+  EuiBottomBar,
   EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
@@ -22,6 +23,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useAbortController } from '@kbn/react-hooks';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../util/errors';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
@@ -63,13 +65,16 @@ export function Settings({
   const { loading: isLoadingDefinition } = useStreamDetail();
   const {
     isServerless,
-    core: { notifications },
+    core: { notifications, overlays, http, application },
+    appParams: { history },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
       },
     },
   } = useKibana();
+  const { navigateToUrl } = application;
+
   const originalSettings = useMemo(
     () => toStringValues(definition.stream.ingest.settings, definition.effective_settings),
     [definition]
@@ -78,11 +83,15 @@ export function Settings({
     () => Streams.ClassicStream.GetResponse.is(definition),
     [definition]
   );
-  const [settings, setSettings] = useState<Record<string, Setting>>({});
-  const hasChanges = useMemo(
-    () => !isEqual(originalSettings, settings),
-    [originalSettings, settings]
+  const [settings, setSettings] = useState<Record<string, Setting>>(() =>
+    toStringValues(definition.stream.ingest.settings, definition.effective_settings)
   );
+
+  const hasChanges = useMemo(() => {
+    const keys = [...new Set([...Object.keys(originalSettings), ...Object.keys(settings)])];
+    return keys.some((key) => originalSettings[key]?.value !== settings[key]?.value);
+  }, [originalSettings, settings]);
+
   const updateSetting = useCallback(
     (name: string, value: string, invalid: boolean) => {
       if (value.length === 0) {
@@ -125,6 +134,7 @@ export function Settings({
           body: {
             ingest: {
               ...definition.stream.ingest,
+              processing: omit(definition.stream.ingest.processing, 'updated_at'),
               settings: prepareSettings(settings),
             },
           },
@@ -140,11 +150,10 @@ export function Settings({
 
       refreshDefinition();
     } catch (error) {
-      notifications.toasts.addError(error, {
+      notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate('xpack.streams.settings.failedToUpdateSettings', {
           defaultMessage: 'Failed to update settings',
         }),
-        toastMessage: getFormattedError(error).message,
       });
     } finally {
       setIsUpdating(false);
@@ -162,6 +171,14 @@ export function Settings({
     if (!definition) return;
     setSettings(toStringValues(definition.stream.ingest.settings, definition.effective_settings));
   }, [definition, setSettings]);
+
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: hasChanges,
+    openConfirm: overlays.openConfirm,
+    history,
+    http,
+    navigateToUrl,
+  });
 
   return (
     <>
@@ -259,42 +276,17 @@ export function Settings({
         onReset={() => onReset('index.refresh_interval')}
       />
 
-      <EuiHorizontalRule />
-
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            isDisabled={!hasChanges || isUpdating}
-            onClick={() =>
-              setSettings(
-                toStringValues(definition.stream.ingest.settings, definition.effective_settings)
-              )
-            }
-          >
-            {i18n.translate('xpack.streams.settings.cancelChangesButton', {
-              defaultMessage: 'Cancel',
-            })}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            isLoading={isUpdating || isLoadingDefinition}
-            isDisabled={
-              !hasChanges ||
-              isLoadingDefinition ||
-              Object.values(settings).some(({ invalid }) => invalid)
-            }
-            color="primary"
-            fill
-            onClick={updateSettings}
-          >
-            {i18n.translate('xpack.streams.settings.saveChangesButton', {
-              defaultMessage: 'Save changes',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {hasChanges && (
+        <SaveChangesBottomBar
+          setSettings={setSettings}
+          updateSettings={updateSettings}
+          isUpdating={isUpdating}
+          isLoadingDefinition={isLoadingDefinition}
+          definition={definition}
+          hasChanges={hasChanges}
+          settings={settings}
+        />
+      )}
     </>
   );
 }
@@ -350,6 +342,7 @@ function SettingRow({
           <EuiFlexItem>
             <EuiFormRow label={inputLabel}>
               <EuiFieldText
+                data-test-subj={`streamsAppSettingsInput-${label}`}
                 name={label}
                 isInvalid={isInvalid}
                 value={setting?.value ?? ''}
@@ -418,3 +411,67 @@ function LinkToStream({ name }: { name: string }) {
     </EuiLink>
   );
 }
+
+const SaveChangesBottomBar = ({
+  setSettings,
+  updateSettings,
+  isUpdating,
+  isLoadingDefinition,
+  definition,
+  hasChanges,
+  settings,
+}: {
+  setSettings: (settings: Record<string, Setting>) => void;
+  updateSettings: () => void;
+  isUpdating: boolean;
+  isLoadingDefinition: boolean;
+  definition: Streams.ingest.all.GetResponse;
+  hasChanges: boolean;
+  settings: Record<string, Setting>;
+}) => {
+  return (
+    <EuiBottomBar data-test-subj="streamsAppSettingsBottomBar">
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="streamsAppSettingsCancelButton"
+                color="text"
+                size="s"
+                onClick={() =>
+                  setSettings(
+                    toStringValues(definition.stream.ingest.settings, definition.effective_settings)
+                  )
+                }
+              >
+                {i18n.translate('xpack.streams.settings.cancelChangesButton', {
+                  defaultMessage: 'Cancel',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="streamsAppSettingsSaveButton"
+                color="primary"
+                fill
+                size="s"
+                isLoading={isUpdating || isLoadingDefinition}
+                onClick={updateSettings}
+                isDisabled={
+                  !hasChanges ||
+                  isLoadingDefinition ||
+                  Object.values(settings).some(({ invalid }) => invalid)
+                }
+              >
+                {i18n.translate('xpack.streams.settings.saveChangesButton', {
+                  defaultMessage: 'Save changes',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiBottomBar>
+  );
+};

@@ -12,6 +12,8 @@ import type { DashboardLocatorParams } from '../../../../common/types';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal } from './show_share_modal';
+import type { AccessControlClient } from '@kbn/content-management-access-control-public';
+import type { SavedObjectAccessControl } from '@kbn/core/server';
 
 describe('showPublicUrlSwitch', () => {
   test('returns false if "dashboard_v2" app is not available', () => {
@@ -68,6 +70,14 @@ describe('ShowShareModal', () => {
   const defaultShareModalProps = {
     isDirty: true,
     anchorElement: document.createElement('div'),
+    canSave: true,
+    saveDashboard: jest.fn(),
+    changeAccessMode: jest.fn(),
+    accessControlClient: {} as AccessControlClient,
+    accessControl: {} as SavedObjectAccessControl,
+    isManaged: false,
+    getCurrentUser: jest.fn().mockResolvedValue({} as { uid: string }),
+    getActiveSpace: jest.fn().mockResolvedValue({ name: 'default' }),
   };
 
   it('locatorParams is missing all unsaved state when none is given', () => {
@@ -89,7 +99,7 @@ describe('ShowShareModal', () => {
       panels: {
         panel_1: {
           type: 'panel_type',
-          gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
+          grid: { w: 0, h: 0, x: 0, y: 0, i: '0' },
           panelRefName: 'superPanel',
           explicitInput: {
             id: 'superPanel',

@@ -13,7 +13,6 @@ import { mockCase } from '../../containers/mock';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
-import { OBSERVABLE_TYPE_IPV4 } from '../../../common/constants';
 import { postObservable } from '../../containers/api';
 
 jest.mock('../../containers/api');
@@ -67,11 +66,8 @@ describe('AddObservable', () => {
     });
 
     await userEvent.click(screen.getByTestId('cases-observables-add'));
-
-    await userEvent.selectOptions(
-      screen.getByTestId('observable-type-select'),
-      OBSERVABLE_TYPE_IPV4.key
-    );
+    await userEvent.click(screen.getByTestId('observable-type-select'));
+    await userEvent.click(screen.getByRole('option', { name: 'IPv4' }));
 
     await userEvent.click(screen.getByTestId('observable-value-field'));
     await userEvent.paste('127.0.0.1');

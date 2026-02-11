@@ -16,15 +16,14 @@ import { euiFlyoutClassname } from './constants';
 import type { ApiService } from './lib/api';
 import type {
   DataPublicPluginStart,
-  UsageCollectionStart,
-  RuntimeType,
+  DataView,
+  DataViewField,
   DataViewsPublicPluginStart,
   FieldFormatsStart,
-  DataViewField,
-  DataView,
+  RuntimeType,
+  UsageCollectionStart,
 } from './shared_imports';
-import { DataViewLazy } from './shared_imports';
-import { createKibanaReactContext } from './shared_imports';
+import { createKibanaReactContext, DataViewLazy } from './shared_imports';
 import type { CloseEditor, Field, InternalFieldType, PluginStart } from './types';
 
 /**
@@ -242,11 +241,6 @@ export const getFieldEditorOpener =
             if (canClose) {
               flyout.close();
             }
-          },
-          maskProps: {
-            className: 'indexPatternFieldEditorMaskOverlay',
-            // // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-            style: 'z-index: 1003', // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
           },
         }
       );

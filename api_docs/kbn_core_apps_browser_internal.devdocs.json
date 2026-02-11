@@ -10,6 +10,8 @@
         "label": "CoreAppsService",
         "description": [],
         "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -24,6 +26,8 @@
               "any"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -38,6 +42,8 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+                "lineNumber": 55,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -58,6 +64,8 @@
               ") => void"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -72,6 +80,8 @@
                   "CoreAppsServiceSetupDeps"
                 ],
                 "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+                "lineNumber": 57,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -92,6 +102,8 @@
               ") => void"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -106,6 +118,8 @@
                   "CoreAppsServiceStartDeps"
                 ],
                 "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+                "lineNumber": 85,
+                "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -124,6 +138,8 @@
               "() => void"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -143,6 +159,8 @@
         "label": "CoreAppsServiceSetupDeps",
         "description": [],
         "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -157,6 +175,8 @@
               "InternalApplicationSetup"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -175,6 +195,8 @@
               "; }"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -189,6 +211,8 @@
               "InternalInjectedMetadataSetup"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -203,6 +227,8 @@
               "NotificationsSetup"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -217,6 +243,8 @@
         "label": "CoreAppsServiceStartDeps",
         "description": [],
         "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -231,6 +259,8 @@
               "InternalApplicationStart"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -245,6 +275,8 @@
               "DocLinksStart"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -263,6 +295,8 @@
               "; }"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -277,6 +311,8 @@
               "NotificationsStart"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -291,6 +327,8 @@
               "IUiSettingsClient"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -311,6 +349,8 @@
               ">; }"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -325,6 +365,8 @@
               "I18nStart"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -339,6 +381,8 @@
               "ThemeServiceSetup"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -353,6 +397,8 @@
               "UserProfileService"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -375,6 +421,8 @@
           "2000 | 25000"
         ],
         "path": "src/core/packages/apps/browser-internal/src/errors/url_overflow.tsx",
+        "lineNumber": 28,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

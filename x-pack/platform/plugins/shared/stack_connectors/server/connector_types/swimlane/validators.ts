@@ -7,10 +7,10 @@
 
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import type {
-  ExternalServiceValidation,
   SwimlanePublicConfigurationType,
   SwimlaneSecretConfigurationType,
-} from './types';
+} from '@kbn/connector-schemas/swimlane';
+import type { ExternalServiceValidation } from './types';
 import * as i18n from './translations';
 
 export const validateCommonConfig = (

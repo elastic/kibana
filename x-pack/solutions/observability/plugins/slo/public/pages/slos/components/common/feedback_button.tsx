@@ -8,6 +8,9 @@
 import React from 'react';
 import { EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getSurveyFeedbackURL } from '@kbn/observability-shared-plugin/public';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { usePluginContext } from '../../../../hooks/use_plugin_context';
 
 const SLO_FEEDBACK_LINK = 'https://ela.st/slo-feedback';
 
@@ -20,10 +23,24 @@ const feedbackButtonLabel = i18n.translate('xpack.slo.featureFeedbackButtonLabel
 });
 
 export function FeedbackButton({ disabled }: Props) {
+  const { kibanaVersion, cloud, notifications } = useKibana().services;
+  const { isServerless } = usePluginContext();
+  const isFeedbackEnabled = notifications?.feedback?.isEnabled() ?? true;
+
+  const feedbackUrl = getSurveyFeedbackURL({
+    formUrl: SLO_FEEDBACK_LINK,
+    kibanaVersion,
+    isCloudEnv: cloud?.isCloudEnabled,
+    isServerlessEnv: isServerless,
+    sanitizedPath: window.location.pathname,
+  });
+
+  if (!isFeedbackEnabled) return null;
+
   return (
     <EuiHeaderLink
       aria-label={feedbackButtonLabel}
-      href={SLO_FEEDBACK_LINK}
+      href={feedbackUrl}
       size="s"
       iconType="popout"
       iconSide="right"

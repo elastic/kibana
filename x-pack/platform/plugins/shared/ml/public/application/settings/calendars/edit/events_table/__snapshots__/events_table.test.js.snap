@@ -10,7 +10,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
     data-test-subj="mlCalendarEventsTable"
   >
     <table
-      class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+      class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
       id="__table_generated-id"
       tabindex="-1"
     >
@@ -28,6 +28,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              id="generated-id-wrapper"
             >
               <button
                 class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -61,6 +62,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              id="generated-id-wrapper"
             >
               <button
                 class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
@@ -95,6 +97,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+              id="generated-id-wrapper"
             >
               <button
                 class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -241,7 +244,7 @@ exports[`EventsTable Renders events table with no search bar 1`] = `
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <nav
-            aria-label="Pagination for table: "
+            aria-label="Pagination for table: Calendar events"
             class="euiPagination emotion-euiPagination"
           >
             <span
@@ -322,7 +325,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
   />
   <div>
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
     >
       <div
         class="euiFlexItem euiSearchBar__searchHolder emotion-euiFlexItem-grow-1-euiSearchBar__searchHolder"
@@ -411,7 +414,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
       data-test-subj="mlCalendarEventsTable"
     >
       <table
-        class="euiTable emotion-euiTable-fixed-uncompressed-desktop"
+        class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
         id="__table_generated-id"
         tabindex="-1"
       >
@@ -429,6 +432,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
             >
               <span
                 class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                id="generated-id-wrapper"
               >
                 <button
                   class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -462,6 +466,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
             >
               <span
                 class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                id="generated-id-wrapper"
               >
                 <button
                   class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
@@ -496,6 +501,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
             >
               <span
                 class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                id="generated-id-wrapper"
               >
                 <button
                   class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -642,7 +648,7 @@ exports[`EventsTable Renders events table with search bar 1`] = `
             class="euiFlexItem emotion-euiFlexItem-growZero"
           >
             <nav
-              aria-label="Pagination for table: "
+              aria-label="Pagination for table: Calendar events"
               class="euiPagination emotion-euiPagination"
             >
               <span

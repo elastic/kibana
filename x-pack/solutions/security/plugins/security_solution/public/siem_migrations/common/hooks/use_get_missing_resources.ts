@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useCallback, useReducer, useMemo } from 'react';
+import { useCallback, useReducer } from 'react';
 import type { MigrationType } from '../../../../common/siem_migrations/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import type { SiemMigrationResourceBase } from '../../../../common/siem_migrations/model/common.gen';
@@ -24,11 +24,14 @@ export const useGetMissingResources = (migrationType: MigrationType, onSuccess: 
   const { siemMigrations, notifications } = useKibana().services;
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const getMissingResourcesFn = useMemo(
-    () =>
-      migrationType === 'rule'
-        ? siemMigrations.rules.api.getMissingResources
-        : siemMigrations.dashboards.api.getDashboardMigrationMissingResources,
+  const getMissingResourcesFn = useCallback(
+    (migrationId: string) => {
+      if (migrationType === 'rule') {
+        return siemMigrations.rules.api.getMissingResources({ migrationId });
+      } else {
+        return siemMigrations.dashboards.api.getDashboardMigrationMissingResources({ migrationId });
+      }
+    },
     [siemMigrations, migrationType]
   );
 
@@ -37,7 +40,7 @@ export const useGetMissingResources = (migrationType: MigrationType, onSuccess: 
       (async () => {
         try {
           dispatch({ type: 'start' });
-          const missingResources = await getMissingResourcesFn({ migrationId });
+          const missingResources = await getMissingResourcesFn(migrationId);
           onSuccess(missingResources);
           dispatch({ type: 'success' });
         } catch (err) {

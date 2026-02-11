@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiPopover, EuiScreenReaderOnly, type EuiButtonIconProps } from '@elastic/eui';
+import { type EuiButtonIconProps, EuiPopover, EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -136,9 +136,9 @@ export const HoverActionsPopover: React.FC<Props> = ({
           closePopover={closePopover}
           hasArrow={false}
           isOpen={showHoverContent}
+          offset={0}
           panelPaddingSize="none"
           repositionOnScroll
-          ownFocus={false}
           panelProps={{ 'data-test-subj': 'hoverActionsPopover' }}
           aria-label={ACTIONS_AREA_LABEL}
         >

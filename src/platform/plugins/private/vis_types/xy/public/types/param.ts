@@ -10,13 +10,13 @@
 import type { Fit, Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { Style, Labels } from '@kbn/charts-plugin/public';
+import type { SchemaConfig } from '@kbn/visualizations-plugin/public';
 import type {
-  SchemaConfig,
-  FakeParams,
-  HistogramParams,
   DateHistogramParams,
+  HistogramParams,
+  FakeParams,
   LegendSize,
-} from '@kbn/visualizations-plugin/public';
+} from '@kbn/chart-expressions-common';
 import type { ChartType } from '../../common';
 
 import type {

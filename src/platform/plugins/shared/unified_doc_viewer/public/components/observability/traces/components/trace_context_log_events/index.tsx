@@ -9,13 +9,13 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ContentFrameworkSection } from '../../../../content_framework/section';
+import { ContentFrameworkSection } from '../../../../content_framework/lazy_content_framework_section';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
-import { useDataSourcesContext } from '../../hooks/use_data_sources';
+import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { useLogsQuery } from '../../hooks/use_logs_query';
-import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 import { createTraceContextWhereClause } from '../../common/create_trace_context_where_clause';
-import { OPEN_IN_DISCOVER_LABEL, OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL } from '../../common/constants';
+import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
+import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
 
 const logsTitle = i18n.translate('unifiedDocViewer.observability.traces.section.logs.title', {
   defaultMessage: 'Logs',
@@ -41,7 +41,6 @@ export function TraceContextLogEvents({
   const { data: dataService, discoverShared } = getUnifiedDocViewerServices();
   const { indexes } = useDataSourcesContext();
   const { from, to } = dataService.query.timefilter.timefilter.getTime();
-  const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern: indexes.logs });
 
   const timeRange = useMemo(() => ({ from, to }), [from, to]);
   const query = useLogsQuery({ traceId, spanId, transactionId });
@@ -54,9 +53,22 @@ export function TraceContextLogEvents({
     [timeRange.from, timeRange.to]
   );
 
-  const openInDiscoverLink = useMemo(() => {
-    return generateDiscoverLink(createTraceContextWhereClause({ traceId, spanId, transactionId }));
-  }, [generateDiscoverLink, traceId, spanId, transactionId]);
+  const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
+    indexPattern: indexes.logs,
+    whereClause: createTraceContextWhereClause({ traceId, spanId, transactionId }),
+  });
+
+  const openInDiscoverSectionAction = useOpenInDiscoverSectionAction({
+    href: discoverUrl,
+    esql: esqlQueryString,
+    tabLabel: logsTitle,
+    dataTestSubj: 'unifiedDocViewerLogsOpenInDiscoverButton',
+  });
+
+  const actions = useMemo(
+    () => (openInDiscoverSectionAction ? [openInDiscoverSectionAction] : []),
+    [openInDiscoverSectionAction]
+  );
 
   const LogEvents = discoverShared.features.registry.getById('observability-log-events');
 
@@ -71,23 +83,15 @@ export function TraceContextLogEvents({
       title={logsTitle}
       description={logsDescription}
       id="traceContextLogEvents"
-      initialIsOpen={false}
-      actions={
-        openInDiscoverLink
-          ? [
-              {
-                icon: 'discoverApp',
-                label: OPEN_IN_DISCOVER_LABEL,
-                ariaLabel: OPEN_IN_DISCOVER_LABEL_ARIAL_LABEL,
-                href: openInDiscoverLink,
-                dataTestSubj: 'unifiedDocViewerLogsOpenInDiscoverButton',
-              },
-            ]
-          : undefined
-      }
+      forceState="closed"
+      actions={actions}
     >
       <div tabIndex={0} className="eui-yScrollWithShadows" style={{ maxHeight: '400px' }}>
-        <LogEventsComponent query={query} timeRange={savedSearchTimeRange} index={indexes.logs} />
+        <LogEventsComponent
+          nonHighlightingQuery={query}
+          timeRange={savedSearchTimeRange}
+          index={indexes.logs}
+        />
       </div>
     </ContentFrameworkSection>
   );

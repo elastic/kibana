@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useHttp } from '../../../common/lib/kibana';
 import { RESPONSE_ACTIONS_ZIP_PASSCODE } from '../../../../common/endpoint/service/response_actions/constants';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
@@ -135,9 +136,17 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     const getTestId = useTestIdGenerator(dataTestSubj);
     const http = useHttp();
 
+    const isCompleted = useMemo(() => {
+      return agentId ? action.agentState[agentId]?.isCompleted : action.isCompleted;
+    }, [action.agentState, action.isCompleted, agentId]);
+
+    const wasSuccessful = useMemo(() => {
+      return agentId ? action.agentState[agentId]?.wasSuccessful : action.wasSuccessful;
+    }, [action.agentState, action.wasSuccessful, agentId]);
+
     const shouldFetchFileInfo: boolean = useMemo(() => {
-      return action.isCompleted && action.wasSuccessful;
-    }, [action.isCompleted, action.wasSuccessful]);
+      return isCompleted && wasSuccessful;
+    }, [isCompleted, wasSuccessful]);
 
     const downloadUrl: string = useMemo(() => {
       return `${http.basePath.get()}${resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
@@ -154,27 +163,41 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
       enabled: canAccessFileDownloadLink && shouldFetchFileInfo,
     });
 
-    if (!canAccessFileDownloadLink || !action.isCompleted || !action.wasSuccessful) {
+    if (!canAccessFileDownloadLink || !isCompleted || !wasSuccessful) {
       return null;
     }
 
     if (isLoading) {
-      return <EuiSkeletonText lines={1} data-test-subj={getTestId('loading')} />;
+      return (
+        <div data-test-subj={getTestId()}>
+          <EuiSkeletonText lines={1} data-test-subj={getTestId('loading')} />
+        </div>
+      );
     }
 
     // Check if file is no longer available
     if ((error && error?.response?.status === 404) || fileInfo?.data.status === 'DELETED') {
       return (
-        <EuiText
-          size={textSize}
-          color="warning"
-          data-test-subj={getTestId('fileNoLongerAvailable')}
-        >
-          {FILE_NO_LONGER_AVAILABLE_MESSAGE}
-        </EuiText>
+        <div data-test-subj={getTestId()}>
+          <EuiText
+            size={textSize}
+            color="warning"
+            data-test-subj={getTestId('fileNoLongerAvailable')}
+          >
+            {FILE_NO_LONGER_AVAILABLE_MESSAGE}
+          </EuiText>
+        </div>
       );
     } else if (error) {
-      return <FormattedError error={error} data-test-subj={getTestId('apiError')} />;
+      return (
+        <EuiText size={textSize} color="warning" data-test-subj={getTestId()}>
+          <FormattedMessage
+            id="xpack.securitySolution.responseActionFileDownloadLink.apiError"
+            defaultMessage="Attempt to retrieve file download information failed."
+          />
+          <FormattedError error={error} data-test-subj={getTestId('apiError')} />
+        </EuiText>
+      );
     }
 
     return (

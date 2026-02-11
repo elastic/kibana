@@ -43,3 +43,6 @@ export const DATA_GRID_FULL_SCREEN =
 export const DATA_GRID_FIELD_SORT_BTN = '[data-test-subj="dataGridColumnSortingButton"]';
 
 export const DATA_GRID_COLUMN_ORDER_BTN = '[data-test-subj="dataGridColumnSelectorButton"]';
+
+export const DATA_GRID_COLUMN_SORTER_SELECTION_BTN =
+  '[data-test-subj="dataGridColumnSortingSelectionButton"]';

@@ -10,8 +10,8 @@
 import React from 'react';
 import type { ComponentProps } from 'react';
 import { CODE_EDITOR_DEFAULT_THEME_ID, CODE_EDITOR_TRANSPARENT_THEME_ID } from '@kbn/monaco';
-import { render } from '@testing-library/react';
-import { MonacoEditor } from './editor';
+import { render, screen } from '@testing-library/react';
+import { MonacoEditor, OVERFLOW_WIDGETS_TEST_ID } from './editor';
 import * as supportedLanguages from './languages/supported';
 
 const defaultProps: Partial<ComponentProps<typeof MonacoEditor>> = {
@@ -56,5 +56,11 @@ describe('react monaco editor', () => {
       CODE_EDITOR_TRANSPARENT_THEME_ID,
       expect.any(Object)
     );
+  });
+
+  it('renders the overflow widgets into a portal', () => {
+    render(<MonacoEditor {...defaultProps} />);
+
+    expect(screen.getByTestId(OVERFLOW_WIDGETS_TEST_ID)).toBeDefined();
   });
 });

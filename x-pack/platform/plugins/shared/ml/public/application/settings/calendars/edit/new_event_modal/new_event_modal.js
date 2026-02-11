@@ -52,6 +52,7 @@ export class NewEventModal extends Component {
       startDate,
       endDate,
       description: '',
+      descriptionVisited: false,
       startDateString: startDate.format(TIME_FORMAT),
       endDateString: endDate.format(TIME_FORMAT),
     };
@@ -60,6 +61,13 @@ export class NewEventModal extends Component {
   onDescriptionChange = (e) => {
     this.setState({
       description: e.target.value,
+      descriptionVisited: true,
+    });
+  };
+
+  onDescriptionBlur = () => {
+    this.setState({
+      descriptionVisited: true,
     });
   };
 
@@ -260,7 +268,9 @@ export class NewEventModal extends Component {
 
   render() {
     const { closeModal } = this.props;
-    const { description } = this.state;
+    const { description, descriptionVisited } = this.state;
+    const isDescriptionInvalid = !description.trim();
+    const isDescriptionInvalidVisible = isDescriptionInvalid && descriptionVisited;
     const modalTitleId = htmlIdGenerator()('modalTitle');
 
     return (
@@ -291,11 +301,16 @@ export class NewEventModal extends Component {
                   />
                 }
                 fullWidth
+                error={i18n.translate('xpack.ml.calendarsEdit.newEventModal.descriptionError', {
+                  defaultMessage: 'Description cannot be empty',
+                })}
+                isInvalid={isDescriptionInvalidVisible}
               >
                 <EuiFieldText
                   name="eventDescription"
+                  onBlur={this.onDescriptionBlur}
                   onChange={this.onDescriptionChange}
-                  isInvalid={!description}
+                  isInvalid={isDescriptionInvalidVisible}
                   fullWidth
                   data-test-subj={'mlCalendarEventDescriptionInput'}
                 />
@@ -317,7 +332,7 @@ export class NewEventModal extends Component {
             <EuiButton
               onClick={this.handleAddEvent}
               fill
-              disabled={!description}
+              disabled={isDescriptionInvalid}
               data-test-subj={'mlCalendarAddEventButton'}
             >
               <FormattedMessage

@@ -6,10 +6,7 @@
  */
 
 import type { Capabilities } from '@kbn/core/public';
-import {
-  SECURITY_FEATURE_ID_V3,
-  SIEM_MIGRATIONS_FEATURE_ID,
-} from '@kbn/security-solution-features/constants';
+import { SIEM_MIGRATIONS_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import { i18n } from '@kbn/i18n';
 import { CapabilitiesChecker } from '../../../common/lib/capabilities';
 
@@ -18,36 +15,22 @@ export interface MissingCapability {
   description: string;
 }
 
-const minimumCapabilities: MissingCapability[] = [
-  {
-    capability: `${SECURITY_FEATURE_ID_V3}.show`,
-    description: i18n.translate(
-      'xpack.securitySolution.siemMigrations.service.capabilities.securityAll',
-      { defaultMessage: 'Security > Security: Read' }
-    ),
-  },
+const minimumSiemMigrationCapabilities: MissingCapability[] = [
   {
     capability: `${SIEM_MIGRATIONS_FEATURE_ID}.all`,
     description: i18n.translate(
       'xpack.securitySolution.siemMigrations.service.capabilities.siemMigrationsAll',
-      { defaultMessage: 'Security > SIEM migrations: All' }
+      { defaultMessage: 'Security > Automatic Migration: All' }
     ),
   },
 ];
 
 const allCapabilities: MissingCapability[] = [
   {
-    capability: `${SECURITY_FEATURE_ID_V3}.crud`,
-    description: i18n.translate(
-      'xpack.securitySolution.siemMigrations.service.capabilities.securityAll',
-      { defaultMessage: 'Security > Security: All' }
-    ),
-  },
-  {
     capability: `${SIEM_MIGRATIONS_FEATURE_ID}.all`,
     description: i18n.translate(
       'xpack.securitySolution.siemMigrations.service.capabilities.siemMigrationsAll',
-      { defaultMessage: 'Security > SIEM migrations: All' }
+      { defaultMessage: 'Security > Automatic Migration: All' }
     ),
   },
   {
@@ -63,8 +46,8 @@ export type CapabilitiesLevel = 'minimum' | 'all';
 
 export type CapabilitiesByLevel = Record<CapabilitiesLevel, MissingCapability[]>;
 
-export const requiredSiemMigrationCapabilities: CapabilitiesByLevel = {
-  minimum: minimumCapabilities,
+export const requiredSiemMigrationCapabilities = {
+  minimum: minimumSiemMigrationCapabilities,
   all: allCapabilities,
 };
 

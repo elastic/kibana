@@ -8,20 +8,21 @@
  */
 
 import type { IBasePath } from '@kbn/core-http-browser';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createBasePathMock = ({
   publicBaseUrl = '/',
   serverBasePath = '/',
   assetsHrefBase = '/',
 }: { publicBaseUrl?: string; serverBasePath?: string; assetsHrefBase?: string } = {}) => {
-  const mock: jest.Mocked<IBasePath> = {
+  const mock: jest.Mocked<IBasePath> = lazyObject({
     prepend: jest.fn(),
     get: jest.fn(),
     remove: jest.fn(),
     publicBaseUrl,
     serverBasePath,
     assetsHrefBase,
-  };
+  });
 
   return mock;
 };

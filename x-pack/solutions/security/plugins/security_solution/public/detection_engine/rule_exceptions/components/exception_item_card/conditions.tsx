@@ -112,6 +112,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
           </ShowValueListModal>
         );
       }
+      // @ts-expect-error upgrade typescript v5.9.3
       return <EntryValueWrap>{value}</EntryValueWrap> ?? '';
     };
 

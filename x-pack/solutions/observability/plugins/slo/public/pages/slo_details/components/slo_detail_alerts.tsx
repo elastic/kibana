@@ -37,7 +37,7 @@ export function SloDetailsAlerts({ slo }: Props) {
                 ],
               },
             }}
-            initialPageSize={100}
+            pageSize={100}
             services={{
               data,
               http,

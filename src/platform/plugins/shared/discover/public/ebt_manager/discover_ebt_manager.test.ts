@@ -14,6 +14,9 @@ import { registerDiscoverEBTManagerAnalytics } from './discover_ebt_manager_regi
 import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import type { Request as InspectedRequest } from '@kbn/inspector-plugin/public';
+import { RequestStatus } from '@kbn/inspector-plugin/public';
+import * as queryAnalysisUtils from './query_analysis_utils';
 import { NON_ECS_FIELD } from './scoped_discover_ebt_manager';
 
 jest.mock('@kbn/ebt-tools', () => ({
@@ -930,6 +933,117 @@ describe('DiscoverEBTManager', () => {
         },
         ['profile1', 'profile2'],
       ]);
+    });
+  });
+
+  describe('trackQueryPerformanceEvent', () => {
+    it('should track query performance events', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      jest.spyOn(window.performance, 'now').mockReturnValueOnce(250).mockReturnValueOnce(1000);
+
+      const tracker = scopedManager.trackQueryPerformanceEvent('testQueryEvent');
+
+      const requests: InspectedRequest[] = [
+        {
+          id: '0',
+          name: 'request 0',
+          startTime: 0,
+          status: RequestStatus.OK,
+          json: {
+            query: {
+              bool: {
+                must: [{ match_phrase: { message: 'foo bar' } }],
+              },
+            },
+          },
+        },
+        {
+          id: '1',
+          name: 'request 1',
+          startTime: 0,
+          status: RequestStatus.OK,
+          json: {
+            query: {
+              multi_match: {
+                query: 'test',
+                type: 'phrase',
+              },
+            },
+          },
+        },
+      ];
+
+      tracker.reportEvent(
+        {
+          queryRangeSeconds: 300,
+          requests,
+        },
+        {
+          meta: { foo: 'bar' },
+        }
+      );
+
+      expect(reportPerformanceMetricEvent).toHaveBeenCalledWith(coreSetupMock.analytics, {
+        eventName: 'testQueryEvent',
+        duration: 750,
+        key1: 'query_range_secs',
+        value1: 300,
+        key2: 'phrase_query_count',
+        value2: 2, // 1 match_phrase + 1 multi_match type=phrase
+        meta: {
+          foo: 'bar',
+          multi_match_types: ['match_phrase', 'phrase'],
+        },
+      });
+    });
+
+    it('should avoid re-analyzing the same request multiple times', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      const analyzeSpy = jest.spyOn(queryAnalysisUtils, 'analyzeMultiMatchTypesRequest');
+
+      const request: InspectedRequest = {
+        id: '0',
+        name: 'test request',
+        startTime: 0,
+        status: RequestStatus.OK,
+        json: {
+          query: {
+            bool: {
+              must: [{ match_phrase: { message: 'foo bar' } }],
+            },
+          },
+        },
+      };
+
+      const tracker1 = scopedManager.trackQueryPerformanceEvent('testQueryEvent1');
+      tracker1.reportEvent({
+        queryRangeSeconds: 300,
+        requests: [request],
+      });
+
+      const tracker2 = scopedManager.trackQueryPerformanceEvent('testQueryEvent2');
+      tracker2.reportEvent({
+        queryRangeSeconds: 300,
+        requests: [request],
+      });
+
+      expect(analyzeSpy).toHaveBeenCalledTimes(1);
+
+      analyzeSpy.mockRestore();
     });
   });
 });

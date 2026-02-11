@@ -1,0 +1,188 @@
+# ES|QL Parser
+
+The Kibana ES|QL parser uses the ANTLR library for lexing and parse tree (CST)
+generation. The ANTLR grammar is imported from the Elasticsearch repository in
+an automated CI job.
+
+We use the ANTLR outputs: (1) the token stream; and (2) the parse tree to
+generate (1) the Abstract Syntax Tree (AST), (2) for syntax validation, (3) for
+syntax highlighting, and (4) for formatting (comment and whitespace) extraction
+and assignment to AST nodes.
+
+In general ANTLR is resilient to grammar errors, in the sense that it can
+produce a Parser tree up to the point of the error, then stops. This is useful
+to perform partial tasks even with broken queries and this means that a partial
+AST can be produced even with an invalid query.
+
+## Folder structure
+
+The parser is structured as follows:
+
+```
+src/
+|- parser/                            Contains the logic to parse the ES|QL query and generate the AST.
+|  |- index.ts                        Main parser exports - primary entry point for consumers.
+|  |- core/                           High-level parsing logic and AST building.
+|  |  |- parser.ts                    Main Parser class with parse(), parseCommand(), parseExpression() methods.
+|  |  |- cst_to_ast_converter.ts      Converts ANTLR CST to ES|QL AST.
+|  |  |- esql_error_listener.ts       Collects syntax errors during parsing.
+|  |  |- constants.ts                 Parser constants and configuration.
+|  |  |- helpers.ts                   Utility functions for parsing operations.
+|  |  |- types.ts                     Parser-specific type definitions.
+|  |  └- index.ts                     Exports from the core parsing module.
+|  |
+|  |- antlr/                          ANTLR-generated grammar files and assets.
+|  |  |- esql_lexer.g4                ES|QL ANTLR lexer grammar.
+|  |  |- esql_parser.g4               ES|QL ANTLR parser grammar.
+|  |  |- esql_lexer.ts                Generated TypeScript lexer.
+|  |  |- esql_parser.ts               Generated TypeScript parser.
+|  |  |- promql_*.g4 / promql_*.ts    PromQL grammar and generated files.
+|  |  └- lexer_config.js              Lexer configuration for ANTLR.
+|  |
+|  └- __tests__/                      Parser tests and test utilities.
+```
+
+## Usage
+
+### Get AST from a query string
+
+The `parse` function returns the AST data structure, unless a syntax error
+happens in which case the `errors` array gets populated with a Syntax errors.
+
+```js
+import { Parser } from '@kbn/esql-language';
+
+const src = 'FROM index | STATS 1 + AVG(myColumn) ';
+const { root, errors } = await Parser.parse(src);
+
+if (errors) {
+  console.log({ syntaxErrors: errors });
+}
+
+// do stuff with the ast
+```
+
+The `root` is the root node of the AST. The AST is a tree structure where each
+node represents a part of the query. Each node has a `type` property which
+indicates the type of the node.
+
+### Parse a query and populate the AST with comments
+
+When calling the `parse` method with the `withFormatting` flag set to `true`,
+the AST will be populated with comments.
+
+```js
+import { Parser } from '@kbn/esql-language';
+
+const src = 'FROM /* COMMENT */ index';
+const { root } = await Parser.parse(src, { withFormatting: true });
+```
+
+### Parse a single command or expression
+
+You can use `Parser.parseCommand()` or `Parser.parseExpression()` to parse a single
+command or expression, respectively. For example:
+
+```js
+import { Parser } from '@kbn/esql-language';
+
+const { root } = await Parser.parseExpression('count(*) + 1');
+```
+
+## Comments
+
+By default, when parsing the AST does not include any _formatting_ information,
+such as comments or whitespace. This is because the AST is designed to be
+compact and to be used for syntax validation, syntax highlighting, and other
+high-level operations.
+
+However, sometimes it is useful to have comments attached to the AST nodes. The
+parser can collect all comments when the `withFormatting` flag is set to `true`
+and attach them to the AST nodes. The comments are attached to the closest node,
+while also considering the surrounding punctuation.
+
+### Inter-node comments
+
+Currently, when parsed inter-node comments are attached to the node from the
+left side.
+
+Around colon in source identifier:
+
+```eslq
+FROM cluster /* comment */ : index
+```
+
+Arounds dots in column identifier:
+
+```eslq
+KEEP column /* comment */ . subcolumn
+```
+
+Cast expressions:
+
+```eslq
+STATS "abc":: /* asdf */ integer
+```
+
+Time interface expressions:
+
+```eslq
+STATS 1 /* asdf */ DAY
+```
+
+## Internal Details
+
+### How does it work?
+
+The pipeline is the following:
+
+1. ANTLR grammar files are added to Kibana.
+2. ANTLR grammar files are compiled to `.ts` assets in the `antlr` folder.
+3. A query is parsed to a CST by ANTLR.
+4. The `ESQLAstBuilderListener` traverses the CST and builds the AST.
+5. Optionally:
+6. Comments and whitespace are extracted from the ANTLR lexer's token stream.
+7. The comments and whitespace are attached to the AST nodes.
+
+### How to add new commands/options?
+
+When a new command/option is added to ES|QL it is done via a grammar update.
+Therefore adding them requires a two step phase:
+
+To update the grammar:
+
+1. Make sure the `lexer` and `parser` files are up to date with their ES
+   counterparts.
+
+- an existing Kibana CI job is updating them already automatically
+
+2. Run the script into the `package.json` to compile the ES|QL grammar.
+3. open the `ast_factory.ts` file and add a new `exit<Command/Option>` method
+4. write some code in the `ast_walker/ts` to translate the Antlr Parser tree
+   into the custom AST (there are already few utilites for that, but sometimes
+   it is required to write some more code if the `parser` introduced a new flow)
+
+- pro tip: use the `http://lab.antlr.org/` to visualize/debug the parser tree
+  for a given statement (copy and paste the grammar files there)
+
+5. if something goes wrong with new quoted/unquoted identifier token, open
+   the `ast_helpers.ts` and check the ids of the new tokens in the `getQuotedText`
+   and `getUnquotedText` functions, please make sure to leave a comment on the
+   token name
+
+#### Debug and fix grammar changes (tokens, etc...)
+
+On token renaming or with subtle `lexer` grammar changes it can happens that
+test breaks, this can be happen for two main issues:
+
+- A token name changed so the `esql_ast_builder_listener.ts` doesn't find it any
+  more. Go there and rename the TOKEN name.
+- Token order changed and tests started failing. This probably generated some
+  token id reorder and there are two functions in `helpers.ts` who rely on
+  hardcoded ids: `getQuotedText` and `getUnquotedText`.
+  - Note that the `getQuotedText` and `getUnquotedText` are automatically
+    updated on grammar changes detected by the Kibana CI sync job.
+  - to fix this just look at the commented tokens and update the ids. If a new
+    token add it and leave a comment to point to the new token name.
+  - This choice was made to reduce the bundle size, as importing the
+    `esql_parser` adds some hundreds of Kbs to the bundle otherwise.

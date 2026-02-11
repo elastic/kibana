@@ -8,15 +8,15 @@
  */
 
 import { serializeLayout } from './serialize_layout';
+import type { DashboardLayout } from './types';
 
 describe('serializeLayout', () => {
   test('should serialize panels', () => {
     const layout = {
       panels: {
         '1': {
-          gridData: {
+          grid: {
             h: 6,
-            i: '1',
             w: 6,
             x: 0,
             y: 0,
@@ -24,9 +24,8 @@ describe('serializeLayout', () => {
           type: 'testPanelType',
         },
         '3': {
-          gridData: {
+          grid: {
             h: 6,
-            i: '3',
             sectionId: 'section1',
             w: 6,
             x: 0,
@@ -35,87 +34,102 @@ describe('serializeLayout', () => {
           type: 'testPanelType',
         },
       },
+      pinnedPanels: {
+        control1: {
+          grow: true,
+          width: 'small',
+          type: 'someControl',
+          order: 1,
+        },
+        control2: {
+          type: 'someOtherControl',
+          order: 0,
+        },
+      },
       sections: {
         section1: {
           collapsed: true,
-          gridData: {
-            i: 'section1',
+          grid: {
             y: 6,
           },
+          uid: 'section1',
           title: 'Section One',
         },
       },
-    };
+    } as unknown as DashboardLayout;
     const childState = {
       '1': {
-        rawState: {
-          title: 'panel One',
-        },
-        references: [
-          {
-            name: 'myRef',
-            id: 'ref1',
-            type: 'testRefType',
-          },
-        ],
+        title: 'panel One',
       },
       '3': {
-        rawState: {
-          title: 'panel Three',
-        },
-        references: [],
+        title: 'panel Three',
+      },
+      control1: {
+        selection: 'some value',
+      },
+      control2: {
+        anotherValue: 'test',
       },
     };
 
-    const { panels, references } = serializeLayout(layout, childState);
+    const { panels, pinned_panels } = serializeLayout(layout, childState);
     expect(panels).toMatchInlineSnapshot(`
       Array [
         Object {
-          "gridData": Object {
+          "config": Object {
+            "title": "panel One",
+          },
+          "grid": Object {
             "h": 6,
-            "i": "1",
             "w": 6,
             "x": 0,
             "y": 0,
           },
-          "panelConfig": Object {
-            "title": "panel One",
-          },
-          "panelIndex": "1",
           "type": "testPanelType",
+          "uid": "1",
         },
         Object {
           "collapsed": true,
-          "gridData": Object {
-            "i": "section1",
+          "grid": Object {
             "y": 6,
           },
           "panels": Array [
             Object {
-              "gridData": Object {
+              "config": Object {
+                "title": "panel Three",
+              },
+              "grid": Object {
                 "h": 6,
-                "i": "3",
                 "w": 6,
                 "x": 0,
                 "y": 0,
               },
-              "panelConfig": Object {
-                "title": "panel Three",
-              },
-              "panelIndex": "3",
               "type": "testPanelType",
+              "uid": "3",
             },
           ],
           "title": "Section One",
+          "uid": "section1",
         },
       ]
     `);
-    expect(references).toMatchInlineSnapshot(`
+    expect(pinned_panels).toMatchInlineSnapshot(`
       Array [
         Object {
-          "id": "ref1",
-          "name": "1:myRef",
-          "type": "testRefType",
+          "config": Object {
+            "anotherValue": "test",
+          },
+          "type": "someOtherControl",
+          "uid": "control2",
+        },
+        Object {
+          "config": Object {
+            "selection": "some value",
+          },
+          "grow": true,
+          "type": "someControl",
+          "uid": "control1",
+          "width": "small",
         },
       ]
     `);

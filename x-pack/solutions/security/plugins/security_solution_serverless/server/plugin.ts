@@ -14,13 +14,8 @@ import type {
 } from '@kbn/core/server';
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
-import { isSupportedConnector } from '@kbn/inference-common';
-import {
-  getDefaultAIConnectorSetting,
-  getDefaultValueReportSettings,
-} from '@kbn/security-solution-plugin/server/ui_settings';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING } from '@kbn/security-solution-plugin/common/constants';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
+import { ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING } from '@kbn/security-solution-navigation';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -44,6 +39,7 @@ import { NLPCleanupTask } from './task_manager/nlp_cleanup_task/nlp_cleanup_task
 import { telemetryEvents } from './telemetry/event_based_telemetry';
 import { UsageReportingService } from './common/services/usage_reporting_service';
 import { ai4SocMeteringService } from './ai4soc/services';
+import { USAGE_REPORTING_ENDPOINT } from './constants';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -61,17 +57,12 @@ export class SecuritySolutionServerlessPlugin
   private ai4SocUsageReportingTask: SecurityUsageReportingTask | undefined;
   private nlpCleanupTask: NLPCleanupTask | undefined;
   private readonly logger: Logger;
-  private readonly usageReportingService: UsageReportingService;
+  private usageReportingService?: UsageReportingService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.config = this.initializerContext.config.get<ServerlessSecurityConfig>();
     this.logger = this.initializerContext.logger.get();
-
-    this.usageReportingService = new UsageReportingService(
-      this.config.usageApi,
-      this.kibanaVersion
-    );
 
     const productTypesStr = JSON.stringify(this.config.productTypes, null, 2);
     this.logger.info(`Security Solution running with product types:\n${productTypesStr}`);
@@ -83,6 +74,20 @@ export class SecuritySolutionServerlessPlugin
   ) {
     this.config = createConfig(this.initializerContext, pluginsSetup.securitySolution);
 
+    let usageApiConfig = pluginsSetup.usageApi?.config;
+    // If no configuration can be retrieved from the usage api plugin, use the configuration from this plugin
+    if (!usageApiConfig) {
+      usageApiConfig = {
+        ...this.config.usageApi,
+        // This plugin adds the reporting endpoint to the url received from its config.
+        // The usage api plugin will return the full URL.
+        url: this.config.usageApi.url
+          ? `${this.config.usageApi.url}${USAGE_REPORTING_ENDPOINT}`
+          : undefined,
+      };
+    }
+
+    this.usageReportingService = new UsageReportingService(usageApiConfig, this.kibanaVersion);
     // Register product features
     const enabledProductFeatures = getEnabledProductFeatures(this.config.productTypes);
 
@@ -91,37 +96,21 @@ export class SecuritySolutionServerlessPlugin
     // Register telemetry events
     telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));
 
-    let projectSettings = SECURITY_PROJECT_SETTINGS;
+    const projectSettings = [...SECURITY_PROJECT_SETTINGS];
 
-    if (!this.config.experimentalFeatures?.continueSuppressionWindowAdvancedSettingEnabled) {
-      projectSettings = projectSettings.filter(
-        (setting) => setting !== SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING
-      );
+    // This setting is only registered when `enableAlertsAndAttacksAlignment` is enabled
+    if (this.config.experimentalFeatures.enableAlertsAndAttacksAlignment) {
+      projectSettings.push(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
+    }
+
+    // This setting is only registered in complete and ease tiers. Adding it to the project settings list while in the essentials tier causes an error.
+    // This is a temporary UI setting to enable workflows, it's planned to be removed on 9.4.0 release.
+    if (this.config.productTypes.some((productType) => productType.product_tier !== 'essentials')) {
+      projectSettings.push(WORKFLOWS_UI_SETTING_ID);
     }
 
     // Setup project uiSettings whitelisting
     pluginsSetup.serverless.setupProjectSettings(projectSettings);
-
-    // Serverless Advanced Settings setup
-    coreSetup
-      .getStartServices()
-      .then(async ([_, depsStart]) => {
-        try {
-          const unsecuredActionsClient = depsStart.actions.getUnsecuredActionsClient();
-          // using "default" space actually forces the api to use undefined space (see getAllUnsecured)
-          const aiConnectors = (await unsecuredActionsClient.getAll('default')).filter(
-            (connector: Connector) => isSupportedConnector(connector)
-          );
-          const defaultAIConnectorSetting = getDefaultAIConnectorSetting(aiConnectors);
-          coreSetup.uiSettings.register({
-            ...(defaultAIConnectorSetting !== null ? defaultAIConnectorSetting : {}),
-            ...getDefaultValueReportSettings(),
-          });
-        } catch (error) {
-          this.logger.error(`Error registering default AI connector: ${error}`);
-        }
-      })
-      .catch(() => {}); // it shouldn't reject, but just in case
 
     // Tasks
     this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({

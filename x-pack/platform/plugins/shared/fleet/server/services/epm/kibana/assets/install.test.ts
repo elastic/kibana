@@ -12,12 +12,13 @@ import type {
 } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { type ArchiveAsset } from './install';
+import { KibanaSavedObjectType } from '../../../../../common/types/models/epm';
 
 jest.mock('timers/promises', () => ({
   async setTimeout() {},
 }));
 
+import { replaceIdsInKibanaAsset, type ArchiveAsset } from './install';
 import { createSavedObjectKibanaAsset, installKibanaSavedObjects } from './install';
 
 const mockLogger = loggingSystemMock.createLogger();
@@ -143,5 +144,56 @@ describe('createSavedObjectKibanaAsset', () => {
 
     expect(result.typeMigrationVersion).toEqual('8.6.0');
     expect(result.coreMigrationVersion).toEqual('8.7.0');
+  });
+});
+
+describe('replaceIdsInKibanaAsset', () => {
+  it('should replace ids in dashboard and visualization assets', () => {
+    const dashboardAsset = createAsset({
+      id: 'dashboard-1',
+      type: KibanaSavedObjectType.dashboard,
+      attributes: {
+        panelsJSON: JSON.stringify([
+          {
+            type: 'DASHBOARD_MARKDOWN',
+            embeddableConfig: {
+              content:
+                '[test](/app/dashboards#/view/dashboard-test-123-456)\n[test2_replaced_multiple_times](/app/dashboards#/view/dashboard-test-123-456)',
+            },
+            panelIndex: '112190c3-da65-4d7e-b811-d97bcf69a412',
+            gridData: { x: 0, y: 0, w: 24, h: 15, i: '112190c3-da65-4d7e-b811-d97bcf69a412' },
+          },
+        ]),
+      },
+    }) as any;
+
+    const idReplacements = {
+      'dashboard-test-123-456': 'dashboard-test-123-456-replaced',
+      'viz-2': 'new-viz-2',
+    };
+
+    const { updated, updatedAsset } = replaceIdsInKibanaAsset(dashboardAsset, idReplacements);
+
+    expect(updated).toBe(true);
+    const panels = JSON.parse((updatedAsset.attributes as any).panelsJSON);
+    expect(panels).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "embeddableConfig": Object {
+            "content": "[test](/app/dashboards#/view/dashboard-test-123-456-replaced)
+      [test2_replaced_multiple_times](/app/dashboards#/view/dashboard-test-123-456-replaced)",
+          },
+          "gridData": Object {
+            "h": 15,
+            "i": "112190c3-da65-4d7e-b811-d97bcf69a412",
+            "w": 24,
+            "x": 0,
+            "y": 0,
+          },
+          "panelIndex": "112190c3-da65-4d7e-b811-d97bcf69a412",
+          "type": "DASHBOARD_MARKDOWN",
+        },
+      ]
+    `);
   });
 });

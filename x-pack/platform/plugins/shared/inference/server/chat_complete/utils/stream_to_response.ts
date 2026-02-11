@@ -35,10 +35,12 @@ export const streamToResponse = <TToolOptions extends ToolOptions = ToolOptions>
 
         return {
           content: messageEvent.content,
+          refusal: messageEvent.refusal,
           toolCalls: messageEvent.toolCalls,
           tokens: tokenEvent?.tokens,
           deanonymized_input: messageEvent.deanonymized_input,
           deanonymized_output: messageEvent.deanonymized_output,
+          model: tokenEvent?.model,
         };
       })
     )

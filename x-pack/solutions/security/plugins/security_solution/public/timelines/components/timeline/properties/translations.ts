@@ -28,10 +28,6 @@ export const DESCRIPTION = i18n.translate(
   }
 );
 
-export const NOTES = i18n.translate('xpack.securitySolution.timeline.properties.notesButtonLabel', {
-  defaultMessage: 'Notes',
-});
-
 export const ADD_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.properties.addTimelineButtonLabel',
   {

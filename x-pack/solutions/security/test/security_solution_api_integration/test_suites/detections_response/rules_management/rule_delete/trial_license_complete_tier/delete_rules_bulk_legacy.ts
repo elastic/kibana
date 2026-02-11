@@ -9,23 +9,23 @@ import expect from 'expect';
 import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '@kbn/detections-response-ftr-services';
+import {
   createLegacyRuleAction,
   getSimpleRule,
   getSlackAction,
   getWebHookAction,
   getLegacyActionSO,
 } from '../../../utils';
-import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
 
@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createLegacyRuleAction(supertest, createRuleBody.id, hookAction.id);
 
         // delete the rule in bulk using the bulk_actions endpoint
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: false },
             body: {
@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createLegacyRuleAction(supertest, createRuleBody2.id, hookAction2.id);
 
         // delete the rule in bulk using the bulk_actions endpoint
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: false },
             body: {
@@ -172,7 +172,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
 
         // delete the rule in bulk using the bulk_actions endpoint
-        await securitySolutionApi
+        await detectionsApi
           .performRulesBulkAction({
             query: { dry_run: false },
             body: {
@@ -183,7 +183,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         // Test to ensure that we have exactly 0 legacy actions by querying the Alerting client REST API directly
-        // See: https://www.elastic.co/guide/en/kibana/current/find-rules-api.html
+        // See: https://www.elastic.co/guide/en/kibana/current/find-rules-detectionsApi.html
         // Note: We specifically filter for both the type "siem.notifications" and the "has_reference" field to ensure we only retrieve legacy actions
         const { body: bodyAfterDelete } = await supertest
           .get(`${BASE_ALERTING_API_PATH}/rules/_find`)

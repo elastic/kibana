@@ -11,11 +11,13 @@ import { LOG_LEVEL_FIELD } from '@kbn/discover-utils';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 import type { DefaultAppStateColumn } from '../../../../types';
 
+export interface CreateGetDefaultAppStateParams {
+  defaultColumns?: DefaultAppStateColumn[];
+}
+
 export const createGetDefaultAppState = ({
   defaultColumns,
-}: {
-  defaultColumns?: DefaultAppStateColumn[];
-} = {}): DataSourceProfileProvider['profile']['getDefaultAppState'] => {
+}: CreateGetDefaultAppStateParams = {}): DataSourceProfileProvider['profile']['getDefaultAppState'] => {
   return (prev) => (params) => {
     const appState = { ...prev(params) };
 

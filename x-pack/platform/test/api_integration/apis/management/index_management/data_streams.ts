@@ -75,6 +75,10 @@ export default function ({ getService }: FtrProviderContext) {
           indexTemplateName: testDataStreamName,
           hidden: false,
           failureStoreEnabled: false,
+          failureStoreRetention: {
+            defaultRetentionPeriod: '30d',
+            retentionDisabled: false,
+          },
           indexMode: 'standard',
         });
       });
@@ -125,6 +129,10 @@ export default function ({ getService }: FtrProviderContext) {
             enabled: true,
           },
           failureStoreEnabled: false,
+          failureStoreRetention: {
+            defaultRetentionPeriod: '30d',
+            retentionDisabled: false,
+          },
           indexMode: 'standard',
         });
       });
@@ -166,6 +174,10 @@ export default function ({ getService }: FtrProviderContext) {
             enabled: true,
           },
           failureStoreEnabled: false,
+          failureStoreRetention: {
+            defaultRetentionPeriod: '30d',
+            retentionDisabled: false,
+          },
           indexMode: 'standard',
         });
       });
@@ -233,6 +245,20 @@ export default function ({ getService }: FtrProviderContext) {
 
         const datastream = await getDatastream(testDataStreamName1);
         expect(datastream.lifecycle).to.be(undefined);
+      });
+
+      it('updates the failure store configuration', async () => {
+        const { body } = await supertest
+          .put(`${API_BASE_PATH}/data_streams/configure_failure_store`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            dataStreams: [testDataStreamName1],
+            dsFailureStore: true,
+            customRetentionPeriod: '14d',
+          })
+          .expect(200);
+
+        expect(body).to.eql({ success: true });
       });
     });
 

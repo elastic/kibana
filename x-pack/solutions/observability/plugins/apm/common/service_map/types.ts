@@ -24,6 +24,7 @@ export interface GroupedNode {
   data: {
     id: string;
     'span.type': string;
+    'span.subtype'?: string;
     label: string;
     groupedConnections: GroupedConnection[];
   };
@@ -91,6 +92,9 @@ export interface ConnectionEdge {
   label?: string;
   bidirectional?: boolean;
   isInverseEdge?: boolean;
+  resources?: string[];
+  sourceData?: ConnectionNode;
+  targetData?: ConnectionNode;
 }
 
 export type NodeItem = {

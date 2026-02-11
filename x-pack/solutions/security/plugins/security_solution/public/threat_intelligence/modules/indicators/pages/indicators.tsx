@@ -7,12 +7,10 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
-import { useBlockListContext } from '../hooks/use_block_list_context';
-import { BlockListProvider } from '../containers/block_list_provider';
-import { BlockListFlyout } from '../../block_list/containers/flyout';
 import { IndicatorsBarChartWrapper } from '../components/barchart/wrapper';
 import { IndicatorsTable } from '../components/table/table';
 import { useAggregatedIndicators } from '../hooks/use_aggregated_indicators';
@@ -26,23 +24,23 @@ import { useColumnSettings } from '../hooks/use_column_settings';
 import { IndicatorsFilters } from '../containers/filters';
 import { UpdateStatus } from '../../../components/update_status';
 import { ScreenReaderAnnouncementsProvider } from '../containers/screen_reader_a11y';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const IndicatorsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <ScreenReaderAnnouncementsProvider>
     <IndicatorsFilters>
       <FieldTypesProvider>
-        <InspectorProvider>
-          <BlockListProvider>{children}</BlockListProvider>
-        </InspectorProvider>
+        <InspectorProvider>{children}</InspectorProvider>
       </FieldTypesProvider>
     </IndicatorsFilters>
   </ScreenReaderAnnouncementsProvider>
 );
 
 const IndicatorsPageContent: FC = () => {
-  const { blockListIndicatorValue } = useBlockListContext();
+  const { sourcererDataView: sourcererDataViewSpec, browserFields } = useTIDataView();
 
-  const { sourcererDataView, browserFields } = useTIDataView();
+  const { fieldFormats } = useKibana().services;
+  const dataView = new DataView({ spec: sourcererDataViewSpec, fieldFormats });
 
   const columnSettings = useColumnSettings();
 
@@ -78,40 +76,40 @@ const IndicatorsPageContent: FC = () => {
   });
 
   return (
-    <FieldTypesProvider>
-      <DefaultPageLayout
-        pageTitle="Indicators"
-        subHeader={<UpdateStatus isUpdating={isFetchingIndicators} updatedAt={dataUpdatedAt} />}
-      >
-        <FiltersGlobal>
-          <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
-        </FiltersGlobal>
-
-        <IndicatorsBarChartWrapper
-          dateRange={dateRange}
-          series={series}
-          timeRange={timeRange}
-          field={selectedField}
-          onFieldChange={onFieldChange}
-          isFetching={isFetchingAggregatedIndicators}
-          isLoading={isLoadingAggregatedIndicators}
+    <DefaultPageLayout
+      pageTitle="Indicators"
+      subHeader={<UpdateStatus isUpdating={isFetchingIndicators} updatedAt={dataUpdatedAt} />}
+    >
+      <FiltersGlobal>
+        <SiemSearchBar
+          dataView={dataView}
+          id={InputsModelId.global}
+          sourcererDataViewSpec={sourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
         />
+      </FiltersGlobal>
 
-        <IndicatorsTable
-          browserFields={browserFields}
-          columnSettings={columnSettings}
-          pagination={pagination}
-          indicatorCount={indicatorCount}
-          indicators={indicators}
-          isLoading={isLoadingIndicators}
-          isFetching={isFetchingIndicators}
-          onChangeItemsPerPage={onChangeItemsPerPage}
-          onChangePage={onChangePage}
-        />
+      <IndicatorsBarChartWrapper
+        dateRange={dateRange}
+        series={series}
+        timeRange={timeRange}
+        field={selectedField}
+        onFieldChange={onFieldChange}
+        isFetching={isFetchingAggregatedIndicators}
+        isLoading={isLoadingAggregatedIndicators}
+      />
 
-        {blockListIndicatorValue && <BlockListFlyout indicatorFileHash={blockListIndicatorValue} />}
-      </DefaultPageLayout>
-    </FieldTypesProvider>
+      <IndicatorsTable
+        browserFields={browserFields}
+        columnSettings={columnSettings}
+        pagination={pagination}
+        indicatorCount={indicatorCount}
+        indicators={indicators}
+        isLoading={isLoadingIndicators}
+        isFetching={isFetchingIndicators}
+        onChangeItemsPerPage={onChangeItemsPerPage}
+        onChangePage={onChangePage}
+      />
+    </DefaultPageLayout>
   );
 };
 

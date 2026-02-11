@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger, KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflow } from '@kbn/workflows';
+import { getReadableFrequency, getReadableInterval } from '../lib/rrule_logging_utils';
 import type { WorkflowTrigger } from '../lib/schedule_utils';
 import { convertWorkflowScheduleToTaskSchedule, getScheduledTriggers } from '../lib/schedule_utils';
 
@@ -26,21 +27,21 @@ export class WorkflowTaskScheduler {
   ) {}
 
   /**
-   * Schedules tasks for all enabled scheduled triggers in a workflow
+   * Schedules tasks for all scheduled triggers in a workflow
    */
   async scheduleWorkflowTasks(
     workflow: EsWorkflow,
     spaceId: string,
     request?: KibanaRequest
   ): Promise<string[]> {
-    const scheduledTriggers = getScheduledTriggers(workflow.definition.triggers);
+    const scheduledTriggers = getScheduledTriggers(workflow.definition?.triggers ?? []);
     const scheduledTaskIds: string[] = [];
 
     for (const trigger of scheduledTriggers) {
       try {
         const taskId = await this.scheduleWorkflowTask(workflow.id, spaceId, trigger, request);
         scheduledTaskIds.push(taskId);
-        this.logger.info(
+        this.logger.debug(
           `Scheduled workflow task for workflow ${workflow.id}, trigger ${trigger.type}, task ID: ${taskId}`
         );
       } catch (error) {
@@ -64,6 +65,16 @@ export class WorkflowTaskScheduler {
     request?: KibanaRequest
   ): Promise<string> {
     const schedule = convertWorkflowScheduleToTaskSchedule(trigger);
+
+    // Log RRule-specific scheduling details
+    if ('rrule' in schedule && schedule.rrule) {
+      const freqText = getReadableFrequency(schedule.rrule.freq);
+      const intervalText = getReadableInterval(schedule.rrule.freq, schedule.rrule.interval);
+
+      this.logger.debug(
+        `RRule schedule created for workflow ${workflowId}: ${freqText} every ${schedule.rrule.interval} ${intervalText}`
+      );
+    }
 
     const taskInstance = {
       id: `workflow:${workflowId}:${trigger.type}`,
@@ -114,7 +125,7 @@ export class WorkflowTaskScheduler {
       const taskIds = tasks.docs.map((task) => task.id);
       if (taskIds.length > 0) {
         await this.taskManager.bulkRemove(taskIds);
-        this.logger.info(`Unscheduled ${taskIds.length} tasks for workflow ${workflowId}`);
+        this.logger.debug(`Unscheduled ${taskIds.length} tasks for workflow ${workflowId}`);
       }
     } catch (error) {
       this.logger.error(`Failed to unschedule tasks for workflow ${workflowId}: ${error}`);
@@ -133,7 +144,7 @@ export class WorkflowTaskScheduler {
     // First, unschedule all existing tasks
     await this.unscheduleWorkflowTasks(workflow.id);
 
-    // Then, schedule new tasks for enabled scheduled triggers
+    // Then, schedule new tasks for scheduled triggers
     await this.scheduleWorkflowTasks(workflow, spaceId, request);
   }
 }

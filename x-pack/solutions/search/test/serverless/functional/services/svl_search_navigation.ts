@@ -23,31 +23,21 @@ export function SvlSearchNavigationServiceProvider({
         await testSubjects.existOrFail('~svlSearchSideNav', { timeout: 2000 });
       });
     },
-    async navigateToGettingStartedPage() {
-      await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp('serverlessElasticsearch');
-        await testSubjects.existOrFail('svlSearchOverviewPage', { timeout: 2000 });
-      });
-    },
-    async navigateToElasticsearchHome(expectRedirect: boolean = false) {
+    async navigateToElasticsearchHome() {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('searchHomepage', {
           shouldLoginIfPrompted: false,
         });
-        if (!expectRedirect) {
-          await testSubjects.existOrFail('search-homepage', { timeout: 2000 });
-        }
+        await testSubjects.existOrFail('search-homepage', { timeout: 2000 });
       });
     },
-    async navigateToElasticsearchStartPage(expectRedirect: boolean = false) {
+    async navigateToGettingStartedPage() {
       await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp('elasticsearchStart', {
+        await PageObjects.common.navigateToApp('searchGettingStarted', {
           shouldLoginIfPrompted: false,
         });
-        if (!expectRedirect) {
-          await testSubjects.existOrFail('elasticsearchStartPage', { timeout: 2000 });
-        }
       });
+      await testSubjects.existOrFail('search-getting-started', { timeout: 2000 });
     },
     async navigateToIndexDetailPage(indexName: string) {
       await retry.tryForTime(60 * 1000, async () => {
@@ -57,7 +47,7 @@ export function SvlSearchNavigationServiceProvider({
       });
       await testSubjects.existOrFail('searchIndicesDetailsPage', { timeout: 2000 });
     },
-    async navigateToInferenceManagementPage(expectRedirect: boolean = false) {
+    async navigateToInferenceManagementPage() {
       await PageObjects.common.navigateToApp('searchInferenceEndpoints', {
         shouldLoginIfPrompted: false,
       });

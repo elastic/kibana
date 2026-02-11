@@ -25,19 +25,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     beforeEach(async () => {
       await PageObjects.console.openConsole();
-      await PageObjects.console.skipTourIfExists();
       await PageObjects.console.clearEditorText();
     });
 
     describe('with a data URI in the load_from query', () => {
       it('loads the data from the URI', async () => {
+        await PageObjects.console.clearEditorText();
+        await PageObjects.console.enterText(`GET _search`);
+        await PageObjects.console.sleepForDebouncePeriod(1000);
+
         await PageObjects.common.navigateToApp('console', {
-          hash: '#/console/shell?load_from=data:text/plain,BYUwNmD2Q',
+          hash: '#/console/shell?load_from=data:text/plain,BYUwNmD2Q', // "hello" compressed
         });
 
         await retry.try(async () => {
           const actualRequest = await PageObjects.console.getEditorText();
-          expect(actualRequest.trim()).to.eql('hello');
+          // The data should be appended after the existing text
+          expect(actualRequest.trim()).to.eql('GET _search\nhello');
         });
       });
 
@@ -54,24 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // not yet implemented for monaco https://github.com/elastic/kibana/issues/186001
-    describe.skip('copy/pasting cURL commands into the console', () => {
-      it('should convert cURL commands into the console request format', async () => {
-        await PageObjects.console.enterText(
-          `\n curl -XGET "http://localhost:9200/_search?pretty" -d'\n{"query": {"match_all": {}}}'`
-        );
-        await PageObjects.console.copyRequestsToClipboard();
-        await PageObjects.console.clearEditorText();
-        await PageObjects.console.pasteClipboardValue();
-        await retry.try(async () => {
-          const actualRequest = await PageObjects.console.getEditorText();
-          expect(actualRequest.trim()).to.eql('GET /_search?pretty\n {"query": {"match_all": {}}}');
-        });
-      });
-    });
-
-    // FLAKY: https://github.com/elastic/kibana/issues/193895
-    describe.skip('console history', () => {
+    describe('console history', () => {
       const sendRequest = async (request: string) => {
         await PageObjects.console.enterText(request);
         await PageObjects.console.clickPlay();

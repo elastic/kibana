@@ -6,161 +6,109 @@
  */
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { Model } from '@kbn/inference-common';
-import type { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import type { Client as EsClient } from '@elastic/elasticsearch';
-import { sumBy } from 'lodash';
-import { table } from 'table';
 import chalk from 'chalk';
 import { hostname } from 'os';
-import type { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
-import { EvaluationScoreRepository } from './score_repository';
-import {
-  buildEvaluationResults,
-  calculateEvaluatorStats,
-  type DatasetScoreWithStats,
-} from './evaluation_stats';
+import type { Model } from '@kbn/inference-common';
+import type { EvaluationScoreRepository } from './score_repository';
+import { type EvaluationScoreDocument } from './score_repository';
+import { getGitMetadata } from './git_metadata';
+import type { RanExperiment, EvaluationRun, TaskRun } from '../types';
 
-export async function reportModelScore({
-  log,
-  phoenixClient,
-  model,
+function getTaskRun(evalRun: EvaluationRun, runs: RanExperiment['runs']): TaskRun {
+  return runs[evalRun.experimentRunId];
+}
+
+export async function mapToEvaluationScoreDocuments({
   experiments,
-  repetitions,
-  esClient,
+  taskModel,
+  evaluatorModel,
   runId,
+  totalRepetitions,
 }: {
-  log: SomeDevLog;
-  phoenixClient: KibanaPhoenixClient;
-  esClient: EsClient;
-  model: Model;
   experiments: RanExperiment[];
-  repetitions: number;
-  runId?: string;
-}): Promise<void> {
-  const { datasetScores, evaluatorNames, overallStats } = await buildEvaluationResults(
-    experiments,
-    phoenixClient
-  );
+  taskModel: Model;
+  evaluatorModel: Model;
+  runId: string;
+  totalRepetitions: number;
+}): Promise<EvaluationScoreDocument[]> {
+  const documents: EvaluationScoreDocument[] = [];
+  const timestamp = new Date().toISOString();
+  const gitMetadata = getGitMetadata();
+  const hostName = hostname();
 
-  // Add evaluator stats to dataset scores for table formatting
-  const datasetScoresWithStats: DatasetScoreWithStats[] = datasetScores.map((dataset) => ({
-    ...dataset,
-    evaluatorStats: new Map(
-      evaluatorNames.map((evaluatorName) => {
-        const scores = dataset.evaluatorScores.get(evaluatorName) || [];
-        const stats = calculateEvaluatorStats(scores, dataset.numExamples);
-        return [evaluatorName, stats];
-      })
-    ),
-  }));
+  for (const experiment of experiments) {
+    const { datasetId, evaluationRuns, runs = {} } = experiment;
+    if (!evaluationRuns) {
+      continue;
+    }
 
-  if (datasetScores.length === 0) {
-    log.error(`No dataset scores were available`);
+    const datasetName = experiment.datasetName ?? datasetId;
+
+    for (const evalRun of evaluationRuns) {
+      const taskRun = getTaskRun(evalRun, runs);
+      const exampleId = evalRun.exampleId ?? String(taskRun.exampleIndex);
+
+      documents.push({
+        '@timestamp': timestamp,
+        run_id: runId,
+        experiment_id: experiment.id ?? '',
+        example: {
+          id: exampleId,
+          index: taskRun.exampleIndex,
+          dataset: {
+            id: datasetId,
+            name: datasetName,
+          },
+        },
+        task: {
+          trace_id: taskRun.traceId ?? null,
+          repetition_index: taskRun.repetition,
+          model: taskModel,
+        },
+        evaluator: {
+          name: evalRun.name,
+          score: evalRun.result?.score ?? null,
+          label: evalRun.result?.label ?? null,
+          explanation: evalRun.result?.explanation ?? null,
+          metadata: evalRun.result?.metadata ?? null,
+          trace_id: evalRun.traceId ?? null,
+          model: evaluatorModel,
+        },
+        run_metadata: {
+          git_branch: gitMetadata.branch,
+          git_commit_sha: gitMetadata.commitSha,
+          total_repetitions: totalRepetitions,
+        },
+        environment: {
+          hostname: hostName,
+        },
+      });
+    }
+  }
+
+  return documents;
+}
+
+export async function exportEvaluations(
+  documents: EvaluationScoreDocument[],
+  scoreRepository: EvaluationScoreRepository,
+  log: SomeDevLog
+): Promise<void> {
+  if (documents.length === 0) {
+    log.warning('No evaluation scores to export');
     return;
   }
 
-  const totalExamples = sumBy(datasetScores, (d) => d.numExamples);
-  const header = [`Model: ${model.id} (${model.family}/${model.provider})`];
+  log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
 
-  // Create summary table with dataset-level and overall descriptive statistics
-  const createSummaryTable = () => {
-    const repetitionAwareExampleCount = (numExamples: number): string => {
-      return repetitions > 1
-        ? `${repetitions} x ${numExamples / repetitions}`
-        : numExamples.toString();
-    };
+  await scoreRepository.exportScores(documents);
 
-    const examplesHeader =
-      repetitions > 1 ? `# Examples\n${chalk.gray('(repetitions x examples)')}` : '# Examples';
+  const { run_id: docRunId, task, environment } = documents[0];
 
-    const tableHeaders = ['Dataset', examplesHeader, ...evaluatorNames];
-
-    const datasetRows = datasetScoresWithStats.map((dataset) => {
-      const row = [dataset.name, repetitionAwareExampleCount(dataset.numExamples)];
-
-      evaluatorNames.forEach((evaluatorName) => {
-        const stats = dataset.evaluatorStats!.get(evaluatorName);
-        if (stats && stats.count > 0) {
-          // Combine all statistics in a single cell with multiple lines
-          const cellContent = [
-            chalk.bold.yellow(`${(stats.percentage * 100).toFixed(1)}%`),
-            chalk.cyan(`mean: ${stats.mean.toFixed(3)}`),
-            chalk.cyan(`median: ${stats.median.toFixed(3)}`),
-            chalk.cyan(`std: ${stats.stdDev.toFixed(3)}`),
-            chalk.cyan(`min: ${stats.min.toFixed(3)}`),
-            chalk.cyan(`max: ${stats.max.toFixed(3)}`),
-          ].join('\n');
-          row.push(cellContent);
-        } else {
-          row.push(chalk.gray('-'));
-        }
-      });
-
-      return row;
-    });
-
-    // Add overall statistics row
-    const overallRow = [chalk.bold.green('Overall'), repetitionAwareExampleCount(totalExamples)];
-    evaluatorNames.forEach((evaluatorName) => {
-      const stats = overallStats.get(evaluatorName);
-      if (stats && stats.count > 0) {
-        const cellContent = [
-          chalk.bold.yellow(`${(stats.percentage * 100).toFixed(1)}%`),
-          chalk.bold.green(`mean: ${stats.mean.toFixed(3)}`),
-          chalk.bold.green(`median: ${stats.median.toFixed(3)}`),
-          chalk.bold.green(`std: ${stats.stdDev.toFixed(3)}`),
-          chalk.bold.green(`min: ${stats.min.toFixed(3)}`),
-          chalk.bold.green(`max: ${stats.max.toFixed(3)}`),
-        ].join('\n');
-        overallRow.push(cellContent);
-      } else {
-        overallRow.push(chalk.bold.green('-'));
-      }
-    });
-
-    // Build column alignment configuration
-    const columnConfig: Record<number, { alignment: 'right' | 'left' }> = {
-      0: { alignment: 'left' },
-    };
-    for (let i = 1; i < tableHeaders.length; i++) {
-      columnConfig[i] = { alignment: 'right' };
-    }
-
-    return table([tableHeaders, ...datasetRows, overallRow], {
-      columns: columnConfig,
-    });
-  };
-
-  const summaryTable = createSummaryTable();
-
-  log.info(`\n\n${header[0]}`);
-  log.info(`\n${chalk.bold.blue('═══ EVALUATION RESULTS ═══')}\n${summaryTable}`);
-
-  // Export to Elasticsearch
-  try {
-    const exporter = new EvaluationScoreRepository(esClient, log);
-    const currentRunId = runId || process.env.TEST_RUN_ID || `run_${Date.now()}`;
-
-    log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
-
-    await exporter.exportScores({
-      datasetScoresWithStats,
-      evaluatorNames,
-      model,
-      runId: currentRunId,
-      tags: ['evaluation', 'model-score'],
-    });
-
-    log.info(chalk.green('✅ Model scores exported to Elasticsearch successfully!'));
-    log.info(
-      chalk.gray(
-        `You can query the data using: environment.hostname:"${hostname()}" AND model.id:"${
-          model.id || 'unknown'
-        }" AND run_id:"${currentRunId}"`
-      )
-    );
-  } catch (error) {
-    log.warning(chalk.yellow('⚠️ Failed to export scores to Elasticsearch:'), error);
-  }
+  log.info(chalk.green('✅ Evaluation scores exported successfully!'));
+  log.info(
+    chalk.gray(
+      `You can query the data using: environment.hostname:"${environment.hostname}" AND task.model.id:"${task.model.id}" AND run_id:"${docRunId}"`
+    )
+  );
 }

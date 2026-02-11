@@ -32,7 +32,20 @@ export interface IndexDetailsTab {
   id: IndexDetailsTabId;
   // a text that is displayed on the tab label, usually a Formatted message component
   name: ReactNode;
-  // a function that renders the content of the tab
+  /**
+   * A function that renders the content of the tab.
+   *
+   * IMPORTANT: This expects an arrow function that returns JSX, NOT a component passed directly.
+   *
+   * @example
+   * // Correct - arrow function returning JSX:
+   * renderTabContent: ({ index, getUrlForApp }) => (
+   *   <MyTabComponent index={index} getUrlForApp={getUrlForApp} />
+   * )
+   *
+   * // Wrong - passing a component directly will break if it uses hooks:
+   * renderTabContent: MyTabComponent
+   */
   renderTabContent: (args: {
     index: Index;
     getUrlForApp: ApplicationStart['getUrlForApp'];

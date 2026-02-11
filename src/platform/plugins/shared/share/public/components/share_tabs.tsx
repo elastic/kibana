@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FC } from 'react';
+import React, { type ReactNode, useMemo, type FC } from 'react';
 import { TabbedModal, type IModalTabDeclaration } from '@kbn/shared-ux-tabbed-modal';
-
 import { ShareProvider, useShareContext, type IShareContext } from './context';
 import { linkTab, embedTab } from './tabs';
 
@@ -25,22 +24,27 @@ export const ShareMenu: FC<{ shareContext: IShareContext }> = ({ shareContext })
 export const ShareMenuTabs = () => {
   const shareContext = useShareContext();
 
-  const { objectTypeMeta, onClose, shareMenuItems, anchorElement } = shareContext;
+  const { objectTypeMeta, onClose, shareMenuItems, anchorElement, sharingData } = shareContext;
 
-  const tabs: Array<IModalTabDeclaration<any>> = [];
+  const tabs = useMemo(() => {
+    const tabList: Array<IModalTabDeclaration<any>> = [];
 
-  // Do not show the link tab if the share url is disabled
-  if (!objectTypeMeta?.config.link?.disabled) {
-    tabs.push(linkTab);
-  }
+    // Do not show the link tab if the share url is disabled
+    if (!objectTypeMeta?.config.link?.disabled) {
+      tabList.push(linkTab);
+    }
 
-  // Embed is disabled in the serverless offering, hence the need to check if the embed tab should be shown
-  if (
-    shareMenuItems.some(({ shareType }) => shareType === 'embed') &&
-    !objectTypeMeta?.config?.embed?.disabled
-  ) {
-    tabs.push(embedTab);
-  }
+    // Embed is disabled in the serverless offering, hence the need to check if the embed tab should be shown
+    if (
+      shareMenuItems.some(({ shareType }) => shareType === 'embed') &&
+      !objectTypeMeta?.config?.embed?.disabled
+    ) {
+      tabList.push(embedTab);
+    }
+    return tabList;
+  }, [objectTypeMeta, shareMenuItems]);
+
+  const showAccessModeContainer = Boolean(sharingData?.accessModeContainer);
 
   return Boolean(tabs.length) ? (
     <TabbedModal
@@ -51,6 +55,10 @@ export const ShareMenuTabs = () => {
       defaultSelectedTabId={tabs[0].id}
       anchorElement={anchorElement}
       data-test-subj="shareContextModal"
+      aboveTabsContent={
+        showAccessModeContainer ? (sharingData?.accessModeContainer as ReactNode) : null
+      }
+      outsideClickCloses
     />
   ) : null;
 };

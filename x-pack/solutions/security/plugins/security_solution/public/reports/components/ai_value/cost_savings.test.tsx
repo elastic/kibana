@@ -66,7 +66,7 @@ describe('CostSavings', () => {
         currentCount: defaultProps.costSavings,
         previousCount: defaultProps.costSavingsCompare,
         stat: '$4,000',
-        statType: 'time saved in hours',
+        statType: 'cost saved in dollars',
         timeRange: '30',
       }),
       {}

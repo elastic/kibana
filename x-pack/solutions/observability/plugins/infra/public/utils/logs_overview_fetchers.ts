@@ -13,6 +13,8 @@ import type {
 } from '@kbn/observability-plugin/public';
 import { DEFAULT_LOG_VIEW, getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
 import moment from 'moment';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { DataTier } from '@kbn/observability-shared-plugin/common';
 import { TIMESTAMP_FIELD } from '../../common/constants';
 import type { InfraClientStartDeps, InfraClientStartServicesAccessor } from '../types';
 
@@ -38,10 +40,11 @@ type StatsAndSeries = Pick<LogsFetchDataResponse, 'stats' | 'series'>;
 
 export function getLogsHasDataFetcher(getStartServices: InfraClientStartServicesAccessor) {
   return async () => {
-    const [, { logsShared }] = await getStartServices();
+    const [coreStart, { logsShared }] = await getStartServices();
     const resolvedLogView = await logsShared.logViews.client.getResolvedLogView(DEFAULT_LOG_VIEW);
     const logViewStatus = await logsShared.logViews.client.getResolvedLogViewStatus(
-      resolvedLogView
+      resolvedLogView,
+      coreStart.uiSettings
     );
 
     const hasData = logViewStatus.index === 'available';
@@ -58,7 +61,7 @@ export function getLogsOverviewDataFetcher(
   getStartServices: InfraClientStartServicesAccessor
 ): FetchData<LogsFetchDataResponse> {
   return async (params) => {
-    const [, { data, logsShared, share }] = await getStartServices();
+    const [coreStart, { data, logsShared, share }] = await getStartServices();
     const resolvedLogView = await logsShared.logViews.client.getResolvedLogView(DEFAULT_LOG_VIEW);
 
     const { stats, series } = await fetchLogsOverview(
@@ -66,7 +69,8 @@ export function getLogsOverviewDataFetcher(
         index: resolvedLogView.indices,
       },
       params,
-      data
+      data,
+      coreStart.uiSettings
     );
     const logsLocator = getLogsLocatorFromUrlService(share.url)!;
     const timeSpanInMinutes = (params.absoluteTime.end - params.absoluteTime.start) / (1000 * 60);
@@ -89,8 +93,12 @@ export function getLogsOverviewDataFetcher(
 async function fetchLogsOverview(
   logParams: LogParams,
   params: FetchDataParams,
-  dataPlugin: InfraClientStartDeps['data']
+  dataPlugin: InfraClientStartDeps['data'],
+  uiSettings: IUiSettingsClient
 ): Promise<StatsAndSeries> {
+  const excludedDataTiers =
+    uiSettings?.get<DataTier[]>('observability:searchExcludedDataTiers') ?? [];
+
   return new Promise((resolve, reject) => {
     let esResponse: estypes.SearchResponse<any> | undefined;
 
@@ -100,7 +108,7 @@ async function fetchLogsOverview(
           index: logParams.index,
           body: {
             size: 0,
-            query: buildLogOverviewQuery(logParams, params),
+            query: buildLogOverviewQuery(params, excludedDataTiers),
             aggs: buildLogOverviewAggregations(logParams, params),
           },
         },
@@ -119,14 +127,21 @@ async function fetchLogsOverview(
   });
 }
 
-function buildLogOverviewQuery(logParams: LogParams, params: FetchDataParams) {
+function buildLogOverviewQuery(params: FetchDataParams, excludedDataTiers: DataTier[]) {
   return {
-    range: {
-      [TIMESTAMP_FIELD]: {
-        gt: new Date(params.absoluteTime.start).toISOString(),
-        lte: new Date(params.absoluteTime.end).toISOString(),
-        format: 'strict_date_optional_time',
-      },
+    bool: {
+      must: [
+        {
+          range: {
+            [TIMESTAMP_FIELD]: {
+              gt: new Date(params.absoluteTime.start).toISOString(),
+              lte: new Date(params.absoluteTime.end).toISOString(),
+              format: 'strict_date_optional_time',
+            },
+          },
+        },
+      ],
+      must_not: excludedDataTiers.length ? [{ terms: { _tier: excludedDataTiers } }] : undefined,
     },
   };
 }

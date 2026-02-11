@@ -24,4 +24,4 @@
  * fail if the versions are out of sync.
  */
 process.env.UNSAFE_DISABLE_NODE_VERSION_VALIDATION = 'true';
-require('../src/setup_node_env');
+require('@kbn/setup-node-env');

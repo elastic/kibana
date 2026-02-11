@@ -20,6 +20,7 @@ exports[`Title it renders title 1`] = `
   >
     <span
       class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+      id="generated-id-wrapper"
     >
       <span
         class="c0"

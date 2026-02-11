@@ -9,7 +9,7 @@ import type { Filter } from '@kbn/es-query';
 import { buildQueryFromFilters } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { FindSLOResponse } from '@kbn/slo-schema';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useMemo } from 'react';
 import { DEFAULT_SLO_PAGE_SIZE, SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import type { SearchState } from '../pages/slos/hooks/use_url_search_state';

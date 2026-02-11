@@ -8,15 +8,18 @@
 import { EuiHeaderLink, EuiHeaderLinks, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { getLegacyApmHref } from '../../../shared/links/apm/apm_link_hooks';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
+import { SloPopoverAndFlyout } from './slo_popover_flyout';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { GiveFeedbackHeaderLink } from './give_feedback_header_link';
 
 export function ApmHeaderActionMenu() {
-  const { core, plugins, config } = useApmPluginContext();
+  const { core, plugins, config, share } = useApmPluginContext();
   const { search } = window.location;
   const { application, http } = core;
   const { basePath } = http;
@@ -28,13 +31,16 @@ export function ApmHeaderActionMenu() {
     capabilities
   );
   const canSaveApmAlerts = capabilities.apm.save && canSaveAlerts;
+  const canReadSlos = !!capabilities.slo?.read;
+  const canWriteSlos = !!capabilities.slo?.write;
+  const isSloAvailable = canReadSlos || canWriteSlos;
+  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
+  const addDataUrl = onboardingLocator?.useUrl({ category: 'application' }) ?? '';
 
   function apmHref(path: string) {
     return getLegacyApmHref({ basePath, path, search });
-  }
-
-  function kibanaHref(path: string) {
-    return basePath.prepend(path);
   }
 
   return (
@@ -65,6 +71,10 @@ export function ApmHeaderActionMenu() {
         />
       )}
 
+      {isSloAvailable && (
+        <SloPopoverAndFlyout canReadSlos={canReadSlos} canWriteSlos={canWriteSlos} />
+      )}
+
       <EuiHeaderLink
         color="primary"
         href={apmHref('/settings')}
@@ -77,11 +87,7 @@ export function ApmHeaderActionMenu() {
 
       <InspectorHeaderLink />
 
-      <EuiHeaderLink
-        color="primary"
-        href={kibanaHref('/app/apm/tutorial')}
-        data-test-subj="apmAddDataHeaderLink"
-      >
+      <EuiHeaderLink color="primary" href={addDataUrl} data-test-subj="apmAddDataHeaderLink">
         {i18n.translate('xpack.apm.addDataButtonLabel', {
           defaultMessage: 'Add data',
         })}

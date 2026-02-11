@@ -18,15 +18,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { OnSourceChangeArgs } from '../source';
 import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
-import { getIndexPatternService } from '../../../kibana_services';
 import { ESQLEditor } from './esql_editor';
 import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
-import { getFields } from './esql_utils';
+import type { getFields } from './esql_utils';
 import type { NormalizedESQLSourceDescriptor } from './esql_source';
 
 interface Props {
   onChange(...args: OnSourceChangeArgs[]): void;
   sourceDescriptor: NormalizedESQLSourceDescriptor;
+  getDataViewFields: () => Promise<ReturnType<typeof getFields>>;
 }
 
 export function UpdateSourceEditor(props: Props) {
@@ -36,13 +36,12 @@ export function UpdateSourceEditor(props: Props) {
 
   useEffect(() => {
     let ignore = false;
-    getIndexPatternService()
-      .get(props.sourceDescriptor.dataViewId)
-      .then((dataView) => {
+    props
+      .getDataViewFields()
+      .then((fields) => {
         if (ignore) {
           return;
         }
-        const fields = getFields(dataView);
         setDateFields(fields.dateFields);
         setGeoFields(fields.geoFields);
         setIsInitialized(true);
@@ -81,7 +80,6 @@ export function UpdateSourceEditor(props: Props) {
               setDateFields(change.dateFields);
               setGeoFields(change.geoFields);
               const changes: OnSourceChangeArgs[] = [
-                { propName: 'columns', value: change.columns },
                 { propName: 'dataViewId', value: change.adhocDataViewId },
                 { propName: 'esql', value: change.esql },
               ];

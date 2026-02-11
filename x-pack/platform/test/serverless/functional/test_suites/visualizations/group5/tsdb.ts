@@ -7,12 +7,10 @@
 
 import expect from '@kbn/expect';
 import { partition } from 'lodash';
-import moment from 'moment';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   type ScenarioIndexes,
   TEST_DOC_COUNT,
-  TIME_PICKER_FORMAT,
   getDataMapping,
   getDocsGenerator,
   setupScenarioRunner,
@@ -74,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // FLAKY: https://github.com/elastic/kibana/issues/232416
     // FLAKY: https://github.com/elastic/kibana/issues/232417
-    describe.skip('downsampling', () => {
+    describe('downsampling', () => {
       const downsampleDataView: { index: string; dataView: string } = { index: '', dataView: '' };
       before(async () => {
         const downsampledTargetIndex = await dataStreams.downsampleTSDBIndex(tsdbIndex, {
@@ -120,6 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('defaults to average for rolled up metric', async () => {
           await lens.switchDataPanelIndexPattern(downsampleDataView.dataView);
           await lens.removeLayer();
+          await lens.ensureLayerTabIsActive();
           await lens.waitForField('bytes_gauge');
           await lens.dragFieldToWorkspace('bytes_gauge', 'xyVisChart');
           expect(await lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
@@ -157,6 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       afterEach(async () => {
         await lens.removeLayer();
+        await lens.ensureLayerTabIsActive();
       });
 
       // skip count for now as it's a special function and will
@@ -205,22 +205,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               keepOpen: true,
             });
 
-            // now check if the provided function has no incompatibility tooltip
             for (const supportedOp of supportedOperations) {
+              // now check if the provided function has no incompatibility tooltip
               expect(
                 testSubjects.exists(`lns-indexPatternDimension-${supportedOp.name} incompatible`, {
                   timeout: 500,
                 })
               ).to.eql(supportedOp[fieldType]);
-            }
-
-            for (const supportedOp of supportedOperations) {
               // try to change to the provided function and check all is ok
               await lens.selectOperation(supportedOp.name);
 
               expect(
                 await find.existsByCssSelector(
-                  '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText'
+                  '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText',
+                  500
                 )
               ).to.be(false);
 
@@ -247,8 +245,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               keepOpen: true,
             });
 
-            // now check if the provided function has the incompatibility tooltip
             for (const unsupportedOp of unsupportedOperatons) {
+              // now check if the provided function has the incompatibility tooltip
               expect(
                 testSubjects.exists(
                   `lns-indexPatternDimension-${unsupportedOp.name} incompatible`,
@@ -257,14 +255,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   }
                 )
               ).to.eql(!unsupportedOp[fieldType]);
-            }
-
-            for (const unsupportedOp of unsupportedOperatons) {
               // try to change to the provided function and check if it's in an incompatibility state
               await lens.selectOperation(unsupportedOp.name, true);
 
               const fieldSelectErrorEl = await find.byCssSelector(
-                '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText'
+                '[data-test-subj="indexPattern-field-selection-row"] .euiFormErrorText',
+                500
               );
 
               expect(await fieldSelectErrorEl.getVisibleText()).to.be(
@@ -468,138 +464,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(
               sumFirstNValues(columnsToCheck, [...(countBars ?? [])].reverse())
             ).to.be.greaterThan(TEST_DOC_COUNT - 1);
-          });
-        });
-      });
-
-      describe('TSDB downgraded to regular data stream scenarios', () => {
-        const tsdbStream = 'tsdb_stream_dowgradable';
-        // rollover does not allow to change name, it will just change backing index underneath
-        const tsdbConvertedToStream = tsdbStream;
-
-        before(async () => {
-          log.info(`Creating "${tsdbStream}" data stream...`);
-          await dataStreams.createDataStream(tsdbStream, getDataMapping({ mode: 'tsdb' }), 'tsdb');
-
-          // add some data to the stream
-          await createDocs(tsdbStream, { isStream: true }, fromTimeForScenarios);
-
-          log.info(`Update settings for "${tsdbStream}" dataView...`);
-          await kibanaServer.uiSettings.update({
-            'dateFormat:tz': 'UTC',
-            'timepicker:timeDefaults': '{ "from": "now-1y", "to": "now" }',
-          });
-          log.info(
-            `Dowgrade "${tsdbStream}" stream into regular stream "${tsdbConvertedToStream}"...`
-          );
-
-          await dataStreams.downgradeStream(tsdbStream, getDataMapping({ mode: 'tsdb' }), 'tsdb');
-          log.info(`Add more data to new "${tsdbConvertedToStream}" dataView (no longer TSDB)...`);
-          // add some more data when upgraded
-          await createDocs(tsdbConvertedToStream, { isStream: true }, toTimeForScenarios);
-        });
-
-        after(async () => {
-          await dataStreams.deleteDataStream(tsdbConvertedToStream);
-        });
-
-        runTestsForEachScenario(tsdbConvertedToStream, 'tsdb', (indexes) => {
-          it('should keep TSDB restrictions only if a tsdb stream is in the dataView mix', async () => {
-            await lens.configureDimension({
-              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-              operation: 'date_histogram',
-              field: '@timestamp',
-            });
-
-            await lens.configureDimension({
-              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-              operation: 'min',
-              field: `bytes_counter`,
-              keepOpen: true,
-            });
-
-            expect(
-              testSubjects.exists(`lns-indexPatternDimension-average incompatible`, {
-                timeout: 500,
-              })
-            ).to.eql(indexes.some(({ mode }) => mode === 'tsdb'));
-            await lens.closeDimensionEditor();
-          });
-
-          it(`should visualize a date histogram chart for counter field`, async () => {
-            await lens.configureDimension({
-              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-              operation: 'date_histogram',
-              field: '@timestamp',
-            });
-            // just check the data is shown
-            await lens.configureDimension({
-              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-              operation: 'count',
-            });
-
-            await lens.waitForVisualization('xyVisChart');
-            const data = await lens.getCurrentChartDebugState('xyVisChart');
-            const bars = data?.bars![0].bars;
-            const columnsToCheck = bars ? bars.length / 2 : 0;
-            // due to the flaky nature of exact check here, we're going to relax it
-            // as long as there's data before and after it is ok
-            log.info('Check count before the downgrade');
-            // Before the upgrade the count is N times the indexes
-            expect(sumFirstNValues(columnsToCheck, bars)).to.be.greaterThan(
-              indexes.length * TEST_DOC_COUNT - 1
-            );
-            log.info('Check count after the downgrade');
-            // later there are only documents for the upgraded stream
-            expect(sumFirstNValues(columnsToCheck, [...(bars ?? [])].reverse())).to.be.greaterThan(
-              TEST_DOC_COUNT - 1
-            );
-          });
-
-          it('should visualize data when moving the time window around the downgrade moment', async () => {
-            // check after the downgrade
-            await lens.goToTimeRange(
-              moment
-                .utc(fromTimeForScenarios, TIME_PICKER_FORMAT)
-                .subtract(1, 'hour')
-                .format(TIME_PICKER_FORMAT),
-              moment
-                .utc(fromTimeForScenarios, TIME_PICKER_FORMAT)
-                .add(1, 'hour')
-                .format(TIME_PICKER_FORMAT) // consider only new documents
-            );
-
-            await lens.configureDimension({
-              dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-              operation: 'date_histogram',
-              field: '@timestamp',
-            });
-            await lens.configureDimension({
-              dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-              operation: 'count',
-            });
-
-            await lens.waitForVisualization('xyVisChart');
-            const dataBefore = await lens.getCurrentChartDebugState('xyVisChart');
-            const barsBefore = dataBefore?.bars![0].bars;
-            expect(barsBefore?.some(({ y }) => y)).to.eql(true);
-
-            // check after the downgrade
-            await lens.goToTimeRange(
-              moment
-                .utc(toTimeForScenarios, TIME_PICKER_FORMAT)
-                .add(1, 'second')
-                .format(TIME_PICKER_FORMAT),
-              moment
-                .utc(toTimeForScenarios, TIME_PICKER_FORMAT)
-                .add(2, 'hour')
-                .format(TIME_PICKER_FORMAT) // consider also new documents
-            );
-
-            await lens.waitForVisualization('xyVisChart');
-            const dataAfter = await lens.getCurrentChartDebugState('xyVisChart');
-            const barsAfter = dataAfter?.bars![0].bars;
-            expect(barsAfter?.some(({ y }) => y)).to.eql(true);
           });
         });
       });

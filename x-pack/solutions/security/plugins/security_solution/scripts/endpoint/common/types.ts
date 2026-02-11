@@ -11,7 +11,7 @@
 export interface HostVm {
   type: SupportedVmManager;
   name: string;
-  exec: (command: string) => Promise<HostVmExecResponse>;
+  exec: (command: string, options?: { silent?: boolean }) => Promise<HostVmExecResponse>;
   mount: (localDir: string, hostVmDir: string) => Promise<HostVmMountResponse>;
   unmount: (hostVmDir: string) => Promise<void>;
   /** @deprecated use `upload` */

@@ -81,7 +81,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
           createdBy: user.fullName,
           updatedBy: user.fullName,
           actions: actions.map((action: any) => {
-            /* eslint-disable @typescript-eslint/naming-convention */
             const { connector_type_id, group, id, params, uuid } = action;
             return {
               actionTypeId: connector_type_id,
@@ -430,7 +429,6 @@ instanceStateValue: true
             createdBy: user.fullName,
             updatedBy: Superuser.fullName,
             actions: response2.body.actions.map((action: any) => {
-              /* eslint-disable @typescript-eslint/naming-convention */
               const { connector_type_id, group, id, params, uuid } = action;
               return {
                 actionTypeId: connector_type_id,
@@ -1498,8 +1496,10 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            maintenance_window_names: [],
                             pending_recovered_count: 0,
                             severity_improving: false,
+                            muted: false,
                             rule: {
                               parameters: {
                                 index: 'kibana-alerting-test-data',
@@ -1543,8 +1543,10 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            maintenance_window_names: [],
                             pending_recovered_count: 0,
                             severity_improving: false,
+                            muted: false,
                             rule: {
                               parameters: {
                                 index: 'kibana-alerting-test-data',
@@ -1604,8 +1606,10 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            maintenance_window_names: [],
                             pending_recovered_count: 0,
                             previous_action_group: 'default',
+                            muted: false,
                             rule: {
                               parameters: {
                                 index: 'kibana-alerting-test-data',
@@ -1649,8 +1653,10 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            maintenance_window_names: [],
                             pending_recovered_count: 0,
                             previous_action_group: 'default',
+                            muted: false,
                             rule: {
                               parameters: {
                                 index: 'kibana-alerting-test-data',
@@ -1758,8 +1764,10 @@ instanceStateValue: true
                       action_group: 'default',
                       flapping_history: expectExpect.any(Array),
                       maintenance_window_ids: [],
+                      maintenance_window_names: [],
                       pending_recovered_count: 0,
                       severity_improving: false,
+                      muted: false,
                       rule: {
                         parameters: {
                           index: 'kibana-alerting-test-data',
@@ -1803,8 +1811,10 @@ instanceStateValue: true
                       action_group: 'default',
                       flapping_history: expectExpect.any(Array),
                       maintenance_window_ids: [],
+                      maintenance_window_names: [],
                       pending_recovered_count: 0,
                       severity_improving: false,
+                      muted: false,
                       rule: {
                         parameters: {
                           index: 'kibana-alerting-test-data',

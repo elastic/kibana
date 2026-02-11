@@ -134,12 +134,14 @@ describe('TopNavMenu', () => {
     const refresh = () => {
       new Promise(async (resolve, reject) => {
         try {
+          // @ts-expect-error upgrade typescript v5.9.3
           if (dom) {
             act(() => {
               dom.update();
             });
           }
 
+          // @ts-expect-error upgrade typescript v5.9.3
           setImmediate(() => resolve(dom)); // flushes any pending promises
         } catch (error) {
           reject(error);

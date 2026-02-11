@@ -10,14 +10,15 @@ import axios from 'axios';
 
 import { createExternalService } from './service';
 import { request, createAxiosResponse } from '@kbn/actions-plugin/server/lib/axios_utils';
-import type { CasesWebhookPublicConfigurationType, ExternalService } from './types';
+import type { CasesWebhookPublicConfigurationType } from '@kbn/connector-schemas/cases_webhook';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { getBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { AuthType, WebhookMethods, SSLCertType } from '../../../common/auth/constants';
-import { CRT_FILE, KEY_FILE } from '../../../common/auth/mocks';
+import { AuthType, WebhookMethods, SSLCertType } from '@kbn/connector-schemas/common/auth';
+import { CRT_FILE, KEY_FILE } from '@kbn/connector-schemas/common/auth/mocks';
+import type { ExternalService } from './types';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -258,6 +259,48 @@ describe('Cases webhook service', () => {
         {
           config: { ...config, hasAuth: false },
           secrets: { ...secrets, user: 'username', password: 'password' },
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          'content-type': 'application/json',
+          foo: 'bar',
+        },
+      });
+    });
+
+    it('headers work as expected if secrets are undefined', () => {
+      createExternalService(
+        actionId,
+        {
+          config: { ...config, hasAuth: false },
+          // @ts-expect-error: should not happen but it does with very old SOs
+          secrets: undefined,
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          'content-type': 'application/json',
+          foo: 'bar',
+        },
+      });
+    });
+
+    it('headers work as expected if secrets are null', () => {
+      createExternalService(
+        actionId,
+        {
+          config: { ...config, hasAuth: false },
+          // @ts-expect-error: should not happen but it does with very old SOs
+          secrets: null,
         },
         logger,
         configurationUtilities,
@@ -1353,6 +1396,48 @@ describe('Cases webhook service', () => {
       await expect(service.updateIncident(incident)).rejects.toThrow(
         '[Action][Webhook - Case Management]: Unable to update case with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
       );
+    });
+
+    it('it should throw if the request status is a 204 and has data', async () => {
+      requestMock.mockImplementation(() =>
+        createAxiosResponse({
+          data: 'some data',
+          headers: { ['content-type']: 'text/html' },
+          status: 204,
+        })
+      );
+
+      await expect(service.updateIncident(incident)).rejects.toThrow(
+        '[Action][Webhook - Case Management]: Unable to update case with id 1. Error: Unsupported content type: text/html in GET https://example.com. Supported content types: application/json.'
+      );
+    });
+
+    it('it should NOT throw if the request status is a 204 and is empty', async () => {
+      // Initial mock for the update call
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: undefined,
+          headers: { ['content-type']: 'text/html' },
+          status: 204,
+        })
+      );
+
+      // Second mock for the getIncident call inside updateIncident
+      requestMock.mockImplementationOnce(() =>
+        createAxiosResponse({
+          data: {
+            id: '1',
+            key: 'CK-1',
+          },
+        })
+      );
+
+      await expect(service.updateIncident(incident)).resolves.toEqual({
+        id: '1',
+        title: 'CK-1',
+        pushedDate: mockTime.toISOString(),
+        url: 'https://coolsite.net/browse/CK-1',
+      });
     });
   });
 

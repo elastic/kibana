@@ -34,7 +34,7 @@ export const getInitialCaseValue = ({
   category: undefined,
   severity: CaseSeverity.LOW as const,
   description: '',
-  settings: { syncAlerts: true },
+  settings: { syncAlerts: true, extractObservables: true },
   customFields: [],
   ...restFields,
   connector: connector ?? getNoneConnector(),
@@ -44,7 +44,7 @@ export const getInitialCaseValue = ({
 export const trimUserFormData = (
   userFormData: Omit<
     CaseFormFieldsSchemaProps,
-    'connectorId' | 'fields' | 'syncAlerts' | 'customFields'
+    'connectorId' | 'fields' | 'syncAlerts' | 'extractObservables' | 'customFields'
   >
 ) => {
   let formData = {
@@ -72,6 +72,7 @@ export const createFormDeserializer = (data: CasePostRequest): CaseFormFieldsSch
     connectorId: connector.id,
     fields: connector.fields,
     syncAlerts: settings.syncAlerts,
+    extractObservables: settings.extractObservables ?? false,
     customFields: customFieldsFormDeserializer(customFields) ?? {},
   };
 };
@@ -88,7 +89,14 @@ export const createFormSerializer = (
     });
   }
 
-  const { connectorId: dataConnectorId, fields, syncAlerts, customFields, ...restData } = data;
+  const {
+    connectorId: dataConnectorId,
+    fields,
+    syncAlerts,
+    extractObservables,
+    customFields,
+    ...restData
+  } = data;
 
   const serializedConnectorFields = getConnectorsFormSerializer({ fields });
   const caseConnector = getConnectorById(dataConnectorId, connectors);
@@ -106,7 +114,7 @@ export const createFormSerializer = (
   return {
     ...trimmedData,
     connector: connectorToUpdate,
-    settings: { syncAlerts: syncAlerts ?? false },
+    settings: { syncAlerts: syncAlerts ?? false, extractObservables: extractObservables ?? false },
     owner: currentConfiguration.owner,
     customFields: transformedCustomFields,
   };

@@ -34,6 +34,10 @@ export interface RemoteSyncedIntegrationsStatus extends RemoteSyncedIntegrations
 export interface RemoteSyncedCustomAssetsStatus extends BaseCustomAssetsData {
   sync_status: SyncStatus;
   error?: string;
+  warning?: {
+    title: string;
+    message?: string;
+  };
 }
 
 export interface RemoteSyncedCustomAssetsRecord {

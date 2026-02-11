@@ -36,7 +36,10 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
     // Installed
     if (dashboard.elastic_dashboard?.id) {
       return (
-        <EuiToolTip content={i18n.DASHBOARD_STATUS_INSTALLED}>
+        <EuiToolTip
+          data-test-subj="installedStatusTooltip"
+          content={i18n.DASHBOARD_STATUS_INSTALLED}
+        >
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiIcon type="check" color={colors[MigrationTranslationResult.FULL]} />
@@ -55,7 +58,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
         ? dashboard.comments[0].message
         : i18n.DASHBOARD_STATUS_FAILED;
       return (
-        <EuiToolTip content={tooltipMessage}>
+        <EuiToolTip data-test-subj="failedStatusTooltip" content={tooltipMessage}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiIcon type="warningFilled" color="danger" />
@@ -73,7 +76,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
     const color = colors[translationResult];
 
     return (
-      <EuiToolTip content={displayValue}>
+      <EuiToolTip data-test-subj="translationStatusTooltip" content={displayValue}>
         <EuiHealth color={color} data-test-subj={dataTestSubj}>
           <div className={statusTextWrapperClassName}>
             <span className="eui-textTruncate">{displayValue}</span>

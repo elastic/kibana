@@ -14,7 +14,7 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { BehaviorSubject } from 'rxjs';
 import { imageClickTrigger } from '../actions';
-import type { ImageEmbeddableApi } from '../image_embeddable/types';
+import type { ImageEmbeddableApi } from '../types';
 import type { FileImageMetadata, FilesClient } from '../imports';
 import { imageEmbeddableFileKind } from '../imports';
 import { coreServices, screenshotModeService, uiActionsService } from '../services/kibana_services';

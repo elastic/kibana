@@ -12,4 +12,5 @@ export default createTestConfig({
   junit: {
     reportName: 'Value Lists Integration Tests - Serverless Env - Complete Tier',
   },
+  indexRefreshInterval: '1s',
 });

@@ -4,12 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  ElasticsearchClient,
-  SavedObjectsClient,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import semverEq from 'semver/functions/eq';
 import semverGte from 'semver/functions/gte';
@@ -82,10 +77,9 @@ const getSyncedIntegrationsCCRDoc = async (
 };
 
 async function getSyncIntegrationsEnabled(
-  soClient: SavedObjectsClient,
   remoteEsHosts: SyncIntegrationsData['remote_es_hosts'] | undefined
 ): Promise<boolean> {
-  const outputs = await outputService.list(soClient);
+  const outputs = await outputService.list();
   const esHosts = outputs.items
     .filter((output) => output.type === 'elasticsearch')
     .flatMap((output) => output.hosts);
@@ -100,7 +94,12 @@ async function getSyncIntegrationsEnabled(
 
 async function installPackageIfNotInstalled(
   savedObjectsClient: SavedObjectsClientContract,
-  pkg: { package_name: string; package_version: string; install_source?: InstallSource },
+  pkg: {
+    package_name: string;
+    package_version: string;
+    install_source?: InstallSource;
+    rolled_back?: boolean;
+  },
   packageClient: PackageClient,
   logger: Logger,
   abortController: AbortController
@@ -108,7 +107,8 @@ async function installPackageIfNotInstalled(
   const installation = await packageClient.getInstallation(pkg.package_name);
   if (
     installation?.install_status === 'installed' &&
-    semverGte(installation.version, pkg.package_version)
+    semverGte(installation.version, pkg.package_version) &&
+    !pkg.rolled_back
   ) {
     logger.debug(`installPackageIfNotInstalled - ${pkg.package_name} already installed`);
     return;
@@ -141,6 +141,24 @@ async function installPackageIfNotInstalled(
       logger.debug(`installPackageIfNotInstalled - Max retry attempts reached`);
       return;
     }
+  }
+
+  try {
+    if (pkg.rolled_back) {
+      const rollbackResult = await packageClient.rollbackPackage({
+        pkgName: pkg.package_name,
+      });
+      if (rollbackResult.success) {
+        logger.info(
+          `Package ${pkg.package_name} rolled back to previous version ${rollbackResult.version}`
+        );
+      } else {
+        logger.warn(`Package ${pkg.package_name} rollback not successful`);
+      }
+      return;
+    }
+  } catch (error) {
+    logger.error(`Failed to rollback package ${pkg.package_name}, error: ${error}`);
   }
 
   try {
@@ -189,7 +207,7 @@ async function installPackageIfNotInstalled(
 
 async function uninstallPackageIfInstalled(
   esClient: ElasticsearchClient,
-  savedObjectsClient: SavedObjectsClient,
+  savedObjectsClient: SavedObjectsClientContract,
   pkg: { package_name: string; package_version: string },
   logger: Logger
 ) {
@@ -230,7 +248,7 @@ async function uninstallPackageIfInstalled(
 
 export const syncIntegrationsOnRemote = async (
   esClient: ElasticsearchClient,
-  soClient: SavedObjectsClient,
+  soClient: SavedObjectsClientContract,
   packageClient: PackageClient,
   abortController: AbortController,
   logger: Logger
@@ -238,7 +256,6 @@ export const syncIntegrationsOnRemote = async (
   const syncIntegrationsDoc = await getSyncedIntegrationsCCRDoc(esClient, abortController, logger);
 
   const isSyncIntegrationsEnabled = await getSyncIntegrationsEnabled(
-    soClient,
     syncIntegrationsDoc?.remote_es_hosts
   );
 

@@ -6,7 +6,7 @@
  */
 
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import { parse, walk, type ESQLColumn, type ESQLFunction } from '@kbn/esql-ast';
+import { parse, walk, type ESQLColumn, type ESQLFunction } from '@kbn/esql-language';
 import { i18n } from '@kbn/i18n';
 import { snakeCase } from 'lodash';
 

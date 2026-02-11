@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
 import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import type { MappingPropertyBase } from '@elastic/elasticsearch/lib/api/types';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 const KNOWLEDGE_BASE_MAPPINGS_QUERY_KEY = ['elastic-assistant', 'knowledge-base-mappings'];
 

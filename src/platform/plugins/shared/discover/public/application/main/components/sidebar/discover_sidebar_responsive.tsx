@@ -57,6 +57,7 @@ const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOpti
     compressed: true,
     showSidebarToggleButton: true,
     disableFieldsExistenceAutoFetching: true,
+    shouldKeepAdHocDataViewImmutable: true,
     buttonAddFieldVariant: 'toolbar',
     buttonAddFieldToWorkspaceProps: {
       'aria-label': i18n.translate('discover.fieldChooser.discoverField.addFieldTooltip', {
@@ -131,7 +132,10 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * callback to execute on edit runtime field
    */
-  onFieldEdited: (options?: { removedFieldName?: string }) => Promise<void>;
+  onFieldEdited: (options: {
+    editedDataView: DataView;
+    removedFieldName?: string;
+  }) => Promise<void>;
   /**
    * callback to execute on create dataview
    */
@@ -159,6 +163,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     useState<UnifiedFieldListSidebarContainerApi | null>(null);
   const { euiTheme } = useEuiTheme();
   const services = useDiscoverServices();
+  const chromeStyle = useObservable(services.core.chrome.getChromeStyle$(), 'classic');
   const isEsqlMode = useIsEsqlMode();
   const {
     fieldListVariant,
@@ -380,13 +385,33 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     [dispatch, setFieldListUiState]
   );
 
+  const fieldListExistingFieldsInfoUiState = useCurrentTabSelector(
+    (state) => state.uiState.fieldListExistingFieldsInfo
+  );
+  const setFieldListExistingFieldsInfoUiState = useCurrentTabAction(
+    internalStateActions.setFieldListExistingFieldsInfoUiState
+  );
+  const onInitialExistingFieldsInfoChange = useCallback(
+    (newUiState: UnifiedFieldListSidebarContainerProps['initialExistingFieldsInfo']) => {
+      dispatch(
+        setFieldListExistingFieldsInfoUiState({
+          fieldListExistingFieldsInfo: newUiState,
+        })
+      );
+    },
+    [dispatch, setFieldListExistingFieldsInfoUiState]
+  );
+
   return (
     <EuiFlexGroup
       gutterSize="none"
       css={css`
         height: 100%;
         display: ${isSidebarCollapsed ? 'none' : 'flex'};
-        background-color: ${euiTheme.colors.body};
+        // Make Discover's field list background distinguished for the "new chrome"
+        background-color: ${chromeStyle === 'project'
+          ? euiTheme.colors.backgroundBasePlain
+          : euiTheme.colors.body};
       `}
     >
       <EuiFlexItem>
@@ -412,6 +437,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             workspaceSelectedFieldNames={columns}
             initialState={fieldListUiState}
             onInitialStateChange={onInitialStateChange}
+            initialExistingFieldsInfo={fieldListExistingFieldsInfoUiState}
+            onInitialExistingFieldsInfoChange={onInitialExistingFieldsInfoChange}
           />
         ) : null}
       </EuiFlexItem>

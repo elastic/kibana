@@ -40,7 +40,6 @@
       "kibanaUtils",
       "lens",
       "maps",
-      "visualizations",
       "fieldFormats"
     ]
   }

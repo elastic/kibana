@@ -154,6 +154,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       status: CaseStatuses.open,
       tags: ['defacement'],
       observables: [],
+      total_observables: 0,
       updated_at: '2019-11-25T21:54:48.952Z',
       updated_by: {
         full_name: 'elastic',
@@ -162,6 +163,7 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
@@ -206,8 +208,10 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       observables: [],
+      total_observables: 0,
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
       category: null,
@@ -251,8 +255,10 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       observables: [],
+      total_observables: 0,
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
       category: null,
@@ -300,8 +306,10 @@ export const mockCases: CaseSavedObjectTransformed[] = [
       },
       settings: {
         syncAlerts: true,
+        extractObservables: true,
       },
       observables: [],
+      total_observables: 0,
       owner: SECURITY_SOLUTION_OWNER,
       assignees: [],
       category: null,
@@ -670,6 +678,7 @@ export const newCase: CasePostRequest = {
   },
   settings: {
     syncAlerts: true,
+    extractObservables: true,
   },
   owner: SECURITY_SOLUTION_OWNER,
 };
@@ -757,6 +766,17 @@ export const mockCasesContract = (): CasesServerStart => ({
       index: {
         enabled: true,
       },
+    },
+    incrementalId: {
+      enabled: true,
+      taskIntervalMinutes: 10,
+      taskStartDelayMinutes: 10,
+    },
+    templates: {
+      enabled: true,
+    },
+    attachments: {
+      enabled: true,
     },
   },
 });

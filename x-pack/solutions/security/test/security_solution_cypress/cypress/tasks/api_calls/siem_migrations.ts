@@ -8,12 +8,24 @@
 import { deleteAllDocuments } from './elasticsearch';
 
 const MIGRATION_INDEX_PREFIX = '.kibana-siem-rule-migrations';
+const DASHBOARDS_MIGRATION_INDEX_PREFIX = '.kibana-siem-dashboard-migrations';
 
 export const cleanMigrationData = () => {
   cy.currentSpace().then((spaceId = 'default') => {
     const migrationIndices = [
       `${MIGRATION_INDEX_PREFIX}-rules-${spaceId}`,
       `${MIGRATION_INDEX_PREFIX}-migrations-${spaceId}`,
+    ];
+
+    deleteAllDocuments(migrationIndices.join(','));
+  });
+};
+
+export const cleanDashboardsMigrationData = () => {
+  cy.currentSpace().then((spaceId = 'default') => {
+    const migrationIndices = [
+      `${DASHBOARDS_MIGRATION_INDEX_PREFIX}-dashboards-${spaceId}`,
+      `${DASHBOARDS_MIGRATION_INDEX_PREFIX}-migrations-${spaceId}`,
     ];
 
     deleteAllDocuments(migrationIndices.join(','));

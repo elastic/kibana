@@ -7,12 +7,26 @@
 
 import {
   ELSER_ON_ML_NODE_INFERENCE_ID,
+  ELSER_IN_EIS_INFERENCE_ID,
   LEGACY_CUSTOM_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
-export function getMappedInferenceId(currentInferenceId: string | undefined): string | undefined {
+export function getMappedInferenceId(
+  currentInferenceId: string | undefined,
+  availableEndpoints?: InferenceAPIConfigResponse[]
+): string | undefined {
   if (currentInferenceId === LEGACY_CUSTOM_INFERENCE_ID) {
     return ELSER_ON_ML_NODE_INFERENCE_ID;
   }
+
+  if (
+    currentInferenceId === ELSER_ON_ML_NODE_INFERENCE_ID &&
+    availableEndpoints?.some((ep) => ep.inference_id === ELSER_IN_EIS_INFERENCE_ID)
+  ) {
+    // Show ELSER in EIS in the UI when available
+    return ELSER_IN_EIS_INFERENCE_ID;
+  }
+
   return currentInferenceId;
 }

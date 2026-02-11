@@ -259,6 +259,8 @@ describe('rule_source', () => {
     payload.rule_source = {
       type: 'external',
       is_customized: true,
+      customized_fields: [{ field_name: 'name' }],
+      has_base_version: true,
     };
 
     const result = RuleResponse.safeParse(payload);

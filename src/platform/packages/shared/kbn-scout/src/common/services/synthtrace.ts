@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import Url from 'url';
-import type { SynthtraceClientTypes, GetClientsReturn } from '@kbn/apm-synthtrace';
-import { LogLevel, createLogger, SynthtraceClientsManager } from '@kbn/apm-synthtrace';
+import type { SynthtraceClientTypes, GetClientsReturn } from '@kbn/synthtrace';
+import { LogLevel, createLogger, SynthtraceClientsManager } from '@kbn/synthtrace';
 import type { Client } from '@elastic/elasticsearch';
 import type { ScoutLogger } from './logger';
 import type { ScoutTestConfig } from '../../types';
@@ -42,7 +42,8 @@ export async function getSynthtraceClient<
   TClient extends SynthtraceClientTypes = SynthtraceClientTypes
 >(
   synthClient: TClient,
-  { esClient, kbnUrl, log, config }: SynthtraceClientOptions
+  { esClient, kbnUrl, log, config }: SynthtraceClientOptions,
+  overrides: { skipInstallation?: boolean } = {}
 ): Promise<GetClientsReturn<TClient>> {
   if (instantiatedClients[synthClient]) {
     return instantiatedClients[synthClient] as unknown as GetClientsReturn<TClient>;
@@ -54,6 +55,7 @@ export async function getSynthtraceClient<
     client: esClient,
     logger: createLogger(LogLevel.info),
     refreshAfterIndex: true,
+    concurrency: 4, // set a default concurrency to allign with EsArchiver
   });
 
   const clients = clientManager.getClients({
@@ -68,8 +70,15 @@ export async function getSynthtraceClient<
 
   await clientManager.initFleetPackageForClient({
     clients,
-    skipInstallation: false,
+    skipInstallation: overrides.skipInstallation ?? false,
   });
+
+  if (overrides.skipInstallation) {
+    log.serviceMessage(
+      synthClient,
+      'Skipped fleet package installation because "overrides.skipInstallation" is true'
+    );
+  }
 
   log.serviceLoaded(synthClient);
 

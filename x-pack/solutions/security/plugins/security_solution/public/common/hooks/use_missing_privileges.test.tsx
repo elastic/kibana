@@ -8,8 +8,8 @@
 import { renderHook } from '@testing-library/react';
 import { useMissingPrivileges } from './use_missing_privileges';
 import { useUserPrivileges } from '../components/user_privileges';
-import { useUserData } from '../../detections/components/user_info';
-import { SECURITY_FEATURE_ID } from '../../../common';
+import { getUserPrivilegesMockDefaultValue } from '../components/user_privileges/__mocks__';
+import { RULES_FEATURE_ID } from '../../../common/constants';
 
 jest.mock('../components/user_privileges');
 jest.mock('../../detections/components/user_info');
@@ -32,6 +32,7 @@ const detectionEnginePrivileges = {
   is_authenticated: true,
   has_encryption_key: true,
 };
+
 const listPrivileges = {
   is_authenticated: true,
   lists: {
@@ -68,99 +69,111 @@ const listPrivileges = {
   },
 };
 
+type UseUserPrivilegesReturn = ReturnType<typeof useUserPrivileges>;
+
+const buildUseUserPrivilegesMockReturn = (
+  overrides: Partial<UseUserPrivilegesReturn> = {}
+): UseUserPrivilegesReturn => ({
+  ...getUserPrivilegesMockDefaultValue(),
+  detectionEnginePrivileges: {
+    // @ts-expect-error partial mock
+    result: detectionEnginePrivileges,
+  },
+  listPrivileges: {
+    // @ts-expect-error partial mock
+    result: listPrivileges,
+  },
+  ...overrides,
+});
+
 describe('useMissingPrivileges', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    (useUserPrivileges as jest.Mock).mockReturnValue(buildUseUserPrivilegesMockReturn());
   });
 
-  it('should return empty arrays if canUserCRUD is null', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
-      detectionEnginePrivileges: {
-        result: detectionEnginePrivileges,
-      },
-      listPrivileges: {
-        result: listPrivileges,
-      },
-    });
-    (useUserData as jest.Mock).mockReturnValue([{ canUserCRUD: null }]);
+  it('reports no privileges missing while detectionEnginePrivileges result is null', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue(
+      buildUseUserPrivilegesMockReturn({
+        detectionEnginePrivileges: {
+          // @ts-expect-error partial mock
+          result: null,
+        },
+      })
+    );
 
     const hookResult = renderHook(() => useMissingPrivileges());
-
     expect(hookResult.result.current).toEqual({
       featurePrivileges: [],
       indexPrivileges: [],
     });
   });
 
-  it('should return empty arrays if detectionEnginePrivileges result is null', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
-      detectionEnginePrivileges: {
-        result: null,
-      },
-      listPrivileges: {
-        result: listPrivileges,
-      },
-    });
-    (useUserData as jest.Mock).mockReturnValue([{ canUserCRUD: true }]);
+  it('reports missing rulesPrivileges if user cannot edit rules', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue(
+      buildUseUserPrivilegesMockReturn({
+        rulesPrivileges: {
+          rules: { edit: false, read: true },
+          exceptions: { edit: false, read: true },
+        },
+      })
+    );
 
     const hookResult = renderHook(() => useMissingPrivileges());
 
+    expect(hookResult.result.current).toEqual(
+      expect.objectContaining({
+        featurePrivileges: expect.arrayContaining([[RULES_FEATURE_ID, ['all']]]),
+      })
+    );
+  });
+
+  it('reports no privileges missing while listPrivileges result is null', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue(
+      buildUseUserPrivilegesMockReturn({
+        listPrivileges: {
+          // @ts-expect-error partial mock
+          result: null,
+        },
+      })
+    );
+
+    const hookResult = renderHook(() => useMissingPrivileges());
     expect(hookResult.result.current).toEqual({
       featurePrivileges: [],
       indexPrivileges: [],
     });
   });
 
-  it('should return empty arrays if listPrivileges result is null', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
-      detectionEnginePrivileges: {
-        result: detectionEnginePrivileges,
-      },
-      listPrivileges: {
-        result: null,
-      },
-    });
-    (useUserData as jest.Mock).mockReturnValue([{ canUserCRUD: true }]);
+  it('reports missing "all" privilege for security if user does not have CRUD', () => {
+    const hookResult = renderHook(() => useMissingPrivileges());
 
+    expect(hookResult.result.current.featurePrivileges).toEqual(
+      expect.arrayContaining([[RULES_FEATURE_ID, ['all']]])
+    );
+  });
+
+  it('reports no missing rule privileges if user can edit rules', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue(
+      buildUseUserPrivilegesMockReturn({
+        rulesPrivileges: {
+          rules: { edit: true, read: true },
+          exceptions: { edit: true, read: true },
+        },
+      })
+    );
+
+    const hookResult = renderHook(() => useMissingPrivileges());
+
+    expect(hookResult.result.current.featurePrivileges).toEqual([]);
+  });
+
+  it('reports complex index privileges when all data is available', () => {
     const hookResult = renderHook(() => useMissingPrivileges());
 
     expect(hookResult.result.current).toEqual({
-      featurePrivileges: [],
-      indexPrivileges: [],
-    });
-  });
-
-  it('should return featurePrivileges security feature all if user does not have CRUD', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
-      detectionEnginePrivileges: {
-        result: detectionEnginePrivileges,
-      },
-      listPrivileges: {
-        result: listPrivileges,
-      },
-    });
-    (useUserData as jest.Mock).mockReturnValue([{ canUserCRUD: false }]);
-
-    const hookResult = renderHook(() => useMissingPrivileges());
-
-    expect(hookResult.result.current.featurePrivileges).toEqual([[SECURITY_FEATURE_ID, ['all']]]);
-  });
-
-  it('should return featurePrivileges and indexPrivileges', () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
-      detectionEnginePrivileges: {
-        result: detectionEnginePrivileges,
-      },
-      listPrivileges: {
-        result: listPrivileges,
-      },
-    });
-    (useUserData as jest.Mock).mockReturnValue([{ canUserCRUD: true }]);
-
-    const hookResult = renderHook(() => useMissingPrivileges());
-
-    expect(hookResult.result.current).toEqual({
-      featurePrivileges: [],
+      featurePrivileges: [[RULES_FEATURE_ID, ['all']]],
       indexPrivileges: [
         ['.items-default', ['view_index_metadata', 'manage']],
         ['.lists-default', ['view_index_metadata', 'manage']],

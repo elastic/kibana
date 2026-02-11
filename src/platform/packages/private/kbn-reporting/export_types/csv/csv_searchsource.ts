@@ -72,7 +72,7 @@ export class CsvSearchSourceExportType extends ExportType<
     cancellationToken,
     stream,
   }: RunTaskOpts<TaskPayloadCSV>) => {
-    const logger = this.logger.get(`execute-job:${jobId}`);
+    const logger = this.logger.get('execute-job');
 
     const { csv: csvConfig } = this.config;
 
@@ -101,7 +101,9 @@ export class CsvSearchSourceExportType extends ExportType<
       dependencies,
       cancellationToken,
       logger,
-      stream
+      stream,
+      this.isServerless,
+      jobId
     );
     return await csv.generateData();
   };

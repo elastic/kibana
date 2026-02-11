@@ -420,4 +420,631 @@ describe('Map rules params with flyout', () => {
       expect(mapRuleParamsWithFlyout(alert as unknown as TopAlert)).toMatchObject(results);
     }
   );
+
+  describe('Warning thresholds', () => {
+    describe('METRIC_THRESHOLD_ALERT_TYPE_ID', () => {
+      it('should include warningThreshold and warningComparator when provided', () => {
+        const alert = {
+          fields: {
+            'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
+            'kibana.alert.rule.parameters': {
+              criteria: [
+                {
+                  aggType: 'avg',
+                  comparator: '>',
+                  threshold: [0.8],
+                  warningThreshold: [0.5],
+                  warningComparator: '>',
+                  timeSize: 1,
+                  timeUnit: 'm',
+                  metric: 'system.process.cpu.total.pct',
+                },
+              ],
+            },
+            'kibana.alert.evaluation.value': [0.95],
+            'kibana.alert.evaluation.threshold': 0.8,
+          },
+        };
+
+        const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+        expect(result).toMatchObject([
+          {
+            observedValue: '95%',
+            threshold: '80%',
+            comparator: '>',
+            warningThreshold: '50%',
+            warningComparator: '>',
+          },
+        ]);
+      });
+
+      it('should not include warningThreshold when only warningComparator is provided', () => {
+        const alert = {
+          fields: {
+            'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
+            'kibana.alert.rule.parameters': {
+              criteria: [
+                {
+                  aggType: 'avg',
+                  comparator: '>',
+                  threshold: [0.8],
+                  warningComparator: '>',
+                  timeSize: 1,
+                  timeUnit: 'm',
+                  metric: 'system.process.cpu.total.pct',
+                },
+              ],
+            },
+            'kibana.alert.evaluation.value': [0.95],
+            'kibana.alert.evaluation.threshold': 0.8,
+          },
+        };
+
+        const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+        expect(result?.[0]).not.toHaveProperty('warningThreshold');
+        expect(result?.[0]).not.toHaveProperty('warningComparator');
+      });
+
+      it('should handle warningThreshold with customMetrics', () => {
+        const alert = {
+          fields: {
+            'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
+            'kibana.alert.rule.parameters': {
+              criteria: [
+                {
+                  aggType: 'custom',
+                  comparator: '>',
+                  threshold: [1000000],
+                  warningThreshold: [500000],
+                  warningComparator: '>',
+                  timeSize: 1,
+                  timeUnit: 'm',
+                  customMetrics: [
+                    {
+                      name: 'A',
+                      field: 'system.memory.used.bytes',
+                      aggType: 'avg',
+                    },
+                  ],
+                },
+              ],
+            },
+            'kibana.alert.evaluation.value': [2000000],
+            'kibana.alert.evaluation.threshold': 1000000,
+          },
+        };
+
+        const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+        expect(result).toMatchObject([
+          {
+            observedValue: expect.any(String),
+            threshold: expect.any(String),
+            comparator: '>',
+            warningThreshold: expect.any(String),
+            warningComparator: '>',
+          },
+        ]);
+        expect(result?.[0].warningThreshold).toBeTruthy();
+      });
+    });
+
+    describe('METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID', () => {
+      it('should include warningThreshold and warningComparator with customMetric.field', () => {
+        const alert = {
+          fields: {
+            'kibana.alert.rule.rule_type_id': 'metrics.alert.inventory.threshold',
+            'kibana.alert.rule.parameters': {
+              nodeType: 'host',
+              criteria: [
+                {
+                  metric: 'cpu',
+                  comparator: '>',
+                  threshold: [80],
+                  warningThreshold: [60],
+                  warningComparator: '>',
+                  timeSize: 1,
+                  timeUnit: 'm',
+                  customMetric: {
+                    type: 'custom',
+                    id: 'alert-custom-metric',
+                    field: 'system.cpu.user.pct',
+                    aggregation: 'avg',
+                  },
+                },
+              ],
+              sourceId: 'default',
+            },
+            'kibana.alert.evaluation.value': [90],
+            'kibana.alert.evaluation.threshold': 80,
+          },
+        };
+
+        const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+        expect(result).toMatchObject([
+          {
+            observedValue: expect.any(String),
+            threshold: expect.any(String),
+            comparator: '>',
+            warningThreshold: expect.any(String),
+            warningComparator: '>',
+            pctAboveThreshold: expect.any(String),
+          },
+        ]);
+        expect(result?.[0].warningThreshold).toBeTruthy();
+        expect(result?.[0].warningComparator).toBe('>');
+      });
+
+      it('should include warningThreshold and warningComparator without customMetric.field (using formatter)', () => {
+        const alert = {
+          fields: {
+            'kibana.alert.rule.rule_type_id': 'metrics.alert.inventory.threshold',
+            'kibana.alert.rule.parameters': {
+              nodeType: 'host',
+              criteria: [
+                {
+                  metric: 'rx',
+                  comparator: '>',
+                  threshold: [3000000],
+                  warningThreshold: [2000000],
+                  warningComparator: '>',
+                  timeSize: 1,
+                  timeUnit: 'm',
+                  customMetric: {
+                    type: 'custom',
+                    id: 'alert-custom-metric',
+                    field: '',
+                    aggregation: 'avg',
+                  },
+                },
+              ],
+              sourceId: 'default',
+            },
+            'kibana.alert.evaluation.value': [4000000],
+            'kibana.alert.evaluation.threshold': 3000000,
+          },
+        };
+
+        const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+        expect(result).toMatchObject([
+          {
+            observedValue: expect.any(String),
+            threshold: expect.any(String),
+            comparator: '>',
+            warningThreshold: expect.any(String),
+            warningComparator: '>',
+            pctAboveThreshold: expect.any(String),
+          },
+        ]);
+        // Warning threshold should be formatted using the same formatter as critical threshold
+        expect(result?.[0].warningThreshold).toBeTruthy();
+        expect(result?.[0].warningThreshold).toContain('Mbit'); // Should be formatted as bits
+      });
+
+      it('should not include warningThreshold when only warningComparator is provided', () => {
+        const alert = {
+          fields: {
+            'kibana.alert.rule.rule_type_id': 'metrics.alert.inventory.threshold',
+            'kibana.alert.rule.parameters': {
+              nodeType: 'host',
+              criteria: [
+                {
+                  metric: 'cpu',
+                  comparator: '>',
+                  threshold: [80],
+                  warningComparator: '>',
+                  timeSize: 1,
+                  timeUnit: 'm',
+                  customMetric: {
+                    type: 'custom',
+                    id: 'alert-custom-metric',
+                    field: 'system.cpu.user.pct',
+                    aggregation: 'avg',
+                  },
+                },
+              ],
+              sourceId: 'default',
+            },
+            'kibana.alert.evaluation.value': [90],
+            'kibana.alert.evaluation.threshold': 80,
+          },
+        };
+
+        const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+        expect(result?.[0]).not.toHaveProperty('warningThreshold');
+        expect(result?.[0]).not.toHaveProperty('warningComparator');
+      });
+
+      it('should handle warningThreshold with percent metric type', () => {
+        const alert = {
+          fields: {
+            'kibana.alert.rule.rule_type_id': 'metrics.alert.inventory.threshold',
+            'kibana.alert.rule.parameters': {
+              nodeType: 'host',
+              criteria: [
+                {
+                  metric: 'cpu',
+                  comparator: '>',
+                  threshold: [8000], // 80% stored as 8000
+                  warningThreshold: [6000], // 60% stored as 6000
+                  warningComparator: '>',
+                  timeSize: 1,
+                  timeUnit: 'm',
+                  customMetric: {
+                    type: 'custom',
+                    id: 'alert-custom-metric',
+                    field: '',
+                    aggregation: 'avg',
+                  },
+                },
+              ],
+              sourceId: 'default',
+            },
+            'kibana.alert.evaluation.value': [9000], // 90% stored as 9000
+            'kibana.alert.evaluation.threshold': 8000,
+          },
+        };
+
+        const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+        expect(result?.[0].warningThreshold).toBeTruthy();
+        // The threshold should be converted from 6000 (60%) to 60 and formatted
+        expect(result?.[0].warningThreshold).toContain('%');
+      });
+    });
+  });
+
+  describe('isFieldsSameType logic', () => {
+    describe('OBSERVABILITY_THRESHOLD_RULE_TYPE_ID', () => {
+      it('should use first field type when all metrics have same field type', () => {
+        const alert = {
+          fields: {
+            'kibana.alert.rule.rule_type_id': 'observability.rules.custom_threshold',
+            'kibana.alert.rule.parameters': {
+              criteria: [
+                {
+                  comparator: '>',
+                  metrics: [
+                    {
+                      name: 'A',
+                      field: 'system.memory.used.bytes',
+                      aggType: 'avg',
+                    },
+                    {
+                      name: 'B',
+                      field: 'system.memory.free.bytes',
+                      aggType: 'avg',
+                    },
+                  ],
+                  threshold: [1000000000],
+                  timeSize: 1,
+                  timeUnit: 'm',
+                },
+              ],
+            },
+            'kibana.alert.evaluation.values': [1500000000],
+            'kibana.alert.evaluation.threshold': 1000000000,
+          },
+        };
+
+        const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+        expect(result?.[0].observedValue).toBeTruthy();
+        expect(result?.[0].threshold).toBeTruthy();
+        // Both fields end with .bytes, so they should use the same formatting
+        expect(result?.[0].observedValue).toContain('B'); // Should be formatted as bytes
+      });
+
+      it('should use noType when metrics have different field types', () => {
+        const alert = {
+          fields: {
+            'kibana.alert.rule.rule_type_id': 'observability.rules.custom_threshold',
+            'kibana.alert.rule.parameters': {
+              criteria: [
+                {
+                  comparator: '>',
+                  metrics: [
+                    {
+                      name: 'A',
+                      field: 'system.memory.used.bytes',
+                      aggType: 'avg',
+                    },
+                    {
+                      name: 'B',
+                      field: 'system.cpu.user.pct',
+                      aggType: 'avg',
+                    },
+                  ],
+                  threshold: [1000000000],
+                  timeSize: 1,
+                  timeUnit: 'm',
+                },
+              ],
+            },
+            'kibana.alert.evaluation.values': [1500000000],
+            'kibana.alert.evaluation.threshold': 1000000000,
+          },
+        };
+
+        const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+        expect(result?.[0].observedValue).toBeTruthy();
+        expect(result?.[0].threshold).toBeTruthy();
+        // Different field types should use 'noType' formatting
+      });
+
+      it('should handle COUNT_AGG fields correctly', () => {
+        const alert = {
+          fields: {
+            'kibana.alert.rule.rule_type_id': 'observability.rules.custom_threshold',
+            'kibana.alert.rule.parameters': {
+              criteria: [
+                {
+                  comparator: '>',
+                  metrics: [
+                    {
+                      name: 'A',
+                      aggType: 'count',
+                    },
+                    {
+                      name: 'B',
+                      field: 'system.memory.used.bytes',
+                      aggType: 'avg',
+                    },
+                  ],
+                  threshold: [100],
+                  timeSize: 1,
+                  timeUnit: 'm',
+                },
+              ],
+            },
+            'kibana.alert.evaluation.values': [150],
+            'kibana.alert.evaluation.threshold': 100,
+          },
+        };
+
+        const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+        expect(result?.[0].observedValue).toBeTruthy();
+        expect(result?.[0].threshold).toBeTruthy();
+      });
+    });
+
+    describe('METRIC_THRESHOLD_ALERT_TYPE_ID', () => {
+      it('should use first field type when all customMetrics have same field type', () => {
+        const alert = {
+          fields: {
+            'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
+            'kibana.alert.rule.parameters': {
+              criteria: [
+                {
+                  aggType: 'custom',
+                  comparator: '>',
+                  threshold: [1000000],
+                  timeSize: 1,
+                  timeUnit: 'm',
+                  customMetrics: [
+                    {
+                      name: 'A',
+                      field: 'system.memory.used.bytes',
+                      aggType: 'avg',
+                    },
+                    {
+                      name: 'B',
+                      field: 'system.memory.free.bytes',
+                      aggType: 'avg',
+                    },
+                  ],
+                },
+              ],
+            },
+            'kibana.alert.evaluation.value': [2000000],
+            'kibana.alert.evaluation.threshold': 1000000,
+          },
+        };
+
+        const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+        expect(result?.[0].observedValue).toBeTruthy();
+        expect(result?.[0].threshold).toBeTruthy();
+      });
+
+      it('should use noType when customMetrics have different field types', () => {
+        const alert = {
+          fields: {
+            'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
+            'kibana.alert.rule.parameters': {
+              criteria: [
+                {
+                  aggType: 'custom',
+                  comparator: '>',
+                  threshold: [1000000],
+                  timeSize: 1,
+                  timeUnit: 'm',
+                  customMetrics: [
+                    {
+                      name: 'A',
+                      field: 'system.memory.used.bytes',
+                      aggType: 'avg',
+                    },
+                    {
+                      name: 'B',
+                      field: 'system.cpu.user.pct',
+                      aggType: 'avg',
+                    },
+                  ],
+                },
+              ],
+            },
+            'kibana.alert.evaluation.value': [2000000],
+            'kibana.alert.evaluation.threshold': 1000000,
+          },
+        };
+
+        const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+        expect(result?.[0].observedValue).toBeTruthy();
+        expect(result?.[0].threshold).toBeTruthy();
+      });
+
+      it('should handle single metric field correctly', () => {
+        const alert = {
+          fields: {
+            'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
+            'kibana.alert.rule.parameters': {
+              criteria: [
+                {
+                  aggType: 'avg',
+                  comparator: '>',
+                  threshold: [0.8],
+                  timeSize: 1,
+                  timeUnit: 'm',
+                  metric: 'system.process.cpu.total.pct',
+                },
+              ],
+            },
+            'kibana.alert.evaluation.value': [0.95],
+            'kibana.alert.evaluation.threshold': 0.8,
+          },
+        };
+
+        const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+        expect(result?.[0].observedValue).toBeTruthy();
+        expect(result?.[0].observedValue).toContain('%'); // Should be formatted as percent
+      });
+    });
+  });
+
+  describe('Edge cases and error scenarios', () => {
+    it('should return undefined when ruleParams is missing', () => {
+      const alert = {
+        fields: {
+          'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
+          'kibana.alert.evaluation.value': [0.95],
+        },
+      };
+
+      const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle multiple observedValues with array criteria', () => {
+      const alert = {
+        fields: {
+          'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
+          'kibana.alert.rule.parameters': {
+            criteria: [
+              {
+                aggType: 'avg',
+                comparator: '>',
+                threshold: [0.8],
+                timeSize: 1,
+                timeUnit: 'm',
+                metric: 'system.process.cpu.total.pct',
+              },
+              {
+                aggType: 'avg',
+                comparator: '>',
+                threshold: [0.5],
+                timeSize: 1,
+                timeUnit: 'm',
+                metric: 'system.memory.used.pct',
+              },
+            ],
+          },
+          'kibana.alert.evaluation.values': [0.95, 0.6],
+          'kibana.alert.evaluation.threshold': 0.8,
+        },
+      };
+
+      const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+      expect(result).toHaveLength(2);
+      expect(result?.[0]).toBeTruthy();
+      expect(result?.[1]).toBeTruthy();
+    });
+
+    it('should handle non-array criteria for METRIC_THRESHOLD_ALERT_TYPE_ID', () => {
+      const alert = {
+        fields: {
+          'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
+          'kibana.alert.rule.parameters': {
+            criteria: {
+              aggType: 'avg',
+              comparator: '>',
+              threshold: [0.8],
+              timeSize: 1,
+              timeUnit: 'm',
+              metric: 'system.process.cpu.total.pct',
+            },
+          },
+          'kibana.alert.evaluation.value': [0.95],
+          'kibana.alert.evaluation.threshold': 0.8,
+        },
+      };
+
+      const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+      expect(result).toBeTruthy();
+      expect(result?.[0]).toBeTruthy();
+    });
+
+    it('should handle unknown rule type by returning empty array', () => {
+      const alert = {
+        fields: {
+          'kibana.alert.rule.rule_type_id': 'unknown.rule.type',
+          'kibana.alert.rule.parameters': {
+            criteria: [],
+          },
+          'kibana.alert.evaluation.value': [100],
+        },
+      };
+
+      const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+      expect(result).toEqual([]);
+    });
+
+    it('should handle threshold arrays with multiple values', () => {
+      const alert = {
+        fields: {
+          'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
+          'kibana.alert.rule.parameters': {
+            criteria: [
+              {
+                aggType: 'avg',
+                comparator: 'between',
+                threshold: [0.5, 0.8],
+                timeSize: 1,
+                timeUnit: 'm',
+                metric: 'system.process.cpu.total.pct',
+              },
+            ],
+          },
+          'kibana.alert.evaluation.value': [0.65],
+          'kibana.alert.evaluation.threshold': [0.5, 0.8],
+        },
+      };
+
+      const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+      expect(result?.[0].threshold).toContain('AND'); // Multiple thresholds should be joined with AND
+    });
+
+    it('should handle warningThreshold with multiple values', () => {
+      const alert = {
+        fields: {
+          'kibana.alert.rule.rule_type_id': 'metrics.alert.threshold',
+          'kibana.alert.rule.parameters': {
+            criteria: [
+              {
+                aggType: 'avg',
+                comparator: '>',
+                threshold: [0.8],
+                warningThreshold: [0.5, 0.7],
+                warningComparator: 'between',
+                timeSize: 1,
+                timeUnit: 'm',
+                metric: 'system.process.cpu.total.pct',
+              },
+            ],
+          },
+          'kibana.alert.evaluation.value': [0.95],
+          'kibana.alert.evaluation.threshold': 0.8,
+        },
+      };
+
+      const result = mapRuleParamsWithFlyout(alert as unknown as TopAlert);
+      expect(result?.[0].warningThreshold).toContain('AND'); // Multiple thresholds should be joined with AND
+    });
+  });
 });

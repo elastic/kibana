@@ -1,0 +1,45 @@
+{
+  "id": "@kbn/core-data-streams-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-data-streams-server-internal",
+        "id": "def-server.DataStreamsConfigType",
+        "type": "Type",
+        "tags": [],
+        "label": "DataStreamsConfigType",
+        "description": [],
+        "signature": [
+          "{ readonly migrations: Readonly<{} & { skip: boolean; }>; }"
+        ],
+        "path": "src/core/packages/data-streams/server-internal/src/config.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

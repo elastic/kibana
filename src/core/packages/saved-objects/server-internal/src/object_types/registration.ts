@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
-import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import {
   LEGACY_URL_ALIAS_TYPE,
   type LegacyUrlAlias,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { ISavedObjectTypeRegistryInternal } from '@kbn/core-saved-objects-base-server-internal';
 
 const legacyUrlAliasType: SavedObjectsType = {
   name: LEGACY_URL_ALIAS_TYPE,
@@ -47,8 +47,6 @@ const legacyUrlAliasType: SavedObjectsType = {
 /**
  * @internal
  */
-export function registerCoreObjectTypes(
-  typeRegistry: ISavedObjectTypeRegistry & Pick<SavedObjectTypeRegistry, 'registerType'>
-) {
+export function registerCoreObjectTypes(typeRegistry: ISavedObjectTypeRegistryInternal) {
   typeRegistry.registerType(legacyUrlAliasType);
 }

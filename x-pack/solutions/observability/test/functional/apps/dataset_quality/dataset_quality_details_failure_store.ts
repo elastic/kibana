@@ -12,7 +12,7 @@
  */
 
 import expect from '@kbn/expect';
-import { IndexTemplateName } from '@kbn/apm-synthtrace/src/lib/logs/custom_logsdb_index_templates';
+import { IndexTemplateName } from '@kbn/synthtrace/src/lib/logs/custom_logsdb_index_templates';
 import type { DatasetQualityFtrProviderContext } from './config';
 import {
   createFailedLogRecord,

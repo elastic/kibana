@@ -11,6 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import type { EuiTableSortingType, EuiSelectableOption } from '@elastic/eui';
 import {
+  getRulesAppDetailsRoute,
+  rulesAppRoute,
+  triggersActionsRoute,
+} from '@kbn/rule-data-utils/src/routes/stack_rule_paths';
+import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
@@ -32,6 +37,8 @@ import {
   parseDuration,
   MONITORING_HISTORY_LIMIT,
 } from '@kbn/alerting-plugin/common';
+
+import { getRouterLinkProps } from '@kbn/router-utils';
 
 import {
   SELECT_ALL_RULES,
@@ -169,6 +176,7 @@ export function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): Ru
         (canExecuteActions || (!canExecuteActions && !rule.actions.length)),
       enabledInLicense: !!ruleTypeIndex.get(rule.ruleTypeId)?.enabledInLicense,
       showIntervalWarning: parseDuration(rule.schedule.interval) < minimumDuration,
+      isInternallyManaged: ruleTypeIndex.get(rule.ruleTypeId)!.isInternallyManaged,
     };
   });
 }
@@ -245,6 +253,8 @@ export const RulesListTable = (props: RulesListTableProps) => {
 
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const { euiTheme } = useEuiTheme();
+
+  // Detect current app to determine the correct path format
 
   const ruleRowCss = css`
     .actRulesList__tableRowDisabled {
@@ -373,9 +383,16 @@ export const RulesListTable = (props: RulesListTableProps) => {
           <EuiCheckbox
             id={`ruleListTable_select_${rule.id}}`}
             onChange={() => onSelectRow(rule)}
-            disabled={!rule.isEditable}
+            disabled={!rule.isEditable || rule.isInternallyManaged}
             checked={isRowSelected(rule)}
             data-test-subj={`checkboxSelectRow-${rule.id}`}
+            aria-label={i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.selectRuleCheckbox',
+              {
+                defaultMessage: 'Select rule {ruleName}',
+                values: { ruleName: rule.name },
+              }
+            )}
           />
         );
       },
@@ -405,13 +422,24 @@ export const RulesListTable = (props: RulesListTableProps) => {
         render: (name: string, rule: RuleTableItem) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
           const checkEnabledResult = checkRuleTypeEnabled(ruleType);
+          const pathToRuleDetails = `${
+            getIsExperimentalFeatureEnabled('unifiedRulesPage')
+              ? rulesAppRoute
+              : triggersActionsRoute
+          }${getRulesAppDetailsRoute(rule.id)}`;
+
+          const linkProps = getRouterLinkProps({
+            href: pathToRuleDetails,
+            onClick: () => onRuleClick(rule),
+          });
+
           const link = (
             <>
               <EuiFlexGroup direction="column" gutterSize="xs">
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      <EuiLink title={name} onClick={() => onRuleClick(rule)}>
+                      <EuiLink title={name} {...linkProps}>
                         {name}
                       </EuiLink>
                     </EuiFlexItem>
@@ -560,7 +588,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                   await onSnoozeRule(rule, snoozeSchedule);
                 }}
                 unsnoozeRule={async (scheduleIds) => await onUnsnoozeRule(rule, scheduleIds)}
-                isRuleEditable={rule.isEditable}
+                isRuleEditable={rule.isEditable && !rule.isInternallyManaged}
               />
             </div>
           );
@@ -794,7 +822,9 @@ export const RulesListTable = (props: RulesListTableProps) => {
             >
               <EuiFlexItem grow={false} className="ruleSidebarItem">
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
-                  {rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId) ? (
+                  {rule.isEditable &&
+                  isRuleTypeEditableInContext(rule.ruleTypeId) &&
+                  !rule.isInternallyManaged ? (
                     <EuiFlexItem grow={false} data-test-subj="ruleSidebarEditAction">
                       <EuiButtonIcon
                         color={'primary'}
@@ -815,7 +845,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
                       />
                     </EuiFlexItem>
                   ) : null}
-                  {rule.isEditable ? (
+                  {rule.isEditable && !rule.isInternallyManaged ? (
                     <EuiFlexItem grow={false} data-test-subj="ruleSidebarDeleteAction">
                       <EuiButtonIcon
                         color={'danger'}
@@ -904,7 +934,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     (rule: RuleTableItem) => {
       const selectedClass = isRowSelected(rule) ? 'euiTableRow-isSelected' : '';
       return {
-        'data-test-subj': 'rule-row',
+        'data-test-subj': `rule-row${rule.isEditable ? '' : '-isNotEditable'}`,
         className: !ruleTypesState.data.get(rule.ruleTypeId)?.enabledInLicense
           ? `actRulesList__tableRowDisabled ${selectedClass}`
           : selectedClass,
@@ -984,6 +1014,12 @@ export const RulesListTable = (props: RulesListTableProps) => {
       </EuiFlexGroup>
       <EuiFlexItem>
         <EuiBasicTable
+          tableCaption={i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.rulesListTable.description',
+            {
+              defaultMessage: 'Displays rule list data',
+            }
+          )}
           loading={isLoading}
           /* Don't display rules until we have the rule types initialized */
           items={items}

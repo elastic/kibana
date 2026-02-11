@@ -26,7 +26,7 @@ import type {
   FramePublicAPI,
   OperationDescriptor,
   UserMessage,
-} from '../../types';
+} from '@kbn/lens-common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 

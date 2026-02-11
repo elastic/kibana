@@ -112,6 +112,7 @@ export const SourceSelection: FC = () => {
           {isCcsCallOut && (
             <>
               <EuiCallOut
+                announceOnMount
                 data-test-subj="analyticsCreateSourceIndexModalCcsErrorCallOut"
                 title={i18n.translate(
                   'xpack.ml.dataFrame.analytics.create.searchSelection.CcsErrorCallOutTitle',

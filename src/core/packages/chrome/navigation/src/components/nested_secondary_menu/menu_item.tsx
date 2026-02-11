@@ -7,59 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IconType } from '@elastic/eui';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import React from 'react';
 import type { ComponentProps, FC, ReactNode } from 'react';
-import React, { useCallback } from 'react';
-import { css } from '@emotion/react';
+import type { IconType } from '@elastic/eui';
 
 import { SecondaryMenu } from '../secondary_menu';
-import { useNestedMenu } from './use_nested_menu';
+import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
 export interface ItemProps
   extends Omit<ComponentProps<typeof SecondaryMenu.Item>, 'isHighlighted' | 'href'> {
   children: ReactNode;
-  hasSubmenu?: boolean;
   href?: string;
   iconType?: IconType;
   isHighlighted?: boolean;
   isCurrent?: boolean;
   onClick?: () => void;
-  submenuPanelId?: string;
 }
 
 export const Item: FC<ItemProps> = ({
   children,
-  hasSubmenu = false,
   href,
   id,
   isHighlighted = false,
   isCurrent,
-  onClick,
-  submenuPanelId,
   ...props
 }) => {
-  const { goToPanel } = useNestedMenu();
-  const { euiTheme } = useEuiTheme();
-
-  const itemStyle = css`
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-  `;
-
-  const arrowStyle = css`
-    margin-left: ${euiTheme.size.xs};
-    opacity: 0.6;
-  `;
-
-  const handleClick = useCallback(() => {
-    onClick?.();
-    if (hasSubmenu && submenuPanelId) {
-      goToPanel(submenuPanelId);
-    }
-  }, [onClick, hasSubmenu, submenuPanelId, goToPanel]);
+  const nestedMenuItemTestSubjPrefix = `${NAVIGATION_SELECTOR_PREFIX}-nestedMenuItem`;
 
   return (
     <SecondaryMenu.Item
@@ -67,24 +40,11 @@ export const Item: FC<ItemProps> = ({
       href={href || ''}
       isHighlighted={isHighlighted}
       isCurrent={isCurrent}
-      onClick={handleClick}
       {...props}
       key={`nested-item-${id}`}
-      testSubjPrefix="nestedMenuItem"
+      testSubjPrefix={nestedMenuItemTestSubjPrefix}
     >
-      <div css={itemStyle}>
-        <span>{children}</span>
-        {hasSubmenu && (
-          <EuiButtonIcon
-            aria-label={`${children} has submenu`}
-            color="text"
-            css={arrowStyle}
-            display="empty"
-            iconType="arrowRight"
-            size="xs"
-          />
-        )}
-      </div>
+      {children}
     </SecondaryMenu.Item>
   );
 };

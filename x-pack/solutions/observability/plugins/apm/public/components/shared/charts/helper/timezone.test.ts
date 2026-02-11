@@ -15,6 +15,7 @@ describe('Timezone helper', () => {
   const max = new Date('Wed Jan 29 2020 07:12:00 GMT+0100').valueOf();
 
   afterAll(() => {
+    // @ts-expect-error upgrade typescript v5.9.3
     moment.tz.setDefault(originalTimezone ? originalTimezone.name : '');
   });
   describe('getTimeTicksTZ', () => {

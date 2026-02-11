@@ -32,7 +32,7 @@ export const CONTENT_TEST_ID = 'alert-summary-content';
 
 export interface WrapperProps {
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   packages: PackageListItem[];
 }

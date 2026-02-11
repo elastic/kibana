@@ -120,6 +120,12 @@ export const DataViewsTable: FC<Props> = ({ matchingDataViews, moduleId, jobsLen
       })}
       pagination={true}
       sorting={sorting}
+      tableCaption={i18n.translate(
+        'xpack.ml.anomalyDetection.suppliedConfigurationsFlyout.matchedDataViewsTableCaption',
+        {
+          defaultMessage: 'Data views that match the supplied configuration',
+        }
+      )}
     />
   );
 };

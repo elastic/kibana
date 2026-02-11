@@ -60,6 +60,7 @@ export const ReactUse = {
   useLocalStorage: require('react-use/lib/useLocalStorage'),
   useMount: require('react-use/lib/useMount'),
   useMountedState: require('react-use/lib/useMountedState'),
+  useObservable: require('react-use/lib/useObservable'),
   usePrevious: require('react-use/lib/usePrevious'),
   useSessionStorage: require('react-use/lib/useSessionStorage'),
   useTimeoutFn: require('react-use/lib/useTimeoutFn'),
@@ -104,15 +105,18 @@ export const KbnSharedUxErrorBoundary = require('@kbn/shared-ux-error-boundary')
 export const KbnRison = require('@kbn/rison');
 export const History = require('history');
 export const Classnames = require('classnames');
-export const ReactQuery = require('@tanstack/react-query');
+export const ReactQuery = require('@kbn/react-query');
 export const ReactQueryDevtools = require('@tanstack/react-query-devtools');
 export const KbnCodeEditor = require('@kbn/code-editor');
-export const KbnEsqlAst = require('@kbn/esql-ast');
+export const KbnEsqlAst = require('@kbn/esql-language');
 export const KbnEbtTools = require('@kbn/ebt-tools');
 export const ElasticApmRumCore = require('@elastic/apm-rum-core');
 export const KbnReactKibanaContextCommon = require('@kbn/react-kibana-context-common');
 export const KbnReactKibanaContextRoot = require('@kbn/react-kibana-context-root');
 export const KbnReactKibanaContextRender = require('@kbn/react-kibana-context-render');
 export const KbnReactKibanaContextTheme = require('@kbn/react-kibana-context-theme');
+export const KbnReactKibanaContextEnv = require('@kbn/react-kibana-context-env');
 export const KbnSharedUxRouter = require('@kbn/shared-ux-router');
 export const KbnReactKibanaMount = require('@kbn/react-kibana-mount');
+export const KbnVisualizationsCommon = require('@kbn/visualizations-common');
+export const KbnCoreSidebarContext = require('@kbn/core-chrome-sidebar-context');

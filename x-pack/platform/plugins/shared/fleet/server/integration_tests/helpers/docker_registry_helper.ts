@@ -14,11 +14,12 @@ import execa from 'execa';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
+import { isActualError } from '@kbn/test/src/functional_test_runner/lib/docker_servers/container_logs';
 
 const BEFORE_SETUP_TIMEOUT = 30 * 60 * 1000; // 30 minutes;
 
-const DOCKER_START_TIMEOUT = 5 * 60 * 1000; // 5 minutes
-// This image comes from the latest successful build of https://buildkite.com/elastic/kibana-package-registry-promote
+const DOCKER_START_TIMEOUT = 6 * 60 * 1000; // 6 minutes
+// This image comes from the latest successful build of https://buildkite.com/elastic/kibana-package-registry-verify-and-promote
 // which is promoted after acceptance tests succeed against docker.elastic.co/package-registry/distribution:lite
 const DOCKER_IMAGE =
   process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
@@ -43,7 +44,14 @@ function childProcessToLogLine(childProcess: ChildProcess, log: ToolingLog) {
       tap((line) => log.info(`[docker:${DOCKER_IMAGE}] ${line}`))
     ), // TypeScript note: As long as the proc stdio[1] is 'pipe', then stdout will not be null
     observeLines(childProcess.stderr!).pipe(
-      tap((line) => log.error(`[docker:${DOCKER_IMAGE}] ${line}`))
+      tap((line) => {
+        // Check if this is actually an error or just info/debug written to stderr
+        if (isActualError(line)) {
+          log.error(`[docker:${DOCKER_IMAGE}] ${line}`);
+        } else {
+          log.info(`[docker:${DOCKER_IMAGE}] ${line}`);
+        }
+      })
     ) // TypeScript note: As long as the proc stdio[2] is 'pipe', then stderr will not be null
   ).subscribe(logLine$);
 
@@ -51,10 +59,15 @@ function childProcessToLogLine(childProcess: ChildProcess, log: ToolingLog) {
 }
 
 export function useDockerRegistry() {
-  const logger = new ToolingLog({
-    level: 'info',
-    writeTo: process.stdout,
-  });
+  const logger = new ToolingLog(
+    {
+      level: 'info',
+      writeTo: process.stdout,
+    },
+    {
+      context: 'fleet-docker',
+    }
+  );
   const packageRegistryPort = process.env.FLEET_PACKAGE_REGISTRY_PORT || '8081';
 
   if (!packageRegistryPort.match(/^[0-9]{4}/)) {
@@ -79,7 +92,6 @@ export function useDockerRegistry() {
       await firstWithTimeout(
         childProcessToLogLine(dockerProcess, logger).pipe(
           filter((line) => {
-            process.stdout.write(line);
             return waitForLogLine.test(line);
           })
         ),
@@ -97,8 +109,12 @@ export function useDockerRegistry() {
   }
 
   async function pullDockerImage() {
-    logger.info(`[docker:${DOCKER_IMAGE}] pulling docker image "${DOCKER_IMAGE}"`);
-    await execa('docker', ['pull', DOCKER_IMAGE]);
+    if (await isImageAvailableLocally(DOCKER_IMAGE)) {
+      logger.info(`skipping pull of docker image "${DOCKER_IMAGE}"`);
+    } else {
+      logger.info(`pulling docker image "${DOCKER_IMAGE}"`);
+      await execa('docker', ['pull', DOCKER_IMAGE]);
+    }
   }
 
   async function cleanupDockerRegistryServer() {
@@ -123,4 +139,13 @@ export function useDockerRegistry() {
   });
 
   return `http://localhost:${packageRegistryPort}`;
+}
+
+async function isImageAvailableLocally(imageUrl: string) {
+  try {
+    const { stdout } = await execa('docker', ['images', '-q', imageUrl]);
+    return stdout.trim().length > 0;
+  } catch {
+    return false;
+  }
 }

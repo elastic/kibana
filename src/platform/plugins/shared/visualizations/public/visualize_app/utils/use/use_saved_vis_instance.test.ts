@@ -15,11 +15,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { useSavedVisInstance } from './use_saved_vis_instance';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
-import { VisualizeConstants } from '../../../../common/constants';
 import { createVisEditorsRegistry } from '../../../vis_editors_registry';
 import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public/mocks';
 import type { VisualizeServices } from '../../types';
 import type { TypesStart } from '../../../vis_types';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 
 const mockDefaultEditorControllerDestroy = jest.fn();
 const mockEmbeddableHandlerDestroy = jest.fn();
@@ -136,7 +136,9 @@ describe('useSavedVisInstance', () => {
       expect(mockGetVisualizationInstance.mock.calls.length).toBe(1);
 
       await waitFor(() => new Promise((resolve) => resolve(null)));
-      expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis');
+      expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis', {
+        project: { value: 'Test Vis', absolute: true },
+      });
       expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
       expect(getEditBreadcrumbs).toHaveBeenCalledWith(
         { originatingAppName: undefined, redirectToOrigin: undefined },
@@ -172,7 +174,9 @@ describe('useSavedVisInstance', () => {
       expect(mockGetVisualizationInstance.mock.calls.length).toBe(1);
 
       await waitFor(() => new Promise((resolve) => resolve(null)));
-      expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis');
+      expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith('Test Vis', {
+        project: { value: 'Test Vis', absolute: true },
+      });
       expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith('Test Vis');
       expect(getEditBreadcrumbs).toHaveBeenCalledWith(
         { originatingAppName: undefined, redirectToOrigin: undefined },

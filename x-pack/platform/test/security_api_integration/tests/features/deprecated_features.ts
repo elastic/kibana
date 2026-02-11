@@ -189,8 +189,11 @@ export default function ({ getService }: FtrProviderContext) {
           "observabilityCasesV2",
           "securitySolutionCases",
           "securitySolutionCasesV2",
+          "securitySolutionRulesV1",
           "siem",
           "siemV2",
+          "siemV3",
+          "siemV4",
           "visualize",
         ]
       `);
@@ -219,6 +222,8 @@ export default function ({ getService }: FtrProviderContext) {
         'maps',
         'siem',
         'siemV2',
+        'siemV3',
+        'siemV4',
       ]);
       for (const feature of features) {
         if (
@@ -377,7 +382,7 @@ export default function ({ getService }: FtrProviderContext) {
           tags: ['defacement'],
           severity: CaseSeverity.LOW,
           connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
-          settings: { syncAlerts: true },
+          settings: { syncAlerts: true, extractObservables: true },
           owner: 'cases_owner_one',
           assignees: [],
           ...props,

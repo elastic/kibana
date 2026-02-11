@@ -28,6 +28,7 @@ import {
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
   removeDeviceControl,
+  removeLinuxDnsEvents,
 } from '../../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 
@@ -73,6 +74,10 @@ export const createDefaultPolicy = (
     !experimentalFeatures.trustedDevices
   ) {
     defaultPolicyPerType = removeDeviceControl(defaultPolicyPerType);
+  }
+
+  if (!experimentalFeatures.linuxDnsEvents) {
+    defaultPolicyPerType = removeLinuxDnsEvents(defaultPolicyPerType);
   }
 
   defaultPolicyPerType.meta.billable = isBillablePolicy(defaultPolicyPerType);

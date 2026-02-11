@@ -32,7 +32,7 @@ export const getDepsMock = ({
             search: {
               searchSource,
             },
-            indexPatterns: {
+            dataViews: {
               get: () => ({
                 fields,
               }),

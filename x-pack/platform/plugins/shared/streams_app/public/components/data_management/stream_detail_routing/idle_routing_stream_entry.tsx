@@ -17,47 +17,32 @@ import {
   EuiButtonIcon,
   useEuiTheme,
   EuiToolTip,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import type { DraggableProvided } from '@hello-pangea/dnd';
 import { i18n } from '@kbn/i18n';
 import { isDescendantOf, isRoutingEnabled } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
-import styled from '@emotion/styled';
+import { css as cssReact } from '@emotion/react';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { ConditionMessage } from '../condition_message';
+import { ConditionPanel, VerticalRule } from '../shared';
 import type { RoutingDefinitionWithUIAttributes } from './types';
-
-function VerticalRule() {
-  const { euiTheme } = useEuiTheme();
-  const CentralizedContainer = styled.div`
-    display: flex;
-    align-items: center;
-  `;
-
-  const Border = styled.div`
-    height: 20px;
-    border-right: ${euiTheme.border.thin};
-  `;
-
-  return (
-    <CentralizedContainer>
-      <Border />
-    </CentralizedContainer>
-  );
-}
+import { DisabledBadge } from '../shared';
 
 export function IdleRoutingStreamEntry({
   availableStreams,
   draggableProvided,
   isEditingEnabled,
-  onEditIconClick,
+  onEditClick,
   routingRule,
+  canReorder,
 }: {
   availableStreams: string[];
   draggableProvided: DraggableProvided;
   isEditingEnabled: boolean;
-  onEditIconClick: (id: string) => void;
+  onEditClick: (id: string) => void;
   routingRule: RoutingDefinitionWithUIAttributes;
+  canReorder: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   const router = useStreamsAppRouter();
@@ -68,20 +53,23 @@ export function IdleRoutingStreamEntry({
 
   return (
     <EuiPanel
+      color="subdued"
       hasShadow={false}
-      hasBorder
-      paddingSize="s"
+      hasBorder={false}
       data-test-subj={`routingRule-${routingRule.destination}`}
       className={css`
         overflow: hidden;
+        border: ${euiTheme.border.thin};
         .streamsDragHandle {
           transition: margin-left ${euiTheme.animation.normal};
           padding: ${euiTheme.size.s} 0;
-          margin-left: -${euiTheme.size.l};
+          margin-left: -${euiTheme.size.xl};
         }
         &:hover .streamsDragHandle {
           margin-left: 0;
         }
+        padding: ${euiTheme.size.m} 16px;
+        border-radius: ${euiTheme.size.s};
       `}
     >
       <EuiFlexGroup direction="column" gutterSize="none">
@@ -91,30 +79,44 @@ export function IdleRoutingStreamEntry({
           alignItems="center"
           responsive={false}
         >
-          <EuiFlexItem grow={false}>
-            <EuiPanel
-              className="streamsDragHandle"
-              color="transparent"
-              paddingSize="s"
-              data-test-subj={`routingRuleDragHandle-${routingRule.destination}`}
-              {...draggableProvided.dragHandleProps}
-              aria-label={i18n.translate(
-                'xpack.streams.idleRoutingStreamEntry.euiPanel.dragHandleLabel',
-                { defaultMessage: 'Drag Handle' }
-              )}
-            >
-              <EuiIcon type="grabOmnidirectional" />
-            </EuiPanel>
-          </EuiFlexItem>
+          {canReorder && (
+            <EuiFlexItem grow={false}>
+              <EuiPanel
+                className="streamsDragHandle"
+                color="transparent"
+                paddingSize="s"
+                data-test-subj={`routingRuleDragHandle-${routingRule.destination}`}
+                {...draggableProvided.dragHandleProps}
+                aria-label={i18n.translate(
+                  'xpack.streams.idleRoutingStreamEntry.euiPanel.dragHandleLabel',
+                  { defaultMessage: 'Drag Handle' }
+                )}
+              >
+                <EuiIcon type="grabOmnidirectional" />
+              </EuiPanel>
+            </EuiFlexItem>
+          )}
+
           <EuiLink
             href={router.link('/{key}/management/{tab}', {
               path: { key: routingRule.destination, tab: 'partitioning' },
             })}
             data-test-subj="streamsAppRoutingStreamEntryButton"
+            css={cssReact`
+              min-width: 0;
+            `}
           >
-            <EuiText size="s">{routingRule.destination}</EuiText>
+            <EuiText
+              size="xs"
+              component="p"
+              className="eui-textTruncate"
+              css={cssReact`
+                font-weight: ${euiTheme.font.weight.bold};
+              `}
+            >
+              {routingRule.destination}
+            </EuiText>
           </EuiLink>
-
           <EuiFlexGroup
             justifyContent="flexEnd"
             gutterSize="xs"
@@ -123,11 +125,7 @@ export function IdleRoutingStreamEntry({
           >
             {!isRoutingEnabled(routingRule.status) && (
               <>
-                <EuiBadge color="subdued">
-                  {i18n.translate('xpack.streams.streamDetailRouting.disabled', {
-                    defaultMessage: 'Disabled',
-                  })}
-                </EuiBadge>
+                <DisabledBadge />
                 <VerticalRule />
               </>
             )}
@@ -141,7 +139,11 @@ export function IdleRoutingStreamEntry({
                     }
                   )}
                 >
-                  <EuiBadge color="hollow">{`+${childrenCount}`}</EuiBadge>
+                  <EuiBadge
+                    color="hollow"
+                    tabIndex={0}
+                    data-test-subj="streamsAppRoutingRuleChildCountBadge"
+                  >{`+${childrenCount}`}</EuiBadge>
                 </EuiToolTip>
                 <VerticalRule />
               </>
@@ -150,7 +152,7 @@ export function IdleRoutingStreamEntry({
               data-test-subj={`routingRuleEditButton-${routingRule.destination}`}
               iconType="pencil"
               disabled={!isEditingEnabled}
-              onClick={() => onEditIconClick(routingRule.id)}
+              onClick={() => onEditClick(routingRule.id)}
               aria-label={i18n.translate('xpack.streams.streamDetailRouting.edit', {
                 defaultMessage: 'Edit',
               })}
@@ -158,14 +160,39 @@ export function IdleRoutingStreamEntry({
           </EuiFlexGroup>
         </EuiFlexGroup>
         <EuiFlexItem
+          grow={false}
+          data-test-subj={`streamDetailRoutingItem-${routingRule.destination}`}
           className={css`
             overflow: hidden;
-            padding-left: ${euiTheme.size.s};
+            padding: ${euiTheme.size.xs} 0px;
           `}
         >
-          <EuiText component="p" size="s" color="subdued" className="eui-textTruncate">
-            <ConditionMessage condition={routingRule.where} />
-          </EuiText>
+          <ConditionPanel
+            condition={routingRule.where}
+            keywordWrapper={(children) => (
+              <EuiToolTip
+                position="top"
+                content={i18n.translate('xpack.streams.streamDetailRouting.editConditionTooltip', {
+                  defaultMessage: 'Edit routing condition',
+                })}
+              >
+                <EuiButtonEmpty
+                  onClick={() => onEditClick(routingRule.id)}
+                  color="text"
+                  size="xs"
+                  aria-label={i18n.translate(
+                    'xpack.streams.streamsDetailRouting.editConditionLabel',
+                    {
+                      defaultMessage: 'Edit routing condition',
+                    }
+                  )}
+                  data-test-subj="streamsAppRoutingConditionTitleEditButton"
+                >
+                  {children}
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            )}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

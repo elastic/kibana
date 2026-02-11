@@ -7,10 +7,12 @@
 import { notImplemented } from '@hapi/boom';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import type { Observable } from 'rxjs';
 import { from, map } from 'rxjs';
 import { v4 } from 'uuid';
 import type { Readable } from 'stream';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
+import { last } from 'lodash';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { flushBuffer } from '../../service/util/flush_buffer';
@@ -28,6 +30,11 @@ import {
   screenContextRt,
 } from '../runtime_types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../types';
+import type {
+  BufferFlushEvent,
+  StreamingChatResponseEventWithoutError,
+} from '../../../common/conversation_complete';
+import type { ConversationCreateRequest } from '../../../common/types';
 
 const chatCompleteBaseRt = (apiType: 'public' | 'internal') =>
   t.type({
@@ -38,6 +45,7 @@ const chatCompleteBaseRt = (apiType: 'public' | 'internal') =>
         persist: toBooleanRt,
       }),
       t.partial({
+        isStream: t.union([t.undefined, toBooleanRt]), // accept undefined in order to default to true
         conversationId: t.string,
         title: t.string,
         disableFunctions: toBooleanRt,
@@ -245,7 +253,10 @@ async function chatComplete(
   resources: ObservabilityAIAssistantRouteHandlerResources & {
     params: t.TypeOf<typeof chatCompleteInternalRt>;
   }
-) {
+): Promise<{
+  response$: Observable<StreamingChatResponseEventWithoutError | BufferFlushEvent>;
+  getConversation: () => Promise<ConversationCreateRequest>;
+}> {
   const { params, service } = resources;
 
   const {
@@ -286,7 +297,7 @@ async function chatComplete(
         : userInstructionOrString
   );
 
-  const response$ = client.complete({
+  const { response$, getConversation } = client.complete({
     messages,
     connectorId,
     conversationId,
@@ -299,7 +310,8 @@ async function chatComplete(
     disableFunctions,
   });
 
-  return response$.pipe(flushBuffer(isCloudEnabled));
+  const responseWithFlushBuffer$ = response$.pipe(flushBuffer(isCloudEnabled));
+  return { response$: responseWithFlushBuffer$, getConversation };
 }
 
 const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
@@ -310,8 +322,22 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
     },
   },
   params: chatCompleteInternalRt,
-  handler: async (resources): Promise<Readable> => {
-    return observableIntoStream(await chatComplete(resources));
+  handler: async (resources) => {
+    const { params } = resources;
+    const { response$, getConversation } = await chatComplete(resources);
+    const { isStream = true, connectorId } = params.body;
+
+    if (isStream === false) {
+      const response = await getConversation();
+
+      return {
+        conversationId: response.conversation.id,
+        data: last(response.messages)?.message.content,
+        connectorId,
+      };
+    }
+
+    return observableIntoStream(response$);
   },
 });
 
@@ -326,18 +352,15 @@ const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
   options: {
     tags: ['observability-ai-assistant'],
   },
-  handler: async (resources): Promise<Readable> => {
+  handler: async (resources) => {
     const { params, logger } = resources;
+    const { actions, ...bodyParams } = params.body;
 
-    const {
-      body: { actions, ...restOfBody },
-    } = params;
-
-    const response$ = await chatComplete({
+    const { response$ } = await chatComplete({
       ...resources,
       params: {
         body: {
-          ...restOfBody,
+          ...bodyParams,
           scopes: ['observability'],
           screenContexts: [
             {

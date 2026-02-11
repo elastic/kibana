@@ -9,28 +9,12 @@
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import { cloneDeep } from 'lodash';
-import type { ControlPanelsState } from '@kbn/controls-plugin/public';
-import type { ESQLControlState } from '@kbn/esql-types';
-import type { FilterCompareOptions } from '@kbn/es-query';
-import { COMPARE_ALL_OPTIONS, isOfAggregateQueryType } from '@kbn/es-query';
-import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
-import { canImportVisContext } from '@kbn/unified-histogram';
-import { isEqual, isFunction } from 'lodash';
-import { VIEW_MODE } from '../../../../common/constants';
 import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
-import type { DiscoverAppState } from './discover_app_state_container';
-import { isEqualFilters } from './discover_app_state_container';
+import type { DiscoverAppState } from './redux';
 import type { DiscoverServices } from '../../../build_services';
-import type { InternalStateStore, TabState } from './redux';
-
-const FILTERS_COMPARE_OPTIONS: FilterCompareOptions = {
-  ...COMPARE_ALL_OPTIONS,
-  state: false, // We don't compare filter types (global vs appState).
-};
+import type { TabState } from './redux';
 
 export interface UpdateParams {
   /**
@@ -48,41 +32,22 @@ export interface UpdateParams {
 }
 
 /**
- * Container for the saved search state, allowing to load, update and persist the saved search
- * Can also be used to track changes to the saved search
+ * Container for the saved search state, allowing to update the saved search
  * It centralizes functionality that was spread across the Discover main codebase
  * There are 2 hooks to access the state of the saved search in React components:
  * - useSavedSearch for the current state, that's updated on every relevant state change
- * - useSavedSearchInitial for the persisted or initial state, just updated when the saved search is peristed or loaded
  */
 export interface DiscoverSavedSearchContainer {
-  /**
-   * Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
-   */
-  initUrlTracking: () => () => void;
   /**
    * Get an BehaviorSubject which contains the current state of the current saved search
    * All modifications are applied to this state
    */
   getCurrent$: () => BehaviorSubject<SavedSearch>;
   /**
-   * Get the id of the current saved search
-   */
-  getId: () => string | undefined;
-  /**
    * Get an BehaviorSubject which contains the initial state of the current saved search
    * This is set when a saved search is loaded or a new saved search is initialized
    */
   getInitial$: () => BehaviorSubject<SavedSearch>;
-  /**
-   * Get the title of the current saved search
-   */
-  getTitle: () => string | undefined;
-  /**
-   * Get an BehaviorSubject containing the state if there have been changes to the initial state of the saved search
-   * Can be used to track if the saved search has been modified and displayed in the UI
-   */
-  getHasChanged$: () => BehaviorSubject<boolean>;
   /**
    * Get the current state of the saved search
    */
@@ -94,8 +59,7 @@ export interface DiscoverSavedSearchContainer {
    */
   set: (savedSearch: SavedSearch) => SavedSearch;
   /**
-   * Similar to set, but does not reset the initial state,
-   * ensuring unsaved changes are tracked
+   * Similar to set, but does not reset the initial state
    * @param nextSavedSearch
    */
   assignNextSavedSearch: (nextSavedSearch: SavedSearch) => void;
@@ -108,34 +72,20 @@ export interface DiscoverSavedSearchContainer {
    * Updates the current state of the saved search with new time range and refresh interval
    */
   updateTimeRange: () => void;
-  /**
-   * Updates the current value of visContext in saved search
-   * @param params
-   */
-  updateVisContext: (params: { nextVisContext: UnifiedHistogramVisContext | undefined }) => void;
-  /**
-   * Updates the current value of controlState in saved search
-   * @param params
-   */
-  updateControlState: (params: { nextControlState: ControlPanelsState<ESQLControlState> }) => void;
 }
 
 export function getSavedSearchContainer({
   services,
-  internalState,
   getCurrentTab,
 }: {
   services: DiscoverServices;
-  internalState: InternalStateStore;
   getCurrentTab: () => TabState;
 }): DiscoverSavedSearchContainer {
   const initialSavedSearch = services.savedSearch.getNew();
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
   const savedSearchCurrent$ = new BehaviorSubject(copySavedSearch(initialSavedSearch));
-  const hasChanged$ = new BehaviorSubject(false);
   const set = (savedSearch: SavedSearch) => {
     addLog('[savedSearch] set', savedSearch);
-    hasChanged$.next(false);
     savedSearchCurrent$.next(savedSearch);
     savedSearchInitial$.next(copySavedSearch(savedSearch));
     return savedSearch;
@@ -143,39 +93,8 @@ export function getSavedSearchContainer({
   const getState = () => savedSearchCurrent$.getValue();
   const getInitial$ = () => savedSearchInitial$;
   const getCurrent$ = () => savedSearchCurrent$;
-  const getHasChanged$ = () => hasChanged$;
-  const getTitle = () => savedSearchCurrent$.getValue().title;
-  const getId = () => savedSearchCurrent$.getValue().id;
-
-  const initUrlTracking = () => {
-    const subscription = savedSearchCurrent$.subscribe((savedSearch) => {
-      const dataView = savedSearch.searchSource.getField('index');
-
-      if (!dataView?.id) {
-        return;
-      }
-
-      const dataViewSupportsTracking =
-        // Disable for ad hoc data views, since they can't be restored after a page refresh
-        dataView.isPersisted() ||
-        // Unless it's a default profile data view, which can be restored on refresh
-        internalState.getState().defaultProfileAdHocDataViewIds.includes(dataView.id) ||
-        // Or we're in ES|QL mode, in which case we don't care about the data view
-        isOfAggregateQueryType(savedSearch.searchSource.getField('query'));
-
-      const trackingEnabled = dataViewSupportsTracking || Boolean(savedSearch.id);
-
-      services.urlTracker.setTrackingEnabled(trackingEnabled);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  };
 
   const assignNextSavedSearch = ({ nextSavedSearch }: { nextSavedSearch: SavedSearch }) => {
-    const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
-    hasChanged$.next(hasChanged);
     savedSearchCurrent$.next(nextSavedSearch);
   };
 
@@ -190,7 +109,6 @@ export function getSavedSearchContainer({
     const nextSavedSearch = updateSavedSearch({
       savedSearch: { ...previousSavedSearch },
       dataView,
-      initialInternalState: undefined,
       appState: nextState || {},
       globalState: getCurrentTab().globalState,
       services,
@@ -220,52 +138,14 @@ export function getSavedSearchContainer({
     addLog('[savedSearch] updateWithTimeRange done', nextSavedSearch);
   };
 
-  const updateVisContext = ({
-    nextVisContext,
-  }: {
-    nextVisContext: UnifiedHistogramVisContext | undefined;
-  }) => {
-    const previousSavedSearch = getState();
-    const nextSavedSearch: SavedSearch = {
-      ...previousSavedSearch,
-      visContext: nextVisContext,
-    };
-
-    assignNextSavedSearch({ nextSavedSearch });
-
-    addLog('[savedSearch] updateVisContext done', nextSavedSearch);
-  };
-
-  const updateControlState = ({
-    nextControlState,
-  }: {
-    nextControlState: ControlPanelsState<ESQLControlState> | undefined;
-  }) => {
-    const previousSavedSearch = getState();
-    const nextSavedSearch: SavedSearch = {
-      ...previousSavedSearch,
-      controlGroupJson: JSON.stringify(nextControlState),
-    };
-
-    assignNextSavedSearch({ nextSavedSearch });
-
-    addLog('[savedSearch] updateControlState done', nextSavedSearch);
-  };
-
   return {
-    initUrlTracking,
     getCurrent$,
-    getHasChanged$,
-    getId,
     getInitial$,
     getState,
-    getTitle,
     set,
     assignNextSavedSearch: (nextSavedSearch) => assignNextSavedSearch({ nextSavedSearch }),
     update,
     updateTimeRange,
-    updateVisContext,
-    updateControlState,
   };
 }
 
@@ -278,119 +158,4 @@ export function copySavedSearch(savedSearch: SavedSearch): SavedSearch {
     ...savedSearch,
     ...{ searchSource: savedSearch.searchSource.createCopy() },
   };
-}
-
-export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext: SavedSearch) {
-  const { searchSource: prevSearchSource, ...prevSavedSearch } = savedSearchPrev;
-  const { searchSource: nextSearchSource, ...nextSavedSearchWithoutSearchSource } = savedSearchNext;
-
-  const keys = new Set([
-    ...Object.keys(prevSavedSearch),
-    ...Object.keys(nextSavedSearchWithoutSearchSource),
-  ] as Array<keyof Omit<SavedSearch, 'searchSource'>>);
-
-  // at least one change in saved search attributes
-  const hasChangesInSavedSearch = [...keys].some((key) => {
-    if (
-      ['usesAdHocDataView', 'hideChart'].includes(key) &&
-      typeof prevSavedSearch[key] === 'undefined' &&
-      nextSavedSearchWithoutSearchSource[key] === false
-    ) {
-      return false; // ignore when value was changed from `undefined` to `false` as it happens per app logic, not by a user action
-    }
-
-    const prevValue = getSavedSearchFieldForComparison(prevSavedSearch, key);
-    const nextValue = getSavedSearchFieldForComparison(nextSavedSearchWithoutSearchSource, key);
-
-    const isSame = isEqual(prevValue, nextValue);
-
-    if (!isSame) {
-      addLog('[savedSearch] difference between initial and changed version', {
-        key,
-        before: prevSavedSearch[key],
-        after: nextSavedSearchWithoutSearchSource[key],
-      });
-    }
-
-    return !isSame;
-  });
-
-  if (hasChangesInSavedSearch) {
-    return false;
-  }
-
-  // at least one change in search source fields
-  const hasChangesInSearchSource = (
-    ['filter', 'query', 'index'] as Array<keyof SearchSourceFields>
-  ).some((key) => {
-    const prevValue = getSearchSourceFieldValueForComparison(prevSearchSource, key);
-    const nextValue = getSearchSourceFieldValueForComparison(nextSearchSource, key);
-
-    const isSame =
-      key === 'filter'
-        ? isEqualFilters(prevValue, nextValue, FILTERS_COMPARE_OPTIONS) // if a filter gets pinned and the order of filters does not change, we don't show the unsaved changes badge
-        : isEqual(prevValue, nextValue);
-
-    if (!isSame) {
-      addLog('[savedSearch] difference between initial and changed version', {
-        key,
-        before: prevValue,
-        after: nextValue,
-      });
-    }
-
-    return !isSame;
-  });
-
-  if (hasChangesInSearchSource) {
-    return false;
-  }
-
-  addLog('[savedSearch] no difference between initial and changed version');
-
-  return true;
-}
-
-function getSavedSearchFieldForComparison(
-  savedSearch: Omit<SavedSearch, 'searchSource'>,
-  fieldName: keyof Omit<SavedSearch, 'searchSource'>
-) {
-  if (fieldName === 'visContext') {
-    const visContext = cloneDeep(savedSearch.visContext);
-    if (canImportVisContext(visContext) && visContext?.attributes?.title) {
-      // ignore differences in title as it sometimes does not match the actual vis type/shape
-      visContext.attributes.title = 'same';
-    }
-    return visContext;
-  }
-
-  if (fieldName === 'breakdownField') {
-    return savedSearch.breakdownField || ''; // ignore the difference between an empty string and undefined
-  }
-
-  if (fieldName === 'viewMode') {
-    // By default, viewMode: undefined is equivalent to documents view
-    // So they should be treated as same
-    return savedSearch.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
-  }
-
-  return savedSearch[fieldName];
-}
-
-function getSearchSourceFieldValueForComparison(
-  searchSource: SavedSearch['searchSource'],
-  searchSourceFieldName: keyof SearchSourceFields
-) {
-  if (searchSourceFieldName === 'index') {
-    const query = searchSource.getField('query');
-    // ad-hoc data view id can change, so we rather compare the ES|QL query itself here
-    return query && 'esql' in query ? query.esql : searchSource.getField('index')?.id;
-  }
-
-  if (searchSourceFieldName === 'filter') {
-    const filterField = searchSource.getField('filter');
-    return isFunction(filterField) ? filterField() : filterField;
-  }
-
-  return searchSource.getField(searchSourceFieldName);
 }

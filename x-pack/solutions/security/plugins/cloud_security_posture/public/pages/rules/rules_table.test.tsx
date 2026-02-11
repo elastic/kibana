@@ -8,7 +8,7 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { TestProvider } from '../../test/test_provider';
 import { RulesTable } from './rules_table';

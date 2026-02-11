@@ -21,7 +21,25 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/axe-config",
+        "id": "def-common.AXE_IMPACT_LEVELS",
+        "type": "Array",
+        "tags": [],
+        "label": "AXE_IMPACT_LEVELS",
+        "description": [],
+        "signature": [
+          "(\"minor\" | \"critical\" | \"moderate\" | \"serious\")[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [
       {
         "parentPluginId": "@kbn/axe-config",
@@ -31,6 +49,8 @@
         "label": "AXE_CONFIG",
         "description": [],
         "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,6 +65,8 @@
               "{ id: string; selector: string; }[]"
             ],
             "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -59,6 +81,8 @@
         "label": "AXE_OPTIONS",
         "description": [],
         "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
+        "lineNumber": 38,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -73,6 +97,8 @@
               "\"raw\" | \"v2\" | \"v1\" | \"rawEnv\" | \"no-passes\""
             ],
             "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -87,6 +113,8 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -98,6 +126,8 @@
             "label": "rules",
             "description": [],
             "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -109,6 +139,8 @@
                 "label": "'color-contrast'",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
+                "lineNumber": 42,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -120,6 +152,8 @@
                     "label": "enabled",
                     "description": [],
                     "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
+                    "lineNumber": 43,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -133,6 +167,8 @@
                 "label": "bypass",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
+                "lineNumber": 45,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -144,6 +180,8 @@
                     "label": "enabled",
                     "description": [],
                     "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
+                    "lineNumber": 46,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -157,6 +195,8 @@
                 "label": "'nested-interactive'",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
+                "lineNumber": 48,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -168,6 +208,8 @@
                     "label": "enabled",
                     "description": [],
                     "path": "src/platform/packages/shared/kbn-axe-config/index.ts",
+                    "lineNumber": 49,
+                    "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
                   }

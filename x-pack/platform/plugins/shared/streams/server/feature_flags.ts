@@ -10,7 +10,10 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
-  OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
+  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
+  OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
+  OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
+  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
 } from '@kbn/management-settings-ids';
 import type { StreamsPluginStartDependencies } from './types';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
@@ -40,6 +43,29 @@ export function registerFeatureFlags(
             technicalPreview: true,
           },
         });
+
+        core.uiSettings.register({
+          [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY]: {
+            category: ['observability'],
+            name: i18n.translate('xpack.streams.significantEventsDiscoverySettingsName', {
+              defaultMessage: 'Streams significant events discovery',
+            }) as string,
+            value: false,
+            description: i18n.translate(
+              'xpack.streams.significantEventsDiscoverySettingsDescription',
+              {
+                defaultMessage: 'Enable streams significant events discovery.',
+              }
+            ),
+            type: 'boolean',
+            schema: schema.boolean(),
+            requiresPageReload: true,
+            solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
+            readonly: true,
+            readonlyMode: 'ui',
+          },
+        });
       }
     })
     .catch((error) => {
@@ -47,20 +73,52 @@ export function registerFeatureFlags(
     });
 
   core.uiSettings.register({
-    [OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS]: {
+    [OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS]: {
       category: ['observability'],
-      name: i18n.translate('xpack.streams.groupStreamsSettingsName', {
-        defaultMessage: 'Group streams',
+      name: i18n.translate('xpack.streams.streamsContentPacksSettingsName', {
+        defaultMessage: 'Streams content packs',
       }) as string,
       value: false,
-      description: i18n.translate('xpack.streams.groupStreamsSettingsDescription', {
-        defaultMessage: 'Enable Group streams.',
+      description: i18n.translate('xpack.streams.streamsContentPacksSettingsDescription', {
+        defaultMessage: 'Enable Streams content packs.',
       }),
       type: 'boolean',
       schema: schema.boolean(),
       requiresPageReload: true,
       solutionViews: ['classic', 'oblt'],
       technicalPreview: true,
+    },
+    [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: {
+      category: ['observability'],
+      name: i18n.translate('xpack.streams.streamsAttachmentsSettingsName', {
+        defaultMessage: 'Streams attachments',
+      }),
+      value: false,
+      description: i18n.translate('xpack.streams.streamsAttachmentsSettingsDescription', {
+        defaultMessage: 'Enable Streams attachments tab.',
+      }),
+      type: 'boolean',
+      schema: schema.boolean(),
+      requiresPageReload: true,
+      solutionViews: ['classic', 'oblt'],
+      technicalPreview: true,
+    },
+    [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: {
+      category: ['observability'],
+      name: i18n.translate('xpack.streams.queryStreamsSettingsName', {
+        defaultMessage: 'Query streams',
+      }) as string,
+      value: false,
+      description: i18n.translate('xpack.streams.queryStreamsSettingsDescription', {
+        defaultMessage: 'Enable Query streams.',
+      }),
+      type: 'boolean',
+      schema: schema.boolean(),
+      requiresPageReload: true,
+      solutionViews: ['classic', 'oblt'],
+      technicalPreview: true,
+      readonly: true,
+      readonlyMode: 'ui',
     },
   });
 }

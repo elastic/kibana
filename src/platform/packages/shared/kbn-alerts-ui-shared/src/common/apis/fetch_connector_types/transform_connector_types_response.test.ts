@@ -22,6 +22,8 @@ describe('transformConnectorTypesResponse', () => {
         supported_feature_ids: ['stackAlerts'],
         is_system_action_type: true,
         sub_feature: 'endpointSecurity',
+        is_deprecated: false,
+        allow_multiple_system_actions: true,
       },
       {
         id: 'actionType2Id',
@@ -32,6 +34,7 @@ describe('transformConnectorTypesResponse', () => {
         minimum_license_required: 'basic',
         supported_feature_ids: ['stackAlerts'],
         is_system_action_type: false,
+        is_deprecated: false,
       },
     ]);
 
@@ -46,6 +49,8 @@ describe('transformConnectorTypesResponse', () => {
         supportedFeatureIds: ['stackAlerts'],
         isSystemActionType: true,
         subFeature: 'endpointSecurity',
+        isDeprecated: false,
+        allowMultipleSystemActions: true,
       },
       {
         id: 'actionType2Id',
@@ -56,6 +61,7 @@ describe('transformConnectorTypesResponse', () => {
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['stackAlerts'],
         isSystemActionType: false,
+        isDeprecated: false,
       },
     ]);
   });

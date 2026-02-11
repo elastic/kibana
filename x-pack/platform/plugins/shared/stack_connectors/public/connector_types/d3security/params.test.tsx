@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import D3ParamsFields from './params';
-import { SUB_ACTION } from '../../../common/d3security/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/d3security/constants';
 
 const messageVariables = [
   {

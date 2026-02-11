@@ -11,8 +11,8 @@ import { AlertProcessingDonut } from './alert_processing_donut_lens';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getAlertProcessingDonutAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/alert_processing_donut';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
+import { PageScope } from '../../../data_view_manager/constants';
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable', () => ({
   VisualizationEmbeddable: jest.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
@@ -56,11 +56,11 @@ describe('AlertProcessingDonut', () => {
         applyGlobalQueriesAndFilters: false,
         height: 250,
         width: '100%',
-        id: 'open',
+        id: 'aiValueAlertProcessingDonut-:r0:',
         isDonut: true,
         donutTitleLabel: 'Total alerts processed',
         donutTextWrapperClassName: 'donutText',
-        scopeId: SourcererScopeName.detections,
+        scopeId: PageScope.alerts,
         timerange: { from: defaultProps.from, to: defaultProps.to },
         withActions: [
           VisualizationContextMenuActions.addToExistingCase,
@@ -130,5 +130,18 @@ describe('AlertProcessingDonut', () => {
       attackAlertIds: [],
       spaceId: 'test-space-id',
     });
+  });
+  it('returns a unique embeddable id per instance', () => {
+    render(
+      <>
+        <AlertProcessingDonut {...defaultProps} />
+        <AlertProcessingDonut {...defaultProps} />
+      </>
+    );
+
+    const firstCallArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0];
+    const secondCallArgs = (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[1][0];
+
+    expect(firstCallArgs.id).not.toEqual(secondCallArgs.id);
   });
 });

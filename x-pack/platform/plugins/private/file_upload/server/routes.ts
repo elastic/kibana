@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import {
-  MAX_FILE_SIZE_BYTES,
+  ABSOLUTE_MAX_FILE_SIZE_BYTES,
   MAX_TIKA_FILE_SIZE_BYTES,
 } from '@kbn/file-upload-common/src/constants';
 import { omit } from 'lodash';
@@ -29,6 +29,14 @@ import type { StartDeps } from './types';
 import { checkFileUploadPrivileges } from './check_privileges';
 import { previewIndexTimeRange } from './preview_index_time_range';
 import { previewTikaContents } from './preview_tika_contents';
+
+function getRequestAbortedSignal(request: KibanaRequest): AbortSignal {
+  const controller = new AbortController();
+  request.events.aborted$.subscribe(() => {
+    controller.abort();
+  });
+  return controller.signal;
+}
 
 /**
  * Routes for the file upload.
@@ -103,7 +111,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       options: {
         body: {
           accepts: ['text/*', 'application/json'],
-          maxBytes: MAX_FILE_SIZE_BYTES,
+          maxBytes: ABSOLUTE_MAX_FILE_SIZE_BYTES,
         },
       },
     })
@@ -126,7 +134,8 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
             logger,
             request.body,
             omit(request.query, 'includePreview'),
-            includePreview === true
+            includePreview === true,
+            getRequestAbortedSignal(request)
           );
           return response.ok({ body: result });
         } catch (e) {
@@ -151,7 +160,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       options: {
         body: {
           accepts: ['application/json'],
-          maxBytes: MAX_FILE_SIZE_BYTES,
+          maxBytes: ABSOLUTE_MAX_FILE_SIZE_BYTES,
         },
       },
       security: {
@@ -210,7 +219,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       options: {
         body: {
           accepts: ['application/json'],
-          maxBytes: MAX_FILE_SIZE_BYTES,
+          maxBytes: ABSOLUTE_MAX_FILE_SIZE_BYTES,
         },
       },
       security: {
@@ -282,7 +291,12 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
             return response.ok({ body });
           }
 
-          const result = await importData(index, ingestPipeline?.id ?? '', data);
+          const result = await importData(
+            index,
+            ingestPipeline?.id ?? '',
+            data,
+            getRequestAbortedSignal(request)
+          );
 
           return response.ok({ body: result });
         } catch (e) {
@@ -312,7 +326,12 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           const esClient = (await context.core).elasticsearch.client;
 
           const { importData } = importDataProvider(esClient);
-          const result = await importData(index, ingestPipelineId, data);
+          const result = await importData(
+            index,
+            ingestPipelineId,
+            data,
+            getRequestAbortedSignal(request)
+          );
 
           return response.ok({ body: result });
         } catch (e) {
@@ -593,55 +612,6 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
 
           return response.ok({
             body: { isSearchable, count },
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
-        }
-      }
-    );
-
-  router.versioned
-    .post({
-      path: '/internal/file_upload/preview_docs',
-      access: 'internal',
-      security: {
-        authz: {
-          requiredPrivileges: ['fileUpload:analyzeFile'],
-        },
-      },
-      options: {
-        body: {
-          accepts: ['application/json'],
-        },
-      },
-    })
-    .addVersion(
-      {
-        version: '1',
-        validate: {
-          request: {
-            body: schema.object({
-              docs: schema.arrayOf(schema.any()),
-              pipeline: schema.any(),
-            }),
-          },
-        },
-      },
-      async (context, request, response) => {
-        try {
-          const { docs, pipeline } = request.body;
-          const esClient = (await context.core).elasticsearch.client;
-          const resp = await esClient.asInternalUser.ingest.simulate({
-            pipeline,
-            docs: docs.map((doc) => {
-              return {
-                _source: doc,
-              };
-            }),
-          });
-
-          return response.ok({
-            body: resp,
           });
         } catch (e) {
           return response.customError(wrapError(e));

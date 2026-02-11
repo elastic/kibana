@@ -16,6 +16,8 @@ import * as useGetMissingResourcesModule from '../../../common/hooks/use_get_mis
 import * as useStartMigrationModule from '../../logic/use_start_migration';
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { TestProviders } from '../../../../common/mock';
+import { MigrationDataInputContextProvider } from '../../../common/components';
+import { MigrationSource } from '../../../common/types';
 
 const mockMigrationStats: DashboardMigrationStats = {
   id: 'mig-1',
@@ -28,6 +30,7 @@ const mockMigrationStats: DashboardMigrationStats = {
     processing: 0,
     completed: 0,
   },
+  vendor: MigrationSource.SPLUNK,
   created_at: '2024-06-01T12:00:00Z',
   last_updated_at: '2024-06-01T12:30:00Z',
   last_execution: {
@@ -70,7 +73,15 @@ jest.spyOn(useStartMigrationModule, 'useStartMigration').mockReturnValue({
 });
 
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
-  <TestProviders>{children}</TestProviders>
+  <TestProviders>
+    <MigrationDataInputContextProvider
+      openFlyout={jest.fn()}
+      closeFlyout={jest.fn()}
+      isFlyoutOpen={false}
+    >
+      {children}
+    </MigrationDataInputContextProvider>
+  </TestProviders>
 );
 
 const renderTestComponent = (partialProps: Partial<MigrationReadyPanelProps> = {}) => {
@@ -124,13 +135,13 @@ describe('MigrationReadyPanel', () => {
 
   it('should show missing resources button and text when resources are missing', async () => {
     mockUseGetMissingResources.mockImplementation((_, setMissingResources) => {
+      mockGetMissingResources.mockImplementation(() => setMissingResources(mockMissingResources));
       return {
-        getMissingResources: jest.fn(() => setMissingResources(mockMissingResources)),
+        getMissingResources: mockGetMissingResources,
         isLoading: false,
         error: null,
       };
     });
-    mockGetMissingResources.mockReturnValue(mockMissingResources);
 
     renderTestComponent();
 
@@ -145,20 +156,30 @@ describe('MigrationReadyPanel', () => {
   });
 
   it('should show loading spinner when fetching missing resources', () => {
-    mockUseGetMissingResources.mockReturnValue({
-      getMissingResources: mockGetMissingResources,
-      isLoading: true,
-      error: null,
+    mockUseGetMissingResources.mockImplementation((_, setMissingResources) => {
+      mockGetMissingResources.mockImplementation(() => setMissingResources(mockMissingResources));
+      return {
+        getMissingResources: mockGetMissingResources,
+        isLoading: true,
+        error: null,
+      };
     });
 
-    renderTestComponent();
-    expect(screen.getByTestId('centeredLoadingSpinner')).toBeInTheDocument();
+    const { container } = renderTestComponent();
+    expect(
+      container.querySelector(
+        '[data-test-subj="dashboardMigrationMissingResourcesButton"] [role="progressbar"]'
+      )
+    ).toBeVisible();
   });
 
   it('should show start translation button', () => {
     mockUseGetMissingResources.mockImplementation((_, setMissingResources) => {
+      mockGetMissingResources.mockImplementation(() =>
+        setMissingResources(mockEmptyMissingResources)
+      );
       return {
-        getMissingResources: jest.fn(() => setMissingResources(mockEmptyMissingResources)),
+        getMissingResources: mockGetMissingResources,
         isLoading: false,
         error: null,
       };

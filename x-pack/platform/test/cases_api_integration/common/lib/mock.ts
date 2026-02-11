@@ -50,6 +50,7 @@ export const postCaseReq: CasePostRequest = {
   },
   settings: {
     syncAlerts: true,
+    extractObservables: true,
   },
   owner: 'securitySolutionFixture',
   assignees: [],
@@ -187,6 +188,7 @@ export const postCaseResp = (
   category: null,
   customFields: [],
   observables: [],
+  total_observables: 0,
 });
 
 export const getCaseWithoutCommentsResp = (

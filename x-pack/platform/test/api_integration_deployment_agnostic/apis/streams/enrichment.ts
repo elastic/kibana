@@ -85,6 +85,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
               },
             },
+            failure_store: { inherit: {} },
           },
         },
       };

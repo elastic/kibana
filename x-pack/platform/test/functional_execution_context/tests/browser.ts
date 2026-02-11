@@ -88,6 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               page: 'app',
               id: 'new',
               description: 'fetch documents',
+              space: 'default',
             }),
           });
         });
@@ -103,6 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               page: 'app',
               id: 'new',
               description: 'fetch chart data and total hits',
+              space: 'default',
               child: {
                 type: 'lens',
                 name: 'lnsXY',
@@ -189,6 +191,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 page: 'app',
                 id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
                 description: '[Flights] Global Flight Dashboard',
+                space: 'default',
                 child: {
                   type: 'lens',
                   name: 'lnsXY',
@@ -219,6 +222,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 page: 'app',
                 id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
                 description: '[Flights] Global Flight Dashboard',
+                space: 'default',
                 child: {
                   type: 'lens',
                   name: 'lnsMetric',
@@ -251,6 +255,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 page: 'app',
                 id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
                 description: '[Flights] Global Flight Dashboard',
+                space: 'default',
                 child: {
                   type: 'lens',
                   name: 'lnsDatatable',
@@ -281,6 +286,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 page: 'app',
                 id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
                 description: '[Flights] Global Flight Dashboard',
+                space: 'default',
                 child: {
                   type: 'lens',
                   name: 'lnsPie',
@@ -312,6 +318,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               page: 'app',
               id: '7adfa750-4c81-11e8-b3d7-01146121b73d',
               description: '[Flights] Global Flight Dashboard',
+              space: 'default',
               child: {
                 type: 'search',
                 name: 'discover',

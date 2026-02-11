@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
-import { EuiPanel, EuiFlexGroup } from '@elastic/eui';
-import { RoutingConditionEditor } from '../condition_editor';
 import { AddRoutingRuleControls } from './control_bars';
-import { StreamNameFormRow } from './stream_name_form_row';
+import { RoutingConditionEditor } from './routing_condition_editor';
 import {
+  selectCurrentRule,
   useStreamRoutingEvents,
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
-import { selectCurrentRule } from './state_management/stream_routing_state_machine';
+import { StreamNameFormRow, useChildStreamInput } from '../../stream_name_form_row';
 
 export function NewRoutingStreamEntry() {
   const panelRef = useRef<HTMLDivElement>(null);
+  const { euiTheme } = useEuiTheme();
 
-  const { changeRule } = useStreamRoutingEvents();
+  const { changeRule, changeRuleDebounced } = useStreamRoutingEvents();
   const currentRule = useStreamsRoutingSelector((snapshot) => selectCurrentRule(snapshot.context));
 
   useEffect(() => {
@@ -28,22 +31,45 @@ export function NewRoutingStreamEntry() {
     }
   }, []);
 
+  const { setLocalStreamName, isStreamNameValid, partitionName, prefix, helpText, errorMessage } =
+    useChildStreamInput(currentRule.destination);
+
   return (
     <div ref={panelRef}>
-      <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+      <EuiPanel
+        color="plain"
+        hasShadow={false}
+        hasBorder={false}
+        paddingSize="m"
+        className={css`
+          border: 1px solid ${euiTheme.colors.primary};
+        `}
+      >
         <EuiFlexGroup gutterSize="m" direction="column">
           <StreamNameFormRow
-            value={currentRule.destination}
-            onChange={(value) => changeRule({ destination: value })}
+            onChange={(value) => changeRuleDebounced({ destination: value })}
+            setLocalStreamName={setLocalStreamName}
             autoFocus
+            partitionName={partitionName}
+            prefix={prefix}
+            helpText={helpText}
+            errorMessage={errorMessage}
+            isStreamNameValid={isStreamNameValid}
           />
-          <RoutingConditionEditor
-            condition={currentRule.where}
-            status={currentRule.status}
-            onConditionChange={(cond) => changeRule({ where: cond })}
-            onStatusChange={(status) => changeRule({ status })}
-          />
-          <AddRoutingRuleControls />
+          <EuiFlexGroup gutterSize="s" direction="column">
+            <RoutingConditionEditor
+              condition={currentRule.where}
+              status={currentRule.status}
+              onConditionChange={(cond) => changeRule({ where: cond })}
+              onStatusChange={(status) => changeRule({ status })}
+            />
+            <EuiText size="xs" color="GrayText">
+              {i18n.translate('xpack.streams.conditionEditor.filterTip', {
+                defaultMessage: 'Tip: You can add a condition directly from a table cell.',
+              })}
+            </EuiText>
+          </EuiFlexGroup>
+          <AddRoutingRuleControls isStreamNameValid={isStreamNameValid} />
         </EuiFlexGroup>
       </EuiPanel>
     </div>

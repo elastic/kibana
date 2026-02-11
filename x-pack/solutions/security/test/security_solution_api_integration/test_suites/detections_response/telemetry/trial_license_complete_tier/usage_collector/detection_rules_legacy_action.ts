@@ -15,6 +15,15 @@ import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import type { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
 import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+} from '@kbn/detections-response-ftr-services';
+import {
   createLegacyRuleAction,
   createWebHookRuleAction,
   getEqlRuleForAlertTesting,
@@ -29,15 +38,6 @@ import {
   deleteAllEventLogExecutionEvents,
   getCustomQueryRuleParams,
 } from '../../../utils';
-import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-  getRuleForAlertTesting,
-  waitForRuleSuccess,
-  waitForAlertsToBePresent,
-} from '../../../../../config/services/detections_response';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {

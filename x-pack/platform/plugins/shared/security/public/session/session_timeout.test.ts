@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ToastInputFields } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   clearBroadcastChannelInstances,
@@ -37,12 +36,23 @@ const nowMock = jest.spyOn(Date, 'now');
 const visibilityStateMock = jest.spyOn(document, 'visibilityState', 'get');
 
 function createSessionTimeout(expiresInMs: number | null = 60 * 60 * 1000, canBeExtended = true) {
-  const { http, notifications, ...coreStart } = coreMock.createStart();
+  const { http, notifications, overlays, ...coreStart } = coreMock.createStart();
   const toast = Symbol();
+  const modal = {
+    close: jest.fn(),
+  };
   notifications.toasts.add.mockReturnValue(toast as any);
+  overlays.openModal.mockReturnValue(modal as any);
   const sessionExpired = createSessionExpiredMock();
   const tenant = 'test';
-  const sessionTimeout = new SessionTimeout(coreStart, notifications, sessionExpired, http, tenant);
+  const sessionTimeout = new SessionTimeout(
+    coreStart,
+    notifications,
+    overlays,
+    sessionExpired,
+    http,
+    tenant
+  );
 
   http.fetch.mockResolvedValue({
     expiresInMs,
@@ -50,7 +60,7 @@ function createSessionTimeout(expiresInMs: number | null = 60 * 60 * 1000, canBe
     provider: { type: 'basic', name: 'basic1' },
   } as SessionInfo);
 
-  return { sessionTimeout, sessionExpired, notifications, http };
+  return { sessionTimeout, sessionExpired, notifications, http, overlays, modal };
 }
 
 describe('SessionTimeout', () => {
@@ -262,20 +272,19 @@ describe('SessionTimeout', () => {
   });
 
   it('shows warning before session expires', async () => {
-    const { sessionTimeout, notifications } = createSessionTimeout(60 * 60 * 1000);
+    const { sessionTimeout, notifications, overlays } = createSessionTimeout(60 * 60 * 1000);
     await sessionTimeout.start();
 
     jest.advanceTimersByTime(
       60 * 60 * 1000 - SESSION_GRACE_PERIOD_MS - SESSION_EXPIRATION_WARNING_MS
     );
 
-    expect(notifications.toasts.add).toHaveBeenCalledWith(
-      expect.objectContaining({ color: 'warning', iconType: 'clock' })
-    );
+    expect(overlays.openModal).toHaveBeenCalled();
+    expect(notifications.toasts.add).not.toHaveBeenCalled();
   });
 
   it('extends session when closing expiration warning', async () => {
-    const { sessionTimeout, notifications, http } = createSessionTimeout(60 * 60 * 1000);
+    const { sessionTimeout, overlays, http } = createSessionTimeout(60 * 60 * 1000);
     await sessionTimeout.start();
 
     expect(http.fetch).toHaveBeenCalledTimes(1);
@@ -292,19 +301,11 @@ describe('SessionTimeout', () => {
       expect.objectContaining({ asSystemRequest: true })
     );
 
-    const [toast] = notifications.toasts.add.mock.calls[0] as [ToastInputFields];
-
-    toast.onClose!();
-
-    expect(http.fetch).toHaveBeenCalledTimes(3);
-    expect(http.fetch).toHaveBeenLastCalledWith(
-      SESSION_ROUTE,
-      expect.objectContaining({ asSystemRequest: false })
-    );
+    expect(overlays.openModal).toHaveBeenCalled();
   });
 
   it('show warning 5 minutes before expiration if not previously dismissed', async () => {
-    const { sessionTimeout, notifications } = createSessionTimeout(null);
+    const { sessionTimeout, notifications, overlays } = createSessionTimeout(null, false);
     await sessionTimeout.start();
 
     const expiresInMs = 10 * 60 * 1000;
@@ -320,10 +321,11 @@ describe('SessionTimeout', () => {
     jest.advanceTimersByTime(showWarningInMs);
 
     expect(notifications.toasts.add).toHaveBeenCalled();
+    expect(overlays.openModal).not.toHaveBeenCalled();
   });
 
   it('do not show warning again if previously dismissed', async () => {
-    const { sessionTimeout, notifications } = createSessionTimeout(null);
+    const { sessionTimeout, notifications, overlays } = createSessionTimeout(null, false);
     await sessionTimeout.start();
 
     const expiresInMs = 10 * 60 * 1000;
@@ -347,6 +349,7 @@ describe('SessionTimeout', () => {
     // dismissed for 10 minutes we will only show it after 10 minutes have elapsed
     jest.advanceTimersByTime(showWarningInMs);
     expect(notifications.toasts.add).not.toHaveBeenCalled();
+    expect(overlays.openModal).not.toHaveBeenCalled();
 
     // Advance the timer further so that a total have 10 minutes would have passed. This is the
     // expiration time of the warning that was dismissed.
@@ -355,19 +358,20 @@ describe('SessionTimeout', () => {
   });
 
   it('hides warning if session gets extended', async () => {
-    const { sessionTimeout, notifications } = createSessionTimeout(60 * 60 * 1000);
+    const { sessionTimeout, overlays } = createSessionTimeout(60 * 60 * 1000);
     await sessionTimeout.start();
 
     jest.advanceTimersByTime(
       60 * 60 * 1000 - SESSION_GRACE_PERIOD_MS - SESSION_EXPIRATION_WARNING_MS
     );
 
-    expect(notifications.toasts.add).toHaveBeenCalled();
+    expect(overlays.openModal).toHaveBeenCalled();
 
     // eslint-disable-next-line dot-notation
     await sessionTimeout['fetchSessionInfo'](true);
 
-    expect(notifications.toasts.remove).toHaveBeenCalled();
+    const modalInstance = overlays.openModal.mock.results[0].value;
+    expect(modalInstance.close).toHaveBeenCalled();
   });
 
   it('logs user out slightly before session expires', async () => {

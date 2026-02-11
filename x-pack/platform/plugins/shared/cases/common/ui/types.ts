@@ -36,6 +36,8 @@ import type {
   Configuration,
   CustomFieldTypes,
   EventAttachment,
+  UnifiedAttachment,
+  CombinedAttachment,
 } from '../types/domain';
 import type {
   CasePatchRequest,
@@ -49,16 +51,20 @@ import type {
   CasesMetricsResponse,
   SingleCaseMetricsResponse,
   CasesSimilarResponse,
-  CaseSummaryResponse,
-  InferenceConnectorsResponse,
 } from '../types/api';
 
 type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
 export interface CasesContextFeatures {
-  alerts: { sync?: boolean; enabled?: boolean; isExperimental?: boolean };
+  alerts: {
+    sync?: boolean;
+    enabled?: boolean;
+    isExperimental?: boolean;
+    read?: boolean;
+    all?: boolean;
+  };
   metrics: SingleCaseMetricsFeature[];
-  observables?: { enabled: boolean };
+  observables?: { enabled: boolean; autoExtract?: boolean };
   events?: { enabled: boolean };
 }
 
@@ -77,8 +83,11 @@ export interface CasesUiConfigType {
   stack: {
     enabled: boolean;
   };
-  unsafe?: {
-    enableCaseSummary: boolean;
+  incrementalId: {
+    enabled: boolean;
+  };
+  templates: {
+    enabled: boolean;
   };
 }
 
@@ -100,6 +109,9 @@ export type CaseViewRefreshPropInterface = null | {
 };
 
 export type AttachmentUI = SnakeToCamelCase<Attachment>;
+export type UnifiedAttachmentUI = SnakeToCamelCase<UnifiedAttachment>;
+export type CombinedAttachmentUI = SnakeToCamelCase<CombinedAttachment>;
+
 export type AlertAttachmentUI = SnakeToCamelCase<AlertAttachment>;
 export type ExternalReferenceAttachmentUI = SnakeToCamelCase<ExternalReferenceAttachment>;
 export type PersistableStateAttachmentUI = SnakeToCamelCase<PersistableStateAttachment>;
@@ -188,13 +200,12 @@ export interface FilterOptions extends SystemFilterOptions {
       options: string[];
     };
   };
+  from: string;
+  to: string;
 }
 
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
 export type SingleCaseMetricsFeature = Exclude<CaseMetricsFeature, CaseMetricsFeature.MTTR>;
-
-export type CaseSummary = CaseSummaryResponse;
-export type InferenceConnectors = InferenceConnectorsResponse;
 
 /**
  * If you add a new value here and you want to support it on the URL

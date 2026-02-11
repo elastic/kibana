@@ -35,9 +35,12 @@ export const ConnectorSetup = ({
   );
   const { setApiConfig } = useConversation();
   // Access all conversations so we can add connector to all on initial setup
-  const { actionTypeRegistry, http, inferenceEnabled } = useAssistantContext();
+  const { actionTypeRegistry, assistantAvailability, http, inferenceEnabled, settings } =
+    useAssistantContext();
 
-  const { refetch: refetchConnectors } = useLoadConnectors({ http, inferenceEnabled });
+  const isMissingConnectorPrivileges = !assistantAvailability.hasConnectorsAllPrivilege;
+
+  const { refetch: refetchConnectors } = useLoadConnectors({ http, inferenceEnabled, settings });
 
   const { data: actionTypes } = useLoadActionTypes({ http });
 
@@ -90,6 +93,7 @@ export const ConnectorSetup = ({
       onSelectActionType={setSelectedActionType}
       selectedActionType={selectedActionType}
       actionTypeSelectorInline={true}
+      isMissingConnectorPrivileges={isMissingConnectorPrivileges}
     />
   );
 };

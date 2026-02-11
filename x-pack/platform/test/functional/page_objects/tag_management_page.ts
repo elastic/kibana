@@ -88,6 +88,7 @@ class TagModal extends FtrService {
 
     if (submit) {
       await this.clickConfirm();
+      await this.header.waitUntilLoadingHasFinished();
     }
   }
 
@@ -338,22 +339,26 @@ export class TagManagementPageObject extends FtrService {
   }
 
   async clickActionItem(action: string) {
+    await this.openCollapsedMenu();
+
+    await this.testSubjects.click(`tagsTableAction-${action}`);
+  }
+
+  async openCollapsedMenu(rowIndex = 0) {
     const rows = await this.testSubjects.findAll('tagsTableRow');
-    const firstRow = rows[0];
+    const row = rows[rowIndex];
     // if there is more than 2 actions, they are wrapped in a popover that opens from a new action.
     const menuActionPresent = await this.testSubjects.descendantExists(
       'euiCollapsedItemActionsButton',
-      firstRow
+      row
     );
     if (menuActionPresent) {
       const actionButton = await this.testSubjects.findDescendant(
         'euiCollapsedItemActionsButton',
-        firstRow
+        row
       );
       await actionButton.click();
     }
-
-    await this.testSubjects.click(`tagsTableAction-${action}`);
   }
 
   /**
@@ -465,17 +470,11 @@ export class TagManagementPageObject extends FtrService {
     if (!(await this.isActionMenuButtonDisplayed())) {
       return false;
     }
-    const menuWasOpened = await this.isActionMenuOpened();
-    if (!menuWasOpened) {
+    if (!(await this.isActionMenuOpened())) {
       await this.openActionMenu();
     }
 
-    if (!menuWasOpened) {
-      await this.toggleActionMenu();
-    }
-
-    const actionExists = await this.testSubjects.exists(`actionBar-button-${actionId}`);
-    return actionExists;
+    return await this.testSubjects.exists(`actionBar-button-${actionId}`);
   }
 
   /**
@@ -497,7 +496,7 @@ export class TagManagementPageObject extends FtrService {
    * Return true if the bulk action menu is opened, false otherwise.
    */
   async isActionMenuOpened() {
-    return this.testSubjects.exists('actionBar-contextMenuPopover');
+    return this.testSubjects.exists('actionBar-contextMenu');
   }
 
   /**

@@ -7,285 +7,154 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getSavedSearchContainer, isEqualSavedSearch } from './discover_saved_search_container';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { discoverServiceMock } from '../../../__mocks__/services';
-import {
-  createSavedSearchAdHocMock,
-  createSavedSearchMock,
-  savedSearchMock,
-} from '../../../__mocks__/saved_search';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { dataViewComplexMock } from '../../../__mocks__/data_view_complex';
-import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { VIEW_MODE } from '../../../../common/constants';
-import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import {
-  createInternalStateStore,
-  createRuntimeStateManager,
-  internalStateActions,
-  selectTab,
-} from './redux';
-import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
-import { mockControlState } from '../../../__mocks__/esql_controls';
+import { createDiscoverServicesMock } from '../../../__mocks__/services';
+import { savedSearchMock } from '../../../__mocks__/saved_search';
+import { fromTabStateToSavedObjectTab, internalStateActions } from './redux';
 import { omit } from 'lodash';
-import { createTabsStorageManager } from './tabs_storage_manager';
+import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
+import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
+import { getTabStateMock } from './redux/__mocks__/internal_state.mocks';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import type { DiscoverServices } from '../../../build_services';
+import { dataViewAdHoc } from '../../../__mocks__/data_view_complex';
 
 describe('DiscoverSavedSearchContainer', () => {
-  const savedSearch = savedSearchMock;
-  const services = discoverServiceMock;
-  const urlStateStorage = createKbnUrlStateStorage();
-  const tabsStorageManager = createTabsStorageManager({
-    urlStateStorage,
-    storage: services.storage,
-  });
-  const internalState = createInternalStateStore({
+  const setup = async ({
+    persistedDiscoverSession,
     services,
-    customizationContext: mockCustomizationContext,
-    runtimeStateManager: createRuntimeStateManager(),
-    urlStateStorage,
-    tabsStorageManager,
-  });
-  const getCurrentTab = () =>
-    selectTab(internalState.getState(), internalState.getState().tabs.unsafeCurrentId);
-
-  beforeAll(async () => {
-    await internalState.dispatch(
-      internalStateActions.initializeTabs({ discoverSessionId: savedSearch?.id })
-    );
-  });
-
-  describe('getTitle', () => {
-    it('returns undefined for new saved searches', () => {
-      const container = getSavedSearchContainer({
+  }: {
+    persistedDiscoverSession?: DiscoverSession;
+    services?: DiscoverServices;
+  } = {}) => {
+    const { internalState, initializeTabs, initializeSingleTab, getCurrentTab } =
+      getDiscoverInternalStateMock({
         services,
-        internalState,
-        getCurrentTab,
+        persistedDataViews: [dataViewWithTimefieldMock],
       });
-      expect(container.getTitle()).toBe(undefined);
+
+    await initializeTabs({ persistedDiscoverSession });
+
+    const { stateContainer } = await initializeSingleTab({ tabId: getCurrentTab().id });
+
+    return { internalState, stateContainer, getCurrentTab };
+  };
+
+  const getPersistedDiscoverSession = ({ services }: { services: DiscoverServices }) => {
+    const persistedTab = fromTabStateToSavedObjectTab({
+      tab: getTabStateMock({
+        id: 'persisted-tab',
+        initialInternalState: {
+          serializedSearchSource: { index: dataViewWithTimefieldMock.id },
+        },
+      }),
+      timeRestore: false,
+      services,
     });
 
-    it('returns the title of a persisted saved searches', () => {
-      const container = getSavedSearchContainer({
-        services,
-        internalState,
-        getCurrentTab,
-      });
-      container.set(savedSearch);
-      expect(container.getTitle()).toBe(savedSearch.title);
+    return createDiscoverSessionMock({
+      id: 'test-id',
+      tabs: [persistedTab],
     });
-  });
+  };
 
   describe('set', () => {
-    it('should update the current and initial state of the saved search', () => {
-      const container = getSavedSearchContainer({
-        services,
-        internalState,
-        getCurrentTab,
-      });
-      const newSavedSearch: SavedSearch = { ...savedSearch, title: 'New title' };
-      const result = container.set(newSavedSearch);
+    it('should update the current and initial state of the saved search', async () => {
+      const {
+        stateContainer: { savedSearchState },
+      } = await setup();
+      const newSavedSearch: SavedSearch = { ...savedSearchMock, title: 'New title' };
+      const result = savedSearchState.set(newSavedSearch);
 
       expect(result).toBe(newSavedSearch);
-      expect(container.getState()).toBe(newSavedSearch);
-      const initialSavedSearch = container.getInitial$().getValue();
-      const currentSavedSearch = container.getCurrent$().getValue();
+      expect(savedSearchState.getState()).toBe(newSavedSearch);
+      const initialSavedSearch = savedSearchState.getInitial$().getValue();
+      const currentSavedSearch = savedSearchState.getCurrent$().getValue();
 
-      expect(isEqualSavedSearch(initialSavedSearch, currentSavedSearch)).toBeTruthy();
-    });
-
-    it('should reset hasChanged$ to false', () => {
-      const container = getSavedSearchContainer({
-        services,
-        internalState,
-        getCurrentTab,
+      expect({
+        ...omit(initialSavedSearch, 'searchSource'),
+        searchSource: initialSavedSearch.searchSource.serialize(),
+      }).toEqual({
+        ...omit(currentSavedSearch, 'searchSource'),
+        searchSource: currentSavedSearch.searchSource.serialize(),
       });
-      const newSavedSearch: SavedSearch = { ...savedSearch, title: 'New title' };
-
-      container.set(newSavedSearch);
-      expect(container.getHasChanged$().getValue()).toBe(false);
-    });
-  });
-
-  describe('update', () => {
-    it('updates a saved search by app state providing hideChart', async () => {
-      const savedSearchContainer = getSavedSearchContainer({
-        services: discoverServiceMock,
-        internalState,
-        getCurrentTab,
-      });
-      savedSearchContainer.set(savedSearch);
-      const updated = savedSearchContainer.update({ nextState: { hideChart: true } });
-      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
-      savedSearchContainer.set(updated);
-      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
-      savedSearchContainer.update({ nextState: { hideChart: false } });
-      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
-      savedSearchContainer.update({ nextState: { hideChart: true } });
-      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
-    });
-    it('updates a saved search by data view', async () => {
-      const savedSearchContainer = getSavedSearchContainer({
-        services: discoverServiceMock,
-        internalState,
-        getCurrentTab,
-      });
-      const updated = savedSearchContainer.update({ nextDataView: dataViewMock });
-      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
-      savedSearchContainer.set(updated);
-      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
-      savedSearchContainer.update({ nextDataView: dataViewComplexMock });
-      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(true);
-      savedSearchContainer.update({ nextDataView: dataViewMock });
-      expect(savedSearchContainer.getHasChanged$().getValue()).toBe(false);
-    });
-  });
-
-  describe('isEqualSavedSearch', () => {
-    it('should return true for equal saved searches', () => {
-      const savedSearch1 = savedSearchMock;
-      const savedSearch2 = { ...savedSearchMock };
-      expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(true);
-    });
-
-    it('should return false for different saved searches', () => {
-      const savedSearch1 = savedSearchMock;
-      const savedSearch2 = { ...savedSearchMock, title: 'New title' };
-      expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(false);
-    });
-
-    it('should return true for saved searches with equal default values of viewMode and false otherwise', () => {
-      const savedSearch1 = { ...savedSearchMock, viewMode: undefined };
-      const savedSearch2 = { ...savedSearchMock, viewMode: VIEW_MODE.DOCUMENT_LEVEL };
-      const savedSearch3 = { ...savedSearchMock, viewMode: VIEW_MODE.AGGREGATED_LEVEL };
-      expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(true);
-      expect(isEqualSavedSearch(savedSearch2, savedSearch1)).toBe(true);
-      expect(isEqualSavedSearch(savedSearch1, savedSearch3)).toBe(false);
-      expect(isEqualSavedSearch(savedSearch2, savedSearch3)).toBe(false);
-    });
-
-    it('should return true for saved searches with equal default values of breakdownField and false otherwise', () => {
-      const savedSearch1 = { ...savedSearchMock, breakdownField: undefined };
-      const savedSearch2 = { ...savedSearchMock, breakdownField: '' };
-      const savedSearch3 = { ...savedSearchMock, breakdownField: 'test' };
-      expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(true);
-      expect(isEqualSavedSearch(savedSearch2, savedSearch1)).toBe(true);
-      expect(isEqualSavedSearch(savedSearch1, savedSearch3)).toBe(false);
-      expect(isEqualSavedSearch(savedSearch2, savedSearch3)).toBe(false);
-    });
-
-    it('should check searchSource fields', () => {
-      const savedSearch1 = {
-        ...savedSearchMock,
-        searchSource: createSearchSourceMock({
-          index: savedSearchMock.searchSource.getField('index'),
-        }),
-      };
-      const savedSearch2 = {
-        ...savedSearchMock,
-        searchSource: createSearchSourceMock({
-          index: savedSearchMock.searchSource.getField('index'),
-        }),
-      };
-      expect(isEqualSavedSearch(savedSearch1, savedSearch1)).toBe(true);
-      expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(true);
-      savedSearch2.searchSource.setField('query', { language: 'lucene', query: 'test' });
-      expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(false);
-    });
-
-    it('should return false for different control states', () => {
-      const savedSearch1 = {
-        ...savedSearchMock,
-        controlGroupState: {
-          ...mockControlState,
-          panel1: { ...mockControlState.panel1, selectedOptions: ['baz'] },
-        },
-      };
-      const savedSearch2 = { ...savedSearchMock, controlGroupState: mockControlState };
-      expect(isEqualSavedSearch(savedSearch1, savedSearch2)).toBe(false);
     });
   });
 
   describe('URL tracking', () => {
-    it('should enable URL tracking for a persisted data view', () => {
-      const savedSearchContainer = getSavedSearchContainer({
-        services: discoverServiceMock,
-        internalState,
-        getCurrentTab,
-      });
-      const unsubscribe = savedSearchContainer.initUrlTracking();
+    it('should enable URL tracking for a persisted data view', async () => {
+      const services = createDiscoverServicesMock();
+      const { internalState, getCurrentTab } = await setup({ services });
       jest.spyOn(services.urlTracker, 'setTrackingEnabled').mockClear();
       expect(services.urlTracker.setTrackingEnabled).not.toHaveBeenCalled();
-      const currentSavedSearch = omit(createSavedSearchMock(), 'id');
-      savedSearchContainer.set(currentSavedSearch);
-      expect(services.urlTracker.setTrackingEnabled).toHaveBeenCalledWith(true);
-      unsubscribe();
-    });
-
-    it('should disable URL tracking for an ad hoc data view', () => {
-      const savedSearchContainer = getSavedSearchContainer({
-        services: discoverServiceMock,
-        internalState,
-        getCurrentTab,
-      });
-      const unsubscribe = savedSearchContainer.initUrlTracking();
-      jest.spyOn(services.urlTracker, 'setTrackingEnabled').mockClear();
-      expect(services.urlTracker.setTrackingEnabled).not.toHaveBeenCalled();
-      const currentSavedSearch = omit(createSavedSearchAdHocMock(), 'id');
-      savedSearchContainer.set(currentSavedSearch);
-      expect(services.urlTracker.setTrackingEnabled).toHaveBeenCalledWith(false);
-      unsubscribe();
-    });
-
-    it('should enable URL tracking if the ad hoc data view is a default profile data view', () => {
-      const savedSearchContainer = getSavedSearchContainer({
-        services: discoverServiceMock,
-        internalState,
-        getCurrentTab,
-      });
-      const unsubscribe = savedSearchContainer.initUrlTracking();
-      jest.spyOn(services.urlTracker, 'setTrackingEnabled').mockClear();
-      expect(services.urlTracker.setTrackingEnabled).not.toHaveBeenCalled();
-      const currentSavedSearch = omit(createSavedSearchAdHocMock(), 'id');
       internalState.dispatch(
-        internalStateActions.setDefaultProfileAdHocDataViews([
-          currentSavedSearch.searchSource.getField('index')!,
-        ])
+        internalStateActions.setDataView({
+          tabId: getCurrentTab().id,
+          dataView: dataViewWithTimefieldMock,
+        })
       );
-      savedSearchContainer.set(currentSavedSearch);
       expect(services.urlTracker.setTrackingEnabled).toHaveBeenCalledWith(true);
-      unsubscribe();
     });
 
-    it('should enable URL tracking with an ad hoc data view if in ES|QL mode', () => {
-      const savedSearchContainer = getSavedSearchContainer({
-        services: discoverServiceMock,
-        internalState,
-        getCurrentTab,
-      });
-      const unsubscribe = savedSearchContainer.initUrlTracking();
+    it('should disable URL tracking for an ad hoc data view', async () => {
+      const services = createDiscoverServicesMock();
+      const { internalState, getCurrentTab } = await setup({ services });
       jest.spyOn(services.urlTracker, 'setTrackingEnabled').mockClear();
       expect(services.urlTracker.setTrackingEnabled).not.toHaveBeenCalled();
-      const currentSavedSearch = omit(createSavedSearchAdHocMock(), 'id');
-      currentSavedSearch.searchSource.setField('query', { esql: 'FROM test' });
-      savedSearchContainer.set(currentSavedSearch);
-      expect(services.urlTracker.setTrackingEnabled).toHaveBeenCalledWith(true);
-      unsubscribe();
+      internalState.dispatch(
+        internalStateActions.setDataView({
+          tabId: getCurrentTab().id,
+          dataView: dataViewAdHoc,
+        })
+      );
+      expect(services.urlTracker.setTrackingEnabled).toHaveBeenCalledWith(false);
     });
 
-    it('should enable URL tracking with an ad hoc data view if the saved search has an ID (persisted)', () => {
-      const savedSearchContainer = getSavedSearchContainer({
-        services: discoverServiceMock,
-        internalState,
-        getCurrentTab,
-      });
-      const unsubscribe = savedSearchContainer.initUrlTracking();
+    it('should enable URL tracking if the ad hoc data view is a default profile data view', async () => {
+      const services = createDiscoverServicesMock();
+      const { internalState, getCurrentTab } = await setup({ services });
       jest.spyOn(services.urlTracker, 'setTrackingEnabled').mockClear();
       expect(services.urlTracker.setTrackingEnabled).not.toHaveBeenCalled();
-      const currentSavedSearch = createSavedSearchAdHocMock();
-      savedSearchContainer.set(currentSavedSearch);
+      internalState.dispatch(internalStateActions.setDefaultProfileAdHocDataViews([dataViewAdHoc]));
+      internalState.dispatch(
+        internalStateActions.setDataView({
+          tabId: getCurrentTab().id,
+          dataView: dataViewAdHoc,
+        })
+      );
       expect(services.urlTracker.setTrackingEnabled).toHaveBeenCalledWith(true);
-      unsubscribe();
+    });
+
+    it('should enable URL tracking with an ad hoc data view if in ES|QL mode', async () => {
+      const services = createDiscoverServicesMock();
+      const { internalState, getCurrentTab } = await setup({ services });
+      jest.spyOn(services.urlTracker, 'setTrackingEnabled').mockClear();
+      expect(services.urlTracker.setTrackingEnabled).not.toHaveBeenCalled();
+      internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: getCurrentTab().id,
+          appState: { query: { esql: 'FROM test' } },
+        })
+      );
+      expect(services.urlTracker.setTrackingEnabled).toHaveBeenCalledWith(true);
+    });
+
+    it('should enable URL tracking with an ad hoc data view if the saved search has an ID (persisted)', async () => {
+      const services = createDiscoverServicesMock();
+      const { internalState, getCurrentTab } = await setup({
+        persistedDiscoverSession: getPersistedDiscoverSession({ services }),
+        services,
+      });
+      jest.spyOn(services.urlTracker, 'setTrackingEnabled').mockClear();
+      expect(services.urlTracker.setTrackingEnabled).not.toHaveBeenCalled();
+      internalState.dispatch(
+        internalStateActions.setDataView({
+          tabId: getCurrentTab().id,
+          dataView: dataViewAdHoc,
+        })
+      );
+      expect(services.urlTracker.setTrackingEnabled).toHaveBeenCalledWith(true);
     });
   });
 });

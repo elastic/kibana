@@ -7,8 +7,10 @@
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { Config } from '@kbn/test';
+import type { SUITE_TAGS } from '@kbn/test-suites-xpack-security-endpoint/configs/config.base';
+import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
+import { installMockPrebuiltRulesPackage } from '../../test_suites/detections_response/utils';
 import { SecuritySolutionEndpointRegistryHelpers } from '../services/common';
-import type { SUITE_TAGS } from '../../../security_solution_endpoint/configs/config.base';
 
 export const generateConfig = async ({
   baseConfig,
@@ -43,8 +45,6 @@ export const generateConfig = async ({
         // always install Endpoint package by default when Fleet sets up
         `--xpack.fleet.packages.0.name=endpoint`,
         `--xpack.fleet.packages.0.version=latest`,
-        // this will be removed in 8.7 when the file upload feature is released
-        `--xpack.fleet.enableExperimental.0=diagnosticFileUploadEnabled`,
         // set any experimental feature flags for testing
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`,
 
@@ -57,6 +57,16 @@ export const generateConfig = async ({
         target === 'serverless'
           ? '/^(?!.*(^|\\s)@skipInServerless(\\s|$)).*@serverless.*/'
           : '/^(?!.*@skipInEss).*@ess.*/',
+      rootHooks: {
+        // Creating an Endpoint package policy with endpointPolicyTestResources.createPolicy()
+        // install prebuilt rules under the hood.
+        // Prebuilt rules package installation has been known to be flakiness reason since
+        // EPR might be unavailable or the network may have faults.
+        // Real prebuilt rules package installation is prevented by
+        // installing a lightweight mock package.
+        beforeAll: ({ getService }: FtrProviderContext) =>
+          installMockPrebuiltRulesPackage({ getService }),
+      },
     },
   };
 };

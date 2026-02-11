@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type SuperTest from 'supertest';
 import { createHash } from 'node:crypto';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import type {
   CasesConnectorRunParams,
   OracleRecordAttributes,
@@ -89,7 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed (Error: [alerts.0]: Alert ID and index must be defined)'
+          `Request validation failed (Field "alerts.0": Alert ID and index must be defined)`
         );
       });
 
@@ -102,7 +102,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed (Error: [groupingBy]: array size is [2], but cannot be greater than [1])'
+          'Request validation failed (Field "groupingBy": Array must contain at most 1 element(s))'
         );
       });
 
@@ -115,7 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed (Error: [timeWindow]: Not a valid time window)'
+          'Request validation failed (Field "timeWindow": Not a valid time window, Not a valid time window)'
         );
       });
 
@@ -128,23 +128,32 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed (Error: [timeWindow]: Not a valid time window)'
+          'Request validation failed (Field "timeWindow": Not a valid time window)'
         );
       });
 
       it('returns 400 for unsupported time units', async () => {
-        for (const unit of ['s', 'H']) {
-          const res = await executeSystemConnector({
-            supertest,
-            connectorId,
-            req: getRequest({ timeWindow: `5${unit}` }),
-          });
+        const res1 = await executeSystemConnector({
+          supertest,
+          connectorId,
+          req: getRequest({ timeWindow: `5s` }),
+        });
 
-          expect(res.status).to.be('error');
-          expect(res.serviceMessage).to.be(
-            'Request validation failed (Error: [timeWindow]: Not a valid time window)'
-          );
-        }
+        expect(res1.status).to.be('error');
+        expect(res1.serviceMessage).to.be(
+          'Request validation failed (Field "timeWindow": Not a valid time window)'
+        );
+
+        const res2 = await executeSystemConnector({
+          supertest,
+          connectorId,
+          req: getRequest({ timeWindow: `5H` }),
+        });
+
+        expect(res2.status).to.be('error');
+        expect(res2.serviceMessage).to.be(
+          'Request validation failed (Field "timeWindow": Not a valid time window, Not a valid time window)'
+        );
       });
 
       it('returns 400 for timeWindow < 5m ', async () => {
@@ -155,7 +164,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed (Error: [timeWindow]: Time window should be at least 5 minutes)'
+          'Request validation failed (Field "timeWindow": Time window should be at least 5 minutes)'
         );
       });
 
@@ -168,7 +177,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed (Error: [maximumCasesToOpen]: Value must be equal to or lower than [20].)'
+          'Request validation failed (Field "maximumCasesToOpen": Number must be less than or equal to 20)'
         );
       });
 
@@ -181,7 +190,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(res.status).to.be('error');
         expect(res.serviceMessage).to.be(
-          'Request validation failed (Error: [maximumCasesToOpen]: Value must be equal to or greater than [1].)'
+          'Request validation failed (Field "maximumCasesToOpen": Number must be greater than or equal to 1)'
         );
       });
     });
@@ -340,6 +349,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolutionFixture',
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
             severity: 'low',
             status: 'open',
@@ -354,6 +364,7 @@ export default ({ getService }: FtrProviderContext): void => {
               username: 'elastic',
             },
             observables: [],
+            total_observables: 0,
           });
         });
 
@@ -454,6 +465,7 @@ export default ({ getService }: FtrProviderContext): void => {
             owner: 'securitySolutionFixture',
             settings: {
               syncAlerts: false,
+              extractObservables: false,
             },
             severity: 'high',
             status: 'open',
@@ -468,6 +480,7 @@ export default ({ getService }: FtrProviderContext): void => {
               username: 'elastic',
             },
             observables: [],
+            total_observables: 0,
           });
         });
 
@@ -826,6 +839,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -847,6 +861,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 username: 'elastic',
               },
               observables: [],
+              total_observables: 0,
             });
 
             expect(secondCase).to.eql({
@@ -875,6 +890,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -896,6 +912,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 username: 'elastic',
               },
               observables: [],
+              total_observables: 0,
             });
           });
 
@@ -1343,6 +1360,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -1364,6 +1382,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 username: 'elastic',
               },
               observables: [],
+              total_observables: 0,
             });
 
             expect(secondCase).to.eql({
@@ -1392,6 +1411,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -1413,6 +1433,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 username: 'elastic',
               },
               observables: [],
+              total_observables: 0,
             });
 
             expect(thirdCase).to.eql({
@@ -1441,6 +1462,7 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
               settings: {
                 syncAlerts: false,
+                extractObservables: false,
               },
               severity: 'low',
               status: 'open',
@@ -1462,6 +1484,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 username: 'elastic',
               },
               observables: [],
+              total_observables: 0,
             });
           });
 
@@ -1788,6 +1811,7 @@ const getRequest = (params: Partial<CasesConnectorRunParams> = {}) => {
       maximumCasesToOpen: 5,
       templateId: null,
       internallyManagedAlerts: null,
+      autoPushCase: null,
       ...params,
     },
   };
@@ -1838,7 +1862,9 @@ const generateId = ({
   spaceId?: string;
   owner?: string;
 }) => {
-  const payload = [ruleId, spaceId, owner, stringify(grouping), counter].filter(Boolean).join(':');
+  const payload = [ruleId, spaceId, owner, stableStringify(grouping), counter]
+    .filter(Boolean)
+    .join(':');
   const hash = createHash('sha256');
 
   hash.update(payload);
@@ -1848,7 +1874,6 @@ const generateId = ({
 const removeServerGeneratedData = (
   theCase: Case
 ): Omit<Case, 'created_at' | 'updated_at' | 'version'> => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { created_at, updated_at, version, ...restCase } = theCase;
 
   return restCase;
@@ -1902,6 +1927,10 @@ const createCaseWithId = async ({
         type: ConnectorTypes.none,
         fields: null,
       },
+      settings: {
+        syncAlerts: req?.settings?.syncAlerts ?? false,
+        extractObservables: req?.settings?.extractObservables ?? false,
+      },
       // @ts-ignore
       status: STATUS_EXTERNAL_TO_ESMODEL[req?.status ?? CaseStatuses.open],
       // @ts-ignore
@@ -1916,7 +1945,9 @@ const createCaseWithId = async ({
       external_service: null,
       total_alerts: 0,
       total_comments: 0,
+      total_events: 0,
       observables: [],
+      total_observables: 0,
       incremental_id: undefined,
     },
     overwrite: false,

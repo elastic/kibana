@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/file-upload",
   "owner": "@elastic/ml-ui",
   "group": "platform",

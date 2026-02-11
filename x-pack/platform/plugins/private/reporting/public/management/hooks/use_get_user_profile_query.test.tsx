@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
+import '@kbn/react-query/mock';
+import * as ReactQuery from '@kbn/react-query';
 import { useGetUserProfileQuery } from './use_get_user_profile_query';
 import type { UserProfileService } from '@kbn/core/public';
-import { QueryClientProvider } from '@tanstack/react-query';
-import * as reactQuery from '@tanstack/react-query';
 import type { PropsWithChildren } from 'react';
 import { testQueryClient } from '../test_utils/test_query_client';
 
-const useQuerySpy = jest.spyOn(reactQuery, 'useQuery');
+const { QueryClientProvider, useQuery } = ReactQuery;
 
 const mockUserProfileService = {
   getCurrent: jest.fn(),
@@ -53,7 +53,7 @@ describe('useGetUserProfileQuery', () => {
       wrapper,
     });
 
-    expect(useQuerySpy).toHaveBeenCalledWith(
+    expect(useQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         enabled: false,
       })

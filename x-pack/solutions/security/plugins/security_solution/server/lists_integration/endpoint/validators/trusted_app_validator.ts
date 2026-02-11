@@ -15,7 +15,7 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
-import {} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
+import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../common/endpoint/service/artifacts/constants';
 import { BaseValidator } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
 import type { TrustedAppConditionEntry as ConditionEntry } from '../../../../common/endpoint/types';
@@ -292,10 +292,25 @@ export class TrustedAppValidator extends BaseValidator {
     try {
       const isTAAdvancedModeFeatureFlagEnabled =
         this.endpointAppContext.experimentalFeatures.trustedAppsAdvancedMode;
+      const isTAProcessDescendantsFeatureFlagEnabled =
+        this.endpointAppContext.experimentalFeatures.filterProcessDescendantsForTrustedAppsEnabled;
       const isAdvancedMode = item.tags.includes('form_mode:advanced');
+      const hasProcessDescendants = item.tags.includes(TRUSTED_PROCESS_DESCENDANTS_TAG);
+
+      // Validate that the feature flags are enabled if the related features are used
       if (!isTAAdvancedModeFeatureFlagEnabled && isAdvancedMode) {
         throw new Error('Trusted apps advanced mode feature is not enabled');
-      } else if (isTAAdvancedModeFeatureFlagEnabled && isAdvancedMode) {
+      }
+      if (!isTAProcessDescendantsFeatureFlagEnabled && hasProcessDescendants) {
+        throw new Error('Trusted apps process descendants feature is not enabled');
+      }
+      // Validate that process descendants is only used in advanced mode
+      if (!isAdvancedMode && hasProcessDescendants) {
+        throw new Error('Process descendants feature is only allowed on advanced mode');
+      }
+
+      // Validate with the correct schema depending on the mode
+      if (isTAAdvancedModeFeatureFlagEnabled && isAdvancedMode) {
         TrustedAppAdvancedModeDataSchema.validate(item);
       } else {
         TrustedAppDataSchema.validate(item, { os: item.osTypes[0] });

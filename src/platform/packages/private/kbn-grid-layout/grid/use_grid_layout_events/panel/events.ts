@@ -107,6 +107,7 @@ export const useGridLayoutPanelEvents = ({
           onStart,
           onMove,
           onEnd,
+          scrollContainer: gridLayoutStateManager.scrollContainer$.getValue(),
         });
       } else if (isTouchEvent(e)) {
         startTouchInteraction({

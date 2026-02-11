@@ -20,8 +20,8 @@ export interface AlertsPrivelegesState {
   hasIndexUpdateDelete: boolean | null;
   hasIndexMaintenance: boolean | null;
   hasIndexRead: boolean | null;
-  hasKibanaCRUD: boolean;
-  hasKibanaREAD: boolean;
+  hasAlertsRead: boolean;
+  hasAlertsAll: boolean;
 }
 /**
  * Hook to get user privilege from
@@ -30,7 +30,10 @@ export interface AlertsPrivelegesState {
 export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
   const {
     detectionEnginePrivileges: { error, result, loading },
-    kibanaSecuritySolutionsPrivileges: { crud: hasKibanaCRUD, read: hasKibanaREAD },
+    // Rules privileges implicitly contain alerts privileges. Until we separate them out into dedicated privileges, we are using rules privileges to determine alerts privileges.
+    rulesPrivileges: {
+      rules: { read: hasAlertsRead, edit: hasAlertsAll },
+    },
   } = useUserPrivileges();
 
   const indexName = useMemo(() => {
@@ -50,8 +53,8 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
         hasIndexWrite: false,
         hasIndexUpdateDelete: false,
         hasIndexMaintenance: false,
-        hasKibanaCRUD,
-        hasKibanaREAD,
+        hasAlertsRead,
+        hasAlertsAll,
       };
     }
 
@@ -68,8 +71,8 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
           result.index[indexName].index ||
           result.index[indexName].write,
         hasIndexUpdateDelete: result.index[indexName].write,
-        hasKibanaCRUD,
-        hasKibanaREAD,
+        hasAlertsRead,
+        hasAlertsAll,
       };
     }
 
@@ -81,10 +84,10 @@ export const useAlertsPrivileges = (): UseAlertsPrivelegesReturn => {
       hasIndexWrite: null,
       hasIndexUpdateDelete: null,
       hasIndexMaintenance: null,
-      hasKibanaCRUD: false,
-      hasKibanaREAD: false,
+      hasAlertsRead: false,
+      hasAlertsAll: false,
     };
-  }, [error, result, indexName, hasKibanaCRUD, hasKibanaREAD]);
+  }, [error, result, indexName, hasAlertsRead, hasAlertsAll]);
 
   return { loading: loading ?? false, ...privileges };
 };

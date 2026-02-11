@@ -10,7 +10,6 @@ import type { SnapshotNode } from '../../../../../common/http_api';
 import { Layout } from './layout';
 
 interface Props {
-  reload: () => void;
   interval: string;
   nodes: SnapshotNode[];
   loading: boolean;

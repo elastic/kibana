@@ -6,7 +6,7 @@
  */
 import React, { useCallback, useMemo, useRef, type PropsWithChildren } from 'react';
 import { v4 as uuidV4 } from 'uuid';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import { TelemetryEventType } from '../../services/telemetry/types';
 import { useKibana } from '../../common/hooks/use_kibana';
 import type {

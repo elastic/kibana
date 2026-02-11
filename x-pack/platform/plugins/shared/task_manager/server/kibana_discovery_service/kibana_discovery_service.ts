@@ -11,7 +11,7 @@ import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
 import type { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
 import type { TaskManagerConfig } from '../config';
 import { DISCOVERY_INTERVAL_AFTER_BLOCK_EXCEPTION_MS } from '../config';
-import { isClusterBlockException } from '../lib/bulk_update_error';
+import { isClusterBlockException } from '../lib/errors';
 
 interface DiscoveryServiceParams {
   config: TaskManagerConfig['discovery'];

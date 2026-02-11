@@ -8,17 +8,14 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-import type { SinonSpy } from 'sinon';
-import { spy, assert } from 'sinon';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { render, waitFor, act, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { RangeControlEditor } from './range_control_editor';
 import type { ControlParams } from '../../editor_utils';
 import { getDepsMock } from '../../test_utils/get_deps_mock';
-import { getIndexPatternMock, updateComponent } from '../../test_utils';
+import { getIndexPatternMock } from '../../test_utils';
 
 const controlParams: ControlParams = {
   id: '1',
@@ -33,80 +30,105 @@ const controlParams: ControlParams = {
   parent: '',
 };
 const deps = getDepsMock();
-let handleFieldNameChange: SinonSpy;
-let handleIndexPatternChange: SinonSpy;
-let handleOptionsChange: SinonSpy;
+let handleFieldNameChange: jest.MockedFunction<any>;
+let handleIndexPatternChange: jest.MockedFunction<any>;
+let handleOptionsChange: jest.MockedFunction<any>;
+
+const Wrapper = ({ children }: { children: React.ReactNode }) => (
+  <I18nProvider>{children}</I18nProvider>
+);
 
 beforeEach(() => {
-  handleFieldNameChange = spy();
-  handleIndexPatternChange = spy();
-  handleOptionsChange = spy();
+  handleFieldNameChange = jest.fn();
+  handleIndexPatternChange = jest.fn();
+  handleOptionsChange = jest.fn();
 });
 
 test('renders RangeControlEditor', async () => {
-  const component = shallow(
-    <RangeControlEditor
-      deps={deps}
-      getIndexPattern={getIndexPatternMock}
-      controlIndex={0}
-      controlParams={controlParams}
-      handleFieldNameChange={handleFieldNameChange}
-      handleIndexPatternChange={handleIndexPatternChange}
-      handleOptionsChange={handleOptionsChange}
-    />
+  const { container } = render(
+    <Wrapper>
+      <RangeControlEditor
+        deps={deps}
+        getIndexPattern={getIndexPatternMock}
+        controlIndex={0}
+        controlParams={controlParams}
+        handleFieldNameChange={handleFieldNameChange}
+        handleIndexPatternChange={handleIndexPatternChange}
+        handleOptionsChange={handleOptionsChange}
+      />
+    </Wrapper>
   );
 
-  await updateComponent(component);
+  // Wait for async loading to complete
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
 
-  expect(component).toMatchSnapshot();
+  expect(container).toMatchSnapshot();
 });
 
 test('handleOptionsChange - step', async () => {
-  const component = mountWithIntl(
-    <RangeControlEditor
-      deps={deps}
-      getIndexPattern={getIndexPatternMock}
-      controlIndex={0}
-      controlParams={controlParams}
-      handleFieldNameChange={handleFieldNameChange}
-      handleIndexPatternChange={handleIndexPatternChange}
-      handleOptionsChange={handleOptionsChange}
-    />
+  render(
+    <Wrapper>
+      <RangeControlEditor
+        deps={deps}
+        getIndexPattern={getIndexPatternMock}
+        controlIndex={0}
+        controlParams={controlParams}
+        handleFieldNameChange={handleFieldNameChange}
+        handleIndexPatternChange={handleIndexPatternChange}
+        handleOptionsChange={handleOptionsChange}
+      />
+    </Wrapper>
   );
 
-  await updateComponent(component);
-
-  findTestSubject(component, 'rangeControlSizeInput0').simulate('change', {
-    target: { valueAsNumber: 0.5 },
+  // Wait for component to load
+  await waitFor(() => {
+    expect(screen.getByTestId('rangeControlSizeInput0')).toBeInTheDocument();
   });
-  assert.notCalled(handleFieldNameChange);
-  assert.notCalled(handleIndexPatternChange);
-  const expectedControlIndex = 0;
-  const expectedOptionName = 'step';
-  assert.calledWith(handleOptionsChange, expectedControlIndex, expectedOptionName, 0.5);
+
+  const input = screen.getByTestId('rangeControlSizeInput0') as HTMLInputElement;
+
+  await act(async () => {
+    await userEvent.clear(input);
+    await userEvent.type(input, '1.5');
+    input.blur();
+  });
+
+  expect(handleFieldNameChange).not.toHaveBeenCalled();
+  expect(handleIndexPatternChange).not.toHaveBeenCalled();
+  expect(handleOptionsChange).toHaveBeenCalledWith(0, 'step', 1.5);
 });
 
 test('handleOptionsChange - decimalPlaces', async () => {
-  const component = mountWithIntl(
-    <RangeControlEditor
-      deps={deps}
-      getIndexPattern={getIndexPatternMock}
-      controlIndex={0}
-      controlParams={controlParams}
-      handleFieldNameChange={handleFieldNameChange}
-      handleIndexPatternChange={handleIndexPatternChange}
-      handleOptionsChange={handleOptionsChange}
-    />
+  render(
+    <Wrapper>
+      <RangeControlEditor
+        deps={deps}
+        getIndexPattern={getIndexPatternMock}
+        controlIndex={0}
+        controlParams={controlParams}
+        handleFieldNameChange={handleFieldNameChange}
+        handleIndexPatternChange={handleIndexPatternChange}
+        handleOptionsChange={handleOptionsChange}
+      />
+    </Wrapper>
   );
 
-  await updateComponent(component);
-
-  findTestSubject(component, 'rangeControlDecimalPlacesInput0').simulate('change', {
-    target: { valueAsNumber: 2 },
+  // Wait for component to load
+  await waitFor(() => {
+    expect(screen.getByTestId('rangeControlDecimalPlacesInput0')).toBeInTheDocument();
   });
-  assert.notCalled(handleFieldNameChange);
-  assert.notCalled(handleIndexPatternChange);
-  const expectedControlIndex = 0;
-  const expectedOptionName = 'decimalPlaces';
-  assert.calledWith(handleOptionsChange, expectedControlIndex, expectedOptionName, 2);
+
+  const input = screen.getByTestId('rangeControlDecimalPlacesInput0') as HTMLInputElement;
+
+  await act(async () => {
+    await userEvent.clear(input);
+    await userEvent.type(input, '2');
+    input.blur();
+  });
+
+  expect(handleFieldNameChange).not.toHaveBeenCalled();
+  expect(handleIndexPatternChange).not.toHaveBeenCalled();
+  expect(handleOptionsChange).toHaveBeenCalledWith(0, 'decimalPlaces', 2);
 });

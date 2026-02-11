@@ -10,10 +10,7 @@ import Boom from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import pMap from 'p-map';
 
-import type {
-  IndicesCreateRequest,
-  ClusterPutComponentTemplateRequest,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import {
@@ -40,6 +37,7 @@ import {
   USER_SETTINGS_TEMPLATE_SUFFIX,
   STACK_COMPONENT_TEMPLATES,
   MAX_CONCURRENT_COMPONENT_TEMPLATES,
+  OTEL_COMPONENT_TEMPLATES,
 } from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
@@ -50,6 +48,8 @@ import {
 import { appContextService } from '../../../app_context';
 import type { AssetsMap, PackageInstallContext } from '../../../../../common/types';
 
+import { OTEL_COLLECTOR_INPUT_TYPE, OTEL_TEMPLATE_SUFFIX } from '../../../../../common/constants';
+
 import {
   generateMappings,
   generateTemplateName,
@@ -57,7 +57,7 @@ import {
   getTemplate,
   getTemplatePriority,
 } from './template';
-import { buildDefaultSettings } from './default_settings';
+import { buildDefaultSettings, getILMMigrationStatus } from './default_settings';
 import { isUserSettingsTemplate } from './utils';
 
 const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => tmpl.name);
@@ -91,19 +91,12 @@ export const prepareToInstallTemplates = async (
   const dataStreams = onlyForDataStreams || packageInfo.data_streams;
   if (!dataStreams) return { assetsToAdd: [], assetsToRemove, install: () => Promise.resolve([]) };
 
-  const templates = dataStreams.map((dataStream) => {
-    const experimentalDataStreamFeature = experimentalDataStreamFeatures.find(
-      (datastreamFeature) =>
-        datastreamFeature.data_stream === getRegistryDataStreamAssetBaseName(dataStream)
-    );
-
-    return prepareTemplate({
-      packageInstallContext,
-      fieldAssetsMap,
-      dataStream,
-      experimentalDataStreamFeature,
-    });
-  });
+  const templates = await prepareDataStreamTemplates(
+    dataStreams,
+    packageInstallContext,
+    fieldAssetsMap,
+    experimentalDataStreamFeatures
+  );
 
   const assetsToAdd = getAllTemplateRefs(templates.map((template) => template.indexTemplate));
 
@@ -135,6 +128,38 @@ export const prepareToInstallTemplates = async (
     },
   };
 };
+
+export async function prepareDataStreamTemplates(
+  dataStreams: RegistryDataStream[],
+  packageInstallContext: PackageInstallContext,
+  fieldAssetsMap: AssetsMap,
+  experimentalDataStreamFeatures: ExperimentalDataStreamFeature[] = []
+): Promise<
+  {
+    componentTemplates: TemplateMap;
+    indexTemplate: IndexTemplateEntry;
+  }[]
+> {
+  const ilmMigrationStatusMap = await getILMMigrationStatus();
+
+  const templates = dataStreams.map((dataStream) => {
+    const experimentalDataStreamFeature = experimentalDataStreamFeatures.find(
+      (datastreamFeature) =>
+        datastreamFeature.data_stream === getRegistryDataStreamAssetBaseName(dataStream)
+    );
+
+    const { componentTemplates, indexTemplate } = prepareTemplate({
+      packageInstallContext,
+      fieldAssetsMap,
+      dataStream,
+      experimentalDataStreamFeature,
+      ilmMigrationStatusMap,
+    });
+    return { componentTemplates, indexTemplate };
+  });
+
+  return templates;
+}
 
 const installPreBuiltTemplates = async (
   packageInstallContext: PackageInstallContext,
@@ -364,6 +389,7 @@ export function buildComponentTemplates(params: {
   lifecycle?: IndexTemplate['template']['lifecycle'];
   fieldCount?: number;
   type?: string;
+  isOtelInputType?: boolean;
 }) {
   const {
     templateName,
@@ -376,6 +402,7 @@ export function buildComponentTemplates(params: {
     lifecycle,
     fieldCount,
     type,
+    isOtelInputType,
   } = params;
   const packageTemplateName = `${templateName}${PACKAGE_TEMPLATE_SUFFIX}`;
   const userSettingsTemplateName = `${templateName}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
@@ -410,9 +437,8 @@ export function buildComponentTemplates(params: {
 
   const mappingsDynamicTemplates = uniqBy(
     concat(mappings.dynamic_templates ?? [], indexTemplateMappings.dynamic_templates ?? []),
-    (dynampingTemplate) => Object.keys(dynampingTemplate)[0]
+    (dynamicTemplate) => Object.keys(dynamicTemplate)[0]
   );
-
   const mappingsRuntimeFields = merge(mappings.runtime, indexTemplateMappings.runtime ?? {});
 
   const isTimeSeriesEnabledByDefault = registryElasticsearch?.index_mode === 'time_series';
@@ -466,6 +492,15 @@ export function buildComponentTemplates(params: {
   // Stub custom template
   if (type) {
     const customTemplateName = `${type}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
+    templatesMap[customTemplateName] = {
+      template: {
+        settings: {},
+      },
+      _meta,
+    };
+  }
+  if (type && isOtelInputType) {
+    const customTemplateName = `${type}-${OTEL_TEMPLATE_SUFFIX}${USER_SETTINGS_TEMPLATE_SUFFIX}`;
     templatesMap[customTemplateName] = {
       template: {
         settings: {},
@@ -563,39 +598,6 @@ export async function ensureComponentTemplate(
   return { isCreated: !existingTemplate };
 }
 
-export async function ensureAliasHasWriteIndex(opts: {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  aliasName: string;
-  writeIndexName: string;
-  body: Omit<IndicesCreateRequest, 'index'>;
-}): Promise<void> {
-  const { esClient, logger, aliasName, writeIndexName, body } = opts;
-  const existingIndex = await retryTransientEsErrors(
-    () =>
-      esClient.indices.exists(
-        {
-          index: [aliasName],
-        },
-        {
-          ignore: [404],
-        }
-      ),
-    { logger }
-  );
-
-  if (!existingIndex) {
-    logger.info(`Creating write index [${writeIndexName}], alias [${aliasName}]`);
-
-    await retryTransientEsErrors(
-      () => esClient.indices.create({ index: writeIndexName, ...body }, { ignore: [404] }),
-      {
-        logger,
-      }
-    );
-  }
-}
-
 function countFields(fields: Fields): number {
   return fields.reduce((acc, field) => {
     let subCount = 1;
@@ -614,19 +616,27 @@ export function prepareTemplate({
   fieldAssetsMap,
   dataStream,
   experimentalDataStreamFeature,
+  ilmMigrationStatusMap,
 }: {
   packageInstallContext: PackageInstallContext;
   fieldAssetsMap: AssetsMap;
   dataStream: RegistryDataStream;
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
-}): { componentTemplates: TemplateMap; indexTemplate: IndexTemplateEntry } {
+  ilmMigrationStatusMap: Map<string, 'success' | undefined | null>;
+}): {
+  componentTemplates: TemplateMap;
+  indexTemplate: IndexTemplateEntry;
+} {
   const { name: packageName, version: packageVersion } = packageInstallContext.packageInfo;
   const fields = loadDatastreamsFieldsFromYaml(
     packageInstallContext,
     fieldAssetsMap,
     dataStream.path
   );
-
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+  const isOtelInputType =
+    experimentalFeature.enableOtelIntegrations &&
+    (dataStream?.streams || []).some((stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE);
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
     !!experimentalDataStreamFeature?.features.tsdb;
@@ -635,7 +645,7 @@ export function prepareTemplate({
 
   const mappings = generateMappings(validFields, isIndexModeTimeSeries);
   const templateName = generateTemplateName(dataStream);
-  const templateIndexPattern = generateTemplateIndexPattern(dataStream);
+  const templateIndexPattern = generateTemplateIndexPattern(dataStream, isOtelInputType);
   const templatePriority = getTemplatePriority(dataStream);
 
   const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
@@ -646,6 +656,8 @@ export function prepareTemplate({
   const defaultSettings = buildDefaultSettings({
     type: dataStream.type,
     ilmPolicy: dataStream.ilm_policy,
+    isOtelInputType,
+    ilmMigrationStatusMap,
   });
 
   const componentTemplates = buildComponentTemplates({
@@ -659,6 +671,7 @@ export function prepareTemplate({
     lifecycle: lifecyle,
     fieldCount: countFields(validFields),
     type: dataStream.type,
+    isOtelInputType,
   });
 
   const template = getTemplate({
@@ -668,9 +681,9 @@ export function prepareTemplate({
     templatePriority,
     hidden: dataStream.hidden,
     registryElasticsearch: dataStream.elasticsearch,
-    mappings,
     isIndexModeTimeSeries,
     type: dataStream.type,
+    isOtelInputType,
   });
 
   return {
@@ -717,6 +730,8 @@ export function getAllTemplateRefs(installedTemplates: IndexTemplateEntry[]) {
       )
       // Filter stack component templates shared between integrations
       .filter((componentTemplateId) => !STACK_COMPONENT_TEMPLATES.includes(componentTemplateId))
+      // Filter OTEL component templates shared between integrations
+      .filter((componentTemplateId) => !OTEL_COMPONENT_TEMPLATES.includes(componentTemplateId))
       .map((componentTemplateId) => ({
         id: componentTemplateId,
         type: ElasticsearchAssetType.componentTemplate,

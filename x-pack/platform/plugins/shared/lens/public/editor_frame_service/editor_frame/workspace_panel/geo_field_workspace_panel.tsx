@@ -14,7 +14,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { GlobeIllustration } from '@kbn/chart-icons';
 import { Droppable } from '@kbn/dom-drag-drop';
-import type { IndexPattern } from '../../../types';
+import type { IndexPattern } from '@kbn/lens-common';
 import { getVisualizeGeoFieldMessage } from '../../../utils';
 import { APP_ID } from '../../../../common/constants';
 import { pageContentBodyStyles, promptIllustrationStyle } from './workspace_panel';

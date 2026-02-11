@@ -17,10 +17,3 @@ export const ANOMALIES_STACK_BY_JOB_ID = i18n.translate(
 export const ANOMALIES_TITLE = i18n.translate('xpack.securitySolution.containers.anomalies.title', {
   defaultMessage: 'Anomalies',
 });
-
-export const ERROR_FETCHING_ANOMALIES_DATA = i18n.translate(
-  'xpack.securitySolution.containers.anomalies.errorFetchingAnomaliesData',
-  {
-    defaultMessage: 'Failed to query anomalies data',
-  }
-);

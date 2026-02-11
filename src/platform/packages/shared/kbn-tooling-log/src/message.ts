@@ -22,5 +22,5 @@ export interface Message {
   /** args passed to the logging method */
   args: any[];
   /** an identifier of the logging entity */
-  context?: string;
+  context?: string | string[];
 }

@@ -9,11 +9,23 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiLoadingSpinner, EuiPageSection } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPageSection, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  return {
+    editorSpinner: css`
+      width: 100%;
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    `,
+  };
+};
 
 export const EditorContentSpinner: FunctionComponent = () => {
+  const styles = useStyles();
   return (
-    <EuiPageSection alignment="center" grow={true} className="conApp__editor__spinner">
+    <EuiPageSection alignment="center" grow={true} css={styles.editorSpinner}>
       <EuiLoadingSpinner size="xxl" />
     </EuiPageSection>
   );

@@ -23,16 +23,21 @@ ${esqlPrompts.examples}`;
 export const generateEsqlPrompt = ({
   esqlPrompts,
   additionalSystemInstructions,
+  availableTools,
   hasTools = false,
 }: {
   esqlPrompts: EsqlPrompts;
   additionalSystemInstructions?: string;
+  availableTools: string[];
   hasTools?: boolean;
 }) => {
   const hasToolBlock = hasTools
     ? `**IMPORTANT**: If there is a tool suitable for answering the user's question, use that tool,
-preferably with a natural language reply included.`
-    : undefined;
+preferably with a natural language reply included. DO NOT attempt to call any other tools
+that are not explicitly listed as available. Only use the following available tools: ${availableTools.join(
+        ', '
+      )}`
+    : '**IMPORTANT**: There are no tools available to use. Do not attempt to call any tools.';
 
   return `You are an assistant that helps with writing ESQL query for Elasticsearch.
 Given a natural language query, you will generate an ESQL query that can be executed against the data source.

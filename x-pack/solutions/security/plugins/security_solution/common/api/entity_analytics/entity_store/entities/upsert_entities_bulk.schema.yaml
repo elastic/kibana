@@ -1,0 +1,63 @@
+openapi: 3.0.0
+info:
+  version: '2023-10-31'
+  title: Entity Store - Update or Create Entities Bulk
+paths:
+  /api/entity_store/entities/bulk:
+    put:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: UpsertEntitiesBulk
+      summary: Upsert many entities in Entity Store
+      description: >
+        Update or create many entities in Entity Store.
+        
+        If the specified entity already exists, it is updated with the provided values. 
+        If the entity does not exist, a new one is created.
+
+        The creation is asynchronous. The time for a document to be present in the 
+        final index depends on the entity store transform and usually takes more than 1 minute.
+      parameters:
+        - name: force
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        description: Schema for the updating many entities
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntitiesContainer'
+                    
+      responses:
+        '403':
+          description: Operation on a restricted field
+        '503':
+          description: Operation on an uninitialized Engine or in a cluster without CRUD API Enabled
+        '200':
+          description: Entities updated or created
+
+components:
+  schemas:
+    EntityContainer:
+      type: object
+      required:
+        - type
+        - record
+      properties:
+        type: 
+          $ref: '../common.schema.yaml#/components/schemas/EntityType'
+        record:
+          $ref: './common.schema.yaml#/components/schemas/Entity'
+    EntitiesContainer:
+      type: object
+      required:
+        - entities
+      properties:
+        entities:
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityContainer'

@@ -5,35 +5,18 @@
  * 2.0.
  */
 
-import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { ReactNode } from 'react';
 import React, { createContext, useContext, useState } from 'react';
-import { AddToCaseAction } from '../components/slo/add_to_case_action/add_to_case_action';
-import { SloBulkDeleteConfirmationModal } from '../components/slo/bulk_delete_confirmation_modal/bulk_delete_confirmation_modal';
+import { BulkDeleteConfirmationModal } from '../components/slo/bulk_delete_confirmation_modal/bulk_delete_confirmation_modal';
 import { SloDeleteConfirmationModal } from '../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloDisableConfirmationModal } from '../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
 import { SloEnableConfirmationModal } from '../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
-import { BulkPurgeConfirmationContainer } from '../components/slo/purge_confirmation_modal/bulk_purge_modal_container';
-import { PurgeConfirmationContainer } from '../components/slo/purge_confirmation_modal/purge_modal_container';
+import { PurgeInstancesConfirmationModal } from '../components/slo/purge_instances_confirmation_modal/purge_instances_confirmation_modal';
+import { BulkPurgeRollupConfirmationModal } from '../components/slo/purge_rollup_confirmation_modal/bulk_purge_rollup_confirmation_modal';
+import { SloPurgeRollupConfirmationModal } from '../components/slo/purge_rollup_confirmation_modal/slo_purge_rollup_confirmation_modal';
 import { SloResetConfirmationModal } from '../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { useCloneSlo } from '../hooks/use_clone_slo';
-
-type Action = SingleAction | BulkAction;
-
-interface BaseAction {
-  onConfirm?: () => void;
-  onCancel?: () => void;
-}
-
-interface SingleAction extends BaseAction {
-  type: 'clone' | 'delete' | 'reset' | 'enable' | 'disable' | 'purge' | 'add_to_case';
-  item: SLODefinitionResponse | SLOWithSummaryResponse;
-}
-
-interface BulkAction extends BaseAction {
-  type: 'bulk_delete' | 'bulk_purge';
-  items: SLODefinitionResponse[];
-}
+import type { Action } from './types';
 
 interface ActionModalContextValue {
   triggerAction: (action: Action) => void;
@@ -94,9 +77,9 @@ export function ActionModalProvider({ children }: { children: ReactNode }) {
             onConfirm={handleOnConfirm}
           />
         );
-      case 'purge':
+      case 'purge_rollup':
         return (
-          <PurgeConfirmationContainer
+          <SloPurgeRollupConfirmationModal
             item={action.item}
             onCancel={handleOnCancel}
             onConfirm={handleOnConfirm}
@@ -104,24 +87,24 @@ export function ActionModalProvider({ children }: { children: ReactNode }) {
         );
       case 'bulk_delete':
         return (
-          <SloBulkDeleteConfirmationModal
+          <BulkDeleteConfirmationModal
             items={action.items}
             onCancel={handleOnCancel}
             onConfirm={handleOnConfirm}
           />
         );
-      case 'bulk_purge':
+      case 'bulk_purge_rollup':
         return (
-          <BulkPurgeConfirmationContainer
+          <BulkPurgeRollupConfirmationModal
             items={action.items}
             onCancel={handleOnCancel}
             onConfirm={handleOnConfirm}
           />
         );
-      case 'add_to_case':
+      case 'purge_instances':
         return (
-          <AddToCaseAction
-            slo={action.item}
+          <PurgeInstancesConfirmationModal
+            items={action.items}
             onCancel={handleOnCancel}
             onConfirm={handleOnConfirm}
           />

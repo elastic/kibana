@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { defaultToEmptyTag } from '../empty_value';
 export interface ReputationLinkSetting {
   name: string;
   url_template: string;
@@ -137,12 +136,15 @@ ReputationLinksOverflow.displayName = 'ReputationLinksOverflow';
 
 export const MoreReputationLinksContainer = React.memo<ReputationLinkOverflowProps>(
   ({ moreMaxHeight, overflowIndexStart, render, rowItems }) => {
+    const defaultRender = (rowItem: ReputationLinkSetting) => (
+      <a href={rowItem.url_template}>{rowItem.name}</a>
+    );
     const moreItems = useMemo(
       () =>
         rowItems.slice(overflowIndexStart).map((rowItem, index) => {
           return (
             <EuiFlexItem grow={1} key={`${rowItem}-${index}`}>
-              {(render && render(rowItem)) ?? defaultToEmptyTag(rowItem)}
+              {(render && render(rowItem)) ?? defaultRender(rowItem)}
             </EuiFlexItem>
           );
         }),

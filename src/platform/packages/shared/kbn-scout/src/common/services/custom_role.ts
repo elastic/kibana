@@ -12,7 +12,7 @@ import type { EsClient, KbnClient } from '.';
 export interface KibanaRole {
   elasticsearch: {
     cluster: string[];
-    indices: Array<{
+    indices?: Array<{
       names: string[];
       privileges: string[];
       allow_restricted_indices?: boolean | undefined;
@@ -65,4 +65,10 @@ export const createElasticsearchCustomRole = async (
     name: customRoleName,
     ...role,
   });
+};
+
+export const isElasticsearchRole = (
+  role: KibanaRole | ElasticsearchRoleDescriptor
+): role is ElasticsearchRoleDescriptor => {
+  return !(role && 'kibana' in role);
 };

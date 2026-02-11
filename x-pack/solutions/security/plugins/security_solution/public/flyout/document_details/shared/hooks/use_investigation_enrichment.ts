@@ -24,6 +24,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { inputsActions } from '../../../../common/store/actions';
 import { DEFAULT_THREAT_INDEX_KEY } from '../../../../../common/constants';
+import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
 
 const INVESTIGATION_ENRICHMENT_REQUEST_ERROR = i18n.translate(
   'xpack.securitySolution.flyout.threatIntelligence.requestError',
@@ -71,15 +72,28 @@ export const useInvestigationTimeEnrichment = ({
   eventFields,
 }: UseInvestigationTimeEnrichmentProps): UseInvestigationTimeEnrichmentResult => {
   const { addError } = useAppToasts();
-  const { data, uiSettings } = useKibana().services;
+  const { data, storage, uiSettings } = useKibana().services;
   const defaultThreatIndices = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
+
+  const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.THREAT_INTELLIGENCE_TIME_RANGE);
 
   const dispatch = useDispatch();
 
-  const [range, setRange] = useState({
-    from: DEFAULT_EVENT_ENRICHMENT_FROM,
-    to: DEFAULT_EVENT_ENRICHMENT_TO,
+  const [range, setCustomRange] = useState({
+    from: timeSavedInLocalStorage?.start || DEFAULT_EVENT_ENRICHMENT_FROM,
+    to: timeSavedInLocalStorage?.end || DEFAULT_EVENT_ENRICHMENT_TO,
   });
+
+  const setRange = useCallback(
+    (rge: { from: string; to: string }) => {
+      setCustomRange(rge);
+      storage.set(FLYOUT_STORAGE_KEYS.THREAT_INTELLIGENCE_TIME_RANGE, {
+        start: rge.from,
+        end: rge.to,
+      });
+    },
+    [storage]
+  );
 
   const { error, loading, result, start } = useEventEnrichmentComplete();
 

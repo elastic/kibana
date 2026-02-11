@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient } from '@kbn/react-query';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import type { FormData, ValidationFunc, ValidationFuncArg } from '../../../../../shared_imports';
 import type { FieldValueQueryBar } from '../../../../rule_creation_ui/components/query_bar_field';
@@ -45,7 +45,7 @@ describe('esqlQueryValidator', () => {
         `FROM kibana_sample_data_logs |
          STATS total_bytes = SUM(bytes) BY host |
          WHERE total_bytes > 200000 |
-         SORT total_bytes DESC | 
+         SORT total_bytes DESC |
          LIMIT 10`,
       ],
     ])('succeeds validation for correct syntax in "%s"', (esqlQuery) =>

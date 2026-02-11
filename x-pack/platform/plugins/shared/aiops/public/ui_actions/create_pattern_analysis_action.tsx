@@ -14,13 +14,12 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import { AIOPS_EMBEDDABLE_GROUPING } from '@kbn/aiops-common/constants';
 
+import { DEFAULT_PROBABILITY, RANDOM_SAMPLER_OPTION } from '@kbn/ml-random-sampler-utils';
 import type { AiopsPluginStartDeps } from '../types';
-import type {
-  PatternAnalysisEmbeddableApi,
-  PatternAnalysisEmbeddableInitialState,
-} from '../embeddables/pattern_analysis/types';
+import type { PatternAnalysisEmbeddableApi } from '../embeddables/pattern_analysis/types';
 
 import type { PatternAnalysisActionContext } from './pattern_analysis_action_context';
+import { DEFAULT_MINIMUM_TIME_RANGE_OPTION } from '../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -54,16 +53,16 @@ export function createAddPatternAnalysisEmbeddableAction(
           '../embeddables/pattern_analysis/resolve_pattern_analysis_config_input'
         );
 
-        const initialState: PatternAnalysisEmbeddableInitialState = {
-          dataViewId: undefined,
-        };
-
         const embeddable = await presentationContainerParent.addNewPanel<
           object,
           PatternAnalysisEmbeddableApi
         >({
           panelType: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
-          serializedState: { rawState: initialState },
+          serializedState: {
+            minimumTimeRangeOption: DEFAULT_MINIMUM_TIME_RANGE_OPTION,
+            randomSamplerMode: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
+            randomSamplerProbability: DEFAULT_PROBABILITY,
+          },
         });
 
         if (!embeddable) {

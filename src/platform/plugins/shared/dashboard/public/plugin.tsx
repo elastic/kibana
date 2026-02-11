@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, filter, map } from 'rxjs';
+import { BehaviorSubject, filter, map, combineLatest, type Subscription } from 'rxjs';
 
 import type {
   ContentManagementPublicSetup,
@@ -16,6 +16,7 @@ import type {
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type {
   App,
+  AppDeepLink,
   AppMountParameters,
   AppUpdater,
   Plugin,
@@ -61,18 +62,21 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
-
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
-import { DASHBOARD_APP_ID, LANDING_PAGE_PATH, SEARCH_SESSION_ID } from '../common/constants';
-import type { GetPanelPlacementSettings } from './panel_placement';
-import { registerDashboardPanelSettings } from './panel_placement';
-import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
+import type { DashboardListingTab } from './dashboard_listing/types';
+import {
+  DASHBOARD_APP_ID,
+  LANDING_PAGE_PATH,
+  SEARCH_SESSION_ID,
+} from '../common/page_bundle_constants';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
+import type { FindDashboardsService } from './dashboard_client';
+import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/performance/dashboard_duration_start_mark';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -112,17 +116,24 @@ export interface DashboardStartDependencies {
   noDataPage?: NoDataPagePluginStart;
   lens?: LensPublicStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  cps?: CPSPluginStart;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface DashboardSetup {}
+export interface DashboardSetup {
+  registerListingPageTab: (tab: DashboardListingTab) => void;
+}
 
+/**
+ * The start contract for the Dashboard plugin.
+ * Provides services for interacting with dashboards from other plugins.
+ */
 export interface DashboardStart {
+  /**
+   * Returns the service for finding dashboards.
+   *
+   * @returns A promise that resolves to the {@link FindDashboardsService}.
+   */
   findDashboardsService: () => Promise<FindDashboardsService>;
-  registerDashboardPanelSettings: <SerializedState extends object = object>(
-    embeddableType: string,
-    getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState>
-  ) => void;
 }
 
 export class DashboardPlugin
@@ -133,14 +144,18 @@ export class DashboardPlugin
     setLogger(initializerContext.logger.get('dashboard'));
   }
 
+  private appStateSubscription?: Subscription;
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private urlUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private deepLinksUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
+  private listingViewRegistry: Set<DashboardListingTab> = new Set();
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, home, data, contentManagement, urlForwarding }: DashboardSetupDependencies
-  ) {
+    { share, home, data, urlForwarding }: DashboardSetupDependencies
+  ): DashboardSetup {
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
       schema: {},
@@ -151,14 +166,13 @@ export class DashboardPlugin
         new DashboardAppLocatorDefinition({
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
-            const [{ getDashboardContentManagementService }] = await Promise.all([
-              import('./services/dashboard_content_management_service'),
+            const [{ dashboardClient }] = await Promise.all([
+              import('./dashboard_client'),
               untilPluginStartServicesReady(),
             ]);
-            return (
-              (await getDashboardContentManagementService().loadDashboardState({ id: dashboardId }))
-                .dashboardInput?.filters ?? []
-            );
+
+            const result = await dashboardClient.get(dashboardId);
+            return result.data.filters ?? [];
           },
         })
       );
@@ -173,7 +187,7 @@ export class DashboardPlugin
       baseUrl: core.http.basePath.prepend('/app/dashboards'),
       defaultSubUrl: `#${LANDING_PAGE_PATH}`,
       storageKey: `lastUrl:${core.http.basePath.get()}:dashboard`,
-      navLinkUpdater$: this.appStateUpdater,
+      navLinkUpdater$: this.urlUpdater,
       toastNotifications: core.notifications.toasts,
       stateParams: [
         {
@@ -214,6 +228,15 @@ export class DashboardPlugin
       stopUrlTracker();
     };
 
+    this.appStateSubscription = combineLatest([this.urlUpdater, this.deepLinksUpdater]).subscribe(
+      ([urlUpdater, deepLinksUpdater]) => {
+        this.appStateUpdater.next((app) => ({
+          ...urlUpdater(app),
+          ...deepLinksUpdater(app),
+        }));
+      }
+    );
+
     const app: App = {
       id: DASHBOARD_APP_ID,
       title: 'Dashboards',
@@ -223,6 +246,7 @@ export class DashboardPlugin
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
+        performance.mark(DASHBOARD_DURATION_START_MARK);
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
         const [{ mountApp }] = await Promise.all([
@@ -239,6 +263,7 @@ export class DashboardPlugin
           scopedHistory: () => this.currentHistory!,
           onAppLeave: params.onAppLeave,
           setHeaderActionMenu: params.setHeaderActionMenu,
+          getListingTabs: () => Array.from(this.listingViewRegistry as Set<DashboardListingTab>),
         };
 
         return mountApp({
@@ -277,30 +302,48 @@ export class DashboardPlugin
       });
     }
 
-    // register content management
-    contentManagement.registry.register({
-      id: CONTENT_ID,
-      version: {
-        latest: LATEST_VERSION,
+    return {
+      registerListingPageTab: (tab: DashboardListingTab) => {
+        this.listingViewRegistry.add(tab);
       },
-      name: dashboardAppTitle,
-    });
-
-    return {};
+    };
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     setKibanaServices(core, plugins);
 
-    untilPluginStartServicesReady().then(() => registerActions(plugins));
+    registerActions(plugins);
+
+    plugins.uiActions.registerActionAsync('searchDashboardAction', async () => {
+      const { searchAction } = await import('./dashboard_client');
+      return searchAction;
+    });
+
+    plugins.uiActions.registerActionAsync('getDashboardsByIdsAction', async () => {
+      const { getDashboardsByIdsAction } = await import('./dashboard_client');
+      return getDashboardsByIdsAction;
+    });
+
+    const deepLinks: AppDeepLink[] = [];
+    for (const tab of this.listingViewRegistry as Set<DashboardListingTab>) {
+      if (tab.deepLink) {
+        deepLinks.push({
+          id: tab.id,
+          title: tab.deepLink.title,
+          path: `#${LANDING_PAGE_PATH}/${tab.id}`,
+          visibleIn: tab.deepLink.visibleIn,
+        });
+      }
+    }
+
+    if (deepLinks.length > 0) {
+      this.deepLinksUpdater.next(() => ({ deepLinks }));
+    }
 
     return {
-      registerDashboardPanelSettings,
       findDashboardsService: async () => {
-        const { getDashboardContentManagementService } = await import(
-          './services/dashboard_content_management_service'
-        );
-        return getDashboardContentManagementService().findDashboards;
+        const { findService } = await import('./dashboard_client');
+        return findService;
       },
     };
   }
@@ -309,5 +352,6 @@ export class DashboardPlugin
     if (this.stopUrlTracking) {
       this.stopUrlTracking();
     }
+    this.appStateSubscription?.unsubscribe();
   }
 }

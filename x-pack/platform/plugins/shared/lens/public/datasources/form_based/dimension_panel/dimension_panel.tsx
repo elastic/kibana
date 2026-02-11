@@ -14,13 +14,14 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type {
+  DateRange,
+  FormBasedPrivateState,
+  GenericIndexPatternColumn,
   DatasourceDimensionTriggerProps,
   DatasourceDimensionEditorProps,
-} from '../../../types';
-import type { GenericIndexPatternColumn } from '../form_based';
-import type { FormBasedPrivateState } from '../types';
+} from '@kbn/lens-common';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { DimensionEditor } from './dimension_editor';
-import type { DateRange } from '../../../../common/types';
 import { getOperationSupportMatrix } from './operation_support';
 
 export type FormBasedDimensionTriggerProps =
@@ -37,6 +38,7 @@ export type FormBasedDimensionEditorProps =
     data: DataPublicPluginStart;
     fieldFormats: FieldFormatsStart;
     unifiedSearch: UnifiedSearchPublicPluginStart;
+    kql: KqlPluginStart;
     dataViews: DataViewsPublicPluginStart;
     uniqueLabel: string;
     dateRange: DateRange;

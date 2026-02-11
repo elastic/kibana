@@ -7,16 +7,17 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
+import { PageScope } from '../../data_view_manager/constants';
 import {
-  setSourcererDataViews,
-  setSourcererScopeLoading,
-  setSelectedDataView,
-  setSignalIndexName,
   setDataView,
   setDataViewLoading,
+  setSelectedDataView,
+  setSignalIndexName,
+  setSourcererDataViews,
+  setSourcererScopeLoading,
 } from './actions';
 import type { SourcererModel } from './model';
-import { initDataView, initialSourcererState, SourcererScopeName } from './model';
+import { initDataView, initialSourcererState } from './model';
 import { validateSelectedPatterns } from './helpers';
 
 export type SourcererState = SourcererModel;
@@ -58,16 +59,16 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
             },
           }
         : {
-            [SourcererScopeName.default]: {
-              ...state.sourcererScopes[SourcererScopeName.default],
+            [PageScope.default]: {
+              ...state.sourcererScopes[PageScope.default],
               loading,
             },
-            [SourcererScopeName.detections]: {
-              ...state.sourcererScopes[SourcererScopeName.detections],
+            [PageScope.alerts]: {
+              ...state.sourcererScopes[PageScope.alerts],
               loading,
             },
-            [SourcererScopeName.timeline]: {
-              ...state.sourcererScopes[SourcererScopeName.timeline],
+            [PageScope.timeline]: {
+              ...state.sourcererScopes[PageScope.timeline],
               loading,
             },
           }),

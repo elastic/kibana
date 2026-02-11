@@ -122,14 +122,14 @@ EOF
   DEPLOY_TAGGER_SLACK_WEBHOOK_URL=${DEPLOY_TAGGER_SLACK_WEBHOOK_URL:-"$(vault_get kibana-serverless-release-tools DEPLOY_TAGGER_SLACK_WEBHOOK_URL)"}
   export DEPLOY_TAGGER_SLACK_WEBHOOK_URL
 
-  SONAR_LOGIN=$(vault_get sonarqube token)
-  export SONAR_LOGIN
+  # unset APM creds to ensure APM data gets sent to preconfigured APM cluster (kibana-cloud-apm)
+  if ! is_pr_with_label "ci:collect-apm"; then
+    ELASTIC_APM_SERVER_URL=$(vault_get project-kibana-ci-apm apm_server_url)
+    export ELASTIC_APM_SERVER_URL
 
-  ELASTIC_APM_SERVER_URL=$(vault_get project-kibana-ci-apm apm_server_url)
-  export ELASTIC_APM_SERVER_URL
-
-  ELASTIC_APM_API_KEY=$(vault_get project-kibana-ci-apm apm_server_api_key)
-  export ELASTIC_APM_API_KEY
+    ELASTIC_APM_API_KEY=$(vault_get project-kibana-ci-apm apm_server_api_key)
+    export ELASTIC_APM_API_KEY
+  fi
 }
 
 # Set up GenAI keys
@@ -147,6 +147,7 @@ EOF
     export KIBANA_SECURITY_GEN_AI_CONFIG="$(vault_get security-gen-ai config)"
   fi
 }
+
 
 # Set up GCS Service Account for CDN
 {
@@ -199,6 +200,19 @@ EOF
   export VAULT_ROLE_ID
   VAULT_SECRET_ID="$(vault_get kibana-buildkite-vault-credentials secret-id)"
   export VAULT_SECRET_ID
+}
+
+# Set up EIS Cloud Connected Mode (CCM) API key
+# Note: This secret is in the legacy vault, requires approle authentication
+{
+  if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
+    echo "FTR_EIS_CCM was set - exposing EIS CCM API key"
+    VAULT_TOKEN_COPY="${VAULT_TOKEN:-}"
+    VAULT_TOKEN=$(VAULT_ADDR=$LEGACY_VAULT_ADDR vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
+    VAULT_ADDR=$LEGACY_VAULT_ADDR vault login -no-print "$VAULT_TOKEN"
+    export KIBANA_EIS_CCM_API_KEY="$(vault read -address=$LEGACY_VAULT_ADDR -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"
+    VAULT_TOKEN="$VAULT_TOKEN_COPY"
+  fi
 }
 
 # Inject moon remote-cache credentials on CI

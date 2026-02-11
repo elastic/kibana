@@ -30,7 +30,7 @@
           "<Zod.ZodRawShape>[]; }) => ",
           "McpServer"
         ],
-        "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_mcp_server.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/utils/create_mcp_server.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,7 +41,7 @@
             "tags": [],
             "label": "{\n  name,\n  version = '1.0.0',\n  tools,\n}",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_mcp_server.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/utils/create_mcp_server.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -52,7 +52,7 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_mcp_server.ts",
+                "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/utils/create_mcp_server.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -66,7 +66,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_mcp_server.ts",
+                "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/utils/create_mcp_server.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -87,7 +87,7 @@
                   },
                   "<Zod.ZodRawShape>[]"
                 ],
-                "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_mcp_server.ts",
+                "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/utils/create_mcp_server.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -115,7 +115,7 @@
           },
           ">"
         ],
-        "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_external_client.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/utils/create_external_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -126,7 +126,7 @@
             "tags": [],
             "label": "{\n  serverUrl,\n  clientName = 'unknown',\n}",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_external_client.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/utils/create_external_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -137,7 +137,7 @@
                 "tags": [],
                 "label": "serverUrl",
                 "description": [],
-                "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_external_client.ts",
+                "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/utils/create_external_client.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -151,7 +151,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_external_client.ts",
+                "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/utils/create_external_client.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -183,7 +183,7 @@
           },
           ">"
         ],
-        "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_internal_client.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/utils/create_internal_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -194,7 +194,7 @@
             "tags": [],
             "label": "{\n  server,\n  clientName = 'unknown',\n}",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_internal_client.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/utils/create_internal_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -208,7 +208,7 @@
                 "signature": [
                   "McpServer"
                 ],
-                "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_internal_client.ts",
+                "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/utils/create_internal_client.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -222,7 +222,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/solutions/chat/packages/wci-server/src/utils/create_internal_client.ts",
+                "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/utils/create_internal_client.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -249,7 +249,7 @@
             "text": "ContentResultTransportFormat"
           }
         ],
-        "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/tool_result.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -263,7 +263,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/tool_result.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -291,7 +291,7 @@
           },
           " extends { [x: string]: unknown; type: \"text\"; text: string; _meta?: { [x: string]: unknown; } | undefined; }"
         ],
-        "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/tool_result.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -305,7 +305,7 @@
             "signature": [
               "\"text\""
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/tool_result.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -325,7 +325,7 @@
                 "text": "ContentRef"
               }
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/tool_result.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -336,7 +336,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/tool_result.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -350,7 +350,7 @@
             "signature": [
               "\"content\""
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/tool_result.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -374,7 +374,7 @@
           },
           "<T>"
         ],
-        "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/integration.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -389,7 +389,7 @@
               "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/integration.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -400,7 +400,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/integration.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -411,7 +411,7 @@
             "tags": [],
             "label": "integrationId",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/integration.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -425,7 +425,7 @@
             "signature": [
               "T"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/integration.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -439,7 +439,7 @@
         "tags": [],
         "label": "McpClientProvider",
         "description": [],
-        "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/mcp.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -450,7 +450,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/mcp.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -480,7 +480,7 @@
               },
               ">"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/mcp.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -496,7 +496,7 @@
             "signature": [
               "Record<string, unknown> | undefined"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/mcp.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -522,7 +522,7 @@
           },
           "<RunInput>"
         ],
-        "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/mcp.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -533,7 +533,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/mcp.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -544,7 +544,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/mcp.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -558,7 +558,7 @@
             "signature": [
               "RunInput"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/mcp.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -580,7 +580,7 @@
               },
               "<{ [x: string]: unknown; content: ({ [x: string]: unknown; type: \"text\"; text: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"image\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"audio\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"resource_link\"; name: string; uri: string; title?: string | undefined; description?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; type: \"resource\"; resource: { [x: string]: unknown; text: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; blob: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; }; _meta?: { [x: string]: unknown; } | undefined; })[]; isError?: boolean | undefined; _meta?: { [x: string]: unknown; } | undefined; structuredContent?: { [x: string]: unknown; } | undefined; }>"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/mcp.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -594,7 +594,7 @@
                 "signature": [
                   "{ [k in keyof Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<RunInput>, any>]: Zod.objectUtil.addQuestionMarks<Zod.baseObjectOutputType<RunInput>, any>[k]; }"
                 ],
-                "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+                "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/mcp.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -612,7 +612,7 @@
         "tags": [],
         "label": "ToolContentResult",
         "description": [],
-        "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/tool_result.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -632,7 +632,7 @@
                 "text": "ContentRef"
               }
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/tool_result.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -646,7 +646,7 @@
             "signature": [
               "{ [x: string]: any; }"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/tool_result.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -655,20 +655,20 @@
       },
       {
         "parentPluginId": "@kbn/wci-server",
-        "id": "def-server.WorkChatIntegration",
+        "id": "def-server.WorkplaceAIIntegration",
         "type": "Interface",
         "tags": [],
-        "label": "WorkChatIntegration",
+        "label": "WorkplaceAIIntegration",
         "description": [
           "\nRepresents an instance of an integration type, bound to a specific context"
         ],
-        "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/integration.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/wci-server",
-            "id": "def-server.WorkChatIntegration.connect",
+            "id": "def-server.WorkplaceAIIntegration.connect",
             "type": "Function",
             "tags": [],
             "label": "connect",
@@ -694,7 +694,7 @@
               },
               ">"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/integration.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -705,30 +705,30 @@
       },
       {
         "parentPluginId": "@kbn/wci-server",
-        "id": "def-server.WorkchatIntegrationDefinition",
+        "id": "def-server.WorkplaceAIIntegrationDefinition",
         "type": "Interface",
         "tags": [],
-        "label": "WorkchatIntegrationDefinition",
+        "label": "WorkplaceAIIntegrationDefinition",
         "description": [
-          "\nRepresents the definition of a type of integration for WorkChat.\n\nThis is the top level entity for integration, which is the source\nof all things related to this integration type, such as being\nable to create an actual integration instance."
+          "\nRepresents the definition of a type of integration for Workplace AI.\n\nThis is the top level entity for integration, which is the source\nof all things related to this integration type, such as being\nable to create an actual integration instance."
         ],
         "signature": [
           {
             "pluginId": "@kbn/wci-server",
             "scope": "server",
             "docId": "kibKbnWciServerPluginApi",
-            "section": "def-server.WorkchatIntegrationDefinition",
-            "text": "WorkchatIntegrationDefinition"
+            "section": "def-server.WorkplaceAIIntegrationDefinition",
+            "text": "WorkplaceAIIntegrationDefinition"
           },
           "<T>"
         ],
-        "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/integration.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/wci-server",
-            "id": "def-server.WorkchatIntegrationDefinition.getType",
+            "id": "def-server.WorkplaceAIIntegrationDefinition.getType",
             "type": "Function",
             "tags": [],
             "label": "getType",
@@ -745,7 +745,7 @@
                 "text": "IntegrationType"
               }
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/integration.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -753,7 +753,7 @@
           },
           {
             "parentPluginId": "@kbn/wci-server",
-            "id": "def-server.WorkchatIntegrationDefinition.createIntegration",
+            "id": "def-server.WorkplaceAIIntegrationDefinition.createIntegration",
             "type": "Function",
             "tags": [],
             "label": "createIntegration",
@@ -782,18 +782,18 @@
                 "pluginId": "@kbn/wci-server",
                 "scope": "server",
                 "docId": "kibKbnWciServerPluginApi",
-                "section": "def-server.WorkChatIntegration",
-                "text": "WorkChatIntegration"
+                "section": "def-server.WorkplaceAIIntegration",
+                "text": "WorkplaceAIIntegration"
               },
               ">"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/integration.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/wci-server",
-                "id": "def-server.WorkchatIntegrationDefinition.createIntegration.$1",
+                "id": "def-server.WorkplaceAIIntegrationDefinition.createIntegration.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "context",
@@ -808,7 +808,7 @@
                   },
                   "<T>"
                 ],
-                "path": "x-pack/solutions/chat/packages/wci-server/src/integration.ts",
+                "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/integration.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -836,7 +836,7 @@
           "Client",
           "<{ method: string; params?: { [x: string]: unknown; _meta?: { [x: string]: unknown; progressToken?: string | number | undefined; } | undefined; } | undefined; }, { method: string; params?: { [x: string]: unknown; _meta?: { [x: string]: unknown; } | undefined; } | undefined; }, { [x: string]: unknown; _meta?: { [x: string]: unknown; } | undefined; }>, \"listTools\" | \"callTool\"> & { disconnect: () => Promise<void>; }"
         ],
-        "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/mcp.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -867,7 +867,7 @@
           },
           ">"
         ],
-        "path": "x-pack/solutions/chat/packages/wci-server/src/mcp.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/mcp.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -885,7 +885,7 @@
         "description": [
           "\nUtility factory to generate MCP call tool results"
         ],
-        "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+        "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/tool_result.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -907,7 +907,7 @@
               },
               "[]) => { [x: string]: unknown; content: ({ [x: string]: unknown; type: \"text\"; text: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"image\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"audio\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"resource_link\"; name: string; uri: string; title?: string | undefined; description?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; type: \"resource\"; resource: { [x: string]: unknown; text: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; blob: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; }; _meta?: { [x: string]: unknown; } | undefined; })[]; isError?: boolean | undefined; _meta?: { [x: string]: unknown; } | undefined; structuredContent?: { [x: string]: unknown; } | undefined; }"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/tool_result.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -928,7 +928,7 @@
                   },
                   "[]"
                 ],
-                "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+                "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/tool_result.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -948,7 +948,7 @@
             "signature": [
               "(text: string) => { [x: string]: unknown; content: ({ [x: string]: unknown; type: \"text\"; text: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"image\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"audio\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"resource_link\"; name: string; uri: string; title?: string | undefined; description?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; type: \"resource\"; resource: { [x: string]: unknown; text: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; blob: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; }; _meta?: { [x: string]: unknown; } | undefined; })[]; isError?: boolean | undefined; _meta?: { [x: string]: unknown; } | undefined; structuredContent?: { [x: string]: unknown; } | undefined; }"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/tool_result.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -962,7 +962,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+                "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/tool_result.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -982,7 +982,7 @@
             "signature": [
               "(message: string) => { [x: string]: unknown; content: ({ [x: string]: unknown; type: \"text\"; text: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"image\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"audio\"; data: string; mimeType: string; _meta?: { [x: string]: unknown; } | undefined; } | { [x: string]: unknown; type: \"resource_link\"; name: string; uri: string; title?: string | undefined; description?: string | undefined; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; type: \"resource\"; resource: { [x: string]: unknown; text: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; } | { [x: string]: unknown; blob: string; uri: string; _meta?: { [x: string]: unknown; } | undefined; mimeType?: string | undefined; }; _meta?: { [x: string]: unknown; } | undefined; })[]; isError?: boolean | undefined; _meta?: { [x: string]: unknown; } | undefined; structuredContent?: { [x: string]: unknown; } | undefined; }"
             ],
-            "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+            "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/tool_result.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -996,7 +996,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/solutions/chat/packages/wci-server/src/tool_result.ts",
+                "path": "x-pack/solutions/workplace_ai/packages/wci-server/src/tool_result.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

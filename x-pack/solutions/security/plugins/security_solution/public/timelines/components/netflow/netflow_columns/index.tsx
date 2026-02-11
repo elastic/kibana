@@ -83,9 +83,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
       <EuiFlexItemMarginRight grow={false}>
         <DurationEventStartEnd
           scopeId={scopeId}
-          contextId={contextId}
           eventDuration={eventDuration}
-          eventId={eventId}
           eventEnd={eventEnd}
           eventStart={eventStart}
         />

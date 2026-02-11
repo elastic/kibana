@@ -1,0 +1,289 @@
+{
+  "_index": ".ds-logs-generic.otel-default-2025.10.30-000001",
+  "_id": "AZo1489HvqT7W2kfiA10",
+  "_version": 1,
+  "_source": {
+    "@timestamp": "2025-10-30T16:11:05.476Z",
+    "attributes": {
+      "event.name": "exception",
+      "exception.message": "The credit card (ending 0454) expired on 1/2025.",
+      "exception.stacktrace": "Error: The credit card (ending 0454) expired on 1/2025.\n    at module.exports.charge (/usr/src/app/charge.js:71:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.chargeServiceHandler [as charge] (/usr/src/app/index.js:21:22)",
+      "exception.type": "Error"
+    },
+    "data_stream": {
+      "dataset": "generic.otel",
+      "namespace": "default",
+      "type": "logs"
+    },
+    "event_name": "exception",
+    "resource": {
+      "attributes": {
+        "container.id": "c07267ceba6abd1ee46d9b651fb3635d5a9064a9b06f158ba676a0335bcf14ee",
+        "host.arch": "arm64",
+        "host.name": "docker-desktop",
+        "os.type": "linux",
+        "os.version": "6.10.14-linuxkit",
+        "process.command": "/usr/src/app/index.js",
+        "process.command_args": [
+          "/nodejs/bin/node",
+          "--require=./opentelemetry.js",
+          "/usr/src/app/index.js"
+        ],
+        "process.executable.name": "/nodejs/bin/node",
+        "process.executable.path": "/nodejs/bin/node",
+        "process.owner": "nonroot",
+        "process.pid": 1,
+        "process.runtime.description": "Node.js",
+        "process.runtime.name": "nodejs",
+        "process.runtime.version": "22.21.1",
+        "service.name": "payment",
+        "service.namespace": "opentelemetry-demo",
+        "service.version": "2.1.3",
+        "telemetry.sdk.language": "nodejs",
+        "telemetry.sdk.name": "opentelemetry",
+        "telemetry.sdk.version": "2.2.0"
+      },
+      "schema_url": "https://opentelemetry.io/schemas/1.6.1"
+    },
+    "scope": {
+      "name": "@opentelemetry/instrumentation-grpc",
+      "version": "0.207.0"
+    },
+    "span_id": "e768658cc0e59de9",
+    "trace_id": "b3aa68b2f2d5766d8254ce937143c70b"
+  },
+  "fields": {
+    "resource.attributes.telemetry.sdk.name.text": [
+      "opentelemetry"
+    ],
+    "attributes.exception.message": [
+      "The credit card (ending 0454) expired on 1/2025."
+    ],
+    "scope.name": [
+      "@opentelemetry/instrumentation-grpc"
+    ],
+    "resource.attributes.telemetry.sdk.name": [
+      "opentelemetry"
+    ],
+    "resource.attributes.process.command": [
+      "/usr/src/app/index.js"
+    ],
+    "process.command_args": [
+      "/nodejs/bin/node",
+      "--require=./opentelemetry.js",
+      "/usr/src/app/index.js"
+    ],
+    "process.runtime.version": [
+      "22.21.1"
+    ],
+    "process.pid": [
+      1
+    ],
+    "service.language.name": [
+      "nodejs"
+    ],
+    "container.id": [
+      "c07267ceba6abd1ee46d9b651fb3635d5a9064a9b06f158ba676a0335bcf14ee"
+    ],
+    "resource.attributes.process.runtime.version": [
+      "22.21.1"
+    ],
+    "process.owner": [
+      "nonroot"
+    ],
+    "telemetry.sdk.language": [
+      "nodejs"
+    ],
+    "process.runtime.name": [
+      "nodejs"
+    ],
+    "host.os.version": [
+      "6.10.14-linuxkit"
+    ],
+    "resource.attributes.process.pid": [
+      1
+    ],
+    "exception.message": [
+      "The credit card (ending 0454) expired on 1/2025."
+    ],
+    "resource.schema_url": [
+      "https://opentelemetry.io/schemas/1.6.1"
+    ],
+    "attributes.event.name": [
+      "exception"
+    ],
+    "host.name": [
+      "docker-desktop"
+    ],
+    "process.command": [
+      "/usr/src/app/index.js"
+    ],
+    "telemetry.sdk.version": [
+      "2.2.0"
+    ],
+    "exception.stacktrace": [
+      "Error: The credit card (ending 0454) expired on 1/2025.\n    at module.exports.charge (/usr/src/app/charge.js:71:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.chargeServiceHandler [as charge] (/usr/src/app/index.js:21:22)"
+    ],
+    "resource.attributes.host.arch": [
+      "arm64"
+    ],
+    "span_id": [
+      "e768658cc0e59de9"
+    ],
+    "event.name": [
+      "exception"
+    ],
+    "resource.attributes.process.executable.path": [
+      "/nodejs/bin/node"
+    ],
+    "service.runtime.version": [
+      "22.21.1"
+    ],
+    "span.id": [
+      "e768658cc0e59de9"
+    ],
+    "data_stream.type": [
+      "logs"
+    ],
+    "resource.attributes.service.namespace": [
+      "opentelemetry-demo"
+    ],
+    "service.namespace": [
+      "opentelemetry-demo"
+    ],
+    "host.architecture": [
+      "arm64"
+    ],
+    "resource.attributes.os.version": [
+      "6.10.14-linuxkit"
+    ],
+    "resource.attributes.telemetry.sdk.version": [
+      "2.2.0"
+    ],
+    "process.executable.path": [
+      "/nodejs/bin/node"
+    ],
+    "resource.attributes.process.owner": [
+      "nonroot"
+    ],
+    "resource.attributes.process.runtime.description": [
+      "Node.js"
+    ],
+    "event_name": [
+      "exception"
+    ],
+    "attributes.exception.type": [
+      "Error"
+    ],
+    "resource.attributes.service.name.text": [
+      "payment"
+    ],
+    "resource.attributes.service.name": [
+      "payment"
+    ],
+    "resource.attributes.process.executable.name": [
+      "/nodejs/bin/node"
+    ],
+    "resource.attributes.os.type": [
+      "linux"
+    ],
+    "attributes.exception.stacktrace": [
+      "Error: The credit card (ending 0454) expired on 1/2025.\n    at module.exports.charge (/usr/src/app/charge.js:71:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.chargeServiceHandler [as charge] (/usr/src/app/index.js:21:22)"
+    ],
+    "error.exception.type": [
+      "Error"
+    ],
+    "os.type": [
+      "linux"
+    ],
+    "resource.attributes.telemetry.sdk.language": [
+      "nodejs"
+    ],
+    "process.executable.name": [
+      "/nodejs/bin/node"
+    ],
+    "os.version": [
+      "6.10.14-linuxkit"
+    ],
+    "telemetry.sdk.name": [
+      "opentelemetry"
+    ],
+    "attributes.exception.stacktrace.text": [
+      "Error: The credit card (ending 0454) expired on 1/2025.\n    at module.exports.charge (/usr/src/app/charge.js:71:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.chargeServiceHandler [as charge] (/usr/src/app/index.js:21:22)"
+    ],
+    "trace.id": [
+      "b3aa68b2f2d5766d8254ce937143c70b"
+    ],
+    "resource.attributes.container.id": [
+      "c07267ceba6abd1ee46d9b651fb3635d5a9064a9b06f158ba676a0335bcf14ee"
+    ],
+    "host.arch": [
+      "arm64"
+    ],
+    "resource.attributes.service.version": [
+      "2.1.3"
+    ],
+    "resource.attributes.host.name": [
+      "docker-desktop"
+    ],
+    "process.executable": [
+      "/nodejs/bin/node"
+    ],
+    "resource.attributes.process.executable.name.text": [
+      "/nodejs/bin/node"
+    ],
+    "trace_id": [
+      "b3aa68b2f2d5766d8254ce937143c70b"
+    ],
+    "service.name": [
+      "payment"
+    ],
+    "resource.attributes.process.command_args": [
+      "/nodejs/bin/node",
+      "--require=./opentelemetry.js",
+      "/usr/src/app/index.js"
+    ],
+    "data_stream.namespace": [
+      "default"
+    ],
+    "exception.type": [
+      "Error"
+    ],
+    "service.runtime.name": [
+      "nodejs"
+    ],
+    "resource.attributes.process.runtime.name": [
+      "nodejs"
+    ],
+    "attributes.event.name.text": [
+      "exception"
+    ],
+    "@timestamp": [
+      "2025-10-30T16:11:05.476Z"
+    ],
+    "service.version": [
+      "2.1.3"
+    ],
+    "host.os.platform": [
+      "linux"
+    ],
+    "data_stream.dataset": [
+      "generic.otel"
+    ],
+    "error.stack_trace": [
+      "Error: The credit card (ending 0454) expired on 1/2025.\n    at module.exports.charge (/usr/src/app/charge.js:71:11)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async Object.chargeServiceHandler [as charge] (/usr/src/app/index.js:21:22)"
+    ],
+    "scope.version": [
+      "0.207.0"
+    ],
+    "process.runtime.description": [
+      "Node.js"
+    ],
+    "event.dataset": [
+      "generic.otel"
+    ],
+    "error.exception.message": [
+      "The credit card (ending 0454) expired on 1/2025."
+    ]
+  }
+}

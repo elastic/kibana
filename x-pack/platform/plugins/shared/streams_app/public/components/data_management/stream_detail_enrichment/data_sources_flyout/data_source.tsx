@@ -8,9 +8,10 @@
 import React from 'react';
 import type { DataSourceActorRef } from '../state_management/data_source_state_machine';
 import { useDataSourceSelector } from '../state_management/data_source_state_machine';
-import { RandomSamplesDataSourceCard } from './random_samples_data_source_card';
+import { LatestSamplesDataSourceCard } from './latest_samples_data_source_card';
 import { KqlSamplesDataSourceCard } from './kql_samples_data_source_card';
 import { CustomSamplesDataSourceCard } from './custom_samples_data_source_card';
+import { FailureStoreDataSourceCard } from './failure_store_data_source_card';
 
 interface DataSourceProps {
   readonly dataSourceRef: DataSourceActorRef;
@@ -23,12 +24,14 @@ export const DataSource = ({ dataSourceRef }: DataSourceProps) => {
   );
 
   switch (dataSourceType) {
-    case 'random-samples':
-      return <RandomSamplesDataSourceCard dataSourceRef={dataSourceRef} />;
+    case 'latest-samples':
+      return <LatestSamplesDataSourceCard dataSourceRef={dataSourceRef} />;
     case 'kql-samples':
       return <KqlSamplesDataSourceCard dataSourceRef={dataSourceRef} />;
     case 'custom-samples':
       return <CustomSamplesDataSourceCard dataSourceRef={dataSourceRef} />;
+    case 'failure-store':
+      return <FailureStoreDataSourceCard dataSourceRef={dataSourceRef} />;
     default:
       return null;
   }

@@ -249,6 +249,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
         <>
           <EuiSpacer />
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="info"
             title={i18n.translate(

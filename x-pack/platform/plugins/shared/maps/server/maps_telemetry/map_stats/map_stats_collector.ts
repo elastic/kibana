@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MapAttributes } from '../../../common/content_management';
+import type { MapAttributes } from '../..';
 import type {
   EMS_BASEMAP_KEYS,
   JOIN_KEYS,
@@ -39,7 +39,7 @@ export class MapStatsCollector {
   private _sourceCountStats: ClusterCountStats | undefined;
 
   push(attributes: MapAttributes) {
-    if (!attributes || !attributes.mapStateJSON || !attributes.layerListJSON) {
+    if (!attributes) {
       return;
     }
 

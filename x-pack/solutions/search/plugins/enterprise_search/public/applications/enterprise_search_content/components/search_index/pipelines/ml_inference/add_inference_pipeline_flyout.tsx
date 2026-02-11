@@ -121,6 +121,7 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
         {createErrors.length > 0 && (
           <>
             <EuiCallOut
+              announceOnMount
               title={i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.createErrors',
                 { defaultMessage: 'Error creating pipeline' }

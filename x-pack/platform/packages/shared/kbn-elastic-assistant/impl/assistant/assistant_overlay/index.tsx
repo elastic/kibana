@@ -11,7 +11,7 @@ import { EuiFlyoutResizable } from '@elastic/eui';
 import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
-import { createGlobalStyle } from 'styled-components';
+import { isMac } from '@kbn/shared-ux-utility';
 import type { ShowAssistantOverlayProps } from '../../assistant_context';
 import { useAssistantContext } from '../../assistant_context';
 import { Assistant, CONVERSATION_SIDE_PANEL_WIDTH } from '..';
@@ -20,19 +20,6 @@ import {
   useAssistantSpaceId,
   type LastConversation,
 } from '../use_space_aware_context';
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
-
-/**
- * Modal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever
- * component currently has focus and any specific context it may provide through the SAssInterface.
- */
-
-export const UnifiedTimelineGlobalStyles = createGlobalStyle`
-  body:has(.timeline-portal-overlay-mask) .euiOverlayMask {
-    z-index: 1003 !important;
-  }
-`;
 
 export const AssistantOverlay = React.memo(() => {
   const spaceId = useAssistantSpaceId();
@@ -118,6 +105,8 @@ export const AssistantOverlay = React.memo(() => {
   );
   useEvent('keydown', onKeyDown);
 
+  const flyoutRef = useRef<HTMLElement>(null);
+
   // Modal control functions
   const cleanupAndCloseModal = useCallback(() => {
     setIsModalVisible(false);
@@ -143,8 +132,6 @@ export const AssistantOverlay = React.memo(() => {
       return !prev;
     });
   }, []);
-
-  const flyoutRef = useRef<HTMLDivElement>();
 
   if (!isModalVisible) return null;
 
@@ -172,7 +159,6 @@ export const AssistantOverlay = React.memo(() => {
           setChatHistoryVisible={toggleChatHistory}
         />
       </EuiFlyoutResizable>
-      <UnifiedTimelineGlobalStyles />
     </>
   );
 });

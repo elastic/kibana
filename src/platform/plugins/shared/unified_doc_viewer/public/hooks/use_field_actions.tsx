@@ -54,6 +54,7 @@ const useFieldActions = ({ columns, filter, onAddColumn, onRemoveColumn }: UseFi
         filter && filter(mapping ?? field, value, '-'),
       copyToClipboard,
       removeColumn: onRemoveColumn,
+      isColumnAdded: ({ field }: WithFieldParam) => columns?.includes(field) ?? false,
       toggleFieldColumn: ({ field }: WithFieldParam) => {
         if (!columns) return;
         const isFieldInTable = columns.includes(field);
@@ -103,7 +104,7 @@ export const useUIFieldActions = ({
       },
       {
         id: 'toggleFieldColumnAction',
-        iconType: 'listAdd',
+        iconType: actions.isColumnAdded({ field }) ? 'cross' : 'plusInCircle',
         label: toggleColumnLabel,
         onClick: () => actions.toggleFieldColumn({ field }),
       },

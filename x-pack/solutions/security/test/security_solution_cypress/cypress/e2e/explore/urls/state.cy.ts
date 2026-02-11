@@ -235,10 +235,9 @@ describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
       .should('have.attr', 'href')
       .and(
         'contain',
-        "/app/security/network?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))" +
-          "&query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')" +
+        "/app/security/network?query=(language:kuery,query:'source.ip:%20%2210.142.0.9%22%20')" +
           "&timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))" +
-          "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')))"
+          "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')),valueReport:(linkTo:!(),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')))"
       );
   });
   it('sets KQL in host page and detail page and check if href match on breadcrumb, tabs and subTabs', () => {
@@ -252,19 +251,17 @@ describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
       .should('have.attr', 'href')
       .and(
         'contain',
-        "/app/security/hosts?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))" +
-          "&query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')" +
+        "/app/security/hosts?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')" +
           "&timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))" +
-          "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))"
+          "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),valueReport:(linkTo:!(),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')))"
       );
     cy.get(NETWORK)
       .should('have.attr', 'href')
       .and(
         'contain',
-        "/app/security/network?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))" +
-          "&query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')" +
+        "/app/security/network?query=(language:kuery,query:'host.name:%20%22siem-kibana%22%20')" +
           "&timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))" +
-          "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))"
+          "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),valueReport:(linkTo:!(),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')))"
       );
     toggleNavigationPanel(EXPLORE_PANEL_BTN);
     cy.get(HOSTS_NAMES).first().should('have.text', 'siem-kibana');
@@ -277,9 +274,8 @@ describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
       .should('have.attr', 'href')
       .and(
         'contain',
-        "/app/security/hosts/name/siem-kibana/anomalies?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))" +
-          "&timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))" +
-          "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))"
+        "/app/security/hosts/name/siem-kibana/anomalies?timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))" +
+          "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),valueReport:(linkTo:!(),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')))"
       );
 
     cy.get(BREADCRUMBS)
@@ -287,20 +283,18 @@ describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
       .should('have.attr', 'href')
       .and(
         'contain',
-        "/app/security/hosts?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))" +
-          "&query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')" +
+        "/app/security/hosts?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')" +
           "&timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))" +
-          "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))"
+          "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),valueReport:(linkTo:!(),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')))"
       );
     cy.get(BREADCRUMBS)
       .eq(3)
       .should('have.attr', 'href')
       .and(
         'contain',
-        "/app/security/hosts/name/siem-kibana?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('auditbeat-*')))" +
-          "&query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')" +
+        "/app/security/hosts/name/siem-kibana?query=(language:kuery,query:'agent.type:%20%22auditbeat%22%20')" +
           "&timeline=(activeTab:query,isOpen:!f,query:(expression:'',kind:kuery))" +
-          "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')))"
+          "&timerange=(global:(linkTo:!(timeline),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),timeline:(linkTo:!(global),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2023-01-01T21:33:29.186Z')),valueReport:(linkTo:!(),timerange:(from:'2019-08-01T20:03:29.186Z',kind:absolute,to:'2019-08-01T20:33:29.186Z')))"
       );
   });
 

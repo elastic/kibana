@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiButtonGroup, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { VerticalAlignment, HorizontalAlignment, Position } from '@elastic/charts';
+import { css } from '@emotion/react';
 
 export interface LegendLocationSettingsProps {
   /**
@@ -180,7 +181,12 @@ export const LegendLocationSettings: React.FunctionComponent<LegendLocationSetti
                 }}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                overflow: hidden;
+              `}
+            >
               <>
                 {(!location || location === 'outside') && (
                   <EuiButtonGroup

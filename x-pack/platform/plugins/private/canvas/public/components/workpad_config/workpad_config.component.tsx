@@ -198,7 +198,7 @@ export const WorkpadConfig: FC<Props> = (props) => {
               position="left"
               className="canvasArg__tooltip"
             >
-              <span>{strings.getGlobalCSSLabel()}</span>
+              <span tabIndex={0}>{strings.getGlobalCSSLabel()}</span>
             </EuiToolTip>
           }
         >
@@ -223,9 +223,11 @@ export const WorkpadConfig: FC<Props> = (props) => {
 };
 
 WorkpadConfig.propTypes = {
+  // @ts-expect-error upgrade typescript v5.9.3
   size: PropTypes.object.isRequired,
   name: PropTypes.string.isRequired,
   css: PropTypes.string,
+  // @ts-expect-error upgrade typescript v5.9.3
   variables: PropTypes.array,
   setSize: PropTypes.func.isRequired,
   setName: PropTypes.func.isRequired,

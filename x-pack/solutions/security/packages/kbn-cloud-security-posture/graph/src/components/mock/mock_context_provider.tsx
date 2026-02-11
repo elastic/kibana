@@ -12,6 +12,7 @@ interface MockData {
     log?: (...args: unknown[]) => void;
     isFetching?: boolean;
     refresh?: () => void;
+    data?: unknown;
   };
 }
 

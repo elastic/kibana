@@ -132,6 +132,7 @@ export const basicESCaseFields: CasePersistedAttributes = {
   assignees: [],
   total_alerts: -1,
   total_comments: -1,
+  total_events: -1,
   category: null,
 };
 
@@ -160,12 +161,14 @@ export const basicCaseFields: CaseAttributes = {
   external_service: null,
   settings: {
     syncAlerts: true,
+    extractObservables: true,
   },
   owner: SECURITY_SOLUTION_OWNER,
   assignees: [],
   category: null,
   customFields: [],
   observables: [],
+  total_observables: 0,
   incremental_id: undefined,
 };
 

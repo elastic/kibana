@@ -36,6 +36,7 @@ export const testContentPackEntry = ({
         lifecycle: { inherit: {} },
         wired: { routing, fields },
         settings: {},
+        failure_store: { inherit: {} },
       },
     },
   },

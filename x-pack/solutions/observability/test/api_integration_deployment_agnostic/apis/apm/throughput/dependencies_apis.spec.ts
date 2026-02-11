@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 import { meanBy, sumBy } from 'lodash';
 import type { DependencyNode, ServiceNode } from '@kbn/apm-plugin/common/connections';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import { SPANS_PER_DESTINATION_METRIC } from '@kbn/synthtrace/src/lib/apm/aggregators/create_span_metrics_aggregator';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { roundNumber } from '../utils/common';
 
@@ -50,7 +51,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             ...commonQuery,
             dependencyName: overrides?.dependencyName || 'elasticsearch',
             spanName: '',
-            searchServiceDestinationMetrics: false,
+            searchServiceDestinationMetrics: true,
             kuery: '',
           },
         },
@@ -187,9 +188,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const { topDependencies } = throughputValues;
           const topDependenciesAsObj = Object.fromEntries(topDependencies);
           expect(topDependenciesAsObj.elasticsearch).to.equal(
-            roundNumber(JAVA_PROD_RATE + GO_PROD_RATE)
+            roundNumber((JAVA_PROD_RATE + GO_PROD_RATE) * SPANS_PER_DESTINATION_METRIC)
           );
-          expect(topDependenciesAsObj.postgresql).to.equal(roundNumber(GO_PROD_RATE));
+          expect(topDependenciesAsObj.postgresql).to.equal(
+            roundNumber(GO_PROD_RATE * SPANS_PER_DESTINATION_METRIC)
+          );
         });
       });
 
@@ -204,7 +207,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             const topDependenciesAsObj = Object.fromEntries(topDependencies);
             const elasticsearchDependency = topDependenciesAsObj.elasticsearch;
             [elasticsearchDependency, dependencyThroughputChartMean].forEach((value) =>
-              expect(value).to.be.equal(roundNumber(JAVA_PROD_RATE + GO_PROD_RATE))
+              expect(value).to.be.equal(
+                roundNumber((JAVA_PROD_RATE + GO_PROD_RATE) * SPANS_PER_DESTINATION_METRIC)
+              )
             );
           });
 
@@ -216,7 +221,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               sumBy(upstreamServicesThroughput, 'throughput')
             );
             [elasticsearchDependency, upstreamServiceThroughputSum].forEach((value) =>
-              expect(value).to.be.equal(roundNumber(JAVA_PROD_RATE + GO_PROD_RATE))
+              expect(value).to.be.equal(
+                roundNumber((JAVA_PROD_RATE + GO_PROD_RATE) * SPANS_PER_DESTINATION_METRIC)
+              )
             );
           });
         });
@@ -230,7 +237,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             const topDependenciesAsObj = Object.fromEntries(topDependencies);
             const postgresqlDependency = topDependenciesAsObj.postgresql;
             [postgresqlDependency, dependencyThroughputChartMean].forEach((value) =>
-              expect(value).to.be.equal(roundNumber(GO_PROD_RATE))
+              expect(value).to.be.equal(roundNumber(GO_PROD_RATE * SPANS_PER_DESTINATION_METRIC))
             );
           });
 
@@ -242,7 +249,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               sumBy(upstreamServicesThroughput, 'throughput')
             );
             [postgresqlDependency, upstreamServiceThroughputSum].forEach((value) =>
-              expect(value).to.be.equal(roundNumber(GO_PROD_RATE))
+              expect(value).to.be.equal(roundNumber(GO_PROD_RATE * SPANS_PER_DESTINATION_METRIC))
             );
           });
         });

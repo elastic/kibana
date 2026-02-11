@@ -48,7 +48,6 @@ import type {
   RulesSettingsFlappingClient,
   RulesSettingsQueryDelayClient,
 } from './rules_settings';
-import type { MaintenanceWindowClient } from './maintenance_window_client';
 export * from '../common';
 import type {
   Rule,
@@ -89,7 +88,6 @@ export interface AlertingApiRequestHandlerContext {
   getAlertDeletionClient: () => AlertDeletionClient;
   getRulesClient: () => Promise<RulesClient>;
   getRulesSettingsClient: (withoutAuth?: boolean) => RulesSettingsClient;
-  getMaintenanceWindowClient: () => MaintenanceWindowClient;
   listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;
@@ -130,6 +128,7 @@ export interface RuleExecutorServices<
   actionsClient?: PublicMethodsOf<ActionsClient>;
   getDataViews: () => Promise<DataViewsContract>;
   getMaintenanceWindowIds: () => Promise<string[]>;
+  getMaintenanceWindowNames: () => Promise<string[]>;
   getSearchSourceClient: () => Promise<ISearchStartSearchSource>;
   ruleMonitoringService?: PublicRuleMonitoringService;
   ruleResultService?: PublicRuleResultService;
@@ -451,8 +450,6 @@ export type RulesClientApi = PublicMethodsOf<RulesClient>;
 export type RulesSettingsClientApi = PublicMethodsOf<RulesSettingsClient>;
 export type RulesSettingsFlappingClientApi = PublicMethodsOf<RulesSettingsFlappingClient>;
 export type RulesSettingsQueryDelayClientApi = PublicMethodsOf<RulesSettingsQueryDelayClient>;
-
-export type MaintenanceWindowClientApi = PublicMethodsOf<MaintenanceWindowClient>;
 
 export interface PublicMetricsSetters {
   setLastRunMetricsTotalSearchDurationMs: (totalSearchDurationMs: number) => void;

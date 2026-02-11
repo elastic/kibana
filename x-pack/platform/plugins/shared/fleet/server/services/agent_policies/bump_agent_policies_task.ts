@@ -13,8 +13,6 @@ import type {
 import { v4 as uuidv4 } from 'uuid';
 import { uniq } from 'lodash';
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-
 import { agentPolicyService, appContextService } from '..';
 import { runWithCache } from '../epm/packages/cache';
 import { getPackagePolicySavedObjectType } from '../package_policy';
@@ -22,6 +20,7 @@ import { mapPackagePolicySavedObjectToPackagePolicy } from '../package_policies'
 import type { PackagePolicy, PackagePolicySOAttributes } from '../../types';
 import { normalizeKuery } from '../saved_object';
 import { SO_SEARCH_LIMIT } from '../../constants';
+import { getSpaceForPackagePolicy } from '../spaces/helpers';
 
 const TASK_TYPE = 'fleet:bump_agent_policies';
 
@@ -81,7 +80,7 @@ export async function _updatePackagePoliciesThatNeedBump(
   );
 
   const packagePoliciesIndexedBySpace = packagePoliciesToBump.items.reduce((acc, policy) => {
-    const spaceId = policy.spaceIds?.[0] ?? DEFAULT_SPACE_ID;
+    const spaceId = getSpaceForPackagePolicy(policy);
     if (!acc[spaceId]) {
       acc[spaceId] = [];
     }

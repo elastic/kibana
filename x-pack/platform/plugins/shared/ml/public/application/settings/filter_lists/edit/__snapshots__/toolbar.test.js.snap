@@ -8,7 +8,7 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
     class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
     >
       <div
         class="euiFlexItem euiSearchBar__searchHolder emotion-euiFlexItem-grow-1-euiSearchBar__searchHolder"
@@ -105,7 +105,7 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
     class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-m-flexStart-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-center-row"
     >
       <div
         class="euiFlexItem euiSearchBar__searchHolder emotion-euiFlexItem-grow-1-euiSearchBar__searchHolder"

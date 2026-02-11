@@ -7,7 +7,6 @@
 
 import type { PluginInitializerContext } from '@kbn/core/public';
 
-import './application/index.scss';
 import { SnapshotRestoreUIPlugin } from './plugin';
 
 /** @public */

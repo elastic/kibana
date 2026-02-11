@@ -5,15 +5,22 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiErrorBoundary, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiErrorBoundary,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-import { DocLink } from '../../../components/doc_link';
 import { useHtmlId } from '../../../components/use_html_id';
 
 export interface ApiKeysEmptyPromptProps {
@@ -26,6 +33,7 @@ export const ApiKeysEmptyPrompt: FC<PropsWithChildren<ApiKeysEmptyPromptProps>> 
   readOnly,
   children,
 }) => {
+  const { services } = useKibana();
   const { euiTheme } = useEuiTheme();
   const accordionId = useHtmlId('apiKeysEmptyPrompt', 'accordion');
 
@@ -43,12 +51,16 @@ export const ApiKeysEmptyPrompt: FC<PropsWithChildren<ApiKeysEmptyPromptProps>> 
                 />
               </p>
               <p>
-                <DocLink app="elasticsearch" doc="security-settings.html#api-key-service-settings">
+                <EuiLink
+                  href={services.docLinks!.links.security.apiKeyServiceSettings}
+                  target="_blank"
+                  external
+                >
                   <FormattedMessage
                     id="xpack.security.management.apiKeysEmptyPrompt.docsLinkText"
                     defaultMessage="Learn how to enable API keys."
                   />
-                </DocLink>
+                </EuiLink>
               </p>
             </>
           }

@@ -418,6 +418,12 @@ class PipelineEditorUi extends React.Component {
                 onChange={(e) => this.handleMaxByteUnitChange(e.target.value)}
                 options={PIPELINE_EDITOR.UNITS}
                 value={this.state.maxBytesUnit}
+                aria-label={i18n.translate(
+                  'xpack.logstash.pipelineEditor.queueMaxBytesUnitsAriaLabel',
+                  {
+                    defaultMessage: 'Queue max bytes units',
+                  }
+                )}
               />
             </FlexItemSetting>
             <FlexItemSetting

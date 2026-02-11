@@ -9,6 +9,7 @@ import type { PostEvaluateBody } from '@kbn/elastic-assistant-common';
 import { API_VERSIONS, ELASTIC_AI_ASSISTANT_EVALUATE_URL } from '@kbn/elastic-assistant-common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import os from 'os';
+import { routeWithNamespace } from '@kbn/detections-response-ftr-services';
 import { getSecurityGenAIConfigFromEnvVar } from '../../../../scripts/genai/vault/manage_secrets';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -19,7 +20,6 @@ import {
   setupKnowledgeBase,
 } from '../../knowledge_base/entries/utils/helpers';
 
-import { routeWithNamespace } from '../../../../config/services/detections_response';
 import { loadEvalKnowledgeBaseEntries } from '../data/kb_entries';
 import { waitForEvaluationComplete } from './utils';
 
@@ -65,6 +65,21 @@ export default ({ getService }: FtrProviderContext) => {
         // delete integration prompt saved objects
         const route = routeWithNamespace(`/api/saved_objects/epm-packages/security_ai_prompts`);
         await supertest.delete(route).set('kbn-xsrf', 'foo');
+      }
+
+      // Ensure .integration_knowledge index exists to ensure that integration knowledge tool
+      // is registered but doesn't intefere with evals
+      const INTEGRATION_KNOWLEDGE_INDEX = '.integration_knowledge';
+      try {
+        const indexExists = await es.indices.exists({
+          index: INTEGRATION_KNOWLEDGE_INDEX,
+        });
+        if (!indexExists) {
+          await es.indices.create({ index: INTEGRATION_KNOWLEDGE_INDEX });
+        }
+      } catch (e) {
+        // Log errors but don't fail evals
+        log.error(`Error creating ${INTEGRATION_KNOWLEDGE_INDEX} index: ${e}`);
       }
     });
 

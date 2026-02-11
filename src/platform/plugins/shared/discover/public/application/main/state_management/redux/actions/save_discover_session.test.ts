@@ -8,21 +8,22 @@
  */
 
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
-import { getDiscoverStateMock } from '../../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { getTabStateMock } from '../__mocks__/internal_state.mocks';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverServices } from '../../../../../build_services';
 import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
-import { internalStateActions } from '..';
-import { savedSearchMock } from '../../../../../__mocks__/saved_search';
+import { internalStateActions, selectTabRuntimeState } from '..';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { internalStateSlice } from '../internal_state';
 import type { SaveDiscoverSessionThunkParams } from './save_discover_session';
-import * as dataViewsActions from './data_views';
+import * as tabStateDataViewActions from './tab_state_data_view';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 
 jest.mock('uuid', () => ({ v4: jest.fn(() => 'test-uuid') }));
 
@@ -39,10 +40,12 @@ const getSaveDiscoverSessionParams = (
   ...overrides,
 });
 
-const setup = ({
+const setup = async ({
   additionalPersistedTabs,
+  initializeTab = false,
 }: {
   additionalPersistedTabs?: (services: DiscoverServices) => DiscoverSessionTab[];
+  initializeTab?: boolean;
 } = {}) => {
   const services = createDiscoverServicesMock();
   const saveDiscoverSessionSpy = jest
@@ -56,14 +59,35 @@ const setup = ({
     );
   const dataViewCreateSpy = jest.spyOn(services.dataViews, 'create');
   const dataViewsClearCacheSpy = jest.spyOn(services.dataViews, 'clearInstanceCache');
-  const state = getDiscoverStateMock({
-    savedSearch: { ...savedSearchMock, timeRestore: false },
-    additionalPersistedTabs: additionalPersistedTabs?.(services),
+
+  const toolkit = getDiscoverInternalStateMock({
+    services,
+    persistedDataViews: [dataViewMock, dataViewMockWithTimeField],
+  });
+
+  const defaultTab = getPersistedTabMock({
+    tabId: 'default-tab',
+    dataView: dataViewMock,
     services,
   });
 
+  const tabs = [defaultTab, ...(additionalPersistedTabs?.(services) ?? [])];
+
+  await toolkit.initializeTabs({
+    persistedDiscoverSession: createDiscoverSessionMock({
+      id: 'test-session',
+      title: 'Test Session',
+      description: 'Test Description',
+      tabs,
+    }),
+  });
+
+  if (initializeTab) {
+    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+  }
+
   return {
-    state,
+    toolkit,
     services,
     saveDiscoverSessionSpy,
     dataViewCreateSpy,
@@ -77,24 +101,19 @@ describe('saveDiscoverSession', () => {
   });
 
   it('should call saveDiscoverSession with the expected params', async () => {
-    const { state, saveDiscoverSessionSpy } = setup({
+    const { toolkit, saveDiscoverSessionSpy } = await setup({
       additionalPersistedTabs: (services) => [
-        fromTabStateToSavedObjectTab({
-          tab: getTabStateMock({
-            id: 'test-tab',
-            initialInternalState: {
-              serializedSearchSource: { index: dataViewMock.id },
-            },
-          }),
-          timeRestore: false,
+        getPersistedTabMock({
+          tabId: 'test-tab',
+          dataView: dataViewMock,
           services,
         }),
       ],
     });
-    const discoverSession = state.internalState.getState().persistedDiscoverSession;
+    const discoverSession = toolkit.internalState.getState().persistedDiscoverSession;
     const onTitleDuplicate = jest.fn();
 
-    await state.internalState.dispatch(
+    await toolkit.internalState.dispatch(
       internalStateActions.saveDiscoverSession(
         getSaveDiscoverSessionParams({ newTags: ['tag1', 'tag2'], onTitleDuplicate })
       )
@@ -114,17 +133,23 @@ describe('saveDiscoverSession', () => {
       isTitleDuplicateConfirmed: false,
     });
 
-    expect(state.internalState.getState().persistedDiscoverSession).toEqual({
+    expect(toolkit.internalState.getState().persistedDiscoverSession).toEqual({
       ...updatedDiscoverSession,
       managed: false,
     });
   });
 
   it('should update runtime state for applicable tabs', async () => {
-    const { state, services, saveDiscoverSessionSpy } = setup();
+    const { toolkit, services, saveDiscoverSessionSpy } = await setup({ initializeTab: true });
 
-    state.savedSearchState.assignNextSavedSearch({
-      ...state.savedSearchState.getState(),
+    const tabRuntimeState = selectTabRuntimeState(
+      toolkit.runtimeStateManager,
+      toolkit.getCurrentTab().id
+    );
+    const stateContainer = tabRuntimeState.stateContainer$.getValue()!;
+
+    stateContainer.savedSearchState.assignNextSavedSearch({
+      ...stateContainer.savedSearchState.getState(),
       breakdownField: 'breakdown-test',
     });
 
@@ -132,17 +157,15 @@ describe('saveDiscoverSession', () => {
       internalStateSlice.actions,
       'resetOnSavedSearchChange'
     );
-    const setDataViewSpy = jest.spyOn(dataViewsActions, 'setDataView');
-    const setSavedSearchSpy = jest.spyOn(state.savedSearchState, 'set');
-    const undoSavedSearchChangesSpy = jest.spyOn(state.actions, 'undoSavedSearchChanges');
-    const resetInitialStateSpy = jest.spyOn(state.appState, 'resetInitialState');
-    const currentTabId = state.getCurrentTab().id;
+    const setDataViewSpy = jest.spyOn(tabStateDataViewActions, 'setDataView');
+    const setSavedSearchSpy = jest.spyOn(stateContainer.savedSearchState, 'set');
+    const currentTabId = toolkit.getCurrentTab().id;
 
     jest
       .spyOn(services.data.search.searchSource, 'create')
       .mockResolvedValue(createSearchSourceMock({ index: dataViewMockWithTimeField }));
 
-    await state.internalState.dispatch(
+    await toolkit.internalState.dispatch(
       internalStateActions.saveDiscoverSession(getSaveDiscoverSessionParams())
     );
 
@@ -155,69 +178,63 @@ describe('saveDiscoverSession', () => {
     expect(setSavedSearchSpy).toHaveBeenCalledWith(
       expect.objectContaining({ breakdownField: 'breakdown-test' })
     );
-    expect(undoSavedSearchChangesSpy).toHaveBeenCalled();
-    expect(resetInitialStateSpy).toHaveBeenCalled();
   });
 
   it('should not update local state if saveDiscoverSession returns undefined', async () => {
-    const { state, saveDiscoverSessionSpy } = setup();
     const resetOnSavedSearchChangeSpy = jest.spyOn(
       internalStateSlice.actions,
       'resetOnSavedSearchChange'
     );
-    const initialPersisted = state.internalState.getState().persistedDiscoverSession;
+    const { toolkit, saveDiscoverSessionSpy } = await setup();
+    const initialPersisted = toolkit.internalState.getState().persistedDiscoverSession;
 
     saveDiscoverSessionSpy.mockResolvedValueOnce(undefined);
 
-    await state.internalState.dispatch(
+    await toolkit.internalState.dispatch(
       internalStateActions.saveDiscoverSession(getSaveDiscoverSessionParams())
     );
 
-    expect(state.internalState.getState().persistedDiscoverSession).toBe(initialPersisted);
+    expect(toolkit.internalState.getState().persistedDiscoverSession).toBe(initialPersisted);
     expect(resetOnSavedSearchChangeSpy).not.toHaveBeenCalled();
   });
 
   it('should allow errors thrown at the persistence layer to bubble up and not modify local state', async () => {
-    const { state, saveDiscoverSessionSpy } = setup();
     const resetOnSavedSearchChangeSpy = jest.spyOn(
       internalStateSlice.actions,
       'resetOnSavedSearchChange'
     );
-    const initialPersisted = state.internalState.getState().persistedDiscoverSession;
+    const { toolkit, saveDiscoverSessionSpy } = await setup();
+    const initialPersisted = toolkit.internalState.getState().persistedDiscoverSession;
 
     saveDiscoverSessionSpy.mockRejectedValueOnce(new Error('boom'));
 
     await expect(
-      state.internalState
+      toolkit.internalState
         .dispatch(internalStateActions.saveDiscoverSession(getSaveDiscoverSessionParams()))
         .unwrap()
     ).rejects.toHaveProperty('message', 'boom');
 
-    expect(state.internalState.getState().persistedDiscoverSession).toBe(initialPersisted);
+    expect(toolkit.internalState.getState().persistedDiscoverSession).toBe(initialPersisted);
     expect(resetOnSavedSearchChangeSpy).not.toHaveBeenCalled();
   });
 
   it('should include timeRange and refreshInterval when timeRestore is true', async () => {
-    const { state, saveDiscoverSessionSpy } = setup({
+    const { toolkit, saveDiscoverSessionSpy } = await setup({
       additionalPersistedTabs: (services) => [
-        fromTabStateToSavedObjectTab({
-          tab: getTabStateMock({
-            id: 'time-tab',
-            globalState: {
-              timeRange: { from: 'now-15m', to: 'now' },
-              refreshInterval: { value: 10000, pause: false },
-            },
-            initialInternalState: {
-              serializedSearchSource: { index: dataViewMock.id },
-            },
-          }),
+        getPersistedTabMock({
+          tabId: 'time-tab',
+          dataView: dataViewMock,
+          globalStateOverrides: {
+            timeRange: { from: 'now-15m', to: 'now' },
+            refreshInterval: { value: 10000, pause: false },
+          },
           timeRestore: true,
           services,
         }),
       ],
     });
 
-    await state.internalState.dispatch(
+    await toolkit.internalState.dispatch(
       internalStateActions.saveDiscoverSession(
         getSaveDiscoverSessionParams({ newTimeRestore: true })
       )
@@ -238,25 +255,26 @@ describe('saveDiscoverSession', () => {
     const filters = [
       { meta: { index: oldId, alias: null, disabled: false }, query: { match_all: {} } },
     ];
-    const { state, saveDiscoverSessionSpy, dataViewCreateSpy, dataViewsClearCacheSpy } = setup({
-      additionalPersistedTabs: (services) => [
-        fromTabStateToSavedObjectTab({
-          tab: getTabStateMock({
-            id: 'adhoc-replace-tab',
-            initialInternalState: {
-              serializedSearchSource: {
-                index: { id: oldId, title: 'Adhoc', name: 'Adhoc Name' },
-                filter: filters,
+    const { toolkit, saveDiscoverSessionSpy, dataViewCreateSpy, dataViewsClearCacheSpy } =
+      await setup({
+        additionalPersistedTabs: (services) => [
+          fromTabStateToSavedObjectTab({
+            tab: getTabStateMock({
+              id: 'adhoc-replace-tab',
+              initialInternalState: {
+                serializedSearchSource: {
+                  index: { id: oldId, title: 'Adhoc', name: 'Adhoc Name' },
+                  filter: filters,
+                },
               },
-            },
+            }),
+            timeRestore: false,
+            services,
           }),
-          timeRestore: false,
-          services,
-        }),
-      ],
-    });
+        ],
+      });
 
-    await state.internalState.dispatch(
+    await toolkit.internalState.dispatch(
       internalStateActions.saveDiscoverSession(
         getSaveDiscoverSessionParams({ newCopyOnSave: true })
       )
@@ -271,8 +289,9 @@ describe('saveDiscoverSession', () => {
     expect(createdSpec.name).toBe('Adhoc Name');
 
     const tabs = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
-    const savedTab = tabs.find((t) => t.id === 'adhoc-replace-tab');
-
+    expect(tabs).toHaveLength(2);
+    const savedTab = tabs[1];
+    expect(savedTab?.id).toBe('test-uuid');
     expect((savedTab?.serializedSearchSource?.index as DataViewSpec).id).toBe('test-uuid');
     expect(savedTab?.serializedSearchSource?.filter?.[0].meta.index).toBe('test-uuid');
   });
@@ -282,29 +301,30 @@ describe('saveDiscoverSession', () => {
     const filters = [
       { meta: { index: defaultProfileId, alias: null, disabled: false }, query: { match_all: {} } },
     ];
-    const { state, saveDiscoverSessionSpy, dataViewCreateSpy, dataViewsClearCacheSpy } = setup({
-      additionalPersistedTabs: (services) => [
-        fromTabStateToSavedObjectTab({
-          tab: getTabStateMock({
-            id: 'adhoc-copy-tab',
-            initialInternalState: {
-              serializedSearchSource: {
-                index: { id: defaultProfileId, title: 'Adhoc', name: 'Adhoc Name' },
-                filter: filters,
+    const { toolkit, saveDiscoverSessionSpy, dataViewCreateSpy, dataViewsClearCacheSpy } =
+      await setup({
+        additionalPersistedTabs: (services) => [
+          fromTabStateToSavedObjectTab({
+            tab: getTabStateMock({
+              id: 'adhoc-copy-tab',
+              initialInternalState: {
+                serializedSearchSource: {
+                  index: { id: defaultProfileId, title: 'Adhoc', name: 'Adhoc Name' },
+                  filter: filters,
+                },
               },
-            },
+            }),
+            timeRestore: false,
+            services,
           }),
-          timeRestore: false,
-          services,
-        }),
-      ],
-    });
+        ],
+      });
 
-    state.internalState.dispatch(
+    toolkit.internalState.dispatch(
       internalStateSlice.actions.setDefaultProfileAdHocDataViewIds([defaultProfileId])
     );
 
-    await state.internalState.dispatch(
+    await toolkit.internalState.dispatch(
       internalStateActions.saveDiscoverSession(getSaveDiscoverSessionParams())
     );
 
@@ -325,24 +345,25 @@ describe('saveDiscoverSession', () => {
 
   it('should not clone ad hoc ES|QL data views', async () => {
     const esqlId = 'adhoc-esql-id';
-    const { state, saveDiscoverSessionSpy, dataViewCreateSpy, dataViewsClearCacheSpy } = setup({
-      additionalPersistedTabs: (services) => [
-        fromTabStateToSavedObjectTab({
-          tab: getTabStateMock({
-            id: 'esql-tab',
-            initialInternalState: {
-              serializedSearchSource: {
-                index: { id: esqlId, title: 'ES|QL Adhoc', type: ESQL_TYPE },
+    const { toolkit, saveDiscoverSessionSpy, dataViewCreateSpy, dataViewsClearCacheSpy } =
+      await setup({
+        additionalPersistedTabs: (services) => [
+          fromTabStateToSavedObjectTab({
+            tab: getTabStateMock({
+              id: 'esql-tab',
+              initialInternalState: {
+                serializedSearchSource: {
+                  index: { id: esqlId, title: 'ES|QL Adhoc', type: ESQL_TYPE },
+                },
               },
-            },
+            }),
+            timeRestore: false,
+            services,
           }),
-          timeRestore: false,
-          services,
-        }),
-      ],
-    });
+        ],
+      });
 
-    await state.internalState.dispatch(
+    await toolkit.internalState.dispatch(
       internalStateActions.saveDiscoverSession(
         getSaveDiscoverSessionParams({ newCopyOnSave: true })
       )
@@ -353,36 +374,33 @@ describe('saveDiscoverSession', () => {
     expect(dataViewsClearCacheSpy).not.toHaveBeenCalled();
 
     const tabs = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
-    const savedTab = tabs.find((t) => t.id === 'esql-tab');
+    expect(tabs).toHaveLength(2);
 
+    const savedTab = tabs[1];
+    expect(savedTab?.id).toBe('test-uuid');
     expect((savedTab?.serializedSearchSource.index as DataViewSpec).id).toBe(esqlId);
   });
 
   it('should apply overriddenVisContextAfterInvalidation to the saved tab', async () => {
-    const { state, saveDiscoverSessionSpy } = setup({
+    const { toolkit, saveDiscoverSessionSpy } = await setup({
       additionalPersistedTabs: (services) => [
-        fromTabStateToSavedObjectTab({
-          tab: getTabStateMock({
-            id: 'vis-context-tab',
-            initialInternalState: {
-              serializedSearchSource: { index: dataViewMock.id },
-            },
-          }),
-          timeRestore: false,
+        getPersistedTabMock({
+          tabId: 'vis-context-tab',
+          dataView: dataViewMock,
           services,
         }),
       ],
     });
     const visContext = { foo: 'bar' };
 
-    state.internalState.dispatch(
+    toolkit.internalState.dispatch(
       internalStateActions.setOverriddenVisContextAfterInvalidation({
         tabId: 'vis-context-tab',
         overriddenVisContextAfterInvalidation: visContext,
       })
     );
 
-    await state.internalState.dispatch(
+    await toolkit.internalState.dispatch(
       internalStateActions.saveDiscoverSession(getSaveDiscoverSessionParams())
     );
 

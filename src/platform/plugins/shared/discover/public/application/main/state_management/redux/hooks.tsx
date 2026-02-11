@@ -16,8 +16,9 @@ import {
 } from 'react-redux';
 import type { PropsWithChildren } from 'react';
 import React, { useMemo, createContext } from 'react';
+import defaultComparator from 'fast-deep-equal';
 import { useAdHocDataViews } from './runtime_state';
-import type { DiscoverInternalState, TabState } from './types';
+import type { DiscoverAppState, DiscoverInternalState, TabState } from './types';
 import {
   type TabActionPayload,
   type InternalStateDispatch,
@@ -84,10 +85,13 @@ export const useCurrentTabContext = () => {
   return context;
 };
 
-export const useCurrentTabSelector: TypedUseSelectorHook<TabState> = (selector) => {
+export const useCurrentTabSelector: TypedUseSelectorHook<TabState> = (selector, equalityFn) => {
   const { currentTabId } = useCurrentTabContext();
-  return useInternalStateSelector((state) => selector(selectTab(state, currentTabId)));
+  return useInternalStateSelector((state) => selector(selectTab(state, currentTabId)), equalityFn);
 };
+
+export const useAppStateSelector = <T,>(selector: (state: DiscoverAppState) => T): T =>
+  useCurrentTabSelector((tab) => selector(tab.appState), defaultComparator);
 
 export const useCurrentTabAction = <TPayload extends TabActionPayload, TReturn>(
   actionCreator: (params: TPayload) => TReturn

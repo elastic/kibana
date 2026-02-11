@@ -61,8 +61,7 @@ export const getMlServices = async (
   const mlCapabilities = new MlCapabilitiesService(mlApi);
   const anomalyExplorerService = new AnomalyExplorerChartsService(
     pluginsStart.data.query.timefilter.timefilter,
-    mlApi,
-    mlResultsService
+    mlApi
   );
   // Note on the following services:
   // - `mlIndexUtils` is just instantiated here to be passed on to `mlFieldFormatService`,

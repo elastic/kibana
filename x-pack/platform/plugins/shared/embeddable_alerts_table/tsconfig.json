@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -33,8 +33,8 @@
     "@kbn/alerting-types",
     "@kbn/es-query",
     "@kbn/kibana-react-plugin",
-    "@kbn/kibana-utils-plugin",
     "@kbn/utility-types",
     "@kbn/presentation-util",
+    "@kbn/react-query",
   ]
 }

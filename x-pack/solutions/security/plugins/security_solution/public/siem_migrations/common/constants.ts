@@ -5,5 +5,12 @@
  * 2.0.
  */
 
+import { MigrationSource } from './types';
+
 export const TASK_STATS_POLLING_SLEEP_SECONDS = 10 as const;
 export const START_STOP_POLLING_SLEEP_SECONDS = 1 as const;
+
+export const MIGRATION_VENDOR_DISPLAY_NAME: Record<MigrationSource, string> = {
+  [MigrationSource.SPLUNK]: 'Splunk',
+  [MigrationSource.QRADAR]: 'QRadar',
+};

@@ -114,6 +114,14 @@ describe('CreateUserPage', () => {
       )
     );
 
+    // The submit button is not available until a change to the form is made
+    fireEvent.change(await findByLabelText('Username'), {
+      target: { value: 'something' },
+    });
+    fireEvent.change(await findByLabelText('Username'), {
+      target: { value: '' },
+    });
+
     fireEvent.click(await findByRole('button', { name: 'Create user' }));
 
     const alert = await findByRole('alert');

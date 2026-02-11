@@ -517,6 +517,13 @@ export const fleetUsagesSchema: RootSchema<any> = {
     type: 'keyword',
     _meta: { description: 'id of the deployment', optional: true },
   },
+  modified_ilms: {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'list of managed ILMs modified by users' },
+    },
+  },
 };
 
 export const fleetIntegrationsSchema: RootSchema<any> = {

@@ -6,11 +6,10 @@
  */
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { maintenanceWindowCategoryIdTypes } from '../../application/maintenance_window/constants';
-import { getMockMaintenanceWindow } from '../../data/maintenance_window/test_helpers';
-import { maintenanceWindowClientMock } from '../../maintenance_window_client.mock';
-import { MaintenanceWindowStatus } from '../../types';
-import type { MaintenanceWindow } from '../../application/maintenance_window/types';
+import { maintenanceWindowCategoryIdTypes } from '@kbn/maintenance-windows-plugin/server';
+import { maintenanceWindowClientMock } from '@kbn/maintenance-windows-plugin/server/maintenance_window_client.mock';
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { mockedRawRuleSO, mockedRule } from '../fixtures';
 import {
   filterMaintenanceWindows,
@@ -21,6 +20,7 @@ import { getFakeKibanaRequest } from '../rule_loader';
 import type { TaskRunnerContext } from '../types';
 import { FilterStateStore } from '@kbn/es-query';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { getMockMaintenanceWindow } from './maintenance_windows_service.mock';
 
 const logger = loggingSystemMock.create().get();
 const mockBasePathService = { set: jest.fn() };
@@ -251,31 +251,33 @@ describe('filterMaintenanceWindows', () => {
       eventEndTime: new Date().toISOString(),
       status: MaintenanceWindowStatus.Running,
       id: 'test-id1',
-      scopedQuery: {
-        kql: "_id: '1234'",
-        filters: [
-          {
-            meta: {
-              disabled: false,
-              negate: false,
-              alias: null,
-              key: 'kibana.alert.action_group',
-              field: 'kibana.alert.action_group',
-              params: {
-                query: 'test',
+      scope: {
+        alerting: {
+          kql: "_id: '1234'",
+          filters: [
+            {
+              meta: {
+                disabled: false,
+                negate: false,
+                alias: null,
+                key: 'kibana.alert.action_group',
+                field: 'kibana.alert.action_group',
+                params: {
+                  query: 'test',
+                },
+                type: 'phrase',
               },
-              type: 'phrase',
-            },
-            $state: {
-              store: FilterStateStore.APP_STATE,
-            },
-            query: {
-              match_phrase: {
-                'kibana.alert.action_group': 'test',
+              $state: {
+                store: FilterStateStore.APP_STATE,
+              },
+              query: {
+                match_phrase: {
+                  'kibana.alert.action_group': 'test',
+                },
               },
             },
-          },
-        ],
+          ],
+        },
       },
     },
     {
@@ -319,31 +321,33 @@ describe('filterMaintenanceWindowsIds', () => {
       eventEndTime: new Date().toISOString(),
       status: MaintenanceWindowStatus.Running,
       id: 'test-id1',
-      scopedQuery: {
-        kql: "_id: '1234'",
-        filters: [
-          {
-            meta: {
-              disabled: false,
-              negate: false,
-              alias: null,
-              key: 'kibana.alert.action_group',
-              field: 'kibana.alert.action_group',
-              params: {
-                query: 'test',
+      scope: {
+        alerting: {
+          kql: "_id: '1234'",
+          filters: [
+            {
+              meta: {
+                disabled: false,
+                negate: false,
+                alias: null,
+                key: 'kibana.alert.action_group',
+                field: 'kibana.alert.action_group',
+                params: {
+                  query: 'test',
+                },
+                type: 'phrase',
               },
-              type: 'phrase',
-            },
-            $state: {
-              store: FilterStateStore.APP_STATE,
-            },
-            query: {
-              match_phrase: {
-                'kibana.alert.action_group': 'test',
+              $state: {
+                store: FilterStateStore.APP_STATE,
+              },
+              query: {
+                match_phrase: {
+                  'kibana.alert.action_group': 'test',
+                },
               },
             },
-          },
-        ],
+          ],
+        },
       },
     },
     {

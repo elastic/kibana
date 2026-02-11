@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   createHistoricalPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
@@ -15,14 +16,13 @@ import {
   importRulesWithSuccess,
   assertImportedRule,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
 
   const PREBUILT_RULE_ID = 'prebuilt-rule';
   const PREBUILT_RULE_ASSET = createRuleAssetSavedObject({
@@ -65,6 +65,8 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_source: {
             type: 'external',
             is_customized: false,
+            customized_fields: [],
+            has_base_version: true,
           },
         },
       });
@@ -97,6 +99,8 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_source: {
             type: 'external',
             is_customized: true,
+            customized_fields: [{ field_name: 'name' }],
+            has_base_version: true,
           },
         },
       });
@@ -110,6 +114,8 @@ export default ({ getService }: FtrProviderContext): void => {
         rule_source: {
           type: 'external',
           is_customized: false,
+          customized_fields: [],
+          has_base_version: true,
         },
       };
 
@@ -139,6 +145,8 @@ export default ({ getService }: FtrProviderContext): void => {
         rule_source: {
           type: 'external',
           is_customized: false,
+          customized_fields: [],
+          has_base_version: true,
         },
       };
 
@@ -201,7 +209,7 @@ export default ({ getService }: FtrProviderContext): void => {
         version: 3,
       });
 
-      await securitySolutionApi
+      await detectionsApi
         .createRule({
           body: CUSTOM_RULE,
         })

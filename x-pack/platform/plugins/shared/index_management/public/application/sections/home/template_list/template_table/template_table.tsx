@@ -302,7 +302,13 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           'data-test-subj': 'cell',
         })}
         data-test-subj="templateTable"
-        message={
+        tableCaption={i18n.translate(
+          'xpack.idxMgmt.templateList.table.indexTemplatesTableCaption',
+          {
+            defaultMessage: 'Index templates list',
+          }
+        )}
+        noItemsMessage={
           <FormattedMessage
             id="xpack.idxMgmt.templateList.table.noIndexTemplatesMessage"
             defaultMessage="No index templates found"

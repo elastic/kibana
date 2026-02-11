@@ -72,32 +72,15 @@ function borderColorForNode(el: cytoscape.NodeSingular, euiTheme: EuiThemeComput
     case JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING:
       return euiTheme.colors.fullShade;
     case JOB_MAP_NODE_TYPES.ANALYTICS:
-      // Amsterdam + Borealis
       return euiTheme.colors.vis.euiColorVis0;
     case JOB_MAP_NODE_TYPES.TRANSFORM:
-      // Amsterdam: euiTheme.colors.vis.euiColorVis1
-      // Borealis:  euiTheme.colors.vis.euiColorVis2
-      return euiTheme.flags.hasVisColorAdjustment
-        ? euiTheme.colors.vis.euiColorVis1
-        : euiTheme.colors.vis.euiColorVis2;
+      return euiTheme.colors.vis.euiColorVis2;
     case JOB_MAP_NODE_TYPES.INDEX:
-      // Amsterdam: euiTheme.colors.vis.euiColorVis2
-      // Borealis:  euiTheme.colors.vis.euiColorVis4
-      return euiTheme.flags.hasVisColorAdjustment
-        ? euiTheme.colors.vis.euiColorVis2
-        : euiTheme.colors.vis.euiColorVis4;
+      return euiTheme.colors.vis.euiColorVis4;
     case JOB_MAP_NODE_TYPES.TRAINED_MODEL:
-      // Amsterdam: euiTheme.colors.vis.euiColorVis3
-      // Borealis:  euiTheme.colors.vis.euiColorVis5
-      return euiTheme.flags.hasVisColorAdjustment
-        ? euiTheme.colors.vis.euiColorVis3
-        : euiTheme.colors.vis.euiColorVis5;
+      return euiTheme.colors.vis.euiColorVis5;
     case JOB_MAP_NODE_TYPES.INGEST_PIPELINE:
-      // Amsterdam: euiTheme.colors.vis.euiColorVis7
-      // Borealis:  euiTheme.colors.vis.euiColorVis8
-      return euiTheme.flags.hasVisColorAdjustment
-        ? euiTheme.colors.vis.euiColorVis7
-        : euiTheme.colors.vis.euiColorVis8;
+      return euiTheme.colors.vis.euiColorVis8;
 
     default:
       return euiTheme.colors.mediumShade;

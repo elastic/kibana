@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -15,7 +15,8 @@
     "@kbn/core-status-common",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-elasticsearch-client-server-mocks",
-    "@kbn/core-elasticsearch-server-internal"
+    "@kbn/core-elasticsearch-server-internal",
+    "@kbn/lazy-object"
   ],
   "exclude": [
     "target/**/*",

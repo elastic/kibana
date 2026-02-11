@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import type { IngestSimulateRequest } from '@elastic/elasticsearch/lib/api/types';
+import { transpileIngestPipeline } from '@kbn/streamlang';
 import type { FieldDefinition, Streams } from '@kbn/streams-schema';
 import { isRoot, keepFields, namespacePrefixes } from '@kbn/streams-schema';
-import { MalformedFieldsError } from '../errors/malformed_fields_error';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import { executePipelineSimulation } from '../../../routes/internal/streams/processing/simulation_handler';
 import { baseMappings } from '../component_templates/logs_layer';
+import { MalformedFieldsError } from '../errors/malformed_fields_error';
 
 export function validateAncestorFields({
   ancestors,
@@ -83,6 +87,30 @@ export function validateClassicFields(definition: Streams.ClassicStream.Definiti
     throw new MalformedFieldsError(
       `Stream ${definition.name} is not allowed to have system fields`
     );
+  }
+}
+
+export async function validateSimulation(
+  definition: Streams.ClassicStream.Definition | Streams.WiredStream.Definition,
+  scopedClusterClient: IScopedClusterClient
+) {
+  if (definition.ingest.processing.steps.length === 0) {
+    return;
+  }
+
+  const simulationBody: IngestSimulateRequest = {
+    docs: [
+      {
+        _source: {},
+      },
+    ],
+    pipeline: {
+      processors: transpileIngestPipeline(definition.ingest.processing).processors,
+    },
+  };
+  const simulationResult = await executePipelineSimulation(scopedClusterClient, simulationBody);
+  if (simulationResult.status === 'failure') {
+    throw new MalformedFieldsError(simulationResult.error.message);
   }
 }
 

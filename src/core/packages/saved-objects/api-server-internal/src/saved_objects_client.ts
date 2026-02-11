@@ -45,6 +45,13 @@ import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
+  SavedObjectsChangeAccessControlResponse,
+  SavedObjectsChangeAccessControlObject,
+  SavedObjectsChangeAccessModeOptions,
+  SavedObjectsChangeOwnershipOptions,
+  SavedObjectsRawDocSource,
+  SavedObjectsSearchOptions,
+  SavedObjectsSearchResponse,
 } from '@kbn/core-saved-objects-api-server';
 
 /**
@@ -101,6 +108,13 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T, A>> {
     return await this._repository.find(options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.search} */
+  async search<T extends SavedObjectsRawDocSource = SavedObjectsRawDocSource, A = unknown>(
+    options: SavedObjectsSearchOptions
+  ): Promise<SavedObjectsSearchResponse<T, A>> {
+    return await this._repository.search(options);
   }
 
   /** {@inheritDoc SavedObjectsClientContract.bulkGet} */
@@ -220,5 +234,21 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   /** {@inheritDoc SavedObjectsClientContract.asScopedToNamespace} */
   asScopedToNamespace(namespace: string) {
     return new SavedObjectsClient(this._repository.asScopedToNamespace(namespace));
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.changeOwnership} */
+  changeOwnership(
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeOwnershipOptions
+  ): Promise<SavedObjectsChangeAccessControlResponse> {
+    return this._repository.changeOwnership(objects, options);
+  }
+
+  /** {@inheritDoc SavedObjectsClientContract.changeAccessMode} */
+  changeAccessMode(
+    objects: SavedObjectsChangeAccessControlObject[],
+    options: SavedObjectsChangeAccessModeOptions
+  ): Promise<SavedObjectsChangeAccessControlResponse> {
+    return this._repository.changeAccessMode(objects, options);
   }
 }

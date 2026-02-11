@@ -87,6 +87,7 @@ export function App() {
             {response?.errors && (
               <>
                 <EuiCallOut
+                  announceOnMount
                   title="Sorry, there was an error"
                   color="danger"
                   iconType="warning"

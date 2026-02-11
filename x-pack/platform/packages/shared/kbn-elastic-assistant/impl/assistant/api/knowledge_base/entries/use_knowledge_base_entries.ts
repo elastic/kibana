@@ -6,7 +6,7 @@
  */
 
 import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type {
   FindKnowledgeBaseEntriesRequestQuery,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MapAttributes } from '../../common/content_management';
+import type { StoredMapAttributes } from '../saved_objects/types';
 import { extract } from './extract';
 
 test('Should return original state and empty references with by-reference embeddable state', () => {
@@ -26,7 +26,7 @@ test('Should update state with refNames with by-value embeddable state', () => {
     attributes: {
       layerListJSON:
         '[{"sourceDescriptor":{"indexPatternId":"90943e30-9a47-11e8-b64d-95841ca0b247"}}]',
-    } as MapAttributes,
+    } as StoredMapAttributes,
     type: 'map',
   };
 

@@ -34,8 +34,11 @@ export type EndpointResponderExtensionComponentProps =
   ManagedConsoleExtensionComponentProps<BasicConsoleProps>;
 
 export type ActionRequestComponentProps<
+  /** The console arguments defintion for the command */
   TArgs extends object = object,
+  /** The response action output as defined in the ActionDetails when action completes */
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  /** The action's parameters as defined in the ActionDetails for the command */
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 > = CommandExecutionComponentProps<
   { comment?: string } & TArgs,

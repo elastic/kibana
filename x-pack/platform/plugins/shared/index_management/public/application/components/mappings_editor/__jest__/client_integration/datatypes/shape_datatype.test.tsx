@@ -5,41 +5,18 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import React from 'react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
-import type { MappingsEditorTestBed } from '../helpers';
-import { componentHelpers } from '../helpers';
+import { WithAppDependencies } from '../helpers/setup_environment';
+import { MappingsEditor } from '../../../mappings_editor';
+import { defaultShapeParameters } from './fixtures';
 
-const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
-
-// Parameters automatically added to the shape datatype when saved (with the default values)
-export const defaultShapeParameters = {
-  type: 'shape',
-  coerce: false,
-  ignore_malformed: false,
-  ignore_z_value: true,
-};
-
+const onChangeHandler = jest.fn();
 describe('Mappings editor: shape datatype', () => {
-  /**
-   * Variable to store the mappings data forwarded to the consumer component
-   */
-  let data: any;
-  let onChangeHandler: jest.Mock = jest.fn();
-  let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
-  let testBed: MappingsEditorTestBed;
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   beforeEach(() => {
-    onChangeHandler = jest.fn();
-    getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
+    jest.clearAllMocks();
   });
 
   test('initial view and default parameters values', async () => {
@@ -51,24 +28,32 @@ describe('Mappings editor: shape datatype', () => {
       },
     };
 
-    await act(async () => {
-      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
-    });
-    testBed.component.update();
+    const Component = WithAppDependencies(MappingsEditor, {});
+    render(
+      <I18nProvider>
+        <Component value={defaultMappings} onChange={onChangeHandler} indexSettings={{}} />
+      </I18nProvider>
+    );
 
-    const {
-      component,
-      actions: { startEditField, updateFieldName, updateFieldAndCloseFlyout },
-    } = testBed;
+    await screen.findByTestId('mappingsEditor');
 
     // Open the flyout to edit the field
-    await startEditField('myField');
+    const editButton = screen.getByTestId('editFieldButton');
+    fireEvent.click(editButton);
+
+    await screen.findByTestId('mappingsEditorFieldEdit');
 
     // Update the name of the field
-    await updateFieldName('updatedField');
+    const nameInput = screen.getByTestId('nameParameterInput');
+    fireEvent.change(nameInput, { target: { value: 'updatedField' } });
 
     // Save the field and close the flyout
-    await updateFieldAndCloseFlyout();
+    const updateButton = screen.getByTestId('editFieldUpdateButton');
+    fireEvent.click(updateButton);
+
+    await waitFor(() => {
+      expect(onChangeHandler).toHaveBeenCalled();
+    });
 
     // It should have the default parameters values added for fields which are not set
     const updatedMappings = {
@@ -79,7 +64,9 @@ describe('Mappings editor: shape datatype', () => {
       },
     };
 
-    ({ data } = await getMappingsEditorData(component));
-    expect(data).toEqual(updatedMappings);
+    // Get the mappings data from the onChange callback
+    const [callData] = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1];
+    const actualMappings = callData.getData();
+    expect(actualMappings).toEqual(updatedMappings);
   });
 });

@@ -18,12 +18,8 @@ jest.mock('../../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
-beforeEach(() => {
-  jest.resetAllMocks();
-});
-
 describe('unsnoozeAlertRoute', () => {
-  const mockedAlert: SanitizedRule<{
+  const mockedRule: SanitizedRule<{
     bar: boolean;
   }> = {
     id: '1',
@@ -65,6 +61,11 @@ describe('unsnoozeAlertRoute', () => {
     revision: 0,
   };
 
+  beforeEach(() => {
+    jest.resetAllMocks();
+    rulesClient.get = jest.fn().mockResolvedValue(mockedRule);
+  });
+
   it('unsnoozes a rule', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
@@ -77,7 +78,7 @@ describe('unsnoozeAlertRoute', () => {
       `"/api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}"`
     );
 
-    rulesClient.get.mockResolvedValueOnce(mockedAlert);
+    rulesClient.get.mockResolvedValueOnce(mockedRule);
     rulesClient.unsnooze.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
@@ -111,7 +112,7 @@ describe('unsnoozeAlertRoute', () => {
   it('ensures the rule type gets validated for the license', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    rulesClient.get.mockResolvedValueOnce(mockedAlert);
+    rulesClient.get.mockResolvedValueOnce(mockedRule);
 
     unsnoozeRuleRoute(router, licenseState);
 
@@ -133,7 +134,7 @@ describe('unsnoozeAlertRoute', () => {
   it('should throw error when snooze schedule is empty', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    rulesClient.get.mockResolvedValueOnce({ ...mockedAlert, snoozeSchedule: [] });
+    rulesClient.get.mockResolvedValueOnce({ ...mockedRule, snoozeSchedule: [] });
 
     unsnoozeRuleRoute(router, licenseState);
 
@@ -153,7 +154,7 @@ describe('unsnoozeAlertRoute', () => {
   it('should throw error for invalid snooze schedule id', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    rulesClient.get.mockResolvedValueOnce(mockedAlert);
+    rulesClient.get.mockResolvedValueOnce(mockedRule);
 
     unsnoozeRuleRoute(router, licenseState);
 
@@ -168,5 +169,45 @@ describe('unsnoozeAlertRoute', () => {
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(
       `[Error: Rule has no snooze schedule with id random_schedule_1.]`
     );
+  });
+
+  describe('internally managed rule types', () => {
+    it('returns 400 if the rule type is internally managed', async () => {
+      const licenseState = licenseStateMock.create();
+      const router = httpServiceMock.createRouter();
+      rulesClient.get = jest
+        .fn()
+        .mockResolvedValue({ ...mockedRule, alertTypeId: 'test.internal-rule-type' });
+
+      unsnoozeRuleRoute(router, licenseState);
+
+      const [config, handler] = router.delete.mock.calls[0];
+
+      expect(config.path).toMatchInlineSnapshot(
+        `"/api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}"`
+      );
+
+      rulesClient.unsnooze.mockResolvedValueOnce();
+
+      const [context, req, res] = mockHandlerArguments(
+        {
+          rulesClient, // @ts-expect-error: not all args are required for this test
+          listTypes: new Map([
+            ['test.internal-rule-type', { id: 'test.internal-rule-type', internallyManaged: true }],
+          ]),
+        },
+        {
+          params: {
+            ruleId: '1',
+            scheduleId: 'snooze_schedule_1',
+          },
+        },
+        ['noContent']
+      );
+
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot unsnooze rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+      );
+    });
   });
 });

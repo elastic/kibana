@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Readable } from 'stream';
+import type { Readable, Transform } from 'stream';
 import type {
   SavedObjectsImportRetry,
   SavedObjectsImportWarning,
   SavedObjectsImportResponse,
+  SavedObjectsImportFailure,
 } from '@kbn/core-saved-objects-common';
-import type { SavedObject } from '..';
+import type { ISavedObjectTypeRegistry, SavedObject } from '..';
 
 /**
  * Utility class used to import savedObjects.
@@ -137,3 +138,13 @@ export interface SavedObjectsImportHookResult {
 export type SavedObjectsImportHook<T = unknown> = (
   objects: Array<SavedObject<T>>
 ) => SavedObjectsImportHookResult | Promise<SavedObjectsImportHookResult>;
+
+export interface AccessControlImportTransforms {
+  filterStream: Transform;
+  mapStream: Transform;
+}
+
+export type AccessControlImportTransformsFactory = (
+  typeRegistry: ISavedObjectTypeRegistry,
+  errors: SavedObjectsImportFailure[]
+) => AccessControlImportTransforms;

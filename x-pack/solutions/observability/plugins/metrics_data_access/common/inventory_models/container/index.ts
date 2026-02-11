@@ -32,4 +32,16 @@ export const container = createInventoryModel('container', {
     ip: 'container.ip_address',
   },
   metrics,
+  nodeFilter: () => [
+    {
+      bool: {
+        should: [
+          { term: { 'event.module': 'docker' } },
+          { term: { 'event.module': 'kubernetes' } },
+          { term: { 'event.module': 'system' } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
+  ],
 });

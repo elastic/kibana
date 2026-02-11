@@ -20,6 +20,7 @@ import {
   HOST_ISOLATION_EXCEPTIONS,
   BLOCKLIST,
   RESPONSE_ACTIONS_HISTORY,
+  SCRIPTS_LIBRARY,
   PROTECTION_UPDATES,
   NOTES,
 } from '../../app/translations';
@@ -34,6 +35,7 @@ const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
   [AdministrationSubTab.hostIsolationExceptions]: HOST_ISOLATION_EXCEPTIONS,
   [AdministrationSubTab.blocklist]: BLOCKLIST,
   [AdministrationSubTab.responseActionsHistory]: RESPONSE_ACTIONS_HISTORY,
+  [AdministrationSubTab.scriptsLibrary]: SCRIPTS_LIBRARY,
   [AdministrationSubTab.protectionUpdates]: PROTECTION_UPDATES,
   [AdministrationSubTab.notes]: NOTES,
 };

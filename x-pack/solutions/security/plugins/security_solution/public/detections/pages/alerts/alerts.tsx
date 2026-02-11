@@ -18,9 +18,10 @@ import { UserUnauthenticatedEmptyPage } from '../../components/alerts/empty_page
 import * as i18n from './translations';
 import { useSignalHelpers } from '../../../sourcerer/containers/use_signal_helpers';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detection_engine/rule_management/components/callouts/need_admin_for_update_rules_callout';
-import { MissingPrivilegesCallOut } from '../../../common/components/missing_privileges';
+import { MissingDetectionsPrivilegesCallOut } from '../../components/callouts/missing_detections_privileges_callout';
 import { NoPrivileges } from '../../../common/components/no_privileges';
 import { HeaderPage } from '../../../common/components/header_page';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 export const ALERTS_PAGE_LOADING_TEST_ID = 'alerts-page-loading';
 
@@ -29,7 +30,8 @@ export const ALERTS_PAGE_LOADING_TEST_ID = 'alerts-page-loading';
  * the actual content of the alerts page is rendered
  */
 export const AlertsPage = memo(() => {
-  const [{ loading: userInfoLoading, isAuthenticated, canUserREAD, hasIndexRead }] = useUserData();
+  const [{ loading: userInfoLoading, isAuthenticated, hasIndexRead }] = useUserData();
+  const canReadAlerts = useUserPrivileges().rulesPrivileges.rules.read;
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
   const { signalIndexNeedsInit } = useSignalHelpers();
@@ -47,8 +49,8 @@ export const AlertsPage = memo(() => {
     [needsListsConfiguration, signalIndexNeedsInit]
   );
   const privilegesRequired: boolean = useMemo(
-    () => !signalIndexNeedsInit && (hasIndexRead === false || canUserREAD === false),
-    [canUserREAD, hasIndexRead, signalIndexNeedsInit]
+    () => !signalIndexNeedsInit && (hasIndexRead === false || canReadAlerts === false),
+    [canReadAlerts, hasIndexRead, signalIndexNeedsInit]
   );
 
   if (loading) {
@@ -87,7 +89,7 @@ export const AlertsPage = memo(() => {
     <>
       <NoApiIntegrationKeyCallOut />
       <NeedAdminForUpdateRulesCallOut />
-      <MissingPrivilegesCallOut />
+      <MissingDetectionsPrivilegesCallOut />
       {privilegesRequired ? (
         <NoPrivileges
           pageName={i18n.PAGE_TITLE.toLowerCase()}

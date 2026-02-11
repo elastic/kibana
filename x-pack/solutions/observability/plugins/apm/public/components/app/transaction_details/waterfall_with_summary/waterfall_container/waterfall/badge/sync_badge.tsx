@@ -68,7 +68,7 @@ export function SyncBadge({ sync, agentName }: SyncBadgeProps) {
 
   return (
     <EuiToolTip content={TOOLTIP_CONTENT}>
-      <EuiBadge>{syncLabel}</EuiBadge>
+      <EuiBadge tabIndex={0}>{syncLabel}</EuiBadge>
     </EuiToolTip>
   );
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SentinelOneGetRemoteScriptsResponse } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type { SentinelOneGetRemoteScriptsResponse } from '@kbn/connector-schemas/sentinelone';
 
 /**
  * The `activity` document ingested from SentinelOne via the integration

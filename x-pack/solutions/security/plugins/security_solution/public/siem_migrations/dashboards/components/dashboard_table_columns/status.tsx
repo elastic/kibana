@@ -29,10 +29,10 @@ export const createStatusColumn = (): TableColumn => {
           <FormattedMessage
             id="xpack.securitySolution.siemMigrations.dashboards.tableColumn.statusTooltip"
             defaultMessage={`{title}
-            {installed} - already added to Elastic SIEM. Click "View" to manage and enable it.{lineBreak}
+            {installed} - already added to Dashboards with a tag of “Migrated from Splunk”.{lineBreak}
             {translated} - ready to install. This dashboard was translated by AI.{lineBreak}
-            {partiallyTranslated} - part of the query could not be translated. Upload any missing macros or lookups and check your syntax.{lineBreak}
-            {notTranslated} - none of the original query could be translated.`}
+            {partiallyTranslated} - part of the dashboard could not be translated.{lineBreak}
+            {notTranslated} - none of the original dashboard could be translated.`}
             values={{
               lineBreak: <br />,
               title: (

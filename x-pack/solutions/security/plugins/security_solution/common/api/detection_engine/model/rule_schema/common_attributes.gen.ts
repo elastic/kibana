@@ -90,6 +90,25 @@ export type IsExternalRuleCustomized = z.infer<typeof IsExternalRuleCustomized>;
 export const IsExternalRuleCustomized = z.boolean();
 
 /**
+ * Determines whether an external/prebuilt rule has its original, unmodified version present when the calculation of its customization status is performed (`rule_source.is_customized` and `rule_source.customized_fields`).
+ */
+export type ExternalRuleHasBaseVersion = z.infer<typeof ExternalRuleHasBaseVersion>;
+export const ExternalRuleHasBaseVersion = z.boolean();
+
+/**
+ * An array of customized field names — that is, fields that the user has modified from their base value. Defaults to an empty array.
+ */
+export type ExternalRuleCustomizedFields = z.infer<typeof ExternalRuleCustomizedFields>;
+export const ExternalRuleCustomizedFields = z.array(
+  z.object({
+    /**
+     * Name of a user-modified field in the rule object.
+     */
+    field_name: z.string(),
+  })
+);
+
+/**
  * Type of rule source for internally sourced rules, i.e. created within the Kibana apps.
  */
 export type InternalRuleSource = z.infer<typeof InternalRuleSource>;
@@ -104,6 +123,8 @@ export type ExternalRuleSource = z.infer<typeof ExternalRuleSource>;
 export const ExternalRuleSource = z.object({
   type: z.literal('external'),
   is_customized: IsExternalRuleCustomized,
+  has_base_version: ExternalRuleHasBaseVersion,
+  customized_fields: ExternalRuleCustomizedFields,
 });
 
 /**
@@ -301,9 +322,9 @@ export const ThreatTechnique = z.object({
    * Technique reference
    */
   reference: z.string(),
-  /** 
+  /**
       * Array containing more specific information on the attack technique.
- 
+
       */
   subtechnique: z.array(ThreatSubtechnique).optional(),
 });
@@ -628,7 +649,7 @@ export const RuleActionId = z.string();
 
 export type RuleAction = z.infer<typeof RuleAction>;
 export const RuleAction = z.object({
-  /** 
+  /**
       * The action type used for sending notifications, can be:
 
   - `.slack`
@@ -648,7 +669,7 @@ export const RuleAction = z.object({
   - `.torq`
   - `.tines`
   - `.d3security`
- 
+
       */
   action_type_id: z.string(),
   group: RuleActionGroup.optional(),
@@ -743,3 +764,8 @@ export const AlertSuppressionCamel = z.object({
   duration: AlertSuppressionDuration.optional(),
   missingFieldsStrategy: AlertSuppressionMissingFieldsStrategy.optional(),
 });
+
+export type GapFillStatus = z.infer<typeof GapFillStatus>;
+export const GapFillStatus = z.enum(['unfilled', 'in_progress', 'filled']);
+export type GapFillStatusEnum = typeof GapFillStatus.enum;
+export const GapFillStatusEnum = GapFillStatus.enum;

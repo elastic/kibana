@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -22,6 +22,5 @@
     "@kbn/cloud-plugin",
     "@kbn/share-plugin",
     "@kbn/security-plugin-types-server",
-    "@kbn/react-kibana-context-render",
   ]
 }

@@ -66,22 +66,31 @@ const SkippedJobList: FC<{ jobs: SkippedJobs[] }> = ({ jobs }) => (
   <>
     {jobs.length > 0 && (
       <>
-        {jobs.map(({ jobId, missingIndices, missingFilters }) => (
-          <EuiText size="s">
+        {jobs.map(({ jobId, missingFilters, sourceIndicesErrors }) => (
+          <EuiText size="xs" key={jobId}>
             <h5>{jobId}</h5>
-            {missingIndices.length > 0 && (
-              <FormattedMessage
-                id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.missingIndex"
-                defaultMessage="Missing index {num, plural, one {pattern} other {patterns}}: {indices}"
-                values={{ num: missingIndices.length, indices: missingIndices.join(',') }}
-              />
-            )}
-            {missingFilters.length > 0 && (
+            {missingFilters && missingFilters.length > 0 && (
               <FormattedMessage
                 id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.missingFilters"
                 defaultMessage="Missing filter {num, plural, one {list} other {lists}}: {filters}"
                 values={{ num: missingFilters.length, filters: missingFilters.join(',') }}
               />
+            )}
+            {sourceIndicesErrors && sourceIndicesErrors.length > 0 && (
+              <>
+                {sourceIndicesErrors.map(({ index, error }, i) => (
+                  <FormattedMessage
+                    key={`${jobId}-${index ?? 'undefined'}-${error}`}
+                    id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.sourceIndexValidationFailed"
+                    defaultMessage="{index, select, undefined {Source indices validation failed} other {Source index validation failed for {index}}}{reason, select, undefined {} other { Reason: {reason}}}{br}"
+                    values={{
+                      index,
+                      reason: error,
+                      br: i < sourceIndicesErrors.length - 1 ? <br /> : '',
+                    }}
+                  />
+                ))}
+              </>
             )}
           </EuiText>
         ))}

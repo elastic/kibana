@@ -13,7 +13,7 @@ import type { CspSecuritySolutionContext } from '../types';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import * as constants from '../common/navigation/constants';
-import type { QueryClientProviderProps } from '@tanstack/react-query';
+import type { QueryClientProviderProps } from '@kbn/react-query';
 
 jest.mock('../pages', () => ({
   Findings: () => <div data-test-subj="Findings">Findings</div>,
@@ -25,7 +25,7 @@ jest.mock('../pages', () => ({
   Benchmarks: () => <div data-test-subj="Benchmarks">Benchmarks</div>,
 }));
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock('@kbn/react-query', () => ({
   QueryClientProvider: ({ children }: QueryClientProviderProps) => <>{children}</>,
   QueryClient: jest.fn(),
 }));

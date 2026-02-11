@@ -5,14 +5,20 @@
  * 2.0.
  */
 
+import { lazy } from 'react';
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '../constants';
 import { securityLink } from '../links';
 
+const LazyIconBriefcase = lazy(() =>
+  import('./custom_icons/briefcase').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
+);
+
 export const createCasesNavigationTree = (): NodeDefinition => ({
   id: SecurityPageName.case,
   link: securityLink(SecurityPageName.case),
-  renderAs: 'item',
+  // TODO: update icon from EUI
+  icon: LazyIconBriefcase,
   children: [
     {
       id: SecurityPageName.caseCreate,

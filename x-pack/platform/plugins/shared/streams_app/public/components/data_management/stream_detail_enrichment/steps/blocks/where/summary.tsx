@@ -5,47 +5,52 @@
  * 2.0.
  */
 
-import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiText, EuiBadge } from '@elastic/eui';
-import type { Condition, FilterCondition, StreamlangStepWithUIAttributes } from '@kbn/streamlang';
-import {
-  getFilterOperator,
-  getFilterValue,
-  isFilterConditionObject,
-  isWhereBlock,
-  operatorToHumanReadableNameMap,
-} from '@kbn/streamlang';
-import React from 'react';
-import { useSelector } from '@xstate5/react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { isConditionBlock } from '@kbn/streamlang';
+import { useSelector } from '@xstate5/react';
+import React from 'react';
+import { ConditionDisplay } from '../../../../shared';
 import { CreateStepButton } from '../../../create_step_button';
-import type { StreamEnrichmentContextType } from '../../../state_management/stream_enrichment_state_machine';
-import { StepContextMenu } from '../context_menu';
-import type { RootLevelMap } from '../../../state_management/stream_enrichment_state_machine/utils';
+import type { StepConfigurationProps } from '../../steps_list';
 import { BlockDisableOverlay } from '../block_disable_overlay';
+import { StepContextMenu } from '../context_menu';
+import { DragHandle } from '../../draggable_step_wrapper';
+
+interface WhereBlockSummaryProps extends StepConfigurationProps {
+  onClick?: () => void;
+}
 
 export const WhereBlockSummary = ({
   stepRef,
   rootLevelMap,
   stepUnderEdit,
   level,
-}: {
-  stepRef: StreamEnrichmentContextType['stepRefs'][number];
-  rootLevelMap: RootLevelMap;
-  stepUnderEdit?: StreamlangStepWithUIAttributes;
-  level: number;
-}) => {
+  isFirstStepInLevel,
+  isLastStepInLevel,
+  readOnly = false,
+  onClick,
+}: WhereBlockSummaryProps) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
-  const { euiTheme } = useEuiTheme();
 
-  if (!isWhereBlock(step)) return null;
+  const handleTitleClick = (event?: React.MouseEvent) => {
+    event?.stopPropagation();
+    stepRef.send({ type: 'step.edit' });
+  };
 
-  const isFilterCondition = isFilterConditionObject(step.where);
+  if (!isConditionBlock(step)) return null;
 
   return (
     <EuiFlexGroup
       gutterSize="s"
       css={css`
         position: relative;
+        // Pointer events are disabled in order to "pass-through" hover events
+        // and let the background condition container handle them.
+        // Pointer events are selectively re-enabled on child elements
+        // that require interaction.
+        pointer-events: none;
       `}
       alignItems="center"
     >
@@ -54,83 +59,79 @@ export const WhereBlockSummary = ({
       {stepUnderEdit &&
         rootLevelMap.get(stepUnderEdit.customIdentifier) ===
           rootLevelMap.get(step.customIdentifier) && <BlockDisableOverlay />}
+      {!readOnly && (
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            pointer-events: all;
+          `}
+        >
+          <DragHandle />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem
         css={css`
           // Facilitates text truncation
           overflow: hidden;
         `}
+        onClick={onClick}
       >
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              // Facilitates text truncation for the condition summary
-              flex-shrink: 0;
-            `}
-          >
-            <EuiText
-              size="s"
-              style={{
-                fontWeight: euiTheme.font.weight.bold,
-              }}
+        <ConditionDisplay
+          condition={step.condition}
+          showKeyword={true}
+          keyword="WHERE"
+          keywordWrapper={(children) => (
+            <EuiToolTip
+              position="top"
+              content={i18n.translate(
+                'xpack.streams.streamDetailEnrichment.whereBlockSummary.editConditionTooltip',
+                {
+                  defaultMessage: 'Edit condition',
+                }
+              )}
             >
-              {'WHERE'}
-            </EuiText>
-          </EuiFlexItem>
-          {isFilterCondition ? (
-            <FilterSummary condition={step.where as FilterCondition} />
-          ) : (
-            <ComplexSummary condition={step.where} />
+              <EuiButtonEmpty
+                css={css`
+                  pointer-events: all;
+                `}
+                onClick={handleTitleClick}
+                color="text"
+                size="xs"
+                aria-label={i18n.translate(
+                  'xpack.streams.streamDetailEnrichment.whereBlockSummary.editConditionLabel',
+                  {
+                    defaultMessage: 'Edit condition',
+                  }
+                )}
+                data-test-subj="streamsAppDetailEnrichmentConditionTitleEditButton"
+              >
+                {children}
+              </EuiButtonEmpty>
+            </EuiToolTip>
           )}
-        </EuiFlexGroup>
+        />
       </EuiFlexItem>
 
-      <EuiFlexItem
-        grow={false}
-        css={css`
-          // Facilitates text truncation for the condition summary
-          flex-shrink: 0;
-        `}
-      >
-        <EuiFlexGroup gutterSize="none">
-          <CreateStepButton parentId={stepRef.id} mode="inline" nestingDisabled={level >= 2} />
-          <StepContextMenu stepRef={stepRef} stepUnderEdit={stepUnderEdit} />
-        </EuiFlexGroup>
-      </EuiFlexItem>
+      {!readOnly && (
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            // Facilitates text truncation for the condition summary
+            flex-shrink: 0;
+            pointer-events: all;
+          `}
+        >
+          <EuiFlexGroup gutterSize="none">
+            <CreateStepButton parentId={stepRef.id} mode="inline" nestingDisabled={level >= 2} />
+            <StepContextMenu
+              stepRef={stepRef}
+              stepUnderEdit={stepUnderEdit}
+              isFirstStepInLevel={isFirstStepInLevel}
+              isLastStepInLevel={isLastStepInLevel}
+            />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
-  );
-};
-
-const FilterSummary = ({ condition }: { condition: FilterCondition }) => {
-  const operator = getFilterOperator(condition);
-  const value = getFilterValue(condition);
-  const field = condition.field;
-
-  return (
-    <>
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">{field}</EuiBadge>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {operatorToHumanReadableNameMap[operator as keyof typeof operatorToHumanReadableNameMap]}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">{value?.toString()}</EuiBadge>
-      </EuiFlexItem>
-    </>
-  );
-};
-
-const ComplexSummary = ({ condition }: { condition: Condition }) => {
-  const summary = JSON.stringify(condition);
-  return (
-    <EuiFlexItem
-      css={css`
-        // Facilitates text truncation
-        overflow: hidden;
-      `}
-    >
-      <span className="eui-textTruncate">{summary}</span>
-    </EuiFlexItem>
   );
 };

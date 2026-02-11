@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { getProtectionUpdatesNoteQueryKey } from './use_get_protection_updates_note';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { resolvePathVariables } from '../../../../../../common/utils/resolve_path_variables';

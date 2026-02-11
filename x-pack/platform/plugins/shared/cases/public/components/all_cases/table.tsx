@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent, MutableRefObject } from 'react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { EuiTableSelectionType, EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiSkeletonText, EuiBasicTable, useEuiTheme } from '@elastic/eui';
@@ -70,7 +70,17 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
     [goToCreateCase, navigateToCreateCase]
   );
 
-  return (isCasesLoading && isDataEmpty) || isLoadingColumns ? (
+  const isInitialLoading = useMemo(
+    () => (isCasesLoading && isDataEmpty) || (isLoadingColumns && columns.length === 0),
+    [isCasesLoading, isDataEmpty, isLoadingColumns, columns]
+  );
+
+  const isLoading = useMemo(
+    () => isCasesLoading || isLoadingColumns || isCommentUpdating,
+    [isCasesLoading, isLoadingColumns, isCommentUpdating]
+  );
+
+  return isInitialLoading ? (
     <div
       css={css`
         margin-top: ${euiTheme.size.m};
@@ -87,7 +97,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
         data-test-subj="cases-table"
         itemId="id"
         items={data.cases}
-        loading={isCommentUpdating}
+        loading={isLoading}
         noItemsMessage={
           <EuiEmptyPrompt
             title={<h3>{i18n.NO_CASES}</h3>}

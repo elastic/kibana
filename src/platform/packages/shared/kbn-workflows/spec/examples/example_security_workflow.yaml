@@ -1,0 +1,229 @@
+name: Threat Intelligence Enrichment & Incident Response
+description: Enriches threat indicators and creates incident response tickets with automated response actions
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  properties:
+    # Security analyst information with email format validation
+    analyst:
+      type: object
+      description: Security analyst handling the incident
+      properties:
+        email:
+          type: string
+          format: email
+          description: Analyst email address
+          default: "analyst@security.com"
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: Analyst full name
+          default: "Security Analyst"
+        team:
+          type: string
+          enum:
+            - SOC
+            - Threat Intelligence
+            - Incident Response
+            - Forensics
+          description: Security team
+          default: "SOC"
+      required:
+        - email
+        - name
+        - team
+      additionalProperties: false
+    
+    # Threat indicator with regex pattern validation for IP addresses and CVE IDs
+    threatIndicator:
+      type: object
+      description: Threat indicator to investigate
+      properties:
+        type:
+          type: string
+          enum:
+            - ip
+            - domain
+            - hash
+            - url
+            - email
+          description: Type of threat indicator
+          default: "ip"
+        value:
+          type: string
+          description: The indicator value
+          default: "8.8.8.8"
+        # IP address with regex pattern validation
+        ipAddress:
+          type: string
+          pattern: "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
+          description: IPv4 address (if type is ip)
+        # CVE ID with regex pattern
+        cveId:
+          type: string
+          pattern: "^CVE-\\d{4}-\\d{4,}$"
+          description: CVE identifier (e.g., CVE-2024-1234)
+        firstSeen:
+          type: string
+          format: date-time
+          description: When the indicator was first observed
+        severity:
+          type: string
+          enum:
+            - low
+            - medium
+            - high
+            - critical
+          default: medium
+          description: Threat severity level
+      required:
+        - type
+        - value
+        - severity
+      additionalProperties: false
+    
+    # Incident metadata with nested objects and array constraints
+    incidentMetadata:
+      type: object
+      description: Incident response metadata
+      properties:
+        incidentId:
+          type: string
+          pattern: "^INC-\\d{8}-\\d{4}$"
+          description: "Incident ID (format: INC-YYYYMMDD-####)"
+          default: "INC-20241118-0001"
+        source:
+          type: string
+          enum:
+            - SIEM Alert
+            - Threat Intelligence Feed
+            - Manual Report
+            - EDR Detection
+          description: Source of the incident
+          default: "SIEM Alert"
+        affectedSystems:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 50
+          uniqueItems: true
+          description: List of affected system hostnames or IPs
+        tags:
+          type: array
+          items:
+            type: string
+            enum:
+              - malware
+              - phishing
+              - ransomware
+              - apt
+              - botnet
+              - c2
+              - data-exfiltration
+          minItems: 1
+          maxItems: 10
+          uniqueItems: true
+          description: Incident classification tags
+        enrichment:
+          type: object
+          description: Threat intelligence enrichment data
+          properties:
+            reputation:
+              type: string
+              enum:
+                - unknown
+                - clean
+                - suspicious
+                - malicious
+              default: unknown
+            confidence:
+              type: number
+              minimum: 0
+              maximum: 100
+              description: Confidence score (0-100)
+            threatActors:
+              type: array
+              items:
+                type: string
+              description: Associated threat actor groups
+            iocs:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+              description: Additional indicators of compromise
+          additionalProperties: false
+      required:
+        - incidentId
+        - source
+      additionalProperties: false
+    
+    # Response actions configuration
+    responseActions:
+      type: object
+      description: Automated response actions to take
+      properties:
+        blockIndicator:
+          type: boolean
+          default: false
+          description: Block the threat indicator in firewall/IDS
+        quarantineHosts:
+          type: boolean
+          default: false
+          description: Quarantine affected hosts
+        createTicket:
+          type: boolean
+          default: true
+          description: Create incident response ticket
+        notifyTeams:
+          type: array
+          items:
+            type: string
+            enum:
+              - SOC
+              - Management
+              - Legal
+              - Compliance
+          description: Teams to notify
+          default:
+            - SOC
+            - Management
+      required:
+        - createTicket
+      additionalProperties: false
+    
+    # Priority level
+    priority:
+      type: string
+      enum:
+        - P1
+        - P2
+        - P3
+        - P4
+      default: P2
+      description: Incident priority (P1=Critical, P4=Low)
+  required:
+    - analyst
+    - threatIndicator
+    - incidentMetadata
+  additionalProperties: false
+steps:
+  - name: enrich-threat-indicator
+    type: console
+    with:
+      message: "Enriching threat indicator: {{ inputs.threatIndicator.value }} (Type: {{ inputs.threatIndicator.type }}, Severity: {{ inputs.threatIndicator.severity }})"
+  
+  - name: create-incident-ticket
+    type: console
+    with:
+      message: "Creating incident ticket {{ inputs.incidentMetadata.incidentId }} for analyst {{ inputs.analyst.name }} ({{ inputs.analyst.email }})"
+  
+  - name: execute-response-actions
+    type: console
+    with:
+      message: "Executing response actions: Block={{ inputs.responseActions.blockIndicator }}, Quarantine={{ inputs.responseActions.quarantineHosts }}, Notify={{ inputs.responseActions.notifyTeams }}"
+

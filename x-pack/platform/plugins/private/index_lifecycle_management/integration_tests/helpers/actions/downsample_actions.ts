@@ -5,40 +5,32 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { TestBed } from '@kbn/test-jest-helpers';
+import { screen, fireEvent, within, waitForElementToBeRemoved } from '@testing-library/react';
 import type { Phase } from '../../../common/types';
-import { createFormToggleAction } from '..';
 
 const createSetDownsampleIntervalAction =
-  (testBed: TestBed, phase: Phase) => async (value: string, units?: string) => {
-    const { find, component } = testBed;
-
-    await act(async () => {
-      find(`${phase}-downsampleFixedInterval`).simulate('change', { target: { value } });
-    });
-    component.update();
+  (phase: Phase) => async (value: string, units?: string) => {
+    const input = screen.getByTestId<HTMLInputElement>(`${phase}-downsampleFixedInterval`);
+    fireEvent.change(input, { target: { value } });
+    fireEvent.blur(input);
 
     if (units) {
-      act(() => {
-        find(`${phase}-downsampleFixedIntervalUnits.show-filters-button`).simulate('click');
-      });
-      component.update();
+      const popover = screen.getByTestId(`${phase}-downsampleFixedIntervalUnits`);
+      const filterButton = within(popover).getByTestId('show-filters-button');
+      fireEvent.click(filterButton);
 
-      act(() => {
-        find(`${phase}-downsampleFixedIntervalUnits.filter-option-${units}`).simulate('click');
-      });
-      component.update();
+      const filterOption = await screen.findByTestId(`filter-option-${units}`);
+      fireEvent.click(filterOption);
+      await waitForElementToBeRemoved(filterOption);
     }
   };
 
-export const createDownsampleActions = (testBed: TestBed, phase: Phase) => {
-  const { exists } = testBed;
+export const createDownsampleActions = (phase: Phase) => {
   return {
     downsample: {
-      exists: () => exists(`${phase}-downsampleSwitch`),
-      toggle: createFormToggleAction(testBed, `${phase}-downsampleSwitch`),
-      setDownsampleInterval: createSetDownsampleIntervalAction(testBed, phase),
+      exists: () => Boolean(screen.queryByTestId(`${phase}-downsampleSwitch`)),
+      toggle: () => fireEvent.click(screen.getByTestId(`${phase}-downsampleSwitch`)),
+      setDownsampleInterval: createSetDownsampleIntervalAction(phase),
     },
   };
 };

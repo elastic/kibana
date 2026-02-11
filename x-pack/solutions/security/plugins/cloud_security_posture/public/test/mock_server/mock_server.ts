@@ -163,8 +163,10 @@ export const getMockServerDependencies = () => {
         },
       },
       dataViewFieldEditor: dataViewFieldEditorMock.createStartContract(),
+      kql: {
+        ...getMockDependencies().kql,
+      },
       unifiedSearch: {
-        ...getMockDependencies().unifiedSearch,
         ui: {
           ...getMockDependencies().unifiedSearch.ui,
           SearchBar,
@@ -182,6 +184,12 @@ export const getMockServerDependencies = () => {
     } as unknown as Partial<CspClientPluginStartDeps>,
     core: {
       ...coreMock.createStart(),
+      application: {
+        ...coreMock.createStart().application,
+        getUrlForApp: (appId: string) => {
+          return `/app/${appId}`;
+        },
+      },
       http: {
         ...coreMock.createStart().http,
         get: async (path: string, options: any) => {

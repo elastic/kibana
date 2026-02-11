@@ -26,9 +26,11 @@ export class SearchHomepagePlugin
   implements Plugin<SearchHomepagePluginSetup, SearchHomepagePluginStart, {}, {}>
 {
   private readonly logger: Logger;
+  private readonly isServerless: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(core: CoreSetup<{}, SearchHomepagePluginStart>) {
@@ -36,7 +38,9 @@ export class SearchHomepagePlugin
     const router = core.http.createRouter();
 
     // Register server side APIs
-    defineRoutes(router, this.logger);
+    defineRoutes(router, this.logger, {
+      isServerless: this.isServerless,
+    });
     return {};
   }
 

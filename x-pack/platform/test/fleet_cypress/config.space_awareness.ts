@@ -41,11 +41,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
 
         // add feature flags here
-        `--xpack.fleet.enableExperimental=${JSON.stringify([
-          'agentTamperProtectionEnabled',
-          'subfeaturePrivileges',
-          'useSpaceAwareness',
-        ])}`,
+        `--xpack.fleet.experimentalFeatures=${JSON.stringify({
+          useSpaceAwareness: true,
+        })}`,
 
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs')),

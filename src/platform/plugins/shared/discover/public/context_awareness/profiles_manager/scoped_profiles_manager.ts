@@ -11,6 +11,7 @@ import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import type { ContextWithProfileId } from '../profile_service';
 import type {
   DataSourceContext,
@@ -76,9 +77,11 @@ export class ScopedProfilesManager {
   /**
    * Resolves the data source context profile
    * @param params The data source profile provider parameters
+   * @param onBeforeChange An optional callback to be invoked before changing the context
    */
   public async resolveDataSourceProfile(
-    params: Omit<DataSourceProfileProviderParams, 'rootContext'>
+    params: Omit<DataSourceProfileProviderParams, 'rootContext'>,
+    onBeforeChange?: () => void
   ) {
     const serializedParams = serializeDataSourceProfileParams(params);
 
@@ -87,7 +90,7 @@ export class ScopedProfilesManager {
     }
 
     const abortController = new AbortController();
-    this.dataSourceProfileAbortController?.abort();
+    this.dataSourceProfileAbortController?.abort(AbortReason.REPLACED);
     this.dataSourceProfileAbortController = abortController;
 
     let context = this.dataSourceProfileService.defaultContext;
@@ -105,6 +108,7 @@ export class ScopedProfilesManager {
       return;
     }
 
+    onBeforeChange?.();
     this.trackActiveProfiles(this.rootContext$.getValue().profileId, context.profileId);
     this.dataSourceContext$.next(context);
     this.prevDataSourceProfileParams = serializedParams;

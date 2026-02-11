@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { MutableRefObject } from 'react';
 
 import { useActions, useValues } from 'kea';
 
@@ -28,6 +29,7 @@ interface ActionColumnProps<Item extends ItemWithAnID> {
   item: Item;
   canRemoveLastItem?: boolean;
   lastItemWarning?: string;
+  prevFocusRef?: MutableRefObject<HTMLElement | null>;
   uneditableItems?: Item[];
 }
 
@@ -39,6 +41,7 @@ export const ActionColumn = <Item extends ItemWithAnID>({
   item,
   canRemoveLastItem,
   lastItemWarning,
+  prevFocusRef,
   uneditableItems,
 }: ActionColumnProps<Item>) => {
   const { doesEditingItemValueContainEmptyProperty, fieldErrors, rowErrors, isEditingUnsavedItem } =
@@ -50,6 +53,13 @@ export const ActionColumn = <Item extends ItemWithAnID>({
     return null;
   }
 
+  const handleEditExistingItem = () => {
+    if (prevFocusRef) {
+      prevFocusRef.current = document.activeElement as HTMLElement;
+    }
+    editExistingItem(item);
+  };
+
   const isInvalid = Object.keys(fieldErrors).length > 0 || rowErrors.length > 0;
 
   if (isActivelyEditing(item)) {
@@ -57,6 +67,7 @@ export const ActionColumn = <Item extends ItemWithAnID>({
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
         <EuiFlexItem>
           <EuiButtonEmpty
+            aria-label={SAVE_BUTTON_LABEL}
             data-test-subj="saveButton"
             color="primary"
             iconType="checkInCircleFilled"
@@ -72,6 +83,7 @@ export const ActionColumn = <Item extends ItemWithAnID>({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButtonEmpty
+            aria-label={CANCEL_BUTTON_LABEL}
             data-test-subj="cancelButton"
             color="danger"
             iconType="cross"
@@ -89,9 +101,10 @@ export const ActionColumn = <Item extends ItemWithAnID>({
     <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
       <EuiFlexItem grow={null}>
         <EuiButtonEmpty
+          aria-label={EDIT_BUTTON_LABEL}
           data-test-subj="editButton"
           size="xs"
-          onClick={() => editExistingItem(item)}
+          onClick={handleEditExistingItem}
         >
           {EDIT_BUTTON_LABEL}
         </EuiButtonEmpty>
@@ -99,12 +112,17 @@ export const ActionColumn = <Item extends ItemWithAnID>({
       <EuiFlexItem grow={null}>
         {!canRemoveLastItem && displayedItems.length === 1 ? (
           <EuiToolTip content={lastItemWarning}>
-            <EuiButtonEmpty size="xs" disabled>
+            <EuiButtonEmpty aria-label={DELETE_BUTTON_LABEL} size="xs" disabled>
               {DELETE_BUTTON_LABEL}
             </EuiButtonEmpty>
           </EuiToolTip>
         ) : (
-          <EuiButtonEmpty data-test-subj="deleteButton" size="xs" onClick={() => deleteItem(item)}>
+          <EuiButtonEmpty
+            aria-label={DELETE_BUTTON_LABEL}
+            data-test-subj="deleteButton"
+            size="xs"
+            onClick={() => deleteItem(item)}
+          >
             {DELETE_BUTTON_LABEL}
           </EuiButtonEmpty>
         )}

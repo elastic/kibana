@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export const JIRA_SERVICE_MANAGEMENT_CONNECTOR_TYPE_ID = '.jira-service-management';
 export const RULE_TAGS_TEMPLATE = `{{rule.tags}}`;
-
-export enum JiraServiceManagementSubActions {
-  CreateAlert = 'createAlert',
-  CloseAlert = 'closeAlert',
-}

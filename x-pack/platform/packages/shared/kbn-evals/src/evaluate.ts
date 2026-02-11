@@ -5,48 +5,39 @@
  * 2.0.
  */
 
-import { times } from 'lodash';
 import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
-import {
-  getConnectorModel,
-  type BoundInferenceClient,
-  getConnectorFamily,
-  getConnectorProvider,
-} from '@kbn/inference-common';
+import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
 import { test as base } from '@kbn/scout';
-import type { HttpHandler } from '@kbn/core/public';
+import { createEsClientForTesting } from '@kbn/test';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
-import { getPhoenixConfig } from './utils/get_phoenix_config';
+import { KibanaEvalsClient } from './kibana_evals_executor/client';
 import { KibanaPhoenixClient } from './kibana_phoenix_client/client';
 import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
-import type { DefaultEvaluators } from './types';
-import { reportModelScore } from './utils/report_model_score';
-import { createConnectorFixture } from './utils/create_connector_fixture';
+import type { DefaultEvaluators, EvaluationSpecificWorkerFixtures } from './types';
+import { mapToEvaluationScoreDocuments, exportEvaluations } from './utils/report_model_score';
+import { getPhoenixConfig } from './utils/get_phoenix_config';
+import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
+import { createConnectorFixture, getConnectorIdAsUuid } from './utils/create_connector_fixture';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
-import { EvaluationAnalysisService } from './utils/analysis';
 import { EvaluationScoreRepository } from './utils/score_repository';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
+import {
+  createCachedTokensEvaluator,
+  createInputTokensEvaluator,
+  createLatencyEvaluator,
+  createOutputTokensEvaluator,
+  createToolCallsEvaluator,
+} from './evaluators/trace_based';
 
 /**
  * Test type for evaluations. Loads an inference client and a
- * (Kibana-flavored) Phoenix client.
+ * executor client (defaults to in-Kibana; Phoenix-backed via `KBN_EVALS_EXECUTOR=phoenix`).
  */
-export const evaluate = base.extend<
-  {},
-  {
-    inferenceClient: BoundInferenceClient;
-    phoenixClient: KibanaPhoenixClient;
-    evaluators: DefaultEvaluators;
-    fetch: HttpHandler;
-    connector: AvailableConnectorWithId;
-    evaluationConnector: AvailableConnectorWithId;
-    repetitions: number;
-    evaluationAnalysisService: EvaluationAnalysisService;
-  }
->({
+
+export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   fetch: [
     async ({ kbnClient, log }, use) => {
       // add a HttpHandler as a fixture, so consumers can use
@@ -69,11 +60,17 @@ export const evaluate = base.extend<
   ],
   evaluationConnector: [
     async ({ fetch, log, connector }, use, testInfo) => {
-      const predefinedConnector = (testInfo.project.use as Pick<EvaluationTestOptions, 'connector'>)
-        .connector;
+      const predefinedConnector = (
+        testInfo.project.use as Pick<EvaluationTestOptions, 'evaluationConnector'>
+      ).evaluationConnector;
 
-      if (predefinedConnector.id !== connector.id) {
+      const evaluationConnectorUuid = getConnectorIdAsUuid(predefinedConnector.id);
+
+      if (evaluationConnectorUuid !== connector.id) {
         await createConnectorFixture({ predefinedConnector, fetch, log, use });
+      } else {
+        // If the evaluation connector is the same as the main connector, reuse it
+        await use(connector);
       }
     },
     {
@@ -81,7 +78,7 @@ export const evaluate = base.extend<
     },
   ],
   inferenceClient: [
-    async ({ kbnClient, log, fetch, connector }, use, testInfo) => {
+    async ({ log, fetch, connector }, use) => {
       log.info('Loading inference client');
 
       const inferenceClient = createRestClient({
@@ -96,63 +93,160 @@ export const evaluate = base.extend<
     },
     { scope: 'worker' },
   ],
+
+  reportDisplayOptions: [
+    async ({ evaluators }, use) => {
+      const { inputTokens, outputTokens, cachedTokens, toolCalls, latency } =
+        evaluators.traceBasedEvaluators;
+
+      await use({
+        evaluatorDisplayOptions: new Map([
+          [
+            inputTokens.name,
+            { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            outputTokens.name,
+            { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            cachedTokens.name,
+            { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [toolCalls.name, { decimalPlaces: 1, statsToInclude: ['mean', 'median', 'min', 'max'] }],
+          [
+            latency.name,
+            { unitSuffix: 's', statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            'Precision@K',
+            { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            'F1@K',
+            { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+          [
+            'Recall@K',
+            { decimalPlaces: 2, statsToInclude: ['mean', 'median', 'stdDev', 'min', 'max'] },
+          ],
+        ]),
+        evaluatorDisplayGroups: [
+          {
+            evaluatorNames: [inputTokens.name, outputTokens.name, cachedTokens.name],
+            combinedColumnName: 'Tokens',
+          },
+          {
+            evaluatorNames: ['Precision@K', 'F1@K', 'Recall@K'],
+            combinedColumnName: 'RAG',
+          },
+        ],
+      });
+    },
+    { scope: 'worker' },
+  ],
+  reportModelScore: [
+    async ({ reportDisplayOptions }, use) => {
+      await use(createDefaultTerminalReporter({ reportDisplayOptions }));
+    },
+    { scope: 'worker' },
+  ],
   phoenixClient: [
-    async ({ log, connector, repetitions, esClient }, use) => {
-      const config = getPhoenixConfig();
+    async (
+      { log, connector, evaluationConnector, repetitions, esClient, reportModelScore },
+      use
+    ) => {
+      function buildModelFromConnector(connectorWithId: AvailableConnectorWithId): Model {
+        const inferenceConnector: InferenceConnector = {
+          type: connectorWithId.actionTypeId as InferenceConnectorType,
+          config: connectorWithId.config,
+          connectorId: connectorWithId.id,
+          name: connectorWithId.name,
+          capabilities: {
+            contextWindowSize: 32000,
+          },
+        };
 
-      const inferenceConnector: InferenceConnector = {
-        type: connector.actionTypeId as InferenceConnectorType,
-        config: connector.config,
-        connectorId: connector.id,
-        name: connector.name,
-        capabilities: {
-          contextWindowSize: 32000,
-        },
-      };
+        const model: Model = {
+          family: getConnectorFamily(inferenceConnector),
+          provider: getConnectorProvider(inferenceConnector),
+          id: getConnectorModel(inferenceConnector),
+        };
 
-      const model: Model = {
-        family: getConnectorFamily(inferenceConnector),
-        provider: getConnectorProvider(inferenceConnector),
-        id: getConnectorModel(inferenceConnector),
-      };
+        return model;
+      }
 
-      const phoenixClient = new KibanaPhoenixClient({
-        config,
-        log,
-        model,
-        runId: process.env.TEST_RUN_ID!,
+      const model = buildModelFromConnector(connector);
+      const evaluatorModel = buildModelFromConnector(evaluationConnector);
+
+      const usePhoenixExecutor = process.env.KBN_EVALS_EXECUTOR === 'phoenix';
+
+      const executorClient = usePhoenixExecutor
+        ? new KibanaPhoenixClient({
+            config: getPhoenixConfig(),
+            log,
+            model,
+            runId: process.env.TEST_RUN_ID!,
+            repetitions,
+          })
+        : new KibanaEvalsClient({
+            log,
+            model,
+            runId: process.env.TEST_RUN_ID!,
+            repetitions,
+          });
+
+      const currentRunId = process.env.TEST_RUN_ID;
+      await use(executorClient);
+
+      if (!currentRunId) {
+        throw new Error(
+          'runId must be provided via TEST_RUN_ID environment variable before exporting scores'
+        );
+      }
+
+      const evaluationsEsClient = process.env.EVALUATIONS_ES_URL
+        ? createEsClientForTesting({
+            esUrl: process.env.EVALUATIONS_ES_URL,
+          })
+        : esClient;
+
+      const experiments = await executorClient.getRanExperiments();
+      const documents = await mapToEvaluationScoreDocuments({
+        experiments,
+        taskModel: model,
+        evaluatorModel,
+        runId: currentRunId,
+        totalRepetitions: repetitions,
       });
+      const scoreRepository = new EvaluationScoreRepository(evaluationsEsClient, log);
 
-      // Temporary: wraps Phoenix client to handle repetitions until native support is added (see https://github.com/Arize-ai/phoenix/issues/3584)
-      const repetitionAwarePhoenixClient = {
-        ...phoenixClient,
-        runExperiment: async (experimentConfig: any, evaluators: any) => {
-          const experiments = await Promise.all(
-            times(repetitions, () => phoenixClient.runExperiment(experimentConfig, evaluators))
-          );
+      try {
+        await exportEvaluations(documents, scoreRepository, log);
+      } catch (error) {
+        log.error(
+          new Error(
+            `Failed to export evaluation results to Elasticsearch for run ID: ${currentRunId}.`,
+            { cause: error }
+          )
+        );
+        throw error;
+      }
 
-          return repetitions === 1 ? experiments[0] : experiments;
-        },
-      } as KibanaPhoenixClient;
-
-      await use(repetitionAwarePhoenixClient);
-
-      await reportModelScore({
-        phoenixClient,
-        esClient,
-        log,
-        model,
-        experiments: await phoenixClient.getRanExperiments(),
-        repetitions,
-        runId: process.env.TEST_RUN_ID,
-      });
+      await reportModelScore(scoreRepository, currentRunId, log);
     },
     {
       scope: 'worker',
     },
   ],
+  executorClient: [
+    async ({ phoenixClient }, use) => {
+      await use(phoenixClient);
+    },
+    { scope: 'worker' },
+  ],
   evaluators: [
-    async ({ log, inferenceClient, evaluationConnector }, use) => {
+    async ({ log, inferenceClient, evaluationConnector, traceEsClient }, use) => {
       const evaluatorInferenceClient = inferenceClient.bindTo({
         connectorId: evaluationConnector.id,
       });
@@ -177,6 +271,28 @@ export const evaluate = base.extend<
             log,
           });
         },
+        traceBasedEvaluators: {
+          inputTokens: createInputTokensEvaluator({
+            traceEsClient,
+            log,
+          }),
+          outputTokens: createOutputTokensEvaluator({
+            traceEsClient,
+            log,
+          }),
+          cachedTokens: createCachedTokensEvaluator({
+            traceEsClient,
+            log,
+          }),
+          toolCalls: createToolCallsEvaluator({
+            traceEsClient,
+            log,
+          }),
+          latency: createLatencyEvaluator({
+            traceEsClient,
+            log,
+          }),
+        },
       };
       await use(evaluators);
     },
@@ -184,19 +300,22 @@ export const evaluate = base.extend<
       scope: 'worker',
     },
   ],
+  traceEsClient: [
+    async ({ esClient }, use) => {
+      const traceEsClient = process.env.TRACING_ES_URL
+        ? createEsClientForTesting({
+            esUrl: process.env.TRACING_ES_URL,
+          })
+        : esClient;
+      await use(traceEsClient);
+    },
+    { scope: 'worker' },
+  ],
   repetitions: [
     async ({}, use, testInfo) => {
       // Get repetitions from test options (set in playwright config)
       const repetitions = (testInfo.project.use as any).repetitions || 1;
       await use(repetitions);
-    },
-    { scope: 'worker' },
-  ],
-  evaluationAnalysisService: [
-    async ({ esClient, log }, use) => {
-      const scoreRepository = new EvaluationScoreRepository(esClient, log);
-      const helper = new EvaluationAnalysisService(scoreRepository, log);
-      await use(helper);
     },
     { scope: 'worker' },
   ],

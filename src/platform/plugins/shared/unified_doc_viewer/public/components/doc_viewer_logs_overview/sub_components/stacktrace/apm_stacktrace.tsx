@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiLoadingSpinner,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiHorizontalRule,
+  EuiIconTip,
+} from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
@@ -54,25 +61,74 @@ export function ApmStacktrace({ hit, dataView }: { hit: DataTableRecord; dataVie
   const codeLanguage = apmErrorDoc?.service?.language?.name;
   const exceptions = apmErrorDoc?.error?.exception || [];
   const logStackframes = apmErrorDoc?.error?.log?.stacktrace;
+  const culprit = apmErrorDoc?.error?.culprit;
   const isPlaintextException =
     !!apmErrorDoc?.error?.stack_trace && exceptions.length === 1 && !exceptions[0].stacktrace;
 
-  if (apmErrorDoc?.error?.log?.message) {
-    return <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />;
+  const renderStacktrace = () => {
+    if (apmErrorDoc?.error?.log?.message) {
+      return <Stacktrace stackframes={logStackframes} codeLanguage={codeLanguage} />;
+    }
+
+    if (apmErrorDoc?.error?.exception?.length) {
+      return isPlaintextException ? (
+        <PlaintextStacktrace
+          message={exceptions[0].message}
+          type={exceptions[0]?.type}
+          stacktrace={apmErrorDoc?.error.stack_trace}
+          codeLanguage={codeLanguage}
+        />
+      ) : (
+        <ExceptionStacktrace codeLanguage={codeLanguage} exceptions={exceptions} />
+      );
+    }
+
+    return null;
+  };
+
+  const stacktrace = renderStacktrace();
+
+  if (!stacktrace && !culprit) {
+    return null;
   }
 
-  if (apmErrorDoc?.error?.exception?.length) {
-    return isPlaintextException ? (
-      <PlaintextStacktrace
-        message={exceptions[0].message}
-        type={exceptions[0]?.type}
-        stacktrace={apmErrorDoc?.error.stack_trace}
-        codeLanguage={codeLanguage}
-      />
-    ) : (
-      <ExceptionStacktrace codeLanguage={codeLanguage} exceptions={exceptions} />
-    );
-  }
-
-  return null;
+  return (
+    <>
+      {culprit ? (
+        <>
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="m"
+            justifyContent="spaceBetween"
+            alignItems="flexEnd"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>
+                  {i18n.translate('unifiedDocViewer.apmStacktrace.culprit', {
+                    defaultMessage: 'Culprit',
+                  })}
+                </strong>
+                &nbsp;
+                <EuiIconTip
+                  size="s"
+                  color="subdued"
+                  type="question"
+                  className="eui-alignCenter"
+                  content={i18n.translate('unifiedDocViewer.apmStacktrace.culprit.tooltip', {
+                    defaultMessage: 'The culprit of an error indicates where it originated.',
+                  })}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow>
+              <EuiText size="s">{culprit}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiHorizontalRule margin="xs" />
+        </>
+      ) : null}
+      {stacktrace}
+    </>
+  );
 }

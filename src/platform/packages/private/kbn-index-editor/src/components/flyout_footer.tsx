@@ -15,9 +15,9 @@ import {
   EuiFlyoutFooter,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { STATUS, useFileUploadContext } from '@kbn/file-upload';
+import { useFileUploadContext } from '@kbn/file-upload';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, type FC } from 'react';
+import React, { type FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -41,12 +41,7 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
 
   const indexName = useObservable(indexUpdateService.indexName$, indexUpdateService.getIndexName());
 
-  const { uploadStatus, onImportClick, canImport, setExistingIndexName } = useFileUploadContext();
-
-  const onImport = useCallback(async () => {
-    indexUpdateService.setIsSaving(true);
-    await onImportClick();
-  }, [indexUpdateService, onImportClick]);
+  const { setExistingIndexName } = useFileUploadContext();
 
   const onSave = async ({ exitAfterFlush = false }) => {
     if (isIndexCreated) {
@@ -115,33 +110,6 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
                   </EuiButton>
                 </EuiFlexItem>
               </>
-            ) : null}
-
-            {uploadStatus.overallImportStatus !== STATUS.STARTED && canImport ? (
-              <EuiFlexItem grow={false}>
-                <EuiButton data-test-subj="indexEditorImportButton" onClick={onImport}>
-                  <FormattedMessage
-                    id="indexEditor.flyout.footer.importButton"
-                    defaultMessage="Import"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            ) : null}
-
-            {uploadStatus.overallImportStatus === STATUS.STARTED ? (
-              <EuiFlexGroup gutterSize="none" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="m" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiButtonEmpty disabled>
-                    <FormattedMessage
-                      id="indexEditor.flyout.footer.importingButton"
-                      defaultMessage="Importing..."
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              </EuiFlexGroup>
             ) : null}
 
             {isSaving ? (

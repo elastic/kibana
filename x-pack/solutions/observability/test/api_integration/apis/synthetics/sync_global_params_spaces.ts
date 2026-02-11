@@ -40,6 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
     const params: Record<string, string> = {};
 
     before(async () => {
+      await testPrivateLocations.cleanupFleetPolicies();
       await kServer.savedObjects.cleanStandardList();
       await testPrivateLocations.installSyntheticsPackage();
       _browserMonitorJson = getFixtureJson('browser_monitor');
@@ -155,8 +156,12 @@ export default function ({ getService }: FtrProviderContext) {
           locId: locWithSpace.id,
           spaceId,
         });
+        const enabledInput = packagePolicy.inputs.find(
+          (input: { enabled: boolean }) => input.enabled === true
+        );
+
         expect(packagePolicy.policy_id).eql(locWithSpace.agentPolicyId);
-        expect(packagePolicy.inputs[0].streams[0].compiled_stream.params).eql(params);
+        expect(enabledInput.streams[0].compiled_stream.params).eql(params);
       });
 
       comparePolicies(
@@ -222,8 +227,11 @@ export default function ({ getService }: FtrProviderContext) {
           locId: locWithSpace.id,
           spaceId,
         });
+        const enabledInput = packagePolicy.inputs.find(
+          (input: { enabled: boolean }) => input.enabled === true
+        );
         expect(packagePolicy.policy_id).eql(locWithSpace.agentPolicyId);
-        expect(packagePolicy.inputs[0].streams[0].compiled_stream.params).eql(undefined);
+        expect(enabledInput.streams[0].compiled_stream.params).eql(undefined);
       });
 
       comparePolicies(

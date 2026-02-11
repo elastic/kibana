@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LastValueIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { LastValueIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiLastValueOperation } from '../../schema/metric_ops';
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './utils';
@@ -15,7 +15,6 @@ import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './ut
 export const fromLastValueAPItoLensState = (
   options: LensApiLastValueOperation
 ): LastValueIndexPatternColumn => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   const { field, format, sort_by, show_array_values } = options;
 
   return {

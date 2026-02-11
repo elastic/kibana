@@ -30,11 +30,8 @@ export const LlmCorrectnessEvaluationPrompt = createPrompt({
         template: userPromptText,
       },
     },
-    toolChoice: {
-      function: 'score',
-    },
     tools: {
-      score: {
+      analyze: {
         description: 'Return correctness evaluation with summary and detailed claim analysis.',
         schema: {
           type: 'object',

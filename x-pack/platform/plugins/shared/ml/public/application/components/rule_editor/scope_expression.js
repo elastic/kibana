@@ -24,6 +24,7 @@ import {
 
 import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { filterTypeToText } from './utils';
 
@@ -98,6 +99,12 @@ export class ScopeExpression extends Component {
                     text: filterTypeToText(ML_DETECTOR_RULE_FILTER_TYPE.EXCLUDE),
                   },
                 ]}
+                aria-label={i18n.translate(
+                  'xpack.ml.ruleEditor.scopeExpression.filterTypeSelectAriaLabel',
+                  {
+                    defaultMessage: 'Filter type',
+                  }
+                )}
               />
             </EuiFlexItem>
 
@@ -107,6 +114,12 @@ export class ScopeExpression extends Component {
                 onChange={this.onChangeFilterId}
                 data-test-subj="mlScopeFilterIdSelect"
                 options={getFilterListOptions(filterListIds)}
+                aria-label={i18n.translate(
+                  'xpack.ml.ruleEditor.scopeExpression.filterListSelectAriaLabel',
+                  {
+                    defaultMessage: 'Filter list',
+                  }
+                )}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

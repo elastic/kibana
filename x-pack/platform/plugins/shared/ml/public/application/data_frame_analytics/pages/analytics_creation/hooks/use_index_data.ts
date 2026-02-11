@@ -146,10 +146,14 @@ export const useIndexData = (
   const [columns, setColumns] = useState<MLEuiDataGridColumn[]>([]);
   useEffect(() => {
     if (Array.isArray(dataViewFields)) {
-      setColumns([
+      const cols = [
         ...getDataViewColumns(dataView, dataViewFields),
         ...(combinedRuntimeMappings ? getRuntimeFieldColumns(combinedRuntimeMappings) : []),
-      ]);
+      ];
+
+      // de-duplicate columns by id to avoid runtime fields being added twice
+      const uniqueCols = Array.from(new Map(cols.map((item) => [item.id, item])).values());
+      setColumns(uniqueCols);
     }
   }, [dataView, dataViewFields, combinedRuntimeMappings]);
 

@@ -61,18 +61,21 @@ export function FieldValueCombobox({
     onSelectionChange(selectedValuesN.map(({ label: lbl }) => lbl));
   };
 
+  const searchFieldPlaceholder = i18n.translate(
+    'xpack.observabilityShared.fieldValueSelection.placeholder.search',
+    {
+      defaultMessage: 'Search {label}',
+      values: { label },
+    }
+  );
+
   const comboBox = (
     <EuiComboBox
       fullWidth
       singleSelection={singleSelection ? { asPlainText: true } : false}
       compressed={compressed}
-      placeholder={i18n.translate(
-        'xpack.observabilityShared.fieldValueSelection.placeholder.search',
-        {
-          defaultMessage: 'Search {label}',
-          values: { label },
-        }
-      )}
+      placeholder={searchFieldPlaceholder}
+      aria-label={searchFieldPlaceholder}
       isLoading={loading}
       onSearchChange={(searchVal) => {
         setQuery(searchVal);

@@ -13,7 +13,7 @@
     "server": false,
     "requiredPlugins": [
       "dataViews",
-      "unifiedSearch"
+      "kql"
     ],
     "optionalPlugins": [
       "visualizations"
@@ -24,7 +24,6 @@
       "data",
       "fieldFormats",
       "esUiShared",
-      "visualizations",
       "savedSearch"
     ]
   }

@@ -27,6 +27,7 @@ import { StepProgressPayloadRT } from '../types';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { createInstallApiKey } from '../../lib/api_key/create_install_api_key';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
+import { hasFleetIntegrationPrivileges } from '../../lib/api_key/has_fleet_integration_privileges';
 import { makeTar, type Entry } from './make_tar';
 
 const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
@@ -311,6 +312,19 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
     const coreStart = await core.start();
     const fleetStart = await plugins.fleet.start();
     const savedObjectsClient = coreStart.savedObjects.createInternalRepository();
+
+    // Check Fleet integration privileges before attempting to install packages
+    const hasFleetPrivileges = await hasFleetIntegrationPrivileges(request, fleetStart);
+
+    if (!hasFleetPrivileges) {
+      return response.forbidden({
+        body: {
+          message:
+            "You don't have adequate permissions to install Fleet packages. Contact your system administrator to grant you the required 'Integrations All' privilege.",
+        },
+      });
+    }
+
     const packageClient = fleetStart.packageService.asScoped(request);
 
     const savedObservabilityOnboardingState = await getObservabilityOnboardingFlow({
@@ -532,15 +546,17 @@ async function ensureInstalledIntegrations(
  * checkout_service custom /path/to/error.log
  * ```
  */
-function parseIntegrationsTSV(tsv: string) {
+export const MAX_INTEGRATIONS_LIMIT = 100;
+
+export function parseIntegrationsTSV(tsv: string) {
   if (tsv.trim() === '') {
     return [];
   }
 
-  return Object.values(
-    tsv
-      .trim()
-      .split('\n')
+  const lines = tsv.trim().split('\n');
+
+  const integrations = Object.values(
+    lines
       .map((line) => line.split('\t', 3))
       .reduce<Record<string, IntegrationToInstall>>((acc, [pkgName, installSource, parameter]) => {
         const key = `${pkgName}-${installSource}`;
@@ -573,6 +589,14 @@ function parseIntegrationsTSV(tsv: string) {
         throw new Error(`Invalid install source: ${installSource}`);
       }, {})
   );
+
+  if (integrations.length > MAX_INTEGRATIONS_LIMIT) {
+    throw new Error(
+      `Too many integrations in the request. Maximum allowed is ${MAX_INTEGRATIONS_LIMIT}, but received ${integrations.length}.`
+    );
+  }
+
+  return integrations;
 }
 
 function parseRegistryIntegrationMetadata(

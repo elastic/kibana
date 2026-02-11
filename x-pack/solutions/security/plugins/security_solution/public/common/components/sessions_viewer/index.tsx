@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { ENTRY_SESSION_ENTITY_ID_PROPERTY } from '@kbn/session-view-plugin/public';
 import { useDispatch } from 'react-redux';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
-import { TableId, dataTableActions } from '@kbn/securitysolution-data-table';
+import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useAddBulkToTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import type { SessionsComponentsProps } from './types';
 import type { ESBoolQuery } from '../../../../common/typed_json';
@@ -19,13 +20,11 @@ import { getSessionsDefaultModel, sessionsHeaders } from './default_headers';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import * as i18n from './translations';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { useLicense } from '../../hooks/use_license';
 import { eventsDefaultModel } from '../events_viewer/default_model';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { SecurityCellActionsTrigger } from '../cell_actions';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 export const TEST_ID = 'security_solution:sessions_viewer:sessions_view';
 
@@ -121,13 +120,8 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   }, [dispatch, tableId]);
 
   const isEnterprisePlus = useLicense().isEnterprise();
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
-  let ACTION_BUTTON_COUNT = isEnterprisePlus || tableId === TableId.kubernetesPageSessions ? 6 : 5;
-  if (securitySolutionNotesDisabled) {
-    ACTION_BUTTON_COUNT--;
-  }
+  const ACTION_BUTTON_COUNT =
+    isEnterprisePlus || tableId === TableId.kubernetesPageSessions ? 6 : 5;
   const leadingControlColumns = useMemo(
     () => getDefaultControlColumn(ACTION_BUTTON_COUNT),
     [ACTION_BUTTON_COUNT]
@@ -138,7 +132,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
     tableId,
     from: startDate,
     to: endDate,
-    scopeId: SourcererScopeName.default,
+    scopeId: PageScope.default,
   });
 
   const bulkActions = useMemo<BulkActionsProp | boolean>(() => {
@@ -164,7 +158,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
         leadingControlColumns={leadingControlColumns}
         renderCellValue={DefaultCellRenderer}
         rowRenderers={defaultRowRenderers}
-        sourcererScope={SourcererScopeName.default}
+        sourcererScope={PageScope.default}
         start={startDate}
         unit={unit}
       />

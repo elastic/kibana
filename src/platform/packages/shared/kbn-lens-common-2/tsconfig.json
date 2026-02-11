@@ -1,0 +1,23 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/lens-common",
+    "@kbn/presentation-publishing",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/chart-expressions-common",
+    "@kbn/embeddable-plugin"
+  ]
+}

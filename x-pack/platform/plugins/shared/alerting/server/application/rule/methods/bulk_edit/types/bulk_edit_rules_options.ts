@@ -27,6 +27,7 @@ export type BulkEditFields = keyof Pick<
 
 export interface BulkEditOptionsCommon<Params extends RuleParams> {
   operations: BulkEditOperation[];
+  ignoreInternalRuleTypes?: boolean;
   paramsModifier?: ParamsModifier<Params>;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
 }

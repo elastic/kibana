@@ -10,7 +10,16 @@ import React, { Component } from 'react';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField, DataView, Query } from '@kbn/data-plugin/common';
-import { indexPatterns } from '@kbn/data-plugin/public';
+import { isNestedField } from '@kbn/data-views-plugin/common';
+import { getIndexPatternService } from '../../../../kibana_services';
+import { getDataViewNotFoundMessage } from '../../../../../common/i18n_getters';
+import { AGG_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
+import type { JoinField } from '../join_editor';
+import { isSpatialJoin } from '../../../../classes/joins/is_spatial_join';
+import {
+  isSpatialSourceComplete,
+  isTermSourceComplete,
+} from '../../../../classes/sources/join_sources';
 import { SpatialJoinExpression } from './spatial_join_expression';
 import { TermJoinExpression } from './term_join_expression';
 import { MetricsExpression } from './metrics_expression';
@@ -25,16 +34,6 @@ import type {
   JoinDescriptor,
   JoinSourceDescriptor,
 } from '../../../../../common/descriptor_types';
-
-import { getIndexPatternService } from '../../../../kibana_services';
-import { getDataViewNotFoundMessage } from '../../../../../common/i18n_getters';
-import { AGG_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
-import type { JoinField } from '../join_editor';
-import { isSpatialJoin } from '../../../../classes/joins/is_spatial_join';
-import {
-  isSpatialSourceComplete,
-  isTermSourceComplete,
-} from '../../../../classes/sources/join_sources';
 
 interface Props {
   join: Partial<JoinDescriptor>;
@@ -92,7 +91,7 @@ export class Join extends Component<Props, State> {
     }
 
     this.setState({
-      rightFields: indexPattern.fields.filter((field) => !indexPatterns.isNestedField(field)),
+      rightFields: indexPattern.fields.filter((field) => !isNestedField(field)),
       indexPattern,
     });
   }

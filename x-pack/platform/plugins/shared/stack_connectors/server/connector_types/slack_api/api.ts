@@ -6,11 +6,11 @@
  */
 
 import type {
-  PostMessageSubActionParams,
   PostBlockkitSubActionParams,
-  SlackApiService,
+  PostMessageSubActionParams,
   ValidChannelIdSubActionParams,
-} from '../../../common/slack_api/types';
+} from '@kbn/connector-schemas/slack_api';
+import type { SlackApiService } from '../../../common/slack_api/types';
 
 const validChannelIdHandler = async ({
   externalService,
@@ -22,19 +22,19 @@ const validChannelIdHandler = async ({
 
 const postMessageHandler = async ({
   externalService,
-  params: { channelIds, channels, text },
+  params: { channelIds, channels, text, channelNames },
 }: {
   externalService: SlackApiService;
   params: PostMessageSubActionParams;
-}) => await externalService.postMessage({ channelIds, channels, text });
+}) => await externalService.postMessage({ channelIds, channels, channelNames, text });
 
 const postBlockkitHandler = async ({
   externalService,
-  params: { channelIds, channels, text },
+  params: { channelIds, channels, channelNames, text },
 }: {
   externalService: SlackApiService;
   params: PostBlockkitSubActionParams;
-}) => await externalService.postBlockkit({ channelIds, channels, text });
+}) => await externalService.postBlockkit({ channelIds, channels, channelNames, text });
 
 export const api = {
   validChannelId: validChannelIdHandler,

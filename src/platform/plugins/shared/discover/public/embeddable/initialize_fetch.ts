@@ -16,7 +16,9 @@ import {
   SEARCH_EMBEDDABLE_TYPE,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
+import { type ESQLControlVariable } from '@kbn/esql-types';
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
+import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type {
@@ -34,7 +36,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
-
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import type { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
@@ -43,6 +45,7 @@ import type { PublishesSavedSearch, SearchEmbeddableStateManager } from './types
 import { getTimeRangeFromFetchContext, updateSearchSource } from './utils/update_search_source';
 import { createDataSource } from '../../common/data_sources';
 import type { ScopedProfilesManager } from '../context_awareness';
+import { isFieldStatsMode } from './utils/is_field_stats_mode';
 
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
@@ -109,6 +112,22 @@ const isExecutionContextWithinLimits = (executionContext: KibanaExecutionContext
   return encoded.length < MAX_VALUE_ALLOWED;
 };
 
+const getRelevantESQLVariables = (
+  savedSearch: SavedSearch,
+  allVariables: ESQLControlVariable[] = []
+) => {
+  const query = savedSearch.searchSource.getField('query');
+  if (isOfAggregateQueryType(query)) {
+    const currentVariables = getESQLQueryVariables(query.esql);
+    if (!currentVariables.length) {
+      return allVariables;
+    }
+    // filter out the variables that are not used in the query
+    return allVariables.filter((variable) => currentVariables.includes(variable.key));
+  }
+  return [];
+};
+
 export function initializeFetch({
   api,
   stateManager,
@@ -127,19 +146,26 @@ export function initializeFetch({
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
 
-  const fetchSubscription = combineLatest([fetch$(api), api.savedSearch$, api.dataViews$])
+  const observables = [fetch$(api), api.savedSearch$, api.dataViews$] as const;
+
+  const fetchSubscription = combineLatest(observables)
     .pipe(
       tap(() => {
         // abort any in-progress requests
         if (abortController) {
-          abortController.abort();
+          abortController.abort(AbortReason.REPLACED);
           abortController = undefined;
         }
       }),
       switchMap(async ([fetchContext, savedSearch, dataViews]) => {
         const dataView = dataViews?.length ? dataViews[0] : undefined;
+
         setBlockingError(undefined);
-        if (!dataView || !savedSearch.searchSource) {
+        if (
+          !dataView ||
+          !savedSearch.searchSource ||
+          isFieldStatsMode(savedSearch, dataView, discoverServices.uiSettings)
+        ) {
           return;
         }
 
@@ -193,6 +219,8 @@ export function initializeFetch({
               expressions: discoverServices.expressions,
               scopedProfilesManager,
               searchSessionId,
+              esqlVariables: getRelevantESQLVariables(savedSearch, fetchContext.esqlVariables),
+              projectRouting: fetchContext.projectRouting,
             });
             return {
               columnsMeta: result.esqlQueryColumns
@@ -225,6 +253,7 @@ export function initializeFetch({
               },
               executionContext,
               disableWarningToasts: true,
+              projectRouting: fetchContext.projectRouting,
             })
           );
           const interceptedWarnings: SearchResponseWarning[] = [];

@@ -15,11 +15,12 @@ import type {
   AnalyticsServicePreboot,
 } from '@kbn/core-analytics-server';
 import type { AnalyticsService } from '@kbn/core-analytics-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 type AnalyticsServiceContract = PublicMethodsOf<AnalyticsService>;
 
 const createAnalyticsServicePreboot = (): jest.Mocked<AnalyticsServicePreboot> => {
-  return {
+  return lazyObject({
     optIn: jest.fn(),
     reportEvent: jest.fn(),
     registerEventType: jest.fn(),
@@ -27,11 +28,11 @@ const createAnalyticsServicePreboot = (): jest.Mocked<AnalyticsServicePreboot> =
     removeContextProvider: jest.fn(),
     registerShipper: jest.fn(),
     telemetryCounter$: new Subject(),
-  };
+  });
 };
 
 const createAnalyticsServiceSetup = (): jest.Mocked<AnalyticsServiceSetup> => {
-  return {
+  return lazyObject({
     optIn: jest.fn(),
     reportEvent: jest.fn(),
     registerEventType: jest.fn(),
@@ -39,24 +40,24 @@ const createAnalyticsServiceSetup = (): jest.Mocked<AnalyticsServiceSetup> => {
     removeContextProvider: jest.fn(),
     registerShipper: jest.fn(),
     telemetryCounter$: new Subject(),
-  };
+  });
 };
 
 const createAnalyticsServiceStart = (): jest.Mocked<AnalyticsServiceStart> => {
-  return {
+  return lazyObject({
     optIn: jest.fn(),
     reportEvent: jest.fn(),
     telemetryCounter$: new Subject(),
-  };
+  });
 };
 
 const createAnalyticsServiceMock = (): jest.Mocked<AnalyticsServiceContract> => {
-  return {
+  return lazyObject({
     preboot: jest.fn().mockImplementation(createAnalyticsServicePreboot),
     setup: jest.fn().mockImplementation(createAnalyticsServiceSetup),
     start: jest.fn().mockImplementation(createAnalyticsServiceStart),
     stop: jest.fn(),
-  };
+  });
 };
 
 export const analyticsServiceMock = {

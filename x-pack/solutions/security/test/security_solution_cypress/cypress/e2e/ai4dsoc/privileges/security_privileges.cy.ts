@@ -13,7 +13,9 @@ import {
   NOTES_FEATURE,
   SECURITY_FEATURE,
   SECURITY_FEATURE_DESCRIPTION,
+  SECURITY_SUB_FEATURE_TABLE,
   SIEM_MIGRATIONS_FEATURE,
+  SOC_MANAGEMENT_SUB_FEATURE,
   TIMELINE_FEATURE,
 } from '../../../screens/custom_roles/assign_to_space_flyout';
 import { login } from '../../../tasks/login';
@@ -28,13 +30,16 @@ describe('Custom role creation', { tags: '@serverless' }, () => {
   });
 
   describe('Security privileges', () => {
-    it('should not show `Security` sub-privileges', () => {
+    it('should only show `Security` SOC Management sub-privilege', () => {
       selectAllSpaces();
-      // should not have Security sub-privileges
+      // should only SOC Management Security sub-privilege
       cy.get(SECURITY_FEATURE).should('exist');
-      cy.get(SECURITY_FEATURE_DESCRIPTION).should('not.exist');
+      cy.get(SECURITY_FEATURE_DESCRIPTION).should('exist');
       cy.get(SECURITY_FEATURE).click();
-      cy.get(`${SECURITY_FEATURE} button.euiAccordion__arrow`).should('not.exist');
+      cy.get(`${SECURITY_FEATURE} button.euiAccordion__arrow`).should('exist');
+      cy.get(SOC_MANAGEMENT_SUB_FEATURE).should('exist');
+      // the first item is the customize sub-privilege toggle
+      cy.get(`${SECURITY_SUB_FEATURE_TABLE} > div`).should('have.length', 2);
     });
 
     it('should not show `Timelines` and `Notes` features', () => {

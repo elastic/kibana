@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ProductName } from '@kbn/product-doc-common';
+import type { ProductName, ResourceType } from '@kbn/product-doc-common';
 
 /**
  * Options for the Product documentation {@link SearchApi}
@@ -21,6 +21,11 @@ export interface DocSearchOptions {
   products?: ProductName[];
   /** optional inference ID to filter search */
   inferenceId?: string;
+  /**
+   * Resource types to include in the search.
+   * Defaults to `['product_doc']`.
+   */
+  resourceTypes?: ResourceType[];
 }
 
 /**

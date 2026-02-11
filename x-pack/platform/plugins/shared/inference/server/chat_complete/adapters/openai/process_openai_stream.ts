@@ -49,7 +49,7 @@ export function processOpenAIStream() {
       mergeMap((chunk): Observable<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent> => {
         const events: Array<ChatCompletionChunkEvent | ChatCompletionTokenCountEvent> = [];
         if (chunk.usage) {
-          events.push(tokenCountFromOpenAI(chunk.usage));
+          events.push(tokenCountFromOpenAI(chunk.usage, chunk.model));
         }
         if (chunk.choices?.length) {
           events.push(chunkFromOpenAI(chunk));

@@ -46,29 +46,11 @@ The authentication and authorization on this endpoint are provided as part of th
 node scripts/jest --config x-pack/solutions/observability/plugins/profiling/jest.config.js [--watchAll]
 ```
 
-## E2E Tests (Cypress)
-The E2E tests are located in [`x-pack/solutions/observability/plugins/profiling/e2e`](./e2e).
+## E2E Tests (Scout)
 
-Universal Profiling uses [FTR](../../../../src/platform/packages/shared/kbn-test/README.mdx) (functional test runner) and [Cypress](https://www.cypress.io/) to run the e2e tests. The tests are located at `kibana/x-pack/solutions/observability/plugins/profiling/e2e/cypress/e2e`.
+The E2E tests are located in [`x-pack/solutions/observability/plugins/profiling/test/scout`](./test/scout).
 
-### Start with Cypress Dashboard
-
-```
-node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e --open
-```
-
-### Run tests
-Runs all tests in the terminal
-
-```
-node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e
-```
-
-### Run tests in headed mode
-
-```
-node x-pack/solutions/observability/plugins/profiling/scripts/test/e2e --headed
-```
+Universal Profiling uses [Scout](https://github.com/elastic/kibana/tree/main/x-pack/solutions/observability/packages/kbn-scout-oblt) (Playwright-based test framework) to run the e2e tests. For detailed instructions on how to run the tests, see the [Scout tests README](./test/scout/README.md).
 
 ## Other resources
 - [Official Profiling documentation](https://www.elastic.co/observability/universal-profiling)

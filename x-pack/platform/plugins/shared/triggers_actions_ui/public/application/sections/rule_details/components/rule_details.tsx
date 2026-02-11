@@ -37,7 +37,7 @@ import {
   hasExecuteActionsCapability,
   hasManageApiKeysCapability,
 } from '../../../lib/capabilities';
-import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
+import { getRulesBreadcrumbWithHref } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import type {
   Rule,
@@ -50,12 +50,14 @@ import type { ComponentOpts as BulkOperationsComponentOpts } from '../../common/
 import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleRouteWithApi } from './rule_route';
 import { ViewInApp } from './view_in_app';
-import { routeToRules } from '../../../constants';
+import { ViewLinkedObject } from './view_linked_object';
+import { routeToHome } from '../../../constants';
 import {
   rulesErrorReasonTranslationsMapping,
   rulesWarningReasonTranslationsMapping,
 } from '../../rules_list/translations';
 import { useKibana } from '../../../../common/lib/kibana';
+import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 import { runRule } from '../../../lib/run_rule';
 import {
@@ -94,7 +96,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 }) => {
   const history = useHistory();
   const {
-    application: { capabilities, navigateToApp },
+    application,
     ruleTypeRegistry,
     setBreadcrumbs,
     chrome,
@@ -104,6 +106,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     userProfile,
     notifications: { toasts },
   } = useKibana().services;
+  const { capabilities, navigateToApp, getUrlForApp } = application;
+  const useUnifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
 
   const [rulesToDelete, setRulesToDelete] = useState<string[]>([]);
   const [rulesToUpdateAPIKey, setRulesToUpdateAPIKey] = useState<string[]>([]);
@@ -122,7 +126,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   // Set breadcrumb and page title
   useEffect(() => {
-    setBreadcrumbs([getAlertingSectionBreadcrumb('rules', true), { text: rule.name }]);
+    const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(getUrlForApp);
+    setBreadcrumbs([rulesBreadcrumbWithAppPath, { text: rule.name }]);
     chrome.docTitle.change(getCurrentDocTitle('rules'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -161,7 +166,8 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     // is this rule type editable from within Rules Management
     (ruleTypeRegistry.has(rule.ruleTypeId)
       ? !ruleTypeRegistry.get(rule.ruleTypeId).requiresAppContext
-      : false);
+      : false) &&
+    !ruleType.isInternallyManaged;
 
   const onRunRule = async (id: string) => {
     await runRule(http, toasts, id);
@@ -224,10 +230,6 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     hasEditButton,
   ]);
 
-  const goToRulesList = () => {
-    history.push(routeToRules);
-  };
-
   const getRuleStatusErrorReasonText = () => {
     if (rule.executionStatus.error && rule.executionStatus.error.reason) {
       return rulesErrorReasonTranslationsMapping[rule.executionStatus.error.reason];
@@ -245,18 +247,35 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   };
 
   const onEditRuleClick = () => {
-    navigateToApp('management', {
-      path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
-      state: {
-        returnApp: 'management',
-        returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
-      },
-    });
+    if (useUnifiedRulesPage) {
+      const { pathname, search, hash } = history.location;
+      const returnPath = `${pathname}${search}${hash}` || `/${rule.id}`;
+      history.push({
+        pathname: getEditRuleRoute(rule.id),
+        state: {
+          returnPath,
+        },
+      });
+    } else {
+      navigateToApp('management', {
+        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
+        state: {
+          returnApp: 'management',
+          returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
+        },
+      });
+    }
   };
 
   const editButton = hasEditButton ? (
     <>
       <EuiButtonEmpty
+        aria-label={i18n.translate(
+          'xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel',
+          {
+            defaultMessage: 'Edit',
+          }
+        )}
         data-test-subj="openEditRuleFlyoutButton"
         iconType="pencil"
         onClick={onEditRuleClick}
@@ -281,7 +300,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     });
     showToast({ action: 'DELETE', errors, total });
     setRulesToDelete([]);
-    goToRulesList();
+    history.push(routeToHome);
   };
 
   const onDeleteCancel = () => {
@@ -355,11 +374,13 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         data-test-subj="ruleDetailsTitle"
         bottomBorder
         pageTitle={
-          <FormattedMessage
-            id="xpack.triggersActionsUI.sections.ruleDetails.ruleDetailsTitle"
-            defaultMessage="{ruleName}"
-            values={{ ruleName: rule.name }}
-          />
+          <span data-test-subj="ruleName">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.ruleDetails.ruleDetailsTitle"
+              defaultMessage="{ruleName}"
+              values={{ ruleName: rule.name }}
+            />
+          </span>
         }
         description={
           <EuiFlexGroup gutterSize="m">
@@ -430,10 +451,17 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               }}
               onEnableDisable={onEnableDisable}
               onRunRule={onRunRule}
+              isInternallyManaged={ruleType.isInternallyManaged}
             />
           ),
           editButton,
           <EuiButtonEmpty
+            aria-label={i18n.translate(
+              'xpack.triggersActionsUI.sections.ruleDetails.refreshRulesButtonLabel',
+              {
+                defaultMessage: 'Refresh',
+              }
+            )}
             data-test-subj="refreshRulesButton"
             iconType="refresh"
             onClick={requestRefresh}
@@ -445,7 +473,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
               defaultMessage="Refresh"
             />
           </EuiButtonEmpty>,
-          <ViewInApp rule={rule} />,
+          useUnifiedRulesPage ? <ViewLinkedObject rule={rule} /> : <ViewInApp rule={rule} />,
         ]}
       />
       <EuiPageSection>
@@ -454,6 +482,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiCallOut
+                announceOnMount
                 color="danger"
                 data-test-subj="ruleErrorBanner"
                 size="s"
@@ -480,6 +509,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiCallOut
+                announceOnMount
                 color="warning"
                 data-test-subj="ruleWarningBanner"
                 size="s"
@@ -501,6 +531,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             <EuiFlexItem>
               <EuiSpacer size="s" />
               <EuiCallOut
+                announceOnMount
                 color="warning"
                 data-test-subj="actionWithBrokenConnectorWarningBanner"
                 size="s"

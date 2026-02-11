@@ -35,15 +35,36 @@ log.info(response.output);
 
 Running a recipe:
 
-```
-$ yarn run ts-node x-pack/solutions/observability/packages/kbn-genai-cli/recipes/hello_world.ts
+```bash
+yarn run ts-node x-pack/solutions/observability/packages/kbn-genai-cli/recipes/hello_world.ts
 ```
 
 ## EIS
 
-You can set up a local instance of the Elastic Inference Service by running `node scripts/eis.js`.
-This starts the EIS Gateway in a Docker container, and handles certificates and configuration.
+You can connect your local Elasticsearch to the Elastic Inference Service (EIS) using Cloud Connected Mode (CCM) by running `node scripts/eis.js`. This script configures your local Elasticsearch instance to use a real EIS endpoint without needing to run the EIS Gateway locally.
 
 ### Prerequisites
 
-EIS connects to external LLM providers, so you need to supply authentication. By default, the setup script will try to get credentials from Vault. Make sure you have configured Vault to point at Elastic's Infra Vault server, and that you're logged in. If you want to, you can run Vault locally and set VAULT_ADDR and VAULT_SECRET_PATH. By default the script will try to get credentials from the [Infra Vault](https://docs.elastic.dev/vault/infra-vault/home) cluster, at `secret/kibana-issues/dev/inference/*`, which is accessible for all employees.
+1. **Vault Access**: Make sure you have configured Vault to point at Elastic's [Infra Vault](https://docs.elastic.dev/vault#infra-vault) server and that you're logged in via `vault login --method oidc`. The script will fetch the EIS API key from `secret/kibana-issues/dev/inference/kibana-eis-ccm`.
+
+2. **Elasticsearch**: Start Elasticsearch with the CCM URL flag:
+
+   ```bash
+   yarn es snapshot --license trial -E xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud
+   ```
+
+3. **Credentials**: The script will automatically detect Elasticsearch credentials from:
+   - Environment variables: `ES_USERNAME`/`ES_PASSWORD` or `ELASTICSEARCH_USERNAME`/`ELASTICSEARCH_PASSWORD`
+   - Default credentials: `elastic:changeme` (hosted) or `elastic_serverless:changeme` (serverless)
+
+### Usage
+
+```bash
+# Start Elasticsearch with CCM enabled
+yarn es snapshot --license trial -E xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud
+
+# In a separate terminal, configure CCM
+node scripts/eis.js
+```
+
+The script will fetch the API key from Vault and configure Cloud Connected Mode in your local Elasticsearch instance.

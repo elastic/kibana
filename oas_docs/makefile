@@ -22,8 +22,7 @@ api-docs: ## Generate Serverless and ESS Kibana OpenAPI bundles
 .PHONY: space-aware-api-docs
 space-aware-api-docs: ## Add special space aware description entries
 	@node scripts/promote_space_awareness.js oas_docs/output/kibana.yaml
-## Just for ess for now...
-# @node scripts/promote_space_awareness.js oas_docs/output/kibana.serverless.yaml
+	@node scripts/promote_space_awareness.js oas_docs/output/kibana.serverless.yaml
 
 .PHONY: merge-api-docs
 merge-api-docs: ## Merge Serverless and ESS Kibana OpenAPI bundles with kbn-openapi-bundler

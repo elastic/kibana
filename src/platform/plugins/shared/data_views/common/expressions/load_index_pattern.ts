@@ -36,6 +36,7 @@ type Output = Promise<IndexPatternExpressionType>;
 
 interface Arguments {
   id: string;
+  includeFields?: boolean;
 }
 
 /** @internal */
@@ -66,6 +67,14 @@ export const getIndexPatternLoadMeta = (): Omit<
       required: true,
       help: i18n.translate('dataViews.functions.dataViewLoad.id.help', {
         defaultMessage: 'data view id to load',
+      }),
+    },
+    includeFields: {
+      types: ['boolean'],
+      required: false,
+      default: true,
+      help: i18n.translate('dataViews.functions.dataViewLoad.includeFields.help', {
+        defaultMessage: 'Whether to include the field list in the serialized data view',
       }),
     },
   },

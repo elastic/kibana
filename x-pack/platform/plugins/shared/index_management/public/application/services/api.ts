@@ -10,6 +10,7 @@ import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types'
 import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { ReindexService } from '@kbn/reindex-service-plugin/public';
 import {
   API_BASE_PATH,
   INTERNAL_API_BASE_PATH,
@@ -47,16 +48,23 @@ import { httpService } from './http';
 import type { UiMetricService } from './ui_metric';
 import type { FieldFromIndicesRequest } from '../../../common';
 import type { Fields } from '../components/mappings_editor/types';
+import type { UserStartPrivilegesResponse } from '../../../server/lib/types';
+import { indexDataEnricher } from '../../services';
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
 }
 
-// Temporary hack to provide the uiMetricService instance to this file.
+// Temporary hack to provide the uiMetricService and reindexService instance to this file.
 // TODO: Refactor and export an ApiService instance through the app dependencies context
 let uiMetricService: UiMetricService;
 export const setUiMetricService = (_uiMetricService: UiMetricService) => {
   uiMetricService = _uiMetricService;
+};
+
+let reindexService: ReindexService;
+export const setReindexService = (_reindexService: ReindexService) => {
+  reindexService = _reindexService;
 };
 // End hack
 
@@ -115,9 +123,16 @@ export async function updateDSFailureStore(
   dataStreams: string[],
   data: {
     dsFailureStore: boolean;
+    customRetentionPeriod?: string;
+    retentionDisabled?: boolean;
   }
 ) {
-  const body = { dsFailureStore: data.dsFailureStore, dataStreams };
+  const body = {
+    dsFailureStore: data.dsFailureStore,
+    dataStreams,
+    customRetentionPeriod: data.customRetentionPeriod,
+    retentionDisabled: data.retentionDisabled,
+  };
 
   return sendRequest({
     path: `${API_BASE_PATH}/data_streams/configure_failure_store`,
@@ -126,9 +141,93 @@ export async function updateDSFailureStore(
   });
 }
 
-export async function loadIndices() {
-  const response = await httpService.httpClient.get<any>(`${API_BASE_PATH}/indices`);
-  return response.data ? response.data : response;
+export async function loadIndices(
+  onIndicesLoaded: (indices: Index[]) => void,
+  onEnrichmentError: (source: string) => void,
+  abortSignal: AbortSignal
+) {
+  const indicesPromise = httpService.httpClient.get<Record<string, Index>>(
+    `${API_BASE_PATH}/indices_get`,
+    {
+      signal: abortSignal,
+    }
+  );
+
+  // Run all requests in parallel
+  const enrichedPromises = indexDataEnricher.enrichIndices(httpService.httpClient, abortSignal);
+
+  // we'll wait for the main request to complete first so the index list has stability
+  const indices = await indicesPromise.catch((error) => {
+    if (error.name === 'AbortError') {
+      // return undefined and exit early if the request was aborted
+      return;
+    }
+    throw error;
+  });
+
+  if (!indices) {
+    return;
+  }
+
+  // Pre-compute an alias -> index names lookup for enrichers that return data keyed by alias.
+  const aliasToIndexNames = new Map<string, string[]>();
+  Object.entries(indices).forEach(([indexName, index]) => {
+    const aliases = index.aliases;
+    const aliasList = Array.isArray(aliases)
+      ? aliases
+      : typeof aliases === 'string' && aliases !== 'none'
+      ? [aliases]
+      : [];
+
+    aliasList.forEach((alias) => {
+      if (!alias) return;
+      const existing = aliasToIndexNames.get(alias);
+      if (existing) {
+        existing.push(indexName);
+      } else {
+        aliasToIndexNames.set(alias, [indexName]);
+      }
+    });
+  });
+
+  onIndicesLoaded(Object.values(indices));
+
+  // iterate over all the requests for additional info
+  enrichedPromises.forEach((enrichedPromise) => {
+    enrichedPromise.then((enriched) => {
+      // iterate over the array of additional data and merge it into the original index data
+      if (enriched.indices) {
+        enriched.indices.forEach((enrichedIndex) => {
+          const directMatch = indices[enrichedIndex.name];
+          if (directMatch) {
+            Object.assign(directMatch, enrichedIndex);
+            return;
+          }
+
+          if (enriched.applyToAliases) {
+            const targets = aliasToIndexNames.get(enrichedIndex.name);
+            if (targets && targets.length) {
+              // Don't overwrite the concrete index name with the alias name.
+
+              const { name, ...rest } = enrichedIndex;
+              targets.forEach((targetIndexName) => {
+                const target = indices[targetIndexName];
+                if (target) {
+                  Object.assign(target, rest);
+                }
+              });
+            }
+          }
+        });
+        onIndicesLoaded(Object.values(indices));
+      }
+
+      // If an enricher fails, keep the index list stable but surface the issue to the UI.
+      if (enriched.error) {
+        onEnrichmentError(enriched.source);
+      }
+    });
+  });
 }
 
 export async function reloadIndices(
@@ -482,3 +581,28 @@ export function useLoadInferenceEndpoints() {
     method: 'get',
   });
 }
+
+export const startReindex = (sourceIndexName: string, lookupIndexName: string) => {
+  return reindexService.startReindex({
+    indexName: sourceIndexName,
+    newIndexName: lookupIndexName,
+    settings: {
+      mode: 'lookup',
+    },
+  });
+};
+
+export const cancelReindex = (sourceIndexName: string) => {
+  return reindexService.cancelReindex(sourceIndexName);
+};
+
+export const getReindexStatus = (sourceIndexName: string) => {
+  return reindexService.getReindexStatus(sourceIndexName);
+};
+
+export const useUserPrivileges = (indexName: string) => {
+  return useRequest<UserStartPrivilegesResponse>({
+    path: `${API_BASE_PATH}/start_privileges/${encodeURIComponent(indexName)}`,
+    method: 'get',
+  });
+};

@@ -1,0 +1,170 @@
+{
+  "lastModified": "2026-01-30T09:07:59.499Z",
+  "sha1": "7a5e9f32cd7cb6a5db3fcf6ed97a2c5fbb1382e5",
+  "tests": [
+    {
+      "id": "448e82090e00e69-f2cd2d3cdc77643",
+      "title": "Ingest data to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/global.setup.ts",
+        "line": 11,
+        "column": 16
+      }
+    },
+    {
+      "id": "06fc533cda37130-a089b9a7d2f8995",
+      "title": "Discover app - errors should render invalid scripted field error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/error_handling.spec.ts",
+        "line": 30,
+        "column": 12
+      }
+    },
+    {
+      "id": "1c8d238ba178b3f-d0060d150395e69",
+      "title": "Discover app - saved searches should customize time range on dashboards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlSearch",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/saved_searches.spec.ts",
+        "line": 60,
+        "column": 14
+      }
+    },
+    {
+      "id": "1c8d238ba178b3f-27057c4fe6e0bd2",
+      "title": "Discover app - saved searches should unselect saved search when navigating to a 'new'",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlSearch",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/saved_searches.spec.ts",
+        "line": 78,
+        "column": 14
+      }
+    },
+    {
+      "id": "ca32806d0b70e16-397bdafb1bc3201",
+      "title": "Discover app - value suggestions non-time based shows all auto-suggest options for a filter in discover context app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlSearch",
+        "@svlOblt"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions_non_time_based.spec.ts",
+        "line": 32,
+        "column": 14
+      }
+    },
+    {
+      "id": "557ab66ec4c2b6c-afd734a0fe0b960",
+      "title": "Discover app - value suggestions: useTimeRange disabled show up if outside of range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlSecurity",
+        "@svlSecurityEssentials",
+        "@svlSecurityEase",
+        "@svlOblt",
+        "@svlLogsEssentials",
+        "@svlSearch"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions_use_time_range_disabled.spec.ts",
+        "line": 38,
+        "column": 14
+      }
+    },
+    {
+      "id": "557ab66ec4c2b6c-00b97203c5962ea",
+      "title": "Discover app - value suggestions: useTimeRange disabled show up if in range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlSecurity",
+        "@svlSecurityEssentials",
+        "@svlSecurityEase",
+        "@svlOblt",
+        "@svlLogsEssentials",
+        "@svlSearch"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions_use_time_range_disabled.spec.ts",
+        "line": 51,
+        "column": 14
+      }
+    },
+    {
+      "id": "369fdc3eaf2da20-82f641d21f82de4",
+      "title": "Discover app - value suggestions: useTimeRange enabled dont show up if outside of range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlSecurity",
+        "@svlSecurityEssentials",
+        "@svlSecurityEase",
+        "@svlOblt",
+        "@svlLogsEssentials",
+        "@svlSearch"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",
+        "line": 36,
+        "column": 14
+      }
+    },
+    {
+      "id": "369fdc3eaf2da20-c4239399eed1a5b",
+      "title": "Discover app - value suggestions: useTimeRange enabled show up if in range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlSecurity",
+        "@svlSecurityEssentials",
+        "@svlSecurityEase",
+        "@svlOblt",
+        "@svlLogsEssentials",
+        "@svlSearch"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",
+        "line": 42,
+        "column": 14
+      }
+    },
+    {
+      "id": "369fdc3eaf2da20-d6abe17e43d844f",
+      "title": "Discover app - value suggestions: useTimeRange enabled also displays descriptions for operators",
+      "expectedStatus": "passed",
+      "tags": [
+        "@ess",
+        "@svlSecurity",
+        "@svlSecurityEssentials",
+        "@svlSecurityEase",
+        "@svlOblt",
+        "@svlLogsEssentials",
+        "@svlSearch"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/parallel_tests/value_suggestions.spec.ts",
+        "line": 55,
+        "column": 14
+      }
+    }
+  ]
+}

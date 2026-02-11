@@ -45,15 +45,10 @@ export const useQualityIssuesDocsChart = () => {
     docsTrendChart,
     breakdownField,
     integrationDetails,
-    isBreakdownFieldAsserted,
   } = useDatasetQualityDetailsState();
 
-  const {
-    trackDatasetDetailsBreakdownFieldChanged,
-    trackDetailsNavigated,
-    navigationTargets,
-    navigationSources,
-  } = useDatasetDetailsTelemetry();
+  const { trackDetailsNavigated, navigationTargets, navigationSources } =
+    useDatasetDetailsTelemetry();
 
   const [isChartLoading, setIsChartLoading] = useState<boolean | undefined>(undefined);
   const [attributes, setAttributes] = useState<
@@ -96,10 +91,6 @@ export const useQualityIssuesDocsChart = () => {
     },
     [service]
   );
-
-  useEffect(() => {
-    if (isBreakdownFieldAsserted) trackDatasetDetailsBreakdownFieldChanged();
-  }, [trackDatasetDetailsBreakdownFieldChanged, isBreakdownFieldAsserted]);
 
   useEffect(() => {
     const dataStreamName = dataStream ?? DEFAULT_LOGS_DATA_VIEW;

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -18,6 +18,7 @@
     "@kbn/observability-plugin",
     "@kbn/fleet-plugin",
     "@kbn/unified-search-plugin",
+    "@kbn/kql",
     "@kbn/i18n",
     "@kbn/core",
     "@kbn/config-schema",
@@ -41,7 +42,6 @@
     "@kbn/i18n-react",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/es-query",
-    "@kbn/stack-connectors-plugin",
     "@kbn/rule-data-utils",
     "@kbn/core-http-browser",
     "@kbn/core-notifications-browser",
@@ -118,8 +118,14 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/field-formats-plugin",
     "@kbn/core-ui-settings-browser",
+    "@kbn/content-management-plugin",
     "@kbn/licensing-types",
-    "@kbn/content-management-plugin"
+    "@kbn/observability-synthetics-test-data",
+    "@kbn/connector-schemas",
+    "@kbn/react-query",
+    "@kbn/content-management-utils",
+    "@kbn/presentation-publishing-schemas",
+    "@kbn/maintenance-windows-plugin"
   ],
   "exclude": ["target/**/*"]
 }

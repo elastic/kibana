@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
 const TEST_TIMEOUT = 3 * 60 * 1000; // 3 minutes timeout, needed to wait for the SLOs to be created
 
 test.describe('SLOs Overview', { tag: ['@ess', '@svlOblt'] }, () => {
+  // eslint-disable-next-line @kbn/eslint/scout_no_describe_configure
   test.describe.configure({ timeout: TEST_TIMEOUT });
-
-  test.beforeAll(async ({ sloData }) => {
-    await sloData.generateSloData();
-    await sloData.addSLO();
-  });
 
   test.beforeEach(async ({ pageObjects, browserAuth }) => {
     await browserAuth.loginAsAdmin();
-
     await pageObjects.slo.goto();
   });
 

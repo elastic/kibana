@@ -11,14 +11,16 @@ import { TestProviders } from '../../../common/mock';
 import { mockContextValue } from '../shared/mocks/mock_context';
 import { DocumentDetailsContext } from '../shared/context';
 import { FLYOUT_FOOTER_TEST_ID } from './test_ids';
-import { CHAT_BUTTON_TEST_ID } from './components/test_ids';
+import { AGENT_ATTACHMENT_BUTTON_TEST_ID, CHAT_BUTTON_TEST_ID } from './components/test_ids';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from '../shared/components/test_ids';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAssistant } from './hooks/use_assistant';
 import { useAlertExceptionActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
+import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
 
+jest.mock('../../../agent_builder/hooks/use_agent_builder_availability');
 jest.mock('../../../common/lib/kibana');
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -49,6 +51,12 @@ describe('PanelFooter', () => {
       showAssistantOverlay: jest.fn(),
       showAssistant: true,
       promptContextId: '',
+    });
+    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+      isAgentBuilderEnabled: false,
+      hasAgentBuilderPrivilege: false,
+      isAgentChatExperienceEnabled: false,
+      hasValidAgentBuilderLicense: true,
     });
   });
 
@@ -81,6 +89,18 @@ describe('PanelFooter', () => {
     const { getByTestId } = renderPanelFooter(false);
 
     expect(getByTestId(CHAT_BUTTON_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should render agent button', () => {
+    (useAgentBuilderAvailability as jest.Mock).mockReturnValue({
+      isAgentBuilderEnabled: true,
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: true,
+    });
+    const { getByTestId } = renderPanelFooter(false);
+
+    expect(getByTestId(AGENT_ATTACHMENT_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should not render chat button', () => {

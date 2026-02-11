@@ -84,6 +84,7 @@ export const EditWarning: FunctionComponent = () => {
         {isManagedPolicy && (
           <>
             <EuiCallOut
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicyModal.proceedWithCautionCallOutTitle"
@@ -107,6 +108,7 @@ export const EditWarning: FunctionComponent = () => {
         {isDeprecatedPolicy && (
           <>
             <EuiCallOut
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicyModal.deprecatedPolicyTitle"

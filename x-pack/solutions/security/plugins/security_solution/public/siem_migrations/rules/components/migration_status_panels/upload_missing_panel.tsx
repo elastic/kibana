@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   useEuiTheme,
@@ -22,9 +21,8 @@ import { useKibana } from '../../../../common/lib/kibana/use_kibana';
 import { PanelText } from '../../../../common/components/panel_text';
 import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
 import * as i18n from './translations';
-import { useRuleMigrationDataInputContext } from '../data_input_flyout/context';
+import { useMigrationDataInputContext } from '../../../common/components';
 import type { RuleMigrationStats } from '../../types';
-import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 
 interface RuleMigrationsUploadMissingPanelProps {
   migrationStats: RuleMigrationStats;
@@ -63,26 +61,16 @@ const RuleMigrationsUploadMissingPanelContent =
     ({ migrationStats, topSpacerSize, missingResources }) => {
       const { euiTheme } = useEuiTheme();
       const { telemetry } = useKibana().services.siemMigrations.rules;
-      const { openFlyout } = useRuleMigrationDataInputContext();
-
-      const { data: translationStats, isLoading: isLoadingTranslationStats } =
-        useGetMigrationTranslationStats(migrationStats.id);
+      const { openFlyout } = useMigrationDataInputContext();
 
       const onOpenFlyout = useCallback(() => {
         openFlyout(migrationStats);
         telemetry.reportSetupMigrationOpenResources({
           migrationId: migrationStats.id,
           missingResourcesCount: missingResources.length,
+          vendor: migrationStats.vendor,
         });
       }, [migrationStats, openFlyout, missingResources, telemetry]);
-
-      const totalRulesToRetry = useMemo(() => {
-        return (
-          (translationStats?.rules.failed ?? 0) +
-          (translationStats?.rules.success.result.partial ?? 0) +
-          (translationStats?.rules.success.result.untranslatable ?? 0)
-        );
-      }, [translationStats]);
 
       return (
         <>
@@ -92,24 +80,23 @@ const RuleMigrationsUploadMissingPanelContent =
             hasBorder
             paddingSize="s"
             css={{ backgroundColor: euiTheme.colors.backgroundBasePrimary }}
+            data-test-subj="uploadMissingPanel"
           >
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <AssistantIcon />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <PanelText size="s" semiBold>
-                  {i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE}
+                <PanelText data-test-subj="uploadMissingPanelTitle" size="s" semiBold>
+                  {migrationStats.vendor === 'splunk'
+                    ? i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_SPLUNK_TITLE
+                    : i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_QRADAR_TITLE}
                 </PanelText>
               </EuiFlexItem>
               <EuiFlexItem>
-                {isLoadingTranslationStats ? (
-                  <EuiLoadingSpinner size="s" />
-                ) : (
-                  <PanelText size="s" subdued>
-                    {i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION(totalRulesToRetry)}
-                  </PanelText>
-                )}
+                <PanelText data-test-subj="uploadMissingPanelDescription" size="s" subdued>
+                  {i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION}
+                </PanelText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
@@ -119,6 +106,7 @@ const RuleMigrationsUploadMissingPanelContent =
                   iconType="download"
                   iconSide="right"
                   size="s"
+                  data-test-subj="uploadMissingPanelButton"
                 >
                   {i18n.RULE_MIGRATION_UPLOAD_BUTTON}
                 </EuiButton>

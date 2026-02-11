@@ -99,6 +99,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
     return (
       <EuiPanel grow={false} hasShadow={false} hasBorder>
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.ml.dataframe.analytics.exploration.indexError', {
             defaultMessage: 'An error occurred loading the index data.',
           })}
@@ -146,6 +147,7 @@ export const OutlierExploration: FC<ExplorationProps> = React.memo(({ jobId }) =
       {showLegacyFeatureInfluenceFormatCallout && (
         <>
           <EuiCallOut
+            announceOnMount
             size="s"
             title={i18n.translate(
               'xpack.ml.dataframe.analytics.outlierExploration.legacyFeatureInfluenceFormatCalloutTitle',

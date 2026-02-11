@@ -22,16 +22,16 @@ export const findSLORoute = createSloServerRoute({
   params: findSLOParamsSchema,
   handler: async ({ request, logger, params, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
-    const { scopedClusterClient, repository, soClient, spaceId } = await getScopedClients({
-      request,
-      logger,
-    });
+    const { scopedClusterClient, repository, spaceId, settingsRepository } = await getScopedClients(
+      { request, logger }
+    );
 
+    const settings = await settingsRepository.get();
     const summarySearchClient = new DefaultSummarySearchClient(
       scopedClusterClient,
-      soClient,
       logger,
-      spaceId
+      spaceId,
+      settings
     );
 
     const findSLO = new FindSLO(repository, summarySearchClient);

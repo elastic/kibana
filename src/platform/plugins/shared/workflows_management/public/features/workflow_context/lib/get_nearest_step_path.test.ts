@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getNearestStepPath } from './get_context_for_path';
+import { getNearestStepPath } from './get_nearest_step_path';
 
 describe('getNearestStepPath', () => {
   it('should return the nearest step name', () => {
@@ -21,5 +21,22 @@ describe('getNearestStepPath', () => {
   it('should return the nearest step path if multiple steps are present', () => {
     const path = ['workflow', 'steps', 0, 'steps', 2, 'foreach'];
     expect(getNearestStepPath(path)).toEqual(['workflow', 'steps', 0, 'steps', 2]);
+  });
+  it('should handle step inside else branch', () => {
+    const path = ['workflow', 'steps', 0, 'steps', 2, 'else', 'steps', 0];
+    expect(getNearestStepPath(path)).toEqual([
+      'workflow',
+      'steps',
+      0,
+      'steps',
+      2,
+      'else',
+      'steps',
+      0,
+    ]);
+  });
+  it('should return step path for nested with parameters', () => {
+    const path = ['workflow', 'steps', 0, 'steps', 2, 'steps', 0, 'with', 'message'];
+    expect(getNearestStepPath(path)).toEqual(['workflow', 'steps', 0, 'steps', 2, 'steps', 0]);
   });
 });

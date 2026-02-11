@@ -8,7 +8,7 @@
  */
 
 import { fromFormulaAPItoLensState, fromFormulaLensStateToAPI } from './formula';
-import type { FormulaIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { FormulaIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiFormulaOperation } from '../../schema/metric_ops';
 
 describe('Formula Transforms', () => {

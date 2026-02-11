@@ -208,6 +208,7 @@ export const Criterion: React.FC<Props> = ({
                     fullWidth
                     isClearable={false}
                     singleSelection={{ asPlainText: true }}
+                    aria-label={criterionFieldTitle}
                     options={fieldOptions}
                     selectedOptions={selectedField}
                     onChange={handleFieldChange}
@@ -272,6 +273,12 @@ export const Criterion: React.FC<Props> = ({
                           updateCriterion(idx, { comparator: e.target.value as Comparator })
                         }
                         options={compatibleComparatorOptions}
+                        aria-label={i18n.translate(
+                          'xpack.infra.logs.alertFlyout.comparatorSelectAriaLabel',
+                          {
+                            defaultMessage: 'Comparison',
+                          }
+                        )}
                       />
                     </EuiFormRow>
                   </EuiFlexItem>

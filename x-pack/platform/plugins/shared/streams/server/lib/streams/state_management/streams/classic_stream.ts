@@ -9,34 +9,46 @@ import type {
   IndicesDataStream,
   IngestProcessorContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IngestStreamLifecycle, IngestStreamSettings } from '@kbn/streams-schema';
-import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
-import _, { cloneDeep } from 'lodash';
 import { isNotFoundError } from '@kbn/es-errors';
+import type {
+  FailureStore,
+  IngestStreamLifecycle,
+  IngestStreamSettings,
+} from '@kbn/streams-schema';
+import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
+import { validateStreamlang } from '@kbn/streamlang';
 import { isMappingProperties } from '@kbn/streams-schema/src/fields';
+import {
+  isDisabledLifecycleFailureStore,
+  isInheritFailureStore,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
+import _, { cloneDeep } from 'lodash';
+import type { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
 import { StatusError } from '../../errors/status_error';
+import { validateClassicFields, validateSimulation } from '../../helpers/validate_fields';
+import { validateBracketsInFieldNames } from '../../helpers/validate_stream';
 import { generateClassicIngestPipelineBody } from '../../ingest_pipelines/generate_ingest_pipeline';
 import { getProcessingPipelineName } from '../../ingest_pipelines/name';
 import { getDataStreamSettings, getUnmanagedElasticsearchAssets } from '../../stream_crud';
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
-import type { StateDependencies, StreamChange } from '../types';
 import type {
-  StreamChangeStatus,
   StreamChanges,
+  StreamChangeStatus,
   ValidationResult,
 } from '../stream_active_record/stream_active_record';
 import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
-import { validateClassicFields } from '../../helpers/validate_fields';
-import { validateBracketsInFieldNames, validateSettings } from '../../helpers/validate_stream';
-import type { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
-import { formatSettings, settingsUpdateRequiresRollover } from './helpers';
+import type { StateDependencies, StreamChange } from '../types';
+import { formatSettings, settingsUpdateRequiresRollover, validateQueryStreams } from './helpers';
+import { validateSettings, validateSettingsWithDryRun } from './validate_settings';
 
 interface ClassicStreamChanges extends StreamChanges {
   processing: boolean;
   field_overrides: boolean;
+  failure_store: boolean;
   lifecycle: boolean;
   settings: boolean;
+  query_streams: boolean;
 }
 
 export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Definition> {
@@ -44,7 +56,9 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     processing: false,
     field_overrides: false,
     lifecycle: false,
+    failure_store: false,
     settings: false,
+    query_streams: false,
   };
 
   private _effectiveSettings?: IngestStreamSettings;
@@ -84,8 +98,8 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     this._changes.processing =
       !startingStateStreamDefinition ||
       !_.isEqual(
-        this._definition.ingest.processing,
-        startingStateStreamDefinition.ingest.processing
+        _.omit(this._definition.ingest.processing, ['updated_at']),
+        _.omit(startingStateStreamDefinition.ingest.processing, ['updated_at'])
       );
 
     this._changes.lifecycle =
@@ -103,6 +117,27 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         startingStateStreamDefinition.ingest.classic.field_overrides
       );
 
+    this._changes.failure_store =
+      !startingStateStreamDefinition ||
+      !_.isEqual(
+        this._definition.ingest.failure_store,
+        startingStateStreamDefinition.ingest.failure_store
+      );
+
+    this._changes.query_streams =
+      !startingStateStreamDefinition ||
+      !_.isEqual(
+        this._definition.query_streams ?? [],
+        startingStateStreamDefinition.query_streams ?? []
+      );
+
+    // The newly upserted definition will always have a new updated_at timestamp. But, if processing didn't change,
+    // we should keep the existing updated_at as processing wasn't touched.
+    if (startingStateStreamDefinition && !this._changes.processing) {
+      this._definition.ingest.processing.updated_at =
+        startingStateStreamDefinition.ingest.processing.updated_at;
+    }
+
     return { cascadingChanges: [], changeStatus: 'upserted' };
   }
 
@@ -115,15 +150,35 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       return { cascadingChanges: [], changeStatus: this.changeStatus };
     }
 
-    return { cascadingChanges: [], changeStatus: 'deleted' };
+    const cascadingChanges: StreamChange[] = [];
+
+    // Cascade delete to all child query streams
+    const childQueryStreams = this._definition.query_streams ?? [];
+    for (const childRef of childQueryStreams) {
+      cascadingChanges.push({
+        type: 'delete',
+        name: childRef.name,
+      });
+    }
+
+    return { cascadingChanges, changeStatus: 'deleted' };
   }
 
   protected async doValidateUpsertion(
     desiredState: State,
     startingState: State
   ): Promise<ValidationResult> {
-    if (this.dependencies.isServerless && isIlmLifecycle(this.getLifecycle())) {
-      return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
+    if (this.dependencies.isServerless) {
+      if (isIlmLifecycle(this.getLifecycle())) {
+        return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
+      }
+
+      if (isDisabledLifecycleFailureStore(this.getFailureStore())) {
+        return {
+          isValid: false,
+          errors: [new Error('Disabling failure store lifecycle is not supported in Serverless')],
+        };
+      }
     }
 
     // Check for conflicts
@@ -198,7 +253,51 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     validateClassicFields(this._definition);
     validateBracketsInFieldNames(this._definition);
 
-    validateSettings(this._definition, this.dependencies.isServerless);
+    // Validate Streamlang processing
+    if (this._definition.ingest.processing.steps.length > 0) {
+      const validationResult = validateStreamlang(this._definition.ingest.processing, {
+        reservedFields: [],
+        streamType: 'classic',
+      });
+
+      if (!validationResult.isValid) {
+        return {
+          isValid: false,
+          errors: validationResult.errors.map(
+            (error) => new Error(`${error.message} (field: ${error.field})`)
+          ),
+        };
+      }
+    }
+
+    const allowlistValidation = validateSettings({
+      settings: this._definition.ingest.settings,
+      isServerless: this.dependencies.isServerless,
+    });
+
+    if (!allowlistValidation.isValid) {
+      return allowlistValidation;
+    }
+
+    await Promise.all([
+      validateSettingsWithDryRun({
+        scopedClusterClient: this.dependencies.scopedClusterClient,
+        streamName: this._definition.name,
+        settings: this._definition.ingest.settings,
+        isServerless: this.dependencies.isServerless,
+      }),
+      validateSimulation(this._definition, this.dependencies.scopedClusterClient),
+    ]);
+
+    const queryStreamsValidation = validateQueryStreams({
+      desiredState,
+      name: this._definition.name,
+      queryStreams: this._definition.query_streams ?? [],
+    });
+
+    if (queryStreamsValidation) {
+      return queryStreamsValidation;
+    }
 
     return { isValid: true, errors: [] };
   }
@@ -248,6 +347,17 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       });
     }
 
+    if (!isInheritFailureStore(this._definition.ingest.failure_store)) {
+      actions.push({
+        type: 'update_failure_store',
+        request: {
+          name: this._definition.name,
+          failure_store: this._definition.ingest.failure_store,
+          definition: this._definition,
+        },
+      });
+    }
+
     if (
       this._definition.ingest.classic.field_overrides &&
       isMappingProperties(this._definition.ingest.classic.field_overrides)
@@ -276,6 +386,10 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     return this._definition.ingest.lifecycle;
   }
 
+  public getFailureStore(): FailureStore {
+    return this._definition.ingest.failure_store;
+  }
+
   protected async doDetermineUpdateActions(
     desiredState: State,
     startingState: State,
@@ -295,18 +409,19 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         },
       });
 
-      const pipelineTargets = await this.getPipelineTargets();
-      if (!pipelineTargets) {
-        throw new StatusError('Could not find pipeline targets', 500);
+      // Only generate delete action if a pipeline actually exists
+      // Don't use fallback names for deletion - can't delete from non-existent pipelines
+      const pipelineTargets = await this.getPipelineTargets({ useFallbackName: false });
+      if (pipelineTargets) {
+        const { pipeline, template } = pipelineTargets;
+        actions.push({
+          type: 'delete_processor_from_ingest_pipeline',
+          pipeline,
+          template,
+          dataStream: this._definition.name,
+          referencePipeline: streamManagedPipelineName,
+        });
       }
-      const { pipeline, template } = pipelineTargets;
-      actions.push({
-        type: 'delete_processor_from_ingest_pipeline',
-        pipeline,
-        template,
-        dataStream: this._definition.name,
-        referencePipeline: streamManagedPipelineName,
-      });
     }
 
     if (this._changes.lifecycle) {
@@ -315,6 +430,17 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         request: {
           name: this._definition.name,
           lifecycle: this.getLifecycle(),
+        },
+      });
+    }
+
+    if (this._changes.failure_store) {
+      actions.push({
+        type: 'update_failure_store',
+        request: {
+          name: this._definition.name,
+          failure_store: this._definition.ingest.failure_store,
+          definition: this._definition,
         },
       });
     }
@@ -389,7 +515,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       },
     };
 
-    const pipelineTargets = await this.getPipelineTargets();
+    const pipelineTargets = await this.getPipelineTargets({ useFallbackName: true });
     if (!pipelineTargets) {
       throw new StatusError('Could not find pipeline targets', 500);
     }
@@ -438,6 +564,12 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
           name: this._definition.name,
         },
       },
+      {
+        type: 'unlink_features',
+        request: {
+          name: this._definition.name,
+        },
+      },
     ];
 
     if (this._definition.ingest.processing.steps.length > 0) {
@@ -448,7 +580,9 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
           name: streamManagedPipelineName,
         },
       });
-      const pipelineTargets = await this.getPipelineTargets();
+      // Only generate delete action if a pipeline actually exists
+      // Don't use fallback names for deletion - can't delete from non-existent pipelines
+      const pipelineTargets = await this.getPipelineTargets({ useFallbackName: false });
       if (pipelineTargets) {
         const { pipeline, template } = pipelineTargets;
         actions.push({
@@ -464,7 +598,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     return actions;
   }
 
-  private async getPipelineTargets() {
+  private async getPipelineTargets({ useFallbackName }: { useFallbackName: boolean }) {
     let dataStream: IndicesDataStream;
     try {
       dataStream = await this.dependencies.streamsClient.getDataStream(this._definition.name);
@@ -479,8 +613,21 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
       scopedClusterClient: this.dependencies.scopedClusterClient,
     });
 
+    // For deletion operations, only return if there's an actual pipeline configured
+    // Don't invent pipeline names - can't delete from non-existent pipelines
+    if (!unmanagedAssets.ingestPipeline) {
+      if (!useFallbackName) {
+        return undefined;
+      }
+      // For append/create operations, use a fallback name if needed
+      return {
+        pipeline: `${dataStream.template}-pipeline`,
+        template: dataStream.template,
+      };
+    }
+
     return {
-      pipeline: unmanagedAssets.ingestPipeline ?? `${dataStream.template}-pipeline`,
+      pipeline: unmanagedAssets.ingestPipeline,
       template: dataStream.template,
     };
   }

@@ -17,7 +17,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const es = getService('es');
 
-  async function getMostRecentDoc(processorEvent: ProcessorEvent) {
+  async function getMostRecentDoc(processorEvent: ProcessorEvent, preferDocId: boolean = false) {
     const response = await es.search<TransactionRaw | SpanRaw | ErrorRaw>({
       index: ['apm-*'],
       query: {
@@ -25,6 +25,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           filter: [{ term: { [PROCESSOR_EVENT]: processorEvent } }],
         },
       },
+      fields: ['_id'],
       size: 1,
       sort: {
         '@timestamp': 'desc',
@@ -32,10 +33,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     const doc = response.hits.hits[0]._source!;
+    const docId = response.hits.hits[0].fields?._id[0];
 
     return {
       // @ts-expect-error
-      id: doc[processorEvent].id as string,
+      id: preferDocId ? docId : (doc[processorEvent].id as string),
       timestamp: doc['@timestamp'],
     };
   }
@@ -75,38 +77,42 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       );
     });
 
-    it('fetches error event metadata', async () => {
-      const { id, timestamp } = await getMostRecentDoc(ProcessorEvent.error);
+    [{ preferDocId: true }, { preferDocId: false }].forEach(({ preferDocId }) => {
+      it(`fetches error event metadata ${
+        preferDocId ? 'without error.id' : 'with error.id'
+      }`, async () => {
+        const { id, timestamp } = await getMostRecentDoc(ProcessorEvent.error, preferDocId);
 
-      const { body } = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
-        params: {
-          path: {
-            processorEvent: ProcessorEvent.error,
-            id,
+        const { body } = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',
+          params: {
+            path: {
+              processorEvent: ProcessorEvent.error,
+              id,
+            },
+            query: {
+              start: timestamp,
+              end: timestamp,
+            },
           },
-          query: {
-            start: timestamp,
-            end: timestamp,
-          },
-        },
+        });
+
+        expect(body).keys('metadata').ok();
+
+        expect(
+          Object.keys(body.metadata).filter((key) => {
+            return Array.isArray(body.metadata[key]);
+          })
+        );
+
+        expect(body.metadata).keys(
+          '@timestamp',
+          'agent.name',
+          'error.grouping_key',
+          'error.grouping_name',
+          'service.name'
+        );
       });
-
-      expect(body).keys('metadata').ok();
-
-      expect(
-        Object.keys(body.metadata).filter((key) => {
-          return Array.isArray(body.metadata[key]);
-        })
-      );
-
-      expect(body.metadata).keys(
-        '@timestamp',
-        'agent.name',
-        'error.grouping_key',
-        'error.grouping_name',
-        'service.name'
-      );
     });
 
     it('fetches span event metadata', async () => {

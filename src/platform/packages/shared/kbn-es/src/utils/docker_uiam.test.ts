@@ -1,0 +1,471 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { ToolingLog } from '@kbn/tooling-log';
+import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
+import undici from 'undici';
+
+jest.mock('timers/promises', () => ({
+  setTimeout: jest.fn(() => Promise.resolve()),
+}));
+
+jest.mock('execa');
+const execa = jest.requireMock('execa');
+
+jest.mock('../paths', () => ({
+  SERVERLESS_UIAM_ENTRYPOINT_PATH: '/some_path/run_java_with_custom_ca.sh',
+  SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH: '/some_path/uiam_cosmosdb.pfx',
+}));
+
+beforeEach(() => {
+  jest.useFakeTimers().setSystemTime(new Date(Date.UTC(2000, 0, 1)));
+  jest.resetAllMocks();
+});
+
+describe(`#runUiamContainer()`, () => {
+  test('should be able to run UIAM containers', async () => {
+    const [cosmosDbContainer, uiamContainer] = UIAM_CONTAINERS;
+
+    // 1. Check Cosmos DB container.
+    execa
+      .mockResolvedValueOnce({ stdout: `name-${cosmosDbContainer.name}` })
+      .mockResolvedValueOnce({ stdout: ` healthy ` });
+
+    await expect(runUiamContainer(new ToolingLog(), cosmosDbContainer)).resolves.toEqual(
+      cosmosDbContainer.name
+    );
+
+    expect(execa.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "docker",
+          Array [
+            "run",
+            "--detach",
+            "--interactive",
+            "--tty",
+            "--health-interval",
+            "5s",
+            "--health-timeout",
+            "2s",
+            "--health-retries",
+            "30",
+            "--health-start-period",
+            "3s",
+            "--net",
+            "elastic",
+            "--volume",
+            "/some_path/uiam_cosmosdb.pfx:/scripts/certs/uiam_cosmosdb.pfx:z",
+            "-p",
+            "127.0.0.1:8081:8081",
+            "-p",
+            "127.0.0.1:8082:1234",
+            "--env",
+            "AZURE_COSMOS_EMULATOR_PARTITION_COUNT=1",
+            "--env",
+            "AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE=false",
+            "--env",
+            "GATEWAY_PUBLIC_ENDPOINT=uiam-cosmosdb",
+            "--env",
+            "CERT_PATH=/scripts/certs/uiam_cosmosdb.pfx",
+            "--env",
+            "LOG_LEVEL=error",
+            "--health-cmd",
+            "curl -sk http://127.0.0.1:8080/ready | grep -q \\"\\\\\\"overall\\\\\\": true\\"",
+            "--name",
+            "uiam-cosmosdb",
+            "mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-EN20251223",
+            "--protocol",
+            "https",
+            "--port",
+            "8081",
+          ],
+        ],
+        Array [
+          "docker",
+          Array [
+            "inspect",
+            "-f",
+            "{{.State.Health.Status}}",
+            "uiam-cosmosdb",
+          ],
+        ],
+      ]
+    `);
+
+    execa.mockClear();
+
+    // 2. Check UIAM container.
+    execa
+      .mockResolvedValueOnce({ stdout: `name-${uiamContainer.name}` })
+      .mockResolvedValueOnce({ stdout: ` healthy ` });
+
+    await expect(runUiamContainer(new ToolingLog(), uiamContainer)).resolves.toEqual(
+      uiamContainer.name
+    );
+
+    expect(execa.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "docker",
+          Array [
+            "run",
+            "--detach",
+            "--interactive",
+            "--tty",
+            "--health-interval",
+            "5s",
+            "--health-timeout",
+            "2s",
+            "--health-retries",
+            "30",
+            "--health-start-period",
+            "3s",
+            "--net",
+            "elastic",
+            "--volume",
+            "/some_path/run_java_with_custom_ca.sh:/opt/jboss/container/java/run/run-java-with-custom-ca.sh:z",
+            "--volume",
+            "/some_path/uiam_cosmosdb.pfx:/tmp/uiam_cosmosdb.pfx:z",
+            "-p",
+            "127.0.0.1:8080:8080",
+            "--entrypoint",
+            "/opt/jboss/container/java/run/run-java-with-custom-ca.sh",
+            "--env",
+            "quarkus.http.ssl.certificate.key-store-provider=JKS",
+            "--env",
+            "quarkus.http.ssl.certificate.trust-store-provider=SUN",
+            "--env",
+            "quarkus.log.category.\\"co\\".level=INFO",
+            "--env",
+            "quarkus.log.category.\\"io\\".level=INFO",
+            "--env",
+            "quarkus.log.category.\\"org\\".level=INFO",
+            "--env",
+            "quarkus.log.console.json.enabled=false",
+            "--env",
+            "quarkus.log.level=INFO",
+            "--env",
+            "quarkus.otel.sdk.disabled=true",
+            "--env",
+            "quarkus.profile=dev",
+            "--env",
+            "uiam.api_keys.decoder.prefixes=essu_dev",
+            "--env",
+            "uiam.api_keys.encoder.prefix=essu_dev",
+            "--env",
+            "uiam.cosmos.account.access_key=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
+            "--env",
+            "uiam.cosmos.account.endpoint=https://uiam-cosmosdb:8081",
+            "--env",
+            "uiam.cosmos.container.apikey=api-keys",
+            "--env",
+            "uiam.cosmos.container.token_invalidation=token-invalidation",
+            "--env",
+            "uiam.cosmos.container.users=users",
+            "--env",
+            "uiam.cosmos.database=uiam-db",
+            "--env",
+            "uiam.cosmos.gateway_connection_mode=true",
+            "--env",
+            "uiam.internal.shared.secrets=Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=",
+            "--env",
+            "uiam.tokens.jwt.signature.secrets=MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=",
+            "--env",
+            "uiam.tokens.jwt.signing.secret=MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=",
+            "--env",
+            "uiam.tokens.jwt.verify.clock.skew=PT2S",
+            "--env",
+            "uiam.tokens.refresh.grace_period=PT3S",
+            "--health-cmd",
+            "timeout 1 bash -c \\"</dev/tcp/localhost/8080\\"",
+            "--name",
+            "uiam",
+            "docker.elastic.co/kibana-ci/uiam:latest-verified",
+          ],
+        ],
+        Array [
+          "docker",
+          Array [
+            "inspect",
+            "-f",
+            "{{.State.Health.Status}}",
+            "uiam",
+          ],
+        ],
+      ]
+    `);
+  });
+
+  test('wait for the container to become healthy', async () => {
+    const [cosmosDbContainer, uiamContainer] = UIAM_CONTAINERS;
+
+    // 1. Check Cosmos DB container.
+    execa
+      .mockResolvedValueOnce({ stdout: `name-${cosmosDbContainer.name}` })
+      .mockResolvedValueOnce({ stdout: ` running ` })
+      .mockResolvedValueOnce({ stdout: ` running ` })
+      .mockResolvedValueOnce({ stdout: ` healthy ` });
+
+    await expect(runUiamContainer(new ToolingLog(), cosmosDbContainer)).resolves.toEqual(
+      cosmosDbContainer.name
+    );
+
+    // Skip the first call to `docker run` as we checked it in the previous test.
+    expect(execa.mock.calls.slice(1)).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "docker",
+          Array [
+            "inspect",
+            "-f",
+            "{{.State.Health.Status}}",
+            "uiam-cosmosdb",
+          ],
+        ],
+        Array [
+          "docker",
+          Array [
+            "inspect",
+            "-f",
+            "{{.State.Health.Status}}",
+            "uiam-cosmosdb",
+          ],
+        ],
+        Array [
+          "docker",
+          Array [
+            "inspect",
+            "-f",
+            "{{.State.Health.Status}}",
+            "uiam-cosmosdb",
+          ],
+        ],
+      ]
+    `);
+
+    execa.mockClear();
+
+    // 2. Check UIAM container.
+    execa
+      .mockResolvedValueOnce({ stdout: `name-${uiamContainer.name}` })
+      .mockResolvedValueOnce({ stdout: ` running ` })
+      .mockResolvedValueOnce({ stdout: ` running ` })
+      .mockResolvedValueOnce({ stdout: ` healthy ` });
+
+    await expect(runUiamContainer(new ToolingLog(), uiamContainer)).resolves.toEqual(
+      uiamContainer.name
+    );
+
+    // Skip the first call to `docker run` as we checked it in the previous test.
+    expect(execa.mock.calls.slice(1)).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "docker",
+          Array [
+            "inspect",
+            "-f",
+            "{{.State.Health.Status}}",
+            "uiam",
+          ],
+        ],
+        Array [
+          "docker",
+          Array [
+            "inspect",
+            "-f",
+            "{{.State.Health.Status}}",
+            "uiam",
+          ],
+        ],
+        Array [
+          "docker",
+          Array [
+            "inspect",
+            "-f",
+            "{{.State.Health.Status}}",
+            "uiam",
+          ],
+        ],
+      ]
+    `);
+  });
+
+  test('fails if container never becomes healthy', async () => {
+    const [cosmosDbContainer, uiamContainer] = UIAM_CONTAINERS;
+
+    // 1. Check Cosmos DB container.
+    execa
+      .mockResolvedValueOnce({ stdout: `name-${cosmosDbContainer.name}` })
+      .mockResolvedValue({ stdout: ` running ` });
+
+    await expect(
+      runUiamContainer(new ToolingLog(), cosmosDbContainer)
+    ).rejects.toMatchInlineSnapshot(
+      `[Error: The "uiam-cosmosdb" container failed to start within the expected time. Last known status: running. Check the logs with [1mdocker logs -f uiam-cosmosdb[22m]`
+    );
+
+    // Skip the first call to `docker run` as we checked it in the previous test.
+    expect(execa.mock.calls.slice(1)).toHaveLength(31);
+
+    execa.mockClear();
+
+    // 2. Check UIAM container.
+    execa
+      .mockResolvedValueOnce({ stdout: `name-${uiamContainer.name}` })
+      .mockResolvedValue({ stdout: ` running ` });
+
+    await expect(runUiamContainer(new ToolingLog(), uiamContainer)).rejects.toMatchInlineSnapshot(
+      `[Error: The "uiam" container failed to start within the expected time. Last known status: running. Check the logs with [1mdocker logs -f uiam[22m]`
+    );
+
+    // Skip the first call to `docker run` as we checked it in the previous test.
+    expect(execa.mock.calls.slice(1)).toHaveLength(31);
+  });
+});
+
+describe('#initializeUiamContainers', () => {
+  const AGENT_MOCK = { name: "I'm the danger. I'm the one who knocks." };
+
+  let agentSpy: jest.SpyInstance;
+  let fetchSpy: jest.SpyInstance;
+  beforeEach(() => {
+    agentSpy = jest.spyOn(undici, 'Agent').mockImplementation(() => AGENT_MOCK as any);
+    fetchSpy = jest.spyOn(global, 'fetch');
+  });
+
+  afterEach(() => {
+    agentSpy.mockRestore();
+    fetchSpy.mockRestore();
+  });
+
+  test('should be able to initialize UIAM containers if Cosmos DB database does not exist', async () => {
+    fetchSpy.mockResolvedValue({ ok: true, status: 201 });
+
+    await initializeUiamContainers(new ToolingLog());
+
+    expect(agentSpy).toHaveBeenCalledTimes(1);
+    expect(agentSpy).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(4);
+    expect(fetchSpy.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "https://localhost:8081/dbs",
+          Object {
+            "body": "{\\"id\\":\\"uiam-db\\"}",
+            "dispatcher": Object {
+              "name": "I'm the danger. I'm the one who knocks.",
+            },
+            "headers": Object {
+              "Authorization": "type%3Dmaster%26ver%3D1.0%26sig%3DbM52wXmcRTqB2rJbuj54HlpDmbiqQInCcPcBfryJHd0%3D",
+              "Content-Type": "application/json",
+              "x-ms-date": "Sat, 01 Jan 2000 00:00:00 GMT",
+              "x-ms-version": "2018-12-31",
+            },
+            "method": "POST",
+          },
+        ],
+        Array [
+          "https://localhost:8081/dbs/uiam-db/colls",
+          Object {
+            "body": "{\\"id\\":\\"users\\",\\"partitionKey\\":{\\"paths\\":[\\"/id\\"],\\"kind\\":\\"Hash\\"}}",
+            "dispatcher": Object {
+              "name": "I'm the danger. I'm the one who knocks.",
+            },
+            "headers": Object {
+              "Authorization": "type%3Dmaster%26ver%3D1.0%26sig%3Djxrkp7JRqa5BKBelNeJSwradPgHYz2aTrP8%2Bce0zMQY%3D",
+              "Content-Type": "application/json",
+              "x-ms-date": "Sat, 01 Jan 2000 00:00:00 GMT",
+              "x-ms-version": "2018-12-31",
+            },
+            "method": "POST",
+          },
+        ],
+        Array [
+          "https://localhost:8081/dbs/uiam-db/colls",
+          Object {
+            "body": "{\\"id\\":\\"api-keys\\",\\"partitionKey\\":{\\"paths\\":[\\"/id\\"],\\"kind\\":\\"Hash\\"}}",
+            "dispatcher": Object {
+              "name": "I'm the danger. I'm the one who knocks.",
+            },
+            "headers": Object {
+              "Authorization": "type%3Dmaster%26ver%3D1.0%26sig%3Djxrkp7JRqa5BKBelNeJSwradPgHYz2aTrP8%2Bce0zMQY%3D",
+              "Content-Type": "application/json",
+              "x-ms-date": "Sat, 01 Jan 2000 00:00:00 GMT",
+              "x-ms-version": "2018-12-31",
+            },
+            "method": "POST",
+          },
+        ],
+        Array [
+          "https://localhost:8081/dbs/uiam-db/colls",
+          Object {
+            "body": "{\\"id\\":\\"token-invalidation\\",\\"partitionKey\\":{\\"paths\\":[\\"/id\\"],\\"kind\\":\\"Hash\\"}}",
+            "dispatcher": Object {
+              "name": "I'm the danger. I'm the one who knocks.",
+            },
+            "headers": Object {
+              "Authorization": "type%3Dmaster%26ver%3D1.0%26sig%3Djxrkp7JRqa5BKBelNeJSwradPgHYz2aTrP8%2Bce0zMQY%3D",
+              "Content-Type": "application/json",
+              "x-ms-date": "Sat, 01 Jan 2000 00:00:00 GMT",
+              "x-ms-version": "2018-12-31",
+            },
+            "method": "POST",
+          },
+        ],
+      ]
+    `);
+  });
+
+  test('should be able to initialize UIAM containers if Cosmos DB database and collections exist', async () => {
+    fetchSpy.mockResolvedValue({ ok: false, status: 409 });
+
+    await initializeUiamContainers(new ToolingLog());
+
+    expect(agentSpy).toHaveBeenCalledTimes(1);
+    expect(agentSpy).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(4);
+  });
+
+  test('fails if cannot create database', async () => {
+    fetchSpy.mockResolvedValue({
+      ok: false,
+      status: 500,
+      text: () => Promise.resolve('Some server error'),
+    });
+
+    await expect(initializeUiamContainers(new ToolingLog())).rejects.toMatchInlineSnapshot(
+      `[Error: Failed to create database (uiam-db): 500 Some server error]`
+    );
+
+    expect(agentSpy).toHaveBeenCalledTimes(1);
+    expect(agentSpy).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('fails if cannot create collection', async () => {
+    fetchSpy.mockResolvedValueOnce({ ok: true, status: 201 }).mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      text: () => Promise.resolve('Some server error'),
+    });
+
+    await expect(initializeUiamContainers(new ToolingLog())).rejects.toMatchInlineSnapshot(
+      `[Error: Failed to create collection (users): 500 Some server error]`
+    );
+
+    expect(agentSpy).toHaveBeenCalledTimes(1);
+    expect(agentSpy).toHaveBeenCalledWith({ connect: { rejectUnauthorized: false } });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+});

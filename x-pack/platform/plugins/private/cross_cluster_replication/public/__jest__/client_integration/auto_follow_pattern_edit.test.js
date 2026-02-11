@@ -5,25 +5,35 @@
  * 2.0.
  */
 
-import { AutoFollowPatternForm } from '../../app/components/auto_follow_pattern_form';
+import { screen, within, act } from '@testing-library/react';
 import './mocks';
-import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 import { AUTO_FOLLOW_PATTERN_EDIT, AUTO_FOLLOW_PATTERN_EDIT_NAME } from './helpers/constants';
 
 const { setup } = pageHelpers.autoFollowPatternEdit;
-const { setup: setupAutoFollowPatternAdd } = pageHelpers.autoFollowPatternAdd;
 
 describe('Edit Auto-follow pattern', () => {
   let httpRequestsMockHelpers;
+  let user;
 
   beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
     ({ httpRequestsMockHelpers } = setupEnvironment());
+    httpRequestsMockHelpers.setGetAutoFollowPatternResponse(
+      AUTO_FOLLOW_PATTERN_EDIT_NAME,
+      AUTO_FOLLOW_PATTERN_EDIT
+    );
   });
 
   describe('on component mount', () => {
-    let find;
-    let component;
-
     const remoteClusters = [
       { name: 'cluster-1', seeds: ['localhost:123'], isConnected: true },
       { name: 'cluster-2', seeds: ['localhost:123'], isConnected: true },
@@ -31,14 +41,11 @@ describe('Edit Auto-follow pattern', () => {
 
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
-      httpRequestsMockHelpers.setGetAutoFollowPatternResponse(
-        AUTO_FOLLOW_PATTERN_EDIT_NAME,
-        AUTO_FOLLOW_PATTERN_EDIT
-      );
-      ({ component, find } = setup());
-
-      await nextTick();
-      component.update();
+      ({ user } = setup());
+      // Advance timers to resolve HTTP mocks (required with fake timers)
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
 
     /**
@@ -46,66 +53,62 @@ describe('Edit Auto-follow pattern', () => {
      * the "create" auto-follow pattern, we won't test it again but simply make sure that
      * the form component is indeed shared between the 2 app sections.
      */
-    test('should use the same Form component as the "<AutoFollowPatternAdd />" component', async () => {
-      const { component: addAutofollowPatternComponent } = setupAutoFollowPatternAdd();
-
-      await nextTick();
-      addAutofollowPatternComponent.update();
-
-      const formEdit = component.find(AutoFollowPatternForm);
-      const formAdd = addAutofollowPatternComponent.find(AutoFollowPatternForm);
-
-      expect(formEdit.length).toBe(1);
-      expect(formAdd.length).toBe(1);
+    test('should use the same Form component as the "<AutoFollowPatternAdd />" component', () => {
+      // Verify the form renders with the expected test subject
+      expect(screen.getByTestId('autoFollowPatternForm')).toBeInTheDocument();
     });
 
     test('should populate the form fields with the values from the auto-follow pattern loaded', () => {
-      expect(find('nameInput').props().value).toBe(AUTO_FOLLOW_PATTERN_EDIT.name);
-      expect(find('remoteClusterInput').props().value).toBe(AUTO_FOLLOW_PATTERN_EDIT.remoteCluster);
-      expect(find('indexPatternInput').text()).toBe(
+      // Form should be populated after mount completes
+      expect(screen.getByTestId('nameInput')).toHaveValue(AUTO_FOLLOW_PATTERN_EDIT.name);
+
+      expect(screen.getByTestId('remoteClusterInput')).toHaveValue(
+        AUTO_FOLLOW_PATTERN_EDIT.remoteCluster
+      );
+
+      const indexPatternInput = screen.getByTestId('indexPatternInput');
+      expect(indexPatternInput.textContent).toBe(
         AUTO_FOLLOW_PATTERN_EDIT.leaderIndexPatterns.join('')
       );
-      expect(find('prefixInput').props().value).toBe('prefix_');
-      expect(find('suffixInput').props().value).toBe('_suffix');
+
+      expect(screen.getByTestId('prefixInput')).toHaveValue('prefix_');
+      expect(screen.getByTestId('suffixInput')).toHaveValue('_suffix');
     });
   });
 
   describe('when the remote cluster is disconnected', () => {
-    let find;
-    let exists;
-    let component;
-    let actions;
-    let form;
-
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([
         { name: 'cluster-2', seeds: ['localhost:123'], isConnected: false },
       ]);
-      httpRequestsMockHelpers.setGetAutoFollowPatternResponse(
-        AUTO_FOLLOW_PATTERN_EDIT_NAME,
-        AUTO_FOLLOW_PATTERN_EDIT
-      );
-      ({ component, find, exists, actions, form } = setup());
-
-      await nextTick();
-      component.update();
+      ({ user } = setup());
+      // Advance timers once to resolve HTTP mocks
+      await act(async () => {
+        await jest.runOnlyPendingTimersAsync();
+      });
     });
 
     test('should display an error and have a button to edit the remote cluster', () => {
-      const error = find('notConnectedError');
+      const error = screen.getByTestId('notConnectedError');
+      expect(error).toBeInTheDocument();
 
-      expect(error.length).toBe(1);
-      expect(error.find('.euiCallOutHeader__title').last().text()).toBe(
+      const title = error.querySelector('.euiCallOutHeader__title');
+      expect(title.textContent).toBe(
         `Can't edit auto-follow pattern because remote cluster '${AUTO_FOLLOW_PATTERN_EDIT.remoteCluster}' is not connected`
       );
-      expect(exists('notConnectedError.editButton')).toBe(true);
+
+      const editButton = within(error).getByTestId('editButton');
+      expect(editButton).toBeInTheDocument();
     });
 
-    test('should prevent saving the form and display an error message for the required remote cluster', () => {
-      actions.clickSaveForm();
+    test('should prevent saving the form and display an error message for the required remote cluster', async () => {
+      const submitButton = screen.getByTestId('submitButton');
+      await user.click(submitButton);
 
-      expect(form.getErrorsMessages()).toEqual(['A connected remote cluster is required.']);
-      expect(find('submitButton').props().disabled).toBe(true);
+      const errors = screen.queryAllByText('A connected remote cluster is required.');
+      expect(errors.length).toBeGreaterThan(0);
+
+      expect(submitButton).toBeDisabled();
     });
   });
 });

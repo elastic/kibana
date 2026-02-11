@@ -7,6 +7,7 @@
       "pretty": "__flag__",
       "include_defaults": "__flag__",
       "master_timeout": [
+        "30s",
         "-1",
         "0"
       ]

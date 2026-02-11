@@ -5,12 +5,7 @@
  * 2.0.
  */
 import pMap from 'p-map';
-import {
-  type CoreSetup,
-  type ElasticsearchClient,
-  type Logger,
-  SavedObjectsClient,
-} from '@kbn/core/server';
+import { type CoreSetup, type ElasticsearchClient, type Logger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -31,7 +26,7 @@ import { getInstalledPackages } from '../services/epm/packages';
 import { getPrereleaseFromSettings } from '../services/epm/packages/get_prerelease_setting';
 
 export const TYPE = 'fleet:auto-install-content-packages-task';
-export const VERSION = '1.0.2';
+export const VERSION = '1.0.3';
 const TITLE = 'Fleet Auto Install Content Packages Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '10m';
@@ -123,7 +118,7 @@ export class AutoInstallContentPackagesTask {
   }
 
   private endRun(msg: string = '') {
-    this.logger.info(`[AutoInstallContentPackagesTask] runTask ended${msg ? ': ' + msg : ''}`);
+    this.logger.debug(`[AutoInstallContentPackagesTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
   public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
@@ -145,12 +140,12 @@ export class AutoInstallContentPackagesTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.info(`[runTask()] started`);
+    this.logger.debug(`[runTask()] started`);
 
     const [coreStart, _startDeps, { packageService }] = (await core.getStartServices()) as any;
     const packageClient = packageService.asInternalUser;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     const prerelease = await getPrereleaseFromSettings(soClient);
 

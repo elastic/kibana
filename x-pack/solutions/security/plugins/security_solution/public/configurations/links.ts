@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import {
+  RULES_UI_READ_PRIVILEGE,
+  SECURITY_UI_SHOW_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { ConfigurationTabs } from './constants';
 import * as i18n from './translations';
 import type { LinkItem } from '..';
 import { CONFIGURATIONS_PATH, SECURITY_FEATURE_ID, SecurityPageName } from '../../common/constants';
 import { CONFIGURATIONS } from '../app/translations';
 
-export const configurationsLinks: LinkItem = {
-  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.configurations`]],
+const baseConfigurationsLinks: LinkItem = {
+  capabilities: [[SECURITY_UI_SHOW_PRIVILEGE, `${SECURITY_FEATURE_ID}.configurations`]],
   globalNavPosition: 3,
   globalSearchKeywords: [i18n.CONFIGURATIONS],
   hideTimeline: true,
@@ -34,6 +39,7 @@ export const configurationsLinks: LinkItem = {
       path: `${CONFIGURATIONS_PATH}/${ConfigurationTabs.basicRules}`,
       skipUrlState: true,
       hideTimeline: true,
+      capabilities: [RULES_UI_READ_PRIVILEGE],
     },
     {
       id: SecurityPageName.configurationsAiSettings,
@@ -44,3 +50,19 @@ export const configurationsLinks: LinkItem = {
     },
   ],
 };
+
+export const getConfigurationsLinks = (
+  chatExperience: AIChatExperience = AIChatExperience.Classic
+): LinkItem => {
+  if (chatExperience === AIChatExperience.Agent) {
+    return {
+      ...baseConfigurationsLinks,
+      links: baseConfigurationsLinks.links?.filter(
+        (link) => link.id !== SecurityPageName.configurationsAiSettings
+      ),
+    };
+  }
+  return baseConfigurationsLinks;
+};
+
+export const configurationsLinks: LinkItem = baseConfigurationsLinks;

@@ -7,16 +7,26 @@
 
 import type {
   ClusterComponentTemplate,
+  DocStats,
+  EpochTime,
   IndicesDataStream,
   IndicesGetDataStreamSettingsDataStreamSettings,
   IndicesGetIndexTemplateIndexTemplateItem,
   IngestPipeline,
+  UnitMillis,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type {
+  EffectiveFailureStore,
+  FailureStoreStatsResponse,
+  DataStreamWithFailureStore,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
 import type {
   ClassicIngestStreamEffectiveLifecycle,
   IngestStreamSettings,
 } from '@kbn/streams-schema';
+import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
+import { FAILURE_STORE_SELECTOR } from '../../../common/constants';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 
 interface BaseParams {
@@ -36,7 +46,20 @@ export function getDataStreamLifecycle(
 
   if (dataStream.next_generation_managed_by === 'Data stream lifecycle') {
     const retention = dataStream.lifecycle?.data_retention;
-    return { dsl: { data_retention: retention ? String(retention) : undefined } };
+    // TODO: Remove this cast when Elasticsearch is updated to a version with the correct downsampling type
+    // The expected type is already updated in the elasticsearch-specification repo:
+    // https://github.com/elastic/elasticsearch-specification/blob/main/output/typescript/types.ts#L12220-L12223
+    const downsampling = dataStream.lifecycle?.downsampling as DownsampleStep[] | undefined;
+
+    return {
+      dsl: {
+        data_retention: retention ? String(retention) : undefined,
+        downsample: downsampling?.map((step) => ({
+          after: step.after,
+          fixed_interval: step.fixed_interval,
+        })),
+      },
+    };
   }
 
   if (dataStream.next_generation_managed_by === 'Unmanaged') {
@@ -107,7 +130,8 @@ export async function getUnmanagedElasticsearchAssets({
   const ingestPipelineId = currentIndex[writeIndexName].settings?.index?.default_pipeline;
 
   return {
-    ingestPipeline: ingestPipelineId,
+    // Normalize empty string to undefined - empty string is not a valid pipeline reference
+    ingestPipeline: ingestPipelineId || undefined,
     componentTemplates,
     indexTemplate: templateName,
     dataStream: dataStream.name,
@@ -273,4 +297,173 @@ export async function getDataStream({
     throw new DefinitionNotFoundError(`Stream definition for ${name} not found.`);
   }
   return dataStream;
+}
+
+export async function getClusterDefaultFailureStoreRetentionValue({
+  scopedClusterClient,
+  isServerless,
+}: {
+  scopedClusterClient: IScopedClusterClient;
+  isServerless: boolean;
+}): Promise<string | undefined> {
+  let defaultRetention: string | undefined;
+  try {
+    if (!isServerless) {
+      const { persistent, defaults } = await scopedClusterClient.asCurrentUser.cluster.getSettings({
+        include_defaults: true,
+      });
+      const persistentDSRetention =
+        persistent?.data_streams?.lifecycle?.retention?.failures_default;
+      const defaultsDSRetention = defaults?.data_streams?.lifecycle?.retention?.failures_default;
+      defaultRetention = persistentDSRetention ?? defaultsDSRetention;
+    }
+  } catch (e) {
+    if (e.meta?.statusCode === 403) {
+      // if user doesn't have permissions to read cluster settings, we just return undefined
+    } else {
+      throw e;
+    }
+  }
+  return defaultRetention;
+}
+
+export function getFailureStore({
+  dataStream,
+}: {
+  dataStream: DataStreamWithFailureStore | null;
+}): EffectiveFailureStore {
+  if (!dataStream) {
+    return { disabled: {} };
+  }
+
+  if (dataStream.failure_store?.enabled) {
+    const lifecycle = dataStream.failure_store?.lifecycle;
+
+    if (lifecycle?.enabled) {
+      const isDefaultRetention = lifecycle.retention_determined_by === 'default_failures_retention';
+      const dataRetention = isDefaultRetention
+        ? lifecycle.effective_retention
+        : lifecycle.data_retention;
+
+      return {
+        lifecycle: {
+          enabled: {
+            ...(dataRetention ? { data_retention: dataRetention } : {}),
+            is_default_retention: isDefaultRetention,
+          },
+        },
+      };
+    }
+
+    return {
+      lifecycle: { disabled: {} },
+    };
+  }
+
+  return { disabled: {} };
+}
+
+export async function getFailureStoreStats({
+  name,
+  scopedClusterClient,
+  isServerless,
+}: {
+  name: string;
+  scopedClusterClient: IScopedClusterClient;
+  isServerless: boolean;
+}): Promise<FailureStoreStatsResponse> {
+  const failureStoreDocs = isServerless
+    ? await getFailureStoreMeteringSize({ name, scopedClusterClient })
+    : await getFailureStoreSize({ name, scopedClusterClient });
+  const creationDate = await getFailureStoreCreationDate({ name, scopedClusterClient });
+
+  return {
+    size: failureStoreDocs?.total_size_in_bytes,
+    count: failureStoreDocs?.count,
+    creationDate,
+  };
+}
+
+export async function getFailureStoreSize({
+  name,
+  scopedClusterClient,
+}: {
+  name: string;
+  scopedClusterClient: IScopedClusterClient;
+}): Promise<DocStats | undefined> {
+  try {
+    const response = await scopedClusterClient.asCurrentUser.indices.stats({
+      index: `${name}${FAILURE_STORE_SELECTOR}`,
+      metric: ['docs'],
+      forbid_closed_indices: false,
+    });
+    const docsStats = response?._all?.total?.docs;
+    return {
+      count: docsStats?.count || 0,
+      total_size_in_bytes: docsStats?.total_size_in_bytes || 0,
+    };
+  } catch (e) {
+    if (e.meta?.statusCode === 404) {
+      return undefined;
+    } else {
+      throw e;
+    }
+  }
+}
+
+export async function getFailureStoreMeteringSize({
+  name,
+  scopedClusterClient,
+}: {
+  name: string;
+  scopedClusterClient: IScopedClusterClient;
+}): Promise<DocStats | undefined> {
+  try {
+    const response = await scopedClusterClient.asSecondaryAuthUser.transport.request<{
+      _total: { num_docs: number; size_in_bytes: number };
+    }>({
+      method: 'GET',
+      path: `/_metering/stats/${name}${FAILURE_STORE_SELECTOR}`,
+    });
+
+    return {
+      count: response._total?.num_docs || 0,
+      total_size_in_bytes: response._total?.size_in_bytes || 0,
+    };
+  } catch (e) {
+    if (e.meta?.statusCode === 404) {
+      return undefined;
+    } else {
+      throw e;
+    }
+  }
+}
+
+export async function getFailureStoreCreationDate({
+  name,
+  scopedClusterClient,
+}: {
+  name: string;
+  scopedClusterClient: IScopedClusterClient;
+}): Promise<number | undefined> {
+  let age: number | undefined;
+  try {
+    const response = await scopedClusterClient.asCurrentUser.indices.explainDataLifecycle({
+      index: `${name}${FAILURE_STORE_SELECTOR}`,
+    });
+    const indices = response.indices;
+    if (indices && typeof indices === 'object') {
+      const firstIndex = Object.values(indices)[0] as {
+        index_creation_date_millis?: EpochTime<UnitMillis>;
+      };
+      age = firstIndex?.index_creation_date_millis;
+    }
+    return age || undefined;
+  } catch (e) {
+    if (e.meta?.statusCode === 404) {
+      return undefined;
+    } else {
+      throw e;
+    }
+  }
 }

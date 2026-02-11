@@ -16,7 +16,7 @@ const buildFileKind = (): FileKind => {
   return {
     id: CASES_TEST_FIXTURE_FILE_KIND_ID,
     http: fileKindHttpTags(),
-    allowedMimeTypes: ['image/png'],
+    allowedMimeTypes: ['image/png', 'text/plain'],
   };
 };
 

@@ -6,7 +6,7 @@
  */
 
 import type { MessageRole } from '@kbn/elastic-assistant-common';
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import { getComments } from '.';
 
 const user: MessageRole = 'user';
@@ -134,5 +134,39 @@ describe('getComments', () => {
     };
     const result = getComments({ CommentActions: () => null })(newTestProps);
     expect((result[1].children as React.ReactElement)?.props.isControlsEnabled).toEqual(false);
+  });
+
+  it('isLastInConversation is true for the last message', () => {
+    const newTestProps = {
+      ...testProps,
+      isConversationOwner: false,
+      currentConversation: {
+        ...currentConversation,
+        messages: [
+          {
+            role: user,
+            content: 'Hello {name}',
+            timestamp: '2024-03-19T18:59:18.174Z',
+            isError: false,
+          },
+          {
+            role: 'assistant' as MessageRole,
+            content: 'Hello elastic',
+            timestamp: '2024-03-19T18:59:18.174Z',
+            isError: false,
+          },
+          {
+            role: 'assistant' as MessageRole,
+            content: 'Hello world',
+            timestamp: '2024-03-19T18:59:18.174Z',
+            isError: false,
+          },
+        ],
+      },
+    };
+    const result = getComments({ CommentActions: () => null })(newTestProps);
+    expect((result[0].children as React.ReactElement)?.props.isLastInConversation).toEqual(false);
+    expect((result[1].children as React.ReactElement)?.props.isLastInConversation).toEqual(false);
+    expect((result[2].children as React.ReactElement)?.props.isLastInConversation).toEqual(true);
   });
 });

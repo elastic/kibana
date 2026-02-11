@@ -398,6 +398,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
         </EuiFlexGroup>
       ) : (
         <EuiCallOut
+          announceOnMount
           data-test-subj="mlTrainedModelsInferenceReviewAndCreateStepSuccessCallout"
           title={i18n.translate(
             'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.reindexStartedMessage',

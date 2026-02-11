@@ -18,8 +18,8 @@ import type { AlertTableContextMenuItem } from '../types';
 export interface UseAddToCaseActions {
   onMenuItemClick: () => void;
   ariaLabel?: string;
-  ecsData?: Ecs;
-  nonEcsData?: TimelineNonEcsData[];
+  ecsData: Ecs;
+  nonEcsData: TimelineNonEcsData[];
   onSuccess?: () => Promise<void>;
   refetch?: (() => void) | undefined;
 }
@@ -91,20 +91,27 @@ export const useAddToCaseActions = ({
   }, [onMenuItemClick, onCaseSuccess]);
 
   const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal(selectCaseArgs);
-
+  const observables = useMemo(
+    () => casesUi.helpers.getObservablesFromEcs(nonEcsData ? [nonEcsData] : []),
+    [casesUi.helpers, nonEcsData]
+  );
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
     createCaseFlyout.open({
       attachments: caseAttachments,
+      observables,
     });
-  }, [onMenuItemClick, createCaseFlyout, caseAttachments]);
+  }, [onMenuItemClick, createCaseFlyout, caseAttachments, observables]);
 
   const handleAddToExistingCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
-    selectCaseModal.open({ getAttachments: () => caseAttachments });
-  }, [caseAttachments, onMenuItemClick, selectCaseModal]);
+    selectCaseModal.open({
+      getAttachments: () => caseAttachments,
+      getObservables: observables ? () => observables : undefined,
+    });
+  }, [caseAttachments, onMenuItemClick, observables, selectCaseModal]);
 
   const addToCaseActionItems: AlertTableContextMenuItem[] = useMemo(() => {
     if (userCasesPermissions.createComment && userCasesPermissions.read) {

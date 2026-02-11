@@ -24,14 +24,14 @@ import {
   EuiSwitch,
   EuiSelect,
 } from '@elastic/eui';
-import { SUB_ACTION, XSOARSeverity } from '../../../common/xsoar/constants';
 import type {
   ExecutorParams,
-  XSOARRunActionParams,
-  XSOARPlaybooksActionResponse,
   XSOARPlaybooksActionParams,
+  XSOARPlaybooksActionResponse,
   XSOARPlaybooksObject,
-} from '../../../common/xsoar/types';
+  XSOARRunActionParams,
+} from '@kbn/connector-schemas/xsoar';
+import { SUB_ACTION, XSOARSeverity } from '@kbn/connector-schemas/xsoar/constants';
 import * as translations from './translations';
 import { severityOptions } from './constants';
 

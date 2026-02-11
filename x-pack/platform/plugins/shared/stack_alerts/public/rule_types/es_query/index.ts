@@ -14,6 +14,7 @@ import { ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import type { EsQueryRuleParams, SearchType } from './types';
 import { validateExpression } from './validation';
 import { isSearchSourceRule } from './util';
+import { getDescriptionFields } from './get_description_fields';
 
 const PLUGIN_ID = 'discover';
 
@@ -40,6 +41,7 @@ export function getRuleType(alerting: AlertingSetup): RuleTypeModel<EsQueryRuleP
       }
     ),
     requiresAppContext: false,
+    getDescriptionFields,
   };
 }
 

@@ -29,6 +29,8 @@
           "BaseInferenceSpanProcessor"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/langfuse/langfuse_span_processor.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +45,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/langfuse/langfuse_span_processor.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -63,6 +67,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/langfuse/langfuse_span_processor.ts",
+                "lineNumber": 18,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -84,6 +90,8 @@
               "ReadableSpan"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/langfuse/langfuse_span_processor.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -98,6 +106,8 @@
                   "ReadableSpan"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/langfuse/langfuse_span_processor.ts",
+                "lineNumber": 51,
+                "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -127,6 +137,8 @@
           "BaseInferenceSpanProcessor"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/phoenix/phoenix_span_processor.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -141,6 +153,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/phoenix/phoenix_span_processor.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -161,6 +175,8 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/phoenix/phoenix_span_processor.ts",
+                "lineNumber": 37,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -182,6 +198,8 @@
               "ReadableSpan"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/phoenix/phoenix_span_processor.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -196,6 +214,8 @@
                   "ReadableSpan"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/phoenix/phoenix_span_processor.ts",
+                "lineNumber": 77,
+                "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -214,13 +234,13 @@
         "type": "Function",
         "tags": [],
         "label": "withActiveInferenceSpan",
-        "description": [
-          "\nCreates an active \"inference\"-scoped span, that is, every span created in this\ncontext will be exported via the inference exporters. This allows us to export\na subset of spans to external systems like Phoenix."
-        ],
+        "description": [],
         "signature": [
           "WithActiveSpan"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_active_inference_span.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -240,6 +260,8 @@
           " | undefined) => T) => T"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+        "lineNumber": 161,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -254,6 +276,8 @@
               "InferenceGenerationOptions"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+            "lineNumber": 167,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -271,6 +295,8 @@
               " | undefined) => T"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -308,6 +334,8 @@
           "<ChatCompleteCompositeResponseOptions>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+        "lineNumber": 171,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -322,6 +350,8 @@
               "InferenceGenerationOptions"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+            "lineNumber": 172,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -347,6 +377,8 @@
               "<ChatCompleteCompositeResponseOptions>"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_chat_complete_span.ts",
+            "lineNumber": 173,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -378,6 +410,8 @@
           " | undefined) => T) => T"
         ],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_execute_tool_span.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -392,6 +426,8 @@
               "string"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_execute_tool_span.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -414,6 +450,8 @@
               " & { tool: { description?: string | undefined; toolCallId?: string | undefined; input?: unknown; }; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_execute_tool_span.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -431,6 +469,47 @@
               " | undefined) => T"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_execute_tool_span.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-tracing",
+        "id": "def-server.withInferenceContext",
+        "type": "Function",
+        "tags": [],
+        "label": "withInferenceContext",
+        "description": [
+          "\nCreates an active \"inference\"-scoped context. Every span created in this\ncontext will be exported via the inference exporters. This allows us to export\na subset of spans to external systems like Phoenix."
+        ],
+        "signature": [
+          "<T>(fn: () => T) => T"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_inference_context.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.withInferenceContext.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [],
+            "signature": [
+              "() => T"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/with_inference_context.ts",
+            "lineNumber": 16,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -450,6 +529,8 @@
         "label": "ElasticGenAIAttributes",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -462,6 +543,8 @@
         "label": "GenAISemanticConventions",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

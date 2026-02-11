@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useIsMutating } from '@tanstack/react-query';
+import { useIsMutating } from '@kbn/react-query';
 import { casesMutationsKeys } from '../../containers/constants';
 
 /**

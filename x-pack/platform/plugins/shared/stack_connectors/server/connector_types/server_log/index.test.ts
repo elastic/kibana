@@ -63,38 +63,26 @@ describe('validateParams()', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [message]: expected value of type [string] but got [undefined]"`
+      `"error validating action params: Field \\"message\\": Required"`
     );
 
     expect(() => {
       validateParams(connectorType, { message: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [message]: expected value of type [string] but got [number]"`
+      `"error validating action params: Field \\"message\\": Expected string, received number"`
     );
 
     expect(() => {
       validateParams(connectorType, { message: 'x', level: 2 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action params: [level]: types that failed validation:
-- [level.0]: expected value to equal [trace]
-- [level.1]: expected value to equal [debug]
-- [level.2]: expected value to equal [info]
-- [level.3]: expected value to equal [warn]
-- [level.4]: expected value to equal [error]
-- [level.5]: expected value to equal [fatal]"
-`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: Field \\"level\\": Expected 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal', received number"`
+    );
 
     expect(() => {
       validateParams(connectorType, { message: 'x', level: 'foo' }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action params: [level]: types that failed validation:
-- [level.0]: expected value to equal [trace]
-- [level.1]: expected value to equal [debug]
-- [level.2]: expected value to equal [info]
-- [level.3]: expected value to equal [warn]
-- [level.4]: expected value to equal [error]
-- [level.5]: expected value to equal [fatal]"
-`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: Field \\"level\\": Invalid enum value. Expected 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal', received 'foo'"`
+    );
   });
 });
 

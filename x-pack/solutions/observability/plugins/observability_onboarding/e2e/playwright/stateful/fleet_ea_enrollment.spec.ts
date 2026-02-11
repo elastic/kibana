@@ -16,9 +16,11 @@ test.beforeEach(async ({ page }) => {
 
 test('Fleet Elastic Agent enrollment flow', async ({ page, fleetAgentsOverviewPage }) => {
   assertEnv(process.env.ARTIFACTS_FOLDER, 'ARTIFACTS_FOLDER is not defined.');
+  assertEnv(process.env.PLATFORM, "PLATFORM (ex. 'Linux x86_64') is not defined.");
 
   const fileName = 'code_snippet_agent_enrollment.sh';
   const outputPath = path.join(__dirname, '..', process.env.ARTIFACTS_FOLDER, fileName);
+  const testNodePlatform = process.env.PLATFORM;
 
   await fleetAgentsOverviewPage.clickAddAgentCTA();
 
@@ -38,6 +40,11 @@ test('Fleet Elastic Agent enrollment flow', async ({ page, fleetAgentsOverviewPa
   await fleetAgentsOverviewPage.selectEnrollInFleet();
 
   await fleetAgentsOverviewPage.assertVisibilityCodeBlock();
+
+  await fleetAgentsOverviewPage.clickCodeBlockPlatformSelectorButton();
+
+  await fleetAgentsOverviewPage.selectPlatform(testNodePlatform);
+
   await fleetAgentsOverviewPage.copyToClipboard();
 
   const clipboardData = (await page.evaluate('navigator.clipboard.readText()')) as string;

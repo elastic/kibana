@@ -7,29 +7,15 @@
 
 import type { ContentPackStream } from '@kbn/content-packs-schema';
 import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
-import type { FieldDefinition } from '@kbn/streams-schema';
 import { withoutRootPrefix } from './helpers';
 import type { StreamTree } from './tree';
 
-export function prepareStreamsForExport({
-  tree,
-  inheritedFields,
-}: {
-  tree: StreamTree;
-  inheritedFields: FieldDefinition;
-}): ContentPackStream[] {
-  return asExportedObjects(tree.name, tree, inheritedFields);
+export function prepareStreamsForExport({ tree }: { tree: StreamTree }): ContentPackStream[] {
+  return asExportedObjects(tree.name, tree);
 }
 
-function asExportedObjects(
-  root: string,
-  tree: StreamTree,
-  inheritedFields: FieldDefinition
-): ContentPackStream[] {
+function asExportedObjects(root: string, tree: StreamTree): ContentPackStream[] {
   const name = tree.name === root ? ROOT_STREAM_ID : withoutRootPrefix(root, tree.name);
-
-  const streamFields = tree.request.stream.ingest.wired.fields;
-  const fields = tree.name === root ? { ...inheritedFields, ...streamFields } : streamFields;
 
   const routing = tree.request.stream.ingest.wired.routing.map(({ destination, ...rest }) => ({
     ...rest,
@@ -46,11 +32,11 @@ function asExportedObjects(
           ...tree.request.stream,
           ingest: {
             ...tree.request.stream.ingest,
-            wired: { ...tree.request.stream.ingest.wired, routing, fields },
+            wired: { ...tree.request.stream.ingest.wired, routing },
           },
         },
       },
     },
-    ...tree.children.flatMap((child) => asExportedObjects(root, child, inheritedFields)),
+    ...tree.children.flatMap((child) => asExportedObjects(root, child)),
   ];
 }

@@ -186,6 +186,7 @@ export function SettingsPage({
   if (status === FETCH_STATUS.FAILURE) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate('xpack.apm.agentConfig.settingsPage.notFound.title', {
           defaultMessage: 'Sorry, there was an error',
         })}

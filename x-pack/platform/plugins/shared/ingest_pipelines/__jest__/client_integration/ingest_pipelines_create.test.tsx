@@ -5,213 +5,187 @@
  * 2.0.
  */
 
+import '@kbn/code-editor-mock/jest_helper';
+
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { createMemoryHistory } from 'history';
+import { Route, Router } from '@kbn/shared-ux-router';
 
-import { setupEnvironment, pageHelpers } from './helpers';
 import { API_BASE_PATH } from '../../common/constants';
-import type { PipelinesCreateTestBed } from './helpers/pipelines_create.helpers';
-
+import { PipelinesCreate } from '../../public/application/sections/pipelines_create';
+import { getCreatePath, ROUTES } from '../../public/application/services/navigation';
+import { setupEnvironment, WithAppDependencies } from './helpers/setup_environment';
 import { nestedProcessorsErrorFixture } from './fixtures';
 
-const { setup } = pageHelpers.pipelinesCreate;
+const getInput = (testSubj: string) => {
+  const el = screen.getByTestId(testSubj) as HTMLElement;
+  if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+    return el as HTMLInputElement | HTMLTextAreaElement;
+  }
+  return within(el).getByRole('textbox') as HTMLInputElement | HTMLTextAreaElement;
+};
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-  return {
-    ...original,
-    // Mocking CodeEditor, which uses React Monaco under the hood
-    CodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
-        }}
-      />
-    ),
-  };
-});
+type TestHttpSetup = ReturnType<typeof setupEnvironment>['httpSetup'];
+
+const renderPipelinesCreate = async (httpSetup: TestHttpSetup, queryParams: string = '') => {
+  const history = createMemoryHistory({
+    initialEntries: [`${getCreatePath()}${queryParams}`],
+  });
+
+  const Wrapped = WithAppDependencies(PipelinesCreate, httpSetup);
+  render(
+    <Router history={history}>
+      <Route path={ROUTES.create} component={Wrapped} />
+    </Router>
+  );
+
+  await screen.findByTestId('pipelineForm');
+};
 
 describe('<PipelinesCreate />', () => {
-  let testBed: PipelinesCreateTestBed;
-
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
-  describe('on component mount', () => {
-    beforeEach(async () => {
-      await act(async () => {
-        testBed = await setup(httpSetup);
-      });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-      testBed.component.update();
+  test('should render the correct page header', async () => {
+    await renderPipelinesCreate(httpSetup);
+
+    expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create pipeline');
+    expect(screen.getByTestId('documentationLink')).toHaveTextContent('Create pipeline docs');
+  });
+
+  test('should toggle the version field', async () => {
+    await renderPipelinesCreate(httpSetup);
+
+    const versionField = screen.getByTestId('versionField');
+    const versionInput = within(versionField).getByTestId('input');
+    expect(versionInput).toBeDisabled();
+    fireEvent.click(screen.getByTestId('versionToggle'));
+    await waitFor(() => expect(versionInput).not.toBeDisabled());
+  });
+
+  test('should toggle the _meta field', async () => {
+    await renderPipelinesCreate(httpSetup);
+
+    expect(screen.getByTestId('metaToggle')).toHaveAttribute('aria-checked', 'false');
+    fireEvent.click(screen.getByTestId('metaToggle'));
+    expect(screen.getByTestId('metaToggle')).toHaveAttribute('aria-checked', 'true');
+    expect(await screen.findByTestId('metaEditor')).toBeInTheDocument();
+  });
+
+  test('should show the request flyout', async () => {
+    await renderPipelinesCreate(httpSetup);
+
+    fireEvent.click(screen.getByTestId('showRequestLink'));
+    expect(await screen.findByText('Request')).toBeInTheDocument();
+  });
+
+  test('should allow to prepopulate the name field', async () => {
+    await renderPipelinesCreate(httpSetup, '?name=test-pipeline');
+
+    const nameInput = getInput('nameField');
+    expect(nameInput).toBeDisabled();
+    expect(nameInput).toHaveValue('test-pipeline');
+  });
+
+  test('should prevent form submission if required fields are missing', async () => {
+    await renderPipelinesCreate(httpSetup);
+
+    fireEvent.click(screen.getByTestId('submitButton'));
+
+    expect((await screen.findAllByText('Name is required.')).length).toBeGreaterThan(0);
+    expect(screen.getByTestId('submitButton')).toBeDisabled();
+
+    fireEvent.change(getInput('nameField'), { target: { value: 'my_pipeline' } });
+    await waitFor(() => expect(screen.getByTestId('submitButton')).not.toBeDisabled());
+  });
+
+  test('should send the correct payload', async () => {
+    const user = userEvent.setup();
+    await renderPipelinesCreate(httpSetup);
+
+    await user.type(getInput('nameField'), 'my_pipeline');
+    await user.type(getInput('descriptionField'), 'pipeline description');
+
+    fireEvent.click(screen.getByTestId('metaToggle'));
+    await screen.findByTestId('metaEditor');
+
+    const metaData = { field1: 'hello', field2: 10 };
+    fireEvent.change(screen.getByTestId('metaEditor'), {
+      target: { value: JSON.stringify(metaData) },
     });
 
-    test('should render the correct page header', () => {
-      const { exists, find } = testBed;
+    const postCallsBefore = httpSetup.post.mock.calls.length;
+    fireEvent.click(screen.getByTestId('submitButton'));
 
-      // Verify page title
-      expect(exists('pageTitle')).toBe(true);
-      expect(find('pageTitle').text()).toEqual('Create pipeline');
-
-      // Verify documentation link
-      expect(exists('documentationLink')).toBe(true);
-      expect(find('documentationLink').text()).toBe('Create pipeline docs');
+    await waitFor(() => expect(httpSetup.post.mock.calls.length).toBeGreaterThan(postCallsBefore));
+    const createRequest = httpSetup.post.mock.results[postCallsBefore]?.value as
+      | Promise<unknown>
+      | undefined;
+    expect(createRequest).toBeDefined();
+    await waitFor(async () => {
+      await createRequest;
     });
 
-    test('should toggle the version field', async () => {
-      const { actions, exists } = testBed;
+    expect(httpSetup.post).toHaveBeenLastCalledWith(
+      API_BASE_PATH,
+      expect.objectContaining({
+        body: JSON.stringify({
+          name: 'my_pipeline',
+          description: 'pipeline description',
+          _meta: metaData,
+          processors: [],
+        }),
+      })
+    );
+  });
 
-      // Version field toggle should be disabled by default
-      expect(actions.getToggleValue('versionToggle')).toBe(false);
+  test('should surface API errors from the request', async () => {
+    const user = userEvent.setup();
+    await renderPipelinesCreate(httpSetup);
 
-      await actions.toggleSwitch('versionToggle');
+    await user.type(getInput('nameField'), 'my_pipeline');
+    await user.type(getInput('descriptionField'), 'pipeline description');
 
-      expect(exists('versionField')).toBe(true);
+    const error = {
+      statusCode: 409,
+      error: 'Conflict',
+      message: `There is already a pipeline with name 'my_pipeline'.`,
+    };
+
+    httpRequestsMockHelpers.setCreatePipelineResponse(undefined, error);
+    fireEvent.click(screen.getByTestId('submitButton'));
+
+    const callout = await screen.findByTestId('savePipelineError');
+    expect(callout).toHaveTextContent(error.message);
+  });
+
+  test('displays nested pipeline errors as a flat list', async () => {
+    const user = userEvent.setup();
+    await renderPipelinesCreate(httpSetup);
+
+    await user.type(getInput('nameField'), 'my_pipeline');
+    await user.type(getInput('descriptionField'), 'pipeline description');
+
+    httpRequestsMockHelpers.setCreatePipelineResponse(undefined, {
+      statusCode: 409,
+      message: 'Error',
+      ...nestedProcessorsErrorFixture,
     });
 
-    test('should toggle the _meta field', async () => {
-      const { exists, actions } = testBed;
+    fireEvent.click(screen.getByTestId('submitButton'));
 
-      // Meta field toggle should be disabled by default
-      expect(actions.getToggleValue('metaToggle')).toBe(false);
+    const callout = await screen.findByTestId('savePipelineError');
+    expect(within(callout).getByTestId('showErrorsButton')).toBeInTheDocument();
 
-      await actions.toggleSwitch('metaToggle');
+    fireEvent.click(within(callout).getByTestId('showErrorsButton'));
 
-      expect(exists('metaEditor')).toBe(true);
-    });
-
-    test('should show the request flyout', async () => {
-      const { actions, find, exists } = testBed;
-
-      await actions.clickShowRequestLink();
-
-      // Verify request flyout opens
-      expect(exists('apiRequestFlyout')).toBe(true);
-      expect(find('apiRequestFlyout.apiRequestFlyoutTitle').text()).toBe('Request');
-    });
-
-    test('should allow to prepopulate the name field', async () => {
-      await act(async () => {
-        testBed = await setup(httpSetup, '?name=test-pipeline');
-      });
-
-      testBed.component.update();
-
-      expect(testBed.exists('nameField.input')).toBe(true);
-      expect(testBed.find('nameField.input').props().disabled).toBe(true);
-      expect(testBed.find('nameField.input').props().value).toBe('test-pipeline');
-    });
-
-    describe('form validation', () => {
-      test('should prevent form submission if required fields are missing', async () => {
-        const { form, actions, component, find } = testBed;
-
-        await actions.clickSubmitButton();
-
-        expect(form.getErrorsMessages()).toEqual(['Name is required.']);
-        expect(find('submitButton').props().disabled).toEqual(true);
-
-        await act(async () => {
-          // Add required fields and verify button is enabled again
-          form.setInputValue('nameField.input', 'my_pipeline');
-        });
-
-        component.update();
-
-        expect(find('submitButton').props().disabled).toEqual(false);
-      });
-    });
-
-    describe('form submission', () => {
-      beforeEach(async () => {
-        await act(async () => {
-          testBed = await setup(httpSetup);
-        });
-
-        testBed.component.update();
-
-        await act(async () => {
-          testBed.form.setInputValue('nameField.input', 'my_pipeline');
-        });
-
-        testBed.component.update();
-
-        await act(async () => {
-          testBed.form.setInputValue('descriptionField.input', 'pipeline description');
-        });
-
-        testBed.component.update();
-      });
-
-      test('should send the correct payload', async () => {
-        const { actions } = testBed;
-
-        await actions.toggleSwitch('metaToggle');
-
-        const metaData = {
-          field1: 'hello',
-          field2: 10,
-        };
-        await act(async () => {
-          actions.setMetaField(metaData);
-        });
-
-        await actions.clickSubmitButton();
-
-        expect(httpSetup.post).toHaveBeenLastCalledWith(
-          API_BASE_PATH,
-          expect.objectContaining({
-            body: JSON.stringify({
-              name: 'my_pipeline',
-              description: 'pipeline description',
-              _meta: metaData,
-              processors: [],
-            }),
-          })
-        );
-      });
-
-      test('should surface API errors from the request', async () => {
-        const { actions, find, exists } = testBed;
-
-        const error = {
-          statusCode: 409,
-          error: 'Conflict',
-          message: `There is already a pipeline with name 'my_pipeline'.`,
-        };
-
-        httpRequestsMockHelpers.setCreatePipelineResponse(undefined, error);
-
-        await actions.clickSubmitButton();
-
-        expect(exists('savePipelineError')).toBe(true);
-        expect(find('savePipelineError').text()).toContain(error.message);
-      });
-
-      test('displays nested pipeline errors as a flat list', async () => {
-        const { actions, find, exists, component } = testBed;
-        httpRequestsMockHelpers.setCreatePipelineResponse(undefined, {
-          statusCode: 409,
-          message: 'Error',
-          ...nestedProcessorsErrorFixture,
-        });
-
-        await actions.clickSubmitButton();
-
-        expect(exists('savePipelineError')).toBe(true);
-        expect(exists('savePipelineError.showErrorsButton')).toBe(true);
-
-        await act(async () => {
-          find('savePipelineError.showErrorsButton').simulate('click');
-        });
-
-        component.update();
-
-        expect(exists('savePipelineError.hideErrorsButton')).toBe(true);
-        expect(exists('savePipelineError.showErrorsButton')).toBe(false);
-        expect(find('savePipelineError').find('li').length).toBe(8);
-      });
-    });
+    await waitFor(() => expect(within(callout).queryByTestId('showErrorsButton')).toBeNull());
+    expect(within(callout).getByTestId('hideErrorsButton')).toBeInTheDocument();
+    expect(within(callout).getAllByRole('listitem')).toHaveLength(8);
   });
 });

@@ -22,7 +22,19 @@ import { PackagePolicyValidationError } from '../errors';
 import { packageToPackagePolicy } from '.';
 import { isInputAllowedForDeploymentMode } from './agentless_policy_helper';
 
-export type SimplifiedVars = Record<string, string | string[] | boolean | number | number[] | null>;
+export type SimplifiedVars = Record<
+  string,
+  | string
+  | string[]
+  | boolean
+  | number
+  | number[]
+  | null
+  | {
+      isSecretRef: boolean;
+      id: string;
+    }
+>;
 
 export type SimplifiedPackagePolicyStreams = Record<
   string,
@@ -51,10 +63,11 @@ export interface SimplifiedPackagePolicy {
   name: string;
   description?: string;
   vars?: SimplifiedVars;
+  var_group_selections?: Record<string, string>;
   inputs?: SimplifiedInputs;
   supports_agentless?: boolean | null;
   supports_cloud_connector?: boolean | null;
-  additional_datastreams_permissions?: string[];
+  additional_datastreams_permissions?: string[] | null;
 }
 
 export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs' | 'vars'> {
@@ -71,6 +84,9 @@ export function packagePolicyToSimplifiedPackagePolicy(packagePolicy: PackagePol
   formattedPackagePolicy.inputs = formatInputs(packagePolicy.inputs);
   if (packagePolicy.vars) {
     formattedPackagePolicy.vars = formatVars(packagePolicy.vars);
+  }
+  if (packagePolicy.var_group_selections) {
+    (formattedPackagePolicy as any).var_group_selections = packagePolicy.var_group_selections;
   }
 
   return formattedPackagePolicy;
@@ -160,6 +176,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
   packageInfo: PackageInfo,
   options?: {
     experimental_data_stream_features?: ExperimentalDataStreamFeature[];
+    policyTemplate?: string;
   }
 ): NewPackagePolicy {
   const {
@@ -171,6 +188,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     description,
     inputs = {},
     vars: packageLevelVars,
+    var_group_selections: varGroupSelections,
     supports_agentless: supportsAgentless,
     supports_cloud_connector: supportsCloudConnector,
     cloud_connector_id: cloudConnectorId,
@@ -182,12 +200,14 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       policyId && isEmpty(policyIds) ? policyId : policyIds,
       namespace,
       name,
-      description
+      description,
+      options?.policyTemplate
     ),
     supports_agentless: supportsAgentless,
     supports_cloud_connector: supportsCloudConnector,
     cloud_connector_id: cloudConnectorId,
     output_id: outputId,
+    var_group_selections: varGroupSelections,
   };
 
   if (additionalDatastreamsPermissions) {

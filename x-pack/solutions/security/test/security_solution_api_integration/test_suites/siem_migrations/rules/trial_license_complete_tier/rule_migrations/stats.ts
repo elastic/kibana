@@ -58,6 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
             completed,
             failed,
           },
+          vendor: 'splunk',
           last_execution: {
             is_aborted: false,
             started_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
@@ -107,6 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
             completed: 33,
             failed: 2,
           },
+          vendor: 'splunk',
           last_execution: {
             is_aborted: false,
             started_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
@@ -125,6 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
             completed: 14,
             failed: 7,
           },
+          vendor: 'splunk',
           last_execution: {
             is_aborted: false,
             started_at: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),

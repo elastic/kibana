@@ -107,14 +107,14 @@ create_pull_request() {
     echo "Author: $KIBANA_MACHINE_USERNAME"
     echo ""
     echo "=== LABELS ==="
-    echo "- Team:obs-ux-logs"
+    echo "- Team:obs-onboarding"
     echo "- release_note:skip"
     echo "- backport:skip"
     echo "- otel-semantic-conventions"
     echo ""
     echo "=== ASSIGNEES & REVIEWERS ==="
-    echo "Assignee: elastic/obs-ux-logs-team"
-    echo "Reviewer: elastic/obs-ux-logs-team"
+    echo "Assignee: elastic/obs-onboarding-team"
+    echo "Reviewer: elastic/obs-onboarding-team"
     echo ""
     echo "=== FILES TO COMMIT ==="
     echo "- $OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
@@ -184,7 +184,7 @@ create_pull_request() {
     --body "$PR_BODY" \
     --base main \
     --head "$BRANCH_NAME" \
-    --label 'Team:obs-ux-logs' \
+    --label 'Team:obs-onboarding' \
     --label 'release_note:skip' \
     --label 'backport:skip' \
     --label 'otel-semantic-conventions'

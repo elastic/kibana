@@ -10,8 +10,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ConnectorSetup } from './connector_setup';
 import type { ActionType } from '@kbn/actions-plugin/common';
+import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { useKibana } from '../../../../../../common/lib/kibana';
-
 jest.mock('../../../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
@@ -26,26 +26,17 @@ describe('ConnectorSetup', () => {
   };
 
   const mockActionTypes: ActionType[] = [
-    {
+    createMockConnectorType({
       id: 'testType1',
       name: 'Test Action 1',
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic',
       supportedFeatureIds: ['alerting'],
-      isSystemActionType: false,
-    },
-    {
+    }),
+    createMockConnectorType({
       id: 'testType2',
       name: 'Test Action 2',
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
       minimumLicenseRequired: 'gold',
       supportedFeatureIds: ['alerting'],
-      isSystemActionType: false,
-    },
+    }),
   ];
 
   beforeEach(() => {

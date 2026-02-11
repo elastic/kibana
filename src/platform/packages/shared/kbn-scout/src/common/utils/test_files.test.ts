@@ -34,7 +34,7 @@ describe('validateAndProcessTestFiles', () => {
   });
 
   describe('UI tests directory', () => {
-    it('should derive correct config for ui/tests directory', () => {
+    it('should derive correct config for scout/ui/tests directory', () => {
       const testFile =
         'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/tests/test.spec.ts';
 
@@ -47,7 +47,20 @@ describe('validateAndProcessTestFiles', () => {
       });
     });
 
-    it('should derive correct config for ui/parallel_tests directory', () => {
+    it('should derive correct config for scout_my_config/ui/tests directory', () => {
+      const testFile =
+        'x-pack/solutions/observability/plugins/my_plugin/test/scout_my_config/ui/tests/test.spec.ts';
+
+      const result = validateAndProcessTestFiles(testFile);
+
+      expect(result).toEqual({
+        testFiles: [testFile],
+        configPath:
+          'x-pack/solutions/observability/plugins/my_plugin/test/scout_my_config/ui/playwright.config.ts',
+      });
+    });
+
+    it('should derive correct config for scout/ui/parallel_tests directory', () => {
       const testFile =
         'x-pack/solutions/observability/plugins/my_plugin/test/scout/ui/parallel_tests/test.spec.ts';
 
@@ -93,9 +106,18 @@ describe('validateAndProcessTestFiles', () => {
       });
     });
 
-    it('should throw error for files from different directories', () => {
+    it('should throw error for files from different sub directories', () => {
       const testFilesString =
         'path/scout/ui/tests/test1.spec.ts,path/scout/api/tests/test2.spec.ts';
+
+      expect(() => validateAndProcessTestFiles(testFilesString)).toThrow(
+        `All paths must be from the same scout test directory`
+      );
+    });
+
+    it('should throw error for files from different scout directories', () => {
+      const testFilesString =
+        'path/scout/ui/tests/test1.spec.ts,path/scout_my_config/ui/tests/test2.spec.ts';
 
       expect(() => validateAndProcessTestFiles(testFilesString)).toThrow(
         `All paths must be from the same scout test directory`
@@ -168,7 +190,7 @@ describe('validateAndProcessTestFiles', () => {
       const testFile = 'some/other/path/test.spec.ts';
 
       expect(() => validateAndProcessTestFiles(testFile)).toThrow(
-        `Test file must be within one of /scout/ui/tests, /scout/ui/parallel_tests, /scout/api/tests directories`
+        `Test file must be within a scout directory matching pattern '{scout,scout_*}/{ui,api}/{tests,parallel_tests}': ${testFile}`
       );
     });
 

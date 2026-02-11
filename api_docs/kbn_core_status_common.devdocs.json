@@ -28,6 +28,8 @@
         "label": "ServerVersion",
         "description": [],
         "path": "src/core/packages/status/common/src/status.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
             "label": "number",
             "description": [],
             "path": "src/core/packages/status/common/src/status.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -50,6 +54,8 @@
             "label": "build_hash",
             "description": [],
             "path": "src/core/packages/status/common/src/status.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -61,6 +67,8 @@
             "label": "build_number",
             "description": [],
             "path": "src/core/packages/status/common/src/status.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -72,6 +80,8 @@
             "label": "build_snapshot",
             "description": [],
             "path": "src/core/packages/status/common/src/status.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -86,6 +96,8 @@
               "\"serverless\" | \"traditional\""
             ],
             "path": "src/core/packages/status/common/src/status.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -97,6 +109,8 @@
             "label": "build_date",
             "description": [],
             "path": "src/core/packages/status/common/src/status.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -117,6 +131,8 @@
           "<Meta>"
         ],
         "path": "src/core/packages/status/common/src/service_status.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -133,6 +149,8 @@
               "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
             ],
             "path": "src/core/packages/status/common/src/service_status.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -146,6 +164,8 @@
               "\nA high-level summary of the service status."
             ],
             "path": "src/core/packages/status/common/src/service_status.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -162,6 +182,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/status/common/src/service_status.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -178,6 +200,8 @@
               "string | undefined"
             ],
             "path": "src/core/packages/status/common/src/service_status.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -194,6 +218,8 @@
               "Meta | undefined"
             ],
             "path": "src/core/packages/status/common/src/service_status.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -208,6 +234,8 @@
         "label": "StatusInfo",
         "description": [],
         "path": "src/core/packages/status/common/src/status.ts",
+        "lineNumber": 44,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -222,6 +250,8 @@
               "StatusInfoServiceStatus"
             ],
             "path": "src/core/packages/status/common/src/status.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -240,6 +270,8 @@
               "; }"
             ],
             "path": "src/core/packages/status/common/src/status.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -256,6 +288,8 @@
               "; }"
             ],
             "path": "src/core/packages/status/common/src/status.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -276,6 +310,8 @@
           "<unknown>, \"level\">"
         ],
         "path": "src/core/packages/status/common/src/status.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -290,6 +326,8 @@
               "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
             ],
             "path": "src/core/packages/status/common/src/status.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -304,6 +342,8 @@
         "label": "StatusResponse",
         "description": [],
         "path": "src/core/packages/status/common/src/status.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -315,6 +355,8 @@
             "label": "name",
             "description": [],
             "path": "src/core/packages/status/common/src/status.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -326,6 +368,8 @@
             "label": "uuid",
             "description": [],
             "path": "src/core/packages/status/common/src/status.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -340,6 +384,8 @@
               "ServerVersion"
             ],
             "path": "src/core/packages/status/common/src/status.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -354,6 +400,8 @@
               "StatusInfo"
             ],
             "path": "src/core/packages/status/common/src/status.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -370,6 +418,8 @@
               ", \"collected_at\"> & { last_updated: string; collection_interval_in_millis: number; requests: { status_codes: Record<number, number>; }; }"
             ],
             "path": "src/core/packages/status/common/src/status.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -392,6 +442,8 @@
           "CoreStatusBase | CoreStatusWithHttp"
         ],
         "path": "src/core/packages/status/common/src/core_status.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -409,6 +461,8 @@
           ", \"collected_at\"> & { last_updated: string; collection_interval_in_millis: number; requests: { status_codes: Record<number, number>; }; }"
         ],
         "path": "src/core/packages/status/common/src/status.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -426,6 +480,8 @@
           "Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }> | Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }> | Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }> | Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>"
         ],
         "path": "src/core/packages/status/common/src/service_status.ts",
+        "lineNumber": 105,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -443,6 +499,8 @@
           "\"degraded\" | \"unavailable\" | \"available\" | \"critical\""
         ],
         "path": "src/core/packages/status/common/src/service_status.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -464,6 +522,8 @@
           "; }"
         ],
         "path": "src/core/packages/status/common/src/status.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -483,6 +543,8 @@
           "{ readonly available: Readonly<{ toString: () => \"available\"; valueOf: () => 0; toJSON: () => \"available\"; }>; readonly degraded: Readonly<{ toString: () => \"degraded\"; valueOf: () => 1; toJSON: () => \"degraded\"; }>; readonly unavailable: Readonly<{ toString: () => \"unavailable\"; valueOf: () => 2; toJSON: () => \"unavailable\"; }>; readonly critical: Readonly<{ toString: () => \"critical\"; valueOf: () => 3; toJSON: () => \"critical\"; }>; }"
         ],
         "path": "src/core/packages/status/common/src/service_status.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

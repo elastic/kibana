@@ -307,12 +307,21 @@ async function calculateDiff(
     packageToPackagePolicyInputs(packageInfo) as InputsOverride[],
     true
   );
-  updatedPackagePolicy.inputs = _compilePackagePolicyInputs(
-    packageInfo,
-    updatedPackagePolicy.vars || {},
-    updatedPackagePolicy.inputs as PackagePolicyInput[],
-    assetsMap
-  );
+  // Validate input are valid when compiling agent template
+  try {
+    updatedPackagePolicy.inputs = _compilePackagePolicyInputs(
+      packageInfo,
+      updatedPackagePolicy.vars || {},
+      updatedPackagePolicy.inputs as PackagePolicyInput[],
+      assetsMap
+    );
+  } catch (error) {
+    if (!updatedPackagePolicy.errors) {
+      updatedPackagePolicy.errors = [];
+    }
+    updatedPackagePolicy.errors.push({ key: undefined, message: error.message });
+  }
+
   updatedPackagePolicy.elasticsearch = packageInfo.elasticsearch;
 
   const hasErrors = 'errors' in updatedPackagePolicy;

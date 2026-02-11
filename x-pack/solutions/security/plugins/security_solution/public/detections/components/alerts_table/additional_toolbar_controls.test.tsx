@@ -8,12 +8,14 @@
 import React from 'react';
 import { AdditionalToolbarControls } from './additional_toolbar_controls';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
+import { PageScope } from '../../../data_view_manager/constants';
+import * as useGetGroupSelectorHook from '@kbn/grouping/src/hooks/use_get_group_selector';
 
 const mockDispatch = jest.fn();
 const mockedUseKibana = mockUseKibana();
@@ -81,22 +83,65 @@ describe('AdditionalToolbarControls', () => {
     (useDeepEqualSelector as jest.Mock).mockClear();
   });
 
-  test('Should render the group selector component and allow the user to select a grouping field', () => {
+  test('Should render the group selector component and allow the user to select a grouping field', async () => {
     const store = createMockStore({
       ...mockGlobalState,
       groups,
     });
     render(
       <TestProviders store={store}>
-        <AdditionalToolbarControls tableType={tableId} />
+        <AdditionalToolbarControls tableType={tableId} pageScope={PageScope.alerts} />
       </TestProviders>
     );
 
     fireEvent.click(screen.getByTestId('group-selector-dropdown'));
     fireEvent.click(screen.getByTestId('panel-user.name'));
-    expect(mockDispatch.mock.calls[0][0].payload).toEqual({
-      activeGroups: ['user.name'],
-      tableId,
+
+    await waitFor(() => {
+      expect(mockDispatch.mock.calls[0][0].payload).toEqual({
+        activeGroups: ['user.name'],
+        tableId,
+      });
     });
+  });
+
+  test('Should pass settings to useGetGroupSelectorStateless', () => {
+    const settings = {
+      hideNoneOption: true,
+      hideCustomFieldOption: true,
+      hideOptionsTitle: true,
+      popoverButtonLabel: 'Custom Label',
+    };
+    (useDeepEqualSelector as jest.Mock).mockImplementation(() => ({
+      ...groups[tableId],
+      settings,
+    }));
+
+    const useGetGroupSelectorStatelessSpy = jest.spyOn(
+      useGetGroupSelectorHook,
+      'useGetGroupSelectorStateless'
+    );
+
+    const store = createMockStore({
+      ...mockGlobalState,
+      groups: {
+        [tableId]: {
+          ...groups[tableId],
+          settings,
+        },
+      },
+    });
+
+    render(
+      <TestProviders store={store}>
+        <AdditionalToolbarControls tableType={tableId} pageScope={PageScope.alerts} />
+      </TestProviders>
+    );
+
+    expect(useGetGroupSelectorStatelessSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        settings,
+      })
+    );
   });
 });

@@ -10,13 +10,23 @@
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import useMount from 'react-use/lib/useMount';
 import { redirectWhenMissing } from '@kbn/kibana-utils-plugin/public';
-import React from 'react';
+import React, { useMemo } from 'react';
+import type { SerializedError } from '@reduxjs/toolkit';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { BrandedLoadingIndicator } from './branded_loading_indicator';
 import { useInternalStateSelector } from '../../state_management/redux';
 import { DiscoverError } from '../../../../components/common/error_alert';
 
-export const InitializationError = ({ error }: { error: Error }) => {
+export const InitializationError = ({
+  error: originalError,
+}: {
+  error: Error | SerializedError;
+}) => {
+  const error = useMemo(
+    () => (originalError instanceof Error ? originalError : new Error(originalError.message)),
+    [originalError]
+  );
+
   if (error instanceof SavedObjectNotFound) {
     return <RedirectWhenSavedObjectNotFound error={error} />;
   }

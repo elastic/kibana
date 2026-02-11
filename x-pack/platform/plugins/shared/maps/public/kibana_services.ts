@@ -62,7 +62,7 @@ export const setSpaceId = (_spaceId: string) => {
 export const getIndexNameFormComponent = () => pluginsStart.fileUpload.IndexNameFormComponent;
 export const getFileUploadComponent = () => pluginsStart.fileUpload.FileUploadComponent;
 export const getIndexPatternService = () => pluginsStart.data.dataViews;
-export const getAutocompleteService = () => pluginsStart.unifiedSearch.autocomplete;
+export const getAutocompleteService = () => pluginsStart.kql.autocomplete;
 export const getInspector = () => pluginsStart.inspector;
 export const getFileUpload = () => pluginsStart.fileUpload;
 export const getUiSettings = () => coreStart.uiSettings;
@@ -134,3 +134,4 @@ export const getEmsTileLayerId = () => {
 };
 
 export const getShareService = () => pluginsStart.share;
+export const getCps = () => pluginsStart.cps;

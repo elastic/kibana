@@ -5,19 +5,6 @@
  * 2.0.
  */
 
-function mergeArrays(a: any[], b: any[]) {
-  const len = b.length;
-
-  for (let i = 0; i < len; i++) {
-    const P = b[i];
-    if (a.indexOf(P) < 0) {
-      a.push(P);
-    }
-  }
-
-  return a;
-}
-
 /**
  * Clusters dataset based on [DBSCAN](https://en.wikipedia.org/wiki/DBSCAN).
  * Implementation based on [density-clustering](https://github.com/astrolukasz/density-clustering/blob/master/lib/DBSCAN.js),
@@ -30,8 +17,8 @@ export function dbscan<T>(
   distanceFn: (left: T, right: T) => number
 ): { clusters: number[][]; noise: number[] } {
   const datasetLength = dataset.length;
-  const visited = new Array(datasetLength);
-  const assigned = new Array(datasetLength);
+  const visited = new Uint8Array(datasetLength);
+  const assigned = new Uint8Array(datasetLength);
   const noise: number[] = [];
 
   const clusters: number[][] = [];
@@ -54,6 +41,11 @@ export function dbscan<T>(
   }
 
   function expandCluster(clusterId: number, neighbors: number[]) {
+    const neighborQueued = new Uint8Array(datasetLength);
+    for (let i = 0; i < neighbors.length; i++) {
+      neighborQueued[neighbors[i]] = 1;
+    }
+
     /**
      * It's very important to calculate length of neighbors array each time,
      * as the number of elements changes over time
@@ -66,7 +58,13 @@ export function dbscan<T>(
         const neighbors2 = regionQuery(pointId2);
 
         if (neighbors2.length >= minPts) {
-          neighbors = mergeArrays(neighbors, neighbors2);
+          for (let j = 0; j < neighbors2.length; j++) {
+            const neighborId = neighbors2[j];
+            if (neighborQueued[neighborId] !== 1) {
+              neighbors.push(neighborId);
+              neighborQueued[neighborId] = 1;
+            }
+          }
         }
       }
 

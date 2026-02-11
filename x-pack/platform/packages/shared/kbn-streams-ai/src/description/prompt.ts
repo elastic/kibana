@@ -6,26 +6,30 @@
  */
 import { createPrompt } from '@kbn/inference-common';
 import { z } from '@kbn/zod';
-import systemPromptTemplate from './system_prompt.text';
-import userPromptTemplate from './user_prompt.text';
+import descriptionSystemPrompt from './system_prompt.text';
+import descriptionUserPrompt from './user_prompt.text';
 
-export const GenerateStreamDescriptionPrompt = createPrompt({
-  name: 'generate_stream_description',
-  input: z.object({
-    name: z.string(),
-    dataset_analysis: z.string(),
-  }),
-})
-  .version({
-    system: {
-      mustache: {
-        template: systemPromptTemplate,
-      },
-    },
-    template: {
-      mustache: {
-        template: userPromptTemplate,
-      },
-    },
+export { descriptionSystemPrompt as descriptionPrompt };
+
+export function createGenerateStreamDescriptionPrompt({ systemPrompt }: { systemPrompt: string }) {
+  return createPrompt({
+    name: 'generate_stream_description',
+    input: z.object({
+      name: z.string(),
+      dataset_analysis: z.string(),
+    }),
   })
-  .get();
+    .version({
+      system: {
+        mustache: {
+          template: systemPrompt,
+        },
+      },
+      template: {
+        mustache: {
+          template: descriptionUserPrompt,
+        },
+      },
+    })
+    .get();
+}

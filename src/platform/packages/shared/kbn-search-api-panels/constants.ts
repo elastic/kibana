@@ -7,14 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const LEARN_MORE_LABEL: string = i18n.translate(
-  'searchApiPanels.welcomeBanner.panels.learnMore',
-  {
-    defaultMessage: 'Learn more',
-  }
-);
-export const API_KEY_PLACEHOLDER = 'your_api_key';
-export const ELASTICSEARCH_URL_PLACEHOLDER = 'https://your_deployment_url';
-export const INDEX_NAME_PLACEHOLDER = 'index_name';
+export const EIS_TOUR_ENABLED_FEATURE_FLAG_ID = 'eisPromotionalTour:enabled';

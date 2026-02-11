@@ -36,7 +36,7 @@ describe('InTableSearchHighlightsWrapper', () => {
       });
 
       expect(container.innerHTML).toMatchInlineSnapshot(
-        `"<div><div>Some text here with <mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"0\\">test</mark> and <mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"1\\">test</mark> and even more <mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"2\\">Test</mark> to be sure<div><mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"3\\">test</mark></div><div>this</div><img src=\\"https://test.com\\" alt=\\"not for test\\"></div></div>"`
+        `"<span><div>Some text here with <mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"0\\">test</mark> and <mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"1\\">test</mark> and even more <mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"2\\">Test</mark> to be sure<div><mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"3\\">test</mark></div><div>this</div><img src=\\"https://test.com\\" alt=\\"not for test\\"></div></span>"`
       );
     });
 
@@ -52,7 +52,7 @@ describe('InTableSearchHighlightsWrapper', () => {
       });
 
       expect(container.innerHTML).toMatchInlineSnapshot(
-        `"<div><div><mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"0\\">test2</mark></div></div>"`
+        `"<span><div><mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"0\\">test2</mark></div></span>"`
       );
     });
 
@@ -63,7 +63,7 @@ describe('InTableSearchHighlightsWrapper', () => {
         </InTableSearchHighlightsWrapper>
       );
 
-      expect(container.innerHTML).toMatchInlineSnapshot(`"<div><div>test2</div></div>"`);
+      expect(container.innerHTML).toMatchInlineSnapshot(`"<span><div>test2</div></span>"`);
     });
 
     it('escape the input with tags', async () => {
@@ -82,7 +82,7 @@ describe('InTableSearchHighlightsWrapper', () => {
       });
 
       expect(container.innerHTML).toMatchInlineSnapshot(
-        `"<div><div><hr><div>test</div><div>this <mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"0\\">&lt;hr /&gt;</mark></div></div></div>"`
+        `"<span><div><hr><div>test</div><div>this <mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"0\\">&lt;hr /&gt;</mark></div></div></span>"`
       );
     });
 
@@ -98,7 +98,7 @@ describe('InTableSearchHighlightsWrapper', () => {
       });
 
       expect(container.innerHTML).toMatchInlineSnapshot(
-        `"<div><div>test this now<mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"0\\">.</mark></div></div>"`
+        `"<span><div>test this now<mark style=\\"color: black; background-color: green;\\" class=\\"dataGridInTableSearch__match\\" data-match-index=\\"0\\">.</mark></div></span>"`
       );
     });
 
@@ -109,7 +109,7 @@ describe('InTableSearchHighlightsWrapper', () => {
         </InTableSearchHighlightsWrapper>
       );
 
-      expect(container.innerHTML).toMatchInlineSnapshot(`"<div><div>test</div></div>"`);
+      expect(container.innerHTML).toMatchInlineSnapshot(`"<span><div>test</div></span>"`);
     });
   });
 
@@ -136,7 +136,7 @@ describe('InTableSearchHighlightsWrapper', () => {
       });
 
       expect(container.innerHTML).toMatchInlineSnapshot(
-        `"<div><div>Some text here with test and test and even more Test to be sure<div>test</div><div>this</div><img src=\\"https://test.com\\" alt=\\"not for test\\"></div></div>"`
+        `"<span><div>Some text here with test and test and even more Test to be sure<div>test</div><div>this</div><img src=\\"https://test.com\\" alt=\\"not for test\\"></div></span>"`
       );
     });
 
@@ -157,7 +157,7 @@ describe('InTableSearchHighlightsWrapper', () => {
         expect(onHighlightsCountFound).toHaveBeenCalledWith(1);
       });
 
-      expect(container.innerHTML).toMatchInlineSnapshot(`"<div><div>test2</div></div>"`);
+      expect(container.innerHTML).toMatchInlineSnapshot(`"<span><div>test2</div></span>"`);
     });
 
     it('with no matches', async () => {
@@ -176,7 +176,7 @@ describe('InTableSearchHighlightsWrapper', () => {
         expect(onHighlightsCountFound).toHaveBeenCalledWith(0);
       });
 
-      expect(container.innerHTML).toMatchInlineSnapshot(`"<div><div>test2</div></div>"`);
+      expect(container.innerHTML).toMatchInlineSnapshot(`"<span><div>test2</div></span>"`);
     });
 
     it('with no search term', async () => {
@@ -187,7 +187,7 @@ describe('InTableSearchHighlightsWrapper', () => {
         </InTableSearchHighlightsWrapper>
       );
 
-      expect(container.innerHTML).toMatchInlineSnapshot(`"<div><div>test</div></div>"`);
+      expect(container.innerHTML).toMatchInlineSnapshot(`"<span><div>test</div></span>"`);
       expect(onHighlightsCountFound).not.toHaveBeenCalled();
     });
   });

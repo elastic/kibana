@@ -36,7 +36,7 @@ function PageViewsTotalTitle({ pageViews }: { pageViews?: number }) {
     <>{numeral(pageViews).format('0,0')}</>
   ) : (
     <EuiToolTip content={numeral(pageViews).format('0,0')}>
-      <>{numeral(pageViews).format('0 a')}</>
+      <span tabIndex={0}>{numeral(pageViews).format('0 a')}</span>
     </EuiToolTip>
   );
 }

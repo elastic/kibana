@@ -6,21 +6,24 @@
  */
 
 import {
-  getAttackDiscoveryMarkdown,
   type AttackDiscovery,
   type AttackDiscoveryAlert,
-  type Replacements,
+  getAttackDiscoveryMarkdown,
   getOriginalAlertIds,
+  type Replacements,
 } from '@kbn/elastic-assistant-common';
 import {
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  useGeneratedHtmlId,
   EuiPopover,
+  EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { useReportAddToChat } from '../../../../agent_builder/hooks/use_report_add_to_chat';
+import * as agentBuilderI18n from '../../../../agent_builder/components/translations';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import { useAddToNewCase } from './use_add_to_case';
 import { useAddToExistingCase } from './use_add_to_existing_case';
@@ -32,6 +35,8 @@ import { UpdateAlertsModal } from './update_alerts_modal';
 import { useAttackDiscoveryBulk } from '../../use_attack_discovery_bulk';
 import { useUpdateAlertsStatus } from './use_update_alerts_status';
 import { isAttackDiscoveryAlert } from '../../utils/is_attack_discovery_alert';
+import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { useAttackDiscoveryAttachment } from '../use_attack_discovery_attachment';
 
 interface Props {
   attackDiscoveries: AttackDiscovery[] | AttackDiscoveryAlert[];
@@ -112,7 +117,7 @@ const TakeActionComponent: React.FC<Props> = ({
 
   /**
    * Called by the modal when the user confirms the action,
-   * or directly when the user selects an action in AI for SOC.
+   * or directly when the user selects an action in EASE.
    */
   const onConfirm = useCallback(
     async ({
@@ -159,7 +164,7 @@ const TakeActionComponent: React.FC<Props> = ({
       setPendingAction(workflowStatus);
 
       if (hasSearchAILakeConfigurations) {
-        // there's no modal for AI for SOC, so we call onConfirm directly
+        // there's no modal for EASE, so we call onConfirm directly
         onConfirm({ updateAlerts: false, workflowStatus });
       }
     },
@@ -205,6 +210,44 @@ const TakeActionComponent: React.FC<Props> = ({
     showAssistantOverlay?.();
   }, [closePopover, showAssistantOverlay]);
 
+  const { hasAgentBuilderPrivilege, isAgentChatExperienceEnabled, hasValidAgentBuilderLicense } =
+    useAgentBuilderAvailability();
+  const attackDiscovery = attackDiscoveries.length === 1 ? attackDiscoveries[0] : undefined;
+  const openAgentBuilderFlyout = useAttackDiscoveryAttachment(attackDiscovery, replacements);
+  const reportAddToChatClick = useReportAddToChat();
+  const onViewInAgentBuilder = useCallback(() => {
+    closePopover();
+    reportAddToChatClick({
+      pathway: 'attack_discovery_take_action',
+      attachments: ['alert'],
+    });
+    openAgentBuilderFlyout();
+  }, [closePopover, openAgentBuilderFlyout, reportAddToChatClick]);
+
+  const isAddToChatDisabled = !hasValidAgentBuilderLicense;
+  const viewInAgentBuilderItem = useMemo(() => {
+    const item = (
+      <EuiContextMenuItem
+        data-test-subj="viewInAgentBuilder"
+        disabled={isAddToChatDisabled}
+        key="viewInAgentBuilder"
+        onClick={onViewInAgentBuilder}
+      >
+        {i18n.ADD_TO_CHAT}
+      </EuiContextMenuItem>
+    );
+
+    if (!isAddToChatDisabled) {
+      return item;
+    }
+
+    return (
+      <EuiToolTip content={agentBuilderI18n.UPGRADE_TO_ENTERPRISE_TO_USE_AGENT_BUILDER_CHAT}>
+        <span>{item}</span>
+      </EuiToolTip>
+    );
+  }, [isAddToChatDisabled, onViewInAgentBuilder]);
+
   // button for the popover:
   const button = useMemo(
     () => (
@@ -243,25 +286,32 @@ const TakeActionComponent: React.FC<Props> = ({
           {i18n.ADD_TO_EXISTING_CASE}
         </EuiContextMenuItem>,
 
-        attackDiscoveries.length === 1 ? (
-          <EuiContextMenuItem
-            data-test-subj="viewInAiAssistant"
-            disabled={viewInAiAssistantDisabled}
-            key="viewInAiAssistant"
-            onClick={onViewInAiAssistant}
-          >
-            {i18n.VIEW_IN_AI_ASSISTANT}
-          </EuiContextMenuItem>
-        ) : (
-          []
-        ),
+        attackDiscoveries.length === 1
+          ? isAgentChatExperienceEnabled
+            ? hasAgentBuilderPrivilege
+              ? [viewInAgentBuilderItem]
+              : []
+            : [
+                <EuiContextMenuItem
+                  data-test-subj="viewInAiAssistant"
+                  disabled={viewInAiAssistantDisabled}
+                  key="viewInAiAssistant"
+                  onClick={onViewInAiAssistant}
+                >
+                  {i18n.VIEW_IN_AI_ASSISTANT}
+                </EuiContextMenuItem>,
+              ]
+          : [],
       ].flat(),
     [
       addToCaseDisabled,
       attackDiscoveries.length,
+      hasAgentBuilderPrivilege,
+      isAgentChatExperienceEnabled,
       onClickAddToExistingCase,
       onClickAddToNewCase,
       onViewInAiAssistant,
+      viewInAgentBuilderItem,
       viewInAiAssistantDisabled,
     ]
   );

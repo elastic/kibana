@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Vis, VisParams, Schema } from '@kbn/visualizations-plugin/public';
+import type { Vis, Schema } from '@kbn/visualizations-plugin/public';
 import type { IAggConfig } from '@kbn/data-plugin/public';
 
+import type { VisParams } from '@kbn/visualizations-common';
 import { EditorStateActionTypes } from './constants';
 
 export interface ActionType<T, P> {

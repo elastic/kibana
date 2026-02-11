@@ -180,9 +180,7 @@ export const findThresholdSignals = async ({
     searchAfterResults.searchErrors.push(...searchErrors);
     loggedRequests.push(...(thresholdLoggedRequests ?? []));
 
-    if (isEmpty(searchErrors)) {
-      searchAfterResults.searchErrors.push(...searchErrors);
-    } else if (searchResult.aggregations != null) {
+    if (searchResult.aggregations != null) {
       const docCount = searchResult.hits.total.value;
       if (
         docCount >= threshold.value &&

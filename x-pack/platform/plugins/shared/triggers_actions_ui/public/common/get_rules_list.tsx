@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { ConnectorProvider } from '../application/context/connector_context';
 import { RulesList } from '../application/sections';

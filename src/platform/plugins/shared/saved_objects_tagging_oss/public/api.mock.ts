@@ -64,6 +64,7 @@ const createApiUiMock = () => {
     convertNameToReference: jest.fn(),
     parseSearchQuery: jest.fn(),
     getTagIdsFromReferences: jest.fn(),
+    tagIdToReference: jest.fn(),
     getTagIdFromName: jest.fn(),
     updateTagsReferences: jest.fn(),
     getTag: jest.fn(),

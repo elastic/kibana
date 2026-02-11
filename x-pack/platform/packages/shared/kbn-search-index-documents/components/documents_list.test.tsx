@@ -32,7 +32,7 @@ describe('DocumentList', () => {
     );
 
     expect(container.querySelector('[data-testId="search-index-documents-result"]')).toBeNull();
-    expect(container.querySelector('[aria-label="Pagination for document list"]')).not.toBeNull();
+    expect(container.querySelector('[aria-label="Document lists pagination"]')).not.toBeNull();
   });
   test('renders documents when results when there is data and mappings', () => {
     const values = {

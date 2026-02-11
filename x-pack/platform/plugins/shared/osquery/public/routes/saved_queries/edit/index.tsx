@@ -90,7 +90,7 @@ const EditSavedQueryPageComponent = () => {
                     }}
                   />
                   {elasticPrebuiltQuery && (
-                    <EuiCallOut css={euiCalloutCss} size="s">
+                    <EuiCallOut announceOnMount css={euiCalloutCss} size="s">
                       <FormattedMessage
                         id="xpack.osquery.viewSavedQuery.prebuiltInfo"
                         defaultMessage="This is a prebuilt Elastic query, and it cannot be edited."

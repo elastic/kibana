@@ -8,8 +8,8 @@
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { ShortIdTable } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { sumBy, uniqBy } from 'lodash';
-import pRetry from 'p-retry';
+import { difference, sumBy, uniqBy } from 'lodash';
+import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import type { Evaluator } from '../../types';
 import { LlmCriteriaEvaluationPrompt } from './prompt';
 
@@ -55,22 +55,20 @@ export function createCriteriaEvaluator({
 
   return {
     evaluate: async ({ input, output }) => {
-      async function scoreTask() {
-        const response = await inferenceClient.prompt({
-          prompt: LlmCriteriaEvaluationPrompt,
-          input: {
-            input: JSON.stringify(input),
-            output: JSON.stringify(output),
-            criteria: structuredCriteria.map((criterion) => {
-              return `${criterion.id}: ${criterion.text}`;
-            }),
-          },
-        });
+      function toScores(
+        evaluatedCriteria: Array<{ id: string; result: 'PASS' | 'FAIL' | 'N/A'; reason?: string }>
+      ) {
+        const evaluations = uniqBy(evaluatedCriteria, (criterion) => criterion.id);
 
-        const evaluations = uniqBy(
-          response.toolCalls.flatMap((toolCall) => toolCall.function.arguments.criteria),
-          (criterion) => criterion.id
-        );
+        const evaluatedCriteriaIds = evaluations.map((evaluation) => evaluation.id);
+
+        const criteriaIds = Array.from(criteriaById.keys());
+
+        const unscored = difference(criteriaIds, evaluatedCriteriaIds);
+
+        if (unscored.length) {
+          throw new Error(`Missing scores for ${unscored.join(', ')}`);
+        }
 
         return evaluations.map((evaluation) => {
           const criterion = criteriaById.get(evaluation.id);
@@ -85,12 +83,40 @@ export function createCriteriaEvaluator({
         });
       }
 
-      const results = await pRetry(scoreTask, {
-        retries: 0,
-        onFailedAttempt: (error) => {
-          log.error(new Error(`Failed to score task`, { cause: error }));
-        },
-      });
+      async function scoreTask() {
+        const response = await executeUntilValid({
+          prompt: LlmCriteriaEvaluationPrompt,
+          inferenceClient,
+          input: {
+            input: JSON.stringify(input),
+            output: JSON.stringify(output),
+            criteria: structuredCriteria.map((criterion) => {
+              return `${criterion.id}: ${criterion.text}`;
+            }),
+          },
+          finalToolChoice: {
+            function: 'score',
+          },
+          maxRetries: 3,
+          toolCallbacks: {
+            score: async (toolCall) => {
+              return {
+                response: {
+                  scores: toScores(toolCall.function.arguments.criteria),
+                },
+              };
+            },
+          },
+        });
+
+        return response;
+      }
+
+      const { toolCalls } = await scoreTask();
+
+      const results = toolCalls.flatMap((toolCall) =>
+        toScores(toolCall.function.arguments.criteria)
+      );
 
       function normalize(val: number) {
         if (!isFinite(val)) {

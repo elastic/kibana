@@ -10,7 +10,12 @@
 import { coreWorkerFixtures } from './core_fixtures';
 import type { ApiClientFixture } from './api_client';
 import type { DefaultRolesFixture } from './default_roles';
-import { measurePerformanceAsync } from '../../../../common';
+import type { ElasticsearchRoleDescriptor, KibanaRole } from '../../../../common';
+import {
+  measurePerformanceAsync,
+  isElasticsearchRole,
+  getPrivilegedRoleName,
+} from '../../../../common';
 
 export interface ApiKey {
   id: string;
@@ -29,7 +34,36 @@ export interface RoleApiCredentials {
 }
 
 export interface RequestAuthFixture {
+  /**
+   * Creates an API key for a predefined role (e.g. 'admin', 'viewer', 'editor').
+   * Role privileges are resolved from the corresponding roles.yml file.
+   * @param role - The predefined role name.
+   */
   getApiKey: (role: string) => Promise<RoleApiCredentials>;
+  /**
+   * Creates an API key for a custom role defined inline via a Kibana or Elasticsearch
+   * role descriptor. The role is created on-the-fly and cleaned up after the worker completes.
+   * @param role - A Kibana or Elasticsearch role descriptor with specific permissions.
+   */
+  getApiKeyForCustomRole: (
+    role: KibanaRole | ElasticsearchRoleDescriptor
+  ) => Promise<RoleApiCredentials>;
+  /**
+   * Shorthand for `getApiKey('admin')`.
+   * Creates an API key with administrative privileges.
+   */
+  getApiKeyForAdmin: () => Promise<RoleApiCredentials>;
+  /**
+   * Shorthand for `getApiKey('viewer')`.
+   * Creates an API key with viewer-only permissions.
+   */
+  getApiKeyForViewer: () => Promise<RoleApiCredentials>;
+  /**
+   * Creates an API key for a non-admin user with elevated privileges.
+   * Resolves the role based on the environment: `developer` for serverless
+   * Elasticsearch projects, `editor` for all other deployments and project types.
+   */
+  getApiKeyForPrivilegedUser: () => Promise<RoleApiCredentials>;
 }
 
 export const requestAuthFixture = coreWorkerFixtures.extend<
@@ -41,20 +75,63 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
   }
 >({
   requestAuth: [
-    async ({ log, samlAuth, defaultRoles, apiClient }, use, workerInfo) => {
+    async ({ log, config, samlAuth, defaultRoles, apiClient }, use, workerInfo) => {
       const generatedApiKeys: ApiKey[] = [];
 
       const createApiKeyPayload = (
         apiKeyName: string,
-        role: string,
+        roleName: string,
         descriptors: Record<string, any>
-      ) => ({
-        name: apiKeyName,
-        metadata: {},
-        ...(role === samlAuth.customRoleName
-          ? { kibana_role_descriptors: descriptors }
-          : { role_descriptors: descriptors }),
-      });
+      ) => {
+        const roleDescriptor = descriptors[roleName];
+
+        return {
+          name: apiKeyName,
+          metadata: {},
+          ...(isElasticsearchRole(roleDescriptor)
+            ? { role_descriptors: descriptors }
+            : { kibana_role_descriptors: descriptors }),
+        };
+      };
+
+      const createApiKeyWithAdminCredentials = async (
+        roleName: string,
+        roleDescriptors: Record<string, any>
+      ) => {
+        log.debug(
+          `Creating API key for ${roleName} with privileges: ${JSON.stringify(roleDescriptors)}`
+        );
+
+        const apiKeyName = `myTestApiKey-${generatedApiKeys.length}-${roleName}-worker-${
+          workerInfo.parallelIndex + 1
+        }`;
+
+        const adminCookieHeader = await samlAuth.session.getApiCredentialsForRole('admin');
+
+        const payload = createApiKeyPayload(apiKeyName, roleName, roleDescriptors);
+        const response = await apiClient.post('internal/security/api_key', {
+          headers: {
+            'kbn-xsrf': 'some-xsrf-token',
+            'x-elastic-internal-origin': 'kibana',
+            ...adminCookieHeader,
+          },
+          body: payload,
+          responseType: 'json',
+        });
+
+        if (response.statusCode !== 200) {
+          throw new Error(
+            `Failed to create API key for '${roleName}' role with response text: ${response.statusMessage}`
+          );
+        }
+
+        const apiKey = response.body as ApiKey;
+        const apiKeyHeader = { Authorization: `ApiKey ${apiKey.encoded}` };
+
+        log.info(`Created API key for ${roleName} role: ${apiKey.name}`);
+        generatedApiKeys.push(apiKey);
+        return { apiKey, apiKeyHeader };
+      };
 
       const invalidateApiKeys = async (apiKeys: ApiKey[]) => {
         // Get admin credentials in order to invalidate the API key
@@ -77,63 +154,59 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
           if (response.statusCode !== 200) {
             log.info(`Failed to invalidate API key: ${apiKey.name}`);
           } else {
-            log.info(`Successfully invalidated API key: ${apiKey.name}`);
+            log.info(`Invalidated API key: ${apiKey.name}`);
           }
         }
       };
 
-      const getApiKey = async (role: string): Promise<RoleApiCredentials> => {
-        const apiKeyName = `myTestApiKey-${generatedApiKeys.length}-worker-${
-          workerInfo.parallelIndex + 1
-        }`;
-        const adminCookieHeader = await samlAuth.session.getApiCredentialsForRole('admin');
-
+      const getApiKey = async (predefinedRole: string): Promise<RoleApiCredentials> => {
+        // fetch role descriptors from roles.yml file
         const roleDescriptors =
-          role === 'admin'
+          predefinedRole === 'admin'
             ? {}
             : (() => {
-                const roleDescriptor = defaultRoles.get(role);
-                if (!roleDescriptor) {
-                  throw new Error(`Cannot create API key for non-existent role "${role}"`);
-                }
-                log.debug(
-                  `Creating API key for ${role} with privileges: ${JSON.stringify(roleDescriptor)}`
-                );
-                return { [role]: roleDescriptor };
+                samlAuth.session.validateRole(predefinedRole);
+                const roleDescriptor = defaultRoles.availableRoles.get(predefinedRole);
+                return { [predefinedRole]: roleDescriptor };
               })();
-
-        const payload = createApiKeyPayload(apiKeyName, role, roleDescriptors);
-        const response = await apiClient.post('internal/security/api_key', {
-          headers: {
-            'kbn-xsrf': 'some-xsrf-token',
-            'x-elastic-internal-origin': 'kibana',
-            ...adminCookieHeader,
-          },
-          body: payload,
-          responseType: 'json',
-        });
-
-        if (response.statusCode !== 200) {
-          throw new Error(
-            `Failed to create API key for '${role}' role with response text: ${response.statusMessage}`
-          );
-        }
-
-        const apiKey = response.body as ApiKey;
-        const apiKeyHeader = { Authorization: `ApiKey ${apiKey.encoded}` };
-
-        log.info(`Created API key for role: [${role}]`);
-        generatedApiKeys.push(apiKey);
-        return { apiKey, apiKeyHeader };
+        return await createApiKeyWithAdminCredentials(predefinedRole, roleDescriptors);
       };
 
-      await use({ getApiKey });
+      const getApiKeyForCustomRole = async (
+        roleDescriptor: KibanaRole | ElasticsearchRoleDescriptor
+      ): Promise<RoleApiCredentials> => {
+        await samlAuth.setCustomRole(roleDescriptor);
+
+        const result = await createApiKeyWithAdminCredentials(samlAuth.customRoleName, {
+          [samlAuth.customRoleName]: roleDescriptor,
+        });
+        return result;
+      };
+
+      const getApiKeyForAdmin = () => getApiKey('admin');
+      const getApiKeyForViewer = () => getApiKey('viewer');
+
+      const getApiKeyForPrivilegedUser = async (): Promise<RoleApiCredentials> => {
+        return getApiKey(
+          getPrivilegedRoleName({ serverless: config.serverless, projectType: config.projectType! })
+        );
+      };
+
+      await use({
+        getApiKey,
+        getApiKeyForCustomRole,
+        getApiKeyForAdmin,
+        getApiKeyForViewer,
+        getApiKeyForPrivilegedUser,
+      });
 
       // Invalidate all API Keys after tests
       await measurePerformanceAsync(log, `Delete all API Keys`, async () => {
         log.debug(`Delete all API Keys`);
         return invalidateApiKeys(generatedApiKeys);
       });
+
+      // Note: the custom role will be deleted in the samlAuth fixture cleanup
     },
     { scope: 'worker' },
   ],

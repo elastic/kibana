@@ -9,7 +9,7 @@ import { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { HttpSetup } from '@kbn/core/public';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { isEmpty, noop } from 'lodash';
 import { SEARCH_DEBOUNCE_MS } from '../../../../common/constants';
 import type { ActionConnector } from '../../../../common/types/domain';

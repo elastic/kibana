@@ -21,13 +21,14 @@ interface Props {
 }
 
 const AlertPropertyActionsComponent: React.FC<Props> = ({ isLoading, totalAlerts, onDelete }) => {
-  const { permissions } = useCasesContext();
+  const { permissions, features } = useCasesContext();
   const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
     onDelete,
   });
+  const buttonRef = React.useRef<HTMLAnchorElement>(null);
 
   const propertyActions = useMemo(() => {
-    const showRemoveAlertIcon = permissions.delete;
+    const showRemoveAlertIcon = permissions.delete && features.alerts.all;
 
     return [
       ...(showRemoveAlertIcon
@@ -43,17 +44,22 @@ const AlertPropertyActionsComponent: React.FC<Props> = ({ isLoading, totalAlerts
           ]
         : []),
     ];
-  }, [permissions.delete, totalAlerts, onModalOpen]);
+  }, [permissions.delete, features.alerts.all, totalAlerts, onModalOpen]);
 
   return (
     <>
-      <UserActionPropertyActions isLoading={isLoading} propertyActions={propertyActions} />
+      <UserActionPropertyActions
+        isLoading={isLoading}
+        propertyActions={propertyActions}
+        buttonRef={buttonRef}
+      />
       {showDeletionModal ? (
         <DeleteAttachmentConfirmationModal
           title={i18n.REMOVE_ALERTS(totalAlerts)}
           confirmButtonText={i18n.REMOVE}
           onCancel={onCancel}
           onConfirm={onConfirm}
+          focusButtonRef={buttonRef}
         />
       ) : null}
     </>

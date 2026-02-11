@@ -19,12 +19,18 @@ const EditorActionContext = createContext<Dispatch<editor.Action>>(() => {});
 export interface EditorContextArgs {
   children: JSX.Element;
   settings: DevToolsSettings;
+  customParsedRequestsProvider?: (model: any) => any;
 }
 
-export function EditorContextProvider({ children, settings }: EditorContextArgs) {
+export function EditorContextProvider({
+  children,
+  settings,
+  customParsedRequestsProvider,
+}: EditorContextArgs) {
   const [state, dispatch] = useReducer(editor.reducer, editor.initialValue, (value) => ({
     ...value,
     settings,
+    customParsedRequestsProvider,
   }));
   return (
     <EditorReadContext.Provider value={state}>

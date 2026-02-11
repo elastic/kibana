@@ -71,7 +71,7 @@ export class SearchInferenceEndpointsPlugin
 
         return renderApp(coreStart, startDeps, element);
       },
-      order: 5,
+      order: 6,
       visibleIn: ['sideNav'],
     });
 

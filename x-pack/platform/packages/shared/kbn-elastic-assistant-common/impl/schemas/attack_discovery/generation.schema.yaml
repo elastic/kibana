@@ -1,0 +1,60 @@
+openapi: 3.0.0
+info:
+  title: Attack Discovery Generation Schema
+  version: '1'
+paths: {}
+components:
+  schemas:
+    AttackDiscoveryGeneration:
+      type: object
+      required:
+        - connector_id
+        - discoveries
+        - execution_uuid
+        - loading_message
+        - start
+        - status
+      properties:
+        alerts_context_count:
+          type: number
+          description: The number of alerts sent as context (max kibana.alert.rule.execution.metrics.alert_counts.active) to the LLM for the generation
+        connector_id:
+          type: string
+          description: The connector id (event.dataset) for this generation
+        connector_stats:
+          type: object
+          description: Stats applicable to the connector for this generation
+          properties:
+            average_successful_duration_nanoseconds:
+              type: number
+              description: The average duration (avg event.duration) in nanoseconds of successful generations for the same connector id, for the current user
+            successful_generations:
+              type: number
+              description: The number of successful generations for the same connector id, for the current user
+        discoveries:
+          type: number
+          description: The number of new Attack discovery alerts (max kibana.alert.rule.execution.metrics.alert_counts.new) for this generation
+        end:
+          type: string
+          description: When generation ended (max event.end)
+        execution_uuid:
+          type: string
+          description: The unique identifier (kibana.alert.rule.execution.uuid) for the generation
+        loading_message:
+          type: string
+          description: Generation loading message (kibana.alert.rule.execution.status)
+        reason:
+          type: string
+          description: Reason for failed generations (event.reason)
+        start:
+          type: string
+          description: When generation started (min event.start)
+        status:
+          type: string
+          description: The status of the attack discovery generation
+          enum:
+            - canceled
+            - dismissed
+            - failed
+            - started
+            - succeeded

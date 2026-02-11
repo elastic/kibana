@@ -18,6 +18,8 @@
         "void"
       ],
       "path": "src/platform/plugins/shared/chart_expressions/expression_tagcloud/public/plugin.ts",
+      "lineNumber": 39,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -49,6 +51,8 @@
           "\"tagcloud\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_tagcloud/common/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -107,6 +111,8 @@
           ">>"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_tagcloud/common/types/expression_functions.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -124,6 +130,8 @@
           "{ readonly SINGLE: \"single\"; readonly RIGHT_ANGLED: \"right angled\"; readonly MULTIPLE: \"multiple\"; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_tagcloud/common/constants.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -139,6 +147,8 @@
           "{ readonly LINEAR: \"linear\"; readonly LOG: \"log\"; readonly SQUARE_ROOT: \"square root\"; }"
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_tagcloud/common/constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

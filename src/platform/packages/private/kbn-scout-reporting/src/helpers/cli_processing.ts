@@ -26,21 +26,70 @@ export const stripRunCommand = (commandArgs: string[]): string => {
   return `npx playwright ${restArgs.join(' ')}`;
 };
 
+/**
+ * Returns the command line used to run Scout tests.
+ *
+ * When Scout starts Playwright, the Playwright process argv no longer contains the Scout CLI invocation.
+ * In those cases, Scout sets SCOUT_RUN_COMMAND and we prefer it for reporting.
+ */
+export function getRunCommand(argv: string[] = process.argv): string {
+  const scoutRunCommand = process.env.SCOUT_RUN_COMMAND;
+  if (typeof scoutRunCommand === 'string' && scoutRunCommand.trim() !== '') {
+    return scoutRunCommand;
+  }
+
+  try {
+    return stripRunCommand(argv);
+  } catch {
+    // As a last resort, avoid failing reporting; show the raw argv.
+    return Array.isArray(argv) ? argv.join(' ') : '';
+  }
+}
+
 export function getRunTarget(argv: string[] = process.argv): string {
+  // First, try to get the target from the environment variable (set by the scout run-tests command)
+  if (process.env.SCOUT_TARGET_MODE) {
+    // Convert mode format (e.g. "serverless=oblt" to display format "serverless-oblt")
+    const mode = process.env.SCOUT_TARGET_MODE;
+    if (mode === 'stateful') {
+      return 'stateful';
+    }
+    if (mode.startsWith('serverless=')) {
+      return mode.replace('=', '-');
+    }
+    return mode;
+  }
+
+  // Fallback to parsing command line arguments
   const tagsToMode: Record<string, string> = {
     '@ess': 'stateful',
     '@svlSearch': 'serverless-search',
     '@svlOblt': 'serverless-oblt',
+    '@svlLogsEssentials': 'serverless-oblt-logs-essentials',
     '@svlSecurity': 'serverless-security',
+    '@svlSecurityEssentials': 'serverless-security-essentials',
+    '@svlSecurityEase': 'serverless-security-ease',
   };
 
-  const grepIndex = argv.findIndex((arg) => arg === '--grep' || arg.startsWith('--grep='));
-  if (grepIndex !== -1) {
-    const tag = argv[grepIndex].startsWith('--grep=')
-      ? argv[grepIndex].split('=')[1]
-      : argv[grepIndex + 1] || ''; // Look at the next argument if '--grep' is used without `=`
+  // Try to find --grep argument in different formats
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
 
-    return tagsToMode[tag] || 'undefined';
+    // Handle --grep=@tag format
+    if (arg.startsWith('--grep=')) {
+      const tag = arg.split('=')[1];
+      if (tag && tagsToMode[tag]) {
+        return tagsToMode[tag];
+      }
+    }
+
+    // Handle --grep @tag format
+    if (arg === '--grep' && i + 1 < argv.length) {
+      const tag = argv[i + 1];
+      if (tag && tagsToMode[tag]) {
+        return tagsToMode[tag];
+      }
+    }
   }
 
   return 'undefined';

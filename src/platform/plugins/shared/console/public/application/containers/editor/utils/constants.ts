@@ -9,16 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-/*
- * CSS class name used for the styling of highlighted requests
- */
-export const SELECTED_REQUESTS_CLASSNAME = 'console__monaco_editor__selectedRequests';
-
-/*
- * CSS class names used for the styling of multiple-response status codes
- */
-export const STATUS_CODE_LINE_CLASSNAME = 'monaco__status_code_line';
-
 export const whitespacesRegex = /\s+/;
 export const newLineRegex = /\n/;
 export const slashesRegex = /\/+/;

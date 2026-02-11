@@ -10,7 +10,11 @@ import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DocumentDetailsContext } from '../../shared/context';
 import { JsonTab } from './json_tab';
-import { JSON_TAB_CONTENT_TEST_ID, JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID } from './test_ids';
+import {
+  JSON_TAB_CONTENT_TEST_ID,
+  JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID,
+} from '../../../shared/components/json_tab';
+import { PREFIX } from '../../../shared/test_ids';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -37,13 +41,13 @@ describe('<JsonTab />', () => {
   it('should render json code editor component', () => {
     const { getByTestId } = renderJsonTab();
 
-    expect(getByTestId(JSON_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(PREFIX + JSON_TAB_CONTENT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should copy to clipboard', () => {
     const { getByTestId } = renderJsonTab();
 
-    const copyToClipboardButton = getByTestId(JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID);
+    const copyToClipboardButton = getByTestId(PREFIX + JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID);
     expect(copyToClipboardButton).toBeInTheDocument();
   });
 });

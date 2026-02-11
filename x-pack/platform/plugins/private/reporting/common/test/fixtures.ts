@@ -37,7 +37,7 @@ export const mockJobs: ReportApiJSON[] = [
     id: 'k90e51pk1ieucbae0c3t8wo2',
     attempts: 0,
     created_at: '2020-04-14T21:01:13.064Z',
-    jobtype: 'printable_pdf_v2',
+    jobtype: 'printablePdfV2',
     meta: { layout: 'preserve_layout', objectType: 'canvas workpad' },
     payload: {
       spaceId: 'my-space',
@@ -181,11 +181,11 @@ export const mockJobs: ReportApiJSON[] = [
 
 export const mockScheduledReports: ScheduledReportApiJSON[] = [
   {
-    created_at: '2025-06-10T12:41:45.136Z',
+    created_at: '2025-06-16T12:41:45.136Z',
     created_by: 'Foo Bar',
     enabled: true,
     id: 'scheduled-report-1',
-    jobtype: 'printable_pdf_v2',
+    jobtype: 'printablePdfV2',
     last_run: '2025-05-10T12:41:46.959Z',
     next_run: '2025-06-16T13:56:07.123Z',
     schedule: {
@@ -221,11 +221,11 @@ export const mockScheduledReports: ScheduledReportApiJSON[] = [
     } as BaseParamsV2,
   },
   {
-    created_at: '2025-06-16T12:41:45.136Z',
+    created_at: '2025-06-12T12:41:45.136Z',
     created_by: 'Test abc',
     enabled: true,
     id: 'scheduled-report-2',
-    jobtype: 'printable_pdf_v2',
+    jobtype: 'printablePdfV2',
     last_run: '2025-06-16T12:41:46.959Z',
     next_run: '2025-06-16T13:56:07.123Z',
     space_id: 'default',
@@ -235,11 +235,11 @@ export const mockScheduledReports: ScheduledReportApiJSON[] = [
     title: 'Scheduled report 2',
   },
   {
-    created_at: '2025-06-12T12:41:45.136Z',
+    created_at: '2025-06-10T12:41:45.136Z',
     created_by: 'New',
     enabled: false,
     id: 'scheduled-report-3',
-    jobtype: 'printable_pdf_v2',
+    jobtype: 'printablePdfV2',
     last_run: '2025-06-16T12:41:46.959Z',
     next_run: '2025-06-16T13:56:07.123Z',
     space_id: 'space-a',

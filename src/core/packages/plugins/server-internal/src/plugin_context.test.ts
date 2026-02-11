@@ -64,6 +64,7 @@ describe('createPluginInitializerContext', () => {
     opaqueId = Symbol();
     instanceInfo = {
       uuid: 'instance-uuid',
+      airgapped: false,
     };
     nodeInfo = nodeServiceMock.createInternalPrebootContract();
     env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -139,7 +140,6 @@ describe('createPluginInitializerContext', () => {
         elasticsearch: {
           shardTimeout: duration(30, 's'),
           requestTimeout: duration(30, 's'),
-          pingTimeout: duration(30, 's'),
         },
         path: { data: fromRoot('data') },
         savedObjects: { maxImportPayloadBytes: new ByteSizeValue(26214400) },
@@ -152,6 +152,7 @@ describe('createPluginInitializerContext', () => {
       const manifest = createPluginManifest();
       instanceInfo = {
         uuid: 'kibana-uuid',
+        airgapped: false,
       };
       const pluginInitializerContext = createPluginInitializerContext({
         coreContext,
@@ -230,6 +231,7 @@ describe('createPluginPrebootSetupContext', () => {
         manifest,
         instanceInfo: {
           uuid: 'instance-uuid',
+          airgapped: false,
         },
         nodeInfo,
       }),

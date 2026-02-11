@@ -24,15 +24,6 @@ describe(
   'Automated Response Actions',
   {
     tags: ['@ess', '@serverless'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'automatedProcessActionsEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
@@ -92,7 +83,7 @@ describe(
       visitRuleAlerts(ruleName);
       closeAllToasts();
 
-      changeAlertsFilter(`process.name: "agentbeat" and agent.id: "${createdHost.agentId}"`);
+      changeAlertsFilter(`process.name: "sshd" and agent.id: "${createdHost.agentId}"`);
       waitForAlertsToPopulate();
 
       cy.getByTestSubj('expand-event').first().click();

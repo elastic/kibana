@@ -36,7 +36,7 @@ paths:
         '403':
           description: Indicates that the user does not have the required permissions to create a draft Timeline.
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -47,7 +47,7 @@ paths:
         '409':
           description: Indicates that there is already a draft Timeline with the given `timelineId`.
           content:
-            application:json:
+            application/json:
               schema:
                 type: object
                 properties:

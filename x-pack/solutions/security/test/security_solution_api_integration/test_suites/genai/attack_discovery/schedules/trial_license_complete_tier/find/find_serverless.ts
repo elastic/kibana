@@ -68,6 +68,8 @@ export default ({ getService }: FtrProviderContext) => {
           expect(results).toEqual({
             data: expect.arrayContaining(createdSchedules),
             total: schedulesCount,
+            page: 1,
+            per_page: 10,
           });
         });
       });

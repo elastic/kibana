@@ -16,7 +16,7 @@ import {
   savedObjectsRepositoryMock,
   savedObjectsTypeRegistryMock,
 } from '@kbn/core/server/mocks';
-import { errorContent } from '@kbn/core-saved-objects-api-server-internal/src/lib/apis/utils';
+import { errorContent } from '@kbn/core-saved-objects-server';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import type { ClientInstanciator } from '.';

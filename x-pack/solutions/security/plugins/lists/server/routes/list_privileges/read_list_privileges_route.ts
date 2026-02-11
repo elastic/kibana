@@ -8,6 +8,7 @@
 import { readPrivileges, transformError } from '@kbn/securitysolution-es-utils';
 import { merge } from 'lodash/fp';
 import { LIST_PRIVILEGES_URL } from '@kbn/securitysolution-list-constants';
+import { LISTS_API_READ } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse, getListClient } from '../utils';
@@ -19,7 +20,7 @@ export const readPrivilegesRoute = (router: ListsPluginRouter): void => {
       path: LIST_PRIVILEGES_URL,
       security: {
         authz: {
-          requiredPrivileges: ['lists-read'],
+          requiredPrivileges: [LISTS_API_READ],
         },
       },
     })

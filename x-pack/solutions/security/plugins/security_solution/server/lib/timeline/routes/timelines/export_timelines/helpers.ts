@@ -83,7 +83,7 @@ const getTimelinesFromObjects = async (
     return acc;
   }, []);
 
-  return [...myResponse, ...errors] ?? [];
+  return [...myResponse, ...errors];
 };
 
 export const getExportTimelineByObjectIds = async ({

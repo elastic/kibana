@@ -8,20 +8,16 @@
  */
 
 import moment from 'moment';
-import { log, timerange } from '@kbn/apm-synthtrace-client';
+import { log, timerange } from '@kbn/synthtrace-client';
 import path from 'path';
-import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const synthtrace = getService('synthtrace');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
-  const { dashboard, header, savedObjects } = getPageObjects([
-    'dashboard',
-    'header',
-    'savedObjects',
-  ]);
+  const { dashboard, savedObjects } = getPageObjects(['dashboard', 'savedObjects']);
 
   const start = moment().subtract(30, 'minutes').valueOf();
   const end = moment().add(30, 'minutes').valueOf();
@@ -69,8 +65,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Load saved dashboard with log stream embeddable
       await dashboard.loadSavedDashboard('Logs stream dashboard test with Saves Search Embeddable');
-
-      await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
 
       // Expect things from saved search embeddable to load

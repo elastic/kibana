@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { TracingConfig, TracingExporterConfig } from './src/types';
+export type { TracingConfig, TracingExporterConfig, OTLPExportConfig } from './src/types';
 export { tracingConfigSchema } from './src/schema';

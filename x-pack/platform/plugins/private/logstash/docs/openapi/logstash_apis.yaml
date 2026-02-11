@@ -100,7 +100,7 @@ paths:
            name: id
            description: >
              An identifier for the pipeline.
-             Only alphanumeric characters, hyphens, and underscores are supported.
+             Pipeline ID must begin with a letter or underscore and can contain only letters, underscores, dashes, hyphens, and numbers.
            required: true
            schema:
             type: string

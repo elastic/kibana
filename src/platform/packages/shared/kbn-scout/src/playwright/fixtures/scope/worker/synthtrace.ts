@@ -14,8 +14,8 @@ import type {
   InfraDocument,
   SynthtraceGenerator,
   LogDocument,
-} from '@kbn/apm-synthtrace-client';
-import type { SynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/shared/base_client';
+} from '@kbn/synthtrace-client';
+import type { SynthtraceEsClient } from '@kbn/synthtrace/src/lib/shared/base_client';
 import { getSynthtraceClient } from '../../../../common/services/synthtrace';
 import { coreWorkerFixtures } from './core_fixtures';
 

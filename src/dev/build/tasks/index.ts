@@ -8,7 +8,6 @@
  */
 
 export * from './bin';
-export * from './build_canvas_shareable_runtime';
 export * from './build_kibana_platform_plugins';
 export * from './build_packages_task';
 export * from './clean_tasks';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { ResolvedCase } from './types';
 import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';

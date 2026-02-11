@@ -7,9 +7,13 @@
 
 import type { DropType } from '@kbn/dom-drag-drop';
 import { onDrop } from './on_drop_handler';
-import type { FormBasedPrivateState } from '../../types';
-import type { OperationMetadata, DatasourceDimensionDropHandlerProps } from '../../../../types';
-import type { FormulaIndexPatternColumn, MedianIndexPatternColumn } from '../../operations';
+import type {
+  FormBasedPrivateState,
+  OperationMetadata,
+  DatasourceDimensionDropHandlerProps,
+  FormulaIndexPatternColumn,
+  MedianIndexPatternColumn,
+} from '@kbn/lens-common';
 import { generateId } from '../../../../id_generator';
 import {
   mockDataViews,

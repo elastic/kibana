@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import { sloDetailsLocatorID } from '@kbn/observability-plugin/common';
+import { sloDetailsLocatorID, type SloDetailsLocatorParams } from '@kbn/deeplinks-observability';
 import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
-import type { SloTabId } from '../pages/slo_details/components/slo_details';
-
-export interface SloDetailsLocatorParams extends SerializableRecord {
-  sloId: string;
-  instanceId?: string;
-  tabId?: SloTabId;
-}
 
 export class SloDetailsLocatorDefinition implements LocatorDefinition<SloDetailsLocatorParams> {
   public readonly id = sloDetailsLocatorID;

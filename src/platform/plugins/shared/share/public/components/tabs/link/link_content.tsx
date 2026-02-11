@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   copyToClipboard,
   EuiButton,
@@ -20,9 +19,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
+import { isTimeRangeAbsoluteTime } from '../../../lib/time_utils';
 import { TimeTypeSection } from './time_type_section';
-import type { IShareContext } from '../../context';
+import { useShareContext, type IShareContext } from '../../context';
 import type { LinkShareConfig, LinkShareUIConfig } from '../../../types';
+import { DraftModeCallout } from '../../common/draft_mode_callout';
 
 type LinkProps = Pick<
   IShareContext,
@@ -52,16 +53,19 @@ export const LinkContent = ({
   shareableUrlLocatorParams,
   allowShortUrl,
 }: LinkProps) => {
+  const { onSave, isSaving } = useShareContext();
   const [snapshotUrl, setSnapshotUrl] = useState<string>('');
   const [isTextCopied, setTextCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isAbsoluteTime, setIsAbsoluteTime] = useState(true);
   const urlParamsRef = useRef<UrlParams | undefined>(undefined);
   const urlToCopy = useRef<string | undefined>(undefined);
   const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
   const timeRange = shareableUrlLocatorParams?.params?.timeRange;
+  const isAbsoluteTimeByDefault = isTimeRangeAbsoluteTime(timeRange);
+  const [isAbsoluteTime, setIsAbsoluteTime] = useState(isAbsoluteTimeByDefault);
 
-  const { delegatedShareUrlHandler, draftModeCallOut: DraftModeCallout } = objectConfig;
+  const { delegatedShareUrlHandler, draftModeCallOut } = objectConfig;
+  const draftModeCalloutContent = typeof draftModeCallOut === 'object' ? draftModeCallOut : {};
 
   const getUrlWithUpdatedParams = useCallback((tempUrl: string): string => {
     const urlWithUpdatedParams = urlParamsRef.current
@@ -123,25 +127,36 @@ export const LinkContent = ({
     setIsLoading(false);
   }, [snapshotUrl, delegatedShareUrlHandler, allowShortUrl, createShortUrl]);
 
-  const changeTimeType = (e: EuiSwitchEvent) => {
-    setIsAbsoluteTime(e.target.checked);
-    if (urlToCopy?.current && e.target.checked !== isAbsoluteTime) {
-      urlToCopy.current = undefined;
-    }
-  };
+  const handleTimeTypeChange = useCallback(
+    (isAbsolute: boolean) => {
+      if (urlToCopy?.current && isAbsolute !== isAbsoluteTime) {
+        urlToCopy.current = undefined;
+      }
+      setIsAbsoluteTime(isAbsolute);
+    },
+    [isAbsoluteTime]
+  );
 
   return (
     <>
       <EuiForm>
         <TimeTypeSection
           timeRange={timeRange}
-          isAbsoluteTime={isAbsoluteTime}
-          changeTimeType={changeTimeType}
+          onTimeTypeChange={handleTimeTypeChange}
+          isAbsoluteTimeByDefault={isAbsoluteTimeByDefault}
         />
-        {isDirty && DraftModeCallout && (
+        {isDirty && draftModeCallOut && (
           <>
             <EuiSpacer size="m" />
-            {DraftModeCallout}
+            <DraftModeCallout
+              {...draftModeCalloutContent}
+              {...(onSave && {
+                saveButtonProps: {
+                  onSave,
+                  isSaving,
+                },
+              })}
+            />
           </>
         )}
         <EuiSpacer size="l" />
@@ -156,6 +171,7 @@ export const LinkContent = ({
             }
           >
             <EuiButton
+              iconType="copy"
               fill
               data-test-subj="copyShareUrlButton"
               data-share-url={urlToCopy.current}

@@ -439,7 +439,47 @@ describe('AlertingAuthorization', () => {
     });
   });
 
+  /**
+   * ensureAuthorized calls bulkEnsureAuthorized internally, so we just need
+   * to test that the parameters are passed correctly
+   */
   describe('ensureAuthorized', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      allRegisteredConsumers.clear();
+      allRegisteredConsumers.add('myApp');
+    });
+
+    it('authorized correctly', async () => {
+      const alertAuthorization = new AlertingAuthorization({
+        request,
+        ruleTypeRegistry,
+        authorization: securityStart.authz,
+        getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
+      });
+
+      await alertAuthorization.bulkEnsureAuthorized({
+        ruleTypeIdConsumersPairs: [{ ruleTypeId: 'myType', consumers: ['myApp'] }],
+        operation: WriteOperations.Create,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+
+      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "kibana": Array [
+              "myType/myApp/rule/create",
+            ],
+          },
+        ]
+      `);
+    });
+  });
+
+  describe('bulkEnsureAuthorized', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       allRegisteredConsumers.clear();
@@ -455,9 +495,8 @@ describe('AlertingAuthorization', () => {
         ruleTypesConsumersMap,
       });
 
-      await alertAuthorization.ensureAuthorized({
-        ruleTypeId: 'myType',
-        consumer: 'myApp',
+      await alertAuthorization.bulkEnsureAuthorized({
+        ruleTypeIdConsumersPairs: [{ ruleTypeId: 'myType', consumers: ['myApp'] }],
         operation: WriteOperations.Create,
         entity: AlertingAuthorizationEntity.Rule,
       });
@@ -477,9 +516,8 @@ describe('AlertingAuthorization', () => {
         ruleTypesConsumersMap,
       });
 
-      await alertAuthorization.ensureAuthorized({
-        ruleTypeId: 'myType',
-        consumer: 'myApp',
+      await alertAuthorization.bulkEnsureAuthorized({
+        ruleTypeIdConsumersPairs: [{ ruleTypeId: 'myType', consumers: ['myApp'] }],
         operation: WriteOperations.Create,
         entity: AlertingAuthorizationEntity.Rule,
       });
@@ -497,9 +535,8 @@ describe('AlertingAuthorization', () => {
         ruleTypesConsumersMap,
       });
 
-      await alertAuthorization.ensureAuthorized({
-        ruleTypeId: 'myType',
-        consumer: 'myApp',
+      await alertAuthorization.bulkEnsureAuthorized({
+        ruleTypeIdConsumersPairs: [{ ruleTypeId: 'myType', consumers: ['myApp'] }],
         operation: WriteOperations.Create,
         entity: AlertingAuthorizationEntity.Rule,
       });
@@ -510,6 +547,44 @@ describe('AlertingAuthorization', () => {
           Object {
             "kibana": Array [
               "myType/myApp/rule/create",
+            ],
+          },
+        ]
+      `);
+    });
+
+    it('authorized correctly with multiple rule types and consumers', async () => {
+      allRegisteredConsumers.add('consumer-1');
+      allRegisteredConsumers.add('consumer-2');
+      allRegisteredConsumers.add('consumer-3');
+
+      const alertAuthorization = new AlertingAuthorization({
+        request,
+        ruleTypeRegistry,
+        authorization: securityStart.authz,
+        getSpaceId,
+        allRegisteredConsumers,
+        ruleTypesConsumersMap,
+      });
+
+      await alertAuthorization.bulkEnsureAuthorized({
+        ruleTypeIdConsumersPairs: [
+          { ruleTypeId: 'rule-type-id-1', consumers: ['consumer-1', 'consumer-2'] },
+          { ruleTypeId: 'rule-type-id-2', consumers: ['consumer-1', 'consumer-3'] },
+        ],
+        operation: WriteOperations.Create,
+        entity: AlertingAuthorizationEntity.Rule,
+      });
+
+      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "kibana": Array [
+              "rule-type-id-1/consumer-1/rule/create",
+              "rule-type-id-1/consumer-2/rule/create",
+              "rule-type-id-2/consumer-1/rule/create",
+              "rule-type-id-2/consumer-3/rule/create",
             ],
           },
         ]
@@ -531,9 +606,8 @@ describe('AlertingAuthorization', () => {
       });
 
       await expect(
-        alertAuthorization.ensureAuthorized({
-          ruleTypeId: 'myType',
-          consumer: 'myApp',
+        alertAuthorization.bulkEnsureAuthorized({
+          ruleTypeIdConsumersPairs: [{ ruleTypeId: 'myType', consumers: ['myApp'] }],
           operation: WriteOperations.Create,
           entity: AlertingAuthorizationEntity.Rule,
         })
@@ -557,9 +631,8 @@ describe('AlertingAuthorization', () => {
       });
 
       await expect(
-        alertAuthorization.ensureAuthorized({
-          ruleTypeId: 'myType',
-          consumer: 'myApp',
+        alertAuthorization.bulkEnsureAuthorized({
+          ruleTypeIdConsumersPairs: [{ ruleTypeId: 'myType', consumers: ['myApp'] }],
           operation: WriteOperations.Update,
           entity: AlertingAuthorizationEntity.Alert,
         })
@@ -579,9 +652,8 @@ describe('AlertingAuthorization', () => {
       });
 
       await expect(
-        alertAuthorization.ensureAuthorized({
-          ruleTypeId: 'myType',
-          consumer: 'not-exist',
+        alertAuthorization.bulkEnsureAuthorized({
+          ruleTypeIdConsumersPairs: [{ ruleTypeId: 'myType', consumers: ['not-exist'] }],
           operation: WriteOperations.Create,
           entity: AlertingAuthorizationEntity.Rule,
         })
@@ -600,9 +672,8 @@ describe('AlertingAuthorization', () => {
       });
 
       await expect(
-        alertAuthorization.ensureAuthorized({
-          ruleTypeId: 'myType',
-          consumer: 'not-exist',
+        alertAuthorization.bulkEnsureAuthorized({
+          ruleTypeIdConsumersPairs: [{ ruleTypeId: 'myType', consumers: ['not-exist'] }],
           operation: WriteOperations.Create,
           entity: AlertingAuthorizationEntity.Rule,
         })
@@ -623,9 +694,8 @@ describe('AlertingAuthorization', () => {
       });
 
       await expect(
-        alertAuthorization.ensureAuthorized({
-          ruleTypeId: 'myType',
-          consumer: 'not-exist',
+        alertAuthorization.bulkEnsureAuthorized({
+          ruleTypeIdConsumersPairs: [{ ruleTypeId: 'myType', consumers: ['not-exist'] }],
           operation: WriteOperations.Create,
           entity: AlertingAuthorizationEntity.Rule,
         })
@@ -660,9 +730,10 @@ describe('AlertingAuthorization', () => {
       });
 
       await expect(
-        auth.ensureAuthorized({
-          ruleTypeId: 'rule-type-1',
-          consumer: 'disabled-feature-consumer',
+        auth.bulkEnsureAuthorized({
+          ruleTypeIdConsumersPairs: [
+            { ruleTypeId: 'rule-type-1', consumers: ['disabled-feature-consumer'] },
+          ],
           operation: WriteOperations.Create,
           entity: AlertingAuthorizationEntity.Rule,
         })
@@ -681,9 +752,8 @@ describe('AlertingAuthorization', () => {
         ruleTypesConsumersMap,
       });
 
-      await alertAuthorization.ensureAuthorized({
-        ruleTypeId: 'myType',
-        consumer: 'myApp',
+      await alertAuthorization.bulkEnsureAuthorized({
+        ruleTypeIdConsumersPairs: [{ ruleTypeId: 'myType', consumers: ['myApp'] }],
         operation: WriteOperations.Create,
         entity: AlertingAuthorizationEntity.Rule,
         additionalPrivileges: ['test/create'],

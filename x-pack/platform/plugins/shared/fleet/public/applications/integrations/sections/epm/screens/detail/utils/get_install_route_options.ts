@@ -13,12 +13,14 @@ const EXCLUDED_PACKAGES = [
   'apm',
   'cloud_security_posture',
   'cloud_asset_inventory',
+  'cloud_defend',
   'dga',
   'fleet_server',
   'osquery_manager',
   'problemchild',
   'security_detection_engine',
   'synthetics',
+  'agentless_hello_world',
 ];
 
 interface GetInstallPkgRouteOptionsParams {
@@ -30,6 +32,7 @@ interface GetInstallPkgRouteOptionsParams {
   isFirstTimeAgentUser: boolean;
   isAgentlessIntegration?: boolean;
   isAgentlessDefault?: boolean;
+  prerelease?: boolean;
 }
 
 export type InstallPkgRouteOptions = [
@@ -52,6 +55,7 @@ export const getInstallPkgRouteOptions = ({
   isCloud,
   isAgentlessIntegration,
   isAgentlessDefault,
+  prerelease,
 }: GetInstallPkgRouteOptionsParams): InstallPkgRouteOptions => {
   const integrationOpts: { integration?: string } = integration ? { integration } : {};
   const packageExemptFromStepsLayout = isPackageExemptFromStepsLayout(pkgkey);
@@ -60,6 +64,7 @@ export const getInstallPkgRouteOptions = ({
   const path = pagePathGetters.add_integration_to_policy({
     pkgkey,
     useMultiPageLayout,
+    prerelease: prerelease ?? false,
     ...integrationOpts,
     ...(agentPolicyId ? { agentPolicyId } : {}),
   })[1];

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
-import Os from 'os';
-import { v4 as uuidv4 } from 'uuid';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { parseRawFlags, getArgValue, remapPluginPaths, DedicatedTaskRunner } from '@kbn/test';
-import type { Config } from '../config';
+import { DedicatedTaskRunner, getArgValue, parseRawFlags, remapPluginPaths } from '@kbn/test';
+import Os from 'os';
+import Path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import type { Config } from './configs';
 
 export async function runKibanaServer(options: {
   procs: ProcRunner;

@@ -14,6 +14,7 @@ import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/serve
 import type { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
 import type {
   DefendInsight,
+  DefendInsightType,
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
 } from '@kbn/elastic-assistant-common';
@@ -40,6 +41,7 @@ import { DATA_STREAM_NAME } from './constants';
 import { buildWorkflowInsights } from './builders';
 
 const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_SUPPRESS_SIZE = 1000;
 
 interface SetupInterface {
   kibanaVersion: string;
@@ -240,6 +242,30 @@ class SecurityWorkflowInsightsService {
     registerCallback(CallbackIds.DefendInsightsPostFetch, this.onAfterFetch.bind(this));
   }
 
+  private async suppressExistingInsights(endpointIds: string[], types: DefendInsightType[]) {
+    const existingInsights = await this.fetch({
+      size: DEFAULT_SUPPRESS_SIZE,
+      targetIds: endpointIds,
+      types,
+      actionTypes: [ActionType.Refreshed],
+    });
+
+    return Promise.all(
+      existingInsights.map((existingInsight) => {
+        if (!existingInsight) {
+          return Promise.resolve();
+        }
+
+        const source = existingInsight._source as SecurityWorkflowInsight;
+        return this.update(
+          existingInsight._id as string,
+          { action: { ...source.action, type: ActionType.Suppressed } },
+          existingInsight._index
+        );
+      })
+    );
+  }
+
   public async onAfterFetch(
     request: KibanaRequest<unknown, unknown, DefendInsightsGetRequestQuery>,
     agentIds: string[]
@@ -258,11 +284,15 @@ class SecurityWorkflowInsightsService {
     defendInsights: DefendInsight[],
     request: KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>
   ): Promise<Array<Awaited<WriteResponseBase | void>>> {
+    await this.isInitialized;
+
+    // suppress existing insights since they might be stale, any current ones will be refreshed
+    await this.suppressExistingInsights(request.body.endpointIds, [request.body.insightType]);
+
+    // comes after suppression since we should always suppress stale insights
     if (!defendInsights || !defendInsights.length) {
       return [];
     }
-
-    await this.isInitialized;
 
     const workflowInsights = await buildWorkflowInsights({
       defendInsights,
@@ -270,6 +300,7 @@ class SecurityWorkflowInsightsService {
       endpointMetadataService: this.endpointContext.getEndpointMetadataService(),
       esClient: this.esClient,
     });
+
     const uniqueInsights = getUniqueInsights(workflowInsights);
 
     return Promise.all(uniqueInsights.map((insight) => this.create(insight)));
@@ -279,11 +310,6 @@ class SecurityWorkflowInsightsService {
     request: KibanaRequest,
     agentIds: string[] = []
   ): Promise<void> {
-    const { endpointManagementSpaceAwarenessEnabled } = this.endpointContext.experimentalFeatures;
-    if (!endpointManagementSpaceAwarenessEnabled) {
-      return;
-    }
-
     const { id: spaceId } = await this.endpointContext.getActiveSpace(request);
     const fleetServices = this.endpointContext.getInternalFleetServices(spaceId);
     await fleetServices.ensureInCurrentSpace({ agentIds });

@@ -116,6 +116,25 @@ describe('TaskPool', () => {
       expect(pool.usedCapacity).toEqual(3);
     });
 
+    test('returns execution IDs of current tasks in pool', async () => {
+      const pool = new TaskPool({
+        capacity$: of(10),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_UPDATE_BY_QUERY,
+      });
+      const mockTask1 = mockTask();
+      const mockTask2 = mockTask();
+      const mockTask3 = mockTask();
+
+      await pool.run([{ ...mockTask1 }, { ...mockTask2 }, { ...mockTask3 }]);
+      expect(pool.getCurrentTasksInPool()).toEqual([
+        mockTask1.taskExecutionId,
+        mockTask2.taskExecutionId,
+        mockTask3.taskExecutionId,
+      ]);
+    });
+
     test('availableCapacity are a function of total_capacity - usedCapacity', async () => {
       const pool = new TaskPool({
         capacity$: of(10),
@@ -501,6 +520,25 @@ describe('TaskPool', () => {
 
       expect(result).toEqual(TaskPoolRunResult.RunningAllClaimedTasks);
       expect(pool.usedCapacity).toEqual(3 * TaskCost.Normal);
+    });
+
+    test('returns execution IDs of current tasks in pool', async () => {
+      const pool = new TaskPool({
+        capacity$: of(10),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_MGET,
+      });
+      const mockTask1 = mockTask();
+      const mockTask2 = mockTask();
+      const mockTask3 = mockTask();
+
+      await pool.run([{ ...mockTask1 }, { ...mockTask2 }, { ...mockTask3 }]);
+      expect(pool.getCurrentTasksInPool()).toEqual([
+        mockTask1.taskExecutionId,
+        mockTask2.taskExecutionId,
+        mockTask3.taskExecutionId,
+      ]);
     });
 
     test('availableCapacity are a function of total_capacity - usedCapacity', async () => {

@@ -9,12 +9,12 @@
 
 import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { useInternalStateSelector } from '../../state_management/redux';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { DiscoverLayout } from '../layout';
 import { addHelpMenuToAppChrome } from '../../../../components/help_menu/help_menu_util';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useSavedSearchAliasMatchRedirect } from '../../../../hooks/saved_search_alias_match_redirect';
-import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { useAdHocDataViews } from '../../hooks/use_adhoc_data_views';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
@@ -27,9 +27,9 @@ export interface DiscoverMainProps {
 }
 
 export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
-  const savedSearch = useSavedSearchInitial();
   const services = useDiscoverServices();
-  const { chrome, docLinks, data, spaces, history } = services;
+  const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
+  const { chrome, docLinks, spaces, history } = services;
 
   /**
    * Adhoc data views functionality
@@ -41,15 +41,8 @@ export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
     addHelpMenuToAppChrome(chrome, docLinks);
   }, [chrome, docLinks]);
 
-  useEffect(() => {
-    return () => {
-      // clear session when navigating away from discover main
-      data.search.session.clear();
-    };
-  }, [data.search.session]);
-
   // TODO: Move this higher up in the component tree
-  useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
+  useSavedSearchAliasMatchRedirect({ discoverSession, spaces, history });
 
   return (
     <RootDragDropProvider>
