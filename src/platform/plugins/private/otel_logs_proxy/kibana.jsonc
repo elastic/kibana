@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/otel-logs-proxy-plugin",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "otelLogsProxy",
+    "configPath": "otel_logs_proxy",
+    "browser": false,
+    "server": true
+  }
+}
