@@ -11,11 +11,29 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
+import { EXECUTION_TIMEOUT } from '../../fixtures/constants';
 import { nationalParksWorkflow } from '../../fixtures/workflows';
 
 test.describe('InternalActions/Elasticsearch', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginWithCustomRole({
+      elasticsearch: {
+        cluster: ['manage_index_templates'],
+        indices: [
+          {
+            names: ['national-parks'],
+            privileges: ['create_index', 'read', 'view_index_metadata', 'write', 'delete_index'],
+          },
+        ],
+      },
+      kibana: [
+        {
+          base: ['all'],
+          feature: {},
+          spaces: ['*'],
+        },
+      ],
+    });
   });
 
   test.afterAll(async ({ scoutSpace, apiServices }) => {
@@ -29,20 +47,13 @@ test.describe('InternalActions/Elasticsearch', { tag: tags.DEPLOYMENT_AGNOSTIC }
     await page.testSubj.waitForSelector('runWorkflowWithUnsavedChangesConfirmationModal');
     await page.testSubj.click('confirmModalConfirmButton');
 
-    const workflowExecutionPanelLocator = page.testSubj.locator('workflowExecutionPanel');
-    const foreachLoopNodeLocator = workflowExecutionPanelLocator
-      .locator('.euiTreeView__node')
-      .filter({ hasText: 'loop_over_results' });
-    await expect(foreachLoopNodeLocator).toBeVisible();
-
-    await foreachLoopNodeLocator.locator('.euiTreeView__expansionArrow').click();
+    await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
     await pageObjects.workflowExecution.expandStepsTree();
 
     // verify output of create_parks_index
-    await pageObjects.workflowExecution
-      .getStep('create_parks_index')
-      .then((locator) => locator.click());
+    const createParksIndexStep = await pageObjects.workflowExecution.getStep('create_parks_index');
+    await createParksIndexStep.click();
     expect(
       await pageObjects.workflowExecution.getStepResultJson<Record<string, unknown>>('output')
     ).toStrictEqual({
@@ -52,9 +63,10 @@ test.describe('InternalActions/Elasticsearch', { tag: tags.DEPLOYMENT_AGNOSTIC }
     });
 
     // verify output of bulk_index_park_data
-    await pageObjects.workflowExecution
-      .getStep('bulk_index_park_data')
-      .then((locator) => locator.click());
+    const bulkIndexParkDataStep = await pageObjects.workflowExecution.getStep(
+      'bulk_index_park_data'
+    );
+    await bulkIndexParkDataStep.click();
     const bulkIndexOutput = await pageObjects.workflowExecution.getStepResultJson<
       Record<string, unknown>
     >('output');
@@ -62,9 +74,8 @@ test.describe('InternalActions/Elasticsearch', { tag: tags.DEPLOYMENT_AGNOSTIC }
     expect(bulkIndexOutput.items).toHaveLength(5);
 
     // verify output of search_park_data
-    await pageObjects.workflowExecution
-      .getStep('search_park_data')
-      .then((locator) => locator.click());
+    const searchParkDataStep = await pageObjects.workflowExecution.getStep('search_park_data');
+    await searchParkDataStep.click();
     const searchParkOutput = await pageObjects.workflowExecution.getStepResultJson<{
       hits: {
         total: { value: number };

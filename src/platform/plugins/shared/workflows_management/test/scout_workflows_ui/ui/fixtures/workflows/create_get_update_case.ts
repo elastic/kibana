@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const createGetUpdateCase = `
+export const getCreateGetUpdateCaseWorkflowYaml = (owner: string) => `
 name: Case E2E test
 enabled: false
 description: This is a workflow to test case kibana E2E
@@ -37,10 +37,6 @@ inputs:
         - high
         - critical
 
-    owner:
-      type: string
-      description: Owner of the case
-
     comments:
       type: array
       description: List of comments associated with the alert
@@ -53,19 +49,11 @@ inputs:
               - user
             description: Comment category
 
-          owner:
-            type: string
-            enum:
-              - securitySolution
-              - observability
-            description: Owner of the comment
-
           comment:
             type: string
             description: Comment text
 
         required:
-          - owner
           - type
           - comment
         additionalProperties: false
@@ -74,7 +62,6 @@ inputs:
     - title
     - description
     - severity
-    - owner
 
   additionalProperties: false
 
@@ -90,7 +77,7 @@ steps:
         id: none
         name: none
         type: .none
-      owner: \${{ inputs.owner }}
+      owner: "${owner}"
       settings:
         syncAlerts: false
       tags:
@@ -116,7 +103,7 @@ steps:
           caseId: \${{variables.case_id}}
           comment: \${{foreach.item.comment}}
           type: user
-          owner: \${{inputs.owner}}
+          owner: "${owner}"
 
       - name: set_new_version
         type: data.set

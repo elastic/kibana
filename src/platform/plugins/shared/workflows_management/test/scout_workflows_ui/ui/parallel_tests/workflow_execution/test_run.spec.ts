@@ -84,9 +84,7 @@ test.describe('Workflow execution - Test runs', { tag: tags.DEPLOYMENT_AGNOSTIC 
     await pageObjects.workflowList.navigate();
     await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
 
-    const workflowRow = page.testSubj
-      .locator('workflowListTable')
-      .getByRole('row', { name: workflowName });
+    const workflowRow = pageObjects.workflowList.getWorkflowRow(workflowName);
     await expect(workflowRow).toBeVisible();
 
     const toggleSwitch = workflowRow.locator('[data-test-subj^="workflowToggleSwitch-"]');

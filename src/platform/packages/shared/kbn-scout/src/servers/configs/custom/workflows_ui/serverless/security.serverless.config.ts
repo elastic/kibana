@@ -27,6 +27,8 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--uiSettings.overrides.workflows:ui:enabled=true',
+      // Allow short alert rule intervals for alert trigger tests (default minimum is 1m)
+      '--xpack.alerting.rules.minimumScheduleInterval.value=15s',
     ],
   },
 };

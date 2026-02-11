@@ -8,7 +8,7 @@
  */
 
 export { nationalParksWorkflow } from './national_parks_workflow';
-export { createGetUpdateCase } from './create_get_update_case';
+export { getCreateGetUpdateCaseWorkflowYaml } from './create_get_update_case';
 export {
   getListTestWorkflowYaml,
   getTestRunWorkflowYaml,

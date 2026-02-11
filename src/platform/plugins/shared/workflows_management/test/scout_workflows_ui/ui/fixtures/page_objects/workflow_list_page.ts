@@ -12,17 +12,10 @@ import { PLUGIN_ID } from '../../../../../common';
 export class WorkflowListPage {
   constructor(private readonly page: ScoutPage) {}
 
-  // Navigation
-
   /** Navigates to the workflows list page. */
   async navigate() {
     await this.page.gotoApp(PLUGIN_ID);
   }
-
-  // Workflow Locators
-  // NOTE: These methods return Locator synchronously (not Promise<Locator>).
-  // This preserves Playwright's auto-retry behavior when used with expect() assertions.
-  // Do NOT wrap the return values with `await` when passing to `expect()`.
 
   /** Returns the table row locator for the specified workflow. */
   getWorkflowRow(workflowName: string): Locator {
@@ -68,8 +61,6 @@ export class WorkflowListPage {
 
   /** Selects multiple workflows by clicking their checkboxes. */
   async selectWorkflows(workflowNamesToCheck: string[]) {
-    await this.navigate();
-
     for (const workflowName of workflowNamesToCheck) {
       await this.getSelectCheckboxForWorkflow(workflowName).click();
     }

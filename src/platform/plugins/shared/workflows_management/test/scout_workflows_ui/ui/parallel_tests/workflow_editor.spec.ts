@@ -39,9 +39,7 @@ test.describe('Sanity tests for workflows', { tag: tags.DEPLOYMENT_AGNOSTIC }, (
     await pageObjects.workflowList.navigate();
     await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
 
-    const workflowRow = page.testSubj
-      .locator('workflowListTable')
-      .getByRole('row', { name: workflowName });
+    const workflowRow = pageObjects.workflowList.getWorkflowRow(workflowName);
     await expect(workflowRow).toBeVisible();
     await workflowRow.getByLabel('Run').click();
     await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });

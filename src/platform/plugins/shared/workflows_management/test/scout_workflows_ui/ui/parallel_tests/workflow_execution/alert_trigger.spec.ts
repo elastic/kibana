@@ -124,17 +124,10 @@ test.describe(
       await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
       // Validate single-alert workflow executions (one alert per execution)
-      await pageObjects.workflowList.navigate();
-      await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
-      await page.testSubj
-        .locator('workflowListTable')
-        .getByRole('link', { name: singleWorkflowName })
-        .click();
-      await page.getByRole('button', { name: 'Executions' }).click();
-      await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
+      await pageObjects.workflowEditor.gotoWorkflowExecutions(singleWorkflow.id);
 
-      const executionItems = page.testSubj.locator('workflowExecutionListItem');
-      await expect(executionItems).toHaveCount(mockAlerts.length, {
+      const singleWorkflowExecutions = page.testSubj.locator('workflowExecutionListItem');
+      await expect(singleWorkflowExecutions).toHaveCount(mockAlerts.length, {
         timeout: ALERT_PROPAGATION_TIMEOUT,
       });
 
@@ -144,24 +137,20 @@ test.describe(
       const isSecurityProject = config.projectType === 'security';
 
       // Most recent execution first -> last alert first
-      const expectedSingleAlertIds = [...mockAlerts].reverse().map((a) => a.alert_id);
+      const expectedSingleAlertIds = mockAlerts.map((a) => a.alert_id).reverse();
 
       for (let i = 0; i < expectedSingleAlertIds.length; i++) {
         // eslint-disable-next-line playwright/no-nth-methods -- iterating over execution list items by index
-        await executionItems.nth(i).click();
+        await singleWorkflowExecutions.nth(i).click();
 
-        const executionPanel = page.testSubj.locator('workflowExecutionPanel');
-        await expect(executionPanel).toBeVisible();
         await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
         await pageObjects.workflowExecution.expandStepsTree();
 
         // Only 1 iteration per execution (single-alert mode)
-        const logEachAlertButtons = executionPanel.getByRole('button', {
-          name: /^log_each_alert/,
-        });
-        await expect(logEachAlertButtons).toHaveCount(1);
-        // eslint-disable-next-line playwright/no-nth-methods
-        await logEachAlertButtons.first().click();
+        const logEachAlertButton = await pageObjects.workflowExecution.getStep(
+          'foreach_log_each_alert > 0 > log_each_alert'
+        );
+        await logEachAlertButton.click();
 
         const stepOutput = await pageObjects.workflowExecution.getStepResultJson<unknown>('output');
         const stepOutputStr = JSON.stringify(stepOutput);
@@ -177,35 +166,24 @@ test.describe(
       }
 
       // Validate multiple-alerts workflow execution (all alerts in one execution)
-      await pageObjects.workflowList.navigate();
-      await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
-      await page.testSubj
-        .locator('workflowListTable')
-        .getByRole('link', { name: multipleWorkflowName })
-        .click();
-      await page.getByRole('button', { name: 'Executions' }).click();
-      await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
+      await pageObjects.workflowEditor.gotoWorkflowExecutions(multipleWorkflow.id);
 
-      const executionItems2 = page.testSubj.locator('workflowExecutionListItem');
-      await expect(executionItems2).toHaveCount(1, { timeout: ALERT_PROPAGATION_TIMEOUT });
+      const multipleWorkflowExecutions = page.testSubj.locator('workflowExecutionListItem');
+      await expect(multipleWorkflowExecutions).toHaveCount(1, {
+        timeout: ALERT_PROPAGATION_TIMEOUT,
+      });
 
-      // eslint-disable-next-line playwright/no-nth-methods
-      await executionItems2.first().click();
+      await multipleWorkflowExecutions.click();
 
-      const executionPanel2 = page.testSubj.locator('workflowExecutionPanel');
-      await expect(executionPanel2).toBeVisible();
       await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
       await pageObjects.workflowExecution.expandStepsTree();
 
       // 2 iterations (both alerts in single execution)
-      const logEachAlertButtons2 = executionPanel2.getByRole('button', {
-        name: /^log_each_alert/,
-      });
-      await expect(logEachAlertButtons2).toHaveCount(mockAlerts.length);
-
       for (let i = 0; i < mockAlerts.length; i++) {
-        // eslint-disable-next-line playwright/no-nth-methods -- iterating over foreach iterations by index
-        await logEachAlertButtons2.nth(i).click();
+        const logEachAlertButton = await pageObjects.workflowExecution.getStep(
+          `foreach_log_each_alert > ${i} > log_each_alert`
+        );
+        await logEachAlertButton.click();
 
         const alertOutput = await pageObjects.workflowExecution.getStepResultJson<unknown>(
           'output'
@@ -277,14 +255,7 @@ test.describe(
       await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
       // Wait for the canary workflow to receive executions — this proves alerts propagated
-      await pageObjects.workflowList.navigate();
-      await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
-      await page.testSubj
-        .locator('workflowListTable')
-        .getByRole('link', { name: canaryWorkflowName })
-        .click();
-      await page.getByRole('button', { name: 'Executions' }).click();
-      await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
+      await pageObjects.workflowEditor.gotoWorkflowExecutions(canaryWorkflow.id);
 
       const canaryExecutions = page.testSubj.locator('workflowExecutionListItem');
       await expect(canaryExecutions).toHaveCount(1, { timeout: ALERT_PROPAGATION_TIMEOUT });
@@ -293,10 +264,8 @@ test.describe(
       // The canary already received its execution, so any alert-triggered execution
       // for the disabled workflow would have appeared by now.
       await pageObjects.workflowList.navigate();
-      await page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
-      await page.testSubj
-        .locator('workflowListTable')
-        .getByRole('link', { name: disabledWorkflowName })
+      await pageObjects.workflowList
+        .getWorkflowAction(disabledWorkflowName, 'editWorkflowAction')
         .click();
       await page.getByRole('button', { name: 'Executions' }).click();
       await page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });

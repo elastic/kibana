@@ -12,7 +12,7 @@ import { expect } from '@kbn/scout/ui';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 import { EXECUTION_TIMEOUT } from '../../fixtures/constants';
-import { createGetUpdateCase } from '../../fixtures/workflows';
+import { getCreateGetUpdateCaseWorkflowYaml } from '../../fixtures/workflows';
 
 /**
  * Returns the correct case owner based on the project type.
@@ -32,7 +32,7 @@ const getCaseOwner = (projectType: string | undefined) => {
 
 test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
   });
 
   test.afterAll(async ({ scoutSpace, apiServices }) => {
@@ -49,16 +49,13 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
       title: `Test Case ${Math.floor(Math.random() * 10000)}`,
       description: 'This is a test case description',
       severity: 'low',
-      owner: caseOwner,
       comments: [
         {
           type: 'user',
-          owner: caseOwner,
           comment: 'This is the case comment 1',
         },
         {
           type: 'user',
-          owner: caseOwner,
           comment: 'This is the case comment 2',
         },
       ],
@@ -66,7 +63,9 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
 
     // Navigate to new workflow and set YAML
     await pageObjects.workflowEditor.gotoNewWorkflow();
-    await pageObjects.workflowEditor.setYamlEditorValue(createGetUpdateCase);
+    await pageObjects.workflowEditor.setYamlEditorValue(
+      getCreateGetUpdateCaseWorkflowYaml(caseOwner)
+    );
 
     // Run workflow with unsaved changes
     await page.testSubj.click('runWorkflowHeaderButton');
@@ -121,7 +120,7 @@ test.describe('InternalActions/Cases', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => 
         }[];
       }>('output');
       expect(createCaseCommentOutput.comments).toHaveLength(i + 1);
-      expect(createCaseCommentOutput.comments[i].owner).toBe(comment.owner);
+      expect(createCaseCommentOutput.comments[i].owner).toBe(caseOwner);
       expect(createCaseCommentOutput.comments[i].type).toBe(comment.type);
       expect(createCaseCommentOutput.comments[i].comment).toBe(comment.comment);
     }

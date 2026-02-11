@@ -43,6 +43,16 @@ export class WorkflowEditorPage {
   }
 
   /**
+   * Navigate directly to the executions tab for a workflow.
+   */
+  async gotoWorkflowExecutions(workflowId: string) {
+    await this.page.gotoApp(`${PLUGIN_ID}/${workflowId}`, {
+      params: { tab: 'executions' },
+    });
+    await this.page.testSubj.waitForSelector('workflowExecutionList', { state: 'visible' });
+  }
+
+  /**
    * Wait for the YAML editor to be visible and ready
    */
   async waitForEditorToLoad() {

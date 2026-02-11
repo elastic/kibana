@@ -34,6 +34,7 @@ test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     ];
     await apiServices.workflows.bulkCreate(scoutSpace.id, workflows.map(getListTestWorkflowYaml));
 
+    await pageObjects.workflowList.navigate();
     await pageObjects.workflowList.performBulkAction(
       workflows.map((w) => w.name),
       'enable'
@@ -60,6 +61,7 @@ test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     ];
     await apiServices.workflows.bulkCreate(scoutSpace.id, workflows.map(getListTestWorkflowYaml));
 
+    await pageObjects.workflowList.navigate();
     await pageObjects.workflowList.performBulkAction(
       workflows.map((w) => w.name),
       'disable'
@@ -83,6 +85,7 @@ test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     ];
     await apiServices.workflows.bulkCreate(scoutSpace.id, workflows.map(getListTestWorkflowYaml));
 
+    await pageObjects.workflowList.navigate();
     await pageObjects.workflowList.performBulkAction(
       workflows.map((w) => w.name),
       'delete'
@@ -113,6 +116,7 @@ test.describe('WorkflowsList/BulkActions', { tag: tags.DEPLOYMENT_AGNOSTIC }, ()
     ];
     await apiServices.workflows.bulkCreate(scoutSpace.id, workflows.map(getListTestWorkflowYaml));
 
+    await pageObjects.workflowList.navigate();
     await pageObjects.workflowList.selectWorkflows(workflows.map((w) => w.name));
     await page.testSubj.waitForSelector('workflows-table-bulk-actions-button', {
       state: 'visible',
