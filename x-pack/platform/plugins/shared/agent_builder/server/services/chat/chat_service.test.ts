@@ -33,8 +33,7 @@ import {
 } from '../../test_utils';
 import type { ChatService } from './types';
 import { createChatService } from './chat_service';
-import { isConversationIdSetEvent, isRoundCompleteEvent } from '@kbn/agent-builder-common/chat';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat';
 
 const createChatModel = (): InferenceChatModel => {
   // we don't really need it
@@ -153,60 +152,6 @@ describe('ChatService', () => {
         },
       })
     );
-  });
-
-  it('passes nextInput through to executeAgent$', async () => {
-    const obs$ = chatService.converse({
-      agentId: 'my-agent',
-      request,
-      nextInput: { message: 'hello' },
-    });
-
-    await firstValueFrom(obs$.pipe(toArray()));
-
-    expect(executeAgentMock$).toHaveBeenCalledWith(
-      expect.objectContaining({
-        nextInput: { message: 'hello' },
-      })
-    );
-  });
-
-  it('emits round-complete events from executeAgent$', async () => {
-    const round = {
-      id: 'round-1',
-      trace_id: 'trace-1',
-      steps: [],
-      response: { message: 'Response' },
-      status: ConversationRoundStatus.completed,
-      input: { message: 'hi' },
-      started_at: new Date().toISOString(),
-      time_to_first_token: 0,
-      time_to_last_token: 0,
-      model_usage: {
-        connector_id: 'c1',
-        llm_calls: 1,
-        input_tokens: 0,
-        output_tokens: 0,
-      },
-    };
-    const mockRoundCompleteEvent = {
-      type: ChatEventType.roundComplete,
-      data: { round },
-    };
-
-    executeAgentMock$.mockReturnValue(of(mockRoundCompleteEvent));
-
-    const obs$ = chatService.converse({
-      agentId: 'my-agent',
-      request,
-      nextInput: { message: 'hello' },
-    });
-
-    const events = await firstValueFrom(obs$.pipe(toArray()));
-
-    const roundCompleteEvents = events.filter(isRoundCompleteEvent);
-    expect(roundCompleteEvents).toHaveLength(1);
-    expect(roundCompleteEvents[0].data.round).toEqual(round);
   });
 
   describe('autoCreateConversationWithId', () => {

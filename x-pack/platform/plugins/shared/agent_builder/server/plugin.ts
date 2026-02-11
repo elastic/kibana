@@ -28,7 +28,6 @@ import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
-import { registerLifecycleConsoleHooks } from './register_lifecycle_console_hooks';
 
 export class AgentBuilderPlugin
   implements
@@ -83,8 +82,6 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
     });
 
-    registerLifecycleConsoleHooks(serviceSetups.hooks);
-
     registerFeatures({ features: setupDeps.features });
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
@@ -112,7 +109,7 @@ export class AgentBuilderPlugin
       analyticsService: this.analyticsService,
     });
 
-    const setupContract: AgentBuilderPluginSetup = {
+    return {
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
       },
@@ -129,8 +126,6 @@ export class AgentBuilderPlugin
         registerSkill: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
       },
     };
-
-    return setupContract;
   }
 
   start(

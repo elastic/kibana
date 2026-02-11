@@ -6,11 +6,13 @@
  */
 
 import type { Observable } from 'rxjs';
-import { filter, of, defer, shareReplay, switchMap, merge, EMPTY, tap } from 'rxjs';
+import { tap } from 'rxjs';
+import { filter, of, defer, shareReplay, switchMap, merge, EMPTY } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import {
   type ConversationAction,
   type ChatEvent,
@@ -52,6 +54,13 @@ export const createChatService = (options: ChatServiceDeps): ChatService => {
   return new ChatServiceImpl(options);
 };
 
+interface ConversationContext {
+  conversation: ConversationWithOperation;
+  conversationClient: ConversationClient;
+  chatModel: InferenceChatModel;
+  selectedConnectorId: string;
+}
+
 class ChatServiceImpl implements ChatService {
   private readonly dependencies: ChatServiceDeps;
 
@@ -69,7 +78,7 @@ class ChatServiceImpl implements ChatService {
     storeConversation = true,
     request,
     abortSignal,
-    nextInput: initialNextInput,
+    nextInput,
     autoCreateConversationWithId = false,
     browserApiTools,
     configurationOverrides,
@@ -96,13 +105,15 @@ class ChatServiceImpl implements ChatService {
           conversationClient: services.conversationClient,
         });
 
-        return {
+        // Build conversation context
+        const context: ConversationContext = {
           conversation,
           conversationClient: services.conversationClient,
           chatModel: services.chatModel,
           selectedConnectorId: services.selectedConnectorId,
-          nextInput: initialNextInput,
         };
+
+        return context;
       }).pipe(
         switchMap((context) => {
           // Emit conversation ID for new conversations (only when persisting)
@@ -115,7 +126,7 @@ class ChatServiceImpl implements ChatService {
           const agentEvents$ = executeAgent$({
             agentId,
             request,
-            nextInput: context.nextInput,
+            nextInput,
             capabilities,
             structuredOutput,
             outputSchema,
@@ -134,7 +145,7 @@ class ChatServiceImpl implements ChatService {
               ? generateTitle({
                   chatModel: context.chatModel,
                   conversation: context.conversation,
-                  nextInput: context.nextInput,
+                  nextInput,
                 })
               : of(context.conversation.title);
 

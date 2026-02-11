@@ -41,15 +41,16 @@ export interface ProcessedAttachment {
   tools: AttachmentBoundedTool[];
 }
 
+export interface ProcessedAttachmentType {
+  type: string;
+  description?: string;
+}
+
 export interface ProcessedRoundInput {
   message: string;
   attachments: ProcessedAttachment[];
 }
 
-export interface ProcessedAttachmentType {
-  type: string;
-  description?: string;
-}
 
 export type ProcessedConversationRound = Omit<ConversationRound, 'input'> & {
   input: ProcessedRoundInput;

@@ -256,7 +256,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const round = await extractRound(events$);
-  return { round };
+  return {
+    round,
+  };
 };
 
 const getConversationState = ({
