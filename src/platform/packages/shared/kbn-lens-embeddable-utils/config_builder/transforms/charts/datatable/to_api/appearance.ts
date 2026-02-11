@@ -87,15 +87,15 @@ function parseTransposedMetricSorting(
     return undefined;
   }
 
-  const mappedMetricColumn = columnIdMapping.get(transposeInfo.id);
+  const mapped = columnIdMapping.get(transposeInfo.id);
 
-  if (!mappedMetricColumn || mappedMetricColumn.type !== 'metric') {
+  if (!mapped || mapped.type !== 'metric') {
     return undefined;
   }
 
   return {
     values: transposeInfo.values,
-    index: mappedMetricColumn.index,
+    index: mapped.index,
   };
 }
 

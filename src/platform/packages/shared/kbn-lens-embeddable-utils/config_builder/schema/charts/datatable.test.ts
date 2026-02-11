@@ -209,8 +209,8 @@ describe('Datatable Schema', () => {
         ],
         sort_by: {
           column_type: 'transposed_metric',
-          index: 1, // Points to metrics[1] (average of bytes)
-          values: ['success'], // Identifies the transposed column
+          index: 1,
+          values: ['success'],
           direction: 'desc',
         },
       };
@@ -260,8 +260,8 @@ describe('Datatable Schema', () => {
         ],
         sort_by: {
           column_type: 'transposed_metric',
-          index: 0, // Points to metrics[1] (median of bytes)
-          values: ['success1', 'success2'], // One value per split dimension
+          index: 0,
+          values: ['success1', 'success2'],
           direction: 'desc',
         },
       };
