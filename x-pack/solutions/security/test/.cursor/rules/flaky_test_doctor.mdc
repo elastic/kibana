@@ -1,6 +1,6 @@
 ---
-description: Flaky test analysis expert for Security Solution Cypress tests
-globs: ["**/*.cy.ts"]
+description: Flaky test analysis expert for Security Solution Cypress and API tests
+globs: ["**/*.cy.ts", "**/test_suites/**/*.ts"]
 ---
 
 # Flaky Test Doctor
@@ -18,15 +18,76 @@ You are a senior QA engineer and Security Solution domain expert. You combine de
 **Security Solution Codebase:**
 - Plugin structure: `x-pack/solutions/security/plugins/security_solution/`
 - Shared packages: `x-pack/solutions/security/packages/`
-- Test locations: Cypress (`test/security_solution_cypress/`), Scout (`test/scout/`), API tests
+- Test locations:
+  - Cypress: `test/security_solution_cypress/`
+  - Scout: `test/scout/`
+  - API tests: `test/security_solution_api_integration/test_suites/`
 - Common components and hooks patterns
 - Data test subject conventions (`[data-test-subj="..."]`)
 
 **Testing Expertise:**
 - Cypress testing patterns and anti-patterns
 - Playwright/Scout testing framework
+- FTR (Functional Test Runner) for API integration tests
 - The testing pyramid (unit, integration, API, E2E)
 - Security Solution's test infrastructure across ESS, Serverless, and MKI environments
+
+---
+
+## Test Framework Overview
+
+> ⚠️ **Note on API Test Coverage:** The API test patterns and guidance in this rule are a **work in progress**. While the Cypress patterns have been refined through many real-world fixes, the API test patterns are newer and may not cover all scenarios. If you encounter a pattern or issue not documented here, please contribute by adding it to this rule.
+
+### Cypress (E2E)
+- **Framework:** Cypress + Mocha
+- **Location:** `test/security_solution_cypress/cypress/e2e/`
+- **Wait Mechanism:** `cy.intercept()`, `cy.wait()`, `.should()` assertions
+- **File Pattern:** `*.cy.ts`
+- **Tags:** `@ess`, `@serverless`, `@skipInServerlessMKI`
+
+### API Integration Tests (FTR)
+- **Framework:** Mocha + supertest + FTR services
+- **Location:** `test/security_solution_api_integration/test_suites/`
+- **Wait Mechanism:** `retry.waitForWithTimeout()`, custom `waitFor()` utilities
+- **File Pattern:** `*.ts` (within `test_suites/` directories)
+- **Tags:** `@ess`, `@serverless`, `@skipInServerlessMKI` (in describe block)
+- **Tag Location:** Often in `index.ts` files that load test files, not in individual test files
+
+### Key Differences
+
+| Aspect | Cypress | API Tests (FTR) |
+|--------|---------|-----------------|
+| **Services** | `cy.*` commands | `getService()` dependency injection |
+| **Assertions** | Cypress chains | `expect` from `@kbn/expect` |
+| **Retry** | Built-in `.should()` retry | `retry.waitForWithTimeout()` |
+| **Setup/Cleanup** | Cypress tasks, `cy.request()` | Direct API calls via `supertest` |
+| **Logging** | `cy.log()` | `log.debug()`, `log.info()` |
+| **Skip Syntax** | `describe.skip`, `it.skip` | `describe.skip`, `it.skip` |
+
+### FTR Service Pattern
+
+API tests use dependency injection via `getService()`:
+
+```typescript
+export default ({ getService }: FtrProviderContext) => {
+  const supertest = getService('supertest');
+  const es = getService('es');
+  const log = getService('log');
+  const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
+
+  describe('My API Test', () => {
+    // Tests here
+  });
+};
+```
+
+**Common FTR Services:**
+- `supertest` - HTTP client for Kibana API calls
+- `es` - Elasticsearch client for direct ES operations
+- `retry` - Retry utilities with timeout
+- `log` - Logging service for debugging
+- `kibanaServer` - Kibana server utilities (saved objects, etc.)
 
 ## Your Role
 
@@ -66,11 +127,46 @@ Before asking the user for information, **exhaust what you can learn from the co
 |-------------|----------------|
 | Is functionality still valid? | Check recent commits, search for related code changes |
 | Are there duplicate tests? | Search for API/unit tests covering same functionality |
-| When was the test skipped? | `git log --oneline -15 -- path/to/test.cy.ts` |
+| When was the test skipped? | Cypress: `git log --oneline -15 -- path/to/test.cy.ts`<br/>API: `git log --oneline -15 -- path/to/test.ts` (also check `index.ts`) |
 | What does the test do? | Read the test code |
-| What utilities exist? | Search `tasks/` folder, grep for common patterns |
+| What utilities exist? | Cypress: Search `tasks/` folder<br/>API: Search `utils/` folder |
 | Is there a linked GitHub issue? | Look at the FLAKY comment in the test file |
-| Test file structure/imports | Read the file and related tasks/screens |
+| Test file structure/imports | Read the file and related utilities |
+| What services are used? | Check `getService()` calls in API tests |
+| What cleanup exists? | Check `before`/`after` hooks |
+
+**For API tests specifically, also check:**
+
+| Information | How to Find It |
+|-------------|----------------|
+| What resources are created? | Look at API calls in `before`/`beforeEach` |
+| Are there wait utilities? | Check for `retry.waitForWithTimeout()`, custom `waitFor()` |
+| What ES resources are involved? | Look for transforms, indices, enrich policies |
+| Is there background task dependency? | Search for TaskManager references |
+| What environments does it run in? | Check the `index.ts` file that loads the test (tags are often there) |
+
+> ⚠️ **API Test Tag Location:** In API tests, environment tags (`@ess`, `@serverless`, etc.) can be in **two places**:
+>
+> 1. **In `index.ts`** - Tags apply to all loaded test files:
+> ```typescript
+> // test_suites/investigation/timeline/tests/index.ts
+> export default function ({ loadTestFile }: FtrProviderContext) {
+>   describe('@ess @serverless @serverlessQA SecuritySolution Timeline', () => {
+>     loadTestFile(require.resolve('./events'));
+>     loadTestFile(require.resolve('./timeline'));
+>   });
+> }
+> ```
+>
+> 2. **In individual test files** - Tags apply to specific describe blocks:
+> ```typescript
+> // test_suites/entity_analytics/entity_store/entity_store.ts
+> describe('@ess @skipInServerlessMKI Entity Store APIs', () => {
+>   // tests here
+> });
+> ```
+>
+> When investigating an API test, check **both** the parent `index.ts` and the test file itself to understand the full environment configuration.
 
 **Ask the user (can't self-determine):**
 
@@ -78,9 +174,10 @@ Before asking the user for information, **exhaust what you can learn from the co
 |-------------|----------|
 | Which environment(s) is failing? | CI links are private, you can't access them |
 | Specific error message | From CI logs/screenshots, not in code |
-| What do screenshots show? | Visual information not in code |
+| What do screenshots show? | Visual information not in code (Cypress only) |
 | Consistent or intermittent? | Requires running the test multiple times |
 | Additional CI context | Private infrastructure |
+| Server logs around failure time | May show ES/Kibana errors not in test output (API tests) |
 
 **Guidelines:**
 1. **Self-investigate first** - Exhaust what you can learn from code and git before asking
@@ -110,9 +207,16 @@ If the test is currently skipped (`.skip`, `@skipInServerless`, `@skipInServerle
 
 1. **Check when it was skipped:** Look at git history to find when and why
    ```bash
+   # For Cypress tests
    git log --oneline -15 -- path/to/test.cy.ts
    git log -p --all -S '.skip' -- path/to/test.cy.ts
+
+   # For API tests (check both describe.skip and it.skip)
+   git log --oneline -15 -- path/to/test.ts
+   git log -p --all -S '.skip' -- path/to/test.ts
    ```
+   
+   > **Note:** Skips can be at either level: `describe.skip` (suite) or `it.skip` (individual test)
 
 2. **Check for application changes:** Has the feature being tested changed since the skip?
    - Use `codebase_search` to find the feature implementation
@@ -465,33 +569,34 @@ Based on the analysis, propose a fix:
 
 > ✅ **After implementing a fix, always run the [Flaky Test Runner](https://ci-stats.kibana.dev/trigger_flaky_test_runner) to verify the fix works before merging.**
 
-### If Fixing the Cypress Test: Data & Cleanup Audit
+### Data & Cleanup Audit
 
-Before implementing a fix, perform a **Data & Cleanup Audit**:
+Before implementing a fix for either Cypress or API tests, perform a **Data & Cleanup Audit**:
 
 **1. Identify all resources the test creates or modifies:**
 - Saved objects (rules, cases, timelines, dashboards)
 - Indices or documents
 - Fleet agents, policies, integrations
-- Engine state (Risk Engine, Priv Mon Engine, Asset Criticality)
+- Engine state (Risk Engine, Entity Store, Priv Mon Engine, Asset Criticality)
+- Transforms, enrich policies, ingest pipelines
 - User preferences or settings
 - API keys or credentials
 
 **2. Verify cleanup for each resource:**
 
-| Resource Created | Cleanup Method | Cleaned in beforeEach? | Cleaned in afterEach? |
-|------------------|----------------|------------------------|----------------------|
-| [list each one]  | [API/UI/none]  | ✅/❌                   | ✅/❌                  |
+| Resource Created | Cleanup Method | Cleaned in before/beforeEach? | Cleaned in after/afterEach? |
+|------------------|----------------|------------------------------|----------------------------|
+| [list each one]  | [API/ES/none]  | ✅/❌                          | ✅/❌                        |
 
 **3. Check for missing cleanup:**
 - Is every created resource explicitly cleaned?
-- Is cleanup API-based (not UI-based)?
-- Does cleanup use `failOnStatusCode: false`?
-- Is there cleanup in `beforeEach` to handle previous failed runs?
+- Is cleanup API-based (not UI-based for Cypress)?
+- Does cleanup handle failures gracefully?
+- Is there cleanup in `before`/`beforeEach` to handle previous failed runs?
 
-> ⚠️ **Common root cause:** "Element not found" or unexpected UI often means stale data from previous runs, not timing issues.
+> ⚠️ **Common root cause:** "Element not found" (Cypress) or unexpected data (API tests) often means stale data from previous runs, not timing issues.
 
-**If cleanup is incomplete, add comprehensive cleanup:**
+**Cypress cleanup example:**
 
 ```typescript
 beforeEach(() => {
@@ -505,6 +610,27 @@ afterEach(() => {
   // Clean AFTER test
   deleteEngine();
   cleanFleet();
+});
+```
+
+**API test cleanup example:**
+
+```typescript
+before(async () => {
+  // Clean BEFORE suite - handles crashed previous runs
+  await utils.cleanEngines();
+  await dataView.create('security-solution');
+});
+
+after(async () => {
+  // Clean AFTER suite
+  await utils.cleanEngines();
+  await dataView.delete('security-solution');
+});
+
+afterEach(async () => {
+  // Clean after each test for isolation
+  await utils.cleanEngines();
 });
 ```
 
@@ -594,6 +720,306 @@ it.only('adding new assignees via add button in flyout', () => {
 ```
 
 > 💡 **Tip:** Run the test in headed mode (`--headed`) to see the browser and interact with it during debugging.
+
+---
+
+## API Test Debugging Techniques
+
+When investigating a flaky API test, use these techniques:
+
+### Use the Log Service
+
+FTR provides a `log` service for debugging. Add detailed logs to understand test flow:
+
+```typescript
+export default ({ getService }: FtrProviderContext) => {
+  const log = getService('log');
+  const entityAnalyticsApi = getService('entityAnalyticsApi');
+
+  describe('My API Test', () => {
+    it('should do something', async () => {
+      log.debug('Starting test...');
+      
+      const { body, status } = await entityAnalyticsApi.initEntityEngine({
+        params: { entityType: 'host' },
+        body: {},
+      });
+      
+      log.debug(`Init response - status: ${status}, body: ${JSON.stringify(body)}`);
+      
+      // Continue with test...
+    });
+  });
+};
+```
+
+**Log Levels:**
+- `log.debug()` - Detailed info for debugging (only shown with `--debug` flag)
+- `log.info()` - General information
+- `log.warning()` - Warnings that don't fail the test
+- `log.error()` - Errors (test may still continue)
+
+### Use Retry with Detailed Logging
+
+When using `retry.waitForWithTimeout()`, add logging to understand what's happening:
+
+```typescript
+await retry.waitForWithTimeout(
+  'Engine to start',
+  60_000,
+  async () => {
+    const { body } = await entityAnalyticsApi.getEntityEngine({ params: { entityType } });
+    log.debug(`Engine status for ${entityType}: ${body.status}`);
+    
+    if (body.status === 'error') {
+      log.error(`Engine error: ${JSON.stringify(body)}`);
+      throw new Error(`Engine failed: ${JSON.stringify(body)}`);
+    }
+    
+    return body.status === 'started';
+  }
+);
+```
+
+### Focus on a Single Test
+
+Use `.only` to run only the specific test you're investigating:
+
+```typescript
+// Run only this describe block
+describe.only('Entity Store APIs', () => {
+  it('should initialize engine', async () => {
+    // ...
+  });
+});
+
+// Or focus on a single test
+describe('Entity Store APIs', () => {
+  it.only('should initialize engine', async () => {
+    // ...
+  });
+});
+```
+
+> ⚠️ **Important:** Remove `.only` before committing!
+
+### Check Elasticsearch State Directly
+
+Use the `es` service to inspect Elasticsearch state:
+
+```typescript
+const es = getService('es');
+
+// Check if index exists
+const indexExists = await es.indices.exists({ index: '.entities.v1.latest.security_host_default' });
+log.debug(`Index exists: ${indexExists}`);
+
+// Check index contents
+const { body } = await es.search({
+  index: '.entities.v1.latest.security_host_default',
+  body: { query: { match_all: {} }, size: 10 }
+});
+log.debug(`Documents in index: ${body.hits.total.value}`);
+
+// Check transform status
+const transform = await es.transform.getTransform({ transform_id: 'my-transform' });
+log.debug(`Transform state: ${JSON.stringify(transform)}`);
+```
+
+### Inspect Task Manager State
+
+For tests involving background tasks:
+
+```typescript
+const kibanaServer = getService('kibanaServer');
+
+// Get task state
+const task = await kibanaServer.savedObjects.get({
+  type: 'task',
+  id: 'my-task-id',
+});
+log.debug(`Task state: ${JSON.stringify(task)}`);
+```
+
+### Running API Tests Locally
+
+The API integration tests use a specific command structure. From the `test/security_solution_api_integration` directory:
+
+**Command Pattern:**
+- `<type>`: Either "server" (start the server) or "runner" (run tests)
+- `<area>`: Test area like "detections_response", "entity_analytics"
+- `<licenseFolder>`: License tier like "default_license", "trial_license"
+
+```bash
+# Example: Entity Analytics tests
+
+# 1. Start the server for ESS
+npm run initialize-server:ea:trial entity_store ess
+
+# 2. Run tests against the server
+npm run run-tests:ea:trial entity_store ess essEnv
+
+# For Serverless:
+npm run initialize-server:ea:trial entity_store serverless
+npm run run-tests:ea:trial entity_store serverless serverlessEnv
+```
+
+**Alternative: Direct FTR command:**
+
+```bash
+# Run specific test suite with config
+node scripts/functional_tests \
+  --config x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/trial_license_complete_tier/configs/ess.config.ts
+
+# Run with debug logging
+DEBUG=* node scripts/functional_tests \
+  --config path/to/config.ts
+
+# Run specific test file pattern
+node scripts/functional_tests \
+  --config path/to/config.ts \
+  --grep "Entity Store APIs"
+```
+
+### Testing with Serverless Roles
+
+The `supertest` service is logged with `admin` role by default. For proper role-based testing, use `securitySolutionUtils.createSuperTest()`:
+
+```typescript
+import TestAgent from 'supertest/lib/agent';
+
+export default ({ getService }: FtrProviderContext) => {
+  const utils = getService('securitySolutionUtils');
+
+  describe('@ess @serverless my_test', () => {
+    let supertest: TestAgent;
+
+    before(async () => {
+      supertest = await utils.createSuperTest('admin');
+    });
+
+    it('should do something', async () => {
+      await supertest.get('/api/endpoint').expect(200);
+    });
+  });
+};
+```
+
+**Multiple roles in same test:**
+
+```typescript
+before(async () => {
+  adminSupertest = await utils.createSuperTest('admin');
+  viewerSupertest = await utils.createSuperTest('viewer');
+});
+```
+
+> ⚠️ **Note:** The helper keeps track of only one active session per role. If you instantiate `supertest` twice for the same role, the first instance will have an invalid API key - this can cause flaky failures!
+
+---
+
+## API Test Utilities Reference
+
+Common utilities available for API tests in Security Solution:
+
+### Detections Response FTR Services
+
+Located in `config/services/detections_response/`:
+
+| Utility | Location | Purpose |
+|---------|----------|---------|
+| `waitFor()` | `wait_for.ts` | Generic polling utility with timeout |
+| `waitForAlertsToBePresent()` | `alerts/wait_for_alerts_to_be_present.ts` | Wait for alerts to be indexed |
+| `deleteAllAlerts()` | `alerts/delete_all_alerts.ts` | Clean up alerts |
+| `deleteAllRules()` | `rules/delete_all_rules.ts` | Clean up detection rules |
+| `createRule()` | `rules/create_rule.ts` | Create a detection rule |
+| `waitForRuleStatus()` | `rules/wait_for_rule_status.ts` | Wait for rule to reach status |
+
+### Entity Analytics Utilities
+
+Located in `test_suites/entity_analytics/utils/`:
+
+| Utility | Purpose |
+|---------|---------|
+| `EntityStoreUtils.cleanEngines()` | Delete all entity engines |
+| `EntityStoreUtils.initEntityEngineForEntityTypesAndWait()` | Initialize and wait for engine to start |
+| `EntityStoreUtils.waitForEngineStatus()` | Poll until engine reaches expected status |
+| `EntityStoreUtils.expectEngineAssetsExist()` | Verify all engine assets are created |
+| `elasticAssetCheckerFactory` | Utilities to check transforms, enrich policies, etc. |
+
+### Privilege Monitoring Utilities
+
+Located in `test_suites/entity_analytics/monitoring/*/utils/privmon_utils.ts`:
+
+| Utility | Purpose |
+|---------|---------|
+| `waitForSyncTaskRun()` | Wait for privilege monitoring sync task |
+| `cleanPrivMonState()` | Clean all privilege monitoring state |
+| `expectUsersToBePresent()` | Wait and verify users are synced |
+
+### Common Wait Patterns
+
+```typescript
+// Using retry.waitForWithTimeout
+const retry = getService('retry');
+
+await retry.waitForWithTimeout(
+  'Descriptive message for logs',
+  60_000,  // Timeout in ms
+  async () => {
+    // Return true when condition is met
+    // Return false to keep polling
+    // Throw to fail immediately
+    const { body } = await api.getStatus();
+    return body.status === 'ready';
+  }
+);
+
+// Using waitFor from detections-response
+import { waitFor } from '@kbn/detections-response-ftr-services';
+
+await waitFor(
+  async () => {
+    const response = await supertest.get('/api/endpoint').expect(200);
+    return response.body.ready === true;
+  },
+  'waitForEndpoint',
+  log,
+  60_000  // Timeout
+);
+```
+
+### Creating Custom Utilities
+
+When you find yourself repeating the same wait pattern, create a utility:
+
+```typescript
+// In your test's utils file
+export const EntityStoreUtils = (getService: FtrProviderContext['getService']) => {
+  const retry = getService('retry');
+  const log = getService('log');
+  const entityAnalyticsApi = getService('entityAnalyticsApi');
+
+  const waitForEngineStatus = async (entityType: string, expectedStatus: string) => {
+    await retry.waitForWithTimeout(
+      `Engine ${entityType} to reach ${expectedStatus}`,
+      60_000,
+      async () => {
+        const { body } = await entityAnalyticsApi.getEntityEngine({ params: { entityType } });
+        log.debug(`Engine ${entityType} status: ${body.status}`);
+        
+        if (body.status === 'error' && expectedStatus !== 'error') {
+          throw new Error(`Engine failed: ${JSON.stringify(body)}`);
+        }
+        
+        return body.status === expectedStatus;
+      }
+    );
+  };
+
+  return { waitForEngineStatus };
+};
+```
 
 ---
 
@@ -1064,6 +1490,266 @@ cy.get(TOOLTIP_A).then(($a) => {
 
 ---
 
+## API Test Flaky Patterns
+
+> 🚧 **Work in Progress:** The following patterns are based on initial observations from API test flakiness. This section is actively being expanded as more patterns are discovered. If you find a new pattern, please add it here.
+
+The following patterns are specific to FTR-based API integration tests.
+
+### API Pattern: Async Engine/Resource Initialization
+
+**Symptoms:**
+- Test fails because engine, transform, or resource returns unexpected status
+- Error: `expected 'installing' to equal 'started'`
+- Test passes on retry or when run in isolation
+- Timing-sensitive assertions on resource status
+
+**Root Cause:** Elasticsearch operations (transforms, enrich policies, indices, entity engines) are asynchronous. The API may return before the operation completes.
+
+**Diagnosis:**
+1. Check if the test waits for the resource to reach expected status
+2. Look for `await api.initSomething()` followed immediately by `await api.getSomething()`
+3. Check if utility functions include polling logic
+
+```typescript
+// ❌ Flaky - doesn't wait for engine to be ready
+await entityAnalyticsApi.initEntityEngine({ params: { entityType: 'host' } });
+const { body } = await entityAnalyticsApi.getEntityEngine({ params: { entityType: 'host' } });
+expect(body.status).to.eql('started'); // May still be 'installing'!
+
+// ✅ Stable - uses retry with timeout
+await entityAnalyticsApi.initEntityEngine({ params: { entityType: 'host' } });
+await retry.waitForWithTimeout(
+  'Engine to start',
+  60_000,
+  async () => {
+    const { body } = await entityAnalyticsApi.getEntityEngine({ params: { entityType } });
+    return body.status === 'started';
+  }
+);
+```
+
+**Real Example:** Entity Store API tests (`entity_store.ts`) failed intermittently because engines were checked immediately after initialization. Fix: Created `initEntityEngineForEntityTypesAndWait()` utility that polls until status is 'started'.
+
+### API Pattern: Transform/Index Not Ready
+
+**Symptoms:**
+- Error: `transform not found`, `index not found`, `resource_not_found_exception`
+- Test creates a resource then immediately queries it
+- Works locally (slower) but fails in CI (faster)
+- Elasticsearch returns stale or missing data
+
+**Root Cause:** Elasticsearch resources (transforms, indices, enrich policies) take time to propagate across the cluster. The resource may not be queryable immediately after creation.
+
+```typescript
+// ❌ Flaky - transform may not exist yet
+await es.transform.putTransform({ transform_id: id, body: config });
+const { body } = await es.transform.getTransform({ transform_id: id }); // May throw!
+
+// ✅ Stable - retry with delay
+const expectTransformExists = async (
+  transformId: string,
+  attempts: number = 5,
+  delayMs: number = 2000
+) => {
+  let currentAttempt = 1;
+  while (currentAttempt <= attempts) {
+    try {
+      await es.transform.getTransform({ transform_id: transformId });
+      return; // Success
+    } catch (e) {
+      if (currentAttempt === attempts) throw e;
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      currentAttempt++;
+    }
+  }
+};
+```
+
+**Real Example:** Entity Store tests checking for transform existence immediately after engine initialization. Fix: Added polling utilities like `expectTransformExists()` with configurable retry attempts.
+
+### API Pattern: Background Task Timing
+
+**Symptoms:**
+- Test expects data that should be created by a background task
+- Data is missing or stale
+- Error: assertion on empty array or missing records
+- Works when a delay is added (but hardcoded delays are bad)
+
+**Root Cause:** Kibana task manager tasks run on intervals (e.g., every 5 minutes). If a test depends on a task having run, it may fail if the task hasn't executed yet.
+
+**Diagnosis:**
+1. Check if the feature uses background tasks (look for `TaskManager`, scheduled tasks)
+2. Identify the task interval
+3. Check if there's a way to trigger the task or wait for it
+
+```typescript
+// ❌ Flaky - task may not have run yet
+await privMonApi.enablePrivMonEngine();
+const { body } = await privMonApi.getUsers();
+expect(body.users.length).to.be.greaterThan(0); // Empty - task hasn't synced!
+
+// ✅ Stable - wait for task execution
+await privMonApi.enablePrivMonEngine();
+await waitForSyncTaskRun(); // Wait for background task
+const { body } = await privMonApi.getUsers();
+expect(body.users.length).to.be.greaterThan(0); // Has data
+```
+
+**Real Example:** Privilege monitoring tests (`cross_source_sync.ts`) failed because they expected synced users immediately after enabling the engine. Fix: Added `waitForSyncTaskRun()` utility that waits for the task to execute.
+
+### API Pattern: Incomplete Cleanup Between Tests
+
+**Symptoms:**
+- Test passes in isolation but fails when run with suite
+- Test fails with "already exists" or duplicate resource errors
+- Unexpected data appears in test results
+- Order-dependent failures (test A passes, test B fails, but B passes when run alone)
+
+**Root Cause:** Resources created by previous tests (or previous failed runs) interfere with the current test.
+
+**Diagnosis:**
+1. Check `before`/`after` hooks for cleanup
+2. Look for resources that persist across tests
+3. Check if cleanup runs even when tests fail
+
+```typescript
+// ❌ Flaky - leftover engines from previous runs
+before(async () => {
+  await utils.initEntityEngineForEntityTypesAndWait(['host']);
+});
+
+after(async () => {
+  await utils.cleanEngines();
+});
+
+// ✅ Stable - clean before AND after
+before(async () => {
+  await utils.cleanEngines(); // Clean first to handle crashed previous runs
+  await utils.initEntityEngineForEntityTypesAndWait(['host']);
+});
+
+after(async () => {
+  await utils.cleanEngines();
+});
+
+// Even better - clean in beforeEach for test isolation
+beforeEach(async () => {
+  await utils.cleanEngines();
+});
+
+afterEach(async () => {
+  await utils.cleanEngines();
+});
+```
+
+**Real Example:** Entity Store tests failed when run together because engines from previous tests weren't cleaned. Fix: Added `cleanEngines()` to both `before` and `after` hooks.
+
+### API Pattern: Asserting on Async Aggregations
+
+**Symptoms:**
+- Aggregation counts don't match expected values
+- Data exists but aggregation returns 0 or partial count
+- Works with a delay, fails without
+- Elasticsearch query returns stale results
+
+**Root Cause:** Elasticsearch indices may not be refreshed immediately after writes. Aggregations may return stale data.
+
+```typescript
+// ❌ Flaky - index may not be refreshed
+await es.index({ index: 'my-index', document: data });
+const { body } = await es.search({
+  index: 'my-index',
+  body: { aggs: { count: { value_count: { field: 'id' } } } }
+});
+expect(body.aggregations.count.value).to.eql(1); // May be 0!
+
+// ✅ Stable - force refresh or use retry
+await es.index({ index: 'my-index', document: data, refresh: true }); // Force refresh
+
+// Or use retry
+await retry.waitForWithTimeout('Document to be indexed', 10000, async () => {
+  const { body } = await es.search({ index: 'my-index', body: { query: { match_all: {} } } });
+  return body.hits.total.value === 1;
+});
+```
+
+### API Pattern: Race Condition in Engine State
+
+**Symptoms:**
+- Engine status fluctuates between states
+- Test catches engine in intermediate state
+- Error assertions on status like 'error' when expecting 'started'
+- Multiple concurrent operations interfere with each other
+
+**Root Cause:** When multiple engines or operations are initialized concurrently, race conditions can cause unexpected states.
+
+```typescript
+// ❌ Potentially flaky - concurrent operations may interfere
+await Promise.all([
+  entityAnalyticsApi.initEntityEngine({ params: { entityType: 'host' } }),
+  entityAnalyticsApi.initEntityEngine({ params: { entityType: 'user' } }),
+]);
+// Check status immediately - may catch intermediate state
+
+// ✅ Stable - wait for all to reach expected state
+await Promise.all([
+  entityAnalyticsApi.initEntityEngine({ params: { entityType: 'host' } }),
+  entityAnalyticsApi.initEntityEngine({ params: { entityType: 'user' } }),
+]);
+
+await Promise.all([
+  utils.waitForEngineStatus('host', 'started'),
+  utils.waitForEngineStatus('user', 'started'),
+]);
+```
+
+### API Pattern: Invalid API Key from Role Reuse
+
+**Symptoms:**
+- 401 Unauthorized errors in Serverless tests
+- Test passes on first run but fails on subsequent runs
+- Works in ESS but fails in Serverless
+- API calls fail with "invalid API key" errors
+
+**Root Cause:** The `securitySolutionUtils.createSuperTest()` helper keeps track of only one active session per role. If you create multiple `supertest` instances for the same role, the first instance's API key becomes invalid.
+
+```typescript
+// ❌ Flaky - first instance becomes invalid
+const supertest1 = await utils.createSuperTest('admin');
+const supertest2 = await utils.createSuperTest('admin'); // Invalidates supertest1!
+
+await supertest1.get('/api/endpoint').expect(200); // 401 Unauthorized!
+
+// ✅ Stable - reuse the same instance
+let adminSupertest: TestAgent;
+
+before(async () => {
+  adminSupertest = await utils.createSuperTest('admin');
+});
+
+it('test 1', async () => {
+  await adminSupertest.get('/api/endpoint').expect(200);
+});
+
+it('test 2', async () => {
+  await adminSupertest.get('/api/other').expect(200); // Uses same instance
+});
+
+// ✅ Stable - different roles are fine
+before(async () => {
+  adminSupertest = await utils.createSuperTest('admin');
+  viewerSupertest = await utils.createSuperTest('viewer'); // Different role, OK
+});
+```
+
+**Diagnosis:**
+1. Check if the test creates multiple `supertest` instances for the same role
+2. Look for `createSuperTest()` calls in `beforeEach` (should usually be in `before`)
+3. Check if `supertest` is being created inside individual tests
+
+---
+
 ## Test Deletion Guidelines
 
 When a test is more trouble than it's worth, consider deletion. Use this process:
@@ -1219,15 +1905,24 @@ cy.contains(getDefaultUsername());
 **Fix:** Skip the test on MKI serverless environments:
 
 ```typescript
-// Add the skip tag to tests requiring feature flags
+// Cypress: Add the skip tag to tests requiring feature flags
 describe('Feature requiring FF', { tags: ['@skipInServerlessMKI'] }, () => {
   it('should do something', () => {
+    // test code
+  });
+});
+
+// API tests: Add skip tag in describe block
+describe('@ess @serverless @skipInServerlessMKI Feature requiring FF', () => {
+  it('should do something', async () => {
     // test code
   });
 });
 ```
 
 **Note:** Per product requirements, the Kibana team has been asked to implement a feature flag mechanism before Serverless GA.
+
+> ⚠️ **Important for API Tests:** The `./scripts/api_configs.json` file allows configuring PLIs (Product Line Items like Essentials vs Complete tier) for MKI, but **experimental feature flags are NOT yet supported**. If your test requires a feature flag, it must be skipped in MKI until this is implemented.
 
 ---
 
@@ -1265,6 +1960,231 @@ because index [auditbeat-2022] does not have all primary shards active yet.]
 4. **Skip on MKI** with `@skipInServerlessMKI` if infrastructure requirements can't be reliably met
 
 **Real Example:** ML rule suppression test failed because `forceStartDatafeeds()` returned before jobs started. The UI cached "not started" status (5-minute cache), keeping fields disabled. Server logs revealed shards weren't active yet - an infrastructure issue, not a test bug.
+
+---
+
+### API Tests: MKI-Specific Considerations
+
+API tests have additional considerations when running in MKI environments:
+
+#### Issue: Transform Operations Take Longer
+
+**Symptoms:**
+- Tests timeout waiting for transforms to start
+- Works in ESS but fails in MKI
+- Transform status remains 'installing' longer than expected
+
+**Root Cause:** MKI infrastructure may have different performance characteristics. Transforms and ES operations can take longer.
+
+**Fix:** Increase timeout values for MKI:
+
+```typescript
+const TIMEOUT = process.env.IS_MKI ? 120_000 : 60_000;
+
+await retry.waitForWithTimeout(
+  'Transform to be ready',
+  TIMEOUT,
+  async () => {
+    // ... check transform status
+  }
+);
+```
+
+#### Issue: Index Refresh Timing
+
+**Symptoms:**
+- Documents written but not immediately visible
+- Aggregations return 0 or stale counts
+- Works locally, fails in MKI
+
+**Root Cause:** Index refresh in MKI may have different timing due to cluster configuration.
+
+**Fix:** Use explicit refresh or longer retry timeouts:
+
+```typescript
+// Option 1: Force refresh after write
+await es.index({ index: 'my-index', document: data, refresh: true });
+
+// Option 2: Use retry with longer timeout
+await retry.waitForWithTimeout('Document to be indexed', 30_000, async () => {
+  const { body } = await es.search({ index: 'my-index' });
+  return body.hits.total.value > 0;
+});
+```
+
+#### Issue: Internal Index Access Restrictions
+
+**Symptoms:**
+- 403 Forbidden when accessing `.internal-*` or `.kibana*` indices directly
+- Works in ESS, fails in MKI
+- Test uses direct ES operations on internal indices
+
+**Root Cause:** MKI restricts direct access to internal indices for security.
+
+**Fix:** Use Kibana APIs instead of direct ES operations:
+
+```typescript
+// ❌ Direct ES access (fails in MKI)
+await es.index({ index: '.internal-my-index', document: data });
+
+// ✅ Use Kibana API
+await supertest
+  .post('/api/my-feature/data')
+  .send(data)
+  .expect(200);
+```
+
+#### Issue: Task Scheduling Differences
+
+**Symptoms:**
+- Background tasks don't run as expected
+- Task intervals seem different
+- Data synced by tasks is missing or delayed
+
+**Root Cause:** Task Manager behavior may differ in MKI due to cluster configuration.
+
+**Fix:** Add explicit waits for task execution and consider longer intervals:
+
+```typescript
+// Wait for task to run with longer timeout in MKI
+await waitFor(
+  async () => {
+    const users = await privMonApi.getUsers();
+    return users.body.length > 0;
+  },
+  'waitForTaskSync',
+  log,
+  180_000 // 3 minutes for MKI
+);
+```
+
+---
+
+## Running MKI Tests Locally
+
+When debugging MKI-specific flakiness, you can run tests against a real MKI environment locally.
+
+### Cypress: MKI Local Execution
+
+#### Setup Required
+
+1. **Create Elastic Cloud API key for QA:**
+   - Navigate to [QA Console](https://console.qa.cld.elstc.co)
+   - Click User menu → Organization → API keys → Create API key
+   - Set name, expiration, assign organization owner role
+   - Save the key to `~/.elastic/cloud.json`:
+
+   ```json
+   {
+     "api_key": {
+       "qa": "<API_KEY>"
+     }
+   }
+   ```
+
+2. **Configure role users** at `.ftr/role_users.json` (Kibana root):
+
+   ```json
+   {
+     "platform_engineer": {
+       "email": "<email>",
+       "password": "<password>"
+     },
+     "admin": {
+       "email": "<email>",
+       "password": "<password>"
+     }
+   }
+   ```
+
+   > ⚠️ **Important:** Append `+skip-mfa` to email addresses to bypass MFA (e.g., `user+platform_engineer+skip-mfa@elasticsearch.com`)
+
+#### Running Tests
+
+```bash
+# Navigate to Cypress directory
+cd x-pack/solutions/security/test/security_solution_cypress
+
+# Set environment
+export QA_CONSOLE_URL="https://console.qa.cld.elstc.co"
+
+# Open Cypress with MKI project (auto-created and auto-deleted)
+yarn cypress:open:qa:serverless
+
+# Debug failures from periodic pipeline (use specific commit)
+yarn cypress:open:qa:serverless --commit <GithubCommitHashValue>
+```
+
+**Finding the commit hash from periodic pipeline:**
+1. Go to #security-serverless-test-alerts Slack channel
+2. Click "View Step" for the failing execution
+3. Expand the failing execution in Buildkite
+4. Copy the `Github Commit Hash` from the blue box
+
+#### PLI Configuration Options
+
+```bash
+# Run with Essentials tier (default is Complete)
+yarn cypress:open:qa:serverless --tier essentials
+
+# Run without endpoint add-on
+yarn cypress:open:qa:serverless --no-endpoint-addon
+
+# Run without cloud add-on
+yarn cypress:open:qa:serverless --no-cloud-addon
+
+# Combine flags
+yarn cypress:open:qa:serverless --commit <hash> --tier essentials --no-endpoint-addon
+```
+
+#### Available Roles for Testing
+
+Configure in `.ftr/role_users.json`:
+- `admin`
+- `platform_engineer` (default for tests)
+- `detections_admin`
+- `editor`
+- `endpoint_operations_analyst`
+- `endpoint_policy_manager`
+- `rule_author`
+- `soc_manager`
+- `t1_analyst`, `t2_analyst`, `t3_analyst`
+- `threat_intelligence_analyst`
+- `viewer`
+- `none`
+
+### API Tests: MKI Local Execution
+
+#### Setup Required
+
+Install the QAF (QA Framework) tool on your machine.
+
+#### Create and Run Tests
+
+```bash
+# 1. Create a Serverless project
+qaf elastic-cloud projects create \
+  --project-type security \
+  --project-name <projectName> \
+  --environment qa \
+  --region aws-eu-west-1
+
+# 2. Get credentials
+qaf elastic-cloud projects list --show-credentials
+
+# 3. Run tests against MKI
+TEST_CLOUD=1 \
+TEST_ES_URL="https://<user>:<password>@<elasticsearchUrl>" \
+TEST_KIBANA_URL="https://<user>:<password>@<kibanaUrl>" \
+yarn <apiTestScript>
+
+# 4. Clean up after testing
+qaf elastic-cloud projects delete-all
+```
+
+> ⚠️ **Notes for API MKI testing:**
+> - For specific PLIs, manually configure them in the created project
+> - For different authorization roles, manually configure in the project
 
 ---
 
