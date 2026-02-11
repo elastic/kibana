@@ -19,6 +19,7 @@ import {
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   LOG_THRESHOLD_ALERT_TYPE_ID,
   ALERT_INDEX_PATTERN,
+  ApmRuleType,
 } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/alerts-ui-shared';
 import type { TopAlert } from '../../../../typings/alerts';
@@ -372,6 +373,40 @@ describe('useDiscoverUrl', () => {
         dataViewSpec: { title: expectedIndexPattern, timeFieldName: '@timestamp' },
         timeRange: expectedTimeRange,
       });
+    });
+  });
+
+  describe('APM rules', () => {
+    it.each([
+      ApmRuleType.TransactionDuration,
+      ApmRuleType.TransactionErrorRate,
+      ApmRuleType.ErrorCount,
+    ])('builds Discover url for APM rule type %s when alert has index pattern', (ruleTypeId) => {
+      const expectedIndexPattern = 'apm-*-transaction*';
+      const alertWithIndexPattern = {
+        ...MOCK_ALERT,
+        fields: {
+          [ALERT_INDEX_PATTERN]: expectedIndexPattern,
+        },
+      } as unknown as TopAlert;
+      const rule = {
+        ruleTypeId,
+        params: {},
+      } as unknown as Rule;
+
+      const expectedTimeRange = {
+        from: moment(MOCK_ALERT.start).subtract(30, 'minutes').toISOString(),
+        to: moment(MOCK_ALERT.start).add(30, 'minutes').toISOString(),
+      };
+
+      renderHook(() => useDiscoverUrl({ alert: alertWithIndexPattern, rule }));
+
+      expect(mockGetRedirectUrl).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dataViewSpec: { title: expectedIndexPattern, timeFieldName: '@timestamp' },
+          timeRange: expectedTimeRange,
+        })
+      );
     });
   });
 });

@@ -11,7 +11,7 @@ import { COMMON_HEADERS, TEST_INPUT } from '../fixtures/constants';
 
 apiTest.describe(
   'POST api/painless_lab/execute with specific cluster privileges',
-  { tag: tags.ESS_ONLY },
+  { tag: tags.stateful.all },
   () => {
     apiTest(
       'should execute a valid painless script using cluster:admin/scripts/painless/execute credentials',
