@@ -219,6 +219,10 @@ export class DatePicker {
     const absoluteTab = this.page.testSubj
       .locator('superDatePickerAbsoluteTab')
       .filter({ visible: true });
+    const isAbsoluteTabVisible = async () => (await absoluteTab.count()) === 1;
+    if (!(await isAbsoluteTabVisible())) {
+      await this.quickMenuButton.click();
+    }
     await expect(absoluteTab).toHaveCount(1);
     await absoluteTab.click();
   }
