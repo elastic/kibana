@@ -41,24 +41,40 @@ test.describe(
     });
 
     test('should reorder routing rules via drag and drop', async ({ pageObjects }) => {
-      await pageObjects.streams.expectRoutingOrder(['logs.otel.first', 'logs.otel.second', 'logs.otel.third']);
+      await pageObjects.streams.expectRoutingOrder([
+        'logs.otel.first',
+        'logs.otel.second',
+        'logs.otel.third',
+      ]);
 
       await pageObjects.streams.dragRoutingRule('logs.otel.first', 2);
 
       await pageObjects.streams.saveRuleOrder();
       await pageObjects.toasts.waitFor();
 
-      await pageObjects.streams.expectRoutingOrder(['logs.otel.second', 'logs.otel.third', 'logs.otel.first']);
+      await pageObjects.streams.expectRoutingOrder([
+        'logs.otel.second',
+        'logs.otel.third',
+        'logs.otel.first',
+      ]);
     });
 
     test('should cancel reordering', async ({ pageObjects }) => {
-      await pageObjects.streams.expectRoutingOrder(['logs.otel.first', 'logs.otel.second', 'logs.otel.third']);
+      await pageObjects.streams.expectRoutingOrder([
+        'logs.otel.first',
+        'logs.otel.second',
+        'logs.otel.third',
+      ]);
 
       await pageObjects.streams.dragRoutingRule('logs.otel.first', 2);
 
       await pageObjects.streams.cancelChanges();
 
-      await pageObjects.streams.expectRoutingOrder(['logs.otel.first', 'logs.otel.second', 'logs.otel.third']);
+      await pageObjects.streams.expectRoutingOrder([
+        'logs.otel.first',
+        'logs.otel.second',
+        'logs.otel.third',
+      ]);
     });
 
     test('should handle multiple reorder operations', async ({ pageObjects }) => {
@@ -105,7 +121,11 @@ test.describe(
       await page.reload();
 
       // Verify order persisted
-      await pageObjects.streams.expectRoutingOrder(['logs.otel.second', 'logs.otel.third', 'logs.otel.first']);
+      await pageObjects.streams.expectRoutingOrder([
+        'logs.otel.second',
+        'logs.otel.third',
+        'logs.otel.first',
+      ]);
     });
 
     test('should allow reordering only when multiple rules exist', async ({

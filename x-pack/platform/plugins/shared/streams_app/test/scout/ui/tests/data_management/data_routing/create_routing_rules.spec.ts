@@ -34,7 +34,9 @@ test.describe(
       // Verify we're in the creating new rule state
       await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
       await expect(page.getByTestId('streamsAppRoutingStreamNameLabel')).toBeVisible();
-      await expect(page.getByTestId('streamsAppRoutingStreamNamePrefix')).toContainText('logs.otel.');
+      await expect(page.getByTestId('streamsAppRoutingStreamNamePrefix')).toContainText(
+        'logs.otel.'
+      );
 
       // Fill in the stream name
       await page.getByTestId('streamsAppRoutingStreamEntryNameField').fill('nginx');
