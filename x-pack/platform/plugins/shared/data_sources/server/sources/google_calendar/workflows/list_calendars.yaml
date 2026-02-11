@@ -1,0 +1,18 @@
+version: '1'
+name: 'sources.google_calendar.list_calendars'
+description: List all calendars accessible to the user. Returns calendar ID, name, description, whether it is the primary calendar, access role, and time zone. Use this to discover available calendars before searching or listing events.
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: manual
+inputs:
+  - name: pageToken
+    type: string
+    required: false
+    description: "Pagination token. Pass the 'nextPageToken' value from a previous response to get the next page."
+steps:
+  - name: list_calendars
+    type: google_calendar.listCalendars
+    connector-id: <%= stackConnectorId %>
+    with:
+      pageToken: "${{inputs.pageToken}}"

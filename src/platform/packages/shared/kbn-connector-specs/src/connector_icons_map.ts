@@ -79,4 +79,11 @@ export const ConnectorIconsMap: Map<
       () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
     ),
   ],
+  [
+    '.google_calendar',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIcongooglecalendar" */ './specs/google_calendar/icon')
+    ),
+  ],
 ]);

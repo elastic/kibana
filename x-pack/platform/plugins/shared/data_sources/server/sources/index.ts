@@ -7,12 +7,14 @@
 import type { DataCatalogPluginSetup } from '@kbn/data-catalog-plugin/server';
 import { notionDataSource } from './notion';
 import { githubDataSource } from './github';
+import { googleCalendarDataSource } from './google_calendar';
 import { googleDriveDataSource } from './google_drive';
 import { sharepointOnlineDataSource } from './sharepoint_online';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(notionDataSource);
   dataCatalog.register(githubDataSource);
+  dataCatalog.register(googleCalendarDataSource);
   dataCatalog.register(googleDriveDataSource);
   dataCatalog.register(sharepointOnlineDataSource);
 }
