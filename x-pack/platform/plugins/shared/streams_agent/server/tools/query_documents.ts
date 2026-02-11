@@ -123,12 +123,19 @@ export function createQueryDocumentsTool({
             ? response.hits.total
             : response.hits.total?.value ?? 0;
 
-        // Extract the time range of returned documents for context
-        let oldestTimestamp: string | undefined;
-        let newestTimestamp: string | undefined;
+        // Extract the time range of returned documents as epoch millis
+        // so the agent can pass them directly to AI tools as startMs/endMs
+        let oldestReturnedTimestampMs: number | undefined;
+        let newestReturnedTimestampMs: number | undefined;
         if (documents.length > 0) {
-          newestTimestamp = documents[0]['@timestamp'] as string;
-          oldestTimestamp = documents[documents.length - 1]['@timestamp'] as string;
+          const newestTs = documents[0]['@timestamp'];
+          const oldestTs = documents[documents.length - 1]['@timestamp'];
+          if (typeof newestTs === 'string') {
+            newestReturnedTimestampMs = new Date(newestTs).getTime();
+          }
+          if (typeof oldestTs === 'string') {
+            oldestReturnedTimestampMs = new Date(oldestTs).getTime();
+          }
         }
 
         return {
@@ -142,8 +149,8 @@ export function createQueryDocumentsTool({
                 timeRange: {
                   ...(startMs !== undefined ? { queriedStartMs: startMs } : {}),
                   ...(endMs !== undefined ? { queriedEndMs: endMs } : {}),
-                  oldestReturnedTimestamp: oldestTimestamp,
-                  newestReturnedTimestamp: newestTimestamp,
+                  oldestReturnedTimestampMs,
+                  newestReturnedTimestampMs,
                 },
                 documents,
               },

@@ -48,6 +48,8 @@ The agent SHALL provide a tool `streams.query_documents` that accepts a stream n
 
 The tool SHALL flatten nested document structures into dot-notation key-value maps (e.g. `body.text`, `resource.attributes.host.name`) to reduce nesting and make documents easier for both the agent and the user to read. Long string values SHALL be truncated to keep context window usage manageable.
 
+The tool's response SHALL include the oldest and newest returned timestamps as epoch milliseconds (`oldestReturnedTimestampMs`, `newestReturnedTimestampMs`) so the agent can pass them directly to AI tools as `startMs`/`endMs` without needing to parse or convert date strings.
+
 #### Scenario: User asks to see recent data
 - **WHEN** the user asks "show me some recent logs from logs.nginx" or "what's in logs.android?"
 - **THEN** the agent calls `streams.query_documents` and presents the returned documents as a **chronological list** showing timestamp and key fields per entry — not as a prose summary
