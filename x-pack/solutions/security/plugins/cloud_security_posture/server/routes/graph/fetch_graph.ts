@@ -28,7 +28,6 @@ import {
   formatJsonProperty,
   buildLookupJoinEsql,
   buildEnrichPolicyEsql,
-  buildPinnedEsql,
 } from './utils';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
@@ -277,6 +276,25 @@ const buildEnrichedEntityFieldsEsql = (): string => {
       "\\"availableInEntityStore\\":false",
       ",\\"ecsParentField\\":\\"", targetEntityFieldHint, "\\"",
     "}")
+  )`;
+};
+
+/**
+ * Generates ESQL statement for evaluating pinned IDs.
+ * This checks if the document _id, actorEntityId, or targetEntityId matches any of the pinned IDs.
+ */
+const buildPinnedEsql = (pinnedIds?: string[]): string => {
+  if (!pinnedIds || pinnedIds.length === 0) {
+    return '| EVAL pinned = TO_STRING(null)';
+  }
+
+  const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
+
+  return `| EVAL pinned = CASE(
+    _id IN (${pinnedParamsStr}), _id,
+    actorEntityId IN (${pinnedParamsStr}), actorEntityId,
+    targetEntityId IN (${pinnedParamsStr}), targetEntityId,
+    null
   )`;
 };
 

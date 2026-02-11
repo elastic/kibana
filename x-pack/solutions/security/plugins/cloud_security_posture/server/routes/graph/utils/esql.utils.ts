@@ -131,25 +131,3 @@ export const buildEnrichPolicyEsql = (enrichPolicyName: string): string => {
 | ENRICH ${enrichPolicyName} ON actorEntityId WITH actorEntityName = entity.name, actorEntityType = entity.type, actorEntitySubType = entity.sub_type, actorHostIp = host.ip
 | ENRICH ${enrichPolicyName} ON targetEntityId WITH targetEntityName = entity.name, targetEntityType = entity.type, targetEntitySubType = entity.sub_type, targetHostIp = host.ip`;
 };
-
-/**
- * Generates ESQL statement for evaluating pinned IDs.
- * This checks if the document _id, actorEntityId, or targetEntityId matches any of the pinned IDs.
- *
- * @param pinnedIds - Array of IDs to check against (document _id, entity IDs)
- * @returns ESQL statement string
- */
-export const buildPinnedEsql = (pinnedIds?: string[]): string => {
-  if (!pinnedIds || pinnedIds.length === 0) {
-    return '| EVAL pinned = TO_STRING(null)';
-  }
-
-  const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
-
-  return `| EVAL pinned = CASE(
-    _id IN (${pinnedParamsStr}), _id,
-    actorEntityId IN (${pinnedParamsStr}), actorEntityId,
-    targetEntityId IN (${pinnedParamsStr}), targetEntityId,
-    null
-  )`;
-};
