@@ -21,6 +21,26 @@ import type {
 
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
 
+jest.mock('../../../../../../../../hooks', () => ({
+  ...jest.requireActual('../../../../../../../../hooks'),
+  useStartServices: () => ({
+    docLinks: {
+      links: {
+        fleet: {
+          datastreamsNamingScheme: 'https://docs.elastic.co',
+        },
+      },
+    },
+  }),
+  sendGetDataStreams: jest.fn(),
+}));
+
+jest.mock('../../datastream_hooks', () => ({
+  useIndexTemplateExists: () => ({
+    exists: true,
+    isLoading: false,
+  }),
+}));
 jest.mock('../../../single_page_layout/hooks/setup_technology', () => {
   return {
     useAgentless: jest.fn(),
@@ -395,6 +415,206 @@ describe('PackagePolicyInputStreamConfig', () => {
 
         // Controlled vars are hidden because no selection is provided
         expect(renderResult.queryByTestId('passwordInput-api-key')).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('dynamic_signal_types behavior', () => {
+    const mockOtelInputStream: RegistryStreamWithDataStream = {
+      input: 'otelcol',
+      title: 'OTel Collector',
+      template_path: 'stream.yml.hbs',
+      vars: [],
+      description: 'Collect telemetry via OpenTelemetry',
+      data_stream: {
+        title: 'OTel Data',
+        release: 'ga',
+        type: 'logs',
+        package: 'otel_package',
+        dataset: 'otel_package.data',
+        path: 'otel_data',
+        elasticsearch: {},
+        ingest_pipeline: 'default',
+        streams: [],
+      },
+    };
+
+    const mockOtelPolicyInputStream: NewPackagePolicyInputStream = {
+      id: 'otel-stream-1',
+      enabled: true,
+      data_stream: {
+        type: 'logs',
+        dataset: 'otel_package.data',
+      },
+      vars: {},
+    };
+
+    it('should hide Data Stream Type selector when dynamic_signal_types is true', async () => {
+      const packageInfoWithDynamicTypes: PackageInfo = {
+        ...mockPackageInfo,
+        type: 'input',
+        policy_templates: [
+          {
+            name: 'otel_template',
+            title: 'OTel Template',
+            description: 'OpenTelemetry template',
+            input: 'otelcol',
+            type: 'logs',
+            template_path: 'input.yml.hbs',
+            dynamic_signal_types: true,
+            vars: [],
+          },
+        ],
+      } as unknown as PackageInfo;
+
+      render(mockOtelInputStream, mockOtelPolicyInputStream, packageInfoWithDynamicTypes);
+
+      // Click to show advanced options
+      const advancedButton = renderResult.getByText('Advanced options');
+      fireEvent.click(advancedButton);
+
+      await waitFor(() => {
+        // Data Stream Type selector should NOT be visible
+        expect(renderResult.queryByText('Data Stream Type')).not.toBeInTheDocument();
+        expect(renderResult.queryByTestId('packagePolicyDataStreamType')).not.toBeInTheDocument();
+      });
+    });
+
+    it('should show Data Stream Type selector when dynamic_signal_types is false', async () => {
+      const packageInfoWithoutDynamicTypes: PackageInfo = {
+        ...mockPackageInfo,
+        type: 'input',
+        policy_templates: [
+          {
+            name: 'otel_template',
+            title: 'OTel Template',
+            description: 'OpenTelemetry template',
+            input: 'otelcol',
+            type: 'logs',
+            template_path: 'input.yml.hbs',
+            dynamic_signal_types: false,
+            vars: [],
+          },
+        ],
+      } as unknown as PackageInfo;
+
+      render(mockOtelInputStream, mockOtelPolicyInputStream, packageInfoWithoutDynamicTypes);
+
+      // Click to show advanced options
+      const advancedButton = renderResult.getByText('Advanced options');
+      fireEvent.click(advancedButton);
+
+      await waitFor(() => {
+        // Data Stream Type selector SHOULD be visible
+        expect(renderResult.getByText('Data Stream Type')).toBeInTheDocument();
+        expect(renderResult.getByTestId('packagePolicyDataStreamType')).toBeInTheDocument();
+      });
+    });
+
+    it('should show Data Stream Type selector when dynamic_signal_types is not defined', async () => {
+      const packageInfoWithoutDynamicTypes: PackageInfo = {
+        ...mockPackageInfo,
+        type: 'input',
+        policy_templates: [
+          {
+            name: 'otel_template',
+            title: 'OTel Template',
+            description: 'OpenTelemetry template',
+            input: 'otelcol',
+            type: 'logs',
+            template_path: 'input.yml.hbs',
+            // dynamic_signal_types not defined
+            vars: [],
+          },
+        ],
+      } as unknown as PackageInfo;
+
+      render(mockOtelInputStream, mockOtelPolicyInputStream, packageInfoWithoutDynamicTypes);
+
+      // Click to show advanced options
+      const advancedButton = renderResult.getByText('Advanced options');
+      fireEvent.click(advancedButton);
+
+      await waitFor(() => {
+        // Data Stream Type selector SHOULD be visible (backward compatibility)
+        expect(renderResult.getByText('Data Stream Type')).toBeInTheDocument();
+        expect(renderResult.getByTestId('packagePolicyDataStreamType')).toBeInTheDocument();
+      });
+    });
+
+    it('should not affect non-otelcol input types', async () => {
+      const regularPackageInfo: PackageInfo = {
+        ...mockPackageInfo,
+        type: 'input',
+        policy_templates: [
+          {
+            name: 'regular_template',
+            title: 'Regular Template',
+            description: 'Regular template',
+            input: 'httpjson',
+            type: 'logs',
+            template_path: 'input.yml.hbs',
+            vars: [],
+          },
+        ],
+      } as unknown as PackageInfo;
+
+      const regularInputStream: RegistryStreamWithDataStream = {
+        ...mockOtelInputStream,
+        input: 'httpjson',
+      };
+
+      render(regularInputStream, mockOtelPolicyInputStream, regularPackageInfo);
+
+      // Click to show advanced options
+      const advancedButton = renderResult.getByText('Advanced options');
+      fireEvent.click(advancedButton);
+
+      await waitFor(() => {
+        // Data Stream Type selector SHOULD be visible for non-otelcol inputs
+        expect(renderResult.getByText('Data Stream Type')).toBeInTheDocument();
+        expect(renderResult.getByTestId('packagePolicyDataStreamType')).toBeInTheDocument();
+      });
+    });
+
+    it('should show all signal type options (logs, metrics, traces)', async () => {
+      const packageInfoWithDynamicTypes: PackageInfo = {
+        ...mockPackageInfo,
+        type: 'input',
+        policy_templates: [
+          {
+            name: 'otel_template',
+            title: 'OTel Template',
+            description: 'OpenTelemetry template',
+            input: 'otelcol',
+            type: 'logs',
+            template_path: 'input.yml.hbs',
+            dynamic_signal_types: false,
+            vars: [],
+          },
+        ],
+      } as unknown as PackageInfo;
+
+      render(mockOtelInputStream, mockOtelPolicyInputStream, packageInfoWithDynamicTypes);
+
+      // Click to show advanced options
+      const advancedButton = renderResult.getByText('Advanced options');
+      fireEvent.click(advancedButton);
+
+      await waitFor(() => {
+        const radioGroup = renderResult.getByTestId('packagePolicyDataStreamType');
+        expect(radioGroup).toBeInTheDocument();
+
+        // Check that all three signal types are available
+        expect(
+          Array.from(radioGroup.children).find((child) => child.textContent === 'Logs')
+        ).toBeInTheDocument();
+        expect(
+          Array.from(radioGroup.children).find((child) => child.textContent === 'Metrics')
+        ).toBeInTheDocument();
+        expect(
+          Array.from(radioGroup.children).find((child) => child.textContent === 'Traces')
+        ).toBeInTheDocument();
       });
     });
   });

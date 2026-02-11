@@ -191,7 +191,6 @@ export const createManagementFooterItemsTree = (
               breadcrumbStatus: 'hidden',
             },
             { link: 'maps' },
-            { link: 'visualize' },
           ],
         },
         {
