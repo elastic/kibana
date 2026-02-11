@@ -6,7 +6,8 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
+import type { PipelineStateStream, RuleExecutionStep } from '../types';
+import { mapOneToOneStep } from '../stream_utils';
 import {
   ResourceManager,
   type ResourceManagerContract,
@@ -25,19 +26,21 @@ export class WaitForResourcesStep implements RuleExecutionStep {
     @inject(ResourceManager) private readonly resourcesService: ResourceManagerContract
   ) {}
 
-  public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
-    const { input } = state;
+  public executeStream(streamState: PipelineStateStream): PipelineStateStream {
+    return mapOneToOneStep(streamState, async (state) => {
+      const { input } = state;
 
-    this.logger.debug({
-      message: `[${this.name}] Starting step for rule ${input.ruleId}`,
+      this.logger.debug({
+        message: `[${this.name}] Starting step for rule ${input.ruleId}`,
+      });
+
+      await this.resourcesService.waitUntilReady();
+
+      this.logger.debug({
+        message: `[${this.name}] Resources ready for rule ${input.ruleId}`,
+      });
+
+      return { type: 'continue', state };
     });
-
-    await this.resourcesService.waitUntilReady();
-
-    this.logger.debug({
-      message: `[${this.name}] Resources ready for rule ${input.ruleId}`,
-    });
-
-    return { type: 'continue' };
   }
 }

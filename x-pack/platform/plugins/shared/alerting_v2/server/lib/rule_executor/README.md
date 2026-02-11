@@ -97,11 +97,13 @@ Steps are self-contained units of work that implement `RuleExecutionStep`:
 | `FetchRuleStep` | Fetches rule from Saved Objects | 
 | `ValidateRuleStep` | Validates rule is enabled | 
 | `ExecuteRuleQueryStep` | Builds and executes ES|QL query | 
-| `CreateAlertEventsStep` | Builds and stores alert events | 
+| `CreateAlertEventsStep` | Builds alert events batches | 
+| `DirectorStep` | Attaches episode information to alert batches |
+| `StoreAlertEventsStep` | Persists alert event batches |
 
 ## Key Design Principles
 
-1. **Immutable State**: Steps receive `Readonly<RulePipelineState>` and return new data via `RuleStepOutput`. Never mutate state directly.
+1. **Immutable Stream State**: Steps consume a `PipelineStateStream` and emit `StepStreamResult` objects. Never mutate incoming state directly; always emit a new state object when updating fields.
 
 2. **Domain-Driven**: Steps work with domain concepts only. No task manager types (`taskInstance`, `RunResult`) are exposed to steps.
 
@@ -128,7 +130,9 @@ Create a new file in `steps/` directory (e.g., `my_new_step.ts`):
 
 ```typescript
 import { inject, injectable } from 'inversify';
-import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
+import type { PipelineStateStream, RuleExecutionStep } from '../types';
+import { mapOneToOneStep, requireState } from '../stream_utils';
+import type { RuleResponse } from '../../rules_client';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -142,30 +146,35 @@ export class MyNewStep implements RuleExecutionStep {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
-    const { input, rule } = state;
+  public executeStream(input: PipelineStateStream): PipelineStateStream {
+    return mapOneToOneStep(input, async (state) => {
+      const requiredState = requireState(state, ['rule']);
 
-    // Validate required state from previous steps
-    if (!rule) {
-      throw new Error('MyNewStep requires rule from previous step');
-    }
+      if (!requiredState.ok) {
+        this.logger.debug({ message: `[${this.name}] State not ready, halting` });
+        return requiredState.result;
+      }
 
-    // Perform your logic here
-    const myResult = await this.doSomething(rule);
+      // The helper narrows the type, so `rule` is guaranteed here
+      const { rule } = requiredState.state;
 
-    // Return one of three options:
+      // Perform your logic here
+      const myResult = await this.doSomething(rule);
 
-    // Option 1: Continue with new data to add to state
-    return { type: 'continue', data: { myNewField: myResult } };
+      // Return one of two options:
 
-    // Option 2: Continue without adding data
-    // return { type: 'continue' };
+      // Option 1: Continue with new data merged into state
+      return {
+        type: 'continue',
+        state: { ...requiredState.state, myNewField: myResult },
+      };
 
-    // Option 3: Halt pipeline with a domain reason
-    // return { type: 'halt', reason: 'rule_disabled' };
+      // Option 2: Halt pipeline with a domain reason
+      // return { type: 'halt', reason: 'rule_disabled', state: requiredState.state };
+    });
   }
 
-  private async doSomething(rule: RuleResponse): Promise<unknown> {
+  private async doSomething(rule: RuleResponse): Promise<MyNewFieldType> {
     return {};
   }
 }
@@ -191,22 +200,22 @@ export interface RulePipelineState {
   readonly input: RuleExecutionInput;
   readonly rule?: RuleResponse;
   readonly queryPayload?: QueryPayload;
-  readonly esqlResponse?: ESQLSearchResponse;
-  readonly alertEvents?: Array<{ id: string; doc: AlertEvent }>;
+  readonly esqlRowBatch?: Array<Record<string, unknown>>;
+  readonly alertEventsBatch?: AlertEvent[];
   readonly myNewField?: MyNewFieldType; // Add your new field
 }
 ```
 
 ### Step 4: Register in DI Container
 
-Add your step to `setup/bind_services.ts`:
+Add your step to `setup/bind_rule_executor.ts`:
 
 ```typescript
 import { MyNewStep } from '../lib/rule_executor/steps';
 
 const bindRuleExecutionServices = (bind: ContainerModuleLoadOptions['bind']) => {
   // Bind your new step
-  bind(MyNewStep).toSelf().inSingletonScope();
+  bind(MyNewStep).toSelf().inRequestScope();
 
   // Add to the steps array at the desired position
   bind(RuleExecutionStepsToken)
@@ -217,6 +226,8 @@ const bindRuleExecutionServices = (bind: ContainerModuleLoadOptions['bind']) => 
       get(ExecuteRuleQueryStep),
       get(MyNewStep),          // <-- Insert at desired position
       get(CreateAlertEventsStep),
+      get(DirectorStep),
+      get(StoreAlertEventsStep),
     ])
     .inRequestScope();
 };
@@ -228,7 +239,7 @@ Create a test file `steps/my_new_step.test.ts`:
 
 ```typescript
 import { MyNewStep } from './my_new_step';
-import { createRuleExecutionInput, createRuleResponse } from '../test_utils';
+import { createPipelineStream, collectStreamResults, createRuleExecutionInput, createRuleResponse } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
 describe('MyNewStep', () => {
@@ -236,26 +247,31 @@ describe('MyNewStep', () => {
     const { loggerService } = createLoggerService();
     const step = new MyNewStep(loggerService);
 
-    const state = {
+    const inputState = {
       input: createRuleExecutionInput(),
       rule: createRuleResponse(),
     };
 
-    const result = await step.execute(state);
+    const stream = step.executeStream(createPipelineStream([inputState]));
+    const [result] = await collectStreamResults(stream);
 
     expect(result.type).toBe('continue');
-    expect(result).toHaveProperty('data.myNewField');
+    expect(result.state).toHaveProperty('myNewField');
   });
 
-  it('throws when required state is missing', async () => {
+  it('halts when required state is missing', async () => {
     const { loggerService } = createLoggerService();
     const step = new MyNewStep(loggerService);
 
-    const state = { input: createRuleExecutionInput() };
+    const inputState = { input: createRuleExecutionInput() };
+    const stream = step.executeStream(createPipelineStream([inputState]));
+    const [result] = await collectStreamResults(stream);
 
-    await expect(step.execute(state)).rejects.toThrow(
-      'MyNewStep requires rule from previous step'
-    );
+    expect(result).toEqual({
+      type: 'halt',
+      reason: 'state_not_ready',
+      state: inputState,
+    });
   });
 });
 ```
@@ -271,9 +287,9 @@ Middleware applies to **all steps** and is ideal for global cross-cutting concer
 ```
 MiddlewareA.execute()
   └─► MiddlewareB.execute()
-        └─► step.execute()
-        ◄── returns result
-  ◄── returns result
+        └─► step.executeStream()
+        ◄── returns stream
+  ◄── returns stream
 ```
 
 ### Creating a New Middleware
@@ -283,7 +299,7 @@ Create a new file in `middleware/` directory (e.g., `performance_middleware.ts`)
 ```typescript
 import { inject, injectable } from 'inversify';
 import type { RuleExecutionMiddlewareContext, RuleExecutionMiddleware } from './types';
-import type { RuleStepOutput } from '../types';
+import type { PipelineStateStream } from '../types';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -297,26 +313,34 @@ export class PerformanceMiddleware implements RuleExecutionMiddleware {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  public async execute(
+  public execute(
     ctx: RuleExecutionMiddlewareContext,
-    next: () => Promise<RuleStepOutput>
-  ): Promise<RuleStepOutput> {
-    const start = performance.now();
-    try {
-      return await next();
-    } finally {
-      const duration = performance.now() - start;
-      this.logger.debug({
-        message: `Step [${ctx.step.name}] completed in ${duration.toFixed(2)}ms`,
-      });
-    }
+    next: (input: PipelineStateStream) => PipelineStateStream,
+    input: PipelineStateStream
+  ): PipelineStateStream {
+    const stream = next(input);
+    const logger = this.logger;
+
+    return (async function* () {
+      const start = performance.now();
+      try {
+        for await (const result of stream) {
+          yield result;
+        }
+      } finally {
+        const duration = performance.now() - start;
+        logger.debug({
+          message: `Step [${ctx.step.name}] completed in ${duration.toFixed(2)}ms`,
+        });
+      }
+    })();
   }
 }
 ```
 
 ### Registering Middleware
 
-Add your middleware to `setup/bind_services.ts`:
+Add your middleware to `setup/bind_rule_executor.ts`:
 
 ```typescript
 import { PerformanceMiddleware } from '../lib/rule_executor/middleware';
@@ -353,7 +377,7 @@ Create a new file in `steps/decorators/` directory (e.g., `audit_logging_decorat
 
 ```typescript
 import { RuleStepDecorator } from './step_decorator';
-import type { RulePipelineState, RuleStepOutput } from '../../types';
+import type { PipelineStateStream } from '../../types';
 
 export class AuditLoggingDecorator extends RuleStepDecorator {
   constructor(
@@ -363,29 +387,28 @@ export class AuditLoggingDecorator extends RuleStepDecorator {
     super(step);
   }
 
-  public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
-    await this.auditService.log({
-      action: `rule_execution.step.${this.name}.start`,
-      ruleId: state.input.ruleId,
-      spaceId: state.input.spaceId,
-    });
+  public executeStream(input: PipelineStateStream): PipelineStateStream {
+    const stream = this.step.executeStream(input);
+    const auditService = this.auditService;
 
-    const result = await this.step.execute(state);
+    return (async function* () {
+      for await (const result of stream) {
+        await auditService.log({
+          action: `rule_execution.step.${result.type}`,
+          ruleId: result.state.input.ruleId,
+          spaceId: result.state.input.spaceId,
+        });
 
-    await this.auditService.log({
-      action: `rule_execution.step.${this.name}.${result.type}`,
-      ruleId: state.input.ruleId,
-      spaceId: state.input.spaceId,
-    });
-
-    return result;
+        yield result;
+      }
+    })();
   }
 }
 ```
 
 ### Applying Decorators
 
-Wrap specific steps at DI binding time in `setup/bind_services.ts`:
+Wrap specific steps at DI binding time in `setup/bind_rule_executor.ts`:
 
 ```typescript
 import { AuditLoggingDecorator } from '../lib/rule_executor/steps/decorators';
@@ -417,7 +440,12 @@ Test utilities are available in `test_utils.ts`:
 
 ```typescript
 import { MyStep } from './my_step';
-import { createRuleExecutionInput, createRuleResponse } from '../test_utils';
+import {
+  collectStreamResults,
+  createPipelineStream,
+  createRuleExecutionInput,
+  createRuleResponse,
+} from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
 describe('MyStep', () => {
@@ -430,7 +458,8 @@ describe('MyStep', () => {
       rule: createRuleResponse(),
     };
 
-    const result = await step.execute(state);
+    const stream = step.executeStream(createPipelineStream([state]));
+    const [result] = await collectStreamResults(stream);
 
     expect(result.type).toBe('continue');
   });
@@ -441,7 +470,7 @@ describe('MyStep', () => {
 
 ```typescript
 import { ErrorHandlingMiddleware } from './error_handling_middleware';
-import { createRuleExecutionInput } from '../test_utils';
+import { createPipelineStream, collectStreamResults, createRuleExecutionInput } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
 describe('ErrorHandlingMiddleware', () => {
@@ -449,17 +478,16 @@ describe('ErrorHandlingMiddleware', () => {
     const { loggerService, mockLogger } = createLoggerService();
     const middleware = new ErrorHandlingMiddleware(loggerService);
 
-    const expectedResult = { type: 'continue' as const };
-    const next = jest.fn().mockResolvedValue(expectedResult);
+    const next = jest.fn((input) => input);
 
     const context = {
-      step: { name: 'test_step', execute: jest.fn() },
-      state: { input: createRuleExecutionInput() },
+      step: { name: 'test_step', executeStream: jest.fn() },
     };
+    const inputState = { input: createRuleExecutionInput() };
+    const output = middleware.execute(context, next, createPipelineStream([inputState]));
+    const [result] = await collectStreamResults(output);
 
-    const result = await middleware.execute(context, next);
-
-    expect(result).toEqual(expectedResult);
+    expect(result).toEqual({ type: 'continue', state: inputState });
     expect(mockLogger.error).not.toHaveBeenCalled();
   });
 
@@ -467,13 +495,17 @@ describe('ErrorHandlingMiddleware', () => {
     const { loggerService, mockLogger } = createLoggerService();
     const middleware = new ErrorHandlingMiddleware(loggerService);
 
-    const next = jest.fn().mockRejectedValue(new Error('Step failed'));
+    const next = jest.fn(() =>
+      (async function* () {
+        throw new Error('Step failed');
+      })()
+    );
     const context = {
-      step: { name: 'failing_step', execute: jest.fn() },
-      state: { input: createRuleExecutionInput() },
+      step: { name: 'failing_step', executeStream: jest.fn() },
     };
+    const output = middleware.execute(context, next, createPipelineStream());
 
-    await expect(middleware.execute(context, next)).rejects.toThrow('Step failed');
+    await expect(collectStreamResults(output)).rejects.toThrow('Step failed');
     expect(mockLogger.error).toHaveBeenCalled();
   });
 });
@@ -483,20 +515,21 @@ describe('ErrorHandlingMiddleware', () => {
 
 ```typescript
 import { AuditLoggingDecorator } from './audit_logging_decorator';
-import { createRuleExecutionInput } from '../test_utils';
+import { collectStreamResults, createPipelineStream, createRuleExecutionInput } from '../test_utils';
 
 describe('AuditLoggingDecorator', () => {
   it('logs before and after step execution', async () => {
     const mockStep = {
       name: 'test_step',
-      execute: jest.fn().mockResolvedValue({ type: 'continue' }),
+      executeStream: jest.fn((input) => input),
     };
     const mockAuditService = { log: jest.fn() };
 
     const decorator = new AuditLoggingDecorator(mockStep, mockAuditService);
     const state = { input: createRuleExecutionInput() };
+    const stream = decorator.executeStream(createPipelineStream([state]));
 
-    await decorator.execute(state);
+    await collectStreamResults(stream);
 
     expect(mockAuditService.log).toHaveBeenCalledTimes(1);
   });
@@ -504,14 +537,20 @@ describe('AuditLoggingDecorator', () => {
   it('propagates errors from wrapped step', async () => {
     const mockStep = {
       name: 'failing_step',
-      execute: jest.fn().mockRejectedValue(new Error('Step failed')),
+      executeStream: jest.fn(() =>
+        (async function* () {
+          throw new Error('Step failed');
+        })()
+      ),
     };
     const mockAuditService = { log: jest.fn() };
 
     const decorator = new AuditLoggingDecorator(mockStep, mockAuditService);
-    const state = { input: createRuleExecutionInput() };
+    const stream = decorator.executeStream(
+      createPipelineStream([{ input: createRuleExecutionInput() }])
+    );
 
-    await expect(decorator.execute(state)).rejects.toThrow('Step failed');
+    await expect(collectStreamResults(stream)).rejects.toThrow('Step failed');
   });
 });
 ```

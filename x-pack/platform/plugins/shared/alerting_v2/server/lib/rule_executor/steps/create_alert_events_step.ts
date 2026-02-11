@@ -6,13 +6,13 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
-import { buildAlertEventsFromEsqlResponse } from '../build_alert_events';
+import type { PipelineStateStream, RuleExecutionStep } from '../types';
+import { createAlertEventsBatchBuilder, type AlertEventsBatchBuilder } from '../build_alert_events';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import { hasState, type StateWith } from '../type_guards';
+import { flatMapStep, requireState } from '../stream_utils';
 
 @injectable()
 export class CreateAlertEventsStep implements RuleExecutionStep {
@@ -20,39 +20,44 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
 
   constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
 
-  private isStepReady(
-    state: Readonly<RulePipelineState>
-  ): state is StateWith<'rule' | 'esqlResponse'> {
-    return hasState(state, ['rule', 'esqlResponse']);
-  }
+  public executeStream(streamState: PipelineStateStream): PipelineStateStream {
+    const step = this;
+    let buildBatch: AlertEventsBatchBuilder | undefined;
 
-  public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
-    const { input } = state;
+    return flatMapStep(streamState, async function* (state) {
+      const { input } = state;
 
-    this.logger.debug({
-      message: `[${this.name}] Starting step for rule ${input.ruleId}`,
+      step.logger.debug({
+        message: `[${step.name}] Starting step for rule ${input.ruleId}`,
+      });
+
+      const requiredState = requireState(state, ['rule', 'esqlRowBatch']);
+
+      if (!requiredState.ok) {
+        step.logger.debug({ message: `[${step.name}] State not ready, halting` });
+        yield requiredState.result;
+        return;
+      }
+
+      if (!buildBatch) {
+        buildBatch = createAlertEventsBatchBuilder({
+          ruleId: input.ruleId,
+          spaceId: input.spaceId,
+          ruleAttributes: requiredState.state.rule,
+          scheduledTimestamp: input.scheduledAt,
+          ruleVersion: 1,
+        });
+
+        step.logger.debug({
+          message: `[${step.name}] Created alert events builder for rule ${input.ruleId}`,
+        });
+      }
+
+      const alertEventsBatch = buildBatch([...requiredState.state.esqlRowBatch]);
+
+      if (alertEventsBatch.length > 0) {
+        yield { type: 'continue', state: { ...requiredState.state, alertEventsBatch } };
+      }
     });
-
-    if (!this.isStepReady(state)) {
-      this.logger.debug({ message: `[${this.name}] State not ready, halting` });
-      return { type: 'halt', reason: 'state_not_ready' };
-    }
-
-    const { rule, esqlResponse } = state;
-
-    const alertEvents = buildAlertEventsFromEsqlResponse({
-      ruleId: input.ruleId,
-      spaceId: input.spaceId,
-      ruleAttributes: rule,
-      esqlResponse,
-      scheduledTimestamp: input.scheduledAt,
-      ruleVersion: 1,
-    });
-
-    this.logger.debug({
-      message: `[${this.name}] Created ${alertEvents.length} alert events for rule ${input.ruleId}`,
-    });
-
-    return { type: 'continue', data: { alertEvents } };
   }
 }

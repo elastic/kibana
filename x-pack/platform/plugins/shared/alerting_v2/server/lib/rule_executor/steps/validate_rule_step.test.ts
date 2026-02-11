@@ -6,7 +6,12 @@
  */
 
 import { ValidateRuleStep } from './validate_rule_step';
-import { createRuleResponse, createRulePipelineState } from '../test_utils';
+import {
+  collectStreamResults,
+  createPipelineStream,
+  createRuleResponse,
+  createRulePipelineState,
+} from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
 describe('ValidateRuleStep', () => {
@@ -19,28 +24,26 @@ describe('ValidateRuleStep', () => {
 
   it('continues when rule is enabled', async () => {
     const state = createRulePipelineState({ rule: createRuleResponse({ enabled: true }) });
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    const result = await step.execute(state);
-
-    expect(result).toEqual({ type: 'continue' });
+    expect(result).toEqual({ type: 'continue', state });
   });
 
   it('halts with rule_disabled when rule is disabled', async () => {
     const state = createRulePipelineState({ rule: createRuleResponse({ enabled: false }) });
-
-    const result = await step.execute(state);
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(result).toEqual({
       type: 'halt',
       reason: 'rule_disabled',
+      state,
     });
   });
 
   it('halts with state_not_ready when rule is missing from state', async () => {
     const state = createRulePipelineState();
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    const result = await step.execute(state);
-
-    expect(result).toEqual({ type: 'halt', reason: 'state_not_ready' });
+    expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
   });
 });

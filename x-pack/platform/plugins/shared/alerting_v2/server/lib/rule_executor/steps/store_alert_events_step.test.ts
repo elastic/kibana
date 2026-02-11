@@ -7,7 +7,12 @@
 
 import { StoreAlertEventsStep } from './store_alert_events';
 import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/alert_events';
-import { createRulePipelineState, createAlertEvent } from '../test_utils';
+import {
+  collectStreamResults,
+  createPipelineStream,
+  createRulePipelineState,
+  createAlertEvent,
+} from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createStorageService } from '../../services/storage_service/storage_service.mock';
 
@@ -28,7 +33,7 @@ describe('StoreAlertEventsStep', () => {
 
   describe('execute', () => {
     it('stores alert events and returns continue', async () => {
-      const alertEvents = [
+      const alertEventsBatch = [
         createAlertEvent({ group_hash: 'hash-1', status: 'breached' }),
         createAlertEvent({ group_hash: 'hash-2', status: 'recovered' }),
       ];
@@ -39,10 +44,12 @@ describe('StoreAlertEventsStep', () => {
         took: 1,
       });
 
-      const state = createRulePipelineState({ alertEvents });
-      const result = await step.execute(state);
+      const state = createRulePipelineState({ alertEventsBatch });
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
 
-      expect(result).toEqual({ type: 'continue' });
+      expect(result).toEqual({ type: 'continue', state });
       expect(mockEsClient.bulk).toHaveBeenCalledTimes(1);
 
       const bulkCall = mockEsClient.bulk.mock.calls[0][0];
@@ -71,29 +78,34 @@ describe('StoreAlertEventsStep', () => {
     });
 
     it('handles empty alert events array without calling bulk', async () => {
-      const state = createRulePipelineState({ alertEvents: [] });
-      const result = await step.execute(state);
+      const state = createRulePipelineState({ alertEventsBatch: [] });
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
 
-      expect(result).toEqual({ type: 'continue' });
+      expect(result).toEqual({ type: 'continue', state });
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
 
-    it('halts with state_not_ready when alertEvents is missing from state', async () => {
+    it('halts with state_not_ready when alertEventsBatch is missing from state', async () => {
       const state = createRulePipelineState();
+      const [result] = await collectStreamResults(
+        step.executeStream(createPipelineStream([state]))
+      );
 
-      const result = await step.execute(state);
-
-      expect(result).toEqual({ type: 'halt', reason: 'state_not_ready' });
+      expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
 
     it('propagates storage service errors', async () => {
-      const alertEvents = [createAlertEvent()];
+      const alertEventsBatch = [createAlertEvent()];
       mockEsClient.bulk.mockRejectedValue(new Error('Bulk index failed'));
 
-      const state = createRulePipelineState({ alertEvents });
+      const state = createRulePipelineState({ alertEventsBatch });
 
-      await expect(step.execute(state)).rejects.toThrow('Bulk index failed');
+      await expect(
+        collectStreamResults(step.executeStream(createPipelineStream([state])))
+      ).rejects.toThrow('Bulk index failed');
     });
   });
 });

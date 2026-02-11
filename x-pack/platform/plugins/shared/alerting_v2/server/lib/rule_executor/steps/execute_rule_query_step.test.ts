@@ -7,15 +7,17 @@
 
 import { ExecuteRuleQueryStep } from './execute_rule_query_step';
 import {
+  collectStreamResults,
+  createEsqlResponse,
+  createPipelineStream,
   createRuleExecutionInput,
   createRuleResponse,
-  createEsqlResponse,
   createRulePipelineState,
 } from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createQueryService } from '../../services/query_service/query_service.mock';
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 describe('ExecuteRuleQueryStep', () => {
   let step: ExecuteRuleQueryStep;
@@ -29,41 +31,34 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('builds query payload and executes query', async () => {
-    const esqlResponse = createEsqlResponse();
-
-    mockEsClient.esql.query.mockResolvedValue(esqlResponse);
+    mockEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-a']])
+    );
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
-    const result = await step.execute(state);
+    const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    expect(result.type).toBe('continue');
-    expect(result).toHaveProperty('data.queryPayload');
-    expect(result).toHaveProperty('data.esqlResponse');
-
-    // @ts-expect-error: the above checks ensure the data exists
-    expect(result.data.esqlResponse).toEqual(esqlResponse);
+    expect(results).toHaveLength(1);
+    expect(results[0].type).toBe('continue');
+    expect(results[0].state.queryPayload).toBeDefined();
+    expect(results[0].state.esqlRowBatch).toEqual([{ 'host.name': 'host-a' }]);
   });
 
-  it('passes correct parameters to query service', async () => {
-    mockEsClient.esql.query.mockResolvedValue(createEsqlResponse());
+  it('passes correct parameters to ES client', async () => {
+    mockEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-a']])
+    );
 
     const rule = createRuleResponse();
     const abortController = new AbortController();
-    const state = createRulePipelineState({
-      input: createRuleExecutionInput({ abortSignal: abortController.signal }),
-      rule,
-    });
+    const input = createRuleExecutionInput({ abortSignal: abortController.signal });
+    const state = createRulePipelineState({ input, rule });
 
-    await step.execute(state);
+    await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
-      {
-        query: rule.query,
-        drop_null_columns: false,
-        filter: expect.any(Object),
-        params: undefined,
-      },
-      { signal: abortController.signal }
+      expect.objectContaining({ query: rule.query }),
+      expect.objectContaining({ signal: abortController.signal })
     );
   });
 
@@ -78,9 +73,9 @@ describe('ExecuteRuleQueryStep', () => {
       rule: createRuleResponse(),
     });
 
-    await expect(step.execute(state)).rejects.toThrow(
-      'Search has been aborted due to cancelled execution'
-    );
+    await expect(
+      collectStreamResults(step.executeStream(createPipelineStream([state])))
+    ).rejects.toThrow(/aborted/i);
   });
 
   it('propagates non-abort errors', async () => {
@@ -88,14 +83,41 @@ describe('ExecuteRuleQueryStep', () => {
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
 
-    await expect(step.execute(state)).rejects.toThrow('Query execution failed');
+    await expect(
+      collectStreamResults(step.executeStream(createPipelineStream([state])))
+    ).rejects.toThrow('Query execution failed');
+  });
+
+  it('yields rows from query results', async () => {
+    mockEsClient.esql.query.mockResolvedValue(
+      createEsqlResponse(
+        [
+          { name: 'host.name', type: 'keyword' },
+          { name: 'count', type: 'integer' },
+        ],
+        [
+          ['host-a', 1],
+          ['host-b', 2],
+        ]
+      )
+    );
+
+    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(results).toHaveLength(1);
+    expect(results[0].type).toBe('continue');
+    expect(results[0].state.esqlRowBatch).toEqual([
+      { 'host.name': 'host-a', count: 1 },
+      { 'host.name': 'host-b', count: 2 },
+    ]);
   });
 
   it('halts with state_not_ready when rule is missing from state', async () => {
     const state = createRulePipelineState();
 
-    const result = await step.execute(state);
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    expect(result).toEqual({ type: 'halt', reason: 'state_not_ready' });
+    expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
   });
 });

@@ -103,4 +103,137 @@ describe('QueryService', () => {
       expect(mockLogger.error).toHaveBeenCalled();
     });
   });
+
+  describe('executeQueryStream', () => {
+    const mockQuery = 'FROM .alerts-* | LIMIT 10';
+
+    it('yields rows from JSON fallback response', async () => {
+      const mockResponse: EsqlQueryResponse = {
+        columns: [
+          { name: 'host', type: 'keyword' },
+          { name: 'count', type: 'integer' },
+        ],
+        values: [
+          ['host-a', 1],
+          ['host-b', 2],
+        ],
+      };
+
+      mockEsClient.esql.query.mockResolvedValue(mockResponse);
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+        batches.push(batch);
+      }
+
+      expect(batches).toHaveLength(1);
+      expect(batches[0]).toEqual([
+        { host: 'host-a', count: 1 },
+        { host: 'host-b', count: 2 },
+      ]);
+    });
+
+    it('coerces BigInt values to Number in streamed rows', async () => {
+      mockEsClient.esql.query.mockResolvedValue({
+        columns: [
+          { name: 'host', type: 'keyword' },
+          { name: 'cpu', type: 'long' },
+          { name: 'memory', type: 'long' },
+        ],
+        values: [
+          ['host-a', BigInt(80), BigInt(1024)],
+          ['host-b', BigInt(45), BigInt(2048)],
+        ],
+      } as unknown as EsqlQueryResponse);
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+        batches.push(batch);
+      }
+
+      expect(batches).toHaveLength(1);
+      expect(batches[0]).toEqual([
+        { host: 'host-a', cpu: 80, memory: 1024 },
+        { host: 'host-b', cpu: 45, memory: 2048 },
+      ]);
+
+      // Verify the values are Numbers, not BigInts
+      for (const row of batches[0]) {
+        expect(typeof row.cpu).toBe('number');
+        expect(typeof row.memory).toBe('number');
+      }
+    });
+
+    it('produces JSON-serializable rows when source contains BigInt', async () => {
+      mockEsClient.esql.query.mockResolvedValue({
+        columns: [
+          { name: 'host', type: 'keyword' },
+          { name: 'count', type: 'long' },
+        ],
+        values: [['host-a', BigInt(99)]],
+      } as unknown as EsqlQueryResponse);
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+        batches.push(batch);
+      }
+
+      // Should not throw "Do not know how to serialize a BigInt"
+      expect(() => JSON.stringify(batches[0])).not.toThrow();
+      expect(JSON.parse(JSON.stringify(batches[0]))).toEqual([{ host: 'host-a', count: 99 }]);
+    });
+
+    it('passes abort signal to ES client', async () => {
+      const mockResponse: EsqlQueryResponse = {
+        columns: [{ name: 'host', type: 'keyword' }],
+        values: [['host-a']],
+      };
+
+      mockEsClient.esql.query.mockResolvedValue(mockResponse);
+      const abortController = new AbortController();
+
+      const batches: Array<Record<string, unknown>[]> = [];
+      for await (const batch of queryService.executeQueryStream({
+        query: mockQuery,
+        abortSignal: abortController.signal,
+      })) {
+        batches.push(batch);
+      }
+
+      expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+        expect.objectContaining({ format: 'arrow' }),
+        expect.objectContaining({ signal: abortController.signal })
+      );
+    });
+
+    it('throws and logs error when query fails', async () => {
+      mockEsClient.esql.query.mockRejectedValue(new Error('ES query failed'));
+
+      const batches: Array<Record<string, unknown>[]> = [];
+
+      await expect(async () => {
+        for await (const batch of queryService.executeQueryStream({ query: mockQuery })) {
+          batches.push(batch);
+        }
+      }).rejects.toThrow('ES query failed');
+
+      expect(mockLogger.error).toHaveBeenCalled();
+    });
+
+    it('logs debug instead of error when cancelled', async () => {
+      const { RuleExecutionCancellationError } = jest.requireActual('../../execution_context');
+      mockEsClient.esql.query.mockRejectedValue(
+        new RuleExecutionCancellationError('Streaming query aborted')
+      );
+
+      await expect(async () => {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      }).rejects.toThrow(/aborted/i);
+
+      expect(mockLogger.debug).toHaveBeenCalled();
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+  });
 });

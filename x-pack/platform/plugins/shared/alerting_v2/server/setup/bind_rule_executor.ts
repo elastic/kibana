@@ -18,7 +18,10 @@ import {
   ExecuteRuleQueryStep,
   CreateAlertEventsStep,
 } from '../lib/rule_executor/steps';
-import { ErrorHandlingMiddleware } from '../lib/rule_executor/middleware';
+import {
+  CancellationBoundaryMiddleware,
+  ErrorHandlingMiddleware,
+} from '../lib/rule_executor/middleware';
 import { DirectorStep } from '../lib/rule_executor/steps/director_step';
 import { StoreAlertEventsStep } from '../lib/rule_executor/steps/store_alert_events';
 
@@ -26,6 +29,7 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   /**
    * Middlewares
    */
+  bind(CancellationBoundaryMiddleware).toSelf().inSingletonScope();
   bind(ErrorHandlingMiddleware).toSelf().inSingletonScope();
 
   /**
@@ -33,7 +37,8 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
    */
   bind(RuleExecutionMiddlewaresToken)
     .toDynamicValue(({ get }) => [
-      // Add more middleware here as needed
+      // First middleware is outermost wrapper
+      get(CancellationBoundaryMiddleware),
       get(ErrorHandlingMiddleware),
     ])
     .inSingletonScope();

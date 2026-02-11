@@ -14,13 +14,14 @@ import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import { getLatestAlertEventStateQuery, type LatestAlertEventState } from './queries';
 import type { AlertEpisodeStatus } from '../../resources/alert_events';
 import { alertEpisodeStatus, type AlertEvent } from '../../resources/alert_events';
-import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
 import { TransitionStrategyFactory } from './strategies/strategy_resolver';
 import type { ITransitionStrategy } from './strategies/types';
+import type { ExecutionContext } from '../execution_context';
 
 interface RunDirectorParams {
   ruleId: string;
-  alertEvents: AlertEvent[];
+  alertEvents: AsyncIterable<AlertEvent[]>;
+  executionContext: ExecutionContext;
 }
 
 interface CalculateNextStateParams {
@@ -43,40 +44,78 @@ export class DirectorService {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  async run({ ruleId, alertEvents }: RunDirectorParams): Promise<AlertEvent[]> {
-    if (alertEvents.length === 0) {
-      return [];
-    }
-
+  async *run({
+    ruleId,
+    alertEvents,
+    executionContext,
+  }: RunDirectorParams): AsyncIterable<AlertEvent[]> {
     const strategy = this.strategyFactory.getStrategy();
-    const groupHashes = Array.from(new Set(alertEvents.map((event) => event.group_hash)));
-    const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(ruleId, groupHashes);
 
-    const alertsWithNextEpisode = alertEvents.map((currentAlertEvent) =>
-      this.getAlertEventWithNextEpisode({
-        currentAlertEvent,
-        previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
-        strategy,
-      })
+    for await (const batch of alertEvents) {
+      executionContext.throwIfAborted();
+
+      const processedBatch = await this.processBatch(ruleId, batch, strategy, executionContext);
+
+      if (processedBatch.length > 0) {
+        yield processedBatch;
+      }
+    }
+  }
+
+  private async processBatch(
+    ruleId: string,
+    alertEvents: AlertEvent[],
+    strategy: ITransitionStrategy,
+    executionContext: ExecutionContext
+  ): Promise<AlertEvent[]> {
+    const scope = executionContext.createScope();
+    const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
+    const alertStateByGroupHash = await this.fetchLatestAlertStateByGroupHash(
+      ruleId,
+      groupHashes,
+      executionContext
     );
+    scope.add(() => alertStateByGroupHash.clear());
 
-    return alertsWithNextEpisode;
+    try {
+      executionContext.throwIfAborted();
+
+      return alertEvents.map((currentAlertEvent) =>
+        this.getAlertEventWithNextEpisode({
+          currentAlertEvent,
+          previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
+          strategy,
+        })
+      );
+    } finally {
+      await scope.disposeAll();
+    }
   }
 
   private async fetchLatestAlertStateByGroupHash(
     ruleId: string,
-    groupHashes: string[]
+    groupHashes: string[],
+    context: ExecutionContext
   ): Promise<Map<string, LatestAlertEventState>> {
     const request = getLatestAlertEventStateQuery({ ruleId, groupHashes }).toRequest();
-    const response = await this.queryService.executeQuery({
+    const rowBatchStream = this.queryService.executeQueryStream<LatestAlertEventState>({
       query: request.query,
       // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
       params: request.params,
       // @ts-expect-error - the types of the composer query are not compatible with the types of the esql client
       filter: request.filter,
+      abortSignal: context.signal,
     });
 
-    const records = queryResponseToRecords<LatestAlertEventState>(response);
+    // Collect all rows from the batch stream (small result set for state lookup)
+    const records: LatestAlertEventState[] = [];
+    for await (const batch of rowBatchStream) {
+      context.throwIfAborted();
+
+      for (const row of batch) {
+        records.push(row);
+      }
+    }
 
     return new Map(records.map((record) => [record.group_hash, record]));
   }

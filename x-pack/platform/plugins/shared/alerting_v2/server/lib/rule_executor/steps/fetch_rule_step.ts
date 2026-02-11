@@ -7,7 +7,8 @@
 
 import { inject, injectable } from 'inversify';
 import Boom from '@hapi/boom';
-import type { RuleExecutionStep, RulePipelineState, RuleStepOutput } from '../types';
+import type { PipelineStateStream, RuleExecutionStep } from '../types';
+import { mapOneToOneStep } from '../stream_utils';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -23,30 +24,32 @@ export class FetchRuleStep implements RuleExecutionStep {
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {}
 
-  public async execute(state: Readonly<RulePipelineState>): Promise<RuleStepOutput> {
-    const { input } = state;
-    const { ruleId } = input;
-
-    this.logger.debug({
-      message: `[${this.name}] Starting step for rule ${ruleId}`,
-    });
-
-    try {
-      const rule = await this.rulesClient.getRule({ id: ruleId });
+  public executeStream(streamState: PipelineStateStream): PipelineStateStream {
+    return mapOneToOneStep(streamState, async (state) => {
+      const { input } = state;
+      const { ruleId } = input;
 
       this.logger.debug({
-        message: () => `[${this.name}] Fetched rule ${ruleId}`,
+        message: `[${this.name}] Starting step for rule ${ruleId}`,
       });
 
-      return { type: 'continue', data: { rule } };
-    } catch (error) {
-      if (Boom.isBoom(error) && error.output.statusCode === 404) {
-        this.logger.debug({ message: `[${this.name}] Rule ${ruleId} not found, halting` });
-        return { type: 'halt', reason: 'rule_deleted' };
-      }
+      try {
+        const rule = await this.rulesClient.getRule({ id: ruleId });
 
-      this.logger.debug({ message: `[${this.name}] Failed to fetch rule ${ruleId}` });
-      throw error;
-    }
+        this.logger.debug({
+          message: () => `[${this.name}] Fetched rule ${ruleId}`,
+        });
+
+        return { type: 'continue', state: { ...state, rule } };
+      } catch (error) {
+        if (Boom.isBoom(error) && error.output.statusCode === 404) {
+          this.logger.debug({ message: `[${this.name}] Rule ${ruleId} not found, halting` });
+          return { type: 'halt', reason: 'rule_deleted', state };
+        }
+
+        this.logger.debug({ message: `[${this.name}] Failed to fetch rule ${ruleId}` });
+        throw error;
+      }
+    });
   }
 }
