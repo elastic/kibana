@@ -27,7 +27,6 @@ import {
 } from '../../tasks/live_query';
 import { changePackActiveStatus, cleanupAllPrebuiltPacks } from '../../tasks/packs';
 import {
-  addIntegration,
   closeFleetTourIfVisible,
   closeModalIfVisible,
   closeToastIfVisible,
@@ -42,8 +41,6 @@ import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
-  const integration = 'Osquery Manager';
-
   describe(
     'Validate that agent policy is getting removed from pack if we remove agent policy',
     { tags: ['@ess'] },
@@ -61,18 +58,19 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.visit(FLEET_AGENT_POLICIES);
         closeFleetTourIfVisible();
         cy.contains('Create agent policy').click();
-        cy.get('input[placeholder*="Choose a name"]').type(AGENT_POLICY_NAME);
-        cy.get('.euiFlyoutFooter').contains('Create agent policy').click();
+        cy.getBySel('createAgentPolicyNameField').type(AGENT_POLICY_NAME);
+        cy.getBySel('createAgentPolicyFlyoutBtn').click();
         cy.contains(`Agent policy '${AGENT_POLICY_NAME}' created`);
-        cy.visit(FLEET_AGENT_POLICIES);
+        closeToastIfVisible();
         closeFleetTourIfVisible();
-        cy.contains(AGENT_POLICY_NAME).click();
+        cy.getBySel('agentPolicyNameLink').contains(AGENT_POLICY_NAME).click();
         closeFleetTourIfVisible();
-        cy.contains('Add integration').click();
-        cy.getBySel('epmList.searchBar').type('osquery');
-        cy.contains(integration).click();
-        addIntegration(AGENT_POLICY_NAME);
-        cy.contains('Add Elastic Agent later').click();
+        cy.getBySel('addPackagePolicyButton').click();
+        cy.getBySel('addIntegrationFlyout').should('exist');
+        cy.getBySel('comboBoxInput').type('osquery manager{downArrow}{enter}');
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
+        cy.getBySel('addIntegrationFlyout.submitBtn').click();
+        closeModalIfVisible();
         navigateTo('app/osquery/packs');
         cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
         cy.get(formFieldInputSelector('name')).type(`${REMOVING_PACK}{downArrow}{enter}`);
