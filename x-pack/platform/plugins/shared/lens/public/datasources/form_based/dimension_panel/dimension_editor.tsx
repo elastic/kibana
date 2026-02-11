@@ -1193,6 +1193,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       [columnId]: {
                         ...selectedColumn,
                         label: value,
+                        customLabel: !!value,
                       },
                     },
                   });

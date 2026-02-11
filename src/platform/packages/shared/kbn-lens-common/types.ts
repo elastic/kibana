@@ -275,7 +275,9 @@ export type DataType = 'string' | 'number' | 'date' | 'boolean' | FieldOnlyDataT
 // Visualizations are able to filter based on the output, not based on the
 // underlying data
 export interface Operation extends OperationMetadata {
-  // the presence of a non-empty label means a user-defined value, not a default
+  /**
+   * User-facing dimension label. This prop is the empty string unless the user has explicitly set a custom label.
+   */
   label: string;
   sortingHint?: SortingHint;
 }

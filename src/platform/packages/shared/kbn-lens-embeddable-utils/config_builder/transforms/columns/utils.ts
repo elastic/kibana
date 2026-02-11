@@ -49,6 +49,7 @@ export function getLensStateMetricSharedProps(
 }
 
 export function getLensAPIMetricSharedProps(options: {
+  customLabel?: boolean;
   timeScale?: TimeScaleUnit;
   reducedTimeRange?: string;
   timeShift?: string;
@@ -56,7 +57,12 @@ export function getLensAPIMetricSharedProps(options: {
   label?: string;
 }) {
   return {
-    ...(options.label ? { label: options.label } : {}),
+    // customLabel is deprecated in the Lens application (new code should check label emptiness instead),
+    // but we still set it for API transforms. We check customLabel here rather than label because
+    // older saved objects may have stored default labels with customLabel undefined or false.
+    // Only labels explicitly marked as custom should be included in the API response.
+    // see https://github.com/elastic/kibana/pull/2526033
+    ...(options.customLabel ? { label: options.label } : {}),
     ...(options.timeScale ? { time_scale: options.timeScale } : {}),
     ...(options.reducedTimeRange ? { reduced_time_range: options.reducedTimeRange } : {}),
     ...(options.timeShift ? { time_shift: options.timeShift } : {}),
@@ -72,10 +78,19 @@ export function getLensStateBucketSharedProps(options: { label?: string; field?:
   };
 }
 
-export function getLensAPIBucketSharedProps(options: { label?: string; sourceField: string }) {
+export function getLensAPIBucketSharedProps(options: {
+  label?: string;
+  customLabel?: boolean;
+  sourceField: string;
+}) {
   return {
     field: options.sourceField,
-    ...(options.label ? { label: options.label } : {}),
+    // customLabel is deprecated in the Lens application (new code should check label emptiness instead),
+    // but we still set it for API transforms. We check customLabel here rather than label because
+    // older saved objects may have stored default labels with customLabel undefined or false.
+    // Only labels explicitly marked as custom should be included in the API response.
+    // see https://github.com/elastic/kibana/pull/252603
+    ...(options.customLabel ? { label: options.label } : {}),
   };
 }
 

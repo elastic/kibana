@@ -35,6 +35,12 @@ export interface BaseIndexPatternColumn extends Operation {
   filter?: Query;
   reducedTimeRange?: string;
   timeShift?: string;
+  /**
+   * This legacy field is stored in the saved objects and used in the API transforms.
+   *
+   * @deprecated should not be referred to in the Lens application. Check the truthiness of the label property instead.
+   */
+  customLabel?: boolean;
 }
 
 // Formatting can optionally be added to any column
@@ -89,8 +95,16 @@ export interface FormBasedPrivateState {
 export interface TextBasedLayerColumn {
   columnId: string;
   fieldName: string;
-  // the presence of a non-empty label means a user-defined value
+  /**
+   * User-facing dimension label. This prop is the empty string unless the user has explicitly set a custom label.
+   */
   label: string;
+  /**
+   * This legacy field is stored in the saved objects and used in the API transforms.
+   *
+   * @deprecated should not be referred to in the Lens application. Check the truthiness of the label property instead.
+   */
+  customLabel?: boolean;
   params?: {
     format?: ValueFormatConfig;
   };
