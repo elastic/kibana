@@ -41,83 +41,95 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
         },
       },
       async (context, request, response) => {
-        const copyContext = await prepareSavedObjectCopy<PackSavedObject>(
-          osqueryContext,
-          request,
-          response,
-          {
-            type: packSavedObjectType,
-            loggerName: 'pack',
-            getNameFromAttributes: (attrs) => attrs.name,
-          }
-        );
+        const logger = osqueryContext.logFactory.get('pack');
 
-        if (!copyContext) {
-          return response.notFound({
-            body: `Pack with id "${request.params.id}" not found.`,
+        try {
+          const copyContext = await prepareSavedObjectCopy<PackSavedObject>(
+            osqueryContext,
+            request,
+            response,
+            {
+              type: packSavedObjectType,
+              loggerName: 'pack',
+              getNameFromAttributes: (attrs) => attrs.name,
+            }
+          );
+
+          if (!copyContext) {
+            return response.notFound({
+              body: `Pack with id "${request.params.id}" not found.`,
+            });
+          }
+
+          const { client, sourceAttributes, newName, username, now } = copyContext;
+
+          const {
+            name: _name,
+            version: _version,
+            read_only: _readOnly,
+            created_at: _createdAt,
+            created_by: _createdBy,
+            updated_at: _updatedAt,
+            updated_by: _updatedBy,
+            policy_ids: _policyIds,
+            shards: _shards,
+            ...restAttributes
+          } = sourceAttributes;
+
+          const newPackSO = await client.create<
+            Omit<PackSavedObject, 'saved_object_id' | 'references'>
+          >(
+            packSavedObjectType,
+            {
+              ...restAttributes,
+              name: newName,
+              enabled: false, // Always disable copy to prevent unexpected deployments
+              shards: [],
+              created_by: username,
+              created_at: now,
+              updated_by: username,
+              updated_at: now,
+            },
+            {
+              // No references — agent policy refs and prebuilt asset refs are both stripped.
+              // Agent policies must be explicitly assigned by the user on the new pack.
+              references: [],
+              refresh: 'wait_for',
+            }
+          );
+
+          const { attributes } = newPackSO;
+
+          const data: PackResponseData = {
+            name: attributes.name,
+            description: attributes.description,
+            queries: attributes.queries,
+            version: attributes.version,
+            enabled: attributes.enabled,
+            created_at: attributes.created_at,
+            created_by: attributes.created_by,
+            updated_at: attributes.updated_at,
+            updated_by: attributes.updated_by,
+            policy_ids: [], // No policy assignments — references are empty
+            shards: attributes.shards,
+            saved_object_id: newPackSO.id,
+          };
+
+          return response.ok({
+            body: {
+              data,
+            },
+          });
+        } catch (error) {
+          logger.error(`Failed to copy pack "${request.params.id}": ${error}`);
+
+          return response.customError({
+            statusCode: 500,
+            body: {
+              message: `Failed to copy pack: ${error.message}`,
+            },
           });
         }
-
-        const { client, sourceAttributes, newName, username, now } = copyContext;
-
-        const {
-          name: _name,
-          version: _version,
-          read_only: _readOnly,
-          created_at: _createdAt,
-          created_by: _createdBy,
-          updated_at: _updatedAt,
-          updated_by: _updatedBy,
-          policy_ids: _policyIds,
-          shards: _shards,
-          ...restAttributes
-        } = sourceAttributes;
-
-        const newPackSO = await client.create<
-          Omit<PackSavedObject, 'saved_object_id' | 'references'>
-        >(
-          packSavedObjectType,
-          {
-            ...restAttributes,
-            name: newName,
-            enabled: false, // Always disable copy to prevent unexpected deployments
-            policy_ids: [],
-            shards: [],
-            created_by: username,
-            created_at: now,
-            updated_by: username,
-            updated_at: now,
-          },
-          {
-            // No references — agent policy refs and prebuilt asset refs are both stripped.
-            // Agent policies must be explicitly assigned by the user on the new pack.
-            references: [],
-            refresh: 'wait_for',
-          }
-        );
-
-        const { attributes } = newPackSO;
-
-        const data: PackResponseData = {
-          name: attributes.name,
-          description: attributes.description,
-          queries: attributes.queries,
-          version: attributes.version,
-          enabled: attributes.enabled,
-          created_at: attributes.created_at,
-          created_by: attributes.created_by,
-          updated_at: attributes.updated_at,
-          updated_by: attributes.updated_by,
-          policy_ids: attributes.policy_ids,
-          shards: attributes.shards,
-          saved_object_id: newPackSO.id,
-        };
-
-        return response.ok({
-          body: {
-            data,
-          },
-        });
       }
     );
 };

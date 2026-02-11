@@ -42,7 +42,6 @@ describe('copyPackRoute', () => {
       ],
       enabled: true,
       version: 1,
-      policy_ids: ['policy-1', 'policy-2'],
       shards: [{ key: 'default', value: 100 }],
       created_at: '2025-01-01T00:00:00.000Z',
       created_by: 'admin',
@@ -89,7 +88,6 @@ describe('copyPackRoute', () => {
           description: 'Test pack description',
           queries: sourcePackSO.attributes.queries,
           enabled: false,
-          policy_ids: [],
           shards: {},
           created_at: '2025-06-01T00:00:00.000Z',
           created_by: 'tester',
@@ -119,9 +117,9 @@ describe('copyPackRoute', () => {
     expect(responseBody.data.saved_object_id).toBe('new-pack-id');
     expect(responseBody.data.enabled).toBe(false);
 
-    // Verify policy_ids and shards are cleared on the copy
+    // Verify policy_ids is NOT passed to create (it's derived from references, not a SO attribute)
     const createArgs = mockSavedObjectsClient.create.mock.calls[0][1];
-    expect(createArgs.policy_ids).toEqual([]);
+    expect(createArgs.policy_ids).toBeUndefined();
     expect(createArgs.shards).toEqual([]);
 
     // Verify all references are cleared (no agent policy or prebuilt asset refs)
@@ -251,7 +249,6 @@ describe('copyPackRoute', () => {
         attributes: {
           name: 'my-pack_copy',
           enabled: false,
-          policy_ids: [],
           shards: {},
           created_at: '2025-06-01T00:00:00.000Z',
           created_by: 'tester',
