@@ -29,19 +29,27 @@ export function defineSessionInfoRoutes({ router, getSession }: RouteDefinitionP
       const { value: sessionValue } = await getSession().get(request);
       if (sessionValue) {
         const expirationTime =
-          sessionValue.idleTimeoutExpiration && sessionValue.lifespanExpiration
+          sessionValue.idleTimeoutExpiration !== null && sessionValue.lifespanExpiration !== null
             ? Math.min(sessionValue.idleTimeoutExpiration, sessionValue.lifespanExpiration)
-            : sessionValue.idleTimeoutExpiration || sessionValue.lifespanExpiration;
+            : sessionValue.idleTimeoutExpiration ?? sessionValue.lifespanExpiration;
+
+        const expirationReason: SessionInfo['expirationReason'] | undefined =
+          expirationTime !== null
+            ? expirationTime === sessionValue.lifespanExpiration
+              ? 'lifespan'
+              : 'idle'
+            : undefined;
 
         return response.ok({
           body: {
-            expiresInMs: expirationTime ? expirationTime - Date.now() : null,
+            expiresInMs: expirationTime !== null ? expirationTime - Date.now() : null,
             canBeExtended:
               sessionValue.idleTimeoutExpiration !== null &&
               expirationTime !== null &&
               (sessionValue.lifespanExpiration === null ||
                 expirationTime + SESSION_EXPIRATION_WARNING_MS < sessionValue.lifespanExpiration),
             provider: sessionValue.provider,
+            ...(expirationReason !== undefined ? { expirationReason } : {}),
           } as SessionInfo,
         });
       }

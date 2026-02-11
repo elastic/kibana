@@ -11,10 +11,13 @@ export interface SessionInfo {
   expiresInMs: number | null;
   canBeExtended: boolean;
   provider: AuthenticationProvider;
+  expirationReason?: 'idle' | 'lifespan';
 }
 
 export enum LogoutReason {
   'SESSION_EXPIRED' = 'SESSION_EXPIRED',
+  'SESSION_IDLE_TIMEOUT' = 'SESSION_IDLE_TIMEOUT',
+  'SESSION_LIFESPAN_TIMEOUT' = 'SESSION_LIFESPAN_TIMEOUT',
   'CONCURRENCY_LIMIT' = 'CONCURRENCY_LIMIT',
   'AUTHENTICATION_ERROR' = 'AUTHENTICATION_ERROR',
   'LOGGED_OUT' = 'LOGGED_OUT',

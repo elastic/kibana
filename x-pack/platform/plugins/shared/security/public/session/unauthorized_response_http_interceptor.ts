@@ -42,9 +42,16 @@ export class UnauthorizedResponseHttpInterceptor implements HttpInterceptor {
 
     if (response.status === 401) {
       const reason = response.headers.get(SESSION_ERROR_REASON_HEADER);
+      const sessionExpiredReasons: LogoutReason[] = [
+        LogoutReason.SESSION_EXPIRED,
+        LogoutReason.SESSION_IDLE_TIMEOUT,
+        LogoutReason.SESSION_LIFESPAN_TIMEOUT,
+      ];
+      const isSessionExpiredReason = sessionExpiredReasons.includes(reason! as LogoutReason);
+      const isConcurrencyLimitReason = reason === LogoutReason.CONCURRENCY_LIMIT;
       this.sessionExpired.logout(
-        reason === LogoutReason.SESSION_EXPIRED || reason === LogoutReason.CONCURRENCY_LIMIT
-          ? reason
+        isSessionExpiredReason || isConcurrencyLimitReason
+          ? (reason as LogoutReason)
           : LogoutReason.AUTHENTICATION_ERROR
       );
       controller.halt();
