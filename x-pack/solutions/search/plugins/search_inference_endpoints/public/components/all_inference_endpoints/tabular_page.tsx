@@ -238,30 +238,28 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           </EuiFlexItem>
         </EuiFlexGroup>
         <EndpointStats endpoints={tableData} />
-        <EuiFlexItem>
-          <EuiInMemoryTable
-            allowNeutralSort={false}
-            columns={tableColumns}
-            itemId="inference_id"
-            items={tableData}
-            pagination={{
-              pageSizeOptions: INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
-            }}
-            sorting={{
-              sort: {
-                field: 'inference_id',
-                direction: 'asc',
-              },
-            }}
-            data-test-subj="inferenceEndpointTable"
-            tableCaption={kbnI18n.translate(
-              'xpack.searchInferenceEndpoints.tabularPage.tableCaption',
-              {
-                defaultMessage: 'Inference endpoints list',
-              }
-            )}
-          />
-        </EuiFlexItem>
+        <EuiInMemoryTable
+          allowNeutralSort={false}
+          columns={tableColumns}
+          itemId="inference_id"
+          items={tableData}
+          pagination={{
+            pageSizeOptions: INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
+          }}
+          sorting={{
+            sort: {
+              field: 'inference_id',
+              direction: 'asc',
+            },
+          }}
+          data-test-subj="inferenceEndpointTable"
+          tableCaption={kbnI18n.translate(
+            'xpack.searchInferenceEndpoints.tabularPage.tableCaption',
+            {
+              defaultMessage: 'Inference endpoints list',
+            }
+          )}
+        />
       </EuiFlexGroup>
       {showDeleteAction && selectedInferenceEndpoint ? (
         <DeleteAction
