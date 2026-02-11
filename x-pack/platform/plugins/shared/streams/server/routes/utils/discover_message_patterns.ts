@@ -15,6 +15,7 @@ import { dateRangeQuery } from '@kbn/es-query';
 export interface MessageCategory {
   pattern: string;
   sampleDocuments: Array<Record<string, unknown>>;
+  isMeaningfulPattern: boolean;
 }
 
 /**
@@ -308,12 +309,11 @@ export const discoverMessagePatterns = async ({
     : undefined;
 
   const categories =
-    samplerAgg?.categories?.buckets
-      .map((bucket) => ({
-        pattern: bucket.key,
-        sampleDocuments: bucket.sample.hits.hits.map((hit) => hit._source),
-      }))
-      .filter((category) => isMeaningfulPattern(category.pattern)) ?? [];
+    samplerAgg?.categories?.buckets.map((bucket) => ({
+      pattern: bucket.key,
+      sampleDocuments: bucket.sample.hits.hits.map((hit) => hit._source),
+      isMeaningfulPattern: isMeaningfulPattern(bucket.key),
+    })) ?? [];
 
   const randomSampleDocuments = (samplerAgg?.random_docs?.hits.hits ?? []).map(
     (hit) => hit._source

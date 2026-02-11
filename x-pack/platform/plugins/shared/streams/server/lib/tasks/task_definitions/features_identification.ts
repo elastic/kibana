@@ -69,6 +69,9 @@ const MIN_NEW_PATTERNS = 2;
 
 const MAX_DISCOVERED_PATTERNS = 200;
 
+/** Target number of sample documents to return for feature identification. */
+const TARGET_SAMPLE_DOCS = 20;
+
 /**
  * Merges previously discovered patterns with newly discovered ones, capping the
  * total at {@link MAX_DISCOVERED_PATTERNS}.
@@ -115,8 +118,9 @@ const getSampleDocuments = async ({
     excludePatterns: excludePatterns.map((p) => p.pattern),
   });
 
-  // If we didn't find enough new patterns, try again without excluding patterns
-  if (result.categorizationField && result.categories.length < MIN_NEW_PATTERNS) {
+  // If we didn't find enough new meaningful patterns, try again without excluding patterns
+  const meaningfulCount = result.categories.filter((c) => c.isMeaningfulPattern).length;
+  if (result.categorizationField && meaningfulCount < MIN_NEW_PATTERNS) {
     resetPatterns = true;
     result = await discoverMessagePatterns({
       esClient,
@@ -130,19 +134,28 @@ const getSampleDocuments = async ({
 
   const now = Date.now();
 
-  const newPatterns: DiscoveredPattern[] = categories.map((c) => ({
-    pattern: c.pattern,
-    discoveredAt: now,
-  }));
+  // Only persist meaningful patterns for future exclusion
+  const newPatterns: DiscoveredPattern[] = categories
+    .filter((c) => c.isMeaningfulPattern)
+    .map((c) => ({
+      pattern: c.pattern,
+      discoveredAt: now,
+    }));
 
   const updatedPatterns = mergeDiscoveredPatterns({
     previousPatterns: excludePatterns && !resetPatterns ? excludePatterns : [],
     newPatterns,
   });
 
-  const sampleDocuments = categorizationField
-    ? categories.flatMap((c) => c.sampleDocuments)
-    : randomSampleDocuments;
+  // Sample documents come from all categories (meaningful and not)
+  const categoryDocs = categorizationField ? categories.flatMap((c) => c.sampleDocuments) : [];
+
+  // Fill up to TARGET_SAMPLE_DOCS with random samples if categories didn't provide enough
+  const remainingSlots = TARGET_SAMPLE_DOCS - categoryDocs.length;
+  const sampleDocuments =
+    remainingSlots > 0
+      ? [...categoryDocs, ...randomSampleDocuments.slice(0, remainingSlots)]
+      : categoryDocs;
 
   return {
     updatedPatterns,
