@@ -675,17 +675,6 @@ describe('CPS onRequest handler', () => {
         });
       });
 
-      it('handles undefined options gracefully', () => {
-        const params = {
-          method: 'GET',
-          path: '/_search',
-          meta: { acceptedParams: ['project_routing'] },
-        };
-
-        setCpsEnabled(true);
-
-        expect(() => onRequestHandler({ scoped: true }, params, undefined)).not.toThrow();
-      });
     });
   });
 });

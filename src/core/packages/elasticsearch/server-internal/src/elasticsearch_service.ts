@@ -266,18 +266,16 @@ export class ElasticsearchService
       const acceptedParams = params.meta?.acceptedParams;
       if (!acceptedParams?.includes('project_routing')) return;
 
-      const querystring = options?.querystring as Record<string, unknown> | undefined;
+      const querystring = options.querystring as Record<string, unknown> | undefined;
       if (querystring?.project_routing != null) return;
 
       const body = params.body as Record<string, unknown> | undefined;
       if (body?.pit != null) return;
 
-      if (options) {
-        options.querystring = {
-          ...querystring,
-          project_routing: '_tag._alias:_local',
-        };
-      }
+      options.querystring = {
+        ...querystring,
+        project_routing: '_tag._alias:_local',
+      };
     };
   }
 }
