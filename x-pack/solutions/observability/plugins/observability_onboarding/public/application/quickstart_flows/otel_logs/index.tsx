@@ -219,7 +219,7 @@ export const OtelLogsPanel: React.FC = () => {
                             {(copy) => (
                               <EuiButton
                                 data-test-subj="observabilityOnboardingOtelLogsPanelButton"
-                                iconType="copyClipboard"
+                                iconType="copy"
                                 onClick={copy}
                               >
                                 {i18n.translate(
@@ -423,7 +423,7 @@ function CopyableCodeBlock({ content }: { content: string }) {
         {(copy) => (
           <EuiButton
             data-test-subj="observabilityOnboardingCopyableCodeBlockCopyToClipboardButton"
-            iconType="copyClipboard"
+            iconType="copy"
             onClick={copy}
           >
             {i18n.translate(

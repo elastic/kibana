@@ -168,7 +168,7 @@ export class RemoteClusterList extends Component {
           <EuiButton
             {...reactRouterNavigate(this.props.history, '/add')}
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             data-test-subj="remoteClusterEmptyPromptCreateButton"
           >
             <FormattedMessage

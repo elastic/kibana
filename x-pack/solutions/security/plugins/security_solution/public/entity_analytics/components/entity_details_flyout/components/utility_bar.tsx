@@ -60,7 +60,7 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(({ risk
                 onClick={togglePopover}
                 size="xs"
                 iconSide="right"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 flush="left"
               >
                 <FormattedMessage

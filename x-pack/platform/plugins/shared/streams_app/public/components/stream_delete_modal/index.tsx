@@ -147,7 +147,7 @@ export function StreamDeleteModal({
                 <EuiButtonEmpty
                   data-test-subj="streamsAppDeleteStreamModalCopyCodeButton"
                   size="s"
-                  iconType="editorCodeBlock"
+                  iconType="code"
                   onClick={copy}
                 >
                   {copyCodeButtonText}

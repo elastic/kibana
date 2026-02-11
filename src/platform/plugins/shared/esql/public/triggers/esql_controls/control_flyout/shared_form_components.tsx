@@ -445,7 +445,7 @@ export function Header({
           >
             <EuiBetaBadge
               label=""
-              iconType="beaker"
+              iconType="flask"
               size="s"
               tabIndex={0}
               css={css`

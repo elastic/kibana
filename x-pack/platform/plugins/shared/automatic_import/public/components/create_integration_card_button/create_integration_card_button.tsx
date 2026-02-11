@@ -106,7 +106,7 @@ export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButto
                     responsive={false}
                   >
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="plusInCircle" size={compressed ? 's' : 'm'} />
+                      <EuiIcon type="plusCircle" size={compressed ? 's' : 'm'} />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <FormattedMessage

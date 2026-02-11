@@ -297,7 +297,7 @@ export class SpaceSelector extends Component<Props, State> {
         label: i18n.translate('xpack.spaces.spaceSelector.tableViewLabel', {
           defaultMessage: 'Table view',
         }),
-        iconType: 'list',
+        iconType: 'listBullet',
       },
     ];
 

@@ -80,7 +80,7 @@ export function AddSeriesButton() {
         data-test-subj="o11yAddSeriesButtonAddSeriesButton"
         onClick={() => addSeries()}
         isDisabled={isAddDisabled}
-        iconType="plusInCircle"
+        iconType="plusCircle"
         size="s"
         buttonRef={addSeriesButtonRef}
       >

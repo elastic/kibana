@@ -23,7 +23,7 @@ export const PrebuiltRuleDiffBadge = ({ label, dataTestSubj }: PrebuiltRuleDiffB
     <EuiBadge
       data-test-subj={dataTestSubj}
       color="hollow"
-      iconType="expand"
+      iconType="maximize"
       iconSide="right"
       onClick={openCustomizationsPreviewFlyout}
       onClickAriaLabel={label}

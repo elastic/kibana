@@ -92,12 +92,12 @@ const useExpandButtonPopover = () => {
         {isLabel ? (
           <>
             <PopoverListItem
-              iconType="visTagCloud"
+              iconType="chartTagCloud"
               label="Show related entities"
               onClick={() => {}}
             />
             <EuiHorizontalRule margin="xs" />
-            <PopoverListItem iconType="expand" label="Show entity details" onClick={() => {}} />
+            <PopoverListItem iconType="maximize" label="Show entity details" onClick={() => {}} />
           </>
         ) : (
           <>
@@ -112,17 +112,17 @@ const useExpandButtonPopover = () => {
               onClick={() => {}}
             />
             <PopoverListItem
-              iconType="indexFlush"
+              iconType="chartThreshold"
               label="Show actions done to this entity"
               onClick={() => {}}
             />
             <PopoverListItem
-              iconType="logstashQueue"
+              iconType="queue"
               label="Show related events"
               onClick={() => {}}
             />
             <EuiHorizontalRule margin="xs" />
-            <PopoverListItem iconType="expand" label="Show entity details" onClick={() => {}} />
+            <PopoverListItem iconType="maximize" label="Show entity details" onClick={() => {}} />
           </>
         )}
       </EuiListGroup>

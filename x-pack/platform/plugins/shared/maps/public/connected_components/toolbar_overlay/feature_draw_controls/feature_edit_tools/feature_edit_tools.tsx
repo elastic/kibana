@@ -81,7 +81,7 @@ export function FeatureEditTools(props: Props) {
               key="polygon"
               size="s"
               onClick={() => toggleDrawShape(DRAW_SHAPE.POLYGON)}
-              iconType="node"
+              iconType="vectorTriangle"
               aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPolygonLabel', {
                 defaultMessage: 'Draw polygon',
               })}

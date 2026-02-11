@@ -156,7 +156,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     <EuiButton
       data-test-subj="createConnectorButton"
       fill
-      iconType="plusInCircle"
+      iconType="plusCircle"
       iconSide="left"
       onClick={() => setAddFlyoutVisibility(true)}
       isLoading={false}

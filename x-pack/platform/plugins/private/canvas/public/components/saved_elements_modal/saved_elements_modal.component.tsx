@@ -186,7 +186,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
 
   let customElementContent = (
     <EuiEmptyPrompt
-      iconType="vector"
+      iconType="vectorSquare"
       title={<h2>{strings.getAddNewElementTitle()}</h2>}
       body={<p>{strings.getAddNewElementDescription()}</p>}
       titleSize="s"

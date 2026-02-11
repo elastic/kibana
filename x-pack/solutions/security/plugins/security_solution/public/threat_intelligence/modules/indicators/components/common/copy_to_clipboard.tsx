@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiContextMenuItem, EuiCopy } from '@elastic/eui';
 import { COPY_TITLE } from './translations';
 
-const COPY_ICON = 'copyClipboard';
+const COPY_ICON = 'copy';
 
 export interface CopyToClipboardProps {
   /**

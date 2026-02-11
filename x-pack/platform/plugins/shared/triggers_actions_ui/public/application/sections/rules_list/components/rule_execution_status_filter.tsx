@@ -59,7 +59,7 @@ export const RuleExecutionStatusFilter: React.FunctionComponent<RuleExecutionSta
       closePopover={onClosePopover}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           isSelected={isPopoverOpen}
           hasActiveFilters={selectedValues.length > 0}
           numActiveFilters={selectedValues.length}

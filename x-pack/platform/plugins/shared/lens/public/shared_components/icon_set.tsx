@@ -51,7 +51,7 @@ export const metricIconsSet: IconSet<AvailableMetricIcon> = [
       label: i18n.translate('xpack.lens.metric.iconSelect.heartLabel', { defaultMessage: 'Heart' }),
     },
     {
-      value: 'mapMarker',
+      value: 'waypoint',
       label: i18n.translate('xpack.lens.metric.iconSelect.mapMarkerLabel', {
         defaultMessage: 'Map Marker',
       }),
@@ -63,7 +63,7 @@ export const metricIconsSet: IconSet<AvailableMetricIcon> = [
       }),
     },
     {
-      value: 'starEmpty',
+      value: 'star',
       label: i18n.translate('xpack.lens.metric.iconSelect.starLabel', { defaultMessage: 'Star' }),
     },
   ] as const),

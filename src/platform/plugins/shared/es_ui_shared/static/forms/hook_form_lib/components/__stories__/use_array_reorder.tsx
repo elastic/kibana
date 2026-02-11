@@ -120,7 +120,7 @@ export function Reorder() {
                                 {items.length > 1 && (
                                   <EuiFlexItem grow={false}>
                                     <EuiButtonIcon
-                                      iconType="minusInCircle"
+                                      iconType="minusCircle"
                                       onClick={() => removeItem(id)}
                                       aria-label="Remove item"
                                     />
@@ -247,7 +247,7 @@ const MyFormComponent = () => {
                               {items.length > 1 && (
                                 <EuiFlexItem grow={false}>
                                   <EuiButtonIcon
-                                    iconType="minusInCircle"
+                                    iconType="minusCircle"
                                     onClick={() => removeItem(id)}
                                     aria-label="Remove item"
                                   />

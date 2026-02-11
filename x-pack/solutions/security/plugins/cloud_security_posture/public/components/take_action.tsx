@@ -140,7 +140,7 @@ export const TakeAction = ({
     <EuiButton
       isLoading={isLoading}
       fill
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={() => setPopoverOpen(!isPopoverOpen)}
     >
@@ -151,7 +151,7 @@ export const TakeAction = ({
       aria-label={kbnI18n.translate('xpack.csp.flyout.moreActionsButton', {
         defaultMessage: 'More actions',
       })}
-      iconType="boxesHorizontal"
+      iconType="boxesVertical"
       color="primary"
       isLoading={isLoading}
       onClick={() => setPopoverOpen(!isPopoverOpen)}

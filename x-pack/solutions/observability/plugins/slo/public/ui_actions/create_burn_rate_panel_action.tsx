@@ -29,7 +29,7 @@ export function createBurnRatePanelAction(
     id: ADD_BURN_RATE_ACTION_ID,
     grouping: COMMON_OBSERVABILITY_GROUPING,
     order: 20,
-    getIconType: () => 'visGauge',
+    getIconType: () => 'chartGauge',
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);
     },

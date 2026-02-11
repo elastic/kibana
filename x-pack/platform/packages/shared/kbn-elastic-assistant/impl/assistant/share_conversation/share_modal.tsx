@@ -139,7 +139,7 @@ const ShareModalComponent: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="copyConversationUrl"
-              iconType="copyClipboard"
+              iconType="copy"
               onClick={handleCopyUrl}
             >
               {COPY_URL}

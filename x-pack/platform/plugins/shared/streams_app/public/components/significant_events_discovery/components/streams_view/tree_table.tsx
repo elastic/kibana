@@ -276,7 +276,7 @@ export function StreamsTreeTable({
                     {treeMode && item.children && hasChildren && (
                       <EuiFlexItem grow={false}>
                         <EuiIcon
-                          type={isCollapsed ? 'arrowRight' : 'arrowDown'}
+                          type={isCollapsed ? 'chevronSingleRight' : 'chevronSingleDown'}
                           color="text"
                           size="m"
                           data-test-subj={`${isCollapsed ? 'expand' : 'collapse'}Button-${
@@ -347,14 +347,14 @@ export function StreamsTreeTable({
                     return '-';
                   case TaskStatus.Completed:
                   case TaskStatus.Acknowledged:
-                    return <EuiIcon type="checkInCircleFilled" color="success" size="m" />;
+                    return <EuiIcon type="checkCircleFill" color="success" size="m" />;
                   case TaskStatus.Stale:
-                    return <EuiIcon type="checkInCircleFilled" color="subdued" size="m" />;
+                    return <EuiIcon type="checkCircleFill" color="subdued" size="m" />;
                   case TaskStatus.Failed:
                     return (
                       <EuiIconTip
                         size="m"
-                        type="crossInCircle"
+                        type="crossCircle"
                         color="danger"
                         content={onboardingResult.error}
                       />
@@ -430,7 +430,7 @@ export function StreamsTreeTable({
                     disableScreenReaderOutput
                   >
                     <EuiButtonIcon
-                      iconType="securitySignal"
+                      iconType="radar"
                       aria-label={RUN_STREAM_ONBOARDING_BUTTON_LABEL}
                       onClick={() => onOnboardStreamActionClick(item.stream.name)}
                     />

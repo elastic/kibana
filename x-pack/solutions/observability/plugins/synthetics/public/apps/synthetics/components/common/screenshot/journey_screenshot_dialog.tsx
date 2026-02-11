@@ -162,7 +162,7 @@ export const JourneyScreenshotDialog = ({
                   setStepNumber((s) => s - 1);
                   evt.preventDefault();
                 }}
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 aria-label={prevAriaLabel}
               >
                 {prevAriaLabel}
@@ -188,7 +188,7 @@ export const JourneyScreenshotDialog = ({
                   setStepNumber((s) => s + 1);
                   evt.stopPropagation();
                 }}
-                iconType="arrowRight"
+                iconType="chevronSingleRight"
                 iconSide="right"
                 aria-label={nextAriaLabel}
               >

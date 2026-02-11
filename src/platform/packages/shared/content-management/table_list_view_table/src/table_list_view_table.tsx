@@ -972,7 +972,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         <EuiButton
           onClick={createItem}
           data-test-subj="newItemButton"
-          iconType="plusInCircleFilled"
+          iconType="plusCircle"
           fill
         >
           <FormattedMessage

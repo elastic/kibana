@@ -21,7 +21,7 @@ interface ProcessorStatusIcon {
 
 const processorStatusToIconMap: Record<ProcessorStatus, ProcessorStatusIcon> = {
   success: {
-    icon: 'checkInCircleFilled',
+    icon: 'checkCircleFill',
     iconColor: 'success',
     label: i18n.translate('xpack.ingestPipelines.pipelineEditorItem.successStatusAriaLabel', {
       defaultMessage: 'Success',

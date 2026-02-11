@@ -25,7 +25,7 @@ export const MinimisedFilterItemActions: FC<FilterItemActionsProps> = (props) =>
 
   const button = (
     <EuiButtonIcon
-      iconType="boxesHorizontal"
+      iconType="boxesVertical"
       color="text"
       aria-label={strings.getMoreActionsLabel()}
       onClick={onMoreActionsButtonClick}

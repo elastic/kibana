@@ -83,7 +83,7 @@ export function DataIngestStatus({ onboardingId }: Props) {
     <>
       <ProgressIndicator
         title={data?.hasData ? 'We are monitoring your cluster' : 'Waiting for data to be shipped'}
-        iconType="checkInCircleFilled"
+        iconType="checkCircleFill"
         isLoading={!data?.hasData}
         css={css`
           max-width: 40%;

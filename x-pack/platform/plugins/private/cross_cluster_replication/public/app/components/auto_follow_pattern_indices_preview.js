@@ -29,7 +29,7 @@ export const AutoFollowPatternIndicesPreview = ({ prefix, suffix, leaderIndexPat
   return (
     <EuiCallOut
       title={title}
-      iconType="indexMapping"
+      iconType="mapping"
       data-test-subj="autoFollowPatternIndicesPreview"
     >
       <FormattedMessage

@@ -181,7 +181,7 @@ const getExportItems = (
         defaultMessage: 'CSV',
       }),
       testId: 'exportMenuItem-CSV',
-      iconType: 'tableDensityNormal',
+      iconType: 'table',
       order: 1,
       run: async () => {
         const shareOptions = await buildShareOptions(buildShareOptionsParams);
@@ -287,7 +287,7 @@ export const getShareAppMenuItem = ({
       label: i18n.translate('discover.localMenu.exportTitle', {
         defaultMessage: 'Export',
       }),
-      iconType: 'exportAction',
+      iconType: 'upload',
       testId: 'exportTopNavButton',
       items: exportItems,
       popoverTestId: 'exportPopoverPanel',

@@ -67,7 +67,7 @@ export const Reason: FC = () => {
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           size="s"
-          iconType="expand"
+          iconType="maximize"
           onClick={openRulePreview}
           iconSide="right"
           data-test-subj={REASON_DETAILS_PREVIEW_BUTTON_TEST_ID}

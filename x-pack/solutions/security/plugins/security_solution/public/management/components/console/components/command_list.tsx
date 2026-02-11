@@ -273,7 +273,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                         }
                       >
                         <EuiButtonIcon
-                          iconType="plusInCircle"
+                          iconType="plusCircle"
                           aria-label={`updateTextInputCommand-${command.name}`}
                           onClick={updateInputText(`${commandNameWithArgs} `)}
                           isDisabled={command.helpDisabled === true}

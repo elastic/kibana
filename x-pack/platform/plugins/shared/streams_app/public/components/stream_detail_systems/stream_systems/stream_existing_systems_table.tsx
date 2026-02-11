@@ -77,7 +77,7 @@ export function StreamExistingSystemsTable({
           name: GENERATE_SIGNIFICANT_EVENTS,
           description: GENERATE_SIGNIFICANT_EVENTS,
           type: 'icon',
-          icon: 'crosshairs',
+          icon: 'crosshair',
           enabled: () => (aiFeatures?.genAiConnectors.selectedConnector ? true : false),
           onClick: (system) => {
             goToGenerateSignificantEvents([system]);
@@ -164,7 +164,7 @@ export function StreamExistingSystemsTable({
           >
             <EuiButtonEmpty
               disabled={isGenerateSignificantEventsButtonDisabled}
-              iconType="crosshairs"
+              iconType="crosshair"
               size="xs"
               aria-label={GENERATE_SIGNIFICANT_EVENTS}
               data-test-subj="system_identification_selection_goto_significant_events_button"

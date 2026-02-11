@@ -189,7 +189,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
       showServiceGroupSaveButton={false}
       selectedNavButton="serviceGroups"
       pageHeader={{
-        iconType: 'magnifyWithExclamation',
+        iconType: 'magnifyExclamation',
         rightSideItems: [<RefreshButton />],
         description: <TemplateDescription />,
         tabs,
@@ -206,7 +206,7 @@ function TemplateDescription() {
     return (
       <EuiCallOut
         title="Displaying results from the uploaded diagnostics report"
-        iconType="exportAction"
+        iconType="upload"
       >
         <EuiButton
           data-test-subj="apmTemplateDescriptionClearBundleButton"

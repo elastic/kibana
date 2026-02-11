@@ -55,7 +55,7 @@ export const SpecViewer = ({ vegaAdapter, ...rest }: SpecViewerProps) => {
               <EuiButtonEmpty
                 size="xs"
                 flush="right"
-                iconType="copyClipboard"
+                iconType="copy"
                 onClick={copy}
                 data-test-subj="vegaDataInspectorCopyClipboardButton"
               >

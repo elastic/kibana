@@ -295,12 +295,12 @@ export const EditMenu: FunctionComponent<Props> = ({
           },
           {
             name: shortcutHelp.BRING_FORWARD, // TODO: same as above
-            icon: 'arrowUp',
+            icon: 'chevronSingleUp',
             onClick: bringForward,
           },
           {
             name: shortcutHelp.SEND_BACKWARD, // TODO: check against current element position and disable if already bottom layer
-            icon: 'arrowDown',
+            icon: 'chevronSingleDown',
             onClick: sendBackward,
           },
           {
@@ -323,7 +323,7 @@ export const EditMenu: FunctionComponent<Props> = ({
         items: [
           {
             name: strings.getLeftAlignMenuItemLabel(),
-            icon: 'editorItemAlignLeft',
+            icon: 'alignLeft',
             onClick: () => {
               alignLeft();
               closePopover();
@@ -331,7 +331,7 @@ export const EditMenu: FunctionComponent<Props> = ({
           },
           {
             name: strings.getCenterAlignMenuItemLabel(),
-            icon: 'editorItemAlignCenter',
+            icon: 'alignCenterHorizontal',
             onClick: () => {
               alignCenter();
               closePopover();
@@ -339,7 +339,7 @@ export const EditMenu: FunctionComponent<Props> = ({
           },
           {
             name: strings.getRightAlignMenuItemLabel(),
-            icon: 'editorItemAlignRight',
+            icon: 'alignRight',
             onClick: () => {
               alignRight();
               closePopover();
@@ -347,7 +347,7 @@ export const EditMenu: FunctionComponent<Props> = ({
           },
           {
             name: strings.getTopAlignMenuItemLabel(),
-            icon: 'editorItemAlignTop',
+            icon: 'alignTop',
             onClick: () => {
               alignTop();
               closePopover();
@@ -355,7 +355,7 @@ export const EditMenu: FunctionComponent<Props> = ({
           },
           {
             name: strings.getMiddleAlignMenuItemLabel(),
-            icon: 'editorItemAlignMiddle',
+            icon: 'alignCenterVertical',
             onClick: () => {
               alignMiddle();
               closePopover();
@@ -363,7 +363,7 @@ export const EditMenu: FunctionComponent<Props> = ({
           },
           {
             name: strings.getBottomAlignMenuItemLabel(),
-            icon: 'editorItemAlignBottom',
+            icon: 'alignBottom',
             onClick: () => {
               alignBottom();
               closePopover();
@@ -384,7 +384,7 @@ export const EditMenu: FunctionComponent<Props> = ({
         items: [
           {
             name: strings.getHorizontalDistributionMenuItemLabel(),
-            icon: 'editorDistributeHorizontal',
+            icon: 'distributeHorizontal',
             onClick: () => {
               distributeHorizontally();
               closePopover();
@@ -392,7 +392,7 @@ export const EditMenu: FunctionComponent<Props> = ({
           },
           {
             name: strings.getVerticalDistributionMenuItemLabel(),
-            icon: 'editorDistributeVertical',
+            icon: 'distributeVertical',
             onClick: () => {
               distributeVertically();
               closePopover();
@@ -418,7 +418,7 @@ export const EditMenu: FunctionComponent<Props> = ({
       {
         // TODO: check history and disable when there are no more changes to revert
         name: strings.getUndoMenuItemLabel(),
-        icon: <EuiIcon type="editorUndo" size="m" />,
+        icon: <EuiIcon type="undo" size="m" />,
         onClick: () => {
           undoHistory();
         },
@@ -426,7 +426,7 @@ export const EditMenu: FunctionComponent<Props> = ({
       {
         // TODO: check history and disable when there are no more changes to reapply
         name: strings.getRedoMenuItemLabel(),
-        icon: <EuiIcon type="editorRedo" size="m" />,
+        icon: <EuiIcon type="redo" size="m" />,
         onClick: () => {
           redoHistory();
         },
@@ -451,7 +451,7 @@ export const EditMenu: FunctionComponent<Props> = ({
       },
       {
         name: shortcutHelp.PASTE, // TODO: can this be disabled if clipboard is empty?
-        icon: <EuiIcon type="copyClipboard" size="m" />,
+        icon: <EuiIcon type="copy" size="m" />,
         disabled: !hasPasteData,
         onClick: () => {
           pasteNodes();

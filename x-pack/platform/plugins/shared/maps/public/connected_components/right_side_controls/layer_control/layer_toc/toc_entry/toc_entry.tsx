@@ -205,7 +205,7 @@ export class TOCEntry extends Component<Props, State> {
       quickActions.push(
         <EuiButtonIcon
           key="fitToBounds"
-          iconType="expand"
+          iconType="maximize"
           title={FIT_TO_DATA_LABEL}
           aria-label={FIT_TO_DATA_LABEL}
           onClick={this._fitToBounds}
@@ -227,7 +227,7 @@ export class TOCEntry extends Component<Props, State> {
       quickActions.push(
         <EuiButtonIcon
           key="reorder"
-          iconType="grab"
+          iconType="dragVertical"
           title={i18n.translate('xpack.maps.layerControl.tocEntry.grabButtonTitle', {
             defaultMessage: 'Reorder layer',
           })}
@@ -275,7 +275,7 @@ export class TOCEntry extends Component<Props, State> {
         >
           <EuiIcon
             className="eui-alignBaseline"
-            type={isLegendDetailsOpen ? 'arrowUp' : 'arrowDown'}
+            type={isLegendDetailsOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
             size="s"
           />
         </button>

@@ -34,11 +34,11 @@ const toggleButtonsIcons = [
   {
     id: `listView`,
     label: 'List View',
-    iconType: 'list',
+    iconType: 'listBullet',
     'data-test-subj': 'sloListViewButton',
   },
   {
-    iconType: 'tableDensityCompact',
+    iconType: 'tableDensityHigh',
     id: 'compactView',
     label: i18n.translate('xpack.slo.listView.compactViewLabel', {
       defaultMessage: 'Compact view',

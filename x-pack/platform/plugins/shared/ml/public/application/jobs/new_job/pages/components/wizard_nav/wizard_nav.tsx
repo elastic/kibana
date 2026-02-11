@@ -55,7 +55,7 @@ export const PreviousButton: FC<StepsNavProps> = ({ previous, previousActive = t
   <EuiButtonEmpty
     disabled={!previousActive}
     onClick={previous}
-    iconType="arrowLeft"
+    iconType="chevronSingleLeft"
     iconSide="left"
     data-test-subj="mlJobWizardNavButtonPrevious"
   >
@@ -69,7 +69,7 @@ export const NextButton: FC<StepsNavProps> = ({ next, nextActive = true }) => (
     disabled={!nextActive}
     onClick={next}
     iconSide="right"
-    iconType="arrowRight"
+    iconType="chevronSingleRight"
     data-test-subj="mlJobWizardNavButtonNext"
   >
     <FormattedMessage id="xpack.ml.newJob.wizard.nextStepButton" defaultMessage="Next" />

@@ -216,7 +216,7 @@ export function HeaderControl({ slo }: Props) {
             data-test-subj="o11yHeaderControlActionsButton"
             fill
             iconSide="right"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSize="s"
             onClick={handleActionsClick}
           >

@@ -104,7 +104,7 @@ export const DataDriftOverviewTable = ({
             }`}
             onClick={() => toggleDetails(item)}
             aria-label={itemIdToExpandedRowMapValues[item.featureName] ? COLLAPSE_ROW : EXPAND_ROW}
-            iconType={itemIdToExpandedRowMapValues[item.featureName] ? 'arrowDown' : 'arrowRight'}
+            iconType={itemIdToExpandedRowMapValues[item.featureName] ? 'chevronSingleDown' : 'chevronSingleRight'}
           />
         );
       },

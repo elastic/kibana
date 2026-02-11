@@ -354,7 +354,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             <EuiButtonIcon
               data-test-subj="selectActionButton"
               data-testid="selectActionButton"
-              iconType="boxesHorizontal"
+              iconType="boxesVertical"
               onClick={() => setIsPopoverOpen(!isPopoverOpen)}
               aria-label={i18n.translate(
                 'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.popoverButtonTitle',

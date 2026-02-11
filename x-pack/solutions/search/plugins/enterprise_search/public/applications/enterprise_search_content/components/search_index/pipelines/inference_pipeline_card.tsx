@@ -123,7 +123,7 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-detachPipeline`}
                 size="s"
                 flush="both"
-                iconType="unlink"
+                iconType="linkSlash"
                 color="text"
                 onClick={() => {
                   detachMlPipeline({ indexName, pipelineName });

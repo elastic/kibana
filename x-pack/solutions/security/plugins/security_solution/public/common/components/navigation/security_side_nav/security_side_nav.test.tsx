@@ -177,7 +177,7 @@ describe('SecuritySideNav', () => {
             id: SecurityPageName.landing,
             label: 'Get started',
             position: 'bottom',
-            iconType: 'launch',
+            iconType: 'rocket',
             appendSeparator: true,
           }),
         ],

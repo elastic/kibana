@@ -145,7 +145,7 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
           <EuiFlexItem>
             <EuiButtonEmpty
               flush="left"
-              iconType="popout"
+              iconType="external"
               iconSide="right"
               href={technique.reference}
               target="_blank"
@@ -195,7 +195,7 @@ const CoverageOverviewMitreTechniquePanelPopoverComponent = ({
               disabled={isEnableButtonDisabled}
               onClick={handleEnableAllDisabled}
               size="s"
-              iconType="checkInCircleFilled"
+              iconType="checkCircleFill"
             >
               {i18n.ENABLE_ALL_DISABLED}
             </EuiButton>

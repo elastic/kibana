@@ -20,7 +20,7 @@ export const GoToSpacesButton: React.FC<GoToSpacesButtonProps> = ({
 }) => {
   return (
     <EuiButton
-      iconType="popout"
+      iconType="external"
       iconSide="right"
       data-test-subj={navigateToPermissions ? 'goToPermissionsTabButton' : 'goToSpacesButton'}
       onClick={onNavigateToSpaces}

@@ -426,7 +426,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                           {(copy: () => void) => (
                             <EuiButtonIcon
                               onClick={copy}
-                              iconType="copyClipboard"
+                              iconType="copy"
                               aria-label={copyToClipboardSourceDescription}
                             />
                           )}

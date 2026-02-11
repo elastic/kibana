@@ -237,7 +237,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
                 defaultMessage: 'Preview finding details',
               }
             )}
-            iconType="expand"
+            iconType="maximize"
             onClick={() => {
               uiMetricService.trackUiMetric(
                 METRIC_TYPE.CLICK,

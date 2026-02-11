@@ -193,7 +193,7 @@ const DraggablePatternInput = ({
             {onRemove && (
               <EuiButtonIcon
                 data-test-subj="streamsAppDraggablePatternInputButton"
-                iconType="minusInCircle"
+                iconType="minusCircle"
                 color="danger"
                 onClick={onRemove}
                 aria-label={i18n.translate(

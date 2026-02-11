@@ -151,7 +151,7 @@ export const useQualityIssuesDocsChart = () => {
         return openInLensText;
       },
       getIconType(): string {
-        return 'visArea';
+        return 'chartArea';
       },
       async isCompatible(): Promise<boolean> {
         return true;

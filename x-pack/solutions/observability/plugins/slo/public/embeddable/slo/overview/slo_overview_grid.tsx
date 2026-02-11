@@ -62,7 +62,7 @@ const getSloChartData = ({
         }}
       />
     ),
-    icon: () => <EuiIcon type="visGauge" size="l" />,
+    icon: () => <EuiIcon type="chartGauge" size="l" />,
     color: cardColor,
   };
 };

@@ -59,7 +59,7 @@ export const AlertDescription: FC = () => {
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           size="s"
-          iconType="expand"
+          iconType="maximize"
           onClick={openRulePreview}
           iconSide="right"
           data-test-subj={RULE_SUMMARY_BUTTON_TEST_ID}

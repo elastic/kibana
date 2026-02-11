@@ -12,7 +12,7 @@ export const areaChart: ElementFactory = () => ({
   displayName: 'Area',
   help: 'A line chart with a filled body',
   type: 'chart',
-  icon: 'visArea',
+  icon: 'chartArea',
   expression: `kibana
 | selectFilter
 | demodata

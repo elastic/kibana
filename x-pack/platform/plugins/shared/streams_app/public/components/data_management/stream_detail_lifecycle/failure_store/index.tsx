@@ -96,7 +96,7 @@ export const StreamDetailFailureStore = ({
       <EuiTitle size="xs">
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="errorFilled" color="danger" />
+            <EuiIcon type="errorFill" color="danger" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <h4>

@@ -198,7 +198,7 @@ describe('QueryStringInput', () => {
         query: luceneQuery,
         onSubmit: noop,
         indexPatterns: [stubIndexPattern],
-        iconType: 'search',
+        iconType: 'magnify',
       })
     );
 

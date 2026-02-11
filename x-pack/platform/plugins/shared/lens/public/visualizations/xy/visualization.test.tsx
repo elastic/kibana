@@ -3926,7 +3926,7 @@ describe('xy_visualization', () => {
                 "disabled": true,
                 "displayName": "Revert changes",
                 "execute": [Function],
-                "icon": "editorUndo",
+                "icon": "undo",
                 "isCompatible": true,
                 "order": 200,
               },

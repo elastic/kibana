@@ -168,7 +168,7 @@ export const OptionsListControl = ({
               >
                 <EuiToken
                   tabIndex={0}
-                  iconType="alert"
+                  iconType="warning"
                   size="s"
                   color="euiColorVis9"
                   shape="square"
@@ -205,7 +205,7 @@ export const OptionsListControl = ({
       role="combobox"
       isLoading={loading}
       compressed={isCompressed(componentApi)}
-      iconType={'arrowDown'}
+      iconType={'chevronSingleDown'}
       iconSide="right"
       value={hasSelections || existsSelected ? selectionDisplayNode : ''}
       placeholder={displaySettings.placeholder ?? OptionsListStrings.control.getPlaceholder()}

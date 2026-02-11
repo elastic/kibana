@@ -23,7 +23,7 @@ export const CopyActionButton: React.FC<CopyActionButtonProps> = ({ copyText, ar
     <EuiButtonIcon
       aria-label={ariaLabel}
       color="text"
-      iconType="copyClipboard"
+      iconType="copy"
       onClick={handleCopy}
     />
   );

@@ -109,7 +109,7 @@ export function TracesInDiscoverCallout() {
       size="m"
       announceOnMount
       title={calloutTitle}
-      iconType="cheer"
+      iconType="popper"
       onDismiss={dismissCallout}
     >
       <EuiText size="s">{calloutContent}</EuiText>

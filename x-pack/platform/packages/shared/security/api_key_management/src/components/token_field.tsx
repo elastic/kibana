@@ -96,7 +96,7 @@ export const SelectableTokenField: FunctionComponent<SelectableTokenFieldProps> 
             <EuiFormPrepend
               element="button"
               label={selectedOption.label}
-              iconRight="arrowDown"
+              iconRight="chevronSingleDown"
               data-test-subj="selectableTokenFieldButton"
               onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             />

@@ -197,7 +197,7 @@ export function SelectModelAndInstallKnowledgeBase({
             color="primary"
             fill
             isLoading={isInstalling}
-            iconType="importAction"
+            iconType="download"
             data-test-subj="observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton"
             onClick={handleInstall}
           >

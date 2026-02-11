@@ -33,7 +33,7 @@ const ViewInAiAssistantComponent: React.FC<Props> = ({
     <EuiButtonEmpty
       data-test-subj="viewInAiAssistantCompact"
       disabled={disabled}
-      iconType="expand"
+      iconType="maximize"
       onClick={showAssistantOverlay}
       size="xs"
     >

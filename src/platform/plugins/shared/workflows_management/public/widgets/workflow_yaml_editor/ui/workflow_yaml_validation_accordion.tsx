@@ -130,7 +130,7 @@ export function WorkflowYamlValidationAccordion({
   } else if (allValidationErrors?.length === 0) {
     icon = (
       <EuiIcon
-        type="checkInCircleFilled"
+        type="checkCircleFill"
         color={euiTheme.colors.vis.euiColorVisSuccess0}
         size="m"
       />
@@ -139,7 +139,7 @@ export function WorkflowYamlValidationAccordion({
   } else {
     icon = (
       <EuiIcon
-        type={highestSeverity === 'error' ? 'errorFilled' : 'warningFilled'}
+        type={highestSeverity === 'error' ? 'errorFill' : 'warningFill'}
         color={highestSeverity === 'error' ? 'danger' : euiTheme.colors.vis.euiColorVis8}
         size="m"
       />
@@ -223,9 +223,9 @@ export function WorkflowYamlValidationAccordion({
                 <EuiIcon
                   type={
                     error.severity === 'error'
-                      ? 'errorFilled'
+                      ? 'errorFill'
                       : error.severity === 'warning'
-                      ? 'warningFilled'
+                      ? 'warningFill'
                       : 'iInCircle'
                   }
                   color={

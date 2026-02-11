@@ -42,7 +42,7 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
     <EuiButtonIcon
       aria-label={labels.cancel}
       data-test-subj="agentBuilderConversationInputCancelButton"
-      iconType="stopFilled"
+      iconType="stopFill"
       size="s"
       color="text"
       css={cancelButtonStyles}

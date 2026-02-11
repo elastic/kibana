@@ -379,7 +379,7 @@ export const MultiRowInput: FunctionComponent<MultiRowInputProps> = ({
           disabled={disabled}
           size="xs"
           flush="left"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={addRowHandler}
         >
           {isUrl ? (

@@ -61,7 +61,7 @@ export function ManagementBottomBar({
             data-stream-type={streamType}
             color="text"
             size="s"
-            iconType="editorCodeBlock"
+            iconType="code"
             onClick={onViewCodeClick}
             disabled={isInvalid}
           >

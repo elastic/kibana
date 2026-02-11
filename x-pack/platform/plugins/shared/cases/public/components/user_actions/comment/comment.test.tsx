@@ -389,7 +389,7 @@ describe('createCommentUserActionBuilder', () => {
         'added an alert from Awesome rule'
       );
 
-      await deleteAttachment('minusInCircle', 'Remove');
+      await deleteAttachment('minusCircle', 'Remove');
 
       await waitFor(() => {
         expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
@@ -477,7 +477,7 @@ describe('createCommentUserActionBuilder', () => {
         'added 2 alerts from Awesome rule'
       );
 
-      await deleteAttachment('minusInCircle', 'Remove');
+      await deleteAttachment('minusCircle', 'Remove');
 
       await waitFor(() => {
         expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
@@ -554,7 +554,7 @@ describe('createCommentUserActionBuilder', () => {
         'added an event'
       );
 
-      await deleteAttachment('minusInCircle', 'Remove');
+      await deleteAttachment('minusCircle', 'Remove');
 
       await waitFor(() => {
         expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(

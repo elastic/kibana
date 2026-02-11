@@ -15,7 +15,7 @@ interface Props {
 export function CreateButton({ onClick }: Props) {
   return (
     <EuiButton
-      iconType="plusInCircle"
+      iconType="plusCircle"
       data-test-subj="apmCreateServiceGroupButton"
       onClick={onClick}
     >

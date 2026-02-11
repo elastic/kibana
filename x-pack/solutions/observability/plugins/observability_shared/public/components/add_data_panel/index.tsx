@@ -116,7 +116,7 @@ export function AddDataPanel({
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     data-test-subj="AddDataPanelTryItNowButton"
-                    iconType="launch"
+                    iconType="rocket"
                     iconSide="right"
                     href={actions.secondary.href}
                     onClick={onTryIt}

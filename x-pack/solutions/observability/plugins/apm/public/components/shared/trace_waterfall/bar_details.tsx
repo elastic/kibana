@@ -132,7 +132,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
               // eslint-disable-next-line @elastic/eui/href-or-on-click
               <EuiBadge
                 color={theme.euiTheme.colors.danger}
-                iconType="arrowRight"
+                iconType="chevronSingleRight"
                 href={getRelatedErrorsHref?.(item.id) as any}
                 onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
                   if (onErrorClick) {
@@ -157,7 +157,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
               </EuiBadge>
             ) : (
               <EuiIcon
-                type="errorFilled"
+                type="errorFill"
                 color={theme.euiTheme.colors.danger}
                 size="s"
                 data-test-subj="apmBarDetailsErrorIcon"

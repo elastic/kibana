@@ -138,7 +138,7 @@ export function WorkflowGraphNode(node: Node<WorkflowNodeData>) {
                 >
                   {node.data.label}
                   {node.data.stepExecution?.status === ExecutionStatus.COMPLETED && (
-                    <EuiIcon type="checkInCircleFilled" color="#16C5C0" />
+                    <EuiIcon type="checkCircleFill" color="#16C5C0" />
                   )}
                   {node.data.stepExecution?.status === ExecutionStatus.FAILED && (
                     <EuiIcon type="alert" color={euiTheme.colors.danger} />

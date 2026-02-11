@@ -98,7 +98,7 @@ export class TOCEntryButton extends Component<Props, State> {
 
     if (!this.props.layer.isVisible()) {
       return {
-        icon: <EuiIcon size="m" type="eyeClosed" />,
+        icon: <EuiIcon size="m" type="eyeSlash" />,
         tooltipContent: i18n.translate('xpack.maps.layer.layerHiddenTooltip', {
           defaultMessage: `Layer is hidden.`,
         }),

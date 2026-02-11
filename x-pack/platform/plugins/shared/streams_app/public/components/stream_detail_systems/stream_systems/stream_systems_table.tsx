@@ -186,7 +186,7 @@ export function StreamSystemsTable({
                     defaultMessage: 'Expand details',
                   })
             }
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             data-test-subj={
               isExpanded
                 ? 'system_identification_collapse_details_button'

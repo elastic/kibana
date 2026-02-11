@@ -20,7 +20,7 @@ export const ColorLabel = ({ label, color, paletteSelected }: Props) => {
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIcon
-          type="stopFilled"
+          type="stopFill"
           color={color}
           size="xl"
           aria-label={i18n.translate('xpack.infra.legendControls.iconColorLabel', {

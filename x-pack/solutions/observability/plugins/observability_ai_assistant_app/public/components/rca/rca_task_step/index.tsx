@@ -25,7 +25,7 @@ export function RootCauseAnalysisTaskStepItem({
     iconType = 'alert';
   } else if (status === 'completed') {
     color = 'success';
-    iconType = 'checkInCircleFilled';
+    iconType = 'checkCircleFill';
   } else {
     color = 'primary';
     loading = true;

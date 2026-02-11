@@ -178,7 +178,7 @@ const SelectableTimelineComponent: React.FC<SelectableTimelineProps> = ({
         <EuiFlexItem grow={false}>
           <EuiIcon
             type={`${
-              option.favorite != null && isEmpty(option.favorite) ? 'starEmpty' : 'starFilled'
+              option.favorite != null && isEmpty(option.favorite) ? 'star' : 'starFill'
             }`}
           />
         </EuiFlexItem>

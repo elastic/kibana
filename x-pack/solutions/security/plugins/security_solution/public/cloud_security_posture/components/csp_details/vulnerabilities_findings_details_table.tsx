@@ -181,7 +181,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
             ? [
                 {
                   onClick: () => window.open(url, '_blank'),
-                  iconType: 'popout',
+                  iconType: 'external',
                   ariaLabel: i18n.translate(
                     'xpack.securitySolution.vulnerabilities.findingsDetailsTable.openUrlInWindow',
                     {
@@ -231,7 +231,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
           finding: VulnerabilitiesFindingDetailFields
         ) => (
           <EuiButtonIcon
-            iconType="expand"
+            iconType="maximize"
             onClick={() => {
               const previewPanelProps: FindingsVulnerabilityPanelExpandableFlyoutPropsPreview = {
                 id: VulnerabilityFindingsPreviewPanelKey,

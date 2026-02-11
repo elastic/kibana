@@ -27,7 +27,7 @@ export const FilterGroup = ({
 
   const button = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       badgeColor="success"
       onClick={toggle}
       isSelected={isPopoverOpen}

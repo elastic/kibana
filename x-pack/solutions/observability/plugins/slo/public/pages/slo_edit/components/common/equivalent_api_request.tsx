@@ -111,7 +111,7 @@ export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
     <>
       <EuiButtonEmpty
         color="primary"
-        iconType="copyClipboard"
+        iconType="copy"
         data-test-subj="sloFormCopyJsonButton"
         disabled={disabled}
         onClick={() => setIsFlyoutVisible(true)}

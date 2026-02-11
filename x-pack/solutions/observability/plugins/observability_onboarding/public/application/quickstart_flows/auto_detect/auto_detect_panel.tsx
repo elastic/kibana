@@ -156,7 +156,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
               <>
                 {status === 'dataReceived' ? (
                   <ProgressIndicator
-                    iconType="cheer"
+                    iconType="popper"
                     title={i18n.translate(
                       'xpack.observability_onboarding.autoDetectPanel.yourDataIsReadyToExploreLabel',
                       { defaultMessage: 'Your data is ready to explore!' }

@@ -96,7 +96,7 @@ export function MobileStats({ start, end, kuery }: { start: string; end: string;
       title: i18n.translate('xpack.apm.mobile.metrics.load.time', {
         defaultMessage: 'Average app load time',
       }),
-      icon: getIcon('visGauge'),
+      icon: getIcon('chartGauge'),
       value: data?.currentPeriod?.launchTimes?.value ?? NaN,
       valueFormatter: (value: number) =>
         Number.isNaN(value) ? NOT_AVAILABLE_LABEL : valueFormatter(Number(value.toFixed(1)), 'ms'),
@@ -109,7 +109,7 @@ export function MobileStats({ start, end, kuery }: { start: string; end: string;
       title: i18n.translate('xpack.apm.mobile.metrics.sessions', {
         defaultMessage: 'Sessions',
       }),
-      icon: getIcon('timeslider'),
+      icon: getIcon('clockControl'),
       value: data?.currentPeriod?.sessions?.value ?? NaN,
       valueFormatter: (value: number) =>
         Number.isNaN(value) ? NOT_AVAILABLE_LABEL : valueFormatter(value),

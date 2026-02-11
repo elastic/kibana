@@ -601,7 +601,7 @@ export const UsersFilterButton: FunctionComponent<CustomComponentProps> = ({ que
     <UserProfilesPopover
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={() => setIsOpen((toggle) => !toggle)}
           isSelected={isOpen}
           numFilters={usernames.length}

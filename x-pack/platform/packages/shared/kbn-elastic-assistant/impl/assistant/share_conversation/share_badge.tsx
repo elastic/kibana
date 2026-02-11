@@ -34,7 +34,7 @@ export const ShareBadge: React.FC<ShareBadgeProps> = ({
   );
   const dropdownProps = useMemo(
     () =>
-      isDropdown ? { iconType: 'arrowDown', iconSide: 'right' as EuiBadgeProps['iconSide'] } : {},
+      isDropdown ? { iconType: 'chevronSingleDown', iconSide: 'right' as EuiBadgeProps['iconSide'] } : {},
     [isDropdown]
   );
   return (

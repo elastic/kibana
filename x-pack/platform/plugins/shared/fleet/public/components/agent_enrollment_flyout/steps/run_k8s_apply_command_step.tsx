@@ -70,7 +70,7 @@ export const KubernetesManifestApplyStep = ({
             {(copy) => (
               <EuiButton
                 color="primary"
-                iconType="copyClipboard"
+                iconType="copy"
                 size="m"
                 onClick={() => onCopyButtonClick(copy)}
               >

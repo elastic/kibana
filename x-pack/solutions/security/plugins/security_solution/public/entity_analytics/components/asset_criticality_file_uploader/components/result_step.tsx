@@ -70,7 +70,7 @@ export const AssetCriticalityResultStep: React.FC<{
             />
           }
           color="success"
-          iconType="checkInCircleFilled"
+          iconType="checkCircleFill"
         >
           <FormattedMessage
             defaultMessage="Your asset criticality levels have been assigned. Note that your assignments can take a few moments to populate."

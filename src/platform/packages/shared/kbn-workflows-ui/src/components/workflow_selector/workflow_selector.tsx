@@ -231,7 +231,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
       label={finalConfig.label}
       labelAppend={
         <EuiLink {...workflowManagementLinkProps} external={false}>
-          {finalConfig.createWorkflowLinkText} <EuiIcon type="plusInCircle" size="s" />
+          {finalConfig.createWorkflowLinkText} <EuiIcon type="plusCircle" size="s" />
         </EuiLink>
       }
       helpText={helpText}

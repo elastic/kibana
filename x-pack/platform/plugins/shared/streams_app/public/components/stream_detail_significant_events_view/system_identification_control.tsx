@@ -193,7 +193,7 @@ export function SystemIdentificationControl({
                 defaultMessage: 'No systems identified',
               })}
               color="primary"
-              iconType="search"
+              iconType="magnify"
               onDismiss={() => {
                 acknowledgeSystemIdentificationTask().then(getTask);
               }}

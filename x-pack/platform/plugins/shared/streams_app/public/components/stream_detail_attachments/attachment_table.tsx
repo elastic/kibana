@@ -90,7 +90,7 @@ export function AttachmentsTable({
       render: (_, attachment) => (
         <EuiButtonIcon
           data-test-subj="streamsAppAttachmentDetailsButton"
-          iconType="expand"
+          iconType="maximize"
           aria-label={i18n.translate('xpack.streams.attachmentTable.detailsButtonAriaLabel', {
             defaultMessage: 'View details',
           })}
@@ -112,7 +112,7 @@ export function AttachmentsTable({
             defaultMessage: 'See attachment details',
           }),
           type: 'icon',
-          icon: 'tableDensityExpanded',
+          icon: 'tableDensityLow',
           onClick: (attachment) => onViewDetails?.(attachment),
           'data-test-subj': 'streamsAppAttachmentSeeDetailsAction',
         },
@@ -150,7 +150,7 @@ export function AttachmentsTable({
             defaultMessage: 'Remove this attachment from stream',
           }),
           type: 'icon',
-          icon: 'unlink',
+          icon: 'linkSlash',
           enabled: () => onUnlinkAttachment !== undefined,
           onClick: (attachment) => {
             onUnlinkAttachment?.(attachment);

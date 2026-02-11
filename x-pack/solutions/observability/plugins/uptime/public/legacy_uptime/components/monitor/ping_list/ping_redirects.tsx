@@ -39,7 +39,7 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
       target: '_blank',
       extraAction: {
         color: 'text',
-        iconType: 'popout',
+        iconType: 'external',
         iconSize: 's',
         alwaysShow: true,
         'aria-label': i18n.translate('xpack.uptime.monitorList.redirects.openWindow', {
@@ -58,7 +58,7 @@ export const PingRedirects: React.FC<Props> = ({ monitorStatus, showTitle }) => 
       target: '_blank',
       extraAction: {
         color: 'text',
-        iconType: 'popout',
+        iconType: 'external',
         iconSize: 's',
         'aria-label': i18n.translate('xpack.uptime.monitorList.redirects.openWindow', {
           defaultMessage: 'Link will open in new window.',

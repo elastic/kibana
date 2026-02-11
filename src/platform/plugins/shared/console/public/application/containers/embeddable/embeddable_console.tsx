@@ -174,7 +174,7 @@ export const EmbeddableConsole = ({
                 <div css={styles.embeddableConsoleControls}>
                   <EuiButtonEmpty
                     color="text"
-                    iconType={isOpen ? 'arrowUp' : 'arrowDown'}
+                    iconType={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
                     onClick={toggleConsole}
                     css={styles.embeddableConsoleControlsButton}
                     data-test-subj="consoleEmbeddedControlBar"

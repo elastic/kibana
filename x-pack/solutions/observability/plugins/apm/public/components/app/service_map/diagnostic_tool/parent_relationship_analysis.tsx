@@ -48,7 +48,7 @@ export function ParentRelationshipAnalysis({
         <>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="checkInCircleFilled" color="success" />
+              <EuiIcon type="checkCircleFill" color="success" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>

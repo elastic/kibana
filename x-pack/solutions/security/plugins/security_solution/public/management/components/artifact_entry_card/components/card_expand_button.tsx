@@ -19,7 +19,7 @@ export const CardExpandButton = memo<CardExpandButtonProps>(
   ({ expanded, onClick, 'data-test-subj': dataTestSubj }) => {
     return (
       <EuiButtonIcon
-        iconType={expanded ? 'arrowUp' : 'arrowDown'}
+        iconType={expanded ? 'chevronSingleUp' : 'chevronSingleDown'}
         onClick={onClick}
         data-test-subj={dataTestSubj}
         aria-label={expanded ? COLLAPSE_ACTION : EXPAND_ACTION}

@@ -71,7 +71,7 @@ export const WorkflowInsightsPolicyResponseFailureResult = ({
           <EuiButtonEmpty
             data-test-subj={`workflowInsightsResult-${index}-remediation`}
             aria-label={ariaLabel}
-            iconType="popout"
+            iconType="external"
             href={insight.remediation.link}
             target="_blank"
             css={{

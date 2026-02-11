@@ -149,7 +149,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
                 title={i18n.THRESHOLD_TYPE_TITLE}
                 titleSize="xs"
                 description={i18n.THRESHOLD_TYPE_DESCRIPTION}
-                icon={<EuiIcon size="l" type="indexFlush" />}
+                icon={<EuiIcon size="l" type="chartThreshold" />}
                 selectable={thresholdSelectableConfig}
                 layout="horizontal"
               />
@@ -188,7 +188,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = memo(
                 title={i18n.NEW_TERMS_TYPE_TITLE}
                 titleSize="xs"
                 description={i18n.NEW_TERMS_TYPE_DESCRIPTION}
-                icon={<EuiIcon size="l" type="magnifyWithPlus" />}
+                icon={<EuiIcon size="l" type="magnifyPlus" />}
                 selectable={newTermsSelectableConfig}
                 layout="horizontal"
               />

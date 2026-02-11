@@ -29,7 +29,7 @@ function FullTraceButton({ isLoading, isDisabled }: { isLoading?: boolean; isDis
         defaultMessage: 'View full trace',
       })}
       data-test-subj="apmFullTraceButtonViewFullTraceButton"
-      iconType="apmTrace"
+      iconType="chartWaterfall"
       isLoading={isLoading}
       disabled={isDisabled}
     >

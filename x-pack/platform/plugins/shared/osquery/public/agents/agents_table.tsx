@@ -320,7 +320,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
           <EuiCallOut
             color="warning"
             size="s"
-            iconType="alert"
+            iconType="warning"
             title={DEGRADED_AGENTS_CALLOUT_TITLE}
           >
             <p>{DEGRADED_AGENTS_CALLOUT_DESCRIPTION}</p>
