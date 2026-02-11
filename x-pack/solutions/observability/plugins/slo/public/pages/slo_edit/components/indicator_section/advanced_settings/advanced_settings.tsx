@@ -163,7 +163,9 @@ function PreventBackfillField({ checkboxId, fullWidth }: PreventBackfillFieldPro
               </span>
             }
             checked={Boolean(field.value)}
-            onChange={(event: any) => onChange(event.target.checked)}
+            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+              onChange(event.target.checked)
+            }
           />
         )}
       />

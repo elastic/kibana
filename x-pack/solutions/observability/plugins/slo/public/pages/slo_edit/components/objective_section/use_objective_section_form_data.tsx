@@ -50,8 +50,9 @@ export function useObjectiveSectionFormData() {
       );
       setValue(
         'timeWindow.duration',
-        // @ts-ignore
-        exists ? defaultValues?.timeWindow?.duration : CALENDARALIGNED_TIMEWINDOW_OPTIONS[1].value
+        (exists
+          ? defaultValues?.timeWindow?.duration
+          : CALENDARALIGNED_TIMEWINDOW_OPTIONS[1].value) as string
       );
     } else if (timeWindowType === 'rolling' && timeWindowTypeState !== timeWindowType) {
       const exists = ROLLING_TIMEWINDOW_OPTIONS.map((opt) => opt.value).includes(
@@ -60,8 +61,9 @@ export function useObjectiveSectionFormData() {
       setTimeWindowTypeState(timeWindowType);
       setValue(
         'timeWindow.duration',
-        // @ts-ignore
-        exists ? defaultValues?.timeWindow?.duration : ROLLING_TIMEWINDOW_OPTIONS[1].value
+        (exists
+          ? defaultValues?.timeWindow?.duration
+          : ROLLING_TIMEWINDOW_OPTIONS[1].value) as string
       );
     }
   }, [timeWindowType, setValue, defaultValues, timeWindowTypeState]);

@@ -51,7 +51,10 @@ export function TimesliceWindowField() {
               min={1}
               max={120}
               step={1}
-              onChange={(event) => onChange(String(parseInt(event.target.value, 10)))}
+              onChange={(event) => {
+                const val = event.target.value;
+                onChange(val === '' ? '' : String(parseInt(val, 10)));
+              }}
             />
           )}
         />
