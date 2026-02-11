@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, type PropsWithChildren } from 'react';
 import type { Meta, StoryFn } from '@storybook/react';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import {
   DOCUMENT_TYPE_ENTITY,
   DOCUMENT_TYPE_EVENT,
@@ -44,6 +46,22 @@ const meta: Meta<ContentTemplateArgs> = {
 };
 
 export default meta;
+
+const PanelContainer = ({ children }: PropsWithChildren) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      css={css`
+        width: 460px;
+        border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+        border-radius: ${euiTheme.border.radius.medium};
+      `}
+    >
+      {children}
+    </div>
+  );
+};
 
 const createEntityItem = (overrides: Partial<EntityItem> = {}): EntityItem => ({
   itemType: DOCUMENT_TYPE_ENTITY,
@@ -106,7 +124,7 @@ const ContentTemplate: StoryFn<ContentTemplateArgs> = (args) => {
   };
 
   return (
-    <div style={{ width: '460px', border: '1px solid #ccc', borderRadius: '4px' }}>
+    <PanelContainer>
       <ContentBody
         items={items}
         totalHits={items.length}
@@ -114,20 +132,20 @@ const ContentTemplate: StoryFn<ContentTemplateArgs> = (args) => {
         groupedItemsType={groupedItemsType}
         pagination={pagination}
       />
-    </div>
+    </PanelContainer>
   );
 };
 
 const LoadingTemplate: StoryFn = () => (
-  <div style={{ width: '460px', border: '1px solid #ccc', borderRadius: '4px' }}>
+  <PanelContainer>
     <LoadingBody />
-  </div>
+  </PanelContainer>
 );
 
 const EmptyTemplate: StoryFn = () => (
-  <div style={{ width: '460px', border: '1px solid #ccc', borderRadius: '4px' }}>
+  <PanelContainer>
     <EmptyBody onRefresh={() => {}} />
-  </div>
+  </PanelContainer>
 );
 
 export const EntitiesGroup: StoryFn<ContentTemplateArgs> = ContentTemplate.bind({});
@@ -356,7 +374,7 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
   };
 
   return (
-    <div style={{ width: '460px', border: '1px solid #ccc', borderRadius: '4px' }}>
+    <PanelContainer>
       <ContentBody
         items={pageItems}
         totalHits={allItems.length}
@@ -364,7 +382,7 @@ export const LargeGroup: StoryFn<ContentTemplateArgs> = () => {
         groupedItemsType={groupedItemsType}
         pagination={pagination}
       />
-    </div>
+    </PanelContainer>
   );
 };
 LargeGroup.parameters = {
