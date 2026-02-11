@@ -10,33 +10,20 @@ import { renderHook } from '@testing-library/react';
 import { InferenceEndpoints } from '../__mocks__/inference_endpoints';
 
 import { useGroupedData } from './use_grouped_data';
-import { GroupByOptions, type QueryParams, SortFieldInferenceEndpoint, SortOrder } from '../types';
-
-const queryParams: QueryParams = {
-  page: 1,
-  perPage: 10,
-  sortField: SortFieldInferenceEndpoint.inference_id,
-  sortOrder: SortOrder.desc,
-  groupBy: GroupByOptions.Model,
-};
+import { GroupByOptions } from '../types';
 
 describe('useGroupedData', () => {
   it('should throw an error when groupBy is set to None', () => {
     expect(() =>
       renderHook(() =>
-        useGroupedData(
-          InferenceEndpoints,
-          { ...queryParams, groupBy: GroupByOptions.None },
-          { provider: [], type: [] },
-          ''
-        )
+        useGroupedData(InferenceEndpoints, GroupByOptions.None, { provider: [], type: [] }, '')
       )
     ).toThrowError('Grouping is not enabled');
   });
 
   it('should group endpoints by model_id', () => {
     const { result } = renderHook(() =>
-      useGroupedData(InferenceEndpoints, queryParams, { provider: [], type: [] }, '')
+      useGroupedData(InferenceEndpoints, GroupByOptions.Model, { provider: [], type: [] }, '')
     );
 
     expect(result.current).toMatchSnapshot();
@@ -44,7 +31,7 @@ describe('useGroupedData', () => {
 
   it('should return empty object when no endpoints provided', () => {
     const { result } = renderHook(() =>
-      useGroupedData([], queryParams, { provider: [], type: [] }, '')
+      useGroupedData([], GroupByOptions.Model, { provider: [], type: [] }, '')
     );
 
     expect(result.current.data).toEqual({});
