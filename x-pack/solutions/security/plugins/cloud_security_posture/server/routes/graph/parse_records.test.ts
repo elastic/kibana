@@ -1623,7 +1623,7 @@ describe('parseRecords', () => {
     it('stacks labels with same actor-target pair under a group node even with different labelNodeIds', () => {
       // Two different documents (different labelNodeIds) with the same actor-target pair
       // should be stacked together under a group node
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'action1',
           actorNodeId: 'actor1',
@@ -1697,7 +1697,7 @@ describe('parseRecords', () => {
 
     it('does not stack labels with different actor-target pairs', () => {
       // Two different actor-target pairs should NOT be stacked together
-      const records: GraphEdge[] = [
+      const records: EventEdge[] = [
         {
           action: 'action1',
           actorNodeId: 'actor1',

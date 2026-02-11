@@ -60,8 +60,8 @@ interface NodeVisualProps {
 
 export const parseRecords = (
   logger: Logger,
-  records: EventEdge[],
-  relationshipRecords: RelationshipEdge[],
+  records: EventEdge[] = [],
+  relationshipRecords: RelationshipEdge[] = [],
   nodesLimit?: number
 ): Pick<GraphResponse, 'nodes' | 'edges' | 'messages'> => {
   const ctx: ParseContext = {
