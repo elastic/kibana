@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
 import type { PublishingSubject } from '@kbn/presentation-publishing/publishing_subject';
 import type { PanelPackage } from './presentation_container';
 
@@ -30,21 +29,26 @@ export const apiCanExpandPanels = (unknownApi: unknown | null): unknownApi is Ca
   return Boolean((unknownApi as CanExpandPanels)?.expandPanel !== undefined);
 };
 
-export interface CanPinPanels {
+export interface HasPinnedPanels {
+  panelIsPinned: (panelId: string) => boolean;
+}
+export interface CanPinPanels extends HasPinnedPanels {
   pinPanel: (panelId: string) => void;
   unpinPanel: (panelId: string) => void;
-  panelIsPinned: (panelId: string) => boolean;
-  // panelIsPinned$: (uuid: string) => Observable<string | undefined>;
   addPinnedPanel: <StateType extends object, ApiType extends unknown = unknown>(
     panel: PanelPackage<StateType>
   ) => Promise<ApiType | undefined>;
 }
 
+export const apiHasPinnedPanels = (api: unknown): api is HasPinnedPanels => {
+  return typeof (api as CanPinPanels)?.panelIsPinned === 'function';
+};
+
 export const apiCanPinPanels = (api: unknown): api is CanPinPanels => {
   return (
     typeof (api as CanPinPanels)?.pinPanel === 'function' &&
     typeof (api as CanPinPanels)?.unpinPanel === 'function' &&
-    typeof (api as CanPinPanels)?.panelIsPinned === 'function' &&
-    typeof (api as CanPinPanels)?.addPinnedPanel === 'function'
+    typeof (api as CanPinPanels)?.addPinnedPanel === 'function' &&
+    apiHasPinnedPanels(api)
   );
 };

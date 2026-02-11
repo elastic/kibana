@@ -29,7 +29,7 @@ import {
 import type { OptionsListControlState } from '@kbn/controls-schemas';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
-  apiCanPinPanels,
+  apiHasPinnedPanels,
   apiHasSections,
   initializeUnsavedChanges,
 } from '@kbn/presentation-containers';
@@ -349,7 +349,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         allowExpensiveQueries$,
       };
 
-      const isPinned = apiCanPinPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
+      const isPinned = apiHasPinnedPanels(parentApi) ? parentApi.panelIsPinned(uuid) : false;
 
       return {
         api,
