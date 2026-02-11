@@ -96,7 +96,7 @@ export class AlertActionsClient {
   private async fetchLastAlertEventRecordsForActions(
     actions: BulkCreateAlertActionItemBody[]
   ): Promise<AlertEventRecord[]> {
-    let whereClause = esql.exp`TRUE`;
+    let whereClause = esql.exp`FALSE`;
     for (const action of actions) {
       whereClause = esql.exp`${whereClause} OR (group_hash == ${action.group_hash} AND ${
         'episode_id' in action ? esql.exp`episode.id == ${action.episode_id}` : esql.exp`TRUE`

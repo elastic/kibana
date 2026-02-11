@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { NotificationPolicy, NotificationPolicyId, Rule, RuleId } from './types';
+import type {
+  NotificationGroup,
+  NotificationPolicy,
+  NotificationPolicyId,
+  Rule,
+  RuleId,
+} from './types';
 
 const NOTIFICATION_POLICY_IDS: NotificationPolicyId[] = ['policy_123', 'policy_456', 'policy_789'];
 
@@ -47,4 +53,14 @@ export async function getFakeNotificationPoliciesByIds(
     return acc;
   }, {} as Record<NotificationPolicyId, NotificationPolicy>);
   return new Map(Object.entries(policies));
+}
+
+export async function executeFakeWorkflow(group: NotificationGroup): Promise<void> {
+  console.log(
+    `Executing workflow ${group.workflowId} for group ${group.id} : ${JSON.stringify(
+      group,
+      null,
+      2
+    )}`
+  );
 }

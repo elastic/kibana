@@ -15,7 +15,7 @@ import {
   ALERT_EVENTS_DATA_STREAM,
   type AlertEventType,
 } from '../../resources/alert_events';
-import type { AlertEpisode } from './types';
+import type { AlertEpisode, NotificationGroupId } from './types';
 
 export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
   const alertEventType: AlertEventType = 'alert';
@@ -68,4 +68,16 @@ export const getAlertEpisodeSuppressionsQuery = (alertEpisodes: AlertEpisode[]):
           false
         )
       | KEEP rule_id, group_hash, episode_id, should_suppress`.toRequest();
+};
+
+export const getLastNotifiedTimestampsQuery = (
+  notificationGroupIds: NotificationGroupId[]
+): EsqlRequest => {
+  return esql`FROM ${ALERT_ACTIONS_DATA_STREAM} 
+    | WHERE action_type == "notified" AND notification_group_id IN (${notificationGroupIds.join(
+      ','
+    )}) 
+    | STATS last_notified = MAX(@timestamp) BY notification_group_id
+    | KEEP notification_group_id, last_notified
+    `.toRequest();
 };

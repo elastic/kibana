@@ -8,6 +8,7 @@
 export type RuleId = string;
 export type NotificationPolicyId = string;
 export type WorkflowId = string;
+export type NotificationGroupId = string;
 
 export interface AlertEpisode {
   last_event_timestamp: string;
@@ -56,8 +57,8 @@ export interface NotificationPolicy {
   /** data.* fields used to group episodes into a single notification */
   groupBy: string[];
   /** Minimum interval between notifications for the same group */
-  throttle: {
-    interval: string; // e.g. '1h', '30m', '5m'
+  throttle?: {
+    interval?: string; // e.g. '1h', '30m', '5m'
   };
   /** Target workflow to dispatch matched episodes to */
   workflowId: WorkflowId;
@@ -69,9 +70,15 @@ export interface MatchedPair {
 }
 
 export interface NotificationGroup {
+  id: NotificationGroupId;
   ruleId: RuleId;
   policyId: NotificationPolicyId;
   workflowId: WorkflowId;
   groupKey: Record<string, unknown>;
   episodes: AlertEpisode[];
+}
+
+export interface LastNotifiedRecord {
+  notification_group_id: NotificationGroupId;
+  last_notified: string;
 }
