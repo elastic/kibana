@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useEffect, useRef, useState } from 'react';
+import { SloDetailsContextProvider } from '../../../pages/slo_details/components/slo_details_context';
 import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 import { useFetchSloList } from '../../../hooks/use_fetch_slo_list';
@@ -19,7 +20,6 @@ import { SLOGroupings } from '../../../pages/slos/components/common/slo_grouping
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { SloOverviewDetails } from '../common/slo_overview_details';
 import type { EmbeddableSloProps } from './types';
-import { SloDetailsContextProvider } from '@kbn/slo-plugin/public/pages/slo_details/components/slo_details_context';
 
 export function SloErrorBudget({
   sloId,

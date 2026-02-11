@@ -23,12 +23,12 @@ import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { OVERVIEW_TAB_ID, type SloTabId } from '@kbn/deeplinks-observability';
+import { SloDetailsContextProvider } from '../../../pages/slo_details/components/slo_details_context';
 import { useSloDetailsTabs } from '../../../pages/slo_details/hooks/use_slo_details_tabs';
 import { SloDetails } from '../../../pages/slo_details/components/slo_details';
 import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
 import { useKibana } from '../../../hooks/use_kibana';
 import { HeaderTitle } from '../../../pages/slo_details/components/header_title';
-import { SloDetailsContextProvider } from '@kbn/slo-plugin/public/pages/slo_details/components/slo_details_context';
 
 export interface SloOverviewDetailsContentProps {
   slo: SLOWithSummaryResponse;
