@@ -95,7 +95,7 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
             start,
             end,
             ...(serviceName && {
-              attachmentLabel: i18n.translate('xpack.apm.sloDetails.sloAttachmentLabel', {
+              attachmentLabel: i18n.translate('xpack.apm.serviceDetails.serviceAttachmentLabel', {
                 defaultMessage: '{serviceName} service',
                 values: { serviceName },
               }),
