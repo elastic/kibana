@@ -20,10 +20,10 @@ export const BodySchema = z.object({
   logExtraction: LogExtractionBodyParams.optional().superRefine(validateLogExtractionParams),
 });
 
-export function validateKql(kql: string): boolean {
+export function validateKql(kql: string): {isValid: boolean, errorMsg?: string} {
   try {
     if (!kql || kql.trim() === '') {
-      throw new Error('Filter cannot be empty');
+      return { isValid: true };
     }
 
     fromKueryExpression(kql);
@@ -35,9 +35,10 @@ export function validateKql(kql: string): boolean {
     if (!kql.includes(':')) {
       throw new Error('Field-based KQL is required');
     }
-    return true;
+
+    return { isValid: true };
   } catch (error) {
-    return false;
+    return { isValid: false, errorMsg: error.message };
   }
 }
 
@@ -45,11 +46,12 @@ function validateFilter(data: LogExtractionBodyParams, ctx: z.RefinementCtx): vo
   if (data.filter === undefined) {
     return;
   }
-  if (!validateKql(data.filter)) {
+  const { isValid, errorMsg } = validateKql(data.filter);
+  if (!isValid) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ['filter'],
-      message: 'must be a valid KQL query',
+      message: errorMsg,
     });
   }
 }
