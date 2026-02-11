@@ -125,7 +125,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           it('Elasticsearch streams is enabled too', async () => {
-            const response = await esClient.transport.request({
+            type StreamsStatusResponse = {
+              logs: { enabled: boolean } & Record<string, unknown>;
+            } & Record<string, unknown>;
+
+            const response = await esClient.transport.request<StreamsStatusResponse>({
               method: 'GET',
               path: '/_streams/status',
             });
