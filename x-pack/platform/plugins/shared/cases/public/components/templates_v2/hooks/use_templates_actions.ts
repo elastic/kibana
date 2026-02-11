@@ -53,7 +53,9 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
       cloneTemplate(
         {
           template: {
-            name: i18n.CLONED_TEMPLATE_NAME_PREFIX(template.name),
+            // TODO: name is now specified in the definition itself (as per figma design)
+            // mabye we should retain a separate input?
+            // name: i18n.CLONED_TEMPLATE_NAME_PREFIX(template.name),
             owner: template.owner,
             definition: template.definition,
             description: template.description,

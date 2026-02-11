@@ -29,6 +29,7 @@ plugins:
     - workflows_extensions
     - workflows_management
     - global_search
+    - banners
   disabled:
 
 packages:
