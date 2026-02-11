@@ -9,8 +9,21 @@ import type { Logger } from '@kbn/logging';
 import type { Result } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getLatestEntitiesIndexName } from './assets/latest_index';
-import { DocumentVersionConflictError, EntityNotFoundError } from './errors';
-import type { Entity } from './schemas/entity.gen';
+import { BadCRUDRequestError, DocumentVersionConflictError, EntityNotFoundError } from './errors';
+import type { Entity } from '../../common/domain/definitions/entity.gen';
+import { getFlattenedObject } from '@kbn/std';
+import { getEntityDefinition } from '@kbn/entity-store/common/domain/definitions/registry';
+import { EntityType } from '@kbn/entity-store/common';
+import { EntityField, ManagedEntityDefinition } from '@kbn/entity-store/common/domain/definitions/entity_schema';
+import { getEuidFromObject } from '@kbn/entity-store/common/domain/euid';
+
+const PROTECTED_FIELDS = [
+'entity.hashedId',
+'entity.id',
+'entity.EngineMetadata.UntypedId',
+'entity.EngineMetadata.Type',
+]
+
 
 interface EntityManagerDependencies {
   logger: Logger;
@@ -29,24 +42,40 @@ export class EntityManager {
     this.namespace = deps.namespace;
   }
 
-  private getEntityId(document: Entity): string {
-    // TODO: NOT IMPLEMENTED
-    throw new Error(`getEntityId() not implemented`);
-    return 'TODO';
+  private getEntityId(entityType: EntityType, document: Entity): string {
+    const id = getEuidFromObject(entityType, document);
+    if (id === undefined) {
+      throw new Error(`Could not get EUID for document`);
+    }
+    return id;
   }
 
-  // TODO: Bulk upsert
-
-  public async upsertEntity(document: Entity) {
-    // From: x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_store_crud_client.ts
-    // TODO: normalizeToECS()
-    // TODO: getFlattenedObject()
-
-    const id = this.getEntityId(document);
+  public async upsertEntity(document: Entity, force: boolean) {
+    const entityType = document.entity?.type;
+    if (entityType == null) {
+      throw new BadCRUDRequestError('', 'entity.type is required');
+    }
+    const id = this.getEntityId(entityType as EntityType, document);
     this.logger.info(`Upserting entity ID ${id}`);
+    
+    // check protected fields
+    const flat = getFlattenedObject(document);
+    const definition = getEntityDefinition(entityType as EntityType, this.namespace);
+    const fieldDescriptions = getFieldDescriptions(id, flat, definition);
+    assertNoEUIDFields(id, fieldDescriptions);
+    if (!force) {
+      assertOnlyNonForcedAttributesInReq(id, fieldDescriptions);
+    }
+
+    // TODO(kuba): 
+    // - hash ID (MD5)
+    const hashedId: string = 'TODO TODO TODO TODO';
+    // - validate entity.id
+    // - validate entity.hashedId
+
     const { result } = await this.esClient.update({
       index: getLatestEntitiesIndexName(this.namespace),
-      id,
+      id: hashedId,
       doc: document,
       doc_as_upsert: true,
     });
@@ -67,8 +96,8 @@ export class EntityManager {
     }
   }
 
-  public async upsertEntitiesBulk(documents: Entity[]) {
-    await Promise.all(documents.map((document) => this.upsertEntity(document)));
+  public async upsertEntitiesBulk(documents: Entity[], force: boolean) {
+    await Promise.all(documents.map((document) => this.upsertEntity(document, force)));
   }
 
   public async deleteEntity(id: string) {
@@ -91,5 +120,83 @@ export class EntityManager {
     if (!resp.deleted) {
       throw new EntityNotFoundError(id);
     }
+  }
+}
+
+function getFieldDescriptions(
+  id: string,
+  flatProps: Record<string, unknown>,
+  description: ManagedEntityDefinition
+): Record<string, EntityField & { value: unknown }> {
+  const allFieldDescriptions = description.fields.reduce((obj, field) => {
+    obj[field.destination || field.source] = field;
+    return obj;
+  }, {} as Record<string, EntityField>);
+
+  const invalid: string[] = [];
+  const descriptions: Record<string, EntityField & { value: unknown }> = {};
+
+  for (const [key, value] of Object.entries(flatProps)) {
+    if (description.identityField.requiresOneOfFields.includes(key)) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+
+    if (!allFieldDescriptions[key]) {
+      invalid.push(key);
+    } else {
+      descriptions[key] = {
+        ...allFieldDescriptions[key],
+        value,
+      };
+    }
+  }
+
+  // This will catch differences between
+  // API and entity store definition
+  if (invalid.length > 0) {
+    const invalidString = invalid.join(', ');
+    throw new BadCRUDRequestError(
+      id,
+      `The following attributes are not allowed to be updated: ${invalidString}`
+    );
+  }
+
+  return descriptions;
+}
+
+function assertNoEUIDFields(id: string, fields: Record<string, EntityField>) {
+  const notAllowedProps = [];
+  for (const [name, _description] of Object.entries(fields)) {
+    if (PROTECTED_FIELDS.includes(name)) {
+      notAllowedProps.push(name);
+    }
+  }
+
+  if (notAllowedProps.length > 0) {
+    const notAllowedPropsString = notAllowedProps.join(', ');
+    throw new BadCRUDRequestError(
+      id, 
+      `The fields are not allowed to be updated: ${notAllowedPropsString}`
+    );
+  }
+}
+
+function assertOnlyNonForcedAttributesInReq(id: string, fields: Record<string, EntityField>) {
+  const notAllowedProps = [];
+
+  for (const [name, description] of Object.entries(fields)) {
+    if (!description.allowAPIUpdate && !PROTECTED_FIELDS.includes(name)) {
+      notAllowedProps.push(name);
+    }
+  }
+
+  if (notAllowedProps.length > 0) {
+    const notAllowedPropsString = notAllowedProps.join(', ');
+    throw new BadCRUDRequestError(
+      id, 
+      `The following attributes are not allowed to be ` +
+        `updated without forcing it (?force=true): ${notAllowedPropsString}`
+    );
   }
 }

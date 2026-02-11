@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { z } from '@kbn/zod';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { EntityStoreNotInstalledError } from '../../domain/errors';
-import { Entity } from '../../domain/schemas/entity.gen';
+import { Entity } from '../../../common/domain/definitions/entity.gen';
 
 const bodySchema = z.array(Entity);
+const querySchema = z.object({
+  force: BooleanFromString.optional().default(false),
+});
 
 export function registerCRUDUpsertBulk(router: EntityStorePluginRouter) {
   router.versioned
@@ -32,6 +35,7 @@ export function registerCRUDUpsertBulk(router: EntityStorePluginRouter) {
         validate: {
           request: {
             body: buildRouteValidationWithZod(bodySchema),
+            query: buildRouteValidationWithZod(querySchema),
           },
         },
       },
@@ -43,11 +47,9 @@ export function registerCRUDUpsertBulk(router: EntityStorePluginRouter) {
         if (!(await assetManager.isInstalled())) {
           return res.customError({ statusCode: 503, body: new EntityStoreNotInstalledError() });
         }
-        // TODO: Check if skipping ?force flag does anything
-        // TODO: use req.body as entity to create
-        // TODO: ask guys do we REALLY need generated schemas
+
         try {
-          await entityManager.upsertEntitiesBulk(req.body);
+          await entityManager.upsertEntitiesBulk(req.body, req.query.force);
         } catch (error) {
           logger.error(error);
           throw error;

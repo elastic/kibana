@@ -8,3 +8,4 @@
 export { EntityNotFoundError } from './entity_not_found';
 export { DocumentVersionConflictError } from './document_version_conflict';
 export { EntityStoreNotInstalledError } from './entity_store_not_installed';
+export { BadCRUDRequestError } from './bad_crud_request_error';

@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { EntityStoreNotInstalledError } from '../../domain/errors';
-import { Entity } from '../../domain/schemas/entity.gen';
+import { Entity } from '../../../common/domain/definitions/entity.gen';
+import { z } from '@kbn/zod';
+
+const querySchema = z.object({
+  force: BooleanFromString.optional().default(false),
+});
 
 export function registerCRUDUpsert(router: EntityStorePluginRouter) {
   router.versioned
@@ -29,6 +34,7 @@ export function registerCRUDUpsert(router: EntityStorePluginRouter) {
         validate: {
           request: {
             body: buildRouteValidationWithZod(Entity),
+            query: buildRouteValidationWithZod(querySchema),
           },
         },
       },
@@ -40,11 +46,9 @@ export function registerCRUDUpsert(router: EntityStorePluginRouter) {
         if (!(await assetManager.isInstalled())) {
           return res.customError({ statusCode: 503, body: new EntityStoreNotInstalledError() });
         }
-        // TODO: Check if skipping ?force flag does anything
-        // TODO: use req.body as entity to create
-        // TODO: ask guys do we REALLY need generated schemas
+
         try {
-          await entityManager.upsertEntity(req.body);
+          await entityManager.upsertEntity(req.body, req.query.force);
         } catch (error) {
           logger.error(error);
           throw error;
