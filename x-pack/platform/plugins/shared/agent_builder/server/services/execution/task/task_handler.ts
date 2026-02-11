@@ -19,6 +19,7 @@ import {
 import {
   handleAgentExecution,
   collectAndWriteEvents,
+  serializeExecutionError,
   type AgentExecutionDeps,
 } from '../execution_runner';
 import { AbortMonitor } from './abort_monitor';
@@ -99,7 +100,11 @@ class TaskHandlerImpl implements TaskHandler {
       this.logger.error(`Execution ${executionId} failed: ${error.message}`);
 
       try {
-        await executionClient.updateStatus(executionId, ExecutionStatus.failed);
+        await executionClient.updateStatus(
+          executionId,
+          ExecutionStatus.failed,
+          serializeExecutionError(error)
+        );
       } catch (statusError) {
         this.logger.error(
           `Failed to update status for execution ${executionId}: ${statusError.message}`

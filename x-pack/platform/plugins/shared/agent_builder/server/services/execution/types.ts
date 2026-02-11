@@ -11,8 +11,9 @@ import type {
   ChatEvent,
   ConverseInput,
   AgentConfigurationOverrides,
+  BrowserApiToolMetadata,
 } from '@kbn/agent-builder-common';
-import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import type { AgentBuilderErrorCode } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 /**
@@ -58,6 +59,18 @@ export interface AgentExecutionParams {
 }
 
 /**
+ * Serialized error stored in the execution document when the execution fails.
+ */
+export interface SerializedExecutionError {
+  /** The error code. */
+  code: AgentBuilderErrorCode;
+  /** Human-readable error message. */
+  message: string;
+  /** Optional metadata associated with the error. */
+  meta?: Record<string, any>;
+}
+
+/**
  * The agent execution document persisted in the agent-executions index.
  */
 export interface AgentExecution {
@@ -73,6 +86,8 @@ export interface AgentExecution {
   spaceId: string;
   /** Serialized execution parameters. */
   agentParams: AgentExecutionParams;
+  /** Error details, present when status is 'failed'. */
+  error?: SerializedExecutionError;
 }
 
 /**

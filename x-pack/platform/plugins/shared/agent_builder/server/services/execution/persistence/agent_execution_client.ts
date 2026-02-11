@@ -7,7 +7,7 @@
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import type { AgentExecution, AgentExecutionParams } from '../types';
+import type { AgentExecution, AgentExecutionParams, SerializedExecutionError } from '../types';
 import { ExecutionStatus } from '../types';
 import type { AgentExecutionProperties, AgentExecutionStorage } from './agent_execution_storage';
 import { createStorage } from './agent_execution_storage';
@@ -23,6 +23,7 @@ const fromEs = (doc: Document): AgentExecution => {
     agentId: source.agent_id,
     spaceId: source.space_id,
     agentParams: source.agent_params,
+    ...(source.error ? { error: source.error } : {}),
   };
 };
 
@@ -41,8 +42,12 @@ export interface AgentExecutionClient {
   /** Get an execution document by id. Returns undefined if not found. */
   get(executionId: string): Promise<AgentExecution | undefined>;
 
-  /** Update the status of an execution. */
-  updateStatus(executionId: string, status: ExecutionStatus): Promise<void>;
+  /** Update the status of an execution, optionally persisting an error. */
+  updateStatus(
+    executionId: string,
+    status: ExecutionStatus,
+    error?: SerializedExecutionError
+  ): Promise<void>;
 }
 
 export const createAgentExecutionClient = ({
@@ -118,7 +123,11 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
     return fromEs(response.hits.hits[0] as Document);
   }
 
-  async updateStatus(executionId: string, status: ExecutionStatus): Promise<void> {
+  async updateStatus(
+    executionId: string,
+    status: ExecutionStatus,
+    error?: SerializedExecutionError
+  ): Promise<void> {
     const response = await this.storage.getClient().search({
       track_total_hits: false,
       size: 1,
@@ -140,6 +149,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       document: {
         ...hit._source,
         status,
+        ...(error ? { error } : {}),
       },
     });
   }

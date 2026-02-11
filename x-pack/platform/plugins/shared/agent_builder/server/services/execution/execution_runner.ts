@@ -19,7 +19,12 @@ import type {
   AgentConfigurationOverrides,
   BrowserApiToolMetadata,
 } from '@kbn/agent-builder-common';
-import { agentBuilderDefaultAgentId, isRoundCompleteEvent } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  isRoundCompleteEvent,
+  isAgentBuilderError,
+  AgentBuilderErrorCode,
+} from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -38,7 +43,7 @@ import {
 } from '../chat/utils';
 import { createConversationIdSetEvent } from '../chat/utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
-import type { AgentExecution, AgentExecutionEventDoc } from './types';
+import type { AgentExecution, AgentExecutionEventDoc, SerializedExecutionError } from './types';
 import type { ExecutionEventsClient } from './persistence';
 
 const EVENT_BATCH_INTERVAL_MS = 200;
@@ -211,6 +216,19 @@ export const collectAndWriteEvents = ({
       },
     });
   });
+};
+
+/**
+ * Converts an unknown error to a {@link SerializedExecutionError} for persistence.
+ * - If the error is already an AgentBuilderError, serializes it using toJSON().
+ * - Otherwise, wraps it as an internalError.
+ */
+export const serializeExecutionError = (error: unknown): SerializedExecutionError => {
+  if (isAgentBuilderError(error)) {
+    return { code: error.code as AgentBuilderErrorCode, message: error.message, meta: error.meta };
+  }
+  const message = error instanceof Error ? error.message : String(error);
+  return { code: AgentBuilderErrorCode.internalError, message };
 };
 
 // --- Internal helpers ---

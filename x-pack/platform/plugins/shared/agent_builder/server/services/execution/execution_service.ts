@@ -13,7 +13,11 @@ import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  createAgentBuilderError,
+  createInternalError,
+} from '@kbn/agent-builder-common';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type {
   AgentExecutionService,
@@ -33,6 +37,7 @@ import {
 import {
   handleAgentExecution,
   collectAndWriteEvents,
+  serializeExecutionError,
   type AgentExecutionDeps,
 } from './execution_runner';
 import { AbortMonitor } from './task/abort_monitor';
@@ -161,7 +166,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
             }
 
             if (execution.status === ExecutionStatus.failed) {
-              observer.error(new Error(`Execution ${executionId} failed`));
+              const err = execution.error
+                ? createAgentBuilderError(
+                    execution.error.code,
+                    execution.error.message,
+                    execution.error.meta
+                  )
+                : createInternalError(`Execution ${executionId} failed`);
+              observer.error(err);
             } else if (execution.status === ExecutionStatus.aborted) {
               observer.error(new Error(`Execution ${executionId} was aborted`));
             }
@@ -328,7 +340,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         this.logger.error(`Local execution ${executionId} failed: ${error.message}`);
 
         try {
-          await executionClient.updateStatus(executionId, ExecutionStatus.failed);
+          await executionClient.updateStatus(
+            executionId,
+            ExecutionStatus.failed,
+            serializeExecutionError(error)
+          );
         } catch (statusErr) {
           this.logger.error(
             `Failed to update status for local execution ${executionId}: ${statusErr.message}`

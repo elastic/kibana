@@ -13,6 +13,7 @@ export type {
   FollowExecutionOptions,
   AgentExecution,
   AgentExecutionEventDoc,
+  SerializedExecutionError,
 } from './types';
 export { ExecutionStatus } from './types';
 export { createAgentExecutionService, type AgentExecutionServiceDeps } from './execution_service';

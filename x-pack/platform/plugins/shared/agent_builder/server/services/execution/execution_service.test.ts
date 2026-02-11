@@ -10,6 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ChatEvent } from '@kbn/agent-builder-common';
+import { isAgentBuilderError, AgentBuilderErrorCode } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from './types';
 import type { AgentExecutionClient } from './persistence';
 import type { ExecutionEventsClient } from './persistence';
@@ -296,6 +297,89 @@ describe('AgentExecutionService', () => {
           done();
         },
         error: done.fail,
+      });
+    });
+
+    it('should emit an AgentBuilderError when execution fails with a persisted error', (done) => {
+      mockEventsClient.readEvents.mockResolvedValue([] as any);
+
+      mockExecutionClient.get.mockResolvedValue({
+        executionId: 'exec-1',
+        '@timestamp': new Date().toISOString(),
+        status: ExecutionStatus.failed,
+        agentId: 'agent-1',
+        spaceId: 'default',
+        agentParams: { nextInput: { message: 'test' } },
+        error: {
+          code: AgentBuilderErrorCode.agentNotFound,
+          message: 'Agent my-agent not found',
+          meta: { agentId: 'my-agent' },
+        },
+      });
+
+      service.followExecution('exec-1').subscribe({
+        next: () => {},
+        complete: () => {
+          done.fail('Expected an error, not completion');
+        },
+        error: (err) => {
+          expect(isAgentBuilderError(err)).toBe(true);
+          expect(err.code).toBe(AgentBuilderErrorCode.agentNotFound);
+          expect(err.message).toBe('Agent my-agent not found');
+          expect(err.meta).toEqual(expect.objectContaining({ agentId: 'my-agent' }));
+          done();
+        },
+      });
+    });
+
+    it('should emit an internalError when execution fails without a persisted error', (done) => {
+      mockEventsClient.readEvents.mockResolvedValue([] as any);
+
+      mockExecutionClient.get.mockResolvedValue({
+        executionId: 'exec-1',
+        '@timestamp': new Date().toISOString(),
+        status: ExecutionStatus.failed,
+        agentId: 'agent-1',
+        spaceId: 'default',
+        agentParams: { nextInput: { message: 'test' } },
+        // no error field
+      });
+
+      service.followExecution('exec-1').subscribe({
+        next: () => {},
+        complete: () => {
+          done.fail('Expected an error, not completion');
+        },
+        error: (err) => {
+          expect(isAgentBuilderError(err)).toBe(true);
+          expect(err.code).toBe(AgentBuilderErrorCode.internalError);
+          expect(err.message).toBe('Execution exec-1 failed');
+          done();
+        },
+      });
+    });
+
+    it('should emit an error when execution is aborted', (done) => {
+      mockEventsClient.readEvents.mockResolvedValue([] as any);
+
+      mockExecutionClient.get.mockResolvedValue({
+        executionId: 'exec-1',
+        '@timestamp': new Date().toISOString(),
+        status: ExecutionStatus.aborted,
+        agentId: 'agent-1',
+        spaceId: 'default',
+        agentParams: { nextInput: { message: 'test' } },
+      });
+
+      service.followExecution('exec-1').subscribe({
+        next: () => {},
+        complete: () => {
+          done.fail('Expected an error, not completion');
+        },
+        error: (err) => {
+          expect(err.message).toBe('Execution exec-1 was aborted');
+          done();
+        },
       });
     });
   });
