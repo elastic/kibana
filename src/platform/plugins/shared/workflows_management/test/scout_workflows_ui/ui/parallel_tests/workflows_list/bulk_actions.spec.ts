@@ -39,11 +39,12 @@ test.describe('WorkflowsList/BulkActions', { tag: [...tags.stateful.classic] }, 
       workflows.map((w) => w.name),
       'enable'
     );
-    const checkEnabled = async () => {
-      for (const workflow of workflows) {
-        await expect(pageObjects.workflowList.getWorkflowStateToggle(workflow.name)).toBeChecked();
-      }
-    };
+    const checkEnabled = () =>
+      Promise.all(
+        workflows.map((workflow) =>
+          expect(pageObjects.workflowList.getWorkflowStateToggle(workflow.name)).toBeChecked()
+        )
+      );
     await checkEnabled();
     await page.reload();
     await checkEnabled();
@@ -66,13 +67,12 @@ test.describe('WorkflowsList/BulkActions', { tag: [...tags.stateful.classic] }, 
       workflows.map((w) => w.name),
       'disable'
     );
-    const checkDisabled = async () => {
-      for (const workflow of workflows) {
-        await expect(
-          pageObjects.workflowList.getWorkflowStateToggle(workflow.name)
-        ).not.toBeChecked();
-      }
-    };
+    const checkDisabled = () =>
+      Promise.all(
+        workflows.map((workflow) =>
+          expect(pageObjects.workflowList.getWorkflowStateToggle(workflow.name)).not.toBeChecked()
+        )
+      );
     await checkDisabled();
     await page.reload();
     await checkDisabled();
@@ -91,11 +91,12 @@ test.describe('WorkflowsList/BulkActions', { tag: [...tags.stateful.classic] }, 
       'delete'
     );
     await page.testSubj.click('confirmModalConfirmButton');
-    const checkDeleted = async () => {
-      for (const workflow of workflows) {
-        await expect(pageObjects.workflowList.getWorkflowRow(workflow.name)).toHaveCount(0);
-      }
-    };
+    const checkDeleted = () =>
+      Promise.all(
+        workflows.map((workflow) =>
+          expect(pageObjects.workflowList.getWorkflowRow(workflow.name)).toHaveCount(0)
+        )
+      );
     await checkDeleted();
     await page.reload();
     await checkDeleted();
@@ -126,10 +127,12 @@ test.describe('WorkflowsList/BulkActions', { tag: [...tags.stateful.classic] }, 
       state: 'hidden',
     });
 
-    for (const workflow of workflows) {
-      await expect(
-        pageObjects.workflowList.getSelectCheckboxForWorkflow(workflow.name)
-      ).not.toBeChecked();
-    }
+    await Promise.all(
+      workflows.map((workflow) =>
+        expect(
+          pageObjects.workflowList.getSelectCheckboxForWorkflow(workflow.name)
+        ).not.toBeChecked()
+      )
+    );
   });
 });
