@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { act, screen, within } from '@testing-library/react';
-import { render } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { TabularPage } from './tabular_page';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';

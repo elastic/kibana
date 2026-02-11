@@ -25,7 +25,7 @@ const renderEndpointInfo = (props: { inferenceId: string; endpointInfo: any }) =
   );
 };
 
-describe('RenderEndpoint component tests', () => {
+describe('EndpointInfo component tests', () => {
   beforeEach(() => {
     jest.useFakeTimers();
     mockExecCommand.mockClear();
