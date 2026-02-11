@@ -63,14 +63,17 @@ export const getOverviewEmbeddableFactory = ({
   sloClient: SLORepositoryClient;
 }): EmbeddableFactory<SloOverviewEmbeddableState, SloOverviewApi> => ({
   type: SLO_OVERVIEW_EMBEDDABLE_ID,
-  buildEmbeddable: async ({ initializeDrilldownsManager, initialState, finalizeApi, uuid, parentApi }) => {
+  buildEmbeddable: async ({
+    initializeDrilldownsManager,
+    initialState,
+    finalizeApi,
+    uuid,
+    parentApi,
+  }) => {
     const deps = { ...coreStart, ...pluginsStart };
     const state = initialState;
 
-    const drilldownsManager = await initializeDrilldownsManager(
-      uuid,
-      initialState
-    );
+    const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
 
     const titleManager = initializeTitleManager(state);
     const sloStateManager = initializeStateManager(state, defaultSloEmbeddableState);

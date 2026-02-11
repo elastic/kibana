@@ -8,7 +8,11 @@
 import { i18n } from '@kbn/i18n';
 
 import React, { useEffect } from 'react';
-import type { DefaultEmbeddableApi, EmbeddableFactory, HasDrilldowns } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddableFactory,
+  HasDrilldowns,
+} from '@kbn/embeddable-plugin/public';
 import type {
   PublishesWritableTitle,
   PublishesTitle,
@@ -58,7 +62,13 @@ export const getStatsOverviewEmbeddableFactory = (
 ) => {
   const factory: EmbeddableFactory<OverviewStatsEmbeddableState, StatsOverviewApi> = {
     type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-    buildEmbeddable: async ({ initializeDrilldownsManager, initialState, finalizeApi, parentApi, uuid }) => {
+    buildEmbeddable: async ({
+      initializeDrilldownsManager,
+      initialState,
+      finalizeApi,
+      parentApi,
+      uuid,
+    }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
       const titleManager = initializeTitleManager(initialState);
@@ -66,11 +76,8 @@ export const getStatsOverviewEmbeddableFactory = (
       const reload$ = new Subject<boolean>();
       const filters$ = new BehaviorSubject(initialState.filters);
 
-      const drilldownsManager = await initializeDrilldownsManager(
-        uuid,
-        initialState
-      );
-      
+      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+
       function serializeState() {
         return {
           ...titleManager.getLatestState(),

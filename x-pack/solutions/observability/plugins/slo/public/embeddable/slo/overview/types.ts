@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { DefaultEmbeddableApi, HasDrilldowns, SerializedDrilldowns } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  HasDrilldowns,
+  SerializedDrilldowns,
+} from '@kbn/embeddable-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { EmbeddableApiContext, HasSupportedTriggers } from '@kbn/presentation-publishing';
 import type {
@@ -41,9 +45,7 @@ export type GroupSloCustomInput = SloConfigurationProps & {
 
 export type SloOverviewState = Partial<GroupSloCustomInput> & Partial<SingleSloCustomInput>;
 
-export type SloOverviewEmbeddableState = SerializedTitles &
-  SerializedDrilldowns &
-  SloOverviewState;
+export type SloOverviewEmbeddableState = SerializedTitles & SerializedDrilldowns & SloOverviewState;
 
 export type SloOverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
   PublishesWritableTitle &
