@@ -185,8 +185,6 @@ ${Object.entries(httpExamples?.params || {})
       '    headers:',
       '      Authorization: Bearer token',
       '```',
-      '',
-      "⚠️ **Note**: When using `connector-id`, the `url` parameter in `with` is ignored. Use `path` instead, which will be appended to the connector's configured base URL.",
     ].join('\n');
   }
 

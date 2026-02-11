@@ -172,7 +172,8 @@ export async function executor(
 
   const { method, path, body, query, headers: paramsHeaders, fetcher } = params;
 
-  const baseUrl = config.url || params.url;
+  // params always takes precedence over config
+  const baseUrl = params.url || config.url;
   if (!baseUrl) {
     return errorResultInvalid(actionId, 'URL is required');
   }
