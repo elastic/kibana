@@ -27,17 +27,16 @@ export function getForeachStateSchema(
 ) {
   let itemSchema: z.ZodType = z.unknown();
 
-  if (Array.isArray(foreachStep.foreach)) {
-    itemSchema = extractForeachItemSchemaFromArray(foreachStep.foreach);
-    return ForEachContextSchema.extend({
-      item: itemSchema,
-      items: z.array(itemSchema),
-    });
-  }
-
-  const cleanedForeachParam =
-    foreachStep.foreach.match(VARIABLE_REGEX)?.groups?.key ?? foreachStep.foreach;
   try {
+    if (Array.isArray(foreachStep.foreach)) {
+      itemSchema = extractForeachItemSchemaFromArray(foreachStep.foreach);
+      return ForEachContextSchema.extend({
+        item: itemSchema,
+        items: z.array(itemSchema),
+      });
+    }
+    const cleanedForeachParam =
+      foreachStep.foreach.match(VARIABLE_REGEX)?.groups?.key ?? foreachStep.foreach;
     itemSchema = getForeachItemSchema(stepContextSchema, cleanedForeachParam);
     return ForEachContextSchema.extend({
       item: itemSchema,
@@ -58,12 +57,6 @@ export function getForeachStateSchema(
 
 const extractForeachItemSchemaFromArray = (foreachParam: unknown[]): z.ZodType => {
   try {
-    if (!Array.isArray(foreachParam)) {
-      throw new InvalidForeachParameterError(
-        `Expected array for foreach iteration, but got: ${typeof foreachParam}`,
-        InvalidForeachParameterErrorCodes.INVALID_ARRAY
-      );
-    }
     if (foreachParam.length === 0) {
       throw new InvalidForeachParameterError(
         'Expected non-empty array for foreach iteration',
@@ -83,7 +76,25 @@ const extractForeachItemSchemaFromArray = (foreachParam: unknown[]): z.ZodType =
 };
 
 const extractForeachItemSchemaFromJson = (foreachParam: string): z.ZodType => {
-  return extractForeachItemSchemaFromArray(JSON.parse(foreachParam));
+  let foreachParamParsed: unknown;
+
+  try {
+    foreachParamParsed = JSON.parse(foreachParam);
+  } catch {
+    throw new InvalidForeachParameterError(
+      'Unable to parse foreach parameter as JSON',
+      InvalidForeachParameterErrorCodes.INVALID_JSON
+    );
+  }
+
+  if (!Array.isArray(foreachParamParsed)) {
+    throw new InvalidForeachParameterError(
+      `Expected array for foreach iteration, but got: ${typeof foreachParamParsed}`,
+      InvalidForeachParameterErrorCodes.INVALID_ARRAY
+    );
+  }
+
+  return extractForeachItemSchemaFromArray(foreachParamParsed);
 };
 
 export function getForeachItemSchema(
