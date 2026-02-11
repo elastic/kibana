@@ -1034,8 +1034,8 @@ export const RulesListTable = (props: RulesListTableProps) => {
           rowHeader="name"
           rowProps={rowProps}
           css={css`
-            min-width: 1200px;
-            ${ruleRowCss}
+            min-width: ${euiTheme.breakpoint.xl}px;
+            ${ruleRowCss};
           `}
           cellProps={(rule: RuleTableItem) => ({
             'data-test-subj': 'cell',
