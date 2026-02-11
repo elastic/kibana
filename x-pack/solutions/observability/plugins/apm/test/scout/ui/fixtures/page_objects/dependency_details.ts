@@ -5,29 +5,46 @@
  * 2.0.
  */
 
-import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
-import { capitalize } from 'lodash';
-import { waitForChartToLoad, waitForTableToLoad } from './utils';
+import { createLazyPageObject, type KibanaUrl, type ScoutPage } from '@kbn/scout-oblt';
+import { OverviewTab } from './dependency_details/overview_tab';
+import { OperationsTab } from './dependency_details/operations_tab';
+import { OperationDetailSubpage } from './dependency_details/operation_detail';
 import { testData } from '..';
-
-type DependencyDetailsPageTabName = 'overview' | 'operations';
-
 export class DependencyDetailsPage {
-  readonly DEPENDENCY_NAME = 'postgresql';
+  public readonly DEPENDENCY_NAME = 'postgresql';
+  public readonly SPAN_NAME = 'SELECT * FROM product';
 
-  readonly latencyChart;
-  readonly throughputChart;
-  readonly failedTransactionRateChart;
-  readonly upstreamServicesTable;
+  public readonly overviewTab: OverviewTab;
+  public readonly operationsTab: OperationsTab;
+  public readonly operationDetailSubpage: OperationDetailSubpage;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
-    this.latencyChart = this.page.getByTestId('latencyChart');
-    this.throughputChart = this.page.getByTestId('throughputChart');
-    this.failedTransactionRateChart = this.page.getByTestId('errorRateChart');
-    this.upstreamServicesTable = this.page.getByTestId('dependenciesTable');
+    this.overviewTab = createLazyPageObject(
+      OverviewTab,
+      this.page,
+      this.kbnUrl,
+      this.DEPENDENCY_NAME
+    );
+    this.operationsTab = createLazyPageObject(
+      OperationsTab,
+      this.page,
+      this.kbnUrl,
+      this.DEPENDENCY_NAME
+    );
+    this.operationDetailSubpage = createLazyPageObject(
+      OperationDetailSubpage,
+      this.page,
+      this.kbnUrl,
+      this.DEPENDENCY_NAME,
+      this.SPAN_NAME
+    );
   }
 
-  async goToPage(overrides?: { dependencyName?: string; rangeFrom?: string; rangeTo?: string }) {
+  public async goToPage(overrides?: {
+    dependencyName?: string;
+    rangeFrom?: string;
+    rangeTo?: string;
+  }) {
     await this.page.goto(
       `${this.kbnUrl.app('apm')}/dependencies?${new URLSearchParams({
         dependencyName: this.DEPENDENCY_NAME,
@@ -38,89 +55,4 @@ export class DependencyDetailsPage {
     );
     await this.page.getByRole('tablist').waitFor();
   }
-
-  // #region Go to Tabs
-  private async goToTab(
-    tabName: DependencyDetailsPageTabName,
-    overrides?: { dependencyName?: string; rangeFrom?: string; rangeTo?: string }
-  ) {
-    await this.page.goto(
-      `${this.kbnUrl.app('apm')}/dependencies/${tabName}?${new URLSearchParams({
-        dependencyName: this.DEPENDENCY_NAME,
-        rangeFrom: testData.OPBEANS_START_DATE,
-        rangeTo: testData.OPBEANS_END_DATE,
-        ...overrides,
-      })}`
-    );
-  }
-
-  private async waitForOverviewTabToLoad() {
-    await Promise.all([
-      waitForChartToLoad(this.page, 'latencyChart'),
-      waitForChartToLoad(this.page, 'throughputChart'),
-      waitForChartToLoad(this.page, 'errorRateChart'),
-      waitForTableToLoad(this.page, 'dependenciesTable'),
-    ]);
-  }
-
-  async goToOverviewTab(overrides?: {
-    dependencyName?: string;
-    rangeFrom?: string;
-    rangeTo?: string;
-  }) {
-    await this.goToTab('overview', overrides);
-    await this.waitForOverviewTabToLoad();
-  }
-
-  private async waitForOperationsTabToLoad() {
-    await waitForTableToLoad(this.page, 'apmDependencyDetailOperationsListTable');
-  }
-
-  async goToOperationsTab(overrides?: {
-    dependencyName?: string;
-    rangeFrom?: string;
-    rangeTo?: string;
-  }) {
-    await this.goToTab('operations', overrides);
-    await this.waitForOperationsTabToLoad();
-  }
-  // #endregion
-
-  // #region Get Tabs
-  private getTab(tabName: DependencyDetailsPageTabName) {
-    return this.page.getByRole('tab', { name: capitalize(tabName) });
-  }
-
-  getOverviewTab() {
-    return this.getTab('overview');
-  }
-
-  getOperationsTab() {
-    return this.getTab('operations');
-  }
-  // #endregion
-
-  // #region Click Tabs
-  private async clickTab(tabName: DependencyDetailsPageTabName) {
-    await this.getTab(tabName).click();
-  }
-
-  async clickOverviewTab() {
-    await this.clickTab('overview');
-  }
-
-  async clickOperationsTab() {
-    await this.clickTab('operations');
-  }
-  // #endregion
-
-  // #region Overview Tab
-  getServiceInUpstreamServicesTable(serviceName: string) {
-    return this.upstreamServicesTable.getByRole('link', { name: serviceName });
-  }
-
-  async clickServiceInUpstreamServicesTable(serviceName: string) {
-    await this.getServiceInUpstreamServicesTable(serviceName).click();
-  }
-  // #endregion
 }
