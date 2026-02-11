@@ -31,6 +31,11 @@ import type {
   PromQLOffset,
   PromQLAt,
 } from '../types';
+import {
+  PromQLPrecedenceGroup,
+  promqlBinaryPrecedenceGroup,
+  isPromQLRightAssociative,
+} from './helpers';
 
 export interface PromQLBasicPrettyPrinterOptions {
   /**
@@ -246,9 +251,27 @@ export class PromQLBasicPrettyPrinter {
   }
 
   protected printBinaryExpression(node: PromQLBinaryExpression): string {
-    const left = this.printExpression(node.left);
-    const right = this.printExpression(node.right);
+    const group = promqlBinaryPrecedenceGroup(node);
+    const leftGroup = promqlBinaryPrecedenceGroup(node.left);
+    const rightGroup = promqlBinaryPrecedenceGroup(node.right);
     const operator = this.formatOperator(node.name);
+    const isRightAssociative = isPromQLRightAssociative(node.name);
+    let left = this.printExpression(node.left);
+    let right = this.printExpression(node.right);
+
+    if (
+      leftGroup !== PromQLPrecedenceGroup.none &&
+      (leftGroup < group || (leftGroup === group && isRightAssociative))
+    ) {
+      left = `(${left})`;
+    }
+
+    if (
+      rightGroup !== PromQLPrecedenceGroup.none &&
+      (rightGroup < group || (rightGroup === group && !isRightAssociative))
+    ) {
+      right = `(${right})`;
+    }
 
     let modifiers = '';
 
