@@ -30,9 +30,11 @@ export const getUserFromRequest = async ({
   /** An ES client scoped to the request as the current user (needed for the authenticate fallback). */
   esClient: ElasticsearchClient;
 }): Promise<UserIdAndName> => {
-  const authUser = security.authc.getCurrentUser(request);
-  if (authUser) {
-    return { id: authUser.profile_uid!, username: authUser.username };
+  if (!request.isFakeRequest) {
+    const authUser = security.authc.getCurrentUser(request);
+    if (authUser) {
+      return { id: authUser.profile_uid!, username: authUser.username };
+    }
   }
 
   // Fallback for fake requests (e.g. Task Manager execution): call ES _security/_authenticate
