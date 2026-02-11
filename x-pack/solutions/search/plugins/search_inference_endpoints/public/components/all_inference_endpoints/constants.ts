@@ -5,27 +5,11 @@
  * 2.0.
  */
 
-import type { QueryParams, AllInferenceEndpointsTableState, FilterOptions } from './types';
-import { SortFieldInferenceEndpoint, SortOrder } from './types';
-
-export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
-export const DEFAULT_TABLE_LIMIT = 25;
-
-export const DEFAULT_QUERY_PARAMS: QueryParams = {
-  page: DEFAULT_TABLE_ACTIVE_PAGE,
-  perPage: DEFAULT_TABLE_LIMIT,
-  sortField: SortFieldInferenceEndpoint.inference_id,
-  sortOrder: SortOrder.asc,
-};
+import type { FilterOptions } from './types';
 
 export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   provider: [],
   type: [],
-};
-
-export const DEFAULT_INFERENCE_ENDPOINTS_TABLE_STATE: AllInferenceEndpointsTableState = {
-  filterOptions: DEFAULT_FILTER_OPTIONS,
-  queryParams: DEFAULT_QUERY_PARAMS,
 };
 
 export const PIPELINE_URL = 'ingest/ingest_pipelines';
