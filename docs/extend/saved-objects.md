@@ -310,27 +310,88 @@ The first PR must define the **current, existing shape** of the Saved Object.
 
 #### Schema definition
 
-While you can use a minimal configuration for the initial version, we recommend defining `create` and `forwardCompatibility` schemas that closely reflect your SO’s current structure. This enables full **Saved Objects Repository (SOR)** validation for both creation and retrieval.
+For the initial version, define `create` and `forwardCompatibility` schemas that cover the full object shape currently used by your type.
+This enables full **Saved Objects Repository (SOR)** validation and improves rollback guarantees.
 
-#### Minimal configuration example
+At a minimum, your schemas must include all attributes present in your type mappings.
+Whenever possible, use `{ unknowns: 'ignore' }` to evict unknown fields without throwing, so rollback checks can validate that data shape remains compatible.
+
+#### Recommended schema definition for the initial model version
 
 ```ts
 const myType: SavedObjectsType = {
-  ...
+  name: 'my_type',
   modelVersions: {
     1: {
       changes: [],
       schemas: {
-        create: schema.object({}, { unknowns: 'allow' }),
-        forwardCompatibility: (attrs) => _.pick([
-          'knownField1',
-          'knownField2',
-          ...
-          'knownFieldN',
-        ]),
+        create: schema.object(
+          {
+            title: schema.maybe(schema.string()),
+            count: schema.maybe(schema.number()),
+            metadata: schema.maybe(schema.object({}, { unknowns: 'ignore' })),
+          },
+          { unknowns: 'ignore' }
+        ),
+        forwardCompatibility: schema.object(
+          {
+            title: schema.maybe(schema.string()),
+            count: schema.maybe(schema.number()),
+            metadata: schema.maybe(schema.object({}, { unknowns: 'ignore' })),
+          },
+          { unknowns: 'ignore' }
+        ),
       },
     },
-  ...
+  },
+  mappings: {
+    dynamic: false,
+    properties: {
+      title: { type: 'text' },
+      count: { type: 'integer' },
+      metadata: { dynamic: false, properties: {} },
+    },
+  },
+};
+```
+
+#### Edge case: minimal bootstrap schema
+
+If you cannot immediately define the full object shape, you can start with a minimal bootstrap schema for the initial model version and harden it in a follow up PR.
+Even in this case, include all mapped attributes in both schemas.
+
+```ts
+const myType: SavedObjectsType = {
+  name: 'my_type',
+  modelVersions: {
+    1: {
+      changes: [],
+      schemas: {
+        create: schema.object(
+          {
+            title: schema.maybe(schema.string()),
+            count: schema.maybe(schema.number()),
+          },
+          { unknowns: 'ignore' }
+        ),
+        forwardCompatibility: schema.object(
+          {
+            title: schema.maybe(schema.string()),
+            count: schema.maybe(schema.number()),
+          },
+          { unknowns: 'ignore' }
+        ),
+      },
+    },
+  },
+  mappings: {
+    dynamic: false,
+    properties: {
+      title: { type: 'text' },
+      count: { type: 'integer' },
+    },
+  },
+};
 ```
 
 If your Saved Object type was defining `schemas:` along with the legacy `migrations:`, you can simply use the latest schema for the initial version.
@@ -1268,7 +1329,7 @@ The following validations are performed to ensure changes to Saved Object types 
 
 * **Single model version per PR:** A given *Pull Request* cannot define more than one model version for the same Saved Object type.
 
-  * Rationale: If the changes are part of a 2-step rollout, they must be shipped in separate Serverless releases. The `on-merge` pipeline will compare changes against current serverless release.
+  * Rationale: If the changes are part of a [2-step rollout](#rollback-safe-two-step-rollout), they must be shipped in separate Serverless releases. The `on-merge` pipeline will compare changes against current serverless release.
 
 * **Legacy migrations:** Types cannot define new versions using the legacy `migrations:` property, as it is deprecated.
 
@@ -1281,6 +1342,29 @@ The following validations are performed to ensure changes to Saved Object types 
   * Note: {{es}} has limitations preventing certain breaking changes, such as removing fields or updating the data types of fields (e.g., changing an `integer` to a `text`).
 
 * **Mandatory schemas:** New model versions must include the `create` and `forwardCompatibility` schemas, as these are now mandatory.
+
+### Rollout patterns that require multiple releases [rollback-safe-two-step-rollout]
+
+Some changes must be split across releases to preserve rollback safety in Serverless environments.
+The following patterns should be implemented as separate PRs/releases.
+
+#### Introducing a new searchable field [two-step-rollout-new-searchable-field]
+
+When adding a new field that your business logic will search/filter/aggregate on:
+
+1. **Release N:** Introduce a new model version with the mapping update (and `data_backfill` if needed). Do not depend on the field in business logic yet.
+2. **Release N+1:** Update business logic to read/search/filter using that field.
+
+This split prevents rollout/rollback windows from depending on data that may not be fully backfilled yet.
+
+#### Deleting an existing field [two-step-rollout-field-deletion]
+
+When removing a field:
+
+1. **Release N:** Stop reading/depending on the field in business logic, but keep the field data in documents.
+2. **Release N+1:** Introduce a new model version that removes the field data (for example with `data_removal`).
+
+This split preserves rollback integrity, because an emergency rollback to the previous release can still operate on documents that retain the field.
 
 ### Ensuring robust serverless rollbacks
 
