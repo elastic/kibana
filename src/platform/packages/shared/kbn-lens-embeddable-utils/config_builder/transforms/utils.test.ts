@@ -139,9 +139,9 @@ describe('addLayerColumn', () => {
 
   test('adds column with reference column', () => {
     const layer = {
-      columns: {},
+      columns: {} as Record<string, GenericIndexPatternColumn>,
       columnOrder: [],
-    } as unknown as PersistedIndexPatternLayer;
+    } satisfies PersistedIndexPatternLayer;
 
     const parentColumn = {
       operationType: 'counter_rate',
@@ -149,7 +149,7 @@ describe('addLayerColumn', () => {
       dataType: 'number',
       isBucketed: false,
       references: [],
-    } as ReferenceBasedIndexPatternColumn;
+    } satisfies ReferenceBasedIndexPatternColumn;
 
     const referenceColumn = {
       operationType: 'max',
@@ -157,21 +157,21 @@ describe('addLayerColumn', () => {
       label: 'Max of bytes',
       dataType: 'number',
       isBucketed: false,
-    } as GenericIndexPatternColumn;
+    } satisfies GenericIndexPatternColumn;
 
     addLayerColumn(layer, 'metric', [parentColumn, referenceColumn]);
 
-    expect(layer.columns.metric).toBeDefined();
-    expect(layer.columns.metric_reference).toBeDefined();
-    expect((layer.columns.metric as any).references).toEqual(['metric_reference']);
+    expect(layer.columns).toHaveProperty('metric');
+    expect(layer.columns).toHaveProperty('metric_reference');
+    expect(layer.columns.metric).toHaveProperty('references', ['metric_reference']);
     expect(layer.columnOrder).toEqual(['metric', 'metric_reference']);
   });
 
   test('adds reference column to the beginning when first=true', () => {
     const layer = {
-      columns: {},
+      columns: {} as Record<string, GenericIndexPatternColumn>,
       columnOrder: ['existing'],
-    } as PersistedIndexPatternLayer;
+    } satisfies PersistedIndexPatternLayer;
 
     const parentColumn = {
       operationType: 'cumulative_sum',
@@ -179,7 +179,7 @@ describe('addLayerColumn', () => {
       dataType: 'number',
       isBucketed: false,
       references: [],
-    } as ReferenceBasedIndexPatternColumn;
+    } satisfies ReferenceBasedIndexPatternColumn;
 
     const referenceColumn = {
       operationType: 'sum',
@@ -187,21 +187,21 @@ describe('addLayerColumn', () => {
       label: 'Sum of sales',
       dataType: 'number',
       isBucketed: false,
-    } as GenericIndexPatternColumn;
+    } satisfies GenericIndexPatternColumn;
 
     addLayerColumn(layer, 'metric', [parentColumn, referenceColumn], true);
 
-    expect(layer.columns.metric).toBeDefined();
-    expect(layer.columns.metric_reference).toBeDefined();
-    expect((layer.columns.metric as any).references).toEqual(['metric_reference']);
+    expect(layer.columns).toHaveProperty('metric');
+    expect(layer.columns).toHaveProperty('metric_reference');
+    expect(layer.columns.metric).toHaveProperty('references', ['metric_reference']);
     expect(layer.columnOrder).toEqual(['metric_reference', 'metric', 'existing']);
   });
 
   test('adds column with postfix and reference', () => {
     const layer = {
-      columns: {},
+      columns: {} as Record<string, GenericIndexPatternColumn>,
       columnOrder: [],
-    } as PersistedIndexPatternLayer;
+    } satisfies PersistedIndexPatternLayer;
 
     const parentColumn = {
       operationType: 'moving_average',
@@ -209,7 +209,7 @@ describe('addLayerColumn', () => {
       dataType: 'number',
       isBucketed: false,
       references: [],
-    } as ReferenceBasedIndexPatternColumn;
+    } satisfies ReferenceBasedIndexPatternColumn;
 
     const referenceColumn = {
       operationType: 'sum',
@@ -217,13 +217,13 @@ describe('addLayerColumn', () => {
       label: 'Sum of count',
       dataType: 'number',
       isBucketed: false,
-    } as GenericIndexPatternColumn;
+    } satisfies GenericIndexPatternColumn;
 
     addLayerColumn(layer, 'metric', [parentColumn, referenceColumn], false, '_trendline');
 
-    expect(layer.columns.metric_trendline).toBeDefined();
-    expect(layer.columns.metric_trendline_reference).toBeDefined();
-    expect((layer.columns.metric_trendline as any).references).toEqual([
+    expect(layer.columns).toHaveProperty('metric_trendline');
+    expect(layer.columns).toHaveProperty('metric_trendline_reference');
+    expect(layer.columns.metric_trendline).toHaveProperty('references', [
       'metric_trendline_reference',
     ]);
     expect(layer.columnOrder).toEqual(['metric_trendline', 'metric_trendline_reference']);

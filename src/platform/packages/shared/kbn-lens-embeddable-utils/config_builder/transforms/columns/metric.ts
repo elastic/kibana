@@ -67,7 +67,6 @@ import { fromMovingAverageAPItoLensState, fromMovingAverageLensStateToAPI } from
 import type {
   AnyLensStateColumn,
   AnyMetricLensStateColumn,
-  ReferableMetricLensStateColumn,
   ReferenceMetricLensStateColumn,
 } from './types';
 import {
@@ -120,7 +119,7 @@ export function fromMetricAPItoLensState(
   }
   if (isAPIColumnOfType<LensApiMovingAverageOperation>('moving_average', options)) {
     if (isApiColumnOfReferableType(options.of)) {
-      const [refColumn] = fromMetricAPItoLensState(options.of) as ReferableMetricLensStateColumn[];
+      const [refColumn] = fromMetricAPItoLensState(options.of);
       return [fromMovingAverageAPItoLensState(options), refColumn];
     }
   }
@@ -144,7 +143,10 @@ export function fromMetricAPItoLensState(
   }
   if (isAPIColumnOfType<LensApiDifferencesOperation>('differences', options)) {
     if (isApiColumnOfReferableType(options.of)) {
-      const [refColumn] = fromMetricAPItoLensState(options.of) as ReferableMetricLensStateColumn[];
+      const [refColumn] = fromMetricAPItoLensState(options.of);
+      if (!refColumn || !isColumnOfReferableType(refColumn)) {
+        return [];
+      }
       return [fromDifferencesAPItoLensState(options), refColumn];
     }
   }
