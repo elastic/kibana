@@ -96,9 +96,9 @@ export interface TextBasedLayerColumn {
   columnId: string;
   fieldName: string;
   /**
-   * User-facing dimension label. This prop is the empty string unless the user has explicitly set a custom label.
+   * User-facing dimension label. This prop is undefined unless the user has explicitly set a custom label.
    */
-  label: string;
+  label?: string;
   /**
    * This legacy field is stored in the saved objects and used in the API transforms.
    *

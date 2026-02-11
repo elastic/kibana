@@ -201,7 +201,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           </EuiText>
 
           <NameInput
-            value={selectedField.label}
+            value={selectedField.label ?? ''}
             defaultValue={selectedField.fieldName}
             onChange={(value) => {
               updateLayer(

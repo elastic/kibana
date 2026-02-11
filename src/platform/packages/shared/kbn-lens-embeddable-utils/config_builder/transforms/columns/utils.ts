@@ -45,6 +45,7 @@ export function getLensStateMetricSharedProps(
     ...(options.reduced_time_range ? { reducedTimeRange: options.reduced_time_range } : {}),
     ...(options.time_shift ? { timeShift: options.time_shift } : {}),
     label: options.label ?? LENS_DEFAULT_LABEL,
+    customLabel: Boolean(options.label), // if a label is present in the API state, it's a custom label
   };
 }
 
@@ -74,6 +75,7 @@ export function getLensStateBucketSharedProps(options: { label?: string; field?:
   return {
     sourceField: options.field ?? '',
     label: options.label ?? LENS_DEFAULT_LABEL,
+    customLabel: Boolean(options.label), // if a label is present in the API state, it's a custom label
     isBucketed: true,
   };
 }
