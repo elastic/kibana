@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import React from 'react';
 import type { JsonArray, JsonValue } from '@kbn/utility-types';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -58,7 +58,7 @@ const formatValue = (value: JsonValue): string => {
     return value;
   }
 
-  return stringify(value);
+  return stableStringify(value);
 };
 
 const CommaSeparatedLi = euiStyled.li`

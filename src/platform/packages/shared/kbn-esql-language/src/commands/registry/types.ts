@@ -20,7 +20,7 @@ import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLLocation, ESQLProperNode } from '../../types';
 import type { SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
-import type { SuggestionCategory } from '../../shared/sorting/types';
+import type { SuggestionCategory } from '../../language/autocomplete/utils/sorting/types';
 
 // This is a subset of the Monaco's editor CompletitionItemKind type
 export type ItemKind =
