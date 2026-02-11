@@ -10,6 +10,7 @@ import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-obje
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { registerAuthenticateRoute } from './authenticate';
 import { registerClustersRoute } from './clusters';
+import { registerRotateApiKeyRoute } from './rotate_api_key';
 
 interface CloudConnectedStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -27,4 +28,5 @@ export interface RouteOptions {
 export function registerRoutes(options: RouteOptions) {
   registerAuthenticateRoute(options);
   registerClustersRoute(options);
+  registerRotateApiKeyRoute(options);
 }

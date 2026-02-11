@@ -126,6 +126,7 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         }
+        wrapHeader={true}
       >
         <PageTitle
           title={i18n.translate('xpack.ml.explorer.pageTitle', {
