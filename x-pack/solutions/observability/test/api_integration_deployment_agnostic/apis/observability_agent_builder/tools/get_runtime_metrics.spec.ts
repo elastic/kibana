@@ -17,9 +17,11 @@ import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 
 const SERVICE_NAME = 'java-service';
 const OTEL_SERVICE_NAME = 'otel-java-service';
+const OTEL_APM_SERVER_SERVICE_NAME = 'otel-apm-server-java-service';
 const ENVIRONMENT = 'production';
 const INSTANCE_NAME = 'instance-a';
 const OTEL_INSTANCE_NAME = 'otel-instance-a';
+const OTEL_APM_SERVER_INSTANCE_NAME = 'otel-apm-server-instance-a';
 const START = 'now-15m';
 const END = 'now';
 
@@ -376,6 +378,107 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // OTel stores GC duration in seconds, we convert to ms
         // Sum of 0.15s * ~14 docs (timing can vary) = ~2100ms
         expect(resultData.nodes[0].gcDurationMs).to.be.within(2000, 2400);
+      });
+    });
+
+    describe('when fetching runtime metrics for OTel JVM service via APM Server ingest', () => {
+      // APM Server stores unmapped OTel attributes under labels.* with dots replaced by underscores
+      // See: https://www.elastic.co/docs/solutions/observability/apm/opentelemetry/attributes
+      let resultData: GetRuntimeMetricsToolResult['data'];
+
+      before(async () => {
+        const now = Date.now();
+        const docs = [];
+
+        for (let i = 0; i < 15; i++) {
+          const timestamp = new Date(now - (15 - i) * 60 * 1000).toISOString();
+
+          // Heap memory doc - uses labels.jvm_memory_type (APM Server ingest path)
+          docs.push({
+            '@timestamp': timestamp,
+            'processor.event': 'metric',
+            'metricset.name': 'app',
+            'service.name': OTEL_APM_SERVER_SERVICE_NAME,
+            'service.environment': ENVIRONMENT,
+            'service.node.name': OTEL_APM_SERVER_INSTANCE_NAME,
+            'host.name': 'otel-apm-host-1',
+            'metrics.jvm.cpu.recent_utilization': 0.55,
+            'metrics.jvm.memory.used': 300000000, // 300MB heap
+            'metrics.jvm.memory.limit': 600000000, // 600MB max
+            'labels.jvm_memory_type': 'heap', // APM Server transforms jvm.memory.type → labels.jvm_memory_type
+            'metrics.jvm.thread.count': 28,
+            'metrics.jvm.gc.duration': 0.1, // 100ms in seconds
+          });
+
+          // Non-heap memory doc
+          docs.push({
+            '@timestamp': timestamp,
+            'processor.event': 'metric',
+            'metricset.name': 'app',
+            'service.name': OTEL_APM_SERVER_SERVICE_NAME,
+            'service.environment': ENVIRONMENT,
+            'service.node.name': OTEL_APM_SERVER_INSTANCE_NAME,
+            'host.name': 'otel-apm-host-1',
+            'metrics.jvm.memory.used': 30000000, // 30MB non-heap
+            'metrics.jvm.memory.limit': 60000000, // 60MB max
+            'labels.jvm_memory_type': 'non_heap',
+          });
+        }
+
+        const body = docs.flatMap((doc) => [
+          { create: { _index: `metrics-apm.app.${OTEL_APM_SERVER_SERVICE_NAME}-default` } },
+          doc,
+        ]);
+
+        await es.bulk({ body, refresh: true });
+
+        const results = await agentBuilderApiClient.executeTool<GetRuntimeMetricsToolResult>({
+          id: OBSERVABILITY_GET_RUNTIME_METRICS_TOOL_ID,
+          params: {
+            serviceName: OTEL_APM_SERVER_SERVICE_NAME,
+            serviceEnvironment: ENVIRONMENT,
+            start: START,
+            end: END,
+          },
+        });
+
+        expect(results).to.have.length(1);
+        resultData = results[0].data;
+      });
+
+      after(async () => {
+        await es.deleteByQuery({
+          index: `metrics-apm.app.${OTEL_APM_SERVER_SERVICE_NAME}-default`,
+          query: { match_all: {} },
+          refresh: true,
+          ignore_unavailable: true,
+        });
+      });
+
+      it('returns runtime metrics for OTel service ingested via APM Server', () => {
+        expect(resultData.total).to.be(1);
+        expect(resultData.nodes.length).to.be(1);
+      });
+
+      it('returns the correct node name', () => {
+        expect(resultData.nodes[0].serviceNodeName).to.be(OTEL_APM_SERVER_INSTANCE_NAME);
+      });
+
+      it('returns heap memory using labels.jvm_memory_type', () => {
+        expect(resultData.nodes[0].heapMemoryBytes).to.be(300000000);
+        expect(resultData.nodes[0].heapMemoryMaxBytes).to.be(600000000);
+        expect(resultData.nodes[0].heapMemoryUtilization).to.be(0.5);
+      });
+
+      it('returns non-heap memory using labels.jvm_memory_type', () => {
+        expect(resultData.nodes[0].nonHeapMemoryBytes).to.be(30000000);
+        expect(resultData.nodes[0].nonHeapMemoryMaxBytes).to.be(60000000);
+        expect(resultData.nodes[0].nonHeapMemoryUtilization).to.be(0.5);
+      });
+
+      it('returns CPU and thread count', () => {
+        expect(resultData.nodes[0].cpuUtilization).to.be.within(0.5, 0.6);
+        expect(resultData.nodes[0].threadCount).to.be(28);
       });
     });
   });

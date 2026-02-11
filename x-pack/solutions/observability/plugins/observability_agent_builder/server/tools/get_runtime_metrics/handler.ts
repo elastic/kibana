@@ -26,6 +26,7 @@ import {
   METRIC_OTEL_JVM_THREAD_COUNT,
   METRIC_OTEL_JVM_GC_DURATION_SECONDS,
   ATTRIBUTE_OTEL_JVM_MEMORY_TYPE,
+  LABEL_OTEL_JVM_MEMORY_TYPE,
   VALUE_OTEL_JVM_MEMORY_TYPE_HEAP,
   VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP,
 } from '@kbn/apm-types';
@@ -234,7 +235,15 @@ async function getOtelJvmMetrics({
           },
           heapMemory: {
             filter: {
-              term: { [ATTRIBUTE_OTEL_JVM_MEMORY_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_HEAP },
+              bool: {
+                should: [
+                  // OTel native ingest (EDOT Collector → ES)
+                  { term: { [ATTRIBUTE_OTEL_JVM_MEMORY_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_HEAP } },
+                  // APM Server ingest (OTel SDK → APM Server → ES)
+                  { term: { [LABEL_OTEL_JVM_MEMORY_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_HEAP } },
+                ],
+                minimum_should_match: 1,
+              },
             },
             aggs: {
               usage: {
@@ -251,7 +260,15 @@ async function getOtelJvmMetrics({
           },
           nonHeapMemory: {
             filter: {
-              term: { [ATTRIBUTE_OTEL_JVM_MEMORY_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP },
+              bool: {
+                should: [
+                  // OTel native ingest (EDOT Collector → ES)
+                  { term: { [ATTRIBUTE_OTEL_JVM_MEMORY_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP } },
+                  // APM Server ingest (OTel SDK → APM Server → ES)
+                  { term: { [LABEL_OTEL_JVM_MEMORY_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP } },
+                ],
+                minimum_should_match: 1,
+              },
             },
             aggs: {
               usage: {

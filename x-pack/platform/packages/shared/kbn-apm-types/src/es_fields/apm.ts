@@ -202,7 +202,11 @@ export const METRIC_OTEL_JVM_MEMORY_LIMIT = 'metrics.jvm.memory.limit';
 export const METRIC_OTEL_JVM_THREAD_COUNT = 'metrics.jvm.thread.count';
 export const METRIC_OTEL_JVM_SYSTEM_CPU = 'metrics.jvm.system.cpu.utilization';
 export const METRIC_OTEL_JVM_GC_DURATION_SECONDS = 'metrics.jvm.gc.duration';
+// OTel native ingest (EDOT Collector → ES) stores as attributes.*
 export const ATTRIBUTE_OTEL_JVM_MEMORY_TYPE = 'attributes.jvm.memory.type';
+// APM Server ingest (OTel SDK → APM Server → ES) stores as labels.* with dots → underscores
+// See: https://www.elastic.co/docs/solutions/observability/apm/opentelemetry/attributes
+export const LABEL_OTEL_JVM_MEMORY_TYPE = 'labels.jvm_memory_type';
 export const VALUE_OTEL_JVM_MEMORY_TYPE_HEAP = 'heap';
 export const VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP = 'non_heap';
 
