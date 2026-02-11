@@ -56,7 +56,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       await dashboard.loadSavedDashboard('Ecom Dashboard');
       await testSubjects.click('exportTopNavButton');
       await testSubjects.click('scheduleExport');
-      await testSubjects.existOrFail('exportDerivativeFlyout-scheduledReports');
+      await testSubjects.existOrFail('exportItemDetailsFlyout');
     };
 
     const fillInSchedule = async () => {
@@ -82,7 +82,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      if (await testSubjects.exists('exportDerivativeFlyout-scheduledReports')) {
+      if (await testSubjects.exists('exportItemDetailsFlyout')) {
         await testSubjects.click('euiFlyoutCloseButton');
       }
       await toasts.dismissIfExists();
@@ -109,7 +109,7 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       // Verify past date validation error appears, retrying to wait for validation
       await retry.waitFor('form validation', async () =>
         (
-          await testSubjects.getVisibleText('exportDerivativeFlyout-scheduledReports')
+          await testSubjects.getVisibleText('exportItemDetailsFlyout')
         ).includes('Start date must be in the future')
       );
 
@@ -138,16 +138,16 @@ export default function ({ getService, getPageObject }: FtrProviderContext) {
       await testSubjects.click('scheduleExportSubmitButton');
       await retry.waitFor('form validation', async () =>
         (
-          await testSubjects.getVisibleText('exportDerivativeFlyout-scheduledReports')
+          await testSubjects.getVisibleText('exportItemDetailsFlyout')
         ).includes('Provide at least one recipient')
       );
 
       // Add invalid email - should show validation warning
       await testSubjects.setValue('emailRecipientsCombobox', 'invalid-email');
       await testSubjects.click('scheduleExportSubmitButton');
-      expect(
-        await testSubjects.getVisibleText('exportDerivativeFlyout-scheduledReports')
-      ).to.contain('Email address invalid-email is not valid');
+      expect(await testSubjects.getVisibleText('exportItemDetailsFlyout')).to.contain(
+        'Email address invalid-email is not valid'
+      );
 
       // Add valid email with subject and message containing template variables
       await testSubjects.setValue('emailRecipientsCombobox', 'user@example.com');
