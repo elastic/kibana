@@ -90,6 +90,35 @@ describe('var_group_policy_effects', () => {
       expect(result).toBeNull();
     });
 
+    it('should preserve cloud_connector_id when already set by CloudConnectorSetup', () => {
+      const packagePolicy = createMockPackagePolicy({
+        supports_cloud_connector: true,
+        cloud_connector_id: 'existing-connector-id',
+      });
+      const varGroups = createMockVarGroups();
+      const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
+
+      const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+
+      expect(result).toBeNull();
+    });
+
+    it('should preserve cloud_connector_id in edit flow with supports_cloud_connectors var set', () => {
+      const packagePolicy = createMockPackagePolicy({
+        supports_cloud_connector: true,
+        cloud_connector_id: 'saved-connector-id',
+        vars: {
+          supports_cloud_connectors: { value: true, type: 'bool' },
+        },
+      });
+      const varGroups = createMockVarGroups();
+      const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
+
+      const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+
+      expect(result).toBeNull();
+    });
+
     it('should return null when cloud connector is already disabled and not selected', () => {
       const packagePolicy = createMockPackagePolicy({
         supports_cloud_connector: false,
@@ -206,6 +235,28 @@ describe('var_group_policy_effects', () => {
         const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
 
         expect(result?.vars?.supports_cloud_connectors).toEqual({ value: false });
+      });
+
+      it('should update stale var without clearing cloud_connector_id', () => {
+        const packagePolicy = createMockPackagePolicy({
+          supports_cloud_connector: true,
+          cloud_connector_id: 'existing-connector-id',
+          vars: {
+            supports_cloud_connectors: { value: false, type: 'bool' },
+          },
+        });
+        const varGroups = createMockVarGroups();
+        const selections: VarGroupSelection = { auth_method: 'cloud_connector' };
+
+        const result = cloudConnectorPolicyEffect(packagePolicy, selections, varGroups);
+
+        expect(result).toEqual({
+          supports_cloud_connector: true,
+          vars: expect.objectContaining({
+            supports_cloud_connectors: { value: true, type: 'bool' },
+          }),
+        });
+        expect(result).not.toHaveProperty('cloud_connector_id');
       });
     });
   });

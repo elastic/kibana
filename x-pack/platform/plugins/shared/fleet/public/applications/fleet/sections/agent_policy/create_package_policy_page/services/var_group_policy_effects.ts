@@ -68,15 +68,20 @@ export const cloudConnectorPolicyEffect: PolicyEffectHandler = (
   const currentVarValue = packagePolicy.vars?.[SUPPORTS_CLOUD_CONNECTORS_VAR_NAME]?.value;
 
   if (cloudConnectorOption.isCloudConnector) {
-    // Only update if values have changed
+    // Only update if supports_cloud_connector flag or the var need to change.
+    // cloud_connector_id is intentionally NOT checked here — once set by
+    // CloudConnectorSetup it must be preserved across unrelated var_group changes.
     if (
       packagePolicy.supports_cloud_connector !== true ||
-      packagePolicy.cloud_connector_id !== undefined ||
       (currentVarValue !== undefined && currentVarValue !== true)
     ) {
       return {
         supports_cloud_connector: true,
-        cloud_connector_id: undefined, // Will be set by CloudConnectorSetup
+        // Only initialize cloud_connector_id when first transitioning to cloud
+        // connector mode; preserve existing ID if CloudConnectorSetup already set one
+        ...(packagePolicy.supports_cloud_connector !== true
+          ? { cloud_connector_id: undefined }
+          : {}),
         ...buildSupportsCloudConnectorsVarsUpdate(packagePolicy.vars, true),
       };
     }
