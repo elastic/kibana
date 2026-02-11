@@ -6,9 +6,10 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 
-test.describe('Index template wizard - Create', { tag: ['@ess'] }, () => {
+test.describe('Index template wizard - Create', { tag: tags.stateful.classic }, () => {
   test.afterEach(async ({ esClient, log }) => {
     try {
       await esClient.indices.deleteIndexTemplate({ name: 'test-index-template' });
