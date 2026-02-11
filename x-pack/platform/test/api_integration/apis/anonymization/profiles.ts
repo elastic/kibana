@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const PROFILES_API = '/internal/anonymization/profiles';
+const PROFILES_INDEX = '.kibana-anonymization-profiles';
 const API_VERSION = '1';
 
 const defaultProfile = {
@@ -30,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
+  const es = getService('es');
 
   describe('anonymization profiles', function () {
     let createdProfileId: string;
@@ -243,6 +245,105 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
         expect(status).to.be(403);
+      });
+    });
+
+    // ---------------------------------------------------------------
+    // 1.14: ai:anonymizationSettings migration execution
+    // ---------------------------------------------------------------
+    describe('advanced settings migration', () => {
+      it('migrates enabled regex/NER rules into profile on route access', async () => {
+        const migrationTargetId = `migration-target-${Date.now()}`;
+
+        const migrationSettings = JSON.stringify({
+          rules: [
+            {
+              type: 'RegExp',
+              enabled: true,
+              pattern: '\\\\b[A-Z]{3}\\\\d{3}\\\\b',
+              entityClass: 'ALPHANUM_ID',
+            },
+            {
+              type: 'NER',
+              enabled: true,
+              modelId: 'test-ner-model',
+              allowedEntityClasses: ['PER'],
+            },
+            {
+              type: 'RegExp',
+              enabled: false,
+              pattern: 'SHOULD_NOT_MIGRATE',
+              entityClass: 'IGNORED',
+            },
+          ],
+        });
+
+        const { body: createdProfile, status: createStatus } = await supertest
+          .post(PROFILES_API)
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'kibana')
+          .set('elastic-api-version', API_VERSION)
+          .send({
+            ...defaultProfile,
+            targetId: migrationTargetId,
+            rules: {
+              fieldRules: [{ field: 'host.name', allowed: true, anonymized: false }],
+            },
+          });
+
+        expect(createStatus).to.be(200);
+
+        try {
+          const { status: settingsStatus } = await supertest
+            .post('/internal/kibana/settings')
+            .set('kbn-xsrf', 'true')
+            .set('x-elastic-internal-origin', 'kibana')
+            .send({
+              changes: {
+                'ai:anonymizationSettings': migrationSettings,
+              },
+            });
+
+          expect(settingsStatus).to.be(200);
+
+          const { body: migratedProfile, status: getStatus } = await supertest
+            .get(`${PROFILES_API}/${createdProfile.id}`)
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('elastic-api-version', API_VERSION);
+
+          expect(getStatus).to.be(200);
+          expect(migratedProfile.rules.regexRules).to.have.length(1);
+          expect(migratedProfile.rules.regexRules[0].entityClass).to.be('ALPHANUM_ID');
+          expect(migratedProfile.rules.nerRules).to.have.length(1);
+          expect(migratedProfile.rules.nerRules[0].modelId).to.be('test-ner-model');
+
+          const esDoc = await es.get({
+            index: PROFILES_INDEX,
+            id: createdProfile.id,
+          });
+
+          const source = esDoc._source as {
+            migration?: { ai_anonymization_settings?: { applied_at?: string } };
+          };
+
+          expect(source.migration?.ai_anonymization_settings?.applied_at).to.be.a('string');
+        } finally {
+          await supertest
+            .post('/internal/kibana/settings')
+            .set('kbn-xsrf', 'true')
+            .set('x-elastic-internal-origin', 'kibana')
+            .send({
+              changes: {
+                'ai:anonymizationSettings': null,
+              },
+            });
+
+          await supertest
+            .delete(`${PROFILES_API}/${createdProfile.id}`)
+            .set('kbn-xsrf', 'true')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('elastic-api-version', API_VERSION);
+        }
       });
     });
   });

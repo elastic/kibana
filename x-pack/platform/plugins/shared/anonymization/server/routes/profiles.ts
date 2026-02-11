@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import {
   ANONYMIZATION_API_VERSION,
   ANONYMIZATION_PROFILES_API_BASE,
@@ -14,6 +14,7 @@ import {
 } from '../../common';
 import { ProfilesRepository } from '../repository';
 import { ensureProfilesIndex } from '../system_index';
+import { migrateAnonymizationSettings } from '../migration';
 
 const fieldRuleSchema = schema.object({
   field: schema.string(),
@@ -66,6 +67,25 @@ const getNamespace = (request: { url: { pathname?: string } }): string => {
   return match?.[1] ?? 'default';
 };
 
+const runSettingsMigration = async ({
+  namespace,
+  esClient,
+  uiSettings,
+  logger,
+}: {
+  namespace: string;
+  esClient: ElasticsearchClient;
+  uiSettings: IUiSettingsClient;
+  logger: Logger;
+}) => {
+  await migrateAnonymizationSettings({
+    namespace,
+    esClient,
+    uiSettings,
+    logger,
+  });
+};
+
 export const registerProfileRoutes = (router: IRouter, logger: Logger): void => {
   // POST /internal/anonymization/profiles — Create profile
   router.versioned
@@ -109,6 +129,12 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
           await ensureProfilesIndex({ esClient, logger });
+          await runSettingsMigration({
+            namespace,
+            esClient,
+            uiSettings: coreContext.uiSettings.client,
+            logger,
+          });
 
           const repo = new ProfilesRepository(esClient);
 
@@ -178,6 +204,12 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
           await ensureProfilesIndex({ esClient, logger });
+          await runSettingsMigration({
+            namespace,
+            esClient,
+            uiSettings: coreContext.uiSettings.client,
+            logger,
+          });
 
           const repo = new ProfilesRepository(esClient);
           const result = await repo.find({
@@ -227,6 +259,12 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           const namespace = getNamespace(request);
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asInternalUser;
+          await runSettingsMigration({
+            namespace,
+            esClient,
+            uiSettings: coreContext.uiSettings.client,
+            logger,
+          });
 
           const repo = new ProfilesRepository(esClient);
           const profile = await repo.get(namespace, request.params.id);
@@ -283,6 +321,12 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           const namespace = getNamespace(request);
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asInternalUser;
+          await runSettingsMigration({
+            namespace,
+            esClient,
+            uiSettings: coreContext.uiSettings.client,
+            logger,
+          });
 
           const repo = new ProfilesRepository(esClient);
           const profile = await repo.update(namespace, request.params.id, {
@@ -330,6 +374,12 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           const namespace = getNamespace(request);
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asInternalUser;
+          await runSettingsMigration({
+            namespace,
+            esClient,
+            uiSettings: coreContext.uiSettings.client,
+            logger,
+          });
 
           const repo = new ProfilesRepository(esClient);
           const deleted = await repo.delete(namespace, request.params.id);
