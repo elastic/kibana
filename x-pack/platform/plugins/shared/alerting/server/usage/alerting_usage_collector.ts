@@ -126,19 +126,49 @@ const byStatusPerDaySchema: MakeSchemaFrom<AlertingUsage>['count_rules_by_execut
 const gapAutoFillSchedulerRunStatusSchema: MakeSchemaFrom<AlertingUsage>['gap_auto_fill_scheduler_runs_by_status_per_day'] =
   {
     // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
-    DYNAMIC_KEY: { type: 'long' },
-    success: { type: 'long' },
-    error: { type: 'long' },
-    skipped: { type: 'long' },
-    no_gaps: { type: 'long' },
+    DYNAMIC_KEY: {
+      type: 'long',
+      _meta: {
+        description: 'The number of gap auto-fill scheduler runs by dynamic status key per day',
+      },
+    },
+    success: {
+      type: 'long',
+      _meta: { description: 'The number of successful gap auto-fill scheduler runs per day' },
+    },
+    error: {
+      type: 'long',
+      _meta: { description: 'The number of errored gap auto-fill scheduler runs per day' },
+    },
+    skipped: {
+      type: 'long',
+      _meta: { description: 'The number of skipped gap auto-fill scheduler runs per day' },
+    },
+    no_gaps: {
+      type: 'long',
+      _meta: {
+        description: 'The number of gap auto-fill scheduler runs with no gaps found per day',
+      },
+    },
   };
 
 const gapAutoFillSchedulerResultStatusSchema: MakeSchemaFrom<AlertingUsage>['gap_auto_fill_scheduler_results_by_status_per_day'] =
   {
     // TODO: Find out an automated way to populate the keys or reformat these into an array (and change the Remote Telemetry indexer accordingly)
-    DYNAMIC_KEY: { type: 'long' },
-    success: { type: 'long' },
-    error: { type: 'long' },
+    DYNAMIC_KEY: {
+      type: 'long',
+      _meta: {
+        description: 'The number of gap auto-fill scheduler results by dynamic status key per day',
+      },
+    },
+    success: {
+      type: 'long',
+      _meta: { description: 'The number of successful gap auto-fill scheduler results per day' },
+    },
+    error: {
+      type: 'long',
+      _meta: { description: 'The number of errored gap auto-fill scheduler results per day' },
+    },
   };
 
 const byNotifyWhenSchema: MakeSchemaFrom<AlertingUsage>['count_rules_by_notify_when'] = {
@@ -361,16 +391,54 @@ export function createAlertingUsageCollector(
       count_gaps: { type: 'long' },
       total_unfilled_gap_duration_ms: { type: 'long' },
       total_filled_gap_duration_ms: { type: 'long' },
-      gap_auto_fill_scheduler_runs_per_day: { type: 'long' },
+      gap_auto_fill_scheduler_runs_per_day: {
+        type: 'long',
+        _meta: { description: 'The total number of gap auto-fill scheduler runs per day' },
+      },
       gap_auto_fill_scheduler_runs_by_status_per_day: gapAutoFillSchedulerRunStatusSchema,
       gap_auto_fill_scheduler_duration_ms_per_day: {
-        min: { type: 'long' },
-        max: { type: 'long' },
-        avg: { type: 'float' },
-        sum: { type: 'float' },
+        min: {
+          type: 'long',
+          _meta: {
+            description:
+              'The minimum duration in milliseconds of gap auto-fill scheduler runs per day',
+          },
+        },
+        max: {
+          type: 'long',
+          _meta: {
+            description:
+              'The maximum duration in milliseconds of gap auto-fill scheduler runs per day',
+          },
+        },
+        avg: {
+          type: 'float',
+          _meta: {
+            description:
+              'The average duration in milliseconds of gap auto-fill scheduler runs per day',
+          },
+        },
+        sum: {
+          type: 'float',
+          _meta: {
+            description:
+              'The total duration in milliseconds of gap auto-fill scheduler runs per day',
+          },
+        },
       },
-      gap_auto_fill_scheduler_unique_rule_count_per_day: { type: 'long' },
-      gap_auto_fill_scheduler_processed_gaps_total_per_day: { type: 'long' },
+      gap_auto_fill_scheduler_unique_rule_count_per_day: {
+        type: 'long',
+        _meta: {
+          description:
+            'The number of unique rules processed by the gap auto-fill scheduler per day',
+        },
+      },
+      gap_auto_fill_scheduler_processed_gaps_total_per_day: {
+        type: 'long',
+        _meta: {
+          description: 'The total number of gaps processed by the gap auto-fill scheduler per day',
+        },
+      },
       gap_auto_fill_scheduler_results_by_status_per_day: gapAutoFillSchedulerResultStatusSchema,
     },
   });
