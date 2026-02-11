@@ -522,9 +522,6 @@ function DiscoverDocumentsComponent({
       },
       onUpdateESQLQuery,
       openInNewTab: (params) => dispatch(internalStateActions.openInNewTab(params)),
-      registerCascadeRequestsInspectorAdapter: (requestAdapter) => {
-        stateContainer.dataState.inspectorAdapters.cascadeRequests = requestAdapter;
-      },
     };
   }, [
     availableCascadeGroups,
@@ -536,7 +533,6 @@ function DiscoverDocumentsComponent({
     requestParams.timeRangeAbsolute,
     selectedCascadeGroups,
     setSelectedCascadeGroups,
-    stateContainer.dataState.inspectorAdapters,
     viewModeToggle,
   ]);
 

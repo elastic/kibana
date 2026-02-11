@@ -14,6 +14,7 @@ import { apm } from '@elastic/apm-rum';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import type { ScopedProfilesManager } from '../../../context_awareness';
@@ -31,12 +32,17 @@ export interface CascadedDocumentsStateManager {
 
 export class CascadedDocumentsFetcher {
   private readonly abortControllers: Map<string, AbortController> = new Map();
+  private readonly requestAdapter = new RequestAdapter();
 
   constructor(
     private readonly services: DiscoverServices,
     private readonly scopedProfilesManager: ScopedProfilesManager,
     private readonly stateManager: CascadedDocumentsStateManager
   ) {}
+
+  getRequestAdapter(): RequestAdapter {
+    return this.requestAdapter;
+  }
 
   async fetchCascadedDocuments({
     nodeId,
@@ -87,8 +93,7 @@ export class CascadedDocumentsFetcher {
         abortSignal: abortController.signal,
         timeRange,
         scopedProfilesManager: this.scopedProfilesManager,
-        // TODO: get inspector adapters
-        inspectorAdapters: {},
+        inspectorAdapters: { requests: this.requestAdapter },
         inspectorConfig: {
           title: i18n.translate('discover.dataCascade.inspector.cascadeQueryTitle', {
             defaultMessage: 'Cascade Row Data Query',

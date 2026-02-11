@@ -134,7 +134,6 @@ export interface DiscoverDataStateContainer {
   inspectorAdapters: {
     requests: RequestAdapter;
     lensRequests?: RequestAdapter;
-    cascadeRequests?: RequestAdapter;
   };
   /**
    * Return the initial fetch status
