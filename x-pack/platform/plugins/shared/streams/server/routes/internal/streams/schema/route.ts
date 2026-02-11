@@ -10,7 +10,11 @@ import type {
   NamedFieldDefinitionConfig,
   SampleDocument,
 } from '@kbn/streams-schema';
-import { FIELD_DEFINITION_TYPES, namedFieldDefinitionConfigSchema, Streams } from '@kbn/streams-schema';
+import {
+  FIELD_DEFINITION_TYPES,
+  namedFieldDefinitionConfigSchema,
+  Streams,
+} from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
@@ -35,12 +39,12 @@ const UNMAPPED_SAMPLE_SIZE = 500;
 const FIELD_SIMULATION_TIMEOUT = '1s';
 
 const isFieldDefinitionType = (value: unknown): value is FieldDefinitionType =>
-  typeof value === 'string' &&
-  (FIELD_DEFINITION_TYPES as readonly string[]).includes(value);
+  typeof value === 'string' && (FIELD_DEFINITION_TYPES as readonly string[]).includes(value);
 
 const isSimulatableFieldDefinition = (
   field: NamedFieldDefinitionConfig
-): field is NamedFieldDefinitionConfig & { type: FieldDefinitionType } => isFieldDefinitionType(field.type);
+): field is NamedFieldDefinitionConfig & { type: FieldDefinitionType } =>
+  isFieldDefinitionType(field.type);
 
 const getSimulatableFieldDefinitions = (fields: NamedFieldDefinitionConfig[]) =>
   fields.filter(isSimulatableFieldDefinition);

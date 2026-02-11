@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { Streams } from '@kbn/streams-schema';
 import type { SchemaField } from '../types';
-import { SchemaEditorFlyout } from './index';
+import { SchemaEditorFlyout } from '.';
 
 jest.mock('../../../../hooks/use_streams_app_router', () => ({
   useStreamsAppRouter: () => ({
@@ -44,13 +44,7 @@ jest.mock('../../../../hooks/use_kibana', () => ({
 }));
 
 jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({
-    value,
-    onChange,
-  }: {
-    value: string;
-    onChange: (value: string) => void;
-  }) => (
+  CodeEditor: ({ value, onChange }: { value: string; onChange: (value: string) => void }) => (
     <textarea
       data-test-subj="mockCodeEditor"
       value={value}
@@ -189,4 +183,3 @@ describe('SchemaEditorFlyout (description-only restrictions)', () => {
     expect(stagedField).not.toHaveProperty('additionalParameters');
   });
 });
-

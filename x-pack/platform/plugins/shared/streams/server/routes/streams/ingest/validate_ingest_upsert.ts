@@ -26,4 +26,3 @@ export const getUnmappedFieldsFromIngestUpsert = (ingest: IngestUpsertRequest): 
 
   return getFieldsWithUnmappedType(ingest.classic.field_overrides);
 };
-

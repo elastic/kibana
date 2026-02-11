@@ -772,7 +772,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           // Update the parent stream to include a mapped field.
-          const parentBefore = Streams.WiredStream.GetResponse.parse(await getStream(apiClient, parentStream));
+          const parentBefore = Streams.WiredStream.GetResponse.parse(
+            await getStream(apiClient, parentStream)
+          );
           const { updated_at: _parentProcessingUpdatedAt, ...parentProcessing } =
             parentBefore.stream.ingest.processing;
           await putStream(apiClient, parentStream, {
@@ -794,7 +796,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           // Update the child stream to only override the description (no type persisted).
-          const childBefore = Streams.WiredStream.GetResponse.parse(await getStream(apiClient, childStream));
+          const childBefore = Streams.WiredStream.GetResponse.parse(
+            await getStream(apiClient, childStream)
+          );
           const { updated_at: _childProcessingUpdatedAt, ...childProcessing } =
             childBefore.stream.ingest.processing;
           await putStream(apiClient, childStream, {
@@ -830,7 +834,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           // Later: parent updates the mapping configuration. The child should reflect the updated
           // inherited mapping, while keeping its own description override as a typeless entry.
-          const parentForUpdate = Streams.WiredStream.GetResponse.parse(await getStream(apiClient, parentStream));
+          const parentForUpdate = Streams.WiredStream.GetResponse.parse(
+            await getStream(apiClient, parentStream)
+          );
           const { updated_at: _parentForUpdateProcessingUpdatedAt, ...parentProcessingForUpdate } =
             parentForUpdate.stream.ingest.processing;
           await putStream(apiClient, parentStream, {

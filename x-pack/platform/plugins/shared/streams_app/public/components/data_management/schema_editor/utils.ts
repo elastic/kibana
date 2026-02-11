@@ -105,7 +105,9 @@ export const buildSchemaSavePayload = (
   fields: SchemaField[]
 ): { ingest: IngestUpsertRequest } => {
   const persistedFields = fields.reduce((acc, field) => {
-    const hasNonEmptyDescription = Boolean(field.description && field.description.trim().length > 0);
+    const hasNonEmptyDescription = Boolean(
+      field.description && field.description.trim().length > 0
+    );
 
     // Persist:
     // - mapped fields (real overrides)

@@ -104,7 +104,9 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
     // Check if this field has a real ES mapping (not type: 'unmapped') in a parent stream.
     // If the parent has type: 'unmapped', the child should still be able to map it.
     const inheritedField = fields.find((f) => f.name === field.name && f.status === 'inherited');
-    const hasRealMappingInParent = Boolean(inheritedField?.type && inheritedField.type !== 'unmapped');
+    const hasRealMappingInParent = Boolean(
+      inheritedField?.type && inheritedField.type !== 'unmapped'
+    );
     // For "Unmap" action, we need to know if there's ANY inherited entry (even unmapped)
     const isInheritedFromParent = !!inheritedField;
 

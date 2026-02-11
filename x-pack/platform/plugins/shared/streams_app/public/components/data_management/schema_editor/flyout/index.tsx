@@ -100,7 +100,8 @@ export const SchemaEditorFlyout = ({
     isEditing && (field.status === 'inherited' || nextField.type === 'unmapped');
   const hasDescriptionChanged =
     (nextField.description ?? undefined) !== (field.description ?? undefined);
-  const isInheritedDescriptionOnlyEditing = isDescriptionOnlyEditing && field.status === 'inherited';
+  const isInheritedDescriptionOnlyEditing =
+    isDescriptionOnlyEditing && field.status === 'inherited';
 
   const onValidate = ({
     isValid,

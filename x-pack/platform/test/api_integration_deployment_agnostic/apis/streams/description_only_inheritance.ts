@@ -8,7 +8,13 @@
 import expect from '@kbn/expect';
 import { emptyAssets, Streams } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import { disableStreams, enableStreams, forkStream, getStream, putStream } from './helpers/requests';
+import {
+  disableStreams,
+  enableStreams,
+  forkStream,
+  getStream,
+  putStream,
+} from './helpers/requests';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
@@ -34,7 +40,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       // Create a parent/child hierarchy using the fork API to ensure proper routing linkage.
       await forkStream(apiClient, 'logs', { stream: { name: parentName }, where: { always: {} } });
-      await forkStream(apiClient, parentName, { stream: { name: childName }, where: { always: {} } });
+      await forkStream(apiClient, parentName, {
+        stream: { name: childName },
+        where: { always: {} },
+      });
 
       // Save a description-only override on the child (no `type` should be persisted).
       const childBefore = await getStream(apiClient, childName);
@@ -90,7 +99,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         description: parentDescription,
         ..._parentRest
       } = parentBefore.stream;
-      const { updated_at: _parentProcessingUpdatedAt, ...parentProcessing } = parentIngest.processing;
+      const { updated_at: _parentProcessingUpdatedAt, ...parentProcessing } =
+        parentIngest.processing;
 
       await putStream(apiClient, parentName, {
         ...emptyAssets,
@@ -125,8 +135,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         'description',
         'child custom description'
       );
-      expect(childAfterParentChange.stream.ingest.wired.fields[fieldName]).not.to.have.property('type');
+      expect(childAfterParentChange.stream.ingest.wired.fields[fieldName]).not.to.have.property(
+        'type'
+      );
     });
   });
 }
-

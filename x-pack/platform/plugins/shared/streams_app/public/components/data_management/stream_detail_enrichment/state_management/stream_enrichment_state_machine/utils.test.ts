@@ -127,4 +127,3 @@ function createWiredDefinition({
     effective_failure_store: { disabled: {}, from: 'parent' },
   };
 }
-

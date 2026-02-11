@@ -63,4 +63,3 @@ describe('getUnmappedFieldsFromIngestUpsert', () => {
     expect(getUnmappedFieldsFromIngestUpsert(ingest)).toEqual([]);
   });
 });
-

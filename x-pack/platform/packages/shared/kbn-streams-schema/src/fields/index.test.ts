@@ -42,7 +42,9 @@ describe('fieldDefinitionConfigSchema', () => {
     const descriptionOnlyOverride = {
       description: 'Custom description without freezing inherited mapping',
     };
-    expect(fieldDefinitionConfigSchema.parse(descriptionOnlyOverride)).toEqual(descriptionOnlyOverride);
+    expect(fieldDefinitionConfigSchema.parse(descriptionOnlyOverride)).toEqual(
+      descriptionOnlyOverride
+    );
   });
 
   it('should accept description on regular field types', () => {
