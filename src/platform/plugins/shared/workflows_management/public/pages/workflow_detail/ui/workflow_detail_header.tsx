@@ -105,6 +105,7 @@ export const WorkflowDetailHeader = React.memo(
 
     const workflow = useSelector(selectWorkflow);
     const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
+    const hasValidationErrors = useSelector(selectHasValidationErrors);
     const hasUnsavedChanges = useSelector(selectHasChanges);
     const isExecutionsTab = useSelector(selectIsExecutionsTab);
 
@@ -134,13 +135,17 @@ export const WorkflowDetailHeader = React.memo(
 
     const [showRunConfirmation, setShowRunConfirmation] = useState(false);
 
+    // Combined validity: syntax must parse AND no strict validation errors AND server considers it valid.
+    // workflow?.valid !== false covers the initial page load before Monaco validates.
+    const isValid = isSyntaxValid && !hasValidationErrors && workflow?.valid !== false;
+
     const runWorkflowTooltipContent = useMemo(() => {
       return getTestRunTooltipContent({
         isExecutionsTab,
-        isValid: isSyntaxValid,
+        isValid,
         canRunWorkflow: canExecuteWorkflow,
       });
-    }, [isSyntaxValid, canExecuteWorkflow, isExecutionsTab]);
+    }, [isValid, canExecuteWorkflow, isExecutionsTab]);
 
     const saveWorkflowTooltipContent = useMemo(() => {
       const isCreate = !workflowId;
@@ -261,9 +266,9 @@ export const WorkflowDetailHeader = React.memo(
                       ? i18n.translate('workflows.workflowDetailHeader.unsaved', {
                           defaultMessage: 'Save changes to enable/disable workflow',
                         })
-                      : !isSyntaxValid
+                      : !isValid
                       ? i18n.translate('workflows.workflowDetailHeader.invalid', {
-                          defaultMessage: 'Fix errors to enable workflow',
+                          defaultMessage: 'Fix validation errors to enable workflow',
                         })
                       : undefined
                   }
@@ -273,7 +278,7 @@ export const WorkflowDetailHeader = React.memo(
                       !workflowId ||
                       isLoading ||
                       !canUpdateWorkflow ||
-                      !isSyntaxValid ||
+                      !isValid ||
                       hasUnsavedChanges
                     }
                     checked={isEnabled}
@@ -291,7 +296,7 @@ export const WorkflowDetailHeader = React.memo(
                     iconType="play"
                     size="s"
                     onClick={handleRunClickWithUnsavedCheck}
-                    disabled={isExecutionsTab || !canExecuteWorkflow || isLoading || !isSyntaxValid}
+                    disabled={isExecutionsTab || !canExecuteWorkflow || isLoading || !isValid}
                     aria-label={Translations.runWorkflow}
                     data-test-subj="runWorkflowHeaderButton"
                   />

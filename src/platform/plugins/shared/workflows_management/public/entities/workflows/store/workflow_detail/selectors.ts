@@ -57,7 +57,7 @@ export const selectIsYamlSyntaxValid = createSelector(selectYamlComputed, (compu
 // Checks whether validation errors (from strict schema + custom validations) are present
 export const selectHasValidationErrors = createSelector(
   selectDetail,
-  (detail): boolean => detail.validationErrorCount > 0
+  (detail): boolean => detail.hasValidationErrors
 );
 
 export const selectFocusedStepId = createSelector(selectDetail, (detail) => detail.focusedStepId);

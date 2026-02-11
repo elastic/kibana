@@ -41,8 +41,8 @@ export interface WorkflowDetailState {
   schema: WorkflowZodSchemaType;
   /** Loading states for async operations */
   loading: LoadingStates;
-  /** Number of validation errors reported by Monaco markers (strict schema + custom validations) */
-  validationErrorCount: number;
+  /** Whether the editor has validation errors (strict schema + custom validations) */
+  hasValidationErrors: boolean;
   /** Connector flyout state */
   connectorFlyout: {
     isOpen: boolean;
