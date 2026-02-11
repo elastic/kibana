@@ -27,6 +27,18 @@ import {
 import { FindSavedQueryResponse, FindSavedQueryDetailResponse } from './find_saved_query.gen';
 import { CreateSavedQueryRequestBody, CreateSavedQueryResponse } from './create_saved_query.gen';
 import { UpdateSavedQueryRequestBody, UpdateSavedQueryResponse } from './update_saved_query.gen';
+import { CopySavedQueryResponse } from './copy_saved_query.gen';
+
+export type OsqueryCopySavedQueryRequestParams = z.infer<typeof OsqueryCopySavedQueryRequestParams>;
+export const OsqueryCopySavedQueryRequestParams = z.object({
+  id: SavedQueryId,
+});
+export type OsqueryCopySavedQueryRequestParamsInput = z.input<
+  typeof OsqueryCopySavedQueryRequestParams
+>;
+
+export type OsqueryCopySavedQueryResponse = z.infer<typeof OsqueryCopySavedQueryResponse>;
+export const OsqueryCopySavedQueryResponse = CopySavedQueryResponse;
 
 export type OsqueryCreateSavedQueryRequestBody = z.infer<typeof OsqueryCreateSavedQueryRequestBody>;
 export const OsqueryCreateSavedQueryRequestBody = CreateSavedQueryRequestBody;

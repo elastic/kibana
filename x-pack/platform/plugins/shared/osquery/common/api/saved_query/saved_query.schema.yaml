@@ -9,7 +9,7 @@ paths:
       description: Get a list of all saved queries.
       operationId: OsqueryFindSavedQueries
       x-codegen-enabled: true
-      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       parameters:
         - name: page
           in: query
@@ -43,7 +43,7 @@ paths:
       description: Create and run a saved query.
       operationId: OsqueryCreateSavedQuery
       x-codegen-enabled: true
-      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       requestBody:
         required: true
         content:
@@ -63,7 +63,7 @@ paths:
       description: Get the details of a saved query using the query ID.
       operationId: OsqueryGetSavedQueryDetails
       x-codegen-enabled: true
-      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       parameters:
         - name: id
           in: path
@@ -82,7 +82,7 @@ paths:
       description: Delete a saved query using the query ID.
       operationId: OsqueryDeleteSavedQuery
       x-codegen-enabled: true
-      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       parameters:
         - name: id
           in: path
@@ -104,7 +104,7 @@ paths:
         > You cannot update a prebuilt saved query.
       operationId: OsqueryUpdateSavedQuery
       x-codegen-enabled: true
-      x-labels: [serverless, ess]
+      x-labels: [ serverless, ess ]
       parameters:
         - name: id
           in: path
@@ -124,3 +124,27 @@ paths:
             application/json:
               schema:
                 $ref: './update_saved_query.schema.yaml#/components/schemas/UpdateSavedQueryResponse'
+  /api/osquery/saved_queries/{id}/copy:
+    post:
+      summary: Copy a saved query
+      description: >-
+        Create a copy of a saved query with a unique name by appending a `_copy` suffix.
+        If the name already exists, a numeric suffix is added (e.g., `_copy_2`).
+      operationId: OsqueryCopySavedQuery
+      x-codegen-enabled: true
+      #      TODO: Remove the empty x-labels array and uncomment the following line when feature flag is enabled
+      x-labels: [ ]
+      #      x-labels: [serverless, ess]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/SavedQueryId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './copy_saved_query.schema.yaml#/components/schemas/CopySavedQueryResponse'
