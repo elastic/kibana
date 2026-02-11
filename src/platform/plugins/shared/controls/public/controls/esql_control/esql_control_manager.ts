@@ -322,6 +322,7 @@ export function initializeESQLControlManager(
       searchStringValid$: new BehaviorSubject(true),
       invalidSelections$: temporaryStateManager.api.invalidSelections$,
       setInvalidSelections: temporaryStateManager.api.setInvalidSelections,
+      variableName$,
     },
   };
 }

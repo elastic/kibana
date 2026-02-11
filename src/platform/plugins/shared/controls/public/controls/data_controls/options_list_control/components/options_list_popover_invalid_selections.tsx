@@ -40,12 +40,10 @@ export const OptionsListPopoverInvalidSelections = () => {
   const { componentApi, customStrings } = useOptionsListContext();
   const styles = useMemoCss(optionsListPopoverInvalidSelectionsStyles);
 
-  const [invalidSelections, fieldFormatter] = useBatchedPublishingSubjects(
+  const [invalidSelections, fieldFormatter, label] = useBatchedPublishingSubjects(
     componentApi.invalidSelections$,
-    componentApi.fieldFormatter
-  );
-  const defaultPanelTitle = useStateFromPublishingSubject(
-    componentApi.defaultTitle$ ?? new BehaviorSubject(undefined)
+    componentApi.fieldFormatter,
+    componentApi.label$
   );
 
   const [selectableOptions, setSelectableOptions] = useState<EuiSelectableOption[]>([]); // will be set in following useEffect
@@ -104,7 +102,7 @@ export const OptionsListPopoverInvalidSelections = () => {
         aria-label={
           customStrings?.invalidSelectionsLabel ||
           OptionsListStrings.popover.getInvalidSelectionsSectionAriaLabel(
-            defaultPanelTitle ?? '',
+            label,
             invalidSelections.size
           )
         }

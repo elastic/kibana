@@ -32,16 +32,21 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
     type: ESQL_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
-      const labelManager = initializeLabelManager(initialState);
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
       const setDataLoading = (loading: boolean | undefined) => dataLoading$.next(loading);
 
       const selections = initializeESQLControlManager(uuid, parentApi, state, setDataLoading);
+      const labelManager = initializeLabelManager(
+        { title: initialState.title, variableName: initialState.variableName },
+        selections.internalApi,
+        'variableName'
+      );
 
       function serializeState() {
         return {
           ...selections.getLatestState(),
+          ...labelManager.getLatestState(),
         };
       }
 
@@ -135,6 +140,7 @@ export const getESQLControlFactory = (): EmbeddableFactory<ESQLControlState, ESQ
       const componentApi: OptionsListComponentApi = {
         ...api,
         ...selections.internalApi,
+        ...labelManager.api,
         isExpandable: false,
         isCustomizable: false,
         isDuplicable: false,

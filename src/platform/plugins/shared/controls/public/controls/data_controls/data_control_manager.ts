@@ -67,8 +67,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
   willHaveInitialFilter?: boolean;
   getInitialFilter?: (dataView: DataView) => Filter | undefined;
 }): Promise<DataControlStateManager> => {
-  const labelManager = initializeLabelManager(state);
-
   const dataControlStateManager = initializeStateManager<Omit<DataControlState, 'title'>>(
     omit(state, 'title'), // this is handled via the label manager
     defaultDataControlState,
@@ -94,7 +92,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
     rejectInitialDataViewReady = reject;
   });
 
-  const defaultTitle$ = new BehaviorSubject<string | undefined>(state.fieldName);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
   const field$ = new BehaviorSubject<DataViewField | undefined>(undefined);
   const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>((toFormat: any) =>
@@ -131,6 +128,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       dataViews$.next(dataView ? [dataView] : undefined);
     });
 
+  const defaultFieldLabel$ = new BehaviorSubject<string>(state.fieldName);
   const fieldNameSubscription = combineLatest([dataViews$, dataControlStateManager.api.fieldName$])
     .pipe(
       tap(() => {
@@ -160,12 +158,21 @@ export const initializeDataControlManager = async <EditorState extends object = 
       }
 
       field$.next(field);
-      defaultTitle$.next(field ? field.displayName || field.name : nextFieldName);
+      if (field) defaultFieldLabel$.next(field.displayName);
       const spec = field?.toSpec();
       if (spec) {
         fieldFormatter.next(dataView.getFormatterForField(spec).getConverterFor('text'));
       }
     });
+
+  const labelManager = initializeLabelManager(
+    { ...state, defaultFieldLabel: defaultFieldLabel$.getValue() },
+    {
+      ...dataControlStateManager.api,
+      defaultFieldLabel$,
+    },
+    'defaultFieldLabel'
+  );
 
   const onEdit = async () => {
     // open the editor to get the new state
@@ -177,7 +184,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       },
       controlType,
       controlId,
-      initialDefaultPanelTitle: defaultTitle$.getValue(),
+      initialDefaultPanelTitle: labelManager.api.defaultLabel$.getValue(),
       parentApi,
       onUpdate: (newState) => {
         labelManager.reinitializeState(newState);

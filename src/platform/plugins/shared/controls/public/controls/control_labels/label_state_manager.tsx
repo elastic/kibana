@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, map } from 'rxjs';
+import { BehaviorSubject, map, skip, combineLatest } from 'rxjs';
 
 import type { DataControlState } from '@kbn/controls-schemas';
 import {
   titleComparators,
+  type PublishingSubject,
   type SerializedTitles,
   type StateComparators,
 } from '@kbn/presentation-publishing';
+import type { SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
 
 import type { ControlLabelStateManager } from './types';
 
@@ -29,12 +31,33 @@ export const defaultControlLabelComparators: StateComparators<Pick<DataControlSt
   title: titleComparators.title,
 };
 
-export const initializeLabelManager = (state: SerializedTitles): ControlLabelStateManager => {
+type PickStringsOnly<T> = {
+  [K in keyof T as T[K] extends string ? K : never]: T[K];
+};
+
+export const initializeLabelManager = <
+  StateType extends Pick<SerializedTitles, 'title'> = Pick<SerializedTitles, 'title'>
+>(
+  state: StateType,
+  api: SubjectsOf<Omit<StateType, 'title'>>,
+  defaultLabelKey: keyof Required<Omit<PickStringsOnly<StateType>, 'title'>> // only strings can be used as the default label
+): ControlLabelStateManager => {
   const label$ = new BehaviorSubject<string | undefined>(state.title);
+  const defaultLabel$ = api[
+    `${defaultLabelKey as string}$` as keyof SubjectsOf<Omit<StateType, 'title'>>
+  ] as PublishingSubject<string>; // guaranteed to be a string by TypeScript due to type of `defaultLabelKey`
+
+  const visibleLabel$ = new BehaviorSubject<string>(state.title || defaultLabel$.getValue());
+  const visibleLabelSubscription = combineLatest([label$, defaultLabel$])
+    .pipe(skip(1))
+    .subscribe(([title, defaultLabel]) => {
+      visibleLabel$.next(title || defaultLabel);
+    });
 
   return {
     api: {
-      label$,
+      label$: visibleLabel$,
+      defaultLabel$,
       setLabel: (newLabel: string | undefined) => {
         label$.next(newLabel);
       },

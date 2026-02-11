@@ -69,20 +69,20 @@ export const ControlPanel = ({
 
     /** Setup subscriptions for necessary state once API is available */
     const subscriptions = new Subscription();
-    if (apiPublishesTitle(api)) {
+    // if (apiPublishesTitle(api)) {
+    subscriptions.add(
+      api.label$.subscribe((result) => {
+        setPanelTitle(result);
+      })
+    );
+    if (api.defaultTitle$) {
       subscriptions.add(
-        api.title$.subscribe((result) => {
-          setPanelTitle(result);
+        api.defaultTitle$.subscribe((result) => {
+          setDefaultPanelTitle(result);
         })
       );
-      if (api.defaultTitle$) {
-        subscriptions.add(
-          api.defaultTitle$.subscribe((result) => {
-            setDefaultPanelTitle(result);
-          })
-        );
-      }
     }
+    // }
     return () => {
       subscriptions.unsubscribe();
     };

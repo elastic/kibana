@@ -16,7 +16,7 @@ import type {
 } from '@kbn/presentation-publishing/state_manager/types';
 
 interface ControlLabelState {
-  label?: string;
+  label: string;
 }
 
 type ControlTitleState = Pick<SerializedTitles, 'title'>;
