@@ -82,18 +82,6 @@ export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-to-existing-cas
 
 export const ATTACH_TO_NEW_CASE_BUTTON = '[data-test-subj="add-to-new-case-action"]';
 
-export const HOST_RISK_HEADER_COLUMN =
-  '[data-test-subj="dataGridHeaderCell-host.risk.calculated_level"]';
-
-export const HOST_RISK_COLUMN = '[data-gridcell-column-id="host.risk.calculated_level"]';
-
-export const USER_RISK_HEADER_COLUMN =
-  '[data-test-subj="dataGridHeaderCell-user.risk.calculated_level"]';
-
-export const USER_RISK_COLUMN = '[data-gridcell-column-id="user.risk.calculated_level"]';
-
-export const ACTION_COLUMN = '[data-gridcell-column-id="expandColumn"]';
-
 export const DATAGRID_CHANGES_IN_PROGRESS = '[data-test-subj="body-data-grid"] .euiProgress';
 
 export const EVENT_CONTAINER_TABLE_LOADING = '[data-test-subj="internalAlertsPageLoading"]';

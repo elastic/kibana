@@ -2723,10 +2723,10 @@
     progress "^1.1.8"
     through2 "^2.0.0"
 
-"@elastic/monaco-esql@3.1.16":
-  version "3.1.16"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.16.tgz#b58d5830305582951e0a17fee4a4b308863b72b8"
-  integrity sha512-EvYVTy3gQ/hiByUkIiJy07ny0kv9k6jQdBoMH8mixkfkDpGZQ5RP1EGUPMqJRTPV7/L0tL0lNhbc45cJ34Sm0Q==
+"@elastic/monaco-esql@3.1.18":
+  version "3.1.18"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-3.1.18.tgz#e6931ca44fb5309275cc3db115d472fd88fa0dab"
+  integrity sha512-3yexduJ2l6RLw2E+uQmO1saO+iWc7zVFyyIcgsZa+Qz2mOCnfMBziUYRdEOuZ+cJdFe1G5HpHisAaYaBSSAIrQ==
 
 "@elastic/node-crypto@1.2.3", "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -4210,9 +4210,9 @@
   integrity sha512-yzMTt9lEb8Gv7zRioUilSglI0c0smZ9k5D65677DLWLtWJaXIS3CqcGyUFByYKlnUj6TkjLVs54fBl6+TiGQDQ==
 
 "@isaacs/brace-expansion@^5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@isaacs/brace-expansion/-/brace-expansion-5.0.0.tgz#4b3dabab7d8e75a429414a96bd67bf4c1d13e0f3"
-  integrity sha512-ZT55BDLV0yv0RBm2czMiZ+SqCGO7AvmOM3G/w2xhVPH+te0aKgFjmBvGlL1dH+ql2tgGO3MVrbb3jCKyvpgnxA==
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/@isaacs/brace-expansion/-/brace-expansion-5.0.1.tgz#0ef5a92d91f2fff2a37646ce54da9e5f599f6eff"
+  integrity sha512-WMz71T1JS624nWj2n2fnYAuPovhv7EUhk69R6i9dsVyzxt5eM3bjwvgk9L+APE1TRscGysAVMANkB0jh0LQZrQ==
   dependencies:
     "@isaacs/balanced-match" "^4.0.1"
 
@@ -16486,10 +16486,10 @@ aws4@1.13.2, aws4@^1.8.0:
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.13.2.tgz#0aa167216965ac9474ccfa83892cfb6b3e1e52ef"
   integrity sha512-lHe62zvbTB5eEABUVi/AwVh0ZKY9rMMDhmm+eeyuuUQbQ3+J+fONVQOZyj+DdrvD4BY33uYniyRJ4UJIaSKAfw==
 
-axe-core@4.11.0, axe-core@~4.11.0:
-  version "4.11.0"
-  resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.11.0.tgz#16f74d6482e343ff263d4f4503829e9ee91a86b6"
-  integrity sha512-ilYanEU8vxxBexpJd8cWM4ElSQq4QctCLKih0TSfjIfCQTeyH/6zVrmIJfLPrKTKJRbiG+cfnZbQIjAlJmF1jQ==
+axe-core@4.11.1:
+  version "4.11.1"
+  resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.11.1.tgz#052ff9b2cbf543f5595028b583e4763b40c78ea7"
+  integrity sha512-BASOg+YwO2C+346x3LZOeoovTIoTrRqEsqMa6fmfAV0P+U9mFr9NsyOEpiYvFjbc64NMrSswhV50WdXzdb/Z5A==
 
 axe-core@^4.10.3:
   version "4.10.3"
@@ -16500,6 +16500,11 @@ axe-core@^4.2.0, axe-core@^4.6.2:
   version "4.7.2"
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.7.2.tgz#040a7342b20765cb18bb50b628394c21bccc17a0"
   integrity sha512-zIURGIS1E1Q4pcrMjp+nnEh+16G56eG/MUllJH8yEvw7asDo7Ac9uhC9KIH5jzpITueEZolfYglnCGIuSBz39g==
+
+axe-core@~4.11.0:
+  version "4.11.0"
+  resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.11.0.tgz#16f74d6482e343ff263d4f4503829e9ee91a86b6"
+  integrity sha512-ilYanEU8vxxBexpJd8cWM4ElSQq4QctCLKih0TSfjIfCQTeyH/6zVrmIJfLPrKTKJRbiG+cfnZbQIjAlJmF1jQ==
 
 axios@1.12.1, axios@^1.11.0, axios@^1.12.0, axios@^1.8.2:
   version "1.12.1"
@@ -26931,6 +26936,11 @@ monaco-marker-data-provider@^1.0.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/monaco-marker-data-provider/-/monaco-marker-data-provider-1.1.1.tgz#0ca69f367152f5aa12cec2bda95f32b7403e876f"
   integrity sha512-PGB7TJSZE5tmHzkxv/OEwK2RGNC2A7dcq4JRJnnj31CUAsfmw0Gl+1QTrH0W0deKhcQmQM0YVPaqgQ+0wCt8Mg==
+
+monaco-promql@1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/monaco-promql/-/monaco-promql-1.8.0.tgz#3fb16d11e58474e1e8bf08514eb762da51aa88d4"
+  integrity sha512-XdgRojBzEe/rKtrJaHbSfoMFOMD5TXymDHIitTngmBT6XEjtAirnA7Rb2YJAO1SZrJfgvAo4LFCzJ71fH7+WOw==
 
 monaco-types@^0.1.0:
   version "0.1.0"
