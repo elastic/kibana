@@ -122,7 +122,7 @@ apiTest.describe('dashboards - create', { tag: tags.ESS_ONLY }, () => {
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.message).toBe(
-      '[request body.data.title]: expected value of type [string] but got [undefined]'
+      '[request body.title]: expected value of type [string] but got [undefined]'
     );
   });
 
@@ -141,7 +141,7 @@ apiTest.describe('dashboards - create', { tag: tags.ESS_ONLY }, () => {
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.message).toBe(
-      '[request body.data.panels]: expected value of type [array] but got [Object]'
+      '[request body.panels]: expected value of type [array] but got [Object]'
     );
   });
 });
