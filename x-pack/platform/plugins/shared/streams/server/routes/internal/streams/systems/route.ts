@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { System } from '@kbn/streams-schema';
 import { streamObjectNameSchema, systemSchema } from '@kbn/streams-schema';
 import type {

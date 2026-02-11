@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { GenerateDescriptionResult, TaskResult } from '@kbn/streams-schema';
 import {
   DESCRIPTION_GENERATION_TASK_TYPE,

@@ -6,7 +6,7 @@
  */
 
 import { Readable } from 'stream';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
 import { contentPackIncludedObjectsSchema } from '@kbn/content-packs-schema';
 import { Streams, emptyAssets, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';

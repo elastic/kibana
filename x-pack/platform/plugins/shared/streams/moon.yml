@@ -36,7 +36,7 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/licensing-plugin'
   - '@kbn/rule-data-utils'
-  - '@kbn/zod'
+  - '@kbn/zod/v4'
   - '@kbn/streams-schema'
   - '@kbn/server-route-repository'
   - '@kbn/es-errors'
