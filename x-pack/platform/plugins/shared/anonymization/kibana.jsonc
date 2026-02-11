@@ -9,7 +9,7 @@
     "server": true,
     "browser": false,
     "configPath": ["xpack", "anonymization"],
-    "requiredPlugins": ["encryptedSavedObjects"],
+    "requiredPlugins": ["encryptedSavedObjects", "features"],
     "requiredBundles": [],
     "optionalPlugins": [],
     "extraPublicDirs": []

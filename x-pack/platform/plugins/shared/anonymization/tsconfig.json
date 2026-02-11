@@ -16,6 +16,8 @@
     "@kbn/config-schema",
     "@kbn/anonymization-common",
     "@kbn/zod",
-    "@kbn/encrypted-saved-objects-plugin"
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/features-plugin",
+    "@kbn/i18n"
   ]
 }

@@ -19,3 +19,18 @@ export const ANONYMIZATION_PROFILES_API_BASE = '/internal/anonymization/profiles
  * Uses `.kibana-` prefix so that `kibana_system` role has access.
  */
 export const ANONYMIZATION_PROFILES_INDEX = '.kibana-anonymization-profiles';
+
+/** Feature ID for Kibana feature privileges. */
+export const ANONYMIZATION_FEATURE_ID = 'anonymization';
+
+/** API privilege tags used in feature registration and route authz. */
+export const apiPrivileges = {
+  readAnonymization: 'read_anonymization',
+  manageAnonymization: 'manage_anonymization',
+} as const;
+
+/** UI capability keys granted by feature privileges. */
+export const uiPrivileges = {
+  show: 'show',
+  manage: 'manage',
+} as const;

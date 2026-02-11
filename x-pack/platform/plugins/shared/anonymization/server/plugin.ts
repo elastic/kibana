@@ -17,6 +17,7 @@ import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 import type {
   AnonymizationPluginSetup,
@@ -27,9 +28,11 @@ import { registerRoutes } from './routes';
 import { ensureProfilesIndex } from './system_index';
 import { SaltService, ANONYMIZATION_SALT_SAVED_OBJECT_TYPE } from './salt';
 import { ProfilesRepository } from './repository';
+import { registerFeatures } from './features';
 
 interface AnonymizationSetupDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  features: FeaturesPluginSetup;
 }
 
 interface AnonymizationStartDeps {
@@ -54,6 +57,9 @@ export class AnonymizationPlugin
 
   public setup(core: CoreSetup<AnonymizationStartDeps>, deps: AnonymizationSetupDeps) {
     this.logger.debug('anonymization: Setup');
+
+    // Register Kibana feature privileges
+    registerFeatures({ features: deps.features });
 
     const router = core.http.createRouter();
     registerRoutes(router, this.logger);
