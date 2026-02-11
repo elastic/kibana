@@ -56,7 +56,6 @@ export const useSubscribeToChatEvents = ({
     // Runs synchronously before any content-updating logic to avoid race with React batched updates.
     if (isRegeneratingRef?.current && !hasClearedForRegenerateRef.current) {
       hasClearedForRegenerateRef.current = true;
-      conversationActions.clearLastRoundResponse();
     }
 
     // chunk received, we append it to the chunk buffer
