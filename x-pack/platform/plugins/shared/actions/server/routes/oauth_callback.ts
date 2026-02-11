@@ -17,7 +17,7 @@ import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { OAuthStateClient } from '../lib/oauth_state_client';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
-import { ConnectorTokenClient } from '../lib/connector_token_client';
+import { ConnectorTokenClientFacade } from '../lib/connector_token_client';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 
 const querySchema = schema.object({
@@ -382,7 +382,7 @@ export const oauthCallbackRoute = (
           );
 
           // Store tokens - first delete any existing tokens for this connector then create a new token record
-          const connectorTokenClient = new ConnectorTokenClient({
+          const connectorTokenClient = new ConnectorTokenClientFacade({
             encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
               includedHiddenTypes: ['connector_token', 'user_connector_token'],
             }),

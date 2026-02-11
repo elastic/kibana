@@ -325,47 +325,6 @@ describe('UserConnectorTokenClient', () => {
     });
   });
 
-  describe('deleteConnectorTokens()', () => {
-    test('deletes personal tokens for profileUid and connectorId', async () => {
-      const expectedResult = Symbol();
-      unsecuredSavedObjectsClient.delete.mockResolvedValue(expectedResult);
-
-      const findResult = {
-        total: 1,
-        per_page: 10,
-        page: 1,
-        saved_objects: [
-          {
-            id: 'token1',
-            type: 'user_connector_token',
-            attributes: {
-              profileUid: 'user-profile-123',
-              connectorId: '123',
-              credentialType: 'oauth',
-              credentials: {},
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-            score: 1,
-            references: [],
-          },
-        ],
-      };
-
-      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(findResult);
-      await userClient.deleteConnectorTokens({
-        profileUid: 'user-profile-123',
-        connectorId: '123',
-        credentialType: 'oauth',
-      });
-
-      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
-        'user_connector_token',
-        'token1'
-      );
-    });
-  });
-
   describe('createWithRefreshToken()', () => {
     test('creates personal token with refresh token', async () => {
       const expiresAt = new Date(Date.now() + 3600 * 1000).toISOString();
@@ -539,9 +498,8 @@ describe('UserConnectorTokenClient', () => {
   });
 
   describe('deleteConnectorTokens()', () => {
-    test('deletes all personal tokens for profileUid and connectorId', async () => {
-      const expectedResult = Symbol();
-      unsecuredSavedObjectsClient.delete.mockResolvedValue(expectedResult);
+    test('deletes personal tokens for profileUid and connectorId', async () => {
+      unsecuredSavedObjectsClient.delete.mockResolvedValue({});
 
       const findResult = {
         total: 1,

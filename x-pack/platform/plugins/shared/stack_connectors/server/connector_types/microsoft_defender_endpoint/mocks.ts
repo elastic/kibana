@@ -11,7 +11,6 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
 import type { ConnectorToken } from '@kbn/actions-plugin/server/types';
-import type { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
 import type {
   MicrosoftDefenderEndpointConfig,
   MicrosoftDefenderEndpointMachine,
@@ -19,6 +18,7 @@ import type {
   MicrosoftDefenderEndpointSecrets,
 } from '@kbn/connector-schemas/microsoft_defender_endpoint';
 import { CONNECTOR_ID } from '@kbn/connector-schemas/microsoft_defender_endpoint';
+import type { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/shared_connector_token_client';
 import { MicrosoftDefenderEndpointConnector } from './microsoft_defender_endpoint';
 import type { ConnectorInstanceMock } from '../lib/mocks';
 import { createAxiosResponseMock, createConnectorInstanceMock } from '../lib/mocks';
@@ -88,7 +88,6 @@ const applyConnectorTokenClientInstanceMock = (
   });
   jest.spyOn(connectorTokenClient, 'deleteConnectorTokens').mockImplementation(async () => {
     cachedTokenMock = null;
-    return [];
   });
 };
 
@@ -177,7 +176,9 @@ const createMicrosoftDefenderConnectorMock = (): CreateMicrosoftDefenderConnecto
     }
   );
 
-  applyConnectorTokenClientInstanceMock(options.services.connectorTokenClient);
+  applyConnectorTokenClientInstanceMock(
+    options.services.connectorTokenClient.getSharedCredentialsClient()
+  );
 
   return {
     options,

@@ -5,20 +5,47 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ConnectorTokenClient } from './connector_token_client';
+import type { ConnectorTokenClientContract } from '../types';
+import type { SharedConnectorTokenClient } from './shared_connector_token_client';
+import type { UserConnectorTokenClient } from './user_connector_token_client';
 
-const createConnectorTokenClientMock = () => {
-  const mocked: jest.Mocked<PublicMethodsOf<ConnectorTokenClient>> = {
-    create: jest.fn(),
-    get: jest.fn(),
+const sharedCredentialsClientMock = {
+  create: jest.fn() as jest.MockedFunction<SharedConnectorTokenClient['create']>,
+  get: jest.fn() as jest.MockedFunction<SharedConnectorTokenClient['get']>,
+  update: jest.fn(),
+  deleteConnectorTokens: jest.fn(),
+  updateOrReplace: jest.fn(),
+  createWithRefreshToken: jest.fn(),
+  updateWithRefreshToken: jest.fn(),
+} as unknown as jest.Mocked<SharedConnectorTokenClient>;
+
+const userCredentialsClientMock = {
+  create: jest.fn() as jest.MockedFunction<UserConnectorTokenClient['create']>,
+  get: jest.fn() as jest.MockedFunction<UserConnectorTokenClient['get']>,
+  getOAuthPersonalToken: jest.fn() as jest.MockedFunction<
+    UserConnectorTokenClient['getOAuthPersonalToken']
+  >,
+  update: jest.fn(),
+  deleteConnectorTokens: jest.fn(),
+  updateOrReplace: jest.fn(),
+  createWithRefreshToken: jest.fn(),
+  updateWithRefreshToken: jest.fn(),
+} as unknown as jest.Mocked<UserConnectorTokenClient>;
+
+const createConnectorTokenClientMock = (): jest.Mocked<ConnectorTokenClientContract> => {
+  const mocked = {
+    create: jest.fn() as jest.MockedFunction<ConnectorTokenClientContract['create']>,
+    get: jest.fn() as jest.MockedFunction<ConnectorTokenClientContract['get']>,
     getOAuthPersonalToken: jest.fn(),
     update: jest.fn(),
     deleteConnectorTokens: jest.fn(),
     updateOrReplace: jest.fn(),
     createWithRefreshToken: jest.fn(),
     updateWithRefreshToken: jest.fn(),
-  };
+    getSharedCredentialsClient: jest.fn(() => sharedCredentialsClientMock),
+    getUserCredentialsClient: jest.fn(() => userCredentialsClientMock),
+  } satisfies jest.Mocked<ConnectorTokenClientContract>;
+
   return mocked;
 };
 

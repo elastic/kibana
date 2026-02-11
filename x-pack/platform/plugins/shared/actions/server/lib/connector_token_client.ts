@@ -7,8 +7,8 @@
 
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { Logger, SavedObjectsClientContract, SavedObjectAttributes } from '@kbn/core/server';
+import { ConnectorTokenClient as SharedConnectorTokenClient } from './shared_connector_token_client';
 import type { ConnectorToken, UserConnectorToken, UserConnectorOAuthToken } from '../types';
-import { SharedConnectorTokenClient } from './shared_connector_token_client';
 import { UserConnectorTokenClient } from './user_connector_token_client';
 
 export const MAX_TOKENS_RETURNED = 1;
@@ -48,7 +48,7 @@ interface UpdateOrReplaceOptions {
   deleteExisting: boolean;
 }
 
-export class ConnectorTokenClient {
+export class ConnectorTokenClientFacade {
   private readonly logger: Logger;
   private readonly sharedClient: SharedConnectorTokenClient;
   private readonly userClient: UserConnectorTokenClient;
@@ -87,6 +87,21 @@ export class ConnectorTokenClient {
   /**
    * Create new token for connector (delegates to shared or user client)
    */
+  public async create(options: {
+    connectorId: string;
+    token: string;
+    expiresAtMillis?: string;
+    tokenType?: string;
+  }): Promise<ConnectorToken>;
+  public async create(options: {
+    profileUid: string;
+    connectorId: string;
+    token?: string;
+    credentials?: SavedObjectAttributes;
+    expiresAtMillis?: string;
+    tokenType?: string;
+    credentialType?: string;
+  }): Promise<UserConnectorToken>;
   public async create(options: CreateOptions): Promise<ConnectorToken | UserConnectorToken> {
     const scope = options.profileUid ? 'personal' : 'shared';
     this.log({ method: 'create', scope, fields: { connectorId: options.connectorId } });
@@ -119,6 +134,26 @@ export class ConnectorTokenClient {
   /**
    * Get connector token (delegates to shared or user client)
    */
+  public async get(options: {
+    connectorId: string;
+    tokenType?: string;
+    credentialType?: string;
+  }): Promise<{ hasErrors: boolean; connectorToken: ConnectorToken | null }>;
+  public async get(options: {
+    profileUid: string;
+    connectorId: string;
+    tokenType?: string;
+    credentialType?: string;
+  }): Promise<{ hasErrors: boolean; connectorToken: UserConnectorToken | null }>;
+  public async get(options: {
+    profileUid?: string;
+    connectorId: string;
+    tokenType?: string;
+    credentialType?: string;
+  }): Promise<{
+    hasErrors: boolean;
+    connectorToken: ConnectorToken | UserConnectorToken | null;
+  }>;
   public async get(options: {
     profileUid?: string;
     connectorId: string;
@@ -162,7 +197,7 @@ export class ConnectorTokenClient {
     connectorId: string;
     tokenType?: string;
     credentialType?: string;
-  }) {
+  }): Promise<void | unknown[]> {
     const scope = options.profileUid ? 'personal' : 'shared';
     this.log({
       method: 'deleteConnectorTokens',
@@ -240,4 +275,15 @@ export class ConnectorTokenClient {
     }
     return this.sharedClient.updateWithRefreshToken({ ...options, id: actualId });
   }
+
+  public getSharedCredentialsClient(): SharedConnectorTokenClient {
+    return this.sharedClient;
+  }
+
+  public getUserCredentialsClient(): UserConnectorTokenClient {
+    return this.userClient;
+  }
 }
+
+// Compatibility alias for existing code expecting ConnectorTokenClient name
+export { ConnectorTokenClientFacade as ConnectorTokenClient };

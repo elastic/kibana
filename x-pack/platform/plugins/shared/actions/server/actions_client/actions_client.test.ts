@@ -38,7 +38,7 @@ import { actionExecutorMock } from '../lib/action_executor.mock';
 import { v4 as uuidv4 } from 'uuid';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
 import { actionsAuthorizationMock } from '../authorization/actions_authorization.mock';
-import { ConnectorTokenClient } from '../lib/connector_token_client';
+import { ConnectorTokenClientFacade } from '../lib/connector_token_client';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
 import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
@@ -3019,7 +3019,7 @@ describe('isPreconfigured()', () => {
           isSystemAction: true,
         }),
       ],
-      connectorTokenClient: new ConnectorTokenClient({
+      connectorTokenClient: new ConnectorTokenClientFacade({
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
@@ -3064,7 +3064,7 @@ describe('isPreconfigured()', () => {
           isSystemAction: true,
         }),
       ],
-      connectorTokenClient: new ConnectorTokenClient({
+      connectorTokenClient: new ConnectorTokenClientFacade({
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
@@ -3111,7 +3111,7 @@ describe('isSystemAction()', () => {
           isSystemAction: true,
         }),
       ],
-      connectorTokenClient: new ConnectorTokenClient({
+      connectorTokenClient: new ConnectorTokenClientFacade({
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
@@ -3156,7 +3156,7 @@ describe('isSystemAction()', () => {
           isSystemAction: true,
         }),
       ],
-      connectorTokenClient: new ConnectorTokenClient({
+      connectorTokenClient: new ConnectorTokenClientFacade({
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
