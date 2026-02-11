@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { applyInclude, normalizeFieldsSpec } from './field_include_utils';
 import { dataMapStepCommonDefinition } from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
 
@@ -15,7 +16,7 @@ export const dataMapStepDefinition = createServerStepDefinition({
   handler: async (context) => {
     try {
       const items = context.contextManager.renderInputTemplate(context.config.items);
-      const rawFields = context.rawInput.fields;
+      const rawFields = context.rawInput?.fields ?? {};
 
       if (items == null) {
         context.logger.error('Input items is null or undefined');
@@ -26,7 +27,6 @@ export const dataMapStepDefinition = createServerStepDefinition({
         };
       }
 
-      // Only accept arrays or objects, reject primitives (strings, numbers, booleans)
       const isArray = Array.isArray(items);
       if (!isArray && typeof items !== 'object') {
         context.logger.error(`Input items has invalid type: ${typeof items}`);
@@ -37,7 +37,6 @@ export const dataMapStepDefinition = createServerStepDefinition({
         };
       }
 
-      // Normalize: wrap single object in array, then unwrap result if needed
       const itemsArray = isArray ? items : [items];
       const shouldReturnObject = !isArray;
 
@@ -46,14 +45,14 @@ export const dataMapStepDefinition = createServerStepDefinition({
         return { output: [] };
       }
 
-      context.logger.debug(
-        `Mapping ${itemsArray.length} item(s) with ${Object.keys(rawFields).length} fields`
-      );
+      const fieldKeys = Object.keys(rawFields);
+      context.logger.debug(`Mapping ${itemsArray.length} item(s) with ${fieldKeys.length} fields`);
 
       const mappedItems = itemsArray.map((item, index) => {
+        if (fieldKeys.length === 0) return item;
         const rendered = context.contextManager.renderInputTemplate(rawFields, { item, index });
         const mappedItem: Record<string, unknown> = {};
-        for (const key of Object.keys(rawFields)) {
+        for (const key of fieldKeys) {
           mappedItem[key] = (rendered as Record<string, unknown>)[key];
         }
         return mappedItem;
@@ -61,8 +60,14 @@ export const dataMapStepDefinition = createServerStepDefinition({
 
       context.logger.debug(`Successfully mapped ${mappedItems.length} item(s)`);
 
-      // Return object if input was object, otherwise return array
-      return { output: shouldReturnObject ? mappedItems[0] : mappedItems };
+      let output = mappedItems;
+      const pick = context.input.transform?.pick;
+      if (pick != null) {
+        const pickSpec = normalizeFieldsSpec(pick);
+        output = mappedItems.map((item) => applyInclude(item, pickSpec)) as typeof mappedItems;
+      }
+
+      return { output: shouldReturnObject ? output[0] : output };
     } catch (error) {
       context.logger.error('Failed to map items', error);
       return {

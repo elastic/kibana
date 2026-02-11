@@ -45,10 +45,6 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: '16c3b3d67e68e77e66ed68869790a4388423a5b4b5aa8a194035f3ff52192836',
   },
   {
-    id: 'data.include',
-    handlerHash: '174477b24573c8b5b7ef4f5a932e1505ab7ba4e18d28fc43b537c1d5617a1e80',
-  },
-  {
     id: 'data.map',
     handlerHash: '6e795a15958a869b328bc8a19836958eafaf088fad7a20a377617fff453dc513',
   },

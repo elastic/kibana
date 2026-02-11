@@ -12,7 +12,6 @@ import { AiPromptStepDefinition } from './ai/ai_prompt_step';
 import { AiSummarizeStepDefinition } from './ai/ai_summarize_step';
 import {
   dataDedupeStepDefinition,
-  dataIncludeStepDefinition,
   dataMapStepDefinition,
   dataRegexExtractStepDefinition,
   dataRegexReplaceStepDefinition,
@@ -21,7 +20,6 @@ import type { PublicStepRegistry } from '../step_registry';
 
 export const registerInternalStepDefinitions = (stepRegistry: PublicStepRegistry) => {
   stepRegistry.register(dataMapStepDefinition);
-  stepRegistry.register(dataIncludeStepDefinition);
   stepRegistry.register(dataDedupeStepDefinition);
   stepRegistry.register(dataRegexExtractStepDefinition);
   stepRegistry.register(dataRegexReplaceStepDefinition);
