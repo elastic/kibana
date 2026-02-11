@@ -48,7 +48,14 @@ const enableOperations: Record<AlertingEntity, string[]> = {
 };
 
 const manageRuleSettingsOperations: Record<AlertingEntity, string[]> = {
-  rule: ['createGapAutoFillScheduler', 'updateGapAutoFillScheduler', 'deleteGapAutoFillScheduler'],
+  rule: [
+    'createGapAutoFillScheduler',
+    'updateGapAutoFillScheduler',
+    'deleteGapAutoFillScheduler',
+    'find',
+    'findBackfill',
+    'scheduleBackfill',
+  ],
   alert: [],
 };
 

@@ -306,6 +306,9 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-consumer/rule/createGapAutoFillScheduler",
             "alerting:alert-type/my-consumer/rule/updateGapAutoFillScheduler",
             "alerting:alert-type/my-consumer/rule/deleteGapAutoFillScheduler",
+            "alerting:alert-type/my-consumer/rule/find",
+            "alerting:alert-type/my-consumer/rule/findBackfill",
+            "alerting:alert-type/my-consumer/rule/scheduleBackfill",
           ]
         `);
       });
