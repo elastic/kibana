@@ -7,6 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const TRANSFORMATIONAL_COMMANDS = ['keep', 'stats', 'promql'];
-export const MAX_PRELOADED_RESOURCE_ITEMS = 200;
-export const MAX_PRELOADED_RESOURCE_PAYLOAD = 20000;
+/**
+ * Single-toggle selection change emitted by the data source browser.
+ *
+ * The UI behaves like a list of options: each click adds/removes one item and
+ * immediately applies the corresponding change in the editor.
+ */
+export enum DataSourceSelectionChange {
+  Add = 'add',
+  Remove = 'remove',
+}

@@ -7,6 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const TRANSFORMATIONAL_COMMANDS = ['keep', 'stats', 'promql'];
-export const MAX_PRELOADED_RESOURCE_ITEMS = 200;
-export const MAX_PRELOADED_RESOURCE_PAYLOAD = 20000;
+/**
+ * Where the indices browser was opened from.
+ *
+ * This affects insertion behavior:
+ * - `Badge`: insert at the beginning of the sources list
+ * - `Autocomplete`: insert at the cursor position
+ */
+export enum IndicesBrowserOpenMode {
+  Badge = 'badge',
+  Autocomplete = 'autocomplete',
+}
