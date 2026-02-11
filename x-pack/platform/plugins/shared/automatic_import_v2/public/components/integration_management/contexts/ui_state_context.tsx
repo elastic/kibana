@@ -7,6 +7,7 @@
 
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 
+import type { DataStreamResponse } from '../../../../common';
 import type { UIStateContextValue } from './types';
 
 const UIStateContext = createContext<UIStateContextValue | undefined>(undefined);
@@ -17,6 +18,8 @@ export interface UIStateProviderProps {
 
 export const UIStateProvider: React.FC<UIStateProviderProps> = ({ children }) => {
   const [isCreateDataStreamFlyoutOpen, setIsCreateDataStreamFlyoutOpen] = useState(false);
+  const [selectedDataStream, setSelectedDataStream] = useState<DataStreamResponse | null>(null);
+  const [selectedPipelineTab, setSelectedPipelineTab] = useState<'table' | 'pipeline'>('table');
 
   const openCreateDataStreamFlyout = useCallback(() => {
     setIsCreateDataStreamFlyoutOpen(true);
@@ -26,13 +29,43 @@ export const UIStateProvider: React.FC<UIStateProviderProps> = ({ children }) =>
     setIsCreateDataStreamFlyoutOpen(false);
   }, []);
 
+  const openEditPipelineFlyout = useCallback((dataStream: DataStreamResponse) => {
+    setSelectedDataStream(dataStream);
+  }, []);
+
+  const closeEditPipelineFlyout = useCallback(() => {
+    setSelectedDataStream(null);
+  }, []);
+
+  const selectPipelineTab = useCallback((tab: 'table' | 'pipeline') => {
+    setSelectedPipelineTab(tab);
+  }, []);
+
+  const isEditPipelineFlyoutOpen = selectedDataStream !== null;
+
   const value = useMemo<UIStateContextValue>(
     () => ({
       isCreateDataStreamFlyoutOpen,
       openCreateDataStreamFlyout,
       closeCreateDataStreamFlyout,
+      isEditPipelineFlyoutOpen,
+      selectedDataStream,
+      openEditPipelineFlyout,
+      closeEditPipelineFlyout,
+      selectedPipelineTab,
+      selectPipelineTab,
     }),
-    [isCreateDataStreamFlyoutOpen, closeCreateDataStreamFlyout, openCreateDataStreamFlyout]
+    [
+      isCreateDataStreamFlyoutOpen,
+      closeCreateDataStreamFlyout,
+      openCreateDataStreamFlyout,
+      isEditPipelineFlyoutOpen,
+      selectedDataStream,
+      openEditPipelineFlyout,
+      closeEditPipelineFlyout,
+      selectedPipelineTab,
+      selectPipelineTab,
+    ]
   );
 
   return <UIStateContext.Provider value={value}>{children}</UIStateContext.Provider>;
