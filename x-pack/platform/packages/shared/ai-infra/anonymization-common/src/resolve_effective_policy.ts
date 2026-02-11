@@ -23,9 +23,7 @@ import type { FieldRule, EffectiveFieldPolicy, EffectivePolicy } from './types';
  * @param fieldRuleSets - One or more arrays of field rules (from contributing profiles)
  * @returns The effective policy keyed by field name
  */
-export const resolveEffectivePolicy = (
-  ...fieldRuleSets: FieldRule[][]
-): EffectivePolicy => {
+export const resolveEffectivePolicy = (...fieldRuleSets: FieldRule[][]): EffectivePolicy => {
   const result: EffectivePolicy = {};
 
   for (const fieldRules of fieldRuleSets) {

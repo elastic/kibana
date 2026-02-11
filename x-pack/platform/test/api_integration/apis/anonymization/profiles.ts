@@ -72,9 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.data).to.be.an('array');
         expect(body.total).to.be.greaterThan(0);
 
-        const found = body.data.find(
-          (p: { id: string }) => p.id === createdProfileId
-        );
+        const found = body.data.find((p: { id: string }) => p.id === createdProfileId);
         expect(found).to.be.ok();
       });
 
@@ -162,9 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
             ...defaultProfile,
             targetId: 'validation-test-data-view',
             rules: {
-              fieldRules: [
-                { field: 'host.name', allowed: true, anonymized: true },
-              ],
+              fieldRules: [{ field: 'host.name', allowed: true, anonymized: true }],
             },
           });
 

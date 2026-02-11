@@ -42,9 +42,7 @@ export const ensureAlertsDataViewProfile = async ({
     );
 
     if (existing) {
-      logger.debug(
-        `Alerts data view anonymization profile already exists in space: ${namespace}`
-      );
+      logger.debug(`Alerts data view anonymization profile already exists in space: ${namespace}`);
       return;
     }
 

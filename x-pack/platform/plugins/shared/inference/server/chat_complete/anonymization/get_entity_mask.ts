@@ -27,12 +27,7 @@ export function getEntityMask(
 ): string {
   if (salt) {
     // Use deterministic HMAC-based tokenization from shared package
-    return generateToken(
-      salt,
-      entity.class_name,
-      entity.field ?? entity.class_name,
-      entity.value
-    );
+    return generateToken(salt, entity.class_name, entity.field ?? entity.class_name, entity.value);
   }
 
   // Legacy fallback: unsalted object-hash (for when anonymization plugin is unavailable)

@@ -95,6 +95,7 @@
     "ruleTypeId",
     "tags"
   ],
+  "anonymization-salt": [],
   "api_key_pending_invalidation": [
     "apiKeyId",
     "createdAt"

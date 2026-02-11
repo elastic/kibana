@@ -7,10 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import {
-  ANONYMIZATION_API_VERSION,
-  ANONYMIZATION_PROFILES_API_BASE,
-} from '../../common';
+import { ANONYMIZATION_API_VERSION, ANONYMIZATION_PROFILES_API_BASE } from '../../common';
 import { ProfilesRepository } from '../repository';
 import { ensureProfilesIndex } from '../system_index';
 import { assertPrivilege, ANONYMIZATION_PRIVILEGES } from './rbac';

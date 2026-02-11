@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export {
-  ANONYMIZATION_REPLACEMENTS_INDEX,
-  ensureReplacementsIndex,
-} from './replacements_index';
+export { ANONYMIZATION_REPLACEMENTS_INDEX, ensureReplacementsIndex } from './replacements_index';
 export { ReplacementsRepository } from './replacements_repository';
