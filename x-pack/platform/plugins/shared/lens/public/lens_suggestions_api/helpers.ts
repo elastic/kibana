@@ -4,20 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { getDatasourceId } from '@kbn/visualization-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 import type {
-  IndexPatternRef,
+  VisualizeEditorContext,
   Suggestion,
-  TextBasedPrivateState,
+  IndexPatternRef,
+  VisualizationMap,
   TypedLensByValueInput,
   TypedLensSerializedState,
-  VisualizationMap,
-  VisualizeEditorContext,
+  TextBasedPrivateState,
 } from '@kbn/lens-common';
 
 const datasourceHasIndexPatternRefs = (

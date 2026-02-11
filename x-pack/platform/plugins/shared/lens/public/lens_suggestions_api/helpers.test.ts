@@ -931,6 +931,5 @@ describe('lens suggestions api helpers', () => {
         expect(mockPieVisualization.switchVisualizationType).not.toHaveBeenCalled();
       });
     });
-
   });
 });
