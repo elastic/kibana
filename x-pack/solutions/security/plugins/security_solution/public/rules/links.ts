@@ -91,6 +91,7 @@ export const links: LinkItem = {
           path: DE_SPACE_RULES_HEALTH_PATH,
           skipUrlState: true,
           hideTimeline: true,
+          globalSearchDisabled: true,
         },
       ],
     },

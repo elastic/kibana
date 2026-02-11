@@ -77,10 +77,7 @@ const getRulesSubRoutes = (capabilities: Capabilities, { deHealthUIEnabled }: Fe
           ? [
               {
                 path: DE_SPACE_RULES_HEALTH_PATH,
-                main: withSecurityRoutePageWrapper(
-                  DetectionEngineSpaceRulesHealthPage,
-                  SecurityPageName.spaceRulesHealth
-                ),
+                main: DetectionEngineSpaceRulesHealthPage,
                 exact: true,
               },
               {
