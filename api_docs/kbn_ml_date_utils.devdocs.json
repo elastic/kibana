@@ -215,9 +215,7 @@
             "type": "Object",
             "tags": [],
             "label": "time",
-            "description": [
-              "- The time range to be validated."
-            ],
+            "description": [],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",

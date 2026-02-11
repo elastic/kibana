@@ -1048,7 +1048,7 @@
                 "label": "node",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/react/kibana_mount/to_mount_point.tsx",
                 "lineNumber": 39,
@@ -1116,7 +1116,7 @@
               "\nTitle of the popover"
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_popover.tsx",
             "lineNumber": 23,
@@ -1477,7 +1477,7 @@
               "\nLabel for clear button."
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
             "lineNumber": 110,

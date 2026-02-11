@@ -4584,6 +4584,80 @@
         },
         {
           "parentPluginId": "actions",
+          "id": "def-server.PluginStartContract.getActionsClientWithRequestInSpace",
+          "type": "Function",
+          "tags": [],
+          "label": "getActionsClientWithRequestInSpace",
+          "description": [
+            "\nReturns an ActionsClient that is bound to the provided spaceId (namespace) while preserving\nthe original request (and its auth context).\n\nThis enables space-agnostic consumers to manage/execute connectors in a fixed space\nwithout forging fake requests (which can break auth under UIAM)."
+          ],
+          "signature": [
+            "(request: ",
+            "KibanaRequest",
+            "<unknown, unknown, unknown, any>, spaceId: string) => Promise<",
+            {
+              "pluginId": "@kbn/utility-types",
+              "scope": "common",
+              "docId": "kibKbnUtilityTypesPluginApi",
+              "section": "def-common.PublicMethodsOf",
+              "text": "PublicMethodsOf"
+            },
+            "<",
+            {
+              "pluginId": "actions",
+              "scope": "server",
+              "docId": "kibActionsPluginApi",
+              "section": "def-server.ActionsClient",
+              "text": "ActionsClient"
+            },
+            ">>"
+          ],
+          "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
+          "lineNumber": 161,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginStartContract.getActionsClientWithRequestInSpace.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                "KibanaRequest",
+                "<unknown, unknown, unknown, any>"
+              ],
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
+              "lineNumber": 169,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "actions",
+              "id": "def-server.PluginStartContract.getActionsClientWithRequestInSpace.$2",
+              "type": "string",
+              "tags": [],
+              "label": "spaceId",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
+              "lineNumber": 170,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "actions",
           "id": "def-server.PluginStartContract.getActionsAuthorizationWithRequest",
           "type": "Function",
           "tags": [],
@@ -4611,7 +4685,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
-          "lineNumber": 161,
+          "lineNumber": 173,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -4628,7 +4702,7 @@
                 "<unknown, unknown, unknown, any>"
               ],
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
-              "lineNumber": 161,
+              "lineNumber": 173,
               "columnNumber": 38,
               "deprecated": false,
               "trackAdoption": false,
@@ -4659,7 +4733,7 @@
             ">[]"
           ],
           "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
-          "lineNumber": 163,
+          "lineNumber": 175,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -4682,7 +4756,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
-          "lineNumber": 165,
+          "lineNumber": 177,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -4704,7 +4778,7 @@
             ">(actionTypeId: string, actionId: string, params: Params, variables: Record<string, unknown>) => Params"
           ],
           "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
-          "lineNumber": 167,
+          "lineNumber": 179,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -4720,7 +4794,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
-              "lineNumber": 168,
+              "lineNumber": 180,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -4737,7 +4811,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
-              "lineNumber": 169,
+              "lineNumber": 181,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -4754,7 +4828,7 @@
                 "Params"
               ],
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
-              "lineNumber": 170,
+              "lineNumber": 182,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -4771,7 +4845,7 @@
                 "Record<string, unknown>"
               ],
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
-              "lineNumber": 171,
+              "lineNumber": 183,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -4791,7 +4865,7 @@
             "(connectorId: string) => boolean"
           ],
           "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
-          "lineNumber": 174,
+          "lineNumber": 186,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -4807,7 +4881,7 @@
                 "string"
               ],
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts",
-              "lineNumber": 174,
+              "lineNumber": 186,
               "columnNumber": 29,
               "deprecated": false,
               "trackAdoption": false,

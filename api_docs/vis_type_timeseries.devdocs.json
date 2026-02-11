@@ -243,7 +243,9 @@
               "type": "Any",
               "tags": [],
               "label": "options",
-              "description": [],
+              "description": [
+                "// ideally this should be VisPayload type, but currently has inconsistencies with x-pack/solutions/observability/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              ],
               "signature": [
                 "any"
               ],

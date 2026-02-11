@@ -422,7 +422,7 @@
         "label": "DeleteTransformsRequestSchema",
         "description": [],
         "signature": [
-          "{ readonly deleteDestIndex?: boolean | undefined; readonly deleteDestDataView?: boolean | undefined; readonly forceDelete?: boolean | undefined; readonly transformsInfo: Readonly<{} & { id: string; state: \"failed\" | \"started\" | \"indexing\" | \"aborting\" | \"stopped\" | \"stopping\" | \"waiting\"; }>[]; }"
+          "{ readonly deleteDestIndex?: boolean | undefined; readonly deleteDestDataView?: boolean | undefined; readonly forceDelete?: boolean | undefined; readonly transformsInfo: Readonly<{} & { id: string; state: \"failed\" | \"started\" | \"indexing\" | \"stopped\" | \"aborting\" | \"stopping\" | \"waiting\"; }>[]; }"
         ],
         "path": "x-pack/platform/plugins/private/transform/server/routes/api_schemas/delete_transforms.ts",
         "lineNumber": 30,
@@ -511,7 +511,7 @@
         "label": "PutTransformsRequestSchema",
         "description": [],
         "signature": [
-          "{ readonly frequency?: string | undefined; readonly description?: string | undefined; readonly settings?: Readonly<{ max_page_search_size?: number | null | undefined; docs_per_second?: number | null | undefined; num_failure_retries?: number | null | undefined; unattended?: boolean | undefined; } & {}> | undefined; readonly pivot?: Readonly<{ aggregations?: any; group_by?: any; max_page_search_size?: number | undefined; } & {}> | undefined; readonly sync?: Readonly<{} & { time: Readonly<{ delay?: string | undefined; } & { field: string; }>; }> | undefined; readonly latest?: Readonly<{} & { sort: string; unique_key: string[]; }> | undefined; readonly _meta?: Readonly<{} & {}> | undefined; readonly retention_policy?: Readonly<{} & { time: Readonly<{} & { field: string; max_age: string; }>; }> | undefined; readonly source: Readonly<{ query?: Record<string, any> | undefined; runtime_mappings?: Readonly<{} & {}> | undefined; } & { index: string | string[]; }>; readonly dest: Readonly<{ pipeline?: string | undefined; } & { index: string; }>; }"
+          "{ readonly frequency?: string | undefined; readonly description?: string | undefined; readonly settings?: Readonly<{ max_page_search_size?: number | null | undefined; docs_per_second?: number | null | undefined; num_failure_retries?: number | null | undefined; unattended?: boolean | undefined; } & {}> | undefined; readonly pivot?: Readonly<{ aggregations?: any; group_by?: any; max_page_search_size?: number | undefined; } & {}> | undefined; readonly latest?: Readonly<{} & { sort: string; unique_key: string[]; }> | undefined; readonly _meta?: Readonly<{} & {}> | undefined; readonly sync?: Readonly<{} & { time: Readonly<{ delay?: string | undefined; } & { field: string; }>; }> | undefined; readonly retention_policy?: Readonly<{} & { time: Readonly<{} & { field: string; max_age: string; }>; }> | undefined; readonly source: Readonly<{ query?: Record<string, any> | undefined; runtime_mappings?: Readonly<{} & {}> | undefined; } & { index: string | string[]; }>; readonly dest: Readonly<{ pipeline?: string | undefined; } & { index: string; }>; }"
         ],
         "path": "x-pack/platform/plugins/private/transform/server/routes/api_schemas/transforms.ts",
         "lineNumber": 139,
@@ -562,7 +562,7 @@
         "label": "ResetTransformsRequestSchema",
         "description": [],
         "signature": [
-          "{ readonly transformsInfo: Readonly<{} & { id: string; state: \"failed\" | \"started\" | \"indexing\" | \"aborting\" | \"stopped\" | \"stopping\" | \"waiting\"; }>[]; }"
+          "{ readonly transformsInfo: Readonly<{} & { id: string; state: \"failed\" | \"started\" | \"indexing\" | \"stopped\" | \"aborting\" | \"stopping\" | \"waiting\"; }>[]; }"
         ],
         "path": "x-pack/platform/plugins/private/transform/server/routes/api_schemas/reset_transforms.ts",
         "lineNumber": 26,
@@ -647,7 +647,7 @@
         "label": "StopTransformsRequestSchema",
         "description": [],
         "signature": [
-          "Readonly<{} & { id: string; state: \"failed\" | \"started\" | \"indexing\" | \"aborting\" | \"stopped\" | \"stopping\" | \"waiting\"; }>[]"
+          "Readonly<{} & { id: string; state: \"failed\" | \"started\" | \"indexing\" | \"stopped\" | \"aborting\" | \"stopping\" | \"waiting\"; }>[]"
         ],
         "path": "x-pack/platform/plugins/private/transform/server/routes/api_schemas/stop_transforms.ts",
         "lineNumber": 21,
@@ -698,7 +698,7 @@
         "label": "TransformState",
         "description": [],
         "signature": [
-          "\"failed\" | \"started\" | \"indexing\" | \"aborting\" | \"stopped\" | \"stopping\" | \"waiting\""
+          "\"failed\" | \"started\" | \"indexing\" | \"stopped\" | \"aborting\" | \"stopping\" | \"waiting\""
         ],
         "path": "x-pack/platform/plugins/private/transform/common/constants.ts",
         "lineNumber": 106,

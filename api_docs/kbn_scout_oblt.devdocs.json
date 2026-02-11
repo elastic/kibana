@@ -799,7 +799,7 @@
             "label": "selectSingleOption",
             "description": [],
             "signature": [
-              "(value: string) => Promise<void>"
+              "(value: string, options?: { optionTestSubj?: string | undefined; optionRoleName?: string | undefined; }) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
             "lineNumber": 150,
@@ -818,11 +818,58 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-                "lineNumber": 150,
-                "columnNumber": 28,
+                "lineNumber": 151,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-oblt",
+                "id": "def-common.EuiComboBoxWrapper.selectSingleOption.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
+                "lineNumber": 152,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/scout-oblt",
+                    "id": "def-common.EuiComboBoxWrapper.selectSingleOption.$2.optionTestSubj",
+                    "type": "string",
+                    "tags": [],
+                    "label": "optionTestSubj",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
+                    "lineNumber": 152,
+                    "columnNumber": 16,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/scout-oblt",
+                    "id": "def-common.EuiComboBoxWrapper.selectSingleOption.$2.optionRoleName",
+                    "type": "string",
+                    "tags": [],
+                    "label": "optionRoleName",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
+                    "lineNumber": 152,
+                    "columnNumber": 41,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -838,7 +885,7 @@
               "(value: string) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-            "lineNumber": 158,
+            "lineNumber": 165,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -854,7 +901,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-                "lineNumber": 158,
+                "lineNumber": 165,
                 "columnNumber": 31,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -874,7 +921,7 @@
               "() => Promise<string>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-            "lineNumber": 166,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2398,7 +2445,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [],
+                "description": [
+                  "optional modifications to apply to the URL"
+                ],
                 "path": "src/platform/packages/shared/kbn-scout/src/common/services/kibana_url.ts",
                 "lineNumber": 61,
                 "columnNumber": 34,
@@ -2685,7 +2734,7 @@
           "; }>"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/index.ts",
-        "lineNumber": 37,
+        "lineNumber": 40,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3003,68 +3052,6 @@
           }
         ],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/scout-oblt",
-        "id": "def-common.expect",
-        "type": "Function",
-        "tags": [],
-        "label": "expect",
-        "description": [],
-        "signature": [
-          "{ <T = unknown>(actual: T, messageOrOptions?: string | { message?: string | undefined; } | undefined): MakeMatchers<void, T, {}>; soft: <T = unknown>(actual: T, messageOrOptions?: string | { message?: string | undefined; } | undefined) => MakeMatchers<void, T, {}>; poll: <T = unknown>(actual: () => T | Promise<T>, messageOrOptions?: string | { message?: string | undefined; timeout?: number | undefined; intervals?: number[] | undefined; } | undefined) => PollMatchers<Promise<void>, T, {}>; extend<MoreMatchers extends Record<string, (this: ",
-          "ExpectMatcherState",
-          ", receiver: any, ...args: any[]) => ",
-          "MatcherReturnType",
-          " | Promise<",
-          "MatcherReturnType",
-          ">>>(matchers: MoreMatchers): ",
-          "Expect",
-          "<{} & MoreMatchers>; configure: (configuration: { message?: string | undefined; timeout?: number | undefined; soft?: boolean | undefined; }) => ",
-          "Expect",
-          "<{}>; getState(): unknown; not: Omit<AsymmetricMatchers, \"any\" | \"anything\">; } & AsymmetricMatchers"
-        ],
-        "path": "src/platform/packages/shared/kbn-scout/src/playwright/expect.ts",
-        "lineNumber": 13,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/scout-oblt",
-            "id": "def-common.expect.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "actual",
-            "description": [],
-            "signature": [
-              "T"
-            ],
-            "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 8379,
-            "columnNumber": 17,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-oblt",
-            "id": "def-common.expect.$2",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "messageOrOptions",
-            "description": [],
-            "signature": [
-              "string | { message?: string | undefined; } | undefined"
-            ],
-            "path": "node_modules/playwright/types/test.d.ts",
-            "lineNumber": 8379,
-            "columnNumber": 28,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -3945,7 +3932,7 @@
         "label": "ApiServicesFixture",
         "description": [],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/index.ts",
-        "lineNumber": 24,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3961,7 +3948,7 @@
               "AlertingApiService"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/index.ts",
-            "lineNumber": 25,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3977,7 +3964,7 @@
               "CasesApiService"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/index.ts",
-            "lineNumber": 26,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3993,7 +3980,7 @@
               "DataViewsApiService"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/index.ts",
-            "lineNumber": 27,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4009,7 +3996,23 @@
               "FleetApiService"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/index.ts",
-            "lineNumber": 28,
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.ApiServicesFixture.sampleData",
+            "type": "Object",
+            "tags": [],
+            "label": "sampleData",
+            "description": [],
+            "signature": [
+              "SampleDataApiService"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/index.ts",
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4025,7 +4028,7 @@
               "StreamsApiService"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/index.ts",
-            "lineNumber": 29,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4041,7 +4044,7 @@
               "CoreApiService"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/index.ts",
-            "lineNumber": 30,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4844,7 +4847,7 @@
                 "tags": [],
                 "label": "arg",
                 "description": [
-                  "Optional argument to pass to\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-option-expression)."
+                  "Optional argument to pass to"
                 ],
                 "signature": [
                   "Arg"
@@ -5019,7 +5022,7 @@
                 "tags": [],
                 "label": "arg",
                 "description": [
-                  "Optional argument to pass to\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-handle-option-expression)."
+                  "Optional argument to pass to"
                 ],
                 "signature": [
                   "Arg"
@@ -5132,7 +5135,7 @@
                 "tags": [],
                 "label": "arg",
                 "description": [
-                  "Optional argument to pass to\n[`pageFunction`](https://playwright.dev/docs/api/class-locator#locator-evaluate-all-option-expression)."
+                  "Optional argument to pass to"
                 ],
                 "signature": [
                   "Arg"
@@ -7152,7 +7155,7 @@
               "\nAllows locating elements by their [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles),\n[ARIA attributes](https://www.w3.org/TR/wai-aria-1.2/#aria-attributes) and\n[accessible name](https://w3c.github.io/accname/#dfn-accessible-name).\n\n**Usage**\n\nConsider the following DOM structure.\n\n```html\n<h3>Sign up</h3>\n<label>\n  <input type=\"checkbox\" /> Subscribe\n</label>\n<br/>\n<button>Submit</button>\n```\n\nYou can locate each element by it's implicit role:\n\n```js\nawait expect(page.getByRole('heading', { name: 'Sign up' })).toBeVisible();\n\nawait page.getByRole('checkbox', { name: 'Subscribe' }).check();\n\nawait page.getByRole('button', { name: /submit/i }).click();\n```\n\n**Details**\n\nRole selector **does not replace** accessibility audits and conformance tests, but rather gives early feedback\nabout the ARIA guidelines.\n\nMany html elements have an implicitly [defined role](https://w3c.github.io/html-aam/#html-element-role-mappings)\nthat is recognized by the role selector. You can find all the\n[supported roles here](https://www.w3.org/TR/wai-aria-1.2/#role_definitions). ARIA guidelines **do not recommend**\nduplicating implicit roles and attributes by setting `role` and/or `aria-*` attributes to default values."
             ],
             "signature": [
-              "(role: \"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"alertdialog\" | \"application\" | \"article\" | \"banner\" | \"button\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"dialog\" | \"directory\" | \"document\" | \"feed\" | \"figure\" | \"form\" | \"grid\" | \"gridcell\" | \"group\" | \"heading\" | \"img\" | \"listbox\" | \"listitem\" | \"main\" | \"marquee\" | \"math\" | \"menu\" | \"menubar\" | \"menuitem\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"option\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"status\" | \"switch\" | \"tab\" | \"table\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"time\" | \"code\" | \"blockquote\" | \"caption\" | \"meter\" | \"strong\" | \"deletion\" | \"emphasis\" | \"generic\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\", options?: { checked?: boolean | undefined; disabled?: boolean | undefined; exact?: boolean | undefined; expanded?: boolean | undefined; includeHidden?: boolean | undefined; level?: number | undefined; name?: string | RegExp | undefined; pressed?: boolean | undefined; selected?: boolean | undefined; } | undefined) => ",
+              "(role: \"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"alertdialog\" | \"application\" | \"article\" | \"banner\" | \"button\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"dialog\" | \"directory\" | \"document\" | \"feed\" | \"figure\" | \"form\" | \"grid\" | \"gridcell\" | \"group\" | \"heading\" | \"img\" | \"listbox\" | \"listitem\" | \"main\" | \"marquee\" | \"math\" | \"menu\" | \"menubar\" | \"menuitem\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"option\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"status\" | \"switch\" | \"tab\" | \"table\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"time\" | \"code\" | \"blockquote\" | \"caption\" | \"meter\" | \"strong\" | \"generic\" | \"deletion\" | \"emphasis\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\", options?: { checked?: boolean | undefined; disabled?: boolean | undefined; exact?: boolean | undefined; expanded?: boolean | undefined; includeHidden?: boolean | undefined; level?: number | undefined; name?: string | RegExp | undefined; pressed?: boolean | undefined; selected?: boolean | undefined; } | undefined) => ",
               "Locator"
             ],
             "path": "node_modules/playwright-core/types/types.d.ts",
@@ -7171,7 +7174,7 @@
                   "Required aria role."
                 ],
                 "signature": [
-                  "\"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"alertdialog\" | \"application\" | \"article\" | \"banner\" | \"button\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"dialog\" | \"directory\" | \"document\" | \"feed\" | \"figure\" | \"form\" | \"grid\" | \"gridcell\" | \"group\" | \"heading\" | \"img\" | \"listbox\" | \"listitem\" | \"main\" | \"marquee\" | \"math\" | \"menu\" | \"menubar\" | \"menuitem\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"option\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"status\" | \"switch\" | \"tab\" | \"table\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"time\" | \"code\" | \"blockquote\" | \"caption\" | \"meter\" | \"strong\" | \"deletion\" | \"emphasis\" | \"generic\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\""
+                  "\"log\" | \"search\" | \"link\" | \"none\" | \"list\" | \"alert\" | \"alertdialog\" | \"application\" | \"article\" | \"banner\" | \"button\" | \"cell\" | \"checkbox\" | \"columnheader\" | \"combobox\" | \"complementary\" | \"contentinfo\" | \"definition\" | \"dialog\" | \"directory\" | \"document\" | \"feed\" | \"figure\" | \"form\" | \"grid\" | \"gridcell\" | \"group\" | \"heading\" | \"img\" | \"listbox\" | \"listitem\" | \"main\" | \"marquee\" | \"math\" | \"menu\" | \"menubar\" | \"menuitem\" | \"menuitemcheckbox\" | \"menuitemradio\" | \"navigation\" | \"note\" | \"option\" | \"presentation\" | \"progressbar\" | \"radio\" | \"radiogroup\" | \"region\" | \"row\" | \"rowgroup\" | \"rowheader\" | \"scrollbar\" | \"searchbox\" | \"separator\" | \"slider\" | \"spinbutton\" | \"status\" | \"switch\" | \"tab\" | \"table\" | \"tablist\" | \"tabpanel\" | \"term\" | \"textbox\" | \"timer\" | \"toolbar\" | \"tooltip\" | \"tree\" | \"treegrid\" | \"treeitem\" | \"time\" | \"code\" | \"blockquote\" | \"caption\" | \"meter\" | \"strong\" | \"generic\" | \"deletion\" | \"emphasis\" | \"insertion\" | \"paragraph\" | \"subscript\" | \"superscript\""
                 ],
                 "path": "node_modules/playwright-core/types/types.d.ts",
                 "lineNumber": 13360,
@@ -8826,7 +8829,7 @@
                 "tags": [],
                 "label": "values",
                 "description": [
-                  "Options to select. If the `<select>` has the `multiple` attribute, all matching options are selected, otherwise\nonly the first option matching one of the passed options is selected. String values are matching both values and\nlabels. Option is considered matching if all specified properties match."
+                  "Options to select. If the `<select>` has the `multiple` attribute, all matching options are selected, otherwise"
                 ],
                 "signature": [
                   "string | readonly string[] | ",
@@ -9451,6 +9454,10 @@
             "trackAdoption": false,
             "references": [
               {
+                "plugin": "@kbn/scout",
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/dashboard_app.ts"
+              },
+              {
                 "plugin": "ux",
                 "path": "x-pack/solutions/observability/plugins/ux/e2e/page_objects/date_picker.ts"
               },
@@ -9461,10 +9468,6 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/solutions/observability/plugins/synthetics/e2e/synthetics/page_objects/utils.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts"
               }
             ],
             "children": [
@@ -10123,7 +10126,7 @@
         "label": "PageObjects",
         "description": [],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10139,7 +10142,7 @@
               "DatePicker"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10155,7 +10158,7 @@
               "DiscoverApp"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10171,7 +10174,7 @@
               "DashboardApp"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10187,7 +10190,7 @@
               "FilterBar"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 34,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10203,7 +10206,7 @@
               "MapsPage"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 35,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10219,7 +10222,7 @@
               "RenderablePage"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 36,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10235,7 +10238,7 @@
               "CollapsibleNav"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10251,7 +10254,7 @@
               "Toasts"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10267,7 +10270,23 @@
               "Inspector"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
-            "lineNumber": 39,
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-oblt",
+            "id": "def-common.PageObjects.lens",
+            "type": "Object",
+            "tags": [],
+            "label": "lens",
+            "description": [],
+            "signature": [
+              "LensApp"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10283,7 +10302,7 @@
         "label": "RoleApiCredentials",
         "description": [],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_key.ts",
-        "lineNumber": 27,
+        "lineNumber": 31,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10299,7 +10318,7 @@
               "ApiKey"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_key.ts",
-            "lineNumber": 28,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10315,7 +10334,7 @@
               "ApiKeyHeader"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/api_key.ts",
-            "lineNumber": 29,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10486,7 +10505,7 @@
                 "tags": [],
                 "label": "role",
                 "description": [
-                  "- Either a built-in Kibana role name (e.g., 'admin', 'editor', 'viewer') or\n  a custom role descriptor with specific permissions (Kibana or Elasticsearch)"
+                  "- Either a built-in Kibana role name (e.g., 'admin', 'editor', 'viewer') or"
                 ],
                 "signature": [
                   "string | ",
@@ -11030,7 +11049,7 @@
             "label": "projectType",
             "description": [],
             "signature": [
-              "\"security\" | \"workplaceai\" | \"oblt\" | \"es\" | undefined"
+              "\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
             "lineNumber": 15,

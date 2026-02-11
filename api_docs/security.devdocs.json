@@ -980,7 +980,7 @@
             "label": "iconType",
             "description": [],
             "signature": [
-              "string | React.ComponentType<{}>"
+              "string | React.ComponentType"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "lineNumber": 14,
@@ -1617,9 +1617,7 @@
                 "type": "string",
                 "tags": [],
                 "label": "headerName",
-                "description": [
-                  "Optional name of the HTTP header to extract authentication information from. By default, the\nauthentication information is extracted from the `Authorization` HTTP header."
-                ],
+                "description": [],
                 "signature": [
                   "string"
                 ],
@@ -6472,7 +6470,7 @@
         }
       ],
       "path": "x-pack/platform/plugins/shared/security/server/plugin.ts",
-      "lineNumber": 71,
+      "lineNumber": 73,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -6494,7 +6492,7 @@
             " | null; }"
           ],
           "path": "x-pack/platform/plugins/shared/security/server/plugin.ts",
-          "lineNumber": 75,
+          "lineNumber": 77,
           "columnNumber": 3,
           "deprecated": true,
           "trackAdoption": false,
@@ -6528,7 +6526,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/security/server/plugin.ts",
-          "lineNumber": 81,
+          "lineNumber": 83,
           "columnNumber": 3,
           "deprecated": true,
           "trackAdoption": false,
@@ -6767,6 +6765,10 @@
             {
               "plugin": "cloudSecurityPosture",
               "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/setup_routes.ts"
+            },
+            {
+              "plugin": "entityStore",
+              "path": "x-pack/solutions/security/plugins/entity_store/server/plugin.ts"
             }
           ]
         },

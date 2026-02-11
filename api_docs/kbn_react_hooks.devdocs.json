@@ -212,9 +212,7 @@
             "type": "Object",
             "tags": [],
             "label": "options",
-            "description": [
-              "- Optional configuration options for debounce."
-            ],
+            "description": [],
             "signature": [
               "DebounceOptions",
               " | undefined"
@@ -323,9 +321,7 @@
             "type": "Object",
             "tags": [],
             "label": "options",
-            "description": [
-              "- Optional configuration options for throttle."
-            ],
+            "description": [],
             "signature": [
               "ThrottleOptions",
               " | undefined"

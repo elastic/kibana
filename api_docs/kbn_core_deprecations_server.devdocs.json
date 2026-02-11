@@ -191,7 +191,7 @@
                 "tags": [],
                 "label": "deprecationContext",
                 "description": [
-                  "- The configuration object containing\ninformation about the deprecated features, including messages, corrective actions,\nand any relevant metadata to inform users or developers about the deprecation."
+                  "- The configuration object containing"
                 ],
                 "signature": [
                   "RegisterDeprecationsConfig"

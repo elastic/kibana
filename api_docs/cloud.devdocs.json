@@ -898,7 +898,7 @@
             "\nOnboarding configuration"
           ],
           "signature": [
-            "{ defaultSolution?: \"security\" | \"workplaceai\" | \"oblt\" | \"es\" | undefined; }"
+            "{ defaultSolution?: \"security\" | \"es\" | \"workplaceai\" | \"oblt\" | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "lineNumber": 201,
@@ -1557,7 +1557,7 @@
             "\nOnboarding configuration."
           ],
           "signature": [
-            "{ defaultSolution?: \"security\" | \"workplaceai\" | \"oblt\" | \"es\" | undefined; }"
+            "{ defaultSolution?: \"security\" | \"es\" | \"workplaceai\" | \"oblt\" | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "lineNumber": 115,

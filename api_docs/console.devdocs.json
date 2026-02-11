@@ -629,7 +629,7 @@
             "label": "ViewContent",
             "description": [],
             "signature": [
-              "React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
+              "React.ComponentType"
             ],
             "path": "src/platform/plugins/shared/console/public/types/embeddable_console.ts",
             "lineNumber": 51,

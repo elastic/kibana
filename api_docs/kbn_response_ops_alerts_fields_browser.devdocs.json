@@ -21,8 +21,8 @@
           },
           ">"
         ],
-        "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/components/field_browser/field_browser.tsx",
-        "lineNumber": 169,
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-fields-browser/components/field_browser/field_browser.tsx",
+        "lineNumber": 167,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -56,8 +56,8 @@
         "tags": [],
         "label": "FieldBrowserOptions",
         "description": [],
-        "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
-        "lineNumber": 36,
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -73,8 +73,8 @@
               "CreateFieldComponent",
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
-            "lineNumber": 37,
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -90,8 +90,8 @@
               "GetFieldTableColumns",
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
-            "lineNumber": 38,
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -108,8 +108,8 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
-            "lineNumber": 39,
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -124,8 +124,8 @@
         "tags": [],
         "label": "FieldBrowserProps",
         "description": [],
-        "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
-        "lineNumber": 45,
+        "path": "x-pack/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
+        "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -142,8 +142,8 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
-            "lineNumber": 46,
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -168,8 +168,8 @@
               },
               ">; }"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
-            "lineNumber": 48,
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -186,8 +186,8 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
-            "lineNumber": 50,
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -204,8 +204,8 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
-            "lineNumber": 52,
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -224,8 +224,8 @@
             "signature": [
               "(columnId: string) => void"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
-            "lineNumber": 54,
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -240,8 +240,8 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
-                "lineNumber": 55,
+                "path": "x-pack/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
+                "lineNumber": 53,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -269,8 +269,8 @@
               },
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
-            "lineNumber": 56,
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -287,8 +287,8 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
-            "lineNumber": 58,
+            "path": "x-pack/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
