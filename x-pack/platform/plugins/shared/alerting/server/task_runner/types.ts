@@ -22,6 +22,7 @@ import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IEventLogClient, IEventLogger } from '@kbn/event-log-plugin/server';
+import type { AuditLogger } from '@kbn/core-security-server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
@@ -174,6 +175,7 @@ export interface TaskRunnerContext {
   actionsConfigMap: ActionsConfigMap;
   actionsPlugin: ActionsPluginStartContract;
   alertsService: AlertsService | null;
+  auditLogger?: AuditLogger;
   backfillClient: BackfillClient;
   basePathService: IBasePath;
   cancelAlertsOnRuleTimeout: boolean;

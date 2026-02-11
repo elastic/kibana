@@ -8,6 +8,7 @@
 import sinon from 'sinon';
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { AuditLogger } from '@kbn/core-security-server';
 import type { MutedAlertInstance } from '@kbn/alerting-types';
 import { clearExpiredMutedAlerts } from './clear_expired_muted_alerts';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
@@ -17,6 +18,11 @@ let clock: sinon.SinonFakeTimers;
 const NOW = new Date('2025-06-15T12:00:00.000Z');
 const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const mockAuditLogger: jest.Mocked<AuditLogger> = {
+  log: jest.fn(),
+  enabled: true,
+  includeSavedObjectNames: false,
+};
 
 describe('clearExpiredMutedAlerts()', () => {
   beforeAll(() => {
@@ -26,6 +32,7 @@ describe('clearExpiredMutedAlerts()', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAuditLogger.log.mockClear();
     clock.reset();
   });
 
@@ -261,6 +268,77 @@ describe('clearExpiredMutedAlerts()', () => {
     );
     expect(mockLogger.info).toHaveBeenCalledTimes(2);
   });
+
+  test('emits audit event for each expired entry when auditLogger is provided', async () => {
+    const expiredEntry: MutedAlertInstance = {
+      alertInstanceId: 'alert-expired',
+      mutedAt: '2025-06-15T11:00:00.000Z',
+      expiresAt: '2025-06-15T11:30:00.000Z',
+    };
+
+    const rule = getRule({
+      mutedAlerts: [expiredEntry],
+      mutedInstanceIds: ['alert-expired'],
+    });
+
+    await clearExpiredMutedAlerts({
+      esClient,
+      logger: mockLogger,
+      rule,
+      auditLogger: mockAuditLogger,
+    });
+
+    expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
+    expect(mockAuditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining('auto-unsnoozed alert of'),
+        event: expect.objectContaining({
+          action: 'rule_alert_unsnooze',
+          category: ['database'],
+          type: ['change'],
+        }),
+      })
+    );
+  });
+
+  test('does not emit audit event when auditLogger is not provided', async () => {
+    const expiredEntry: MutedAlertInstance = {
+      alertInstanceId: 'alert-expired',
+      mutedAt: '2025-06-15T11:00:00.000Z',
+      expiresAt: '2025-06-15T11:30:00.000Z',
+    };
+
+    const rule = getRule({
+      mutedAlerts: [expiredEntry],
+      mutedInstanceIds: ['alert-expired'],
+    });
+
+    await clearExpiredMutedAlerts({ esClient, logger: mockLogger, rule });
+
+    expect(mockAuditLogger.log).not.toHaveBeenCalled();
+  });
+
+  test('does not emit audit event when nothing expired', async () => {
+    const futureEntry: MutedAlertInstance = {
+      alertInstanceId: 'alert-future',
+      mutedAt: '2025-06-15T11:50:00.000Z',
+      expiresAt: '2025-06-15T13:00:00.000Z',
+    };
+
+    const rule = getRule({
+      mutedAlerts: [futureEntry],
+      mutedInstanceIds: ['alert-future'],
+    });
+
+    await clearExpiredMutedAlerts({
+      esClient,
+      logger: mockLogger,
+      rule,
+      auditLogger: mockAuditLogger,
+    });
+
+    expect(mockAuditLogger.log).not.toHaveBeenCalled();
+  });
 });
 
 const getRule = ({
@@ -271,6 +349,7 @@ const getRule = ({
   mutedInstanceIds: string[];
 }) => ({
   id: 'rule-1',
+  name: 'Test Rule',
   mutedAlerts,
   mutedInstanceIds,
 });

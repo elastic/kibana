@@ -75,6 +75,7 @@ import {
   isOutdatedTaskVersionError,
   OUTDATED_TASK_VERSION,
 } from '../lib/error_with_type';
+import { ruleAuditEvent, RuleAuditAction } from '../rules_client/common/audit_events';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -455,6 +456,12 @@ export class TaskRunner<
           this.logger.info(
             `Auto-unmuted alert '${alertInstanceId}' for rule '${ruleId}': ${reason}`
           );
+          this.context.auditLogger?.log(
+            ruleAuditEvent({
+              action: RuleAuditAction.UNSNOOZE_ALERT,
+              savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: rule.name },
+            })
+          );
         }
       } catch (err) {
         this.logger.error(`Failed to persist auto-unmute for rule '${ruleId}': ${err.message}`);
@@ -630,6 +637,7 @@ export class TaskRunner<
             logger: this.logger,
             rule: runRuleParams.rule,
             version: runRuleParams.version,
+            auditLogger: this.context.auditLogger,
           });
         } catch (e) {
           // Most likely a 409 conflict error, which is ok, we'll try again at the next rule run
