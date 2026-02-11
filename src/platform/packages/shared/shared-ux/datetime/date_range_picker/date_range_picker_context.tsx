@@ -116,7 +116,9 @@ export function DateRangePickerProvider({
     ? durationToDisplayShortText(duration.startDate, duration.endDate)
     : null;
 
-  const isInvalid = isInvalidProp ?? false;
+  // TODO separate a "live" validity prop that should be available in context
+  // from the `isInvalid` top-level prop that will be passed down to control
+  const isInvalid = isInvalidProp || timeRange.isInvalid;
 
   useEffect(() => {
     if (!isEditing && text.trim() === '' && lastValidText.current) {
