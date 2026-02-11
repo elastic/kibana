@@ -23,8 +23,9 @@ import React, { useMemo } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { isCancelableStatus, isTerminalStatus } from '@kbn/workflows';
+import { ExecutionStatus, isCancelableStatus, isTerminalStatus } from '@kbn/workflows';
 import { CancelExecutionButton } from './cancel_execution_button';
+import { ResumeExecutionButton } from './resume_execution_button';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 
 const i18nTexts = {
@@ -44,6 +45,7 @@ export interface WorkflowExecutionPanelProps {
   selectedId: string | null;
   showBackButton?: boolean;
   onClose: () => void;
+  shouldAutoResume?: boolean;
 }
 export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
   ({
@@ -54,10 +56,15 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
     onStepExecutionClick,
     selectedId: selectedStepExecutionId,
     onClose,
+    shouldAutoResume = false,
   }) => {
     const styles = useMemoCss(componentStyles);
     const showCancelButton = useMemo<boolean>(
       () => Boolean(execution && isCancelableStatus(execution.status)),
+      [execution]
+    );
+    const showResumeButton = useMemo<boolean>(
+      () => Boolean(execution && execution.status === ExecutionStatus.WAITING),
       [execution]
     );
     const showDoneButton = useMemo<boolean>(
@@ -104,11 +111,13 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
           </EuiPanel>
         </EuiFlexItem>
 
-        {(showDoneButton || showCancelButton) && (
+        {(showDoneButton || showCancelButton || showResumeButton) && (
           <EuiFlexItem grow={false}>
             <EuiHorizontalRule margin="none" />
             <EuiPanel paddingSize="m" hasShadow={false}>
-              {showCancelButton && execution ? (
+              {showResumeButton && execution ? (
+                <ResumeExecutionButton executionId={execution.id} autoOpen={shouldAutoResume} />
+              ) : showCancelButton && execution ? (
                 <CancelExecutionButton executionId={execution.id} />
               ) : (
                 <>

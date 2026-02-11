@@ -1,0 +1,39 @@
+version: '1'
+name: Minimal HITL Test
+description: Simplest workflow to test waitForInput - logs execution info then pauses
+
+triggers:
+  - type: manual
+
+steps:
+  # Log execution details for easy testing
+  - name: log_info
+    type: console
+    with:
+      message: |
+        🔔 Workflow will pause at next step
+        ════════════════════════════════════════
+        Execution ID: {{ execution.id }}
+        Workflow ID: {{ workflow.id }}
+        Space: {{ workflow.spaceId }}
+        
+        Resume from UI:
+        {{ execution.url }}?resume=true
+        
+        Or via API:
+        curl -X POST http://localhost:5601/s/{{ workflow.spaceId }}/api/workflowExecutions/{{ execution.id }}/resume \
+          -H "kbn-xsrf: true" \
+          -H "Content-Type: application/json" \
+          -d '{"input": {"approved": true, "comments": "Test!"}}'
+        ════════════════════════════════════════
+
+  - name: wait_for_input
+    type: waitForInput
+    with:
+      message: "Please provide input to continue"
+
+  - name: display_result
+    type: data.set
+    with:
+      message: "Workflow completed!"
+      received_data: "{{ steps.wait_for_input.output }}"

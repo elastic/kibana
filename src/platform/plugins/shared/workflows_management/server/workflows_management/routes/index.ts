@@ -25,6 +25,7 @@ import { registerGetWorkflowStatsRoute } from './get_workflow_stats';
 import { registerPostCancelWorkflowExecutionRoute } from './post_cancel_workflow_execution';
 import { registerPostCloneWorkflowRoute } from './post_clone_workflow';
 import { registerPostCreateWorkflowRoute } from './post_create_workflow';
+import { registerPostResumeWorkflowExecutionRoute } from './post_resume_workflow_execution';
 import { registerPostRunWorkflowRoute } from './post_run_workflow';
 import { registerPostSearchWorkflowsRoute } from './post_search_workflows';
 import { registerPostTestStepRoute } from './post_test_step';
@@ -59,6 +60,7 @@ export function defineRoutes(
   registerGetWorkflowExecutionsRoute(deps);
   registerGetWorkflowExecutionByIdRoute(deps);
   registerPostCancelWorkflowExecutionRoute(deps);
+  registerPostResumeWorkflowExecutionRoute(deps);
   registerGetWorkflowExecutionLogsRoute(deps);
   registerGetStepExecutionRoute(deps);
   registerGetWorkflowJsonSchemaRoute(deps);

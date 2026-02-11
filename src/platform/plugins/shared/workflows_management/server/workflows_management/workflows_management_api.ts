@@ -419,6 +419,16 @@ export class WorkflowsManagementApi {
     return workflowsExecutionEngine.cancelWorkflowExecution(workflowExecutionId, spaceId);
   }
 
+  public async resumeWorkflowExecution(
+    executionId: string,
+    spaceId: string,
+    input: Record<string, any>,
+    request: KibanaRequest
+  ): Promise<void> {
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
+  }
+
   public async getWorkflowStats(spaceId: string) {
     return this.workflowsService.getWorkflowStats(spaceId);
   }

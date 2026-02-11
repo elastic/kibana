@@ -39,6 +39,7 @@ export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;
   cancelWorkflowExecution: CancelWorkflowExecution;
+  resumeWorkflowExecution: ResumeWorkflowExecution;
   workflowEventLoggerService: IWorkflowEventLoggerService;
   scheduleWorkflow: ScheduleWorkflow;
 }
@@ -80,3 +81,10 @@ export type ScheduleWorkflow = (
   context: Record<string, any>,
   request: KibanaRequest
 ) => Promise<ExecuteWorkflowResponse>;
+
+export type ResumeWorkflowExecution = (
+  executionId: string,
+  spaceId: string,
+  input: Record<string, any>,
+  request: KibanaRequest
+) => Promise<void>;

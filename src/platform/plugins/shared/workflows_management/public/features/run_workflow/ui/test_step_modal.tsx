@@ -38,10 +38,14 @@ export function TestStepModal({
   initialcontextOverride,
   onClose,
   onSubmit,
+  mode = 'test',
+  resumeMessage,
 }: {
   initialcontextOverride: ContextOverrideData;
   onSubmit?: (params: { stepInputs: Record<string, any> }) => void;
   onClose: () => void;
+  mode?: 'test' | 'resume';
+  resumeMessage?: string;
 }) {
   const styles = useMemoCss(componentStyles);
   useWorkflowsMonacoTheme();
@@ -124,13 +128,30 @@ export function TestStepModal({
         <EuiModalHeaderTitle id={modalTitleId}>
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem>
-              <FormattedMessage id="workflows.testStepModal.title" defaultMessage="Test step" />
+              {mode === 'resume' ? (
+                <FormattedMessage
+                  id="workflows.testStepModal.resumeTitle"
+                  defaultMessage="Resume workflow"
+                />
+              ) : (
+                <FormattedMessage id="workflows.testStepModal.title" defaultMessage="Test step" />
+              )}
             </EuiFlexItem>
             <EuiFlexItem css={styles.description}>
-              <FormattedMessage
-                id="workflows.testStepModal.description"
-                defaultMessage="Test run with current changes and provided payload. Will not be saved in history."
-              />
+              {mode === 'resume' ? (
+                <>
+                  {resumeMessage && <div>{resumeMessage}</div>}
+                  <FormattedMessage
+                    id="workflows.testStepModal.resumeDescription"
+                    defaultMessage="Provide input to continue the paused workflow execution."
+                  />
+                </>
+              ) : (
+                <FormattedMessage
+                  id="workflows.testStepModal.description"
+                  defaultMessage="Test run with current changes and provided payload. Will not be saved in history."
+                />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
@@ -180,11 +201,15 @@ export function TestStepModal({
           onClick={handleSubmit}
           disabled={!isJsonValid}
           color="success"
-          iconType="play"
+          iconType={mode === 'resume' ? 'playFilled' : 'play'}
           size="s"
           data-test-subj="submit-step-run"
         >
-          <FormattedMessage id="workflows.testStepModal.submitRunBtn" defaultMessage="Run" />
+          {mode === 'resume' ? (
+            <FormattedMessage id="workflows.testStepModal.resumeBtn" defaultMessage="Resume" />
+          ) : (
+            <FormattedMessage id="workflows.testStepModal.submitRunBtn" defaultMessage="Run" />
+          )}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

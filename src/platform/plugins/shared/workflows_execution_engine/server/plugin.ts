@@ -38,6 +38,7 @@ import type {
   CancelWorkflowExecution,
   ExecuteWorkflow,
   ExecuteWorkflowStep,
+  ResumeWorkflowExecution,
   ScheduleWorkflow,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginSetupDeps,
@@ -734,6 +735,63 @@ export class WorkflowsExecutionEnginePlugin
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
     };
 
+    const resumeWorkflowExecution: ResumeWorkflowExecution = async (
+      executionId,
+      spaceId,
+      input,
+      request
+    ) => {
+      await checkLicense(plugins.licensing);
+
+      await this.initialize(coreStart);
+      const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+        executionId,
+        spaceId
+      );
+
+      if (!workflowExecution) {
+        throw new WorkflowExecutionNotFoundError(executionId);
+      }
+
+      // Validate execution is in WAITING status
+      if (workflowExecution.status !== ExecutionStatus.WAITING) {
+        throw new Error(
+          `Workflow execution is not waiting. Current status: ${workflowExecution.status}`
+        );
+      }
+
+      // Validate current step is waitForInput type (build graph to check)
+      if (workflowExecution.currentNodeId) {
+        const { convertToWorkflowGraph } = await import(
+          '@kbn/workflows/graph/build_execution_graph/build_execution_graph'
+        );
+        const graph = convertToWorkflowGraph(workflowExecution.workflowDefinition);
+        const currentNode = graph.node(workflowExecution.currentNodeId);
+
+        if (currentNode?.stepType !== 'waitForInput') {
+          throw new Error(
+            `Current step is not waiting for input. Step type: ${currentNode?.stepType}`
+          );
+        }
+      }
+
+      // Update execution with resume input
+      await workflowExecutionRepository.updateWorkflowExecution({
+        id: executionId,
+        context: {
+          ...workflowExecution.context,
+          resumeInput: input,
+        },
+      });
+
+      // Schedule immediate resume task
+      await workflowTaskManager.scheduleImmediateResume({
+        executionId,
+        spaceId,
+        fakeRequest: request,
+      });
+    };
+
     const workflowEventLoggerService = new WorkflowEventLoggerService(
       coreStart.dataStreams,
       this.logger,
@@ -746,6 +804,7 @@ export class WorkflowsExecutionEnginePlugin
       executeWorkflowStep,
       scheduleWorkflow,
       cancelWorkflowExecution,
+      resumeWorkflowExecution,
     };
   }
 
