@@ -45,7 +45,9 @@ export function ServiceContents({ onFocusClick, selection, environment, kuery }:
 
   const isServiceNode =
     !('source' in selection && 'target' in selection) && isServiceNodeData(selection.data);
-  const nodeData: ServiceNodeData | null = isServiceNode ? (selection.data as ServiceNodeData) : null;
+  const nodeData: ServiceNodeData | null = isServiceNode
+    ? (selection.data as ServiceNodeData)
+    : null;
   const serviceName = nodeData?.id;
   const serviceGroup = ('serviceGroup' in query && query.serviceGroup) || '';
 

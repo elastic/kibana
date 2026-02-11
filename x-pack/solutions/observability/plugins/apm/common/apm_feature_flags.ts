@@ -67,4 +67,3 @@ export type ValueOfApmFeatureFlag<TApmFeatureFlagName extends ApmFeatureFlagName
 export function getApmFeatureFlags(): ApmFeatureFlags {
   return mapValues(apmFeatureFlagMap, (value, key) => value.default);
 }
-

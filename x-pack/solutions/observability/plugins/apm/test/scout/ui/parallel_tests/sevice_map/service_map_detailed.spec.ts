@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
+import { tags } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
 import {
   DEPENDENCY_POSTGRESQL,
@@ -13,147 +14,148 @@ import {
   SERVICE_OPBEANS_JAVA,
   SERVICE_OPBEANS_NODE,
 } from '../../fixtures/constants';
-import { tags } from '@kbn/scout-oblt';
 
-test.describe('Service map - nodes, edges and popovers', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects: { serviceMapPage } }) => {
-    await browserAuth.loginAsViewer();
-    await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
-    await serviceMapPage.waitForReactFlowServiceMapToLoad();
-    await serviceMapPage.dismissPopoverIfOpen();
-  });
+test.describe(
+  'Service map - nodes, edges and popovers',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeEach(async ({ browserAuth, pageObjects: { serviceMapPage } }) => {
+      await browserAuth.loginAsViewer();
+      await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
+      await serviceMapPage.waitForReactFlowServiceMapToLoad();
+      await serviceMapPage.dismissPopoverIfOpen();
+    });
 
-  test('renders service map with controls', async ({ pageObjects: { serviceMapPage } }) => {
-    await expect(serviceMapPage.reactFlowServiceMap).toBeVisible();
-    await expect(serviceMapPage.reactFlowControls).toBeVisible();
-    await expect(serviceMapPage.reactFlowZoomInBtn).toBeVisible();
-    await expect(serviceMapPage.reactFlowZoomOutBtn).toBeVisible();
-    await expect(serviceMapPage.reactFlowFitViewBtn).toBeVisible();
-
-    await test.step('zoom controls are interactive', async () => {
+    test('renders service map with controls', async ({ pageObjects: { serviceMapPage } }) => {
+      await expect(serviceMapPage.reactFlowServiceMap).toBeVisible();
       await expect(serviceMapPage.reactFlowControls).toBeVisible();
-      await serviceMapPage.clickReactFlowZoomIn();
-      await serviceMapPage.clickReactFlowZoomOut();
+      await expect(serviceMapPage.reactFlowZoomInBtn).toBeVisible();
+      await expect(serviceMapPage.reactFlowZoomOutBtn).toBeVisible();
+      await expect(serviceMapPage.reactFlowFitViewBtn).toBeVisible();
+
+      await test.step('zoom controls are interactive', async () => {
+        await expect(serviceMapPage.reactFlowControls).toBeVisible();
+        await serviceMapPage.clickReactFlowZoomIn();
+        await serviceMapPage.clickReactFlowZoomOut();
+        await serviceMapPage.clickReactFlowFitView();
+        await expect(serviceMapPage.reactFlowControls).toBeVisible();
+      });
+
+      await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+
+      await test.step('service nodes from opbeans data', async () => {
+        const opbeansJavaNode = serviceMapPage.getNodeById(SERVICE_OPBEANS_JAVA);
+        await expect(opbeansJavaNode).toBeVisible();
+        const opbeansNodeNode = serviceMapPage.getNodeById(SERVICE_OPBEANS_NODE);
+        await expect(opbeansNodeNode).toBeVisible();
+      });
+
+      await test.step('edges from service to dependency', async () => {
+        // Opbeans synthtrace has opbeans-java → postgresql (no direct opbeans-java → opbeans-node edge)
+        const edge = serviceMapPage.getEdgeById(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
+        await expect(edge).toBeVisible();
+      });
+    });
+
+    test('shows popover when clicking on a service node', async ({
+      pageObjects: { serviceMapPage },
+    }) => {
+      await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.waitForPopoverToBeVisible();
+      await expect(serviceMapPage.serviceMapPopover).toBeVisible();
+
+      const popoverTitle = await serviceMapPage.getPopoverTitle();
+      expect(popoverTitle).toContain(SERVICE_OPBEANS_JAVA);
+      await expect(serviceMapPage.serviceMapServiceDetailsButton).toBeVisible();
+      await expect(serviceMapPage.serviceMapFocusMapButton).toBeVisible();
+    });
+
+    test('dismisses popover when clicking outside', async ({ pageObjects: { serviceMapPage } }) => {
+      await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.waitForPopoverToBeVisible();
+      await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
+
       await serviceMapPage.clickReactFlowFitView();
-      await expect(serviceMapPage.reactFlowControls).toBeVisible();
+      await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.waitForPopoverToBeHidden();
+      await expect(serviceMapPage.serviceMapPopoverContent).toBeHidden();
     });
 
-    await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+    test('shows popover when clicking on an edge', async ({ pageObjects: { serviceMapPage } }) => {
+      await serviceMapPage.waitForEdgeToLoad(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
+      await serviceMapPage.clickEdge(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
+      await serviceMapPage.waitForPopoverToBeVisible();
+      await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
 
-    await test.step('service nodes from opbeans data', async () => {
-      const opbeansJavaNode = serviceMapPage.getNodeById(SERVICE_OPBEANS_JAVA);
-      await expect(opbeansJavaNode).toBeVisible();
-      const opbeansNodeNode = serviceMapPage.getNodeById(SERVICE_OPBEANS_NODE);
-      await expect(opbeansNodeNode).toBeVisible();
+      const popoverTitle = await serviceMapPage.getPopoverTitle();
+      expect(popoverTitle).toContain(`${SERVICE_OPBEANS_JAVA} → >${DEPENDENCY_POSTGRESQL}`);
     });
 
-    await test.step('edges from service to dependency', async () => {
-      // Opbeans synthtrace has opbeans-java → postgresql (no direct opbeans-java → opbeans-node edge)
-      const edge = serviceMapPage.getEdgeById(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
-      await expect(edge).toBeVisible();
+    test('shows popover when clicking on a dependency node', async ({
+      pageObjects: { serviceMapPage },
+    }) => {
+      await serviceMapPage.dismissPopoverIfOpen();
+      await serviceMapPage.waitForNodeToLoad(`>${DEPENDENCY_POSTGRESQL}`);
+      await serviceMapPage.clickNode(`>${DEPENDENCY_POSTGRESQL}`, { force: true });
+      await serviceMapPage.waitForPopoverToBeVisible();
+      await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
+
+      const popoverTitle = await serviceMapPage.getPopoverTitle();
+      expect(popoverTitle).toContain(DEPENDENCY_POSTGRESQL);
+      await expect(serviceMapPage.serviceMapDependencyDetailsButton).toBeVisible();
     });
-  });
 
-  test('shows popover when clicking on a service node', async ({
-    pageObjects: { serviceMapPage },
-  }) => {
-    await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-    await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
-    await serviceMapPage.waitForPopoverToBeVisible();
-    await expect(serviceMapPage.serviceMapPopover).toBeVisible();
+    test('navigates to Service Details from popover', async ({
+      page,
+      pageObjects: { serviceMapPage },
+    }) => {
+      await serviceMapPage.dismissPopoverIfOpen();
+      await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA, { force: true });
+      await serviceMapPage.waitForPopoverToBeVisible();
+      await serviceMapPage.serviceMapServiceDetailsButton.click();
 
-    const popoverTitle = await serviceMapPage.getPopoverTitle();
-    expect(popoverTitle).toContain(SERVICE_OPBEANS_JAVA);
-    await expect(serviceMapPage.serviceMapServiceDetailsButton).toBeVisible();
-    await expect(serviceMapPage.serviceMapFocusMapButton).toBeVisible();
-  });
+      await expect(page).toHaveURL(
+        new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/overview`)
+      );
+      await page.goBack();
+      await serviceMapPage.waitForReactFlowServiceMapToLoad();
+      await expect(serviceMapPage.reactFlowServiceMap).toBeVisible();
+    });
 
-  test('dismisses popover when clicking outside', async ({
-    pageObjects: { serviceMapPage },
-  }) => {
-    await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-    await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA);
-    await serviceMapPage.waitForPopoverToBeVisible();
-    await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
+    test('navigates to Focus Map from popover', async ({
+      page,
+      pageObjects: { serviceMapPage },
+    }) => {
+      await serviceMapPage.dismissPopoverIfOpen();
+      await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
+      await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA, { force: true });
+      await serviceMapPage.waitForPopoverToBeVisible();
+      await serviceMapPage.serviceMapFocusMapButton.click();
 
-    await serviceMapPage.clickReactFlowFitView();
-    await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-    await serviceMapPage.waitForPopoverToBeHidden();
-    await expect(serviceMapPage.serviceMapPopoverContent).toBeHidden();
-  });
+      await expect(page).toHaveURL(
+        new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/service-map`)
+      );
+      await serviceMapPage.waitForReactFlowServiceMapToLoad();
+      await expect(serviceMapPage.reactFlowServiceMap).toBeVisible();
+    });
 
-  test('shows popover when clicking on an edge', async ({
-    pageObjects: { serviceMapPage },
-  }) => {
-    await serviceMapPage.waitForEdgeToLoad(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
-    await serviceMapPage.clickEdge(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
-    await serviceMapPage.waitForPopoverToBeVisible();
-    await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
+    test('navigates to Dependency Details from popover', async ({
+      page,
+      pageObjects: { serviceMapPage },
+    }) => {
+      await serviceMapPage.dismissPopoverIfOpen();
+      await serviceMapPage.waitForNodeToLoad(`>${DEPENDENCY_POSTGRESQL}`);
+      await serviceMapPage.clickNode(`>${DEPENDENCY_POSTGRESQL}`, { force: true });
+      await serviceMapPage.waitForPopoverToBeVisible();
+      await serviceMapPage.serviceMapDependencyDetailsButton.click();
 
-    const popoverTitle = await serviceMapPage.getPopoverTitle();
-    expect(popoverTitle).toContain(`${SERVICE_OPBEANS_JAVA} → >${DEPENDENCY_POSTGRESQL}`);
-  });
-
-  test('shows popover when clicking on a dependency node', async ({
-    pageObjects: { serviceMapPage },
-  }) => {
-    await serviceMapPage.dismissPopoverIfOpen();
-    await serviceMapPage.waitForNodeToLoad(`>${DEPENDENCY_POSTGRESQL}`);
-    await serviceMapPage.clickNode(`>${DEPENDENCY_POSTGRESQL}`, { force: true });
-    await serviceMapPage.waitForPopoverToBeVisible();
-    await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
-
-    const popoverTitle = await serviceMapPage.getPopoverTitle();
-    expect(popoverTitle).toContain(DEPENDENCY_POSTGRESQL);
-    await expect(serviceMapPage.serviceMapDependencyDetailsButton).toBeVisible();
-  });
-
-  test('navigates to Service Details from popover', async ({
-    page,
-    pageObjects: { serviceMapPage },
-  }) => {
-    await serviceMapPage.dismissPopoverIfOpen();
-    await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-    await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA, { force: true });
-    await serviceMapPage.waitForPopoverToBeVisible();
-    await serviceMapPage.serviceMapServiceDetailsButton.click();
-
-    await expect(page).toHaveURL(new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/overview`));
-    await page.goBack();
-    await serviceMapPage.waitForReactFlowServiceMapToLoad();
-    await expect(serviceMapPage.reactFlowServiceMap).toBeVisible();
-  });
-
-  test('navigates to Focus Map from popover', async ({
-    page,
-    pageObjects: { serviceMapPage },
-  }) => {
-    await serviceMapPage.dismissPopoverIfOpen();
-    await serviceMapPage.waitForNodeToLoad(SERVICE_OPBEANS_JAVA);
-    await serviceMapPage.clickNode(SERVICE_OPBEANS_JAVA, { force: true });
-    await serviceMapPage.waitForPopoverToBeVisible();
-    await serviceMapPage.serviceMapFocusMapButton.click();
-
-    await expect(page).toHaveURL(
-      new RegExp(`/app/apm/services/${SERVICE_OPBEANS_JAVA}/service-map`)
-    );
-    await serviceMapPage.waitForReactFlowServiceMapToLoad();
-    await expect(serviceMapPage.reactFlowServiceMap).toBeVisible();
-  });
-
-  test('navigates to Dependency Details from popover', async ({
-    page,
-    pageObjects: { serviceMapPage },
-  }) => {
-    await serviceMapPage.dismissPopoverIfOpen();
-    await serviceMapPage.waitForNodeToLoad(`>${DEPENDENCY_POSTGRESQL}`);
-    await serviceMapPage.clickNode(`>${DEPENDENCY_POSTGRESQL}`, { force: true });
-    await serviceMapPage.waitForPopoverToBeVisible();
-    await serviceMapPage.serviceMapDependencyDetailsButton.click();
-
-    await expect(page).toHaveURL(new RegExp(`/app/apm/dependencies/overview`));
-    await page.goBack();
-    await serviceMapPage.waitForReactFlowServiceMapToLoad();
-    await expect(serviceMapPage.reactFlowServiceMap).toBeVisible();
-  });
-});
+      await expect(page).toHaveURL(new RegExp(`/app/apm/dependencies/overview`));
+      await page.goBack();
+      await serviceMapPage.waitForReactFlowServiceMapToLoad();
+      await expect(serviceMapPage.reactFlowServiceMap).toBeVisible();
+    });
+  }
+);

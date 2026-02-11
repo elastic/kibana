@@ -52,7 +52,9 @@ export class ServiceMapPage {
 
   async gotoWithDateSelected(start: string, end: string) {
     await this.page.goto(
-      `${this.kbnUrl.app('apm')}/service-map?rangeFrom=${start}&rangeTo=${end}&environment=${PRODUCTION_ENVIRONMENT}`
+      `${this.kbnUrl.app(
+        'apm'
+      )}/service-map?rangeFrom=${start}&rangeTo=${end}&environment=${PRODUCTION_ENVIRONMENT}`
     );
     return await waitForApmSettingsHeaderLink(this.page);
   }

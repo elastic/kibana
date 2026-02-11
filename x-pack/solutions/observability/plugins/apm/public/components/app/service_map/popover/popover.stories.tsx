@@ -7,9 +7,9 @@
 
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
+import { MarkerType } from '@xyflow/react';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { PopoverContent } from './popover_content';
-import { MarkerType } from '@xyflow/react';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../../common/service_map';
 
 const routePath = '/service-map?rangeFrom=now-15m&rangeTo=now';

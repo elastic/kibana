@@ -32,7 +32,7 @@ export function EdgeContents({ selection, environment, start, end }: ContentsPro
 
   const isEdgeSelection = 'source' in selection && 'target' in selection;
   const sourceData = isEdgeSelection
-    ? (selection.data?.sourceData ?? { id: selection.source })
+    ? selection.data?.sourceData ?? { id: selection.source }
     : null;
   const resources = isEdgeSelection ? selection.data?.resources ?? [] : [];
   const sourceServiceName = sourceData?.[SERVICE_NAME];
