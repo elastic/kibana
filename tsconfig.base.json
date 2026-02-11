@@ -2392,8 +2392,6 @@
       "@kbn/typed-react-router-config/*": ["src/platform/packages/shared/kbn-typed-react-router-config/*"],
       "@kbn/ui-actions-browser": ["src/platform/packages/shared/kbn-ui-actions-browser"],
       "@kbn/ui-actions-browser/*": ["src/platform/packages/shared/kbn-ui-actions-browser/*"],
-      "@kbn/ui-actions-enhanced-examples-plugin": ["x-pack/examples/ui_actions_enhanced_examples"],
-      "@kbn/ui-actions-enhanced-examples-plugin/*": ["x-pack/examples/ui_actions_enhanced_examples/*"],
       "@kbn/ui-actions-enhanced-plugin": ["src/platform/plugins/shared/ui_actions_enhanced"],
       "@kbn/ui-actions-enhanced-plugin/*": ["src/platform/plugins/shared/ui_actions_enhanced/*"],
       "@kbn/ui-actions-examples-plugin": ["examples/ui_action_examples"],
