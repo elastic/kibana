@@ -170,6 +170,31 @@ describe('CascadedDocumentsFetcher', () => {
     await expect(fetchPromise).resolves.toEqual([]);
   });
 
+  it('does not cancel fetches when the instance is inactive', async () => {
+    const { stateManager, fetcher } = createFetcher();
+    const delay = Promise.withResolvers<void>();
+    const records = [buildDataTableRecord({ _id: '1', _index: 'logs' }, dataViewWithTimefieldMock)];
+    let capturedSignal: AbortSignal | undefined;
+
+    jest.mocked(stateManager.getIsActiveInstance).mockReturnValue(false);
+    mockFetchEsql.mockImplementation(async ({ abortSignal }) => {
+      capturedSignal = abortSignal;
+      await delay.promise;
+      abortSignal?.throwIfAborted();
+      return { records };
+    });
+
+    const fetchPromise = fetcher.fetchCascadedDocuments(createFetchParams({ nodeId: 'node-6' }));
+
+    fetcher.cancelFetch('node-6', AbortReason.CANCELED);
+    delay.resolve();
+
+    await expect(fetchPromise).resolves.toEqual(records);
+    expect(capturedSignal).toBeDefined();
+    expect(capturedSignal?.aborted).toBe(false);
+    expect(stateManager.setCascadedDocuments).toHaveBeenCalledWith('node-6', records);
+  });
+
   it('aborts all active fetches', async () => {
     const { fetcher } = createFetcher();
     const delay = Promise.withResolvers<void>();
