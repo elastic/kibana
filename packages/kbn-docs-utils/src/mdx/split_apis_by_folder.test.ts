@@ -42,7 +42,7 @@ beforeAll(() => {
 });
 
 test('foo service has all exports', () => {
-  expect(doc?.client.length).toBe(38);
+  expect(doc?.client.length).toBe(40);
   const split = splitApisByFolder(doc);
   expect(split.length).toBe(2);
 
@@ -51,5 +51,5 @@ test('foo service has all exports', () => {
 
   expect(fooDoc?.common.length).toBe(1);
   expect(fooDoc?.client.length).toBe(2);
-  expect(mainDoc?.client.length).toBe(36);
+  expect(mainDoc?.client.length).toBe(38);
 });
