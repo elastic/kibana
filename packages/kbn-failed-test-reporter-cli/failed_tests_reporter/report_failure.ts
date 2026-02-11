@@ -67,7 +67,7 @@ function createFTRBody(
  */
 function getPlaywrightConfigPath(command?: string): string {
   if (!command) return 'N/A';
-  const configMatch = command.match(/--config\s+(\S+)/);
+  const configMatch = command.match(/--config(?:=|\s+)(\S+)/);
   return configMatch ? configMatch[1] : 'N/A';
 }
 
