@@ -5,51 +5,56 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { test } from '../fixtures';
 import { getFleetAgentsReadIntegrationsNoneRole } from '../fixtures/services/privileges';
 
-test.describe('When the user has Fleet Agents Read built-in role', { tag: ['@ess'] }, () => {
-  test('is accessible but user cannot perform any write actions on agent tabs', async ({
-    browserAuth,
-    pageObjects,
-  }) => {
-    await browserAuth.loginWithCustomRole(getFleetAgentsReadIntegrationsNoneRole());
-    const { fleetHome } = pageObjects;
+test.describe(
+  'When the user has Fleet Agents Read built-in role',
+  { tag: [...tags.stateful.classic] },
+  () => {
+    test('is accessible but user cannot perform any write actions on agent tabs', async ({
+      browserAuth,
+      pageObjects,
+    }) => {
+      await browserAuth.loginWithCustomRole(getFleetAgentsReadIntegrationsNoneRole());
+      const { fleetHome } = pageObjects;
 
-    await fleetHome.navigateTo();
-    await fleetHome.waitForPageToLoad();
+      await fleetHome.navigateTo();
+      await fleetHome.waitForPageToLoad();
 
-    // Verify agents tab exists
-    await expect(fleetHome.getAgentsTab()).toBeVisible();
+      // Verify agents tab exists
+      await expect(fleetHome.getAgentsTab()).toBeVisible();
 
-    // Verify missing privileges prompt does not exist
-    await expect(fleetHome.getMissingPrivilegesPromptTitle()).toHaveCount(0);
+      // Verify missing privileges prompt does not exist
+      await expect(fleetHome.getMissingPrivilegesPromptTitle()).toHaveCount(0);
 
-    // Verify write action buttons do not exist
-    await expect(fleetHome.getAddAgentButton()).toHaveCount(0);
-    await expect(fleetHome.getAddFleetServerHeader()).toHaveCount(0);
-  });
+      // Verify write action buttons do not exist
+      await expect(fleetHome.getAddAgentButton()).toHaveCount(0);
+      await expect(fleetHome.getAddFleetServerHeader()).toHaveCount(0);
+    });
 
-  test('is accessible and user only see agents tab', async ({
-    browserAuth,
-    pageObjects,
-    config,
-  }) => {
-    await browserAuth.loginWithCustomRole(getFleetAgentsReadIntegrationsNoneRole());
-    const { fleetHome } = pageObjects;
+    test('is accessible and user only see agents tab', async ({
+      browserAuth,
+      pageObjects,
+      config,
+    }) => {
+      await browserAuth.loginWithCustomRole(getFleetAgentsReadIntegrationsNoneRole());
+      const { fleetHome } = pageObjects;
 
-    await fleetHome.navigateTo();
-    await fleetHome.waitForPageToLoad();
+      await fleetHome.navigateTo();
+      await fleetHome.waitForPageToLoad();
 
-    // Verify agents tab exists
-    await expect(fleetHome.getAgentsTab()).toBeVisible();
+      // Verify agents tab exists
+      await expect(fleetHome.getAgentsTab()).toBeVisible();
 
-    const defaultPolicyCount = config.isCloud ? 1 : 0;
+      const defaultPolicyCount = config.isCloud ? 1 : 0;
 
-    await expect(fleetHome.getAgentPoliciesTab()).toHaveCount(defaultPolicyCount);
-    await expect(fleetHome.getSettingsTab()).toHaveCount(defaultPolicyCount);
-    await expect(fleetHome.getUninstallTokensTab()).toHaveCount(0);
-  });
-});
+      await expect(fleetHome.getAgentPoliciesTab()).toHaveCount(defaultPolicyCount);
+      await expect(fleetHome.getSettingsTab()).toHaveCount(defaultPolicyCount);
+      await expect(fleetHome.getUninstallTokensTab()).toHaveCount(0);
+    });
+  }
+);
