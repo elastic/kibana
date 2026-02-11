@@ -8,7 +8,7 @@
  */
 
 import type { inlineCastsMapping } from './commands/definitions/generated/inline_casts_mapping';
-import type { PromQLAstQueryExpression } from './promql/types';
+import type { PromQLAstQueryExpression } from './embedded_languages/promql/types';
 
 /**
  * @deprecated A full query AST is represented by {@link ESQLAstQueryExpression} type.
