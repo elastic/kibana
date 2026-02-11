@@ -47,7 +47,7 @@ import type { AnalyticsService, TrackingService } from '../../telemetry';
 import type { AgentExecution, AgentExecutionEventDoc, SerializedExecutionError } from './types';
 import type { ExecutionEventsClient } from './persistence';
 
-const EVENT_BATCH_INTERVAL_MS = 200;
+import { EVENT_BATCH_INTERVAL_MS } from './constants';
 
 /**
  * Dependencies needed to build and run an agent event stream.

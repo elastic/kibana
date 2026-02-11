@@ -10,3 +10,6 @@ export const ABORT_POLL_INTERVAL_MS = 2000;
 
 /** How often (ms) followExecution polls for new events. */
 export const FOLLOW_POLL_INTERVAL_MS = 500;
+
+/** How often (ms) execution events are batched before being written to ES. */
+export const EVENT_BATCH_INTERVAL_MS = 200;
