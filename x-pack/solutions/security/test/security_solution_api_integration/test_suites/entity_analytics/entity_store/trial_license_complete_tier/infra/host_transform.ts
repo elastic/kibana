@@ -87,13 +87,38 @@ export async function createDocumentsAndTriggerTransform(
   // Trigger the transform manually
   await triggerTransform(providerContext, HOST_TRANSFORM_ID);
   await retry.waitForWithTimeout('Transform to run again', TIMEOUT_MS, async () => {
-    const response = await es.transform.getTransformStats({
-      transform_id: HOST_TRANSFORM_ID,
-    });
-    transform = response.transforms[0];
-    expect(transform.stats.trigger_count).toBeGreaterThan(triggerCount);
-    expect(transform.stats.documents_processed).toBeGreaterThan(docsProcessed);
-    return true;
+    try {
+      const response = await es.transform.getTransformStats({
+        transform_id: HOST_TRANSFORM_ID,
+      });
+      if (!response.transforms[0]) {
+        log.debug(`Transform ${HOST_TRANSFORM_ID} not found in stats response, retrying...`);
+        return false;
+      }
+      transform = response.transforms[0];
+      if (transform.stats.trigger_count <= triggerCount) {
+        log.debug(
+          `Transform trigger_count ${transform.stats.trigger_count} not greater than ${triggerCount}, waiting...`
+        );
+        return false;
+      }
+      if (transform.stats.documents_processed <= docsProcessed) {
+        log.debug(
+          `Transform docs_processed ${transform.stats.documents_processed} not greater than ${docsProcessed}, waiting...`
+        );
+        return false;
+      }
+      log.debug(
+        `Transform completed: trigger_count=${transform.stats.trigger_count}, docs_processed=${transform.stats.documents_processed}`
+      );
+      return true;
+    } catch (e: any) {
+      if (e.message?.includes('resource_not_found_exception')) {
+        log.debug(`Transform ${HOST_TRANSFORM_ID} not found, retrying...`);
+        return false;
+      }
+      throw e;
+    }
   });
 }
 
