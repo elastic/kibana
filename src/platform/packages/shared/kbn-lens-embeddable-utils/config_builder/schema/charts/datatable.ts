@@ -31,29 +31,38 @@ import { bucketOperationDefinitionSchema } from '../bucket_ops';
  */
 const sortingSchema = schema.oneOf(
   [
-    // Sorting for metric, row columns or transposed metric column
+    // Sorting for metric or row columns
     schema.object(
       {
-        column_type: schema.oneOf(
-          [schema.literal('metric'), schema.literal('row'), schema.literal('transposed_metric')],
-          {
-            meta: { description: 'Type of column to sort by' },
-          }
-        ),
+        column_type: schema.oneOf([schema.literal('metric'), schema.literal('row')], {
+          meta: { description: 'Type of column to sort by' },
+        }),
         index: schema.number({
           min: 0,
           meta: { description: 'Index of the column/row to sort by (0-based)' },
         }),
-        values: schema.maybe(
-          schema.arrayOf(schema.string(), {
-            minSize: 1,
-            maxSize: 20,
-            meta: {
-              description:
-                'Required only for transposed_metric: array of transposed column values, one for each split_metrics_by column in order',
-            },
-          })
-        ),
+        direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+          meta: { description: 'Sort direction' },
+        }),
+      },
+      { meta: { description: 'Sort by a metric or row column' } }
+    ),
+    // Sorting for split_metrics_by (transposed) columns
+    schema.object(
+      {
+        column_type: schema.literal('transposed_metric'),
+        index: schema.number({
+          min: 0,
+          meta: { description: '' },
+        }),
+        values: schema.arrayOf(schema.string(), {
+          minSize: 1,
+          maxSize: 20,
+          meta: {
+            description:
+              'Array of transposed column values, one for each split_metrics_by column in order',
+          },
+        }),
         direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
           meta: { description: 'Sort direction' },
         }),
@@ -61,7 +70,7 @@ const sortingSchema = schema.oneOf(
       {
         meta: {
           description:
-            'Sort by a metric, row column or transposed metric column (the transposed metric columns are created when metrics are pivoted by split_metrics_by)',
+            'Sort by a transposed metric column (created when metrics are pivoted by split_metrics_by)',
         },
       }
     ),
