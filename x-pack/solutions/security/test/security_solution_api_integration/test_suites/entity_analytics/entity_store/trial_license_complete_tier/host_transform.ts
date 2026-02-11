@@ -153,22 +153,66 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it("Should return 200 and status 'running' for all engines", async () => {
-        const { body } = await supertest
-          .get('/api/entity_store/status')
-          .query({ include_components: true })
-          .expect(200);
+        const log = providerContext.getService('log');
 
-        const response: GetEntityStoreStatusResponse = body as GetEntityStoreStatusResponse;
-        expect(response.status).to.eql('running');
-        for (const engine of response.engines) {
-          expect(engine.status).to.eql('started');
-          if (!engine.components) {
-            continue;
+        // Wait for stable 'running' status with retry
+        await retry.waitForWithTimeout(
+          'Entity Store to be in running state',
+          TIMEOUT_MS,
+          async () => {
+            const { body } = await supertest
+              .get('/api/entity_store/status')
+              .query({ include_components: true })
+              .expect(200);
+
+            const response: GetEntityStoreStatusResponse = body as GetEntityStoreStatusResponse;
+
+            if (response.status === 'error') {
+              // Log detailed error info
+              log.error(`Entity Store status is 'error'`);
+              for (const engine of response.engines) {
+                log.error(`Engine ${engine.type}: status=${engine.status}`);
+                if (engine.components) {
+                  for (const component of engine.components) {
+                    if (!component.installed || component.errors) {
+                      log.error(
+                        `  Component ${component.resource}: installed=${
+                          component.installed
+                        }, errors=${JSON.stringify(component.errors)}`
+                      );
+                    }
+                  }
+                }
+              }
+              throw new Error(`Entity Store is in error state: ${JSON.stringify(response)}`);
+            }
+
+            if (response.status !== 'running') {
+              log.debug(`Entity Store status is '${response.status}', waiting for 'running'...`);
+              return false;
+            }
+
+            // Verify all engines are started
+            for (const engine of response.engines) {
+              if (engine.status !== 'started') {
+                log.debug(
+                  `Engine ${engine.type} status is '${engine.status}', waiting for 'started'...`
+                );
+                return false;
+              }
+              if (engine.components) {
+                for (const component of engine.components) {
+                  if (!component.installed) {
+                    log.debug(`Component ${component.resource} not yet installed...`);
+                    return false;
+                  }
+                }
+              }
+            }
+
+            return true;
           }
-          for (const component of engine.components) {
-            expect(component.installed).to.be(true);
-          }
-        }
+        );
       });
 
       it('Should successfully trigger a host transform', async () => {
