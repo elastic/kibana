@@ -178,14 +178,162 @@ interface RunStatsAggregations {
 }
 
 const EVALUATIONS_DATA_STREAM_ALIAS = '.kibana-evaluations';
+const EVALUATIONS_DATA_STREAM_WILDCARD = '.kibana-evaluations*';
+const EVALUATIONS_DATA_STREAM_TEMPLATE = 'kibana-evaluations-template';
 export class EvaluationScoreRepository {
   constructor(private readonly esClient: EsClient, private readonly log: SomeDevLog) {}
+
+  private async ensureIndexTemplate(): Promise<void> {
+    const templateBody = {
+      index_patterns: [EVALUATIONS_DATA_STREAM_WILDCARD],
+      data_stream: {},
+      template: {
+        settings: {
+          refresh_interval: '5s',
+        },
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            run_id: { type: 'keyword' },
+            experiment_id: { type: 'keyword' },
+            suite: {
+              type: 'object',
+              properties: {
+                id: { type: 'keyword' },
+              },
+            },
+            ci: {
+              type: 'object',
+              properties: {
+                buildkite: {
+                  type: 'object',
+                  properties: {
+                    build_id: { type: 'keyword' },
+                    job_id: { type: 'keyword' },
+                    build_url: { type: 'keyword' },
+                    pipeline_slug: { type: 'keyword' },
+                    pull_request: { type: 'keyword' },
+                    branch: { type: 'keyword' },
+                    commit: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+            example: {
+              type: 'object',
+              properties: {
+                id: { type: 'keyword' },
+                index: { type: 'integer' },
+                dataset: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'keyword' },
+                    name: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+            task: {
+              type: 'object',
+              properties: {
+                trace_id: { type: 'keyword' },
+                repetition_index: { type: 'integer' },
+                model: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'keyword' },
+                    family: { type: 'keyword' },
+                    provider: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+            evaluator: {
+              type: 'object',
+              properties: {
+                name: { type: 'keyword' },
+                score: { type: 'float' },
+                label: { type: 'keyword' },
+                explanation: { type: 'text', index: false },
+                metadata: { type: 'flattened' },
+                trace_id: { type: 'keyword' },
+                model: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'keyword' },
+                    family: { type: 'keyword' },
+                    provider: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+            run_metadata: {
+              type: 'object',
+              properties: {
+                git_branch: { type: 'keyword' },
+                git_commit_sha: { type: 'keyword' },
+                total_repetitions: { type: 'integer' },
+              },
+            },
+            environment: {
+              type: 'object',
+              properties: {
+                hostname: { type: 'keyword' },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    try {
+      const templateExists = await this.esClient.indices
+        .existsIndexTemplate({
+          name: EVALUATIONS_DATA_STREAM_TEMPLATE,
+        })
+        .catch(() => false);
+
+      if (!templateExists) {
+        await this.esClient.indices.putIndexTemplate({
+          name: EVALUATIONS_DATA_STREAM_TEMPLATE,
+          index_patterns: templateBody.index_patterns,
+          data_stream: templateBody.data_stream,
+          template: templateBody.template as any,
+        });
+
+        this.log.debug('Created Elasticsearch index template for evaluation scores');
+      }
+    } catch (error) {
+      this.log.error('Failed to create index template:', error);
+      throw error;
+    }
+  }
+
+  private async ensureDatastream(): Promise<void> {
+    try {
+      await this.esClient.indices.getDataStream({
+        name: EVALUATIONS_DATA_STREAM_ALIAS,
+      });
+    } catch (error: any) {
+      if (error?.statusCode === 404) {
+        await this.esClient.indices.createDataStream({
+          name: EVALUATIONS_DATA_STREAM_ALIAS,
+        });
+        this.log.debug(`Created datastream: ${EVALUATIONS_DATA_STREAM_ALIAS}`);
+      } else {
+        throw error;
+      }
+    }
+  }
 
   async exportScores(
     documents: EvaluationScoreDocument[],
     options: ExportScoresOptions = {}
   ): Promise<void> {
     try {
+      await this.ensureIndexTemplate();
+      await this.ensureDatastream();
+
       if (documents.length === 0) {
         this.log.warning('No evaluation scores to export');
         return;

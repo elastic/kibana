@@ -91,10 +91,10 @@ describe('EvaluationScoreRepository', () => {
 
     mockEsClient = {
       indices: {
-        existsIndexTemplate: jest.fn(),
-        putIndexTemplate: jest.fn(),
-        getDataStream: jest.fn(),
-        createDataStream: jest.fn(),
+        existsIndexTemplate: jest.fn().mockResolvedValue(true),
+        putIndexTemplate: jest.fn().mockResolvedValue({}),
+        getDataStream: jest.fn().mockResolvedValue({}),
+        createDataStream: jest.fn().mockResolvedValue({}),
         create: jest.fn(),
         delete: jest.fn(),
       },
@@ -238,8 +238,6 @@ describe('EvaluationScoreRepository', () => {
     });
 
     it('should enrich documents with suite/buildkite via exportScores options', async () => {
-      mockEsClient.indices.putIndexTemplate.mockResolvedValue({} as any);
-      mockEsClient.indices.getDataStream.mockResolvedValue({} as any);
       mockEsClient.helpers.bulk.mockResolvedValue({
         total: 1,
         failed: 0,
