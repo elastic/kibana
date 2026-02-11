@@ -219,11 +219,30 @@ export class DatePicker {
     const absoluteTab = this.page.testSubj
       .locator('superDatePickerAbsoluteTab')
       .filter({ visible: true });
-    const isAbsoluteTabVisible = async () => (await absoluteTab.count()) === 1;
-    if (!(await isAbsoluteTabVisible())) {
-      await this.quickMenuButton.click();
-    }
-    await expect(absoluteTab).toHaveCount(1);
+    const ensureVisible = async () => {
+      if ((await absoluteTab.count()) !== 1) {
+        await this.quickMenuButton.click();
+      }
+      await expect(absoluteTab).toHaveCount(1);
+    };
+
+    await ensureVisible();
+
+    await expect
+      .poll(
+        async () => {
+          try {
+            await absoluteTab.click({ trial: true });
+            return true;
+          } catch {
+            await this.quickMenuButton.click();
+            return false;
+          }
+        },
+        { timeout: 10000, intervals: [250] }
+      )
+      .toBe(true);
+
     await absoluteTab.click();
   }
 
