@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { NonEmptyString } from '@kbn/zod-helpers';
 import type { Condition } from '@kbn/streamlang';
 import { conditionSchema } from '@kbn/streamlang';
 import { primitive } from '../shared/record_types';
@@ -35,8 +34,14 @@ export interface StreamQueryKql extends StreamQueryBase {
 export type StreamQuery = StreamQueryKql;
 
 const streamQueryBaseSchema: z.Schema<StreamQueryBase> = z.object({
-  id: NonEmptyString,
-  title: NonEmptyString,
+  id: z
+    .string()
+    .nonempty()
+    .refine((val) => val.trim() !== '', 'No empty strings allowed'),
+  title: z
+    .string()
+    .nonempty()
+    .refine((val) => val.trim() !== '', 'No empty strings allowed'),
 });
 
 export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
@@ -44,7 +49,10 @@ export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
   z.object({
     feature: z
       .object({
-        name: NonEmptyString,
+        name: z
+          .string()
+          .nonempty()
+          .refine((val) => val.trim() !== '', 'No empty strings allowed'),
         filter: conditionSchema,
         type: z.literal('system'),
       })
@@ -64,10 +72,16 @@ export const querySchema: z.ZodType<QueryDslQueryContainer> = z.lazy(() =>
 export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryKqlSchema;
 
 export const upsertStreamQueryRequestSchema = z.object({
-  title: NonEmptyString,
+  title: z
+    .string()
+    .nonempty()
+    .refine((val) => val.trim() !== '', 'No empty strings allowed'),
   feature: z
     .object({
-      name: NonEmptyString,
+      name: z
+        .string()
+        .nonempty()
+        .refine((val) => val.trim() !== '', 'No empty strings allowed'),
       filter: conditionSchema,
       type: z.literal('system'),
     })

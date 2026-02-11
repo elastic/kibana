@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { isSchema } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { isSchema } from '@kbn/zod-helpers/v4';
 import type { Condition } from './conditions';
 import { conditionSchema } from './conditions';
 import type { StreamlangProcessorDefinition } from './processors';

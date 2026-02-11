@@ -6,7 +6,7 @@
  */
 
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { NonEmptyString } from '@kbn/zod-helpers';
 import { isSchema } from '../../../shared/type_guards';
 

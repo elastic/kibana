@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { NonEmptyString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
 import { createIsNarrowSchema } from '../../../shared/type_guards';
 
 export interface IngestStreamLifecycleDSL {
@@ -61,20 +60,45 @@ export type IngestStreamEffectiveLifecycle =
   | ClassicIngestStreamEffectiveLifecycle;
 
 const downsampleStepSchema = z.object({
-  after: NonEmptyString,
-  fixed_interval: NonEmptyString,
+  after: z
+    .string()
+    .nonempty()
+    .refine((val) => val.trim() !== '', 'No empty strings allowed'),
+  fixed_interval: z
+    .string()
+    .nonempty()
+    .refine((val) => val.trim() !== '', 'No empty strings allowed'),
 });
 
 const dslLifecycleSchema = z.object({
   dsl: z.object({
-    data_retention: z.optional(NonEmptyString),
+    data_retention: z.optional(
+      z
+        .string()
+        .nonempty()
+        .refine((val) => val.trim() !== '', 'No empty strings allowed')
+    ),
     downsample: z.optional(z.array(downsampleStepSchema)),
   }),
 });
-const ilmLifecycleSchema = z.object({ ilm: z.object({ policy: NonEmptyString }) });
+const ilmLifecycleSchema = z.object({
+  ilm: z.object({
+    policy: z
+      .string()
+      .nonempty()
+      .refine((val) => val.trim() !== '', 'No empty strings allowed'),
+  }),
+});
 const inheritLifecycleSchema = z.object({ inherit: z.strictObject({}) });
 const disabledLifecycleSchema = z.object({ disabled: z.strictObject({}) });
-const errorLifecycleSchema = z.object({ error: z.strictObject({ message: NonEmptyString }) });
+const errorLifecycleSchema = z.object({
+  error: z.strictObject({
+    message: z
+      .string()
+      .nonempty()
+      .refine((val) => val.trim() !== '', 'No empty strings allowed'),
+  }),
+});
 
 export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.union([
   dslLifecycleSchema,
