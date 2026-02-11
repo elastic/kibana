@@ -51,15 +51,9 @@ test.describe('per-spaces banners', { tag: tags.ESS_ONLY }, () => {
     expect(await pageObjects.banners.getTopBannerText()).toBe('global banner text');
   });
 
-  test('displays the global banner on the login page', async ({
-    page,
-    pageObjects,
-    kbnUrl,
-    context,
-  }) => {
+  test('displays the global banner on the login page', async ({ pageObjects, context }) => {
     await context.clearCookies();
-    await page.goto(kbnUrl.get('/login'));
-    expect(await pageObjects.banners.isLoginButtonVisible()).toBe(true);
+    await pageObjects.login.goto();
 
     expect(await pageObjects.banners.isTopBannerVisible()).toBe(true);
     expect(await pageObjects.banners.getTopBannerText()).toBe('global banner text');

@@ -10,11 +10,10 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 test.describe('global pages', { tag: tags.ESS_ONLY }, () => {
-  test('displays the global banner on the login page', async ({ page, pageObjects, kbnUrl }) => {
-    await page.goto(kbnUrl.get('/login'));
-    expect(await pageObjects.banners.isLoginButtonVisible()).toBe(true);
+  test('displays the global banner on the login page', async ({ pageObjects }) => {
+    await pageObjects.login.goto();
 
-    expect(await pageObjects.banners.isTopBannerVisible()).toBe(true);
+    await expect(pageObjects.banners.mainWrapper).toBeVisible();
     expect(await pageObjects.banners.getTopBannerText()).toBe('global banner text');
   });
 });
