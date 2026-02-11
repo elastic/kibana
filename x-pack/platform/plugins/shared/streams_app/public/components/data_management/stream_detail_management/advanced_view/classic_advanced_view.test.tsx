@@ -100,6 +100,11 @@ jest.mock('../../../../hooks/use_stream_detail', () => ({
   }),
 }));
 
+// Mock hooks used by StreamTitlePanel and StreamTagsPanel
+jest.mock('../../../../hooks/use_update_streams', () => ({
+  useUpdateStreams: () => jest.fn().mockResolvedValue({}),
+}));
+
 jest.mock('../../../../hooks/use_streams_app_fetch', () => ({
   useStreamsAppFetch: () => ({
     value: {
@@ -212,8 +217,8 @@ describe('ClassicAdvancedView', () => {
     jest.clearAllMocks();
   });
 
-  describe('Significant Events Feature (Stream Description & Feature Configuration)', () => {
-    it('should render Stream description panel when significantEvents feature is enabled', () => {
+  describe('Significant Events Feature (Description Field & Stream Discovery)', () => {
+    it('should render description field when significantEvents feature is enabled', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           significantEvents: { enabled: true },
@@ -227,8 +232,8 @@ describe('ClassicAdvancedView', () => {
         />
       );
 
-      // Check the Stream description panel title is rendered
-      expect(screen.getByText('Stream description')).toBeInTheDocument();
+      // Check the Description field label is rendered (part of unified metadata form)
+      expect(screen.getByText('Description')).toBeInTheDocument();
     });
 
     it('should render Stream discovery panel when significantEvents feature is enabled', () => {
@@ -249,7 +254,7 @@ describe('ClassicAdvancedView', () => {
       expect(screen.getByText('Stream discovery')).toBeInTheDocument();
     });
 
-    it('should NOT render Stream description or Feature identification when significantEvents is disabled', () => {
+    it('should NOT render description field or Stream discovery when significantEvents is disabled', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           significantEvents: { enabled: false },
@@ -263,11 +268,11 @@ describe('ClassicAdvancedView', () => {
         />
       );
 
-      expect(screen.queryByText('Stream description')).not.toBeInTheDocument();
+      expect(screen.queryByText('Description')).not.toBeInTheDocument();
       expect(screen.queryByText('Stream discovery')).not.toBeInTheDocument();
     });
 
-    it('should NOT render Stream description or Feature identification when significantEvents is undefined', () => {
+    it('should NOT render description field or Stream discovery when significantEvents is undefined', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           significantEvents: undefined,
@@ -281,13 +286,13 @@ describe('ClassicAdvancedView', () => {
         />
       );
 
-      expect(screen.queryByText('Stream description')).not.toBeInTheDocument();
+      expect(screen.queryByText('Description')).not.toBeInTheDocument();
       expect(screen.queryByText('Stream discovery')).not.toBeInTheDocument();
     });
   });
 
   describe('Unmanaged Elasticsearch Assets', () => {
-    it('should always render Index Configuration section', () => {
+    it('should always render Stream Settings section', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           significantEvents: { enabled: false },
@@ -301,7 +306,7 @@ describe('ClassicAdvancedView', () => {
         />
       );
 
-      expect(screen.getByText('Index Configuration')).toBeInTheDocument();
+      expect(screen.getByText('Stream Settings')).toBeInTheDocument();
     });
 
     it('should render Index template section', () => {
@@ -426,6 +431,42 @@ describe('ClassicAdvancedView', () => {
     });
   });
 
+  describe('Stream Metadata Form', () => {
+    it('should always render title field', () => {
+      mockUseStreamsPrivileges.mockReturnValue({
+        features: {
+          significantEvents: { enabled: false },
+        },
+      } as any);
+
+      renderWithProviders(
+        <ClassicAdvancedView
+          definition={createMockDefinition()}
+          refreshDefinition={mockRefreshDefinition}
+        />
+      );
+
+      expect(screen.getByText('Title')).toBeInTheDocument();
+    });
+
+    it('should always render tags field', () => {
+      mockUseStreamsPrivileges.mockReturnValue({
+        features: {
+          significantEvents: { enabled: false },
+        },
+      } as any);
+
+      renderWithProviders(
+        <ClassicAdvancedView
+          definition={createMockDefinition()}
+          refreshDefinition={mockRefreshDefinition}
+        />
+      );
+
+      expect(screen.getByText('Tags')).toBeInTheDocument();
+    });
+  });
+
   describe('All Features Enabled', () => {
     it('should render all panels when significantEvents is enabled', () => {
       mockUseStreamsPrivileges.mockReturnValue({
@@ -441,12 +482,15 @@ describe('ClassicAdvancedView', () => {
         />
       );
 
-      // Stream description
-      expect(screen.getByText('Stream description')).toBeInTheDocument();
+      // Stream title and tags (now part of unified form with labels "Title" and "Tags")
+      expect(screen.getByText('Title')).toBeInTheDocument();
+      expect(screen.getByText('Tags')).toBeInTheDocument();
+      // Stream description (now part of unified form with label "Description")
+      expect(screen.getByText('Description')).toBeInTheDocument();
       // Stream discovery (contains Features and Systems)
       expect(screen.getByText('Stream discovery')).toBeInTheDocument();
-      // Index Configuration
-      expect(screen.getByText('Index Configuration')).toBeInTheDocument();
+      // Stream Settings (renamed from Index Configuration)
+      expect(screen.getByText('Stream Settings')).toBeInTheDocument();
       // Elasticsearch assets
       expect(screen.getByText('Index template')).toBeInTheDocument();
       expect(screen.getByText('Pipeline')).toBeInTheDocument();

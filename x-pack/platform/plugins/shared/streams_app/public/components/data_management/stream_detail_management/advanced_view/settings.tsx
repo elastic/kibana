@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import type { IngestStreamSettings } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import { convertGetResponseIntoUpsertRequest, Streams } from '@kbn/streams-schema';
 import {
   EuiBottomBar,
   EuiButton,
@@ -24,18 +24,29 @@ import {
 } from '@elastic/eui';
 import { useAbortController } from '@kbn/react-hooks';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../util/errors';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
+import { useUpdateStreams } from '../../../../hooks/use_update_streams';
 import { Row, RowMetadata } from './row';
 import { parseDuration } from '../../stream_detail_lifecycle/helpers/helpers';
+import { StreamMetadataForm } from './stream_metadata_form';
+import type { AIFeatures } from '../../../../hooks/use_ai_features';
+import { getLast24HoursTimeRange } from '../../../../util/time_range';
 
 interface Setting {
   invalid: boolean;
   value: string;
   override: boolean;
   from?: string;
+}
+
+interface MetadataState {
+  tags: string[];
+  description: string;
 }
 
 function toStringValues(settings: IngestStreamSettings, effectiveSettings: IngestStreamSettings) {
@@ -53,15 +64,21 @@ function toStringValues(settings: IngestStreamSettings, effectiveSettings: Inges
   );
 }
 
+export interface SettingsProps {
+  definition: Streams.ingest.all.GetResponse;
+  refreshDefinition: () => void;
+  children?: React.ReactNode;
+  showDescription?: boolean;
+  aiFeatures?: AIFeatures | null;
+}
+
 export function Settings({
   definition,
   refreshDefinition,
   children,
-}: {
-  definition: Streams.ingest.all.GetResponse;
-  refreshDefinition: () => void;
-  children?: React.ReactNode;
-}) {
+  showDescription = false,
+  aiFeatures,
+}: SettingsProps) {
   const { loading: isLoadingDefinition } = useStreamDetail();
   const {
     isServerless,
@@ -74,7 +91,11 @@ export function Settings({
     },
   } = useKibana();
   const { navigateToUrl } = application;
+  const abortController = useAbortController();
+  const updateStream = useUpdateStreams(definition.stream.name);
+  const canManage = definition.privileges.manage === true;
 
+  // Index settings state
   const originalSettings = useMemo(
     () => toStringValues(definition.stream.ingest.settings, definition.effective_settings),
     [definition]
@@ -87,10 +108,121 @@ export function Settings({
     toStringValues(definition.stream.ingest.settings, definition.effective_settings)
   );
 
-  const hasChanges = useMemo(() => {
+  // Metadata state (tags, description)
+  const originalMetadata = useMemo<MetadataState>(
+    () => ({
+      tags: definition.stream.tags ?? [],
+      description: definition.stream.description ?? '',
+    }),
+    [definition.stream.tags, definition.stream.description]
+  );
+  const [metadata, setMetadata] = useState<MetadataState>(() => ({
+    tags: definition.stream.tags ?? [],
+    description: definition.stream.description ?? '',
+  }));
+
+  // Description generation task state
+  const getDescriptionGenerationStatus = useCallback(async () => {
+    return await streamsRepositoryClient.fetch(
+      'GET /internal/streams/{name}/_description_generation/_status',
+      {
+        signal: abortController.signal,
+        params: {
+          path: { name: definition.stream.name },
+        },
+      }
+    );
+  }, [definition.stream.name, abortController.signal, streamsRepositoryClient]);
+
+  const scheduleDescriptionGenerationTask = useCallback(
+    async (connectorId: string) => {
+      const { from, to } = getLast24HoursTimeRange();
+      await streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/_description_generation/_task',
+        {
+          signal: abortController.signal,
+          params: {
+            path: { name: definition.stream.name },
+            body: {
+              action: 'schedule',
+              to,
+              from,
+              connectorId,
+            },
+          },
+        }
+      );
+    },
+    [definition.stream.name, abortController.signal, streamsRepositoryClient]
+  );
+
+  const [{ loading: isSchedulingGenerationTask }, doScheduleGenerationTask] = useAsyncFn(
+    scheduleDescriptionGenerationTask
+  );
+
+  const cancelDescriptionGenerationTask = useCallback(async () => {
+    await streamsRepositoryClient.fetch(
+      'POST /internal/streams/{name}/_description_generation/_task',
+      {
+        signal: abortController.signal,
+        params: {
+          path: { name: definition.stream.name },
+          body: {
+            action: 'cancel',
+          },
+        },
+      }
+    );
+  }, [definition.stream.name, abortController.signal, streamsRepositoryClient]);
+
+  const acknowledgeDescriptionGenerationTask = useCallback(async () => {
+    try {
+      await streamsRepositoryClient.fetch(
+        'POST /internal/streams/{name}/_description_generation/_task',
+        {
+          signal: abortController.signal,
+          params: {
+            path: { name: definition.stream.name },
+            body: {
+              action: 'acknowledge',
+            },
+          },
+        }
+      );
+    } catch (error) {
+      if (!(isHttpFetchError(error) && error.response?.status === 409)) {
+        throw error;
+      }
+    }
+  }, [definition.stream.name, abortController.signal, streamsRepositoryClient]);
+
+  const [{ loading: isTaskLoading, value: task, error: taskError }, refreshTask] = useAsyncFn(
+    getDescriptionGenerationStatus
+  );
+
+  // Update description when task completes
+  useEffect(() => {
+    if (task?.status === 'completed' && task.description) {
+      setMetadata((prev) => ({ ...prev, description: task.description! }));
+    }
+  }, [task]);
+
+  // Check for changes
+  const hasSettingsChanges = useMemo(() => {
     const keys = [...new Set([...Object.keys(originalSettings), ...Object.keys(settings)])];
     return keys.some((key) => originalSettings[key]?.value !== settings[key]?.value);
   }, [originalSettings, settings]);
+
+  const hasMetadataChanges = useMemo(() => {
+    const tagsChanged =
+      metadata.tags.length !== originalMetadata.tags.length ||
+      metadata.tags.some((tag, index) => tag !== originalMetadata.tags[index]);
+    const descriptionChanged =
+      showDescription && metadata.description !== originalMetadata.description;
+    return tagsChanged || descriptionChanged;
+  }, [metadata, originalMetadata, showDescription]);
+
+  const hasChanges = hasSettingsChanges || hasMetadataChanges;
 
   const updateSetting = useCallback(
     (name: string, value: string, invalid: boolean) => {
@@ -106,7 +238,7 @@ export function Settings({
     },
     [isClassicStream, definition.stream.name, setSettings]
   );
-  const abortController = useAbortController();
+
   const [isUpdating, setIsUpdating] = useState(false);
   const onReset = useCallback(
     (name: string) => {
@@ -125,22 +257,40 @@ export function Settings({
     [originalSettings, isClassicStream, definition.stream.name]
   );
 
-  const updateSettings = useCallback(async () => {
+  const updateAllSettings = useCallback(async () => {
     setIsUpdating(true);
     try {
-      await streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
-        params: {
-          path: { name: definition.stream.name },
-          body: {
-            ingest: {
-              ...definition.stream.ingest,
-              processing: omit(definition.stream.ingest.processing, 'updated_at'),
-              settings: prepareSettings(settings),
+      // Acknowledge any pending description generation task
+      if (showDescription) {
+        await acknowledgeDescriptionGenerationTask();
+      }
+
+      // Save metadata (tags, description) via stream upsert API if changed
+      if (hasMetadataChanges) {
+        const request = convertGetResponseIntoUpsertRequest(definition);
+        request.stream.tags = metadata.tags.length > 0 ? metadata.tags : undefined;
+        if (showDescription) {
+          request.stream.description = metadata.description;
+        }
+        await updateStream(request);
+      }
+
+      // Save index settings via ingest API if changed
+      if (hasSettingsChanges) {
+        await streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
+          params: {
+            path: { name: definition.stream.name },
+            body: {
+              ingest: {
+                ...definition.stream.ingest,
+                processing: omit(definition.stream.ingest.processing, 'updated_at'),
+                settings: prepareSettings(settings),
+              },
             },
           },
-        },
-        signal: abortController.signal,
-      });
+          signal: abortController.signal,
+        });
+      }
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.settings.successfullyUpdatedSettings', {
@@ -161,15 +311,33 @@ export function Settings({
   }, [
     definition,
     settings,
+    metadata,
+    hasSettingsChanges,
+    hasMetadataChanges,
+    showDescription,
     abortController.signal,
     streamsRepositoryClient,
+    updateStream,
+    acknowledgeDescriptionGenerationTask,
     notifications.toasts,
     refreshDefinition,
   ]);
 
+  const resetAllChanges = useCallback(() => {
+    setSettings(toStringValues(definition.stream.ingest.settings, definition.effective_settings));
+    setMetadata({
+      tags: definition.stream.tags ?? [],
+      description: definition.stream.description ?? '',
+    });
+  }, [definition]);
+
   useEffect(() => {
     if (!definition) return;
     setSettings(toStringValues(definition.stream.ingest.settings, definition.effective_settings));
+    setMetadata({
+      tags: definition.stream.tags ?? [],
+      description: definition.stream.description ?? '',
+    });
   }, [definition, setSettings]);
 
   useUnsavedChangesPrompt({
@@ -180,8 +348,35 @@ export function Settings({
     navigateToUrl,
   });
 
+  const areButtonsDisabled =
+    isSchedulingGenerationTask ||
+    task?.status === 'in_progress' ||
+    task?.status === 'being_canceled' ||
+    isTaskLoading ||
+    isUpdating;
+
   return (
     <>
+      <StreamMetadataForm
+        tags={metadata.tags}
+        onTagsChange={(tags) => setMetadata((prev) => ({ ...prev, tags }))}
+        description={metadata.description}
+        onDescriptionChange={(value) => setMetadata((prev) => ({ ...prev, description: value }))}
+        showDescription={showDescription}
+        disabled={areButtonsDisabled}
+        canManage={canManage}
+        aiFeatures={aiFeatures}
+        isTaskLoading={isTaskLoading}
+        task={task}
+        taskError={taskError}
+        refreshTask={refreshTask}
+        getDescriptionGenerationStatus={getDescriptionGenerationStatus}
+        scheduleDescriptionGenerationTask={doScheduleGenerationTask}
+        cancelDescriptionGenerationTask={cancelDescriptionGenerationTask}
+      />
+
+      <EuiHorizontalRule margin="m" />
+
       {children}
 
       {isServerless ? null : (
@@ -278,11 +473,10 @@ export function Settings({
 
       {hasChanges && (
         <SaveChangesBottomBar
-          setSettings={setSettings}
-          updateSettings={updateSettings}
+          resetAllChanges={resetAllChanges}
+          updateSettings={updateAllSettings}
           isUpdating={isUpdating}
           isLoadingDefinition={isLoadingDefinition}
-          definition={definition}
           hasChanges={hasChanges}
           settings={settings}
         />
@@ -413,19 +607,17 @@ function LinkToStream({ name }: { name: string }) {
 }
 
 const SaveChangesBottomBar = ({
-  setSettings,
+  resetAllChanges,
   updateSettings,
   isUpdating,
   isLoadingDefinition,
-  definition,
   hasChanges,
   settings,
 }: {
-  setSettings: (settings: Record<string, Setting>) => void;
+  resetAllChanges: () => void;
   updateSettings: () => void;
   isUpdating: boolean;
   isLoadingDefinition: boolean;
-  definition: Streams.ingest.all.GetResponse;
   hasChanges: boolean;
   settings: Record<string, Setting>;
 }) => {
@@ -439,11 +631,7 @@ const SaveChangesBottomBar = ({
                 data-test-subj="streamsAppSettingsCancelButton"
                 color="text"
                 size="s"
-                onClick={() =>
-                  setSettings(
-                    toStringValues(definition.stream.ingest.settings, definition.effective_settings)
-                  )
-                }
+                onClick={resetAllChanges}
               >
                 {i18n.translate('xpack.streams.settings.cancelChangesButton', {
                   defaultMessage: 'Cancel',

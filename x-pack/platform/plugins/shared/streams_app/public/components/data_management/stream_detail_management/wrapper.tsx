@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiTourStep, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageHeader,
+  EuiToolTip,
+  EuiTourStep,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import { Streams } from '@kbn/streams-schema';
@@ -138,7 +146,20 @@ export function Wrapper({
             wrap
           >
             <EuiFlexGroup gutterSize="s" alignItems="baseline" wrap direction="column">
-              {streamId}
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup direction="column" gutterSize="none">
+                  <EuiFlexItem grow={false}>
+                    {Streams.ingest.all.GetResponse.is(definition) &&
+                    definition.stream.description ? (
+                      <EuiToolTip content={definition.stream.description}>
+                        <span data-test-subj="streamName">{streamId}</span>
+                      </EuiToolTip>
+                    ) : (
+                      <span data-test-subj="streamName">{streamId}</span>
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
               <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap gutterSize="m">
                 <EuiFlexItem grow={true}>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -156,6 +177,18 @@ export function Wrapper({
                       verbose={true}
                       showTooltip={true}
                     />
+                    {Streams.ingest.all.GetResponse.is(definition) &&
+                      definition.stream.tags &&
+                      definition.stream.tags.length > 0 &&
+                      definition.stream.tags.map((tag) => (
+                        <EuiBadge
+                          key={tag}
+                          color="hollow"
+                          data-test-subj={`streamHeaderTag-${tag}`}
+                        >
+                          {tag}
+                        </EuiBadge>
+                      ))}
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>

@@ -23,6 +23,7 @@ const streamsStorageSettings = {
       name: types.keyword(),
       description: types.text(),
       updated_at: types.date(),
+      tags: types.keyword(),
       ingest: types.object({ enabled: false }),
       query: types.object({ enabled: false }),
       query_streams: types.object({ enabled: false }),

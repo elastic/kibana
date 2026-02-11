@@ -13,7 +13,6 @@ import { isRoot } from '@kbn/streams-schema';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { StreamDiscoveryConfiguration } from '../../../stream_detail_systems/stream_discovery_configuration';
-import { StreamDescription } from '../../../stream_detail_systems/stream_description';
 import { IndexConfiguration } from './index_configuration';
 import { DeleteStreamPanel } from './delete_stream';
 import { ImportExportPanel } from './import_export';
@@ -54,19 +53,12 @@ export function WiredAdvancedView({
           <EuiSpacer />
         </>
       )}
-      {significantEvents?.enabled && (
-        <>
-          <StreamDescription
-            definition={definition}
-            refreshDefinition={refreshDefinition}
-            aiFeatures={aiFeatures}
-          />
-          <EuiSpacer />
-          <StreamDiscoveryConfiguration definition={definition.stream} aiFeatures={aiFeatures} />
-          <EuiSpacer />
-        </>
-      )}
-      <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
+      <IndexConfiguration
+        definition={definition}
+        refreshDefinition={refreshDefinition}
+        showDescription={significantEvents?.enabled}
+        aiFeatures={aiFeatures}
+      >
         <EuiCallOut
           iconType="warning"
           color="primary"
@@ -80,6 +72,12 @@ export function WiredAdvancedView({
         />
         <EuiSpacer size="l" />
       </IndexConfiguration>
+      {significantEvents?.enabled && (
+        <>
+          <EuiSpacer />
+          <StreamDiscoveryConfiguration definition={definition.stream} aiFeatures={aiFeatures} />
+        </>
+      )}
       {!isRoot(definition.stream.name) && (
         <>
           <EuiSpacer />

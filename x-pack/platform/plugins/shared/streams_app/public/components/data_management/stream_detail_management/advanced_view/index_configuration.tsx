@@ -10,30 +10,40 @@ import { EuiPanel, EuiText } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { Settings } from './settings';
+import type { AIFeatures } from '../../../../hooks/use_ai_features';
 
 export function IndexConfiguration({
   definition,
   refreshDefinition,
   children,
+  showDescription = false,
+  aiFeatures,
 }: {
   definition: Streams.ingest.all.GetResponse;
   refreshDefinition: () => void;
   children?: React.ReactNode;
+  showDescription?: boolean;
+  aiFeatures?: AIFeatures | null;
 }) {
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="none" grow={false}>
       <EuiPanel hasShadow={false} color="subdued">
         <EuiText size="s">
           <h3>
-            {i18n.translate('xpack.streams.streamAdvancedView.indexConfiguration', {
-              defaultMessage: 'Index Configuration',
+            {i18n.translate('xpack.streams.streamAdvancedView.streamSettings', {
+              defaultMessage: 'Stream Settings',
             })}
           </h3>
         </EuiText>
       </EuiPanel>
 
       <EuiPanel hasShadow={false} hasBorder={false}>
-        <Settings definition={definition} refreshDefinition={refreshDefinition}>
+        <Settings
+          definition={definition}
+          refreshDefinition={refreshDefinition}
+          showDescription={showDescription}
+          aiFeatures={aiFeatures}
+        >
           {children}
         </Settings>
       </EuiPanel>
