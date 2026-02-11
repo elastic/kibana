@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type {
-  NotificationGroup,
-  NotificationPolicy,
-  NotificationPolicyId,
-  Rule,
-  RuleId,
-} from './types';
+import type { NotificationPolicy, NotificationPolicyId, Rule, RuleId } from './types';
 
 export async function getFakeRulesByIds(ruleIds: RuleId[]): Promise<Map<RuleId, Rule>> {
   const now = new Date().toISOString();
@@ -34,23 +28,23 @@ export async function getFakeRulesByIds(ruleIds: RuleId[]): Promise<Map<RuleId, 
 const FAKE_POLICIES: Record<NotificationPolicyId, NotificationPolicy> = {
   policy_123: {
     id: 'policy_123',
-    name: 'Policy matching critical alerts in non-dev environments',
+    name: 'Policy matching all alerts but throttled to 1 hour',
     matcher: undefined, // catch-all, matcher is not supported yet
     groupBy: [], // not implemted yet, require flattened data support
     throttle: {
       interval: '1h',
     },
-    workflowId: 'workflow_123',
+    workflowId: 'workflow-dbaaec7e-77a2-40eb-bbe9-9c26620b7850',
   },
   policy_456: {
     id: 'policy_456',
-    name: 'Policy matching all alerts but throttled to 5 minutes',
-    matcher: 'false', // matcher is not supported yet
+    name: 'Policy matching all alerts but not throttled',
+    matcher: undefined, // catch-all, matcher is not supported yet
     groupBy: [], // not implemted yet, require flattened data support
     throttle: {
-      interval: '5m',
+      interval: undefined,
     },
-    workflowId: 'workflow_456',
+    workflowId: 'workflow-dbaaec7e-77a2-40eb-bbe9-9c26620b7850',
   },
 };
 
@@ -62,14 +56,4 @@ export async function getFakeNotificationPoliciesByIds(
     return acc;
   }, {} as Record<NotificationPolicyId, NotificationPolicy>);
   return new Map(Object.entries(policies));
-}
-
-export async function executeFakeWorkflow(group: NotificationGroup): Promise<void> {
-  console.log(
-    `Executing workflow ${group.workflowId} for group ${group.id} : ${JSON.stringify(
-      group,
-      null,
-      2
-    )}`
-  );
 }

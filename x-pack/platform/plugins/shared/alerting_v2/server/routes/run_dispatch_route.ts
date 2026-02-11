@@ -7,11 +7,12 @@
 
 import Boom from '@hapi/boom';
 import { schema, type TypeOf } from '@kbn/config-schema';
-import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
 import type { RouteHandler } from '@kbn/core-di-server';
 import { Request, Response } from '@kbn/core-di-server';
+import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
-import { DispatcherService, type DispatcherServiceContract } from '../lib/dispatcher/dispatcher';
+import { type DispatcherServiceContract } from '../lib/dispatcher/dispatcher';
+import { DispatcherServiceScopedToken } from '../lib/dispatcher/tokens';
 
 const runDispatchBodySchema = schema.object({
   previousStartedAt: schema.maybe(schema.string({ minLength: 1 })),
@@ -40,7 +41,8 @@ export class RunDispatchRoute implements RouteHandler {
     @inject(Request)
     private readonly request: KibanaRequest<unknown, unknown, RunDispatchBody>,
     @inject(Response) private readonly response: KibanaResponseFactory,
-    @inject(DispatcherService) private readonly dispatcherService: DispatcherServiceContract
+    @inject(DispatcherServiceScopedToken)
+    private readonly dispatcherService: DispatcherServiceContract
   ) {}
 
   async handle() {

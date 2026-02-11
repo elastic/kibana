@@ -23,5 +23,5 @@ export const DispatcherTaskDefinition: AlertingTaskDefinition<DispatcherTaskRunn
   maxAttempts: 1,
   paramsSchema: schema.object({}),
   taskRunnerClass: DispatcherTaskRunner,
-  requiresFakeRequest: false,
+  requiresFakeRequest: true,
 };

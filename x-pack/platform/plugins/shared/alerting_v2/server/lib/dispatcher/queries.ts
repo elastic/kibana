@@ -73,10 +73,11 @@ export const getAlertEpisodeSuppressionsQuery = (alertEpisodes: AlertEpisode[]):
 export const getLastNotifiedTimestampsQuery = (
   notificationGroupIds: NotificationGroupId[]
 ): EsqlRequest => {
+  const values = notificationGroupIds.map((id) => esql.str(id));
+  const whereClause = esql.exp`action_type == "notified" AND notification_group_id IN (${values})`;
+
   return esql`FROM ${ALERT_ACTIONS_DATA_STREAM} 
-    | WHERE action_type == "notified" AND notification_group_id IN (${notificationGroupIds.join(
-      ','
-    )}) 
+    | WHERE ${whereClause}
     | STATS last_notified = MAX(@timestamp) BY notification_group_id
     | KEEP notification_group_id, last_notified
     `.toRequest();

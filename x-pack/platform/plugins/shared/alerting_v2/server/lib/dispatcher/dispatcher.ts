@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server/workflows_management/workflows_management_api';
 import { inject, injectable } from 'inversify';
 import moment from 'moment';
 import objectHash from 'object-hash';
@@ -20,11 +22,7 @@ import { QueryServiceInternalToken } from '../services/query_service/tokens';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 import { LOOKBACK_WINDOW_MINUTES } from './constants';
-import {
-  executeFakeWorkflow,
-  getFakeNotificationPoliciesByIds,
-  getFakeRulesByIds,
-} from './faker_service';
+import { getFakeNotificationPoliciesByIds, getFakeRulesByIds } from './faker_service';
 import {
   getAlertEpisodeSuppressionsQuery,
   getDispatchableAlertEventsQuery,
@@ -44,6 +42,7 @@ import type {
   Rule,
   RuleId,
 } from './types';
+import { dispatchWorkflow } from './workflow_dispatcher';
 
 export interface DispatcherServiceContract {
   run(params: DispatcherExecutionParams): Promise<DispatcherExecutionResult>;
@@ -54,7 +53,9 @@ export class DispatcherService implements DispatcherServiceContract {
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
+    @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
+    @inject(Request) private readonly request: KibanaRequest,
+    private readonly workflowsManagement: WorkflowsManagementApi
   ) {}
 
   public async run({
@@ -87,7 +88,7 @@ export class DispatcherService implements DispatcherServiceContract {
     );
 
     for (const group of dispatch) {
-      await executeFakeWorkflow(group);
+      await dispatchWorkflow(group, this.request, this.workflowsManagement);
     }
 
     const now = new Date();
@@ -161,6 +162,10 @@ export class DispatcherService implements DispatcherServiceContract {
       }
     }
 
+    this.logger.debug({
+      message: () =>
+        `Applied throttling to ${throttled.length} groups and dispatched ${dispatch.length} groups`,
+    });
     return { dispatch, throttled };
   }
 

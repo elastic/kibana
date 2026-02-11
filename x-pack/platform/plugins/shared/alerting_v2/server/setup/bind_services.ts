@@ -5,37 +5,43 @@
  * 2.0.
  */
 
+import { PluginSetup } from '@kbn/core-di';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
+import { DirectorService } from '../lib/director/director';
+import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
+import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
 import { DispatcherService } from '../lib/dispatcher/dispatcher';
-import { RulesClient } from '../lib/rules_client';
 import { NotificationPolicyClient } from '../lib/notification_policy_client';
+import { RulesClient } from '../lib/rules_client';
+import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
+import { NotificationPolicySavedObjectService } from '../lib/services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { QueryService } from '../lib/services/query_service/query_service';
 import {
   QueryServiceInternalToken,
   QueryServiceScopedToken,
 } from '../lib/services/query_service/tokens';
+import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { AlertingRetryService } from '../lib/services/retry_service';
+import { RetryServiceToken } from '../lib/services/retry_service/tokens';
 import { RulesSavedObjectService } from '../lib/services/rules_saved_object_service/rules_saved_object_service';
-import { NotificationPolicySavedObjectService } from '../lib/services/notification_policy_saved_object_service/notification_policy_saved_object_service';
 import { StorageService } from '../lib/services/storage_service/storage_service';
 import {
   StorageServiceInternalToken,
   StorageServiceScopedToken,
 } from '../lib/services/storage_service/tokens';
-import { RetryServiceToken } from '../lib/services/retry_service/tokens';
-import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
-import { DirectorService } from '../lib/director/director';
-import { TransitionStrategyFactory } from '../lib/director/strategies/strategy_resolver';
-import { BasicTransitionStrategy } from '../lib/director/strategies/basic_strategy';
-import { ResourceManager } from '../lib/services/resource_service/resource_manager';
-import { UserService } from '../lib/services/user_service/user_service';
 import {
   createTaskRunnerFactory,
   TaskRunnerFactoryToken,
 } from '../lib/services/task_run_scope_service/create_task_runner';
+import { UserService } from '../lib/services/user_service/user_service';
+import type { AlertingServerSetupDependencies } from '../types';
+import {
+  DispatcherServiceInternalToken,
+  DispatcherServiceScopedToken,
+} from '../lib/dispatcher/tokens';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
@@ -105,7 +111,44 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inSingletonScope();
 
-  bind(DispatcherService).toSelf().inSingletonScope();
+  bind(DispatcherServiceScopedToken)
+    .toDynamicValue(({ get }) => {
+      const workflowsManagement = get(
+        PluginSetup<AlertingServerSetupDependencies['workflowsManagement']>('workflowsManagement')
+      );
+      const queryService = get(QueryServiceScopedToken);
+      const loggerService = get(LoggerServiceToken);
+      const storageService = get(StorageServiceInternalToken);
+      const request = get(Request);
+
+      return new DispatcherService(
+        queryService,
+        loggerService,
+        storageService,
+        request,
+        workflowsManagement.management
+      );
+    })
+    .inRequestScope();
+
+  bind(DispatcherServiceInternalToken)
+    .toDynamicValue(({ get }) => {
+      const workflowsManagement = get(
+        PluginSetup<AlertingServerSetupDependencies['workflowsManagement']>('workflowsManagement')
+      );
+      const queryService = get(QueryServiceInternalToken);
+      const loggerService = get(LoggerServiceToken);
+      const storageService = get(StorageServiceInternalToken);
+      const request = get(Request);
+      return new DispatcherService(
+        queryService,
+        loggerService,
+        storageService,
+        request,
+        workflowsManagement.management
+      );
+    })
+    .inSingletonScope();
 
   bind(DirectorService).toSelf().inSingletonScope();
   bind(TransitionStrategyFactory).toSelf().inSingletonScope();
