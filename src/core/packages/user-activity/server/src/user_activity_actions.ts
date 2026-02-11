@@ -54,7 +54,24 @@ export interface RemovedUserActivityActionDefinition extends UserActivityActionD
  * Registry for actions that have been removed.
  * @private
  */
-export const removedUserActivityActions = {} as const satisfies Record<
+export const removedUserActivityActions = {
+  example_action_2: {
+    description: `just an example so the first team using the service can use this as a guide, 
+    we can remove this when we have an actual usage`,
+    ownerTeam: '@elastic/kibana-core',
+    groupName: 'Example plugins',
+    versionAddedAt: '0.0',
+    versionRemovedAt: '10.0'
+  },
+  example_action_3: {
+    description: `just an example so the first team using the service can use this as a guide, 
+    we can remove this when we have an actual usage`,
+    ownerTeam: '@elastic/kibana-core',
+    groupName: 'Example plugins #2',
+    versionAddedAt: '0.0',
+    versionRemovedAt: '10.0'
+  },
+} as const satisfies Record<
   string,
   RemovedUserActivityActionDefinition
 >;
