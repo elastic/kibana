@@ -10,7 +10,7 @@ import type {
   EuiBasicTableColumn,
   EuiTableSortingType,
 } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import type { SortState, NodeMetricsTableData } from '../shared';
@@ -149,11 +149,33 @@ function podNodeColumns(
       },
     },
     {
-      name: i18n.translate(
-        'xpack.metricsData.metricsTable.pod.averageCpuUsagePercentColumnHeader',
-        {
-          defaultMessage: 'CPU usage (avg.)',
-        }
+      name: (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate(
+              'xpack.metricsData.metricsTable.pod.averageCpuUsagePercentColumnHeader',
+              {
+                defaultMessage: 'CPU usage (avg.)',
+              }
+            )}
+          </EuiFlexItem>
+          {schema === 'semconv' ? (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.metricsData.metricsTable.pod.metricsOptionalTooltip',
+                  {
+                    defaultMessage:
+                      '{metricName} is optional and may not appear for all pods. Visibility depends on your Kubernetes metrics collection setup.',
+                    values: {
+                      metricName: 'metrics.k8s.pod.cpu_limit_utilization',
+                    },
+                  }
+                )}
+              />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       ),
       field: 'averageCpuUsagePercent',
       align: 'right',
@@ -162,11 +184,33 @@ function podNodeColumns(
       ),
     },
     {
-      name: i18n.translate(
-        'xpack.metricsData.metricsTable.pod.averageMemoryUsagePercentColumnHeader',
-        {
-          defaultMessage: 'Memory usage (avg.)',
-        }
+      name: (
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            {i18n.translate(
+              'xpack.metricsData.metricsTable.pod.averageMemoryUsagePercentColumnHeader',
+              {
+                defaultMessage: 'Memory usage (avg.)',
+              }
+            )}
+          </EuiFlexItem>
+          {schema === 'semconv' ? (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip
+                content={i18n.translate(
+                  'xpack.metricsData.metricsTable.pod.metricsOptionalTooltip',
+                  {
+                    defaultMessage:
+                      '{metricName} is optional and may not appear for all pods. Visibility depends on your Kubernetes metrics collection setup.',
+                    values: {
+                      metricName: 'metrics.k8s.pod.memory_limit_utilization',
+                    },
+                  }
+                )}
+              />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       ),
       field: 'averageMemoryUsagePercent',
       align: 'right',

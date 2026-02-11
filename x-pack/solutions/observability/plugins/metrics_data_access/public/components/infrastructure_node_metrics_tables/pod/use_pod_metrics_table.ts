@@ -69,15 +69,10 @@ const podMetricsQueryConfigOtel: MetricsQueryOptions<PodMetricsFieldsOtel> = {
         {
           name: 'A',
           aggregation: 'avg',
-          field: 'metrics.k8s.pod.memory.available',
-        },
-        {
-          name: 'B',
-          aggregation: 'avg',
-          field: 'metrics.k8s.pod.memory.usage',
+          field: 'metrics.k8s.pod.memory_limit_utilization',
         },
       ],
-      equation: 'B / (A+B)',
+      equation: 'A',
     },
   },
 };
