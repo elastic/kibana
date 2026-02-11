@@ -187,12 +187,12 @@ const configSchema = schema.object(
       disableProtection: schema.boolean({ defaultValue: false }),
       allowlist: schema.arrayOf(
         schema.string({ validate: match(/^\//, 'must start with a slash') }),
-        { defaultValue: [], maxSize: 100 }
+        { defaultValue: [] }
       ),
     }),
     excludeRoutes: schema.arrayOf(
       schema.string({ validate: match(/^\//, 'must start with a slash') }),
-      { defaultValue: [] }
+      { defaultValue: [], maxSize: 100 }
     ),
     eluMonitor: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
