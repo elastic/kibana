@@ -16,8 +16,15 @@ export class SpacesPage {
 
   async navigateToHome() {
     await this.page.gotoApp('home');
+    await this.dismissWelcomeScreen();
     await this.page.testSubj.locator('homeApp').waitFor({
       state: 'visible',
+    });
+  }
+
+  async dismissWelcomeScreen() {
+    await this.page.evaluate(() => {
+      localStorage.setItem('home:welcome:show', 'false');
     });
   }
 

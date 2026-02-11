@@ -6,7 +6,6 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-
 import { test } from '../fixtures';
 
 test.describe('Spaces selection', { tag: ['@svlOblt', '@svlSearch', '@svlSecurity'] }, () => {
