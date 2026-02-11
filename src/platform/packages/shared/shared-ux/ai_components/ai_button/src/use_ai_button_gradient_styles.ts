@@ -81,7 +81,6 @@ const getAiButtonThemeTokens = (euiTheme: ReturnType<typeof useEuiTheme>['euiThe
 
 export interface AiButtonGradientStyleOptions {
   readonly fill?: boolean;
-  readonly empty?: boolean;
 }
 
 export interface AiButtonGradientStyles {
@@ -91,7 +90,6 @@ export interface AiButtonGradientStyles {
 
 export const useAiButtonGradientStyles = ({
   fill,
-  empty = false,
 }: AiButtonGradientStyleOptions = {}): AiButtonGradientStyles => {
   const { euiTheme } = useEuiTheme();
   const isDarkMode = useKibanaIsDarkMode();
@@ -99,7 +97,7 @@ export const useAiButtonGradientStyles = ({
   return useMemo(() => {
     const colors = isDarkMode ? darkModeColors : lightModeColors;
     const themeTokens = getAiButtonThemeTokens(euiTheme);
-    const isFilled = Boolean(fill) && !empty;
+    const isFilled = Boolean(fill);
 
     const filledButtonGradient = makeLinearGradient({
       angle: buttonGradientAngle,
@@ -109,30 +107,12 @@ export const useAiButtonGradientStyles = ({
       endPercent: buttonGradientEndPercent,
     });
 
-    let buttonBackground = colors.buttonGradient;
-    if (isFilled) {
-      buttonBackground = filledButtonGradient;
-    } else if (empty) {
-      buttonBackground = euiTheme.colors.emptyShade;
-    }
+    const buttonBackground = isFilled ? filledButtonGradient : colors.buttonGradient;
 
     const buttonCss = css`
       background: ${buttonBackground} !important;
       border-radius: 4px;
       ${isFilled ? `color: ${euiTheme.colors.textInverse};` : ''}
-      ${empty
-        ? `
-          box-shadow: none !important;
-          border: ${euiTheme.border.width.thin} solid transparent;
-          &:focus {
-            outline: none;
-          }
-          &:focus-visible {
-            outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
-            outline-offset: -${euiTheme.focus.width};
-          }
-        `
-        : ''}
 
       &:hover:not(:disabled) {
         background: ${buttonBackground} !important;
@@ -160,5 +140,5 @@ export const useAiButtonGradientStyles = ({
       buttonCss,
       labelCss,
     };
-  }, [euiTheme, empty, fill, isDarkMode]);
+  }, [euiTheme, fill, isDarkMode]);
 };
