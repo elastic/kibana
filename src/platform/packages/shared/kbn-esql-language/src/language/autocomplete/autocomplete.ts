@@ -19,11 +19,11 @@ import { EsqlQuery } from '../../composer';
 import { esqlCommandRegistry } from '../../commands';
 import { isHeaderCommand, Walker } from '../../ast';
 import { parse } from '../../parser';
-import { SuggestionOrderingEngine } from '../../shared';
 import {
   getCommandAutocompleteDefinitions,
   createIndicesBrowserSuggestion,
 } from '../../commands/registry/complete_items';
+import { SuggestionOrderingEngine } from './utils';
 import { ESQL_VARIABLES_PREFIX } from '../../commands/registry/constants';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '../../commands/registry/options/recommended_queries';
 import type {
