@@ -121,7 +121,6 @@ export const EndpointScriptFlyout = memo<EndpointScriptFlyoutProps>(
       queryParams,
       isMounted,
       setUrlParams,
-      toasts.addWarning,
       toasts,
     ]);
 
