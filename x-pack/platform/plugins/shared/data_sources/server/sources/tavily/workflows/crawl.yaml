@@ -1,0 +1,49 @@
+version: '1'
+name: 'sources.tavily.crawl'
+description: 'Crawl a website starting from a URL, extracting content from pages with configurable depth and breadth'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: url
+    type: string
+    required: true
+    description: 'The root URL to begin the crawl'
+  - name: max_depth
+    type: number
+    required: false
+    default: 1
+    description: 'Max depth of the crawl. Defines how far from the base URL the crawler can explore.'
+  - name: max_breadth
+    type: number
+    required: false
+    default: 20
+    description: 'Max number of links to follow per level of the tree (i.e., per page)'
+  - name: limit
+    type: number
+    required: false
+    default: 50
+    description: 'Total number of links the crawler will process before stopping'
+  - name: instructions
+    type: string
+    required: false
+    description: 'Natural language instructions for the crawler specifying which types of pages to return'
+  - name: extract_depth
+    type: string
+    required: false
+    default: 'basic'
+    description: 'Depth of extraction: basic or advanced. Advanced retrieves more data including tables and embedded content.'
+steps:
+  - name: tavily-crawl
+    type: mcp.callTool
+    connector-id: <%= stackConnectorId %>
+    with:
+      name: "tavily_crawl"
+      arguments:
+        url: "${{inputs.url}}"
+        max_depth: ${{inputs.max_depth}}
+        max_breadth: ${{inputs.max_breadth}}
+        limit: ${{inputs.limit}}
+        instructions: "${{inputs.instructions}}"
+        extract_depth: "${{inputs.extract_depth}}"

@@ -1,0 +1,32 @@
+version: '1'
+name: 'sources.tavily.extract'
+description: 'Extract and retrieve content from one or more web page URLs using Tavily'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: urls
+    type: string
+    required: true
+    description: 'The URL or comma-separated list of URLs to extract content from'
+  - name: extract_depth
+    type: string
+    required: false
+    default: 'basic'
+    description: 'Depth of extraction: basic or advanced'
+  - name: include_images
+    type: boolean
+    required: false
+    default: false
+    description: 'Whether to include images extracted from the pages'
+steps:
+  - name: tavily-extract
+    type: mcp.callTool
+    connector-id: <%= stackConnectorId %>
+    with:
+      name: "tavily_extract"
+      arguments:
+        urls: "${{inputs.urls}}"
+        extract_depth: "${{inputs.extract_depth}}"
+        include_images: ${{inputs.include_images}}

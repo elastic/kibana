@@ -1,0 +1,44 @@
+version: '1'
+name: 'sources.tavily.search'
+description: 'Search the web for current information on any topic using Tavily'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query
+    type: string
+    required: true
+    description: 'The search query to execute'
+  - name: max_results
+    type: number
+    required: false
+    default: 10
+    description: 'Maximum number of search results to return'
+  - name: search_depth
+    type: string
+    required: false
+    default: 'basic'
+    description: 'Search depth: basic, advanced, fast, or ultra-fast'
+  - name: include_raw_content
+    type: boolean
+    required: false
+    default: false
+    description: 'Include the cleaned and parsed HTML content of each search result'
+  - name: include_images
+    type: boolean
+    required: false
+    default: false
+    description: 'Include a list of query-related images in the response'
+steps:
+  - name: tavily-search
+    type: mcp.callTool
+    connector-id: <%= stackConnectorId %>
+    with:
+      name: "tavily_search"
+      arguments:
+        query: "${{inputs.query}}"
+        max_results: ${{inputs.max_results}}
+        search_depth: "${{inputs.search_depth}}"
+        include_raw_content: ${{inputs.include_raw_content}}
+        include_images: ${{inputs.include_images}}

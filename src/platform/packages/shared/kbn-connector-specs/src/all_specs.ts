@@ -19,3 +19,5 @@ export * from './specs/urlvoid/urlvoid';
 export * from './specs/virustotal/virustotal';
 export * from './specs/jina/jina_reader';
 export * from './specs/sharepoint_online/sharepoint_online';
+// Tavily uses the .mcp connector type and does not need its own connector spec registration.
+// The spec scaffold exists at ./specs/tavily/tavily.ts for documentation/icon purposes only.
