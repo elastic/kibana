@@ -90,4 +90,3 @@ describe('suggest_pipeline_actor polling', () => {
     });
   });
 });
-

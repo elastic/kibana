@@ -247,9 +247,10 @@ export const StepsEditor = React.memo(() => {
   );
 
   // Pipeline suggestion state
-  const isLoadingSuggestion = useInteractiveModeSelector((snapshot) =>
-    snapshot.matches({ pipelineSuggestion: 'generatingSuggestion' }) ||
-    snapshot.matches({ pipelineSuggestion: 'pollingExistingSuggestion' })
+  const isLoadingSuggestion = useInteractiveModeSelector(
+    (snapshot) =>
+      snapshot.matches({ pipelineSuggestion: 'generatingSuggestion' }) ||
+      snapshot.matches({ pipelineSuggestion: 'pollingExistingSuggestion' })
   );
   const suggestedPipeline = useInteractiveModeSelector(
     (snapshot) => snapshot.context.suggestedPipeline
