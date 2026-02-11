@@ -8,6 +8,7 @@
 import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { isInferenceProviderError } from '@kbn/inference-common';
 import type { InsightsResult } from '@kbn/streams-schema';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
@@ -120,7 +121,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   errorMessage.includes('ERR_CANCELED') ||
                   errorMessage.includes('Request was aborted')
                 ) {
-                  return;
+                  return getDeleteTaskRunResult();
                 }
 
                 taskContext.logger.error(
@@ -132,6 +133,7 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   { connectorId },
                   errorMessage
                 );
+                return getDeleteTaskRunResult();
               }
             },
             runContext,

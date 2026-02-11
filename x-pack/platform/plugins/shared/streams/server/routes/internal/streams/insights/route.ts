@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import type { InsightsResult } from '@kbn/streams-schema';
+import { z } from '@kbn/zod';
+import type { TaskResult } from '@kbn/streams-schema';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import type { InsightsDiscoveryTaskParams } from '../../../../lib/tasks/task_definitions/insights_discovery';
 import { STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE } from '../../../../lib/tasks/task_definitions/insights_discovery';
-import type { TaskResult } from '../../../../lib/tasks/types';
-import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
+import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { handleTaskAction } from '../../../utils/task_helpers';
 import { resolveConnectorId } from '../../../utils/resolve_connector_id';
+import { handleTaskAction } from '../../../utils/task_helpers';
+
+/* Insights Discovery Task */
 
 export type InsightsTaskResult = TaskResult<InsightsResult>;
 
@@ -22,8 +25,8 @@ const insightsTaskRoute = createServerRoute({
   endpoint: 'POST /internal/streams/_insights/_task',
   options: {
     access: 'internal',
-    summary: 'Identify insights in streams',
-    description: 'Identify insights in streams based on significant events',
+    summary: 'Management of the insights discovery task',
+    description: 'schedules/cancels/acknowledges the insights discovery task',
   },
   security: {
     authz: {
@@ -31,45 +34,33 @@ const insightsTaskRoute = createServerRoute({
     },
   },
   params: z.object({
-    body: z.discriminatedUnion('action', [
-      z.object({
-        action: z.literal('schedule').describe('Schedule a new generation task'),
-        connectorId: z
-          .string()
-          .optional()
-          .describe(
-            'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-          ),
-        streamNames: z
-          .array(z.string())
-          .optional()
-          .describe('Stream names to analyze. If not provided, analyzes all streams.'),
-        from: z
-          .number()
-          .optional()
-          .describe('Start of time range (epoch ms). Defaults to now-1h.'),
-        to: z.number().optional().describe('End of time range (epoch ms). Defaults to now.'),
-        bucketSize: z
-          .string()
-          .optional()
-          .describe('Bucket size for histogram (e.g., "1h", "15m"). Auto-derived if not provided.'),
-        changeThreshold: z
-          .number()
-          .optional()
-          .describe('Minimum absolute percentage change to include (default: 20 for 20%).'),
-        maxQueries: z
-          .number()
-          .optional()
-          .describe('Maximum number of queries to process (default: 50).'),
-        queryFilter: z.string().optional().describe('Optional text filter for query search.'),
-      }),
-      z.object({
-        action: z.literal('cancel').describe('Cancel an in-progress generation task'),
-      }),
-      z.object({
-        action: z.literal('acknowledge').describe('Acknowledge a completed generation task'),
-      }),
-    ]),
+    body: taskActionSchema({
+      connectorId: z
+        .string()
+        .optional()
+        .describe(
+          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
+        ),
+      streamNames: z
+        .array(z.string())
+        .optional()
+        .describe('Stream names to analyze. If not provided, analyzes all streams.'),
+      from: z.number().optional().describe('Start of time range (epoch ms). Defaults to now-1h.'),
+      to: z.number().optional().describe('End of time range (epoch ms). Defaults to now.'),
+      bucketSize: z
+        .string()
+        .optional()
+        .describe('Bucket size for histogram (e.g., "1h", "15m"). Auto-derived if not provided.'),
+      changeThreshold: z
+        .number()
+        .optional()
+        .describe('Minimum absolute percentage change to include (default: 20 for 20%).'),
+      maxQueries: z
+        .number()
+        .optional()
+        .describe('Maximum number of queries to process (default: 50).'),
+      queryFilter: z.string().optional().describe('Optional text filter for query search.'),
+    }),
   }),
   handler: async ({
     params,
@@ -128,8 +119,8 @@ const insightsStatusRoute = createServerRoute({
   endpoint: 'POST /internal/streams/_insights/_status',
   options: {
     access: 'internal',
-    summary: 'Check the status of insights identification',
-    description: 'Check the status of insights identification',
+    summary: 'Check the status of insights discovery',
+    description: 'Check the status of insights discovery',
   },
   security: {
     authz: {
