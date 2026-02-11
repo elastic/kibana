@@ -40,6 +40,11 @@ export interface ProcessedAttachment {
   tools: AttachmentBoundedTool[];
 }
 
+export interface ProcessedRoundInput {
+  message: string;
+  attachments: ProcessedAttachment[];
+}
+
 export interface ProcessedAttachmentType {
   type: string;
   description?: string;
