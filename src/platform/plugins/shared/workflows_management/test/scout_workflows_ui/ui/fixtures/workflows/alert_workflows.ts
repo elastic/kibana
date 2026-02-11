@@ -135,6 +135,12 @@ inputs:
 consts:
   alerts_index_name: ${TEST_ALERTS_INDEX}
 steps:
+  - name: delete_index
+    type: elasticsearch.indices.delete
+    with:
+      index: "{{consts.alerts_index_name}}"
+    on-failure:
+      continue: true
   - name: create_obs_alert_rule
     type: kibana.request
     with:
@@ -147,9 +153,9 @@ steps:
         params:
           searchType: esqlQuery
           esqlQuery:
-            esql: "FROM ${TEST_ALERTS_INDEX} METADATA _id | KEEP _id, severity, alert_id, description, category"
-          timeWindowSize: 5
-          timeWindowUnit: m
+            esql: "FROM {{consts.alerts_index_name}} METADATA _id | KEEP _id, severity, alert_id, description, category"
+          timeWindowSize: 20
+          timeWindowUnit: s
           threshold:
             - 0
           thresholdComparator: ">"
@@ -203,12 +209,6 @@ inputs:
   required:
     - "alerts"
 steps:
-  - name: delete_index
-    type: elasticsearch.indices.delete
-    with:
-      index: "{{consts.alerts_index_name}}"
-    on-failure:
-      continue: true
   - name: create_ingest_pipeline
     type: elasticsearch.request
     on-failure:

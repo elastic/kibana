@@ -42,15 +42,9 @@ test.describe(
       await pageObjects.workflowEditor.saveWorkflow();
 
       // Run with custom input
-      await pageObjects.workflowEditor.clickRunButton();
-      await page.testSubj.waitForSelector('workflowExecuteModal', { state: 'visible' });
-      await pageObjects.workflowEditor.setExecuteModalInputs({ message: 'test message' });
-      await page.testSubj.click('executeWorkflowButton');
+      await pageObjects.workflowEditor.executeWorkflowWithInputs({ message: 'test message' });
 
       await page.waitForURL('**/workflows/*?executionId=*');
-
-      const executionPanel = page.testSubj.locator('workflowExecutionPanel');
-      await expect(executionPanel).toBeVisible();
 
       await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
@@ -63,21 +57,24 @@ test.describe(
       await pageObjects.workflowExecution.expandStepsTree();
 
       // Verify trigger section shows the manual input
-      await executionPanel.getByText('Manual').click();
+      const manualStep = await pageObjects.workflowExecution.getStep('manual');
+      await manualStep.click();
       const triggerSection = page.testSubj.locator('workflowExecutionTrigger');
       await expect(triggerSection).toBeVisible();
       await expect(triggerSection.getByText('test message')).toBeVisible();
 
       // Verify execution tree structure
-      const firstStepButton = executionPanel.getByRole('button', { name: 'first_step' });
+      const firstStepButton = await pageObjects.workflowExecution.getStep('first_step');
       await expect(firstStepButton).toHaveCount(1);
 
-      const loopStepButton = executionPanel.getByRole('button', { name: 'loop' });
+      const loopStepButton = await pageObjects.workflowExecution.getStep('loop');
       await loopStepButton.click();
       await expect(loopStepButton).toHaveCount(1);
 
       // Verify foreach produced 2 iterations
-      const logIterationButtons = executionPanel.getByRole('button', { name: 'log_iteration' });
+      const logIterationButtons = pageObjects.workflowExecution.executionPanel.getByRole('button', {
+        name: 'log_iteration',
+      });
       await expect(logIterationButtons).toHaveCount(2);
 
       // eslint-disable-next-line playwright/no-nth-methods -- it's useful here, as it's a list, not a hacky workaround
@@ -106,15 +103,12 @@ test.describe(
       await pageObjects.workflowEditor.clickRunButton();
       await page.waitForURL('**/workflows/*?executionId=*');
 
-      const executionPanel = page.testSubj.locator('workflowExecutionPanel');
-      await expect(executionPanel).toBeVisible();
-
       await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 
       await pageObjects.workflowExecution.expandStepsTree();
 
       // Verify 50 leaf step executions (exclude the parent foreach step)
-      const stepButtons = executionPanel.getByRole('button', {
+      const stepButtons = pageObjects.workflowExecution.executionPanel.getByRole('button', {
         name: /^(?!foreach_).*hello_world_step/,
       });
       await expect(stepButtons).toHaveCount(50);
