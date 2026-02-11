@@ -9,11 +9,13 @@
 
 import React, { type KeyboardEvent, type ChangeEvent, useRef, useEffect, useCallback } from 'react';
 
+import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiFieldText,
   EuiFormControlButton,
   EuiFormControlLayout,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -38,6 +40,7 @@ export function DateRangePickerControl() {
     compressed,
     maxWidth,
     displayText,
+    fullFormattedText,
     displayDuration,
     inputRef,
     buttonRef,
@@ -111,6 +114,10 @@ export function DateRangePickerControl() {
     [isEditing, setIsEditing]
   );
 
+  const tooltipStyles = css`
+    max-inline-size: min(58ch, 90vw);
+  `;
+
   return (
     <div
       ref={controlRef}
@@ -144,16 +151,23 @@ export function DateRangePickerControl() {
             compressed={compressed}
           />
         ) : (
-          <EuiFormControlButton
-            data-test-subj="dateRangePickerControlButton"
-            buttonRef={buttonRef}
-            value={displayText}
-            onClick={onButtonClick}
-            isInvalid={isInvalid}
-            compressed={compressed}
+          <EuiToolTip
+            content={fullFormattedText !== displayText ? fullFormattedText : undefined}
+            display="block"
+            css={tooltipStyles}
+            offset={euiTheme.base * 0.75}
           >
-            {displayDuration && <EuiBadge>{displayDuration}</EuiBadge>}
-          </EuiFormControlButton>
+            <EuiFormControlButton
+              data-test-subj="dateRangePickerControlButton"
+              buttonRef={buttonRef}
+              value={displayText}
+              onClick={onButtonClick}
+              isInvalid={isInvalid}
+              compressed={compressed}
+            >
+              {displayDuration && <EuiBadge>{displayDuration}</EuiBadge>}
+            </EuiFormControlButton>
+          </EuiToolTip>
         )}
       </EuiFormControlLayout>
     </div>

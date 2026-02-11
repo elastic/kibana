@@ -8,7 +8,7 @@
  */
 
 import { textToTimeRange } from '../parse';
-import { timeRangeToDisplayText } from './format_time_range';
+import { timeRangeToDisplayText, timeRangeToFullFormattedText } from './format_time_range';
 
 describe('timeRangeToDisplayText', () => {
   const toDisplay = (text: string, options?: Parameters<typeof timeRangeToDisplayText>[1]) =>
@@ -70,5 +70,47 @@ describe('timeRangeToDisplayText', () => {
     const invalidRange = textToTimeRange('not a range');
 
     expect(timeRangeToDisplayText(invalidRange)).toBe('not a range');
+  });
+});
+
+describe('timeRangeToFullFormattedText', () => {
+  const toFullFormatted = (
+    text: string,
+    options?: Parameters<typeof timeRangeToFullFormattedText>[1]
+  ) => timeRangeToFullFormattedText(textToTimeRange(text), options);
+
+  it('formats absolute to absolute with full date format', () => {
+    expect(toFullFormatted('Feb 3 2016, 19:00 to Feb 3 2026, 19:00')).toBe(
+      'Feb 3 2016, 19:00 → Feb 3 2026, 19:00'
+    );
+  });
+
+  it('resolves relative dates to absolute formatted dates', () => {
+    // Use local-time constructor to avoid timezone offset in assertions
+    jest.useFakeTimers().setSystemTime(new Date(2026, 1, 11, 12, 0, 0));
+    expect(toFullFormatted('-7d to now')).toBe('Feb 4 2026, 12:00 → Feb 11 2026, 12:00');
+    jest.useRealTimers();
+  });
+
+  it('resolves both relative dates to absolute formatted dates', () => {
+    jest.useFakeTimers().setSystemTime(new Date(2026, 1, 11, 12, 0, 0));
+    expect(toFullFormatted('-1h to +1h')).toBe('Feb 11 2026, 11:00 → Feb 11 2026, 13:00');
+    jest.useRealTimers();
+  });
+
+  it('returns raw text for invalid ranges', () => {
+    expect(toFullFormatted('not a range')).toBe('not a range');
+  });
+
+  it('supports a custom delimiter', () => {
+    expect(toFullFormatted('Feb 3 2016 to Feb 3 2026', { delimiter: '—' })).toBe(
+      'Feb 3 2016, 00:00 — Feb 3 2026, 00:00'
+    );
+  });
+
+  it('supports a custom date format', () => {
+    expect(toFullFormatted('Feb 3 2016 to Feb 3 2026', { dateFormat: 'YYYY-MM-DD' })).toBe(
+      '2016-02-03 → 2026-02-03'
+    );
   });
 });

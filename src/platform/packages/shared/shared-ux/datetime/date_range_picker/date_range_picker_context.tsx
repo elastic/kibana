@@ -24,7 +24,11 @@ import { useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import type { TimeRangeBounds, TimeRange } from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
 import { textToTimeRange } from './parse';
-import { durationToDisplayShortText, timeRangeToDisplayText } from './format';
+import {
+  durationToDisplayShortText,
+  timeRangeToDisplayText,
+  timeRangeToFullFormattedText,
+} from './format';
 import type { DateRangePickerProps, DateRangePickerOnChangeProps } from './date_range_picker';
 
 /** Public context value exposed to consumers via `useDateRangePickerContext`. */
@@ -51,12 +55,14 @@ export interface DateRangePickerContextValue {
 export type InitialFocus = RefObject<HTMLElement | null> | string;
 
 /** Internal context value used by sub-components. */
+// TODO add comments for each explaning why they're needed
 interface DateRangePickerInternalContextValue extends DateRangePickerContextValue {
   isEditing: boolean;
   setIsEditing: (value: boolean) => void;
   compressed: boolean;
   maxWidth: string;
   displayText: string;
+  fullFormattedText: string;
   displayDuration: string | null;
   inputRef: RefObject<HTMLInputElement>;
   buttonRef: RefObject<HTMLButtonElement>;
@@ -107,6 +113,10 @@ export function DateRangePickerProvider({
   const displayText = useMemo(
     () => timeRangeToDisplayText(timeRange, { dateFormat }),
     [dateFormat, timeRange]
+  );
+  const fullFormattedText = useMemo(
+    () => timeRangeToFullFormattedText(timeRange, { dateFormat }),
+    [timeRange, dateFormat]
   );
   const duration =
     timeRange.startDate && timeRange.endDate
@@ -176,6 +186,7 @@ export function DateRangePickerProvider({
       compressed,
       maxWidth,
       displayText,
+      fullFormattedText,
       displayDuration,
       inputRef,
       buttonRef,
@@ -192,6 +203,7 @@ export function DateRangePickerProvider({
       compressed,
       maxWidth,
       displayText,
+      fullFormattedText,
       displayDuration,
       panelId,
       timeRange,
