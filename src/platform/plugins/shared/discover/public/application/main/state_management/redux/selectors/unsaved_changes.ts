@@ -89,6 +89,7 @@ export const selectHasUnsavedChanges = (
           services,
         }),
       }),
+      overridenTimeRestore: Boolean(persistedTab.timeRestore),
       services,
     });
 
@@ -103,6 +104,7 @@ export const selectHasUnsavedChanges = (
         })
       : fromTabStateToSavedObjectTab({
           tab: tabState,
+          overridenTimeRestore: Boolean(persistedTab.timeRestore),
           services,
         });
 
