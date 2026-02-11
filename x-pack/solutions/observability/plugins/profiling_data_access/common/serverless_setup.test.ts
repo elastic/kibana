@@ -18,7 +18,9 @@ describe('areServerlessResourcesSetup', () => {
   });
 
   it('returns true when profiling is enabled', () => {
-    const state = mergePartialSetupStates(createDefaultSetupState(), [{ profiling: { enabled: true } }]);
+    const state = mergePartialSetupStates(createDefaultSetupState(), [
+      { profiling: { enabled: true } },
+    ]);
 
     expect(areServerlessResourcesSetup(state)).toBeTruthy();
   });
