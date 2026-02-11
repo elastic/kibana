@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -32,7 +32,7 @@ import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_a
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
 import { isEsqlMode } from '../initialize_fetch';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
-import { DiscoverGridEmbeddable } from './saved_search_grid';
+import { DiscoverGridEmbeddable, type ViewModeDeletedTabAction } from './saved_search_grid';
 import { getSearchEmbeddableDefaults } from '../get_search_embeddable_defaults';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
 import { DISCOVER_CELL_ACTIONS_TRIGGER, useAdditionalCellActions } from '../../context_awareness';
@@ -50,12 +50,25 @@ interface SavedSearchEmbeddableComponentProps {
   enableDocumentViewer: boolean;
   stateManager: SearchEmbeddableStateManager;
   selectedTabId$: BehaviorSubject<string | undefined>;
-  isSelectedTabDeleted$: BehaviorSubject<boolean>;
   tabs: DiscoverSessionTab[];
   onTabChange: (tabId: string) => void;
 }
 
 const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
+
+const apiPublishesIsEditableByUser = (
+  parentApi: unknown
+): parentApi is { isEditableByUser: boolean } =>
+  typeof parentApi === 'object' &&
+  parentApi !== null &&
+  typeof (parentApi as { isEditableByUser?: unknown }).isEditableByUser === 'boolean';
+
+const apiCanSetViewMode = (
+  parentApi: unknown
+): parentApi is { setViewMode: (viewMode: ViewMode) => void } =>
+  typeof parentApi === 'object' &&
+  parentApi !== null &&
+  typeof (parentApi as { setViewMode?: unknown }).setViewMode === 'function';
 
 export function SearchEmbeddableGridComponent({
   api,
@@ -64,7 +77,6 @@ export function SearchEmbeddableGridComponent({
   enableDocumentViewer,
   stateManager,
   selectedTabId$,
-  isSelectedTabDeleted$,
   tabs,
   onTabChange,
 }: SavedSearchEmbeddableComponentProps) {
@@ -99,7 +111,6 @@ export function SearchEmbeddableGridComponent({
     esqlVariables,
     viewMode,
     selectedTabId,
-    isSelectedTabDeleted,
   ] = useBatchedPublishingSubjects(
     api.dataLoading$,
     api.savedSearch$,
@@ -118,11 +129,38 @@ export function SearchEmbeddableGridComponent({
     api.defaultDescription$,
     esqlVariables$ ?? emptyEsqlVariables$,
     viewModeSubject,
-    selectedTabId$,
-    isSelectedTabDeleted$
+    selectedTabId$
   );
 
-  const showTabSelector = viewMode === 'edit' && Boolean(savedSearchId) && tabs.length > 1;
+  const isSelectedTabDeleted = useMemo(
+    () => Boolean(selectedTabId) && !tabs.some((tab) => tab.id === selectedTabId),
+    [selectedTabId, tabs]
+  );
+
+  const isEditMode = viewMode === 'edit';
+  const canShowDashboardWriteControls = Boolean(
+    (
+      discoverServices.capabilities as {
+        dashboard_v2?: {
+          showWriteControls?: boolean;
+        };
+      }
+    ).dashboard_v2?.showWriteControls
+  );
+  const canEditDashboardByAccessControl = apiPublishesIsEditableByUser(api.parentApi)
+    ? api.parentApi.isEditableByUser
+    : true;
+  const canSwitchToEditMode = apiCanSetViewMode(api.parentApi);
+  const canEditPanelInViewMode =
+    canShowDashboardWriteControls && canEditDashboardByAccessControl && canSwitchToEditMode;
+  const onEditPanel = useCallback(() => {
+    if (apiCanSetViewMode(api.parentApi)) {
+      api.parentApi.setViewMode('edit');
+    }
+  }, [api.parentApi]);
+  const viewModeDeletedTabAction: ViewModeDeletedTabAction = canEditPanelInViewMode
+    ? { type: 'editPanel', onClick: onEditPanel }
+    : { type: 'contactAdmin' };
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
   // `fetchContext.query` and `fetchContext.filters` are Dashboard's query and filters
@@ -280,7 +318,8 @@ export function SearchEmbeddableGridComponent({
       showTimeCol={!discoverServices.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false)}
       dataGridDensityState={savedSearch.density}
       enableDocumentViewer={enableDocumentViewer}
-      showTabSelector={showTabSelector}
+      isEditMode={isEditMode}
+      viewModeDeletedTabAction={viewModeDeletedTabAction}
       selectedTabId={selectedTabId}
       isSelectedTabDeleted={isSelectedTabDeleted}
       tabs={tabs}

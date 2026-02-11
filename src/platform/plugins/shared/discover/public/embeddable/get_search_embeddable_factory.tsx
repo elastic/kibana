@@ -87,10 +87,10 @@ export const getSearchEmbeddableFactory = ({
       const defaultDescription$ = new BehaviorSubject<string | undefined>(
         runtimeState?.savedObjectDescription
       );
-      const selectedTabId$ = new BehaviorSubject<string | undefined>(runtimeState.selectedTabId);
       const isSelectedTabDeleted$ = new BehaviorSubject<boolean>(
         runtimeState.isSelectedTabDeleted ?? false
       );
+      const selectedTabId$ = new BehaviorSubject<string | undefined>(runtimeState.selectedTabId);
 
       const tabs = runtimeState.tabs ?? [];
       let rawSavedObjectAttributes = runtimeState.rawSavedObjectAttributes;
@@ -118,7 +118,11 @@ export const getSearchEmbeddableFactory = ({
       const serialize = (savedObjectId?: string) =>
         serializeState({
           uuid,
-          initialState: { ...runtimeState, rawSavedObjectAttributes },
+          initialState: {
+            ...runtimeState,
+            rawSavedObjectAttributes,
+            isSelectedTabDeleted: isSelectedTabDeleted$.getValue(),
+          },
           savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
           serializeTitles: titleManager.getLatestState,
           serializeTimeRange: timeRangeManager.getLatestState,
@@ -162,8 +166,8 @@ export const getSearchEmbeddableFactory = ({
             ...titleComparators,
             ...timeRangeComparators,
             ...searchEmbeddable.comparators,
-            // When the selected tab was deleted, skip all attribute comparators
-            // so the fallback to the first tab doesn't trigger unsaved changes
+            // While the selected tab is missing, ignore tab-dependent comparators
+            // until the user explicitly picks a valid tab.
             ...(isDeleted
               ? Object.fromEntries(
                   Object.keys(searchEmbeddable.comparators).map((k) => [k, 'skip' as const])
@@ -205,7 +209,7 @@ export const getSearchEmbeddableFactory = ({
             rawSavedObjectAttributes = lastSavedRuntimeState.rawSavedObjectAttributes;
 
             const resolvedTabId = lastSavedRuntimeState.isSelectedTabDeleted
-              ? tabs[0]?.id
+              ? undefined
               : lastSavedRuntimeState.selectedTabId ?? tabs[0]?.id;
 
             if (currentTabId !== resolvedTabId && resolvedTabId) {
@@ -404,11 +408,10 @@ export const getSearchEmbeddableFactory = ({
                               ? runtimeState.nonPersistedDisplayOptions?.enableDocumentViewer
                               : true
                           }
-                          stateManager={searchEmbeddable.stateManager}
-                          selectedTabId$={selectedTabId$}
-                          isSelectedTabDeleted$={isSelectedTabDeleted$}
-                          tabs={tabs}
                           onTabChange={switchTab}
+                          selectedTabId$={selectedTabId$}
+                          stateManager={searchEmbeddable.stateManager}
+                          tabs={tabs}
                         />
                       </CellActionsProvider>
                     )}

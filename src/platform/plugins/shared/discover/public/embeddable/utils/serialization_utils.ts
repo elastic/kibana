@@ -37,36 +37,37 @@ export const deserializeState = async ({
     const session = await getDiscoverSession(savedObjectId);
 
     const selectedTabId = (serializedState as SearchEmbeddableByReferenceState).selectedTabId;
-    let resolvedTab = session.tabs[0];
-    let isSelectedTabDeleted = false;
+    const selectedTab = selectedTabId
+      ? session.tabs.find((t) => t.id === selectedTabId)
+      : undefined;
 
-    if (selectedTabId) {
-      const found = session.tabs.find((t) => t.id === selectedTabId);
+    const resolvedTab = selectedTab ?? session.tabs[0];
+    const isSelectedTabDeleted = Boolean(selectedTabId && !selectedTab);
+    const resolvedSelectedTabId = isSelectedTabDeleted
+      ? selectedTabId
+      : selectedTabId ?? resolvedTab?.id;
+    const savedObjectOverride = pick(serializedState, EDITABLE_SAVED_SEARCH_KEYS);
+    const rawSavedObjectAttributes = isSelectedTabDeleted
+      ? savedObjectOverride
+      : pick(resolvedTab, EDITABLE_SAVED_SEARCH_KEYS);
 
-      if (found) resolvedTab = found;
-      else isSelectedTabDeleted = true;
-    }
-
-    const rawSavedObjectAttributes = pick(resolvedTab, EDITABLE_SAVED_SEARCH_KEYS);
-    // Skip stale dashboard overrides when the selected tab was deleted
-    const savedObjectOverride = isSelectedTabDeleted
-      ? {}
-      : pick(serializedState, EDITABLE_SAVED_SEARCH_KEYS);
+    // Build runtime state from the resolved tab's attributes
+    // ignore the time range from the tab - only global time range + panel time range matter
+    const runtimeSavedSearchState = isSelectedTabDeleted
+      ? savedObjectOverride
+      : omit(resolvedTab, 'timeRange');
 
     return {
-      // Build runtime state from the resolved tab's attributes
-      // ignore the time range from the tab - only global time range + panel time range matter
-      ...omit(resolvedTab, 'timeRange'),
+      ...runtimeSavedSearchState,
       savedObjectId,
       savedObjectTitle: session.title,
       savedObjectDescription: session.description,
-      selectedTabId,
+      selectedTabId: resolvedSelectedTabId,
       isSelectedTabDeleted,
       tabs: session.tabs,
 
       // Overwrite SO state with dashboard state for title, description, etc.
       ...panelState,
-      ...savedObjectOverride,
 
       // back up the original saved object attributes for comparison
       rawSavedObjectAttributes,
@@ -115,15 +116,19 @@ export const serializeState = ({
 
   if (savedObjectId) {
     const editableAttributesBackup = initialState.rawSavedObjectAttributes ?? {};
-    const [{ attributes }] = savedSearchAttributes.tabs;
+    const attributes =
+      savedSearchAttributes.tabs?.[0]?.attributes ??
+      pick(savedSearchAttributes, EDITABLE_SAVED_SEARCH_KEYS);
 
     // only save the current state that is **different** than the saved object state
-    const overwriteState = EDITABLE_SAVED_SEARCH_KEYS.reduce((prev, key) => {
-      if (deepEqual(attributes[key], editableAttributesBackup[key])) {
-        return prev;
-      }
-      return { ...prev, [key]: attributes[key] };
-    }, {});
+    const overwriteState = initialState.isSelectedTabDeleted
+      ? pick(initialState, EDITABLE_SAVED_SEARCH_KEYS)
+      : EDITABLE_SAVED_SEARCH_KEYS.reduce((prev, key) => {
+          if (deepEqual(attributes[key], editableAttributesBackup[key])) {
+            return prev;
+          }
+          return { ...prev, [key]: attributes[key] };
+        }, {});
 
     return {
       // Serialize the current dashboard state into the panel state **without** updating the saved object

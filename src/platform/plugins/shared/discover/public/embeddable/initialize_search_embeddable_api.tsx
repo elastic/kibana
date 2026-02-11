@@ -114,7 +114,7 @@ export const initializeSearchEmbeddableApi = async (
   /** We **must** have a search source, so start by initializing it  */
   const { searchSource, dataView } = await initializeSearchSource(
     discoverServices,
-    initialState.serializedSearchSource
+    initialState.serializedSearchSource ?? initialState.tabs?.[0]?.serializedSearchSource
   );
   const searchSource$ = new BehaviorSubject<ISearchSource>(searchSource);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(dataView ? [dataView] : undefined);

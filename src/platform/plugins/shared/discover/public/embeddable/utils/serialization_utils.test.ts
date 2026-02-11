@@ -135,7 +135,7 @@ describe('Serialization utils', () => {
       // Dashboard override should be applied on top of tab-1 defaults
       expect(deserializedState.sort).toEqual([['order_date', 'asc']]);
       expect(deserializedState.columns).toEqual(['_source']); // from tab-1
-      expect(deserializedState.selectedTabId).toBeUndefined();
+      expect(deserializedState.selectedTabId).toEqual('tab-1');
       expect(deserializedState.isSelectedTabDeleted).toBe(false);
       expect(deserializedState.tabs).toEqual(sessionTabs);
     });
@@ -174,7 +174,7 @@ describe('Serialization utils', () => {
       expect(deserializedState.sampleSize).toEqual(200);
     });
 
-    test('by reference - deleted selectedTabId falls back to first tab', async () => {
+    test('by reference - deleted selectedTabId keeps saved dashboard overrides', async () => {
       const sessionTabs = [
         mockDiscoverSessionTab({
           id: 'tab-1',
@@ -202,9 +202,9 @@ describe('Serialization utils', () => {
       });
       expect(deserializedState.selectedTabId).toEqual('deleted-tab-id');
       expect(deserializedState.isSelectedTabDeleted).toBe(true);
-      // Should use fallback tab-1 attributes, NOT stale overrides
-      expect(deserializedState.columns).toEqual(['fallback-col']);
-      expect(deserializedState.sort).toEqual([['fallback_field', 'desc']]);
+      // Keep serialized dashboard overrides; no runtime fallback tab should be applied
+      expect(deserializedState.columns).toEqual(['stale-col-a']);
+      expect(deserializedState.sort).toEqual([['stale_field', 'asc']]);
     });
 
     test('by reference - valid selectedTabId with dashboard overrides', async () => {
