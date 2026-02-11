@@ -26,11 +26,7 @@ import type { HasCustomPrepend, PinnedControlLayoutState } from '@kbn/controls-s
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  apiPublishesTitle,
-  useBatchedPublishingSubjects,
-  type PublishingSubject,
-} from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects, type PublishingSubject } from '@kbn/presentation-publishing';
 
 import type { ControlsRendererParentApi } from '../types';
 import { controlWidthStyles } from './control_panel.styles';
