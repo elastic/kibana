@@ -51,7 +51,7 @@ apiTest.describe('Agent Builder Skills CRUD API', { tag: ['@ess'] }, () => {
         results: Array<{ id: string; readonly: boolean; description: string }>;
       };
       expect(Array.isArray(body.results)).toBe(true);
-      expect(body.results.length).toBeGreaterThanOrEqual(1);
+      expect(body.results.length).toBeGreaterThan(0);
 
       // The built-in data-exploration skill should always be present
       const builtinSkill = body.results.find((skill) => skill.id === BUILTIN_SKILL_ID);
