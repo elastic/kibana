@@ -7,10 +7,6 @@
 
 import { z } from '@kbn/zod';
 
-// ---------------------------------------------------------------------------
-// Field rules
-// ---------------------------------------------------------------------------
-
 export const fieldRuleSchema = z.object({
   /** ECS or custom field name (e.g., `host.name`). */
   field: z.string(),
@@ -25,10 +21,6 @@ export const fieldRuleSchema = z.object({
   entityClass: z.string().optional(),
 });
 
-// ---------------------------------------------------------------------------
-// Regex rules
-// ---------------------------------------------------------------------------
-
 export const regexRuleSchema = z.object({
   /** Unique rule identifier. */
   id: z.string(),
@@ -42,10 +34,6 @@ export const regexRuleSchema = z.object({
   enabled: z.boolean(),
 });
 
-// ---------------------------------------------------------------------------
-// NER rules
-// ---------------------------------------------------------------------------
-
 export const nerRuleSchema = z.object({
   /** Unique rule identifier. */
   id: z.string(),
@@ -58,10 +46,6 @@ export const nerRuleSchema = z.object({
   /** Whether the rule is active. */
   enabled: z.boolean(),
 });
-
-// ---------------------------------------------------------------------------
-// Anonymization Profile
-// ---------------------------------------------------------------------------
 
 export const anonymizationProfileSchema = z.object({
   /** UUID for the profile. */
@@ -94,10 +78,6 @@ export const anonymizationProfileSchema = z.object({
   updatedBy: z.string(),
 });
 
-// ---------------------------------------------------------------------------
-// Token source entry
-// ---------------------------------------------------------------------------
-
 export const tokenSourceEntrySchema = z.object({
   /** The token (e.g., `HOST_NAME_ae687...`). */
   token: z.string(),
@@ -124,10 +104,6 @@ export const tokenSourceEntrySchema = z.object({
   /** When the token was first seen (optional). */
   firstSeenAt: z.string().optional(),
 });
-
-// ---------------------------------------------------------------------------
-// Replacements set
-// ---------------------------------------------------------------------------
 
 export const replacementsSetSchema = z.object({
   /** UUID for the mapping set. */
