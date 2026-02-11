@@ -295,6 +295,23 @@ Once the relevant code paths are identified in Step 1, **read the actual source 
 **Example from test run (#251674):**
 > Read `routes/enablement.ts` (enable route) and `routes/init.ts` (init route). The init route checks privileges via `getEntityStoreInitPrivileges()` and returns 403 if insufficient. The enable route calls `enable()` directly without any privilege check. When a user with restricted privileges triggers enable, it fails partway through initialization, leaving the Entity Store in a corrupted state. The defect (missing privilege check in the enable route) is still present in the current code.
 
+### Step 1c: Team Ownership Check
+
+**Run in parallel with other Step 1 checks.** Determine which team(s) own the affected code and whether the issue's team label is correct.
+
+1. **Identify affected code paths** from Step 1 and Step 1b (the files you read, the routes/components involved)
+2. **Look up ownership:** Check the `owner` field in the nearest `kibana.jsonc` to the affected file(s). If unavailable, check `.github/CODEOWNERS`
+3. **Map to issue labels:** Use the **Team Ownership Lookup** tables (Table A for Security teams, Table B for platform/cross-Kibana teams) in the Domain Knowledge section
+4. **Compare with current label:** Check the issue's existing team label(s) against the code ownership
+5. **Flag mismatches:**
+   - **(a) No team label:** Suggest one based on code ownership
+   - **(b) Wrong team:** The label doesn't match the team that owns the affected code
+   - **(c) Multi-team bug:** Multiple teams' code is affected but only one is labeled
+   - **(d) Route to platform team:** The root cause is in a platform plugin (Table B), not in Security code. Use the cross-team decision guide:
+     - Security calling the platform API incorrectly → Security team owns it
+     - Platform plugin has a bug that Security triggers → route to the platform team
+     - Both sides need changes → label both teams, note which is primary
+
 ### Step 2: Change History Analysis
 
 Analyze what has changed in the affected code since the bug was filed:
@@ -608,6 +625,37 @@ When analyzing a single bug, structure your response as:
 - **Current label:** impact:<level> (or "none")
 - **Suggested label:** impact:<level> (or "correct" if the label is accurate)
 - **Reasoning:** <1-2 sentences explaining why the label is correct or should change>
+
+### Team Label Check
+- **Current label:** <Team label or "none">
+- **Code owner(s):** <@elastic/team-slug (from path/to/affected/code/)>
+- **Suggested label:** <Team label -- correct, or suggested change with reasoning>
+```
+
+**Team Label Check examples:**
+
+When the label is correct:
+```
+### Team Label Check
+- **Current label:** Team:Entity Analytics
+- **Code owner(s):** @elastic/security-entity-analytics (from server/lib/entity_analytics/risk_engine/)
+- **Suggested label:** Team:Entity Analytics -- correct
+```
+
+When the root cause is in a platform plugin:
+```
+### Team Label Check
+- **Current label:** Team:Entity Analytics
+- **Code owner(s):** @elastic/kibana-presentation (root cause in src/platform/plugins/shared/inspector/)
+- **Suggested label:** team:kibana-presentation -- the Inspect modal bug is in the platform Inspector plugin, not Security code. Recommend routing to @elastic/kibana-presentation.
+```
+
+When there's an intra-Security mismatch:
+```
+### Team Label Check
+- **Current label:** Team:SecuritySolution
+- **Code owner(s):** @elastic/security-detection-engine (from server/lib/detection_engine/), @elastic/security-entity-analytics (from server/lib/entity_analytics/)
+- **Suggested label:** Team:Detection Engine, Team:Entity Analytics (multi-team; currently labeled as generic SecuritySolution)
 ```
 
 ### Bulk Triage Table
@@ -622,12 +670,18 @@ When analyzing multiple bugs from a list URL, present results in two parts:
 **Source:** <URL or label filter>
 **Analyzed:** <N> issues | **Date:** <today>
 
-| # | Title | Filed | Version | Verdict | Confidence | Impact | Key Evidence |
-|---|-------|-------|---------|---------|------------|--------|--------------|
-| #12345 | Short title | Jan 10 | 9.3.0 | FIXED | High | high (correct) | PR #12400 closes it |
-| #12346 | Short title | Dec 5 | 9.2.0 | STILL VALID | High | high -> medium | Code unchanged |
-| #12347 | Short title | Nov 20 | 8.15.0 | OBSOLETE | Medium | medium (correct) | Component removed |
-| #12348 | Short title | Jan 15 | 9.3.0 | INCONCLUSIVE | N/A | none -> high | Needs UI verification |
+| # | Title | Filed | Version | Verdict | Confidence | Impact | Team | Key Evidence |
+|---|-------|-------|---------|---------|------------|--------|------|--------------|
+| #12345 | Short title | Jan 10 | 9.3.0 | FIXED | High | high (correct) | EA (correct) | PR #12400 closes it |
+| #12346 | Short title | Dec 5 | 9.2.0 | STILL VALID | High | high -> medium | SecSol -> DE | Code unchanged |
+| #12347 | Short title | Nov 20 | 8.15.0 | OBSOLETE | Medium | medium (correct) | TH (correct) | Component removed |
+| #12348 | Short title | Jan 15 | 9.3.0 | INCONCLUSIVE | N/A | none -> high | EA -> kibana-presentation | Needs UI verification |
+
+Team column format:
+- `EA (correct)` -- label matches code ownership
+- `SecSol -> DE` -- labeled SecuritySolution but code is owned by Detection Engine
+- `none -> TH` -- no team label, suggest Threat Hunting
+- `EA -> kibana-presentation` -- root cause is in a platform plugin, suggest routing out
 
 ### Summary
 - **FIXED:** N issues (can likely be closed)
@@ -635,6 +689,8 @@ When analyzing multiple bugs from a list URL, present results in two parts:
 - **STILL VALID:** N issues (need attention)
 - **INCONCLUSIVE:** N issues (need further investigation)
 - **Impact mismatches:** N issues (labels may need adjustment)
+- **Team label mismatches:** N issues (may be assigned to wrong team)
+- **Route to platform team:** N issues (root cause outside Security Solution)
 ```
 
 **Part 2: Details (on request or for non-obvious verdicts)**
@@ -689,6 +745,51 @@ Use issue labels to quickly navigate to the relevant code area:
 | Rule Monitoring | `server/lib/detection_engine/rule_monitoring/` | `public/detection_engine/rule_monitoring/` |
 | Rule Types | `server/lib/detection_engine/rule_types/` | `public/detection_engine/rule_creation_ui/` |
 | Rule Preview | `server/lib/detection_engine/rule_preview/` | `public/detection_engine/rule_creation_ui/` |
+
+### Team Ownership Lookup
+
+Use these tables to map code paths to the correct GitHub issue team label. Ownership is defined in `kibana.jsonc` files (`owner` field) and compiled into `.github/CODEOWNERS`.
+
+**Table A -- Security Solution Teams:**
+
+| CODEOWNERS Team | GitHub Issue Label | Primary Code Paths |
+|---|---|---|
+| `@elastic/security-solution` | `Team:SecuritySolution` | `security_solution/` (root-level, shared) |
+| `@elastic/security-entity-analytics` | `Team:Entity Analytics` | `server/lib/entity_analytics/`, `public/entity_analytics/` |
+| `@elastic/security-detection-engine` | `Team:Detection Engine` | `server/lib/detection_engine/`, `lists/` |
+| `@elastic/security-detection-rule-management` | `Team:Detection Rule Management` | `server/lib/detection_engine/rule_management/`, `prebuilt_rules/` |
+| `@elastic/security-threat-hunting-investigations` | `Team:Threat Hunting` | `server/lib/timeline/`, `public/timelines/`, `timelines/` |
+| `@elastic/security-generative-ai` | `Team:Security Generative AI` | `elastic_assistant/`, `public/attack_discovery/` |
+| `@elastic/security-defend-workflows` | `Team:Defend Workflows` | `public/management/`, `server/endpoint/`, `osquery/` |
+| `@elastic/kibana-cloud-security-posture` | `Team:Cloud Security` | `cloud_security_posture/`, `cloud_defend/` |
+| `@elastic/security-scalability` | `Team:Security Scalability` | (performance, infrastructure) |
+
+**Table B -- Platform and Cross-Kibana Teams (commonly misrouted to Security):**
+
+| CODEOWNERS Team | GitHub Issue Label | Plugin/Path | Common Security Overlap |
+|---|---|---|---|
+| `@elastic/kibana-cases` | `team:kibana-cases` | `x-pack/platform/plugins/shared/cases/` | "Add to Case" actions, case attachments |
+| `@elastic/kibana-visualizations` | `team:kibana-visualizations` | `x-pack/platform/plugins/shared/lens/` | "Open in Lens" errors, visualization configs |
+| `@elastic/ml-ui` | `team:ml-ui` | `x-pack/platform/plugins/shared/ml/` | Anomaly detection jobs, ML job space filtering |
+| `@elastic/fleet` | `Team:Fleet` | `x-pack/platform/plugins/shared/fleet/` | Agent policies, integrations, package installs |
+| `@elastic/response-ops` | `team:response-ops` | `x-pack/platform/plugins/shared/alerting/`, `actions/`, `task_manager/` | Alert actions, connectors, rule execution |
+| `@elastic/kibana-data-discovery` | `team:kibana-data-discovery` | `src/platform/plugins/shared/discover/` | "Investigate in Discover", ESQL queries |
+| `@elastic/kibana-presentation` | `team:kibana-presentation` | `src/platform/plugins/shared/dashboard/`, `inspector/`, `embeddable/` | Inspect modal, dashboard embeds, embeddables |
+| `@elastic/kibana-security` | `team:kibana-security` | `x-pack/platform/plugins/shared/spaces/`, `security/` | Space scoping, RBAC, privilege checks |
+
+**How to look up ownership at runtime:**
+
+1. Check the `owner` field in the nearest `kibana.jsonc` to the affected file
+2. If no `kibana.jsonc` nearby, check `.github/CODEOWNERS` for the path
+3. Map the `@elastic/<team>` slug to the issue label using the tables above
+4. If the root cause is in a platform plugin (Table B), suggest routing to that team
+
+**Cross-team bug decision guide:**
+
+When the bug's SYMPTOM is in Security but the ROOT CAUSE is in a platform plugin:
+- If Security code is calling the platform API incorrectly → Security team owns it
+- If the platform plugin has a bug that Security triggers → route to the platform team
+- If both sides need changes → label both teams, note which is primary
 
 ### Common Page Routes
 
