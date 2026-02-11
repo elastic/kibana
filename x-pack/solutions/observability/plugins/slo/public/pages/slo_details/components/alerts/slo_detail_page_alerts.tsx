@@ -5,50 +5,18 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
-import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
-import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
-import React, { Fragment } from 'react';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useSloDetailsContext } from '../slo_details_context';
+import React from 'react';
+import { SloDetailsAlertsTable } from './slo_details_alerts_table';
 
 export function SloDetailsPageAlerts() {
-  const { slo } = useSloDetailsContext();
-  const { data, http, notifications, fieldFormats, application, licensing, cases, settings } =
-    useKibana().services;
-
   return (
-    <Fragment>
+    <>
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="column" gutterSize="xl">
         <EuiFlexItem>
-          <ObservabilityAlertsTable
-            id={SLO_ALERTS_TABLE_ID}
-            data-test-subj="alertTable"
-            ruleTypeIds={SLO_RULE_TYPE_IDS}
-            consumers={[AlertConsumers.SLO, AlertConsumers.ALERTS, AlertConsumers.OBSERVABILITY]}
-            query={{
-              bool: {
-                filter: [
-                  { term: { 'slo.id': slo.id } },
-                  { term: { 'slo.instanceId': slo.instanceId } },
-                ],
-              },
-            }}
-            pageSize={100}
-            services={{
-              data,
-              http,
-              notifications,
-              fieldFormats,
-              application,
-              licensing,
-              cases,
-              settings,
-            }}
-          />
+          <SloDetailsAlertsTable />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </Fragment>
+    </>
   );
 }
