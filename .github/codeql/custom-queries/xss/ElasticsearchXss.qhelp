@@ -1,0 +1,113 @@
+<!DOCTYPE qhelp SYSTEM "qhelp.dtd">
+<qhelp>
+
+<overview>
+<p>
+This query detects data flowing from Elasticsearch utility functions into React's
+<code>dangerouslySetInnerHTML</code> property. Since Elasticsearch indices can contain
+arbitrary user-controlled content (log messages, document fields, error messages, etc.),
+rendering this data as raw HTML without sanitization can lead to cross-site scripting (XSS)
+vulnerabilities.
+</p>
+<p>
+The query tracks data from the following <code>@kbn/discover-utils</code> functions:
+</p>
+<ul>
+<li><code>buildDataTableRecord</code> — wraps raw ES hits into <code>DataTableRecord</code> objects</li>
+<li><code>buildDataTableRecordList</code> — wraps multiple ES hits into <code>DataTableRecord[]</code></li>
+<li><code>getMessageFieldWithFallbacks</code> — extracts message field values from ES documents</li>
+<li><code>getLogFieldWithFallback</code> — extracts log field values with fallback logic</li>
+<li><code>formatHit</code> — formats an ES hit for display</li>
+<li><code>formatFieldValue</code> — formats individual field values from ES documents</li>
+</ul>
+<p>
+The query catches both direct usage of <code>dangerouslySetInnerHTML</code> as a JSX attribute
+and indirect usage via object literals that are later spread into JSX elements. The latter
+pattern is particularly dangerous because it bypasses the ESLint <code>react/no-danger</code>
+rule, allowing the vulnerability to go undetected by standard linting.
+</p>
+</overview>
+
+<recommendation>
+<p>
+Avoid using <code>dangerouslySetInnerHTML</code> with data that originates from Elasticsearch.
+If HTML rendering is required, sanitize the HTML before rendering using a library such as
+<code>DOMPurify</code> to remove dangerous content:
+</p>
+<sample language="javascript">
+import DOMPurify from 'dompurify';
+
+// GOOD: HTML is sanitized before rendering
+const MessageDisplay = ({ hit }) => {
+  const { value } = getMessageFieldWithFallbacks(hit.flattened);
+  const sanitized = DOMPurify.sanitize(value ?? '');
+  return &lt;div dangerouslySetInnerHTML={{ __html: sanitized }} /&gt;;
+};
+</sample>
+</recommendation>
+
+<example>
+<p>
+The following example shows a component that renders a log message from Elasticsearch using
+<code>dangerouslySetInnerHTML</code>. If the log message contains malicious HTML (e.g.
+<code>&lt;img src=x onerror=alert(1)&gt;</code>), it will execute in the user's browser:
+</p>
+<sample language="javascript">
+import { getMessageFieldWithFallbacks } from '@kbn/discover-utils';
+
+// BAD: ES data rendered as raw HTML — vulnerable to XSS
+const LogMessage = ({ hit }) => {
+  const { value } = getMessageFieldWithFallbacks(hit.flattened, {
+    includeFormattedValue: true,
+  });
+  return &lt;div dangerouslySetInnerHTML={{ __html: value ?? '' }} /&gt;;
+};
+</sample>
+<p>
+The spread pattern variant is equally dangerous and also bypasses the ESLint
+<code>react/no-danger</code> rule:
+</p>
+<sample language="javascript">
+import { getMessageFieldWithFallbacks } from '@kbn/discover-utils';
+
+// BAD: Spread pattern bypasses ESLint react/no-danger rule
+const LogMessage = ({ hit }) => {
+  const { value, formattedValue } = getMessageFieldWithFallbacks(hit.flattened, {
+    includeFormattedValue: true,
+  });
+  const props = formattedValue
+    ? { children: formattedValue }
+    : { dangerouslySetInnerHTML: { __html: value ?? '' } };
+  return &lt;div {...props} /&gt;;
+};
+</sample>
+<p>
+The fix is to render the content as text children instead:
+</p>
+<sample language="javascript">
+import { getMessageFieldWithFallbacks } from '@kbn/discover-utils';
+
+// GOOD: Render as text content instead of raw HTML
+const LogMessage = ({ hit }) => {
+  const { value } = getMessageFieldWithFallbacks(hit.flattened);
+  return &lt;pre&gt;{value}&lt;/pre&gt;;
+};
+</sample>
+</example>
+
+<references>
+<li>
+  <a href="https://react.dev/reference/react-dom/components/common#dangerously-setting-the-inner-html">React: Dangerously setting the inner HTML</a>
+</li>
+<li>
+  <a href="https://owasp.org/www-community/attacks/xss/">OWASP: Cross-Site Scripting (XSS)</a>
+</li>
+<li>
+  <a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html">OWASP: XSS Prevention Cheat Sheet</a>
+</li>
+<li>
+  <a href="https://cwe.mitre.org/data/definitions/79.html">CWE-79: Improper Neutralization of Input During Web Page Generation</a>
+</li>
+</references>
+
+</qhelp>

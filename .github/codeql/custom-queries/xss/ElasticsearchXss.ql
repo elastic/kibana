@@ -17,7 +17,6 @@
  */
 
 import javascript
-import DataFlow::PathGraph
 
 /**
  * Holds if `call` invokes a function named `funcName` that was imported
@@ -26,7 +25,7 @@ import DataFlow::PathGraph
 predicate isImportedCall(DataFlow::CallNode call, string modulePath, string funcName) {
   call.getCalleeName() = funcName and
   exists(ImportDeclaration imp |
-    imp.getImportedPath().getValue() = modulePath and
+    imp.getImportedPathExpr().getStringValue() = modulePath and
     imp.getASpecifier().getImportedName() = funcName and
     imp.getFile() = call.getFile()
   )
@@ -64,11 +63,7 @@ class DangerousInnerHtmlSink extends DataFlow::ValueNode {
     exists(Property prop |
       prop.getName() = "__html" and
       this = DataFlow::valueNode(prop.getInit())
-    ) and
-    // Exclude test files, mocks, and storybook
-    not this.getFile()
-        .getRelativePath()
-        .regexpMatch(".*(\\.test\\.|__tests__|__mocks__|__fixtures__|__stories__|storybook|\\.mock\\.).*")
+    )
   }
 }
 
@@ -83,6 +78,8 @@ module EsXssConfig implements DataFlow::ConfigSig {
 }
 
 module EsXssFlow = TaintTracking::Global<EsXssConfig>;
+
+import EsXssFlow::PathGraph
 
 from EsXssFlow::PathNode source, EsXssFlow::PathNode sink
 where EsXssFlow::flowPath(source, sink)
