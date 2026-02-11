@@ -584,8 +584,6 @@ export function createResourceBrowserSuggestion(options: {
   insertText?: string;
   commandArgs?: Record<string, string>;
 }): ISuggestionItem {
-  // TODO: The Timeseries suggestion still appears before the Resource Browser suggestion
-  // We should fix this
   return withAutoSuggest({
     label: options.label,
     text: options.insertText || '',
@@ -599,6 +597,7 @@ export function createResourceBrowserSuggestion(options: {
     asSnippet: false,
     filterText: options.filterText || '',
     ...(options.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
+    category: SuggestionCategory.CUSTOM_ACTION,
   });
 }
 
