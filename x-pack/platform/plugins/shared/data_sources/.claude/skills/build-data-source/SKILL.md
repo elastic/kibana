@@ -44,9 +44,9 @@ Args: $ARGUMENTS
 ```
 
 This runs in a forked context and will generate:
-- A connector spec YAML (in `src/platform/packages/shared/kbn-connector-specs/src/specs/`)
-- Workflow YAML files (in `x-pack/solutions/workplace_ai/packages/workflows/src/workflows/`)
-- A data source definition YAML (in `x-pack/solutions/workplace_ai/packages/data_sources/src/data_sources/`)
+- A connector specification code bundle (in `src/platform/packages/shared/kbn-connector-specs/src/specs/`)
+- Documentation for the connector (in `docs/reference/connectors-kibana/`)
+- A data source definition and Workflow YAML files (in `x-pack/solutions/workplace_ai/packages/data_sources/src/data_sources/`)
 
 When complete, mark task 1 as `completed`.
 
