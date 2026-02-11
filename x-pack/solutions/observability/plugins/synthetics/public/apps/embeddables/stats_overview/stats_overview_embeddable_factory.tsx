@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useEffect } from 'react';
 import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type {
   PublishesWritableTitle,
   PublishesTitle,
@@ -116,7 +117,7 @@ export const getStatsOverviewEmbeddableFactory = (
         ...titleManager.api,
         ...(dynamicActionsManager?.api ?? {}),
         ...unsavedChangesApi,
-        supportedTriggers: () => [],
+        supportedTriggers: () => [CONTEXT_MENU_TRIGGER],
         defaultTitle$,
         getTypeDisplayName: () =>
           i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {

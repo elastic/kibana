@@ -13,7 +13,7 @@ import { monitorFiltersSchema } from './common_schemas';
 /**
  * Schema for the custom state of the stats overview embeddable
  */
-const statsOverviewCustomStateSchema = schema.object({
+export const statsOverviewCustomStateSchema = schema.object({
   filters: schema.maybe(monitorFiltersSchema),
 });
 

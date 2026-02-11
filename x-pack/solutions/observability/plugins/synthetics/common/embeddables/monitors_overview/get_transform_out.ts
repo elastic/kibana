@@ -7,7 +7,6 @@
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
-import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { flow } from 'lodash';
 import type { OverviewMonitorsEmbeddableState } from './types';
 
@@ -22,8 +21,11 @@ interface LegacyFilters {
   monitor_types?: Array<{ label: string; value: string }>;
 }
 
-export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['transformOut']) {
-  function transformOut(storedState: OverviewMonitorsEmbeddableState, references?: Reference[]) {
+export function getTransformOut() {
+  function transformOut(
+    storedState: OverviewMonitorsEmbeddableState,
+    references?: Reference[]
+  ): { state: OverviewMonitorsEmbeddableState; references: Reference[] } {
     const transformsFlow = flow(
       transformTitlesOut<OverviewMonitorsEmbeddableState>,
       (state: OverviewMonitorsEmbeddableState) => {
@@ -34,7 +36,7 @@ export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['tra
 
           if (hasLegacyKeys) {
             // Convert legacy camelCase to REST API snake_case
-            const convertedState: OverviewMonitorsEmbeddableState = {
+            return {
               ...state,
               filters: {
                 projects: filters.projects,
@@ -44,14 +46,13 @@ export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['tra
                 monitor_types: filters.monitorTypes || filters.monitor_types || [],
               },
             };
-            return transformDrilldownsOut(convertedState, references);
           }
         }
         // Already in REST API shape (snake_case)
-        return transformDrilldownsOut(state, references);
+        return state;
       }
     );
-    return transformsFlow(storedState);
+    return { state: transformsFlow(storedState), references: references ?? [] };
   }
   return transformOut;
 }

@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export const ALL_VALUE = '*';
+// Re-export schema-derived types from server for use in common and public
+export type {
+  MonitorOption,
+  MonitorFilters,
+  SyntheticsStatsOverviewEmbeddableState,
+  SyntheticsMonitorsEmbeddableState,
+} from '../server/schemas';

@@ -14,6 +14,7 @@ export {
 
 export {
   syntheticsStatsOverviewEmbeddableSchema,
+  statsOverviewCustomStateSchema,
   type SyntheticsStatsOverviewEmbeddableState,
 } from './synthetics_stats_overview_embeddable_schema';
 

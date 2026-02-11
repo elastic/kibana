@@ -6,25 +6,19 @@
  */
 
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
-import type { SerializedTitles } from '@kbn/presentation-publishing-schemas';
 
-interface Option {
-  label: string;
-  value: string;
-}
-
-export interface MonitorFilters {
-  projects: Option[];
-  tags: Option[];
-  monitor_ids: Option[];
-  monitor_types: Option[];
-  locations: Option[];
-}
+export type {
+  MonitorFilters,
+  SyntheticsStatsOverviewEmbeddableState as OverviewStatsEmbeddableStateBase,
+} from '../../types';
+import type {
+  MonitorFilters,
+  SyntheticsStatsOverviewEmbeddableState as OverviewStatsEmbeddableStateBase,
+} from '../../types';
 
 export interface OverviewStatsEmbeddableCustomState {
   filters?: MonitorFilters;
 }
 
-export type OverviewStatsEmbeddableState = SerializedTitles &
-  DynamicActionsSerializedState &
-  OverviewStatsEmbeddableCustomState;
+export type OverviewStatsEmbeddableState = OverviewStatsEmbeddableStateBase &
+  DynamicActionsSerializedState;
