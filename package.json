@@ -839,6 +839,7 @@
     "@kbn/opentelemetry-utils": "link:src/platform/packages/shared/kbn-opentelemetry-utils",
     "@kbn/osquery-io-ts-types": "link:src/platform/packages/shared/kbn-osquery-io-ts-types",
     "@kbn/osquery-plugin": "link:x-pack/platform/plugins/shared/osquery",
+    "@kbn/otel-logs-proxy-plugin": "link:src/platform/plugins/private/otel_logs_proxy",
     "@kbn/otel-semantic-conventions": "link:src/platform/packages/shared/kbn-otel-semantic-conventions",
     "@kbn/paertial-results-example-plugin": "link:examples/partial_results_example",
     "@kbn/painless-lab-plugin": "link:x-pack/platform/plugins/private/painless_lab",
