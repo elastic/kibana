@@ -53,9 +53,11 @@ function buildUserMessagesApi(
   {
     visOverrides,
     dataOverrides,
+    getConsumerMessages,
   }: {
     visOverrides?: { id: string } & Partial<Visualization>;
     dataOverrides?: { id: string } & Partial<Datasource>;
+    getConsumerMessages?: () => UserMessage[];
   } = {
     visOverrides: { id: 'lnsXY' },
     dataOverrides: { id: 'formBased' },
@@ -86,7 +88,8 @@ function buildUserMessagesApi(
     internalApi,
     services,
     onBeforeBadgesRender,
-    metaInfo
+    metaInfo,
+    getConsumerMessages
   );
   return { api, internalApi, userMessagesApi, onBeforeBadgesRender };
 }
@@ -292,6 +295,43 @@ describe('User Messages API', () => {
       userMessagesApi.addUserMessages([userMessageEmbeddable]);
       userMessagesApi.getUserMessages('embeddableBadge');
       expect(onBeforeBadgesRender).toHaveBeenCalled();
+    });
+
+    it('should return both consumer and internal messages', () => {
+      const consumerMessage = createUserMessage(['embeddableBadge'], 'error');
+      const getConsumerMessages = jest.fn(() => [consumerMessage]);
+      const { userMessagesApi } = buildUserMessagesApi(undefined, {
+        visOverrides: { id: 'lnsXY' },
+        dataOverrides: { id: 'formBased' },
+        getConsumerMessages,
+      });
+      const internalMessage = createUserMessage(['embeddableBadge'], 'warning');
+      userMessagesApi.addUserMessages([internalMessage]);
+
+      const result = userMessagesApi.getUserMessages('embeddableBadge');
+
+      expect(result).toHaveLength(2);
+      expect(getConsumerMessages).toHaveBeenCalled();
+
+      expect(result[0]).toEqual(expect.objectContaining({ uniqueId: consumerMessage.uniqueId }));
+      expect(result[1]).toEqual(expect.objectContaining({ uniqueId: internalMessage.uniqueId }));
+
+      expect(result.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it('should return only consumer messages when no internal messages', () => {
+      const consumerMessage = createUserMessage(['embeddableBadge'], 'error');
+      const getConsumerMessages = jest.fn(() => [consumerMessage]);
+      const { userMessagesApi } = buildUserMessagesApi(undefined, {
+        visOverrides: { id: 'lnsXY' },
+        dataOverrides: { id: 'formBased' },
+        getConsumerMessages,
+      });
+
+      const result = userMessagesApi.getUserMessages('embeddableBadge');
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual(expect.objectContaining({ uniqueId: consumerMessage.uniqueId }));
     });
   });
 
