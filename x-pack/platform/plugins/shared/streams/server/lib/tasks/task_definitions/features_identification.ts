@@ -122,10 +122,7 @@ const getSampleDocuments = async ({
   const categoryDocuments = categories.flatMap((c) => c.sampleDocuments);
   const sampleDocuments = [
     ...categoryDocuments,
-    ...randomSampleDocuments.slice(
-      0,
-      Math.max(0, size - categoryDocuments.length)
-    )
+    ...randomSampleDocuments.slice(0, Math.max(0, size - categoryDocuments.length)),
   ].slice(0, size);
 
   const now = Date.now();
@@ -138,10 +135,13 @@ const getSampleDocuments = async ({
     }));
 
   return {
-    updatedPatterns: newPatterns.length < MIN_NEW_PATTERNS ? [] : mergeDiscoveredPatterns({
-      previousPatterns: excludePatterns,
-      newPatterns,
-    }),
+    updatedPatterns:
+      newPatterns.length < MIN_NEW_PATTERNS
+        ? []
+        : mergeDiscoveredPatterns({
+            previousPatterns: excludePatterns,
+            newPatterns,
+          }),
     sampleDocuments,
   };
 };
@@ -228,7 +228,8 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                   const existing = existingFeatures.find(({ id }) => id === feature.id);
                   if (existing) {
                     taskContext.logger.debug(
-                      `Overwriting feature with id [${feature.id
+                      `Overwriting feature with id [${
+                        feature.id
                       }] since it already exists.\nExisting feature: ${JSON.stringify(
                         existing
                       )}\nNew feature: ${JSON.stringify(feature)}`
