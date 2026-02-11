@@ -37,6 +37,7 @@ import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
 import { getMaxSignalsWarning, getSafeSortIds } from '../../utils/utils';
 import { getDataTierFilter } from '../../utils/get_data_tier_filter';
+import { getDataStreamNamespaceFilter } from '../../utils/get_data_stream_namespace_filter';
 import { getQueryFields } from '../../utils/get_query_fields';
 
 export const createThreatSignals = async ({
@@ -100,9 +101,23 @@ export const createThreatSignals = async ({
     uiSettingsClient: services.uiSettingsClient,
   });
 
+  const dataStreamNamespaceFilters = await getDataStreamNamespaceFilter({
+    uiSettingsClient: services.uiSettingsClient,
+  });
+
   const { eventMappingFilter, indicatorMappingFilter } = getMappingFilters(threatMapping);
-  const allEventFilters = [...filters, eventMappingFilter, ...dataTiersFilters];
-  const allThreatFilters = [...threatFilters, indicatorMappingFilter, ...dataTiersFilters];
+  const allEventFilters = [
+    ...filters,
+    eventMappingFilter,
+    ...dataTiersFilters,
+    ...dataStreamNamespaceFilters,
+  ];
+  const allThreatFilters = [
+    ...threatFilters,
+    indicatorMappingFilter,
+    ...dataTiersFilters,
+    ...dataStreamNamespaceFilters,
+  ];
 
   const dataViews = await services.getDataViews();
   const inputIndexFields = await getQueryFields({

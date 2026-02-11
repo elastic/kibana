@@ -178,6 +178,7 @@ export interface UsageStats {
   'aiAssistant:preferredAIAssistantType': string;
   'aiAssistant:preferredChatExperience': string;
   'securitySolution:excludedDataTiersForRuleExecution': string[];
+  'securitySolution:includedDataStreamNamespacesForRuleExecution': string[];
   'securitySolution:maxUnassociatedNotes': number;
   'observability:searchExcludedDataTiers': string[];
   'cases:incrementalIdDisplay:enabled': boolean;
