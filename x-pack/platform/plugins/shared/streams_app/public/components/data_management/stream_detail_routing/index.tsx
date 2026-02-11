@@ -86,17 +86,27 @@ export function StreamDetailRoutingImpl() {
     },
   } = useKibana();
 
-  const routingSnapshot = useStreamsRoutingSelector((snapshot) => snapshot);
   const { cancelChanges, saveChanges } = useStreamRoutingEvents();
 
-  const hasRoutingChanges = selectHasRoutingChanges(routingSnapshot.context);
-
-  const definition = routingSnapshot.context.definition;
+  const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
+  const routing = useStreamsRoutingSelector((snapshot) => snapshot.context.routing);
+  const canSaveRouting = useStreamsRoutingSelector((snapshot) => snapshot.can({ type: 'routingRule.save' }));
+  const canForkRouting = useStreamsRoutingSelector((snapshot) => snapshot.can({ type: 'routingRule.fork' }));
+  const canSaveSuggestion = useStreamsRoutingSelector((snapshot) =>
+    snapshot.can({ type: 'suggestion.saveSuggestion' })
+  );
+  const isReordering = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: { ingestMode: { reorderingRules: 'reordering' } } })
+  );
+  const isUpdatingStream = useStreamsRoutingSelector((snapshot) =>
+    snapshot.matches({ ready: { ingestMode: { reorderingRules: 'updatingStream' } } })
+  );
+  const hasRoutingChanges = useStreamsRoutingSelector((snapshot) =>
+    selectHasRoutingChanges(snapshot.context)
+  );
 
   const shouldDisplayBottomBar =
-    routingSnapshot.matches({ ready: { ingestMode: { reorderingRules: 'reordering' } } }) &&
-    routingSnapshot.can({ type: 'routingRule.save' }) &&
-    hasRoutingChanges;
+    isReordering && canSaveRouting && hasRoutingChanges;
 
   const { onPageReady } = usePerformanceContext();
   const { timeState } = useTimefilter();
@@ -131,9 +141,7 @@ export function StreamDetailRoutingImpl() {
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges:
-      routingSnapshot.can({ type: 'routingRule.save' }) ||
-      routingSnapshot.can({ type: 'routingRule.fork' }) ||
-      routingSnapshot.can({ type: 'suggestion.saveSuggestion' }),
+      canSaveRouting || canForkRouting || canSaveSuggestion,
     history: appParams.history,
     http: core.http,
     navigateToUrl: core.application.navigateToUrl,
@@ -150,12 +158,12 @@ export function StreamDetailRoutingImpl() {
   } = useRequestPreviewFlyoutState();
 
   const onBottomBarViewCodeClick = () => {
-    const routing = routingSnapshot.context.routing.map(routingConverter.toAPIDefinition);
-    const body = buildRoutingSaveRequestPayload(routingSnapshot.context.definition, routing);
+    const routingPayload = routing.map(routingConverter.toAPIDefinition);
+    const body = buildRoutingSaveRequestPayload(definition, routingPayload);
 
     openRequestPreviewFlyout({
       method: 'PUT',
-      url: `/api/streams/${routingSnapshot.context.definition.stream.name}/_ingest`,
+      url: `/api/streams/${definition.stream.name}/_ingest`,
       body,
     });
   };
@@ -228,11 +236,9 @@ export function StreamDetailRoutingImpl() {
               })}
               onCancel={cancelChanges}
               onConfirm={saveChanges}
-              isLoading={routingSnapshot.matches({
-                ready: { ingestMode: { reorderingRules: 'updatingStream' } },
-              })}
-              disabled={!routingSnapshot.can({ type: 'routingRule.save' })}
-              insufficientPrivileges={!routingSnapshot.can({ type: 'routingRule.save' })}
+              isLoading={isUpdatingStream}
+              disabled={!canSaveRouting}
+              insufficientPrivileges={!canSaveRouting}
               onViewCodeClick={onBottomBarViewCodeClick}
             />
           </EuiFlexItem>
