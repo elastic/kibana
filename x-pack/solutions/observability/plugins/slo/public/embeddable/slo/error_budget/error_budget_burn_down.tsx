@@ -19,6 +19,7 @@ import { SLOGroupings } from '../../../pages/slos/components/common/slo_grouping
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { SloOverviewDetails } from '../common/slo_overview_details';
 import type { EmbeddableSloProps } from './types';
+import { SloDetailsContextProvider } from '@kbn/slo-plugin/public/pages/slo_details/components/slo_details_context';
 
 export function SloErrorBudget({
   sloId,
@@ -133,11 +134,9 @@ export function SloErrorBudget({
 
       <EuiFlexGroup direction="column" gutterSize="l">
         <ErrorBudgetHeader hideTitle={true} slo={slo} />
-        <ErrorBudgetChart
-          data={errorBudgetBurnDownData}
-          isLoading={historicalSummaryLoading}
-          slo={slo!}
-        />
+        <SloDetailsContextProvider value={{ slo, isAutoRefreshing: false, isFlyout: false }}>
+          <ErrorBudgetChart data={errorBudgetBurnDownData} isLoading={historicalSummaryLoading} />
+        </SloDetailsContextProvider>
       </EuiFlexGroup>
 
       <SloOverviewDetails slo={selectedSlo} setSelectedSlo={setSelectedSlo} />

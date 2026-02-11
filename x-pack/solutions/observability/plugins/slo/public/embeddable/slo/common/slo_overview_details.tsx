@@ -28,6 +28,7 @@ import { SloDetails } from '../../../pages/slo_details/components/slo_details';
 import { getSloFormattedSummary } from '../../../pages/slos/hooks/use_slo_summary';
 import { useKibana } from '../../../hooks/use_kibana';
 import { HeaderTitle } from '../../../pages/slo_details/components/header_title';
+import { SloDetailsContextProvider } from '@kbn/slo-plugin/public/pages/slo_details/components/slo_details_context';
 
 export interface SloOverviewDetailsContentProps {
   slo: SLOWithSummaryResponse;
@@ -126,7 +127,9 @@ export function SloOverviewDetails({
           ))}
         </EuiTabs>
         <EuiSpacer size="m" />
-        <SloDetails slo={slo} isAutoRefreshing={false} selectedTabId={selectedTabId} />
+        <SloDetailsContextProvider value={{ slo, isAutoRefreshing: false, isFlyout: false }}>
+          <SloDetails selectedTabId={selectedTabId} />
+        </SloDetailsContextProvider>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <SloOverviewDetailsFlyoutFooter slo={slo} onClose={onClose} />
