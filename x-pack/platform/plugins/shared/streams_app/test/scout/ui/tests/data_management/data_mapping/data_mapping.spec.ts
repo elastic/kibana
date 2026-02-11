@@ -242,10 +242,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
 
     // Fill in the field name
     const fieldName = 'attributes.id';
-    await page.getByTestId('streamsAppSchemaEditorAddFieldFlyoutFieldName').click();
-    await page.keyboard.type(fieldName);
-    await page.keyboard.press('Enter');
-
+    await pageObjects.streams.typeFieldName(fieldName);
     // Select field type
     await pageObjects.streams.setFieldMappingType('keyword');
 

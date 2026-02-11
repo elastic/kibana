@@ -13,7 +13,6 @@ import type {
   SavedObjectsClientContract,
   KibanaRequest,
 } from '@kbn/core/server';
-import { SPACES_EXTENSION_ID } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
@@ -112,7 +111,6 @@ export class Plugin implements PluginType {
 
     this.syncGlobalParamsTask.registerTaskDefinition(plugins.taskManager);
     plugins.embeddable.registerTransforms(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
-      transformOutInjectsReferences: true,
       transformIn: getTransformIn(plugins.embeddable.transformEnhancementsIn),
       transformOut: getTransformOut(plugins.embeddable.transformEnhancementsOut),
     });
@@ -130,9 +128,7 @@ export class Plugin implements PluginType {
         return;
       }
 
-      return pluginsStart.maintenanceWindows?.getMaintenanceWindowClientInternal(request, [
-        SPACES_EXTENSION_ID,
-      ]);
+      return pluginsStart.maintenanceWindows?.getMaintenanceWindowClientInternal(request);
     };
 
     if (this.server) {

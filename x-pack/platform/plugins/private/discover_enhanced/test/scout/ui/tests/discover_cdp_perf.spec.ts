@@ -73,8 +73,10 @@ test.describe(
         'eventAnnotation',
         'expressionXY',
         'kbn-ui-shared-deps-npm',
+        'kql',
         'lens',
         'maps',
+        'presentationPanel',
         ...(config.projectType === 'security' ? ['securitySolution'] : []),
         'unifiedSearch',
       ]);

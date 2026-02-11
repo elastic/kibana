@@ -53,7 +53,7 @@ describe('validateConnectorIds', () => {
     id: 'test-id-1-2-3-4',
     connectorType: 'slack',
     type: 'connector-id',
-    key: 'My Slack Connector',
+    key: 'slack-connector-1', // Default to UUID
     startLineNumber: 5,
     startColumn: 10,
     endLineNumber: 5,
@@ -79,16 +79,17 @@ describe('validateConnectorIds', () => {
         endLineNumber: 0,
         endColumn: 0,
         afterMessage: null,
+        beforeMessage: null,
         hoverMessage: null,
       });
     });
   });
 
-  describe('when connector is found by name', () => {
-    it('should return valid result with afterMessage containing connector details', () => {
+  describe('when connector is found by UUID', () => {
+    it('should return valid result with beforeMessage containing connector name', () => {
       const connectorIdItems: ConnectorIdItem[] = [
         createConnectorIdItem({
-          key: 'My Slack Connector',
+          key: 'slack-connector-1',
           connectorType: 'slack',
         }),
       ];
@@ -105,17 +106,18 @@ describe('validateConnectorIds', () => {
         startColumn: 10,
         endLineNumber: 5,
         endColumn: 30,
-        afterMessage: '✓ Connected (slack connector, ID: slack-connector-1)',
+        beforeMessage: '✓ My Slack Connector',
+        afterMessage: null,
         hoverMessage: null,
       });
     });
   });
 
-  describe('when connector is found by id', () => {
-    it('should return valid result with afterMessage containing connector details', () => {
+  describe('when connector name is used instead of UUID', () => {
+    it('should return error indicating UUID is required', () => {
       const connectorIdItems: ConnectorIdItem[] = [
         createConnectorIdItem({
-          key: 'slack-connector-1',
+          key: 'My Slack Connector',
           connectorType: 'slack',
         }),
       ];
@@ -125,11 +127,11 @@ describe('validateConnectorIds', () => {
       expect(results).toHaveLength(1);
       expect(results[0]).toMatchObject({
         id: 'test-id-1-2-3-4',
-        severity: null,
-        message: null,
+        severity: 'error',
+        message: expect.stringContaining('UUID "My Slack Connector" not found'),
         owner: 'connector-id-validation',
-        afterMessage: '✓ Connected (slack connector, ID: slack-connector-1)',
-        hoverMessage: null,
+        beforeMessage: null,
+        afterMessage: null,
       });
     });
   });
@@ -150,13 +152,14 @@ describe('validateConnectorIds', () => {
         id: 'test-id-1-2-3-4',
         severity: 'error',
         message:
-          'Slack connector "non-existent-connector" not found. Add a new connector or choose an existing one',
+          'Slack connector UUID "non-existent-connector" not found. Add a new connector or choose an existing one',
         owner: 'connector-id-validation',
         startLineNumber: 5,
         startColumn: 10,
         endLineNumber: 5,
         endColumn: 30,
         afterMessage: null,
+        beforeMessage: null,
         hoverMessage: null,
       });
     });
@@ -193,7 +196,7 @@ describe('validateConnectorIds', () => {
 
       const results = validateConnectorIds(connectorIdItems, mockConnectorTypes);
 
-      expect(results[0].message).toContain('Slack connector');
+      expect(results[0].message).toContain('Slack connector UUID');
     });
 
     it('should use connector type as fallback if displayName not available', () => {
@@ -206,7 +209,7 @@ describe('validateConnectorIds', () => {
 
       const results = validateConnectorIds(connectorIdItems, mockConnectorTypes);
 
-      expect(results[0].message).toContain('unknown-type connector');
+      expect(results[0].message).toContain('unknown-type connector UUID');
     });
   });
 
@@ -274,7 +277,7 @@ describe('validateConnectorIds', () => {
       const connectorIdItems: ConnectorIdItem[] = [
         createConnectorIdItem({
           id: 'test-id-1',
-          key: 'My Slack Connector',
+          key: 'slack-connector-1', // Valid UUID
           connectorType: 'slack',
           startLineNumber: 5,
         }),
@@ -286,7 +289,7 @@ describe('validateConnectorIds', () => {
         }),
         createConnectorIdItem({
           id: 'test-id-3',
-          key: 'OpenAI Connector',
+          key: 'openai-connector-1', // Valid UUID
           connectorType: 'inference.unified_completion',
           startLineNumber: 15,
         }),
@@ -301,6 +304,7 @@ describe('validateConnectorIds', () => {
         id: 'test-id-1',
         severity: null,
         message: null,
+        beforeMessage: '✓ My Slack Connector',
       });
 
       // Second connector should have error
@@ -315,6 +319,7 @@ describe('validateConnectorIds', () => {
         id: 'test-id-3',
         severity: null,
         message: null,
+        beforeMessage: '✓ OpenAI Connector',
       });
     });
 
@@ -322,7 +327,7 @@ describe('validateConnectorIds', () => {
       const connectorIdItems: ConnectorIdItem[] = [
         createConnectorIdItem({
           id: 'test-id-1',
-          key: 'My Slack Connector',
+          key: 'slack-connector-1', // Valid UUID
           connectorType: 'slack',
         }),
         createConnectorIdItem({
@@ -349,7 +354,7 @@ describe('validateConnectorIds', () => {
     it('should validate connectors with sub-action types', () => {
       const connectorIdItems: ConnectorIdItem[] = [
         createConnectorIdItem({
-          key: 'OpenAI Connector',
+          key: 'openai-connector-1', // Valid UUID
           connectorType: 'inference.unified_completion',
         }),
       ];
@@ -360,8 +365,8 @@ describe('validateConnectorIds', () => {
       expect(results[0]).toMatchObject({
         severity: null,
         message: null,
-        afterMessage:
-          '✓ Connected (inference.unified_completion connector, ID: openai-connector-1)',
+        beforeMessage: '✓ OpenAI Connector',
+        afterMessage: null,
       });
     });
 
@@ -392,7 +397,7 @@ describe('validateConnectorIds', () => {
       expect(results[0]).toMatchObject({
         severity: 'error',
         message:
-          'Email connector "some-email-connector" not found. Add a new connector or choose an existing one',
+          'Email connector UUID "some-email-connector" not found. Add a new connector or choose an existing one',
       });
     });
   });
@@ -409,7 +414,7 @@ describe('validateConnectorIds', () => {
     it('should preserve exact position information from connector items', () => {
       const connectorIdItems: ConnectorIdItem[] = [
         createConnectorIdItem({
-          key: 'My Slack Connector',
+          key: 'slack-connector-1', // Valid UUID
           connectorType: 'slack',
           startLineNumber: 10,
           startColumn: 5,

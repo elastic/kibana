@@ -55,7 +55,7 @@ export class EuiDataGridWrapper {
     this.popoverPanel = this.page.locator('div[data-popover-panel="true"]');
   }
 
-  private async ensureGridVisible(): Promise<void> {
+  async ensureGridVisible(): Promise<void> {
     await this.dataGridWrapper.waitFor({ state: 'visible' });
   }
 
@@ -141,15 +141,23 @@ export class EuiDataGridWrapper {
     return await this.rows.count();
   }
 
+  // Anytime the full screen button is clicked, it obtains focus. Because the button is wrapped in a tooltip,
+  // focusing it causes the tooltip to appear, which can cover parts of the grid and interfere with other test interactions.
+  // To prevent this, we blur the button immediately after clicking it to ensure the tooltip remains hidden.
+  private async clickFullScreenButton() {
+    await this.toolbarFullScreenButton.click();
+    await this.toolbarFullScreenButton.blur();
+  }
+
   async openFullScreenMode() {
     await this.ensureGridVisible();
-    await this.toolbarFullScreenButton.click();
+    await this.clickFullScreenButton();
     await expect(this.dataGridWrapper).toContainClass('euiDataGrid--fullScreen');
   }
 
   async closeFullScreenMode() {
     await this.ensureGridVisible();
-    await this.toolbarFullScreenButton.click();
+    await this.clickFullScreenButton();
     await expect(this.dataGridWrapper).not.toContainClass('euiDataGrid--fullScreen');
   }
 

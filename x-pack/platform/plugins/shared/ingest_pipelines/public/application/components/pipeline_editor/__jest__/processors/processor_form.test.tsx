@@ -5,50 +5,35 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { SetupResult } from './processor.helpers';
-import { setup, setupEnvironment } from './processor.helpers';
+import { fireEvent, screen, within } from '@testing-library/react';
+import { renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 describe('Processor: Bytes', () => {
   let onUpdate: jest.Mock;
-  let testBed: SetupResult;
-  const { httpSetup } = setupEnvironment();
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpSetup } = setupEnvironment());
     onUpdate = jest.fn();
 
-    await act(async () => {
-      testBed = await setup(httpSetup, {
-        value: {
-          processors: [],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
-      });
+    renderProcessorEditor(httpSetup, {
+      value: {
+        processors: [],
+      },
+      onFlyoutOpen: jest.fn(),
+      onUpdate,
     });
-    testBed.component.update();
   });
 
   test('Prevents form submission if processor type not selected', async () => {
-    const {
-      actions: { addProcessor, saveNewProcessor },
-      form,
-    } = testBed;
-
     // Open flyout to add new processor
-    addProcessor();
+    fireEvent.click(screen.getByTestId('addProcessorButton'));
+    const addProcessorForm = await screen.findByTestId('addProcessorForm');
     // Click submit button without entering any fields
-    await saveNewProcessor();
+    fireEvent.click(within(addProcessorForm).getByTestId('submitButton'));
 
     // Expect form error as a processor type is required
-    expect(form.getErrorsMessages()).toEqual(['A type is required.']);
+    expect(await screen.findByText('A type is required.')).toBeInTheDocument();
   });
 });

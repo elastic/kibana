@@ -17,7 +17,7 @@ import {
 import React, { useCallback, useEffect, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
-import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/onechat-common/telemetry';
+import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
 import type { AgentBuilderTourState } from './step_config';

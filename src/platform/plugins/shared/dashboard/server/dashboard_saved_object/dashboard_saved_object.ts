@@ -108,9 +108,10 @@ export const createDashboardSavedObjectType = ({
       },
       controlGroupInput: {
         properties: {
+          panelsJSON: { type: 'text', index: false },
+          // Following props are deprecated, kept in mappings for backwards compatibility only
           controlStyle: { type: 'keyword', index: false, doc_values: false },
           chainingSystem: { type: 'keyword', index: false, doc_values: false },
-          panelsJSON: { type: 'text', index: false },
           showApplySelections: { type: 'boolean', index: false, doc_values: false },
           ignoreParentSettingsJSON: { type: 'text', index: false },
         },

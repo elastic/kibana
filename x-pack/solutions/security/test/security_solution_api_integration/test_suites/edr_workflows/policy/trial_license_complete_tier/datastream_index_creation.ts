@@ -28,7 +28,8 @@ export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
   const isServerless = config.get('serverless');
 
-  describe('@ess @serverless Creation of DOT indices for elastic defend policies', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/246341
+  describe.skip('@ess @serverless Creation of DOT indices for elastic defend policies', function () {
     let testData: PolicyTestResourceInfo;
 
     const getExpectedIndexList = (namespace: string): string[] => {

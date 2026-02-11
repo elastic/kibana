@@ -6,7 +6,7 @@
  */
 
 import type { MetricVisualizationState } from '../../../../public';
-import type { LensAttributes } from '../../../../server/content_management';
+import type { LensAttributes } from '../../../../server/content_management/v1';
 
 /**
  * Cleanup metric properties

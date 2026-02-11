@@ -475,7 +475,8 @@ export class CommonPageObject extends FtrService {
 
   async waitForTopNavToBeVisible() {
     await this.retry.try(async () => {
-      const isNavVisible = await this.testSubjects.exists('top-nav');
+      const isNavVisible =
+        (await this.testSubjects.exists('top-nav')) || (await this.testSubjects.exists('app-menu'));
       if (!isNavVisible) {
         throw new Error('Local nav not visible yet');
       }

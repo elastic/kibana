@@ -14,14 +14,14 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isMac } from '../../../shared/utils/is_mac';
+import { isMac } from '@kbn/shared-ux-utility';
 
 type ActionsMenuButtonProps = Omit<EuiButtonEmptyPropsForButton, 'children'>;
 
 export function ActionsMenuButton(props: ActionsMenuButtonProps) {
   const styles = useMemoCss(componentStyles);
 
-  const commandKey = isMac() ? '⌘' : 'Ctrl';
+  const commandKey = isMac ? '⌘' : 'Ctrl';
 
   return (
     <EuiButtonEmpty size="s" {...props}>

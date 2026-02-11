@@ -45,6 +45,7 @@ describe('useMetricFields', () => {
     metricFields: [] as MetricField[],
     dimensions: [] as Dimension[],
     getSampleRow: jest.fn(() => undefined),
+    whereStatements: [] as string[],
   };
 
   beforeEach(() => {

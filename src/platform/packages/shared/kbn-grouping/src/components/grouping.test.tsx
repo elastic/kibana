@@ -18,6 +18,7 @@ import { getTelemetryEvent } from '../telemetry/const';
 
 import { mockGroupingProps, host1Name, host2Name } from './grouping.mock';
 import type { SetRequired } from 'type-fest';
+import { EuiContextMenu } from '@elastic/eui';
 
 const renderChildComponent = jest.fn();
 const takeActionItems = jest.fn(mockGroupingProps.takeActionItems);
@@ -92,12 +93,16 @@ describe('Grouping', () => {
     fireEvent.click(group1);
     expect(renderChildComponent).toHaveBeenNthCalledWith(
       1,
-      createGroupFilter(testProps.selectedGroup, [host1Name])
+      createGroupFilter(testProps.selectedGroup, [host1Name]),
+      testProps.selectedGroup,
+      expect.objectContaining({ key: [host1Name], selectedGroup: testProps.selectedGroup })
     );
     fireEvent.click(group2);
     expect(renderChildComponent).toHaveBeenNthCalledWith(
       2,
-      createGroupFilter(testProps.selectedGroup, [host2Name])
+      createGroupFilter(testProps.selectedGroup, [host2Name]),
+      testProps.selectedGroup,
+      expect.objectContaining({ key: [host2Name], selectedGroup: testProps.selectedGroup })
     );
   });
 
@@ -131,7 +136,17 @@ describe('Grouping', () => {
   });
 
   it('Renders a null group and passes the correct filter to take actions and child component', () => {
-    takeActionItems.mockReturnValue({ items: [{ key: '1', name: '1' }], panels: [] });
+    takeActionItems.mockReturnValue(
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={[
+          {
+            id: 0,
+            items: [{ key: '1', name: '1' }],
+          },
+        ]}
+      />
+    );
     render(
       <I18nProvider>
         <Grouping {...testProps} />
@@ -147,7 +162,15 @@ describe('Grouping', () => {
     lastGroup = screen.getAllByTestId('grouping-accordion').at(-1);
     fireEvent.click(within(lastGroup!).getByTestId('group-panel-toggle'));
 
-    expect(renderChildComponent).toHaveBeenCalledWith(getNullGroupFilter('host.name'));
+    expect(renderChildComponent).toHaveBeenCalledWith(
+      getNullGroupFilter('host.name'),
+      testProps.selectedGroup,
+      expect.objectContaining({
+        key: ['-'],
+        selectedGroup: testProps.selectedGroup,
+        isNullGroup: true,
+      })
+    );
   });
 
   it('Renders groupPanelRenderer when provided', () => {

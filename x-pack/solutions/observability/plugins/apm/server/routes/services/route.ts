@@ -28,6 +28,7 @@ import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
+import { getApmSloClient } from '../../lib/helpers/get_apm_slo_client';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -115,11 +116,12 @@ const servicesRoute = createApmServerRoute({
     const savedObjectsClient = (await context.core).savedObjects.client;
 
     const coreStart = await core.start();
-    const [mlClient, apmEventClient, apmAlertsClient, serviceGroup, randomSampler] =
+    const [mlClient, apmEventClient, apmAlertsClient, sloClient, serviceGroup, randomSampler] =
       await Promise.all([
         getMlClient(resources),
         getApmEventClient(resources),
         getApmAlertsClient(resources),
+        getApmSloClient(resources),
         serviceGroupId
           ? getServiceGroup({ savedObjectsClient, serviceGroupId })
           : Promise.resolve(null),
@@ -132,6 +134,7 @@ const servicesRoute = createApmServerRoute({
       mlClient,
       apmEventClient,
       apmAlertsClient,
+      sloClient,
       logger,
       start,
       end,

@@ -21,9 +21,7 @@
       "kibanaReact",
       "kibanaUtils"
     ],
-    "optionalPlugins": [
-      "security"
-    ],
+    "optionalPlugins": [],
     "extraPublicDirs": [
       "common"
     ]

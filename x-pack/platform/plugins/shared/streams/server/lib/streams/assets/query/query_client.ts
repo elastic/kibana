@@ -10,18 +10,17 @@ import { isBoom } from '@hapi/boom';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import type { FeatureType, StreamQuery } from '@kbn/streams-schema';
+import type { StreamQuery } from '@kbn/streams-schema';
 import { buildEsqlQuery } from '@kbn/streams-schema';
 import { isEqual, map, partition } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import type {
-  Asset,
-  AssetLink,
-  AssetLinkRequest,
-  AssetUnlinkRequest,
+  Query,
+  QueryLinkRequest,
+  QueryUnlinkRequest,
   QueryLink,
-} from '../../../../../common/assets';
+} from '../../../../../common/queries';
 import type { EsqlRuleParams } from '../../../rules/esql/types';
 import { AssetNotFoundError } from '../../errors/asset_not_found_error';
 import {
@@ -37,7 +36,7 @@ import {
   QUERY_TITLE,
   STREAM_NAME,
 } from '../fields';
-import type { AssetStorageSettings } from '../storage_settings';
+import type { QueryStorageSettings } from '../storage_settings';
 import { getRuleIdFromQueryLink } from './helpers/query';
 
 type TermQueryFieldValue = string | boolean | number | null;
@@ -84,7 +83,7 @@ function wildcardQuery<T extends string>(
   return [{ wildcard: { [field]: { value: `*${value}*`, case_insensitive: true } } }];
 }
 
-export function getQueryLinkUuid(name: string, asset: Pick<AssetLink, 'asset.id' | 'asset.type'>) {
+export function getQueryLinkUuid(name: string, asset: Pick<QueryLink, 'asset.id' | 'asset.type'>) {
   return objectHash({
     [STREAM_NAME]: name,
     [ASSET_ID]: asset[ASSET_ID],
@@ -92,71 +91,73 @@ export function getQueryLinkUuid(name: string, asset: Pick<AssetLink, 'asset.id'
   });
 }
 
-function toQueryLink<TQueryLink extends AssetLinkRequest>(
+function toQueryLink<TQueryLink extends QueryLinkRequest>(
   name: string,
   asset: TQueryLink
-): TQueryLink & { [ASSET_UUID]: string } {
+): QueryLink {
   return {
     ...asset,
     [ASSET_UUID]: getQueryLinkUuid(name, asset),
+    stream_name: name,
   };
 }
 
-type StoredQueryLink = Omit<QueryLink, 'query'> & {
+type QueryLinkStorageFields = Omit<QueryLink, 'query' | 'stream_name'> & {
   [QUERY_TITLE]: string;
   [QUERY_KQL_BODY]: string;
   [QUERY_SEVERITY_SCORE]?: number;
 };
 
-export type StoredAssetLink = StoredQueryLink & {
+export type StoredQueryLink = QueryLinkStorageFields & {
   [STREAM_NAME]: string;
 };
 
 interface QueryBulkIndexOperation {
-  index: { asset: AssetLinkRequest };
+  index: { asset: QueryLinkRequest };
 }
 interface QueryBulkDeleteOperation {
-  delete: { asset: AssetUnlinkRequest };
+  delete: { asset: QueryUnlinkRequest };
 }
 
 export type QueryBulkOperation = QueryBulkIndexOperation | QueryBulkDeleteOperation;
 
-function fromStorage(link: StoredAssetLink): QueryLink {
-  const storedQueryLink: StoredQueryLink & {
+function fromStorage(link: StoredQueryLink): QueryLink {
+  const storageFields: QueryLinkStorageFields & {
     [QUERY_FEATURE_NAME]: string;
     [QUERY_FEATURE_FILTER]: string;
-    [QUERY_FEATURE_TYPE]: FeatureType;
+    [QUERY_FEATURE_TYPE]: 'system';
     [QUERY_EVIDENCE]?: string[];
-  } = link as StoredAssetLink & {
+  } = link as StoredQueryLink & {
     [QUERY_FEATURE_NAME]: string;
     [QUERY_FEATURE_FILTER]: string;
-    [QUERY_FEATURE_TYPE]: FeatureType;
+    [QUERY_FEATURE_TYPE]: 'system';
     [QUERY_EVIDENCE]?: string[];
   };
   return {
-    ...storedQueryLink,
+    ...storageFields,
+    stream_name: link[STREAM_NAME],
     query: {
-      id: storedQueryLink[ASSET_ID],
-      title: storedQueryLink[QUERY_TITLE],
+      id: storageFields[ASSET_ID],
+      title: storageFields[QUERY_TITLE],
       kql: {
-        query: storedQueryLink[QUERY_KQL_BODY],
+        query: storageFields[QUERY_KQL_BODY],
       },
-      feature: storedQueryLink[QUERY_FEATURE_NAME]
+      feature: storageFields[QUERY_FEATURE_NAME]
         ? {
-            name: storedQueryLink[QUERY_FEATURE_NAME],
-            filter: JSON.parse(storedQueryLink[QUERY_FEATURE_FILTER]),
-            type: storedQueryLink[QUERY_FEATURE_TYPE] ?? 'system',
+            name: storageFields[QUERY_FEATURE_NAME],
+            filter: JSON.parse(storageFields[QUERY_FEATURE_FILTER]),
+            type: 'system',
           }
         : undefined,
-      severity_score: storedQueryLink[QUERY_SEVERITY_SCORE],
-      evidence: storedQueryLink[QUERY_EVIDENCE],
+      severity_score: storageFields[QUERY_SEVERITY_SCORE],
+      evidence: storageFields[QUERY_EVIDENCE],
     },
   } satisfies QueryLink;
 }
 
-function toStorage(name: string, request: AssetLinkRequest): StoredAssetLink {
+function toStorage(name: string, request: QueryLinkRequest): StoredQueryLink {
   const link = toQueryLink(name, request);
-  const { query, ...rest } = link;
+  const { query, stream_name, ...rest } = link;
   return {
     ...rest,
     [STREAM_NAME]: name,
@@ -167,7 +168,7 @@ function toStorage(name: string, request: AssetLinkRequest): StoredAssetLink {
     [QUERY_FEATURE_TYPE]: query.feature ? query.feature.type : '',
     [QUERY_SEVERITY_SCORE]: query.severity_score,
     [QUERY_EVIDENCE]: query.evidence,
-  } as unknown as StoredAssetLink;
+  } as unknown as StoredQueryLink;
 }
 
 function hasBreakingChange(currentQuery: StreamQuery, nextQuery: StreamQuery): boolean {
@@ -183,13 +184,14 @@ function toQueryLinkFromQuery(query: StreamQuery, stream: string): QueryLink {
     'asset.type': 'query',
     'asset.id': query.id,
     query,
+    stream_name: stream,
   };
 }
 
 export class QueryClient {
   constructor(
     private readonly dependencies: {
-      storageClient: IStorageClient<AssetStorageSettings, StoredAssetLink>;
+      storageClient: IStorageClient<QueryStorageSettings, StoredQueryLink>;
       soClient: SavedObjectsClientContract;
       rulesClient: RulesClient;
       logger: Logger;
@@ -199,7 +201,7 @@ export class QueryClient {
 
   // ==================== Storage Operations ====================
 
-  async linkQuery(name: string, link: AssetLinkRequest): Promise<QueryLink> {
+  async linkQuery(name: string, link: QueryLinkRequest): Promise<QueryLink> {
     const document = toStorage(name, link);
 
     await this.dependencies.storageClient.index({
@@ -212,7 +214,7 @@ export class QueryClient {
 
   async syncQueryList(
     name: string,
-    links: AssetLinkRequest[]
+    links: QueryLinkRequest[]
   ): Promise<{ deleted: QueryLink[]; indexed: QueryLink[] }> {
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 10_000,
@@ -250,7 +252,7 @@ export class QueryClient {
     };
   }
 
-  async unlinkQuery(name: string, asset: AssetUnlinkRequest): Promise<void> {
+  async unlinkQuery(name: string, asset: QueryUnlinkRequest): Promise<void> {
     const id = getQueryLinkUuid(name, asset);
 
     const { result } = await this.dependencies.storageClient.delete({ id });
@@ -263,7 +265,7 @@ export class QueryClient {
     await this.dependencies.storageClient.clean();
   }
 
-  async getQueryLinks(names: string[]): Promise<Record<string, QueryLink[]>> {
+  async getStreamToQueryLinksMap(names: string[]): Promise<Record<string, QueryLink[]>> {
     const filters = [...termsQuery(STREAM_NAME, names), ...termQuery(ASSET_TYPE, 'query')];
 
     const assetsResponse = await this.dependencies.storageClient.search({
@@ -290,6 +292,26 @@ export class QueryClient {
     return queriesPerName;
   }
 
+  /**
+   * Returns all query links for given streams or
+   * all query links if no stream names are provided.
+   */
+  async getQueryLinks(streamNames: string[]): Promise<QueryLink[]> {
+    const filter = [...termsQuery(STREAM_NAME, streamNames), ...termQuery(ASSET_TYPE, 'query')];
+
+    const queriesResponse = await this.dependencies.storageClient.search({
+      size: 10_000,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter,
+        },
+      },
+    });
+
+    return queriesResponse.hits.hits.map((hit) => fromStorage(hit._source));
+  }
+
   async bulkGetByIds(name: string, ids: string[]) {
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 10_000,
@@ -311,7 +333,9 @@ export class QueryClient {
     return assetsResponse.hits.hits.map((hit) => fromStorage(hit._source));
   }
 
-  async findQueries(name: string, query: string) {
+  async findQueries(streamNames: string[], query: string): Promise<QueryLink[]> {
+    const filter = [...termsQuery(STREAM_NAME, streamNames), ...termQuery(ASSET_TYPE, 'query')];
+
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 10_000,
       track_total_hits: false,
@@ -321,7 +345,7 @@ export class QueryClient {
       },
       query: {
         bool: {
-          filter: [...termQuery(STREAM_NAME, name), ...termQuery(ASSET_TYPE, 'query')],
+          filter,
           should: [
             ...wildcardQuery(QUERY_TITLE, query),
             ...wildcardQuery(QUERY_KQL_BODY, query),
@@ -340,7 +364,7 @@ export class QueryClient {
     return await this.dependencies.storageClient.bulk({
       operations: operations.map((operation) => {
         if ('index' in operation) {
-          const document = toStorage(name, Object.values(operation)[0].asset as AssetLinkRequest);
+          const document = toStorage(name, Object.values(operation)[0].asset as QueryLinkRequest);
           return {
             index: {
               document,
@@ -360,8 +384,8 @@ export class QueryClient {
     });
   }
 
-  async getAssets(name: string): Promise<Asset[]> {
-    const { [name]: queryLinks } = await this.getQueryLinks([name]);
+  async getAssets(name: string): Promise<Query[]> {
+    const { [name]: queryLinks } = await this.getStreamToQueryLinksMap([name]);
 
     if (queryLinks.length === 0) {
       return [];
@@ -374,6 +398,7 @@ export class QueryClient {
         [ASSET_TYPE]: link[ASSET_TYPE],
         query: link.query,
         title: link.query.title,
+        stream_name: link.stream_name,
       };
     });
   }
@@ -397,7 +422,7 @@ export class QueryClient {
      * - If a query is updated without a breaking change, it updates the existing rule.
      * - If a query is deleted, it removes the associated rule.
      */
-    const { [stream]: currentQueryLinks } = await this.getQueryLinks([stream]);
+    const { [stream]: currentQueryLinks } = await this.getStreamToQueryLinksMap([stream]);
     const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
     const nextIds = new Set(queries.map((query) => query.id));
 
@@ -469,7 +494,7 @@ export class QueryClient {
       return;
     }
 
-    const { [stream]: currentQueryLinks } = await this.getQueryLinks([stream]);
+    const { [stream]: currentQueryLinks } = await this.getStreamToQueryLinksMap([stream]);
     const queriesToDelete = currentQueryLinks.map((link) => ({ delete: { id: link.query.id } }));
     await this.bulk(stream, queriesToDelete);
   }
@@ -485,7 +510,7 @@ export class QueryClient {
       return;
     }
 
-    const { [stream]: currentQueryLinks } = await this.getQueryLinks([stream]);
+    const { [stream]: currentQueryLinks } = await this.getStreamToQueryLinksMap([stream]);
     const currentIds = new Set(currentQueryLinks.map((link) => link.query.id));
     const indexOperationsMap = new Map(
       operations

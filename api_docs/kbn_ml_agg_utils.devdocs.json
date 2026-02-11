@@ -34,6 +34,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/build_sampler_aggregation.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -50,6 +52,8 @@
               "any"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/build_sampler_aggregation.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -67,6 +71,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/build_sampler_aggregation.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -106,6 +112,8 @@
           ">"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -128,6 +136,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -159,6 +169,8 @@
           " | OrdinalChartData | UnsupportedChartData)[]>"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "lineNumber": 205,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -175,6 +187,8 @@
               "FetchHistogramsForFieldsParams"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "lineNumber": 205,
+            "columnNumber": 48,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -198,6 +212,8 @@
           "(samplerShardSize: number) => string[]"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/get_sampler_aggregations_response_path.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -214,6 +230,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/get_sampler_aggregations_response_path.ts",
+            "lineNumber": 16,
+            "columnNumber": 52,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -245,6 +263,8 @@
           " | undefined) => boolean"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/time_series_metric_fields.ts",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -268,6 +288,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/time_series_metric_fields.ts",
+            "lineNumber": 25,
+            "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -299,6 +321,8 @@
           " | undefined) => boolean"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/time_series_metric_fields.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -322,6 +346,8 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/time_series_metric_fields.ts",
+            "lineNumber": 33,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -349,6 +375,8 @@
           "<TBucket>"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/is_multi_bucket_aggregate.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -365,6 +393,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/is_multi_bucket_aggregate.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -386,6 +416,8 @@
           "(arg: unknown) => boolean"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/type_guards.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -402,6 +434,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/type_guards.ts",
+            "lineNumber": 20,
+            "columnNumber": 35,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -425,6 +459,8 @@
           "(arg: unknown) => boolean"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/type_guards.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -441,6 +477,8 @@
               "unknown"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/type_guards.ts",
+            "lineNumber": 40,
+            "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -474,6 +512,8 @@
           " | null) & _.MemoizedFunction"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/validate_number.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -490,6 +530,8 @@
               "NumberValidatorConditions | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/validate_number.ts",
+            "lineNumber": 56,
+            "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -514,6 +556,8 @@
           "\nInterface for cardinality aggregation."
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -530,6 +574,8 @@
               "FieldAggCardinality | ScriptAggCardinality"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -546,6 +592,8 @@
           "\nInterface for the parameters required to fetch aggregation intervals."
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -639,7 +687,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "WriteResponseBase",
-              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
+              ">; }; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kProject]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; name: string | symbol; transport: ",
               "default",
               "; helpers: ",
               "default",
@@ -1203,6 +1251,8 @@
               "TransportRequestOptions",
               " | undefined): Promise<boolean>; }; profiling: ",
               "default",
+              "; project: ",
+              "default",
               "; putScript: { (this: That, params: ",
               "PutScriptRequest",
               ", options?: ",
@@ -1548,6 +1598,8 @@
               "; }"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1564,6 +1616,8 @@
               "AbortSignal | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1592,6 +1646,8 @@
               " | undefined; randomSamplerProbability?: number | undefined; randomSamplerSeed?: number | undefined; }"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_agg_intervals.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1608,6 +1664,8 @@
           "\nField/value pair definition."
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1621,6 +1679,8 @@
               "The field name."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1637,6 +1697,8 @@
               "string | number"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1655,6 +1717,8 @@
           "\nRepresents parameters used to identify which histogram data needs to be generated for a field."
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+        "lineNumber": 93,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1668,6 +1732,8 @@
               "\nThe name of the field for which histogram data is generated."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1690,6 +1756,8 @@
               }
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 103,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1706,6 +1774,8 @@
           "\nRepresents an item set returned from `frequent_item_sets` augmented\nwith some metadata related to log rate analysis."
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+        "lineNumber": 54,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1729,6 +1799,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1742,6 +1814,8 @@
               "The size of the item set."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1755,6 +1829,8 @@
               "The maximum p-value associated with the item set."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1768,6 +1844,8 @@
               "The document count of the item set."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 65,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1781,6 +1859,8 @@
               "The support value of the item set."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1794,6 +1874,8 @@
               "The total document count."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1812,6 +1894,8 @@
           "\nInterface describing the data structure returned for numeric-based charts."
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1835,6 +1919,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "lineNumber": 75,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1848,6 +1934,8 @@
               "\nThe identifier for the data set."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1861,6 +1949,8 @@
               "\nThe interval value for the data."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1877,6 +1967,8 @@
               "[number, number]"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "lineNumber": 90,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1893,6 +1985,8 @@
               "\"numeric\""
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1911,6 +2005,8 @@
           "\nInterface describing attributes used for numeric histograms."
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+        "lineNumber": 73,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1924,6 +2020,8 @@
               "The interval value for the histogram."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1937,6 +2035,8 @@
               "The minimum value in the histogram."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1950,6 +2050,8 @@
               "The maximum value in the histogram."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1968,6 +2070,8 @@
           "\nRepresents an item in numeric data."
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1981,6 +2085,8 @@
               "\nThe numeric key."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1997,6 +2103,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2010,6 +2118,8 @@
               "\nThe document count associated with the key."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2043,6 +2153,8 @@
           }
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "lineNumber": 101,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2074,6 +2186,8 @@
               ".NUMBER"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "lineNumber": 105,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2110,6 +2224,8 @@
           }
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+        "lineNumber": 127,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2123,6 +2239,8 @@
               "The key associated with the significant item."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 137,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2139,6 +2257,8 @@
               "\"keyword\" | \"log_pattern\""
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 140,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2152,6 +2272,8 @@
               "The document count for the significant item."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2165,6 +2287,8 @@
               "The background count for the significant item."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 146,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2178,6 +2302,8 @@
               "The total document count for all items."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2191,6 +2317,8 @@
               "The total background count for all items."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 152,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2204,6 +2332,8 @@
               "The score associated with the significant item."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 155,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2220,6 +2350,8 @@
               "number | null"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 158,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2233,6 +2365,8 @@
               "The normalized score for the significant item."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 161,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2256,6 +2390,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 164,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2272,6 +2408,8 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 167,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2288,6 +2426,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 170,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2306,6 +2446,8 @@
           "\nRepresents a significant item group."
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+        "lineNumber": 235,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2319,6 +2461,8 @@
               "The identifier for the item."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 240,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2342,6 +2486,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 243,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2355,6 +2501,8 @@
               "The document count associated with this item."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 246,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2371,6 +2519,8 @@
               "number | null"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 249,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2394,6 +2544,8 @@
               "[] | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 252,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2412,6 +2564,8 @@
           "\nRepresents histogram data for a group of field/value pairs."
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+        "lineNumber": 202,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2425,6 +2579,8 @@
               "The identifier for the group."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 207,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2448,6 +2604,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 210,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2483,6 +2641,8 @@
           }
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+        "lineNumber": 214,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2496,6 +2656,8 @@
               "The key associated with the significant item."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 219,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2512,6 +2674,8 @@
               "\"keyword\" | \"log_pattern\""
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 222,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2525,6 +2689,8 @@
               "The document count associated with this item."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 225,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2541,6 +2707,8 @@
               "number | null"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 228,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2557,6 +2725,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 231,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2592,6 +2762,8 @@
           }
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+        "lineNumber": 193,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2615,6 +2787,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 198,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2641,6 +2815,8 @@
           " extends SignificantItemHistogramItemBase"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+        "lineNumber": 185,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2654,6 +2830,8 @@
               "The document count for this histogram item in the significant item context."
             ],
             "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+            "lineNumber": 189,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2672,6 +2850,8 @@
           "\nAll available types for time series metric fields"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/time_series_metric_fields.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2691,6 +2871,8 @@
           "5000"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/field_histograms.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2716,6 +2898,8 @@
           " | NumericHistogramFieldWithColumnStats | OrdinalHistogramField | UnsupportedHistogramField)[]"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+        "lineNumber": 165,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2735,6 +2919,8 @@
           "{ [key: string]: boolean; } & { min?: boolean | undefined; max?: boolean | undefined; integerOnly?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/validate_number.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2760,6 +2946,8 @@
           "; }"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+        "lineNumber": 88,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2777,6 +2965,8 @@
           "\"keyword\" | \"log_pattern\""
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+        "lineNumber": 122,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2796,6 +2986,8 @@
           "{ readonly KEYWORD: \"keyword\"; readonly LOG_PATTERN: \"log_pattern\"; }"
         ],
         "path": "x-pack/platform/packages/private/ml/agg_utils/src/types.ts",
+        "lineNumber": 112,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

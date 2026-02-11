@@ -48,15 +48,18 @@ export function ingestPipelineValidatorTool(
   samples: string[]
 ): DynamicStructuredTool {
   const validatorSchema = z.object({
-    generated_pipeline: z
-      .object({
-        processors: z.array(z.any()).describe('The processors in the pipeline'),
-        on_failure: z
-          .array(z.any())
-          .optional()
-          .describe('Optional failure handlers for the pipeline'),
-      })
-      .describe('The generated ingest pipeline to validate'),
+    // We intentionally keep this schema permissive to avoid LangChain output
+    // parsing failures. The model can return the pipeline as:
+    // - a JSON object
+    // - a JSON string
+    // - a loosely-shaped object that we'll validate at runtime
+    //
+    // Detailed validation happens inside the tool implementation so that
+    // we can surface rich error messages instead of generic
+    // OUTPUT_PARSING_FAILURE errors.
+    generatedPipeline: z
+      .any()
+      .describe('The generated ingest pipeline to validate (object or JSON string)'),
   });
   return new DynamicStructuredTool({
     name: 'validate_ingest_pipeline',
@@ -64,23 +67,91 @@ export function ingestPipelineValidatorTool(
       'Validates a generated ingest pipeline by testing it against log samples. ' +
       'Simulates the pipeline to verify it works correctly. ' +
       'Returns validation results including success rate, failed samples, and error details.',
-    schema: z.object({
-      generated_pipeline: z
-        .object({
-          processors: z.array(z.any()).describe('The processors in the pipeline'),
-          on_failure: z
-            .array(z.any())
-            .optional()
-            .describe('Optional failure handlers for the pipeline'),
-        })
-        .describe('The generated ingest pipeline to validate'),
-    }),
+    schema: validatorSchema,
     func: async (
       input: z.infer<typeof validatorSchema>,
       _runManager?: CallbackManagerForToolRun,
       config?: ToolRunnableConfig
     ) => {
-      const { generated_pipeline: generatedPipeline } = input;
+      const { generatedPipeline } = input;
+
+      // Normalize the generated pipeline into an object we can pass to the
+      // Elasticsearch client. We keep this logic here (rather than in Zod)
+      // so that bad inputs produce interpretable validation errors instead
+      // of LangChain OUTPUT_PARSING_FAILURE errors.
+      let generatedPipelineObject: unknown = generatedPipeline;
+
+      // Handle common case where the model returns a JSON string.
+      if (typeof generatedPipelineObject === 'string') {
+        try {
+          generatedPipelineObject = JSON.parse(generatedPipeline);
+        } catch (e) {
+          const errorMessage = `Failed to parse generatedPipeline JSON string: ${
+            (e as Error).message
+          }`;
+          return new Command({
+            update: {
+              pipeline_generation_results: [],
+              failure_count: samples.length,
+              pipeline_validation_results: {
+                success_rate: 0,
+                successful_samples: 0,
+                failed_samples: samples.length,
+                total_samples: samples.length,
+                failure_details: [
+                  {
+                    error: errorMessage,
+                    sample: 'Pipeline validation error',
+                  },
+                ],
+              },
+              messages: [
+                new ToolMessage({
+                  content: errorMessage,
+                  tool_call_id: config?.toolCall?.id as string,
+                }),
+              ],
+            },
+          });
+        }
+      }
+
+      // Basic shape validation so we don't send obviously invalid structures
+      // to the Elasticsearch simulate API.
+      if (
+        !generatedPipelineObject ||
+        typeof generatedPipelineObject !== 'object' ||
+        Array.isArray((generatedPipelineObject as any).processors)
+          ? (generatedPipelineObject as any).processors.length === 0
+          : !(generatedPipelineObject as any).processors
+      ) {
+        const errorMessage =
+          'generated_pipeline must contain a non-empty processors array with valid processor objects';
+        return new Command({
+          update: {
+            pipeline_generation_results: [],
+            failure_count: samples.length,
+            pipeline_validation_results: {
+              success_rate: 0,
+              successful_samples: 0,
+              failed_samples: samples.length,
+              total_samples: samples.length,
+              failure_details: [
+                {
+                  error: errorMessage,
+                  sample: 'Pipeline validation error',
+                },
+              ],
+            },
+            messages: [
+              new ToolMessage({
+                content: errorMessage,
+                tool_call_id: config?.toolCall?.id as string,
+              }),
+            ],
+          },
+        });
+      }
 
       try {
         if (!samples || samples.length === 0) {
@@ -112,9 +183,12 @@ export function ingestPipelineValidatorTool(
         // Simulate the pipeline
         let response;
         try {
+          // Cast to IngestPipeline to satisfy the Elasticsearch client types.
+          // Shape is validated above by zod (processors/on_failure arrays, each with a type field).
           response = await esClient.ingest.simulate({
             docs,
-            pipeline: generatedPipeline,
+
+            pipeline: generatedPipelineObject as any,
           });
         } catch (simulateError) {
           const errorMessage = `Pipeline simulation failed: ${(simulateError as Error).message}`;
@@ -186,7 +260,7 @@ export function ingestPipelineValidatorTool(
 
         return new Command({
           update: {
-            current_pipeline: generatedPipeline,
+            current_pipeline: generatedPipelineObject,
             pipeline_generation_results: successfulDocuments,
             failure_count: failedCount,
             pipeline_validation_results: {

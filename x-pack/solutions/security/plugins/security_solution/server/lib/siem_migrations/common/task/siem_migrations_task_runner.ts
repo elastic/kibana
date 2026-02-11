@@ -22,6 +22,7 @@ import type {
 } from '../types';
 import { ActionsClientChat } from './util/actions_client_chat';
 import type { SiemMigrationTelemetryClient } from './siem_migrations_telemetry_client';
+import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/model/common.gen';
 
 /** Number of items loaded in memory to be translated in the pool */
 const TASK_BATCH_SIZE = 100 as const;
@@ -81,6 +82,7 @@ export abstract class SiemMigrationTaskRunner<
 
   constructor(
     public readonly migrationId: string,
+    protected readonly vendor: SiemMigrationVendor,
     protected readonly request: KibanaRequest,
     public readonly startedBy: AuthenticatedUser,
     public readonly abortController: AbortController,

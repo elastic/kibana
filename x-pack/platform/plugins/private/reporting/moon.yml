@@ -86,6 +86,7 @@ dependsOn:
   - '@kbn/alerting-types'
   - '@kbn/core-user-profile-browser-mocks'
   - '@kbn/zod'
+  - '@kbn/deeplinks-analytics'
 tags:
   - plugin
   - prod

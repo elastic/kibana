@@ -10,7 +10,6 @@
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { discoverServiceMock } from '../../__mocks__/services';
 import type {
@@ -64,18 +63,9 @@ describe('Serialization utils', () => {
 
   describe('deserialize state', () => {
     test('by value', async () => {
-      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
-        rawState: {
-          attributes: mockedSavedSearchAttributes,
-          title: 'test panel title',
-        },
-        references: [
-          {
-            name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-            id: dataViewMock.id ?? 'test-id',
-            type: 'index-pattern',
-          },
-        ],
+      const serializedState: SearchEmbeddableState = {
+        attributes: mockedSavedSearchAttributes,
+        title: 'test panel title',
       };
 
       const deserializedState = await deserializeState({
@@ -84,7 +74,7 @@ describe('Serialization utils', () => {
       });
 
       expect(discoverServiceMock.savedSearch.byValueToSavedSearch).toBeCalledWith(
-        serializedState.rawState,
+        serializedState,
         true // should be serializable
       );
       expect(Object.keys(deserializedState)).toContain('serializedSearchSource');
@@ -102,13 +92,10 @@ describe('Serialization utils', () => {
         )),
       });
 
-      const serializedState: SerializedPanelState<SearchEmbeddableState> = {
-        rawState: {
-          title: 'test panel title',
-          sort: [['order_date', 'asc']], // overwrite the saved object sort
-          savedObjectId: 'savedSearch',
-        },
-        references: [],
+      const serializedState: SearchEmbeddableState = {
+        title: 'test panel title',
+        sort: [['order_date', 'asc']], // overwrite the saved object sort
+        savedObjectId: 'savedSearch',
       };
 
       const deserializedState = await deserializeState({
@@ -151,19 +138,16 @@ describe('Serialization utils', () => {
       );
 
       expect(serializedState).toEqual({
-        rawState: {
-          attributes: {
-            ...attributes,
-            tabs: [
-              {
-                ...attributes.tabs![0]!,
-                id: expect.any(String),
-              },
-            ],
-            references: mockedSavedSearchAttributes.references,
-          },
+        attributes: {
+          ...attributes,
+          tabs: [
+            {
+              ...attributes.tabs![0]!,
+              id: expect.any(String),
+            },
+          ],
+          references: mockedSavedSearchAttributes.references,
         },
-        references: [],
       });
     });
 
@@ -192,10 +176,7 @@ describe('Serialization utils', () => {
         });
 
         expect(serializedState).toEqual({
-          rawState: {
-            savedObjectId: 'test-id',
-          },
-          references: [],
+          savedObjectId: 'test-id',
         });
       });
 
@@ -213,12 +194,9 @@ describe('Serialization utils', () => {
         });
 
         expect(serializedState).toEqual({
-          rawState: {
-            sampleSize: 500,
-            sort: [['order_date', 'asc']],
-            savedObjectId: 'test-id',
-          },
-          references: [],
+          sampleSize: 500,
+          sort: [['order_date', 'asc']],
+          savedObjectId: 'test-id',
         });
       });
     });

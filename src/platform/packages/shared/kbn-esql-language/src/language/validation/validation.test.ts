@@ -665,7 +665,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval CEIL(23::DOUBLE)', []);
 
       testErrorsAndWarnings('from a_index | eval TRIM(23::keyword)', []);
-      testErrorsAndWarnings('from a_index | eval TRIM(23::text)', []);
+      testErrorsAndWarnings('from a_index | eval TRIM(23::string)', []);
       testErrorsAndWarnings('from a_index | eval TRIM(23::keyword)', []);
 
       testErrorsAndWarnings('from a_index | eval true AND 0::boolean', []);

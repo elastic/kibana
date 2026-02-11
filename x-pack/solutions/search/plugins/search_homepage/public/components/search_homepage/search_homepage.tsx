@@ -70,7 +70,12 @@ export const SearchHomepagePage = () => {
       <KibanaPageTemplate.Section restrictWidth={true} grow={false}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
-            <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+            <EuiFlexGroup
+              responsive={false}
+              alignItems="center"
+              gutterSize="s"
+              data-test-subj="searchHomepageHeaderLeftsideGroup"
+            >
               <EuiFlexItem grow={false}>
                 <EuiTitle size="m">
                   <h3>

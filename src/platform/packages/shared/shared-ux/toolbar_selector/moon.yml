@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/shared-ux-toolbar-selector'
 type: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: '@elastic/obs-exploration-team'
 toolchain:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   name: '@kbn/shared-ux-toolbar-selector'
   description: Moon project for @kbn/shared-ux-toolbar-selector
   channel: ''
-  owner: '@elastic/obs-presentation-team'
+  owner: '@elastic/obs-exploration-team'
   metadata:
     sourceRoot: src/platform/packages/shared/shared-ux/toolbar_selector
 dependsOn:

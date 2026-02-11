@@ -23,6 +23,8 @@
         "label": "savedObjectsClientMock",
         "description": [],
         "path": "src/core/packages/saved-objects/api-server-mocks/src/saved_objects_client.mock.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server-mocks/src/saved_objects_client.mock.ts",
+            "lineNumber": 48,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -55,6 +59,8 @@
         "label": "savedObjectsClientProviderMock",
         "description": [],
         "path": "src/core/packages/saved-objects/api-server-mocks/src/scoped_client_provider.mock.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -71,6 +77,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server-mocks/src/scoped_client_provider.mock.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -87,6 +95,8 @@
         "label": "savedObjectsExtensionsMock",
         "description": [],
         "path": "src/core/packages/saved-objects/api-server-mocks/src/saved_objects_extensions.mock.ts",
+        "lineNumber": 68,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -103,6 +113,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server-mocks/src/saved_objects_extensions.mock.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -121,6 +133,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server-mocks/src/saved_objects_extensions.mock.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -139,6 +153,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server-mocks/src/saved_objects_extensions.mock.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -157,6 +173,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server-mocks/src/saved_objects_extensions.mock.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -173,6 +191,8 @@
         "label": "savedObjectsRepositoryMock",
         "description": [],
         "path": "src/core/packages/saved-objects/api-server-mocks/src/repository.mock.ts",
+        "lineNumber": 50,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -189,6 +209,8 @@
               ">"
             ],
             "path": "src/core/packages/saved-objects/api-server-mocks/src/repository.mock.ts",
+            "lineNumber": 50,
+            "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

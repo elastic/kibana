@@ -47,6 +47,7 @@ import {
   editorExtensions,
   inferenceEndpoints,
 } from '../../../__tests__/language/helpers';
+import { IGNORED_FUNCTIONS_BY_LOCATION } from '../../../__tests__/commands/autocomplete';
 
 export type PartialSuggestionWithText = Partial<ISuggestionItem> & { text: string };
 
@@ -291,9 +292,13 @@ export function getFunctionSignaturesByReturnType(
       }
     )
     .filter(({ name }) => {
-      if (ignored?.length) {
-        return !ignored?.includes(name);
+      const locationIgnored = locations.flatMap((loc) => IGNORED_FUNCTIONS_BY_LOCATION[loc] ?? []);
+      const allIgnored = [...locationIgnored, ...(ignored ?? [])];
+
+      if (allIgnored.length) {
+        return !allIgnored.includes(name);
       }
+
       return true;
     })
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))

@@ -8,7 +8,6 @@
   "kbn_references": [
     "@kbn/field-types",
     "@kbn/unified-histogram",
-    "@kbn/metrics-experience-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/esql-language",
     "@kbn/i18n",
@@ -22,7 +21,6 @@
     "@kbn/shared-ux-toolbar-selector",
     "@kbn/ui-actions-plugin",
     "@kbn/react-hooks",
-    "@kbn/data-grid-in-table-search",
     "@kbn/discover-utils",
     "@kbn/fields-metadata-plugin",
     "@kbn/shared-ux-button-toolbar",

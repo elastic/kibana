@@ -38,6 +38,7 @@ const comparators: StateComparators<DashboardSettings> = {
   sync_colors: 'referenceEquality',
   sync_cursor: 'referenceEquality',
   sync_tooltips: 'referenceEquality',
+  auto_apply_filters: 'referenceEquality',
   time_restore: 'referenceEquality',
   use_margins: 'referenceEquality',
   project_routing_restore: 'referenceEquality',
@@ -89,6 +90,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
       timeRestore$: stateManager.api.time_restore$,
       hideTitle$: stateManager.api.hide_panel_titles$,
       settings: {
+        autoApplyFilters$: stateManager.api.auto_apply_filters$,
         syncColors$: stateManager.api.sync_colors$,
         syncCursor$: stateManager.api.sync_cursor$,
         syncTooltips$: stateManager.api.sync_tooltips$,
@@ -97,7 +99,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
     },
     internalApi: {
       serializeSettings,
-      startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
+      startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return stateManager.anyStateChange$.pipe(
           debounceTime(100),
           map(() => stateManager.getLatestState()),

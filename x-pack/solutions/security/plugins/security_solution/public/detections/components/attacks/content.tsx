@@ -22,6 +22,7 @@ import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
 import type { Filter } from '@kbn/es-query';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -78,16 +79,21 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     inferenceEnabled,
     settings,
   });
-
-  const { data } = useFindAttackDiscoveries({ http, isAssistantEnabled: true });
+  const { from } = useGlobalTime();
+  const { data } = useFindAttackDiscoveries({
+    http,
+    isAssistantEnabled: true,
+    start: from,
+    scheduled: true,
+  });
   const aiConnectorNames = useMemo(() => data?.connector_names ?? [], [data]);
 
-  // showing / hiding the flyout:
-  const [showFlyout, setShowFlyout] = useState<boolean>(false);
-  const openFlyout = useCallback(() => {
-    setShowFlyout(true);
+  // showing / hiding the schedules flyout:
+  const [showSchedulesFlyout, setShowSchedulesFlyout] = useState<boolean>(false);
+  const openSchedulesFlyout = useCallback(() => {
+    setShowSchedulesFlyout(true);
   }, []);
-  const onClose = useCallback(() => setShowFlyout(false), []);
+  const onCloseSchedulesFlyout = useCallback(() => setShowSchedulesFlyout(false), []);
   const [assignees, setAssignees] = useState<AssigneesIdsSelection[]>([]);
 
   const onAssigneesSelectionChange = useCallback(
@@ -141,7 +147,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <Schedule openFlyout={openFlyout} />
+                <Schedule openFlyout={openSchedulesFlyout} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </HeaderPage>
@@ -149,6 +155,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           <EuiSpacer size="l" />
           <FiltersSection
             dataView={dataView}
+            pageFilters={pageFilters}
             setStatusFilter={setStatusFilter}
             setPageFilters={setPageFilters}
             setPageFilterHandler={setPageFilterHandler}
@@ -156,9 +163,16 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           <EuiSpacer size="l" />
         </Display>
 
-        <TableSection dataView={dataView} statusFilter={statusFilter} pageFilters={pageFilters} />
+        <TableSection
+          dataView={dataView}
+          statusFilter={statusFilter}
+          pageFilters={pageFilters}
+          assignees={assignees}
+          selectedConnectorNames={selectedConnectorNames}
+          openSchedulesFlyout={openSchedulesFlyout}
+        />
 
-        {showFlyout && <SchedulesFlyout onClose={onClose} />}
+        {showSchedulesFlyout && <SchedulesFlyout onClose={onCloseSchedulesFlyout} />}
       </SecuritySolutionPageWrapper>
     </StyledFullHeightContainer>
   );

@@ -43,12 +43,14 @@ export class ReindexServiceServerPlugin
   private readonly logger: Logger;
   private version: Version;
   private rollupsEnabled: boolean;
+  private isServerless: boolean;
 
   constructor({ logger, env, config }: PluginInitializerContext) {
     this.logger = logger.get();
     this.version = new Version();
     this.version.setup(env.packageInfo.version);
     this.rollupsEnabled = config.get<ReindexConfig>().rollupsEnabled;
+    this.isServerless = env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup({
@@ -99,6 +101,7 @@ export class ReindexServiceServerPlugin
       security,
       version: this.version,
       rollupsEnabled: this.rollupsEnabled,
+      isServerless: this.isServerless,
     });
 
     this.reindexService = service.getInternalApis();

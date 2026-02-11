@@ -133,6 +133,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
       pageCount > 1 ? (
         <EuiFlexItem grow={false}>
           <EuiPagination
+            data-test-subj="indicesListPagination"
             pageCount={pageCount}
             activePage={page}
             onPageClick={this.onChangePage}
@@ -153,7 +154,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
             closePopover={this.closePerPageControl}
             panelPaddingSize="none"
           >
-            <EuiContextMenuPanel items={items} />
+            <EuiContextMenuPanel items={items} data-test-subj="perPageIndicesListMenu" />
           </EuiPopover>
         </EuiFlexItem>
         {paginationControls}
@@ -212,7 +213,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     const paginatedIndices = indices.slice(this.pager.firstItemIndex, this.pager.lastItemIndex + 1);
     const rows = paginatedIndices.map((index, key) => {
       return (
-        <EuiTableRow key={key}>
+        <EuiTableRow data-test-subj="indicesListTableRow" key={key}>
           <EuiTableRowCell>{this.highlightIndexName(index.name, query)}</EuiTableRowCell>
           <EuiTableRowCell>
             {index.tags.map((tag: Tag) => {

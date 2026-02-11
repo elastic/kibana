@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/synthtrace';
-import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
-import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
+import type { LlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
+import { createLlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   createLlmProxyActionConnector,
@@ -17,7 +17,7 @@ import {
 import {
   createDistributedTraceWithErrors,
   type DistributedTraceData,
-} from '../utils/synthtrace_scenarios/create_distributed_trace_with_errors';
+} from '../utils/synthtrace_scenarios/ai_insights/create_distributed_trace_with_errors';
 
 const MOCKED_AI_SUMMARY = 'This is a mocked AI insight summary for the payment timeout error.';
 

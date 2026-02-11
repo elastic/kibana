@@ -40,7 +40,7 @@ export function getConnectorIdSuggestionsItems(
     suggestions.push({
       label: displayLabel, // Show both connector ID and name
       kind: monaco.languages.CompletionItemKind.Value, // Use generic value kind
-      insertText: instance.name,
+      insertText: instance.id, // Insert UUID
       range,
       detail: connectorType, // Show connector type as detail - this is what CSS targets
       documentation: `Connector ID: ${instance.id}\nName: ${
@@ -50,9 +50,7 @@ export function getConnectorIdSuggestionsItems(
       }`,
       sortText: `${instance.isDeprecated ? 'z' : 'a'}_${instance.name}`, // Sort deprecated items last
       preselect: !instance.isDeprecated, // Don't preselect deprecated connectors
-
-      // Add custom attributes for better CSS targeting
-      filterText: `${instance.id} ${connectorName} ${connectorType}`, // Enhanced filter text for better targeting
+      filterText: `${instance.id} ${connectorName} "${connectorName}" '${connectorName}' ${connectorType}`, // Enhanced filter text for better targeting
     });
   });
 

@@ -21,8 +21,8 @@ import {
  * @returns The project routing value if found, undefined otherwise
  *
  * @example
- * getProjectRoutingFromEsqlQuery('SET project_routing = "_alias: *"; FROM my_index')
- * // Returns: '_alias: *'
+ * getProjectRoutingFromEsqlQuery('SET project_routing = "_alias:*"; FROM my_index')
+ * // Returns: '_alias:*'
  *
  * getProjectRoutingFromEsqlQuery('FROM my_index')
  * // Returns: undefined

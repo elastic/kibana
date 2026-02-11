@@ -426,6 +426,38 @@ describe('API Keys', () => {
       expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
     });
 
+    it('throws an error when request does not contain authorization header', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      await expect(
+        apiKeys.grantAsInternalUser(httpServerMock.createKibanaRequest(), {
+          name: 'test_api_key',
+          role_descriptors: {},
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unable to grant an API Key, request does not contain an authorization header"`
+      );
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).not.toHaveBeenCalled();
+    });
+
+    it('throws an error when grantApiKey fails', async () => {
+      mockLicense.isEnabled.mockReturnValue(true);
+      const error = new Error('Elasticsearch error');
+      mockClusterClient.asInternalUser.security.grantApiKey.mockRejectedValue(error);
+
+      await expect(
+        apiKeys.grantAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: `Bearer foo-access-token` },
+          }),
+          {
+            name: 'test_api_key',
+            role_descriptors: roleDescriptors,
+          }
+        )
+      ).rejects.toThrowError('Elasticsearch error');
+      expect(mockClusterClient.asInternalUser.security.grantApiKey).toHaveBeenCalledTimes(1);
+    });
+
     it('throws an error when kibana privilege validation fails', async () => {
       mockLicense.isEnabled.mockReturnValue(true);
       mockValidateKibanaPrivileges

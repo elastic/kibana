@@ -19,59 +19,20 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              example:
-                item_id: simple_list_item
-                list_id: simple_list
-                type: simple
-                name: Sample Exception List Item
-                description: This is a sample detection type exception item.
-                entries:
-                  - type: exists
-                    field: actingProcess.file.signer
-                    operator: excluded
-                  - type: match_any
-                    field: host.name
-                    value: [saturn, jupiter]
-                    operator: included
-                namespace_type: single
-                os_types: [linux]
-                tags: [malware]
-              properties:
-                item_id:
-                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemHumanId'
-                list_id:
-                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
-                type:
-                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemType'
-                name:
-                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemName'
-                description:
-                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemDescription'
-                entries:
-                  $ref: '../model/exception_list_item_entry.schema.yaml#/components/schemas/ExceptionListItemEntryArray'
-                namespace_type:
-                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
-                  default: 'single'
-                os_types:
-                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemOsTypeArray'
-                  default: []
-                tags:
-                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemTags'
-                  default: []
-                meta:
-                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemMeta'
-                expire_time:
-                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemExpireTime'
-                comments:
-                  $ref: '#/components/schemas/CreateExceptionListItemCommentArray'
-                  default: []
-              required:
-                - list_id
-                - type
-                - name
-                - description
-                - entries
+              oneOf:
+                - $ref: '#/components/schemas/CreateExceptionListItemGeneric'
+                - $ref: '#/components/schemas/CreateExceptionListItemEndpointList'
+                - $ref: '#/components/schemas/CreateExceptionListItemTrustedAppsWindows'
+                - $ref: '#/components/schemas/CreateExceptionListItemTrustedAppsMac'
+                - $ref: '#/components/schemas/CreateExceptionListItemTrustedAppsLinux'
+                - $ref: '#/components/schemas/CreateExceptionListItemTrustedDevicesWindows'
+                - $ref: '#/components/schemas/CreateExceptionListItemTrustedDevicesMac'
+                - $ref: '#/components/schemas/CreateExceptionListItemTrustedDevicesWindowsMac'
+                - $ref: '#/components/schemas/CreateExceptionListItemEventFilters'
+                - $ref: '#/components/schemas/CreateExceptionListItemHostIsolation'
+                - $ref: '#/components/schemas/CreateExceptionListItemBlocklistWindows'
+                - $ref: '#/components/schemas/CreateExceptionListItemBlocklistLinux'
+                - $ref: '#/components/schemas/CreateExceptionListItemBlocklistMac'
       responses:
         200:
           description: Successful response
@@ -311,6 +272,130 @@ paths:
 components:
   x-codegen-enabled: true
   schemas:
+    # Base schema WITHOUT entries, os_types, tags, list_id - these are defined by artifact-specific schemas
+    CreateExceptionListItemBase:
+      type: object
+      properties:
+        item_id:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemHumanId'
+        type:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemType'
+        name:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemName'
+        description:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemDescription'
+        namespace_type:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
+          default: 'single'
+        meta:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemMeta'
+        expire_time:
+          $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemExpireTime'
+        comments:
+          $ref: '#/components/schemas/CreateExceptionListItemCommentArray'
+          default: []
+      required:
+        - type
+        - name
+        - description
+
+    # Generic schema for non-endpoint artifacts (includes generic entries, os_types, tags)
+    CreateExceptionListItemGeneric:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - type: object
+          example:
+            item_id: simple_list_item
+            list_id: simple_list
+            type: simple
+            name: Sample Exception List Item
+            description: This is a sample detection type exception item.
+            entries:
+              - type: exists
+                field: actingProcess.file.signer
+                operator: excluded
+              - type: match_any
+                field: host.name
+                value: [saturn, jupiter]
+                operator: included
+            namespace_type: single
+            os_types: [linux]
+            tags: [malware]
+          properties:
+            list_id:
+              $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
+            entries:
+              $ref: '../model/exception_list_item_entry.schema.yaml#/components/schemas/ExceptionListItemEntryArray'
+            os_types:
+              $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemOsTypeArray'
+              default: []
+            tags:
+              $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListItemTags'
+              default: []
+          required:
+            - list_id
+            - entries
+
+    CreateExceptionListItemEndpointList:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/EndpointListProperties'
+
+    CreateExceptionListItemTrustedAppsWindows:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/TrustedAppsWindowsProperties'
+
+    CreateExceptionListItemTrustedAppsMac:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/TrustedAppsMacProperties'
+
+    CreateExceptionListItemTrustedAppsLinux:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/TrustedAppsLinuxProperties'
+
+    CreateExceptionListItemTrustedDevicesWindows:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/TrustedDevicesWindowsProperties'
+
+    CreateExceptionListItemTrustedDevicesMac:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/TrustedDevicesMacProperties'
+
+    CreateExceptionListItemTrustedDevicesWindowsMac:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/TrustedDevicesWindowsMacProperties'
+
+    CreateExceptionListItemEventFilters:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/EventFiltersProperties'
+
+    CreateExceptionListItemHostIsolation:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/HostIsolationProperties'
+
+    CreateExceptionListItemBlocklistWindows:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/BlocklistWindowsProperties'
+
+    CreateExceptionListItemBlocklistLinux:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/BlocklistLinuxProperties'
+
+    CreateExceptionListItemBlocklistMac:
+      allOf:
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '../model/exception_list_common.schema.yaml#/components/schemas/BlocklistMacProperties'
+
     CreateExceptionListItemComment:
       type: object
       properties:

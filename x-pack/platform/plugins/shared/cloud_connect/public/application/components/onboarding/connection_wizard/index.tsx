@@ -165,6 +165,7 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              fill
               onClick={handleConnect}
               disabled={!apiKey.trim() || isLoading || !clusterConfig?.hasEncryptedSOEnabled}
               isLoading={isLoading}

@@ -26,6 +26,8 @@
         "label": "TsProject",
         "description": [],
         "path": "packages/kbn-ts-projects/ts_project.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,6 +50,8 @@
               "[]"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -59,6 +63,8 @@
                 "label": "options",
                 "description": [],
                 "path": "packages/kbn-ts-projects/ts_project.ts",
+                "lineNumber": 63,
+                "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -73,6 +79,8 @@
                       "string[]"
                     ],
                     "path": "packages/kbn-ts-projects/ts_project.ts",
+                    "lineNumber": 64,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -87,6 +95,8 @@
                       "string[]"
                     ],
                     "path": "packages/kbn-ts-projects/ts_project.ts",
+                    "lineNumber": 65,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -101,6 +111,8 @@
                       "boolean | undefined"
                     ],
                     "path": "packages/kbn-ts-projects/ts_project.ts",
+                    "lineNumber": 66,
+                    "columnNumber": 5,
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -128,6 +140,8 @@
               }
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 143,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -141,6 +155,8 @@
               "absolute path to the tsconfig file defininig this project"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 148,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -154,6 +170,8 @@
               "repo relative path to the tsconfig file defininig this project"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 150,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -167,6 +185,8 @@
               "repo relative path to the directory containing this ts project"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 152,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -180,6 +200,8 @@
               "The directory containing this ts project"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 154,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -193,6 +215,8 @@
               "The directory containing this ts project"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 156,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -210,6 +234,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 158,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -226,6 +252,8 @@
               "boolean | undefined"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 160,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -242,6 +270,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 162,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -255,6 +285,8 @@
               "absolute path to the tsconfig file that will be generated for type checking this file"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -269,6 +301,8 @@
               "any"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 173,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -291,6 +325,8 @@
                   ">"
                 ],
                 "path": "packages/kbn-ts-projects/ts_project.ts",
+                "lineNumber": 174,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -306,6 +342,8 @@
                   "string"
                 ],
                 "path": "packages/kbn-ts-projects/ts_project.ts",
+                "lineNumber": 175,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -322,6 +360,8 @@
                   " | undefined"
                 ],
                 "path": "packages/kbn-ts-projects/ts_project.ts",
+                "lineNumber": 176,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -339,6 +379,8 @@
               "name of this project"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 202,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -353,6 +395,8 @@
               "() => boolean"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 224,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -371,6 +415,8 @@
               "(projectRel: string) => string"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 228,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -385,6 +431,8 @@
                   "string"
                 ],
                 "path": "packages/kbn-ts-projects/ts_project.ts",
+                "lineNumber": 231,
+                "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -405,6 +453,8 @@
               "() => void"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 235,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -421,6 +471,8 @@
               "(jsonc: string) => void"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 243,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -435,6 +487,8 @@
                   "string"
                 ],
                 "path": "packages/kbn-ts-projects/ts_project.ts",
+                "lineNumber": 243,
+                "columnNumber": 25,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -463,6 +517,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 251,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -486,6 +542,8 @@
               }
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 275,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -520,6 +578,8 @@
               "[]"
             ],
             "path": "packages/kbn-ts-projects/ts_project.ts",
+            "lineNumber": 298,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -541,6 +601,8 @@
                   "[]"
                 ],
                 "path": "packages/kbn-ts-projects/ts_project.ts",
+                "lineNumber": 301,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -562,6 +624,8 @@
         "label": "TsConfig",
         "description": [],
         "path": "packages/kbn-ts-projects/ts_configfile.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -576,6 +640,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-ts-projects/ts_configfile.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -590,6 +656,8 @@
               "{ [key: string]: unknown; types?: string[] | undefined; } | undefined"
             ],
             "path": "packages/kbn-ts-projects/ts_configfile.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -604,6 +672,8 @@
               "string[] | undefined"
             ],
             "path": "packages/kbn-ts-projects/ts_configfile.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -618,6 +688,8 @@
               "string[] | undefined"
             ],
             "path": "packages/kbn-ts-projects/ts_configfile.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -632,6 +704,8 @@
               "(string | { path: string; force?: boolean | undefined; })[] | undefined"
             ],
             "path": "packages/kbn-ts-projects/ts_configfile.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -646,6 +720,8 @@
               "[key: string]:  unknown"
             ],
             "path": "packages/kbn-ts-projects/ts_configfile.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -675,6 +751,8 @@
           "; }"
         ],
         "path": "packages/kbn-ts-projects/ts_project.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -697,6 +775,8 @@
           "[]"
         ],
         "path": "packages/kbn-ts-projects/ts_projects.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

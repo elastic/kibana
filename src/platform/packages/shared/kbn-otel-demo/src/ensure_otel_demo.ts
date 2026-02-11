@@ -125,7 +125,7 @@ export async function ensureOtelDemo({
   const elasticsearchUsername = elasticsearchConfig.username;
   const elasticsearchPassword = elasticsearchConfig.password;
 
-  const kibanaUrl = `http://${serverConfig.host}:${serverConfig.port}`;
+  const kibanaUrl = `http://${serverConfig.host}:${serverConfig.port}${serverConfig.basePath}`;
 
   log.info(`Kibana: ${kibanaUrl}`);
   log.info(`Elasticsearch: ${elasticsearchHost}`);

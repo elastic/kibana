@@ -26,6 +26,7 @@ import { Pagination } from './pagination';
 import { usePagination } from '../hooks';
 import { MetricsGridLoadingProgress } from './empty_state/empty_state';
 import { useMetricsExperienceState } from '../context/metrics_experience_state_provider';
+import { useMetricsExperienceFieldsContext } from '../context/metrics_experience_fields_provider';
 import type { UnifiedMetricsGridProps } from '../types';
 
 export interface MetricsExperienceGridContentProps
@@ -53,6 +54,7 @@ export const MetricsExperienceGridContent = ({
   const { euiTheme } = euiThemeContext;
 
   const { searchTerm, currentPage, selectedDimensions, onPageChange } = useMetricsExperienceState();
+  const { whereStatements } = useMetricsExperienceFieldsContext();
 
   const {
     currentPageItems: currentPageFields = [],
@@ -143,6 +145,7 @@ export const MetricsExperienceGridContent = ({
           discoverFetch$={discoverFetch$}
           fetchParams={fetchParams}
           searchTerm={searchTerm}
+          whereStatements={whereStatements}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

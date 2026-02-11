@@ -5,232 +5,61 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
 import React from 'react';
-
+import { render } from '@testing-library/react';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 import type { HttpSetup } from '@kbn/core/public';
-
-import type { TestBed } from '@kbn/test-jest-helpers';
-import { registerTestBed } from '@kbn/test-jest-helpers';
-import { stubWebWorker } from '@kbn/test-jest-helpers';
-
 import { docLinksServiceMock } from '@kbn/core/public/mocks';
+import '@kbn/code-editor-mock/jest_helper';
+
 import { uiMetricService, apiService, documentationService } from '../../../services';
 import type { Props } from '..';
 import { initHttpRequests } from './http_requests.helpers';
 import { ProcessorsEditorWithDeps } from './processors_editor';
 
-stubWebWorker();
+type AutoSizerChildren = (size: { height: number; width: number }) => React.ReactNode;
+jest.mock(
+  'react-virtualized/dist/commonjs/AutoSizer',
+  () =>
+    ({ children }: { children: AutoSizerChildren }) =>
+      <div>{children({ height: 500, width: 500 })}</div>
+);
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
+const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
+const getDomInputValue = (evt: unknown): string =>
+  isRecord(evt) && isRecord(evt.target) && typeof evt.target.value === 'string'
+    ? evt.target.value
+    : '';
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
 
   return {
     ...original,
-    // Mocking CodeEditor, which uses React Monaco under the hood
-    CodeEditor: (props: any) => (
+    EuiComboBox: (props: {
+      'data-test-subj'?: string;
+      selectedOptions?: Array<{ label?: string }>;
+      onChange: (options: Array<{ label: string; value?: string }>) => void;
+    }) => (
       <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-          props.onChange(e.currentTarget.getAttribute('data-currentvalue'));
+        data-test-subj={props['data-test-subj']}
+        value={props.selectedOptions?.[0]?.label ?? ''}
+        onChange={(event: unknown) => {
+          const value = getDomInputValue(event);
+          props.onChange([{ label: value, value }]);
         }}
       />
     ),
   };
 });
 
-jest.mock('react-virtualized/dist/commonjs/AutoSizer', () => ({ children }: { children: any }) => (
-  <div>{children({ height: 500, width: 500 })}</div>
-));
-
-const testBedSetup = registerTestBed<TestSubject>(
-  (props: Props) => <ProcessorsEditorWithDeps {...props} />,
-  {
-    doMountAsync: false,
-  }
-);
-
-export interface SetupResult extends TestBed<TestSubject> {
-  httpSetup: HttpSetup;
-  actions: ReturnType<typeof createActions>;
-}
-
-const createActions = (testBed: TestBed<TestSubject>) => {
-  const { find, component, form } = testBed;
-
-  return {
-    clickAddDocumentsButton() {
-      act(() => {
-        find('addDocumentsButton').simulate('click');
-      });
-      component.update();
-    },
-
-    async clickViewOutputButton() {
-      await act(async () => {
-        find('viewOutputButton').simulate('click');
-      });
-      component.update();
-    },
-
-    closeTestPipelineFlyout() {
-      act(() => {
-        find('euiFlyoutCloseButton').simulate('click');
-      });
-      component.update();
-    },
-
-    async clickProcessorConfigurationTab() {
-      await act(async () => {
-        find('configurationTab').simulate('click');
-      });
-      component.update();
-    },
-
-    async clickProcessorOutputTab() {
-      await act(async () => {
-        find('outputTab').simulate('click');
-        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
-      });
-      component.update();
-    },
-
-    async clickRefreshOutputButton() {
-      await act(async () => {
-        find('refreshOutputButton').simulate('click');
-      });
-      component.update();
-    },
-
-    async clickRunPipelineButton() {
-      await act(async () => {
-        find('runPipelineButton').simulate('click');
-        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
-      });
-      component.update();
-    },
-
-    async toggleVerboseSwitch() {
-      await act(async () => {
-        form.toggleEuiSwitch('verboseOutputToggle');
-        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
-      });
-      component.update();
-    },
-
-    addDocumentsJson(jsonString: string) {
-      find('documentsEditor').getDOMNode().setAttribute('data-currentvalue', jsonString);
-      find('documentsEditor').simulate('change');
-    },
-
-    clickDocumentsDropdown() {
-      act(() => {
-        find('documentsDropdown.documentsButton').simulate('click');
-      });
-      component.update();
-    },
-
-    clickEditDocumentsButton() {
-      act(() => {
-        find('editDocumentsButton').simulate('click');
-      });
-      component.update();
-    },
-
-    clickClearAllButton() {
-      act(() => {
-        find('clearAllDocumentsButton').simulate('click');
-      });
-      component.update();
-    },
-
-    async clickConfirmResetButton() {
-      const modal = document.body.querySelector(
-        '[data-test-subj="resetDocumentsConfirmationModal"]'
-      );
-      const confirmButton: HTMLButtonElement | null = modal!.querySelector(
-        '[data-test-subj="confirmModalConfirmButton"]'
-      );
-
-      await act(async () => {
-        confirmButton!.click();
-      });
-      component.update();
-    },
-
-    async clickProcessor(processorSelector: string) {
-      await act(async () => {
-        find(`${processorSelector}.manageItemButton`).simulate('click');
-      });
-      component.update();
-    },
-
-    async toggleDocumentsAccordion() {
-      await act(async () => {
-        find('addDocumentsAccordion').simulate('click');
-      });
-      component.update();
-    },
-
-    async clickAddDocumentButton() {
-      await act(async () => {
-        find('addDocumentButton').simulate('click');
-        jest.advanceTimersByTime(0); // advance timers to allow the form to validate
-      });
-      component.update();
-    },
-  };
-};
-
-export const setup = async (httpSetup: HttpSetup, props: Props): Promise<SetupResult> => {
-  // Initialize mock services
-  uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
-  // @ts-ignore
-  apiService.setup(httpSetup, uiMetricService);
-
-  const testBed = testBedSetup(props);
-
-  return {
-    ...testBed,
-    httpSetup,
-    actions: createActions(testBed),
-  };
-};
-
 export const setupEnvironment = () => {
+  uiMetricService.setup(usageCollectionPluginMock.createSetupContract());
   documentationService.setup(docLinksServiceMock.createStartContract());
   return initHttpRequests();
 };
 
-type TestSubject =
-  | 'addDocumentsButton'
-  | 'testPipelineFlyout'
-  | 'documentsDropdown'
-  | 'documentsDropdown.documentsButton'
-  | 'outputTab'
-  | 'documentsEditor'
-  | 'runPipelineButton'
-  | 'documentsTabContent'
-  | 'outputTabContent'
-  | 'verboseOutputToggle'
-  | 'refreshOutputButton'
-  | 'viewOutputButton'
-  | 'pipelineExecutionError'
-  | 'euiFlyoutCloseButton'
-  | 'processorStatusIcon'
-  | 'documentsTab'
-  | 'manageItemButton'
-  | 'addProcessorForm'
-  | 'editProcessorForm'
-  | 'configurationTab'
-  | 'outputTab'
-  | 'processorOutputTabContent'
-  | 'editDocumentsButton'
-  | 'clearAllDocumentsButton'
-  | 'addDocumentsAccordion'
-  | 'addDocumentButton'
-  | 'addDocumentError'
-  | 'addDocumentSuccess'
-  | string;
+export const renderTestPipeline = (httpSetup: HttpSetup, props: Props) => {
+  apiService.setup(httpSetup, uiMetricService);
+  return render(<ProcessorsEditorWithDeps {...props} />);
+};

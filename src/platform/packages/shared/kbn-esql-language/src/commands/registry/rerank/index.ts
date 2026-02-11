@@ -13,11 +13,13 @@ import { autocomplete } from './autocomplete';
 import { validate } from './validate';
 import type { ICommandContext } from '../types';
 import { columnsAfter } from './columns_after';
+import { summary } from './summary';
 
 const rerankCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
   columnsAfter,
+  summary,
 };
 
 export const rerankCommand: ICommand = {

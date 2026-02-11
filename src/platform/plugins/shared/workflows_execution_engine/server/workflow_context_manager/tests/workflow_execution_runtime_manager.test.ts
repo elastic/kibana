@@ -15,7 +15,7 @@ import type {
   WorkflowContext,
   WorkflowExecutionContext,
 } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import { buildWorkflowContext } from '../build_workflow_context';
@@ -367,13 +367,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       });
     });
 
-    describe.each([
-      ExecutionStatus.COMPLETED,
-      ExecutionStatus.FAILED,
-      ExecutionStatus.CANCELLED,
-      ExecutionStatus.SKIPPED,
-      ExecutionStatus.TIMED_OUT,
-    ])('for status %s', (status) => {
+    describe.each(TerminalExecutionStatuses)('for status %s', (status) => {
       beforeEach(() => {
         (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
           startedAt: '2025-08-05T00:00:00.000Z',

@@ -8,7 +8,7 @@
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 
 import { createChartInfoApi } from './chart_info_api';
-import { LENS_ITEM_LATEST_VERSION } from '../common/constants';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { LensDocument, DatasourceMap, VisualizationMap } from '@kbn/lens-common';
 
 const mockGetVisualizationInfo = jest.fn().mockReturnValue({

@@ -5,146 +5,66 @@
  * 2.0.
  */
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import type { AgentName } from '@kbn/apm-types/es_schemas_ui';
 import { getSyncLabel, SyncBadge } from '.';
 
 describe('Sync badge', () => {
-  describe('Nodejs', () => {
-    it('shows blocking badge', () => {
-      expect(getSyncLabel('nodejs', true)).toBe('blocking');
+  describe('getSyncLabel', () => {
+    describe.each([
+      // Agents that show "blocking" when sync=true
+      { agentName: 'nodejs', sync: true, expected: 'blocking', description: 'Nodejs' },
+      { agentName: 'nodejs', sync: false, expected: undefined, description: 'Nodejs' },
+      { agentName: 'js-base', sync: true, expected: 'blocking', description: 'JS' },
+      { agentName: 'js-base', sync: false, expected: undefined, description: 'JS' },
+      { agentName: 'rum-js', sync: true, expected: 'blocking', description: 'RUM' },
+      { agentName: 'rum-js', sync: false, expected: undefined, description: 'RUM' },
+      // Agents that show "async" when sync=false
+      { agentName: 'php', sync: true, expected: undefined, description: 'PHP' },
+      { agentName: 'php', sync: false, expected: 'async', description: 'PHP' },
+      { agentName: 'python', sync: true, expected: undefined, description: 'Python' },
+      { agentName: 'python', sync: false, expected: 'async', description: 'Python' },
+      { agentName: 'dotnet', sync: true, expected: undefined, description: '.NET' },
+      { agentName: 'dotnet', sync: false, expected: 'async', description: '.NET' },
+      { agentName: 'iOS/swift', sync: true, expected: undefined, description: 'iOS' },
+      { agentName: 'iOS/swift', sync: false, expected: 'async', description: 'iOS' },
+      { agentName: 'ruby', sync: true, expected: undefined, description: 'Ruby' },
+      { agentName: 'ruby', sync: false, expected: 'async', description: 'Ruby' },
+      { agentName: 'java', sync: true, expected: undefined, description: 'Java' },
+      { agentName: 'java', sync: false, expected: 'async', description: 'Java' },
+      { agentName: 'go', sync: true, expected: undefined, description: 'Go' },
+      { agentName: 'go', sync: false, expected: 'async', description: 'Go' },
+    ])('$description: agentName=$agentName, sync=$sync', ({ agentName, sync, expected }) => {
+      it(`returns ${expected === undefined ? 'undefined' : `"${expected}"`}`, () => {
+        expect(getSyncLabel(agentName as AgentName, sync)).toBe(expected);
+      });
     });
-    it('does not show async badge', () => {
-      expect(getSyncLabel('nodejs', false)).toBeUndefined();
-    });
-  });
-  describe('PHP', () => {
-    it('does not show blocking badge', () => {
-      expect(getSyncLabel('php', true)).toBeUndefined();
-    });
-    it('shows async badge', () => {
-      expect(getSyncLabel('php', false)).toBe('async');
-    });
-  });
-  describe('Python', () => {
-    it('does not show blocking badge', () => {
-      expect(getSyncLabel('python', true)).toBeUndefined();
-    });
-    it('shows async badge', () => {
-      expect(getSyncLabel('python', false)).toBe('async');
-    });
-  });
-  describe('.NET', () => {
-    it('does not show blocking badge', () => {
-      expect(getSyncLabel('dotnet', true)).toBeUndefined();
-    });
-    it('shows async badge', () => {
-      expect(getSyncLabel('dotnet', false)).toBe('async');
-    });
-  });
-  describe('iOS', () => {
-    it('does not show blocking badge', () => {
-      expect(getSyncLabel('iOS/swift', true)).toBeUndefined();
-    });
-    it('shows async badge', () => {
-      expect(getSyncLabel('iOS/swift', false)).toBe('async');
-    });
-  });
-  describe('Ruby', () => {
-    it('does not show blocking badge', () => {
-      expect(getSyncLabel('ruby', true)).toBeUndefined();
-    });
-    it('shows async badge', () => {
-      expect(getSyncLabel('ruby', false)).toBe('async');
-    });
-  });
-  describe('Java', () => {
-    it('does not show blocking badge', () => {
-      expect(getSyncLabel('java', true)).toBeUndefined();
-    });
-    it('shows async badge', () => {
-      expect(getSyncLabel('java', false)).toBe('async');
-    });
-  });
-  describe('JS', () => {
-    it('shows blocking badge', () => {
-      expect(getSyncLabel('js-base', true)).toBe('blocking');
-    });
-    it('does not show async badge', () => {
-      expect(getSyncLabel('js-base', false)).toBeUndefined();
-    });
-  });
-  describe('RUM', () => {
-    it('shows blocking badge', () => {
-      expect(getSyncLabel('rum-js', true)).toBe('blocking');
-    });
-    it('does not show async badge', () => {
-      expect(getSyncLabel('rum-js', false)).toBeUndefined();
-    });
-  });
 
-  describe('Go', () => {
-    it('does not show blocking badge', () => {
-      expect(getSyncLabel('go', true)).toBeUndefined();
-    });
-    it('shows async badge', () => {
-      expect(getSyncLabel('go', false)).toBe('async');
-    });
-  });
-
-  describe('OTEL documents without agentName', () => {
-    it('does not show badge when agentName is undefined', () => {
-      expect(getSyncLabel(undefined, true)).toBeUndefined();
-      expect(getSyncLabel(undefined, false)).toBeUndefined();
+    describe('OTEL documents without agentName', () => {
+      it('does not show badge when agentName is undefined', () => {
+        expect(getSyncLabel(undefined, true)).toBeUndefined();
+        expect(getSyncLabel(undefined, false)).toBeUndefined();
+      });
     });
   });
 });
 
 describe('SyncBadge Component', () => {
   describe('Tooltip functionality', () => {
-    it('renders blocking badge with tooltip for nodejs', async () => {
-      const user = userEvent.setup();
+    it('renders badge with tooltip on hover', async () => {
       render(<SyncBadge sync={true} agentName="nodejs" />);
-
       const badge = screen.getByText('blocking');
       expect(badge).toBeInTheDocument();
 
-      await user.hover(badge);
-      expect(
-        await screen.findByText(
-          'Indicates whether the span was executed synchronously or asynchronously.'
-        )
-      ).toBeInTheDocument();
-    });
+      fireEvent.mouseOver(badge);
 
-    it('renders async badge with tooltip for python', async () => {
-      const user = userEvent.setup();
-      render(<SyncBadge sync={false} agentName="python" />);
-
-      const badge = screen.getByText('async');
-      expect(badge).toBeInTheDocument();
-
-      await user.hover(badge);
-      expect(
-        await screen.findByText(
-          'Indicates whether the span was executed synchronously or asynchronously.'
-        )
-      ).toBeInTheDocument();
-    });
-
-    it('renders async badge with tooltip for go', async () => {
-      const user = userEvent.setup();
-      render(<SyncBadge sync={false} agentName="go" />);
-
-      const badge = screen.getByText('async');
-      expect(badge).toBeInTheDocument();
-
-      await user.hover(badge);
-      expect(
-        await screen.findByText(
-          'Indicates whether the span was executed synchronously or asynchronously.'
-        )
-      ).toBeInTheDocument();
+      await waitFor(() =>
+        expect(
+          screen.getByText(
+            'Indicates whether the span was executed synchronously or asynchronously.'
+          )
+        ).toBeInTheDocument()
+      );
     });
 
     it('does not render badge when sync is undefined', () => {
@@ -154,11 +74,13 @@ describe('SyncBadge Component', () => {
       expect(screen.queryByText('async')).not.toBeInTheDocument();
     });
 
-    it('does not render badge when label conditions are not met', () => {
+    it('does not render badge when nodejs agent has sync=false', () => {
       render(<SyncBadge sync={false} agentName="nodejs" />);
       expect(screen.queryByText('blocking')).not.toBeInTheDocument();
       expect(screen.queryByText('async')).not.toBeInTheDocument();
+    });
 
+    it('does not render badge when python agent has sync=true', () => {
       render(<SyncBadge sync={true} agentName="python" />);
       expect(screen.queryByText('blocking')).not.toBeInTheDocument();
       expect(screen.queryByText('async')).not.toBeInTheDocument();
@@ -166,34 +88,18 @@ describe('SyncBadge Component', () => {
   });
 
   describe('Badge content', () => {
-    it('shows correct blocking badge for js-base agent', () => {
-      render(<SyncBadge sync={true} agentName="js-base" />);
-      expect(screen.getByText('blocking')).toBeInTheDocument();
-    });
-
-    it('shows correct async badge for php agent', () => {
-      render(<SyncBadge sync={false} agentName="php" />);
-      expect(screen.getByText('async')).toBeInTheDocument();
-    });
-
-    it('shows correct async badge for dotnet agent', () => {
-      render(<SyncBadge sync={false} agentName="dotnet" />);
-      expect(screen.getByText('async')).toBeInTheDocument();
-    });
-
-    it('shows correct async badge for ruby agent', () => {
-      render(<SyncBadge sync={false} agentName="ruby" />);
-      expect(screen.getByText('async')).toBeInTheDocument();
-    });
-
-    it('shows correct async badge for java agent', () => {
-      render(<SyncBadge sync={false} agentName="java" />);
-      expect(screen.getByText('async')).toBeInTheDocument();
-    });
-
-    it('shows correct async badge for iOS/swift agent', () => {
-      render(<SyncBadge sync={false} agentName="iOS/swift" />);
-      expect(screen.getByText('async')).toBeInTheDocument();
+    describe.each([
+      { agentName: 'js-base', sync: true, expected: 'blocking' },
+      { agentName: 'php', sync: false, expected: 'async' },
+      { agentName: 'dotnet', sync: false, expected: 'async' },
+      { agentName: 'ruby', sync: false, expected: 'async' },
+      { agentName: 'java', sync: false, expected: 'async' },
+      { agentName: 'iOS/swift', sync: false, expected: 'async' },
+    ])('$agentName with sync=$sync', ({ agentName, sync, expected }) => {
+      it(`shows correct ${expected} badge`, () => {
+        render(<SyncBadge sync={sync} agentName={agentName as AgentName} />);
+        expect(screen.getByText(expected)).toBeInTheDocument();
+      });
     });
   });
 });

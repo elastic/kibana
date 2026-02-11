@@ -23,6 +23,8 @@
         "label": "customBrandingServiceMock",
         "description": [],
         "path": "src/core/packages/custom-branding/server-mocks/src/custom_branding_service.mock.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,6 +41,8 @@
               ">"
             ],
             "path": "src/core/packages/custom-branding/server-mocks/src/custom_branding_service.mock.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -55,6 +59,8 @@
               "() => { register: jest.Mock<any, any, any>; getBrandingFor: jest.Mock<any, any, any>; }"
             ],
             "path": "src/core/packages/custom-branding/server-mocks/src/custom_branding_service.mock.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -71,6 +77,8 @@
               "() => {}"
             ],
             "path": "src/core/packages/custom-branding/server-mocks/src/custom_branding_service.mock.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

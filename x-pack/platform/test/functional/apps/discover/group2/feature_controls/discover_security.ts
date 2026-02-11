@@ -222,7 +222,6 @@ export default function (ctx: FtrProviderContext) {
             query: '',
           },
           sort: [['@timestamp', 'desc']],
-          columns: [],
           interval: 'auto',
           filters: [],
           dataViewId: 'logstash-*',

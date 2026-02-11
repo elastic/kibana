@@ -84,6 +84,7 @@ describe('SiemMigrationTaskRunner', () => {
     abortController = new AbortController();
     taskRunner = new TestMigrationTaskRunner(
       'test-migration-id',
+      'splunk',
       mockRequest,
       mockUser,
       abortController,

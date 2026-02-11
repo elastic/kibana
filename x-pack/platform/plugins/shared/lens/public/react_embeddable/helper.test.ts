@@ -24,13 +24,13 @@ describe('Embeddable helpers', () => {
         dataOverrides: { id: 'form_based' },
       });
     }
-    it('should forward a by value raw state', async () => {
+    it('should forward a by value state', async () => {
       const services = getServices();
-      const rawState = {
+      const initialState = {
         attributes: defaultDoc,
       };
-      const runtimeState = await deserializeState(services, rawState);
-      expect(runtimeState).toEqual(rawState);
+      const runtimeState = await deserializeState(services, initialState);
+      expect(runtimeState).toEqual(initialState);
     });
 
     it('should wrap Lens doc/attributes into component state shape', async () => {

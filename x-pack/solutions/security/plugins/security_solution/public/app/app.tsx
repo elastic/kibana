@@ -32,6 +32,7 @@ import { UserPrivilegesProvider } from '../common/components/user_privileges/use
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
 import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
 import { AssistantProvider } from '../assistant/provider';
+import { TrialCompanion } from '../trial_companion/trial_companion';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -67,6 +68,7 @@ const StartAppComponent: FC<StartAppComponent> = ({ children, history, store, th
                           <DiscoverInTimelineContextProvider>
                             <PageRouter history={history}>
                               <AssistantProvider>{children}</AssistantProvider>
+                              <TrialCompanion />
                             </PageRouter>
                           </DiscoverInTimelineContextProvider>
                         </UpsellingProvider>
@@ -106,8 +108,8 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
 
   // Set conversation flyout active config on mount, clear on unmount
   useEffect(() => {
-    if (services.onechat?.setConversationFlyoutActiveConfig) {
-      services.onechat.setConversationFlyoutActiveConfig({
+    if (services.agentBuilder?.setConversationFlyoutActiveConfig) {
+      services.agentBuilder.setConversationFlyoutActiveConfig({
         sessionTag: 'security',
         agentId: THREAT_HUNTING_AGENT_ID,
         newConversation: false,
@@ -115,11 +117,11 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
     }
 
     return () => {
-      if (services.onechat?.clearConversationFlyoutActiveConfig) {
-        services.onechat.clearConversationFlyoutActiveConfig();
+      if (services.agentBuilder?.clearConversationFlyoutActiveConfig) {
+        services.agentBuilder.clearConversationFlyoutActiveConfig();
       }
     };
-  }, [services.onechat]);
+  }, [services.agentBuilder]);
 
   return (
     <KibanaContextProvider

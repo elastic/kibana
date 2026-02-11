@@ -33,7 +33,7 @@ import type {
 } from './profile_provider_services';
 import { createSecurityDocumentProfileProvider } from './security/security_document_profile';
 import { createSecurityRootProfileProvider } from './security/security_root_profile';
-import { createMetricsDataSourceProfileProviders } from './common/metrics_data_source_profile';
+import { createMetricsDataSourceProfileProvider } from './common/metrics_data_source_profile';
 
 /**
  * Register profile providers for root, data source, and document contexts to the profile profile services
@@ -123,7 +123,7 @@ const createDataSourceProfileProviders = (providerServices: ProfileProviderServi
   createDeprecationLogsDataSourceProfileProvider(),
   ...createObservabilityLogsDataSourceProfileProviders(providerServices),
   ...createObservabilityTracesDataSourceProfileProviders(providerServices),
-  ...createMetricsDataSourceProfileProviders(providerServices),
+  createMetricsDataSourceProfileProvider(),
 ];
 
 /**

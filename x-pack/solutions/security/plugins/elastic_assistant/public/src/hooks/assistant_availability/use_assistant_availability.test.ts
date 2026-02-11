@@ -85,7 +85,6 @@ describe('useAssistantAvailability', () => {
       isAssistantManagementEnabled: true,
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
-      isAiAgentsEnabled: true,
     });
   });
 
@@ -146,7 +145,6 @@ describe('useAssistantAvailability', () => {
       isAssistantManagementEnabled: true,
       hasUpdateAIAssistantAnonymization: true,
       hasManageGlobalKnowledgeBase: true,
-      isAiAgentsEnabled: true,
     });
   });
 
@@ -200,7 +198,6 @@ describe('useAssistantAvailability', () => {
       isAssistantManagementEnabled: false,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
-      isAiAgentsEnabled: false,
     });
   });
 
@@ -249,7 +246,6 @@ describe('useAssistantAvailability', () => {
       isAssistantManagementEnabled: true,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
-      isAiAgentsEnabled: true,
     });
   });
 
@@ -283,7 +279,6 @@ describe('useAssistantAvailability', () => {
       isAssistantManagementEnabled: false,
       hasUpdateAIAssistantAnonymization: false,
       hasManageGlobalKnowledgeBase: false,
-      isAiAgentsEnabled: false,
     });
   });
 });

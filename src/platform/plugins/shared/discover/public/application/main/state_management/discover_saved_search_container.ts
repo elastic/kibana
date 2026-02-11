@@ -9,10 +9,10 @@
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import type { ControlPanelsState } from '@kbn/controls-plugin/public';
 import type { ESQLControlState } from '@kbn/esql-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import type { DiscoverAppState } from './redux';

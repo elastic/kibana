@@ -30,6 +30,7 @@ export interface DiscoverContainerInternalProps {
   getDiscoverServices: () => Promise<DiscoverServices>;
   scopedHistory: ScopedHistory;
   customizationCallbacks: CustomizationCallback[];
+  customizationContext?: DiscoverCustomizationContext;
   stateStorageContainer?: IKbnUrlStateStorage;
   isLoading?: boolean;
 }
@@ -45,12 +46,13 @@ const discoverContainerWrapperCss = css`
   }
 `;
 
-const customizationContext: DiscoverCustomizationContext = { displayMode: 'embedded' };
+const defaultCustomizationContext: DiscoverCustomizationContext = { displayMode: 'embedded' };
 
 export const DiscoverContainerInternal = ({
   overrideServices,
   scopedHistory,
   customizationCallbacks,
+  customizationContext = defaultCustomizationContext,
   getDiscoverServices,
   stateStorageContainer,
   isLoading = false,

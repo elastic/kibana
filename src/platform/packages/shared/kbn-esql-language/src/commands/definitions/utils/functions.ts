@@ -23,11 +23,12 @@ import { aggFunctionDefinitions } from '../generated/aggregation_functions';
 import { timeSeriesAggFunctionDefinitions } from '../generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../generated/scalar_functions';
+import { inlineCastsMapping } from '../generated/inline_casts_mapping';
 import type { ESQLColumnData, ISuggestionItem } from '../../registry/types';
 import { withAutoSuggest } from './autocomplete/helpers';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
-import type { ESQLAstItem, ESQLFunction } from '../../../types';
+import type { ESQLAstItem, ESQLFunction, InlineCastingType } from '../../../types';
 import { removeFinalUnknownIdentiferArg } from './shared';
 import { getTestFunctions } from './test_functions';
 import { getMatchingSignatures } from './expressions';
@@ -292,7 +293,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     category = SuggestionCategory.FUNCTION_SCALAR;
   }
 
-  return withAutoSuggest({
+  return {
     label: fn.name.toUpperCase(),
     text,
     asSnippet: true,
@@ -318,7 +319,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
       id: 'editor.action.triggerParameterHints',
       title: '',
     },
-  });
+  };
 }
 
 export function checkFunctionInvocationComplete(
@@ -441,7 +442,14 @@ export const buildColumnSuggestions = (
 ): ISuggestionItem[] => {
   const fieldsSuggestions = columns.map((column) => {
     const fieldType = column.type.charAt(0).toUpperCase() + column.type.slice(1);
-    const titleCaseType = `${column.name} (${fieldType})`;
+    const unmmapedSuffix = column.isUnmappedField
+      ? i18n.translate('kbn-esql-language.esql.autocomplete.unmappedFieldTypeSuffix', {
+          defaultMessage: ' - Unmapped Field',
+        })
+      : '';
+
+    const titleCaseType = `${column.name} (${fieldType})${unmmapedSuffix}`;
+
     // Check if the field is in the recommended fields from extensions list
     // and if so, mark it as recommended. This also ensures that recommended fields
     // that are registered wrongly, won't be shown as suggestions.
@@ -486,3 +494,13 @@ export const buildColumnSuggestions = (
 
   return [...suggestions];
 };
+
+/**
+ * Given an inline cast data type, return the corresponding function that performs the cast.
+ * E.g., for 'integer' or 'int', it returns 'to_integer'.
+ *
+ * It returns undefined if the inline cast data type is not supported.
+ */
+export function getFunctionForInlineCast(castingType: InlineCastingType): string | undefined {
+  return inlineCastsMapping[castingType];
+}

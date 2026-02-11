@@ -14,6 +14,8 @@
           "\nService types"
         ],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+        "lineNumber": 239,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,6 +45,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 243,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -57,6 +61,8 @@
         "label": "DiscoverFeaturesServiceStart",
         "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+        "lineNumber": 246,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -86,6 +92,8 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 247,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -100,6 +108,8 @@
         "label": "ObservabilityLogsAIAssistantFeature",
         "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -114,6 +124,8 @@
               "\"observability-logs-ai-assistant\""
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -136,6 +148,8 @@
               ") => JSX.Element"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -156,6 +170,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+                "lineNumber": 54,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -174,6 +190,8 @@
         "label": "ObservabilityLogsAIAssistantFeatureRenderDeps",
         "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -194,6 +212,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -208,6 +228,8 @@
         "label": "ObservabilityLogsAIInsightFeature",
         "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -222,6 +244,8 @@
               "\"observability-logs-ai-insight\""
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -244,6 +268,8 @@
               ") => JSX.Element"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -264,6 +290,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+                "lineNumber": 62,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -282,6 +310,8 @@
         "label": "ObservabilityLogsAiInsightFeatureRenderDeps",
         "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -302,6 +332,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -316,6 +348,8 @@
         "label": "ObservabilityStreamsFeature",
         "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -330,6 +364,8 @@
               "\"streams\""
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -352,6 +388,8 @@
               ") => JSX.Element"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -372,6 +410,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+                "lineNumber": 45,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -398,6 +438,8 @@
               ") => JSX.Element"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -418,6 +460,8 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+                "lineNumber": 46,
+                "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -438,6 +482,8 @@
           "\nFeatures types\nHere goes the contract definition for the client features that can be registered\nand that will be consumed by Discover.\n\nAllow to register an AIAssistant scoped to investigate log entries.\nIt will be opinionatedly used as an additional tool to investigate a log document and\nwill be shown on the logs-overview preset tab of the UnifiedDocViewer."
         ],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -458,6 +504,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -478,6 +526,8 @@
               }
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -492,6 +542,8 @@
         "label": "SecuritySolutionAppWrapperFeature",
         "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -506,6 +558,8 @@
               "\"security-solution-app-wrapper\""
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 114,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -520,6 +574,8 @@
               "() => Promise<() => React.FunctionComponent<{ children?: React.ReactNode; }>>"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 115,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -538,6 +594,8 @@
           "*************** Security Solution"
         ],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+        "lineNumber": 104,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -552,6 +610,8 @@
               "\"security-solution-cell-renderer\""
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 107,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -574,6 +634,8 @@
               "> | undefined>"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "lineNumber": 108,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -628,6 +690,8 @@
           "SecuritySolutionFeature"
         ],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+        "lineNumber": 226,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -642,6 +706,8 @@
       "label": "DiscoverSharedPublicSetup",
       "description": [],
       "path": "src/platform/plugins/shared/discover_shared/public/types.ts",
+      "lineNumber": 16,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -662,6 +728,8 @@
             }
           ],
           "path": "src/platform/plugins/shared/discover_shared/public/types.ts",
+          "lineNumber": 17,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -677,6 +745,8 @@
       "label": "DiscoverSharedPublicStart",
       "description": [],
       "path": "src/platform/plugins/shared/discover_shared/public/types.ts",
+      "lineNumber": 20,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -697,6 +767,8 @@
             }
           ],
           "path": "src/platform/plugins/shared/discover_shared/public/types.ts",
+          "lineNumber": 21,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -733,6 +805,8 @@
           "<Feature>"
         ],
         "path": "src/platform/plugins/shared/discover_shared/common/features_registry/features_registry.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -747,6 +821,8 @@
               "(feature: Feature) => void"
             ],
             "path": "src/platform/plugins/shared/discover_shared/common/features_registry/features_registry.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -761,6 +837,8 @@
                   "Feature"
                 ],
                 "path": "src/platform/plugins/shared/discover_shared/common/features_registry/features_registry.ts",
+                "lineNumber": 15,
+                "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -779,6 +857,8 @@
               "<Id extends Feature[\"id\"]>(id: Id) => Extract<Feature, { id: Id; }> | undefined"
             ],
             "path": "src/platform/plugins/shared/discover_shared/common/features_registry/features_registry.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -793,6 +873,8 @@
                   "Id"
                 ],
                 "path": "src/platform/plugins/shared/discover_shared/common/features_registry/features_registry.ts",
+                "lineNumber": 25,
+                "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

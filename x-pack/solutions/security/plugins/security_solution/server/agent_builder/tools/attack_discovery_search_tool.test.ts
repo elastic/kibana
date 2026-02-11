@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { ToolResultType, type TabularDataResult, type ErrorResult } from '@kbn/onechat-common';
-import { executeEsql } from '@kbn/onechat-genai-utils';
-import type { ToolHandlerStandardReturn } from '@kbn/onechat-server/tools';
+import {
+  ToolResultType,
+  type TabularDataResult,
+  type ErrorResult,
+} from '@kbn/agent-builder-common';
+import { executeEsql } from '@kbn/agent-builder-genai-utils';
+import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test_helpers';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 
-jest.mock('@kbn/onechat-genai-utils', () => ({
+jest.mock('@kbn/agent-builder-genai-utils', () => ({
   executeEsql: jest.fn(),
 }));
 

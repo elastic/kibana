@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
 import ColumnHeaderTruncateContainer from '@kbn/unified-data-table/src/components/column_header_truncate_container';
 import { FieldIcon } from '@kbn/react-field';
-import React, { useMemo, useState, useCallback, createContext, useContext } from 'react';
+import React, { useMemo, useState, useCallback, createContext, useContext, useEffect } from 'react';
 import type {
   IgnoredField,
   DocumentWithIgnoredFields,
@@ -77,6 +77,35 @@ function RowSelectionButton({ rowIndex }: { rowIndex: number }) {
       color={selectedRowIndex === rowIndex ? 'primary' : 'text'}
     />
   );
+}
+
+function RowSelectionCell({
+  rowIndex,
+  setCellProps,
+  highlightColor,
+}: {
+  rowIndex: number;
+  setCellProps: (props: { style: React.CSSProperties }) => void;
+  highlightColor: string;
+}) {
+  const { selectedRowIndex } = useRowSelection();
+  const isSelected = selectedRowIndex === rowIndex;
+
+  useEffect(() => {
+    if (isSelected) {
+      setCellProps({
+        style: {
+          backgroundColor: highlightColor,
+        },
+      });
+    } else {
+      setCellProps({
+        style: {},
+      });
+    }
+  }, [isSelected, setCellProps, highlightColor]);
+
+  return <RowSelectionButton rowIndex={rowIndex} />;
 }
 
 export const MemoPreviewTable = React.memo(PreviewTable);
@@ -280,23 +309,13 @@ export function PreviewTable({
         id: 'selection',
         width: 36,
         headerCellRender: () => null,
-        rowCellRender: ({ rowIndex, setCellProps }) => {
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const { selectedRowIndex } = useRowSelection();
-
-          if (selectedRowIndex === rowIndex) {
-            setCellProps({
-              style: {
-                backgroundColor: theme.colors.highlight,
-              },
-            });
-          } else {
-            setCellProps({
-              style: {},
-            });
-          }
-          return <RowSelectionButton rowIndex={rowIndex} />;
-        },
+        rowCellRender: ({ rowIndex, setCellProps }) => (
+          <RowSelectionCell
+            rowIndex={rowIndex}
+            setCellProps={setCellProps}
+            highlightColor={theme.colors.highlight}
+          />
+        ),
       },
     ],
     [theme.colors.highlight]

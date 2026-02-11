@@ -13,6 +13,7 @@ import { validateColumnForCommand } from './column';
 import { errors } from '../errors';
 import type { ESQLAst, ESQLAstAllCommands, ESQLMessage } from '../../../../types';
 import type { ICommandCallbacks, ICommandContext } from '../../../registry/types';
+import { validateInlineCasts } from './inline_cast';
 
 export const validateCommandArguments = (
   command: ESQLAstAllCommands,
@@ -46,5 +47,8 @@ export const validateCommandArguments = (
       }
     }
   }
+
+  messages.push(...validateInlineCasts(command, context));
+
   return messages;
 };

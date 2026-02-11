@@ -10,9 +10,7 @@ exports[`Header renders 1`] = `
     id="globalHeaderBars"
   >
     <div
-      class="euiHeader header__firstBar emotion-euiHeader-fixed-dark"
-      data-fixed-header="true"
-      style="inset-block-start: 0px;"
+      class="euiHeader header__firstBar emotion-euiHeader-static-dark"
     >
       <div
         class="euiHeaderSection emotion-euiHeaderSection"
@@ -138,9 +136,7 @@ exports[`Header renders 1`] = `
       </div>
     </div>
     <div
-      class="euiHeader header__secondBar emotion-euiHeader-fixed-default"
-      data-fixed-header="true"
-      style="inset-block-start: 48px;"
+      class="euiHeader header__secondBar emotion-euiHeader-static-default"
     >
       <div
         class="euiHeaderSection emotion-euiHeaderSection"

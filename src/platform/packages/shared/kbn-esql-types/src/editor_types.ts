@@ -73,9 +73,29 @@ export interface ESQLFieldWithMetadata {
   userDefined: false;
   isEcs?: boolean;
   hasConflict?: boolean;
+  isUnmappedField?: boolean;
   metadata?: {
     description?: string;
   };
+}
+
+enum KQLInESQLSuggestionType {
+  Value = 'Value',
+  Operator = 'Operator',
+  Field = 'Field',
+}
+/** Maps KQL suggestion types to ISuggestionItem kind values */
+export const KQL_TYPE_TO_KIND_MAP: Record<string, KQLInESQLSuggestionType> = {
+  operator: KQLInESQLSuggestionType.Operator,
+  field: KQLInESQLSuggestionType.Field,
+  value: KQLInESQLSuggestionType.Value,
+};
+
+interface KQLInESQLSuggestion {
+  text: string;
+  label: string;
+  kind: KQLInESQLSuggestionType;
+  detail?: string;
 }
 
 export interface ESQLCallbacks {
@@ -105,4 +125,10 @@ export interface ESQLCallbacks {
   getHistoryStarredItems?: () => Promise<string[]>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
   isServerless?: boolean;
+  getKqlSuggestions?: (
+    kqlQuery: string,
+    cursorPositionInKql: number
+    // it shoud be ISuggestionItem[] but we need to carry this first from the kbn-esql-language package
+    // to avoid circular dependency
+  ) => Promise<KQLInESQLSuggestion[] | undefined>;
 }

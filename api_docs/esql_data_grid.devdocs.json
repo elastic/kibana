@@ -14,6 +14,8 @@
           "(props: ESQLDataGridProps) => React.JSX.Element"
         ],
         "path": "src/platform/plugins/shared/esql_datagrid/public/create_datagrid.tsx",
+        "lineNumber": 40,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,6 +30,8 @@
               "ESQLDataGridProps"
             ],
             "path": "src/platform/plugins/shared/esql_datagrid/public/create_datagrid.tsx",
+            "lineNumber": 40,
+            "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

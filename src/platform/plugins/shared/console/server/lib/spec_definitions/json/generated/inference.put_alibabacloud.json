@@ -15,7 +15,7 @@
       "task_type": [
         "completion",
         "rerank",
-        "space_embedding",
+        "sparse_embedding",
         "text_embedding"
       ]
     },

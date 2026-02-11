@@ -23,7 +23,6 @@ export interface CreateCloudConnectorRequest {
 export interface UpdateCloudConnectorRequest {
   name?: string;
   vars?: CloudConnectorVars;
-  packagePolicyCount?: number;
   cloudProvider?: CloudProvider;
   accountType?: AccountType;
 }

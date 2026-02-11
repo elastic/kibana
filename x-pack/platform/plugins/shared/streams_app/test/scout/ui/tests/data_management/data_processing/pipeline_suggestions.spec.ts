@@ -67,7 +67,7 @@ test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }
     pageObjects,
   }) => {
     // Wait for the page content to load - the empty prompt should be visible
-    await expect(page.getByText('Extract useful fields from your data')).toBeVisible();
+    await expect(page.getByText('Extract fields from your data')).toBeVisible();
 
     // Verify the generate button is visible with connector
     await expect(pageObjects.streams.getSuggestPipelineButton()).toBeVisible();
@@ -81,13 +81,13 @@ test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }
     });
     await page.reload();
     // Wait for the page to load again
-    await expect(page.getByText('Extract useful fields from your data')).toBeVisible();
+    await expect(page.getByText('Extract fields from your data')).toBeVisible();
     await expect(pageObjects.streams.getSuggestPipelineButton()).toBeHidden();
   });
 
   test('should generate suggestion and allow accept/reject', async ({ page, pageObjects }) => {
     // Wait for page to load
-    await expect(page.getByText('Extract useful fields from your data')).toBeVisible();
+    await expect(page.getByText('Extract fields from your data')).toBeVisible();
     await setupMockPipelineResponse(page);
 
     // Generate suggestion
@@ -98,7 +98,7 @@ test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }
     // Reject and verify we're back to empty state
     await pageObjects.streams.rejectPipelineSuggestion();
     await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeHidden();
-    await expect(page.getByText('Extract useful fields from your data')).toBeVisible();
+    await expect(page.getByText('Extract fields from your data')).toBeVisible();
     expect(await pageObjects.streams.getProcessorsListItemsFast()).toHaveLength(0);
 
     // Generate again and accept
@@ -114,7 +114,7 @@ test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }
 
   test('should regenerate suggestions', async ({ page, pageObjects }) => {
     // Wait for page to load
-    await expect(page.getByText('Extract useful fields from your data')).toBeVisible();
+    await expect(page.getByText('Extract fields from your data')).toBeVisible();
     await setupMockPipelineResponse(page);
 
     // Generate first suggestion

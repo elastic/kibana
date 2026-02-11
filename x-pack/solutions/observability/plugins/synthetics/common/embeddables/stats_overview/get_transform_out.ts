@@ -6,10 +6,12 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils/src/types';
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { OverviewStatsEmbeddableState } from './types';
 
-export function getTransformOut(transformEnhancementsOut: EnhancementsRegistry['transformOut']) {
+export function getTransformOut(
+  transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
+) {
   function transformOut(state: OverviewStatsEmbeddableState, references?: Reference[]) {
     const { enhancements, ...rest } = state;
     const enhancementsState = enhancements

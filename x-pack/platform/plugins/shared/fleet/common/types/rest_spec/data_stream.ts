@@ -16,8 +16,9 @@ export const DeprecatedILMPolicyCheckResponseSchema = schema.object({
     schema.object({
       policyName: schema.string(),
       version: schema.number(),
-      componentTemplates: schema.arrayOf(schema.string()),
-    })
+      componentTemplates: schema.arrayOf(schema.string(), { maxSize: 10000 }),
+    }),
+    { maxSize: 3 }
   ),
 });
 export type DeprecatedILMPolicyCheckResponse = TypeOf<

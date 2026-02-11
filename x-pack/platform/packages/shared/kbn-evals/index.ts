@@ -14,6 +14,17 @@ export { createQuantitativeGroundednessEvaluator } from './src/evaluators/ground
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
 export { withEvaluatorSpan } from './src/utils/tracing';
 export {
+  containsAllTerms,
+  extractAllStrings,
+  extractMaxSemver,
+  extractReleaseDateNearVersion,
+  getBooleanMeta,
+  getFinalAssistantMessage,
+  getStringMeta,
+  getToolCallSteps,
+  includesOneOf,
+} from './src/utils/evaluation_helpers';
+export {
   type EvaluationReporter,
   createDefaultTerminalReporter,
 } from './src/utils/reporting/evaluation_reporter';

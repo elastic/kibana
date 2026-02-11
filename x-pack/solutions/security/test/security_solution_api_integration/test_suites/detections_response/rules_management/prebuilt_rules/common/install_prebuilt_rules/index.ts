@@ -9,4 +9,5 @@ import type { FtrProviderContext } from '../../../../../../ftr_provider_context'
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
   loadTestFile(require.resolve('./install_mocked_prebuilt_rule_assets'));
+  loadTestFile(require.resolve('./review_installation'));
 };

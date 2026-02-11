@@ -9,7 +9,7 @@ import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 export const ListResponseSchema = (itemSchema: Type<any>) =>
   schema.object({
-    items: schema.arrayOf(itemSchema),
+    items: schema.arrayOf(itemSchema, { maxSize: 10000 }),
     total: schema.number(),
     page: schema.number(),
     perPage: schema.number(),

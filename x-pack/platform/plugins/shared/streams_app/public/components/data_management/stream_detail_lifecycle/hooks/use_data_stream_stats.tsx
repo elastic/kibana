@@ -99,21 +99,20 @@ export const useDataStreamStats = ({
           aggregations: dsAggregations,
         },
         fs: {
-          stats:
-            failureStore.stats && failureStore.stats.creationDate
-              ? {
-                  ...failureStore.stats,
-                  ...getCalculatedStats({
-                    stats: {
-                      creationDate: failureStore.stats.creationDate,
-                      totalDocs: failureStore.stats.count,
-                      sizeBytes: failureStore.stats.size,
-                    },
-                    timeState,
-                    buckets: fsAggregations?.buckets,
-                  }),
-                }
-              : undefined,
+          stats: failureStore.stats
+            ? {
+                ...failureStore.stats,
+                ...getCalculatedStats({
+                  stats: {
+                    creationDate: failureStore.stats.creationDate,
+                    totalDocs: failureStore.stats.count,
+                    sizeBytes: failureStore.stats.size,
+                  },
+                  timeState,
+                  buckets: fsAggregations?.buckets,
+                }),
+              }
+            : undefined,
           aggregations: fsAggregations,
         },
       };

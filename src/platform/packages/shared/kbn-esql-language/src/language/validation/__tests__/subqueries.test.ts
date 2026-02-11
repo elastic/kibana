@@ -50,9 +50,7 @@ describe('Subqueries Validation', () => {
       await expectErrors('FROM index, (FROM remote-ccs:indexes)', [
         'Unknown index "remote-ccs:indexes"',
       ]);
-      await expectErrors('FROM index, (FROM remote-*:indexes*)', [
-        'Unknown index "remote-*:indexes*"',
-      ]);
+      await expectErrors('FROM index, (FROM remote-*:indexes*)', []);
     });
 
     it('should validate custom command validation inside deeply nested subqueries', async () => {

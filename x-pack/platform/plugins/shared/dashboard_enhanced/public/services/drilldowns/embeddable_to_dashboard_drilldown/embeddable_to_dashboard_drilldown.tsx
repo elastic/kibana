@@ -19,8 +19,7 @@ import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/public';
 import type { AbstractDashboardDrilldownParams } from '../abstract_dashboard_drilldown';
 import { AbstractDashboardDrilldown } from '../abstract_dashboard_drilldown';
 import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
-import { createExtract, createInject } from '../../../../common';
-import type { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
+import type { DashboardDrilldownConfig } from '../abstract_dashboard_drilldown';
 
 export type Context = ApplyGlobalFilterActionContext & {
   embeddable: Partial<PublishesUnifiedSearch & HasParentApi<Partial<PublishesUnifiedSearch>>>;
@@ -40,7 +39,7 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
   public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER, IMAGE_CLICK_TRIGGER];
 
   protected async getLocation(
-    config: Config,
+    config: DashboardDrilldownConfig,
     context: Context,
     useUrlForState: boolean
   ): Promise<KibanaLocation> {
@@ -87,8 +86,4 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
       location.path
     );
   }
-
-  public readonly inject = createInject({ drilldownId: this.id });
-
-  public readonly extract = createExtract({ drilldownId: this.id });
 }

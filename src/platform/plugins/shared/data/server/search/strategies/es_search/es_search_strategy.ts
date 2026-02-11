@@ -70,6 +70,7 @@ export const esSearchStrategyProvider = (
           ...defaults,
           ...getShardTimeout(config),
           ...(terminateAfter ? { terminate_after: terminateAfter } : {}),
+          ...(options.projectRouting !== undefined && { project_routing: options.projectRouting }),
           ...requestParams,
         };
         const { body, meta } = await esClient.asCurrentUser.search(params, {

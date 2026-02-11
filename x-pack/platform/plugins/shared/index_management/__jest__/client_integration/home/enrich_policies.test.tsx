@@ -5,36 +5,33 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { screen, waitFor } from '@testing-library/react';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 
-import { setupEnvironment } from '../helpers';
+import { setupEnvironment } from '../helpers/setup_environment';
+import { renderHome } from '../helpers/render_home';
 import { createTestEnrichPolicy } from '../helpers/fixtures';
-import type { EnrichPoliciesTestBed } from './enrich_policies.helpers';
-import { setup } from './enrich_policies.helpers';
+import {
+  createEnrichPoliciesActions,
+  getEnrichPoliciesTableRowCount,
+} from '../helpers/actions/enrich_policies_actions';
 import { notificationService } from '../../../public/application/services/notification';
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-  return {
-    ...original,
-    // Mocking CodeEditor, which uses React Monaco under the hood
-    CodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: any) => {
-          props.onChange(e.jsonContent);
-        }}
-      />
-    ),
-  };
-});
+jest.mock('@kbn/code-editor');
 
 describe('Enrich policies tab', () => {
-  const { httpSetup, httpRequestsMockHelpers, setDelayResponse } = setupEnvironment();
-  let testBed: EnrichPoliciesTestBed;
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
+  let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
+  let setDelayResponse: ReturnType<typeof setupEnvironment>['setDelayResponse'];
+
+  beforeEach(() => {
+    jest.restoreAllMocks();
+    jest.clearAllMocks();
+    const mockEnvironment = setupEnvironment();
+    httpSetup = mockEnvironment.httpSetup;
+    httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
+    setDelayResponse = mockEnvironment.setDelayResponse;
+  });
 
   describe('empty states', () => {
     beforeEach(async () => {
@@ -43,17 +40,13 @@ describe('Enrich policies tab', () => {
 
     test('displays a loading prompt', async () => {
       setDelayResponse(true);
+      httpRequestsMockHelpers.setLoadEnrichPoliciesResponse([]);
 
-      testBed = await setup(httpSetup);
-
-      await act(async () => {
-        testBed.actions.goToEnrichPoliciesTab();
+      await renderHome(httpSetup, {
+        initialEntries: ['/enrich_policies'],
       });
 
-      const { exists, component } = testBed;
-      component.update();
-
-      expect(exists('sectionLoading')).toBe(true);
+      expect(await screen.findByTestId('sectionLoading')).toBeInTheDocument();
     });
 
     test('displays a error prompt', async () => {
@@ -65,80 +58,87 @@ describe('Enrich policies tab', () => {
 
       httpRequestsMockHelpers.setLoadEnrichPoliciesResponse(undefined, error);
 
-      testBed = await setup(httpSetup);
-
-      await act(async () => {
-        testBed.actions.goToEnrichPoliciesTab();
+      await renderHome(httpSetup, {
+        initialEntries: ['/enrich_policies'],
       });
 
-      const { exists, component } = testBed;
-      component.update();
-
-      expect(exists('sectionError')).toBe(true);
+      await screen.findByTestId('sectionError');
+      expect(screen.getByTestId('sectionError')).toBeInTheDocument();
     });
   });
 
   describe('policies list', () => {
     let testPolicy: ReturnType<typeof createTestEnrichPolicy>;
+
     beforeEach(async () => {
+      setDelayResponse(false);
       testPolicy = createTestEnrichPolicy('policy-match', 'match');
 
       httpRequestsMockHelpers.setLoadEnrichPoliciesResponse([
         testPolicy,
         createTestEnrichPolicy('policy-range', 'range'),
       ]);
-
-      testBed = await setup(httpSetup);
-      await act(async () => {
-        testBed.actions.goToEnrichPoliciesTab();
-      });
-
-      testBed.component.update();
     });
 
     it('shows enrich policies in table', async () => {
-      const { table } = testBed;
-      expect(table.getMetaData('enrichPoliciesTable').rows.length).toBe(2);
+      await renderHome(httpSetup, {
+        initialEntries: ['/enrich_policies'],
+      });
+
+      await screen.findByTestId('enrichPoliciesTable');
+      expect(getEnrichPoliciesTableRowCount()).toBe(2);
     });
 
     it('can reload the table data through a call to action', async () => {
-      const { actions } = testBed;
-
-      // Reset mock to clear calls from setup
-      httpSetup.get.mockClear();
-
-      await act(async () => {
-        actions.clickReloadPoliciesButton();
+      await renderHome(httpSetup, {
+        initialEntries: ['/enrich_policies'],
       });
+
+      await screen.findByTestId('enrichPoliciesTable');
+      const actions = createEnrichPoliciesActions();
+
+      const requestsBefore = jest.mocked(httpSetup.get).mock.calls.length;
+
+      actions.clickReloadPoliciesButton();
 
       // Should have made a call to load the policies after the reload
       // button is clicked.
-      expect(httpSetup.get.mock.calls.length).toBeGreaterThan(0);
+      await waitFor(() => {
+        expect(jest.mocked(httpSetup.get).mock.calls.length).toBeGreaterThan(requestsBefore);
+      });
     });
 
     describe('details flyout', () => {
       it('can open the details flyout', async () => {
-        const { actions, exists } = testBed;
+        // Navigate directly to the policy details URL since link click doesn't trigger router navigation in RTL
+        await renderHome(httpSetup, {
+          initialEntries: ['/enrich_policies?policy=policy-match'],
+        });
 
-        await actions.clickEnrichPolicyAt(0);
-
-        expect(exists('policyDetailsFlyout')).toBe(true);
+        await screen.findByTestId('policyDetailsFlyout');
+        expect(screen.getByTestId('policyDetailsFlyout')).toBeInTheDocument();
       });
 
       it('contains all the necessary policy fields', async () => {
-        const { actions, find } = testBed;
+        // Navigate directly to the policy details URL
+        await renderHome(httpSetup, {
+          initialEntries: ['/enrich_policies?policy=policy-match'],
+        });
 
-        await actions.clickEnrichPolicyAt(0);
+        await screen.findByTestId('policyDetailsFlyout');
 
-        expect(find('policyTypeValue').text()).toBe(testPolicy.type);
-        expect(find('policyIndicesValue').text()).toBe(testPolicy.sourceIndices.join(', '));
-        expect(find('policyMatchFieldValue').text()).toBe(testPolicy.matchField);
-        expect(find('policyEnrichFieldsValue').text()).toBe(testPolicy.enrichFields.join(', '));
+        expect(screen.getByTestId('policyTypeValue')).toHaveTextContent(testPolicy.type);
+        expect(screen.getByTestId('policyIndicesValue')).toHaveTextContent(
+          testPolicy.sourceIndices.join(', ')
+        );
+        expect(screen.getByTestId('policyMatchFieldValue')).toHaveTextContent(
+          testPolicy.matchField
+        );
+        expect(screen.getByTestId('policyEnrichFieldsValue')).toHaveTextContent(
+          testPolicy.enrichFields.join(', ')
+        );
 
-        const codeEditorValue = find('queryEditor')
-          .at(0)
-          .getDOMNode()
-          .getAttribute('data-currentvalue');
+        const codeEditorValue = screen.getByTestId('queryEditor').getAttribute('data-currentvalue');
         expect(JSON.parse(codeEditorValue || '')).toEqual(testPolicy.query);
       });
     });
@@ -152,23 +152,16 @@ describe('Enrich policies tab', () => {
         httpRequestsMockHelpers.setLoadEnrichPoliciesResponse([
           createTestEnrichPolicy('policy-match', 'match'),
         ]);
-
-        testBed = await setup(httpSetup, {
-          services: {
-            notificationService,
-          },
-        });
-
-        await act(async () => {
-          testBed.actions.goToEnrichPoliciesTab();
-        });
-
-        testBed.component.update();
       });
 
       describe('deletion', () => {
         it('can delete a policy', async () => {
-          const { actions, exists } = testBed;
+          await renderHome(httpSetup, {
+            initialEntries: ['/enrich_policies'],
+          });
+
+          await screen.findByTestId('enrichPoliciesTable');
+          const actions = createEnrichPoliciesActions();
 
           httpRequestsMockHelpers.setDeleteEnrichPolicyResponse('policy-match', {
             acknowledged: true,
@@ -176,20 +169,27 @@ describe('Enrich policies tab', () => {
 
           await actions.clickDeletePolicyAt(0);
 
-          expect(exists('deletePolicyModal')).toBe(true);
+          expect(screen.getByTestId('deletePolicyModal')).toBeInTheDocument();
 
           await actions.clickConfirmDeletePolicyButton();
 
-          expect(notificationsServiceMock.toasts.add).toHaveBeenLastCalledWith(
-            expect.objectContaining({
-              title: 'Deleted policy-match',
-            })
-          );
+          await waitFor(() => {
+            expect(notificationsServiceMock.toasts.add).toHaveBeenLastCalledWith(
+              expect.objectContaining({
+                title: 'Deleted policy-match',
+              })
+            );
+          });
           expect(httpSetup.delete.mock.calls.length).toBe(1);
         });
 
         test('displays an error toast if it fails', async () => {
-          const { actions, exists } = testBed;
+          await renderHome(httpSetup, {
+            initialEntries: ['/enrich_policies'],
+          });
+
+          await screen.findByTestId('enrichPoliciesTable');
+          const actions = createEnrichPoliciesActions();
 
           const error = {
             statusCode: 400,
@@ -201,21 +201,28 @@ describe('Enrich policies tab', () => {
 
           await actions.clickDeletePolicyAt(0);
 
-          expect(exists('deletePolicyModal')).toBe(true);
+          expect(screen.getByTestId('deletePolicyModal')).toBeInTheDocument();
 
           await actions.clickConfirmDeletePolicyButton();
 
-          expect(notificationsServiceMock.toasts.add).toHaveBeenLastCalledWith(
-            expect.objectContaining({
-              title: `Error deleting enrich policy: 'something went wrong...'`,
-            })
-          );
+          await waitFor(() => {
+            expect(notificationsServiceMock.toasts.add).toHaveBeenLastCalledWith(
+              expect.objectContaining({
+                title: `Error deleting enrich policy: 'something went wrong...'`,
+              })
+            );
+          });
         });
       });
 
       describe('execution', () => {
         it('can execute a policy', async () => {
-          const { actions, exists } = testBed;
+          await renderHome(httpSetup, {
+            initialEntries: ['/enrich_policies'],
+          });
+
+          await screen.findByTestId('enrichPoliciesTable');
+          const actions = createEnrichPoliciesActions();
 
           httpRequestsMockHelpers.setExecuteEnrichPolicyResponse('policy-match', {
             acknowledged: true,
@@ -223,20 +230,27 @@ describe('Enrich policies tab', () => {
 
           await actions.clickExecutePolicyAt(0);
 
-          expect(exists('executePolicyModal')).toBe(true);
+          expect(screen.getByTestId('executePolicyModal')).toBeInTheDocument();
 
           await actions.clickConfirmExecutePolicyButton();
 
-          expect(notificationsServiceMock.toasts.add).toHaveBeenLastCalledWith(
-            expect.objectContaining({
-              title: 'Executed policy-match',
-            })
-          );
+          await waitFor(() => {
+            expect(notificationsServiceMock.toasts.add).toHaveBeenLastCalledWith(
+              expect.objectContaining({
+                title: 'Executed policy-match',
+              })
+            );
+          });
           expect(httpSetup.put.mock.calls.length).toBe(1);
         });
 
         test('displays an error toast if it fails', async () => {
-          const { actions, exists } = testBed;
+          await renderHome(httpSetup, {
+            initialEntries: ['/enrich_policies'],
+          });
+
+          await screen.findByTestId('enrichPoliciesTable');
+          const actions = createEnrichPoliciesActions();
 
           const error = {
             statusCode: 400,
@@ -248,15 +262,17 @@ describe('Enrich policies tab', () => {
 
           await actions.clickExecutePolicyAt(0);
 
-          expect(exists('executePolicyModal')).toBe(true);
+          expect(screen.getByTestId('executePolicyModal')).toBeInTheDocument();
 
           await actions.clickConfirmExecutePolicyButton();
 
-          expect(notificationsServiceMock.toasts.add).toHaveBeenLastCalledWith(
-            expect.objectContaining({
-              title: `Error executing enrich policy: 'something went wrong...'`,
-            })
-          );
+          await waitFor(() => {
+            expect(notificationsServiceMock.toasts.add).toHaveBeenLastCalledWith(
+              expect.objectContaining({
+                title: `Error executing enrich policy: 'something went wrong...'`,
+              })
+            );
+          });
         });
       });
     });

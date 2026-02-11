@@ -19,7 +19,6 @@ import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../../../hooks/use_apm_router';
 import type { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
-import { ColdStartBadge } from './badge/cold_start_badge';
 import { SyncBadge } from './badge/sync_badge';
 import { FailureBadge } from './failure_badge';
 import { OrphanItemTooltipIcon } from './orphan_item_tooltip_icon';
@@ -29,6 +28,7 @@ import type {
   IWaterfallSpanOrTransaction,
 } from './waterfall_helpers/waterfall_helpers';
 import { SpanLinksBadge } from '../../../../../shared/trace_waterfall/badges/span_links_badge';
+import { ColdStartBadge } from '../../../../../shared/trace_waterfall/badges/cold_start_badge';
 
 type ItemType = 'transaction' | 'span' | 'error';
 

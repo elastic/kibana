@@ -10,7 +10,7 @@
 import { BinaryExpressionGroup } from '../ast/grouping';
 import { binaryExpressionGroup, unaryExpressionGroup } from '../ast/grouping';
 import { isBinaryExpression, isIdentifier, isParamLiteral } from '../ast/is';
-import type { ESQLAstBaseItem, ESQLAstQueryExpression } from '../types';
+import type { ESQLAstBaseItem, ESQLAstQueryExpression, ESQLMap } from '../types';
 import type {
   CommandOptionVisitorContext,
   ExpressionVisitorContext,
@@ -126,7 +126,8 @@ export class WrappingPrettyPrinter {
     return printer.print(query);
   };
 
-  protected readonly opts: Required<WrappingPrettyPrinterOptions>;
+  protected readonly opts: Omit<Required<WrappingPrettyPrinterOptions>, 'mapRepresentation'> &
+    Pick<WrappingPrettyPrinterOptions, 'mapRepresentation'>;
 
   constructor(opts: WrappingPrettyPrinterOptions = {}) {
     this.opts = {
@@ -142,6 +143,7 @@ export class WrappingPrettyPrinter {
       lowercaseOptions: opts.lowercaseOptions ?? opts.lowercase ?? false,
       lowercaseFunctions: opts.lowercaseFunctions ?? opts.lowercase ?? false,
       lowercaseKeywords: opts.lowercaseKeywords ?? opts.lowercase ?? false,
+      mapRepresentation: opts.mapRepresentation,
     };
   }
 
@@ -296,7 +298,8 @@ export class WrappingPrettyPrinter {
       | FunctionCallExpressionVisitorContext
       | ListLiteralExpressionVisitorContext
       | MapExpressionVisitorContext,
-    inp: Input
+    inp: Input,
+    doNotUseCommaAsSeparator: boolean = false
   ) {
     let txt = '';
     let lines = 1;
@@ -318,16 +321,23 @@ export class WrappingPrettyPrinter {
       }
     }
 
-    const commaBetweenArgs = !commandsWithNoCommaArgSeparator.has(ctx.node.name);
+    let commaBetweenArgs = !commandsWithNoCommaArgSeparator.has(ctx.node.name);
+
+    if (doNotUseCommaAsSeparator) commaBetweenArgs = false;
 
     if (!oneArgumentPerLine) {
       let argIndex = 0;
+      const opts: BasicPrettyPrinterOptions = {
+        ...this.opts,
+        mapRepresentation: ctx.node.type === 'map' ? ctx.node.representation : undefined,
+      };
+
       ARGS: for (const arg of singleItems(ctx.arguments())) {
         if (arg.type === 'option') {
           continue;
         }
 
-        const formattedArg = BasicPrettyPrinter.expression(arg, this.opts);
+        const formattedArg = BasicPrettyPrinter.expression(arg, opts);
         const formattedArgLength = formattedArg.length;
         const needsWrap = remainingCurrentLine < formattedArgLength;
         if (formattedArgLength > largestArg) {
@@ -373,6 +383,12 @@ export class WrappingPrettyPrinter {
       }
     }
 
+    const isAssignmentMap = ctx.node.type === 'map' && ctx.node.representation === 'assignment';
+
+    if (isAssignmentMap && lines > 1) {
+      oneArgumentPerLine = true;
+    }
+
     let indent = inp.indent + this.opts.tab;
 
     if (ctx instanceof CommandVisitorContext) {
@@ -385,7 +401,7 @@ export class WrappingPrettyPrinter {
 
     if (oneArgumentPerLine) {
       lines = 1;
-      txt = ctx instanceof CommandVisitorContext ? '' : '\n';
+      txt = ctx instanceof CommandVisitorContext || isAssignmentMap ? '' : '\n';
       const args = [...ctx.arguments()].filter((arg) => {
         if (!arg) return false;
         if (arg.type === 'option') return arg.name === 'as';
@@ -406,7 +422,19 @@ export class WrappingPrettyPrinter {
         const indentation = arg.indented ? '' : indent;
         const formattedArg = arg.txt;
         const separator = isFirstArg ? '' : '\n';
-        txt += separator + indentation + formattedArg;
+
+        // Remove extra indentation for PROMQL command first map argument
+        let adjustedIndentation = indentation;
+        if (
+          i === 0 &&
+          ctx instanceof CommandVisitorContext &&
+          ctx.name() === 'PROMQL' &&
+          [...children(ctx.node)][0].type === 'map'
+        ) {
+          adjustedIndentation = adjustedIndentation.slice(0, -2);
+        }
+
+        txt += separator + adjustedIndentation + formattedArg;
         lines++;
       }
     }
@@ -651,8 +679,15 @@ export class WrappingPrettyPrinter {
     })
 
     .on('visitMapEntryExpression', (ctx, inp: Input) => {
-      const operator = this.keyword(':');
-      const expression = this.printBinaryOperatorExpression(ctx, operator, inp, '');
+      const representation = (ctx.parent?.node as ESQLMap).representation ?? 'map';
+      const operator = representation === 'map' ? ':' : representation === 'assignment' ? '=' : '';
+      const operatorLeadingWhitespace = representation === 'assignment' ? ' ' : '';
+      const expression = this.printBinaryOperatorExpression(
+        ctx,
+        operator,
+        inp,
+        operatorLeadingWhitespace
+      );
 
       return this.decorateWithComments(
         { ...inp, suffix: '' },
@@ -663,14 +698,22 @@ export class WrappingPrettyPrinter {
     })
 
     .on('visitMapExpression', (ctx, inp: Input) => {
-      const { txt, oneArgumentPerLine } = this.printChildrenList(ctx, inp);
+      const representation = ctx.node.representation ?? 'map';
+      const doNotUseCommaAsSeparator = representation !== 'map';
+      const { txt, oneArgumentPerLine } = this.printChildrenList(
+        ctx,
+        inp,
+        doNotUseCommaAsSeparator
+      );
 
       let formatted = txt;
 
-      if (oneArgumentPerLine) {
-        formatted = '{' + txt + '\n' + inp.indent + '}';
-      } else {
-        formatted = '{' + txt + '}';
+      if (representation === 'map') {
+        if (oneArgumentPerLine) {
+          formatted = '{' + txt + '\n' + inp.indent + '}';
+        } else {
+          formatted = '{' + txt + '}';
+        }
       }
 
       return this.decorateWithComments(inp, ctx.node, formatted);

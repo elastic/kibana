@@ -117,6 +117,13 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       return await testSubjects.getVisibleText('detailsPanelTitle');
     },
 
+    async waitForDetailsFlyoutTitle(expectedTitle: string) {
+      await retry.waitFor(`details flyout title to be "${expectedTitle}"`, async () => {
+        const title = await testSubjects.getVisibleText('detailsPanelTitle');
+        return title === expectedTitle;
+      });
+    },
+
     async pipelineTreeExists() {
       return await testSubjects.exists('pipelineTreePanel');
     },

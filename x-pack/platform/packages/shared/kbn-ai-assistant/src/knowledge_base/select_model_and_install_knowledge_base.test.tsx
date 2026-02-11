@@ -26,10 +26,31 @@ jest.mock('../utils/get_model_options_for_inference_endpoints', () => ({
     })),
 }));
 
+const mockSetEisKnowledgeBaseCalloutDismissed = jest.fn();
+
+jest.mock('@kbn/observability-ai-assistant-plugin/public', () => ({
+  EIS_PRECONFIGURED_INFERENCE_IDS: ['id1'],
+  EisKnowledgeBaseCallout: ({
+    children,
+    isOpen,
+  }: {
+    children: React.ReactNode;
+    isOpen: boolean;
+  }) => (
+    <div data-test-subj="eisKnowledgeBaseCallout" data-is-open={isOpen}>
+      {children}
+    </div>
+  ),
+  useEisKnowledgeBaseCalloutDismissed: () => [false, mockSetEisKnowledgeBaseCalloutDismissed],
+  useAIAgentTourDismissed: () => [true],
+}));
+
 const onInstall = jest.fn();
 
-function renderComponent() {
-  return render(<SelectModelAndInstallKnowledgeBase onInstall={onInstall} isInstalling={false} />);
+function renderComponent(props = {}) {
+  return render(
+    <SelectModelAndInstallKnowledgeBase onInstall={onInstall} isInstalling={false} {...props} />
+  );
 }
 
 describe('SelectModelAndInstallKnowledgeBase', () => {
@@ -66,5 +87,23 @@ describe('SelectModelAndInstallKnowledgeBase', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Install Knowledge Base/i }));
     expect(onInstall).toHaveBeenCalledWith('id2');
+  });
+
+  it('renders the EIS callout when selected model is from EIS', () => {
+    const callout = screen.getByTestId('eisKnowledgeBaseCallout');
+    expect(callout).toBeInTheDocument();
+    expect(callout).toHaveAttribute('data-is-open', 'true');
+  });
+
+  it('does not show the EIS callout when selected model is not from EIS', async () => {
+    const defaultSelection = screen.getByText('Label1');
+    fireEvent.click(defaultSelection);
+
+    const nextSelection = screen.getByText('Label2');
+    await waitFor(() => nextSelection);
+    fireEvent.click(nextSelection);
+
+    const callout = screen.getByTestId('eisKnowledgeBaseCallout');
+    expect(callout).toHaveAttribute('data-is-open', 'false');
   });
 });

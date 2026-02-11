@@ -105,6 +105,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await refreshAlertsList();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
+      await testSubjects.click(`clearSearchButton`);
       await testSubjects.click(`checkboxSelectRow-${rule1.id}`);
       await testSubjects.click(`checkboxSelectRow-${rule2.id}`);
       await testSubjects.click('showBulkActionButton');
@@ -142,6 +143,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await refreshAlertsList();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
+      await testSubjects.click(`clearSearchButton`);
       await testSubjects.click(`checkboxSelectRow-${rule1.id}`);
       await testSubjects.click(`checkboxSelectRow-${rule2.id}`);
       await testSubjects.click('showBulkActionButton');
@@ -187,6 +189,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await refreshAlertsList();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
+      await testSubjects.click(`clearSearchButton`);
       await testSubjects.click(`checkboxSelectRow-${rule1.id}`);
       await testSubjects.click(`checkboxSelectRow-${rule2.id}`);
       await testSubjects.click('showBulkActionButton');
@@ -222,6 +225,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await refreshAlertsList();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
+      await testSubjects.click(`clearSearchButton`);
       await testSubjects.click(`checkboxSelectRow-${rule1.id}`);
       await testSubjects.click('selectAllRulesButton');
       await testSubjects.click(`checkboxSelectRow-${rule2.id}`);

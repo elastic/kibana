@@ -201,7 +201,7 @@ describe('SharedLists', () => {
     });
   });
 
-  it('disables the "endpoint_list" overflow card button when user is restricted to only READ Endpoint Exceptions', async () => {
+  it('renders the "endpoint_list" overflow card button as enabled when user is restricted to only READ Endpoint Exceptions', async () => {
     (useEndpointExceptionsCapability as jest.Mock).mockReturnValue(false);
 
     const wrapper = render(
@@ -210,7 +210,7 @@ describe('SharedLists', () => {
       </TestProviders>
     );
     const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
-    expect(allMenuActions[0]).toBeDisabled();
+    expect(allMenuActions[0]).toBeEnabled();
   });
 
   it('renders delete option as disabled if list is "endpoint_list"', async () => {
@@ -228,7 +228,7 @@ describe('SharedLists', () => {
     });
   });
 
-  it('renders overflow card button as disabled if user is read only', async () => {
+  it('renders overflow card button as enabled if user is read only', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
       rulesPrivileges: { read: true, edit: false },
@@ -240,6 +240,26 @@ describe('SharedLists', () => {
       </TestProviders>
     );
     const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
-    expect(allMenuActions[1]).toBeDisabled();
+    expect(allMenuActions[1]).toBeEnabled();
+  });
+
+  it('renders export option as enabled when user is restricted to only READ rules', async () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: { read: true, edit: false },
+    });
+
+    const wrapper = render(
+      <TestProviders>
+        <SharedLists />
+      </TestProviders>
+    );
+    const allMenuActions = wrapper.getAllByTestId('sharedListOverflowCardButtonIcon');
+    fireEvent.click(allMenuActions[0]);
+
+    await waitFor(() => {
+      const allDeleteActions = wrapper.getAllByTestId('sharedListOverflowCardActionItemExport');
+      expect(allDeleteActions[0]).toBeEnabled();
+    });
   });
 });

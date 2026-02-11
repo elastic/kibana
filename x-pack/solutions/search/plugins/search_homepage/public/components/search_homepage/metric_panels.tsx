@@ -40,6 +40,7 @@ export interface ComplexMetricPanel {
   metricDescription: string;
   metricTitle: string;
   type: MetricPanelType;
+  dataTestSubj: string;
   onPanelClick?: ({
     share,
     application,
@@ -49,7 +50,7 @@ export interface ComplexMetricPanel {
   }) => void;
 }
 
-const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
+export const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
   {
     getImageUrl: (assetBasePath: string) => `${assetBasePath}/search_lake.svg`,
     metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.discover.desc', {
@@ -64,6 +65,7 @@ const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
     onPanelClick: ({ application }) => {
       application.navigateToApp('discover');
     },
+    dataTestSubj: 'searchHomepageNavLinks-discover',
   },
   {
     getImageUrl: (assetBasePath: string) => `${assetBasePath}/search_data_vis.svg`,
@@ -79,6 +81,7 @@ const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
     onPanelClick: ({ application }) => {
       application.navigateToApp('dashboards');
     },
+    dataTestSubj: 'searchHomepageNavLinks-dashboards',
   },
   {
     getImageUrl: (assetBasePath: string) => `${assetBasePath}/search_agents.svg`,
@@ -94,6 +97,7 @@ const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
     onPanelClick: ({ application }) => {
       application.navigateToApp('agent_builder');
     },
+    dataTestSubj: 'searchHomepageNavLinks-agentBuilder',
   },
 
   {
@@ -109,6 +113,7 @@ const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
     onPanelClick: ({ application }) => {
       application.navigateToApp('workflows');
     },
+    dataTestSubj: 'searchHomepageNavLinks-workflows',
   },
   {
     type: 'machineLearning',
@@ -125,8 +130,11 @@ const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
       defaultMessage: 'Machine Learning',
     }),
     onPanelClick: ({ application }) => {
-      application.navigateToApp('ml');
+      application.navigateToApp('ml', {
+        path: 'overview',
+      });
     },
+    dataTestSubj: 'searchHomepageNavLinks-machineLearning',
   },
   {
     type: 'dataManagement',
@@ -147,6 +155,7 @@ const METRIC_PANEL_ITEMS: Array<ComplexMetricPanel> = [
         path: 'data/index_management',
       });
     },
+    dataTestSubj: 'searchHomepageNavLinks-dataManagement',
   },
 ];
 
@@ -161,11 +170,12 @@ const MetricPanelEmpty = ({ panel }: MetricPanelEmptyProps) => {
   const assetBasePath = useAssetBasePath();
   const { euiTheme } = useEuiTheme();
 
-  const { getImageUrl, metricTitle, metricDescription, onPanelClick } = panel;
+  const { getImageUrl, metricTitle, metricDescription, onPanelClick, dataTestSubj } = panel;
   return (
     <EuiSplitPanel.Outer
       hasBorder
       onClick={() => onPanelClick && onPanelClick({ share, application })}
+      data-test-subj={dataTestSubj}
     >
       <EuiSplitPanel.Inner
         grow
@@ -223,7 +233,7 @@ export const MetricPanels = () => {
     : METRIC_PANEL_ITEMS.filter((p) => p.type !== 'workflows');
 
   return (
-    <EuiFlexGrid gutterSize="l" columns={3}>
+    <EuiFlexGrid gutterSize="l" columns={3} data-test-subj="searchHomepageNavLinksTabGrid">
       {panels.map((panel, index) => (
         <EuiFlexItem key={panel.type + '-' + index}>
           <MetricPanelEmpty panel={panel} />

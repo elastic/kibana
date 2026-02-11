@@ -21,6 +21,7 @@ const items = Array.from({ length: 5 }).map((_, i) => ({
 const recentlyClosedItems = Array.from({ length: 3 }).map((_, i) => ({
   id: `closed-tab-${i}`,
   label: `Closed Tab ${i}`,
+  closedAt: 0,
 }));
 
 const tabContentId = 'test-content-id';

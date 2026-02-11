@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import {
   MAX_FILE_SIZE_BYTES,
   MAX_TIKA_FILE_SIZE_BYTES,
@@ -29,6 +29,14 @@ import type { StartDeps } from './types';
 import { checkFileUploadPrivileges } from './check_privileges';
 import { previewIndexTimeRange } from './preview_index_time_range';
 import { previewTikaContents } from './preview_tika_contents';
+
+function getRequestAbortedSignal(request: KibanaRequest): AbortSignal {
+  const controller = new AbortController();
+  request.events.aborted$.subscribe(() => {
+    controller.abort();
+  });
+  return controller.signal;
+}
 
 /**
  * Routes for the file upload.
@@ -126,7 +134,8 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
             logger,
             request.body,
             omit(request.query, 'includePreview'),
-            includePreview === true
+            includePreview === true,
+            getRequestAbortedSignal(request)
           );
           return response.ok({ body: result });
         } catch (e) {
@@ -282,7 +291,12 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
             return response.ok({ body });
           }
 
-          const result = await importData(index, ingestPipeline?.id ?? '', data);
+          const result = await importData(
+            index,
+            ingestPipeline?.id ?? '',
+            data,
+            getRequestAbortedSignal(request)
+          );
 
           return response.ok({ body: result });
         } catch (e) {
@@ -312,7 +326,12 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           const esClient = (await context.core).elasticsearch.client;
 
           const { importData } = importDataProvider(esClient);
-          const result = await importData(index, ingestPipelineId, data);
+          const result = await importData(
+            index,
+            ingestPipelineId,
+            data,
+            getRequestAbortedSignal(request)
+          );
 
           return response.ok({ body: result });
         } catch (e) {

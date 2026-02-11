@@ -39,6 +39,8 @@
           "> | undefined; zoom?: number | undefined; } : never"
         ],
         "path": "x-pack/platform/plugins/shared/screenshotting/common/layout.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -71,6 +73,8 @@
           "CaptureOptions"
         ],
         "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -87,6 +91,8 @@
               "\"pdf\""
             ],
             "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -103,6 +109,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -119,6 +127,8 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -145,6 +155,8 @@
               "> | undefined; zoom?: number | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -161,6 +173,8 @@
           "\nFinal, formatted PDF result"
         ],
         "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -177,6 +191,8 @@
               "{ cpu?: number | undefined; cpuInPercentage?: number | undefined; memory?: number | undefined; memoryInMegabytes?: number | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -193,6 +209,8 @@
               "Buffer"
             ],
             "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -209,6 +227,8 @@
               "Error[]"
             ],
             "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -225,6 +245,8 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/pdf/index.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -252,6 +274,8 @@
           "CaptureOptions"
         ],
         "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/png.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -270,6 +294,8 @@
               "\"png\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/png.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -286,6 +312,8 @@
               "> | undefined; zoom?: number | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/png.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -308,6 +336,8 @@
           "CaptureResult"
         ],
         "path": "x-pack/platform/plugins/shared/screenshotting/server/formats/png.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -337,6 +367,8 @@
           }
         ],
         "path": "x-pack/platform/plugins/shared/screenshotting/server/screenshots/index.ts",
+        "lineNumber": 64,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -360,6 +392,8 @@
           "CaptureResult"
         ],
         "path": "x-pack/platform/plugins/shared/screenshotting/server/screenshots/index.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -376,6 +410,8 @@
         "\nStart public contract."
       ],
       "path": "x-pack/platform/plugins/shared/screenshotting/server/plugin.ts",
+      "lineNumber": 29,
+      "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -394,6 +430,8 @@
             "<string>"
           ],
           "path": "x-pack/platform/plugins/shared/screenshotting/server/plugin.ts",
+          "lineNumber": 33,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "returnComment": [
@@ -411,6 +449,8 @@
                 "string[]"
               ],
               "path": "x-pack/platform/plugins/shared/screenshotting/server/browsers/chromium/driver_factory/index.ts",
+              "lineNumber": 395,
+              "columnNumber": 12,
               "deprecated": false,
               "trackAdoption": false
             }
@@ -477,6 +517,8 @@
             ">; }"
           ],
           "path": "x-pack/platform/plugins/shared/screenshotting/server/plugin.ts",
+          "lineNumber": 39,
+          "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
         }
@@ -499,6 +541,8 @@
           "\nCollected performance metrics during a screenshotting session."
         ],
         "path": "x-pack/platform/plugins/shared/screenshotting/common/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -515,6 +559,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/screenshotting/common/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -531,6 +577,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/screenshotting/common/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -547,6 +595,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/screenshotting/common/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -563,6 +613,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/screenshotting/common/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -605,6 +657,8 @@
           "> | undefined; zoom?: number | undefined; } : never"
         ],
         "path": "x-pack/platform/plugins/shared/screenshotting/common/layout.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -622,6 +676,8 @@
           "\"canvas\" | \"print\" | \"preserve_layout\""
         ],
         "path": "x-pack/platform/plugins/shared/screenshotting/common/layout.ts",
+        "lineNumber": 68,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -637,6 +693,8 @@
           "\"screenshotting\""
         ],
         "path": "x-pack/platform/plugins/shared/screenshotting/common/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -652,6 +710,8 @@
           "\"screenshotting\""
         ],
         "path": "x-pack/platform/plugins/shared/screenshotting/common/expression.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -667,6 +727,8 @@
           "\"expression\""
         ],
         "path": "x-pack/platform/plugins/shared/screenshotting/common/expression.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -682,6 +744,8 @@
           "\"input\""
         ],
         "path": "x-pack/platform/plugins/shared/screenshotting/common/expression.ts",
+        "lineNumber": 10,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

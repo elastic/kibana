@@ -261,21 +261,37 @@ describe('Discover flyout', function () {
     });
     const singleDocumentView = findTestSubject(component, 'docTableRowAction');
     expect(singleDocumentView.length).toBeFalsy();
-    const flyoutTitle = findTestSubject(component, 'docViewerRowDetailsTitle');
-    expect(flyoutTitle.text()).toBe('Result');
+
+    // After opting in to flyout session management we render title via flyoutMenuProps prop, not as an explicit element anymore
+    // Enzyme has limitations with reading the header, so we check the prop directly
+    // TODO: check title text content directly after migrating the test to RTL https://github.com/elastic/kibana/issues/222939
+    const flyout = component.find('EuiFlyout');
+    const flyoutMenuProps = flyout.prop('flyoutMenuProps');
+    expect(flyoutMenuProps).toEqual(
+      expect.objectContaining({
+        title: 'Result',
+        hideTitle: false,
+      })
+    );
   });
 
   describe('with applied customizations', () => {
     describe('when title is customized', () => {
-      it('should display the passed string as title', async () => {
+      it('should pass the custom title to EuiFlyout flyoutMenuProps', async () => {
         const customTitle = 'Custom flyout title';
         mockFlyoutCustomization.title = customTitle;
 
         const { component } = await mountComponent({});
 
-        const titleNode = findTestSubject(component, 'docViewerRowDetailsTitle');
-
-        expect(titleNode.text()).toBe(customTitle);
+        // TODO: check title text content directly after migrating the test to RTL https://github.com/elastic/kibana/issues/222939
+        const flyout = component.find('EuiFlyout');
+        const flyoutMenuProps = flyout.prop('flyoutMenuProps');
+        expect(flyoutMenuProps).toEqual(
+          expect.objectContaining({
+            title: customTitle,
+            hideTitle: false,
+          })
+        );
       });
     });
 
@@ -500,10 +516,19 @@ describe('Discover flyout', function () {
           processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
         });
         const { component } = await mountComponent({ records, services });
-        const title = findTestSubject(component, 'docViewerRowDetailsTitle');
-        expect(title.text()).toBe('Document #new::1::');
+
         const content = findTestSubject(component, 'kbnDocViewer');
         expect(content.text()).toBe('Mock tab');
+
+        // TODO: check title text content directly after migrating the test to RTL https://github.com/elastic/kibana/issues/222939
+        const flyout = component.find('EuiFlyout');
+        const flyoutMenuProps = flyout.prop('flyoutMenuProps');
+        expect(flyoutMenuProps).toEqual(
+          expect.objectContaining({
+            title: 'Document #new::1::',
+            hideTitle: false,
+          })
+        );
       });
     });
   });

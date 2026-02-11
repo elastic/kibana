@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttachmentServiceStartContract } from '@kbn/onechat-browser';
+import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { registerAttachmentUiDefinitions } from '.';
 

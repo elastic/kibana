@@ -5,42 +5,70 @@
  * 2.0.
  */
 import { expect } from '@kbn/scout-oblt';
-import { test, testData } from '../../fixtures';
+import { test } from '../../fixtures';
 
-const EXPECTED_CONTROLS = ['Statusactive 1', 'Rule', 'Group', 'Tags'];
+const EXPECTED_CONTROLS = ['Status', 'Rule', 'Group', 'Tags'];
 
 test.describe('Service overview alerts tab', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsViewer();
   });
 
-  test('shows alerts search bar, table, query bar and filter controls', async ({
+  test('Is accessible from the default tab', async ({
     page,
-    pageObjects: { alertsTab },
+    pageObjects: { serviceDetailsPage },
   }) => {
-    await alertsTab.gotoServiceAlertsPage(
-      'opbeans-java',
-      testData.OPBEANS_START_DATE,
-      testData.OPBEANS_END_DATE
-    );
+    await test.step('navigate to service details and show alerts tab', async () => {
+      await serviceDetailsPage.goToPage();
+      await expect(serviceDetailsPage.alertsTab.getTab()).toBeVisible();
+    });
 
-    await alertsTab.waitForControlsToLoad();
+    await test.step('navigate to alerts tab', async () => {
+      await serviceDetailsPage.alertsTab.clickTab();
+      const url = new URL(page.url());
+      expect(url.pathname).toContain(`/alerts`);
+      await expect(serviceDetailsPage.alertsTab.tab).toHaveAttribute('aria-selected', 'true');
+    });
+  });
+
+  test('Shows alerts search bar, table, query bar and filter controls', async ({
+    page,
+    pageObjects: { serviceDetailsPage },
+  }) => {
+    await serviceDetailsPage.alertsTab.goToTab();
 
     await test.step('core alerts UI is visible', async () => {
-      await expect(alertsTab.globalQueryBar).toBeVisible();
-      await expect(alertsTab.alertsTableEmptyState).toBeVisible();
+      await expect(serviceDetailsPage.alertsTab.globalQueryBar).toBeVisible();
+      await expect(serviceDetailsPage.alertsTab.alertsTableEmptyState).toBeVisible();
       await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText('opbeans-java');
     });
 
     await test.step('renders the expected filter controls', async () => {
-      const controlTitles = await alertsTab.getControlFrameTitles();
+      const controlTitles = serviceDetailsPage.alertsTab.controlTitles;
       await expect(controlTitles).toHaveCount(4);
 
-      const titles = (await controlTitles.allTextContents()).map((title: string) => title.trim());
-
       for (const expectedControl of EXPECTED_CONTROLS) {
-        expect(titles).toContain(expectedControl);
+        await expect(controlTitles.getByText(expectedControl)).toBeVisible();
       }
     });
+
+    await test.step("status control has 'active' selected by default", async () => {
+      const statusControl = serviceDetailsPage.alertsTab.controlTitles.filter({
+        hasText: 'Status',
+      });
+
+      await expect(statusControl.getByText('active')).toBeVisible();
+      await expect(statusControl.getByText('1')).toBeVisible();
+    });
+  });
+
+  test('Has no detectable a11y violations on load', async ({
+    page,
+    pageObjects: { serviceDetailsPage },
+  }) => {
+    await serviceDetailsPage.alertsTab.goToTab();
+    await serviceDetailsPage.alertsTab.alertsTableEmptyState.waitFor();
+    const { violations } = await page.checkA11y({ include: ['main'] });
+    expect(violations).toHaveLength(0);
   });
 });

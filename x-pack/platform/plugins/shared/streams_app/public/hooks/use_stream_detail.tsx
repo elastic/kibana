@@ -74,11 +74,7 @@ export function StreamDetailContextProvider({
             };
           }
 
-          if (Streams.GroupStream.GetResponse.is(response)) {
-            return response;
-          }
-
-          throw new Error('Stream detail only supports Ingest streams and Group streams.');
+          throw new Error('Stream detail only supports Ingest streams.');
         });
     },
     [streamsRepositoryClient, name, canManage]

@@ -19,7 +19,7 @@ export * from './transform_manager';
 export * from './summay_transform_manager';
 export * from './update_slo';
 export * from './summary_client';
-export * from './get_slo_groupings';
+export * from './find_slo_instances';
 export * from './find_slo_groups';
 export * from './get_slo_health';
 export * from './summary_search_client/summary_search_client';

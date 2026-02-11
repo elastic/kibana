@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  createRepositoryClient,
-  type DefaultClientOptions,
-} from '@kbn/server-route-repository-client';
-import type { ObservabilityAgentBuilderServerRouteRepository } from '../../../server';
 import { AiInsight, type AiInsightAttachment } from '../ai_insight';
 import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
 } from '../../../common';
-import { useKibana } from '../../hooks/use_kibana';
+import { useApiClient } from '../../hooks/use_api_client';
 
 export interface ErrorSampleAiInsightProps {
   errorId: string;
@@ -34,20 +29,12 @@ export function ErrorSampleAiInsight({
   end,
   environment,
 }: ErrorSampleAiInsightProps) {
-  const {
-    services: { http },
-  } = useKibana();
+  const apiClient = useApiClient();
 
-  const apiClient = createRepositoryClient<
-    ObservabilityAgentBuilderServerRouteRepository,
-    DefaultClientOptions
-  >({ http });
-
-  const fetchInsight = async () => {
-    const response = await apiClient.fetch(
-      'POST /internal/observability_agent_builder/ai_insights/error',
-      {
-        signal: null,
+  const createStream = useCallback(
+    (signal: AbortSignal) =>
+      apiClient.stream('POST /internal/observability_agent_builder/ai_insights/error', {
+        signal,
         params: {
           body: {
             errorId,
@@ -57,13 +44,9 @@ export function ErrorSampleAiInsight({
             environment,
           },
         },
-      }
-    );
-    return {
-      summary: response.summary ?? '',
-      context: response.context ?? '',
-    };
-  };
+      }),
+    [apiClient, errorId, serviceName, start, end, environment]
+  );
 
   const buildAttachments = (summary: string, context: string): AiInsightAttachment[] => [
     {
@@ -103,7 +86,7 @@ export function ErrorSampleAiInsight({
       title={i18n.translate('xpack.observabilityAgentBuilder.errorAiInsight.titleLabel', {
         defaultMessage: "What's this error?",
       })}
-      fetchInsight={fetchInsight}
+      createStream={createStream}
       buildAttachments={buildAttachments}
     />
   );

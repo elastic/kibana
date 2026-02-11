@@ -13,7 +13,13 @@ const INTEGRATION_WEIGHTS = [
   { ids: ['endpoint'], weight: 1.5 }, // Elastic Defend should be boosted
 ];
 
-const EXCLUDED_INTEGRATIONS = ['splunk', 'elastic_security']; // exclude Splunk and Elastic Security integrations since they don't make sense
+/**
+ * excludes Splunk, QRadar and Elastic Security integrations since automatic migrations
+ * intends to work with customers actual data instead of data improted from vendors
+ * for which artifacts are being migrated
+ *
+ * */
+const EXCLUDED_INTEGRATIONS = ['splunk', 'elastic_security', 'ibm_qradar'];
 
 /* The minimum score required for a integration to be considered correct, might need to change this later */
 const MIN_SCORE = 7 as const;

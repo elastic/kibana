@@ -12,7 +12,11 @@ import type {
   SecurityParallelTestFixtures,
   SecurityParallelWorkerFixtures,
 } from './types';
-import { getDetectionRuleApiService, getEntityAnalyticsApiService } from './worker';
+import {
+  getDetectionRuleApiService,
+  getEntityAnalyticsApiService,
+  getCloudConnectorApiService,
+} from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
 const securityParallelFixtures = mergeTests(baseTest, securityBrowserAuthFixture);
@@ -61,6 +65,10 @@ export const spaceTest = securityParallelFixtures.extend<
       extendedApiServices.entityAnalytics = getEntityAnalyticsApiService({
         kbnClient,
         log,
+        scoutSpace,
+      });
+      extendedApiServices.cloudConnectorApi = getCloudConnectorApiService({
+        kbnClient,
         scoutSpace,
       });
 

@@ -1,0 +1,40 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        updateAttachmentContentExample:
+          description: "Example request for updating attachment content"
+          value:
+            data: "This is the updated content"
+        updateAttachmentWithDescriptionExample:
+          description: "Example request for updating both content and description"
+          value:
+            data: "New content version"
+            description: "Updated meeting notes - v2"
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          updateAttachmentResponseExample:
+            description: "Example response returning the updated attachment with new version"
+            value:
+              attachment:
+                id: att-abc123
+                type: text
+                current_version: 2
+                versions:
+                  - version: 1
+                    data: "Original content"
+                    created_at: "2025-01-06T10:00:00.000Z"
+                    content_hash: "sha256-abc"
+                    estimated_tokens: 10
+                  - version: 2
+                    data: "This is the updated content"
+                    created_at: "2025-01-06T11:00:00.000Z"
+                    content_hash: "sha256-def"
+                    estimated_tokens: 12
+                description: "Meeting notes"
+                active: true
+              new_version: 2

@@ -3,13 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "*.ts",
-    ".storybook/**/*.ts",
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-  ],
+  "include": ["*.ts", ".storybook/**/*.ts", "common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/inspector-plugin",
@@ -17,7 +11,6 @@
     "@kbn/data-views-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/share-plugin",
-    "@kbn/controls-plugin",
     "@kbn/presentation-util-plugin",
     "@kbn/url-forwarding-plugin",
     "@kbn/usage-collection-plugin",
@@ -94,6 +87,7 @@
     "@kbn/data-service-server",
     "@kbn/controls-schemas",
     "@kbn/controls-constants",
+    "@kbn/controls-renderer",
     "@kbn/presentation-util",
     "@kbn/security-plugin-types-server",
     "@kbn/core-saved-objects-common",
@@ -102,7 +96,10 @@
     "@kbn/react-query",
     "@kbn/core-http-server",
     "@kbn/core-chrome-layout-utils",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/core-chrome-app-menu-components",
+    "@kbn/core-chrome-app-menu",
+    "@kbn/test-jest-helpers"
   ],
   "exclude": ["target/**/*"]
 }

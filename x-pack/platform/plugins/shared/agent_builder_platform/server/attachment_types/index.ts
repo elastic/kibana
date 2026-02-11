@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import { createTextAttachmentType } from './text';
 import { createEsqlAttachmentType } from './esql';
@@ -23,7 +23,7 @@ export const registerAttachmentTypes = ({
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   setupDeps: PluginSetupDependencies;
 }) => {
-  const { onechat } = setupDeps;
+  const { agentBuilder } = setupDeps;
 
   const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
     createTextAttachmentType(),
@@ -32,6 +32,6 @@ export const registerAttachmentTypes = ({
   ];
 
   attachmentTypes.forEach((attachmentType) => {
-    onechat.attachments.registerType(attachmentType);
+    agentBuilder.attachments.registerType(attachmentType);
   });
 };

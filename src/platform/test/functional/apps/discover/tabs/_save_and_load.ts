@@ -204,8 +204,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.saveSearch(sessionName, undefined, { storeTimeRange: true });
         expect(await discover.getSavedSearchTitle()).to.be(sessionName);
 
-        // Confirm no unsaved changes badge after saving
-        await testSubjects.missingOrFail('unsavedChangesBadge');
+        // Confirm no unsaved changes indicator after saving
+        await discover.ensureNoUnsavedChangesIndicator();
 
         // Validate persisted tab
         expect(await discover.getHitCount()).to.be(persistedTabHitCount);
@@ -250,8 +250,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           esqlTabLabel,
         ]);
 
-        // Confirm no unsaved changes badge after loading
-        await testSubjects.missingOrFail('unsavedChangesBadge');
+        // Confirm no unsaved changes indicator after loading
+        await discover.ensureNoUnsavedChangesIndicator();
 
         // Validate persisted tab
         expect(await discover.getHitCount()).to.be(persistedTabHitCount);
@@ -333,8 +333,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.changeVisShape(esqlUnsaved.visShape);
         const esqlUnsavedCount = await discover.getHitCount();
 
-        // Unsaved changes badge should be visible after making changes
-        await testSubjects.existOrFail('unsavedChangesBadge');
+        // Unsaved changes indicator should be visible after making changes
+        await discover.ensureHasUnsavedChangesIndicator();
 
         // Refresh and ensure the unsaved changes are restored
         await browser.refresh();
@@ -368,8 +368,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await discover.getCurrentVisTitle()).to.be(esqlUnsaved.visShape);
         expect(await discover.getHitCount()).to.be(esqlUnsavedCount);
 
-        // Unsaved badge should still be visible after refresh
-        await testSubjects.existOrFail('unsavedChangesBadge');
+        // Unsaved indicator should still be visible after refresh
+        await discover.ensureHasUnsavedChangesIndicator();
       });
 
       it('should clear all tabs when starting a new session', async () => {

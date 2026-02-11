@@ -84,10 +84,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'max',
         field: 'bytes',
       });
-      await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      await dashboard.ensureMissingUnsavedChangesNotification();
       await testSubjects.click('applyFlyoutButton');
       // After apply the should detect the changes
-      await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
+      await dashboard.ensureHasUnsavedChangesNotification();
       await dashboard.waitForRenderComplete();
       const data = await lens.getMetricVisualizationData();
       const normalizedData = data.map((item) => ({

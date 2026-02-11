@@ -76,7 +76,7 @@ export const LimitCommand: React.FC = () => {
           position: 'relative',
         }}
       >
-        <EuiTitle size="xxs">
+        <EuiTitle size="xxs" css={{ color: focusedNode === limit ? 'rgb(7, 16, 31)' : 'inherit' }}>
           <h3>Limit</h3>
         </EuiTitle>
         <div

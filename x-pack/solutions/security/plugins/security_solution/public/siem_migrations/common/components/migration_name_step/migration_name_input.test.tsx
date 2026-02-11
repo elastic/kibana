@@ -56,6 +56,17 @@ describe('MigrationNameInput', () => {
     expect(mockSetMigrationName).toHaveBeenCalledWith('New Name');
   });
 
+  it('does not accept empty string as migration name', () => {
+    render(<MigrationNameInput {...defaultProps} />);
+    const input = screen.getByDisplayValue('Default Name');
+
+    fireEvent.change(input, { target: { value: '       ' } });
+    fireEvent.blur(input);
+
+    expect(mockSetMigrationName).toHaveBeenCalledWith('');
+    expect(screen.getByText(i18n.MIGRATION_NAME_INPUT_ERROR)).toBeInTheDocument();
+  });
+
   it('shows error when empty name is submitted', () => {
     render(<MigrationNameInput {...defaultProps} />);
     const input = screen.getByDisplayValue('Default Name');

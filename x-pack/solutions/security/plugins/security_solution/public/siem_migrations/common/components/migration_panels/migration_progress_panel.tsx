@@ -47,8 +47,8 @@ export const MigrationProgressPanel = React.memo(function MigrationProgressPanel
   const { mutate: stopMigration, isLoading: isStopping } = useStopSiemMigration(migrationType);
 
   const onStopMigration = useCallback(() => {
-    stopMigration({ migrationId: migrationStats.id });
-  }, [migrationStats.id, stopMigration]);
+    stopMigration({ migrationId: migrationStats.id, vendor: migrationStats.vendor });
+  }, [migrationStats, stopMigration]);
 
   const { items } = migrationStats;
   const finishedCount = items.completed + items.failed;

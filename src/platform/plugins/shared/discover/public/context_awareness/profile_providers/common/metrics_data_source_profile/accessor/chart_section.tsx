@@ -9,36 +9,18 @@
 
 import React from 'react';
 import { UnifiedMetricsExperienceGrid } from '@kbn/unified-metrics-grid';
-import type { MetricsExperienceClient } from '@kbn/metrics-experience-plugin/public';
-import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 
 export const createChartSection =
-  (
-    metricsExperienceClient?: MetricsExperienceClient
-  ): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
+  (): DataSourceProfileProvider['profile']['getChartSectionConfiguration'] =>
   (prev) =>
   (params) => {
     return {
       ...prev(params),
       renderChartSection: (props) => {
-        // This will prevent the filter being added to the query for multi-dimensional breakdowns when the user clicks on a data point on the series.
-        const handleFilter = (event: ExpressionRendererEvent['data']) => {
-          if (props.onFilter) {
-            props.onFilter(event);
-          }
-          event.preventDefault();
-        };
-        return (
-          <UnifiedMetricsExperienceGrid
-            {...props}
-            onFilter={handleFilter}
-            client={metricsExperienceClient}
-            actions={params.actions}
-          />
-        );
+        return <UnifiedMetricsExperienceGrid {...props} actions={params.actions} />;
       },
-      replaceDefaultChart: !!metricsExperienceClient,
+      replaceDefaultChart: true,
       localStorageKeyPrefix: 'discover:metricsExperience',
       defaultTopPanelHeight: 'max-content',
     };

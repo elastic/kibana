@@ -448,10 +448,13 @@ export const EndpointList = () => {
   }, [getAppUrl, searchParams]);
 
   const onRefresh = useCallback(() => {
+    if (autoRefreshInterval <= 0) {
+      return;
+    }
     dispatch({
       type: 'appRequestedEndpointList',
     });
-  }, [dispatch]);
+  }, [autoRefreshInterval, dispatch]);
 
   const onRefreshChange = useCallback<NonNullable<EuiSuperDatePickerProps['onRefreshChange']>>(
     (evt) => {

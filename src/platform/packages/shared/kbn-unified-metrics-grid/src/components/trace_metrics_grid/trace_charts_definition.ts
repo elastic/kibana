@@ -14,12 +14,14 @@ import {
   PROCESSOR_EVENT,
   STATUS_CODE,
   TRANSACTION_DURATION,
+  TRANSACTION_ID,
+  SPAN_ID,
 } from '@kbn/apm-types';
 import { evaluate, from, keep, sort, stats, where } from '@kbn/esql-composer';
 import { i18n } from '@kbn/i18n';
 import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import type { MetricUnit } from '../../types';
-import { chartPalette, type DataSource } from '.';
+import { chartPalette } from '.';
 
 interface TraceChart {
   id: string;
@@ -30,103 +32,113 @@ interface TraceChart {
   esqlQuery: string;
 }
 
-function getWhereClauses(dataSource: DataSource, filters: string[]) {
-  return [...filters, ...(dataSource === 'apm' ? [`${PROCESSOR_EVENT} == "transaction"`] : [])].map(
-    (filter) => where(filter)
-  );
+const UNMAPPED_FIELDS_NULLIFY_SET_COMMAND = 'SET unmapped_fields="NULLIFY";';
+
+function getWhereClauses(filters: string[]) {
+  return [
+    ...filters,
+    ...[`TO_STRING(${PROCESSOR_EVENT}) == "transaction" OR ${PROCESSOR_EVENT} IS NULL`],
+  ].map((filter) => where(filter));
 }
 
 export function getErrorRateChart({
-  dataSource,
   indexes,
   filters,
 }: {
-  dataSource: DataSource;
   indexes: string;
   filters: string[];
-}): TraceChart {
-  const whereClauses = getWhereClauses(dataSource, filters);
-  return {
-    id: 'error_rate',
-    title: i18n.translate('metricsExperience.grid.error_rate.label', {
-      defaultMessage: 'Error Rate',
-    }),
-    color: chartPalette[6],
-    unit: 'percent',
-    seriesType: 'line',
-    esqlQuery: from(indexes)
+}): TraceChart | null {
+  try {
+    const whereClauses = getWhereClauses(filters);
+    const esqlQuery = from(indexes)
       .pipe(
         ...whereClauses,
-        dataSource === 'apm'
-          ? stats(
-              `failure = COUNT(*) WHERE ${EVENT_OUTCOME} == "failure", all = COUNT(*)  BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
-            )
-          : stats(
-              `failure = COUNT(*) WHERE ${STATUS_CODE} == "Error", all = COUNT(*)  BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
-            ),
+        stats(
+          `failure = COUNT(*) WHERE TO_STRING(${EVENT_OUTCOME}) == "failure" OR TO_STRING(${STATUS_CODE}) == "Error", all = COUNT(*)  BY timestamp = BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`
+        ),
         evaluate('error_rate = TO_DOUBLE(failure) / all'),
         keep('timestamp, error_rate'),
         sort('timestamp')
       )
-      .toString(),
-  };
+      .toString();
+
+    return {
+      id: 'error_rate',
+      title: i18n.translate('metricsExperience.grid.error_rate.label', {
+        defaultMessage: 'Error Rate',
+      }),
+      color: chartPalette[6],
+      unit: 'percent',
+      seriesType: 'line',
+      esqlQuery: `${UNMAPPED_FIELDS_NULLIFY_SET_COMMAND} ${esqlQuery}`,
+    };
+  } catch (error) {
+    return null;
+  }
 }
 
 export function getLatencyChart({
-  dataSource,
   indexes,
   filters,
 }: {
-  dataSource: DataSource;
   indexes: string;
   filters: string[];
-}): TraceChart {
-  const whereClauses = getWhereClauses(dataSource, filters);
-  return {
-    id: 'latency',
-    title: i18n.translate('metricsExperience.grid.latency.label', {
-      defaultMessage: 'Latency',
-    }),
-    color: chartPalette[2],
-    unit: 'ms',
-    seriesType: 'line',
-    esqlQuery: from(indexes)
+}): TraceChart | null {
+  try {
+    const whereClauses = getWhereClauses(filters);
+    const esqlQuery = from(indexes)
       .pipe(
         ...whereClauses,
-        dataSource === 'apm'
-          ? evaluate(`duration_ms = ROUND(${TRANSACTION_DURATION})/1000`) // apm duration is in us
-          : evaluate(`duration_ms = ROUND(${DURATION})/1000/1000`), // otel duration is in ns
+        evaluate(`duration_ms_ecs = ROUND(${TRANSACTION_DURATION})/1000`), // apm duration is in us
+        evaluate(`duration_ms_otel = ROUND(${DURATION})/1000/1000`), // otel duration is in ns
+        evaluate('duration_ms = COALESCE(TO_LONG(duration_ms_ecs), TO_LONG(duration_ms_otel))'), // need to convert both to the same type to make sure the COALESCE works
         stats(`AVG(duration_ms) BY BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`)
       )
-      .toString(),
-  };
+      .toString();
+
+    return {
+      id: 'latency',
+      title: i18n.translate('metricsExperience.grid.latency.label', {
+        defaultMessage: 'Latency',
+      }),
+      color: chartPalette[2],
+      unit: 'ms',
+      seriesType: 'line',
+      esqlQuery: `${UNMAPPED_FIELDS_NULLIFY_SET_COMMAND} ${esqlQuery}`,
+    };
+  } catch (error) {
+    return null;
+  }
 }
 
 export function getThroughputChart({
   indexes,
   filters,
-  dataSource,
-  fieldName,
 }: {
   indexes: string;
   filters: string[];
-  dataSource: DataSource;
-  fieldName: string;
-}): TraceChart {
-  const whereClauses = getWhereClauses(dataSource, filters);
-  return {
-    id: 'throughput',
-    title: i18n.translate('metricsExperience.grid.throughput.label', {
-      defaultMessage: 'Throughput',
-    }),
-    color: chartPalette[0],
-    unit: 'count',
-    seriesType: 'line',
-    esqlQuery: from(indexes)
+}): TraceChart | null {
+  try {
+    const whereClauses = getWhereClauses(filters);
+    const esqlQuery = from(indexes)
       .pipe(
         ...whereClauses,
-        stats(`COUNT(${fieldName}) BY BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`)
+        evaluate(`id = COALESCE(${TRANSACTION_ID}, ${SPAN_ID})`),
+        stats(`COUNT(id) BY BUCKET(${AT_TIMESTAMP}, 100, ?_tstart, ?_tend)`)
       )
-      .toString(),
-  };
+      .toString();
+
+    return {
+      id: 'throughput',
+      title: i18n.translate('metricsExperience.grid.throughput.label', {
+        defaultMessage: 'Throughput',
+      }),
+      color: chartPalette[0],
+      unit: 'count',
+      seriesType: 'line',
+      esqlQuery: `${UNMAPPED_FIELDS_NULLIFY_SET_COMMAND} ${esqlQuery}`,
+    };
+  } catch (error) {
+    return null;
+  }
 }

@@ -265,6 +265,16 @@ paths:
           schema:
             type: boolean
         - description: >-
+            Whether to filter by scheduled or ad-hoc attack discoveries. If
+            omitted, both types of attack discoveries are returned. Use `true`
+            to return only scheduled discoveries or `false` to return only
+            ad-hoc discoveries.
+          in: query
+          name: scheduled
+          required: false
+          schema:
+            type: boolean
+        - description: >-
             Field used to sort results. See `AttackDiscoveryFindSortField` for
             allowed values.
           example: '@timestamp'
@@ -2429,6 +2439,11 @@ components:
             The optional time the attack discovery alert workflow status was
             last updated
           type: string
+        assignees:
+          description: The optional array of user-IDs who have been assigned the attack
+          items:
+            type: string
+          type: array
         connector_id:
           description: The ID of the connector that generated the attack discovery
           type: string

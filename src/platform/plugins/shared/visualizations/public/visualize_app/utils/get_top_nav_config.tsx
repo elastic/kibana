@@ -193,9 +193,7 @@ export const getTopNavConfig = (
                 {
                   type: VISUALIZE_EMBEDDABLE_TYPE,
                   serializedState: {
-                    rawState: {
-                      savedObjectId: id,
-                    },
+                    savedObjectId: id,
                   },
                   embeddableId: saveOptions.copyOnSave ? undefined : embeddableId,
                   searchSessionId: data.search.session.getSessionId(),
