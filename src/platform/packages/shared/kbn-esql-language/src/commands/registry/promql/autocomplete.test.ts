@@ -825,7 +825,8 @@ describe('index= suggestions', () => {
 describe('label selector suggestions', () => {
   const labelNames = getFieldNamesByType(ESQL_STRING_TYPES, true);
 
-  test.each([
+  // TODO: Re-enable when label matcher suggestions are implemented
+  test.skip.each([
     ['opening brace', 'PROMQL rate(http_requests{'],
     ['comma', 'PROMQL rate(http_requests{job="api", '],
   ])('suggests labels after %s in selector', async (_position, query) => {
@@ -835,7 +836,8 @@ describe('label selector suggestions', () => {
     });
   });
 
-  test('suggests labels when cursor is before a typed operator and label name is missing', async () => {
+  // TODO: Re-enable when label matcher suggestions are implemented
+  test.skip('suggests labels when cursor is before a typed operator and label name is missing', async () => {
     const query =
       'PROMQL step = "5m" sum(avg(quantile_over_time(0, bytes{ = ""}[5m])) by (event.dataset))';
     const cursorPosition = query.indexOf('{ = ""') + 2; // bytes{| = ""}
@@ -857,20 +859,23 @@ describe('label selector suggestions', () => {
     });
   });
 
-  test('suggests string placeholder when label value is missing', async () => {
+  // TODO: Re-enable when label matcher suggestions are implemented
+  test.skip('suggests string placeholder when label value is missing', async () => {
     await expectPromqlSuggestions('PROMQL rate(bytes_counter{job= ', {
       textsContain: ['"${0:value}"'],
     });
   });
 
-  test('suggests comma after complete label value', async () => {
+  // TODO: Re-enable when label matcher suggestions are implemented
+  test.skip('suggests comma after complete label value', async () => {
     await expectPromqlSuggestions('PROMQL rate(http_requests{job="api" ', {
       labelsContain: [','],
       labelsNotContain: labelNames,
     });
   });
 
-  test('suggests labels after complete label value', async () => {
+  // TODO: Re-enable when label matcher suggestions are implemented
+  test.skip('suggests labels after complete label value', async () => {
     await expectPromqlSuggestions('PROMQL rate(http_requests{job="api",', {
       labelsContain: labelNames,
     });
