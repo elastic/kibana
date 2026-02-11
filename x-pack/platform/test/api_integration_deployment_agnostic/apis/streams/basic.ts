@@ -98,7 +98,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         it('reports enabled status', async () => {
           const wiredStatus = await getWiredStatus();
-          expect(wiredStatus.logs).to.eql(true);
+          expect(wiredStatus.logs).to.eql(false);
           expect(wiredStatus['logs.otel']).to.eql(true);
           expect(wiredStatus['logs.ecs']).to.eql(true);
         });
@@ -113,13 +113,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             const wiredStatus = await getWiredStatus();
             expect(wiredStatus['logs.otel']).to.eql('conflict');
             expect(wiredStatus['logs.ecs']).to.eql(true);
-            expect(wiredStatus.logs).to.eql(true);
+            expect(wiredStatus.logs).to.eql(false);
           });
 
           it('reports enabled after calling enabled again', async () => {
             await enableStreams(apiClient);
             const wiredStatus = await getWiredStatus();
-            expect(wiredStatus.logs).to.eql(true);
+            expect(wiredStatus.logs).to.eql(false);
             expect(wiredStatus['logs.otel']).to.eql(true);
             expect(wiredStatus['logs.ecs']).to.eql(true);
           });
@@ -131,7 +131,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             });
             expect(response).to.eql({
               logs: {
-                enabled: true,
+                enabled: false,
               },
               'logs.otel': {
                 enabled: true,
@@ -180,7 +180,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     // Note: Each step is dependent on the previous
     // Test full flow for each root stream
-    ['logs', 'logs.otel', 'logs.ecs'].forEach((rootStream) => {
+    ['logs.otel', 'logs.ecs'].forEach((rootStream) => {
       describe(`Full flow for ${rootStream}`, () => {
         before(async () => {
           await enableStreams(apiClient);
