@@ -480,17 +480,13 @@ describe('utils', () => {
   });
 
   describe('checkForNoReadableIndices', () => {
-    test('returns true when missing logs-endpoint.alerts-* index and rule name is Endpoint Security', async () => {
+    test('returns foundNoIndices true when the fieldCapsResponse is empty', async () => {
       const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: [],
           fields: {},
         },
       };
-
-      ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
-        ruleName: 'Endpoint Security',
-      });
 
       const { foundNoIndices } = await checkForNoReadableIndices({
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
@@ -502,6 +498,29 @@ describe('utils', () => {
       });
 
       expect(foundNoIndices).toBeTruthy();
+    });
+
+    test('logs a special Endpoint Security message when the rule name is "Endpoint Security"', async () => {
+      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
+        body: {
+          indices: [],
+          fields: {},
+        },
+      };
+
+      ruleExecutionLogger = ruleExecutionLogMock.forExecutors.create({
+        ruleName: 'Endpoint Security',
+      });
+
+      await checkForNoReadableIndices({
+        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
+          estypes.FieldCapsResponse,
+          unknown
+        >,
+        inputIndices: ['logs-endpoint.alerts-*'],
+        ruleExecutionLogger,
+      });
+
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatusEnum['partial failure'],
         message:
@@ -509,7 +528,7 @@ describe('utils', () => {
       });
     });
 
-    test('returns true when missing logs-endpoint.alerts-* index and rule name is NOT Endpoint Security', async () => {
+    test('logs a generic missing-index message when the rule name is not "Endpoint Security"', async () => {
       const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
         body: {
           indices: [],
@@ -522,7 +541,7 @@ describe('utils', () => {
         ruleName: 'NOT Endpoint Security',
       });
 
-      const { foundNoIndices } = await checkForNoReadableIndices({
+      await checkForNoReadableIndices({
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           estypes.FieldCapsResponse,
           unknown
@@ -531,7 +550,6 @@ describe('utils', () => {
         ruleExecutionLogger,
       });
 
-      expect(foundNoIndices).toBeTruthy();
       expect(ruleExecutionLogger.logStatusChange).toHaveBeenCalledWith({
         newStatus: RuleExecutionStatusEnum['partial failure'],
         message:
