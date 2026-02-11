@@ -37,10 +37,8 @@ const mockEncryptedSavedObjectsClient = {
 
 const createClient = () =>
   new OAuthStateClient({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    encryptedSavedObjectsClient: mockEncryptedSavedObjectsClient as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    unsecuredSavedObjectsClient: mockUnsecuredSavedObjectsClient as any,
+    encryptedSavedObjectsClient: mockEncryptedSavedObjectsClient as never,
+    unsecuredSavedObjectsClient: mockUnsecuredSavedObjectsClient as never,
     logger: mockLogger,
   });
 

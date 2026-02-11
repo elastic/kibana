@@ -104,16 +104,19 @@ describe('oauthAuthorizeRoute', () => {
     mockSpacesService.spaceIdToNamespace.mockReturnValue(undefined);
     mockEncryptedSavedObjectsClient.getClient.mockReturnValue({});
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    MockOAuthStateClient.mockImplementation(() => mockOAuthStateClientInstance as any);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    MockOAuthAuthorizationService.mockImplementation(() => mockOAuthServiceInstance as any);
+    MockOAuthStateClient.mockImplementation(() => mockOAuthStateClientInstance as never);
+    MockOAuthAuthorizationService.mockImplementation(() => mockOAuthServiceInstance as never);
   });
 
   const registerRoute = (coreSetup = createMockCoreSetup()) => {
     const licenseState = licenseStateMock.create();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    oauthAuthorizeRoute(router, licenseState, mockLogger, coreSetup as any, mockRateLimiter as any);
+    oauthAuthorizeRoute(
+      router,
+      licenseState,
+      mockLogger,
+      coreSetup as never,
+      mockRateLimiter as never
+    );
     return router.post.mock.calls[0];
   };
 
@@ -255,7 +258,7 @@ describe('oauthAuthorizeRoute', () => {
       },
     });
 
-    // Verify OAuth state was created with correct params
+    // Verify OAuth state was created with the correct params
     expect(mockOAuthStateClientInstance.create).toHaveBeenCalledWith({
       connectorId: 'connector-1',
       redirectUri: 'https://kibana.example.com/api/actions/connector/_oauth_callback',
@@ -369,10 +372,8 @@ describe('oauthAuthorizeRoute', () => {
       router,
       licenseState,
       mockLogger,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      createMockCoreSetup() as any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mockRateLimiter as any
+      createMockCoreSetup() as never,
+      mockRateLimiter as never
     );
 
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
