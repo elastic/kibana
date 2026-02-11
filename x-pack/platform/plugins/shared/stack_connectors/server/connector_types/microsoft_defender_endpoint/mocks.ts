@@ -177,7 +177,7 @@ const createMicrosoftDefenderConnectorMock = (): CreateMicrosoftDefenderConnecto
   );
 
   applyConnectorTokenClientInstanceMock(
-    options.services.connectorTokenClient.getSharedCredentialsClient()
+    options.services.connectorTokenClient.getSharedConnectorTokenClient()
   );
 
   return {

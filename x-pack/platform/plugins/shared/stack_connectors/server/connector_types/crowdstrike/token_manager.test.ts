@@ -40,8 +40,9 @@ describe('CrowdStrikeTokenManager', () => {
   beforeEach(() => {
     mockRequest = jest.fn();
     const mockServices = actionsMock.createServices();
-    connectorTokenClientMock =
-      mockServices.connectorTokenClient as unknown as jest.Mocked<SharedConnectorTokenClient>;
+    connectorTokenClientMock = jest.mocked(
+      mockServices.connectorTokenClient.getSharedConnectorTokenClient()
+    );
 
     // Apply connector token client mock behavior
     let cachedTokenMock: ConnectorToken | null = null;

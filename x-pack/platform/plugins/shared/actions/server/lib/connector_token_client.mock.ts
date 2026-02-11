@@ -42,8 +42,8 @@ const createConnectorTokenClientMock = (): jest.Mocked<ConnectorTokenClientContr
     updateOrReplace: jest.fn(),
     createWithRefreshToken: jest.fn(),
     updateWithRefreshToken: jest.fn(),
-    getSharedCredentialsClient: jest.fn(() => sharedCredentialsClientMock),
-    getUserCredentialsClient: jest.fn(() => userCredentialsClientMock),
+    getSharedConnectorTokenClient: jest.fn(() => sharedCredentialsClientMock),
+    getUserConnectorTokenClient: jest.fn(() => userCredentialsClientMock),
   } satisfies jest.Mocked<ConnectorTokenClientContract>;
 
   return mocked;

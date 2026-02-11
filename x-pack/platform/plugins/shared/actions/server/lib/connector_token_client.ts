@@ -276,11 +276,11 @@ export class ConnectorTokenClient {
     return this.sharedClient.updateWithRefreshToken({ ...options, id: actualId });
   }
 
-  public getSharedCredentialsClient(): SharedConnectorTokenClient {
+  public getSharedConnectorTokenClient(): SharedConnectorTokenClient {
     return this.sharedClient;
   }
 
-  public getUserCredentialsClient(): UserConnectorTokenClient {
+  public getUserConnectorTokenClient(): UserConnectorTokenClient {
     return this.userClient;
   }
 }
