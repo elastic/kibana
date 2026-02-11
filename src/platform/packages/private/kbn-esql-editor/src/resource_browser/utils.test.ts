@@ -110,6 +110,62 @@ describe('computeInsertionText', () => {
       })
     ).toEqual({ at, text: ',index4' });
   });
+
+  it('autocomplete mode should add trailing comma when a subquery follows the sources list', () => {
+    const query =
+      'FROM kibana_sample_data_ecommerce, (FROM kibana_sample_data_ecommerce | LIMIT 1)';
+    const idxStart = query.indexOf('kibana_sample_data_ecommerce');
+    const items = [
+      {
+        min: idxStart,
+        max: idxStart + 'kibana_sample_data_ecommerce'.length - 1,
+      },
+    ];
+
+    // Cursor right after the comma separating main source and subquery
+    const at = query.indexOf(',') + 1;
+    expect(
+      computeInsertionText({
+        query,
+        items,
+        at,
+        sourceName: 'kibana_sample_data_logs',
+        mode: 'autocomplete',
+      })
+    ).toEqual({ at, text: 'kibana_sample_data_logs,' });
+  });
+
+  it('autocomplete mode should insert a source before a subquery when there are no existing sources', () => {
+    const query = 'FROM (FROM kibana_sample_data_ecommerce | LIMIT 1)';
+    const at = query.indexOf('FROM') + 4; // right after `FROM`
+
+    expect(
+      computeInsertionText({
+        query,
+        items: [],
+        at,
+        sourceName: 'kibana_sample_data_ecommerce',
+        mode: 'autocomplete',
+      })
+    ).toEqual({ at, text: ' kibana_sample_data_ecommerce,' });
+  });
+
+  it('autocomplete mode should not add trailing comma before FROM metadata clause', () => {
+    const query = 'FROM index1 metadata _id';
+    const index1Start = query.indexOf('index1');
+    const items = [{ min: index1Start, max: index1Start + 'index1'.length - 1 }];
+
+    const at = query.indexOf('metadata') - 1; // in the whitespace before metadata
+    expect(
+      computeInsertionText({
+        query,
+        items,
+        at,
+        sourceName: 'index2',
+        mode: 'autocomplete',
+      })
+    ).toEqual({ at, text: ',index2' });
+  });
 });
 
 describe('getSourceCommandContextFromQuery', () => {
@@ -208,6 +264,23 @@ describe('computeRemovalRange', () => {
     const range = computeRemovalRange(query, items, 'index3');
     expect(range).toBeDefined();
     expect(query.slice(range!.start, range!.end)).toBe(',index3');
+  });
+
+  it('should remove the only main source and the following comma when a subquery follows', () => {
+    const query = 'FROM kibana_sample_data_logs, (FROM kibana_sample_data_ecommerce | LIMIT 1)';
+    const idxStart = query.indexOf('kibana_sample_data_logs');
+    const items = [
+      {
+        type: 'source',
+        name: 'kibana_sample_data_logs',
+        min: idxStart,
+        max: idxStart + 'kibana_sample_data_logs'.length - 1,
+      },
+    ];
+
+    const range = computeRemovalRange(query, items, 'kibana_sample_data_logs');
+    expect(range).toBeDefined();
+    expect(query.slice(range!.start, range!.end)).toBe('kibana_sample_data_logs,');
   });
 });
 

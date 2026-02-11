@@ -229,6 +229,19 @@ export const computeRemovalRange = (
   }
 
   // Single item
+  // If there is a comma immediately after this token (e.g. before a subquery argument),
+  // remove the following comma as well to avoid leaving a stray separator: `FROM , ( ... )`.
+  for (let i = targetEnd; i < query.length; i++) {
+    const ch = query[i];
+    if (!ch) break;
+    if (/\s/.test(ch)) continue;
+    if (ch === ',') {
+      return { start: targetStart, end: i + 1 };
+    }
+    break;
+  }
+
+  // Otherwise, fall back to removing only the token.
   return { start: targetStart, end: targetEnd };
 };
 
@@ -262,19 +275,30 @@ export const computeInsertionText = ({
   }
 
   if (!hasItems) {
-    return { at, text: sourceName };
+    const rightCh = findNextNonWhitespaceChar(query, at, query.length);
+    const before = query[at - 1];
+    const needsLeadingSpace = Boolean(before && /[A-Za-z0-9_]/.test(before));
+    const needsTrailingComma = rightCh === '(';
+
+    return {
+      at,
+      text: `${needsLeadingSpace ? ' ' : ''}${sourceName}${needsTrailingComma ? ',' : ''}`,
+    };
   }
 
   const lowerBound = items[0].min;
-  const upperBound = Math.max(at, items[items.length - 1].max + 1) + 1;
   const leftCh = findPrevNonWhitespaceChar(query, at - 1, lowerBound);
-  const rightCh = findNextNonWhitespaceChar(query, at, Math.min(upperBound, query.length));
+  // Scan until the end of the query to detect cases like a subquery following the sources list:
+  // `FROM index1, | (FROM index2 ...)`.
+  const rightCh = findNextNonWhitespaceChar(query, at, query.length);
 
   const hasPrevItem = items.some((it) => it.max + 1 <= at);
   const hasNextItem = items.some((it) => it.min >= at);
 
   const needsLeadingComma = hasPrevItem && leftCh !== ',';
-  const needsTrailingComma = hasNextItem && rightCh !== ',' && rightCh !== '|';
+  // Add a trailing comma when inserting before another source OR when inserting right before
+  // a subquery argument (which is comma-separated, but not represented in `items`).
+  const needsTrailingComma = (hasNextItem && rightCh !== ',' && rightCh !== '|') || rightCh === '(';
 
   return {
     at,

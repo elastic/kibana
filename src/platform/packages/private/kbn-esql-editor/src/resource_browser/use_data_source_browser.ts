@@ -15,7 +15,6 @@ import type {
   IndexAutocompleteItem,
 } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { BROWSER_POPOVER_WIDTH, DataSourceSelectionChange } from '@kbn/esql-resource-browser';
 import {
   computeInsertionText,
@@ -132,9 +131,12 @@ export function useDataSourceBrowser({
       // Snapshot current selection state at open time.
       // The browser UI is driven by `selectedSourcesRef.current`.
       const fullText = model.getValue() || '';
-      const indexPattern = getIndexPatternFromESQLQuery(fullText);
-      const currentSelectedSources = indexPattern ? indexPattern.split(',').filter(Boolean) : [];
-      selectedSourcesRef.current = currentSelectedSources;
+      // IMPORTANT: `getIndexPatternFromESQLQuery` includes sources from subqueries, but the indices
+      // browser is intentionally main-query-only. Seed selection from the AST locations of the
+      // main `FROM`/`TS` command so what's selected always matches what we can insert/remove.
+      selectedSourcesRef.current = getLocatedSourceItemsFromQuery(fullText)
+        .map((it) => it.name)
+        .filter((name): name is string => Boolean(name));
 
       // Capture cursor offset at the moment we open the popover.
       // We keep it in a ref because the actual edits happen later (on selection changes).
