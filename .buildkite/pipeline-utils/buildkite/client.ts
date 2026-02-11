@@ -10,7 +10,7 @@
 import type { AxiosInstance } from 'axios';
 import axios from 'axios';
 import type { ExecSyncOptions } from 'child_process';
-import { execSync } from 'child_process';
+import { execFileSync, execSync } from 'child_process';
 
 import { dump } from 'js-yaml';
 
@@ -365,6 +365,25 @@ export class BuildkiteClient {
     const url = `v2/organizations/elastic/pipelines/${pipelineSlug}/builds`;
 
     return (await this.http.post(url, options)).data;
+  };
+
+  cancelStep = (stepIdOrKey: string): void => {
+    execFileSync('buildkite-agent', ['step', 'cancel', '--step', stepIdOrKey], {
+      stdio: ['pipe', 'inherit', 'inherit'],
+    });
+  };
+
+  getMetadataKeys = (): string[] => {
+    const stdout = this.exec('buildkite-agent meta-data keys', {
+      stdio: ['pipe', 'pipe', 'inherit'],
+    });
+
+    const output = stdout?.toString().trim() ?? '';
+    if (!output) {
+      return [];
+    }
+
+    return output.split('\n').filter(Boolean);
   };
 
   setMetadata = (key: string, value: string) => {

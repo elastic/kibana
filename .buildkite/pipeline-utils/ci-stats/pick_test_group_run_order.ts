@@ -24,7 +24,12 @@ import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import SHARDED_JEST_CONFIGS from '../../sharded_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
 import { filterEmptyJestConfigs } from './get_tests_from_config';
-import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
+import {
+  collectEnvFromLabels,
+  expandAgentQueue,
+  getRequiredEnv,
+  shouldSkipUploaderForGateFailure,
+} from '#pipeline-utils';
 
 const SHARD_ANNOTATION_SEP = '||shard=';
 
@@ -377,91 +382,114 @@ export async function pickTestGroupRunOrder() {
     bk.uploadArtifacts('ftr_run_order.json');
   }
 
+  if (shouldSkipUploaderForGateFailure(bk, 'dynamic test fanout')) {
+    return;
+  }
+
+  const steps = [
+    unit.count > 0
+      ? {
+          label: 'Jest Tests',
+          command: getRequiredEnv('JEST_UNIT_SCRIPT'),
+          parallelism: unit.count,
+          timeout_in_minutes: 50,
+          key: 'jest',
+          agents: expandAgentQueue('n2-4-spot', 110),
+          depends_on: JEST_CONFIGS_DEPS,
+          retry: {
+            automatic: [
+              { exit_status: '-1', limit: 3 },
+              ...(JEST_CONFIGS_RETRY_COUNT > 0
+                ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
+                : []),
+            ],
+          },
+        }
+      : [],
+    integration.count > 0
+      ? {
+          label: 'Jest Integration Tests',
+          command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
+          parallelism: integration.count,
+          // TODO: Reduce once we have identified the cause of random long-running tests
+          timeout_in_minutes: 50,
+          key: 'jest-integration',
+          agents: expandAgentQueue('n2-4-spot', 105),
+          depends_on: JEST_CONFIGS_DEPS,
+          retry: {
+            automatic: [
+              { exit_status: '-1', limit: 3 },
+              ...(JEST_CONFIGS_RETRY_COUNT > 0
+                ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
+                : []),
+            ],
+          },
+        }
+      : [],
+    functionalGroups.length
+      ? {
+          group: 'FTR Configs',
+          key: 'ftr-configs',
+          depends_on: FTR_CONFIGS_DEPS,
+          steps: functionalGroups
+            .sort((a, b) =>
+              // if both groups are sorted by number then sort by that
+              typeof a.sortBy === 'number' && typeof b.sortBy === 'number'
+                ? a.sortBy - b.sortBy
+                : // if both groups are sorted by string, sort by that
+                typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
+                ? a.sortBy.localeCompare(b.sortBy)
+                : // if a is sorted by number then order it later than b
+                typeof a.sortBy === 'number'
+                ? 1
+                : -1
+            )
+            .map(
+              ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
+                label: title,
+                command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
+                timeout_in_minutes: 50,
+                key,
+                agents: expandAgentQueue(queue, 105),
+                env: {
+                  FTR_CONFIG_GROUP_KEY: key,
+                  ...ftrExtraArgs,
+                  ...envFromlabels,
+                },
+                retry: {
+                  automatic: [
+                    { exit_status: '-1', limit: 3 },
+                    ...(FTR_CONFIGS_RETRY_COUNT > 0
+                      ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
+                      : []),
+                  ],
+                },
+              })
+            ),
+        }
+      : [],
+  ].flat();
+
+  // Register cancelable child keys before uploading so a concurrent gate failure
+  // can discover and short-circuit these jobs immediately.
+  if (unit.count > 0) {
+    bk.setMetadata('cancel_on_gate_failure:jest', 'true');
+  }
+  if (integration.count > 0) {
+    bk.setMetadata('cancel_on_gate_failure:jest-integration', 'true');
+  }
+  // Register child step keys (not the group key) because `buildkite-agent step cancel`
+  // does not work on group keys.
+  for (const fg of functionalGroups) {
+    bk.setMetadata(`cancel_on_gate_failure:${fg.key}`, 'true');
+  }
+
+  if (shouldSkipUploaderForGateFailure(bk, 'dynamic test fanout')) {
+    return;
+  }
+
   // upload the step definitions to Buildkite
-  bk.uploadSteps(
-    [
-      unit.count > 0
-        ? {
-            label: 'Jest Tests',
-            command: getRequiredEnv('JEST_UNIT_SCRIPT'),
-            parallelism: unit.count,
-            timeout_in_minutes: 50,
-            key: 'jest',
-            agents: expandAgentQueue('n2-4-spot', 110),
-            depends_on: JEST_CONFIGS_DEPS,
-            retry: {
-              automatic: [
-                { exit_status: '-1', limit: 3 },
-                ...(JEST_CONFIGS_RETRY_COUNT > 0
-                  ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
-                  : []),
-              ],
-            },
-          }
-        : [],
-      integration.count > 0
-        ? {
-            label: 'Jest Integration Tests',
-            command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
-            parallelism: integration.count,
-            // TODO: Reduce once we have identified the cause of random long-running tests
-            timeout_in_minutes: 50,
-            key: 'jest-integration',
-            agents: expandAgentQueue('n2-4-spot', 105),
-            depends_on: JEST_CONFIGS_DEPS,
-            retry: {
-              automatic: [
-                { exit_status: '-1', limit: 3 },
-                ...(JEST_CONFIGS_RETRY_COUNT > 0
-                  ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
-                  : []),
-              ],
-            },
-          }
-        : [],
-      functionalGroups.length
-        ? {
-            group: 'FTR Configs',
-            key: 'ftr-configs',
-            depends_on: FTR_CONFIGS_DEPS,
-            steps: functionalGroups
-              .sort((a, b) =>
-                // if both groups are sorted by number then sort by that
-                typeof a.sortBy === 'number' && typeof b.sortBy === 'number'
-                  ? a.sortBy - b.sortBy
-                  : // if both groups are sorted by string, sort by that
-                  typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
-                  ? a.sortBy.localeCompare(b.sortBy)
-                  : // if a is sorted by number then order it later than b
-                  typeof a.sortBy === 'number'
-                  ? 1
-                  : -1
-              )
-              .map(
-                ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
-                  label: title,
-                  command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 50,
-                  agents: expandAgentQueue(queue, 105),
-                  env: {
-                    FTR_CONFIG_GROUP_KEY: key,
-                    ...ftrExtraArgs,
-                    ...envFromlabels,
-                  },
-                  retry: {
-                    automatic: [
-                      { exit_status: '-1', limit: 3 },
-                      ...(FTR_CONFIGS_RETRY_COUNT > 0
-                        ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
-                        : []),
-                    ],
-                  },
-                })
-              ),
-          }
-        : [],
-    ].flat()
-  );
+  bk.uploadSteps(steps);
 }
 
 function getRunGroups(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string): RunGroup[] {

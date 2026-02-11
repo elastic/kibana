@@ -99,6 +99,63 @@ is_test_execution_step() {
   buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" 'true'
 }
 
+is_gate_failed() {
+  [[ "$(buildkite-agent meta-data get gate_failed --default '' --log-level error)" == "true" ]]
+}
+
+get_gate_failure_label() {
+  local gate_label
+  gate_label="$(buildkite-agent meta-data get gate_failed_label --default '' --log-level error)"
+
+  if [[ -n "$gate_label" ]]; then
+    echo "$gate_label"
+    return 0
+  fi
+
+  buildkite-agent meta-data get gate_failed_by --default '' --log-level error
+}
+
+skip_if_gate_failed() {
+  if ! is_gate_failed; then
+    return 1
+  fi
+
+  local gate_label
+  gate_label="$(get_gate_failure_label)"
+
+  if [[ -n "$gate_label" ]]; then
+    echo "--- Skipping because check gate '$gate_label' has already failed"
+  else
+    echo '--- Skipping because a check gate has already failed'
+  fi
+
+  return 0
+}
+
+is_current_step_cancelable_on_gate_failure() {
+  local step_key
+  step_key="${BUILDKITE_STEP_KEY:-}"
+
+  if [[ -z "$step_key" ]]; then
+    return 1
+  fi
+
+  [[ "$(buildkite-agent meta-data get "cancel_on_gate_failure:${step_key}" --default '' --log-level error)" == "true" ]]
+}
+
+exit_current_step_if_gate_failed() {
+  if ! is_current_step_cancelable_on_gate_failure; then
+    return 1
+  fi
+
+  if ! skip_if_gate_failed; then
+    return 1
+  fi
+
+  buildkite-agent step cancel --step "${BUILDKITE_STEP_KEY}" || true
+  exit 0
+}
+
 retry() {
   local retries=$1; shift
   local delay=$1; shift

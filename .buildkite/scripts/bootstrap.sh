@@ -52,3 +52,5 @@ fi
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'yarn kbn bootstrap'
 fi
+
+exit_current_step_if_gate_failed || true

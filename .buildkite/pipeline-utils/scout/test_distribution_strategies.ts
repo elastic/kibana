@@ -12,7 +12,11 @@ import fs from 'node:fs';
 import { SCOUT_TEST_LANE_LOADS_PATH, SCOUT_TEST_TRACKS_ROOT } from './paths';
 import { scoutTestTrack, type ScoutTestTrack } from './test_tracks';
 import { pickScoutTestGroupRunOrder } from './pick_scout_test_group_run_order';
-import { BuildkiteClient, type BuildkiteStep } from '../buildkite';
+import {
+  BuildkiteClient,
+  shouldSkipUploaderForGateFailure,
+  type BuildkiteStep,
+} from '../buildkite';
 import { getKibanaDir } from '../utils';
 import { expandAgentQueue } from '../agent_images';
 import { collectEnvFromLabels } from '../pr_labels';
@@ -111,11 +115,11 @@ async function distributeScoutTestsOnLanes() {
       loadIDsByStepKey[stepKey] = lane.loads;
     });
 
-  // Write the test lane load IDs to disk in preparation of uploading as an artifact
-  fs.writeFileSync(testLaneLoadsFilePath, JSON.stringify(loadIDsByStepKey));
-
   const bk = new BuildkiteClient();
-  bk.uploadArtifacts(testLaneLoadsFilePath);
+
+  if (shouldSkipUploaderForGateFailure(bk, 'Scout test lane fanout')) {
+    return;
+  }
 
   const lanesGroupStepDependencies: string[] = [];
 
@@ -129,6 +133,18 @@ async function distributeScoutTestsOnLanes() {
   } else {
     // Default dependencies
     lanesGroupStepDependencies.push('build_scout_tests');
+  }
+
+  for (const { key } of steps) {
+    bk.setMetadata(`cancel_on_gate_failure:${key}`, 'true');
+  }
+
+  // Write the test lane load IDs to disk in preparation of uploading as an artifact
+  fs.writeFileSync(testLaneLoadsFilePath, JSON.stringify(loadIDsByStepKey));
+  bk.uploadArtifacts(testLaneLoadsFilePath);
+
+  if (shouldSkipUploaderForGateFailure(bk, 'Scout test lane fanout')) {
+    return;
   }
 
   // Send it 🚀

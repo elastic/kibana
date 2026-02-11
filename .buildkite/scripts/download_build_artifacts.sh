@@ -25,3 +25,5 @@ if [[ "${KIBANA_BUILD_ID:-}" != "false" ]]; then
     cd "$KIBANA_DIR"
   fi
 fi
+
+exit_current_step_if_gate_failed || true

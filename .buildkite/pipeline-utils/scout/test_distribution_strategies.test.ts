@@ -16,12 +16,19 @@ let mockKibanaDir: string;
 
 const mockUploadSteps = jest.fn();
 const mockUploadArtifacts = jest.fn();
+const mockSetMetadata = jest.fn();
+const mockGetMetadata = jest.fn();
 
 jest.mock('../buildkite', () => ({
   BuildkiteClient: jest.fn().mockImplementation(() => ({
     uploadSteps: mockUploadSteps,
     uploadArtifacts: mockUploadArtifacts,
+    setMetadata: mockSetMetadata,
+    getMetadata: mockGetMetadata,
   })),
+  shouldSkipUploaderForGateFailure: (metadataReader: {
+    getMetadata: (key: string, defaultValue?: string | null) => string | null;
+  }) => metadataReader.getMetadata('gate_failed', 'false') === 'true',
 }));
 
 jest.mock('../agent_images', () => ({
@@ -111,6 +118,9 @@ describe('scoutTestDistributionStrategies', () => {
     mockKibanaDir = tmpDir;
     fs.mkdirSync(path.join(tmpDir, '.scout'), { recursive: true });
     writeFileSyncSpy = jest.spyOn(fs, 'writeFileSync').mockImplementation(() => {});
+    mockGetMetadata.mockImplementation(
+      (_key: string, defaultValue?: string | null) => defaultValue
+    );
     process.env = { ...originalEnv };
     delete process.env.SCOUT_TEST_LANES_GROUP_DEPS;
     delete process.env.SERVERLESS_TESTS_ONLY;
@@ -244,6 +254,74 @@ describe('scoutTestDistributionStrategies', () => {
 
       const uploadedGroup = mockUploadSteps.mock.calls[0][0][0];
       expect(uploadedGroup.depends_on).toEqual([]);
+    });
+
+    it('registers each lane step for cancel-on-gate-failure before uploading', async () => {
+      const track = createMockTrack('local', 'stateful', 'classic', 'default', [
+        createMockLane(1, 'n2-4-spot', ['config-a.ts']),
+        createMockLane(2, 'n2-4-spot', ['config-b.ts']),
+      ]);
+
+      mockDefinitionsAll.mockReturnValue(['/mock/tracks.json']);
+      mockDefinitionsLoadFromPath.mockReturnValue(createMockTrackDefinition([track]));
+
+      await scoutTestDistributionStrategies.lanes();
+
+      expect(mockSetMetadata.mock.calls).toEqual([
+        ['cancel_on_gate_failure:scout_test_lane_1', 'true'],
+        ['cancel_on_gate_failure:scout_test_lane_2', 'true'],
+      ]);
+      expect(mockSetMetadata.mock.invocationCallOrder[1]).toBeLessThan(
+        mockUploadSteps.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('skips Scout lane fanout entirely after a gate failure', async () => {
+      const track = createMockTrack('local', 'stateful', 'classic', 'default', [
+        createMockLane(1, 'n2-4-spot', ['config-a.ts']),
+      ]);
+
+      mockDefinitionsAll.mockReturnValue(['/mock/tracks.json']);
+      mockDefinitionsLoadFromPath.mockReturnValue(createMockTrackDefinition([track]));
+      mockGetMetadata.mockImplementation((key: string, defaultValue?: string | null) =>
+        key === 'gate_failed' ? 'true' : defaultValue
+      );
+
+      await scoutTestDistributionStrategies.lanes();
+
+      expect(mockSetMetadata).not.toHaveBeenCalled();
+      expect(writeFileSyncSpy).not.toHaveBeenCalled();
+      expect(mockUploadArtifacts).not.toHaveBeenCalled();
+      expect(mockUploadSteps).not.toHaveBeenCalled();
+    });
+
+    it('re-checks gate failure immediately before uploading lane steps', async () => {
+      const track = createMockTrack('local', 'stateful', 'classic', 'default', [
+        createMockLane(1, 'n2-4-spot', ['config-a.ts']),
+      ]);
+
+      mockDefinitionsAll.mockReturnValue(['/mock/tracks.json']);
+      mockDefinitionsLoadFromPath.mockReturnValue(createMockTrackDefinition([track]));
+
+      let gateCheckCount = 0;
+      mockGetMetadata.mockImplementation((key: string, defaultValue?: string | null) => {
+        if (key !== 'gate_failed') {
+          return defaultValue;
+        }
+
+        gateCheckCount += 1;
+        return gateCheckCount === 1 ? 'false' : 'true';
+      });
+
+      await scoutTestDistributionStrategies.lanes();
+
+      expect(mockSetMetadata).toHaveBeenCalledWith(
+        'cancel_on_gate_failure:scout_test_lane_1',
+        'true'
+      );
+      expect(writeFileSyncSpy).toHaveBeenCalled();
+      expect(mockUploadArtifacts).toHaveBeenCalled();
+      expect(mockUploadSteps).not.toHaveBeenCalled();
     });
   });
 });

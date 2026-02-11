@@ -61,6 +61,10 @@ else
   buildkite-agent artifact upload "scout_playwright_configs.json"
 fi
 
+if skip_if_gate_failed; then
+  exit 0
+fi
+
 echo '--- Running Scout API Integration Tests'
 node scripts/scout.js run-tests \
   --location local \
