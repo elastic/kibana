@@ -21,7 +21,13 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EarsOAuthProvider, GoogleUserInfo } from '../../../common';
 import { useWorkplaceAIConfig } from '../hooks/use_kibana';
-import { useExchangeCode, useRefreshToken } from '../hooks/use_ears_oauth';
+import { useExchangeCode, useRefreshToken, useRevokeToken } from '../hooks/use_ears_oauth';
+
+/*
+ * WARNING
+ * THIS CODE IS A THROWAWAY CODE PURELY FOR DEMONSTRATION PURPOSES
+ * DO NOT TRY TO RE-USE IT, JUST DELETE IT
+ */
 
 const GOOGLE_SCOPES = [
   'email',
@@ -50,49 +56,66 @@ export const EarsConnectionsSection: React.FC = () => {
 
   const urlParams = new URLSearchParams(window.location.search);
 
-  const [code, setCode] = useState<string | null>(urlParams.get('code'));
+  const [code, _] = useState<string | null>(urlParams.get('code'));
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [earsLoading, setEarsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<GoogleUserInfo | null>(null);
   const [userInfoError, setUserInfoError] = useState<string | null>(null);
+  const [userInfoLoading, setUserInfoLoading] = useState(false);
+  const [earsError, setEarsError] = useState<string | null>(null);
 
   const exchangeCodeMutation = useExchangeCode();
 
   const handleExchangeCode = () => {
     if (!code) return;
+    setEarsLoading(true);
 
     exchangeCodeMutation.mutate(
       { provider: EarsOAuthProvider.Google, code },
       {
         onSuccess: (data) => {
+          if (!data.access_token || data.access_token.length == 0) {
+            setEarsError("Got empty token. Likely your access code is invalid - delete it from the query parameters and try the flow again")
+            return;
+          }
+
           setAccessToken(data.access_token);
           if (data.refresh_token) {
             setRefreshToken(data.refresh_token);
           }
+          setEarsError(null)
         },
         onError: (error) => {
-          console.error('Failed to exchange code:', error);
+          setEarsError(`Failed to exchange code for token: ${error}`)
         },
+        onSettled: () => {
+          setEarsLoading(false);
+        }
       }
     );
   };
 
   const handleWhoAmI = async () => {
-    if (!accessToken) return;
+    setUserInfoLoading(true);
     try {
-    const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
 
       if (!userInfoResponse.ok) {
-        throw new Error(`Failed to fetch user info: ${userInfoResponse.statusText}`);
+        throw new Error(`Failed to fetch user info: ${userInfoResponse.status}`);
       }
       const userInfoData = (await userInfoResponse.json()) as GoogleUserInfo;
       setUserInfo(userInfoData);
+      setUserInfoError(null);
     } catch (error) {
+      setUserInfo(null);
       setUserInfoError(error instanceof Error ? error.message : 'Failed to fetch user info');
+    } finally {
+      setUserInfoLoading(false);
     }
   };
 
@@ -100,16 +123,44 @@ export const EarsConnectionsSection: React.FC = () => {
 
   const handleRefreshToken = async () => {
     if (!refreshToken) return;
+    setEarsLoading(true);
 
     useRefreshTokenMutation.mutate(
       { provider: EarsOAuthProvider.Google, refresh_token: refreshToken },
       {
         onSuccess: (data) => {
           setAccessToken(data.access_token);
+          setEarsError(null)
         },
         onError: (error) => {
-          console.error('Failed to exchange code:', error);
+          setEarsError(`Failed to refresh token: ${error}`)
         },
+        onSettled: () => {
+          setEarsLoading(false);
+        }
+      }
+    );
+  };
+
+  const useRevokeTokensMutation = useRevokeToken();
+
+  const handleRevokeToken = async () => {
+    if (!accessToken) return;
+    setEarsLoading(true);
+
+    useRevokeTokensMutation.mutate(
+      { provider: EarsOAuthProvider.Google, token: accessToken },
+      {
+        onSuccess: (data) => {
+          console.log('Token successfully revoked');
+          setEarsError(null)
+        },
+        onError: (error) => {
+          setEarsError(`Failed to revoke the token: ${error}`)
+        },
+        onSettled: () => {
+          setEarsLoading(false);
+        }
       }
     );
   };
@@ -134,6 +185,7 @@ export const EarsConnectionsSection: React.FC = () => {
       </EuiText>
       <EuiSpacer size="m" />
 
+      {!code && (
       <EuiPanel paddingSize="l">
         <EuiFlexGroup alignItems="center" gutterSize="l">
           <EuiFlexItem grow={false}>
@@ -157,7 +209,6 @@ export const EarsConnectionsSection: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
-                {!code && (
                 <EuiFlexItem>
                   <EuiButton
                     href={earsAuthUrl}
@@ -169,12 +220,42 @@ export const EarsConnectionsSection: React.FC = () => {
                     />
                   </EuiButton>
                 </EuiFlexItem>
-                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+        )}
+
+      {code && (
+      <EuiPanel paddingSize="l">
+        <EuiFlexGroup alignItems="center" gutterSize="l">
+          <EuiFlexItem grow={false}>
+            <EuiAvatar name="Google" iconType="logoGoogleG" size="l" color="plain" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h3>
+                <FormattedMessage
+                  id="xpack.workplaceai.gettingStarted.earsSection.googleTitle"
+                  defaultMessage="Google"
+                />
+              </h3>
+            </EuiTitle>
+            <EuiText size="s" color="subdued">
+              <FormattedMessage
+                id="xpack.workplaceai.gettingStarted.earsSection.googleDescription"
+                defaultMessage="Code received, you can try it out!"
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s">
                 {code && !accessToken && (
                   <EuiFlexItem>
                     <EuiButton
                       color="success"
                       onClick={handleExchangeCode}
+                      isLoading={earsLoading}
                     >
                       <FormattedMessage
                         id="xpack.workplaceai.gettingStarted.earsSection.exchangeCodeButton"
@@ -190,7 +271,7 @@ export const EarsConnectionsSection: React.FC = () => {
                         <FormattedMessage
                           id="xpack.workplaceai.gettingStarted.earsSection.gotAccessToken"
                           defaultMessage="Got a token: ...{tokenSuffix}"
-                          values={{ tokenSuffix: accessToken }}
+                          values={{ tokenSuffix: accessToken.slice(-10) }}
                         />
                       }
                       color="success"
@@ -198,66 +279,12 @@ export const EarsConnectionsSection: React.FC = () => {
                     />
                   </EuiFlexItem>
                 )}
-                {accessToken && (
-                  <EuiFlexItem>
-                    <EuiButton
-                      color="primary"
-                      onClick={handleWhoAmI}
-                    >
-                      <FormattedMessage
-                        id="xpack.workplaceai.gettingStarted.earsSection.whoAmIButton"
-                        defaultMessage="Who Am I?"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                )}
-                {userInfo && (
-                  <>
-                    <EuiSpacer size="m" />
-                    <EuiCallOut
-                      announceOnMount
-                      title={
-                        <FormattedMessage
-                          id="xpack.workplaceai.gettingStarted.earsSection.connectedTitle"
-                          defaultMessage="Successfully connected!"
-                        />
-                      }
-                      color="success"
-                      iconType="check"
-                    >
-                      <EuiSpacer size="s" />
-                      <EuiFlexGroup alignItems="center" gutterSize="m">
-                        {userInfo.picture && (
-                          <EuiFlexItem grow={false}>
-                            <EuiAvatar name={userInfo.email} imageUrl={userInfo.picture} size="l" />
-                          </EuiFlexItem>
-                        )}
-                        <EuiFlexItem>
-                          <EuiDescriptionList
-                            type="column"
-                            compressed
-                            listItems={[
-                              {
-                                title: (
-                                  <FormattedMessage
-                                    id="xpack.workplaceai.gettingStarted.earsSection.emailLabel"
-                                    defaultMessage="Email"
-                                  />
-                                ),
-                                description: userInfo.email,
-                              },
-                            ]}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiCallOut>
-                  </>
-                )}
                 {refreshToken && (
                   <EuiFlexItem>
                     <EuiButton
                       color="primary"
                       onClick={handleRefreshToken}
+                      isLoading={earsLoading}
                     >
                       <FormattedMessage
                         id="xpack.workplaceai.gettingStarted.earsSection.refreshTokenButton"
@@ -266,10 +293,118 @@ export const EarsConnectionsSection: React.FC = () => {
                     </EuiButton>
                   </EuiFlexItem>
                 )}
+                {accessToken && (
+                  <EuiFlexItem>
+                    <EuiButton
+                      color="primary"
+                      onClick={handleRevokeToken}
+                      isLoading={earsLoading}
+                    >
+                      <FormattedMessage
+                        id="xpack.workplaceai.gettingStarted.earsSection.revokeTokenButton"
+                        defaultMessage="Revoke Token"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
             </EuiFlexGroup>
           </EuiFlexItem>
+        {earsError && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              announceOnMount
+              title={
+                <FormattedMessage
+                  id="xpack.workplaceai.gettingStarted.earsSection.userInfoErrorTitle"
+                  defaultMessage="Failed to execute EARS call"
+                />
+              }
+              color="warning"
+              iconType="warning"
+            >
+              {earsError}
+            </EuiCallOut>
+          </>
+        )}
         </EuiFlexGroup>
       </EuiPanel>
-    </EuiFlexGroup>
-  );
+  )}
+  {code && (
+    <EuiPanel paddingSize="l">
+      <EuiFlexGroup alignItems="center" gutterSize="l">
+        <EuiFlexItem>
+          <EuiButton
+            color="primary"
+            onClick={handleWhoAmI}
+            isLoading={userInfoLoading}
+          >
+            <FormattedMessage
+              id="xpack.workplaceai.gettingStarted.earsSection.whoAmIButton"
+              defaultMessage="Who Am I?"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+        {userInfo && (
+          <EuiCallOut
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.workplaceai.gettingStarted.earsSection.connectedTitle"
+                defaultMessage="Successfully connected!"
+              />
+            }
+            color="success"
+            iconType="check"
+          >
+            <EuiSpacer size="s" />
+            <EuiFlexGroup alignItems="center" gutterSize="m">
+              {userInfo.picture && (
+                <EuiFlexItem grow={false}>
+                  <EuiAvatar name={userInfo.email} imageUrl={userInfo.picture} size="l" />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem>
+                <EuiDescriptionList
+                  type="column"
+                  compressed
+                  listItems={[
+                    {
+                      title: (
+                        <FormattedMessage
+                          id="xpack.workplaceai.gettingStarted.earsSection.emailLabel"
+                          defaultMessage="Email"
+                        />
+                      ),
+                      description: userInfo.email,
+                    },
+                  ]}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiCallOut>
+        )}
+        {userInfoError && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              announceOnMount
+              title={
+                <FormattedMessage
+                  id="xpack.workplaceai.gettingStarted.earsSection.userInfoErrorTitle"
+                  defaultMessage="Failed to fetch user info"
+                />
+              }
+              color="warning"
+              iconType="warning"
+            >
+              {userInfoError}
+            </EuiCallOut>
+          </>
+        )}
+      </EuiFlexGroup>
+    </EuiPanel>
+  )}
+  </EuiFlexGroup>
+  )
 };

@@ -15,8 +15,9 @@ export {
   STACK_CONNECTORS_MANAGEMENT_ID,
   EARS_API_PATH,
   EARS_START_OAUTH_ROUTE,
-  EARS_FETCH_SECRETS_ROUTE,
   EARS_EXCHANGE_CODE_ROUTE,
+  EARS_REFRESH_TOKEN_ROUTE,
+  EARS_REVOKE_TOKEN_ROUTE,
 } from './routes';
 
 export {
@@ -29,6 +30,7 @@ export type {
   ExchangeCodeResponse,
   refreshTokenResponseSchema,
   RefreshTokenResponse,
+  RevokeTokenResponse,
   ExchangeCodeRequest,
   GoogleUserInfo,
 } from './http_api/ears';

@@ -27,6 +27,7 @@ export const ALL_EARS_OAUTH_PROVIDERS = [
   EarsOAuthProvider.Microsoft,
 ] as const;
 
+// Exchange token
 export interface ExchangeCodeRequest {
   code: string;
 }
@@ -38,11 +39,7 @@ export const exchangeCodeResponseSchema = z.object({
 
 export type ExchangeCodeResponse = z.infer<typeof exchangeCodeResponseSchema>;
 
-export interface GoogleUserInfo {
-  picture: string;
-  email: string;
-}
-
+// Refresh Token
 export interface RefreshTokenRequest {
   refresh_token: string;
 }
@@ -52,3 +49,19 @@ export const refreshTokenResponseSchema = z.object({
 });
 
 export type RefreshTokenResponse = z.infer<typeof refreshTokenResponseSchema>;
+
+// Revoke Token
+export interface RevokeTokenRequest {
+  token: string;
+}
+
+export const revokeTokenResponseSchema = z.object({
+});
+
+export type RevokeTokenResponse = z.infer<typeof refreshTokenResponseSchema>;
+
+export interface GoogleUserInfo {
+  picture: string;
+  email: string;
+}
+

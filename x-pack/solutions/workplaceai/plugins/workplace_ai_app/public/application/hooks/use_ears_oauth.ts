@@ -13,10 +13,11 @@ import {
   ExchangeCodeRequest,
   type EarsOAuthProvider,
   type ExchangeCodeResponse,
-  type RefreshTokenResponse
+  type RefreshTokenResponse,
+  type RevokeTokenResponse
 } from '../../../common';
 import { useKibana } from './use_kibana';
-import { RefreshTokenRequest } from '@kbn/workplace-ai-app/common/http_api/ears';
+import { RefreshTokenRequest, RevokeTokenRequest } from '@kbn/workplace-ai-app/common/http_api/ears';
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
 
@@ -62,6 +63,29 @@ export const useRefreshToken = (): UseMutationResult<
     mutationFn: async ({ provider, refresh_token }: UseRefreshTokenInput) => {
       const body: RefreshTokenRequest = { refresh_token };
       return http.post<RefreshTokenResponse>(`${EARS_API_PATH}/${provider}/oauth/refresh`, {
+        body: JSON.stringify(body),
+      });
+    },
+  });
+};
+
+interface UseRevokeTokenInput {
+  provider: EarsOAuthProvider;
+  token: string;
+}
+
+export const useRevokeToken = (): UseMutationResult<
+  RevokeTokenResponse,
+  ServerError,
+  UseRevokeTokenInput
+> => {
+  const { http } = useKibana().services;
+
+  return useMutation<RevokeTokenResponse, ServerError, UseRevokeTokenInput>({
+    mutationKey: ['workplace_ai', 'ears', 'revoke_token'],
+    mutationFn: async ({ provider, token }: UseRevokeTokenInput) => {
+      const body: RevokeTokenRequest = { token };
+      return http.post<RevokeTokenResponse>(`${EARS_API_PATH}/${provider}/oauth/revoke`, {
         body: JSON.stringify(body),
       });
     },

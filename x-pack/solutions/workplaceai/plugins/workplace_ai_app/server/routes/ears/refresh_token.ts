@@ -8,8 +8,8 @@
 import { Agent } from 'undici';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import { EARS_FETCH_SECRETS_ROUTE } from '../../../common/routes';
-import { fetchSecretsResponseSchema } from '../../../common/http_api/ears';
+import { EARS_REFRESH_TOKEN_ROUTE } from '../../../common/routes';
+import { EarsOAuthProvider, refreshTokenResponseSchema } from '../../../common/http_api/ears';
 import type { WorkplaceAIAppConfig } from '../../config';
 
 // Create an undici Agent that ignores self-signed certificates (for local dev)
@@ -19,7 +19,7 @@ const insecureAgent = new Agent({
   },
 });
 
-export function registerFetchSecretsRoute({
+export function registerRefreshTokenRoute({
   router,
   logger,
   config,
@@ -28,9 +28,9 @@ export function registerFetchSecretsRoute({
   logger: Logger;
   config: WorkplaceAIAppConfig;
 }) {
-  router.get(
+  router.post(
     {
-      path: EARS_FETCH_SECRETS_ROUTE,
+      path: EARS_REFRESH_TOKEN_ROUTE,
       options: {
         access: 'internal',
       },
@@ -40,8 +40,16 @@ export function registerFetchSecretsRoute({
         },
       },
       validate: {
-        query: schema.object({
-          request_id: schema.string(),
+        params: schema.object({
+          provider: schema.oneOf([
+            schema.literal(EarsOAuthProvider.Google),
+            schema.literal(EarsOAuthProvider.GitHub),
+            schema.literal(EarsOAuthProvider.Notion),
+            schema.literal(EarsOAuthProvider.Microsoft),
+          ]),
+        }),
+        body: schema.object({
+          refresh_token: schema.string(),
         }),
       },
     },
@@ -58,14 +66,17 @@ export function registerFetchSecretsRoute({
         });
       }
 
-      const { request_id: requestId } = request.query;
+      const { provider } = request.params;
+
+      const { refresh_token } = request.body;
 
       try {
         const fetchOptions: RequestInit & { dispatcher?: Agent } = {
-          method: 'GET',
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify({refresh_token}),
         };
 
         if (allowInsecure) {
@@ -73,13 +84,13 @@ export function registerFetchSecretsRoute({
         }
 
         const earsResponse = await fetch(
-          `${earsUrl}/oauth/fetch_request_secrets?request_id=${encodeURIComponent(requestId)}`,
+          `${earsUrl}/${provider}/oauth/refresh`,
           fetchOptions
         );
 
         if (!earsResponse.ok) {
           const errorText = await earsResponse.text();
-          const errorMsg = `EARS fetch secrets failed: ${earsResponse.status} - ${errorText}`;
+          const errorMsg = `EARS refreshing token failed: ${earsResponse.status} - ${errorText}`;
           logger.error(errorMsg);
           return response.customError({
             statusCode: earsResponse.status,
@@ -90,7 +101,7 @@ export function registerFetchSecretsRoute({
         }
 
         const rawData = await earsResponse.json();
-        const parseResult = fetchSecretsResponseSchema.safeParse(rawData);
+        const parseResult = refreshTokenResponseSchema.safeParse(rawData);
 
         if (!parseResult.success) {
           const errorMsg = `Invalid response from EARS: ${parseResult.error.message}`;
@@ -107,7 +118,7 @@ export function registerFetchSecretsRoute({
           body: parseResult.data,
         });
       } catch (error) {
-        const errorMsg = `EARS fetch secrets error: ${error}`;
+        const errorMsg = `EARS exchange code error: ${error}`;
         logger.error(errorMsg);
         return response.customError({
           statusCode: 500,
@@ -119,3 +130,4 @@ export function registerFetchSecretsRoute({
     }
   );
 }
+
