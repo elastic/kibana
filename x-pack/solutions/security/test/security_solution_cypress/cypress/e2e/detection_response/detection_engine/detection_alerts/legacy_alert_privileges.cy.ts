@@ -7,23 +7,23 @@
 
 import { getCustomQueryRuleParams } from '../../../../objects/rule';
 import {
-  CLOSE_ALERT_BTN,
   MARK_ALERT_ACKNOWLEDGED_BTN,
   ALERT_ASSIGN_CONTEXT_MENU_ITEM,
   ALERT_TAGGING_CONTEXT_MENU_ITEM,
-  TAKE_ACTION_POPOVER_BTN,
   CLOSE_SELECTED_ALERTS_BTN,
+  TIMELINE_CONTEXT_MENU_BTN,
+  OPEN_ALERT_BTN,
 } from '../../../../screens/alerts';
 import {
   addAlertTagToNAlerts,
   closeAlerts,
-  expandFirstAlertActions,
   markAcknowledgedFirstAlert,
   openFirstAlert,
   selectNumberOfAlerts,
   goToClosedAlerts,
   goToAcknowledgedAlerts,
   waitForAlerts,
+  expandBulkActions,
 } from '../../../../tasks/alerts';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
@@ -296,29 +296,18 @@ describe('Legacy Alerts Privileges', { tags: ['@ess'] }, () => {
       waitForAlertsToPopulate();
     });
 
-    it('should NOT be able to acknowledge alerts', () => {
-      expandFirstAlertActions();
-      cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).should('not.exist');
+    it('should NOT be able to manage alerts via the context menu', () => {
+      cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.disabled');
     });
 
-    it('should NOT be able to close alerts via context menu', () => {
-      expandFirstAlertActions();
-      cy.get(CLOSE_ALERT_BTN).should('not.exist');
-    });
-
-    it('should NOT be able to close alerts via bulk actions', () => {
+    it('should NOT be able to manage alerts via bulk actions', () => {
       selectNumberOfAlerts(2);
-      cy.get(TAKE_ACTION_POPOVER_BTN).click();
+      expandBulkActions();
+
       cy.get(CLOSE_SELECTED_ALERTS_BTN).should('not.exist');
-    });
-
-    it('should NOT be able to assign alerts', () => {
-      expandFirstAlertActions();
+      cy.get(OPEN_ALERT_BTN).should('not.exist');
       cy.get(ALERT_ASSIGN_CONTEXT_MENU_ITEM).should('not.exist');
-    });
-
-    it('should NOT be able to tag alerts', () => {
-      expandFirstAlertActions();
+      cy.get(MARK_ALERT_ACKNOWLEDGED_BTN).should('not.exist');
       cy.get(ALERT_TAGGING_CONTEXT_MENU_ITEM).should('not.exist');
     });
   });
