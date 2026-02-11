@@ -92,7 +92,6 @@ export const oauthAuthorizeRoute = (
             encryptedSavedObjectsClient: encryptedSavedObjects.getClient({
               includedHiddenTypes: ['action'],
             }),
-            kibanaBaseUrl: kibanaUrl,
           });
 
           const spaceId = spaces ? spaces.spacesService.getSpaceId(req) : 'default';
@@ -101,7 +100,7 @@ export const oauthAuthorizeRoute = (
             namespace = spaces.spacesService.spaceIdToNamespace(spaceId);
           }
           const oauthConfig = await oauthService.getOAuthConfig(connectorId, namespace);
-          const redirectUri = oauthService.getRedirectUri();
+          const redirectUri = OAuthAuthorizationService.getRedirectUri(kibanaUrl);
 
           // Validate and build return URL for post-OAuth redirect
           const requestedReturnUrl = req.body?.returnUrl;
@@ -137,7 +136,6 @@ export const oauthAuthorizeRoute = (
           });
           const { state, codeChallenge } = await oauthStateClient.create({
             connectorId,
-            redirectUri,
             kibanaReturnUrl,
             spaceId,
           });

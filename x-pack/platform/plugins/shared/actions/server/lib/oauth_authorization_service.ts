@@ -65,7 +65,6 @@ interface ConnectorWithOAuth {
 interface ConstructorOptions {
   actionsClient: ActionsClient;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
-  kibanaBaseUrl: string;
 }
 
 /**
@@ -79,12 +78,10 @@ interface ConstructorOptions {
 export class OAuthAuthorizationService {
   private readonly actionsClient: ActionsClient;
   private readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
-  private readonly kibanaBaseUrl: string;
 
-  constructor({ actionsClient, encryptedSavedObjectsClient, kibanaBaseUrl }: ConstructorOptions) {
+  constructor({ actionsClient, encryptedSavedObjectsClient }: ConstructorOptions) {
     this.actionsClient = actionsClient;
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
-    this.kibanaBaseUrl = kibanaBaseUrl;
   }
 
   /**
@@ -152,16 +149,17 @@ export class OAuthAuthorizationService {
    * The redirect URI is where the OAuth provider will send the user after authorization.
    * It points to the oauth_callback route in this Kibana instance.
    *
+   * @param publicBaseUrl - The Kibana public base URL (`server.publicBaseUrl`)
    * @returns The complete redirect URI
    * @throws Error if Kibana public base URL is not configured
    */
-  getRedirectUri(): string {
-    if (!this.kibanaBaseUrl) {
+  static getRedirectUri(publicBaseUrl: string | undefined): string {
+    if (!publicBaseUrl) {
       throw new Error(
         'Kibana public URL not configured. Please set server.publicBaseUrl in kibana.yml'
       );
     }
-    return `${this.kibanaBaseUrl}${BASE_ACTION_API_PATH}/connector/_oauth_callback`;
+    return `${publicBaseUrl}${BASE_ACTION_API_PATH}/connector/_oauth_callback`;
   }
 
   /**
