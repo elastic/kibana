@@ -10,7 +10,7 @@ export const dataViewRouteHelpersFactory = (
   supertest: SuperTest.Agent,
   namespace: string = 'default'
 ) => ({
-  create: async (name: string) => {
+  create: async (name: string, indexPattern: string = 'logs-*') => {
     const { body: existingDataView, statusCode } = await supertest.get(
       `/s/${namespace}/api/data_views/data_view/${name}-${namespace}`
     );
@@ -25,7 +25,7 @@ export const dataViewRouteHelpersFactory = (
       .set('kbn-xsrf', 'foo')
       .send({
         data_view: {
-          title: `logs-*`,
+          title: indexPattern,
           timeFieldName: '@timestamp',
           name: `${name}-${namespace}`,
           id: `${name}-${namespace}`,

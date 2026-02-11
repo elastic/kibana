@@ -9337,6 +9337,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-suites-security-solution-evals@link:x-pack/solutions/security/test/security_solution_evals":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-suites-src@link:src/platform/test":
   version "0.0.0"
   uid ""
