@@ -16,7 +16,6 @@ import { i18n } from '@kbn/i18n';
 
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 
-
 export interface DynamicSideNavItems {
   collections?: Array<EuiSideNavItemType<unknown>>;
   indices?: Array<EuiSideNavItemType<unknown>>;
