@@ -39,9 +39,7 @@ export function applyInclude(value: unknown, pick: unknown, recurseDepth: number
         if (isNonEmptyPlainObject(childSpec)) {
           if (recurseDepth > MAX_RECURSE_DEPTH) {
             return {
-              error: new Error(
-                `Maximum recursion depth ${MAX_RECURSE_DEPTH} has been exceeded`
-              ),
+              error: new Error(`Maximum recursion depth ${MAX_RECURSE_DEPTH} has been exceeded`),
             };
           }
           result[key] = applyInclude(childValue, childSpec, recurseDepth + 1);

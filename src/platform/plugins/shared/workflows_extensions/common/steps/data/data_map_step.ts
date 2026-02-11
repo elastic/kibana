@@ -16,11 +16,11 @@ export const ConfigSchema = z.object({
   items: z.unknown(),
 });
 
-/** Recursive node for pick array format: string (path or key) or one-key map with array of nodes */
-const PickNodeSchema: z.ZodType<string | Record<string, (string | Record<string, unknown>)[]>> =
-  z.lazy(() => z.union([z.string(), z.record(z.string(), z.array(PickNodeSchema))]));
-
-/** Object or array (dot-path + nested list) for field projection. */
+/** Recursive node: string (dot-path or key) or { [key]: PickNode[] } for nested list format */
+type PickNode = string | Record<string, PickNode[]>;
+const PickNodeSchema: z.ZodType<PickNode> = z.lazy(() =>
+  z.union([z.string(), z.record(z.string(), z.array(PickNodeSchema))])
+);
 const PickSchema = z.union([z.record(z.string(), z.unknown()), z.array(PickNodeSchema)]);
 
 export const InputSchema = z.object({
