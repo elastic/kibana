@@ -109,8 +109,6 @@ dependsOn:
   - '@kbn/core-elasticsearch-server-mocks'
   - '@kbn/core-data-streams-server'
   - '@kbn/task-manager-plugin'
-  - '@kbn/data-streams'
-  - '@kbn/es-mappings'
 tags:
   - plugin
   - prod
