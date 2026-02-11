@@ -632,7 +632,7 @@ apiTest.describe(
       const childStreamName = `${streamNamePrefix}-update-cond`;
 
       // Create stream first
-      const { statusCode: createStatus } = await apiClient.post('api/streams/logs/_fork', {
+      const { statusCode: createStatus } = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: childStreamName },
@@ -644,7 +644,7 @@ apiTest.describe(
       expect(createStatus).toBe(200);
 
       // Get the parent stream to get current routing rules
-      const { body: parentBody } = await apiClient.get('api/streams/logs', {
+      const { body: parentBody } = await apiClient.get(`api/streams/${rootStream}`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         responseType: 'json',
       });
@@ -665,7 +665,7 @@ apiTest.describe(
       // Update parent stream with new routing
       const { updated_at: _, ...processingWithoutUpdatedAt } =
         parentBody.stream.ingest.processing || {};
-      const updateResponse = await apiClient.put('api/streams/logs/_ingest', {
+      const updateResponse = await apiClient.put(`api/streams/${rootStream}/_ingest`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           ingest: {
@@ -683,7 +683,7 @@ apiTest.describe(
       expect(updateResponse.statusCode).toBe(200);
 
       // Verify the routing rule was updated
-      const { body: verifyBody } = await apiClient.get('api/streams/logs', {
+      const { body: verifyBody } = await apiClient.get(`api/streams/${rootStream}`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         responseType: 'json',
       });
@@ -702,7 +702,7 @@ apiTest.describe(
         const childStreamName = `${streamNamePrefix}-toggle-status`;
 
         // Create stream with enabled status
-        await apiClient.post('api/streams/logs/_fork', {
+        await apiClient.post(`api/streams/${rootStream}/_fork`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           body: {
             stream: { name: childStreamName },
@@ -713,7 +713,7 @@ apiTest.describe(
         });
 
         // Get parent stream
-        const { body: parentBody } = await apiClient.get('api/streams/logs', {
+        const { body: parentBody } = await apiClient.get(`api/streams/${rootStream}`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           responseType: 'json',
         });
@@ -730,7 +730,7 @@ apiTest.describe(
 
         const { updated_at: _, ...processingWithoutUpdatedAt } =
           parentBody.stream.ingest.processing || {};
-        const updateResponse = await apiClient.put('api/streams/logs/_ingest', {
+        const updateResponse = await apiClient.put(`api/streams/${rootStream}/_ingest`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           body: {
             ingest: {
@@ -748,7 +748,7 @@ apiTest.describe(
         expect(updateResponse.statusCode).toBe(200);
 
         // Verify status was updated
-        const { body: verifyBody } = await apiClient.get('api/streams/logs', {
+        const { body: verifyBody } = await apiClient.get(`api/streams/${rootStream}`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           responseType: 'json',
         });
@@ -772,7 +772,7 @@ apiTest.describe(
         [stream2, 'service-2'],
         [stream3, 'service-3'],
       ]) {
-        await apiClient.post('api/streams/logs/_fork', {
+        await apiClient.post(`api/streams/${rootStream}/_fork`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           body: {
             stream: { name: streamName },
@@ -784,7 +784,7 @@ apiTest.describe(
       }
 
       // Get parent stream
-      const { body: parentBody } = await apiClient.get('api/streams/logs', {
+      const { body: parentBody } = await apiClient.get(`api/streams/${rootStream}`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         responseType: 'json',
       });
@@ -811,7 +811,7 @@ apiTest.describe(
 
       const { updated_at: _, ...processingWithoutUpdatedAt } =
         parentBody.stream.ingest.processing || {};
-      const updateResponse = await apiClient.put('api/streams/logs/_ingest', {
+      const updateResponse = await apiClient.put(`api/streams/${rootStream}/_ingest`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           ingest: {
@@ -829,7 +829,7 @@ apiTest.describe(
       expect(updateResponse.statusCode).toBe(200);
 
       // Verify the order was updated
-      const { body: verifyBody } = await apiClient.get('api/streams/logs', {
+      const { body: verifyBody } = await apiClient.get(`api/streams/${rootStream}`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         responseType: 'json',
       });
@@ -861,7 +861,7 @@ apiTest.describe(
         const childStreamName = `${streamNamePrefix}-complex-upd`;
 
         // Create stream with simple condition
-        await apiClient.post('api/streams/logs/_fork', {
+        await apiClient.post(`api/streams/${rootStream}/_fork`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           body: {
             stream: { name: childStreamName },
@@ -872,7 +872,7 @@ apiTest.describe(
         });
 
         // Get parent stream
-        const { body: parentBody } = await apiClient.get('api/streams/logs', {
+        const { body: parentBody } = await apiClient.get(`api/streams/${rootStream}`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           responseType: 'json',
         });
@@ -897,7 +897,7 @@ apiTest.describe(
 
         const { updated_at: _, ...processingWithoutUpdatedAt } =
           parentBody.stream.ingest.processing || {};
-        const updateResponse = await apiClient.put('api/streams/logs/_ingest', {
+        const updateResponse = await apiClient.put(`api/streams/${rootStream}/_ingest`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           body: {
             ingest: {
@@ -915,7 +915,7 @@ apiTest.describe(
         expect(updateResponse.statusCode).toBe(200);
 
         // Verify the complex condition was saved
-        const { body: verifyBody } = await apiClient.get('api/streams/logs', {
+        const { body: verifyBody } = await apiClient.get(`api/streams/${rootStream}`, {
           headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
           responseType: 'json',
         });

@@ -13,8 +13,11 @@ apiTest.describe(
   'Stream schema - field mapping persistence API (CRUD)',
   { tag: ['@ess', '@svlOblt'] },
   () => {
-    // Stream names must be exactly one level deep when forking from 'logs'
-    const streamNamePrefix = 'logs.sp';
+    // Use logs.otel as it's guaranteed to exist after enableStreams() in fresh installs
+    // Stream names must be exactly one level deep when forking from 'logs.otel'
+    // Format: logs.otel.<name> where name uses hyphens, not dots
+    const rootStream = 'logs.otel';
+    const streamNamePrefix = `${rootStream}.sp`;
 
     // Helper to create a stream and get its definition
     async function createAndGetStream(
@@ -23,7 +26,7 @@ apiTest.describe(
       streamName: string,
       condition: { field: string; eq: string }
     ): Promise<{ success: boolean; stream?: any; error?: string }> {
-      const forkResponse = await apiClient.post('api/streams/logs/_fork', {
+      const forkResponse = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: streamName },
