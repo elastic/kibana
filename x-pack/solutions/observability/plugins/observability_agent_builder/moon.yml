@@ -59,7 +59,8 @@ dependsOn:
   - '@kbn/kibana-utils-plugin'
   - '@kbn/server-route-repository-client'
   - '@kbn/apm-types'
-  - '@kbn/observability-plugin'
+  - '@kbn/apm-types-shared'
+  - '@kbn/observability-utils-server'
 tags:
   - plugin
   - prod
