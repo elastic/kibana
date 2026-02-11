@@ -39,13 +39,16 @@ const isBumpServiceError = (error: unknown): boolean => {
 
 export const runBumpDiff = (basePath: string, currentPath: string): BumpDiffEntry[] => {
   try {
-    const output = execSync(`npx bump-cli diff "${basePath}" "${currentPath}" --format=json`, {
-      cwd: OAS_DOCS_DIR,
-      encoding: 'utf-8',
-      maxBuffer: 50 * 1024 * 1024,
-      stdio: ['pipe', 'pipe', 'pipe'],
-      timeout: DIFF_TIMEOUT,
-    });
+    const output = execSync(
+      `npm run --silent bump:diff -- "${basePath}" "${currentPath}" --format=json`,
+      {
+        cwd: OAS_DOCS_DIR,
+        encoding: 'utf-8',
+        maxBuffer: 50 * 1024 * 1024,
+        stdio: ['pipe', 'pipe', 'pipe'],
+        timeout: DIFF_TIMEOUT,
+      }
+    );
 
     const trimmed = output.trim();
     if (!trimmed || trimmed === '[]') {
