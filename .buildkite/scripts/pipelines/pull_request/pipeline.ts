@@ -538,7 +538,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^src\/platform\/packages\/private\/kbn-import-resolver/,
         /^src\/platform\/packages\/private\/kbn-jest-serializers/,
         /^src\/platform\/packages\/private\/kbn-repo-packages/,
-        /^src\/platform\/packages\/shared\/kbn-babel-register/,
         /^src\/platform\/packages\/shared\/kbn-jest-benchmarks/,
         /^src\/platform\/packages\/shared\/kbn-repo-info/,
         /^src\/platform\/packages\/shared\/kbn-test/,
