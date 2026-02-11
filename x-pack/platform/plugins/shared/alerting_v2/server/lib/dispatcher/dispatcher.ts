@@ -9,6 +9,7 @@ import { inject, injectable } from 'inversify';
 import moment from 'moment';
 import objectHash from 'object-hash';
 import { ALERT_ACTIONS_DATA_STREAM, type AlertAction } from '../../resources/alert_actions';
+import { parseDurationToMs } from '../duration';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -62,6 +63,10 @@ export class DispatcherService implements DispatcherServiceContract {
     const startedAt = new Date();
 
     const alertEpisodes = await this.fetchAlertEpisodes(previousStartedAt);
+    if (alertEpisodes.length === 0) {
+      return { startedAt };
+    }
+
     const suppressions = await this.fetchAlertEpisodeSuppressions(alertEpisodes);
 
     const { suppressed, active } = this.applySuppression(alertEpisodes, suppressions);
@@ -98,7 +103,7 @@ export class DispatcherService implements DispatcherServiceContract {
               episode,
               actionType: 'suppress',
               now,
-              reason: `throttled by policy ${group.policyId}`,
+              reason: `suppressed by throttled policy ${group.policyId}`,
             })
           )
         ),
@@ -355,8 +360,8 @@ export class DispatcherService implements DispatcherServiceContract {
 }
 
 function isWithinInterval(lastNotifiedAt: Date, interval: string, now: Date): boolean {
-  const intervalMillis = moment.duration(interval).asMilliseconds();
-  return lastNotifiedAt.getTime() + intervalMillis <= now.getTime();
+  const intervalMillis = parseDurationToMs(interval);
+  return lastNotifiedAt.getTime() + intervalMillis > now.getTime();
 }
 
 function getSuppressionReason(suppression: AlertEpisodeSuppression): string {
