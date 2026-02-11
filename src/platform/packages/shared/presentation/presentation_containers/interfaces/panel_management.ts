@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
 import type { PublishingSubject } from '@kbn/presentation-publishing/publishing_subject';
 import type { PanelPackage } from './presentation_container';
 
