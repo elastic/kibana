@@ -22,7 +22,7 @@ import { MessageRole, ToolChoiceType, type Prompt } from '@kbn/inference-common'
 import { withActiveInferenceSpan, withExecuteToolSpan } from '@kbn/inference-tracing';
 import { trace } from '@opentelemetry/api';
 import { omit, partition } from 'lodash';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import {
   createCompleteToolCall,
   createCompleteToolCallResponse,
