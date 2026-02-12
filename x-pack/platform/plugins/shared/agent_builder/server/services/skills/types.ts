@@ -9,9 +9,9 @@ import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 
 export interface SkillServiceSetup {
   /**
-   * @deprecated This API is still in development and not ready to be used yet.
+   * Register a built-in skill to be exposed to built-in agents.
    */
-  registerSkill(skill: SkillDefinition): Promise<void>;
+  registerSkill(skill: SkillDefinition): void;
 }
 
 export interface SkillServiceStart {
