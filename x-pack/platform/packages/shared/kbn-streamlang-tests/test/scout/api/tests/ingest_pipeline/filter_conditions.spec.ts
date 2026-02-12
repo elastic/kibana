@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { SetProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Filter Conditions',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     // This test is ingest-pipeline only because ESQL's MV_CONTAINS requires exact type matching.
     // Painless handles this gracefully via string-based comparison fallback.
@@ -47,11 +48,11 @@ apiTest.describe(
       expect(ingestResult[0].attributes).toStrictEqual(
         expect.objectContaining({ status_codes: [200, 201, 204], has_status_200: 'success' })
       );
-      expect(ingestResult[1].attributes).not.toHaveProperty('has_status_200');
+      expect(ingestResult[1].attributes?.has_status_200).toBeUndefined();
       expect(ingestResult[2].attributes).toStrictEqual(
         expect.objectContaining({ status_codes: [200], has_status_200: 'success' })
       );
-      expect(ingestResult[3].attributes).not.toHaveProperty('has_status_200');
+      expect(ingestResult[3].attributes?.has_status_200).toBeUndefined();
     });
   }
 );

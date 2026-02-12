@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, expect, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { PageObjects } from '@kbn/scout';
 import {
   LENS_BASIC_DATA_VIEW,
@@ -22,7 +23,7 @@ const PANEL_TITLES_CUSTOM_TITLE = 'Custom title';
 const PANEL_TITLES_CUSTOM_TITLE_CAPS = 'Custom Title';
 const PANEL_TITLES_CUSTOM_DESCRIPTION = 'Custom description';
 
-spaceTest.describe('Panel titles (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Panel titles (dashboard)', { tag: tags.deploymentAgnostic }, () => {
   let lensSavedObjectId = '';
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
