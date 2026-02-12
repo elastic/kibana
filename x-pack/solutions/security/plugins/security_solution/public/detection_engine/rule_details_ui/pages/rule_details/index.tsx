@@ -182,6 +182,9 @@ const RuleFieldsSectionWrapper = styled.div`
   overflow-wrap: anywhere;
 `;
 
+/**
+ * Styled EuiFlexItem component that occupies a predetermined percentage of the parent container.
+ */
 const StyledEuiFlexItem = styled(EuiFlexItem)`
   min-width: 0px;
   flex-basis: ${({ flexBasis }) => (flexBasis ? `${flexBasis}%` : 'auto')};
@@ -479,14 +482,17 @@ export const RuleDetailsPage = connector(
           <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
         </EuiFlexItem>
       ) : (
-        <RuleStatusFailedCallOut
-          ruleNameForChat={rule?.name ?? ruleI18n.DETECTION_RULES_CONVERSATION_ID}
-          ruleName={rule?.immutable ? rule?.name : undefined}
-          dataSources={rule?.immutable ? ruleIndex : undefined}
-          status={lastExecutionStatus}
-          date={lastExecutionDate}
-          message={lastExecutionMessage}
-        />
+        <>
+          <EuiSpacer size="m" />
+          <RuleStatusFailedCallOut
+            ruleNameForChat={rule?.name ?? ruleI18n.DETECTION_RULES_CONVERSATION_ID}
+            ruleName={rule?.immutable ? rule?.name : undefined}
+            dataSources={rule?.immutable ? ruleIndex : undefined}
+            status={lastExecutionStatus}
+            date={lastExecutionDate}
+            message={lastExecutionMessage}
+          />
+        </>
       );
     }, [
       lastExecutionStatus,
