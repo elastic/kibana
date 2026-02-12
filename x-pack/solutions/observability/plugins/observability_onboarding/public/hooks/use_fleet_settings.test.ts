@@ -169,4 +169,53 @@ describe('useFleetSettings', () => {
     // Should not make API call when fleet is not available
     expect(mockGet).not.toHaveBeenCalled();
   });
+
+  it('provides canUpdateSettings based on fleet.allSettings authorization', async () => {
+    mockGet.mockResolvedValue({
+      item: {
+        prerelease_integrations_enabled: true,
+      },
+    });
+
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        http: {
+          get: mockGet,
+        },
+        fleet: {
+          authz: {
+            fleet: {
+              readSettings: true,
+              allSettings: true,
+            },
+          },
+        },
+      },
+    });
+
+    const { result } = renderHook(() => useFleetSettings());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.canUpdateSettings).toBe(true);
+  });
+
+  it('provides refetch function to reload settings', async () => {
+    mockGet.mockResolvedValue({
+      item: {
+        prerelease_integrations_enabled: false,
+      },
+    });
+
+    const { result } = renderHook(() => useFleetSettings());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.refetch).toBeDefined();
+    expect(typeof result.current.refetch).toBe('function');
+  });
 });

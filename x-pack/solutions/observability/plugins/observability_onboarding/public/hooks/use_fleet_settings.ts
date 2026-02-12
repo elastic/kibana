@@ -22,6 +22,8 @@ interface UseFleetSettingsResult {
   prereleaseIntegrationsEnabled: boolean;
   isLoading: boolean;
   error: Error | null;
+  canUpdateSettings: boolean;
+  refetch: () => void;
 }
 
 export const useFleetSettings = (): UseFleetSettingsResult => {
@@ -33,8 +35,9 @@ export const useFleetSettings = (): UseFleetSettingsResult => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Check if user has permission to read Fleet settings
+  // Check if user has permission to read/update Fleet settings
   const canReadSettings = fleet?.authz?.fleet?.readSettings ?? false;
+  const canUpdateSettings = fleet?.authz?.fleet?.allSettings ?? false;
 
   const fetchSettings = useCallback(async () => {
     if (!http) {
@@ -75,5 +78,7 @@ export const useFleetSettings = (): UseFleetSettingsResult => {
     prereleaseIntegrationsEnabled,
     isLoading,
     error,
+    canUpdateSettings,
+    refetch: fetchSettings,
   };
 };

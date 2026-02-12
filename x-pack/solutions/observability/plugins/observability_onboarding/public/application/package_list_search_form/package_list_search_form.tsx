@@ -8,12 +8,20 @@
 import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiCallOut, EuiSearchBar, EuiSkeletonText } from '@elastic/eui';
-import React, { useRef, useMemo } from 'react';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSearchBar,
+  EuiSkeletonText,
+} from '@elastic/eui';
+import React, { useRef, useMemo, useState, useCallback } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import { useCardUrlRewrite } from './use_card_url_rewrite';
 import { PackageList } from '../package_list/package_list';
 import { useFleetSettings } from '../../hooks/use_fleet_settings';
+import { BetaIntegrationsToggle } from '../../components/beta_integrations_toggle';
 
 interface Props {
   searchQuery: string;
@@ -31,6 +39,7 @@ interface Props {
 type WrapperProps = Props & {
   useAvailablePackages: AvailablePackagesHookType;
   prereleaseIntegrationsEnabled: boolean;
+  onPrereleaseToggle: (enabled: boolean) => void;
 };
 
 const fetchAvailablePackagesHook = (): Promise<AvailablePackagesHookType> =>
@@ -49,6 +58,7 @@ const PackageListGridWrapper = ({
   flowCategory,
   excludePackageIdList = [],
   prereleaseIntegrationsEnabled,
+  onPrereleaseToggle,
 }: WrapperProps) => {
   const { filteredCards: integrationCards, isLoading } = useAvailablePackages({
     prereleaseIntegrationsEnabled,
@@ -69,17 +79,27 @@ const PackageListGridWrapper = ({
 
   return (
     <div ref={packageListRef}>
-      <EuiSearchBar
-        box={{
-          incremental: true,
-        }}
-        onChange={({ queryText, error }) => {
-          if (error) return;
+      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+        <EuiFlexItem grow={true}>
+          <EuiSearchBar
+            box={{
+              incremental: true,
+            }}
+            onChange={({ queryText, error }) => {
+              if (error) return;
 
-          setSearchQuery(queryText);
-        }}
-        query={searchQuery}
-      />
+              setSearchQuery(queryText);
+            }}
+            query={searchQuery}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <BetaIntegrationsToggle
+            prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
+            onToggle={onPrereleaseToggle}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {searchQuery !== '' && (
         <PackageList list={list} searchTerm={searchQuery} showCardLabels={false} />
       )}
@@ -90,7 +110,28 @@ const PackageListGridWrapper = ({
 export const PackageListSearchForm = React.forwardRef(
   (props: Props, packageListRef?: React.Ref<HTMLDivElement>) => {
     const ref = useRef<AvailablePackagesHookType | null>(null);
-    const { prereleaseIntegrationsEnabled, isLoading: isLoadingSettings } = useFleetSettings();
+    const {
+      prereleaseIntegrationsEnabled,
+      isLoading: isLoadingSettings,
+      refetch: refetchSettings,
+    } = useFleetSettings();
+
+    // Local state to immediately reflect toggle changes before refetch completes
+    const [localPrereleaseEnabled, setLocalPrereleaseEnabled] = useState<boolean | undefined>(
+      undefined
+    );
+
+    const handlePrereleaseToggle = useCallback(
+      (enabled: boolean) => {
+        setLocalPrereleaseEnabled(enabled);
+        // Refetch settings to confirm the change was persisted
+        refetchSettings();
+      },
+      [refetchSettings]
+    );
+
+    // Use local state if available, otherwise use fetched setting
+    const effectivePrereleaseEnabled = localPrereleaseEnabled ?? prereleaseIntegrationsEnabled;
 
     const {
       error: errorLoading,
@@ -138,7 +179,8 @@ export const PackageListSearchForm = React.forwardRef(
         {...props}
         useAvailablePackages={ref.current}
         packageListRef={packageListRef}
-        prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
+        prereleaseIntegrationsEnabled={effectivePrereleaseEnabled}
+        onPrereleaseToggle={handlePrereleaseToggle}
       />
     );
   }
