@@ -124,6 +124,10 @@ export function ConditionEditor(props: ConditionEditorProps) {
 
   const flushSyntaxEditorCondition = useCallback(() => {
     const currentValue = syntaxEditorValueRef.current;
+    if (currentValue === lastSyncedSerializedConditionRef.current) {
+      debouncedEmitConditionChange.cancel();
+      return;
+    }
     try {
       const parsed = JSON.parse(currentValue) as Condition;
       debouncedEmitConditionChange.cancel();

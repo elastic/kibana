@@ -179,6 +179,27 @@ describe('ConditionEditor', () => {
       jest.useRealTimers();
     });
 
+    it('does not flush on blur when the syntax editor value has not changed', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ConditionEditor
+          condition={{ field: 'severity_text', eq: 'info' }}
+          status="enabled"
+          onConditionChange={mockOnConditionChange}
+        />
+      );
+
+      const switchButton = screen.getByTestId('streamsAppConditionEditorSwitch');
+      await user.click(switchButton);
+
+      const textarea = screen.getByTestId(
+        'streamsAppConditionEditorCodeEditor'
+      ) as HTMLTextAreaElement;
+
+      fireEvent.blur(textarea);
+      expect(mockOnConditionChange).not.toHaveBeenCalled();
+    });
+
     it('flushes pending debounced updates on unmount', async () => {
       jest.useFakeTimers();
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
