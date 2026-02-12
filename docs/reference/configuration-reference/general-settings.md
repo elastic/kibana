@@ -580,8 +580,8 @@ $$$settings-explore-data-in-chart$$$ `xpack.discoverEnhanced.actions.exploreData
 :   Allow to configure the max file upload size for use with the Upload File Repsonse action available with the Defend Integration.  To learn more, check [Endpoint Response actions](docs-content://solutions/security/endpoint-response-actions.md).
     It is available in {{ecloud}} 8.9.0 and later versions.
 
-`xpack.securitySolution.disableEndpointRuleAutoInstall` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Set to `false` to disable the automatic installation of Elastic Defend SIEM rules when a new Endpoint integration policy is created. Introduced with v9.2.4
+`xpack.securitySolution.disableEndpointRuleAutoInstall` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.2.4+`
+:   Set to `true` to disable the automatic installation of Elastic Defend SIEM rules when a new Endpoint integration policy is created. Introduced with v9.2.4. Default is `false`.
 
 
 `xpack.snapshot_restore.ui.enabled`
