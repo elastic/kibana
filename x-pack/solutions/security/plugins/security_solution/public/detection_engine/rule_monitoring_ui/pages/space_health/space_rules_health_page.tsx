@@ -20,7 +20,7 @@ import { TechnicalPreviewBadge } from '../../../../common/components/technical_p
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
-import { useSpaceRulesHealth } from '../../../health/logic/use_space_rules_health';
+import { useSpaceRulesHealth } from '../../../rule_monitoring/logic/detection_engine_health/use_space_rules_health';
 
 export const DetectionEngineSpaceRulesHealthPage = memo(
   function DetectionEngineSpaceRulesHealthPage(): JSX.Element {

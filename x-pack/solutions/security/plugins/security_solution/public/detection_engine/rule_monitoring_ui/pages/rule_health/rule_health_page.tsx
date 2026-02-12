@@ -21,7 +21,7 @@ import { TechnicalPreviewBadge } from '../../../../common/components/technical_p
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
-import { useRuleHealth } from '../../../health/logic/use_rule_health';
+import { useRuleHealth } from '../../../rule_monitoring/logic/detection_engine_health/use_rule_health';
 
 export const DetectionEngineRuleHealthPage = memo(
   function DetectionEngineRuleHealthPage(): JSX.Element {

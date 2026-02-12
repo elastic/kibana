@@ -39,7 +39,7 @@ import { AddRulesPage } from '../detection_engine/rule_management_ui/pages/add_r
 import {
   DetectionEngineRuleHealthPage,
   DetectionEngineSpaceRulesHealthPage,
-} from '../detection_engine/health_ui/pages';
+} from '../detection_engine/rule_monitoring_ui/pages';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { RulesLandingPage } from './landing';
 import { CoverageOverviewPage } from '../detection_engine/rule_management_ui/pages/coverage_overview';

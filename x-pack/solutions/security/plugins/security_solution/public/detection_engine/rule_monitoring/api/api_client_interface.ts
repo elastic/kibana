@@ -9,6 +9,10 @@ import type { SortOrder } from '../../../../common/api/detection_engine';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
+  GetRuleHealthRequestBody,
+  GetRuleHealthResponse,
+  GetSpaceHealthRequestBody,
+  GetSpaceHealthResponse,
   LogLevel,
   RuleExecutionEventType,
   RuleExecutionResult,
@@ -38,6 +42,36 @@ export interface IRuleMonitoringApiClient {
   fetchRuleExecutionResults(
     args: FetchRuleExecutionResultsArgs
   ): Promise<GetRuleExecutionResultsResponse>;
+
+  /**
+   * Fetches health overview of all detection rules in the current Kibana space.
+   *
+   * @param params GetSpaceHealthRequestBody request parameters
+   * @param signal to cancel request
+   *
+   * @returns Promise<GetSpaceHealthResponse> The health overview of all detection rules in the current Kibana space
+   *
+   * @throws An error if response is not OK
+   */
+  fetchSpaceRulesHealth(
+    params: GetSpaceHealthRequestBody,
+    signal?: AbortSignal
+  ): Promise<GetSpaceHealthResponse>;
+
+  /**
+   * Fetches health overview of a specific detection rule in the current Kibana space.
+   *
+   * @param params GetRuleHealthRequestBody request parameters
+   * @param signal to cancel request
+   *
+   * @returns Promise<GetRuleHealthResponse> The health overview of a specific detection rule in the current Kibana space
+   *
+   * @throws An error if response is not OK
+   */
+  fetchRuleHealth(
+    params: GetRuleHealthRequestBody,
+    signal?: AbortSignal
+  ): Promise<GetRuleHealthResponse>;
 }
 
 export interface RuleMonitoringApiCallArgs {

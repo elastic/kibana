@@ -6,31 +6,31 @@
  */
 
 import type { UseQueryOptions } from '@kbn/react-query';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type {
-  GetSpaceHealthRequestBody,
-  GetSpaceHealthResponse,
-} from '../../../../common/api/detection_engine';
-import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useGetSpaceRulesHealthQuery } from '../api/hooks/use_get_space_rules_health';
+  GetRuleHealthRequestBody,
+  GetRuleHealthResponse,
+} from '../../../../../common/api/detection_engine';
+import { useGetRuleHealthQuery } from '../../api/hooks/use_get_rule_health';
 import * as i18n from './translations';
 
 /**
  * A wrapper around useQuery provides default values to the underlying query,
  * like query key, abortion signal, and error handler.
  */
-export const useSpaceRulesHealth = (
-  queryArgs: GetSpaceHealthRequestBody,
+export const useRuleHealth = (
+  queryArgs: GetRuleHealthRequestBody,
   queryOptions?: UseQueryOptions<
-    GetSpaceHealthResponse,
+    GetRuleHealthResponse,
     Error,
-    GetSpaceHealthResponse,
-    [...string[], GetSpaceHealthRequestBody]
+    GetRuleHealthResponse,
+    [...string[], GetRuleHealthRequestBody]
   >
 ) => {
   const { addError } = useAppToasts();
 
-  return useGetSpaceRulesHealthQuery(queryArgs, {
-    onError: (error: Error) => addError(error, { title: i18n.SPACE_RULES_HEALTH_FETCH_FAILURE }),
+  return useGetRuleHealthQuery(queryArgs, {
+    onError: (error: Error) => addError(error, { title: i18n.RULE_HEALTH_FETCH_FAILURE }),
     ...queryOptions,
   });
 };

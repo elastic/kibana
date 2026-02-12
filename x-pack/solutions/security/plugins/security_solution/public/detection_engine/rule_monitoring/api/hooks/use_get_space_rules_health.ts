@@ -12,7 +12,7 @@ import type {
   GetSpaceHealthResponse,
 } from '../../../../../common/api/detection_engine';
 import { GET_SPACE_HEALTH_URL } from '../../../../../common/api/detection_engine';
-import { fetchSpaceRulesHealth } from '../api';
+import { api } from '../api_client';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
 const GET_SPACE_RULES_HEALTH_KEY = ['POST', GET_SPACE_HEALTH_URL];
@@ -33,7 +33,7 @@ export const useGetSpaceRulesHealthQuery = (
   useQuery(
     [...GET_SPACE_RULES_HEALTH_KEY, queryArgs],
     async ({ signal }) => {
-      const response = await fetchSpaceRulesHealth(queryArgs, signal);
+      const response = await api.fetchSpaceRulesHealth(queryArgs, signal);
 
       return response;
     },
