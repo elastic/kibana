@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
 import path from 'path';
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
 
 /*
  * These tests exist in a separate configuration because:
@@ -21,10 +20,6 @@ import { FtrConfigProviderContext } from '@kbn/test';
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const httpConfig = await readConfigFile(require.resolve('../../config.base.js'));
-
-  // Find all folders in plugins since we treat all them as plugin folder
-  const pluginDir = path.resolve(__dirname, '../../plugins');
-  const pluginsDirs = fs.readdirSync(pluginDir).map((name) => path.resolve(pluginDir, name));
 
   return {
     testFiles: [
@@ -41,7 +36,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...httpConfig.get('kbnTestServer'),
       serverArgs: [
         ...httpConfig.get('kbnTestServer.serverArgs'),
-        ...pluginsDirs.map((p) => `--plugin-path=${p}`),
+        ...findTestPluginPaths(path.resolve(__dirname, '../../plugins')),
       ],
       runOptions: {
         ...httpConfig.get('kbnTestServer.runOptions'),

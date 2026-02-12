@@ -178,12 +178,16 @@ http.request.method: (GET OR POST OR DELETE)
 === Matching multiple fields
 
 Wildcards can also be used to query multiple fields. For example, to search for
-documents where any sub-field of `http.response` contains “error”, use the following:
+documents where any sub-field of `datastream` contains “logs”, use the following:
 
 [source,yaml]
 -------------------
-http.response.*: error
+datastream.*: logs
 -------------------
+
+NOTE: When using wildcards to query multiple fields, errors might occur if the fields are of
+different types. For example, if `datastream.*` matches both numeric and string fields, the
+above query will result in an error because numeric fields cannot be queried for string values.
 
 [discrete]
 === Querying nested fields

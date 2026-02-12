@@ -9,7 +9,10 @@ import expect from '@kbn/expect';
 import { JSDOM } from 'jsdom';
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { format as formatURL } from 'url';
-import { createTokens, getStateAndNonce } from '../../../fixtures/oidc/oidc_tools';
+import {
+  createTokens,
+  getStateAndNonce,
+} from '@kbn/security-api-integration-helpers/oidc/oidc_tools';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {

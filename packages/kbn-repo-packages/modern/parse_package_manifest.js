@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+const Path = require('path');
 const Fs = require('fs');
 const { inspect } = require('util');
 
@@ -19,6 +20,7 @@ const {
   PACKAGE_TYPES,
 } = require('./parse_helpers');
 const { parse } = require('../utils/jsonc');
+const { isValidPluginCategoryInfo, PLUGIN_CATEGORY } = require('./plugin_category_info');
 
 /**
  * @param {string} key
@@ -41,9 +43,10 @@ const isValidOwner = (v) => typeof v === 'string' && v.startsWith('@');
 
 /**
  * @param {unknown} plugin
+ * @param {string} path
  * @returns {import('./types').PluginPackageManifest['plugin']} plugin
  */
-function validatePackageManifestPlugin(plugin) {
+function validatePackageManifestPlugin(plugin, path) {
   if (!isObj(plugin)) {
     throw err('plugin', plugin, 'must be an object');
   }
@@ -59,6 +62,7 @@ function validatePackageManifestPlugin(plugin) {
     requiredBundles,
     enabledOnAnonymousPages,
     type,
+    __category__,
   } = plugin;
 
   if (!isValidPluginId(id)) {
@@ -113,6 +117,28 @@ function validatePackageManifestPlugin(plugin) {
     throw err(`plugin.type`, type, `must be undefined or "preboot"`);
   }
 
+  const segs = path.split(Path.sep);
+  const isBuild = segs.includes('node_modules') || segs.includes('build');
+  if (__category__ !== undefined) {
+    if (!isBuild) {
+      throw err(
+        'plugin.__category__',
+        __category__,
+        'may only be specified on built packages in node_modules'
+      );
+    }
+
+    if (!isValidPluginCategoryInfo(__category__)) {
+      throw err('plugin.__category__', __category__, 'is not valid');
+    }
+  } else if (isBuild) {
+    throw err(
+      'plugin.__category__',
+      __category__,
+      'must be defined on built packages in node_modules'
+    );
+  }
+
   return {
     id,
     browser,
@@ -124,6 +150,7 @@ function validatePackageManifestPlugin(plugin) {
     requiredBundles,
     enabledOnAnonymousPages,
     extraPublicDirs,
+    [PLUGIN_CATEGORY]: __category__,
   };
 }
 
@@ -168,9 +195,10 @@ function validatePackageManifestBuild(build) {
 /**
  * Validate the contents of a parsed kibana.jsonc file.
  * @param {unknown} parsed
+ * @param {string} path
  * @returns {import('./types').KibanaPackageManifest}
  */
-function validatePackageManifest(parsed) {
+function validatePackageManifest(parsed, path) {
   if (!isObj(parsed)) {
     throw new Error('expected manifest root to be an object');
   }
@@ -245,7 +273,7 @@ function validatePackageManifest(parsed) {
     return {
       type,
       ...base,
-      plugin: validatePackageManifestPlugin(plugin),
+      plugin: validatePackageManifestPlugin(plugin, path),
     };
   }
 
@@ -285,7 +313,7 @@ function readPackageManifest(path) {
       throw new Error(`Invalid JSONc: ${error.message}`);
     }
 
-    return validatePackageManifest(parsed);
+    return validatePackageManifest(parsed, path);
   } catch (error) {
     throw new Error(`Unable to parse [${path}]: ${error.message}`);
   }

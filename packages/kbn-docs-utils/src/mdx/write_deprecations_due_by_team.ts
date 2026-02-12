@@ -32,7 +32,7 @@ export async function writeDeprecationDueByTeam(
       );
       if (!dueDeprecations || dueDeprecations.length === 0) return teamMap;
 
-      const pluginMetaInfo = plugins.find((p) => p.manifest.id === pluginId);
+      const pluginMetaInfo = plugins.find((p) => p.id === pluginId);
       if (!pluginMetaInfo || !pluginMetaInfo.manifest.owner.name) return teamMap;
 
       if (!teamMap[pluginMetaInfo.manifest.owner.name]) {

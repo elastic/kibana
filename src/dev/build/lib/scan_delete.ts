@@ -6,70 +6,69 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
+import Path from 'path';
+import Fsp from 'fs/promises';
 
-import del from 'del';
-import { join } from 'path';
 import * as Rx from 'rxjs';
-import { count, map, mergeAll, mergeMap } from 'rxjs/operators';
 
-// @ts-ignore
-import { assertAbsolute } from './fs';
-
-const getStat$ = Rx.bindNodeCallback<[Fs.PathLike], [Fs.Stats]>(Fs.stat);
-const getReadDir$ = Rx.bindNodeCallback<[string], [string[]]>(Fs.readdir);
+import { makeMatcher, MatchOptions } from '@kbn/picomatcher';
+import { assertAbsolute, fsReadDir$ } from './fs';
 
 interface Options {
-  directory: string;
-  regularExpressions: RegExp[];
-  concurrency?: 20;
-  excludePaths?: string[];
+  /**
+   * array of micromatch patterns, all relative paths within `directory`
+   * will be checked against these patterns. If any matches (and none of
+   * the negative patterns match) then that directory/file will be deleted
+   * recursively.
+   */
+  match: string[];
+
+  /**
+   * Options for customizing how match patterns are applied (see micromatch docs)
+   */
+  matchOptions?: MatchOptions;
+
+  /**
+   * optional concurrency to run deletes, defaults to 20
+   */
+  concurrency?: number;
 }
 
 /**
  * Scan the files in a directory and delete the directories/files that
  * are matched by an array of regular expressions.
  *
- * @param options.directory the directory to scan, all files including dot files will be checked
- * @param options.regularExpressions an array of regular expressions, if any matches the file/directory will be deleted
- * @param options.concurrency optional concurrency to run deletes, defaults to 20
+ * @param directory the directory to scan and find files/folders that should be deleted
  */
-export async function scanDelete(options: Options) {
-  const { directory, regularExpressions, concurrency = 20, excludePaths } = options;
-
+export async function scanDelete(directory: string, options: Options) {
   assertAbsolute(directory);
-  (excludePaths || []).forEach((excluded) => assertAbsolute(excluded));
-
-  // get an observable of absolute paths within a directory
-  const getChildPath$ = (path: string) =>
-    getReadDir$(path).pipe(
-      mergeAll(),
-      map((name: string) => join(path, name))
-    );
+  const matcher = makeMatcher(options.match, options.matchOptions);
 
   // get an observable of all paths to be deleted, by starting with the arg
-  // and recursively iterating through all children, unless a child matches
-  // one of the supplied regular expressions
-  const getPathsToDelete$ = (path: string): Rx.Observable<string> => {
-    if (excludePaths && excludePaths.includes(path)) {
-      return Rx.EMPTY;
-    }
+  // and recursively iterating through all children, once a child matches
+  // is will be recursively deleted and we will no longer iterate from down
+  // that path
+  const getPathsToDelete$ = (path: string): Rx.Observable<string> =>
+    fsReadDir$(path).pipe(
+      Rx.mergeAll(),
+      Rx.mergeMap((ent) => {
+        const abs = Path.resolve(path, ent.name);
+        const rel = Path.relative(directory, abs);
+        if (matcher(rel)) {
+          return Rx.of(abs);
+        }
 
-    if (regularExpressions.some((re) => re.test(path))) {
-      return Rx.of(path);
-    }
-
-    return getStat$(path).pipe(
-      mergeMap((stat) => (stat.isDirectory() ? getChildPath$(path) : Rx.EMPTY)),
-      mergeMap(getPathsToDelete$)
+        return ent.isDirectory() ? getPathsToDelete$(abs) : Rx.EMPTY;
+      })
     );
-  };
 
-  return await Rx.of(directory)
-    .pipe(
-      mergeMap(getPathsToDelete$),
-      mergeMap(async (path) => await del(path), concurrency),
-      count()
+  return await Rx.lastValueFrom(
+    getPathsToDelete$(directory).pipe(
+      Rx.mergeMap(
+        async (path) => await Fsp.rm(path, { recursive: true, maxRetries: 1 }),
+        options.concurrency
+      ),
+      Rx.count()
     )
-    .toPromise();
+  );
 }

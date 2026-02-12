@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/session-notifications-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "sessionNotifications",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "session_notifications"
+    ],
+    "requiredPlugins": [
+      "data",
+      "navigation"
+    ]
+  }
+}

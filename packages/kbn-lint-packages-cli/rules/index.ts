@@ -9,6 +9,13 @@
 import type { PackageRule } from '@kbn/repo-linter';
 
 import { matchingPackageNameRule } from './matching_package_name';
+import { constantVersionRule } from './constant_version';
+import { noLicenseRule } from './no_license';
 import { noBasenameCollisionsRule } from './no_basename_collisions';
 
-export const RULES: PackageRule[] = [matchingPackageNameRule, noBasenameCollisionsRule];
+export const RULES: PackageRule[] = [
+  matchingPackageNameRule,
+  constantVersionRule,
+  noLicenseRule,
+  noBasenameCollisionsRule,
+];

@@ -15,7 +15,7 @@ interface MLJobWizardFieldStatsFlyoutProps {
   setFieldValue: (v: string) => void;
   fieldValue?: string | number;
 }
-export const MLJobWizardFieldStatsFlyoutContext = createContext<MLJobWizardFieldStatsFlyoutProps>({
+export const MLFieldStatsFlyoutContext = createContext<MLJobWizardFieldStatsFlyoutProps>({
   isFlyoutVisible: false,
   setIsFlyoutVisible: () => {},
   toggleFlyoutVisible: () => {},
@@ -24,5 +24,5 @@ export const MLJobWizardFieldStatsFlyoutContext = createContext<MLJobWizardField
 });
 
 export function useFieldStatsFlyoutContext() {
-  return useContext(MLJobWizardFieldStatsFlyoutContext);
+  return useContext(MLFieldStatsFlyoutContext);
 }

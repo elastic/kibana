@@ -116,7 +116,6 @@ it('passes correct args to sub-classes', () => {
           "cache": true,
           "dist": true,
           "enabled": true,
-          "oss": true,
           "pluginPaths": Array [],
           "pluginScanDirs": Array [
             <absolute path>/src/plugins,

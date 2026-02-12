@@ -95,7 +95,6 @@ export class RepoPath {
           pkgDir,
           pkgId,
           rel,
-          isBazelPackage: this.resolver.isBazelPackage(pkgId),
         };
       }
     }

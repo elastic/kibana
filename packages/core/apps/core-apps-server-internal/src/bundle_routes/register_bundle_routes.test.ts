@@ -77,7 +77,7 @@ describe('registerBundleRoutes', () => {
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
-      bundlesPath: expect.stringMatching(/src\/core\/target\/public/),
+      bundlesPath: expect.stringMatching(/\/@kbn\/core\/target\/public$/),
       publicPath: '/server-base-path/42/bundles/core/',
       routePath: '/42/bundles/core/',
     });

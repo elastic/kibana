@@ -56,4 +56,4 @@ https://github.com/elastic/kibana/blob/main/docs/development/plugins/expressions
 
 
 ==== Other documentation
-https://www.elastic.co/guide/en/kibana/current/canvas-function-arguments.html[See Canvas documentation about expressions]
+<<canvas-function-arguments,See Canvas documentation about expressions>>

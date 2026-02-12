@@ -57,6 +57,7 @@ webpackstats.json
 !/config/serverless.security.yml
 !/config/node.options
 coverage
+!/test/common/fixtures/plugins/coverage
 selenium
 .babel_register_cache.json
 .webpack.babelcache

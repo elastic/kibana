@@ -1,0 +1,10 @@
+{
+  "type": "plugin",
+  "id": "@kbn/screenshot-mode-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "plugin": {
+    "id": "screenshotMode",
+    "server": true,
+    "browser": true
+  }
+}

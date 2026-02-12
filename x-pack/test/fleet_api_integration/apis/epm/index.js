@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-export default function loadTests({ loadTestFile }) {
+import { setupTestUsers } from '../test_users';
+
+export default function loadTests({ loadTestFile, getService }) {
   describe('EPM Endpoints', () => {
+    before(async () => {
+      await setupTestUsers(getService('security'));
+    });
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./list'));
     loadTestFile(require.resolve('./setup'));

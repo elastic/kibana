@@ -200,6 +200,7 @@ describe('tabify_docs', () => {
               _size: 12,
               _score: 77,
               _source: {},
+              invalid_meta: 'test',
             },
           ],
         },
@@ -216,7 +217,7 @@ describe('tabify_docs', () => {
             },
           },
         },
-        metaFields: ['_id', '_index', '_score', '_type', '_size'],
+        metaFields: ['_id', '_index', '_score', '_type', '_size', 'invalid_meta'],
         fieldFormats: fieldFormats as any,
       });
       const table = tabifyDocs(responsePlugin, dataView);

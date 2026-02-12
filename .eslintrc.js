@@ -121,7 +121,7 @@ const VENN_DIAGRAM_HEADER = `
 
 /** Packages which should not be included within production code. */
 const DEV_PACKAGE_DIRS = getPackages(REPO_ROOT).flatMap((pkg) =>
-  pkg.isDevOnly ? pkg.normalizedRepoRelativeDir : []
+  pkg.isDevOnly() ? pkg.normalizedRepoRelativeDir : []
 );
 
 /** Directories (at any depth) which include dev-only code. */
@@ -1736,7 +1736,10 @@ module.exports = {
      * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
      */
     {
-      files: 'packages/kbn-{package-*,repo-*,dep-*}/**/*',
+      files: [
+        'packages/kbn-{package-*,repo-*,dep-*}/**/*',
+        'packages/kbn-find-used-node-modules/**/*',
+      ],
       rules: {
         'max-classes-per-file': 'off',
       },

@@ -35,6 +35,7 @@ export interface BaseStepCtx {
   kibanaServer: KibanaServer;
   es: Es;
   retry: RetryService;
+  auth: Auth;
 }
 
 export type AnyStep = Step<{}>;

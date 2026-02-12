@@ -28,7 +28,6 @@ export function getPluginBundles(
         new Bundle({
           type: 'plugin',
           id: p.id,
-          publicDirNames: ['public', ...p.extraPublicDirs],
           sourceRoot: repoRoot,
           contextDir: p.directory,
           outputDir: Path.resolve(
@@ -38,10 +37,15 @@ export function getPluginBundles(
           ),
           manifestPath: p.manifestPath,
           banner: p.directory.startsWith(xpackDirSlash)
-            ? `/*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements. \n` +
+            ? `/*! Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one or more contributor license agreements.\n` +
               ` * Licensed under the Elastic License 2.0; you may not use this file except in compliance with the Elastic License 2.0. */\n`
             : undefined,
           pageLoadAssetSizeLimit: limits.pageLoadAssetSize?.[p.id],
+          remoteInfo: {
+            pkgId: p.pkgId,
+            targets: ['public', ...p.extraPublicDirs],
+          },
+          ignoreMetrics: p.ignoreMetrics,
         })
     );
 }

@@ -38,7 +38,9 @@ const config = new Config(
   '',
   '',
   false,
-  true
+  true,
+  true,
+  {}
 );
 
 const linuxPlatform = config.getPlatform('linux', 'x64');

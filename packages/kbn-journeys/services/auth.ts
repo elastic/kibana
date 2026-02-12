@@ -29,7 +29,7 @@ export class Auth {
     private readonly kibanaServer: KibanaServer
   ) {}
 
-  public async login({ username, password }: Credentials) {
+  public async login(credentials?: Credentials) {
     const baseUrl = new URL(
       Url.format({
         protocol: this.config.get('servers.kibana.protocol'),
@@ -37,9 +37,10 @@ export class Auth {
         port: this.config.get('servers.kibana.port'),
       })
     );
-
     const loginUrl = new URL('/internal/security/login', baseUrl);
-    const provider = baseUrl.hostname === 'localhost' ? 'basic' : 'cloud-basic';
+    const provider = this.isCloud() ? 'cloud-basic' : 'basic';
+
+    const version = await this.kibanaServer.version.get();
 
     this.log.info('fetching auth cookie from', loginUrl.href);
     const authResponse = await axios.request({
@@ -49,17 +50,23 @@ export class Auth {
         providerType: 'basic',
         providerName: provider,
         currentURL: new URL('/login?next=%2F', baseUrl).href,
-        params: { username, password },
+        params: credentials ?? { username: this.getUsername(), password: this.getPassword() },
       },
       headers: {
         'content-type': 'application/json',
-        'kbn-version': await this.kibanaServer.version.get(),
+        'kbn-version': version,
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
       },
       validateStatus: () => true,
       maxRedirects: 0,
     });
+
+    if (authResponse.status !== 200) {
+      throw new Error(
+        `Kibana auth failed: code: ${authResponse.status}, message: ${authResponse.statusText}`
+      );
+    }
 
     const cookie = extractCookieValue(authResponse);
     if (cookie) {
@@ -81,5 +88,17 @@ export class Auth {
       value: cookie,
       url: baseUrl.href,
     };
+  }
+
+  public getUsername() {
+    return this.config.get('servers.kibana.username');
+  }
+
+  public getPassword() {
+    return this.config.get('servers.kibana.password');
+  }
+
+  public isCloud() {
+    return this.config.get('servers.kibana.hostname') !== 'localhost';
   }
 }

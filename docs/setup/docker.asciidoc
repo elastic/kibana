@@ -4,6 +4,11 @@
 <titleabbrev>Install with Docker</titleabbrev>
 ++++
 
+:docker-repo:     docker.elastic.co/kibana/kibana
+:docker-image:    {docker-repo}:{version}
+:es-docker-repo:  docker.elastic.co/elasticsearch/elasticsearch
+:es-docker-image: {es-docker-repo}:{version}
+
 Docker images for {kib} are available from the Elastic Docker registry. The
 base image is https://hub.docker.com/_/ubuntu[ubuntu:20.04].
 
@@ -198,7 +203,7 @@ services:
     image: {docker-image}
     environment:
       SERVER_NAME: kibana.example.org
-      ELASTICSEARCH_HOSTS: '["http://es01:9200","http://es02:9200","http://es03:9200"]'
+      ELASTICSEARCH_HOSTS: '["<HOST_1>:9200","<HOST_2>:9200","<HOST_3>:9200"]'
 ----------------------------------------------------------
 
 Since environment variables are translated to CLI arguments, they take

@@ -42,6 +42,9 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
     dockerPush: false,
     dockerTag: '',
     dockerTagQualifier: '',
+    downloadFreshNode: true,
+    withExamplePlugins: false,
+    withTestPlugins: true,
   });
 
   getNodeDownloadInfo.mockImplementation((_: Config, platform: Platform) => {

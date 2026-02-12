@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/foo-plugin",
+  "owner": "@elastic/kibana-security",
+  "plugin": {
+    "id": "fooPlugin",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "features"
+    ]
+  }
+}

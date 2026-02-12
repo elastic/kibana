@@ -1,5 +1,5 @@
 {
-  "name": "data_search_plugin",
+  "name": "@kbn/data-search-plugin",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana"

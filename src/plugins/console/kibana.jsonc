@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/console-plugin",
+  "owner": "@elastic/platform-deployment-management",
+  "plugin": {
+    "id": "console",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "console"
+    ],
+    "requiredPlugins": [
+      "devTools",
+      "share"
+    ],
+    "optionalPlugins": [
+      "usageCollection",
+      "home"
+    ],
+    "requiredBundles": [
+      "esUiShared",
+      "kibanaReact",
+      "kibanaUtils"
+    ]
+  }
+}

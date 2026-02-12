@@ -44,6 +44,7 @@
       "enabled": false,
       "id": "my-monitor-3",
       "name": "My Monitor 3",
+      "proxy_url": "${testGlobalParam2}",
       "urls": [
         "http://localhost:9200"
       ],
@@ -66,13 +67,17 @@
         ],
         "body":{
           "positive": [
-            "Saved",
+            "${testLocal1}",
             "saved"
           ]
         }
       },
       "hash": "ekrjelkjrelkjre",
-      "ssl.verification_mode": "strict"
+      "ssl.verification_mode": "strict",
+      "params": {
+        "testLocal1": "testLocalParamsValue",
+        "testGlobalParam2": "testGlobalParamOverwrite"
+      }
     }
   ]
 }

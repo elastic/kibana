@@ -7,6 +7,7 @@
  */
 
 import type { Package } from './package';
+import type { PLUGIN_CATEGORY } from './plugin_category_info';
 
 /**
  * Simple parsed representation of a package.json file, validated
@@ -93,7 +94,7 @@ interface PackageManifestBaseFields {
 export interface PluginPackageManifest extends PackageManifestBaseFields {
   type: 'plugin';
   /**
-   * Details about the plugin which is contained within this package.
+   * Details about the plugin in this package
    */
   plugin: {
     id: string;
@@ -106,6 +107,7 @@ export interface PluginPackageManifest extends PackageManifestBaseFields {
     enabledOnAnonymousPages?: boolean;
     type?: 'preboot';
     extraPublicDirs?: string[];
+    [PLUGIN_CATEGORY]?: PluginCategoryInfo;
   };
 }
 

@@ -1,0 +1,18 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cases-api-integration-test-plugin",
+  "owner": "@elastic/response-ops",
+  "plugin": {
+    "id": "casesApiIntegrationTestPlugin",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "features",
+      "cases"
+    ],
+    "optionalPlugins": [
+      "security",
+      "spaces"
+    ]
+  }
+}

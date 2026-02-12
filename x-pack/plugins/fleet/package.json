@@ -1,9 +1,9 @@
 {
   "author": "Elastic",
-  "name": "fleet",
-  "version": "8.0.0",
+  "name": "@kbn/fleet-plugin",
+  "version": "1.0.0",
   "private": true,
-  "license": "Elastic-License",
+  "license": "Elastic License 2.0",
   "scripts": {
     "cypress": "../../../node_modules/.bin/cypress",
     "cypress:open": "yarn cypress open --config-file ./cypress.config.ts",

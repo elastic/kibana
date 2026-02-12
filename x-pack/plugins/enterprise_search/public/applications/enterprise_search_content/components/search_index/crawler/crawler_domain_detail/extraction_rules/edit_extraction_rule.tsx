@@ -103,7 +103,7 @@ export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
   saveRule,
 }) => {
   const { closeEditRuleFlyout, openEditRuleFlyout } = useActions(ExtractionRulesLogic);
-  const { fieldRuleFlyoutVisible, fieldRuleToEdit, fieldRuleToEditIndex, fieldRuleToEditIsNew } =
+  const { fieldRuleFlyoutVisible, fieldRuleToEdit, fieldRuleToEditIsNew } =
     useValues(ExtractionRulesLogic);
   const [urlToggle, setUrlToggle] = useState<UrlState>(UrlState.ALL);
   const { control, formState, getValues, handleSubmit, reset, setValue } =
@@ -437,6 +437,7 @@ export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
             if (fieldRuleToEditIsNew) {
               appendRule(fieldRule);
             } else {
+              const fieldRuleToEditIndex = rulesFields.findIndex(({ id: ruleId }) => ruleId === id);
               updateRule(fieldRuleToEditIndex ?? 0, fieldRule);
             }
             closeEditRuleFlyout();

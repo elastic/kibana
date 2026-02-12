@@ -15,11 +15,11 @@ fi
 
 if [[ "$RELEASE_BUILD" == "true" ]]; then
   FULL_VERSION="$QUALIFIER_VERSION"
-  BUILD_ARGS="--release --version-qualifier=$VERSION_QUALIFIER"
+  BUILD_ARGS=("--release" "--version-qualifier=$VERSION_QUALIFIER")
   WORKFLOW="staging"
 else
   FULL_VERSION="$QUALIFIER_VERSION-SNAPSHOT"
-  BUILD_ARGS="--version-qualifier=$VERSION_QUALIFIER"
+  BUILD_ARGS=("--version-qualifier=$VERSION_QUALIFIER")
   WORKFLOW="snapshot"
 fi
 

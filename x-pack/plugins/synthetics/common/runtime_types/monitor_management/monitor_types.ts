@@ -90,6 +90,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.ORIGINAL_SPACE]: t.string,
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
     [ConfigKey.ALERT_CONFIG]: AlertConfigsCodec,
+    [ConfigKey.PARAMS]: t.string,
   }),
 ]);
 
@@ -242,7 +243,6 @@ export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
     [ConfigKey.SOURCE_PROJECT_CONTENT]: t.string,
     [ConfigKey.SOURCE_ZIP_USERNAME]: t.string,
     [ConfigKey.SOURCE_ZIP_PASSWORD]: t.string,
-    [ConfigKey.PARAMS]: t.string,
     [ConfigKey.URLS]: t.union([t.string, t.null]),
     [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),

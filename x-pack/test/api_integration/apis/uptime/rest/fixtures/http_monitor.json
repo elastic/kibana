@@ -81,5 +81,6 @@
   "form_monitor_type": "http",
   "journey_id": "",
   "id": "",
-  "hash": ""
+  "hash": "",
+  "params": ""
 }

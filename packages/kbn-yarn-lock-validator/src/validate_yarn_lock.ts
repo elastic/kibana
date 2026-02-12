@@ -92,9 +92,11 @@ export async function validateDependencies(log: SomeDevLog, yarnLock: YarnLock) 
 
   // look for packages that have the the `kibana.devOnly` flag in their package.json
   // and make sure they aren't included in the production dependencies of Kibana
-  const bazelPackages = getPackages(REPO_ROOT);
-  const devOnlyPackagesInProduction = bazelPackages.flatMap((p) =>
-    p.isDevOnly && Object.hasOwn(kibanaPackageJson.dependencies, p.manifest.id) ? p.manifest.id : []
+  const pkgs = getPackages(REPO_ROOT);
+  const devOnlyPackagesInProduction = pkgs.flatMap((p) =>
+    p.isDevOnly() && Object.hasOwn(kibanaPackageJson.dependencies, p.manifest.id)
+      ? p.manifest.id
+      : []
   );
   if (devOnlyPackagesInProduction.length) {
     log.error(dedent`

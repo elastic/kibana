@@ -30,9 +30,9 @@ export class ImportLocator {
     }
 
     const imports = new Set<string>();
-    const queue: Ts.Node[] = [
-      Ts.createSourceFile(path, strippedContent, Ts.ScriptTarget.Latest, true),
-    ];
+    const sourceFile = Ts.createSourceFile(path, strippedContent, Ts.ScriptTarget.Latest, true);
+
+    const queue: Ts.Node[] = [sourceFile];
     const addNodeToQueue = (n: Ts.Node) => {
       queue.push(n);
     };

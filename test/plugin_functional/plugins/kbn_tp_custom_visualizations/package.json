@@ -1,5 +1,5 @@
 {
-  "name": "kbn_tp_custom_visualizations",
+  "name": "@kbn/kbn-tp-custom-visualizations-plugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/kbn_tp_custom_visualizations",
   "kibana": {

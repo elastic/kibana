@@ -1,5 +1,5 @@
 {
-  "name": "rendering_plugin",
+  "name": "@kbn/rendering-plugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/rendering_plugin",
   "kibana": {

@@ -21,6 +21,7 @@ import { convertSOQueriesToPack } from '../../routes/pack/utils';
 import { ACTIONS_INDEX } from '../../../common/constants';
 import { TELEMETRY_EBT_LIVE_QUERY_EVENT } from '../../lib/telemetry/constants';
 import type { PackSavedObjectAttributes } from '../../common/types';
+import { CustomHttpRequestError } from '../../common/error';
 
 interface Metadata {
   currentUser: string | undefined;
@@ -55,7 +56,7 @@ export const createActionHandler = async (
   });
 
   if (!selectedAgents.length) {
-    throw new Error('No agents found for selection');
+    throw new CustomHttpRequestError('No agents found for selection', 400);
   }
 
   let packSO;

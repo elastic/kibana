@@ -47,9 +47,9 @@ To use {kib} i18n tooling, create a `.i18nrc.json` file with the following confi
 }
 -----------
 
-An example {kib} `.i18nrc.json` is {blob}.i18nrc.json[here].
+An example {kib} `.i18nrc.json` is {kibana-blob}.i18nrc.json[here].
 
-Full documentation about i18n tooling is {blob}src/dev/i18n/README.md[here].
+Full documentation about i18n tooling is {kibana-blob}src/dev/i18n/README.md[here].
 
 [discrete]
 === Extracting default messages

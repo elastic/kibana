@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/expressions-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "description": "Adds expression runtime to Kibana",
+  "plugin": {
+    "id": "expressions",
+    "server": true,
+    "browser": true,
+    "requiredBundles": [
+      "kibanaUtils",
+      "inspector"
+    ],
+    "extraPublicDirs": [
+      "common",
+      "common/fonts"
+    ]
+  }
+}

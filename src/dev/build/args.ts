@@ -37,12 +37,13 @@ export function readCliArgs(argv: string[]) {
       'verbose',
       'debug',
       'all-platforms',
-      'example-plugins',
       'verbose',
       'quiet',
       'silent',
       'debug',
       'help',
+      'with-test-plugins',
+      'with-example-plugins',
     ],
     string: ['docker-namespace', 'epr-registry'],
     alias: {
@@ -51,7 +52,6 @@ export function readCliArgs(argv: string[]) {
     },
     default: {
       debug: true,
-      'example-plugins': false,
       rpm: null,
       deb: null,
       'docker-images': null,
@@ -131,7 +131,6 @@ export function readCliArgs(argv: string[]) {
     createGenericFolders: !Boolean(flags['skip-generic-folders']),
     createPlatformFolders: !Boolean(flags['skip-platform-folders']),
     createArchives: !Boolean(flags['skip-archives']),
-    buildExamplePlugins: Boolean(flags['example-plugins']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
     createDockerUbuntu:
@@ -142,6 +141,8 @@ export function readCliArgs(argv: string[]) {
     targetAllPlatforms: Boolean(flags['all-platforms']),
     eprRegistry: flags['epr-registry'],
     buildCanvasShareableRuntime: !Boolean(flags['skip-canvas-shareable-runtime']),
+    withExamplePlugins: Boolean(flags['with-example-plugins']),
+    withTestPlugins: Boolean(flags['with-test-plugins']),
   };
 
   return {
