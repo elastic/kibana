@@ -44,7 +44,7 @@ const buildModuleDiscoveryInfo = (): ModuleDiscoveryInfo[] => {
         (test) => test.expectedStatus === 'passed' && test.location.file.endsWith('.spec.ts')
       );
 
-      const usesParallelWorkers = config.path.includes('parallel.playwright.config.ts');
+      const usesParallelWorkers = config.type === 'parallel';
       const allTags = collectUniqueTags(config.manifest.tests);
 
       return {
@@ -107,7 +107,7 @@ const logFlattenedConfigs = (flattenedConfigs: FlattenedConfigGroup[], log: Tool
   log.info(`Found ${flattenedConfigs.length} flattened config group(s):`);
   flattenedConfigs.forEach((group) => {
     log.info(
-      `- ${group.mode} / ${group.group} / ${group.scoutCommand}: ${group.configs.length} config(s)`
+      `- ${group.testTarget.arch} / ${group.group} / ${group.scoutCommand}: ${group.configs.length} config(s)`
     );
   });
 };

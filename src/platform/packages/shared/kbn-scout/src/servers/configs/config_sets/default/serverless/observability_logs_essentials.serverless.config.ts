@@ -8,20 +8,29 @@
  */
 
 import { defaultConfig } from './serverless.base.config';
-import type { ScoutServerConfig } from '../../../../types';
+import type { ScoutServerConfig } from '../../../../../types';
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   esTestCluster: {
     ...defaultConfig.esTestCluster,
-    serverArgs: [...defaultConfig.esTestCluster.serverArgs],
+    serverArgs: [
+      ...defaultConfig.esTestCluster.serverArgs,
+      'xpack.apm_data.enabled=true',
+      'serverless.project_type=observability',
+      'serverless.observability.tier=logs_essentials',
+    ],
   },
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
-      '--serverless=es',
+      '--serverless=oblt',
       '--coreApp.allowDynamicConfigOverrides=true',
+      '--xpack.uptime.service.manifestUrl=mockDevUrl',
+      `--pricing.tiers.products=${JSON.stringify([
+        { name: 'observability', tier: 'logs_essentials' },
+      ])}`,
     ],
   },
 };

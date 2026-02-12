@@ -8,11 +8,11 @@
 import { expect } from '@kbn/scout/api';
 import type { RemoveByPrefixProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
-import { streamlangApiTest as apiTest } from '../..';
+import { streamlangApiTest as apiTest, tags } from '../..';
 
 apiTest.describe(
   'Streamlang to ES|QL - RemoveByPrefix Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest(
       'should keep the parent field when it has no nested fields',
