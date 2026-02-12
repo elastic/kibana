@@ -333,7 +333,9 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
             ...(needsUpdate ? { needsUpdate } : {}),
           }}
           width={width}
-          showTimeWindowButtons={true}
+          showTimeWindowButtons={{
+            showZoomIn: true,
+          }}
           timeZoneDisplayProps={{
             timeZone: timeZoneName,
           }}

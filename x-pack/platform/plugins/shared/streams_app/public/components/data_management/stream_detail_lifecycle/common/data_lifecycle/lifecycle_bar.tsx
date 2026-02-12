@@ -17,23 +17,36 @@ interface LifecycleBarProps {
   phaseColumnSpans: number[];
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void;
   testSubjPrefix?: string;
+  isIlm?: boolean;
+  onRemovePhase?: (phaseName: string) => void;
+  canManageLifecycle: boolean;
 }
 
 const renderLifecyclePhase = (
-  phase: LifecyclePhase,
   index: number,
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void,
   testSubjPrefix?: string
+  phase: LifecyclePhase,
+  onPhaseClick?: (phase: LifecyclePhase, index: number) => void,
+  isIlm?: boolean,
+  onRemovePhase?: (phaseName: string) => void,
+  canManageLifecycle?: boolean
 ) => {
   const commonProps = {
+    description: phase.description,
+    isReadOnly: phase.isReadOnly,
+    isRemoveDisabled: phase.isRemoveDisabled,
+    removeDisabledReason: phase.removeDisabledReason,
     label: phase.label,
     onClick: () => {
       onPhaseClick?.(phase, index);
     },
-    description: phase.description,
+    isIlm,
     minAge: phase.min_age,
     isReadOnly: phase.isReadOnly,
     testSubjPrefix,
+    onRemovePhase,
+    canManageLifecycle: canManageLifecycle ?? false,
   };
 
   return phase.isDelete ? (
@@ -42,9 +55,9 @@ const renderLifecyclePhase = (
     <LifecyclePhaseComponent
       {...commonProps}
       color={phase.color}
+      docsCount={phase.docsCount}
       size={phase.size}
       sizeInBytes={phase.sizeInBytes}
-      docsCount={phase.docsCount}
       searchableSnapshot={phase.searchableSnapshot}
     />
   );
@@ -56,6 +69,9 @@ export const LifecycleBar = ({
   phaseColumnSpans,
   onPhaseClick,
   testSubjPrefix,
+  isIlm,
+  onRemovePhase,
+  canManageLifecycle,
 }: LifecycleBarProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -88,7 +104,7 @@ export const LifecycleBar = ({
         >
           {phases.map((phase, index) => (
             <EuiFlexItem
-              key={index}
+              key={phase.label ?? index}
               grow={phase.grow}
               css={{
                 display: 'flex',
@@ -101,7 +117,15 @@ export const LifecycleBar = ({
                 justifyContent: 'center',
               }}
             >
-              {renderLifecyclePhase(phase, index, onPhaseClick, testSubjPrefix)}
+              {renderLifecyclePhase(
+                index,
+                phase,
+                onPhaseClick,
+                isIlm,
+                onRemovePhase,
+                canManageLifecycle,
+                testSubjPrefix
+              )}
             </EuiFlexItem>
           ))}
         </EuiFlexGrid>

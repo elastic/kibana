@@ -16,19 +16,6 @@ import {
 
 export const runAgentStepDefinition = createPublicStepDefinition({
   ...runAgentStepCommonDefinition,
-  editorHandlers: {
-    dynamicSchema: {
-      getOutputSchema: ({ input }) => {
-        if (!input.schema) {
-          return RunAgentOutputSchema;
-        }
-
-        return RunAgentOutputSchema.extend({
-          structured_output: fromJSONSchema(input.schema),
-        });
-      },
-    },
-  },
   label: i18n.translate('xpack.agentBuilder.runAgentStep.label', {
     defaultMessage: 'Run Agent',
   }),
@@ -76,5 +63,25 @@ export const runAgentStepDefinition = createPublicStepDefinition({
     message: "Continue from the previous analysis and complete any missing steps."
 \`\`\``,
     ],
+  },
+  editorHandlers: {
+    config: {
+      'connector-id': {
+        connectorIdSelection: {
+          connectorTypes: ['inference.unified_completion', 'bedrock', 'gen-ai', 'gemini'],
+          enableCreation: false,
+        },
+      },
+    },
+    dynamicSchema: {
+      getOutputSchema: ({ input }) => {
+        if (!input.schema) {
+          return RunAgentOutputSchema;
+        }
+        return RunAgentOutputSchema.extend({
+          structured_output: fromJSONSchema(input.schema),
+        });
+      },
+    },
   },
 });

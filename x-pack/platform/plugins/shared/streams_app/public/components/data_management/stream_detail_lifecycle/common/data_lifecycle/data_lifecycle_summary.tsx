@@ -34,6 +34,10 @@ interface DataLifecycleSummaryProps {
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void;
   downsampleSteps?: DownsampleStep[];
   testSubjPrefix?: string;
+  isIlm?: boolean;
+  onRemovePhase?: (phaseName: string) => void;
+  onRemoveDownsampleStep?: (stepNumber: number) => void;
+  canManageLifecycle: boolean;
 }
 
 export const DataLifecycleSummary = ({
@@ -42,6 +46,10 @@ export const DataLifecycleSummary = ({
   onPhaseClick,
   downsampleSteps,
   testSubjPrefix,
+  isIlm,
+  onRemovePhase,
+  onRemoveDownsampleStep,
+  canManageLifecycle,
 }: DataLifecycleSummaryProps) => {
   const isRetentionInfinite = !phases.some((p) => p.isDelete);
   const showSkeleton = loading && phases.length === 0;
@@ -51,7 +59,6 @@ export const DataLifecycleSummary = ({
     hasDslDownsampling && downsampleSteps ? buildDslSegments(phases, downsampleSteps) : null;
   const timelineSegments = dslSegments?.timelineSegments ?? buildPhaseTimelineSegments(phases);
   const downsamplingSegments = buildDownsamplingSegments(phases, dslSegments);
-
   const gridTemplateColumns = getGridTemplateColumns(timelineSegments);
   const phaseColumnSpans = getPhaseColumnSpans(phases, timelineSegments);
 
@@ -91,10 +98,15 @@ export const DataLifecycleSummary = ({
                   phaseColumnSpans={phaseColumnSpans}
                   onPhaseClick={onPhaseClick}
                   testSubjPrefix={testSubjPrefix}
+                  isIlm={isIlm}
+                  onRemovePhase={onRemovePhase}
+                  canManageLifecycle={canManageLifecycle}
                 />
                 <DownsamplingBar
                   segments={downsamplingSegments}
                   gridTemplateColumns={gridTemplateColumns}
+                  onRemoveStep={onRemoveDownsampleStep}
+                  canManageLifecycle={canManageLifecycle}
                 />
                 <EuiSpacer size="xs" />
                 <DataLifecycleTimeline
