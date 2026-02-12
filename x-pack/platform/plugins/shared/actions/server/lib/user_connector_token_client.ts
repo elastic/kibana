@@ -82,15 +82,17 @@ export class UserConnectorTokenClient {
     this.logger = logger;
   }
 
-  private parseTokenId(id: string): { scope: 'per-user' | 'shared'; actualId: string } {
+  private parseTokenId(id: string): string {
     if (id.startsWith('per-user:')) {
-      return { scope: 'per-user', actualId: id.substring(9) };
+      return id.substring(9);
     }
     if (id.startsWith('shared:')) {
-      return { scope: 'shared', actualId: id.substring(7) };
+      throw new Error(
+        'UserConnectorTokenClient cannot handle shared-scope tokens. Use SharedConnectorTokenClient or ConnectorTokenClient instead.'
+      );
     }
     // Default unprefixed IDs to per-user when called on user client
-    return { scope: 'per-user', actualId: id };
+    return id;
   }
 
   private formatTokenId(rawId: string): string {
@@ -184,7 +186,7 @@ export class UserConnectorTokenClient {
     tokenType,
     credentialType,
   }: UpdateOptions): Promise<UserConnectorToken | null> {
-    const { actualId } = this.parseTokenId(id);
+    const actualId = this.parseTokenId(id);
     const { attributes, references, version } =
       await this.unsecuredSavedObjectsClient.get<UserConnectorToken>(
         USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
@@ -585,7 +587,7 @@ export class UserConnectorTokenClient {
     tokenType?: string;
     credentialType?: string;
   }): Promise<UserConnectorToken | null> {
-    const { actualId } = this.parseTokenId(id);
+    const actualId = this.parseTokenId(id);
     const { attributes, references, version } =
       await this.unsecuredSavedObjectsClient.get<UserConnectorToken>(
         USER_CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,

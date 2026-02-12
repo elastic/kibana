@@ -180,7 +180,7 @@ export class ConnectorTokenClient {
     connectorId: string;
     tokenType?: string;
     credentialType?: string;
-  }): Promise<void | unknown[]> {
+  }): Promise<void> {
     const scope = options.profileUid ? 'per-user' : 'shared';
     this.log({
       method: 'deleteConnectorTokens',

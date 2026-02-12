@@ -143,7 +143,7 @@ export class SharedConnectorTokenClient {
           },
           omitBy(
             {
-              id,
+              id: actualId,
               overwrite: true,
               references,
               version,

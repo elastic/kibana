@@ -439,6 +439,17 @@ describe('UserConnectorTokenClient', () => {
         'token-id-1'
       );
     });
+
+    test('throws error when given shared: prefix', async () => {
+      await expect(
+        userClient.update({
+          id: 'shared:token-id-1',
+          token: 'newtoken',
+        })
+      ).rejects.toThrow(
+        'UserConnectorTokenClient cannot handle shared-scope tokens. Use SharedConnectorTokenClient or ConnectorTokenClient instead.'
+      );
+    });
   });
 
   describe('updateWithRefreshToken()', () => {
@@ -494,6 +505,17 @@ describe('UserConnectorTokenClient', () => {
           refreshToken: 'newrefresh',
         },
       });
+    });
+
+    test('throws error when given shared: prefix', async () => {
+      await expect(
+        userClient.updateWithRefreshToken({
+          id: 'shared:token-id-1',
+          token: 'newtoken',
+        })
+      ).rejects.toThrow(
+        'UserConnectorTokenClient cannot handle shared-scope tokens. Use SharedConnectorTokenClient or ConnectorTokenClient instead.'
+      );
     });
   });
 
