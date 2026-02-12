@@ -28,7 +28,6 @@ export {
   getKqlSearchQueries,
   getRemoteClustersFromESQLQuery,
   convertTimeseriesCommandToFrom,
-  hasDateBreakdown,
   hasOnlySourceCommand,
 } from './utils/query_parsing_helpers';
 export { getIndexPatternFromESQLQuery } from './utils/get_index_pattern_from_query';

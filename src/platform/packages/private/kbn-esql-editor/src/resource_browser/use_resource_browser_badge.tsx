@@ -34,13 +34,13 @@ export const useSourcesBadge = ({
   const sourcesBadgeStyle = css`
     .${sourcesBadgeClassName} {
       cursor: pointer;
-      display: inline-block;
-      vertical-align: middle;
-      padding-block: 0px;
+      display: inline-flex;
+      align-items: center;
+      padding-block: 2px;
       padding-inline: ${euiTheme.size.xxs};
       max-inline-size: 100%;
       font-size: ${euiTheme.font.scale.s};
-      line-height: ${`calc(${euiTheme.size.m} * 1.5)`};
+      line-height: 1;
       font-weight: ${euiTheme.font.weight.medium};
       white-space: nowrap;
       text-decoration: none;
@@ -50,6 +50,7 @@ export const useSourcesBadge = ({
       border-style: solid;
       color: ${euiTheme.colors.plainLight} !important;
       background-color: ${euiTheme.colors.primary};
+      box-sizing: border-box;
     }
   `;
 

@@ -62,7 +62,6 @@ export {
   getViews,
   getInferenceEndpoints,
   getEditorExtensions,
-  hasDateBreakdown,
   getProjectRoutingFromEsqlQuery,
   hasOnlySourceCommand,
   isComputedColumn,

@@ -8,10 +8,10 @@
 import React, { useMemo } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { load as parseYaml } from 'js-yaml';
-import { ParsedTemplateDefinitionSchema } from '../../../../../common/types/domain/template/latest';
-import { TemplateFieldRenderer } from '../../field_types/field_renderer';
+import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
+import { TemplateFieldRenderer } from '../field_types/field_renderer';
 
-export const CreateTemplatePreview = () => {
+export const TemplatePreview = () => {
   const { control } = useFormContext();
   const values = useWatch({ control, defaultValue: { definition: '' } });
 
@@ -52,9 +52,10 @@ export const CreateTemplatePreview = () => {
 
   return (
     <div>
+      {/** NOTE: this component uses shared-form renderer for Case form compatiblit */}
       <TemplateFieldRenderer parsedTemplate={parsedTemplateData} />
     </div>
   );
 };
 
-CreateTemplatePreview.displayName = 'CreateTemplatePreview';
+TemplatePreview.displayName = 'TemplatePreview';
