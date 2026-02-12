@@ -109,6 +109,7 @@ export class AgentsService {
         storage: internalStorage,
         spaceId,
         toolIds,
+        logger,
       });
     };
 

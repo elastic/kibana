@@ -5,27 +5,32 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { AgentProfileStorage } from './client/storage';
 import type { ToolRefCleanupResult } from './types';
 import { updateRequestToEs } from './client/converters';
 import { removeToolIdsFromToolSelection } from './client/utils';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 
+const SEARCH_SIZE = 1000;
+
 export interface ToolRefCleanupParams {
   storage: AgentProfileStorage;
   spaceId: string;
   toolIds: string[];
+  logger?: Logger;
 }
 
 export async function runToolRefCleanup({
   storage,
   spaceId,
   toolIds,
+  logger,
 }: ToolRefCleanupParams): Promise<ToolRefCleanupResult> {
   const idsSet = new Set(toolIds);
   const response = await storage.getClient().search({
     track_total_hits: false,
-    size: 1000,
+    size: SEARCH_SIZE,
     query: {
       bool: {
         filter: [createSpaceDslFilter(spaceId)],
@@ -34,6 +39,11 @@ export async function runToolRefCleanup({
   });
 
   const hits = response.hits.hits;
+  if (hits.length >= SEARCH_SIZE && logger) {
+    logger.warn(
+      `Tool ref cleanup: search limit reached (size=${SEARCH_SIZE}, spaceId=${spaceId}). Some agents may still reference the deleted tool(s).`
+    );
+  }
   const bulkOperations = [];
 
   for (const hit of hits) {
@@ -61,10 +71,19 @@ export async function runToolRefCleanup({
   }
 
   if (bulkOperations.length > 0) {
-    await storage.getClient().bulk({
-      operations: bulkOperations,
-      refresh: 'wait_for',
-    });
+    try {
+      await storage.getClient().bulk({
+        operations: bulkOperations,
+        refresh: 'wait_for',
+        throwOnFail: true,
+      });
+    } catch (err) {
+      if (logger) {
+        const message = err instanceof Error ? err.message : String(err);
+        logger.error(`Tool ref cleanup: bulk update failed. ${message}`);
+      }
+      throw err;
+    }
   }
 
   return { agentsUpdated: bulkOperations.length };
