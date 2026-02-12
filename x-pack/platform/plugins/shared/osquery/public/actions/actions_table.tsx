@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isArray, isEmpty, pickBy, map, isNumber, compact, uniq, flatMap } from 'lodash';
+import { isArray, isEmpty, pickBy, map, isNumber, compact, uniq } from 'lodash';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import {
@@ -36,7 +36,6 @@ import { useHistory } from 'react-router-dom';
 import { QUERY_TIMEOUT } from '../../common/constants';
 import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
 import { useAllLiveQueries } from './use_all_live_queries';
-import { useBulkGetCases } from './use_bulk_get_cases';
 import { useBulkGetUserProfiles } from './use_bulk_get_user_profiles';
 import { useUniqueUsers } from './use_unique_users';
 import type { SearchHit, ActionDetails } from '../../common/search_strategy';
@@ -70,8 +69,7 @@ const ActionTableResultsButton: React.FC<ActionTableResultsButtonProps> = ({ act
 ActionTableResultsButton.displayName = 'ActionTableResultsButton';
 
 const ActionsTableComponent = () => {
-  const { application, http } = useKibana().services;
-  const permissions = application.capabilities.osquery;
+  const permissions = useKibana().services.application.capabilities.osquery;
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { push } = useHistory();
   const [pageIndex, setPageIndex] = useState(0);
@@ -132,13 +130,6 @@ const ActionsTableComponent = () => {
 
   const items = actionsData?.data?.items ?? EMPTY_ARRAY;
 
-  const caseIds = useMemo(() => {
-    if (!isHistoryEnabled) return [];
-    return uniq(
-      compact(flatMap(items, (item: SearchHit) => (item._source as ActionDetails)?.case_ids))
-    );
-  }, [isHistoryEnabled, items]);
-
   const profileUids = useMemo(() => {
     if (!isHistoryEnabled) return [];
     return uniq(
@@ -146,7 +137,6 @@ const ActionsTableComponent = () => {
     );
   }, [isHistoryEnabled, items]);
 
-  const { data: casesMap } = useBulkGetCases(caseIds);
   const { data: userProfilesMap } = useBulkGetUserProfiles(profileUids);
 
   const onTableChange = useCallback(({ page = {} }: any) => {
@@ -307,44 +297,6 @@ const ActionsTableComponent = () => {
     return <EuiBadge color="hollow">Rule</EuiBadge>;
   }, []);
 
-  const renderCasesColumn = useCallback((_: unknown, item: SearchHit) => {
-    const action = item._source as ActionDetails;
-    const actionCaseIds = action?.case_ids;
-    if (!actionCaseIds?.length || !casesMap) return <>-</>;
-
-    const resolvedCases = actionCaseIds
-      .map((id) => casesMap.get(id))
-      .filter(Boolean);
-
-    if (resolvedCases.length === 0) return <>-</>;
-
-    const CaseLink = ({ caseInfo }: { caseInfo: { id: string; title: string } }) => (
-      <a
-        href={http?.basePath?.prepend(`/app/security/cases/${caseInfo.id}`) ?? '#'}
-        onClick={(e) => {
-          e.preventDefault();
-          application?.navigateToUrl(
-            http?.basePath?.prepend(`/app/security/cases/${caseInfo.id}`) ?? ''
-          );
-        }}
-      >
-        {caseInfo.title}
-      </a>
-    );
-
-    if (resolvedCases.length === 1) return <CaseLink caseInfo={resolvedCases[0]!} />;
-
-    const tooltipContent = resolvedCases.map((c) => c!.title).join(', ');
-
-    return (
-      <EuiToolTip content={tooltipContent}>
-        <span>
-          <CaseLink caseInfo={resolvedCases[0]!} /> +{resolvedCases.length - 1}
-        </span>
-      </EuiToolTip>
-    );
-  }, [casesMap, http, application]);
-
   const renderRunByColumn = useCallback((_: unknown, item: SearchHit) => {
     const action = item._source as ActionDetails;
     const profileUid = action?.user_profile_uid;
@@ -444,14 +396,6 @@ const ActionsTableComponent = () => {
         render: renderSourceColumn,
       },
       {
-        field: 'cases',
-        name: i18n.translate('xpack.osquery.history.table.casesColumnTitle', {
-          defaultMessage: 'Cases',
-        }),
-        width: '120px',
-        render: renderCasesColumn,
-      },
-      {
         field: 'agents',
         name: i18n.translate('xpack.osquery.history.table.agentsColumnTitle', {
           defaultMessage: 'Agents',
@@ -479,7 +423,6 @@ const ActionsTableComponent = () => {
     [
       isPlayButtonAvailable,
       renderActionsColumn,
-      renderCasesColumn,
       renderHistoryAgentsColumn,
       renderPlayButton,
       renderQueryColumn,
