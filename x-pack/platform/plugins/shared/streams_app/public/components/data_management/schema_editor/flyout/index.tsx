@@ -184,13 +184,15 @@ export const SchemaEditorFlyout = ({
             stream={stream}
             enableGeoPointSuggestions={enableGeoPointSuggestions}
           />
-          <AdvancedFieldMappingOptions
-            value={nextField.additionalParameters}
-            onChange={(additionalParameters) => setNextField({ additionalParameters })}
-            onValidate={setValidAdvancedFieldMappings}
-            isEditing={isEditing}
-          />
-          {withFieldSimulation && (
+          {nextField.type !== 'unmapped' && (
+            <AdvancedFieldMappingOptions
+              value={nextField.additionalParameters}
+              onChange={(additionalParameters) => setNextField({ additionalParameters })}
+              onValidate={setValidAdvancedFieldMappings}
+              isEditing={isEditing}
+            />
+          )}
+          {withFieldSimulation && nextField.type !== 'unmapped' && (
             <EuiFlexItem grow={false}>
               <SamplePreviewTable stream={stream} nextField={nextField} onValidate={onValidate} />
             </EuiFlexItem>

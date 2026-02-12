@@ -88,6 +88,113 @@ describe('buildSchemaSavePayload', () => {
       },
     });
   });
+
+  it('includes description in payload when provided', () => {
+    const mockDefinition = buildWiredDefinition();
+    const schemaFields: SchemaField[] = [
+      {
+        name: 'message',
+        parent: '',
+        status: 'mapped',
+        type: 'keyword',
+        description: 'The log message content',
+      },
+      {
+        name: '@timestamp',
+        parent: '',
+        status: 'mapped',
+        type: 'date',
+        format: 'strict_date_optional_time',
+        description: 'Event timestamp',
+      },
+    ];
+
+    const payload = buildSchemaSavePayload(mockDefinition, schemaFields);
+
+    expect(payload).toEqual({
+      ingest: {
+        ...mockDefinition.stream.ingest,
+        processing: omit(mockDefinition.stream.ingest.processing, 'updated_at'),
+        wired: {
+          ...mockDefinition.stream.ingest.wired,
+          fields: {
+            message: { type: 'keyword', description: 'The log message content' },
+            '@timestamp': {
+              type: 'date',
+              format: 'strict_date_optional_time',
+              description: 'Event timestamp',
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it('builds payload for unmapped fields with description only', () => {
+    const mockDefinition = buildWiredDefinition();
+    const schemaFields: SchemaField[] = [
+      {
+        name: 'documented_field',
+        parent: '',
+        status: 'mapped',
+        type: 'unmapped',
+        description: 'This field is documented but not mapped to ES',
+      },
+      {
+        name: 'regular_field',
+        parent: '',
+        status: 'mapped',
+        type: 'keyword',
+      },
+    ];
+
+    const payload = buildSchemaSavePayload(mockDefinition, schemaFields);
+
+    expect(payload).toEqual({
+      ingest: {
+        ...mockDefinition.stream.ingest,
+        processing: omit(mockDefinition.stream.ingest.processing, 'updated_at'),
+        wired: {
+          ...mockDefinition.stream.ingest.wired,
+          fields: {
+            documented_field: {
+              type: 'unmapped',
+              description: 'This field is documented but not mapped to ES',
+            },
+            regular_field: { type: 'keyword' },
+          },
+        },
+      },
+    });
+  });
+
+  it('does not include empty description in payload', () => {
+    const mockDefinition = buildWiredDefinition();
+    const schemaFields: SchemaField[] = [
+      {
+        name: 'message',
+        parent: '',
+        status: 'mapped',
+        type: 'keyword',
+        description: '',
+      },
+    ];
+
+    const payload = buildSchemaSavePayload(mockDefinition, schemaFields);
+
+    expect(payload).toEqual({
+      ingest: {
+        ...mockDefinition.stream.ingest,
+        processing: omit(mockDefinition.stream.ingest.processing, 'updated_at'),
+        wired: {
+          ...mockDefinition.stream.ingest.wired,
+          fields: {
+            message: { type: 'keyword' },
+          },
+        },
+      },
+    });
+  });
 });
 
 const privileges = {

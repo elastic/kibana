@@ -35,6 +35,30 @@ const removeKeywordSuffix = (name: string) => {
   return name.endsWith('.keyword') ? name.slice(0, -8) : name;
 };
 
+/**
+ * Extracts the first source name from the FROM clause of an ES|QL query.
+ * This is used to determine if we're querying from a stream and to fetch
+ * stream-specific field metadata.
+ *
+ * Examples:
+ * - "FROM logs | WHERE ..." -> "logs"
+ * - "FROM logs.nginx | STATS ..." -> "logs.nginx"
+ * - "FROM logs, metrics | ..." -> "logs" (first source only)
+ * - "FROM logs* | ..." -> "logs*" (wildcard patterns are returned as-is)
+ *
+ * Returns undefined if no FROM clause is found.
+ */
+export const extractSourceFromQuery = (query: string): string | undefined => {
+  // Match FROM clause followed by source name(s)
+  // Source names can contain letters, numbers, dots, underscores, hyphens, and wildcards
+  // The source name ends at whitespace, comma, pipe, or end of string
+  const fromMatch = query.match(/\bFROM\s+([a-zA-Z0-9_.*-]+)/i);
+  if (fromMatch && fromMatch[1]) {
+    return fromMatch[1];
+  }
+  return undefined;
+};
+
 export const ESQL_AUTOCOMPLETE_TRIGGER_CHARS = ['(', ' ', '[', '?'];
 
 export type MonacoMessage = monaco.editor.IMarkerData & {
@@ -156,6 +180,10 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
     return provider;
   },
   getSuggestionProvider: (deps?: ESQLDependencies): monaco.languages.CompletionItemProvider => {
+    // Store the last query text so resolveCompletionItem can access it
+    // to extract the stream name from the FROM clause
+    let lastQueryText = '';
+
     return {
       triggerCharacters: ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
       async provideCompletionItems(
@@ -163,6 +191,7 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         position: monaco.Position
       ): Promise<monaco.languages.CompletionList> {
         const fullText = model.getValue();
+        lastQueryText = fullText;
         const offset = monacoPositionToOffset(fullText, position);
 
         const computeStart = performance.now();
@@ -189,19 +218,39 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         if (!deps?.getFieldsMetadata) return item;
         const fieldsMetadataClient = await deps?.getFieldsMetadata;
 
-        const fullEcsMetadataList = await fieldsMetadataClient?.find({
-          attributes: ['type'],
-        });
-        if (!fullEcsMetadataList || !fieldsMetadataClient || typeof item.label !== 'string')
-          return item;
+        if (!fieldsMetadataClient || typeof item.label !== 'string') return item;
+
+        // Only fetch metadata for field suggestions
+        if (item.kind !== monaco.languages.CompletionItemKind.Variable) return item;
 
         const strippedFieldName = removeKeywordSuffix(item.label);
-        if (
-          // If item is not a field, no need to fetch metadata
-          item.kind === monaco.languages.CompletionItemKind.Variable &&
-          // If not ECS, no need to fetch description
-          Object.hasOwn(fullEcsMetadataList?.fields, strippedFieldName)
-        ) {
+
+        // Extract stream name from the FROM clause to fetch stream-specific field descriptions
+        const streamName = extractSourceFromQuery(lastQueryText);
+
+        let streamDescription: string | undefined;
+        let ecsDescription: string | undefined;
+
+        // Try to fetch stream-specific field metadata (if querying from a stream)
+        if (streamName) {
+          const streamMetadata = await fieldsMetadataClient.find({
+            fieldNames: [strippedFieldName],
+            attributes: ['description'],
+            streamName,
+          });
+
+          const streamFieldMetadata = streamMetadata.fields[strippedFieldName];
+          if (streamFieldMetadata && streamFieldMetadata.description) {
+            streamDescription = streamFieldMetadata.description;
+          }
+        }
+
+        // Also fetch ECS/OTel metadata
+        const fullEcsMetadataList = await fieldsMetadataClient.find({
+          attributes: ['type'],
+        });
+
+        if (Object.hasOwn(fullEcsMetadataList?.fields, strippedFieldName)) {
           const ecsMetadata = await fieldsMetadataClient.find({
             fieldNames: [strippedFieldName],
             attributes: ['description'],
@@ -209,14 +258,32 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
 
           const fieldMetadata = ecsMetadata.fields[strippedFieldName];
           if (fieldMetadata && fieldMetadata.description) {
-            const completionItem: monaco.languages.CompletionItem = {
-              ...item,
-              documentation: {
-                value: fieldMetadata.description,
-              },
-            };
-            return completionItem;
+            ecsDescription = fieldMetadata.description;
           }
+        }
+
+        // Merge descriptions if both exist, otherwise use whichever is available
+        if (streamDescription && ecsDescription) {
+          return {
+            ...item,
+            documentation: {
+              value: `**Stream description:**\n${streamDescription}\n\n**ECS/OTel description:**\n${ecsDescription}`,
+            },
+          };
+        } else if (streamDescription) {
+          return {
+            ...item,
+            documentation: {
+              value: streamDescription,
+            },
+          };
+        } else if (ecsDescription) {
+          return {
+            ...item,
+            documentation: {
+              value: ecsDescription,
+            },
+          };
         }
 
         return item;

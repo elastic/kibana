@@ -22,6 +22,7 @@ export type FieldsMetadataPluginStartServicesAccessor =
 export interface FieldsMetadataServerSetup {
   registerIntegrationFieldsExtractor: FieldsMetadataServiceSetup['registerIntegrationFieldsExtractor'];
   registerIntegrationListExtractor: FieldsMetadataServiceSetup['registerIntegrationListExtractor'];
+  registerStreamsFieldsExtractor: FieldsMetadataServiceSetup['registerStreamsFieldsExtractor'];
 }
 
 export interface FieldsMetadataServerStart {

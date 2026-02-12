@@ -13,13 +13,19 @@ import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
 import { MetadataFieldsRepository } from './repositories/metadata_fields_repository';
 import { OtelFieldsRepository } from './repositories/otel_fields_repository';
-import type { IntegrationFieldsExtractor, IntegrationListExtractor } from './repositories/types';
+import { StreamsFieldsRepository } from './repositories/streams_fields_repository';
+import type {
+  IntegrationFieldsExtractor,
+  IntegrationListExtractor,
+  StreamsFieldsExtractor,
+} from './repositories/types';
 import type { FieldsMetadataServiceSetup, FieldsMetadataServiceStart } from './types';
 import { MetadataFields as metadataFields } from '../../../common/metadata_fields';
 
 export class FieldsMetadataService {
   private integrationFieldsExtractor: IntegrationFieldsExtractor = () => Promise.resolve({});
   private integrationListExtractor: IntegrationListExtractor = () => Promise.resolve([]);
+  private streamsFieldsExtractor: StreamsFieldsExtractor = () => Promise.resolve({});
 
   constructor(private readonly logger: Logger) {}
 
@@ -31,11 +37,15 @@ export class FieldsMetadataService {
       registerIntegrationListExtractor: (extractor: IntegrationListExtractor) => {
         this.integrationListExtractor = extractor;
       },
+      registerStreamsFieldsExtractor: (extractor: StreamsFieldsExtractor) => {
+        this.streamsFieldsExtractor = extractor;
+      },
     };
   }
 
   public start(core: CoreStart): FieldsMetadataServiceStart {
-    const { logger, integrationFieldsExtractor, integrationListExtractor } = this;
+    const { logger, integrationFieldsExtractor, integrationListExtractor, streamsFieldsExtractor } =
+      this;
 
     const ecsFieldsRepository = EcsFieldsRepository.create({ ecsFields });
     const metadataFieldsRepository = MetadataFieldsRepository.create({ metadataFields });
@@ -44,6 +54,9 @@ export class FieldsMetadataService {
       integrationListExtractor,
     });
     const otelFieldsRepository = OtelFieldsRepository.create({ otelFields });
+    const streamsFieldsRepository = StreamsFieldsRepository.create({
+      streamsFieldsExtractor,
+    });
 
     return {
       getClient: async (request) => {
@@ -58,6 +71,7 @@ export class FieldsMetadataService {
           metadataFieldsRepository,
           integrationFieldsRepository,
           otelFieldsRepository,
+          streamsFieldsRepository,
         });
       },
     };

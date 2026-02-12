@@ -12,6 +12,7 @@ import {
   EuiHorizontalRule,
   EuiIconTip,
   EuiSpacer,
+  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
@@ -45,6 +46,14 @@ const FIELD_SUMMARIES = {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldSummaryFieldFormatHeader', {
       defaultMessage: 'Format',
     }),
+  },
+  fieldDescription: {
+    label: i18n.translate(
+      'xpack.streams.streamDetailSchemaEditorFieldSummaryFieldDescriptionHeader',
+      {
+        defaultMessage: 'Description',
+      }
+    ),
   },
   fieldParent: {
     label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldSummaryFieldParentHeader', {
@@ -193,6 +202,32 @@ export const FieldSummary = (props: FieldSummaryProps) => {
             <EuiHorizontalRule margin="xs" />
           </>
         )}
+
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <EuiTitle size="xxs">
+              <span>{FIELD_SUMMARIES.fieldDescription.label}</span>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={2}>
+            {isEditing ? (
+              <EuiTextArea
+                data-test-subj="streamsAppFieldSummaryDescriptionTextArea"
+                value={field.description ?? ''}
+                onChange={(e) => onChange({ description: e.target.value || undefined })}
+                placeholder={i18n.translate('xpack.streams.fieldSummary.descriptionPlaceholder', {
+                  defaultMessage: 'Add a description for this field...',
+                })}
+                rows={3}
+                fullWidth
+              />
+            ) : (
+              `${field.description ?? EMPTY_CONTENT}`
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiHorizontalRule margin="xs" />
 
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>

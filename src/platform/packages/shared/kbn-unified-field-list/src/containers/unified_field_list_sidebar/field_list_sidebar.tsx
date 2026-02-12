@@ -52,6 +52,7 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
   | 'onAddFieldToWorkspace'
   | 'onRemoveFieldFromWorkspace'
   | 'additionalFilters'
+  | 'streamName'
 > & {
   /**
    * All fields: fields from data view and unmapped fields or columns from text-based search
@@ -171,6 +172,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   onToggleSidebar,
   additionalFilters,
   additionalFieldGroups,
+  streamName,
 }) => {
   const styles = useMemoCss(componentStyles);
 
@@ -285,6 +287,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
           services={services}
           size={compressed ? 'xs' : 's'}
           stateService={stateService}
+          streamName={streamName}
           trackUiMetric={trackUiMetric}
           workspaceSelectedFieldNames={workspaceSelectedFieldNames}
         />
@@ -308,6 +311,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       workspaceSelectedFieldNames,
       selectedFieldsState.selectedFieldsMap,
       additionalFilters,
+      streamName,
     ]
   );
 

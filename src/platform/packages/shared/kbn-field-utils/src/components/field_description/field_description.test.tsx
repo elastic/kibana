@@ -116,15 +116,26 @@ describe('FieldDescription', () => {
   });
 
   it('should fetch ECS metadata', async () => {
+    const mockUseFieldsMetadata = jest.fn();
+    // First call: stream-specific metadata (no streamName, so empty params)
+    mockUseFieldsMetadata.mockReturnValueOnce({
+      fieldsMetadata: {},
+      loading: false,
+      error: undefined,
+      reload: jest.fn(),
+    });
+    // Second call: ECS metadata
+    mockUseFieldsMetadata.mockReturnValueOnce({
+      fieldsMetadata: {
+        bytes: { description: 'ESC desc', type: 'long' },
+      },
+      loading: false,
+      error: undefined,
+      reload: jest.fn(),
+    });
+
     const fieldsMetadataService: Partial<FieldsMetadataPublicStart> = {
-      useFieldsMetadata: jest.fn(() => ({
-        fieldsMetadata: {
-          bytes: { description: 'ESC desc', type: 'long' },
-        },
-        loading: false,
-        error: undefined,
-        reload: jest.fn(),
-      })),
+      useFieldsMetadata: mockUseFieldsMetadata,
     };
     render(
       <FieldDescription
@@ -134,22 +145,157 @@ describe('FieldDescription', () => {
     );
     const desc = screen.queryByTestId('fieldDescription-bytes');
     expect(desc).toHaveTextContent('ESC desc');
-    expect(fieldsMetadataService.useFieldsMetadata).toHaveBeenCalledWith({
+    // First call with empty params (no streamName provided)
+    expect(mockUseFieldsMetadata).toHaveBeenCalledWith({
+      attributes: [],
+      fieldNames: [],
+    });
+    // Second call for ECS metadata
+    expect(mockUseFieldsMetadata).toHaveBeenCalledWith({
       attributes: ['description', 'type'],
       fieldNames: ['bytes'],
     });
   });
 
-  it('should not show ECS metadata if types do not match', async () => {
+  it('should show stream-specific description when streamName is provided (stream-only case)', async () => {
+    const mockUseFieldsMetadata = jest.fn();
+    // First call: stream-specific metadata (with streamName)
+    mockUseFieldsMetadata.mockReturnValueOnce({
+      fieldsMetadata: {
+        message: { description: 'Stream-specific description', type: 'keyword' },
+      },
+      loading: false,
+      error: undefined,
+      reload: jest.fn(),
+    });
+    // Second call: ECS metadata (without streamName) - no description
+    mockUseFieldsMetadata.mockReturnValueOnce({
+      fieldsMetadata: {},
+      loading: false,
+      error: undefined,
+      reload: jest.fn(),
+    });
+
     const fieldsMetadataService: Partial<FieldsMetadataPublicStart> = {
-      useFieldsMetadata: jest.fn(() => ({
-        fieldsMetadata: {
-          bytes: { description: 'ESC desc', type: 'keyword' },
-        },
-        loading: false,
-        error: undefined,
-        reload: jest.fn(),
-      })),
+      useFieldsMetadata: mockUseFieldsMetadata,
+    };
+    render(
+      <FieldDescription
+        field={{ name: 'message', type: 'string', customDescription: undefined }}
+        fieldsMetadataService={fieldsMetadataService as FieldsMetadataPublicStart}
+        streamName="logs.nginx"
+      />
+    );
+    const desc = screen.queryByTestId('fieldDescription-message');
+    expect(desc).toHaveTextContent('Stream-specific description');
+    expect(mockUseFieldsMetadata).toHaveBeenCalledWith({
+      attributes: ['description', 'type'],
+      fieldNames: ['message'],
+      streamName: 'logs.nginx',
+    });
+    expect(mockUseFieldsMetadata).toHaveBeenCalledWith({
+      attributes: ['description', 'type'],
+      fieldNames: ['message'],
+    });
+  });
+
+  it('should merge stream and ECS descriptions when both exist', async () => {
+    const mockUseFieldsMetadata = jest.fn();
+    // First call: stream-specific metadata (with streamName)
+    mockUseFieldsMetadata.mockReturnValueOnce({
+      fieldsMetadata: {
+        message: { description: 'Stream-specific description', type: 'keyword' },
+      },
+      loading: false,
+      error: undefined,
+      reload: jest.fn(),
+    });
+    // Second call: ECS metadata (without streamName)
+    mockUseFieldsMetadata.mockReturnValueOnce({
+      fieldsMetadata: {
+        message: { description: 'ECS/OTel description', type: 'keyword' },
+      },
+      loading: false,
+      error: undefined,
+      reload: jest.fn(),
+    });
+
+    const fieldsMetadataService: Partial<FieldsMetadataPublicStart> = {
+      useFieldsMetadata: mockUseFieldsMetadata,
+    };
+    render(
+      <FieldDescription
+        field={{ name: 'message', type: 'string', customDescription: undefined }}
+        fieldsMetadataService={fieldsMetadataService as FieldsMetadataPublicStart}
+        streamName="logs.nginx"
+      />
+    );
+    const desc = screen.queryByTestId('fieldDescription-message');
+    expect(desc).toHaveTextContent('Stream description:');
+    expect(desc).toHaveTextContent('Stream-specific description');
+    expect(desc).toHaveTextContent('ECS/OTel description:');
+    expect(desc).toHaveTextContent('ECS/OTel description');
+  });
+
+  it('should not merge descriptions if they are identical', async () => {
+    const mockUseFieldsMetadata = jest.fn();
+    // First call: stream-specific metadata (with streamName)
+    mockUseFieldsMetadata.mockReturnValueOnce({
+      fieldsMetadata: {
+        message: { description: 'Same description', type: 'keyword' },
+      },
+      loading: false,
+      error: undefined,
+      reload: jest.fn(),
+    });
+    // Second call: ECS metadata (without streamName) - same description
+    mockUseFieldsMetadata.mockReturnValueOnce({
+      fieldsMetadata: {
+        message: { description: 'Same description', type: 'keyword' },
+      },
+      loading: false,
+      error: undefined,
+      reload: jest.fn(),
+    });
+
+    const fieldsMetadataService: Partial<FieldsMetadataPublicStart> = {
+      useFieldsMetadata: mockUseFieldsMetadata,
+    };
+    render(
+      <FieldDescription
+        field={{ name: 'message', type: 'string', customDescription: undefined }}
+        fieldsMetadataService={fieldsMetadataService as FieldsMetadataPublicStart}
+        streamName="logs.nginx"
+      />
+    );
+    const desc = screen.queryByTestId('fieldDescription-message');
+    expect(desc).toHaveTextContent('Same description');
+    // Should NOT contain merge headers when descriptions are identical
+    expect(desc).not.toHaveTextContent('Stream description:');
+    expect(desc).not.toHaveTextContent('ECS/OTel description:');
+  });
+
+  it('should not show ECS metadata if types do not match', async () => {
+    const mockUseFieldsMetadata = jest.fn();
+    // First call: stream-specific metadata (no streamName, so empty params)
+    mockUseFieldsMetadata.mockReturnValueOnce({
+      fieldsMetadata: {},
+      loading: false,
+      error: undefined,
+      reload: jest.fn(),
+    });
+    // Second call: ECS metadata with mismatched type
+    mockUseFieldsMetadata.mockReturnValueOnce({
+      fieldsMetadata: {
+        bytes: { description: 'ESC desc', type: 'keyword' },
+      },
+      loading: false,
+      error: undefined,
+      reload: jest.fn(),
+    });
+
+    const fieldsMetadataService: Partial<FieldsMetadataPublicStart> = {
+      useFieldsMetadata: mockUseFieldsMetadata,
     };
     render(
       <FieldDescription
@@ -162,13 +308,24 @@ describe('FieldDescription', () => {
   });
 
   it('should not show ECS metadata if none found', async () => {
+    const mockUseFieldsMetadata = jest.fn();
+    // First call: stream-specific metadata (no streamName, so empty params)
+    mockUseFieldsMetadata.mockReturnValueOnce({
+      fieldsMetadata: {},
+      loading: false,
+      error: undefined,
+      reload: jest.fn(),
+    });
+    // Second call: ECS metadata - none found
+    mockUseFieldsMetadata.mockReturnValueOnce({
+      fieldsMetadata: {},
+      loading: false,
+      error: undefined,
+      reload: jest.fn(),
+    });
+
     const fieldsMetadataService: Partial<FieldsMetadataPublicStart> = {
-      useFieldsMetadata: jest.fn(() => ({
-        fieldsMetadata: {},
-        loading: false,
-        error: undefined,
-        reload: jest.fn(),
-      })),
+      useFieldsMetadata: mockUseFieldsMetadata,
     };
     render(
       <FieldDescription
@@ -178,7 +335,13 @@ describe('FieldDescription', () => {
     );
     const desc = screen.queryByTestId('fieldDescription-extension.keyword');
     expect(desc).toBeNull();
-    expect(fieldsMetadataService.useFieldsMetadata).toHaveBeenCalledWith({
+    // First call with empty params (no streamName provided)
+    expect(mockUseFieldsMetadata).toHaveBeenCalledWith({
+      attributes: [],
+      fieldNames: [],
+    });
+    // Second call for ECS metadata
+    expect(mockUseFieldsMetadata).toHaveBeenCalledWith({
       attributes: ['description', 'type'],
       fieldNames: ['extension'],
     });

@@ -47,6 +47,7 @@ import { ProcessorSuggestionsService } from './lib/streams/ingest_pipelines/proc
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { TaskService } from './lib/tasks/task_service';
 import { SystemService } from './lib/streams/system/system_service';
+import { registerFieldsMetadataExtractors } from './register_fields_metadata_extractors';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -253,6 +254,13 @@ export class StreamsPlugin
         createStreamsGlobalSearchResultProvider(core, this.logger)
       );
     }
+
+    // Register streams field extractor with fields_metadata service
+    registerFieldsMetadataExtractors({
+      core,
+      fieldsMetadata: plugins.fieldsMetadata,
+      logger: this.logger,
+    });
 
     return {};
   }

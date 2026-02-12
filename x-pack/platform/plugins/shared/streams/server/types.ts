@@ -26,7 +26,10 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { FieldsMetadataServerStart } from '@kbn/fields-metadata-plugin/server';
+import type {
+  FieldsMetadataServerSetup,
+  FieldsMetadataServerStart,
+} from '@kbn/fields-metadata-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { ConsoleStart as ConsoleServerStart } from '@kbn/console-plugin/server';
@@ -54,6 +57,7 @@ export interface StreamsPluginSetupDependencies {
   ruleRegistry: RuleRegistryPluginSetup;
   features: FeaturesPluginSetup;
   usageCollection: UsageCollectionSetup;
+  fieldsMetadata: FieldsMetadataServerSetup;
   cloud?: CloudSetup;
   globalSearch?: GlobalSearchPluginSetup;
 }
