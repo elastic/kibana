@@ -210,8 +210,8 @@ export const ToolbarSelector = ({
               labelPopoverDisabled
                 ? undefined
                 : buttonTooltipContent !== undefined
-                  ? buttonTooltipContent
-                  : buttonLabel
+                ? buttonTooltipContent
+                : buttonLabel
             }
             delay="long"
             display="block"
