@@ -92,7 +92,7 @@ The API returns the following:
 --------------------------------------------------
 PUT api/uptime/settings
 {
-    "heartbeatIndices": "heartbeat-8*",
+    "heartbeatIndices": "heartbeat-8*"
 }
 --------------------------------------------------
 
