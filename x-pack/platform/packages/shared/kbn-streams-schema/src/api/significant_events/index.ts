@@ -10,6 +10,50 @@ import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Condition } from '@kbn/streamlang';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { TaskStatus } from '../../tasks/types';
+import type { StreamQueryKql } from '../../queries';
+
+/**
+ * SignificantEvents Get Response
+ */
+type ChangePointsType =
+  | 'dip'
+  | 'distribution_change'
+  | 'non_stationary'
+  | 'spike'
+  | 'stationary'
+  | 'step_change'
+  | 'trend_change';
+
+type ChangePointsValue = Partial<{
+  p_value: number;
+  r_value: number;
+  change_point: number;
+  trend: string;
+}>;
+
+interface SignificantEventOccurrence {
+  date: string;
+  count: number;
+}
+
+type SignificantEventsResponse = StreamQueryKql & {
+  stream_name: string;
+  occurrences: SignificantEventOccurrence[];
+  change_points: {
+    type: Partial<Record<ChangePointsType, ChangePointsValue>>;
+  };
+  rule_backed: boolean;
+};
+
+interface SignificantEventsGetResponse {
+  significant_events: SignificantEventsResponse[];
+  aggregated_occurrences: SignificantEventOccurrence[];
+}
+
+type SignificantEventsPreviewResponse = Pick<
+  SignificantEventsResponse,
+  'occurrences' | 'change_points' | 'kql'
+>;
 
 interface GeneratedSignificantEventQuery {
   title: string;
@@ -56,9 +100,6 @@ export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
   SignificantEventsPreviewResponse,
-} from '../../queries';
-
-export type {
   GeneratedSignificantEventQuery,
   SignificantEventsGenerateResponse,
   SignificantEventsQueriesGenerationResult,

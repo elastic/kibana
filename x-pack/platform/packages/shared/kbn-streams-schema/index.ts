@@ -82,9 +82,6 @@ export {
 export {
   type StreamQuery,
   type StreamQueryKql,
-  type SignificantEventsResponse,
-  type SignificantEventsGetResponse,
-  type SignificantEventsPreviewResponse,
   type DiscoveryQueriesGetResponse,
   type DiscoveryQueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
@@ -143,6 +140,9 @@ export {
 } from './src/models/ingest/failure_store';
 
 export type {
+  SignificantEventsResponse,
+  SignificantEventsGetResponse,
+  SignificantEventsPreviewResponse,
   SignificantEventsGenerateResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsQueriesGenerationResult,
