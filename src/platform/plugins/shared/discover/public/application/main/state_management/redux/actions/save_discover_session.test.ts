@@ -218,36 +218,192 @@ describe('saveDiscoverSession', () => {
     expect(resetOnSavedSearchChangeSpy).not.toHaveBeenCalled();
   });
 
-  it('should include timeRange and refreshInterval when timeRestore is true', async () => {
-    const { toolkit, saveDiscoverSessionSpy } = await setup({
-      additionalPersistedTabs: (services) => [
-        getPersistedTabMock({
-          tabId: 'time-tab',
-          dataView: dataViewMock,
-          globalStateOverrides: {
-            timeRange: { from: 'now-15m', to: 'now' },
-            refreshInterval: { value: 10000, pause: false },
-          },
-          timeRestore: true,
-          services,
-        }),
-      ],
+  describe('timeRestore, timeRange, and refreshInterval handling', () => {
+    const TIME_RANGE_30M = { from: 'now-30m', to: 'now' };
+    const REFRESH_INTERVAL_5S = { value: 5000, pause: true };
+    const TIME_RANGE_15M = { from: 'now-15m', to: 'now' };
+    const REFRESH_INTERVAL_10S = { value: 10000, pause: false };
+    const TIME_RANGE_1H = { from: 'now-1h', to: 'now' };
+    const REFRESH_INTERVAL_20S = { value: 20000, pause: false };
+    const TIME_RANGE_7D = { from: 'now-7d', to: 'now' };
+    const REFRESH_INTERVAL_30S = { value: 30000, pause: true };
+
+    const findSavedTab = (
+      saveDiscoverSessionSpy: jest.SpyInstance,
+      tabId: string
+    ): { timeRestore?: boolean; timeRange?: unknown; refreshInterval?: unknown } | undefined =>
+      saveDiscoverSessionSpy.mock.calls[0][0].tabs.find((t: { id: string }) => t.id === tabId);
+
+    describe('when tab has a stateContainer (initialized tab)', () => {
+      it.each([
+        {
+          scenario: 'newTimeRestore is true',
+          newTimeRestore: true,
+          expectedTimeRestore: true,
+          expectedTimeRange: TIME_RANGE_30M,
+          expectedRefreshInterval: REFRESH_INTERVAL_5S,
+        },
+        {
+          scenario: 'newTimeRestore is false',
+          newTimeRestore: false,
+          expectedTimeRestore: false,
+          expectedTimeRange: undefined,
+          expectedRefreshInterval: undefined,
+        },
+      ])(
+        'should save time settings correctly when $scenario',
+        async ({
+          newTimeRestore,
+          expectedTimeRestore,
+          expectedTimeRange,
+          expectedRefreshInterval,
+        }) => {
+          const { toolkit, saveDiscoverSessionSpy } = await setup({ initializeTab: true });
+
+          toolkit.internalState.dispatch(
+            internalStateSlice.actions.setGlobalState({
+              tabId: toolkit.getCurrentTab().id,
+              globalState: { timeRange: TIME_RANGE_30M, refreshInterval: REFRESH_INTERVAL_5S },
+            })
+          );
+
+          await toolkit.internalState.dispatch(
+            internalStateActions.saveDiscoverSession(
+              getSaveDiscoverSessionParams({ newTimeRestore })
+            )
+          );
+
+          expect(saveDiscoverSessionSpy).toHaveBeenCalled();
+          const savedTab = findSavedTab(saveDiscoverSessionSpy, toolkit.getCurrentTab().id);
+          expect(savedTab?.timeRestore).toBe(expectedTimeRestore);
+          expect(savedTab?.timeRange).toEqual(expectedTimeRange);
+          expect(savedTab?.refreshInterval).toEqual(expectedRefreshInterval);
+        }
+      );
     });
 
-    await toolkit.internalState.dispatch(
-      internalStateActions.saveDiscoverSession(
-        getSaveDiscoverSessionParams({ newTimeRestore: true })
-      )
-    );
+    describe('when tab does not have a stateContainer (uninitialized tab)', () => {
+      it.each([
+        {
+          scenario: 'newTimeRestore is true',
+          newTimeRestore: true,
+          expectedTimeRestore: true,
+          expectedTimeRange: TIME_RANGE_15M,
+          expectedRefreshInterval: REFRESH_INTERVAL_10S,
+        },
+        {
+          scenario: 'newTimeRestore is false',
+          newTimeRestore: false,
+          expectedTimeRestore: false,
+          expectedTimeRange: undefined,
+          expectedRefreshInterval: undefined,
+        },
+      ])(
+        'should save time settings correctly when $scenario',
+        async ({
+          newTimeRestore,
+          expectedTimeRestore,
+          expectedTimeRange,
+          expectedRefreshInterval,
+        }) => {
+          const { toolkit, saveDiscoverSessionSpy } = await setup({
+            additionalPersistedTabs: (services) => [
+              getPersistedTabMock({
+                tabId: 'time-tab',
+                dataView: dataViewMock,
+                globalStateOverrides: {
+                  timeRange: TIME_RANGE_15M,
+                  refreshInterval: REFRESH_INTERVAL_10S,
+                },
+                overridenTimeRestore: true,
+                services,
+              }),
+            ],
+          });
 
-    expect(saveDiscoverSessionSpy).toHaveBeenCalled();
+          await toolkit.internalState.dispatch(
+            internalStateActions.saveDiscoverSession(
+              getSaveDiscoverSessionParams({ newTimeRestore })
+            )
+          );
 
-    const tabs = saveDiscoverSessionSpy.mock.calls[0][0].tabs;
-    const savedTimeTab = tabs.find((t) => t.id === 'time-tab');
+          expect(saveDiscoverSessionSpy).toHaveBeenCalled();
+          const savedTab = findSavedTab(saveDiscoverSessionSpy, 'time-tab');
+          expect(savedTab?.timeRestore).toBe(expectedTimeRestore);
+          expect(savedTab?.timeRange).toEqual(expectedTimeRange);
+          expect(savedTab?.refreshInterval).toEqual(expectedRefreshInterval);
+        }
+      );
 
-    expect(savedTimeTab?.timeRestore).toBe(true);
-    expect(savedTimeTab?.timeRange).toEqual({ from: 'now-15m', to: 'now' });
-    expect(savedTimeTab?.refreshInterval).toEqual({ value: 10000, pause: false });
+      it('should use the selected tab time range for uninitialized tabs without their own time range when newTimeRestore is true', async () => {
+        const { toolkit, saveDiscoverSessionSpy } = await setup({
+          initializeTab: true,
+          additionalPersistedTabs: (services) => [
+            getPersistedTabMock({
+              tabId: 'uninitialized-tab',
+              dataView: dataViewMock,
+              services,
+            }),
+          ],
+        });
+
+        toolkit.internalState.dispatch(
+          internalStateSlice.actions.setGlobalState({
+            tabId: toolkit.getCurrentTab().id,
+            globalState: { timeRange: TIME_RANGE_1H, refreshInterval: REFRESH_INTERVAL_20S },
+          })
+        );
+
+        await toolkit.internalState.dispatch(
+          internalStateActions.saveDiscoverSession(
+            getSaveDiscoverSessionParams({ newTimeRestore: true })
+          )
+        );
+
+        expect(saveDiscoverSessionSpy).toHaveBeenCalled();
+        const savedTab = findSavedTab(saveDiscoverSessionSpy, 'uninitialized-tab');
+        expect(savedTab?.timeRestore).toBe(true);
+        expect(savedTab?.timeRange).toEqual(TIME_RANGE_1H);
+        expect(savedTab?.refreshInterval).toEqual(REFRESH_INTERVAL_20S);
+      });
+
+      it('should not use the selected tab time range for uninitialized tabs if they have their own time range', async () => {
+        const { toolkit, saveDiscoverSessionSpy } = await setup({
+          initializeTab: true,
+          additionalPersistedTabs: (services) => [
+            getPersistedTabMock({
+              tabId: 'uninitialized-tab-with-time',
+              dataView: dataViewMock,
+              globalStateOverrides: {
+                timeRange: TIME_RANGE_7D,
+                refreshInterval: REFRESH_INTERVAL_30S,
+              },
+              overridenTimeRestore: true,
+              services,
+            }),
+          ],
+        });
+
+        toolkit.internalState.dispatch(
+          internalStateSlice.actions.setGlobalState({
+            tabId: toolkit.getCurrentTab().id,
+            globalState: { timeRange: TIME_RANGE_1H, refreshInterval: REFRESH_INTERVAL_20S },
+          })
+        );
+
+        await toolkit.internalState.dispatch(
+          internalStateActions.saveDiscoverSession(
+            getSaveDiscoverSessionParams({ newTimeRestore: true })
+          )
+        );
+
+        expect(saveDiscoverSessionSpy).toHaveBeenCalled();
+        const savedTab = findSavedTab(saveDiscoverSessionSpy, 'uninitialized-tab-with-time');
+        expect(savedTab?.timeRestore).toBe(true);
+        expect(savedTab?.timeRange).toEqual(TIME_RANGE_7D);
+        expect(savedTab?.refreshInterval).toEqual(REFRESH_INTERVAL_30S);
+      });
+    });
   });
 
   it('should replace custom ad hoc data view when copying on save', async () => {
@@ -268,7 +424,6 @@ describe('saveDiscoverSession', () => {
                 },
               },
             }),
-            timeRestore: false,
             services,
           }),
         ],
@@ -314,7 +469,6 @@ describe('saveDiscoverSession', () => {
                 },
               },
             }),
-            timeRestore: false,
             services,
           }),
         ],
@@ -357,7 +511,6 @@ describe('saveDiscoverSession', () => {
                 },
               },
             }),
-            timeRestore: false,
             services,
           }),
         ],

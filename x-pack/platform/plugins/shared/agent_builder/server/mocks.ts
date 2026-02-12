@@ -26,6 +26,9 @@ const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {
     skills: {
       register: jest.fn(),
     },
+    hooks: {
+      register: jest.fn(),
+    },
   };
 };
 
