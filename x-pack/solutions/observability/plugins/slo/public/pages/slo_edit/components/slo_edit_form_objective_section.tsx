@@ -33,8 +33,15 @@ import { MAX_WIDTH } from '../constants';
 import { AdvancedSettings } from './indicator_section/advanced_settings/advanced_settings';
 import { SloEditFormObjectiveSectionTimeslices } from './slo_edit_form_objective_section_timeslices';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { DataPreviewChart } from './common/data_preview_chart';
 
-export function SloEditFormObjectiveSection() {
+interface SloEditFormObjectiveSectionProps {
+  isHorizontalLayout?: boolean;
+}
+
+export function SloEditFormObjectiveSection({
+  isHorizontalLayout = false,
+}: SloEditFormObjectiveSectionProps) {
   const {
     control,
     watch,
@@ -104,7 +111,7 @@ export function SloEditFormObjectiveSection() {
             })}
           </EuiCallOut>
         )}
-        <EuiFlexGrid columns={3} gutterSize="m">
+        <EuiFlexGrid columns={isHorizontalLayout ? 1 : 3} gutterSize="m">
           <EuiFlexItem>
             <EuiFormRow
               label={
@@ -203,7 +210,7 @@ export function SloEditFormObjectiveSection() {
           </EuiFlexItem>
         )}
 
-        <EuiFlexGrid columns={3} gutterSize="m">
+        <EuiFlexGrid columns={isHorizontalLayout ? 1 : 3} gutterSize="m">
           <EuiFlexItem>
             <EuiFormRow
               label={
@@ -247,7 +254,7 @@ export function SloEditFormObjectiveSection() {
           ) : null}
         </EuiFlexGrid>
 
-        <EuiFlexGrid columns={3} gutterSize="m">
+        <EuiFlexGrid columns={isHorizontalLayout ? 1 : 3} gutterSize="m">
           <EuiFlexItem>
             <EuiFormRow
               isInvalid={getFieldState('objective.target').invalid}
@@ -291,7 +298,8 @@ export function SloEditFormObjectiveSection() {
           </EuiFlexItem>
         </EuiFlexGrid>
 
-        <AdvancedSettings />
+        <AdvancedSettings isHorizontalLayout={isHorizontalLayout} />
+        {isHorizontalLayout && <DataPreviewChart />}
       </EuiFlexGroup>
     </EuiPanel>
   );
