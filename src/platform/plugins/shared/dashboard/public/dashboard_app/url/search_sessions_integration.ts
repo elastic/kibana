@@ -9,14 +9,19 @@
 
 import type { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import type { Query } from '@kbn/es-query';
+import { isFilterPinned, type Query } from '@kbn/es-query';
+import { fromStoredFilter } from '@kbn/as-code-filters-transforms';
+import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createQueryParamObservable, getQueryParams } from '@kbn/kibana-utils-plugin/public';
 import type { History } from 'history';
 import { map } from 'rxjs';
 import { SEARCH_SESSION_ID } from '../../../common/page_bundle_constants';
-import type { DashboardLocatorParams } from '../../../common/types';
+import type {
+  DashboardLocatorParams,
+  DashboardLocatorParamsSerializable,
+} from '../../../common/types';
 import type { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
 import { dataService } from '../../services/kibana_services';
 
@@ -43,7 +48,7 @@ export const getSessionURLObservable = (history: History) =>
 export function createSessionRestorationDataProvider(
   dashboardApi: DashboardApi,
   dashboardInternalApi: DashboardInternalApi
-): SearchSessionInfoProvider<DashboardLocatorParams> {
+): SearchSessionInfoProvider<DashboardLocatorParamsSerializable> {
   return {
     getName: async () =>
       dashboardApi.title$.value ?? dashboardApi.savedObjectId$.value ?? dashboardApi.uuid,
@@ -53,12 +58,12 @@ export function createSessionRestorationDataProvider(
         dashboardApi,
         dashboardInternalApi,
         shouldRestoreSearchSession: false,
-      }),
+      }) as DashboardLocatorParamsSerializable,
       restoreState: getLocatorParams({
         dashboardApi,
         dashboardInternalApi,
         shouldRestoreSearchSession: true,
-      }),
+      }) as DashboardLocatorParamsSerializable,
     }),
   };
 }
@@ -83,11 +88,27 @@ function getLocatorParams({
     'panels' | 'pinned_panels'
   >;
 
+  const allFilters = dataService.query.filterManager.getFilters();
+  const { pinnedFiltersAsCode, filtersAsCode } = allFilters.reduce(
+    (acc, filter) => {
+      if (isFilterPinned(filter)) {
+        const pinnedAsCode = fromStoredFilter(filter, undefined, false);
+        if (pinnedAsCode) acc.pinnedFiltersAsCode.push(pinnedAsCode);
+      } else {
+        const filterAsCode = fromStoredFilter(filter);
+        if (filterAsCode) acc.filtersAsCode.push(filterAsCode);
+      }
+      return acc;
+    },
+    { pinnedFiltersAsCode: [] as AsCodeFilter[], filtersAsCode: [] as AsCodeFilter[] }
+  );
+
   return {
     viewMode: dashboardApi.viewMode$.value ?? 'view',
     useHash: false,
     preserveSavedFilters: false,
-    filters: dataService.query.filterManager.getFilters(),
+    filters: filtersAsCode?.length ? filtersAsCode : undefined,
+    pinnedFilters: pinnedFiltersAsCode?.length ? pinnedFiltersAsCode : undefined,
     query: dataService.query.queryString.formatQuery(dashboardApi.query$.value) as Query,
     dashboardId: savedObjectId,
     searchSessionId: shouldRestoreSearchSession

@@ -15,7 +15,10 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { topNavStrings } from '../../_dashboard_app_strings';
-import type { DashboardLocatorParams } from '../../../../common';
+import type {
+  DashboardLocatorParams,
+  DashboardLocatorParamsSerializable,
+} from '../../../../common';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { dataService, shareService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
@@ -126,7 +129,7 @@ export function buildShareableUrlLocatorParams(locatorParams: DashboardLocatorPa
   return {
     locator: shareService?.url.locators.get(
       DASHBOARD_APP_LOCATOR
-    ) as LocatorPublic<DashboardLocatorParams>,
+    ) as LocatorPublic<DashboardLocatorParamsSerializable>,
     params: { ...locatorParams, timeRange: locatorParams.time_range },
   };
 }

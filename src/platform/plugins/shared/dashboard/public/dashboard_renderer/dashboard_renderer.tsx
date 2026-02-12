@@ -24,7 +24,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { DashboardLocatorParams } from '../../common';
+import type { DashboardLocatorParamsSerializable } from '../../common';
 import type { DashboardApi, DashboardInternalApi } from '../dashboard_api/types';
 import type { DashboardCreationOptions } from '..';
 import { loadDashboardApi } from '../dashboard_api/load_dashboard_api';
@@ -43,7 +43,7 @@ import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
  */
 export interface DashboardRendererProps {
   /** Optional locator for dashboard navigation and URL generation. */
-  locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
+  locator?: Pick<LocatorPublic<DashboardLocatorParamsSerializable>, 'navigate' | 'getRedirectUrl'>;
   /** The ID of the saved dashboard to load. If not provided, creates a new dashboard. */
   savedObjectId?: string;
   /** Whether to show a plain spinner instead of the Elastic loading animation. */

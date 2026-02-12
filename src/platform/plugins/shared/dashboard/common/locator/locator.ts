@@ -10,13 +10,15 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { flow } from 'lodash';
 
-import type { Filter } from '@kbn/es-query';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
+import { pinFilter } from '@kbn/es-query';
+import { toStoredFilters } from '@kbn/as-code-filters-transforms';
 
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import type { DashboardLocatorParams } from '../types';
+import type { DashboardLocatorParams, DashboardLocatorParamsSerializable } from '../types';
 import { DASHBOARD_APP_ID, SEARCH_SESSION_ID } from '../page_bundle_constants';
 
 /**
@@ -40,11 +42,11 @@ export const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
   return stateObj;
 };
 
-export type DashboardAppLocator = LocatorPublic<DashboardLocatorParams>;
+export type DashboardAppLocator = LocatorPublic<DashboardLocatorParamsSerializable>;
 
 export interface DashboardAppLocatorDependencies {
   useHashedUrl: boolean;
-  getDashboardFilterFields: (dashboardId: string) => Promise<Filter[]>;
+  getDashboardFilterFields: (dashboardId: string) => Promise<AsCodeFilter[]>;
 }
 
 export type ForwardedDashboardState = Omit<
@@ -56,7 +58,9 @@ export type ForwardedDashboardState = Omit<
  * Locator definition for the Dashboard application.
  * This class is responsible for generating URLs and navigation state for dashboard links.
  */
-export class DashboardAppLocatorDefinition implements LocatorDefinition<DashboardLocatorParams> {
+export class DashboardAppLocatorDefinition
+  implements LocatorDefinition<DashboardLocatorParamsSerializable>
+{
   /** The unique identifier for the dashboard app locator. */
   public readonly id = DASHBOARD_APP_LOCATOR;
 
@@ -73,9 +77,10 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
    * @param params - The {@link DashboardLocatorParams} to use for generating the location.
    * @returns A promise that resolves to the location object containing app, path, and state.
    */
-  public readonly getLocation = async (params: DashboardLocatorParams) => {
+  public readonly getLocation = async (params: DashboardLocatorParamsSerializable) => {
     const {
       filters,
+      pinnedFilters,
       useHash: paramsUseHash,
       preserveSavedFilters,
       dashboardId,
@@ -85,7 +90,7 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
 
     const hash = dashboardId ? `view/${dashboardId}` : `create`;
 
-    const getSavedFiltersFromDestinationDashboardIfNeeded = async (): Promise<Filter[]> => {
+    const getSavedFiltersFromDestinationDashboardIfNeeded = async (): Promise<AsCodeFilter[]> => {
       if (preserveSavedFilters === false) return [];
       if (!params.dashboardId) return [];
       try {
@@ -106,14 +111,12 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       ...params.filters,
     ];
 
-    const { isFilterPinned } = await import('@kbn/es-query');
-
     let path = `#/${hash}`;
     path = setStateToKbnUrl<GlobalQueryStateFromUrl>(
       '_g',
       cleanEmptyKeys({
         time: params.time_range,
-        filters: filters?.filter((f) => isFilterPinned(f)),
+        filters: toStoredFilters(pinnedFilters)?.map((filter) => pinFilter(filter)),
         refreshInterval: params.refresh_interval,
       }),
       { useHash },

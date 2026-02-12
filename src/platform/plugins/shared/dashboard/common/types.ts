@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { DashboardState, DashboardPinnedPanelsState, DashboardPinnedPanel } from '../server';
@@ -34,6 +35,10 @@ export interface DashboardCapabilities {
  */
 export type DashboardLocatorParams = Partial<
   DashboardState & {
+    /**
+     * UI-global filters (pinned) that should be written to `_g.filters` only.
+     */
+    pinnedFilters?: AsCodeFilter[];
     viewMode?: ViewMode;
 
     /**
@@ -65,3 +70,9 @@ export type DashboardLocatorParams = Partial<
     passThroughContext?: SerializableRecord;
   }
 >;
+
+// LocatorPublic requires params to extend SerializableRecord; AsCodeFilter in the
+// DashbaordState is a recursive union that TypeScript cannot prove satisfies that
+// index signature, even though it is JSON-serializable. So we use a wrapper type
+// in the locator.
+export type DashboardLocatorParamsSerializable = DashboardLocatorParams & SerializableRecord;

@@ -22,7 +22,7 @@ import {
 } from '@kbn/content-management-access-control-public';
 
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
-import type { DashboardLocatorParams } from '../../../../common';
+import type { DashboardLocatorParamsSerializable } from '../../../../common';
 import { shareService, coreServices, spacesService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { shareModalStrings } from '../../_dashboard_app_strings';
@@ -219,7 +219,7 @@ export function ShowShareModal({
     shareableUrlLocatorParams: {
       locator: shareService.url.locators.get(
         DASHBOARD_APP_LOCATOR
-      ) as LocatorPublic<DashboardLocatorParams>,
+      ) as LocatorPublic<DashboardLocatorParamsSerializable>,
       params: { ...locatorParams, timeRange: locatorParams.time_range },
     },
   });
