@@ -27,7 +27,6 @@ import { useOnboardingApi } from '../../../../hooks/use_onboarding_api';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { getFormattedError } from '../../../../util/errors';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
-import { useDiscoveryStreams } from '../../hooks/use_discovery_streams_fetch';
 import { useOnboardingStatusUpdateQueue } from '../../hooks/use_onboarding_status_update_queue';
 import {
   DISCOVER_INSIGHTS_BUTTON_LABEL,
@@ -40,6 +39,7 @@ import {
 } from './translations';
 import { StreamsTreeTable } from './tree_table';
 import type { TableRow } from './utils';
+import { useFetchStreams } from '../../hooks/use_fetch_streams';
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -72,7 +72,18 @@ export function StreamsView({
   } = useKibana();
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
   const [discoverInsightsPopoverOpen, setDiscoverInsightsPopoverOpen] = useState(false);
-  const streamsListFetch = useDiscoveryStreams();
+  const streamsListFetch = useFetchStreams({
+    select: (result) => {
+      return {
+        ...result,
+        /**
+         * Significant events discovery for now only works with logs streams.
+         */
+        streams: result.streams.filter((stream) => stream.stream.name.startsWith('logs')),
+      };
+    },
+  });
+
   const [selectedStreams, setSelectedStreams] = useState<TableRow[]>([]);
   const significantEventsFetch = useStreamsAppFetch(
     async ({ signal }) =>
@@ -155,17 +166,17 @@ export function StreamsView({
   };
 
   useEffect(() => {
-    if (streamsListFetch.value === undefined) {
+    if (streamsListFetch.data === undefined) {
       return;
     }
 
-    streamsListFetch.value.streams.forEach((item) => {
+    streamsListFetch.data.streams.forEach((item) => {
       onboardingStatusUpdateQueue.add(item.stream.name);
     });
     processStatusUpdateQueue().finally(() => {
       isInitialStatusUpdateDone.current = true;
     });
-  }, [onboardingStatusUpdateQueue, processStatusUpdateQueue, streamsListFetch.value]);
+  }, [onboardingStatusUpdateQueue, processStatusUpdateQueue, streamsListFetch.data]);
 
   const bulkScheduleOnboardingTask = async (streamList: string[]) => {
     try {
@@ -262,7 +273,7 @@ export function StreamsView({
               'xpack.streams.significantEventsDiscovery.streamsTree.streamsCountLabel',
               {
                 defaultMessage: '{count} streams',
-                values: { count: streamsListFetch.value?.streams.length ?? 0 },
+                values: { count: streamsListFetch.data?.streams.length ?? 0 },
               }
             )}
           </EuiText>
@@ -334,9 +345,9 @@ export function StreamsView({
 
       <EuiFlexItem>
         <StreamsTreeTable
-          streams={streamsListFetch.value?.streams}
+          streams={streamsListFetch.data?.streams}
           streamOnboardingResultMap={streamOnboardingResultMap}
-          loading={streamsListFetch.loading}
+          loading={streamsListFetch.isLoading}
           searchQuery={searchQuery}
           selection={{ selected: selectedStreams, onSelectionChange: setSelectedStreams }}
           onOnboardStreamActionClick={onOnboardStreamActionClick}

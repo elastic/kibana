@@ -13,13 +13,13 @@ import { buildDocumentation } from '../definitions/utils/documentation';
 import { TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
 import { withAutoSuggest } from '../definitions/utils/autocomplete/helpers';
 import { techPreviewLabel } from '../definitions/utils/shared';
-import { SuggestionCategory } from '../../shared/sorting/types';
+import { SuggestionCategory } from '../../language/autocomplete/utils/sorting/types';
 import {
   ESQL_STRING_TYPES,
   ESQL_COMMON_NUMERIC_TYPES,
   ESQL_NAMED_PARAMS_TYPE,
 } from '../definitions/types';
-import { getPromqlParamDefinitions } from './promql/utils';
+import { PROMQL_PARAMS } from './promql/utils';
 
 function buildCharCompleteItem(
   label: string,
@@ -173,7 +173,7 @@ export function buildMapValueCompleteItem(value: string): ISuggestionItem {
 }
 
 export function getPromqlParamKeySuggestions(): ISuggestionItem[] {
-  return getPromqlParamDefinitions().map(({ name, description }) =>
+  return PROMQL_PARAMS.map(({ name, description }) =>
     withAutoSuggest({
       label: name,
       text: `${name} = `,
@@ -199,8 +199,33 @@ export const promqlByCompleteItem: ISuggestionItem = withAutoSuggest({
   text: 'by ($0) ',
   asSnippet: true,
   kind: 'Reference',
+  category: SuggestionCategory.LANGUAGE_KEYWORD,
   detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.byDoc', {
     defaultMessage: 'Group by labels',
+  }),
+});
+
+export const promqlLabelSelectorItem: ISuggestionItem = withAutoSuggest({
+  label: i18n.translate('kbn-esql-language.esql.autocomplete.promql.addLabelSelector', {
+    defaultMessage: 'Add selector',
+  }),
+  text: '{$0}',
+  asSnippet: true,
+  kind: 'Operator',
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.labelSelectorDoc', {
+    defaultMessage: 'Filter by labels',
+  }),
+});
+
+export const promqlRangeSelectorItem: ISuggestionItem = withAutoSuggest({
+  label: i18n.translate('kbn-esql-language.esql.autocomplete.promql.addRangeSelector', {
+    defaultMessage: 'Add time range',
+  }),
+  text: '[${0:5m}]',
+  asSnippet: true,
+  kind: 'Operator',
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.rangeSelectorDoc', {
+    defaultMessage: 'Range selector (duration)',
   }),
 });
 
@@ -574,3 +599,53 @@ export const getDateHistogramCompletionItem: (histogramBarTarget?: number) => IS
     sortText: '1',
     category: SuggestionCategory.CUSTOM_ACTION,
   });
+
+export function createResourceBrowserSuggestion(options: {
+  label: string;
+  description: string;
+  commandId: string;
+  rangeToReplace?: { start: number; end: number };
+  filterText?: string;
+  insertText?: string;
+  commandArgs?: Record<string, string>;
+}): ISuggestionItem {
+  return withAutoSuggest({
+    label: options.label,
+    text: options.insertText || '',
+    kind: 'Folder',
+    detail: options.description,
+    command: {
+      title: options.label,
+      id: options.commandId,
+      ...(options.commandArgs && { arguments: [options.commandArgs] }),
+    },
+    asSnippet: false,
+    filterText: options.filterText || '',
+    ...(options.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
+    category: SuggestionCategory.CUSTOM_ACTION,
+  });
+}
+
+export function createIndicesBrowserSuggestion(
+  rangeToReplace?: { start: number; end: number },
+  filterText?: string,
+  insertText?: string,
+  commandArgs?: Record<string, string>
+): ISuggestionItem {
+  return createResourceBrowserSuggestion({
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.indicesBrowser.suggestionLabel', {
+      defaultMessage: 'Browse indices',
+    }),
+    description: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.indicesBrowser.suggestionDescription',
+      {
+        defaultMessage: 'Open data source browser',
+      }
+    ),
+    commandId: 'esql.indicesBrowser.open',
+    rangeToReplace,
+    filterText,
+    insertText,
+    commandArgs,
+  });
+}
