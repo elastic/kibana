@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
-
 import type {
   SecurityGetRoleResponse,
   SecurityGetRoleRole,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import type { ElasticsearchRoleDescriptor } from '@kbn/scout';
-import { apiTest } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { EXPECTED_BUILTIN_ROLES_WITH_KIBANA_ACCESS } from '../fixtures/expected_builtin_roles_kibana_access';
@@ -120,7 +118,7 @@ function compareRoleAccessMaps(
   return { addedRoles, removedRoles, changedRoles };
 }
 
-apiTest.describe('Built-in roles Kibana access validation', { tag: ['@ess'] }, () => {
+apiTest.describe('Built-in roles Kibana access validation', { tag: tags.stateful.classic }, () => {
   apiTest(
     'should have expected Kibana access for all built-in roles',
     async ({ esClient, log }) => {
