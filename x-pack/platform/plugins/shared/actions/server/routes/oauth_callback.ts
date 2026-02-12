@@ -17,6 +17,7 @@ import type { ActionsConfigurationUtilities } from '../actions_config';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { OAuthStateClient } from '../lib/oauth_state_client';
+import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
 import { ConnectorTokenClient } from '../lib/connector_token_client';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
@@ -317,7 +318,7 @@ export const oauthCallbackRoute = (
         }
 
         try {
-          const [, { encryptedSavedObjects, spaces }] = await coreSetup.getStartServices();
+          const [coreStart, { encryptedSavedObjects, spaces }] = await coreSetup.getStartServices();
 
           // Retrieve and validate state
           const oauthStateClient = new OAuthStateClient({
@@ -372,13 +373,18 @@ export const oauthCallbackRoute = (
             );
           }
 
+          // Build the redirect URI (must match the one sent to the authorization endpoint)
+          const redirectUri = OAuthAuthorizationService.getRedirectUri(
+            coreStart.http.basePath.publicBaseUrl
+          );
+
           // Exchange authorization code for tokens
           const tokenResult = await requestOAuthAuthorizationCodeToken(
             tokenUrl,
             logger,
             {
               code,
-              redirectUri: oauthState.redirectUri,
+              redirectUri,
               codeVerifier: oauthState.codeVerifier,
               clientId,
               clientSecret,
