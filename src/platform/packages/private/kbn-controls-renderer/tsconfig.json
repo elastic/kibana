@@ -16,6 +16,6 @@
     "@kbn/controls-constants",
     "@kbn/i18n",
     "@kbn/controls-schemas",
-    "@kbn/presentation-containers",
+    "@kbn/presentation-containers"
   ]
 }
