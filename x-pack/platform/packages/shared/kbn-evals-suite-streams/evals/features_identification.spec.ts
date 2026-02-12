@@ -61,8 +61,8 @@ const typeValidationEvaluator = {
       explanation:
         invalidFeatures.length > 0
           ? `Invalid types: ${invalidFeatures
-            .map((f) => `"${f.id}" has type "${f.type}"`)
-            .join('; ')} (expected one of: ${VALID_FEATURE_TYPES.join(', ')})`
+              .map((f) => `"${f.id}" has type "${f.type}"`)
+              .join('; ')} (expected one of: ${VALID_FEATURE_TYPES.join(', ')})`
           : 'All features have a valid type',
       details: {
         total: features.length,
@@ -201,10 +201,11 @@ const evidenceGroundingEvaluator = {
       score,
       explanation:
         ungroundedItems.length > 0
-          ? `${ungroundedItems.length
-          }/${totalEvidence} evidence strings not grounded: ${ungroundedItems
-            .slice(0, 3)
-            .join('; ')}`
+          ? `${
+              ungroundedItems.length
+            }/${totalEvidence} evidence strings not grounded: ${ungroundedItems
+              .slice(0, 3)
+              .join('; ')}`
           : `All ${totalEvidence} evidence strings are grounded in input documents`,
       details: { totalEvidence, groundedEvidence, ungroundedItems },
     };
@@ -235,8 +236,9 @@ const featureCountEvaluator = {
       explanation:
         issues.length > 0
           ? issues.join('; ')
-          : `Feature count ${count} is within bounds [${min_features ?? '∞'}, ${max_features ?? '∞'
-          }]`,
+          : `Feature count ${count} is within bounds [${min_features ?? '∞'}, ${
+              max_features ?? '∞'
+            }]`,
       details: { count, min_features, max_features },
     };
   },
@@ -265,10 +267,11 @@ const confidenceBoundsEvaluator = {
       score: violations.length === 0 ? 1 : 1 - violations.length / features.length,
       explanation:
         violations.length > 0
-          ? `${violations.length}/${features.length
-          } features exceed max confidence ${max_confidence}: ${violations
-            .map((f) => `"${f.id}" (${f.confidence})`)
-            .join(', ')}`
+          ? `${violations.length}/${
+              features.length
+            } features exceed max confidence ${max_confidence}: ${violations
+              .map((f) => `"${f.id}" (${f.confidence})`)
+              .join(', ')}`
           : `All features have confidence ≤ ${max_confidence}`,
       details: {
         max_confidence,
