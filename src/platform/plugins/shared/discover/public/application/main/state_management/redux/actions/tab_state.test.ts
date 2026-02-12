@@ -12,53 +12,37 @@ import { internalStateActions, selectTab } from '..';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
-import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
-import { getTabStateMock } from '../__mocks__/internal_state.mocks';
-import { mockControlState } from '../../../../../__mocks__/esql_controls';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import { mockControlState } from '../../../../../__mocks__/esql_controls';
+import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 
 const setup = async () => {
   const services = createDiscoverServicesMock();
-  const { internalState, initializeTabs, initializeSingleTab } = getDiscoverInternalStateMock({
+  const toolkit = getDiscoverInternalStateMock({
     services,
     persistedDataViews: [dataViewMockWithTimeField],
   });
 
-  // Create a persisted tab with ES|QL query
-  const persistedTab = fromTabStateToSavedObjectTab({
-    tab: getTabStateMock({
-      id: 'test-tab',
-      initialInternalState: {
-        serializedSearchSource: {
-          index: dataViewMockWithTimeField.id,
-          query: { esql: 'FROM test-index' },
-        },
-      },
-      appState: {
-        query: { esql: 'FROM test-index' },
-        columns: ['field1', 'field2'],
-        dataSource: {
-          type: DataSourceType.Esql,
-        },
-        sort: [['@timestamp', 'desc']],
-        interval: 'auto',
-        hideChart: false,
-      },
-    }),
-    timeRestore: false,
+  const persistedTab = getPersistedTabMock({
+    dataView: dataViewMockWithTimeField,
     services,
+    appStateOverrides: {
+      query: { esql: 'FROM test-index' },
+      dataSource: { type: DataSourceType.Esql },
+      columns: ['field1', 'field2'],
+    },
   });
 
-  const persistedDiscoverSession = createDiscoverSessionMock({
-    id: 'test-session',
-    tabs: [persistedTab],
+  await toolkit.initializeTabs({
+    persistedDiscoverSession: createDiscoverSessionMock({
+      id: 'test-session',
+      tabs: [persistedTab],
+    }),
   });
-
-  await initializeTabs({ persistedDiscoverSession });
-  await initializeSingleTab({ tabId: persistedTab.id });
+  await toolkit.initializeSingleTab({ tabId: persistedTab.id });
 
   return {
-    internalState,
+    ...toolkit,
     tabId: persistedTab.id,
   };
 };

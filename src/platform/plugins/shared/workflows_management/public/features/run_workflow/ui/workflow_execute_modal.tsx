@@ -22,7 +22,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
-import capitalize from 'lodash/capitalize';
+import { capitalize } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { parseDocument } from 'yaml';
 import { i18n } from '@kbn/i18n';

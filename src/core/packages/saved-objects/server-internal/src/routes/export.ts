@@ -9,7 +9,7 @@
 
 import path from 'node:path';
 import { schema } from '@kbn/config-schema';
-import stringify from 'json-stable-stringify';
+import { stableStringify } from '@kbn/std';
 import { createPromiseFromStreams, createMapStream, createConcatStream } from '@kbn/utils';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -264,7 +264,7 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
         const docsToExport: string[] = await createPromiseFromStreams([
           exportStream,
           createMapStream((obj: unknown) => {
-            return stringify(obj);
+            return stableStringify(obj);
           }),
           createConcatStream([]),
         ]);

@@ -410,7 +410,14 @@ const xyDataLayerSchemaESQL = schema.object(
     ...layerSettingsSchema,
     ...datasetEsqlTableSchema,
     ...xyDataLayerSharedSchema,
-    breakdown_by: schema.maybe(esqlColumnSchema),
+    breakdown_by: schema.maybe(
+      esqlColumnSchema.extends(
+        {
+          color: schema.maybe(colorMappingSchema),
+        },
+        { meta: { description: 'ES|QL column for breakdown with optional color mapping' } }
+      )
+    ),
     y: schema.arrayOf(
       esqlColumnSchema.extends(
         {
