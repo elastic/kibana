@@ -12,7 +12,11 @@ import { spaceTest, testData } from '../../fixtures';
 spaceTest.describe(
   'Metrics in Discover - Grid',
   {
-    tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
+    tag: [
+      ...tags.stateful.all,
+      ...tags.serverless.observability.complete,
+      ...tags.serverless.security.complete,
+    ],
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
