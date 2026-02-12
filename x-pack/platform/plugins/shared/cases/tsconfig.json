@@ -99,7 +99,8 @@
     "@kbn/react-query",
     "@kbn/zod",
     "@kbn/securitysolution-es-utils",
-    "@kbn/response-ops-retry-service"
+    "@kbn/response-ops-retry-service",
+    "@kbn/openapi-generator"
   ],
   "exclude": [
     "target/**/*"
