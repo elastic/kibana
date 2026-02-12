@@ -335,6 +335,33 @@ const ActionsConnectorsList = ({
       },
     },
     {
+      field: 'authMode',
+      'data-test-subj': 'connectorsTableCell-authMode',
+      name: i18n.translate(
+        'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.authModeTitle',
+        {
+          defaultMessage: 'Authentication',
+        }
+      ),
+      sortable: false,
+      truncateText: true,
+      render: (authMode: 'shared' | 'per-user') => {
+        return (
+          <EuiFlexItem grow={false}>
+            {authMode === 'shared'
+              ? i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.authModeShared',
+                  { defaultMessage: 'Service account' }
+                )
+              : i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.authModePerUser',
+                  { defaultMessage: 'Personal credentials' }
+                )}
+          </EuiFlexItem>
+        );
+      },
+    },
+    {
       name: '',
       render: (item: ActionConnectorTableItem) => {
         if (!actionTypesIndex || !actionTypesIndex[item.actionTypeId]) {

@@ -239,6 +239,66 @@ describe('actions_connectors_list', () => {
       expect(runButtons[runButtons.length - 1]).toBeDisabled();
     });
 
+    it('renders authentication column with Service account for shared authMode', async () => {
+      const actionsWithAuth: ActionConnector[] = [
+        createMockActionConnector({
+          id: '1',
+          actionTypeId: 'test',
+          name: 'Test Connector with shared auth',
+          referencedByCount: 1,
+          authMode: 'shared',
+        }),
+      ];
+
+      render(
+        <IntlProvider>
+          <ActionsConnectorsList
+            setAddFlyoutVisibility={() => {}}
+            loadActions={async () => {}}
+            editItem={mockedEditItem}
+            isLoadingActions={false}
+            actions={actionsWithAuth}
+            setActions={() => {}}
+          />
+        </IntlProvider>
+      );
+
+      expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+      const authModeCells = await screen.findAllByTestId('connectorsTableCell-authMode');
+      expect(authModeCells).toHaveLength(1);
+      expect(authModeCells[0]).toHaveTextContent('Service account');
+    });
+
+    it('renders authentication column with Personal credentials for per-user authMode', async () => {
+      const actionsWithAuth: ActionConnector[] = [
+        createMockActionConnector({
+          id: '1',
+          actionTypeId: 'test',
+          name: 'Test Connector with per-user auth',
+          referencedByCount: 1,
+          authMode: 'per-user',
+        }),
+      ];
+
+      render(
+        <IntlProvider>
+          <ActionsConnectorsList
+            setAddFlyoutVisibility={() => {}}
+            loadActions={async () => {}}
+            editItem={mockedEditItem}
+            isLoadingActions={false}
+            actions={actionsWithAuth}
+            setActions={() => {}}
+          />
+        </IntlProvider>
+      );
+
+      expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+      const authModeCells = await screen.findAllByTestId('connectorsTableCell-authMode');
+      expect(authModeCells).toHaveLength(1);
+      expect(authModeCells[0]).toHaveTextContent('Personal credentials');
+    });
+
     it('renders fix button when connector secrets is missing', async () => {
       render(
         <IntlProvider>
