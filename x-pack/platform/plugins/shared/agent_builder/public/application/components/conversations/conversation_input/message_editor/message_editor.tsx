@@ -68,14 +68,12 @@ const useInlineActionsMenuAnchor = ({
       !messageEditorRef.current ||
       !containerRef.current
     ) {
-      setAnchorPosition(null);
       return;
     }
 
     const { triggerStartOffset } = triggerMatch.activeTrigger;
     const rect = getRectAtOffset(messageEditorRef.current, triggerStartOffset);
     if (!rect) {
-      setAnchorPosition(null);
       return;
     }
 
