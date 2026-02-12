@@ -10,6 +10,11 @@
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
 
 export class WorkflowTemplatingEngine {
+  /**
+   * Liquid tags that are not supported in workflow templates.
+   */
+  private static readonly UNSUPPORTED_TAG_PATTERN = /\{%-?\s*(include|render|layout)\s/i;
+
   private readonly engine;
 
   constructor() {
@@ -90,11 +95,6 @@ export class WorkflowTemplatingEngine {
     // Return primitive values as-is (numbers, booleans, etc.)
     return value;
   }
-
-  /**
-   * Liquid tags that are not supported in workflow templates.
-   */
-  private static readonly UNSUPPORTED_TAG_PATTERN = /\{%-?\s*(include|render|layout)\s/i;
 
   /**
    * Validates that a template string does not use unsupported Liquid tags.

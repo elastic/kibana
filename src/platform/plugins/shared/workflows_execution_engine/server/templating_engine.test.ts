@@ -541,18 +541,14 @@ describe('WorkflowTemplatingEngine', () => {
 
       it('should reject {% tablerow %} tag', () => {
         expect(() => {
-          templatingEngine.render(
-            '{% tablerow item in items %}{{ item }}{% endtablerow %}',
-            { items: [1, 2] }
-          );
+          templatingEngine.render('{% tablerow item in items %}{{ item }}{% endtablerow %}', {
+            items: [1, 2],
+          });
         }).toThrow('not found');
       });
 
       it('should allow {% assign %} tag', () => {
-        const result = templatingEngine.render(
-          '{% assign greeting = "hello" %}{{ greeting }}',
-          {}
-        );
+        const result = templatingEngine.render('{% assign greeting = "hello" %}{{ greeting }}', {});
         expect(result).toBe('hello');
       });
 
@@ -606,10 +602,9 @@ describe('WorkflowTemplatingEngine', () => {
 
       it('should reject include tags embedded in larger templates', () => {
         expect(() => {
-          templatingEngine.render(
-            "Hello {{ name }}, {% include 'some_file' %} done",
-            { name: 'test' }
-          );
+          templatingEngine.render("Hello {{ name }}, {% include 'some_file' %} done", {
+            name: 'test',
+          });
         }).toThrow('unsupported tags');
       });
 
@@ -673,10 +668,7 @@ describe('WorkflowTemplatingEngine', () => {
 
       it('should reject templates that allocate too much memory', () => {
         expect(() => {
-          templatingEngine.render(
-            '{% for i in (1..99999999) %}{{ i }}{% endfor %}',
-            {}
-          );
+          templatingEngine.render('{% for i in (1..15000000) %}{{ i }}{% endfor %}', {});
         }).toThrow('memory alloc limit exceeded');
       });
     });
@@ -688,18 +680,16 @@ describe('WorkflowTemplatingEngine', () => {
       });
 
       it('should allow if/else control flow', () => {
-        const result = templatingEngine.render(
-          '{% if show %}visible{% else %}hidden{% endif %}',
-          { show: true }
-        );
+        const result = templatingEngine.render('{% if show %}visible{% else %}hidden{% endif %}', {
+          show: true,
+        });
         expect(result).toBe('visible');
       });
 
       it('should allow for loops', () => {
-        const result = templatingEngine.render(
-          '{% for item in items %}{{ item }} {% endfor %}',
-          { items: ['a', 'b', 'c'] }
-        );
+        const result = templatingEngine.render('{% for item in items %}{{ item }} {% endfor %}', {
+          items: ['a', 'b', 'c'],
+        });
         expect(result).toBe('a b c ');
       });
 
