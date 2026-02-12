@@ -275,6 +275,22 @@ paths:
                       An optional array of warnings about the monitor configuration.
                     items:
                       $ref: "#/components/schemas/monitorWarning"
+              examples:
+                postSyntheticMonitorsResponseWithWarning:
+                  summary: Response with warning
+                  description: A response when a browser monitor specifies a timeout but has no private locations.
+                  value: |-
+                    {
+                      "type": "browser",
+                      "name": "Example journey",
+                      "enabled": true,
+                      "warnings": [
+                        {
+                          "id": "monitor-id",
+                          "message": "Browser monitor \"Example journey\" specifies a timeout but has no private locations configured. Timeout is only supported for browser monitors running on private locations and will have no effect."
+                        }
+                      ]
+                    }
         '400':
           description: >
             Bad request.
@@ -299,6 +315,19 @@ paths:
                       details:
                         type: string
                         example: Invalid timeout 20 seconds supplied. Minimum timeout for browser monitors is 30 seconds.
+              examples:
+                invalidBrowserTimeout:
+                  summary: Invalid browser timeout
+                  description: A 400 error when a browser monitor timeout is below 30 seconds.
+                  value: |-
+                    {
+                      "statusCode": 400,
+                      "error": "Bad Request",
+                      "message": "Browser Monitor timeout is invalid",
+                      "attributes": {
+                        "details": "Invalid timeout 20 seconds supplied. Minimum timeout for browser monitors is 30 seconds."
+                      }
+                    }
   /api/synthetics/monitors/{id}:
     delete:
       summary: Delete a monitor
@@ -496,6 +525,22 @@ paths:
                       An optional array of warnings about the monitor configuration.
                     items:
                       $ref: "#/components/schemas/monitorWarning"
+              examples:
+                putSyntheticMonitorResponseWithWarning:
+                  summary: Response with warning
+                  description: A response when a browser monitor specifies a timeout but has no private locations.
+                  value: |-
+                    {
+                      "type": "browser",
+                      "name": "Example journey",
+                      "enabled": true,
+                      "warnings": [
+                        {
+                          "id": "monitor-id",
+                          "message": "Browser monitor \"Example journey\" specifies a timeout but has no private locations configured. Timeout is only supported for browser monitors running on private locations and will have no effect."
+                        }
+                      ]
+                    }
         '400':
           description: >
             Bad request.
