@@ -8,8 +8,10 @@
 export {
   monitorOptionSchema,
   monitorFiltersSchema,
+  legacyMonitorFiltersSchema,
   type MonitorOption,
   type MonitorFilters,
+  type LegacyMonitorFilters,
 } from './common_schemas';
 
 export {

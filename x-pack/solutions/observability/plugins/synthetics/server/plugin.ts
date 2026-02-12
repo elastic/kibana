@@ -39,6 +39,7 @@ import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_
 import { getTransformIn as getStatsTransformIn } from '../common/embeddables/stats_overview/get_transform_in';
 import { getTransformOut as getStatsTransformOut } from '../common/embeddables/stats_overview/get_transform_out';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../common/embeddables/stats_overview/constants';
+import { getTransformIn as getMonitorsTransformIn } from '../common/embeddables/monitors_overview/get_transform_in';
 import { getTransformOut as getMonitorsTransformOut } from '../common/embeddables/monitors_overview/get_transform_out';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../common/embeddables/monitors_overview/constants';
 import { statsOverviewCustomStateSchema, syntheticsMonitorsEmbeddableSchema } from './schemas';
@@ -137,6 +138,7 @@ export class Plugin implements PluginType {
     // Register transforms and schema for SYNTHETICS_MONITORS_EMBEDDABLE
     plugins.embeddable.registerTransforms(SYNTHETICS_MONITORS_EMBEDDABLE, {
       getTransforms: () => ({
+        transformIn: getMonitorsTransformIn(),
         transformOut: getMonitorsTransformOut(),
       }),
       getSchema: () => syntheticsMonitorsEmbeddableSchema,

@@ -10,17 +10,7 @@ import { transformTitlesOut } from '@kbn/presentation-publishing';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { flow } from 'lodash';
 import type { OverviewStatsEmbeddableState } from './types';
-
-// Legacy stored shape with camelCase keys (backward compatibility)
-interface LegacyFilters {
-  projects: Array<{ label: string; value: string }>;
-  tags: Array<{ label: string; value: string }>;
-  locations: Array<{ label: string; value: string }>;
-  monitorIds?: Array<{ label: string; value: string }>;
-  monitorTypes?: Array<{ label: string; value: string }>;
-  monitor_ids?: Array<{ label: string; value: string }>;
-  monitor_types?: Array<{ label: string; value: string }>;
-}
+import type { LegacyMonitorFilters } from '../../types';
 
 export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['transformOut']) {
   function transformOut(storedState: OverviewStatsEmbeddableState, references?: Reference[]) {
@@ -29,7 +19,7 @@ export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['tra
       (state: OverviewStatsEmbeddableState) => {
         // Handle legacy stored shape: convert camelCase to snake_case (REST API shape)
         if (state.filters) {
-          const filters = state.filters as unknown as LegacyFilters;
+          const filters = state.filters as unknown as LegacyMonitorFilters;
           const hasLegacyKeys = 'monitorIds' in filters || 'monitorTypes' in filters;
 
           if (hasLegacyKeys) {

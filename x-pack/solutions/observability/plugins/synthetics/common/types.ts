@@ -9,6 +9,7 @@
 export type {
   MonitorOption,
   MonitorFilters,
+  LegacyMonitorFilters,
   SyntheticsStatsOverviewEmbeddableState,
   SyntheticsMonitorsEmbeddableState,
 } from '../server/schemas';

@@ -61,3 +61,55 @@ export const monitorFiltersSchema = schema.object({
 });
 
 export type MonitorFilters = TypeOf<typeof monitorFiltersSchema>;
+
+/**
+ * Legacy schema for monitor filters with camelCase keys (backward compatibility)
+ * Used for migrating old saved dashboards to the new snake_case format
+ */
+export const legacyMonitorFiltersSchema = schema.object({
+  projects: schema.maybe(
+    schema.arrayOf(monitorOptionSchema, {
+      maxSize: 100,
+      meta: { description: 'Filter by project' },
+    })
+  ),
+  tags: schema.maybe(
+    schema.arrayOf(monitorOptionSchema, {
+      maxSize: 100,
+      meta: { description: 'Filter by tags' },
+    })
+  ),
+  monitorIds: schema.maybe(
+    schema.arrayOf(monitorOptionSchema, {
+      maxSize: 1000,
+      meta: { description: 'Filter by monitor IDs (legacy camelCase key)' },
+    })
+  ),
+  monitorTypes: schema.maybe(
+    schema.arrayOf(monitorOptionSchema, {
+      maxSize: 10,
+      meta: { description: 'Filter by monitor types (legacy camelCase key)' },
+    })
+  ),
+  locations: schema.maybe(
+    schema.arrayOf(monitorOptionSchema, {
+      maxSize: 100,
+      meta: { description: 'Filter by monitor locations' },
+    })
+  ),
+  // Include snake_case variants for hybrid cases
+  monitor_ids: schema.maybe(
+    schema.arrayOf(monitorOptionSchema, {
+      maxSize: 1000,
+      meta: { description: 'Filter by monitor IDs' },
+    })
+  ),
+  monitor_types: schema.maybe(
+    schema.arrayOf(monitorOptionSchema, {
+      maxSize: 10,
+      meta: { description: 'Filter by monitor types' },
+    })
+  ),
+});
+
+export type LegacyMonitorFilters = TypeOf<typeof legacyMonitorFiltersSchema>;

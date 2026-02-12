@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { monitorOptionSchema, monitorFiltersSchema } from './common_schemas';
+import {
+  monitorOptionSchema,
+  monitorFiltersSchema,
+  legacyMonitorFiltersSchema,
+} from './common_schemas';
 
 describe('Common Schemas', () => {
   describe('monitorOptionSchema', () => {
@@ -228,6 +232,102 @@ describe('Common Schemas', () => {
       };
 
       const validated = monitorFiltersSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+  });
+
+  describe('legacyMonitorFiltersSchema', () => {
+    it('validates legacy filters with camelCase keys', () => {
+      const input = {
+        projects: [{ label: 'Project 1', value: 'project-1' }],
+        tags: [{ label: 'Tag 1', value: 'tag-1' }],
+        monitorIds: [{ label: 'Monitor A', value: 'monitor-a' }],
+        monitorTypes: [{ label: 'HTTP', value: 'http' }],
+        locations: [{ label: 'US East', value: 'us-east-1' }],
+      };
+
+      const validated = legacyMonitorFiltersSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('validates legacy filters with snake_case keys', () => {
+      const input = {
+        projects: [{ label: 'Project 1', value: 'project-1' }],
+        tags: [{ label: 'Tag 1', value: 'tag-1' }],
+        monitor_ids: [{ label: 'Monitor A', value: 'monitor-a' }],
+        monitor_types: [{ label: 'HTTP', value: 'http' }],
+        locations: [{ label: 'US East', value: 'us-east-1' }],
+      };
+
+      const validated = legacyMonitorFiltersSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('validates hybrid filters with both camelCase and snake_case keys', () => {
+      const input = {
+        projects: [{ label: 'Project 1', value: 'project-1' }],
+        tags: [{ label: 'Tag 1', value: 'tag-1' }],
+        monitorIds: [{ label: 'Monitor A', value: 'monitor-a' }],
+        monitor_ids: [{ label: 'Monitor B', value: 'monitor-b' }],
+        monitorTypes: [{ label: 'HTTP', value: 'http' }],
+        locations: [{ label: 'US East', value: 'us-east-1' }],
+      };
+
+      const validated = legacyMonitorFiltersSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('validates legacy filters with only monitorIds (camelCase)', () => {
+      const input = {
+        monitorIds: [{ label: 'Monitor A', value: 'monitor-a' }],
+      };
+
+      const validated = legacyMonitorFiltersSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('validates legacy filters with only monitorTypes (camelCase)', () => {
+      const input = {
+        monitorTypes: [{ label: 'Browser', value: 'browser' }],
+      };
+
+      const validated = legacyMonitorFiltersSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('validates empty legacy filters object', () => {
+      const input = {};
+
+      const validated = legacyMonitorFiltersSchema.validate(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('throws on invalid monitorIds array item', () => {
+      const input = {
+        monitorIds: [{ label: 123, value: 'monitor-a' }], // invalid label type
+      };
+
+      expect(() => legacyMonitorFiltersSchema.validate(input)).toThrow(
+        /\[monitorIds.0.label\]: expected value of type \[string\]/
+      );
+    });
+
+    it('throws on invalid monitorTypes array item', () => {
+      const input = {
+        monitorTypes: [{ label: 'HTTP', value: 123 }], // invalid value type
+      };
+
+      expect(() => legacyMonitorFiltersSchema.validate(input)).toThrow(
+        /\[monitorTypes.0.value\]: expected value of type \[string\]/
+      );
+    });
+
+    it('validates legacy filters with all optional fields omitted', () => {
+      const input = {
+        projects: [{ label: 'Project 1', value: 'project-1' }],
+      };
+
+      const validated = legacyMonitorFiltersSchema.validate(input);
       expect(validated).toEqual(input);
     });
   });
