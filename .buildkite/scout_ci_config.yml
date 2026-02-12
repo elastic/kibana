@@ -9,6 +9,7 @@ plugins:
     - discover_enhanced
     - entity_store
     - fleet
+    - gen_ai_settings
     - index_management
     - infra
     - lens
@@ -29,6 +30,7 @@ plugins:
     - dashboard
     - workflows_extensions
     - global_search
+    - banners
   disabled:
 
 packages:
