@@ -49,8 +49,8 @@ const InteractiveWrapper = ({ selectedSources = [] }: { selectedSources?: string
         setIsOpen(false);
         action('onClose')();
       }}
-      onSelect={(sources) => {
-        action('onSelect')(sources);
+      onSelect={(sourceName, change) => {
+        action('onSelect')({ sourceName, change });
       }}
       allSources={mockDataSources}
       selectedSources={selectedSources}

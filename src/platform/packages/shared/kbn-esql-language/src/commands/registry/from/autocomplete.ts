@@ -13,6 +13,7 @@ import {
   getSourcesFromCommands,
   getSourceSuggestions,
   additionalSourcesSuggestions,
+  buildViewsDefinitions,
 } from '../../definitions/utils/sources';
 import { metadataSuggestion, getMetadataSuggestions } from '../options/metadata';
 import { getRecommendedQueriesSuggestions } from '../options/recommended_queries';
@@ -97,7 +98,7 @@ async function handleFromAutocomplete(
 }
 
 /**
- * Case 1: No indexes yet - suggest available sources and subquery.
+ * Case 1: No indexes yet - suggest available sources, views, and subquery.
  */
 function suggestInitialSources(
   context: ICommandContext | undefined,
@@ -109,7 +110,9 @@ function suggestInitialSources(
     sources = sources.filter((source) => source.type !== SOURCES_TYPES.TIMESERIES);
   }
 
-  const suggestions = getSourceSuggestions(sources, [], innerText);
+  const sourceSuggestions = getSourceSuggestions(sources, [], innerText);
+  const viewSuggestions = buildViewsDefinitions(context?.views ?? [], []);
+  const suggestions = [...sourceSuggestions, ...viewSuggestions];
 
   if (shouldSuggestSubquery(context)) {
     suggestions.push(subqueryCompleteItem);
@@ -171,7 +174,8 @@ async function suggestAdditionalSources(
     innerText,
     sources,
     indexes.map(({ name }) => name),
-    recommendedQueries
+    recommendedQueries,
+    context?.views ?? []
   );
 
   if (isRestartingExpression(innerText) && shouldSuggestSubquery(context)) {
