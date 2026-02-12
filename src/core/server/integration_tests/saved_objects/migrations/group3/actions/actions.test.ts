@@ -1414,9 +1414,9 @@ describe('migration actions', () => {
       });
 
       const searchTask = client.search({
+        allow_partial_search_results: false,
         body: {
           pit: { id: pitId },
-          allow_partial_search_results: false,
         },
       });
 
