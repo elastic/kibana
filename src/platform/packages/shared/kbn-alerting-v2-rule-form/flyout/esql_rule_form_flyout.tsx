@@ -8,6 +8,7 @@
  */
 import type { NotificationsStart } from '@kbn/core/public';
 import React, { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -64,6 +65,7 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
   } = useForm<FormValues>({
     mode: 'onBlur',
     defaultValues: {
+      kind: 'alert',
       name: '',
       description: '',
       tags: [],
@@ -76,7 +78,8 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
       groupingKey: [],
     },
   });
-  const { http, data, dataViews, notifications } = services;
+  const { http, notifications } = services;
+
   const flyoutTitleId = 'ruleV2FormFlyoutTitle';
   const formId = 'ruleV2Form';
 
@@ -107,9 +110,29 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
     }
   }, [query, defaultGroupBy, setValue]);
 
+  // Handle query validation errors from the parent (e.g., Discover)
+  useEffect(() => {
+    if (isQueryInvalid) {
+      setError('query', {
+        type: 'manual',
+        message: i18n.translate('xpack.esqlRuleForm.invalidQueryError', {
+          defaultMessage:
+            'The ESQL query resulted in an error. Please review the query before saving the rule.',
+        }),
+      });
+    } else {
+      clearErrors('query');
+    }
+  }, [isQueryInvalid, setError, clearErrors]);
+
   return (
     <EuiForm id={formId} component="form" onSubmit={handleSubmit(onSubmit)}>
       <EuiFlyout
+        session="start"
+        flyoutMenuProps={{
+          title: 'Create Alert Rule',
+          hideTitle: true,
+        }}
         type={push ? 'push' : 'overlay'}
         onClose={handleClose}
         aria-labelledby={flyoutTitleId}
@@ -126,19 +149,13 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <ErrorCallOut
-            errors={errors}
-            isSubmitted={isSubmitted}
-            isQueryInvalid={isQueryInvalid}
-            setError={setError}
-            clearErrors={clearErrors}
-          />
+          <ErrorCallOut errors={errors} isSubmitted={isSubmitted} />
           <RuleFields
             control={control}
             errors={errors}
             setValue={setValue}
             query={query}
-            services={{ http, data, dataViews }}
+            services={services}
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
