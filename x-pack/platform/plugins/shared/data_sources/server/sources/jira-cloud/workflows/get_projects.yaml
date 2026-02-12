@@ -1,0 +1,25 @@
+version: '1'
+name: 'sources.jira.get_projects'
+description: 'List or search Jira projects. Use when you need to discover available projects or find a project by name or key. Inputs: query (string), maxResults (number), startAt (number); all optional.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: maxResults
+    type: number
+    required: false
+  - name: startAt
+    type: number
+    required: false
+  - name: query
+    type: string
+    required: false
+steps:
+  - name: get-projects
+    type: jira-cloud.getProjects
+    connector-id: <%= jira-cloud-stack-connector-id %>
+    with:
+      maxResults: ${{inputs.maxResults}}
+      startAt: ${{inputs.startAt}}
+      query: "${{inputs.query}}"
