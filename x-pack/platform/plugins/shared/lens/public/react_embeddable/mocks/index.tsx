@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Subject, of } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import deepMerge from 'deepmerge';
 import React from 'react';
 import { faker } from '@faker-js/faker';
@@ -34,7 +34,6 @@ import type {
   LensSerializedState,
 } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
-import type { DrilldownsManager } from '@kbn/embeddable-plugin/public';
 import { DOC_TYPE } from '../../../common/constants';
 import { createEmptyLensState } from '../helper';
 import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
@@ -201,22 +200,6 @@ export function makeEmbeddableServices(
     },
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
   };
-}
-
-export function mockDrilldownsManager() {
-  return {
-    api: {
-      setDrilldowns: jest.fn(),
-      drilldowns$: {},
-    } as unknown as DrilldownsManager['api'],
-    anyStateChange$: of(undefined),
-    cleanup: jest.fn(),
-    comparators: {
-      drilldown: jest.fn(),
-    } as unknown as DrilldownsManager['comparators'],
-    getLatestState: jest.fn(),
-    reinitializeState: jest.fn(),
-  } as DrilldownsManager;
 }
 
 export const mockVisualizationMap = (

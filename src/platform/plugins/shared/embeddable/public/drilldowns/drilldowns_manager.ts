@@ -23,16 +23,16 @@ export function initializeDrilldownsManager(
   const drilldowns$ = new BehaviorSubject<DrilldownActionState[]>([]);
   const api: DrilldownsManager['api'] = {
     drilldowns$: drilldowns$ as PublishingSubject<DrilldownActionState[]>,
-    setDrilldowns: (drilldowns: DrilldownState[]) => {
+    setDrilldowns: (next: DrilldownState[]) => {
       deleteActions();
-      const drilldownsInternal = drilldowns.map((drilldown) => {
+      const drilldowns = next.map((drilldown) => {
         return {
           ...drilldown,
           actionId: `${drilldown.type}_${uuidv4()}`,
         };
       });
-      drilldowns$.next(drilldownsInternal);
-      drilldownsInternal.forEach((drilldownState) => createAction(embeddableUuid, drilldownState));
+      drilldowns$.next(drilldowns);
+      drilldowns.forEach((drilldownState) => createAction(embeddableUuid, drilldownState));
     },
   };
   api.setDrilldowns(state.drilldowns ?? []);

@@ -15,9 +15,9 @@ import {
   getLensRuntimeStateMock,
   createUnifiedSearchApi,
   getLensInternalApiMock,
-  mockDrilldownsManager,
 } from '../mocks';
 import { createEmptyLensState } from '../helper';
+import { mockDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
 const DATAVIEW_ID = 'myDataView';
 
 jest.mock('../../app_plugin/show_underlying_data', () => {
