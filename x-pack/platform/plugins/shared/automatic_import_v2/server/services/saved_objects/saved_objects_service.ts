@@ -526,6 +526,41 @@ export class AutomaticImportSavedObjectService {
   }
 
   /**
+   * Updates only the status of a data stream's job_info.
+   * @param dataStreamId - The ID of the data stream
+   * @param integrationId - The ID of the integration
+   * @param status - The new status to set
+   */
+  public async updateDataStreamStatus(
+    dataStreamId: string,
+    integrationId: string,
+    status: keyof typeof TASK_STATUSES
+  ): Promise<void> {
+    try {
+      const dataStream = await this.getDataStream(dataStreamId, integrationId);
+      const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
+
+      const updatedAttributes: Partial<DataStreamAttributes> = {
+        job_info: {
+          ...dataStream.attributes.job_info,
+          status,
+        },
+      };
+
+      await this.savedObjectsClient.update(
+        DATA_STREAM_SAVED_OBJECT_TYPE,
+        compositeId,
+        updatedAttributes
+      );
+
+      this.logger.debug(`Data stream ${dataStreamId} status updated to ${status}`);
+    } catch (error) {
+      this.logger.error(`Failed to update data stream ${dataStreamId} status: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
    * Delete a data stream by ID
    * @param dataStreamId - The ID of the data stream
    * @param integrationId - The ID of the integration
@@ -543,6 +578,50 @@ export class AutomaticImportSavedObjectService {
       await this.savedObjectsClient.delete(DATA_STREAM_SAVED_OBJECT_TYPE, compositeId, options);
     } catch (error) {
       this.logger.error(`Failed to delete data stream ${dataStreamId}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Resets a data stream's status to pending, clears previous results, and updates the job info
+   * for a reanalysis run. This preserves existing metadata (title, description, input_types, etc.)
+   * while scheduling a fresh analysis task.
+   */
+  public async resetDataStreamForReanalysis(params: {
+    integrationId: string;
+    dataStreamId: string;
+    newTaskId: string;
+    jobType: string;
+  }): Promise<void> {
+    const { integrationId, dataStreamId, newTaskId, jobType } = params;
+
+    try {
+      const dataStream = await this.getDataStream(dataStreamId, integrationId);
+      if (!dataStream) {
+        throw new Error(`Data stream ${dataStreamId} not found`);
+      }
+
+      const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
+
+      const updatedAttributes: DataStreamAttributes = {
+        ...dataStream.attributes,
+        result: undefined,
+        job_info: {
+          job_id: newTaskId,
+          job_type: jobType,
+          status: TASK_STATUSES.pending,
+        },
+      };
+
+      await this.savedObjectsClient.update(
+        DATA_STREAM_SAVED_OBJECT_TYPE,
+        compositeId,
+        updatedAttributes
+      );
+
+      this.logger.debug(`Data stream ${dataStreamId} reanalysis with new task ${newTaskId}`);
+    } catch (error) {
+      this.logger.error(`Failed to reset data stream ${dataStreamId} for reanalysis: ${error}`);
       throw error;
     }
   }

@@ -16,10 +16,11 @@ import {
 import { css } from '@emotion/css';
 import type { DataStreamResponse } from '../../../../../../common';
 import * as i18n from '../translations';
-import { useDeleteDataStream } from '../../../../../common';
+import { useDeleteDataStream, useReanalyzeDataStream } from '../../../../../common';
 import { InputTypesBadges } from './input_types_badges';
 import { Status } from './status';
 import { useUIState } from '../../../contexts';
+import { useIntegrationForm } from '../../../forms/integration_form';
 
 interface DataStreamsTableProps {
   integrationId: string;
@@ -29,7 +30,9 @@ interface DataStreamsTableProps {
 export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps) => {
   const { euiTheme } = useEuiTheme();
   const { deleteDataStreamMutation } = useDeleteDataStream();
+  const { reanalyzeDataStreamMutation } = useReanalyzeDataStream();
   const { openEditPipelineFlyout } = useUIState();
+  const { formData } = useIntegrationForm();
   const [dataStreamDeleteTarget, setDataStreamDeleteTarget] = useState<DataStreamResponse | null>(
     null
   );
@@ -67,6 +70,17 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
     ? deleteDataStreamMutation.variables?.dataStreamId
     : undefined;
 
+  const reanalyzingDataStreamId = reanalyzeDataStreamMutation.isLoading
+    ? reanalyzeDataStreamMutation.variables?.dataStreamId
+    : undefined;
+
+  // Check if item is being deleted (either actively loading or server-side status)
+  const isDeleting = useMemo(
+    () => (item: DataStreamResponse) =>
+      item.status === 'deleting' || item.dataStreamId === deletingDataStreamId,
+    [deletingDataStreamId]
+  );
+
   const handleDeleteConfirm = () => {
     if (dataStreamDeleteTarget) {
       setDataStreamDeleteTarget(null);
@@ -101,8 +115,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
             onClick: (item: DataStreamResponse) => {
               openEditPipelineFlyout(item);
             },
-            enabled: (item: DataStreamResponse) =>
-              item.status === 'completed' && item.dataStreamId !== deletingDataStreamId,
+            enabled: (item: DataStreamResponse) => item.status === 'completed' && !isDeleting(item),
           },
         ],
         width: '48px',
@@ -138,7 +151,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
         name: i18n.TABLE_COLUMN_HEADERS.status,
         sortable: true,
         render: (status: DataStreamResponse['status'], item: DataStreamResponse) => (
-          <Status status={status} isDeleting={item.dataStreamId === deletingDataStreamId} />
+          <Status status={status} isDeleting={isDeleting(item)} />
         ),
         width: '120px',
       },
@@ -151,13 +164,19 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
             icon: 'refresh',
             type: 'icon',
             'data-test-subj': 'refreshDataStreamButton',
-            onClick: () => {
-              // TODO: Implement refresh action
-              // run analyze operation with same data stream I think. Have to check if I have to delete existing
+            onClick: (item: DataStreamResponse) => {
+              if (!formData?.connectorId) return;
+              reanalyzeDataStreamMutation.mutate({
+                integrationId,
+                dataStreamId: item.dataStreamId,
+                connectorId: formData.connectorId,
+              });
             },
             enabled: (item: DataStreamResponse) =>
+              !!formData?.connectorId &&
               (item.status === 'completed' || item.status === 'failed') &&
-              item.dataStreamId !== deletingDataStreamId,
+              !isDeleting(item) &&
+              item.dataStreamId !== reanalyzingDataStreamId,
           },
           {
             name: i18n.TABLE_ACTIONS.delete,
@@ -169,13 +188,21 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
             onClick: (item: DataStreamResponse) => {
               setDataStreamDeleteTarget(item);
             },
-            enabled: (item: DataStreamResponse) => item.dataStreamId !== deletingDataStreamId,
+            enabled: (item: DataStreamResponse) => !isDeleting(item),
           },
         ],
         width: '80px',
       },
     ];
-  }, [deletingDataStreamId, euiTheme, openEditPipelineFlyout]);
+  }, [
+    reanalyzingDataStreamId,
+    isDeleting,
+    openEditPipelineFlyout,
+    reanalyzeDataStreamMutation,
+    integrationId,
+    formData?.connectorId,
+    euiTheme,
+  ]);
 
   return (
     <>
