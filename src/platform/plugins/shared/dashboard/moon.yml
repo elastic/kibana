@@ -106,6 +106,8 @@ dependsOn:
   - '@kbn/presentation-util'
   - '@kbn/background-search'
   - '@kbn/react-query'
+  - '@kbn/scout'
+  - '@kbn/test'
 tags:
   - plugin
   - prod
@@ -119,6 +121,9 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
+    - test/scout_oas_schema/**/*
+    - test/scout_oas_schema/**/*.json
     - '!target/**/*'
 tasks:
   jest:

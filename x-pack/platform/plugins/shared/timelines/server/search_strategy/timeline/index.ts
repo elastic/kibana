@@ -14,7 +14,6 @@ import type {
 import { shimHitsTotal } from '@kbn/data-plugin/server';
 import type { ISearchOptions } from '@kbn/search-types';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { z } from '@kbn/zod';
 
@@ -30,8 +29,7 @@ import { isAggCardinalityAggregate } from './factory/helpers/is_agg_cardinality_
 
 export const timelineSearchStrategyProvider = (
   data: PluginStart,
-  logger: Logger,
-  _security?: SecurityPluginSetup
+  logger: Logger
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): ISearchStrategy<z.input<typeof searchStrategyRequestSchema>, any> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);

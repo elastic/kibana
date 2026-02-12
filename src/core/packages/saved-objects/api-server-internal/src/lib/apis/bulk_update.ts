@@ -379,7 +379,6 @@ export const performBulkUpdate = async <T>(
 
       const { _seq_no: seqNo, _primary_term: primaryTerm } = rawResponse;
 
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       const { [type]: attributes, references, updated_at, updated_by } = documentToSave;
 
       const {

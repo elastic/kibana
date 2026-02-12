@@ -363,7 +363,6 @@ export default function ({ getService }: FtrProviderContext) {
           { enabled: null, prior_logs_usage: false, indexMode: 'logsdb' },
         ];
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         logsdbSettings.forEach(({ enabled, prior_logs_usage, indexMode }) => {
           it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled}`, async () => {
             await es.cluster.putSettings({

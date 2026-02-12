@@ -14,9 +14,13 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { pickLevelFromFlags } from '@kbn/tooling-log';
-import { resolve } from 'path';
+import { basename, isAbsolute, relative, resolve } from 'path';
 import { silence } from '../../common';
-import { runElasticsearch, runKibanaServer } from '../../servers';
+import {
+  preCreateSecurityIndexesViaSamlAuth,
+  runElasticsearch,
+  runKibanaServer,
+} from '../../servers';
 import { getConfigRootDir, loadServersConfig } from '../../servers/configs';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
 import type { ScoutPlaywrightProjects } from '../types';
@@ -32,6 +36,22 @@ export const getPlaywrightProject = (
   }
 
   return 'local';
+};
+
+const getScoutRunCommandForReporting = (argv: string[]): string => {
+  const [nodeBin, scriptPath, ...rest] = argv;
+  const nodeDisplay =
+    typeof nodeBin === 'string' && basename(nodeBin) === 'node' ? 'node' : nodeBin;
+
+  if (typeof scriptPath !== 'string') {
+    return [nodeDisplay, ...rest].filter(Boolean).join(' ');
+  }
+
+  const relativeScriptPath = isAbsolute(scriptPath) ? relative(REPO_ROOT, scriptPath) : scriptPath;
+  const scriptDisplay =
+    relativeScriptPath && !relativeScriptPath.startsWith('..') ? relativeScriptPath : scriptPath;
+
+  return [nodeDisplay, scriptDisplay, ...rest].filter(Boolean).join(' ');
 };
 
 async function runPlaywrightTest(
@@ -125,6 +145,9 @@ async function runLocalServersAndTests(
     // wait for 5 seconds
     await silence(log, 5000);
 
+    // Pre-create Elasticsearch Security indexes after server startup
+    await preCreateSecurityIndexesViaSamlAuth(config, log);
+
     await runPlaywrightTest(procs, cmd, cmdArgs, env);
   } finally {
     try {
@@ -140,6 +163,8 @@ async function runLocalServersAndTests(
 export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const runStartTime = Date.now();
   const reportTime = getTimeReporter(log, 'scripts/scout run-tests');
+
+  const scoutRunCommandForReporting = getScoutRunCommandForReporting(process.argv);
 
   const pwGrepTag = getPlaywrightGrepTag(options.mode);
   const pwConfigPath = options.configPath;
@@ -172,6 +197,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       SCOUT_LOG_LEVEL: logsLevel,
       SCOUT_TARGET_TYPE: options.testTarget,
       SCOUT_TARGET_MODE: options.mode,
+      SCOUT_RUN_COMMAND: scoutRunCommandForReporting,
     };
 
     if (exitCode !== 0) {

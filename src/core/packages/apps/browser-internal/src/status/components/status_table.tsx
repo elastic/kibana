@@ -113,6 +113,9 @@ export const StatusTable: FunctionComponent<StatusTableProps> = ({ statuses }) =
         },
       }}
       data-test-subj="statusBreakdown"
+      tableCaption={i18n.translate('core.statusPage.statusTable.tableCaption', {
+        defaultMessage: 'Status breakdown',
+      })}
     />
   );
 };

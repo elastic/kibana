@@ -19,6 +19,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
 import { createEngineStatusService } from '../engine/status_service';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
+import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const healthCheckPrivilegeMonitoringRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -40,49 +41,52 @@ export const healthCheckPrivilegeMonitoringRoute = (
         validate: {},
       },
 
-      async (context, request, response): Promise<IKibanaResponse<PrivMonHealthResponse>> => {
-        const siemResponse = buildSiemResponse(response);
-        const secSol = await context.securitySolution;
+      withMinimumLicense(
+        async (context, request, response): Promise<IKibanaResponse<PrivMonHealthResponse>> => {
+          const siemResponse = buildSiemResponse(response);
+          const secSol = await context.securitySolution;
 
-        await assertAdvancedSettingsEnabled(
-          await context.core,
-          ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-        );
-        const dataClient = secSol.getPrivilegeMonitoringDataClient();
-        const soClient = dataClient.getScopedSoClient(request);
-        const config = secSol.getConfig();
-        const maxUsersAllowed =
-          config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
+          const dataClient = secSol.getPrivilegeMonitoringDataClient();
+          const soClient = dataClient.getScopedSoClient(request);
+          const config = secSol.getConfig();
+          const maxUsersAllowed =
+            config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
 
-        const statusService = createEngineStatusService(dataClient, soClient);
+          const statusService = createEngineStatusService(dataClient, soClient);
 
-        try {
-          const body = await statusService.get();
+          try {
+            const body = await statusService.get();
 
-          // Only include user count if engine status is "started"
-          if (body.status === PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
-            const userCountResponse = await statusService.getCurrentUserCount();
-            return response.ok({
-              body: {
-                ...body,
-                users: {
-                  current_count: userCountResponse.count,
-                  max_allowed: maxUsersAllowed,
+            // Only include user count if engine status is "started"
+            if (body.status === PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
+              const userCountResponse = await statusService.getCurrentUserCount();
+              return response.ok({
+                body: {
+                  ...body,
+                  users: {
+                    current_count: userCountResponse.count,
+                    max_allowed: maxUsersAllowed,
+                  },
                 },
-              },
-            });
-          } else {
-            return response.ok({ body });
-          }
-        } catch (e) {
-          const error = transformError(e);
+              });
+            } else {
+              return response.ok({ body });
+            }
+          } catch (e) {
+            const error = transformError(e);
 
-          logger.error(`Error checking privilege monitoring health: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+            logger.error(`Error checking privilege monitoring health: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

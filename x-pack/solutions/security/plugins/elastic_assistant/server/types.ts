@@ -44,7 +44,6 @@ import type {
 import type {
   ActionsClientChatVertexAI,
   ActionsClientChatOpenAI,
-  ActionsClientGeminiChatModel,
   ActionsClientChatBedrockConverse,
   ActionsClientLlm,
 } from '@kbn/langchain/server';
@@ -271,7 +270,6 @@ export interface AssistantTool {
 export type AssistantToolLlm =
   | ActionsClientChatBedrockConverse
   | ActionsClientChatOpenAI
-  | ActionsClientGeminiChatModel
   | ActionsClientChatVertexAI
   | InferenceChatModel;
 

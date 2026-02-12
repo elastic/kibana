@@ -36,10 +36,52 @@ export type { KibanaUrl } from '../../../../common/services/kibana_url';
 export type { ScoutTestConfig } from '../../../../types';
 export type { ScoutLogger } from '../../../../common/services/logger';
 
+export interface CookieHeader {
+  [Cookie: string]: string;
+}
+
+export interface RoleSessionCredentials {
+  cookieValue: string;
+  cookieHeader: CookieHeader;
+}
+
 export interface SamlAuth {
   session: SamlSessionManager;
   customRoleName: string;
   setCustomRole(role: KibanaRole | ElasticsearchRoleDescriptor): Promise<void>;
+
+  /**
+   * Generates a SAML session cookie for an interactive user with the specified role.
+   *
+   * This method is ideal for testing internal APIs that are typically accessed via the UI.
+   * It authenticates as an interactive user and returns session credentials including cookie
+   * headers that can be used in API requests.
+   *
+   * @param role - Either a built-in Kibana role name (e.g., 'admin', 'editor', 'viewer') or
+   *               a custom role descriptor with specific permissions (Kibana or Elasticsearch)
+   * @returns Promise resolving to credentials with cookieValue and cookieHeader properties
+   *
+   * @example
+   * // Using a built-in role
+   * const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+   * const response = await apiClient.get('internal/endpoint', {
+   *   headers: { ...cookieHeader }
+   * });
+   *
+   * @example
+   * // Using a custom role descriptor
+   * const customRole = {
+   *   kibana: [{ base: ['read'], spaces: ['*'] }],
+   *   elasticsearch: { indices: [{ names: ['logs-*'], privileges: ['read'] }] }
+   * };
+   * const { cookieHeader } = await samlAuth.asInteractiveUser(customRole);
+   * const response = await apiClient.get('internal/endpoint', {
+   *   headers: { ...cookieHeader }
+   * });
+   */
+  asInteractiveUser(
+    role: string | KibanaRole | ElasticsearchRoleDescriptor
+  ): Promise<RoleSessionCredentials>;
 }
 
 export interface CoreWorkerFixtures {
@@ -88,6 +130,18 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
       }
       const serversConfigDir = projectUse.serversConfigDir;
       const configInstance = createScoutConfig(serversConfigDir, projectUse.configName, log);
+
+      log.info(
+        `Running tests against ${
+          configInstance.isCloud
+            ? configInstance.serverless
+              ? `MKI ${configInstance.projectType} project`
+              : 'ECH deployment'
+            : `local ${
+                configInstance.serverless ? `serverless ${configInstance.projectType}` : 'stateful'
+              } cluster`
+        }`
+      );
 
       use(configInstance);
     },
@@ -180,7 +234,34 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
         customRoleHash = newRoleHash;
       };
 
-      await use({ session, customRoleName, setCustomRole });
+      const asInteractiveUser = async (
+        role: string | KibanaRole | ElasticsearchRoleDescriptor
+      ): Promise<RoleSessionCredentials> => {
+        let roleName: string;
+
+        if (typeof role === 'string') {
+          // Built-in role name
+          roleName = role;
+        } else {
+          // Custom role descriptor - create/update the role first
+          await setCustomRole(role);
+          roleName = customRoleName;
+        }
+
+        const cookieValue = await session.getInteractiveUserSessionCookieWithRoleScope(roleName);
+        const cookieHeader = { Cookie: `sid=${cookieValue}` };
+        return { cookieValue, cookieHeader };
+      };
+
+      // Hide the announcements (including the sidenav tour) in the default space
+      await kbnClient.uiSettings.update({ hideAnnouncements: true });
+
+      await use({
+        session,
+        customRoleName,
+        setCustomRole,
+        asInteractiveUser,
+      });
 
       // Delete custom role when worker completes (if it was created)
       if (isCustomRoleCreated) {

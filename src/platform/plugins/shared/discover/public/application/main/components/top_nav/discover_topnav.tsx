@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
-import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
-import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import {
   DiscoverFlyouts,
@@ -18,6 +15,11 @@ import {
   prepareDataViewForEditing,
 } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
+import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
+import { type Filter, isOfAggregateQueryType } from '@kbn/es-query';
+import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { cloneDeep } from 'lodash';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -38,6 +40,8 @@ import {
 } from '../../state_management/redux';
 import { onSaveDiscoverSession } from './save_discover_session';
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
+
+const EMPTY_FILTERS: Filter[] = [];
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -68,8 +72,19 @@ export const DiscoverTopNav = ({
 
   const query = useAppStateSelector((state) => state.query);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
+  const { timeRangeAbsolute } = useCurrentTabSelector((tab) => tab.dataRequestParams);
+  const refreshInterval = useCurrentTabSelector((state) => state.globalState.refreshInterval);
+  const timeRangeRelative = useCurrentTabSelector((state) => state.globalState.timeRange);
+  const appFilters = useAppStateSelector((state) => state.filters);
+  const globalFilters = useCurrentTabSelector((state) => state.globalState.filters);
 
-  const timeRange = useCurrentTabSelector((tab) => tab.dataRequestParams.timeRangeAbsolute);
+  const filtersMemoized = useMemo(() => {
+    if (isOfAggregateQueryType(query)) {
+      return EMPTY_FILTERS;
+    }
+    const allFilters = [...(globalFilters ?? []), ...(appFilters ?? [])];
+    return allFilters.length ? cloneDeep(allFilters) : EMPTY_FILTERS;
+  }, [appFilters, globalFilters, query]);
 
   const { savedDataViews, adHocDataViews } = useDataViewsForPicker();
   const dataView = useCurrentDataView();
@@ -263,7 +278,13 @@ export const DiscoverTopNav = ({
         onCancel={onCancelClick}
         isLoading={isLoading}
         onSavedQueryIdChange={updateSavedQueryId}
+        disableSubscribingToGlobalDataServices={true}
         query={query}
+        filters={filtersMemoized}
+        dateRangeFrom={timeRangeRelative?.from}
+        dateRangeTo={timeRangeRelative?.to}
+        refreshInterval={refreshInterval?.value}
+        isRefreshPaused={refreshInterval?.pause}
         savedQueryId={savedQuery}
         screenTitle={persistedDiscoverSession?.title}
         showDatePicker={showDatePicker}
@@ -299,7 +320,7 @@ export const DiscoverTopNav = ({
                 controlsWrapper: (
                   <ControlGroupRenderer
                     onApiAvailable={setControlGroupApi}
-                    timeRange={timeRange}
+                    timeRange={timeRangeAbsolute}
                     getCreationOptions={async (initialState) => {
                       const initialChildControlState =
                         getActivePanels() ?? initialState.initialChildControlState ?? {};

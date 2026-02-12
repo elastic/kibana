@@ -32,6 +32,8 @@ import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { withSpan } from '@kbn/apm-utils';
 
+import { copyPackagePolicy } from '../../common/services/copy_package_policy_utils';
+
 import { catchAndSetErrorStackTrace } from '../errors/utils';
 
 import {
@@ -1118,12 +1120,10 @@ class AgentPolicyService {
         const newPackagePolicies = await pMap(
           basePackagePolicies,
           async (packagePolicy: PackagePolicy) => {
-            const { id: packagePolicyId, version, ...newPackagePolicy } = packagePolicy;
-
             const updatedPackagePolicy = {
-              ...newPackagePolicy,
+              ...copyPackagePolicy(packagePolicy),
               name: await incrementPackagePolicyCopyName(soClient, packagePolicy.name),
-            };
+            } as NewPackagePolicy & { id: undefined };
             return updatedPackagePolicy;
           }
         );
@@ -1392,7 +1392,7 @@ class AgentPolicyService {
     outputId: string,
     options?: { user?: AuthenticatedUser }
   ): Promise<SavedObjectsBulkUpdateResponse<AgentPolicy>> {
-    const { useSpaceAwareness } = appContextService.getExperimentalFeatures();
+    const useSpaceAwareness = await isSpaceAwarenessEnabled();
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
 

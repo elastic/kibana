@@ -148,7 +148,7 @@ export function MonacoEditor({
 
   const _subscription = useRef<monaco.IDisposable | null>(null);
 
-  const __prevent_trigger_change_event = useRef<boolean | null>(null);
+  const __preventTriggerChangeEvent = useRef<boolean | null>(null);
 
   const fixedWidth = processSize(width);
 
@@ -174,7 +174,7 @@ export function MonacoEditor({
     editorDidMount?.(editor.current!, monaco);
 
     _subscription.current = editor.current!.onDidChangeModelContent((event) => {
-      if (!__prevent_trigger_change_event.current) {
+      if (!__preventTriggerChangeEvent.current) {
         onChangeRef.current?.(editor.current!.getValue(), event);
       }
     });
@@ -251,7 +251,7 @@ export function MonacoEditor({
       }
 
       const model = editor.current.getModel();
-      __prevent_trigger_change_event.current = true;
+      __preventTriggerChangeEvent.current = true;
       editor.current.pushUndoStop();
       // pushEditOperations says it expects a cursorComputer, but doesn't seem to need one.
       model!.pushEditOperations(
@@ -266,7 +266,7 @@ export function MonacoEditor({
         undefined
       );
       editor.current.pushUndoStop();
-      __prevent_trigger_change_event.current = false;
+      __preventTriggerChangeEvent.current = false;
     }
   }, [value]);
 

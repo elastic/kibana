@@ -242,12 +242,12 @@ export const useListDetailsView = (exceptionListId: string) => {
   // #region DeleteList
 
   const handleDeleteSuccess = useCallback(
-    (listId?: string) => () => {
+    (listName: string) => () => {
       notifications.toasts.addSuccess({
-        title: i18n.exceptionDeleteSuccessMessage(listId ?? referenceModalState.listId),
+        title: i18n.exceptionDeleteSuccessMessage(listName),
       });
     },
-    [notifications.toasts, referenceModalState.listId]
+    [notifications.toasts]
   );
 
   const handleDeleteError = useCallback(
@@ -264,17 +264,20 @@ export const useListDetailsView = (exceptionListId: string) => {
         id: list.id,
         namespaceType: list.namespace_type,
         onError: handleDeleteError,
-        onSuccess: handleDeleteSuccess,
+        onSuccess: () => {
+          handleDeleteSuccess(list.name)();
+          setReferenceModalState(exceptionReferenceModalInitialState);
+          setShowReferenceErrorModal(false);
+          navigateToApp(APP_UI_ID, {
+            deepLinkId: SecurityPageName.exceptions,
+            path: '',
+          });
+        },
       });
     } catch (error) {
       handleErrorStatus(error);
-    } finally {
       setReferenceModalState(exceptionReferenceModalInitialState);
       setShowReferenceErrorModal(false);
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.exceptions,
-        path: '',
-      });
     }
   }, [
     list,

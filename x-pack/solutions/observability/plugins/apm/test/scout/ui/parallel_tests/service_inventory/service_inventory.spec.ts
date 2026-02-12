@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 
 test.describe('Service inventory', { tag: ['@ess', '@svlOblt'] }, () => {
@@ -32,7 +32,7 @@ test.describe('Service inventory', { tag: ['@ess', '@svlOblt'] }, () => {
 
     await test.step('shows a list of environments', async () => {
       const environmentEntrySelector = page.locator('td:has-text("production")');
-      await expect(environmentEntrySelector).toHaveCount(3);
+      await expect(environmentEntrySelector).toHaveCount(5);
     });
   });
 

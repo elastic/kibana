@@ -20,6 +20,7 @@ import { START_MIGRATION_TITLE_CLASS_NAME } from '../../../common/styles';
 import { useUploadPanelStyles } from '../../../common/styles/upload_panel.styles';
 import { useMigrationDataInputContext, MigrationsReadMore } from '../../../common/components';
 import type { DashboardMigrationStats } from '../../types';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 
 export interface UploadDashboardsPanelProps {
   isUploadMore?: boolean;
@@ -109,10 +110,11 @@ export const UploadDashboardsPanel = React.memo<UploadDashboardsPanelProps>(
     migrationStats,
   }: UploadDashboardsPanelProps) {
     const { openFlyout } = useMigrationDataInputContext();
-
+    const { telemetry } = useKibana().services.siemMigrations.dashboards;
     const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
       openFlyout(migrationStats);
-    }, [openFlyout, migrationStats]);
+      telemetry.reportSetupMigrationOpen({ isFirstMigration: !isUploadMore });
+    }, [openFlyout, migrationStats, telemetry, isUploadMore]);
 
     return (
       <UploadDashboardsSectionPanel

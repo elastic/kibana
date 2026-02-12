@@ -296,6 +296,9 @@ const SavedQueriesPageComponent = () => {
           sorting={sorting}
           onChange={onTableChange}
           rowHeader="id"
+          tableCaption={i18n.translate('xpack.osquery.savedQueryList.queriesTable.tableCaption', {
+            defaultMessage: 'Saved queries',
+          })}
         />
       )}
     </WithHeaderLayout>

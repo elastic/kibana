@@ -13,9 +13,14 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
   max-width: 1000px;
 }
 
+.c0 .euiDataGridHeader {
+  overflow-x: hidden;
+  width: 100%;
+}
+
 .c0 .euiDataGridRowCell--lastColumn.euiDataGridRowCell--controlColumn .euiDataGridRowCell__content {
-  width: 1000px;
-  max-width: 1000px;
+  width: min(100%,1000px);
+  max-width: 100%;
   overflow-x: auto;
   -webkit-scrollbar-width: thin;
   -moz-scrollbar-width: thin;

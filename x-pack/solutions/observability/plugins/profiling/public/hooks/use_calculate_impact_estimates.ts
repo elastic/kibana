@@ -27,6 +27,14 @@ export function useCalculateImpactEstimate() {
     totalSamples: number;
     totalSeconds: number;
   }) {
+    if (totalSamples === 0 || totalSeconds === 0) {
+      return {
+        percentage: 0,
+        coreSeconds: 0,
+        annualizedCoreSeconds: 0,
+      };
+    }
+
     const annualizedScaleUp = ANNUAL_SECONDS / totalSeconds;
     const totalCoreSeconds = totalSamples / 19;
     const percentage = samples / totalSamples;

@@ -28,7 +28,7 @@ const minimumCapabilities: MissingCapability[] = [
     capability: `${SIEM_MIGRATIONS_FEATURE_ID}.all`,
     description: i18n.translate(
       'xpack.securitySolution.siemMigrations.service.capabilities.siemMigrationsAll',
-      { defaultMessage: 'Security > SIEM migrations: All' }
+      { defaultMessage: 'Security > Automatic Migration: All' }
     ),
   },
 ];
@@ -45,7 +45,7 @@ const allCapabilities: MissingCapability[] = [
     capability: `${SIEM_MIGRATIONS_FEATURE_ID}.all`,
     description: i18n.translate(
       'xpack.securitySolution.siemMigrations.service.capabilities.siemMigrationsAll',
-      { defaultMessage: 'Security > SIEM migrations: All' }
+      { defaultMessage: 'Security > Automatic Migration: All' }
     ),
   },
   {

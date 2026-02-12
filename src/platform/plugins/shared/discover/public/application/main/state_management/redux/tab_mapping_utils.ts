@@ -16,24 +16,18 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DEFAULT_TAB_STATE } from './constants';
+import type { DiscoverAppState } from '../discover_app_state_container';
 
 export const fromSavedObjectTabToTabState = ({
   tab,
   existingTab,
+  initialAppState,
 }: {
   tab: DiscoverSessionTab;
   existingTab?: TabState;
-}): TabState => ({
-  ...DEFAULT_TAB_STATE,
-  ...existingTab,
-  id: tab.id,
-  label: tab.label,
-  initialInternalState: {
-    serializedSearchSource: tab.serializedSearchSource,
-    visContext: tab.visContext,
-    controlGroupJson: tab.controlGroupJson,
-  },
-  initialAppState: {
+  initialAppState?: DiscoverAppState;
+}): TabState => {
+  const appState: DiscoverAppState = initialAppState ?? {
     columns: tab.columns,
     filters: tab.serializedSearchSource.filter,
     grid: tab.grid,
@@ -52,12 +46,27 @@ export const fromSavedObjectTabToTabState = ({
     sampleSize: tab.sampleSize,
     breakdownField: tab.breakdownField,
     density: tab.density,
-  },
-  globalState: {
-    timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
-    refreshInterval: tab.timeRange ? tab.refreshInterval : existingTab?.globalState.refreshInterval,
-  },
-});
+  };
+
+  return {
+    ...DEFAULT_TAB_STATE,
+    ...existingTab,
+    id: tab.id,
+    label: tab.label,
+    initialInternalState: {
+      serializedSearchSource: tab.serializedSearchSource,
+      visContext: tab.visContext,
+      controlGroupJson: tab.controlGroupJson,
+    },
+    initialAppState: appState,
+    globalState: {
+      timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
+      refreshInterval: tab.timeRange
+        ? tab.refreshInterval
+        : existingTab?.globalState.refreshInterval,
+    },
+  };
+};
 
 export const fromSavedObjectTabToSavedSearch = async ({
   tab,

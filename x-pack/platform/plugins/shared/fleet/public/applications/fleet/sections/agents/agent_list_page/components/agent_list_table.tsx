@@ -347,6 +347,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     <EuiBasicTable<Agent>
       className="fleet__agentList__table"
       data-test-subj="fleetAgentListTable"
+      tableCaption={i18n.translate('xpack.fleet.agentList.tableCaption', {
+        defaultMessage: 'Fleet agents',
+      })}
       loading={isLoading}
       noItemsMessage={noItemsMessage}
       items={agentsShown}

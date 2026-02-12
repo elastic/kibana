@@ -20,6 +20,7 @@ import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { isFunction } from 'lodash';
+import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../..';
 import { restoreStateFromSavedSearch } from './utils/restore_from_saved_search';
 import { FetchStatus } from '../../types';
@@ -203,7 +204,10 @@ export interface DiscoverStateContainer {
     /**
      * Undo changes made to the saved search, e.g. when the user triggers the "Reset search" button
      */
-    undoSavedSearchChanges: () => Promise<SavedSearch>;
+    undoSavedSearchChanges: (
+      persistedTab: DiscoverSessionTab,
+      dataView: DataView | undefined
+    ) => Promise<SavedSearch>;
     /**
      * When editing an ad hoc data view, a new id needs to be generated for the data view
      * This is to prevent duplicate ids messing with our system
@@ -577,7 +581,10 @@ export function getDiscoverStateContainer({
   /**
    * Undo all changes to the current saved search
    */
-  const undoSavedSearchChanges = async () => {
+  const undoSavedSearchChanges = async (
+    persistedTab: DiscoverSessionTab,
+    dataView: DataView | undefined
+  ) => {
     addLog('undoSavedSearchChanges');
 
     const nextSavedSearch = savedSearchContainer.getInitial$().getValue();
@@ -602,7 +609,8 @@ export function getDiscoverStateContainer({
 
     const newAppState = getInitialState({
       initialUrlState: undefined,
-      savedSearch: nextSavedSearch,
+      persistedTab,
+      dataView,
       services,
     });
 

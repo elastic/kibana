@@ -57,8 +57,7 @@ const contextsModule = require('../../../contexts');
 const mockUseSyntheticsSettingsContext =
   contextsModule.useSyntheticsSettingsContext as jest.MockedFunction<any>;
 
-// Failing: See https://github.com/elastic/kibana/issues/246633
-describe.skip('useSyntheticsRules', () => {
+describe('useSyntheticsRules', () => {
   const baseMockState = {
     defaultAlerting: {
       data: {
@@ -181,7 +180,12 @@ describe.skip('useSyntheticsRules', () => {
       wrapper: TestWrapper,
     });
 
-    expect(mockDispatch).toHaveBeenCalledWith(enableDefaultAlertingSilentlyAction.get());
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: enableDefaultAlertingSilentlyAction.get().type,
+        meta: { dispatchedAt: expect.any(Number) },
+      })
+    );
   });
 
   it('dispatches getDefaultAlertingAction when canSave is false and popover opens', () => {
@@ -203,7 +207,12 @@ describe.skip('useSyntheticsRules', () => {
       wrapper: TestWrapper,
     });
 
-    expect(mockDispatch).toHaveBeenCalledWith(getDefaultAlertingAction.get());
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: getDefaultAlertingAction.get().type,
+        meta: { dispatchedAt: expect.any(Number) },
+      })
+    );
   });
 
   it('returns NewRuleFlyout as null when isNewRule is false', () => {

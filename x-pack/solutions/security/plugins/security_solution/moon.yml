@@ -251,6 +251,7 @@ dependsOn:
   - '@kbn/core-lifecycle-server-mocks'
   - '@kbn/licensing-types'
   - '@kbn/core-metrics-server'
+  - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/rrule'
   - '@kbn/core-analytics-server-mocks'
   - '@kbn/object-utils'

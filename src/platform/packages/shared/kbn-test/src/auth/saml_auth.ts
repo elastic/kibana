@@ -134,6 +134,8 @@ export const createCloudSession = async (
               }
             });
 
+            log.error(`Error occurred, cloud login response: \n${JSON.stringify(data)}`);
+
             // MFA must be disabled for test accounts
             if (data.mfa_required === true) {
               // Changing MFA configuration requires manual action, skip retry
