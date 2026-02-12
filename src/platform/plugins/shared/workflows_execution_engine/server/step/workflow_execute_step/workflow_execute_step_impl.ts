@@ -54,112 +54,102 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
     );
   }
 
-  private get node(): WorkflowExecuteGraphNode {
-    return this.init.node;
-  }
-
-  private get stepExecutionRuntime(): StepExecutionRuntime {
-    return this.init.stepExecutionRuntime;
-  }
-
-  private get workflowExecutionRuntime(): WorkflowExecutionRuntimeManager {
-    return this.init.workflowExecutionRuntime;
-  }
-
-  private get workflowRepository(): WorkflowRepository {
-    return this.init.workflowRepository;
-  }
-
-  private get spaceId(): string {
-    return this.init.spaceId;
-  }
-
-  private get request(): KibanaRequest {
-    return this.init.request;
-  }
-
-  async run(): Promise<void> {
-    // Start step execution to ensure stepType and stepId are set
-    // This is important for frontend rendering even if the step fails early
-    this.stepExecutionRuntime.startStep();
-    await this.stepExecutionRuntime.flushEventLogs();
-
-    const step = this.node.configuration as WorkflowExecuteStep;
-    const renderedWith = this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
-      step.with || {}
-    ) as Record<string, unknown>;
+  private getInput(): { workflowId: string; inputs: Record<string, unknown> } {
+    const step = this.init.node.configuration as WorkflowExecuteStep;
+    const renderedWith =
+      this.init.stepExecutionRuntime.contextManager.renderValueAccordingToContext(
+        step.with || {}
+      ) as Record<string, unknown>;
     const { 'workflow-id': workflowId, inputs = {} } = renderedWith;
     const mappedInputs =
       typeof inputs === 'object' && inputs !== null ? (inputs as Record<string, unknown>) : {};
+    return { workflowId: String(workflowId), inputs: mappedInputs };
+  }
+
+  async run(): Promise<void> {
+    const { node, stepExecutionRuntime, workflowExecutionRuntime } = this.init;
+
+    // Start step execution to ensure stepType and stepId are set
+    // This is important for frontend rendering even if the step fails early
+    stepExecutionRuntime.startStep();
+    await stepExecutionRuntime.flushEventLogs();
+
+    const { workflowId, inputs } = this.getInput();
 
     try {
-      const currentDepth =
-        ((this.stepExecutionRuntime.workflowExecution.context?.parentDepth as number | undefined) ??
-          -1) + 1;
+      const rawDepth = stepExecutionRuntime.workflowExecution.context?.parentDepth;
+      const currentDepth = (typeof rawDepth === 'number' ? rawDepth : -1) + 1;
       if (currentDepth >= MAX_WORKFLOW_DEPTH) {
         const error = new Error(
-          `Workflow composition depth limit (${MAX_WORKFLOW_DEPTH}) exceeded. Refactor to reduce nesting.`
+          `Workflow composition depth limit (${MAX_WORKFLOW_DEPTH}) exceeded at step "${node.stepId}" in workflow "${stepExecutionRuntime.workflowExecution.workflowId}". Refactor to reduce nesting.`
         );
-        this.stepExecutionRuntime.failStep(error);
-        this.workflowExecutionRuntime.navigateToNextNode();
-        await this.stepExecutionRuntime.flushEventLogs();
+        stepExecutionRuntime.failStep(error);
+        workflowExecutionRuntime.navigateToNextNode();
+        await stepExecutionRuntime.flushEventLogs();
         return;
       }
 
-      const targetWorkflow = await this.getWorkflow(String(workflowId));
+      const targetWorkflow = await this.getWorkflow(workflowId);
       if (!targetWorkflow) {
-        const error = new Error(`Workflow not found: ${workflowId}`);
-        this.stepExecutionRuntime.failStep(error);
-        this.workflowExecutionRuntime.navigateToNextNode();
-        await this.stepExecutionRuntime.flushEventLogs();
+        const error = new Error(
+          `Workflow not found: "${workflowId}" (referenced by step "${node.stepId}" in workflow "${stepExecutionRuntime.workflowExecution.workflowId}")`
+        );
+        stepExecutionRuntime.failStep(error);
+        workflowExecutionRuntime.navigateToNextNode();
+        await stepExecutionRuntime.flushEventLogs();
         return;
       }
 
       try {
         await this.ensureWorkflowIsExecutable(targetWorkflow);
       } catch (error) {
-        this.stepExecutionRuntime.failStep(error as Error);
-        this.workflowExecutionRuntime.navigateToNextNode();
-        await this.stepExecutionRuntime.flushEventLogs();
+        stepExecutionRuntime.failStep(error as Error);
+        workflowExecutionRuntime.navigateToNextNode();
+        await stepExecutionRuntime.flushEventLogs();
         return;
       }
 
       const result = await this.syncExecutor.execute(
         targetWorkflow,
-        mappedInputs as Record<string, unknown>,
-        this.spaceId,
-        this.request,
+        inputs,
+        this.init.spaceId,
+        this.init.request,
         currentDepth
       );
 
       if (result.status === 'completed') {
-        this.stepExecutionRuntime.finishStep(result.output);
-        this.workflowExecutionRuntime.navigateToNextNode();
+        stepExecutionRuntime.finishStep(result.output);
+        workflowExecutionRuntime.navigateToNextNode();
       } else if (result.status === 'failed') {
-        this.stepExecutionRuntime.failStep(result.error as Error);
-        this.workflowExecutionRuntime.navigateToNextNode();
+        stepExecutionRuntime.failStep(result.error as Error);
+        workflowExecutionRuntime.navigateToNextNode();
       }
       // result.status === 'waiting': delay entered, no navigation
     } catch (error) {
-      this.stepExecutionRuntime.failStep(error as Error);
-      this.workflowExecutionRuntime.navigateToNextNode();
+      stepExecutionRuntime.failStep(error as Error);
+      workflowExecutionRuntime.navigateToNextNode();
     } finally {
-      await this.stepExecutionRuntime.flushEventLogs();
+      await stepExecutionRuntime.flushEventLogs();
     }
   }
 
   private async getWorkflow(workflowId: string): Promise<EsWorkflow | null> {
-    return this.workflowRepository.getWorkflow(workflowId, this.spaceId);
+    return this.init.workflowRepository.getWorkflow(workflowId, this.init.spaceId);
   }
 
   private async ensureWorkflowIsExecutable(workflow: EsWorkflow): Promise<void> {
+    const { node, stepExecutionRuntime } = this.init;
     // Note: spaceId validation is already done by the repository when fetching the workflow
     // since getWorkflow filter by spaceId
     if (!workflow.enabled) {
-      throw new Error(`Workflow ${workflow.id} is disabled`);
+      throw new Error(
+        `Workflow "${workflow.id}" is disabled (referenced by step "${node.stepId}" in workflow "${stepExecutionRuntime.workflowExecution.workflowId}")`
+      );
     }
     if (!workflow.valid) {
-      throw new Error(`Workflow ${workflow.id} is not valid`);
+      throw new Error(
+        `Workflow "${workflow.id}" is not valid (referenced by step "${node.stepId}" in workflow "${stepExecutionRuntime.workflowExecution.workflowId}")`
+      );
     }
   }
 }

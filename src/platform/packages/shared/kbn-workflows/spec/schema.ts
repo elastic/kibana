@@ -357,13 +357,9 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
 const WorkflowExecuteBaseSchema = BaseStepSchema.extend({
   with: z.object({
     'workflow-id': z.string().min(1),
-    inputs: z.record(z.string(), z.any()).optional(),
+    inputs: z.record(z.string(), z.unknown()).optional(),
   }),
-})
-  .extend(StepWithIfConditionSchema.shape)
-  .extend(StepWithForEachSchema.shape)
-  .extend(TimeoutPropSchema.shape)
-  .extend(StepWithOnFailureSchema.shape);
+});
 
 export const WorkflowExecuteStepSchema = WorkflowExecuteBaseSchema.extend({
   type: z.literal('workflow.execute'),
