@@ -32,7 +32,7 @@ pageLoadAssetSize:
   customIntegrations: 11715
   dashboard: 20000
   dashboardMarkdown: 4994
-  data: 494561
+  data: 494465
   dataQuality: 11469
   datasetQuality: 49315
   dataSources: 6748
@@ -49,7 +49,7 @@ pageLoadAssetSize:
   discoverShared: 2322
   elasticAssistant: 338870
   elasticAssistantSharedState: 4881
-  embeddable: 14545
+  embeddable: 16638
   embeddableAlertsTable: 6524
   enterpriseSearch: 40244
   entityStore: 71717
