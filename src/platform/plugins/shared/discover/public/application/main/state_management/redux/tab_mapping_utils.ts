@@ -11,6 +11,7 @@ import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plug
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isObject } from 'lodash';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { createDataSource } from '../../../../../common/data_sources';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
@@ -119,10 +120,12 @@ export const fromTabStateToSavedObjectTab = ({
   tab,
   overridenTimeRestore,
   services,
+  serializedSearchSource,
 }: {
   tab: TabState;
   overridenTimeRestore?: boolean;
   services: DiscoverServices;
+  serializedSearchSource?: SerializedSearchSourceFields;
 }): DiscoverSessionTab => {
   const allowedSampleSize = getAllowedSampleSize(tab.appState.sampleSize, services.uiSettings);
   const timeRestore = overridenTimeRestore ?? tab.attributes.timeRestore ?? false;
@@ -136,7 +139,8 @@ export const fromTabStateToSavedObjectTab = ({
     hideChart: tab.appState.hideChart ?? false,
     isTextBasedQuery: isOfAggregateQueryType(tab.appState.query),
     usesAdHocDataView: isObject(tab.initialInternalState?.serializedSearchSource?.index),
-    serializedSearchSource: tab.initialInternalState?.serializedSearchSource ?? {},
+    serializedSearchSource:
+      serializedSearchSource ?? tab.initialInternalState?.serializedSearchSource ?? {},
     viewMode: tab.appState.viewMode,
     hideAggregatedPreview: tab.appState.hideAggregatedPreview,
     rowHeight: tab.appState.rowHeight,
