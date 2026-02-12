@@ -2124,7 +2124,7 @@ export class CstToAstConverter {
     this.parseMmrOnOption(ctx, command);
     this.parseMmrLimitOption(ctx, command);
     this.parseMmrWithOption(ctx, command);
-
+    console.log('command', command);
     return command;
   }
 
@@ -2157,7 +2157,7 @@ export class CstToAstConverter {
     const onToken = ctx.ON();
     const diversifyFieldCtx = ctx.qualifiedName();
 
-    if (!onToken || !diversifyFieldCtx) {
+    if (!onToken) {
       return;
     }
 
@@ -2176,7 +2176,7 @@ export class CstToAstConverter {
     const limitToken = ctx.MMR_LIMIT();
     const limitValueCtx = ctx.integerValue();
 
-    if (!limitToken || !limitValueCtx) {
+    if (!limitToken) {
       return;
     }
 
