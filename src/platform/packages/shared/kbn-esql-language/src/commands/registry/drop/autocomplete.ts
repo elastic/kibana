@@ -17,6 +17,7 @@ import {
 } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
+import { getFieldsSuggestions } from '../../definitions/utils';
 
 export async function autocomplete(
   query: string,
@@ -37,7 +38,13 @@ export async function autocomplete(
   const alreadyDeclaredFields = (command as ESQLCommand).args
     .filter(isColumn)
     .map((arg) => arg.name);
-  const fieldSuggestions = (await callbacks?.getByType?.('any', alreadyDeclaredFields)) ?? [];
+  const fieldSuggestions = callbacks?.getByType
+    ? await getFieldsSuggestions(['any'], callbacks.getByType, {
+        ignoreColumns: alreadyDeclaredFields,
+        promoteToTop: true,
+        isFieldsBrowserEnabled: Boolean(context?.isFieldsBrowserEnabled),
+      })
+    : [];
 
   return handleFragment(
     innerText,
