@@ -2,8 +2,8 @@ steps:
   - command: .buildkite/scripts/steps/ftr_bench.sh
     label: 'FTR Bench'
     agents:
-      machineType: c2d-standard-16
-      zones: northamerica-northeast2-b,us-central1-c,us-central1-a
+      machineType: c4d-standard-16
+      diskType: hyperdisk-balanced
       diskSizeGb: 200
     key: ftr_bench
     timeout_in_minutes: 120
