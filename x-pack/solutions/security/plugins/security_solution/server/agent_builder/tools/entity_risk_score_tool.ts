@@ -18,7 +18,6 @@ import { createGetRiskScores } from '../../lib/entity_analytics/risk_score/get_r
 import type { EntityType } from '../../../common/entity_analytics/types';
 import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
 import { getRiskIndex } from '../../../common/search_strategy/security_solution/risk_score/common';
-import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
 
 const entityRiskScoreSchema = z.object({
@@ -167,8 +166,7 @@ export const entityRiskScoreTool = (
         }
       },
     },
-    handler: async ({ identifierType, identifier, limit = 10 }, { request, esClient }) => {
-      const spaceId = getSpaceIdFromRequest(request);
+    handler: async ({ identifierType, identifier, limit = 10 }, { spaceId, esClient }) => {
       const alertsIndexPattern = `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
       const entityType = identifierType as EntityType;
 

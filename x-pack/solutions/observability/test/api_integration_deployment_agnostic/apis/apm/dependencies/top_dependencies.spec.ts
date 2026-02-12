@@ -13,6 +13,7 @@ import { SPANS_PER_DESTINATION_METRIC } from '@kbn/synthtrace/src/lib/apm/aggreg
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { dataConfig, generateData } from './generate_data';
 import { roundNumber } from '../utils/common';
+import { generateManyDependencies } from './generate_many_dependencies';
 
 type TopDependencies = APIReturnType<'GET /internal/apm/dependencies/top_dependencies'>;
 type TopDependenciesStatistics =
@@ -190,6 +191,29 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             )
           ).to.be(true);
         });
+      });
+    });
+
+    describe('when a high volume of data is loaded', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        await generateManyDependencies({ apmSynthtraceEsClient, from: start, to: end });
+      });
+
+      after(() => apmSynthtraceEsClient.clean());
+
+      it('returns an array of top dependencies without error', async () => {
+        const response = await callApi();
+        expect(response.status).to.be(200);
+        expect(response.body.dependencies.length).to.be.greaterThan(0);
+      });
+
+      it('returns dependencies statistics without error', async () => {
+        const response = await callStatisticsApi();
+        expect(response.status).to.be(200);
+        expect(Object.keys(response.body.currentTimeseries).length).to.be.greaterThan(0);
       });
     });
   });

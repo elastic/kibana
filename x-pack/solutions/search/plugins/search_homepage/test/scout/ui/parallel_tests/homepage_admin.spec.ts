@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-search';
+import { expect } from '@kbn/scout-search/ui';
+import { tags } from '@kbn/scout-search';
 import { test } from '../fixtures';
 
-test.describe('Homepage - Admin', { tag: ['@svlSearch'] }, () => {
+test.describe('Homepage - Admin', { tag: tags.serverless.search }, () => {
   test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await page.addInitScript(() => {

@@ -18,7 +18,7 @@ import { lighthouseTest, tags } from '@kbn/scout';
 
 lighthouseTest.describe(
   'Discover App - Lighthouse Performance Audit',
-  { tag: [...tags.DEPLOYMENT_AGNOSTIC, ...tags.PERFORMANCE] },
+  { tag: [...tags.deploymentAgnostic, ...tags.performance] },
   () => {
     lighthouseTest.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
       // loading the data

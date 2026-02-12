@@ -38,10 +38,7 @@ export const waitForPickupUpdatedMappingsTask = flow(
         );
       } else if (Option.isSome(res.error)) {
         const error = res.error.value;
-        if (
-          error.type === 'search_phase_execution_exception' &&
-          error.caused_by?.reason?.includes('Search rejected due to missing shards')
-        ) {
+        if (error.type === 'search_phase_execution_exception') {
           // This error is normally fixed in the next try, so let's retry
           // the update mappings task instead of throwing
           return TaskEither.left({

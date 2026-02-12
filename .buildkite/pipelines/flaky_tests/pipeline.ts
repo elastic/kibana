@@ -60,26 +60,31 @@ function getScoutServerRunFlags(configPath: string): string[] {
   }
 
   if (groupType === 'platform') {
-    return ['--stateful', '--serverless=es', '--serverless=oblt', '--serverless=security'];
+    return [
+      '--arch stateful --domain classic',
+      '--arch serverless --domain search',
+      '--arch serverless --domain observability_complete',
+      '--arch serverless --domain security_complete',
+    ];
   }
 
   if (groupType === 'workplaceai') {
-    return ['--serverless=workplace-ai'];
+    return ['--arch serverless --domain workplaceai'];
   }
-
-  const flags = ['--stateful'];
-
   if (groupType === 'observability') {
-    flags.push('--serverless=oblt');
-  } else if (groupType === 'security') {
-    flags.push('--serverless=security');
-  } else if (groupType === 'search') {
-    flags.push('--serverless=search');
-  } else {
-    throw new Error(`Unknown solution type: ${groupType}.`);
+    return [
+      '--arch stateful --domain classic',
+      '--arch serverless --domain observability_complete',
+    ];
+  }
+  if (groupType === 'security') {
+    return ['--arch stateful --domain classic', '--arch serverless --domain security_complete'];
+  }
+  if (groupType === 'search') {
+    return ['--arch stateful --domain classic', '--arch serverless --domain search'];
   }
 
-  return flags;
+  throw new Error(`Unknown solution type: ${groupType}.`);
 }
 
 function getTestSuitesFromJson(json: string) {
@@ -225,14 +230,13 @@ for (const testSuite of testSuites) {
 
   if (testSuite.type === 'scoutConfig') {
     const usesParallelWorkers = testSuite.scoutConfig.endsWith('parallel.playwright.config.ts');
-    const scoutConfigGroupType = getScoutConfigGroupType(testSuite.scoutConfig);
     const serverRunFlags = getScoutServerRunFlags(testSuite.scoutConfig);
 
     steps.push({
-      command: `.buildkite/scripts/steps/test/scout_configs.sh`,
+      command: `.buildkite/scripts/steps/test/scout_flaky_configs.sh`,
       env: {
         SCOUT_CONFIG: testSuite.scoutConfig,
-        SCOUT_CONFIG_GROUP_TYPE: scoutConfigGroupType!,
+        SCOUT_REPORTER_ENABLED: 'true',
         SCOUT_SERVER_RUN_FLAGS: serverRunFlags.join('\n'),
       },
       key: `${TestSuiteType.SCOUT}-${suiteIndex++}`,
