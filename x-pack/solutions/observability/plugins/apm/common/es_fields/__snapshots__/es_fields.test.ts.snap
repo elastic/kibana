@@ -190,6 +190,8 @@ exports[`Error LABEL_LIFECYCLE_STATE 1`] = `undefined`;
 
 exports[`Error LABEL_NAME 1`] = `undefined`;
 
+exports[`Error LABEL_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
+
 exports[`Error LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Error LABEL_TYPE 1`] = `undefined`;
@@ -610,6 +612,8 @@ exports[`Span LABEL_GC 1`] = `undefined`;
 exports[`Span LABEL_LIFECYCLE_STATE 1`] = `undefined`;
 
 exports[`Span LABEL_NAME 1`] = `undefined`;
+
+exports[`Span LABEL_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
 
 exports[`Span LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
@@ -1041,6 +1045,8 @@ exports[`Transaction LABEL_GC 1`] = `undefined`;
 exports[`Transaction LABEL_LIFECYCLE_STATE 1`] = `undefined`;
 
 exports[`Transaction LABEL_NAME 1`] = `undefined`;
+
+exports[`Transaction LABEL_OTEL_JVM_MEMORY_TYPE 1`] = `undefined`;
 
 exports[`Transaction LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
