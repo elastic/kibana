@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { RenameProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Rename Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should rename a field', async ({ testBed }) => {
       const indexName = 'streams-e2e-test-rename';
@@ -35,8 +36,8 @@ apiTest.describe(
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
-      expect(source).toHaveProperty('host.renamed', 'test-host');
-      expect(source).not.toHaveProperty('host.original');
+      expect(source?.host?.renamed).toBe('test-host');
+      expect(source?.host?.original).toBeUndefined();
     });
 
     [
@@ -90,7 +91,7 @@ apiTest.describe(
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
-      expect(source).not.toHaveProperty('host.renamed');
+      expect(source?.host?.renamed).toBeUndefined();
     });
 
     apiTest('should fail if field is missing and ignore_missing is false', async ({ testBed }) => {
@@ -137,7 +138,7 @@ apiTest.describe(
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
-      expect(source).toHaveProperty('host.renamed', 'test-host');
+      expect(source?.host?.renamed).toBe('test-host');
     });
 
     apiTest('should fail if target field exists and override is false', async ({ testBed }) => {

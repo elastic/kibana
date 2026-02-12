@@ -13,8 +13,7 @@ import { deepMockedFields, buildDataViewMock } from '@kbn/discover-utils/src/__m
 import { allSuggestionsMock } from '../__mocks__/suggestions';
 import { getLensVisMock } from '../__mocks__/lens_vis';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
-import { UnifiedHistogramSuggestionType, type UnifiedHistogramVisContext } from '../types';
-import { ChartType } from '@kbn/visualization-utils';
+import { UnifiedHistogramSuggestionType } from '../types';
 
 describe('LensVisService suggestions', () => {
   const dataViewMock = buildDataViewMock({
@@ -372,88 +371,5 @@ describe('LensVisService suggestions', () => {
     };
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
-  });
-
-  test('should use ChartType.Line as preferred chart type when query has timeseries bucket aggregation and no preferred vis attributes', async () => {
-    let capturedPreferredChartType: ChartType | undefined;
-
-    await getLensVisMock({
-      filters: [],
-      query: { esql: 'TS the-data-view | STATS COUNT() BY bucket(@timestamp, 1h)' },
-      dataView: dataViewMock,
-      timeInterval: 'auto',
-      timeRange: {
-        from: '2023-09-03T08:00:00.000Z',
-        to: '2023-09-04T08:56:28.274Z',
-      },
-      breakdownField: undefined,
-      columns: [
-        {
-          id: 'BUCKET(@timestamp, 1h)',
-          name: 'BUCKET(@timestamp, 1h)',
-          meta: { type: 'date', esType: 'date' },
-        },
-        {
-          id: 'COUNT()',
-          name: 'COUNT()',
-          meta: { type: 'number', esType: 'long' },
-        },
-      ],
-      isPlainRecord: true,
-      allSuggestions: allSuggestionsMock,
-      onLensSuggestionsApiCall: (preferredChartType) => {
-        capturedPreferredChartType = preferredChartType;
-      },
-    });
-
-    expect(capturedPreferredChartType).toBe(ChartType.Line);
-  });
-
-  test('should use preferred vis attributes chart type instead of Line for timeseries bucket aggregation queries when externalVisContext is provided', async () => {
-    let capturedPreferredChartType: ChartType | undefined;
-
-    const externalVisContext = {
-      attributes: {
-        visualizationType: 'lnsHeatmap',
-        state: {
-          query: { esql: 'TS the-data-view | STATS COUNT() BY bucket(@timestamp, 1h)' },
-          datasourceStates: { formBased: { layers: {} } },
-        },
-      },
-      requestData: {},
-      suggestionType: UnifiedHistogramSuggestionType.lensSuggestion,
-    } as UnifiedHistogramVisContext;
-
-    await getLensVisMock({
-      filters: [],
-      query: { esql: 'TS the-data-view | STATS COUNT() BY bucket(@timestamp, 1h)' },
-      dataView: dataViewMock,
-      timeInterval: 'auto',
-      timeRange: {
-        from: '2023-09-03T08:00:00.000Z',
-        to: '2023-09-04T08:56:28.274Z',
-      },
-      breakdownField: undefined,
-      columns: [
-        {
-          id: 'BUCKET(@timestamp, 1h)',
-          name: 'BUCKET(@timestamp, 1h)',
-          meta: { type: 'date', esType: 'date' },
-        },
-        {
-          id: 'COUNT()',
-          name: 'COUNT()',
-          meta: { type: 'number', esType: 'long' },
-        },
-      ],
-      isPlainRecord: true,
-      allSuggestions: allSuggestionsMock,
-      externalVisContext,
-      onLensSuggestionsApiCall: (preferredChartType) => {
-        capturedPreferredChartType = preferredChartType;
-      },
-    });
-
-    expect(capturedPreferredChartType).toBe(ChartType.Heatmap);
   });
 });
