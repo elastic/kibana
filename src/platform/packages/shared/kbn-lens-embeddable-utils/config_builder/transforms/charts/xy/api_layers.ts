@@ -155,6 +155,7 @@ function convertDataLayerToAPI(
             ...(visualization.colorMapping
               ? { color: fromColorMappingLensStateToAPI(visualization.colorMapping) }
               : {}),
+            ...(visualization.collapseFn ? { collapse_by: visualization.collapseFn } : {}),
           },
         }
       : {}),

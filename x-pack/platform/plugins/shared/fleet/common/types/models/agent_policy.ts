@@ -191,10 +191,30 @@ export interface FullAgentPolicyMonitoring {
     };
   };
 }
+export interface FullAgentPolicyDownloadAuth {
+  username?: string;
+  password?: string;
+  api_key?: string;
+  headers?: Array<{
+    key: string;
+    value: string;
+  }>;
+}
+
+export interface FullAgentPolicyDownloadAuthSecrets {
+  password?: { id: string };
+  api_key?: { id: string };
+}
+
+export interface FullAgentPolicyDownloadSecrets extends BaseSSLSecrets {
+  auth?: FullAgentPolicyDownloadAuthSecrets;
+}
+
 export interface FullAgentPolicyDownload {
   sourceURI: string;
   ssl?: BaseSSLConfig;
-  secrets?: BaseSSLSecrets;
+  auth?: FullAgentPolicyDownloadAuth;
+  secrets?: FullAgentPolicyDownloadSecrets;
   proxy_url?: string;
   proxy_headers?: any;
 }
