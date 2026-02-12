@@ -125,14 +125,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(trace.items.length).to.be.greaterThan(0);
       });
 
-      it('respects maxTraces and indicates truncation', async () => {
+      it('respects maxTraceIds and indicates truncation', async () => {
         const results = await agentBuilderApiClient.executeTool<GetTracesToolResult>({
           id: OBSERVABILITY_GET_TRACES_TOOL_ID,
           params: {
             start: START,
             end: END,
             kqlFilter: `trace.id: "${DEFAULT_TRACE_CONFIGS[0].traceId}"`,
-            maxTraces: 1,
+            maxTraceIds: 1,
           },
         });
 

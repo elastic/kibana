@@ -19,7 +19,7 @@ export async function getTraceIds({
   endTime,
   kqlFilter,
   logger,
-  maxTraceSize,
+  maxDocsPerTrace,
 }: {
   esClient: IScopedClusterClient;
   indices: string[];
@@ -27,12 +27,12 @@ export async function getTraceIds({
   endTime: number;
   kqlFilter: string | undefined;
   logger: Logger;
-  maxTraceSize: number;
+  maxDocsPerTrace: number;
 }): Promise<TraceIdSample[]> {
   const search = getTypedSearch(esClient.asCurrentUser);
 
   // `traceIdBucketSize` controls the number of unique `trace.id` values returned (terms `size`).
-  const traceIdBucketSize = Math.min(maxTraceSize, 20);
+  const traceIdBucketSize = Math.min(maxDocsPerTrace, 20);
   // `samplerShardSize` controls how many documents are considered per shard for the nested terms agg.
   const samplerShardSize = Math.max(200, traceIdBucketSize * 10);
   const searchRequest = {

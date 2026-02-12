@@ -14,14 +14,14 @@
  * multiple log sequences using a variety of correlation identifiers.
  *
  * This scenario is designed to exercise the tool's capabilities:
- * - Direct trace lookup via `traceId` (returns APM events + logs)
- * - Anchor-based lookup via `kqlFilter` (returns sequences derived from anchor logs)
- * - Anchor-based lookup via `logId` for a single deterministic anchor log
- * - `errorLogsOnly` vs `errorLogsOnly: false` behavior (some sequences are info-only)
+ * - Direct trace lookup via `kqlFilter` on `trace.id` (returns APM events + logs)
+ * - Anchor-based lookup via broader `kqlFilter` (discovers multiple trace.id values)
+ * - Using a specific document `_id` as the anchor in `kqlFilter`
+ * - Limiting results via `maxTraceIds` (how many trace ids) and `maxDocsPerTrace` (docs per trace)
  *
  * Validate via:
  *
- * 1) Direct lookup by traceId (APM + logs)
+ * 1) Direct lookup by trace id (APM + logs)
  * ```
  * POST kbn:///api/agent_builder/tools/_execute
  * {
@@ -29,12 +29,13 @@
  *   "tool_params": {
  *     "start": "now-1h",
  *     "end": "now",
- *     "traceId": "trace-get-traces-001"
+ *     "kqlFilter": "trace.id: \"trace-get-traces-001\"",
+ *     "maxTraceIds": 1
  *   }
  * }
  * ```
  *
- * 2) Anchor from logs by query (multiple sequences)
+ * 2) Anchor from logs by query (may discover multiple trace ids)
  * ```
  * POST kbn:///api/agent_builder/tools/_execute
  * {
@@ -43,19 +44,20 @@
  *     "start": "now-1h",
  *     "end": "now",
  *     "kqlFilter": "service.name: payment-service",
- *     "maxSequences": 5
+ *     "maxTraceIds": 5,
+ *     "maxDocsPerTrace": 100
  *   }
  * }
  * ```
  *
- * 3) Anchor from a specific log document by ID (single sequence)
- * Note: only one anchor log has a deterministic ID in this dataset.
+ * 3) Anchor from a specific document id
  * ```
  * POST kbn:///api/agent_builder/tools/_execute
  * {
  *   "tool_id": "observability.get_traces",
  *   "tool_params": {
- *     "logId": "log-get-traces-anchor-001"
+ *     "kqlFilter": "_id: \"<document_id>\"",
+ *     "maxTraceIds": 1
  *   }
  * }
  */

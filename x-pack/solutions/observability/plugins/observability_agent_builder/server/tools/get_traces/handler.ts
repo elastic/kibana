@@ -71,8 +71,8 @@ export async function getToolHandler({
   index,
   kqlFilter,
   fields,
-  maxTraces,
-  maxTraceSize,
+  maxTraceIds,
+  maxDocsPerTrace,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
@@ -83,8 +83,8 @@ export async function getToolHandler({
   index?: string;
   kqlFilter?: string;
   fields: string[];
-  maxTraces: number;
-  maxTraceSize: number;
+  maxTraceIds: number;
+  maxDocsPerTrace: number;
 }) {
   const dataSources = await getObservabilityDataSources({ core, plugins, logger });
   const apmIndexPatterns = [
@@ -103,7 +103,7 @@ export async function getToolHandler({
     endTime,
     kqlFilter,
     logger,
-    maxTraceSize,
+    maxDocsPerTrace,
   });
 
   // For each trace time window, find the full distributed trace (transactions, spans, errors, and logs)
@@ -115,7 +115,7 @@ export async function getToolHandler({
         index: indices,
         startTime: traceTimeWindow.start,
         endTime: traceTimeWindow.end,
-        size: maxTraces,
+        size: maxTraceIds,
         fields,
       });
     })

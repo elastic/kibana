@@ -43,7 +43,6 @@ export const DEFAULT_TRACE_FIELDS = [
   '_id',
   AT_TIMESTAMP,
   TRACE_ID,
-  AT_TIMESTAMP,
   'message',
   'log.level',
 

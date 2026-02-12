@@ -17,7 +17,7 @@ export async function getTraceTimeWindows({
   endTime,
   kqlFilter,
   logger,
-  maxTraceSize,
+  maxDocsPerTrace,
 }: {
   esClient: IScopedClusterClient;
   indices: string[];
@@ -25,7 +25,7 @@ export async function getTraceTimeWindows({
   endTime: number;
   kqlFilter: string | undefined;
   logger: Logger;
-  maxTraceSize: number;
+  maxDocsPerTrace: number;
 }): Promise<TraceTimeWindow[]> {
   const traceIds = await getTraceIds({
     esClient,
@@ -34,7 +34,7 @@ export async function getTraceTimeWindows({
     endTime,
     kqlFilter,
     logger,
-    maxTraceSize,
+    maxDocsPerTrace,
   });
 
   return traceIds.map((traceIdSample) => {

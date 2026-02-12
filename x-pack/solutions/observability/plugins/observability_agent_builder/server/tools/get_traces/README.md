@@ -22,6 +22,8 @@ POST kbn://api/agent_builder/tools/_execute
 }
 ```
 
+Note: When `kqlFilter` targets a specific `trace.id`, the tool typically returns a single trace. If `kqlFilter` is broader (e.g. `service.name: ...`), it may discover multiple trace ids; you can control how many via `maxTraceIds`.
+
 ### Expand from a specific log document id
 
 Use this when you already have a log event id (e.g. from Discover) and want to retrieve the surrounding trace/log context.
@@ -46,7 +48,7 @@ POST kbn://api/agent_builder/tools/_execute
     "start": "now-30m",
     "end": "now",
     "kqlFilter": "service.name: payment-service",
-    "maxTraceSize": 5
+    "maxTraceIds": 5
   }
 }
 ```

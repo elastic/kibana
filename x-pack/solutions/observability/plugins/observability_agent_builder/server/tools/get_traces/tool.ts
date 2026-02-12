@@ -27,16 +27,21 @@ const getTracesSchema = z.object({
   kqlFilter: z
     .string()
     .describe(
-      'KQL filter used to find seed documents (logs or APM events) within the selected time range. Examples: \'service.name: "payment-service"\', \'trace.id: "abc123"\', \'_id: "a1b2c3"\'. The tool discovers `trace.id` values from matching documents (up to `maxTraceSize`) and returns APM trace events and logs for each discovered trace.id.'
+      'KQL filter used to find seed documents (logs or APM events) within the selected time range. Examples: \'service.name: "payment-service"\', \'trace.id: "abc123"\', \'_id: "a1b2c3"\'. The tool discovers one or more `trace.id` values from matching documents (up to `maxTraceIds`) and returns APM trace events and logs for each discovered trace.id.'
     ),
-  maxTraceSize: z
+  maxTraceIds: z
     .number()
+    .optional()
     .default(10)
-    .describe('Maximum number of unique traces (trace.id values) to return.'),
-  maxTraces: z
+    .describe('Maximum number of unique `trace.id` values to discover and return. Defaults to 10.'),
+  maxDocsPerTrace: z
     .number()
+    .optional()
     .default(DEFAULT_MAX_TRACES)
-    .describe('Maximum number of traces to return per trace.id'),
+    .describe(
+      'Maximum number of documents (APM events + logs) to return for each trace.id. Defaults to 100.'
+    ),
+
   fields: z
     .array(z.string())
     .default(DEFAULT_TRACE_FIELDS)
@@ -78,7 +83,7 @@ export function createGetTracesTool({
       },
     },
     handler: async (
-      { start, end, index, kqlFilter, maxTraceSize, maxTraces, fields },
+      { start, end, index, kqlFilter, maxDocsPerTrace, maxTraceIds, fields },
       { esClient }
     ) => {
       try {
@@ -91,9 +96,9 @@ export function createGetTracesTool({
           end,
           index,
           kqlFilter,
-          maxTraceSize,
+          maxDocsPerTrace,
           fields,
-          maxTraces,
+          maxTraceIds,
         });
 
         return {
