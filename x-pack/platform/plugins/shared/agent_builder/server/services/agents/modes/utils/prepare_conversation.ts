@@ -18,6 +18,7 @@ import {
   getLatestVersion,
   hashContent,
 } from '@kbn/agent-builder-common/attachments';
+import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type {
   AttachmentFormatContext,
   AttachmentStateManager,
@@ -25,29 +26,15 @@ import type {
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import type {
-  AttachmentRepresentation,
-  AttachmentBoundedTool,
-} from '@kbn/agent-builder-server/attachments';
+import type { AttachmentRepresentation } from '@kbn/agent-builder-server/attachments';
 import {
   prepareAttachmentPresentation,
   type AttachmentPresentation,
 } from './attachment_presentation';
 
-export interface ProcessedAttachment {
-  attachment: Attachment;
-  representation: AttachmentRepresentation;
-  tools: AttachmentBoundedTool[];
-}
-
 export interface ProcessedAttachmentType {
   type: string;
   description?: string;
-}
-
-export interface ProcessedRoundInput {
-  message: string;
-  attachments: ProcessedAttachment[];
 }
 
 export type ProcessedConversationRound = Omit<ConversationRound, 'input'> & {

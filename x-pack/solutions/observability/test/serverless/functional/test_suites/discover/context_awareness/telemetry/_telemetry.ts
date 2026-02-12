@@ -130,7 +130,8 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       });
     });
 
-    describe('contextual profiles', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/252793
+    describe.skip('contextual profiles', () => {
       before(async () => {
         await esArchiver.loadIfNeeded(
           'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
@@ -241,7 +242,8 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       });
     });
 
-    describe('events', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/252799
+    describe.skip('events', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
         await header.waitUntilLoadingHasFinished();
