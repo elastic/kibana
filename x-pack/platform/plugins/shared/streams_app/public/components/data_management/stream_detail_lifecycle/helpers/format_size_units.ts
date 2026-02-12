@@ -66,6 +66,11 @@ const timeUnitsLabels = {
   },
 };
 
+export const getTimeUnitLabel = (unit: keyof typeof timeUnitsLabels, count: number = 2): string => {
+  const labels = timeUnitsLabels[unit];
+  return count === 1 ? labels.singular : labels.plural;
+};
+
 export const splitSizeAndUnits = (field: string): { size: string; unit: string } => {
   let size = '';
   let unit = '';

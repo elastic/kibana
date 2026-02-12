@@ -270,6 +270,33 @@ describe('EditDslStepsFlyout', () => {
       expect(getTab(1).querySelector('[data-euiicon-type="warning"]')).not.toBeNull();
     });
 
+    it('prevents saving when fixed_interval is less than 5 minutes', async () => {
+      const { onSave } = renderFlyout({
+        initialSteps: {
+          dsl: {
+            data_retention: '30d',
+            downsample: [{ after: '30d', fixed_interval: '1h' }],
+          },
+        },
+      });
+
+      await tick();
+
+      const panel = withinStep(0);
+      fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalUnit`), {
+        target: { value: 'm' },
+      });
+      fireEvent.change(panel.getByTestId(`${DATA_TEST_SUBJ}FixedIntervalValue`), {
+        target: { value: '1' },
+      });
+
+      fireEvent.click(screen.getByTestId(`${DATA_TEST_SUBJ}SaveButton`));
+
+      await tick();
+      expect(onSave).toHaveBeenCalledTimes(0);
+      expect(getTab(1).querySelector('[data-euiicon-type="warning"]')).not.toBeNull();
+    });
+
     it('calls onClose when cancelling', async () => {
       const { onClose } = renderFlyout();
       await tick();

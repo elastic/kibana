@@ -15,6 +15,8 @@ import { toMilliseconds } from './utils';
 const { emptyField, isInteger } = fieldValidators;
 type AnyValidationFunc = ValidationFunc<any, any, any>;
 
+const FIVE_MINUTES_IN_MS = 5 * 60_000;
+
 const getStepIndexFromPath = (path: string): number | null => {
   const match = /^_meta\.downsampleSteps\[(\d+)\]\./.exec(path);
   if (!match) return null;
@@ -118,6 +120,34 @@ export const fixedIntervalMustBeInteger: AnyValidationFunc = (
       defaultMessage: 'An integer is required.',
     }),
   })(...args);
+};
+
+export const fixedIntervalMustBeAtLeastFiveMinutes: AnyValidationFunc = (...args) => {
+  const [{ value, formData, path }] = args as any as [
+    { value: unknown; formData: Record<string, unknown>; path: string }
+  ];
+
+  const stepIndex = getStepIndexFromPath(path);
+  if (stepIndex === null) return;
+
+  if (value === '' || value === undefined || value === null) return;
+  const num = Number(value);
+  if (!Number.isFinite(num) || num <= 0) return;
+  if (!Number.isInteger(num)) return;
+
+  const unit = String(
+    (formData as any)[`_meta.downsampleSteps[${stepIndex}].fixedIntervalUnit`] ?? 'd'
+  ) as TimeUnit;
+  const milliseconds = toMilliseconds(String(value), unit);
+  if (!Number.isFinite(milliseconds) || milliseconds <= 0) return;
+
+  if (milliseconds < FIVE_MINUTES_IN_MS) {
+    return {
+      message: i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalMinFiveMinutes', {
+        defaultMessage: 'Must be at least 5 minutes.',
+      }),
+    };
+  }
 };
 
 export const fixedIntervalMultipleOfPreviousStep: AnyValidationFunc = (...args) => {

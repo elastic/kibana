@@ -22,6 +22,7 @@ import { MAX_DOWNSAMPLE_STEPS } from '../constants';
 import {
   fixedIntervalMultipleOfPreviousStep,
   fixedIntervalMustBeGreaterThanZero,
+  fixedIntervalMustBeAtLeastFiveMinutes,
   fixedIntervalMustBeInteger,
   requiredFixedIntervalValue,
 } from '../validations';
@@ -74,6 +75,7 @@ export const FixedIntervalField = ({
       { validator: requiredFixedIntervalValue },
       { validator: fixedIntervalMustBeGreaterThanZero },
       { validator: fixedIntervalMustBeInteger },
+      { validator: fixedIntervalMustBeAtLeastFiveMinutes },
       { validator: fixedIntervalMultipleOfPreviousStep },
     ],
     []
