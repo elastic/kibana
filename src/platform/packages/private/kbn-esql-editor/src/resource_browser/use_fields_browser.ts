@@ -9,7 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState, type MutableRefObject } from 'react';
 import type { HttpStart } from '@kbn/core/public';
-import type { ESQLControlVariable, ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
+import type { ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
 import type { TimeRange } from '@kbn/es-query';
 import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
 import type { ISearchGeneric } from '@kbn/search-types';
@@ -26,7 +26,6 @@ interface UseFieldsBrowserParams {
   search: ISearchGeneric;
   getTimeRange: () => TimeRange;
   signal?: AbortSignal;
-  variables?: ESQLControlVariable[];
   activeSolutionId?: SolutionId;
 }
 
@@ -44,7 +43,6 @@ export function useFieldsBrowser({
   search,
   getTimeRange,
   signal,
-  variables,
   activeSolutionId,
 }: UseFieldsBrowserParams) {
   const [isFieldsBrowserOpen, setIsFieldsBrowserOpen] = useState(false);
@@ -115,10 +113,9 @@ export function useFieldsBrowser({
         search,
         timeRange: getTimeRange(),
         signal,
-        variables,
       });
     },
-    [getTimeRange, search, signal, variables]
+    [getTimeRange, search, signal]
   );
 
   const fetchRecommendedFields = useCallback(
