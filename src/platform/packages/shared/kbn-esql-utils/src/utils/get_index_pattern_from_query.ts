@@ -75,3 +75,38 @@ export function getIndexPatternFromESQLQuery(esql?: string): string {
 
   return uniqueSources.join(',');
 }
+
+/**
+ * Expands an index pattern by resolving ES|QL view names to their underlying index patterns.
+ * For each comma-separated entry: if it is a view, replaces it with the index pattern from the view's query; otherwise keeps it.
+ *
+ * @param indexPattern - Comma-separated list of index/view names
+ * @param views - List of ES|QL views (name + query)
+ * @returns Comma-separated list of index names with views expanded
+ */
+export function expandIndexPatternWithViewsList(
+  indexPattern: string,
+  views: Array<{ name: string; query: string }>
+): string {
+  const indices = indexPattern
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const expanded: string[] = [];
+  for (const index of indices) {
+    const view = views.find((v) => v.name === index);
+    if (view) {
+      const pattern = getIndexPatternFromESQLQuery(view.query);
+      if (pattern) {
+        const parts = pattern
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+        expanded.push(...parts);
+      }
+    } else {
+      expanded.push(index);
+    }
+  }
+  return [...new Set(expanded)].join(',');
+}

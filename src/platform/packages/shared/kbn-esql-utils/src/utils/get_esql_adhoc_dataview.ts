@@ -9,8 +9,18 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { HttpStart } from '@kbn/core/public';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
-import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
-import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
+import type { EsqlViewsResult } from '@kbn/esql-types';
+import { TIMEFIELD_ROUTE, VIEWS_ROUTE } from '@kbn/esql-types';
+import {
+  expandIndexPatternWithViewsList,
+  getIndexPatternFromESQLQuery,
+} from './get_index_pattern_from_query';
+
+async function expandIndexPatternWithViews(indexPattern: string, http: HttpStart): Promise<string> {
+  const result = await http.get<EsqlViewsResult>(VIEWS_ROUTE).catch(() => ({ views: [] }));
+  const views = result?.views ?? [];
+  return expandIndexPatternWithViewsList(indexPattern, views);
+}
 
 // uses browser sha256 method with fallback if unavailable
 async function sha256(str: string) {
@@ -75,7 +85,12 @@ export async function getESQLAdHocDataview({
     return undefined;
   })) as { timeField?: string } | undefined;
   const timeField = response?.timeField;
-  const indexPattern = getIndexPatternFromESQLQuery(query);
+  // This can contain views, so we need to expand it
+  const rawIndexPattern = getIndexPatternFromESQLQuery(query);
+  const indexPattern =
+    http && rawIndexPattern
+      ? await expandIndexPatternWithViews(rawIndexPattern, http)
+      : rawIndexPattern;
   const dataViewId = await sha256(`esql-${indexPattern}`);
 
   if (options?.createNewInstanceEvenIfCachedOneAvailable) {
