@@ -26,6 +26,8 @@ import {
   internalStateSlice,
   type InternalStateThunkActionCreator,
   type TabActionPayload,
+  transitionedFromEsqlToDataView,
+  transitionedFromDataViewToEsql,
 } from '../internal_state';
 import { selectTab } from '../selectors';
 import { selectTabRuntimeState } from '../runtime_state';
@@ -206,6 +208,8 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
         },
       })
     );
+
+    dispatch(transitionedFromEsqlToDataView({ tabId }));
   };
 
 const clearTimeFieldFromSort = (
@@ -251,6 +255,8 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
 
     // clears pinned filters
     dispatch(updateGlobalState({ tabId, globalState: { filters: [] } }));
+
+    dispatch(transitionedFromDataViewToEsql({ tabId }));
   };
 
 /**

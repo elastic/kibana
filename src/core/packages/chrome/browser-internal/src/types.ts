@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
+import type { JSX, ReactNode } from 'react';
 import type {
   ChromeSetup,
   ChromeStart,
@@ -96,13 +96,6 @@ export interface InternalChromeStart extends ChromeStart {
    * @internal
    */
   getSidebarComponent(): JSX.Element;
-
-  /**
-   * Used only by the rendering service to retrieve the set of classNames
-   * that will be set on the body element.
-   * @internal
-   */
-  getBodyClasses$(): Observable<string[]>;
 
   /**
    * Used only by the rendering service to render the global footer UI (devbar)

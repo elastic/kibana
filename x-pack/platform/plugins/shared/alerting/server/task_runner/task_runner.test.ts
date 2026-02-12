@@ -32,6 +32,7 @@ import {
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
 import type { TaskRunnerContext } from './types';
+import { ApiKeyType } from './types';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
@@ -203,6 +204,7 @@ describe('Task Runner', () => {
     usageCounter: mockUsageCounter,
     isServerless: false,
     getEventLogClient: jest.fn().mockReturnValue(eventLogClientMock.create()),
+    apiKeyType: ApiKeyType.ES,
   };
 
   beforeEach(() => {

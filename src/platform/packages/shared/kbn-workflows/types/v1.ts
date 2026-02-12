@@ -98,7 +98,8 @@ export interface EsWorkflowExecution {
   scopeStack: StackFrame[];
   createdAt: string;
   error: SerializedError | null;
-  createdBy: string;
+  createdBy?: string; // Keep for backwards compatibility with existing documents
+  executedBy?: string; // User who executed the workflow
   startedAt: string;
   finishedAt: string;
   cancelRequested: boolean;
@@ -196,6 +197,7 @@ export interface WorkflowExecutionDto {
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
   duration: number | null;
+  executedBy?: string; // User who executed the workflow
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
   context?: Record<string, unknown>;
@@ -244,6 +246,12 @@ export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string(),
   id: z.string().optional(),
 });
+
+export const BulkCreateWorkflowsCommandSchema = z.object({
+  workflows: z.array(CreateWorkflowCommandSchema),
+});
+
+export type BulkCreateWorkflowsCommand = z.infer<typeof BulkCreateWorkflowsCommandSchema>;
 
 export const UpdateWorkflowCommandSchema = z.object({
   name: z.string(),
@@ -385,6 +393,11 @@ export interface ConnectorInstance {
   name: string;
   isPreconfigured: boolean;
   isDeprecated: boolean;
+  config?: ConnectorInstanceConfig;
+}
+
+export interface ConnectorInstanceConfig {
+  taskType?: string;
 }
 
 export interface ConnectorTypeInfo {
@@ -405,8 +418,7 @@ export type CompletionFn = () => Promise<
 export interface BaseConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
-  connectorIdRequired?: boolean;
-  connectorId?: z.ZodType;
+  hasConnectorId?: 'required' | 'optional' | false;
   outputSchema: z.ZodType;
   configSchema?: z.ZodObject;
   summary: string | null;
@@ -468,6 +480,13 @@ export interface StepPropertyHandler<T = unknown> {
    * Provides a unified interface for search, resolution, and decoration of entity references.
    */
   selection?: PropertySelectionHandler<Exclude<T, undefined>>;
+  /**
+   * Connector ID selection configuration for the property.
+   * Used to resolve connector IDs for custom steps.
+   *
+   * **Note**: This handler is currently only supported for the `connector-id` property in the config schema.
+   */
+  connectorIdSelection?: ConnectorIdSelectionHandler;
 }
 
 export interface PropertySelectionHandler<T = unknown> {
@@ -519,7 +538,7 @@ export interface SelectionDetails {
   }>;
 }
 
-export interface PropertyValidationContext {
+export interface SelectionContext {
   /** The step type ID (e.g., "onechat.runAgent") */
   stepType: string;
   /** The property path ("config" or "input") */
@@ -528,7 +547,18 @@ export interface PropertyValidationContext {
   propertyKey: string;
 }
 
-export type SelectionContext = PropertyValidationContext;
+export interface ConnectorIdSelectionHandler {
+  /**
+   * The action type IDs to search for.
+   */
+  connectorTypes: string[];
+  /**
+   * Whether to disable creation of a new connector from the connector ID selection.
+   * If false (default), creation from the connector ID selection will be disabled.
+   * If true, creation from the connector ID selection will be enabled for the first type in the `connectorTypes` list.
+   */
+  enableCreation?: boolean;
+}
 
 export interface ConnectorExamples {
   params?: Record<string, string>;

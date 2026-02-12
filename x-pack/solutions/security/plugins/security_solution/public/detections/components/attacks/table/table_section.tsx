@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiSwitch } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -44,6 +44,8 @@ import { buildConnectorIdFilter } from './filtering_configs';
 import type { GroupTakeActionItems } from '../../alerts_table/types';
 import { AttacksGroupTakeActionItems } from './attacks_group_take_action_items';
 import { useGroupStats } from './grouping_settings/use_group_stats';
+import { AttacksTableSortSelect, DEFAULT_ATTACKS_SORT } from './attacks_table_sort_select';
+import { AlertActionItems } from './alerts_action_items';
 
 export const TABLE_SECTION_TEST_ID = 'attacks-page-table-section';
 
@@ -232,12 +234,12 @@ export const TableSection = React.memo(
     );
 
     const groupTakeActionItems: GroupTakeActionItems = useCallback(
-      ({ selectedGroup, groupBucket }) => {
-        const attack = getAttack(selectedGroup, groupBucket);
-        if (!attack) return;
+      (props) => {
+        const attack = getAttack(props.selectedGroup, props.groupBucket);
+        if (!attack) return <AlertActionItems statusFilter={statusFilter} {...props} />;
         return <AttacksGroupTakeActionItems attack={attack} />;
       },
-      [getAttack]
+      [getAttack, statusFilter]
     );
 
     const accordionExtraActionGroupStats = useGroupStats();
@@ -251,7 +253,24 @@ export const TableSection = React.memo(
       [openSchedulesFlyout]
     );
 
-    const sort = useMemo<GroupingSort>(() => [{ latestTimestamp: { order: 'desc' } }], []);
+    const [sort, setSort] = useState<GroupingSort>(DEFAULT_ATTACKS_SORT);
+
+    const attacksTableSortSelect = useMemo(
+      () => (
+        <EuiFlexGroup
+          key={`${TABLE_SECTION_TEST_ID}-sort-select`}
+          gutterSize="s"
+          alignItems="center"
+        >
+          <EuiSpacer />
+          <EuiFlexItem>
+            <AttacksTableSortSelect sort={sort} onChange={setSort} />
+          </EuiFlexItem>
+          <EuiSpacer />
+        </EuiFlexGroup>
+      ),
+      [sort]
+    );
 
     return (
       <div data-test-subj={TABLE_SECTION_TEST_ID}>
@@ -271,7 +290,7 @@ export const TableSection = React.memo(
           tableId={TableId.alertsOnAttacksPage}
           to={to}
           onAggregationsChange={onAggregationsChange}
-          additionalToolbarControls={[showAnonymizedSwitch]}
+          additionalToolbarControls={[showAnonymizedSwitch, attacksTableSortSelect]}
           pageScope={PageScope.attacks} // allow filtering and grouping by attack fields
           settings={groupingSettings}
           emptyGroupingComponent={emptyGroupingComponent}

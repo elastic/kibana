@@ -28,7 +28,7 @@ export const SOLUTION_REQUIREMENTS_LINK_TEXT = i18n.translate(
 );
 
 export const DETECTIONS_REQUIREMENTS_LINK_PATH =
-  'solutions/security/detect-and-alert/detections-requirements';
+  'solutions/security/detect-and-alert/detections-privileges';
 export const DETECTIONS_REQUIREMENTS_LINK_TEXT = i18n.translate(
   'xpack.securitySolution.documentationLinks.detectionsRequirements.text',
   {
