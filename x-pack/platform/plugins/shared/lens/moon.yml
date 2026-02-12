@@ -150,7 +150,6 @@ dependsOn:
   - '@kbn/core-base-browser-mocks'
   - '@kbn/react-kibana-context-env'
   - '@kbn/scout'
-  - '@kbn/controls-schemas'
 tags:
   - plugin
   - prod
