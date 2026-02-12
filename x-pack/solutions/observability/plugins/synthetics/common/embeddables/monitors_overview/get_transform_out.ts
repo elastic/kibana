@@ -14,8 +14,9 @@ import type { LegacyMonitorFilters } from '../../types';
 export function getTransformOut() {
   function transformOut(
     storedState: OverviewMonitorsEmbeddableState,
-    references?: Reference[]
-  ): { state: OverviewMonitorsEmbeddableState; references: Reference[] } {
+    _panelReferences?: Reference[],
+    _containerReferences?: Reference[]
+  ): OverviewMonitorsEmbeddableState {
     const transformsFlow = flow(
       transformTitlesOut<OverviewMonitorsEmbeddableState>,
       (state: OverviewMonitorsEmbeddableState) => {
@@ -42,7 +43,7 @@ export function getTransformOut() {
         return state;
       }
     );
-    return { state: transformsFlow(storedState), references: references ?? [] };
+    return transformsFlow(storedState);
   }
   return transformOut;
 }
