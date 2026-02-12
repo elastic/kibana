@@ -125,7 +125,7 @@ async function fetchAlerts(
           alert = registeredRuleType.alerts.formatAlert(alert) as Alert;
         }
 
-        const expandedAlert = expandFlattenedAlert(alert as object) as Alert;
+        const expandedAlert = expandFlattenedAlert(alert) as Alert;
 
         alerts.push({ _id: doc._id, _index: doc._index, ...expandedAlert });
       } else {
