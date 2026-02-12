@@ -18,6 +18,7 @@ import { useESQLVariables } from './use_esql_variables';
 import type { ESQLControlVariable, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { internalStateActions } from '../../state_management/redux';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 
 // Mock ControlGroupRendererApi
 class MockControlGroupRendererApi {

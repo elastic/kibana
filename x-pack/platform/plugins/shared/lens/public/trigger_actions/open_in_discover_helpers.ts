@@ -5,29 +5,13 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
-import {
-  isOfAggregateQueryType,
-  type AggregateQuery,
-  type Filter,
-  type Query,
-  type TimeRange,
-} from '@kbn/es-query';
+import { type AggregateQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
-import type { Serializable, SerializableRecord } from '@kbn/utility-types';
-import {
-  apiHasSerializableState,
-  apiHasType,
-  apiHasUniqueId,
-  type EmbeddableApiContext,
-} from '@kbn/presentation-publishing';
-import type { LensApi } from '@kbn/lens-common-2';
-import { ESQL_CONTROL } from '@kbn/controls-constants';
-import { getESQLQueryVariables } from '@kbn/esql-utils';
-import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import { isControlGroupRendererApi } from '@kbn/control-group-renderer';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers/interfaces/presentation_container';
+import { getEsqlControls } from '@kbn/esql-utils';
 import { isLensApi } from '../react_embeddable/type_guards';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {
@@ -92,65 +76,18 @@ async function getDiscoverLocationParams({
     }
   }
 
-  const esqlControls = getEsqlControls(embeddable);
+  const presentationContainer = apiIsPresentationContainer(embeddable.parentApi)
+    ? embeddable.parentApi
+    : undefined;
 
   return {
     ...args,
     timeRange: timeRangeToApply,
     filters: filtersToApply,
-    esqlControls,
+    esqlControls: presentationContainer
+      ? getEsqlControls(presentationContainer, args.query)
+      : undefined,
   };
-}
-
-function getEsqlControls(embeddable: LensApi) {
-  const state = embeddable.getSerializedStateByValue();
-  if (!state) return null;
-
-  const embeddableQuery = state.query;
-  if (!isOfAggregateQueryType(embeddableQuery)) return null;
-
-  const parentApi = embeddable.parentApi;
-  if (!apiIsPresentationContainer(parentApi)) return null;
-
-  const usedVariables = getESQLQueryVariables(embeddableQuery.esql);
-  const controlsLayout = isControlGroupRendererApi(parentApi) ? parentApi.getControls() : {};
-  const esqlControlState = Object.values(parentApi.children$.getValue()).reduce(
-    (acc: { [uuid: string]: Serializable }, api, index) => {
-      if (
-        !(
-          apiHasType(api) &&
-          api.type === ESQL_CONTROL &&
-          apiHasUniqueId(api) &&
-          apiHasSerializableState(api)
-        )
-      ) {
-        return acc;
-      }
-
-      const controlState = api.serializeState() as OptionsListESQLControlState;
-      const variableName =
-        'variable_name' in controlState && (controlState.variable_name as string);
-      if (!variableName) return acc;
-      const isUsed = usedVariables.includes(variableName);
-      if (!isUsed) return acc;
-
-      return {
-        ...acc,
-        [api.uuid]: {
-          type: api.type,
-          ...controlState,
-          ...(controlsLayout[api.uuid]
-            ? {
-                ...omit(controlsLayout[api.uuid], 'type'),
-              }
-            : { order: index }),
-        },
-      };
-    },
-    {}
-  );
-
-  return esqlControlState;
 }
 
 export async function getHref({ embeddable, locator, filters, dataViews, timeFieldName }: Context) {

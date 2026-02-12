@@ -10,8 +10,8 @@ import { isEqual, omit } from 'lodash';
 import { useCallback, useEffect, useRef } from 'react';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import {
   extractEsqlVariables,
   internalStateActions,
