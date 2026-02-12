@@ -14,7 +14,7 @@ interface MonitorWarning {
 }
 
 const buildBrowserTimeoutWarning = (monitorId: string): MonitorWarning => ({
-  monitorId: monitorId,
+  monitorId,
   message: i18n.translate(
     'xpack.synthetics.server.monitors.browserTimeoutNoPrivateLocationsWarning',
     {

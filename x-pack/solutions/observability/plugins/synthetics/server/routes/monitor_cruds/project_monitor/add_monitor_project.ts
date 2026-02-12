@@ -18,7 +18,8 @@ import type { RouteContext, SyntheticsRestApiRouteFactory } from '../../types';
 import type { ProjectMonitor } from '../../../../common/runtime_types';
 
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { FailedError, ProjectMonitorFormatter } from '../../../synthetics_service/project_monitor/project_monitor_formatter';
+import type { FailedError } from '../../../synthetics_service/project_monitor/project_monitor_formatter';
+import { ProjectMonitorFormatter } from '../../../synthetics_service/project_monitor/project_monitor_formatter';
 import { getBrowserTimeoutWarningsForProjectMonitors } from '../monitor_warnings';
 
 const MAX_PAYLOAD_SIZE = 1048576 * 100; // 50MiB
@@ -95,7 +96,10 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
 
       await pushMonitorFormatter.configureAllProjectMonitors();
 
-      const warnings = getBrowserTimeoutWarningsForSucceededProjectMonitors(monitors, pushMonitorFormatter.failedMonitors);
+      const warnings = getBrowserTimeoutWarningsForSucceededProjectMonitors(
+        monitors,
+        pushMonitorFormatter.failedMonitors
+      );
 
       return {
         createdMonitors: pushMonitorFormatter.createdMonitors,
@@ -222,7 +226,10 @@ export const checkPublicLocationsPermissions = async (
   }
 };
 
-const getBrowserTimeoutWarningsForSucceededProjectMonitors = (monitors: ProjectMonitor[], failedMonitors: FailedError) => {
+const getBrowserTimeoutWarningsForSucceededProjectMonitors = (
+  monitors: ProjectMonitor[],
+  failedMonitors: FailedError
+) => {
   const failedIds = new Set(failedMonitors.map((m) => m.id));
   const succeededMonitors = monitors.filter((m) => !failedIds.has(m.id));
   return getBrowserTimeoutWarningsForProjectMonitors(succeededMonitors);

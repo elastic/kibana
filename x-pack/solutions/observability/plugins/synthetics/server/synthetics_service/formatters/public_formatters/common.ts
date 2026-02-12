@@ -6,7 +6,11 @@
  */
 
 import { maxAttemptsFormatter } from '../formatting_utils';
-import { arrayFormatter, publicTimeoutFormatter, stringToObjectFormatter } from './formatting_utils';
+import {
+  arrayFormatter,
+  publicTimeoutFormatter,
+  stringToObjectFormatter,
+} from './formatting_utils';
 import type { CommonFields, MonitorFields } from '../../../../common/runtime_types';
 import { ConfigKey, SourceType } from '../../../../common/runtime_types';
 
