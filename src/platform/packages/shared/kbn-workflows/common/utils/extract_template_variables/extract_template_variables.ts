@@ -8,11 +8,13 @@
  */
 
 import { Liquid } from 'liquidjs';
+import { removeDisallowedLiquidTags } from '../liquid_allowed_tags/liquid_allowed_tags';
 
 const liquidEngine = new Liquid({
   strictFilters: false,
   strictVariables: false,
 });
+removeDisallowedLiquidTags(liquidEngine);
 
 function isLiteral(value: string): boolean {
   // Check if it's a string literal (quoted with ' or ")

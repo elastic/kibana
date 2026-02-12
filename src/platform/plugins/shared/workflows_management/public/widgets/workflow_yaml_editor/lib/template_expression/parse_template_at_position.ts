@@ -9,11 +9,13 @@
 
 import { Liquid } from 'liquidjs';
 import { monaco } from '@kbn/monaco';
+import { removeDisallowedLiquidTags } from '@kbn/workflows';
 
 const liquidEngine = new Liquid({
   strictFilters: false,
   strictVariables: false,
 });
+removeDisallowedLiquidTags(liquidEngine);
 
 export interface TemplateExpressionInfo {
   /** Whether cursor is inside a template expression */

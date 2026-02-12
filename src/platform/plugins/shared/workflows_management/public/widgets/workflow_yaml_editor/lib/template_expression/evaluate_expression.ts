@@ -9,6 +9,7 @@
 
 import { Liquid } from 'liquidjs';
 import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
+import { removeDisallowedLiquidTags } from '@kbn/workflows';
 import { resolvePathValue } from './resolve_path_value';
 import type { ExecutionContext } from '../execution_context/build_execution_context';
 
@@ -17,6 +18,7 @@ const liquidEngine = new Liquid({
   strictFilters: true, // Match server-side behavior - error on unknown filters
   strictVariables: false,
 });
+removeDisallowedLiquidTags(liquidEngine);
 
 // Register custom filters that match server-side exactly
 liquidEngine.registerFilter('json_parse', (value: unknown): unknown => {

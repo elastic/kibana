@@ -14,3 +14,7 @@ export { parseJsPropertyAccess } from './parse_js_property_access/parse_js_prope
 export { extractPropertyPathsFromKql } from './extract_property_paths_from_kql/extract_property_paths_from_kql';
 export { isPropertyAccess } from './is_property_access/is_property_access';
 export { getOrResolveObject } from './json_schema/get_or_resolve_object';
+export {
+  LIQUID_ALLOWED_TAGS,
+  removeDisallowedLiquidTags,
+} from './liquid_allowed_tags/liquid_allowed_tags';

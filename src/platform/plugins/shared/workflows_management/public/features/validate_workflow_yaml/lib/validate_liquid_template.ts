@@ -8,6 +8,7 @@
  */
 
 import { Liquid } from 'liquidjs';
+import { removeDisallowedLiquidTags } from '@kbn/workflows';
 import { extractLiquidErrorPosition } from './extract_liquid_error_position';
 import type { YamlValidationResult } from '../model/types';
 
@@ -20,6 +21,7 @@ function getLiquidInstance(): Liquid {
       strictFilters: true,
       strictVariables: false, // Allow undefined variables during validation
     });
+    removeDisallowedLiquidTags(liquidInstance);
     // register filters, for validation purposes only
     liquidInstance.registerFilter('json_parse', (value: unknown): unknown => {
       return value;

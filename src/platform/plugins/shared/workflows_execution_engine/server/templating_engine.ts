@@ -7,7 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FS } from 'liquidjs';
 import { Liquid } from 'liquidjs';
+import { removeDisallowedLiquidTags } from '@kbn/workflows';
+
+/**
+ * A no-op filesystem implementation for the LiquidJS engine.
+ * Workflow templates do not support file operations.
+ */
+const noopFs: FS = {
+  exists: async () => false,
+  existsSync: () => false,
+  readFile: async (filepath: string) => {
+    throw new Error(
+      `File reading is not supported in workflow templates. Attempted to read: ${filepath}`
+    );
+  },
+  readFileSync: (filepath: string) => {
+    throw new Error(
+      `File reading is not supported in workflow templates. Attempted to read: ${filepath}`
+    );
+  },
+  resolve: (_dir: string, file: string, _ext: string) => file,
+  contains: () => false,
+};
 
 export class WorkflowTemplatingEngine {
   private readonly engine: Liquid;
@@ -16,7 +39,13 @@ export class WorkflowTemplatingEngine {
     this.engine = new Liquid({
       strictFilters: true,
       strictVariables: false,
+      ownPropertyOnly: true,
+      fs: noopFs,
+      templates: {}
     });
+
+    // Remove unsupported tags so LiquidJS treats them as unknown (parse error).
+    removeDisallowedLiquidTags(this.engine);
 
     // register json_parse filter that converts JSON string to object
     this.engine.registerFilter('json_parse', (value: unknown): unknown => {
@@ -36,6 +65,8 @@ export class WorkflowTemplatingEngine {
   }
 
   public evaluateExpression(template: string, context: Record<string, unknown>): unknown {
+    this.validateTemplate(template);
+
     let resolvedExpression = template.trim();
     const openExpressionIndex = resolvedExpression.indexOf('{{');
     const closeExpressionIndex = resolvedExpression.lastIndexOf('}}');
@@ -89,8 +120,23 @@ export class WorkflowTemplatingEngine {
     return value;
   }
 
+  /**
+   * Liquid tags that are not supported in workflow templates.
+   */
+  private static readonly UNSUPPORTED_TAG_PATTERN = /\{%-?\s*(include|render|layout)\s/i;
+
+  /**
+   * Validates that a template string does not use unsupported Liquid tags.
+   */
+  private validateTemplate(template: string): void {
+    if (WorkflowTemplatingEngine.UNSUPPORTED_TAG_PATTERN.test(template)) {
+      throw new Error('Template contains unsupported tags.');
+    }
+  }
+
   private renderString(template: string, context: Record<string, unknown>): string {
     try {
+      this.validateTemplate(template);
       return this.engine.parseAndRenderSync(template, context);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
