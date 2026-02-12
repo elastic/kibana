@@ -549,9 +549,15 @@ function applyJsonDescription(jsonSchema: Record<string, any>, description?: str
 }
 
 export const convert = (schema: z.ZodTypeAny) => {
-  if (isZodV4(schema)) {
+  // Unwrap DeepStrict pipes, optional/default wrappers, transforms, etc.
+  // This is critical because makeZodValidationObject wraps ALL Zod schemas
+  // (including v3) with v4's DeepStrict, producing a v4 pipe around v3 schemas.
+  // We must unwrap to find the real inner schema before choosing the converter.
+  const unwrapped = unwrapZodType(schema, true);
+
+  if (isZodV4(unwrapped)) {
     // Use Zod v4's native toJSONSchema
-    const raw = z4.toJSONSchema(schema as unknown as z4.ZodType, {
+    const raw = z4.toJSONSchema(unwrapped as unknown as z4.ZodType, {
       unrepresentable: 'any',
       io: 'input',
     }) as Record<string, any>;
@@ -560,7 +566,7 @@ export const convert = (schema: z.ZodTypeAny) => {
     const { $schema, ...jsonSchema } = raw;
 
     // Apply the same JSON-description post-processing as v3
-    const description = (schema as any).description;
+    const description = (unwrapped as any).description;
     const processed = applyJsonDescription(jsonSchema, description);
 
     return {
@@ -572,7 +578,7 @@ export const convert = (schema: z.ZodTypeAny) => {
   // v3 path (unchanged)
   return {
     shared: {},
-    schema: zodToJsonSchema(schema, {
+    schema: zodToJsonSchema(unwrapped, {
       target: 'openApi3',
       $refStrategy: 'none',
       postProcess: jsonDescription,

@@ -278,6 +278,73 @@ describe('zod', () => {
   });
 });
 
+describe('DeepStrict-wrapped v3 schemas (mixed v3/v4)', () => {
+  test('convert correctly handles DeepStrict-wrapped v3 body schema', () => {
+    // This simulates what happens in makeZodValidationObject:
+    // v3 Zod schemas get wrapped with v4 DeepStrict, creating a v4 pipe around v3 inner schemas
+    const v3BodySchema = z.object({
+      name: z.string(),
+      age: z.number().optional(),
+    });
+    const wrapped = DeepStrict(v3BodySchema as any);
+
+    const result = convert(wrapped as any);
+    expect(result.shared).toEqual({});
+    expect(result.schema).toMatchObject({
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        age: { type: 'number' },
+      },
+      required: ['name'],
+    });
+  });
+
+  test('convertPathParameters handles DeepStrict-wrapped v3 path schema', () => {
+    const v3PathSchema = z.object({ id: z.string() });
+    const wrapped = DeepStrict(v3PathSchema as any);
+
+    expect(convertPathParameters(wrapped as any, { id: { optional: false } })).toEqual({
+      params: [
+        {
+          in: 'path',
+          name: 'id',
+          required: true,
+          schema: {
+            type: 'string',
+          },
+        },
+      ],
+      shared: {},
+    });
+  });
+
+  test('convertQuery handles DeepStrict-wrapped v3 query schema', () => {
+    const v3QuerySchema = z.object({ page: z.string().optional(), size: z.string() });
+    const wrapped = DeepStrict(v3QuerySchema as any);
+
+    const result = convertQuery(wrapped as any);
+    expect(result.query).toEqual([
+      {
+        in: 'query',
+        name: 'page',
+        required: false,
+        schema: {
+          type: 'string',
+        },
+      },
+      {
+        in: 'query',
+        name: 'size',
+        required: true,
+        schema: {
+          type: 'string',
+        },
+      },
+    ]);
+  });
+});
+
 describe('zod v4', () => {
   describe('convert', () => {
     test('base case', () => {
