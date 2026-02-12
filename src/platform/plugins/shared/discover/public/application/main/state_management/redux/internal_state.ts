@@ -32,7 +32,11 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
-import { type RuntimeStateManager, selectTabRuntimeInternalState } from './runtime_state';
+import {
+  type RuntimeStateManager,
+  selectTabRuntimeInternalState,
+  selectTabRuntimeState,
+} from './runtime_state';
 import {
   TabsBarVisibility,
   type DiscoverInternalState,
@@ -538,6 +542,19 @@ const createMiddleware = (options: InternalStateDependencies) => {
     effect: (action, listenerApi) => {
       const { services } = listenerApi.extra;
       services.storage.set(DISCOVER_QUERY_MODE_KEY, 'classic');
+    },
+  });
+
+  startListening({
+    actionCreator: internalStateSlice.actions.resetOnSavedSearchChange,
+    effect: (action, listenerApi) => {
+      const { runtimeStateManager } = listenerApi.extra;
+      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, action.payload.tabId);
+      const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
+
+      if (tabStateContainer?.dataState.cleanupEsql) {
+        tabStateContainer.dataState.cleanupEsql();
+      }
     },
   });
 
