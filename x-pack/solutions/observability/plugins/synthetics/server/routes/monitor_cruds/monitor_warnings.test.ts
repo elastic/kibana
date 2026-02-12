@@ -23,7 +23,7 @@ describe('monitor warnings', () => {
       expect(getBrowserTimeoutWarningForMonitor(monitor, 'monitor-id')).toEqual({
         id: 'monitor-id',
         message:
-          'Monitor monitor-id specifies a timeout but has no private locations configured. The timeout will have no effect.',
+          'For browser monitors, timeout is only supported on private locations. Browser monitor monitor-id specifies a timeout but has no private locations configured, so the timeout will have no effect.',
       });
     });
 
@@ -74,7 +74,7 @@ describe('monitor warnings', () => {
         {
           id: 'journey-1',
           message:
-            'Monitor journey-1 specifies a timeout but has no private locations configured. The timeout will have no effect.',
+            'For browser monitors, timeout is only supported on private locations. Browser monitor journey-1 specifies a timeout but has no private locations configured, so the timeout will have no effect.',
         },
       ]);
     });

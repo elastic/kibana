@@ -19,7 +19,7 @@ const buildBrowserTimeoutWarning = (monitorId: string): MonitorWarning => ({
     'xpack.synthetics.server.monitors.browserTimeoutNoPrivateLocationsWarning',
     {
       defaultMessage:
-        'Monitor {monitorId} specifies a timeout but has no private locations configured. The timeout will have no effect.',
+        'For browser monitors, timeout is only supported on private locations. Browser monitor {monitorId} specifies a timeout but has no private locations configured, so the timeout will have no effect.',
       values: { monitorId },
     }
   ),
