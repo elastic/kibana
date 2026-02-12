@@ -93,3 +93,20 @@ export interface CasesSearchResponse {
   countClosedCases: number;
   countInProgressCases: number;
 }
+
+// Retention types
+export type RetentionType = 'ilm' | 'dsl' | null;
+export type RetentionStatus = 'healthy' | 'non-compliant' | 'unknown';
+
+export interface RetentionInfo {
+  indexName: string;
+  retentionType: RetentionType;
+  retentionPeriod: string | null;
+  retentionDays: number | null;
+  policyName: string | null;
+  status: RetentionStatus;
+}
+
+export interface RetentionResponse {
+  items: RetentionInfo[];
+}
