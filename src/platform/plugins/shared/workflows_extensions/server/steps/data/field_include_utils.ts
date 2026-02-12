@@ -21,14 +21,33 @@ export type FieldsSpec = Record<string, unknown>;
  * the same projection to each element. For objects, keeps only keys present in
  * the pick spec; if the spec value is a nested object, recurses into that branch.
  */
-export function applyInclude(value: unknown, pick: unknown, recurseDepth: number = 1): unknown {
-  const MAX_RECURSE_DEPTH = 15;
+export function applyInclude(value: unknown, pick: unknown): unknown {
+  return applyIncludeRecurse(pick, value, 1);
+}
+
+const MAX_APPLY_INCLUDE_DEPTH = 15;
+
+/** Thrown when recursion exceeds MAX_APPLY_INCLUDE_DEPTH; allows handler try/catch to surface the error. */
+class ApplyIncludeDepthError extends Error {
+  constructor() {
+    super(`Maximum recursion depth ${MAX_APPLY_INCLUDE_DEPTH} has been exceeded`);
+    this.name = 'ApplyIncludeDepthError';
+  }
+}
+
+/**
+ * Recurses and throws ApplyIncludeDepthError when depth is exceeded so the error propagates to the caller.
+ */
+function applyIncludeRecurse(pick: unknown, value: unknown, recurseDepth: number): unknown {
+  if (recurseDepth > MAX_APPLY_INCLUDE_DEPTH) {
+    throw new ApplyIncludeDepthError();
+  }
   const spec = normalizeFieldsSpec(pick);
   if (!isPlainObject(spec)) {
     return value;
   }
   if (Array.isArray(value)) {
-    return value.map((item) => applyInclude(item, spec, recurseDepth + 1));
+    return value.map((item) => applyIncludeRecurse(spec, item, recurseDepth + 1));
   }
   if (isPlainObject(value)) {
     const result: Record<string, unknown> = {};
@@ -37,12 +56,7 @@ export function applyInclude(value: unknown, pick: unknown, recurseDepth: number
         const childSpec = spec[key];
         const childValue = value[key];
         if (isNonEmptyPlainObject(childSpec)) {
-          if (recurseDepth > MAX_RECURSE_DEPTH) {
-            return {
-              error: new Error(`Maximum recursion depth ${MAX_RECURSE_DEPTH} has been exceeded`),
-            };
-          }
-          result[key] = applyInclude(childValue, childSpec, recurseDepth + 1);
+          result[key] = applyIncludeRecurse(childSpec, childValue, recurseDepth + 1);
         } else {
           result[key] = childValue;
         }
