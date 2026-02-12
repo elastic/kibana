@@ -6,10 +6,10 @@ This directory contains Scout tests for the Lens plugin.
 
 ### Run server
 ```
-node scripts/scout.js start-server --stateful
+node scripts/scout.js start-server --arch stateful --domain classic
 ```
 
 ### Run tests
 ```
-npx playwright test --project local --grep @ess --config x-pack/platform/plugins/shared/lens/test/scout/ui/  --ui
+npx playwright test --project local --grep @local-stateful-classic --config x-pack/platform/plugins/shared/lens/test/scout/ui/  --ui
 ```
