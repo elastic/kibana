@@ -80,3 +80,46 @@ export const upsertStreamQueryRequestSchema = z.object({
 });
 
 export const isStreamQueryKql = createIsNarrowSchema(streamQuerySchema, streamQueryKqlSchema);
+
+/**
+ * Discovery queries (Significant Events) response types
+ */
+type ChangePointsType =
+  | 'dip'
+  | 'distribution_change'
+  | 'non_stationary'
+  | 'spike'
+  | 'stationary'
+  | 'step_change'
+  | 'trend_change';
+
+type ChangePointsValue = Partial<{
+  p_value: number;
+  r_value: number;
+  change_point: number;
+  trend: string;
+}>;
+
+interface SignificantEventOccurrence {
+  date: string;
+  count: number;
+}
+
+export type SignificantEventsResponse = StreamQueryKql & {
+  stream_name: string;
+  occurrences: SignificantEventOccurrence[];
+  change_points: {
+    type: Partial<Record<ChangePointsType, ChangePointsValue>>;
+  };
+  rule_backed: boolean;
+};
+
+export interface SignificantEventsGetResponse {
+  significant_events: SignificantEventsResponse[];
+  aggregated_occurrences: SignificantEventOccurrence[];
+}
+
+export type SignificantEventsPreviewResponse = Pick<
+  SignificantEventsResponse,
+  'occurrences' | 'change_points' | 'kql'
+>;

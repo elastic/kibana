@@ -24,6 +24,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./significant_events'));
     loadTestFile(require.resolve('./discovery_queries'));
     loadTestFile(require.resolve('./queries'));
+    loadTestFile(require.resolve('./discovery_queries_endpoints'));
     loadTestFile(require.resolve('./discover'));
     loadTestFile(require.resolve('./content'));
     loadTestFile(require.resolve('./migration_on_read'));
