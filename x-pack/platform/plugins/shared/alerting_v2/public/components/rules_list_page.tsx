@@ -14,6 +14,7 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPageHeader,
   EuiSpacer,
   type EuiBasicTableColumn,
@@ -72,7 +73,9 @@ export const RulesListPage = () => {
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />
         ),
-        render: (metadata: RuleApiResponse['metadata']) => metadata?.name ?? '-',
+        render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
+          <EuiLink onClick={() => history.push(`/${rule.id}`)}>{metadata?.name ?? '-'}</EuiLink>
+        ),
       },
       {
         field: 'id',

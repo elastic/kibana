@@ -327,7 +327,7 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
               compressed={true}
               type="column"
               listItems={metadataListItems}
-              css={{ alignItems: 'start' }}
+              css={{ alignItems: 'start', gridTemplateColumns: '140px 1fr' }}
             />
           </EuiPanel>
         </EuiFlexItem>
