@@ -2,7 +2,8 @@ steps:
   - command: .buildkite/scripts/steps/jest_bench.sh
     label: 'Jest Bench'
     agents:
-      machineType: n2-highmem-16
+      machineType: c4d-standard-16
+      diskType: hyperdisk-balanced
       diskSizeGb: 100
     key: jest_bench
     timeout_in_minutes: 60
