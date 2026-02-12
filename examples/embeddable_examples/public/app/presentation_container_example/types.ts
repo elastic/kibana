@@ -13,8 +13,6 @@ import type {
   HasLastSavedChildState,
   HasSerializedChildState,
   PresentationContainer,
-} from '@kbn/presentation-publishing';
-import type {
   HasExecutionContext,
   PublishesDataLoading,
   PublishesTimeRange,
