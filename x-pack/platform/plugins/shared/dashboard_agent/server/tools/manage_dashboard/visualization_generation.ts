@@ -14,7 +14,12 @@ import {
   guessChartType,
   getSchemaForChartType,
 } from '@kbn/agent-builder-platform-plugin/server';
-import type { AttachmentPanel, LensAttachmentPanel } from '@kbn/dashboard-agent-common';
+import {
+  DASHBOARD_PANEL_ADDED_EVENT,
+  type AttachmentPanel,
+  type DashboardUiEvent,
+  type LensAttachmentPanel,
+} from '@kbn/dashboard-agent-common';
 import { getErrorMessage, type VisualizationFailure } from './utils';
 
 export interface VisualizationQueryInput {
@@ -37,7 +42,10 @@ export const buildVisualizationsFromQueriesWithLLM = async ({
   esClient: IScopedClusterClient;
   modelProvider: ModelProvider;
   events: ToolEventEmitter;
-  sendIncrementalEvents: (panels: AttachmentPanel[], eventType?: string) => void;
+  sendIncrementalEvents: (
+    panels: AttachmentPanel[],
+    eventType: DashboardUiEvent['data']['custom_event']
+  ) => void;
 }): Promise<{
   panels: LensAttachmentPanel[];
   failures: VisualizationFailure[];
@@ -61,7 +69,7 @@ export const buildVisualizationsFromQueriesWithLLM = async ({
       let selectedChartType: SupportedChartType = chartType || SupportedChartType.Metric;
       if (!chartType) {
         logger.debug('Chart type not provided, using LLM to suggest one');
-        selectedChartType = await guessChartType(modelProvider, '', nlQuery);
+        selectedChartType = await guessChartType(modelProvider, nlQuery);
       }
 
       const schema = getSchemaForChartType(selectedChartType);
@@ -100,7 +108,7 @@ export const buildVisualizationsFromQueriesWithLLM = async ({
       };
 
       panels.push(panelEntry);
-      sendIncrementalEvents([panelEntry]);
+      sendIncrementalEvents([panelEntry], DASHBOARD_PANEL_ADDED_EVENT);
 
       logger.debug(`Created lens visualization: ${panelEntry.panelId}`);
     } catch (error) {

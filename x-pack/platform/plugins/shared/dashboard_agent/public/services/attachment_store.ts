@@ -123,9 +123,20 @@ export class DashboardAttachmentStore {
       panels: [],
     };
 
+    const existingPanelIndex = baseData.panels.findIndex(
+      ({ panelId: existingPanelId }) => existingPanelId === attachmentPanel.panelId
+    );
+    // TODO: Temporary logic for updating panels (currently just the markdown panel)
+    const panels =
+      existingPanelIndex === -1
+        ? [...baseData.panels, attachmentPanel]
+        : baseData.panels.map((existingPanel, index) =>
+            index === existingPanelIndex ? attachmentPanel : existingPanel
+          );
+
     const updatedData: DashboardAttachmentData = {
       ...baseData,
-      panels: [...baseData.panels, attachmentPanel],
+      panels,
     };
 
     this.commitState({

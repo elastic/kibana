@@ -17,12 +17,14 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import deepEqual from 'fast-deep-equal';
 import { i18n } from '@kbn/i18n';
 import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { type DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/common/constants';
 import {
   type AttachmentPanel,
   isLensAttachmentPanel,
@@ -52,14 +54,10 @@ const arePanelsEqual = (
   a: DashboardAttachmentData['panels'],
   b: DashboardAttachmentData['panels']
 ): boolean => {
-  if (a.length !== b.length) return false;
-  const aIds = a.map((p) => p.panelId).sort();
-  const bIds = b.map((p) => p.panelId).sort();
-  return aIds.every((id, i) => id === bIds[i]);
+  return deepEqual(a, b);
 };
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
-const MARKDOWN_EMBEDDABLE_TYPE = 'DASHBOARD_MARKDOWN';
 
 export const PANEL_LAYOUT = {
   defaultPanelHeight: DEFAULT_PANEL_HEIGHT,

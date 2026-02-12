@@ -11,10 +11,12 @@ import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-ag
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   isGenericAttachmentPanel,
+  type GenericAttachmentPanel,
   type LensAttachmentPanel,
 } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/common/constants';
 import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 
 /**
@@ -94,26 +96,69 @@ export const resolveExistingVisualizations = async ({
   return { panels, failures };
 };
 
-export const getMarkdownPanel = (
+interface UpsertMarkdownPanelResult {
+  panels: AttachmentPanel[];
+  changedPanel?: AttachmentPanel;
+}
+
+const isDashboardMarkdownPanel = (
+  panel: AttachmentPanel
+): panel is GenericAttachmentPanel & { type: typeof MARKDOWN_EMBEDDABLE_TYPE } => {
+  return isGenericAttachmentPanel(panel) && panel.type === MARKDOWN_EMBEDDABLE_TYPE;
+};
+
+const getMarkdownContent = (panel: AttachmentPanel): string | undefined => {
+  if (!isDashboardMarkdownPanel(panel)) {
+    return undefined;
+  }
+
+  const { content } = panel.rawConfig;
+  return typeof content === 'string' ? content : undefined;
+};
+
+export const upsertMarkdownPanel = (
   panels: AttachmentPanel[],
   markdownContent?: string
-): AttachmentPanel | undefined => {
+): UpsertMarkdownPanelResult => {
   if (!markdownContent) {
-    return undefined;
+    return { panels };
   }
 
-  const hasMarkdownPanel = panels.some(
-    (panel) => isGenericAttachmentPanel(panel) && panel.type === 'DASHBOARD_MARKDOWN'
-  );
-
-  if (hasMarkdownPanel) {
-    return undefined;
+  const existingMarkdownPanelIndex = panels.findIndex((panel) => isDashboardMarkdownPanel(panel));
+  if (existingMarkdownPanelIndex === -1) {
+    const markdownPanel: AttachmentPanel = {
+      type: MARKDOWN_EMBEDDABLE_TYPE,
+      panelId: uuidv4(),
+      rawConfig: { content: markdownContent },
+    };
+    return {
+      panels: [markdownPanel, ...panels],
+      changedPanel: markdownPanel,
+    };
   }
+
+  const existingMarkdownPanel = panels[existingMarkdownPanelIndex];
+  if (!isDashboardMarkdownPanel(existingMarkdownPanel)) {
+    return { panels };
+  }
+
+  if (getMarkdownContent(existingMarkdownPanel) === markdownContent) {
+    return { panels };
+  }
+
+  const updatedMarkdownPanel: AttachmentPanel = {
+    ...existingMarkdownPanel,
+    rawConfig: {
+      ...existingMarkdownPanel.rawConfig,
+      content: markdownContent,
+    },
+  };
+  const updatedPanels = [...panels];
+  updatedPanels[existingMarkdownPanelIndex] = updatedMarkdownPanel;
 
   return {
-    type: 'DASHBOARD_MARKDOWN',
-    panelId: uuidv4(),
-    rawConfig: { content: markdownContent },
+    panels: updatedPanels,
+    changedPanel: updatedMarkdownPanel,
   };
 };
 
@@ -129,10 +174,38 @@ export const getRemovedPanels = (
   }
 
   const removeSet = new Set(removePanelIds);
+  const panelsToRemove: AttachmentPanel[] = [];
+  const panelsToKeep: AttachmentPanel[] = [];
+
+  for (const panel of panels) {
+    if (removeSet.has(panel.panelId)) {
+      panelsToRemove.push(panel);
+    } else {
+      panelsToKeep.push(panel);
+    }
+  }
+
   return {
-    panelsToRemove: panels.filter((panel) => removeSet.has(panel.panelId)),
-    panelsToKeep: panels.filter((panel) => !removeSet.has(panel.panelId)),
+    panelsToRemove,
+    panelsToKeep,
   };
+};
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+};
+
+const extractLensVisualization = (data: unknown): LensApiSchemaType | undefined => {
+  if (!isRecord(data)) {
+    return undefined;
+  }
+
+  const { visualization } = data;
+  if (!isRecord(visualization)) {
+    return undefined;
+  }
+
+  return visualization as LensApiSchemaType;
 };
 
 /**
@@ -158,17 +231,14 @@ const resolveLensConfigFromAttachment = (
     );
   }
 
-  // TODO: Fix types
-  const data = latestVersion.data;
-  const visualization = (data as { visualization?: unknown }).visualization;
-
-  if (!visualization || typeof visualization !== 'object') {
+  const visualization = extractLensVisualization(latestVersion.data);
+  if (!visualization) {
     throw new Error(
       `Visualization attachment "${attachmentId}" does not contain a valid visualization config.`
     );
   }
 
-  return visualization as LensApiSchemaType;
+  return visualization;
 };
 
 /**
@@ -180,9 +250,6 @@ export const retrieveLatestVersion = (
 ): AttachmentVersion<DashboardAttachmentData> | undefined => {
   if (!attachmentId) {
     return undefined;
-  }
-  if (!attachmentId) {
-    throw new Error('Attachment ID is required.');
   }
 
   const attachment = attachments.getAttachmentRecord(attachmentId);

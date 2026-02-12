@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { filterVisualizationIds } from './manage_dashboard/utils';
+import { filterVisualizationIds, upsertMarkdownPanel } from './manage_dashboard/utils';
+import type { AttachmentPanel } from '@kbn/dashboard-agent-common';
 
 // TODO: Add tests for normalizePanels and resolveLensConfigFromAttachment once attachment mocking utilities are available
 // These functions require AttachmentStateManager which is complex to mock
@@ -87,5 +88,85 @@ describe('AttachmentPanel types', () => {
 
     expect(lensPanel.panelId).toBe('panel-1');
     expect(genericPanel.panelId).toBe('panel-2');
+  });
+});
+
+describe('upsertMarkdownPanel', () => {
+  it('adds a markdown panel when one does not exist', () => {
+    const existingPanels: AttachmentPanel[] = [
+      {
+        type: 'lens',
+        panelId: 'panel-1',
+        visualization: { type: 'Metric' },
+      },
+    ];
+
+    const result = upsertMarkdownPanel(existingPanels, '# Summary');
+
+    expect(result.changedPanel).toBeDefined();
+    expect(result.panels).toHaveLength(2);
+    expect(result.panels[0]).toMatchObject({
+      type: 'DASHBOARD_MARKDOWN',
+      rawConfig: { content: '# Summary' },
+    });
+  });
+
+  it('updates existing markdown panel content in place', () => {
+    const existingPanels: AttachmentPanel[] = [
+      {
+        type: 'DASHBOARD_MARKDOWN',
+        panelId: 'markdown-1',
+        rawConfig: { content: '# Old summary' },
+      },
+      {
+        type: 'lens',
+        panelId: 'panel-1',
+        visualization: { type: 'Metric' },
+      },
+    ];
+
+    const result = upsertMarkdownPanel(existingPanels, '# New summary');
+
+    expect(result.changedPanel).toMatchObject({
+      type: 'DASHBOARD_MARKDOWN',
+      panelId: 'markdown-1',
+      rawConfig: { content: '# New summary' },
+    });
+    expect(result.panels[0]).toMatchObject({
+      type: 'DASHBOARD_MARKDOWN',
+      panelId: 'markdown-1',
+      rawConfig: { content: '# New summary' },
+    });
+    expect(result.panels[1]).toEqual(existingPanels[1]);
+  });
+
+  it('does not change panels when markdown content is unchanged', () => {
+    const existingPanels: AttachmentPanel[] = [
+      {
+        type: 'DASHBOARD_MARKDOWN',
+        panelId: 'markdown-1',
+        rawConfig: { content: '# Summary' },
+      },
+    ];
+
+    const result = upsertMarkdownPanel(existingPanels, '# Summary');
+
+    expect(result.changedPanel).toBeUndefined();
+    expect(result.panels).toEqual(existingPanels);
+  });
+
+  it('does not change panels when markdown content is not provided', () => {
+    const existingPanels: AttachmentPanel[] = [
+      {
+        type: 'lens',
+        panelId: 'panel-1',
+        visualization: { type: 'Metric' },
+      },
+    ];
+
+    const result = upsertMarkdownPanel(existingPanels);
+
+    expect(result.changedPanel).toBeUndefined();
+    expect(result.panels).toEqual(existingPanels);
   });
 });

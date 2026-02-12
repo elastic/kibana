@@ -15,6 +15,9 @@ import {
   DASHBOARD_PANEL_ADDED_EVENT,
   DASHBOARD_PANELS_REMOVED_EVENT,
   type AttachmentPanel,
+  type DashboardUiEvent,
+  type PanelAddedEventData,
+  type PanelsRemovedEventData,
 } from '@kbn/dashboard-agent-common';
 
 import { dashboardTools } from '../../../common';
@@ -23,7 +26,7 @@ import {
   retrieveLatestVersion,
   getErrorMessage,
   resolveExistingVisualizations,
-  getMarkdownPanel,
+  upsertMarkdownPanel,
   getRemovedPanels,
   type VisualizationFailure,
 } from './utils';
@@ -103,7 +106,7 @@ This tool can:
 When creating a new dashboard, title and description are required.
 When updating, all fields are optional and only the provided ones are updated.
 
-The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that can be used by the dashboard app to update its state in real-time.`,
+The tool emits UI events (dashboard:panel_added, dashboard:panels_removed) that can be used by the dashboard app to update its state in real-time.`,
     schema: manageDashboardSchema,
     tags: [],
     handler: async (
@@ -124,13 +127,30 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
 
         const sendIncrementalEvents = (
           panels: AttachmentPanel[],
-          eventType = DASHBOARD_PANEL_ADDED_EVENT
+          eventType: DashboardUiEvent['data']['custom_event']
         ) => {
-          for (const panel of panels) {
-            events.sendUiEvent(eventType, {
+          if (panels.length === 0) {
+            return;
+          }
+
+          if (eventType === DASHBOARD_PANELS_REMOVED_EVENT) {
+            const removedPayload: PanelsRemovedEventData = {
               dashboardAttachmentId,
-              panel,
-            });
+              panelIds: panels.map(({ panelId }) => panelId),
+            };
+            events.sendUiEvent(DASHBOARD_PANELS_REMOVED_EVENT, removedPayload);
+            return;
+          }
+
+          if (eventType === DASHBOARD_PANEL_ADDED_EVENT) {
+            for (const panel of panels) {
+              const addedPayload: PanelAddedEventData = {
+                dashboardAttachmentId,
+                panel,
+              };
+              events.sendUiEvent(DASHBOARD_PANEL_ADDED_EVENT, addedPayload);
+            }
+            return;
           }
         };
 
@@ -144,10 +164,11 @@ The tool emits UI events (dashboard:panel_added, dashboard:panel_removed) that c
         // Track failures to report to the user
         const failures: VisualizationFailure[] = [];
 
-        const markdownPanel = getMarkdownPanel(panels, markdownContent);
-        if (markdownPanel) {
-          panels = [markdownPanel, ...panels];
-          sendIncrementalEvents([markdownPanel], DASHBOARD_PANEL_ADDED_EVENT);
+        const markdownPanelUpdate = upsertMarkdownPanel(panels, markdownContent);
+        panels = markdownPanelUpdate.panels;
+
+        if (markdownPanelUpdate.changedPanel) {
+          sendIncrementalEvents([markdownPanelUpdate.changedPanel], DASHBOARD_PANEL_ADDED_EVENT);
         }
 
         const { panelsToRemove, panelsToKeep } = getRemovedPanels(panels, removePanelIds);
