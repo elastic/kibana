@@ -35,7 +35,6 @@ export type EntityMaintainerTaskMethod = (context: EntityMaintainerTaskMethodCon
 
 export interface RegisterEntityMaintainerConfig {
   id: string;
-  name: string;
   description?: string;
   interval: string;
   initialState: EntityMaintainerState;
