@@ -88,6 +88,7 @@ packages/kbn-plugin-check @elastic/appex-sharedux
 packages/kbn-plugin-generator @elastic/kibana-operations
 packages/kbn-plugin-helpers @elastic/kibana-operations
 packages/kbn-relocate @elastic/kibana-core
+packages/kbn-renovate-reviewer-sync @elastic/kibana-operations
 packages/kbn-repo-file-maps @elastic/kibana-operations
 packages/kbn-repo-linter @elastic/kibana-operations
 packages/kbn-repo-source-classifier @elastic/kibana-operations
