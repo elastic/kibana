@@ -100,5 +100,19 @@ export function updateSavedSearch({
     }
   }
 
+  const timeRange = globalState?.timeRange;
+  const refreshInterval = globalState?.refreshInterval;
+  savedSearch.timeRange =
+    timeRange && (savedSearch.timeRestore || savedSearch.timeRange)
+      ? {
+          from: timeRange.from,
+          to: timeRange.to,
+        }
+      : undefined;
+  savedSearch.refreshInterval =
+    refreshInterval && (savedSearch.timeRestore || savedSearch.refreshInterval)
+      ? { value: refreshInterval.value, pause: refreshInterval.pause }
+      : undefined;
+
   return savedSearch;
 }
