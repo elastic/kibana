@@ -120,9 +120,10 @@ describe('copySavedQueryRoute', () => {
     expect(responseBody.data.description).toBe('Test query');
     expect(responseBody.data.query).toBe('select 1;');
 
-    // Verify prebuilt and version are stripped from the create call
+    // Verify prebuilt is stripped but version (min osquery version) is preserved
     const createArgs = mockSavedObjectsClient.create.mock.calls[0][1];
     expect(createArgs.prebuilt).toBeUndefined();
+    expect(createArgs.version).toBe('1.0.0');
   });
 
   it('resolves name collision (_copy exists → _copy_2)', async () => {
@@ -188,7 +189,7 @@ describe('copySavedQueryRoute', () => {
     });
   });
 
-  it('strips version from prebuilt query copy', async () => {
+  it('preserves version but strips prebuilt from query copy', async () => {
     const mockSavedObjectsClient = {
       get: jest.fn().mockResolvedValue(sourceSavedQuery),
       find: jest.fn().mockResolvedValue({ saved_objects: [] }),
@@ -198,6 +199,7 @@ describe('copySavedQueryRoute', () => {
           id: 'my-query_copy',
           query: 'select 1;',
           interval: 3600,
+          version: '1.0.0',
           created_at: '2025-06-01T00:00:00.000Z',
           created_by: 'tester',
           updated_at: '2025-06-01T00:00:00.000Z',
@@ -221,7 +223,7 @@ describe('copySavedQueryRoute', () => {
     await routeHandler({} as any, mockRequest, mockResponse);
 
     const createArgs = mockSavedObjectsClient.create.mock.calls[0][1];
-    expect(createArgs.version).toBeUndefined();
+    expect(createArgs.version).toBe('1.0.0');
     expect(createArgs.prebuilt).toBeUndefined();
   });
 });

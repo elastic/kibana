@@ -47,7 +47,6 @@ export const copyPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           const copyContext = await prepareSavedObjectCopy<PackSavedObject>(
             osqueryContext,
             request,
-            response,
             {
               type: packSavedObjectType,
               loggerName: 'pack',
