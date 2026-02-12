@@ -24,7 +24,8 @@ import type { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { inspect } from 'util';
-import type { ZodType } from '@kbn/zod';
+import type { z as z3 } from '@kbn/zod';
+import type { z as z4 } from '@kbn/zod/v4';
 import type { ConnectorUsageCollector } from '../usage';
 import { assertURL } from './helpers/validators';
 import type { ActionsConfigurationUtilities } from '../actions_config';
@@ -103,7 +104,10 @@ export abstract class SubActionConnector<Config, Secrets> {
     return { 'Content-Type': 'application/json', ...headersWithBasicAuth };
   }
 
-  private validateResponse(responseSchema: ZodType<unknown>, data: unknown) {
+  private validateResponse(
+    responseSchema: z3.ZodType<unknown> | z4.ZodType<unknown>,
+    data: unknown
+  ) {
     try {
       responseSchema.parse(data);
     } catch (resValidationError) {
