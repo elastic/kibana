@@ -8,19 +8,61 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { StoryObj } from '@storybook/react';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { ESQLEditor } from '../esql_editor';
-import type { ESQLEditorProps } from '../types';
+import type { ESQLEditorProps } from '../esql_editor';
+
+const uiConfig: Record<string, unknown> = {};
+const uiSettings = {
+  get: (key: string) => uiConfig[key],
+};
+
+const core = coreMock.createStart();
+core.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject<'oblt' | null>('oblt'));
+(core.http.get as jest.Mock).mockImplementation(async (path: string) => {
+  if (path.includes('/internal/esql/autocomplete/sources/')) {
+    return [
+      { name: 'test_index', hidden: false, type: 'index' },
+      { name: 'logs', hidden: false, type: 'index' },
+    ];
+  }
+  return [];
+});
+
+const kql = kqlPluginMock.createStartContract();
+(kql.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
+
+const storage = {
+  get: (key: string) => null,
+  set: (_key: string, _value: unknown) => {},
+  remove: (_key: string) => {},
+  clear: () => {},
+};
+
+const uiActions = {
+  getTrigger: (_id: string) => ({
+    exec: async () => {},
+  }),
+};
+
+const services = {
+  core,
+  application: core.application,
+  uiSettings,
+  settings: { client: uiSettings },
+  data: dataPluginMock.createStartContract(),
+  kql,
+  storage,
+  uiActions,
+};
 
 const Template = (args: ESQLEditorProps) => (
-  <KibanaContextProvider
-    services={{
-      settings: { client: { get: () => {} } },
-      uiSettings: { get: () => {} },
-      data: { query: { timefilter: { timefilter: { getTime: () => {} } } } },
-    }}
-  >
+  <KibanaContextProvider services={services}>
     <ESQLEditor {...args} />
   </KibanaContextProvider>
 );
