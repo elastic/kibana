@@ -27,6 +27,7 @@ describe('templatesToYaml', () => {
         isLatest: true,
         deletedAt: null,
         definition: {
+          name: 'My template',
           fields: [
             {
               name: 'severity',
@@ -99,6 +100,7 @@ describe('templateToYaml', () => {
       isLatest: true,
       deletedAt: null,
       definition: {
+        name: 'My template',
         fields: [
           {
             name: 'summary',
