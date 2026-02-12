@@ -71,6 +71,13 @@ apiTest.describe('dashboard REST schema', { tag: tags.stateful.all }, () => {
     expect(panelSchema).toBeDefined();
 
     const configSchema = panelSchema.properties.config;
+    // API integration tests do not support jest expect
+    // so we had to roll our own toMatchSnapshot
+    // To update snapshot:
+    // 1) uncomment console.log
+    // 2) run test
+    // 3) replace snapshot file contents with copy of consoled output
+    // console.log(JSON.stringify(configSchema.anyOf, null, ' '));
     expect(configSchema.anyOf).toHaveLength(4);
     expect(configSchema.anyOf).toStrictEqual(snapshot);
   });

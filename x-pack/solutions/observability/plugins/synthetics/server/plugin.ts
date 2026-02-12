@@ -127,11 +127,10 @@ export class Plugin implements PluginType {
       getSchema: (getDrilldownsSchema) => {
         const drilldownsSchema = getDrilldownsSchema(['CONTEXT_MENU_TRIGGER']);
         // Combine custom state, titles, and drilldowns schemas
-        return schema.allOf([
-          statsOverviewCustomStateSchema,
-          serializedTitlesSchema,
-          drilldownsSchema,
-        ]);
+        return schema.allOf(
+          [statsOverviewCustomStateSchema, serializedTitlesSchema, drilldownsSchema],
+          { meta: { description: 'Synthetics stats overview embeddable schema' } }
+        );
       },
     });
 
