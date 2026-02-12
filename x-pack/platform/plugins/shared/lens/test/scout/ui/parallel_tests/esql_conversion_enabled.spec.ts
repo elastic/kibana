@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../fixtures';
 
-spaceTest.describe('Lens Convert to ES|QL', { tag: ['@ess'] }, () => {
+spaceTest.describe('Lens Convert to ES|QL', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': {

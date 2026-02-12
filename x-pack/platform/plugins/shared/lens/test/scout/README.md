@@ -13,8 +13,8 @@ Then you can run the tests in another terminal
 npx playwright test --project local --grep @local-stateful-classic --config x-pack/platform/plugins/shared/lens/test/scout/ui/  --ui
 ```
 
-You can run the parallel tests in another terminal:
+You can run the parallel tests in another terminal
 
 ```bash
-npx playwright test --config x-pack/platform/plugins/shared/lens/test/scout/ui/parallel.playwright.config.ts --project=local --grep @local-stateful-classic
-``
+npx playwright test --project local --grep @local-stateful-classic --config x-pack/platform/plugins/shared/lens/test/scout/ui/parallel.playwright.config.ts
+```

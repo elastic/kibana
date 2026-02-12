@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { test } from '@kbn/scout';
+import { tags, test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-
 import { testData } from '../fixtures';
 
-test.describe('Lens Convert to ES|QL button', { tag: ['@ess'] }, () => {
+test.describe('Lens Convert to ES|QL button', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.ESQL_CONVERSION_DASHBOARD);
