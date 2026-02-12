@@ -12,7 +12,7 @@ export type DatasourceMock = jest.Mocked<Datasource> & {
 };
 
 export function createMockDatasource(
-  id = 'testDatasource',
+  id = 'formBased',
   customPublicApi: Partial<DatasourcePublicAPI> = {}
 ): DatasourceMock {
   const publicAPIMock = {
@@ -29,7 +29,7 @@ export function createMockDatasource(
   } as jest.Mocked<DatasourcePublicAPI>;
 
   return {
-    id: 'testDatasource',
+    id,
     clearLayer: jest.fn((state, _layerId) => ({ newState: state, removedLayerIds: [] })),
     getDatasourceSuggestionsForField: jest.fn((_state, _item, filterFn, _indexPatterns) => []),
     getDatasourceSuggestionsForVisualizeField: jest.fn(
@@ -78,7 +78,7 @@ export function createMockDatasource(
 }
 
 export function mockDatasourceMap() {
-  const datasource = createMockDatasource();
+  const datasource = createMockDatasource('formBased');
   datasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
     {
       state: {},
@@ -94,8 +94,8 @@ export function mockDatasourceMap() {
 
   datasource.getLayers.mockReturnValue(['a']);
   return {
-    testDatasource2: createMockDatasource('testDatasource2'),
-    testDatasource: datasource,
+    textBased: createMockDatasource('textBased'),
+    formBased: datasource,
   };
 }
 

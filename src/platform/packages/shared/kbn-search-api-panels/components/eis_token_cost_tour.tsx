@@ -10,6 +10,7 @@
 import React from 'react';
 import type { EuiTourStepProps } from '@elastic/eui';
 import { EuiButton, EuiButtonEmpty, EuiText, EuiTourStep, useEuiTheme } from '@elastic/eui';
+import { useKibana } from '../hooks/use_kibana';
 import * as i18n from '../translations';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
 
@@ -59,8 +60,12 @@ export const EisTokenCostTour = ({
     promoId: `${promoId}EisCostsTour`,
   });
   const dataId = `${promoId}-eis-costs-tour`;
+  const {
+    services: { notifications },
+  } = useKibana();
+  const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
 
-  if (!isPromoVisible || !isReady || !isCloudEnabled) {
+  if (!isPromoVisible || !isReady || !isCloudEnabled || !isTourEnabled) {
     return children;
   }
 

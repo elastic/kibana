@@ -9,8 +9,9 @@ import pRetry from 'p-retry';
 import { mkdir, readdir, stat, unlink } from 'fs/promises';
 import { join } from 'path';
 import fs from 'fs';
-import nodeFetch from 'node-fetch';
 import { finished } from 'stream/promises';
+import { Readable } from 'stream';
+import type { ReadableStream as WebReadableStream } from 'stream/web';
 import { handleProcessInterruptions } from './nodejs_utils';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { SettingsStorage } from './settings_storage';
@@ -114,8 +115,12 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
           await handleProcessInterruptions(
             async () => {
               try {
-                const { body } = await nodeFetch(agentDownloadUrl);
-                await finished(body.pipe(outputStream));
+                const response = await fetch(agentDownloadUrl);
+                if (!response.ok || !response.body) {
+                  throw new Error(`Failed to download: ${response.status} ${response.statusText}`);
+                }
+                const nodeStream = Readable.fromWeb(response.body as WebReadableStream);
+                await finished(nodeStream.pipe(outputStream));
               } catch (error) {
                 this.log.error(`Error during download attempt ${attempt}: ${error.message}`);
                 // Ensure any errors here propagate and trigger retry

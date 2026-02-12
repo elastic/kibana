@@ -18,6 +18,7 @@ import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_
 import type { DiscoverServices } from '../../../../build_services';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { DEFAULT_COLUMNS_SETTING } from '@kbn/discover-utils';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 describe('getInitialAppState', () => {
   const customQuery = {
@@ -73,10 +74,10 @@ describe('getInitialAppState', () => {
           },
         },
       }),
-      timeRestore: false,
       services,
     });
     const appState = getInitialAppState({
+      hasGlobalState: false,
       initialUrlState: undefined,
       persistedTab,
       dataView: dataViewMock,
@@ -118,10 +119,10 @@ describe('getInitialAppState', () => {
           },
         },
       }),
-      timeRestore: false,
       services,
     });
     const appState = getInitialAppState({
+      hasGlobalState: false,
       initialUrlState: undefined,
       persistedTab,
       dataView: dataViewMock,
@@ -151,6 +152,7 @@ describe('getInitialAppState', () => {
   test('data view with timefield', () => {
     const services = createDiscoverServicesMock();
     const actual = getInitialAppState({
+      hasGlobalState: false,
       initialUrlState: undefined,
       persistedTab: undefined,
       dataView: dataViewWithTimefieldMock,
@@ -192,6 +194,7 @@ describe('getInitialAppState', () => {
   test('data view without timefield', () => {
     const services = createDiscoverServicesMock();
     const actual = getInitialAppState({
+      hasGlobalState: false,
       initialUrlState: undefined,
       persistedTab: undefined,
       dataView: dataViewMock,
@@ -228,13 +231,13 @@ describe('getInitialAppState', () => {
   const getPersistedTab = ({ services }: { services: DiscoverServices }) =>
     fromTabStateToSavedObjectTab({
       tab: getTabStateMock({ id: 'mock-tab' }),
-      timeRestore: false,
       services,
     });
 
   test('should set view mode correctly', () => {
     const services = createDiscoverServicesMock();
     const actualForUndefinedViewMode = getInitialAppState({
+      hasGlobalState: false,
       initialUrlState: undefined,
       persistedTab: {
         ...getPersistedTab({ services }),
@@ -246,6 +249,7 @@ describe('getInitialAppState', () => {
     expect(actualForUndefinedViewMode.viewMode).toBeUndefined();
 
     const actualForEsqlWithAggregatedViewMode = getInitialAppState({
+      hasGlobalState: false,
       initialUrlState: undefined,
       persistedTab: {
         ...getPersistedTab({ services }),
@@ -258,6 +262,7 @@ describe('getInitialAppState', () => {
     expect(actualForEsqlWithAggregatedViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
 
     const actualForEsqlWithInvalidPatternLevelViewMode = getInitialAppState({
+      hasGlobalState: false,
       initialUrlState: undefined,
       persistedTab: {
         ...getPersistedTab({ services }),
@@ -270,6 +275,7 @@ describe('getInitialAppState', () => {
     expect(actualForEsqlWithInvalidPatternLevelViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
 
     const actualForEsqlWithValidViewMode = getInitialAppState({
+      hasGlobalState: false,
       initialUrlState: undefined,
       persistedTab: {
         ...getPersistedTab({ services }),
@@ -283,6 +289,7 @@ describe('getInitialAppState', () => {
     expect(actualForEsqlWithValidViewMode.dataSource).toEqual(createEsqlDataSource());
 
     const actualForWithValidAggLevelViewMode = getInitialAppState({
+      hasGlobalState: false,
       initialUrlState: undefined,
       persistedTab: {
         ...getPersistedTab({ services }),
@@ -297,6 +304,7 @@ describe('getInitialAppState', () => {
     );
 
     const actualForWithValidPatternLevelViewMode = getInitialAppState({
+      hasGlobalState: false,
       initialUrlState: undefined,
       persistedTab: {
         ...getPersistedTab({ services }),
@@ -314,6 +322,7 @@ describe('getInitialAppState', () => {
   test('should return expected dataSource', () => {
     const services = createDiscoverServicesMock();
     const actualForEsql = getInitialAppState({
+      hasGlobalState: false,
       initialUrlState: undefined,
       persistedTab: {
         ...getPersistedTab({ services }),
@@ -328,6 +337,7 @@ describe('getInitialAppState', () => {
       }
     `);
     const actualForDataView = getInitialAppState({
+      hasGlobalState: false,
       initialUrlState: undefined,
       persistedTab: getPersistedTab({ services }),
       dataView: dataViewMock,
@@ -341,10 +351,276 @@ describe('getInitialAppState', () => {
     `);
   });
 
+  describe('when there is no persistedTab', () => {
+    describe('when there is a global state', () => {
+      describe('when there is a query in the url', () => {
+        it('should use the query from the url state', () => {
+          // Given
+          const services = createDiscoverServicesMock();
+          const query = { language: 'kuery', query: 'url state query' };
+
+          // When
+          const appState = getInitialAppState({
+            hasGlobalState: true,
+            initialUrlState: { query },
+            persistedTab: undefined,
+            dataView: dataViewMock,
+            services,
+          });
+
+          // Then
+          expect(appState).toEqual(
+            expect.objectContaining({
+              query,
+            })
+          );
+        });
+      });
+
+      describe('when there is no query in the url', () => {
+        it('should use the default query', () => {
+          // Given
+          const services = createDiscoverServicesMock();
+          const dataSource = createDataViewDataSource({ dataViewId: 'some-data-view-id' });
+          services.data.query.queryString.getDefaultQuery = jest.fn().mockReturnValue(defaultQuery);
+
+          // When
+          const appState = getInitialAppState({
+            hasGlobalState: true,
+            initialUrlState: { dataSource },
+            persistedTab: undefined,
+            dataView: dataViewMock,
+            services,
+          });
+
+          // Then
+          expect(appState).toEqual(
+            expect.objectContaining({
+              query: defaultQuery,
+            })
+          );
+        });
+      });
+    });
+
+    describe('when there is no global state', () => {
+      describe('when there is initial url state', () => {
+        describe('when there is a query in the url state', () => {
+          it('should use the query from the url state', () => {
+            // Given
+            const services = createDiscoverServicesMock();
+            const query = { language: 'kuery', query: 'url state query' };
+
+            // When
+            const appState = getInitialAppState({
+              hasGlobalState: false,
+              initialUrlState: { query },
+              persistedTab: undefined,
+              dataView: dataViewMock,
+              services,
+            });
+
+            // Then
+            expect(appState).toEqual(
+              expect.objectContaining({
+                query,
+              })
+            );
+          });
+        });
+
+        describe('when there is no query in the url state', () => {
+          it('should use the default query', () => {
+            // Given
+            const services = createDiscoverServicesMock();
+            const dataSource = createDataViewDataSource({ dataViewId: 'some-data-view-id' });
+            services.data.query.queryString.getDefaultQuery = jest
+              .fn()
+              .mockReturnValue(defaultQuery);
+
+            // When
+            const appState = getInitialAppState({
+              hasGlobalState: false,
+              initialUrlState: { dataSource },
+              persistedTab: undefined,
+              dataView: dataViewMock,
+              services,
+            });
+
+            // Then
+            expect(appState).toEqual(
+              expect.objectContaining({
+                query: defaultQuery,
+              })
+            );
+          });
+        });
+      });
+
+      describe('when there is no initial url state', () => {
+        describe('when the query mode is esql', () => {
+          it('should return an esql initial query', () => {
+            // Given
+            const services = createDiscoverServicesMock();
+            services.storage.get = jest.fn().mockReturnValue('esql');
+            services.uiSettings.get = jest.fn().mockReturnValue(true);
+
+            // When
+            const appState = getInitialAppState({
+              hasGlobalState: false,
+              initialUrlState: undefined,
+              persistedTab: undefined,
+              dataView: new DataView({
+                spec: dataViewMock.toSpec(),
+                fieldFormats: {} as DataView['fieldFormats'],
+              }),
+              services,
+            });
+
+            // Then
+            expect(appState).toEqual(
+              expect.objectContaining({
+                query: { esql: 'FROM the-data-view-title' },
+              })
+            );
+          });
+        });
+
+        describe('when esql default is enabled', () => {
+          describe('when the query mode is unset', () => {
+            it('should return an esql initial query', () => {
+              // Given
+              const services = createDiscoverServicesMock();
+              services.storage.get = jest.fn().mockReturnValue(undefined);
+              services.uiSettings.get = jest.fn().mockReturnValue(true);
+              services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+
+              // When
+              const appState = getInitialAppState({
+                hasGlobalState: false,
+                initialUrlState: undefined,
+                persistedTab: undefined,
+                dataView: new DataView({
+                  spec: dataViewMock.toSpec(),
+                  fieldFormats: {} as DataView['fieldFormats'],
+                }),
+                services,
+              });
+
+              // Then
+              expect(appState).toEqual(
+                expect.objectContaining({
+                  query: { esql: 'FROM the-data-view-title' },
+                })
+              );
+            });
+
+            describe('when esql uiSetting is disabled', () => {
+              it('should return the default query', () => {
+                // Given
+                const services = createDiscoverServicesMock();
+                services.storage.get = jest.fn().mockReturnValue(undefined);
+                services.uiSettings.get = jest.fn().mockReturnValue(false);
+                services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+                services.data.query.queryString.getDefaultQuery = jest
+                  .fn()
+                  .mockReturnValue(defaultQuery);
+
+                // When
+                const appState = getInitialAppState({
+                  hasGlobalState: false,
+                  initialUrlState: undefined,
+                  persistedTab: undefined,
+                  dataView: new DataView({
+                    spec: dataViewMock.toSpec(),
+                    fieldFormats: {} as DataView['fieldFormats'],
+                  }),
+                  services,
+                });
+
+                // Then
+                expect(appState).toEqual(
+                  expect.objectContaining({
+                    query: defaultQuery,
+                  })
+                );
+              });
+            });
+
+            describe('when dataView is not a DataView instance', () => {
+              it('should return the default query', () => {
+                // Given
+                const services = createDiscoverServicesMock();
+                services.storage.get = jest.fn().mockReturnValue(undefined);
+                services.uiSettings.get = jest.fn().mockReturnValue(true);
+                services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+                services.data.query.queryString.getDefaultQuery = jest
+                  .fn()
+                  .mockReturnValue(defaultQuery);
+
+                // When
+                const appState = getInitialAppState({
+                  hasGlobalState: false,
+                  initialUrlState: undefined,
+                  persistedTab: undefined,
+                  dataView: dataViewMock,
+                  services,
+                });
+
+                // Then
+                expect(appState).toEqual(
+                  expect.objectContaining({
+                    query: defaultQuery,
+                  })
+                );
+              });
+            });
+          });
+        });
+
+        describe.each([
+          { queryMode: 'esql', description: 'esql but esql is disabled' },
+          { queryMode: 'classic', description: 'classic' },
+          { queryMode: undefined, description: 'unset' },
+        ])('when the query mode is $description', ({ queryMode }) => {
+          it('should return the default query', () => {
+            // Given
+            const services = createDiscoverServicesMock();
+            services.storage.get = jest.fn().mockReturnValue(queryMode);
+            services.uiSettings.get = jest.fn().mockReturnValue(false);
+            services.data.query.queryString.getDefaultQuery = jest
+              .fn()
+              .mockReturnValue(defaultQuery);
+
+            // When
+            const appState = getInitialAppState({
+              hasGlobalState: false,
+              initialUrlState: undefined,
+              persistedTab: undefined,
+              dataView: new DataView({
+                spec: dataViewMock.toSpec(),
+                fieldFormats: {} as DataView['fieldFormats'],
+              }),
+              services,
+            });
+
+            // Then
+            expect(appState).toEqual(
+              expect.objectContaining({
+                query: defaultQuery,
+              })
+            );
+          });
+        });
+      });
+    });
+  });
+
   describe('default sort array', () => {
     test('should use persistedTab sort array if valid and data view is provided', () => {
       const services = createDiscoverServicesMock();
       const appState = getInitialAppState({
+        hasGlobalState: false,
         initialUrlState: undefined,
         persistedTab: {
           ...getPersistedTab({ services }),
@@ -359,6 +635,7 @@ describe('getInitialAppState', () => {
     test('should not use persistedTab sort array if invalid and data view is provided', () => {
       const services = createDiscoverServicesMock();
       const appState = getInitialAppState({
+        hasGlobalState: false,
         initialUrlState: undefined,
         persistedTab: {
           ...getPersistedTab({ services }),
@@ -373,6 +650,7 @@ describe('getInitialAppState', () => {
     test('should use persistedTab sort array when data view is not provided', () => {
       const services = createDiscoverServicesMock();
       const appState = getInitialAppState({
+        hasGlobalState: false,
         initialUrlState: undefined,
         persistedTab: {
           ...getPersistedTab({ services }),
@@ -387,6 +665,7 @@ describe('getInitialAppState', () => {
     test('should use persistedTab sort array when partial data view is provided', () => {
       const services = createDiscoverServicesMock();
       const appState = getInitialAppState({
+        hasGlobalState: false,
         initialUrlState: undefined,
         persistedTab: {
           ...getPersistedTab({ services }),
@@ -403,6 +682,7 @@ describe('getInitialAppState', () => {
     test('should use persistedTab columns if provided', () => {
       const services = createDiscoverServicesMock();
       const appState = getInitialAppState({
+        hasGlobalState: false,
         initialUrlState: undefined,
         persistedTab: {
           ...getPersistedTab({ services }),
@@ -417,6 +697,7 @@ describe('getInitialAppState', () => {
     test('should use default columns if empty columns are stored for persistedTab', () => {
       const services = createDiscoverServicesMock();
       const appState = getInitialAppState({
+        hasGlobalState: false,
         initialUrlState: undefined,
         persistedTab: {
           ...getPersistedTab({ services }),
@@ -436,6 +717,7 @@ describe('getInitialAppState', () => {
         }
       });
       const appState = getInitialAppState({
+        hasGlobalState: false,
         initialUrlState: undefined,
         persistedTab: {
           ...getPersistedTab({ services }),
@@ -455,6 +737,7 @@ describe('getInitialAppState', () => {
         }
       });
       const appState = getInitialAppState({
+        hasGlobalState: false,
         initialUrlState: { columns: [] },
         persistedTab: undefined,
         dataView: dataViewWithTimefieldMock,
@@ -471,6 +754,7 @@ describe('getInitialAppState', () => {
         }
       });
       const appState = getInitialAppState({
+        hasGlobalState: false,
         initialUrlState: undefined,
         persistedTab: undefined,
         dataView: dataViewWithTimefieldMock,

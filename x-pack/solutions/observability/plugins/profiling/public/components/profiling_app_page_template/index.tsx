@@ -45,7 +45,7 @@ export function ProfilingAppPageTemplate({
   showBetaBadge?: boolean;
 }) {
   const {
-    start: { observabilityShared },
+    start: { observabilityShared, core },
   } = useProfilingDependencies();
 
   const [privilegesWarningDismissed, setPrivilegesWarningDismissed] = useLocalStorage(
@@ -58,6 +58,8 @@ export function ProfilingAppPageTemplate({
 
   const history = useHistory();
 
+  const isFeedbackEnabled = core.notifications.feedback.isEnabled();
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [history.location.pathname]);
@@ -67,19 +69,21 @@ export function ProfilingAppPageTemplate({
       noDataConfig={noDataConfig}
       pageHeader={{
         'data-test-subj': 'profilingPageTemplate',
-        rightSideItems: [
-          <EuiButton
-            data-test-subj="profilingProfilingAppPageTemplateGiveFeedbackButton"
-            href={PROFILING_FEEDBACK_LINK}
-            target="_blank"
-            color="warning"
-            iconType="editorComment"
-          >
-            {i18n.translate('xpack.profiling.header.giveFeedbackLink', {
-              defaultMessage: 'Give feedback',
-            })}
-          </EuiButton>,
-        ],
+        rightSideItems: isFeedbackEnabled
+          ? [
+              <EuiButton
+                data-test-subj="profilingProfilingAppPageTemplateGiveFeedbackButton"
+                href={PROFILING_FEEDBACK_LINK}
+                target="_blank"
+                color="warning"
+                iconType="editorComment"
+              >
+                {i18n.translate('xpack.profiling.header.giveFeedbackLink', {
+                  defaultMessage: 'Give feedback',
+                })}
+              </EuiButton>,
+            ]
+          : undefined,
         pageTitle: (
           <EuiFlexGroup gutterSize="s" alignItems="baseline">
             <EuiFlexItem grow={false}>{pageTitle}</EuiFlexItem>

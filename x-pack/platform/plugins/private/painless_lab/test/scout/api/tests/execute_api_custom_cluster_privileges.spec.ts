@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { apiTest, expect, tags } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS, TEST_INPUT } from '../fixtures/constants';
 
 apiTest.describe(
   'POST api/painless_lab/execute with specific cluster privileges',
-  { tag: tags.ESS_ONLY },
+  { tag: tags.stateful.all },
   () => {
     apiTest(
       'should execute a valid painless script using cluster:admin/scripts/painless/execute credentials',
@@ -28,7 +29,7 @@ apiTest.describe(
           responseType: 'json',
           body: TEST_INPUT.script,
         });
-        expect(response.statusCode).toBe(200);
+        expect(response).toHaveStatusCode(200);
         expect(response.body).toStrictEqual({
           result: 'true',
         });
@@ -50,7 +51,7 @@ apiTest.describe(
           responseType: 'json',
           body: TEST_INPUT.script,
         });
-        expect(response.statusCode).toBe(200);
+        expect(response).toHaveStatusCode(200);
         expect(response.body).toStrictEqual({
           result: 'true',
         });
@@ -92,7 +93,7 @@ apiTest.describe(
           responseType: 'json',
           body: TEST_INPUT.script,
         });
-        expect(response.statusCode).toBe(200);
+        expect(response).toHaveStatusCode(200);
         expect(response.body).toStrictEqual({
           result: 'true',
         });

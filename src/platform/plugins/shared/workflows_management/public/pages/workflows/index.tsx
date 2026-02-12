@@ -34,7 +34,7 @@ import { WorkflowSearchField } from '../../widgets/workflow_search_field/ui/work
 
 export function WorkflowsPage() {
   const { application, featureFlags } = useKibana().services;
-  const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy']);
+  const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy', 'tags']);
   const { euiTheme } = useEuiTheme();
   const [search, setSearch] = useState<WorkflowsSearchParams>({
     size: WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
@@ -83,6 +83,7 @@ export function WorkflowsPage() {
                   size="m"
                   fill
                   onClick={navigateToCreateWorkflow}
+                  data-test-subj="createWorkflowButton"
                 >
                   <FormattedMessage
                     id="workflows.createWorkflowButton"
@@ -134,6 +135,21 @@ export function WorkflowsPage() {
                     onSelectedValuesChanged={(newValues) => {
                       setSearch((prevState) => {
                         return { ...prevState, createdBy: newValues };
+                      });
+                    }}
+                  />
+                </EuiFilterGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFilterGroup>
+                  <WorkflowsFilterPopover
+                    filter="tags"
+                    title="Tags"
+                    values={filtersData?.tags || []}
+                    selectedValues={search.tags || []}
+                    onSelectedValuesChanged={(newValues) => {
+                      setSearch((prevState) => {
+                        return { ...prevState, tags: newValues };
                       });
                     }}
                   />

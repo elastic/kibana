@@ -775,6 +775,9 @@ export const mockCasesContract = (): CasesServerStart => ({
     templates: {
       enabled: true,
     },
+    attachments: {
+      enabled: true,
+    },
   },
 });
 

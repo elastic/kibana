@@ -27,8 +27,6 @@ module.exports = () => ({
         [
           require.resolve('@emotion/babel-preset-css-prop'),
           {
-            // Use Babel's compile-time labeling for better test performance
-            // This is preferred over Emotion's runtime labeling via stack traces because of performance
             autoLabel: 'always',
             labelFormat: '[local]',
             sourceMap: false,

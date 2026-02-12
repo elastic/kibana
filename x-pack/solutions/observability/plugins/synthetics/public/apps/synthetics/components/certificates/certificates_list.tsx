@@ -113,13 +113,7 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
           direction: sort.direction,
         },
       }}
-      noItemsMessage={
-        certificates.isLoading ? (
-          LOADING_CERTIFICATES
-        ) : (
-          <span data-test-subj="uptimeCertsEmptyMessage">{NO_CERTS_AVAILABLE}</span>
-        )
-      }
+      noItemsMessage={certificates.isLoading ? LOADING_CERTIFICATES : NO_CERTS_AVAILABLE}
     />
   );
 };

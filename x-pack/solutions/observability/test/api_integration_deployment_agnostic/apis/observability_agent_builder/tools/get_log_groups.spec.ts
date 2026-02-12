@@ -569,14 +569,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('size parameter', () => {
+    describe('limit parameter', () => {
       it('limits the total number of groups returned', async () => {
         const results = await agentBuilderApiClient.executeTool<GetLogGroupsToolResult>({
           id: OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
           params: {
             start: START,
             end: END,
-            size: 5,
+            limit: 5,
           },
         });
 
@@ -592,7 +592,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           params: {
             start: START,
             end: END,
-            size: 4,
+            limit: 4,
           },
         });
 
@@ -601,27 +601,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(groups.every((group) => group.type === 'spanException')).to.be(true);
       });
 
-      it('returns more groups when size is larger', async () => {
-        const smallSizeResults = await agentBuilderApiClient.executeTool<GetLogGroupsToolResult>({
+      it('returns more groups when limit is larger', async () => {
+        const smallLimitResults = await agentBuilderApiClient.executeTool<GetLogGroupsToolResult>({
           id: OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
           params: {
             start: START,
             end: END,
-            size: 3,
+            limit: 3,
           },
         });
 
-        const largeSizeResults = await agentBuilderApiClient.executeTool<GetLogGroupsToolResult>({
+        const largeLimitResults = await agentBuilderApiClient.executeTool<GetLogGroupsToolResult>({
           id: OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
           params: {
             start: START,
             end: END,
-            size: 15,
+            limit: 15,
           },
         });
 
-        expect(largeSizeResults[0].data.groups.length).to.be.greaterThan(
-          smallSizeResults[0].data.groups.length
+        expect(largeLimitResults[0].data.groups.length).to.be.greaterThan(
+          smallLimitResults[0].data.groups.length
         );
       });
     });

@@ -6,11 +6,12 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 
 // This role behaves like Fleet -> None, Integrations -> Read
-test.describe('When the user has Viewer built-in role', { tag: ['@ess'] }, () => {
+test.describe('When the user has Viewer built-in role', { tag: tags.stateful.classic }, () => {
   test('Fleet is accessible but user cannot perform any write actions on agent tabs', async ({
     browserAuth,
     pageObjects,

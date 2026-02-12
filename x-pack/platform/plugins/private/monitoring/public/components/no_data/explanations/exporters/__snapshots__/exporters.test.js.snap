@@ -87,7 +87,7 @@ Array [
         >
           Elasticsearch Service Console
           <span
-            class="css-1j75qc1"
+            class="emotion-EuiExternalLinkIcon"
             data-euiicon-type="popout"
             role="presentation"
           />
@@ -106,7 +106,7 @@ Array [
         >
           Logs and metrics
           <span
-            class="css-1j75qc1"
+            class="emotion-EuiExternalLinkIcon"
             data-euiicon-type="popout"
             role="presentation"
           />
@@ -125,7 +125,7 @@ Array [
         >
           the documentation page.
           <span
-            class="css-1j75qc1"
+            class="emotion-EuiExternalLinkIcon"
             data-euiicon-type="popout"
             role="presentation"
           />

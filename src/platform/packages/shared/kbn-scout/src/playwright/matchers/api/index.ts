@@ -7,10 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Matchers } from './types';
+import type { ExpectOptions, ExpectOptionsOrMessage, Matchers } from './types';
 import { createGenericMatchers } from './generic_matchers';
 import { createResponseMatchers } from './response_matchers';
 import { asymmetricMatchers } from './asymmetric_matchers';
+
+/**
+ * Normalize options parameter to ExpectOptions object.
+ */
+function normalizeOptions(options?: ExpectOptionsOrMessage): ExpectOptions | undefined {
+  if (typeof options === 'string') {
+    return { message: options };
+  }
+  return options;
+}
 
 /**
  * Custom expect wrapper for API tests with generic and response matchers.
@@ -18,10 +28,12 @@ import { asymmetricMatchers } from './asymmetric_matchers';
  * @example
  * expect(response).toHaveStatusCode(200);
  * expect(response).toMatchObject({ body: { count: expect.toBeGreaterThan(0) } });
+ * expect(value, 'Custom error message').toBeDefined();
  */
-function expectFn(actual: unknown): Matchers {
-  const genericMatchers = createGenericMatchers(actual);
-  const responseMatchers = createResponseMatchers(actual);
+function expectFn(actual: unknown, options?: ExpectOptionsOrMessage): Matchers {
+  const normalizedOptions = normalizeOptions(options);
+  const genericMatchers = createGenericMatchers(actual, normalizedOptions);
+  const responseMatchers = createResponseMatchers(actual, normalizedOptions);
 
   return {
     ...genericMatchers,

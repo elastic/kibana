@@ -127,8 +127,15 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   };
 
   const { supported, enabled } = getSetupModeState();
+
+  // Check AutoOps connection status
+  const cloudConnectStatus = Legacy.shims.useCloudConnectStatus();
   const shouldShowAutoOpsPromotion =
-    showAutoOpsPromotion && !Legacy.shims.isCloud && Legacy.shims.hasEnterpriseLicense;
+    showAutoOpsPromotion &&
+    !Legacy.shims.isCloud &&
+    Legacy.shims.hasEnterpriseLicense &&
+    !cloudConnectStatus.isLoading &&
+    !cloudConnectStatus.isCloudConnectAutoopsEnabled;
 
   return (
     <EuiPageTemplate

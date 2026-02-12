@@ -52,4 +52,9 @@ export type {
   EuiSideNavItemTypeEnhanced,
   RenderAs,
   SolutionId,
+  SidebarApp,
+  SidebarAppConfig,
+  SidebarAppDefinition,
+  SidebarSetup,
+  SidebarStart,
 } from './src';

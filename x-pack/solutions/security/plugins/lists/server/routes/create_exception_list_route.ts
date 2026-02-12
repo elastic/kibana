@@ -49,6 +49,7 @@ export const createExceptionListRoute = (router: ListsPluginRouter): void => {
             namespace_type: namespaceType,
             description,
             list_id: listId = uuidv4(),
+            os_types: osTypes = [],
             type,
             version,
           } = request.body;
@@ -73,6 +74,7 @@ export const createExceptionListRoute = (router: ListsPluginRouter): void => {
             meta,
             name,
             namespaceType,
+            osTypes,
             tags,
             type,
             version,

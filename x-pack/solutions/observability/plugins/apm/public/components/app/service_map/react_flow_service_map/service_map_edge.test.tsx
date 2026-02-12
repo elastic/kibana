@@ -11,6 +11,7 @@ import { ReactFlowProvider } from '@xyflow/react';
 import { Position } from '@xyflow/react';
 import { ServiceMapEdge } from './service_map_edge';
 import type { ServiceMapEdgeData } from '../../../../../common/service_map/react_flow_types';
+import { MOCK_PRIMARY_COLOR, MOCK_DEFAULT_COLOR, MOCK_EUI_THEME } from './constants';
 
 // Mock EUI theme
 jest.mock('@elastic/eui', () => {
@@ -20,8 +21,8 @@ jest.mock('@elastic/eui', () => {
     useEuiTheme: () => ({
       euiTheme: {
         colors: {
-          mediumShade: '#98A2B3',
-          primary: '#0077CC',
+          mediumShade: MOCK_EUI_THEME.colors.mediumShade,
+          primary: MOCK_EUI_THEME.colors.primary,
         },
       },
       colorMode: 'LIGHT',
@@ -43,7 +44,9 @@ const createEdgeProps = (selected: boolean = false) => ({
   targetHandleId: undefined,
   interactionWidth: 20,
   // Style is passed externally based on selection state
-  style: selected ? { stroke: '#0077CC', strokeWidth: 2 } : { stroke: '#98A2B3', strokeWidth: 1 },
+  style: selected
+    ? { stroke: MOCK_PRIMARY_COLOR, strokeWidth: 2 }
+    : { stroke: MOCK_DEFAULT_COLOR, strokeWidth: 1 },
 });
 
 function createEdgeData(overrides: Partial<ServiceMapEdgeData> = {}): ServiceMapEdgeData {
@@ -79,7 +82,7 @@ describe('ServiceMapEdge', () => {
     const path = container.querySelector('path');
     expect(path).toHaveAttribute('style');
     // The stroke should be mediumShade color (may be hex or rgb depending on browser)
-    expect(['rgb(152, 162, 179)', '#98A2B3']).toContain(path?.style.stroke);
+    expect(['rgb(152, 162, 179)', MOCK_DEFAULT_COLOR]).toContain(path?.style.stroke);
   });
 
   it('renders with primary stroke color when selected', () => {
@@ -87,7 +90,7 @@ describe('ServiceMapEdge', () => {
     const path = container.querySelector('path');
     expect(path).toHaveAttribute('style');
     // The stroke should be primary color (may be hex or rgb depending on browser)
-    expect(['rgb(0, 119, 204)', '#0077CC']).toContain(path?.style.stroke);
+    expect(['rgb(0, 119, 204)', MOCK_PRIMARY_COLOR]).toContain(path?.style.stroke);
   });
 
   it('renders with wider stroke when selected', () => {

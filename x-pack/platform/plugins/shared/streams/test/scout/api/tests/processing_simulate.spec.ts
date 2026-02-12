@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import { streamsApiTest as apiTest } from '../fixtures';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
   'Stream data processing - simulate processing API',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     // Grok processor tests
     apiTest(
@@ -51,7 +52,7 @@ apiTest.describe(
         );
 
         expect(statusCode).toBe(200);
-        expect(body).toHaveProperty('documents');
+        expect(body.documents).toBeDefined();
         expect(Array.isArray(body.documents)).toBe(true);
         expect(body.documents).toHaveLength(2);
       }
@@ -157,7 +158,7 @@ apiTest.describe(
 
         // Should return 200 even if pattern doesn't match (processor reports failure)
         expect(statusCode).toBe(200);
-        expect(body).toHaveProperty('documents');
+        expect(body.documents).toBeDefined();
       }
     );
 

@@ -111,6 +111,28 @@ describe('zod', () => {
         shared: {},
       });
     });
+
+    test('extracts title, description, and examples from JSON in describe()', () => {
+      const schema = z
+        .object({
+          name: z.string(),
+          age: z.number(),
+        })
+        .describe(
+          JSON.stringify({
+            title: 'User',
+            description: 'A user object',
+            examples: [{ name: 'John', age: 30 }],
+          })
+        );
+
+      const result = convert(schema);
+
+      expect(result.schema.title).toBe('User');
+      expect(result.schema.description).toBe('A user object');
+      // examples is supported at runtime but not in OpenAPI types
+      expect((result.schema as any).examples).toEqual([{ name: 'John', age: 30 }]);
+    });
   });
 
   describe('convertPathParameters', () => {

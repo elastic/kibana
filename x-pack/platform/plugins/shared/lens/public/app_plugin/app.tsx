@@ -67,6 +67,16 @@ export type SaveProps = Simplify<
   }
 >;
 
+// Helper to determine if we're coming from a specific dashboard/canvas view (not from library list)
+function isComingFromContainerView(incomingState?: LensAppProps['incomingState']): boolean {
+  return Boolean(
+    incomingState?.originatingApp &&
+      incomingState?.originatingPath &&
+      // Exclude library lists (/list/*) - no "Save and Return" from Dashboard Viz tab
+      !incomingState.originatingPath.includes('/list/')
+  );
+}
+
 export function App({
   history,
   onAppLeave,
@@ -447,6 +457,7 @@ export function App({
       >
         <LensTopNavMenu
           initialInput={initialInput}
+          incomingState={incomingState}
           redirectToOrigin={redirectToOrigin}
           getIsByValueMode={getIsByValueMode}
           onAppLeave={onAppLeave}
@@ -484,7 +495,7 @@ export function App({
         <SaveModalContainer
           lensServices={lensAppServices}
           originatingApp={
-            isLinkedToOriginatingApp
+            isComingFromContainerView(incomingState) || initialContextIsEmbedded
               ? incomingState?.originatingApp ?? initialContext?.originatingApp
               : undefined
           }

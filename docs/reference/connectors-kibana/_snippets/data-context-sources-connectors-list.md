@@ -1,6 +1,7 @@
 **Third-party search**
 * [Brave Search](/reference/connectors-kibana/brave-search-action-type.md): Search the web using the Brave Search API.
 * [Jina Reader](/reference/connectors-kibana/jina-action-type.md): Convert web pages into markdown from their URL and search the web for better LLM grounding.
+* [Google Drive](/reference/connectors-kibana/google-drive-action-type.md): Search and access files and folders in Google Drive.
 * [Notion](/reference/connectors-kibana/notion-action-type.md): Explore content and databases in Notion.
 * [Sharepoint online](/reference/connectors-kibana/sharepoint-online-action-type.md): Search across SharePoint sites, pages, and content using the Microsoft Graph API.
 

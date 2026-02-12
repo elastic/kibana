@@ -28,10 +28,10 @@ export const filterMaintenanceWindows = ({
   maintenanceWindows,
   withScopedQuery,
 }: FilterMaintenanceWindowsOpts): MaintenanceWindow[] => {
-  const filteredMaintenanceWindows = maintenanceWindows.filter(({ scopedQuery }) => {
-    if (withScopedQuery && scopedQuery) {
+  const filteredMaintenanceWindows = maintenanceWindows.filter(({ scope }) => {
+    if (withScopedQuery && scope && scope.alerting) {
       return true;
-    } else if (!withScopedQuery && !scopedQuery) {
+    } else if (!withScopedQuery && !scope?.alerting) {
       return true;
     }
 

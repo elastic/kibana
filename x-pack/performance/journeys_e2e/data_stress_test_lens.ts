@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { createDashboardJourney } from '../utils/dashboard_journey';
+import { Journey } from '@kbn/journeys';
+import { setupDashboardJourney } from '../utils/dashboard_journey';
 
-export const journey = createDashboardJourney({
-  esArchives: ['src/platform/test/functional/fixtures/es_archiver/stress_test'],
-  kbnArchives: ['src/platform/test/functional/fixtures/kbn_archiver/stress_test'],
+export const journey = setupDashboardJourney({
+  // call the journey constructor in this file so the name is set correctly
+  journey: new Journey({
+    esArchives: ['src/platform/test/functional/fixtures/es_archiver/stress_test'],
+    kbnArchives: ['src/platform/test/functional/fixtures/kbn_archiver/stress_test'],
+  }),
   dashboardName: 'Stress Test Dashboard',
   dashboardLinkSubj: 'dashboardListingTitleLink-Stresstest',
   visualizationCount: 1,
