@@ -14,8 +14,8 @@ import type { TaskEither } from 'fp-ts/TaskEither';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { MIGRATION_CLIENT_OPTIONS } from '@kbn/core-saved-objects-server-internal';
-import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+// import { MIGRATION_CLIENT_OPTIONS } from '@kbn/core-saved-objects-server-internal';
+// import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   bulkOverwriteTransformedDocuments,
   closePit,
@@ -46,20 +46,20 @@ import {
   createBulkIndexOperationTuple,
   checkClusterRoutingAllocationEnabled,
 } from '@kbn/core-saved-objects-migration-server-internal';
-import { BASELINE_TEST_ARCHIVE_SMALL } from '../../kibana_migrator_archive_utils';
-import { defaultKibanaIndex } from '@kbn/migrator-test-kit';
+// import { BASELINE_TEST_ARCHIVE_SMALL } from '../../kibana_migrator_archive_utils';
+import { defaultKibanaIndex, getEsClient } from '@kbn/migrator-test-kit';
 
-const { startES } = createTestServers({
-  adjustTimeout: (t: number) => jest.setTimeout(t),
-  settings: {
-    es: {
-      dataArchive: BASELINE_TEST_ARCHIVE_SMALL,
-      license: 'basic',
-      esArgs: ['http.max_content_length=10Kb'],
-    },
-  },
-});
-let esServer: TestElasticsearchUtils;
+// const { startES } = createTestServers({
+//   adjustTimeout: (t: number) => jest.setTimeout(t),
+//   settings: {
+//     es: {
+//       dataArchive: BASELINE_TEST_ARCHIVE_SMALL,
+//       license: 'basic',
+//       esArgs: ['http.max_content_length=10Kb'],
+//     },
+//   },
+// });
+// let esServer: TestElasticsearchUtils;
 
 describe('migration actions', () => {
   let client: ElasticsearchClient;
@@ -67,9 +67,18 @@ describe('migration actions', () => {
 
   beforeAll(async () => {
     // start ES and get capabilities
-    esServer = await startES();
+    // esServer = await startES();
     // we don't need a long timeout for testing purposes
-    client = esServer.es.getClient().child({ ...MIGRATION_CLIENT_OPTIONS, requestTimeout: 10_000 });
+    // client = esServer.es.getClient().child({ ...MIGRATION_CLIENT_OPTIONS, requestTimeout: 10_000 });
+    client = await getEsClient({
+      settings: {
+        elasticsearch: {
+          hosts: ['http://localhost:9220'],
+          username: 'system_indices_superuser',
+          password: 'changeme',
+        },
+      },
+    });
     esCapabilities = elasticsearchServiceMock.createCapabilities();
   });
 
@@ -137,7 +146,7 @@ describe('migration actions', () => {
     })();
   });
 
-  afterAll(async () => await esServer?.stop());
+  // afterAll(async () => await esServer?.stop());
 
   describe('fetchIndices', () => {
     afterAll(async () => {
