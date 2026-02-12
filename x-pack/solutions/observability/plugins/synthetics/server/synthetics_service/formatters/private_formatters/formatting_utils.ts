@@ -77,7 +77,7 @@ export const stringifyString = (value?: string) => {
 export const secondsToCronFormatter: FormatterFn = (fields, key) => {
   const value = (fields[key] as string) ?? '';
 
-  return value ? `${value}s` : null;
+  return value !== undefined && value !== null ? `${value}s` : null;
 };
 
 export const privateTimeoutFormatter: FormatterFn = (fields) => {

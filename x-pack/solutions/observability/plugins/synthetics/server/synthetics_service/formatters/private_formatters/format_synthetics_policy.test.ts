@@ -1155,7 +1155,7 @@ const browserConfig: any = {
   'service.name': 'Local Service',
   config_id: '00bb3ceb-a242-4c7a-8405-8da963661374',
   tags: ['cookie-test', 'browser'],
-  timeout: '16',
+  timeout: '60',
   name: 'Test HTTP Monitor 03',
   locations: [
     {

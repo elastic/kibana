@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
-import { timeoutFormatterPrivate, throttlingFormatter } from './browser_formatters';
+import { throttlingFormatter } from './browser_formatters';
+import { privateTimeoutFormatter } from './formatting_utils';
 
 describe('formatters', () => {
   describe('throttling formatter', () => {
@@ -70,7 +71,7 @@ describe('formatters', () => {
   describe('timeout formatter', () => {
     it('subtracts heartbeat overhead for browser monitors', () => {
       expect(
-        timeoutFormatterPrivate!(
+        privateTimeoutFormatter!(
           {
             [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
             [ConfigKey.TIMEOUT]: '60',
@@ -82,7 +83,7 @@ describe('formatters', () => {
 
     it('returns zero overhead for timeouts greater than the Heartbeat overhead (safeguard against negative timeouts)', () => {
       expect(
-        timeoutFormatterPrivate!(
+        privateTimeoutFormatter!(
           {
             [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
             [ConfigKey.TIMEOUT]: '0',
@@ -94,7 +95,7 @@ describe('formatters', () => {
 
     it('returns raw timeout for non-browser monitors', () => {
       expect(
-        timeoutFormatterPrivate!(
+        privateTimeoutFormatter!(
           {
             [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
             [ConfigKey.TIMEOUT]: '45',
