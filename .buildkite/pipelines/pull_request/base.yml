@@ -32,7 +32,6 @@ steps:
 
   - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
-    key: checks
     agents:
       machineType: c4d-standard-2
       diskType: hyperdisk-balanced
@@ -40,6 +39,7 @@ steps:
       spotZones: us-central1-c,us-central1-a
       diskSizeGb: 105
     timeout_in_minutes: 60
+    key: checks
     retry:
       automatic:
         - exit_status: '-1'
@@ -123,13 +123,13 @@ steps:
   - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
     label: 'Scout Test Run Builder'
     agents:
-      machineType: c3d-standard-8
+      machineType: n2d-standard-8
     key: build_scout_tests
     timeout_in_minutes: 20
     depends_on:
       - build
     env:
-      SCOUT_CONFIGS_DEPS: 'quick_checks,checks,linting,linting_with_types,check_oas_snapshot,check_types,build_scout_tests'
+      SCOUT_CONFIGS_DEPS: 'build_scout_tests,quick_checks,checks,linting,linting_with_types,check_oas_snapshot,check_types'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
     retry:
       automatic:
@@ -159,11 +159,12 @@ steps:
     key: build_api_docs
     depends_on:
       - build
-      - check_types
+      - quick_checks
+      - checks
       - linting
       - linting_with_types
-      - quick_checks
       - check_oas_snapshot
+      - check_types
     timeout_in_minutes: 90
     retry:
       automatic:
