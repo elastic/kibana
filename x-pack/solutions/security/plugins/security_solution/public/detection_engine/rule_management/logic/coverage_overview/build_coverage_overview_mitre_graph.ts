@@ -10,7 +10,7 @@ import type {
   MitreTactic,
   MitreTechnique,
   MitreSubTechnique,
-} from '../../../../detections/mitre/types';
+} from '../../../../../common/detection_engine/mitre/types';
 import type { CoverageOverviewMitreSubTechnique } from '../../model/coverage_overview/mitre_subtechnique';
 import type { CoverageOverviewMitreTactic } from '../../model/coverage_overview/mitre_tactic';
 import type { CoverageOverviewMitreTechnique } from '../../model/coverage_overview/mitre_technique';

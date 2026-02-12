@@ -10,18 +10,15 @@ import { isAIMessage, isHumanMessage } from '@langchain/core/messages';
 import type { ToolCallStep, ToolCallWithResult } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
-import { conversationToLangchainMessages } from './to_langchain_messages';
+import { convertPreviousRounds } from './to_langchain_messages';
+import type { ToolCallResultTransformer } from './create_result_transformer';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type {
-  ProcessedAttachment,
-  ProcessedConversation,
-  ProcessedConversationRound,
-  ProcessedRoundInput,
-} from './prepare_conversation';
+import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
+import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
 
-describe('conversationLangchainMessages', () => {
+describe('convertPreviousRounds', () => {
   const now = new Date().toISOString();
 
   const makeRoundInput = (
@@ -112,9 +109,9 @@ describe('conversationLangchainMessages', () => {
     };
   };
 
-  it('returns only the user message if no previous rounds', () => {
+  it('returns only the user message if no previous rounds', async () => {
     const nextInput = makeRoundInput('hello');
-    const result = conversationToLangchainMessages({
+    const result = await convertPreviousRounds({
       conversation: createConversation({ nextInput }),
     });
     expect(result).toHaveLength(1);
@@ -122,7 +119,7 @@ describe('conversationLangchainMessages', () => {
     expect(result[0].content).toBe('hello');
   });
 
-  it('handles a round with only user and assistant messages', () => {
+  it('handles a round with only user and assistant messages', async () => {
     const previousRounds = [
       createRound({
         id: 'round-1',
@@ -135,7 +132,7 @@ describe('conversationLangchainMessages', () => {
       }),
     ];
     const nextInput = makeRoundInput('how are you?');
-    const result = conversationToLangchainMessages({
+    const result = await convertPreviousRounds({
       conversation: createConversation({ previousRounds, nextInput }),
     });
 
@@ -150,7 +147,7 @@ describe('conversationLangchainMessages', () => {
     expect(secondHumanMessage.content).toBe('how are you?');
   });
 
-  it('handles a round with a tool call step', () => {
+  it('handles a round with a tool call step', async () => {
     const toolCall = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
       {
         tool_result_id: 'result-1',
@@ -172,7 +169,7 @@ describe('conversationLangchainMessages', () => {
       }),
     ];
     const nextInput = makeRoundInput('next');
-    const result = conversationToLangchainMessages({
+    const result = await convertPreviousRounds({
       conversation: createConversation({ previousRounds, nextInput }),
     });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
@@ -210,7 +207,7 @@ describe('conversationLangchainMessages', () => {
     expect(nextHumanMessage.content).toBe('next');
   });
 
-  it('handles multiple rounds', () => {
+  it('handles multiple rounds', async () => {
     const previousRounds = [
       createRound({
         id: 'round-1',
@@ -238,7 +235,7 @@ describe('conversationLangchainMessages', () => {
       }),
     ];
     const nextInput = makeRoundInput('bye');
-    const result = conversationToLangchainMessages({
+    const result = await convertPreviousRounds({
       conversation: createConversation({ previousRounds, nextInput }),
     });
     // 1 user + 1 assistant + 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
@@ -275,7 +272,7 @@ describe('conversationLangchainMessages', () => {
     expect(lastHumanMessage.content).toBe('bye');
   });
 
-  it('escapes tool ids', () => {
+  it('escapes tool ids', async () => {
     const toolCall = makeToolCallWithResult('call-1', '.search', { query: 'foo' }, [
       {
         tool_result_id: 'result-1',
@@ -297,7 +294,7 @@ describe('conversationLangchainMessages', () => {
       }),
     ];
     const nextInput = makeRoundInput('next');
-    const result = conversationToLangchainMessages({
+    const result = await convertPreviousRounds({
       conversation: createConversation({ previousRounds, nextInput }),
     });
     // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
@@ -310,7 +307,7 @@ describe('conversationLangchainMessages', () => {
   });
 
   describe('with attachments', () => {
-    it('includes a single attachment in the user message', () => {
+    it('includes a single attachment in the user message', async () => {
       const attachment = makeProcessedAttachment(
         'att-1',
         'text',
@@ -318,7 +315,7 @@ describe('conversationLangchainMessages', () => {
         'This is the formatted text content'
       );
       const nextInput = makeRoundInput('hello with attachment', [attachment]);
-      const result = conversationToLangchainMessages({
+      const result = await convertPreviousRounds({
         conversation: createConversation({ previousRounds: [], nextInput }),
       });
 
@@ -332,7 +329,7 @@ describe('conversationLangchainMessages', () => {
       expect(result[0].content).toContain('</attachments>');
     });
 
-    it('includes multiple attachments in the user message', () => {
+    it('includes multiple attachments in the user message', async () => {
       const attachment1 = makeProcessedAttachment(
         'att-1',
         'text',
@@ -349,7 +346,7 @@ describe('conversationLangchainMessages', () => {
         attachment1,
         attachment2,
       ]);
-      const result = conversationToLangchainMessages({
+      const result = await convertPreviousRounds({
         conversation: createConversation({ nextInput }),
       });
 
@@ -365,7 +362,7 @@ describe('conversationLangchainMessages', () => {
       expect(content).toContain('</attachments>');
     });
 
-    it('includes attachments from previous rounds', () => {
+    it('includes attachments from previous rounds', async () => {
       const attachment = makeProcessedAttachment(
         'prev-att-1',
         'text',
@@ -384,7 +381,7 @@ describe('conversationLangchainMessages', () => {
         }),
       ];
       const nextInput = makeRoundInput('next message');
-      const result = conversationToLangchainMessages({
+      const result = await convertPreviousRounds({
         conversation: createConversation({ previousRounds, nextInput }),
       });
 
@@ -404,6 +401,124 @@ describe('conversationLangchainMessages', () => {
       expect(isHumanMessage(secondHumanMessage)).toBe(true);
       expect(secondHumanMessage.content).toBe('next message');
       expect(secondHumanMessage.content).not.toContain('<attachments>');
+    });
+  });
+
+  describe('with resultTransformer', () => {
+    it('applies custom transformer to tool call results', async () => {
+      const toolCall = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
+        {
+          tool_result_id: 'result-1',
+          type: ToolResultType.other,
+          data: { original: 'data' },
+        },
+      ]);
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: makeRoundInput('find foo'),
+          steps: [makeToolCallStep(toolCall)],
+          response: makeAssistantResponse('done!'),
+          started_at: now,
+        }),
+      ];
+      const nextInput = makeRoundInput('next');
+      const conversation = createConversation({ previousRounds, nextInput });
+
+      // Custom transformer that modifies all results from a tool call
+      const customTransformer: ToolCallResultTransformer = jest.fn(async (toolCallArg) => {
+        return toolCallArg.results.map(
+          (result): ToolResult => ({
+            tool_result_id: result.tool_result_id,
+            type: ToolResultType.other,
+            data: {
+              ...(result.data as Record<string, unknown>),
+              transformedBy: 'custom',
+              toolId: toolCallArg.tool_id,
+            },
+          })
+        );
+      });
+
+      const result = await convertPreviousRounds({
+        conversation,
+        resultTransformer: customTransformer,
+      });
+
+      const toolResultMessage = result[2] as ToolMessage;
+      const content = JSON.parse(toolResultMessage.content as string);
+
+      expect(customTransformer).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tool_call_id: 'call-1',
+          tool_id: 'search',
+          results: expect.arrayContaining([
+            expect.objectContaining({ tool_result_id: 'result-1' }),
+          ]),
+        })
+      );
+      expect(content.results[0].data).toEqual({
+        original: 'data',
+        transformedBy: 'custom',
+        toolId: 'search',
+      });
+    });
+
+    it('transformer receives all results from a tool call', async () => {
+      const toolCall = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
+        {
+          tool_result_id: 'result-1',
+          type: ToolResultType.other,
+          data: { first: 'result' },
+        },
+        {
+          tool_result_id: 'result-2',
+          type: ToolResultType.other,
+          data: { second: 'result' },
+        },
+      ]);
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: makeRoundInput('find foo'),
+          steps: [makeToolCallStep(toolCall)],
+          response: makeAssistantResponse('done!'),
+          started_at: now,
+        }),
+      ];
+      const nextInput = makeRoundInput('next');
+      const conversation = createConversation({ previousRounds, nextInput });
+
+      // Transformer that aggregates results
+      const customTransformer: ToolCallResultTransformer = jest.fn(async (toolCallArg) => {
+        // Aggregate all results into one
+        const aggregated: ToolResult[] = [
+          {
+            tool_result_id: 'aggregated',
+            type: ToolResultType.other,
+            data: {
+              count: toolCallArg.results.length,
+              toolId: toolCallArg.tool_id,
+            },
+          },
+        ];
+        return aggregated;
+      });
+
+      const result = await convertPreviousRounds({
+        conversation,
+        resultTransformer: customTransformer,
+      });
+
+      const toolResultMessage = result[2] as ToolMessage;
+      const content = JSON.parse(toolResultMessage.content as string);
+
+      // Should have one aggregated result
+      expect(content.results).toHaveLength(1);
+      expect(content.results[0].data).toEqual({
+        count: 2,
+        toolId: 'search',
+      });
     });
   });
 });

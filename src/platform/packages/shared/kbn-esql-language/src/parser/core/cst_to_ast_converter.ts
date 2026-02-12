@@ -17,8 +17,10 @@ import { nonNullable, unescapeColumn } from './helpers';
 import { firstItem, lastItem, resolveItem, singleItems } from '../../ast/visitor/utils';
 import { type AstNodeParserFields, Builder } from '../../ast/builder';
 import { type ArithmeticUnaryContext } from '../antlr/esql_parser';
+import { PromQLParser } from '../../embedded_languages/promql/parser/parser';
 import type { AstNodeTemplate } from '../../ast/builder';
 import type { Parser } from './parser';
+import type { PromQLAstQueryExpression } from '../../embedded_languages/promql/types';
 
 const textExistsAndIsValid = (text: string | undefined): text is string =>
   !!(text && !/<missing /.test(text));
@@ -1506,14 +1508,14 @@ export class CstToAstConverter {
     command: ast.ESQLAstRerankCommand
   ): void {
     const onToken = ctx.ON();
-    const rerankFieldsCtx = ctx.rerankFields();
+    const fieldsCtx = ctx.fields();
 
-    if (!onToken || !rerankFieldsCtx) {
+    if (!onToken || !fieldsCtx) {
       return;
     }
 
-    const onOption = this.toOption(onToken.getText().toLowerCase(), rerankFieldsCtx);
-    const fields = this.fromRerankFields(rerankFieldsCtx);
+    const onOption = this.toOption(onToken.getText().toLowerCase(), fieldsCtx);
+    const fields = this.fromFields(fieldsCtx);
 
     onOption.args.push(...fields);
     onOption.location.min = onToken.symbol.start;
@@ -1572,97 +1574,6 @@ export class CstToAstConverter {
         command.inferenceId.incomplete = inferenceIdParam.valueUnquoted?.length === 0;
       }
     }
-  }
-
-  /**
-   * Collects all ON fields for RERANK.
-   *
-   * - Accepts simple columns (e.g. `title`).
-   * - Accepts assignments (e.g. `title = X(title, 2)`).
-   * - Accepts expressions after a qualified name (e.g. `field < 10`).
-   */
-  private fromRerankFields(ctx: cst.RerankFieldsContext | undefined): ast.ESQLAstField[] {
-    const fields: ast.ESQLAstField[] = [];
-    if (!ctx) {
-      return fields;
-    }
-
-    try {
-      for (const fieldCtx of ctx.rerankField_list()) {
-        const field = this.fromRerankField(fieldCtx);
-
-        if (field) {
-          fields.push(field);
-        }
-      }
-    } catch (e) {
-      // do nothing
-    }
-    return fields;
-  }
-
-  /**
-   * Parses a single RERANK field entry.
-   *
-   * Supports three forms:
-   * 1) Assignment: qualifiedName '=' booleanExpression
-   * 2) Column only: qualifiedName
-   */
-  private fromRerankField(ctx: cst.RerankFieldContext): ast.ESQLAstField | undefined {
-    try {
-      const qualifiedNameCtx = ctx.qualifiedName();
-
-      if (!qualifiedNameCtx) {
-        return undefined;
-      }
-
-      // 1) field assignment: <col> = <booleanExpression>
-      if (ctx.ASSIGN()) {
-        const left = this.toColumn(qualifiedNameCtx);
-        const assignment = this.toFunction(
-          ctx.ASSIGN().getText(),
-          ctx,
-          undefined,
-          'binary-expression'
-        ) as ast.ESQLBinaryExpression;
-
-        if (ctx.booleanExpression()) {
-          const right = this.fromBooleanExpression(ctx.booleanExpression());
-          const hasIncompleteItem = !!right?.incomplete;
-          const hasException = !!ctx.booleanExpression()?.exception;
-
-          if (!right || hasIncompleteItem || hasException) {
-            assignment.incomplete = true;
-          }
-
-          assignment.args.push(left);
-
-          if (right) {
-            assignment.args.push(right);
-          }
-
-          assignment.location = this.extendLocationToArgs(assignment);
-        } else {
-          // User typed something like `ON col0 =` and stopped.
-          // Build an assignment with only the left operand, mark it as incomplete,
-          assignment.args.push(left, []);
-          assignment.incomplete = true;
-          assignment.location = {
-            min: left.location.min,
-            max: ctx.ASSIGN()!.symbol.stop,
-          };
-        }
-
-        return assignment;
-      }
-
-      // 2) simple column reference
-      return this.toColumn(qualifiedNameCtx);
-    } catch (e) {
-      // do nothing
-    }
-
-    return undefined;
   }
 
   // --------------------------------------------------------------------- FUSE
@@ -1779,9 +1690,8 @@ export class CstToAstConverter {
     const command = this.createCommand('promql', ctx) as ast.ESQLAstPromqlCommand;
     const args: ast.ESQLAstExpression[] = command.args;
     const paramCtxs = ctx.promqlParam_list();
-    const query = this.toPromqlCommandQuery(ctx);
 
-    // PromQL params (key=value pairs)
+    // PromQL params: (key = value) pairs
     if (paramCtxs.length > 0) {
       const params = this.fromPromqlParamsToMap(paramCtxs);
       command.params = params;
@@ -1789,11 +1699,12 @@ export class CstToAstConverter {
       command.incomplete ||= params.incomplete;
     }
 
+    const query = this.toPromqlCommandQuery(ctx);
+
     // PromQL query
     if (query) {
       command.query = query;
       args.push(query);
-      command.incomplete ||= query.incomplete;
     } else {
       command.incomplete = true;
     }
@@ -1917,19 +1828,17 @@ export class CstToAstConverter {
    */
   private fromPromqlParamValue(
     ctx: cst.PromqlParamValueContext
-  ): (ast.ESQLAstExpression & { incomplete: boolean }) | undefined {
+  ): ast.ESQLAstExpression | undefined {
     const parserFields = this.getParserFields(ctx);
 
-    // Check for index patterns first
     const indexPatterns = ctx.promqlIndexPattern_list();
+
     if (indexPatterns.length > 0) {
-      // If multiple index patterns, join them with comma in the text representation
-      // For now, we'll return the first one as an identifier with the full text
-      const fullText = ctx.getText();
-      return Builder.identifier({ name: fullText }, parserFields);
+      return this.fromPromqlIndexPatternList(indexPatterns);
     }
 
     const quotedId = ctx.QUOTED_IDENTIFIER();
+
     if (quotedId) {
       const text = quotedId.getText();
       const name = text.slice(1, -1).replace(/``/g, '`');
@@ -1937,6 +1846,7 @@ export class CstToAstConverter {
     }
 
     const namedParam = ctx.NAMED_OR_POSITIONAL_PARAM();
+
     if (namedParam) {
       const text = namedParam.getText();
       const paramValue = text.slice(1); // Remove the leading '?'
@@ -1953,6 +1863,122 @@ export class CstToAstConverter {
     return undefined;
   }
 
+  private fromPromqlIndexPatternList(ctx: cst.PromqlIndexPatternContext[]): ast.ESQLList {
+    const length = ctx.length;
+    const values: ast.ESQLAstExpression[] = [];
+    let incomplete = false;
+
+    for (let i = 0; i < length; i++) {
+      const indexPatternCtx = ctx[i];
+      const item = this.fromPromqlIndexPattern(indexPatternCtx);
+
+      incomplete ||= Boolean(indexPatternCtx.exception) || item.incomplete;
+      values.push(item);
+    }
+
+    const location: ast.ESQLLocation = {
+      min: values[0]?.location.min ?? 0,
+      max: values[values.length - 1]?.location.max ?? 0,
+    };
+    const list = Builder.expression.list.bare(
+      { values },
+      {
+        incomplete,
+        location,
+      }
+    );
+
+    return list;
+  }
+
+  private fromPromqlIndexPattern(ctx: cst.PromqlIndexPatternContext): ast.ESQLSource {
+    const text = ctx.getText();
+    let prefix: ast.ESQLStringLiteral | undefined;
+    let index: ast.ESQLStringLiteral | undefined;
+    let selector: ast.ESQLStringLiteral | undefined;
+
+    const indexStringCtx = ctx.promqlIndexString();
+
+    if (indexStringCtx) {
+      index = this.fromPromqlIndexString(indexStringCtx);
+    }
+
+    const clusterStringCtx = ctx.promqlClusterString();
+
+    if (clusterStringCtx) {
+      prefix = this.fromUnquotedStringContext(clusterStringCtx);
+    }
+
+    const unquotedIndexStringCtx = ctx.promqlUnquotedIndexString();
+
+    if (unquotedIndexStringCtx) {
+      index = this.fromUnquotedStringContext(unquotedIndexStringCtx);
+    }
+
+    const selectorString = ctx.promqlSelectorString();
+
+    if (selectorString) {
+      selector = this.fromUnquotedStringContext(selectorString);
+    }
+
+    const source = Builder.expression.source.node(
+      {
+        sourceType: 'index',
+        prefix,
+        index,
+        selector,
+        name: text,
+      },
+      {
+        location: getPosition(ctx.start, ctx.stop),
+        incomplete: Boolean(ctx.exception || text === ''),
+        text: ctx?.getText(),
+      }
+    );
+
+    return source;
+  }
+
+  private fromPromqlIndexString(ctx: cst.PromqlIndexStringContext): ast.ESQLStringLiteral {
+    const unquotedIdentifierCtx = ctx.UNQUOTED_IDENTIFIER();
+
+    if (unquotedIdentifierCtx) {
+      return this.toUnquotedString(unquotedIdentifierCtx);
+    }
+
+    const unquotedSourceCtx = ctx.UNQUOTED_SOURCE();
+
+    if (unquotedSourceCtx) {
+      return this.toUnquotedString(unquotedSourceCtx);
+    }
+
+    const quotedStringCtx = ctx.QUOTED_STRING();
+
+    if (quotedStringCtx) {
+      return this.toStringLiteral(ctx);
+    }
+
+    return Builder.expression.literal.string('', { name: '' }, { incomplete: true });
+  }
+
+  private fromUnquotedStringContext(
+    ctx: Pick<cst.PromqlClusterStringContext, 'UNQUOTED_IDENTIFIER' | 'UNQUOTED_SOURCE'>
+  ): ast.ESQLStringLiteral {
+    const unquotedIdentifierCtx = ctx.UNQUOTED_IDENTIFIER();
+
+    if (unquotedIdentifierCtx) {
+      return this.toUnquotedString(unquotedIdentifierCtx);
+    }
+
+    const unquotedSourceCtx = ctx.UNQUOTED_SOURCE();
+
+    if (unquotedSourceCtx) {
+      return this.toUnquotedString(unquotedSourceCtx);
+    }
+
+    return Builder.expression.literal.string('', { name: '' }, { incomplete: true });
+  }
+
   private toPromqlCommandQuery(
     ctx: cst.PromqlCommandContext
   ): ast.ESQLAstPromqlCommandQuery | undefined {
@@ -1962,7 +1988,11 @@ export class CstToAstConverter {
     const valueNameCtx = ctx.valueName();
     let node: ast.ESQLAstPromqlCommandQuery | undefined = this.fromPromqlQueryParts(queryPartCtxs);
 
-    // No parenthesis: ( promqlQueryPart+ )
+    if (!node) {
+      return undefined;
+    }
+
+    // No parenthesis
     if (!lp) {
       return node;
     }
@@ -1976,7 +2006,7 @@ export class CstToAstConverter {
       incomplete: !hasCloseParen || node.incomplete,
     });
 
-    // There's a "name = ( query )"" assignment
+    // There's a "name = ( query )" assignment
     if (valueNameCtx) {
       const valueNameId = this.fromIdentifier(valueNameCtx);
       node = Builder.expression.func.binary(
@@ -1994,36 +2024,29 @@ export class CstToAstConverter {
   }
 
   /**
-   * Converts promql query parts to an "unknown" node.
-   * The detailed parsing of PromQL query will be done later.
+   * Parses promql query parts into a PromQL AST node.
    */
-  private fromPromqlQueryParts(queryPartCtxs: cst.PromqlQueryPartContext[]): ast.ESQLUnknownItem {
+  private fromPromqlQueryParts(
+    queryPartCtxs: cst.PromqlQueryPartContext[]
+  ): PromQLAstQueryExpression | undefined {
     if (queryPartCtxs.length === 0) {
-      return {
-        type: 'unknown',
-        name: 'unknown',
-        text: '',
-        location: { min: 0, max: 0 },
-        incomplete: true,
-      };
+      return undefined;
     }
 
     const firstPart = queryPartCtxs[0];
     const lastPart = queryPartCtxs[queryPartCtxs.length - 1];
     const location = getPosition(firstPart.start, lastPart.stop);
     const text = this.parser.src.slice(location.min, location.max + 1);
-
-    // If the text is empty, only whitespace, or only empty parens like "()", mark as incomplete
     const trimmedText = text.trim();
     const isEmpty = !trimmedText || trimmedText === '()';
 
-    return {
-      type: 'unknown',
-      name: 'unknown',
-      text,
-      location,
-      incomplete: isEmpty,
-    };
+    if (isEmpty) {
+      return undefined;
+    }
+
+    const parsed = PromQLParser.parse(text, { offset: location.min });
+
+    return parsed.root;
   }
 
   // --------------------------------------------------------------------- FORK
@@ -2318,7 +2341,7 @@ export class CstToAstConverter {
     const value = this.fromPrimaryExpressionStrict(ctx.primaryExpression());
 
     return Builder.expression.inlineCast(
-      { castType: ctx.dataType().getText().toLowerCase() as ast.InlineCastingType, value },
+      { castType: ctx.dataType().getText().toLowerCase(), value },
       this.getParserFields(ctx)
     );
   }
@@ -2573,7 +2596,7 @@ export class CstToAstConverter {
     if (dataTypeCtx) {
       expression = Builder.expression.inlineCast(
         {
-          castType: dataTypeCtx.getText().toLowerCase() as ast.InlineCastingType,
+          castType: dataTypeCtx.getText().toLowerCase(),
           value: expression,
         },
         {
@@ -2650,6 +2673,8 @@ export class CstToAstConverter {
 
   /**
    * Converts selector string context to string literal
+   *
+   * @todo Re-use {@link toUnquotedString} here.
    */
   private toSelectorString(ctx: cst.SelectorStringContext): ast.ESQLStringLiteral {
     const unquotedCtx = ctx.UNQUOTED_SOURCE();
@@ -2664,6 +2689,23 @@ export class CstToAstConverter {
         unquoted: true,
       },
       this.createParserFieldsFromTerminalNode(unquotedCtx)
+    );
+  }
+
+  /**
+   * Converts UNQUOTED_IDENTIFIER or UNQUOTED_SOURCE to an unquoted string literal.
+   */
+  private toUnquotedString(ctx: antlr.TerminalNode): ast.ESQLStringLiteral {
+    const valueUnquoted = ctx.getText();
+    const quotedString = LeafPrinter.string({ valueUnquoted });
+
+    return Builder.expression.literal.string(
+      valueUnquoted,
+      {
+        name: quotedString,
+        unquoted: true,
+      },
+      this.createParserFieldsFromTerminalNode(ctx)
     );
   }
 

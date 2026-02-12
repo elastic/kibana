@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getTimeSizeAndUnitLabel } from './format_size_units';
+import { getTimeSizeAndUnitLabel, toMillis } from './format_size_units';
 
 describe('format_size_units', () => {
   describe('getTimeSizeAndUnitLabel', () => {
@@ -118,6 +118,79 @@ describe('format_size_units', () => {
         expect(getTimeSizeAndUnitLabel('12h')).toBe('12 hours');
         expect(getTimeSizeAndUnitLabel('1d')).toBe('1 day');
         expect(getTimeSizeAndUnitLabel('365d')).toBe('365 days');
+      });
+    });
+  });
+
+  describe('toMillis', () => {
+    describe('Valid time units', () => {
+      it('should convert days to milliseconds', () => {
+        expect(toMillis('1d')).toBe(86400000); // 1 day = 24 * 60 * 60 * 1000
+        expect(toMillis('7d')).toBe(604800000); // 7 days
+        expect(toMillis('30d')).toBe(2592000000); // 30 days
+      });
+
+      it('should convert hours to milliseconds', () => {
+        expect(toMillis('1h')).toBe(3600000); // 1 hour = 60 * 60 * 1000
+        expect(toMillis('24h')).toBe(86400000); // 24 hours = 1 day
+        expect(toMillis('12h')).toBe(43200000);
+      });
+
+      it('should convert minutes to milliseconds', () => {
+        expect(toMillis('1m')).toBe(60000); // 1 minute = 60 * 1000
+        expect(toMillis('60m')).toBe(3600000); // 60 minutes = 1 hour
+        expect(toMillis('15m')).toBe(900000);
+      });
+
+      it('should convert seconds to milliseconds', () => {
+        expect(toMillis('1s')).toBe(1000);
+        expect(toMillis('60s')).toBe(60000); // 60 seconds = 1 minute
+        expect(toMillis('30s')).toBe(30000);
+      });
+
+      it('should convert milliseconds to milliseconds', () => {
+        expect(toMillis('1ms')).toBe(1);
+        expect(toMillis('500ms')).toBe(500);
+        expect(toMillis('1000ms')).toBe(1000);
+      });
+
+      it('should convert microseconds to milliseconds', () => {
+        expect(toMillis('1000micros')).toBe(1); // 1000 microseconds = 1 ms
+        expect(toMillis('500micros')).toBe(0.5);
+      });
+
+      it('should convert nanoseconds to milliseconds', () => {
+        expect(toMillis('1000000nanos')).toBe(1); // 1,000,000 nanoseconds = 1 ms
+        expect(toMillis('500000nanos')).toBe(0.5);
+      });
+    });
+
+    describe('Edge cases', () => {
+      it('should return undefined for undefined input', () => {
+        expect(toMillis(undefined)).toBeUndefined();
+      });
+
+      it('should return undefined for empty string', () => {
+        expect(toMillis('')).toBeUndefined();
+      });
+
+      it('should handle zero values', () => {
+        expect(toMillis('0d')).toBe(0);
+        expect(toMillis('0h')).toBe(0);
+        expect(toMillis('0m')).toBe(0);
+        expect(toMillis('0s')).toBe(0);
+        expect(toMillis('0ms')).toBe(0);
+      });
+
+      it('should return undefined for unrecognized units', () => {
+        expect(toMillis('30x')).toBeUndefined();
+        expect(toMillis('invalid')).toBeUndefined();
+      });
+
+      it('should return undefined for malformed input', () => {
+        expect(toMillis('d30')).toBeUndefined();
+        expect(toMillis('abc123d')).toBeUndefined();
+        expect(toMillis('30')).toBeUndefined();
       });
     });
   });

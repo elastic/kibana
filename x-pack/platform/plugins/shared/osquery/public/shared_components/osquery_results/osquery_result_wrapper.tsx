@@ -25,7 +25,7 @@ import type { OsqueryActionResultProps } from './types';
 
 // eslint-disable-next-line react/display-name
 const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
-  ({ actionId, ruleName, startDate, ecsData }) => {
+  ({ actionId, ruleName, startDate, ecsData, addToTimeline }) => {
     const { read } = useKibana().services.application.capabilities.osquery;
 
     const [isLive, setIsLive] = useState(false);
@@ -56,6 +56,7 @@ const OsqueryResultComponent = React.memo<OsqueryActionResultProps>(
               startDate={data?.['@timestamp']}
               expirationDate={data?.expiration}
               agentIds={data?.agents}
+              addToTimeline={addToTimeline}
             />
           )}
         </EuiComment>
