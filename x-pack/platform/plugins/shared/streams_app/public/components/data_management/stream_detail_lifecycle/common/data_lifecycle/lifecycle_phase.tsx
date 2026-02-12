@@ -125,7 +125,10 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
                 })}
               </EuiFlexItem>
               {isReadOnly && (
-                <EuiFlexItem grow={false} data-test-subj={`${prefix}lifecyclePhase-${label}-readOnly`}>
+                <EuiFlexItem
+                  grow={false}
+                  data-test-subj={`${prefix}lifecyclePhase-${label}-readOnly`}
+                >
                   <EuiIconTip
                     type="readOnly"
                     size="m"
