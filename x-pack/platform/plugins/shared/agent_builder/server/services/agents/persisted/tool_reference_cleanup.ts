@@ -33,8 +33,8 @@ export async function runToolRefCleanup({
     },
   });
 
-  let agentsUpdated = 0;
   const hits = response.hits.hits;
+  const bulkOperations = [];
 
   for (const hit of hits) {
     const source = hit._source;
@@ -55,12 +55,17 @@ export async function runToolRefCleanup({
       updateDate: new Date(),
     });
 
-    await storage.getClient().index({
-      id: hit._id,
-      document: updated,
+    bulkOperations.push({
+      index: { _id: String(hit._id), document: updated },
     });
-    agentsUpdated += 1;
   }
 
-  return { agentsUpdated };
+  if (bulkOperations.length > 0) {
+    await storage.getClient().bulk({
+      operations: bulkOperations,
+      refresh: 'wait_for',
+    });
+  }
+
+  return { agentsUpdated: bulkOperations.length };
 }
