@@ -8,10 +8,7 @@
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import type {
-  AttachmentResolveContext,
-  AttachmentTypeDefinition,
-} from '@kbn/agent-builder-server/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
@@ -159,68 +156,69 @@ describe('attachment tools', () => {
       expect((result.results[0] as any).data.data).toBe('hello');
     });
 
-    it('resolves visualization_ref attachments when savedObjectsClient is available', async () => {
+    it('reads a visualization attachment that was resolved from origin at add time', async () => {
+      const resolvedData = {
+        query: 'My Lens',
+        visualization: { layers: [] },
+        chart_type: 'bar',
+        esql: 'FROM index',
+      };
       const customAttachmentsService = {
         getTypeDefinition: () =>
           ({
-            id: AttachmentType.visualizationRef,
+            id: AttachmentType.visualization,
             validate: (input: unknown) => ({ valid: true, data: input }),
+            validateOrigin: (input: unknown) => ({ valid: true, data: input }),
             format: (formattedAttachment: Attachment) => ({
               getRepresentation: () => ({
                 type: 'text',
                 value: JSON.stringify(formattedAttachment.data),
               }),
             }),
-            resolve: async (_a: Attachment, ctx: AttachmentResolveContext) => {
-              const resolved = await ctx.savedObjectsClient!.resolve('lens', 'so-123');
-              return {
-                found: true,
-                outcome: resolved.outcome,
-                alias_target_id: resolved.alias_target_id,
-                saved_object_id: resolved.saved_object.id,
-                saved_object_type: resolved.saved_object.type,
-                updated_at: resolved.saved_object.updated_at,
-                attributes: resolved.saved_object.attributes,
-                title: (resolved.saved_object.attributes as any).title,
-                description: (resolved.saved_object.attributes as any).description,
-              };
-            },
+            resolve: async () => resolvedData,
+            isReadonly: false,
           } as unknown as AttachmentTypeDefinition),
       } as any;
       const resolveAttachmentManager = createAttachmentStateManager([], {
         getTypeDefinition: customAttachmentsService.getTypeDefinition,
       });
-      const attachment = await resolveAttachmentManager.add({
-        type: AttachmentType.visualizationRef,
-        data: {
-          saved_object_id: 'so-123',
+
+      // Add the attachment with origin — content is resolved during add()
+      const resolveContext = {
+        request: httpServerMock.createKibanaRequest(),
+        spaceId: 'default',
+        savedObjectsClient: {} as any,
+      };
+      const attachment = await resolveAttachmentManager.add(
+        {
+          type: AttachmentType.visualization,
+          origin: { saved_object_id: 'so-123' },
+          description: 'Lens ref',
         },
-        description: 'Lens ref',
-      });
+        undefined,
+        resolveContext
+      );
+
+      // Verify origin is stored on the attachment
+      expect(attachment.origin).toEqual({ saved_object_id: 'so-123' });
+
+      // Read should return the resolved data directly — no raw_data, no re-resolve
       const tool = createAttachmentTools({
         attachmentManager: resolveAttachmentManager,
         attachmentsService: customAttachmentsService,
         formatContext,
       }).find((t) => t.id === 'platform.core.attachment_read')!;
-      const result = (await tool.handler({ attachment_id: attachment.id }, {
-        savedObjectsClient: {
-          resolve: async () => ({
-            outcome: 'exactMatch',
-            alias_target_id: null,
-            saved_object: {
-              id: 'so-123',
-              type: 'lens',
-              updated_at: '2026-01-01T00:00:00.000Z',
-              attributes: { title: 'My Lens', description: 'Desc', state: { a: 1 } },
-            },
-          }),
-        },
-      } as any)) as ToolHandlerStandardReturn;
 
-      expect((result.results[0] as any).data.type).toBe(AttachmentType.visualizationRef);
-      expect((result.results[0] as any).data.raw_data).toEqual({ saved_object_id: 'so-123' });
-      expect((result.results[0] as any).data.data).toContain('"found":true');
-      expect((result.results[0] as any).data.data).toContain('"title":"My Lens"');
+      const result = (await tool.handler(
+        { attachment_id: attachment.id },
+        {} as any
+      )) as ToolHandlerStandardReturn;
+
+      expect((result.results[0] as any).data.type).toBe(AttachmentType.visualization);
+      // Data is the resolved content stored directly
+      expect((result.results[0] as any).data.data).toEqual(resolvedData);
+      // No raw_data field in the response
+      expect((result.results[0] as any).data.raw_data).toBeUndefined();
     });
 
     it('reads a specific version', async () => {

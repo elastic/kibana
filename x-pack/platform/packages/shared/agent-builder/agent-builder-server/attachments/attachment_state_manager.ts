@@ -62,23 +62,21 @@ export interface ResolvedAttachmentRef {
  * Provides CRUD operations with version tracking.
  */
 export interface AttachmentStateManager {
-  /** Get an attachment by ID. Optionally resolve by-reference data when context is provided. */
+  /** Get an attachment by ID. Returns the version data directly (no resolve). */
   get(
     id: string,
-    options: {
-      context: AttachmentResolveContext;
+    options?: {
       actor?: AttachmentRefActor;
       version?: number;
     }
-  ): Promise<
+  ):
     | {
         id: string;
         version: number;
         type: AttachmentType;
         data: AttachmentVersion;
       }
-    | undefined
-  >;
+    | undefined;
   /** Get the raw stored attachment record (all versions, metadata). */
   getAttachmentRecord(id: string): VersionedAttachment | undefined;
   /** Get all active (non-deleted) attachments */
@@ -88,10 +86,11 @@ export interface AttachmentStateManager {
   /** Get diff between two versions of an attachment */
   getDiff(id: string, fromVersion: number, toVersion: number): AttachmentDiff | undefined;
 
-  /** Add a new attachment */
+  /** Add a new attachment. If only `origin` is provided (no `data`), resolves content via the type's resolve(). */
   add<TType extends string>(
     input: VersionedAttachmentInput<TType>,
-    actor?: AttachmentRefActor
+    actor?: AttachmentRefActor,
+    resolveContext?: AttachmentResolveContext
   ): Promise<VersionedAttachment<TType>>;
   /** Update an existing attachment (creates new version if content changed) */
   update(
@@ -115,14 +114,6 @@ export interface AttachmentStateManager {
 
   /** Resolve attachment references to their actual data */
   resolveRefs(refs: AttachmentVersionRef[]): ResolvedAttachmentRef[];
-  /** Resolve a single attachment's referenced data if the type supports it */
-  resolveAttachment(
-    attachment: VersionedAttachment,
-    options: {
-      context: AttachmentResolveContext;
-      version: number;
-    }
-  ): Promise<unknown | undefined>;
   /** Get total estimated tokens for all active attachments */
   getTotalTokenEstimate(): number;
   /** Check if any changes have been made */
@@ -186,12 +177,11 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
   }
 
-  async get(
+  get(
     id: string,
-    options: {
+    options?: {
       version?: number;
       actor?: AttachmentRefActor;
-      context: AttachmentResolveContext;
     }
   ) {
     const attachment = this.attachments.get(id);
@@ -205,29 +195,15 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       return undefined;
     }
 
-    const resolvedContent = await this.resolveAttachment(attachment, {
-      context: options.context,
-      version,
-    });
-
-    if (options.actor) {
+    if (options?.actor) {
       this.recordAccess(id, version, ATTACHMENT_REF_OPERATION.read, options.actor);
     }
-
-    const responseVersion: AttachmentVersion =
-      resolvedContent !== undefined
-        ? {
-            ...attachmentVersion,
-            data: resolvedContent,
-            raw_data: attachmentVersion.raw_data ?? attachmentVersion.data,
-          }
-        : attachmentVersion;
 
     return {
       id,
       version,
       type: attachment.type as AttachmentType,
-      data: responseVersion,
+      data: attachmentVersion,
     };
   }
 
@@ -292,11 +268,51 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
 
   async add<TType extends string>(
     input: VersionedAttachmentInput<TType>,
-    actor?: AttachmentRefActor
+    actor?: AttachmentRefActor,
+    resolveContext?: AttachmentResolveContext
   ): Promise<VersionedAttachment<TType>> {
     const id = input.id || uuidv4();
     const now = new Date().toISOString();
-    const validatedData = await this.validateAttachmentData(input.type, input.data);
+
+    let validatedData: unknown;
+
+    if (input.data !== undefined) {
+      validatedData = await this.validateAttachmentData(input.type, input.data);
+    } else if (input.origin !== undefined) {
+      const typeDefinition = this.options.getTypeDefinition(input.type);
+      if (!typeDefinition) {
+        throw new Error(`Unknown attachment type: ${input.type}`);
+      }
+      if (!typeDefinition.resolve) {
+        throw new Error(`Attachment type "${input.type}" does not support resolving from origin`);
+      }
+
+      let validatedOrigin: unknown = input.origin;
+      if (typeDefinition.validateOrigin) {
+        const originResult = await typeDefinition.validateOrigin(input.origin);
+        if (!originResult.valid) {
+          throw new Error(`Invalid origin data for type "${input.type}": ${originResult.error}`);
+        }
+        validatedOrigin = originResult.data;
+      }
+
+      if (!resolveContext) {
+        throw new Error(
+          `Resolve context is required to add attachment of type "${input.type}" with origin`
+        );
+      }
+
+      const resolved = await typeDefinition.resolve(validatedOrigin, resolveContext);
+      if (resolved === undefined) {
+        throw new Error(
+          `Failed to resolve content from origin for attachment type "${input.type}"`
+        );
+      }
+      validatedData = resolved;
+    } else {
+      throw new Error('Either data or origin must be provided when adding an attachment');
+    }
+
     const contentHash = hashContent(validatedData);
     const tokens = estimateTokens(validatedData);
 
@@ -317,6 +333,7 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       ...(input.description && { description: input.description }),
       ...(input.hidden !== undefined && { hidden: input.hidden }),
       readonly: input.readonly ?? this.getDefaultReadonly(input.type),
+      ...(input.origin !== undefined && { origin: input.origin }),
     };
 
     this.attachments.set(id, attachment);
@@ -476,79 +493,6 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
 
     return results;
-  }
-
-  async resolveAttachment(
-    attachment: VersionedAttachment,
-    options: {
-      version: number;
-      context: AttachmentResolveContext;
-    }
-  ): Promise<unknown | undefined> {
-    const { version, context } = options;
-    const { id, type } = attachment;
-    const attachmentVersion = getVersion(attachment, version);
-    const definition = this.options.getTypeDefinition(type);
-    if (!definition?.resolve) {
-      return undefined;
-    }
-
-    if (!attachmentVersion) {
-      return undefined;
-    }
-
-    const referenceData = attachmentVersion.raw_data ?? attachmentVersion.data;
-    const resolved = await definition.resolve(
-      {
-        id,
-        type,
-        data: referenceData,
-      },
-      context
-    );
-
-    if (resolved === undefined) {
-      return undefined;
-    }
-
-    const currentResolved =
-      attachmentVersion.raw_data !== undefined ? attachmentVersion.data : undefined;
-    const isSameResolved =
-      currentResolved !== undefined && JSON.stringify(currentResolved) === JSON.stringify(resolved);
-
-    if (isSameResolved) {
-      return resolved;
-    }
-
-    const newContentHash = hashContent(resolved);
-    const newTokens = estimateTokens(resolved);
-
-    if (attachmentVersion.raw_data === undefined) {
-      // First resolve: cache resolved data on the existing version without bumping version.
-      attachmentVersion.raw_data = attachmentVersion.data;
-      attachmentVersion.data = resolved;
-      attachmentVersion.content_hash = newContentHash;
-      attachmentVersion.estimated_tokens = newTokens;
-      this.dirty = true;
-      return resolved;
-    }
-
-    const newVersionNumber = attachment.current_version + 1;
-    const newVersion: AttachmentVersion = {
-      ...attachmentVersion,
-      version: newVersionNumber,
-      data: resolved,
-      raw_data: attachmentVersion.raw_data,
-      created_at: new Date().toISOString(),
-      content_hash: newContentHash,
-      estimated_tokens: newTokens,
-    };
-
-    attachment.versions.push(newVersion);
-    attachment.current_version = newVersionNumber;
-    this.dirty = true;
-
-    return resolved;
   }
 
   getTotalTokenEstimate(): number {

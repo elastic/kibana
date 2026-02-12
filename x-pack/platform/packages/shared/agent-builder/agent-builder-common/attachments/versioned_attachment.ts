@@ -11,13 +11,11 @@ import type { AttachmentType, AttachmentDataOf } from './attachment_types';
 /**
  * Represents a single version of an attachment's content.
  */
-export interface AttachmentVersion<DataType = unknown, RawDataType = unknown> {
+export interface AttachmentVersion<DataType = unknown> {
   /** Version number (starts at 1) */
   version: number;
   /** The attachment data for this version */
   data: DataType;
-  /** The attachment raw data for by reference attachments */
-  raw_data?: RawDataType;
   /** When this version was created */
   created_at: string;
   /** Hash of the content for deduplication */
@@ -52,6 +50,11 @@ export interface VersionedAttachment<
   readonly?: boolean;
   /** The client-provided ID if this attachment was created with one (e.g., via flyout configuration) */
   client_id?: string;
+  /**
+   * Origin/reference info for attachments created from external sources (e.g., saved objects).
+   * Undefined for by-value attachments.
+   */
+  origin?: unknown;
 }
 
 /**
@@ -114,8 +117,10 @@ export interface VersionedAttachmentInput<
   id?: string;
   /** Type of the attachment */
   type: Type;
-  /** The attachment data */
-  data: DataType;
+  /** The attachment data. Optional when `origin` is provided (content will be resolved). */
+  data?: DataType;
+  /** Origin/reference info for by-reference attachments (e.g., saved object ID). */
+  origin?: unknown;
   /** Human-readable description */
   description?: string;
   /** Whether the attachment should be hidden */
@@ -150,7 +155,6 @@ export const attachmentVersionRefSchema = z.object({
 export const attachmentVersionSchema = z.object({
   version: z.number().int().positive(),
   data: z.unknown(),
-  raw_data: z.unknown().optional(),
   created_at: z.string(),
   content_hash: z.string(),
   estimated_tokens: z.number().int().optional(),
@@ -166,12 +170,14 @@ export const versionedAttachmentSchema = z.object({
   hidden: z.boolean().optional(),
   readonly: z.boolean().optional(),
   client_id: z.string().optional(),
+  origin: z.unknown().optional(),
 });
 
 export const versionedAttachmentInputSchema = z.object({
   id: z.string().optional(),
   type: z.string(),
-  data: z.unknown(),
+  data: z.unknown().optional(),
+  origin: z.unknown().optional(),
   description: z.string().optional(),
   hidden: z.boolean().optional(),
   readonly: z.boolean().optional(),
