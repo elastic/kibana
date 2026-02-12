@@ -6,6 +6,7 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { AggregateQuery } from '@kbn/es-query';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
@@ -50,6 +51,7 @@ export function getSuggestions({
   dataViews,
   mainPalette,
   allowMixed,
+  query,
 }: {
   datasourceMap: DatasourceMap;
   datasourceStates: DatasourceStates;
@@ -63,6 +65,8 @@ export function getSuggestions({
   dataViews: DataViewsState;
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
+  /** Optional query (e.g. ES|QL) for context-aware suggestions (e.g. prefer line for time series). */
+  query?: AggregateQuery;
 }): Suggestion[] {
   const datasources = Object.entries(datasourceMap).filter(
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
@@ -169,7 +173,8 @@ export function getSuggestions({
             visualizeTriggerFieldContext && 'isVisualizeAction' in visualizeTriggerFieldContext,
             activeData,
             allowMixed,
-            datasourceId
+            datasourceId,
+            query
           );
         });
     })
@@ -240,7 +245,8 @@ function getVisualizationSuggestions(
   isFromContext?: boolean,
   activeData?: Record<string, Datatable>,
   allowMixed?: boolean,
-  datasourceId?: string
+  datasourceId?: string,
+  query?: AggregateQuery
 ) {
   try {
     const isSubtypeSupported =
@@ -256,6 +262,7 @@ function getVisualizationSuggestions(
         activeData,
         allowMixed,
         datasourceId,
+        query,
       })
       .map(({ state, ...visualizationSuggestion }) => ({
         ...visualizationSuggestion,

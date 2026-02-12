@@ -71,7 +71,10 @@ import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
 import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
-import { CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY } from './constants';
+import {
+  CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
+  IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
+} from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
 
 /**
@@ -89,6 +92,7 @@ export interface UrlTracker {
 
 export interface DiscoverFeatureFlags {
   getCascadeLayoutEnabled: () => boolean;
+  getIsEsqlDefault: () => boolean;
 }
 
 export interface DiscoverServices {
@@ -201,6 +205,8 @@ export const buildServices = ({
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: () =>
         core.featureFlags.getBooleanValue(CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, false),
+      getIsEsqlDefault: () =>
+        core.featureFlags.getBooleanValue(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,

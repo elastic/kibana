@@ -74,6 +74,19 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconUrlvoid" */ './specs/urlvoid/icon')),
   ],
   [
+    '.jira-cloud',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconJiraCloud" */ './specs/atlassian/jira-cloud/icon')
+    ),
+  ],
+  [
+    '.google_drive',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
+    ),
+  ],
+  [
     '.microsoft-teams',
     lazy(
       () =>

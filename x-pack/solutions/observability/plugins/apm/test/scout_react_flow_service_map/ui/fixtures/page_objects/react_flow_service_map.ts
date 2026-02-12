@@ -127,16 +127,25 @@ export class ReactFlowServiceMapPage {
   async focusNodeAndWaitForFocus(nodeId: string) {
     await this.waitForNodeToLoad(nodeId);
     const node = this.getNodeById(nodeId);
-    await node.focus();
+    const button = node.locator('[role="button"]');
+    await button.focus();
     await this.page.waitForFunction((id) => {
       const nodeEl = document.querySelector(`[data-id="${id}"]`);
-      return nodeEl === document.activeElement || nodeEl?.contains(document.activeElement);
+      const buttonEl = nodeEl?.querySelector('[role="button"]');
+      return (
+        buttonEl === document.activeElement ||
+        nodeEl === document.activeElement ||
+        nodeEl?.contains(document.activeElement)
+      );
     }, nodeId);
   }
 
   async openPopoverWithKeyboard(nodeId: string, key: 'Enter' | ' ') {
     await this.focusNodeAndWaitForFocus(nodeId);
-    await this.page.keyboard.press(key);
+
+    const node = this.getNodeById(nodeId);
+    const button = node.locator('[role="button"]');
+    await button.press(key === ' ' ? 'Space' : key);
     await this.waitForPopoverToBeVisible();
   }
 
