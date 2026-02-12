@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync, writeFileSync } from 'fs';
-import { resolve } from 'path';
 import { takeSnapshot } from '../snapshots/take_snapshot';
 import type { MigrationInfoRecord, MigrationSnapshot } from '../types';
-import { TEST_TYPES } from '../commands/test/types';
-
-const BASELINE_SNAPSHOT_PATH = resolve(__dirname, '../commands/test/baseline_snapshot.json');
+import { fileToJson, jsonToFile } from './json';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 
 /**
  * Refreshes computed hashes in `baseline_snapshot.json` while preserving
@@ -32,11 +29,15 @@ const BASELINE_SNAPSHOT_PATH = resolve(__dirname, '../commands/test/baseline_sna
  *    `schemas`) in the baseline from the fresh snapshot.
  * 4. Writes the updated baseline back to disk.
  */
-export const updateBaselineHashes = async (): Promise<{ updated: string[]; path: string }> => {
-  const baseline: MigrationSnapshot = JSON.parse(
-    readFileSync(BASELINE_SNAPSHOT_PATH, { encoding: 'utf-8' })
-  );
-  const freshSnapshot = await takeSnapshot(TEST_TYPES);
+export const updateBaselineHashes = async (
+  testTypes: SavedObjectsType<any>[],
+  baselineSnapshotPath: string
+): Promise<{ updated: string[]; path: string }> => {
+  const baseline = (await fileToJson(baselineSnapshotPath)) as MigrationSnapshot | undefined;
+  if (!baseline) {
+    throw new Error(`Baseline snapshot not found at ${baselineSnapshotPath}`);
+  }
+  const freshSnapshot = await takeSnapshot(testTypes);
   const updated: string[] = [];
 
   for (const [typeName, baselineType] of Object.entries(baseline.typeDefinitions)) {
@@ -82,8 +83,8 @@ export const updateBaselineHashes = async (): Promise<{ updated: string[]; path:
   }
 
   if (updated.length > 0) {
-    writeFileSync(BASELINE_SNAPSHOT_PATH, JSON.stringify(baseline, null, 2) + '\n');
+    await jsonToFile(baselineSnapshotPath, JSON.stringify(baseline, null, 2) + '\n');
   }
 
-  return { updated, path: BASELINE_SNAPSHOT_PATH };
+  return { updated, path: baselineSnapshotPath };
 };

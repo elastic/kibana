@@ -92,7 +92,6 @@ export function runCheckSavedObjectsCli() {
             title: 'Validate SO changes',
             task: validateSOChanges,
             enabled: !server && !test,
-            skip: test,
           },
           {
             title: 'Fallback to test mode (no updated types detected)',
