@@ -100,16 +100,14 @@ export async function getTransaction({
         })
       : undefined;
 
-  const serverWithPort = server as Transaction['server'];
+  const serverTransaction = server as Transaction['server'];
 
   return {
     ...event,
-    server: serverWithPort
-      ? {
-          ...serverWithPort,
-          port: serverWithPort.port ? Number(serverWithPort.port) : undefined,
-        }
-      : undefined,
+    server: {
+      ...serverTransaction,
+      port: serverTransaction?.port ? Number(serverTransaction.port) : undefined,
+    },
     transaction: {
       ...transaction,
       marks: source?.transaction?.marks,

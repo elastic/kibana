@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this code except in compliance with the Elastic License
- * 2.0.
- */
-
 import { getTransaction } from '.';
 
 const requiredFieldsForHit = {
@@ -61,7 +54,7 @@ describe('getTransaction', () => {
       end: 50000,
     });
     expect(result).toBeDefined();
-    expect(result?.server).toBeUndefined();
+    expect(result?.server).toStrictEqual({ port: undefined });
     expect(result?.transaction.name).toBe('POST /api/test');
   });
 
