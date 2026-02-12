@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const urlTemplate = `{{kibanaUrl}}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{date event.from}}',to:'{{date event.to}}'))&_a=(columns:!(_source),filters:{{rison context.panel.filters}},index:'{{context.panel.indexPatternId}}',interval:auto,query:(language:{{context.panel.query.language}},query:'{{context.panel.query.query}}'),sort:!())`;
 
-      await testSubjects.click('actionFactoryItem-URL_DRILLDOWN');
+      await testSubjects.click('drilldownFactoryItem-url_drilldown');
       await dashboardDrilldownsManage.fillInDashboardToURLDrilldownWizard({
         drilldownName: DRILLDOWN_TO_DISCOVER_URL,
         destinationURLTemplate: urlTemplate,

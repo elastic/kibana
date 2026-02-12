@@ -347,7 +347,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // add a drilldown to the pie chart
       await dashboardDrilldownPanelActions.clickCreateDrilldown();
-      await testSubjects.click('actionFactoryItem-OPEN_IN_DISCOVER_DRILLDOWN');
+      await testSubjects.click('drilldownFactoryItem-discover_drilldown');
       await dashboardDrilldownsManage.saveChanges();
       await dashboardDrilldownsManage.closeFlyout();
       await header.waitUntilLoadingHasFinished();

@@ -130,7 +130,7 @@ export class DrilldownsManager {
    *
    * - `['create']`
    * - `['new']`
-   * - `['new', 'DASHBOARD_TO_DASHBOARD_DRILLDOWN']`
+   * - `['new', 'dashboard_drilldown']`
    * - `['manage']`
    * - `['manage', 'yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy']`
    */
