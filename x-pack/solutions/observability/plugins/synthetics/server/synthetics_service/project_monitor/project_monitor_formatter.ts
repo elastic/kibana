@@ -34,7 +34,7 @@ import {
 } from '../../routes/monitor_cruds/monitor_validation';
 import { normalizeProjectMonitor } from './normalizers';
 
-type FailedError = Array<{ id?: string; reason: string; details: string; payload?: object }>;
+export type FailedError = Array<{ id?: string; reason: string; details: string; payload?: object }>;
 
 export interface ExistingMonitor {
   [ConfigKey.JOURNEY_ID]: string;
