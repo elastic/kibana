@@ -9,9 +9,6 @@ import React, { useCallback, useMemo } from 'react';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { IExternalUrl, ThemeServiceStart } from '@kbn/core/public';
 import {
-  CONTEXT_MENU_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
   type ChartActionContext,
   type DrilldownDefinition,
   type DrilldownEditorProps,
@@ -30,8 +27,6 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { getInheritedViewMode } from '@kbn/presentation-publishing';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/common';
-import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-browser';
 import {
   DEFAULT_ENCODE_URL,
   DEFAULT_OPEN_IN_NEW_TAB,
@@ -41,6 +36,7 @@ import type { UrlDrilldownState } from '../../server';
 import { getEventScopeValues, getEventVariableList } from './variables/event_variables';
 import { getContextScopeValues, getContextVariableList } from './variables/context_variables';
 import { getGlobalVariableList } from './variables/global_variables';
+import { CONTEXT_MENU_TRIGGER, IMAGE_CLICK_TRIGGER, ROW_CLICK_TRIGGER, SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 type ExecutionContext = ChartActionContext & EmbeddableApiContext;
 type SetupContext = EmbeddableApiContext;

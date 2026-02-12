@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { HasSupportedTriggers } from '@kbn/presentation-publishing';
 import {
+  APPLY_FILTER_TRIGGER,
   CONTEXT_MENU_TRIGGER,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-} from '../../common/constants';
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 export function getEmbeddableTriggers(embeddable: HasSupportedTriggers) {
   return [CONTEXT_MENU_TRIGGER, ...ensureNestedTriggers(embeddable.supportedTriggers())];

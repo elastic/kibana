@@ -16,7 +16,7 @@ import type {
   PublicAppInfo,
 } from '@kbn/core/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { registerTriggers } from './ui_actions/register_triggers';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { EmbeddableStateTransfer } from './state_transfer';
 import { setKibanaServices } from './kibana_services';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
@@ -33,7 +33,6 @@ import {
   getLegacyURLTransform,
 } from './bwc/legacy_url_transform';
 import { registerDrilldown } from './drilldowns/registry';
-import { CONTEXT_MENU_TRIGGER } from '../common/constants';
 import { OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN } from './ui_actions/constants';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
@@ -44,8 +43,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
-    registerTriggers(uiActions);
-
     uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, OPEN_FLYOUT_ADD_DRILLDOWN, async () => {
       const { openCreateDrilldownFlyout } = await import('./async_module');
       return openCreateDrilldownFlyout;

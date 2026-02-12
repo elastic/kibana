@@ -64,4 +64,25 @@ describe('PROMQL columnsAfter', () => {
 
     expect(result.map(({ name }) => name)).toEqual(['step', 'col0', 'job']);
   });
+
+  it('does not treat pipe inside label string as command delimiter', async () => {
+    const sourceFields: ESQLFieldWithMetadata[] = [
+      { name: 'bytes', type: 'double', userDefined: false },
+      { name: 'event.dataset', type: 'keyword', userDefined: false },
+    ];
+
+    const result = await columnsAfter(
+      synth.cmd`PROMQL step=5m sum(rate(bytes{event.dataset="|"}[5m]))`,
+      [],
+      'PROMQL step=5m sum(rate(bytes{event.dataset="|"}[5m]))',
+      {
+        fromFrom: () => Promise.resolve([]),
+        fromJoin: () => Promise.resolve([]),
+        fromEnrich: () => Promise.resolve([]),
+        fromPromql: () => Promise.resolve(sourceFields),
+      }
+    );
+
+    expect(result).toEqual(sourceFields);
+  });
 });

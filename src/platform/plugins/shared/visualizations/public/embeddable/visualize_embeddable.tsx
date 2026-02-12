@@ -9,10 +9,8 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart, EuiText } from '@elastic/eui';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EmbeddableStart, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -41,6 +39,10 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, map, merge, switchMap } from 'rxjs';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import {
+  APPLY_FILTER_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VisualizeEmbeddableState } from '../../common/embeddable/types';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { getInspector, getUiActions, getUsageCollection } from '../services';
@@ -448,7 +450,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
                       },
                     };
                   }
-                  await getUiActions().getTrigger(triggerId).exec(context);
+                  await getUiActions().executeTriggerActions(triggerId, context);
                 }
               },
               onData: (_, inspectorAdapters) => {

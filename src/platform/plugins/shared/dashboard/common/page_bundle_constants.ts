@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/common';
-import { IMAGE_CLICK_TRIGGER } from '@kbn/image-embeddable-plugin/common';
+import { APPLY_FILTER_TRIGGER, IMAGE_CLICK_TRIGGER } from "@kbn/ui-actions-plugin/common/trigger_ids";
 
 export const LANDING_PAGE_PATH = '/list';
 /** The application ID for the Dashboard app. */
