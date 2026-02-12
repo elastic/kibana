@@ -80,12 +80,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await enableStreams(apiClient);
 
       // Create a test document
-      await indexDocument(esClient, 'logs', testDoc);
+      await indexDocument(esClient, 'logs.otel', testDoc);
 
       // Create a forked stream for testing
-      await forkStream(apiClient, 'logs', {
+      await forkStream(apiClient, 'logs.otel', {
         stream: {
-          name: 'logs.test',
+          name: 'logs.otel.test',
         },
         where: {
           field: 'resource.attributes.host.name',
@@ -101,7 +101,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('Successful simulations', () => {
       it('should simulate additive processing', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [basicGrokProcessor],
           },
@@ -125,7 +125,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should simulate with detected fields', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: { steps: [basicGrokProcessor] },
           documents: [createTestDocument()],
           detected_fields: [
@@ -143,7 +143,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should simulate multiple sequential processors', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor,
@@ -177,7 +177,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should simulate partially parsed documents', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor, // This processor will correctly extract fields
@@ -211,7 +211,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should return processor metrics', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor, // This processor will correctly extract fields
@@ -255,7 +255,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should return accurate rates', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor,
@@ -296,7 +296,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should return metrics for skipped documents due to non-hit condition', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -329,7 +329,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should allow overriding fields detected by previous simulation processors', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor,
@@ -364,7 +364,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should gracefully return the errors for each partially parsed or failed document', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               basicDissectProcessor, // This processor will correctly extract fields
@@ -392,7 +392,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should gracefully return failed simulation errors', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -477,7 +477,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should gracefully return mappings simulation errors', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -504,7 +504,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Simulate detected fields mapping issue
         const detectedFieldsFailureResponse = await simulateProcessingForStream(
           apiClient,
-          'logs.test',
+          'logs.otel.test',
           {
             processing: {
               steps: [basicGrokProcessor],
@@ -553,7 +553,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should properly report ignored fields for geo.location in OTEL streams', async () => {
         // logs.test is a wired stream (OTEL stream) created in the parent describe's before hook
         // Test with geo.location field using OTEL semantic conventions (flattened format)
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -676,7 +676,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // Temporary fields that are created and then deleted should NOT appear in detected_fields
 
       it('should NOT include temporary fields (created then deleted) in detected_fields', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -714,7 +714,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should include fields that are created and kept in detected_fields', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -745,7 +745,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should NOT include fields that are modified then deleted in detected_fields', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -788,7 +788,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should track per-processor fields even for temporary fields', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {
@@ -821,7 +821,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('should handle mixed temporary and permanent fields correctly', async () => {
-        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+        const response = await simulateProcessingForStream(apiClient, 'logs.otel.test', {
           processing: {
             steps: [
               {

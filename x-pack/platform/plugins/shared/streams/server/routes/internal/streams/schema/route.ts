@@ -274,7 +274,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
 
       return {
         _index: params.path.name.startsWith(`${LOGS_ROOT_STREAM_NAME}.`)
-          ? LOGS_ROOT_STREAM_NAME
+          ? getRoot(params.path.name)
           : params.path.name,
         _id: hit._id,
         _source: sourceWithGeoPoints,
@@ -483,8 +483,9 @@ async function simulateIngest(
 
   if (isWiredStream) {
     // For wired streams: override root logs processing pipeline to reroute, then noop child stream processing
+    const rootStream = getRoot(dataStreamName);
     pipelineSubstitutions = {
-      [getProcessingPipelineName(LOGS_ROOT_STREAM_NAME)]: {
+      [getProcessingPipelineName(rootStream)]: {
         processors: [
           {
             reroute: {

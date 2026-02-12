@@ -15,7 +15,7 @@ type StreamPutItem = Streams.WiredStream.UpsertRequest & {
 
 const streams: StreamPutItem[] = [
   {
-    name: 'logs',
+    name: 'logs.otel',
     stream: {
       description: '',
       ingest: {
@@ -60,7 +60,7 @@ const streams: StreamPutItem[] = [
           },
           routing: [
             {
-              destination: 'logs.test',
+              destination: 'logs.otel.test',
               where: {
                 and: [
                   {
@@ -72,7 +72,7 @@ const streams: StreamPutItem[] = [
               status: 'enabled',
             },
             {
-              destination: 'logs.test2',
+              destination: 'logs.otel.test2',
               where: {
                 and: [
                   {
@@ -93,7 +93,7 @@ const streams: StreamPutItem[] = [
     ...emptyAssets,
   },
   {
-    name: 'logs.test',
+    name: 'logs.otel.test',
     stream: {
       description: '',
       ingest: {
@@ -114,7 +114,7 @@ const streams: StreamPutItem[] = [
     ...emptyAssets,
   },
   {
-    name: 'logs.test2',
+    name: 'logs.otel.test2',
     stream: {
       description: '',
       ingest: {
@@ -144,7 +144,7 @@ const streams: StreamPutItem[] = [
     ...emptyAssets,
   },
   {
-    name: 'logs.deeply.nested.streamname',
+    name: 'logs.otel.deeply.nested.streamname',
     stream: {
       description: '',
       ingest: {

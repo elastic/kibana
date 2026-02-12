@@ -32,7 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   let apiClient: StreamsSupertestRepositoryClient;
 
-  const STREAM_NAME = 'logs.queries-test';
+  const STREAM_NAME = 'logs.otel.queries-test';
   const stream: Streams.WiredStream.UpsertRequest['stream'] = {
     description: '',
     ingest: {

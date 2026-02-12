@@ -38,7 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let apiClient: StreamsSupertestRepositoryClient;
 
   describe('Processing Date Suggestions', () => {
-    const TEST_STREAM_NAME = 'logs.test';
+    const TEST_STREAM_NAME = 'logs.otel.test';
 
     const TIMESTAMP_ISO8601 = '2025-01-01T00:00:00.000Z';
     const TIMESTAMP_ISO8601_SPACED = '2025-01-01 00:00:00.000Z';
@@ -51,7 +51,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await enableStreams(apiClient);
 
       // Create a forked stream for testing
-      await forkStream(apiClient, 'logs', {
+      await forkStream(apiClient, 'logs.otel', {
         stream: {
           name: TEST_STREAM_NAME,
         },
