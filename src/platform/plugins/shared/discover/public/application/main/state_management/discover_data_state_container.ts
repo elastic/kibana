@@ -143,6 +143,10 @@ export interface DiscoverDataStateContainer {
    *  LOADING: data is fetched initially (when Discover is rendered, or data views are switched)
    */
   getInitialFetchStatus: () => FetchStatus;
+  /**
+   * Clean up ES|QL state when saved search changes
+   */
+  cleanupEsql: () => void;
 }
 
 /**
@@ -225,8 +229,7 @@ export function getDataStateContainer({
 
   // The main subscription to handle state changes
   dataSubjects.documents$.pipe(switchMap(esqlFetchSubscribe)).subscribe();
-  // Make sure to clean up the ES|QL state when the saved search changes
-  savedSearchContainer.getInitial$().subscribe(cleanupEsql);
+  // ES|QL state cleanup is handled by Redux listener middleware (resetOnSavedSearchChange action)
 
   /**
    * handler emitted by `timefilter.getAutoRefreshFetch$()`
@@ -552,5 +555,6 @@ export function getDataStateContainer({
     getInitialFetchStatus,
     cancel,
     getAbortController,
+    cleanupEsql,
   };
 }
