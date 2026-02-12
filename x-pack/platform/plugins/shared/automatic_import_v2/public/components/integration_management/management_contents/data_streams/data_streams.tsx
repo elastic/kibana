@@ -19,10 +19,17 @@ import { CreateDataStreamFlyout } from './create_data_stream_flyout';
 import * as i18n from './translations';
 import { useGetIntegrationById } from '../../../../common';
 import { DataStreamsTable } from './data_streams_table/data_steams_table';
+import { EditPipelineFlyout } from './edit_pipeline_flyout';
 
 export const DataStreams = React.memo<{ integrationId?: string }>(() => {
-  const { isCreateDataStreamFlyoutOpen, openCreateDataStreamFlyout, closeCreateDataStreamFlyout } =
-    useUIState();
+  const {
+    isCreateDataStreamFlyoutOpen,
+    openCreateDataStreamFlyout,
+    closeCreateDataStreamFlyout,
+    isEditPipelineFlyoutOpen,
+    selectedDataStream,
+    closeEditPipelineFlyout,
+  } = useUIState();
   const { integrationId } = useParams<{ integrationId?: string }>();
   const { integration } = useGetIntegrationById(integrationId);
 
@@ -83,6 +90,14 @@ export const DataStreams = React.memo<{ integrationId?: string }>(() => {
 
       {isCreateDataStreamFlyoutOpen && (
         <CreateDataStreamFlyout onClose={closeCreateDataStreamFlyout} />
+      )}
+
+      {isEditPipelineFlyoutOpen && selectedDataStream && integrationId && (
+        <EditPipelineFlyout
+          integrationId={integrationId}
+          dataStream={selectedDataStream}
+          onClose={closeEditPipelineFlyout}
+        />
       )}
     </>
   );

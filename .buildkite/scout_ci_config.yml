@@ -3,6 +3,7 @@ plugins:
   enabled:
     - apm
     - console
+    - dashboard
     - cloud_security_posture
     - discover_enhanced
     - entity_store
@@ -26,6 +27,8 @@ plugins:
     - transform
     - dashboard
     - workflows_extensions
+    - global_search
+    - banners
   disabled:
 
 packages:

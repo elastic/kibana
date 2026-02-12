@@ -63,7 +63,6 @@ export interface HeaderProps {
   docLinks: DocLinksStart;
   navLinks$: Observable<ChromeNavLink[]>;
   recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
-  forceAppSwitcherNavigation$: Observable<boolean>;
   globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
   helpExtension$: Observable<ChromeHelpExtension | undefined>;
   helpSupportUrl$: Observable<string>;
@@ -127,8 +126,6 @@ export function Header({
                   />,
                   <HeaderLogo
                     href={homeHref}
-                    forceNavigation$={observables.forceAppSwitcherNavigation$}
-                    navLinks$={observables.navLinks$}
                     navigateToApp={application.navigateToApp}
                     loadingCount$={observables.loadingCount$}
                     customBranding$={customBranding$}

@@ -154,6 +154,8 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/shared-ux-utility'
   - '@kbn/lens-common'
+  - '@kbn/apm-types'
+  - '@kbn/apm-types-shared'
 tags:
   - plugin
   - prod
