@@ -247,79 +247,6 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
             <EuiFlexItem grow={false}>
               <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued" data-test-subj="ruleType">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.ruleDetails.createdLabel"
-                      defaultMessage="Created"
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow" data-test-subj="createdBadge">
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.ruleDetails.createdValue"
-                      defaultMessage="{created}"
-                      values={{
-                        created: formatMaybeIsoDateTime(rule.createdAt),
-                      }}
-                    />
-                  </EuiBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            {rule.createdBy && (
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued" data-test-subj="ruleType">
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.createdByLabel"
-                        defaultMessage="Created By"
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow" data-test-subj="createdByBadge">
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.createdByValue"
-                        defaultMessage="{createdBy}"
-                        values={{
-                          createdBy: rule.createdBy,
-                        }}
-                      />
-                    </EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            )}
-            {rule.updatedAt && (
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued" data-test-subj="ruleType">
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.lastModifiedLabel"
-                        defaultMessage="Last Modified"
-                      />
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow" data-test-subj="lastModifiedBadge">
-                      <FormattedMessage
-                        id="xpack.triggersActionsUI.sections.ruleDetails.lastModifiedValue"
-                        defaultMessage="{lastModified}"
-                        values={{
-                          lastModified: formatMaybeIsoDateTime(rule.updatedAt),
-                        }}
-                      />
-                    </EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-                <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued" data-test-subj="ruleTags">
                     <FormattedMessage
                       id="xpack.triggersActionsUI.sections.ruleDetails.tagsLabel"
@@ -345,47 +272,68 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
       />
 
       <EuiSpacer size="m" />
-      <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
-        <EuiTitle size="s">
-          <EuiFlexItem grow={false}>
-            {i18n.translate('xpack.triggersActionsUI.ruleDetails.definition', {
-              defaultMessage: 'Configuration',
-            })}
-          </EuiFlexItem>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <EuiDescriptionList
-          compressed={true}
-          type="column"
-          listItems={configurationListItems}
-          css={{ alignItems: 'start' }}
-        />
-      </EuiPanel>
-      <EuiSpacer size="s" />
+      <EuiFlexGroup responsive={false}>
+        <EuiFlexItem grow={2}>
+          <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
+            <EuiTitle size="s">
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.triggersActionsUI.ruleDetails.definition', {
+                  defaultMessage: 'Configuration',
+                })}
+              </EuiFlexItem>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiDescriptionList
+              compressed={true}
+              type="column"
+              listItems={configurationListItems}
+              css={{ alignItems: 'start' }}
+            />
 
-      <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
-        <EuiSpacer size="m" />
-        <EuiTitle size="s">
-          <h3>
-            {i18n.translate('xpack.alertingV2.ruleDetails.query', {
-              defaultMessage: 'ES|QL query',
-            })}
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiPanel hasBorder paddingSize="none" css={{ width: '100%' }}>
-          <EuiCodeBlock
-            language="text"
-            isCopyable
-            overflowHeight={360}
-            paddingSize="m"
-            data-test-subj="alertingV2RuleDetailsQuery"
-            css={{ width: '100%' }}
-          >
-            {rule.query || EMPTY_VALUE}
-          </EuiCodeBlock>
-        </EuiPanel>
-      </EuiPanel>
+            <EuiSpacer size="m" />
+            <EuiTitle size="xs">
+              <h3>
+                {i18n.translate('xpack.alertingV2.ruleDetails.query', {
+                  defaultMessage: 'ES|QL query',
+                })}
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiPanel hasBorder paddingSize="none" css={{ width: '100%' }}>
+              <EuiCodeBlock
+                language="text"
+                isCopyable
+                overflowHeight={360}
+                paddingSize="m"
+                data-test-subj="alertingV2RuleDetailsQuery"
+                css={{ width: '100%' }}
+              >
+                {rule.query || EMPTY_VALUE}
+              </EuiCodeBlock>
+            </EuiPanel>
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <EuiPanel hasBorder paddingSize="m">
+            <EuiTitle size="s">
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.alertingV2.ruleDetails.metadata', {
+                  defaultMessage: 'Metadata',
+                })}
+              </EuiFlexItem>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiDescriptionList
+              compressed={true}
+              type="column"
+              listItems={metadataListItems}
+              css={{ alignItems: 'start' }}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="m" />
     </>
   );
 };
