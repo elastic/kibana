@@ -170,8 +170,11 @@ export async function createBulkDataStreams(
   log.info(`Creating ${count} unmanaged data streams with prefix '${prefix}' via ES bulk API...`);
 
   // 1. Raise max shards per node with headroom for system/async indices.
-  //    5000 streams + Kibana/ES system indices can saturate count + 1000 and break async-search.
-  const shardHeadroom = 3000;
+  //    5000 data streams = 5000 primary shards. On top of that, Kibana + ES system indices
+  //    (.kibana*, .security*, .alerts*, .fleet*, .ml-*, wired streams, etc.) plus runtime
+  //    indices like .async-search (ESQL) can easily consume 3000+ shards. Previous headroom
+  //    values of 1000 and 3000 were both exceeded in CI (6000/6000 and 8000/8000 respectively).
+  const shardHeadroom = 5000;
   const maxShardsPerNode = count + shardHeadroom;
   await es.cluster.putSettings({
     persistent: { 'cluster.max_shards_per_node': String(maxShardsPerNode) },
