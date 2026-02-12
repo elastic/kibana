@@ -21,6 +21,8 @@ import { OAuthStateClient } from '../lib/oauth_state_client';
 import { ConnectorTokenClient } from '../lib/connector_token_client';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
 
+const KIBANA_URL = 'https://kibana.example.com';
+
 const MockOAuthStateClient = OAuthStateClient as jest.MockedClass<typeof OAuthStateClient>;
 const MockConnectorTokenClient = ConnectorTokenClient as jest.MockedClass<
   typeof ConnectorTokenClient
@@ -64,7 +66,13 @@ const mockRateLimiter = {
 
 const createMockCoreSetup = () => ({
   getStartServices: jest.fn().mockResolvedValue([
-    {},
+    {
+      http: {
+        basePath: {
+          publicBaseUrl: KIBANA_URL,
+        },
+      },
+    },
     {
       encryptedSavedObjects: mockEncryptedSavedObjectsClient,
       spaces: { spacesService: mockSpacesService },
@@ -243,7 +251,6 @@ describe('oauthCallbackRoute', () => {
       state: 'valid-state',
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
-      redirectUri: 'https://kibana.example.com/api/actions/connector/_oauth_callback',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
       spaceId: 'default',
       createdAt: '2025-01-01T00:00:00.000Z',
@@ -290,7 +297,7 @@ describe('oauthCallbackRoute', () => {
       mockLogger,
       expect.objectContaining({
         code: 'auth-code',
-        redirectUri: mockOAuthState.redirectUri,
+        redirectUri: `${KIBANA_URL}/api/actions/connector/_oauth_callback`,
         codeVerifier: mockOAuthState.codeVerifier,
         clientId: 'client-id',
         clientSecret: 'client-secret',
@@ -330,7 +337,6 @@ describe('oauthCallbackRoute', () => {
       state: 'valid-state',
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
-      redirectUri: 'https://kibana.example.com/callback',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
       spaceId: 'default',
       createdAt: '2025-01-01T00:00:00.000Z',
@@ -377,7 +383,6 @@ describe('oauthCallbackRoute', () => {
       state: 'valid-state',
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
-      redirectUri: 'https://kibana.example.com/callback',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
       spaceId: 'default',
       createdAt: '2025-01-01T00:00:00.000Z',

@@ -34,7 +34,6 @@ const mockOAuthStateClientInstance = {
 
 const mockOAuthServiceInstance = {
   getOAuthConfig: jest.fn(),
-  getRedirectUri: jest.fn(),
   buildAuthorizationUrl: jest.fn(),
 };
 
@@ -106,6 +105,9 @@ describe('oauthAuthorizeRoute', () => {
 
     MockOAuthStateClient.mockImplementation(() => mockOAuthStateClientInstance as never);
     MockOAuthAuthorizationService.mockImplementation(() => mockOAuthServiceInstance as never);
+    (OAuthAuthorizationService.getRedirectUri as jest.Mock).mockReturnValue(
+      'https://kibana.example.com/api/actions/connector/_oauth_callback'
+    );
   });
 
   const registerRoute = (coreSetup = createMockCoreSetup()) => {
@@ -198,9 +200,6 @@ describe('oauthAuthorizeRoute', () => {
       authorizationUrl: 'https://provider.example.com/authorize',
       clientId: 'client-id',
     });
-    mockOAuthServiceInstance.getRedirectUri.mockReturnValue(
-      'https://kibana.example.com/api/actions/connector/_oauth_callback'
-    );
 
     const [, handler] = registerRoute();
     const context = createMockContext();
@@ -225,9 +224,7 @@ describe('oauthAuthorizeRoute', () => {
       clientId: 'client-id',
       scope: 'openid',
     });
-    mockOAuthServiceInstance.getRedirectUri.mockReturnValue(
-      'https://kibana.example.com/api/actions/connector/_oauth_callback'
-    );
+
     mockOAuthServiceInstance.buildAuthorizationUrl.mockReturnValue(
       'https://provider.example.com/authorize?client_id=client-id&response_type=code&state=random-state'
     );
@@ -261,7 +258,6 @@ describe('oauthAuthorizeRoute', () => {
     // Verify OAuth state was created with the correct params
     expect(mockOAuthStateClientInstance.create).toHaveBeenCalledWith({
       connectorId: 'connector-1',
-      redirectUri: 'https://kibana.example.com/api/actions/connector/_oauth_callback',
       kibanaReturnUrl: 'https://kibana.example.com/app/my-page',
       spaceId: 'default',
     });
@@ -282,9 +278,7 @@ describe('oauthAuthorizeRoute', () => {
       authorizationUrl: 'https://provider.example.com/authorize',
       clientId: 'client-id',
     });
-    mockOAuthServiceInstance.getRedirectUri.mockReturnValue(
-      'https://kibana.example.com/api/actions/connector/_oauth_callback'
-    );
+
     mockOAuthServiceInstance.buildAuthorizationUrl.mockReturnValue(
       'https://provider.example.com/authorize?state=s'
     );
@@ -314,9 +308,6 @@ describe('oauthAuthorizeRoute', () => {
     mockOAuthServiceInstance.getOAuthConfig.mockRejectedValue(
       new Error('Connector does not use OAuth Authorization Code flow')
     );
-    mockOAuthServiceInstance.getRedirectUri.mockReturnValue(
-      'https://kibana.example.com/api/actions/connector/_oauth_callback'
-    );
 
     const [, handler] = registerRoute();
     const context = createMockContext();
@@ -342,9 +333,6 @@ describe('oauthAuthorizeRoute', () => {
     const notFoundError = new Error('Connector not found') as Error & { statusCode: number };
     notFoundError.statusCode = 404;
     mockOAuthServiceInstance.getOAuthConfig.mockRejectedValue(notFoundError);
-    mockOAuthServiceInstance.getRedirectUri.mockReturnValue(
-      'https://kibana.example.com/api/actions/connector/_oauth_callback'
-    );
 
     const [, handler] = registerRoute();
     const context = createMockContext();

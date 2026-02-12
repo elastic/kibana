@@ -60,7 +60,6 @@ describe('OAuthStateClient', () => {
           state: 'mock-state',
           codeVerifier: 'mock-verifier',
           connectorId: 'connector-1',
-          redirectUri: 'https://kibana.example.com/callback',
           kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
           spaceId: 'default',
           createdAt: '2025-01-01T00:00:00.000Z',
@@ -70,7 +69,6 @@ describe('OAuthStateClient', () => {
 
       const result = await client.create({
         connectorId: 'connector-1',
-        redirectUri: 'https://kibana.example.com/callback',
         kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
         spaceId: 'default',
       });
@@ -79,7 +77,6 @@ describe('OAuthStateClient', () => {
         expect.objectContaining({
           id: 'generated-id',
           connectorId: 'connector-1',
-          redirectUri: 'https://kibana.example.com/callback',
           kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
           spaceId: 'default',
         })
@@ -93,7 +90,6 @@ describe('OAuthStateClient', () => {
           state: expect.any(String),
           codeVerifier: expect.any(String),
           connectorId: 'connector-1',
-          redirectUri: 'https://kibana.example.com/callback',
           kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
           spaceId: 'default',
           createdAt: now.toISOString(),
@@ -112,7 +108,6 @@ describe('OAuthStateClient', () => {
 
       await client.create({
         connectorId: 'connector-1',
-        redirectUri: 'https://kibana.example.com/callback',
         kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
         spaceId: 'default',
         createdBy: 'testuser',
@@ -129,7 +124,6 @@ describe('OAuthStateClient', () => {
       await expect(
         client.create({
           connectorId: 'connector-1',
-          redirectUri: 'https://kibana.example.com/callback',
           kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
           spaceId: 'default',
         })
@@ -162,7 +156,6 @@ describe('OAuthStateClient', () => {
           state: 'test-state',
           codeVerifier: 'decrypted-verifier',
           connectorId: 'connector-1',
-          redirectUri: 'https://kibana.example.com/callback',
           kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
           spaceId: 'default',
           createdAt: '2025-01-01T00:00:00.000Z',
@@ -177,7 +170,6 @@ describe('OAuthStateClient', () => {
         state: 'test-state',
         codeVerifier: 'decrypted-verifier',
         connectorId: 'connector-1',
-        redirectUri: 'https://kibana.example.com/callback',
         kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
         spaceId: 'default',
         createdAt: '2025-01-01T00:00:00.000Z',

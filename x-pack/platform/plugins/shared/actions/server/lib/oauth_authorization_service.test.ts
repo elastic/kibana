@@ -15,11 +15,10 @@ const mockEncryptedSavedObjectsClient = {
   getDecryptedAsInternalUser: jest.fn(),
 };
 
-const createService = (kibanaBaseUrl = 'https://kibana.example.com') =>
+const createService = () =>
   new OAuthAuthorizationService({
     actionsClient: mockActionsClient as never,
     encryptedSavedObjectsClient: mockEncryptedSavedObjectsClient as never,
-    kibanaBaseUrl,
   });
 
 describe('OAuthAuthorizationService', () => {
@@ -158,7 +157,10 @@ describe('OAuthAuthorizationService', () => {
       );
     });
 
-    it('throws when missing required OAuth config (authorizationUrl)', async () => {
+    it.each([
+      ['authorizationUrl', { clientId: 'client-id' }],
+      ['clientId', { authorizationUrl: 'https://provider.example.com/authorize' }],
+    ])('throws when missing required OAuth config (%s)', async (_, secrets) => {
       const service = createService();
       const getResult = createMockConnector({
         id: 'connector-1',
@@ -167,26 +169,7 @@ describe('OAuthAuthorizationService', () => {
       mockActionsClient.get.mockResolvedValue(getResult);
       mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
         attributes: {
-          secrets: { clientId: 'client-id' },
-          config: {},
-        },
-      });
-
-      await expect(service.getOAuthConfig('connector-1', undefined)).rejects.toThrow(
-        'Connector missing required OAuth configuration (authorizationUrl, clientId)'
-      );
-    });
-
-    it('throws when missing required OAuth config (clientId)', async () => {
-      const service = createService();
-      const getResult = createMockConnector({
-        id: 'connector-1',
-        config: { authType: 'oauth_authorization_code' },
-      });
-      mockActionsClient.get.mockResolvedValue(getResult);
-      mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-        attributes: {
-          secrets: { authorizationUrl: 'https://provider.example.com/authorize' },
+          secrets,
           config: {},
         },
       });
@@ -199,17 +182,13 @@ describe('OAuthAuthorizationService', () => {
 
   describe('getRedirectUri', () => {
     it('returns the correct redirect URI', () => {
-      const service = createService('https://kibana.example.com');
-
-      expect(service.getRedirectUri()).toBe(
+      expect(OAuthAuthorizationService.getRedirectUri('https://kibana.example.com')).toBe(
         'https://kibana.example.com/api/actions/connector/_oauth_callback'
       );
     });
 
-    it('throws when kibanaBaseUrl is empty', () => {
-      const service = createService('');
-
-      expect(() => service.getRedirectUri()).toThrow(
+    it.each([[''], [undefined]])('throws when publicBaseUrl is %j', (publicBaseUrl) => {
+      expect(() => OAuthAuthorizationService.getRedirectUri(publicBaseUrl)).toThrow(
         'Kibana public URL not configured. Please set server.publicBaseUrl in kibana.yml'
       );
     });
