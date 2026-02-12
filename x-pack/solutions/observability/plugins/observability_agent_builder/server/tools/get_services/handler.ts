@@ -129,6 +129,7 @@ export async function getToolHandler({
   end,
   environment,
   healthStatus,
+  kqlFilter,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
   plugins: ObservabilityAgentBuilderPluginSetupDependencies;
@@ -140,6 +141,7 @@ export async function getToolHandler({
   end: string;
   environment?: string;
   healthStatus?: string[];
+  kqlFilter?: string;
 }): Promise<{
   services: ServicesItemsItem[];
   maxCountExceeded: boolean;
@@ -157,6 +159,7 @@ export async function getToolHandler({
     dataRegistry.getData('servicesItems', {
       request,
       environment,
+      kuery: kqlFilter,
       start,
       end,
     }),

@@ -20,6 +20,7 @@ import type {
 } from '../../types';
 import { getToolHandler as getLogGroups } from '../../tools/get_log_groups/handler';
 import { getToolHandler as getRuntimeMetrics } from '../../tools/get_runtime_metrics/handler';
+import { getToolHandler as getHosts } from '../../tools/get_hosts/handler';
 import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 
 /**
@@ -38,6 +39,7 @@ export interface AlertDocForInsight {
   'service.environment'?: string;
   'transaction.type'?: string;
   'transaction.name'?: string;
+  'host.name'?: string;
   'kibana.alert.start'?: string | number;
   [key: string]: unknown;
 }
@@ -91,6 +93,7 @@ const START_TIME_OFFSETS = {
   logs: 15,
   changePoints: 6 * 60, // 6 hours
   runtimeMetrics: 15,
+  infraHosts: 15,
 } as const;
 
 async function fetchAlertContext({
@@ -108,8 +111,10 @@ async function fetchAlertContext({
   const serviceEnvironment = alertDoc?.['service.environment'] ?? '';
   const transactionType = alertDoc?.['transaction.type'];
   const transactionName = alertDoc?.['transaction.name'];
+  const hostName = alertDoc?.['host.name'] ?? '';
 
-  if (!serviceName) {
+  // Need at least a service name or host name to fetch context
+  if (!serviceName && !hostName) {
     return 'No related signals available.';
   }
 
@@ -147,6 +152,16 @@ async function fetchAlertContext({
   const esClient = coreStart.elasticsearch.client.asScoped(request);
 
   async function fetchLogGroups() {
+    // Build filter based on available identifiers
+    let filter: string;
+    if (serviceName) {
+      filter = `service.name: "${serviceName}"`;
+    } else if (hostName) {
+      filter = `host.name: "${hostName}"`;
+    } else {
+      return null;
+    }
+
     try {
       const start = getStart(START_TIME_OFFSETS.logs);
       const end = alertStart;
@@ -158,7 +173,7 @@ async function fetchAlertContext({
         esClient,
         start,
         end,
-        kqlFilter: `service.name: "${serviceName}"`,
+        kqlFilter: filter,
         fields: [],
         includeStackTrace: false,
         includeFirstSeen: false,
@@ -173,6 +188,8 @@ async function fetchAlertContext({
   }
 
   async function fetchRuntimeMetrics() {
+    if (!serviceName) return null;
+
     try {
       const start = getStart(START_TIME_OFFSETS.runtimeMetrics);
       const end = alertStart;
@@ -196,26 +213,61 @@ async function fetchAlertContext({
     }
   }
 
-  const allFetchers = [
-    ...fetchConfigs.map(async (config) => {
-      try {
-        const start = getStart(config.startOffset);
-        const end = alertStart;
-        const data = await dataRegistry.getData(config.key, {
-          request,
-          ...config.params,
-          start,
-          end,
-        });
-        return isEmpty(data) ? null : { key: config.key, start, end, data };
-      } catch (err) {
-        logger.debug(`AI insight: ${config.key} failed: ${err}`);
-        return null;
-      }
-    }),
-    fetchLogGroups(),
-    fetchRuntimeMetrics(),
-  ];
+  async function fetchInfraHosts() {
+    const kqlFilter = hostName
+      ? `host.name: "${hostName}"`
+      : serviceName
+        ? `service.name: "${serviceName}"`
+        : null;
+
+    if (!kqlFilter) return null;
+
+    try {
+      const start = getStart(START_TIME_OFFSETS.infraHosts);
+      const end = alertStart;
+      const result = await getHosts({
+        request,
+        dataRegistry,
+        start,
+        end,
+        limit: 10,
+        kqlFilter,
+      });
+
+      return result.hosts.length > 0
+        ? { key: 'infraHosts' as const, start, end, data: result.hosts }
+        : null;
+    } catch (err) {
+      logger.debug(`AI insight: infraHosts failed: ${err}`);
+      return null;
+    }
+  }
+
+  // APM-specific fetchers only run when we have a service name
+  const apmFetchers = serviceName
+    ? [
+        ...fetchConfigs.map(async (config) => {
+          try {
+            const start = getStart(config.startOffset);
+            const end = alertStart;
+            const data = await dataRegistry.getData(config.key, {
+              request,
+              ...config.params,
+              start,
+              end,
+            });
+            return isEmpty(data) ? null : { key: config.key, start, end, data };
+          } catch (err) {
+            logger.debug(`AI insight: ${config.key} failed: ${err}`);
+            return null;
+          }
+        }),
+        fetchRuntimeMetrics(),
+      ]
+    : [];
+
+  // These fetchers work with either service.name or host.name
+  const allFetchers = [...apmFetchers, fetchLogGroups(), fetchInfraHosts()];
 
   const results = await Promise.all(allFetchers);
   const contextParts = compact(results).map(
@@ -268,6 +320,7 @@ function generateAlertSummary({
     - Change points: sudden shifts in throughput/latency/failure rate — shows when problems started
     - Log categories: error messages and exception patterns
     - Service summary: instance counts, versions, anomalies, and metadata
+    - Host infrastructure: CPU, memory, disk, network usage — indicates host-level resource pressure
 
     ${getEntityLinkingInstructions({ urlPrefix })}
   `);
