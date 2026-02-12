@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, Fragment, useRef } from 'react';
+import React, { useMemo, useCallback, Fragment, useRef, useEffect } from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import { throttle } from 'lodash';
 import {
   DataCascade,
   DataCascadeRow,
   DataCascadeRowCell,
   type DataCascadeRowCellProps,
+  type DataCascadeImplRef,
 } from '@kbn/shared-ux-document-data-cascade';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
@@ -31,6 +33,7 @@ import { cascadedDocumentsStyles } from './cascaded_documents.styles';
 import { useEsqlDataCascadeRowActionHelpers } from './blocks/use_row_header_components';
 import { useDataCascadeRowExpansionHandlers, useGroupedCascadeData } from './hooks';
 import { useCascadedDocumentsContext } from './cascaded_documents_provider';
+import type { DataCascadeLeafUiState } from '../../../state_management/redux';
 
 export interface ESQLDataCascadeProps
   extends Pick<
@@ -51,13 +54,54 @@ export interface ESQLDataCascadeProps
 
 const ESQLDataCascade = React.memo(
   ({ rows, columns, dataView, togglePopover, queryMeta, ...props }: ESQLDataCascadeProps) => {
+    const cascadeStateChangesSubscription = useRef<ReturnType<
+      NonNullable<
+        ReturnType<
+          NonNullable<DataCascadeImplRef<ESQLDataGroupNode, DataTableRecord>['getUISnapshotStore']>
+        >
+      >['subscribe']
+    > | null>(null);
+
     const {
       availableCascadeGroups,
       selectedCascadeGroups,
+      dataCascadeUiState,
+      setDataCascadeUiState,
       esqlVariables,
       viewModeToggle,
       cascadeGroupingChangeHandler,
     } = useCascadedDocumentsContext();
+
+    const cascadeStateSnapshotHandler = useCallback(
+      (ref: DataCascadeImplRef<ESQLDataGroupNode, DataTableRecord>) => {
+        const snapshotStore = ref?.getUISnapshotStore();
+
+        if (snapshotStore && !cascadeStateChangesSubscription.current) {
+          cascadeStateChangesSubscription.current = snapshotStore.subscribe(
+            throttle(() => {
+              const snapshot = snapshotStore.getSnapshot();
+              setDataCascadeUiState({
+                expanded: snapshot.expanded,
+                rowSelection: snapshot.rowSelection,
+                scrollOffset: snapshot.scrollOffset,
+              });
+            }, 150)
+          );
+        }
+      },
+      [setDataCascadeUiState]
+    );
+
+    useEffect(
+      () => () => {
+        // unsubscribe from the snapshot store when the component unmounts
+        if (cascadeStateChangesSubscription.current) {
+          cascadeStateChangesSubscription.current();
+          cascadeStateChangesSubscription.current = null;
+        }
+      },
+      []
+    );
 
     const cascadeGroupData = useGroupedCascadeData({
       selectedCascadeGroups,
@@ -84,6 +128,21 @@ const ESQLDataCascade = React.memo(
       togglePopover
     );
 
+    const updateLeafUiState = useCallback(
+      (cellId: string, nextState: DataCascadeLeafUiState) => {
+        const existingLeafState = dataCascadeUiState?.leafUiState?.[cellId] ?? {};
+        setDataCascadeUiState({
+          leafUiState: {
+            [cellId]: {
+              ...existingLeafState,
+              ...nextState,
+            },
+          },
+        });
+      },
+      [dataCascadeUiState?.leafUiState, setDataCascadeUiState]
+    );
+
     const cascadeLeafRowRenderer = useCallback<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
     >(
@@ -100,22 +159,26 @@ const ESQLDataCascade = React.memo(
           dataView={dataView}
           cellData={cellData!}
           cellId={cellId}
+          leafUiState={dataCascadeUiState?.leafUiState?.[cellId]}
+          onLeafUiStateChange={(nextState) => updateLeafUiState(cellId, nextState)}
           getScrollElement={getScrollElement}
           getScrollOffset={getScrollOffset}
           getScrollMargin={getScrollMargin}
           preventSizeChangePropagation={preventSizeChangePropagation}
         />
       ),
-      [dataView, props]
+      [dataCascadeUiState?.leafUiState, dataView, props, updateLeafUiState]
     );
 
     return (
       <DataCascade<ESQLDataGroupNode>
         size="s"
         overscan={25}
+        ref={cascadeStateSnapshotHandler}
         data={cascadeGroupData}
         cascadeGroups={availableCascadeGroups}
         initialGroupColumn={selectedCascadeGroups}
+        initialScrollOffset={dataCascadeUiState?.scrollOffset}
         customTableHeader={customTableHeading}
       >
         <DataCascadeRow<ESQLDataGroupNode, DataTableRecord>

@@ -20,6 +20,7 @@ import type {
   VIEW_MODE,
 } from '@kbn/saved-search-plugin/common';
 import type { DataGridDensity, UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
+import type { ExpandedState, RowSelectionState } from '@tanstack/react-table';
 import type {
   UnifiedFieldListRestorableState,
   UnifiedFieldListSidebarContainerProps,
@@ -124,6 +125,21 @@ export interface CascadedDocumentsState {
   cascadedDocumentsMap: Record<string, DataTableRecord[] | undefined>;
 }
 
+export interface DataCascadeLeafUiState {
+  selectedColumns?: string[];
+  density?: DataGridDensity;
+  isFullScreen?: boolean;
+  expandedDocId?: string;
+  scrollOffset?: number;
+}
+
+export interface DataCascadeUiState {
+  expanded?: ExpandedState;
+  rowSelection?: RowSelectionState;
+  scrollOffset?: number;
+  leafUiState?: Record<string, DataCascadeLeafUiState>;
+}
+
 export enum TabInitializationStatus {
   NotStarted = 'NotStarted',
   InProgress = 'InProgress',
@@ -176,6 +192,7 @@ export interface TabState extends TabItem {
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
     docViewer?: Partial<DocViewerRestorableState>;
+    dataCascade?: Partial<DataCascadeUiState>;
   };
   expandedDoc: DataTableRecord | undefined;
   initialDocViewerTabId?: string;

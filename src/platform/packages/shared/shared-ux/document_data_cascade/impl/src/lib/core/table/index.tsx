@@ -138,7 +138,8 @@ export const useCascadeTable = <G extends GroupNode, L extends LeafNode>({
         }
       }
 
-      return actions.setExpandedRows(newRootRow ? { [newRootRow]: true } : newExpandedRows);
+      const nextExpandedState = newRootRow ? { [newRootRow]: true } : newExpandedRows;
+      return actions.setExpandedRows(nextExpandedState);
     },
     getRowId: (rowData) => rowData.id,
     getSubRows: (row) => row.children as G[],

@@ -9,7 +9,13 @@
 
 import type React from 'react';
 import type { EuiThemeShape, EuiButtonIconProps, EuiButtonEmptyProps } from '@elastic/eui';
-import type { Table, CellContext, Row } from '@tanstack/react-table';
+import type {
+  ExpandedState,
+  RowSelectionState,
+  Table,
+  CellContext,
+  Row,
+} from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode, LeafNode } from '../../store_provider';
 import type { CascadeVirtualizerProps, useCascadeVirtualizer } from '../../lib/core/virtualizer';
