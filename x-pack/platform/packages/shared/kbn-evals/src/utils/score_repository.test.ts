@@ -231,7 +231,7 @@ describe('EvaluationScoreRepository', () => {
       expect(bulkCall.datasource[1].evaluator.name).toBe('Groundedness');
       expect(bulkCall.onDocument(mockDocuments[0])).toEqual({
         create: {
-          _index: '.kibana-evaluations',
+          _index: 'kibana-evaluations',
           _id: 'run-123-unknown-suite-gpt-4-dataset-1-example-1-Correctness-0',
         },
       });
@@ -270,7 +270,7 @@ describe('EvaluationScoreRepository', () => {
       });
       expect(bulkCall.onDocument(bulkCall.datasource[0])).toEqual({
         create: {
-          _index: '.kibana-evaluations',
+          _index: 'kibana-evaluations',
           _id: 'run-123-my-suite-gpt-4-dataset-1-example-1-Correctness-0',
         },
       });
@@ -411,7 +411,7 @@ describe('EvaluationScoreRepository', () => {
       expect(result).toEqual(mockScores);
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          index: '.kibana-evaluations',
+          index: 'kibana-evaluations',
           query: {
             bool: {
               must: [{ term: { run_id: 'run-123' } }],

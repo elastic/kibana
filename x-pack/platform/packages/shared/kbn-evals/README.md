@@ -361,7 +361,7 @@ The environment variable takes priority over the value passed to `createRagEvalu
 
 #### Using a Separate Cluster for Evaluation Results
 
-If you want to store evaluation results (exported to `.kibana-evaluations` datastream) in a different Elasticsearch cluster than your test environment, specify the cluster URL with the `EVALUATIONS_ES_URL` environment variable:
+If you want to store evaluation results (exported to `kibana-evaluations` datastream) in a different Elasticsearch cluster than your test environment, specify the cluster URL with the `EVALUATIONS_ES_URL` environment variable:
 
 ```bash
 EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200 node scripts/playwright test --config x-pack/platform/packages/shared/<my-dir-name>/playwright.config.ts
@@ -415,11 +415,11 @@ evaluate('my test', async ({ executorClient }) => {
 
 ## Elasticsearch Export
 
-The evaluation results are automatically exported to Elasticsearch in datastream called `.kibana-evaluations`. This provides persistent storage and enables analysis of evaluation metrics over time across different models and datasets.
+The evaluation results are automatically exported to Elasticsearch in datastream called `kibana-evaluations`. This provides persistent storage and enables analysis of evaluation metrics over time across different models and datasets.
 
 ### Golden cluster API key privileges (required)
 
-When exporting to a “golden”/centralized Elasticsearch cluster via `EVALUATIONS_ES_URL` + `EVALUATIONS_ES_API_KEY`, the exporter will **ensure the `.kibana-evaluations` data stream exists**. This requires the ability to create the data stream (internally an `indices:admin/data_stream/create` action), which is granted by index privileges like `create_index` (or broader `manage`/`all`) on the `.kibana-evaluations*` pattern.
+When exporting to a “golden”/centralized Elasticsearch cluster via `EVALUATIONS_ES_URL` + `EVALUATIONS_ES_API_KEY`, the exporter will **ensure the `kibana-evaluations` data stream exists**. This requires the ability to create the data stream (internally an `indices:admin/data_stream/create` action), which is granted by index privileges like `create_index` (or broader `manage`/`all`) on the `kibana-evaluations*` pattern.
 
 Use Kibana Dev Tools on the golden cluster to create an API key with the minimal required privileges:
 
@@ -433,7 +433,7 @@ POST /_security/api_key
       "cluster": ["manage_index_templates"],
       "indices": [
         {
-          "names": [".kibana-evaluations*"],
+          "names": ["kibana-evaluations*"],
           "privileges": [
             "auto_configure",
             "create_index",
@@ -468,8 +468,8 @@ EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200 node scripts/playwrigh
 
 The evaluation data is stored with the following structure:
 
-- **Index Pattern**: `.kibana-evaluations*`
-- **Datastream**: `.kibana-evaluations`
+- **Index Pattern**: `kibana-evaluations*`
+- **Datastream**: `kibana-evaluations`
 - **Document Structure**:
 
   ```json
