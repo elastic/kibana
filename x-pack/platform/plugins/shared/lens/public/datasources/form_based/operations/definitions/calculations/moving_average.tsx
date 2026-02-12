@@ -23,6 +23,7 @@ import {
   dateBasedOperationToExpression,
   hasDateField,
   checkForDataLayerType,
+  getReferencedColumnLabel,
 } from './utils';
 import { updateColumnParam } from '../../layer_helpers';
 import { getFormatFromPreviousColumn, isValidNumber, getFilter } from '../helpers';
@@ -74,23 +75,37 @@ export const movingAverageOperation: OperationDefinition<
     }
   },
   getDefaultLabel: (column, columns, indexPattern) => {
-    return ofName(columns[column.references[0]]?.label, column.timeScale, column.timeShift);
+    const refLabel = getReferencedColumnLabel(column.references[0], columns, indexPattern);
+    return ofName(refLabel, column.timeScale, column.timeShift);
   },
-  toExpression: (layer, columnId) => {
-    return dateBasedOperationToExpression(layer, columnId, 'moving_average', {
-      window: [(layer.columns[columnId] as MovingAverageIndexPatternColumn).params.window],
-    });
+  toExpression: (layer, columnId, indexPattern) => {
+    return dateBasedOperationToExpression(
+      layer,
+      columnId,
+      'moving_average',
+      {
+        window: [(layer.columns[columnId] as MovingAverageIndexPatternColumn).params.window],
+      },
+      indexPattern
+    );
   },
   buildColumn: ({ referenceIds, previousColumn, layer }, columnParams) => {
     const window = columnParams?.window ?? MOVING_AVERAGE_WINDOW_DEFAULT_VALUE;
+    const referencedColumn = layer.columns[referenceIds[0]];
+    const timeShift = columnParams?.shift || previousColumn?.timeShift;
+
+    const label = referencedColumn.label
+      ? ofName(referencedColumn.label, previousColumn?.timeScale, timeShift)
+      : '';
 
     return {
-      label: '',
+      label,
+      customLabel: !!label,
       dataType: 'number',
       operationType: 'moving_average',
       isBucketed: false,
       references: referenceIds,
-      timeShift: columnParams?.shift || previousColumn?.timeShift,
+      timeShift,
       filter: getFilter(previousColumn, columnParams),
       timeScale: previousColumn?.timeScale,
       params: {
