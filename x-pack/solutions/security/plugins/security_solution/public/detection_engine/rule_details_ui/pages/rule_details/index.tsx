@@ -760,7 +760,11 @@ export const RuleDetailsPage = connector(
                           <StyledEuiFlexItem grow={1} component="section" flexBasis={40}>
                             <EuiFlexGroup direction="column">
                               <EuiFlexItem component="section" grow={1} data-test-subj="defineRule">
-                                <StepPanel loading={isLoading} title={ruleI18n.DEFINITION}>
+                                <StepPanel
+                                  loading={isLoading}
+                                  title={ruleI18n.DEFINITION}
+                                  headerProps={{ border: true, hideSubtitle: true }}
+                                >
                                   {rule !== null && !isStartingJobs && (
                                     <RuleDefinitionSection
                                       rule={rule}
@@ -771,13 +775,21 @@ export const RuleDetailsPage = connector(
                                 </StepPanel>
                               </EuiFlexItem>
                               <EuiFlexItem data-test-subj="schedule" component="section" grow={1}>
-                                <StepPanel loading={isLoading} title={ruleI18n.SCHEDULE}>
+                                <StepPanel
+                                  loading={isLoading}
+                                  title={ruleI18n.SCHEDULE}
+                                  headerProps={{ border: true, hideSubtitle: true }}
+                                >
                                   {rule != null && <RuleScheduleSection rule={rule} />}
                                 </StepPanel>
                               </EuiFlexItem>
                               {hasActions && (
                                 <EuiFlexItem data-test-subj="actions" component="section" grow={1}>
-                                  <StepPanel loading={isLoading} title={ruleI18n.ACTIONS}>
+                                  <StepPanel
+                                    loading={isLoading}
+                                    title={ruleI18n.ACTIONS}
+                                    headerProps={{ border: true, hideSubtitle: true }}
+                                  >
                                     <StepRuleActionsReadOnly
                                       addPadding={false}
                                       defaultValues={ruleActionsData}
