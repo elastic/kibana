@@ -475,43 +475,74 @@ The evaluation data is stored with the following structure:
   ```json
   {
     "@timestamp": "2025-08-28T14:21:35.886Z",
-    "run_id": "026c5060fbfc7dcb",
-    "model": {
-      "id": "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
-      "family": "anthropic",
-      "provider": "bedrock"
+    "run_id": "run_123",
+    "experiment_id": "exp_456",
+    "suite": {
+      "id": "my-suite"
     },
-    "dataset": {
-      "id": "dataset_id",
-      "name": "my-dataset",
-      "examples_count": 10
+    "ci": {
+      "buildkite": {
+        "build_id": "bk-build-1",
+        "job_id": "bk-job-1",
+        "build_url": "https://buildkite.example/builds/1",
+        "pipeline_slug": "my-pipeline",
+        "pull_request": "123",
+        "branch": "feature-branch",
+        "commit": "deadbeef"
+      }
+    },
+    "example": {
+      "id": "example-1",
+      "index": 0,
+      "dataset": {
+        "id": "dataset_id",
+        "name": "my-dataset"
+      }
+    },
+    "task": {
+      "trace_id": "trace-task-123",
+      "repetition_index": 0,
+      "model": {
+        "id": "gpt-4",
+        "family": "gpt",
+        "provider": "openai"
+      }
     },
     "evaluator": {
-      "name": "Factuality",
-      "stats": {
-        "mean": 0.85,
-        "median": 1.0,
-        "std_dev": 0.37,
-        "min": 0.0,
-        "max": 1.0,
-        "count": 10,
-        "percentage": 85.0
+      "name": "Correctness",
+      "score": 0.85,
+      "label": "PASS",
+      "explanation": "The response was correct.",
+      "metadata": {
+        "successful": 3,
+        "failed": 0
       },
-      "scores": [1.0, 0.8, 1.0, 0.6, 1.0]
+      "trace_id": "trace-eval-456",
+      "model": {
+        "id": "claude-3",
+        "family": "claude",
+        "provider": "anthropic"
+      }
     },
-    "experiments": [{ "id": "experiment_id_1" }],
+    "run_metadata": {
+      "git_branch": "main",
+      "git_commit_sha": "abc123",
+      "total_repetitions": 1
+    },
     "environment": {
       "hostname": "your-hostname"
     }
   }
   ```
 
+Each document represents a single evaluator score for a single example (and repetition) within a `run_id`.
+
 ### Querying Evaluation Data
 
 After running evaluations, you can query the results in Kibana using the query filter provided in the logs:
 
 ```kql
-environment.hostname:"your-hostname" AND model.id:"model-id" AND run_id:"run-id"
+environment.hostname:"your-hostname" AND task.model.id:"model-id" AND run_id:"run-id"
 ```
 
 ### Using the Evaluation Analysis Service
