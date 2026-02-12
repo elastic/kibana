@@ -6,7 +6,7 @@
  */
 
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import type { EntityMaintainerState, RegisterEntityMaintainerConfig } from './types';
+import type { EntityMaintainerStatus, RegisterEntityMaintainerConfig } from './types';
 import { TasksConfig } from "../config";
 import { EntityStoreTaskType } from "../constants";
 import type { Logger } from '@kbn/logging';
@@ -21,33 +21,37 @@ export function registerEntityMaintainerTask({
   config: RegisterEntityMaintainerConfig;
 }): void {
   try {
-    const {type, title} = TasksConfig[EntityStoreTaskType.Values.entityMaintainer];
-    const {run, interval, initialState, description, name, id, setup} = config;
+    const { type, title } = TasksConfig[EntityStoreTaskType.Values.entityMaintainer];
+    const { run, interval, initialState, description, name, id, setup } = config;
 
     taskManager.registerTaskDefinitions({
       [type]: {
         title: title,
+        description,
         createTaskRunner: ({ taskInstance }) => ({
           run: async () => {
-            const taskState = taskInstance.state;
-
-            const maintainerState: EntityMaintainerState = {
+            const currentStatus = taskInstance.state;
+            const maintainerSatus: EntityMaintainerStatus = {
               metaData: {
-                runs: taskState?.metaData?.runs || 0,
-                lastSuccessTimestamp: taskState?.metaData?.lastSuccessTimestamp || null,
-                lastErrorTimestamp: taskState?.metaData?.lastErrorTimestamp || null,
+                runs: currentStatus?.metaData?.runs || 0,
+                lastSuccessTimestamp: currentStatus?.metaData?.lastSuccessTimestamp || null,
+                lastErrorTimestamp: currentStatus?.metaData?.lastErrorTimestamp || null,
               },
-              state: taskState?.state?.runs ? taskState.state : initialState,
+              state: currentStatus?.state?.runs ? currentStatus.state : initialState,
             };
 
-            const isFirstRun = maintainerState.metaData.runs === 0;
+            const isFirstRun = maintainerSatus.metaData.runs === 0;
 
             if (isFirstRun && setup) {
-              await setup({ state: initialState });
+              maintainerSatus.state = await setup({ state: maintainerSatus });
             }
-            await run();
+            maintainerSatus.state = await run({ state: maintainerSatus });
+            maintainerSatus.metaData.runs++;
+            maintainerSatus.metaData.lastSuccessTimestamp = new Date().toISOString();
+
+            // TODO: Handle error
             return {
-              state: { ...state, setupDone: true },
+              state: maintainerSatus,
             };
           },
         }),

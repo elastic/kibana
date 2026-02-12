@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 
 export interface EntityMaintainerWriter { }
 
-export interface EntityMaintainerMetaData {
+export interface EntityMaintainerStatusMetaData {
   runs: number;
   lastSuccessTimestamp: string | null;
   lastErrorTimestamp: string | null;
@@ -17,28 +17,28 @@ export interface EntityMaintainerMetaData {
 
 
 type JsonPrimitive = string | number | boolean | null;
-type JsonValue = JsonPrimitive | JsonObject | JsonValue[];
-interface JsonObject {
+type JsonValue = JsonPrimitive | EntityMaintainerState | JsonValue[];
+interface EntityMaintainerState {
   [key: string]: JsonValue;
 }
 
-export interface EntityMaintainerState {
-  metaData: EntityMaintainerMetaData;
-  state: JsonObject;
-}
-
-interface EntityMaintainerTaskMethodContext {
+export interface EntityMaintainerStatus extends Record<string, unknown> {
+  metaData: EntityMaintainerStatusMetaData;
   state: EntityMaintainerState;
 }
 
-export type EntityMaintainerTaskMethod = (context: EntityMaintainerTaskMethodContext) => Promise<JsonObject>;
+interface EntityMaintainerTaskMethodContext {
+  state: EntityMaintainerStatus;
+}
+
+export type EntityMaintainerTaskMethod = (context: EntityMaintainerTaskMethodContext) => Promise<EntityMaintainerState>;
 
 export interface RegisterEntityMaintainerConfig {
   id: string;
   name: string;
   description?: string;
   interval: string;
-  initialState: JsonObject;
+  initialState: EntityMaintainerState;
   run: EntityMaintainerTaskMethod;
   setup?: EntityMaintainerTaskMethod;
 }
