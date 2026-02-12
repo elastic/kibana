@@ -7,8 +7,7 @@
 
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiIcon, EuiComboBox, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiIcon, EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { parse, stringify } from 'query-string';
 import { useLocation } from 'react-router-dom';
 
@@ -18,7 +17,7 @@ import {
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
 } from '../../../../common/constants';
 import { WATCHLIST_I18N } from './constants';
-import { WatchlistItem, WatchlistOption } from './types';
+import type { WatchlistItem, WatchlistOption } from './types';
 
 interface WatchlistFilterProps {
   onChangeSelectedId?: (id: string) => void;
@@ -30,13 +29,7 @@ const WATCHLIST_QUERY_PARAM = 'watchlist_id';
 // Demo atm, replacing with real data with crud
 const WATCHLIST_OPTIONS: WatchlistOption[] = [
   {
-    prepend: (
-      <EuiIcon
-        type="pin"
-        aria-label={WATCHLIST_I18N.iconPin}
-        style={{ marginRight: 8 }}
-      />
-    ),
+    prepend: <EuiIcon type="pin" aria-label={WATCHLIST_I18N.iconPin} style={{ marginRight: 8 }} />,
     id: 'group-prebuilt',
     label: WATCHLIST_I18N.groupPrebuilt,
     isGroupLabelOption: true,
@@ -48,11 +41,7 @@ const WATCHLIST_OPTIONS: WatchlistOption[] = [
 
   {
     prepend: (
-      <EuiIcon
-        type="gear"
-        aria-label={WATCHLIST_I18N.iconGear}
-        style={{ marginRight: 8 }}
-      />
+      <EuiIcon type="gear" aria-label={WATCHLIST_I18N.iconGear} style={{ marginRight: 8 }} />
     ),
     id: 'group-custom',
     label: WATCHLIST_I18N.groupCustom,
@@ -161,7 +150,7 @@ export const WatchlistFilter = ({
           onChange={onChangeComboBox}
           isClearable={true}
         />
-      </EuiFlexItem>     
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
