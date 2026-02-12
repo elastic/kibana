@@ -69,7 +69,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
           name: `setup-${project?.name}`,
           use: project?.use ? { ...project.use } : {},
           testMatch: /global.setup\.ts/,
-          timeout: 60000, // Default to 3 minutes for global setup
+          timeout: 180000, // Default to 3 minutes for global setup
         },
         { ...project, dependencies: [`setup-${project?.name}`] },
       ])
