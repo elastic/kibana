@@ -14,7 +14,7 @@ import type { TableActions } from '../managed_table';
 import { getESQLQuery } from '../links/discover_links/get_esql_query';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
-interface UseTransactionActionsParams {
+interface DiscoverActionParams {
   kuery: string;
   serviceName: string;
   environment: string;
@@ -30,7 +30,7 @@ export function useTransactionActions({
   rangeFrom,
   rangeTo,
   indexSettings,
-}: UseTransactionActionsParams): TableActions<ServiceTransactionGroupItem> {
+}: DiscoverActionParams): TableActions<ServiceTransactionGroupItem> {
   const { share } = useApmPluginContext();
 
   return useMemo(() => {
