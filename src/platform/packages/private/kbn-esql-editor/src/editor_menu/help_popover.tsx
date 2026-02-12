@@ -22,7 +22,6 @@ import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { type RecommendedQuery, REGISTRY_EXTENSIONS_ROUTE, QuerySource } from '@kbn/esql-types';
 import { getRecommendedQueriesTemplates } from '@kbn/esql-language/src/commands/registry/options/recommended_queries';
@@ -47,7 +46,18 @@ export const HelpPopover: React.FC<{
   const activeSolutionId = useObservable(chrome.getActiveSolutionNavId$());
   const [isESQLMenuPopoverOpen, setIsESQLMenuPopoverOpen] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
-  const [adHocDataview, setAdHocDataview] = useState<DataView | undefined>(undefined);
+
+  const [dataviewDerived, setDataviewDerived] = useState<{
+    queryForRecommendedQueries: string;
+    timeFieldName: string | undefined;
+    categorizationField: string | undefined;
+    dataviewName: string | undefined;
+  }>({
+    queryForRecommendedQueries: '',
+    timeFieldName: undefined,
+    categorizationField: undefined,
+    dataviewName: undefined,
+  });
 
   useEffect(() => {
     onESQLDocsFlyoutVisibilityChanged?.(isLanguageComponentOpen);
@@ -63,7 +73,12 @@ export const HelpPopover: React.FC<{
     let isMounted = true;
     const getDataViewForQuery = async () => {
       if (!actions?.currentQuery) {
-        setAdHocDataview(undefined);
+        setDataviewDerived({
+          queryForRecommendedQueries: '',
+          timeFieldName: undefined,
+          categorizationField: undefined,
+          dataviewName: undefined,
+        });
         return;
       }
       try {
@@ -72,12 +87,34 @@ export const HelpPopover: React.FC<{
           query: actions.currentQuery,
           http,
         });
-        if (isMounted) {
-          setAdHocDataview(dataView);
+        if (!isMounted) return;
+        if (dataView) {
+          const textFields = dataView.fields?.getByType('string') ?? [];
+          const tempCategorizationField = textFields.length
+            ? getCategorizationField(textFields.map((field) => field.name))
+            : undefined;
+          setDataviewDerived({
+            queryForRecommendedQueries: `FROM ${dataView.name}`,
+            timeFieldName: dataView.timeFieldName ?? dataView.fields?.getByType('date')?.[0]?.name,
+            categorizationField: tempCategorizationField,
+            dataviewName: dataView.name,
+          });
+        } else {
+          setDataviewDerived({
+            queryForRecommendedQueries: '',
+            timeFieldName: undefined,
+            categorizationField: undefined,
+            dataviewName: undefined,
+          });
         }
       } catch (error) {
         if (isMounted) {
-          setAdHocDataview(undefined);
+          setDataviewDerived({
+            queryForRecommendedQueries: '',
+            timeFieldName: undefined,
+            categorizationField: undefined,
+            dataviewName: undefined,
+          });
         }
       }
     };
@@ -89,27 +126,8 @@ export const HelpPopover: React.FC<{
     };
   }, [actions?.currentQuery, data.dataViews, http]);
 
-  const { queryForRecommendedQueries, timeFieldName, categorizationField } = useMemo(() => {
-    if (adHocDataview) {
-      const textFields = adHocDataview.fields?.getByType('string') ?? [];
-      let tempCategorizationField;
-      if (textFields.length) {
-        tempCategorizationField = getCategorizationField(textFields.map((field) => field.name));
-      }
-
-      return {
-        queryForRecommendedQueries: `FROM ${adHocDataview.name}`,
-        timeFieldName:
-          adHocDataview.timeFieldName ?? adHocDataview.fields?.getByType('date')?.[0]?.name,
-        categorizationField: tempCategorizationField,
-      };
-    }
-    return {
-      queryForRecommendedQueries: '',
-      timeFieldName: undefined,
-      categorizationField: undefined,
-    };
-  }, [adHocDataview]);
+  const { queryForRecommendedQueries, timeFieldName, categorizationField, dataviewName } =
+    dataviewDerived;
 
   const lastFetchedQueries = useRef<RecommendedQuery[]>([]);
 
@@ -164,7 +182,7 @@ export const HelpPopover: React.FC<{
           // Check if query starts with FROM or TS
           const startsWithTs = recommendedQuery.query.startsWith('TS');
           const queryString = startsWithTs
-            ? `TS ${adHocDataview?.name} ${template}`
+            ? `TS ${dataviewName ?? ''} ${template}`
             : `${queryForRecommendedQueries} ${template}`;
 
           return {
@@ -245,8 +263,8 @@ export const HelpPopover: React.FC<{
     return panels as EuiContextMenuPanelDescriptor[];
   }, [
     actions,
-    adHocDataview?.name,
     categorizationField,
+    dataviewName,
     queryForRecommendedQueries,
     solutionsRecommendedQueries,
     timeFieldName,

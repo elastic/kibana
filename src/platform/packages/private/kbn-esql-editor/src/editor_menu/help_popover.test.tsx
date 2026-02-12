@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 import { screen, render, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { createStubDataView, stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/stubs';
+import { createStubDataView, stubLogstashFieldSpecMap } from '@kbn/data-plugin/public/stubs';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { coreMock, notificationServiceMock } from '@kbn/core/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';

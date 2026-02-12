@@ -42,7 +42,6 @@
     "@kbn/ebt-tools",
     "@kbn/shared-ux-utility",
     "@kbn/search-types",
-    "@kbn/data-views-plugin",
     "@kbn/aiops-utils",
     "@kbn/esql-resource-browser"
   ],
