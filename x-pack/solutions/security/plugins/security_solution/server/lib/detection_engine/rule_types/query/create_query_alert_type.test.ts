@@ -181,24 +181,6 @@ describe('Custom Query Alerts', () => {
 
     const params = getQueryRuleParams();
 
-    // mock field caps so as not to short-circuit on "no indices found"
-    services.scopedClusterClient.asInternalUser.fieldCaps.mockResolvedValueOnce({
-      // @ts-expect-error our fieldCaps mock only seems to use the last value of the overloaded FieldCapsApi
-      body: {
-        indices: params.index!,
-        fields: {
-          _id: {
-            _id: {
-              type: '_id',
-              metadata_field: true,
-              searchable: true,
-              aggregatable: false,
-            },
-          },
-        },
-      },
-    });
-
     services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
       hits: {
         hits: [sampleDocNoSortId()],
