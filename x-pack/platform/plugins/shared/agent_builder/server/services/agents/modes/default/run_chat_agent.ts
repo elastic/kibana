@@ -104,6 +104,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventEmitter: AgentEventEmitterFn = (event) => {
     manualEvents$.next(event);
   };
+  toolManager.setEventEmitter(eventEmitter);
+
   // Pass action so regenerate uses the last round's original input instead of request input
   const processedConversation = await prepareConversation({
     nextInput,
@@ -125,8 +127,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     spaceId: context.spaceId,
     runner: context.runner,
   });
-
-  toolManager.setEventEmitter(eventEmitter);
 
   await Promise.all([
     toolManager.addTools({
