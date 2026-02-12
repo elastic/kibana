@@ -123,6 +123,12 @@ function dateMathToRelativeParts(
  * Formats relative time as natural language.
  * e.g., (7, 'm', false) => "7 minutes ago"
  * e.g., (3, 'd', true) => "3 days from now"
+ *
+ * TODO: translate the output of this function
+ * using @kbn/i18n with ICU plural syntax for each unit/direction combination.
+ * Other user-facing strings in this file (e.g. "now", the delimiter) also need
+ * to be translated.
+ * https://github.com/elastic/eui-private/issues/534
  */
 function formatRelativeTime(count: number, unit: string, isFuture: boolean): string {
   const unitName = UNIT_SHORT_TO_FULL_MAP[unit] || unit;
