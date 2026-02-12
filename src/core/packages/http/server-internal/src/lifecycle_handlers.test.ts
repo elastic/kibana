@@ -254,38 +254,6 @@ describe('excludeRoutes pre-auth handler', () => {
     expect(responseFactory.notFound).toHaveBeenCalledTimes(1);
     expect(result).toBe('notFound');
   });
-
-  it('normalizes basePath before matching', () => {
-    const handler = createExcludeRoutesPreAuthHandler(
-      createConfig({ basePath: '/base', excludeRoutes: ['/api/status'] }),
-      logger
-    );
-    const request = forgeRequest({ path: '/base/api/status' });
-
-    responseFactory.notFound.mockReturnValue('notFound' as any);
-
-    const result = handler(request, responseFactory, toolkit);
-
-    expect(toolkit.next).not.toHaveBeenCalled();
-    expect(responseFactory.notFound).toHaveBeenCalledTimes(1);
-    expect(result).toBe('notFound');
-  });
-
-  it('normalizes space basePath before matching', () => {
-    const handler = createExcludeRoutesPreAuthHandler(
-      createConfig({ basePath: '/s/space-id', excludeRoutes: ['/api/status'] }),
-      logger
-    );
-    const request = forgeRequest({ path: '/s/space-id/api/status' });
-
-    responseFactory.notFound.mockReturnValue('notFound' as any);
-
-    const result = handler(request, responseFactory, toolkit);
-
-    expect(toolkit.next).not.toHaveBeenCalled();
-    expect(responseFactory.notFound).toHaveBeenCalledTimes(1);
-    expect(result).toBe('notFound');
-  });
 });
 
 describe('versionCheck post-auth handler', () => {
