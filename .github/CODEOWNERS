@@ -1814,6 +1814,7 @@ x-pack/platform/plugins/shared/streams_app/public/components/data_management/str
 
 # obs-exploration-team 
 /x-pack/solutions/observability/test/serverless/functional/test_suites/discover/logs/ @elastic/obs-exploration-team
+/x-pack/solutions/observability/test/serverless/functional/utils/ @elastic/obs-exploration-team
 /src/platform/test/functional/apps/discover/observability/logs/ @elastic/obs-exploration-team
 
 # obs-onboarding-team
