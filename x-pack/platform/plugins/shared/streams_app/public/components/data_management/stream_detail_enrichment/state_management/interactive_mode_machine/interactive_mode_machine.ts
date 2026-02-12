@@ -11,9 +11,11 @@ import {
   ALWAYS_CONDITION,
   convertStepsForUI,
   convertUIStepsToDSL,
+  streamlangDSLSchema,
   type StreamlangProcessorDefinition,
 } from '@kbn/streamlang';
 import type { StreamlangConditionBlock, StreamlangDSL } from '@kbn/streamlang/types/streamlang';
+import { TaskStatus } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { MachineImplementationsFrom } from 'xstate5';
 import {
@@ -40,9 +42,9 @@ import { collectDescendantStepIds } from '../utils';
 import { selectWhetherAnyProcessorBeforePersisted } from './selectors';
 import {
   createNotifySuggestionFailureNotifier,
-  createSuggestPipelineActor,
   createLoadExistingSuggestionActor,
-  createPollExistingSuggestionActor,
+  createSchedulePipelineSuggestionTaskActor,
+  createGetPipelineSuggestionStatusActor,
 } from './suggest_pipeline_actor';
 import type {
   InteractiveModeContext,
@@ -63,6 +65,9 @@ export type InteractiveModeSnapshot = SnapshotFrom<typeof interactiveModeMachine
 
 const createId = htmlIdGenerator();
 
+const PIPELINE_SUGGESTION_POLLING_INTERVAL_MS = 2000;
+const PIPELINE_SUGGESTION_MAX_POLLING_TIME_MS = 5 * 60 * 1000; // 5 minutes
+
 export const interactiveModeMachine = setup({
   types: {
     input: {} as InteractiveModeInput,
@@ -71,9 +76,9 @@ export const interactiveModeMachine = setup({
   },
   actors: {
     stepMachine,
-    suggestPipeline: getPlaceholderFor(createSuggestPipelineActor),
     loadExistingSuggestion: getPlaceholderFor(createLoadExistingSuggestionActor),
-    pollExistingSuggestion: getPlaceholderFor(createPollExistingSuggestionActor),
+    schedulePipelineSuggestionTask: getPlaceholderFor(createSchedulePipelineSuggestionTaskActor),
+    getPipelineSuggestionStatus: getPlaceholderFor(createGetPipelineSuggestionStatusActor),
   },
   actions: {
     notifySuggestionFailure: (_, __: { event: { error: unknown } }) => {},
@@ -342,6 +347,10 @@ export const interactiveModeMachine = setup({
       suggestedPipeline: params.pipeline,
     })),
     clearSuggestion: assign({ suggestedPipeline: undefined }),
+    setSuggestionPollingDeadline: assign({
+      suggestionPollingDeadline: () => Date.now() + PIPELINE_SUGGESTION_MAX_POLLING_TIME_MS,
+    }),
+    clearSuggestionPollingDeadline: assign({ suggestionPollingDeadline: undefined }),
   },
   guards: {
     hasStagedChanges: ({ context }) => {
@@ -368,6 +377,11 @@ export const interactiveModeMachine = setup({
       // Don't show suggestions if stream already has processing steps
       return context.initialStepRefs.length === 0;
     },
+    suggestionPollingTimedOut: ({ context }) => {
+      return context.suggestionPollingDeadline !== undefined
+        ? Date.now() > context.suggestionPollingDeadline
+        : false;
+    },
   },
 }).createMachine({
   id: 'interactiveMode',
@@ -393,6 +407,7 @@ export const interactiveModeMachine = setup({
       simulationMode: input.simulationMode,
       streamName: input.streamName,
       suggestedPipeline: undefined,
+      suggestionPollingDeadline: undefined,
       grokCollection: input.grokCollection,
     };
   },
@@ -411,6 +426,25 @@ export const interactiveModeMachine = setup({
   states: {
     pipelineSuggestion: {
       initial: 'loadingExistingSuggestion',
+      on: {
+        'suggestion.cancel': {
+          target: '.idle',
+          actions: [
+            {
+              type: 'cancelSuggestionTask',
+              params: ({ context }) => ({ streamName: context.streamName }),
+            },
+            { type: 'clearSuggestion' },
+            {
+              type: 'overwriteSteps',
+              params: () => ({ steps: [] }),
+            },
+            { type: 'syncToDSL' },
+            { type: 'sendStepsToSimulator' },
+            { type: 'clearSuggestionPollingDeadline' },
+          ],
+        },
+      },
       states: {
         loadingExistingSuggestion: {
           invoke: {
@@ -424,7 +458,7 @@ export const interactiveModeMachine = setup({
                 // Only show suggestion if stream has no initial steps (not already configured)
                 guard: ({ context, event }) =>
                   event.output.type === 'completed' && context.initialStepRefs.length === 0,
-                target: 'viewingSuggestion',
+                target: 'completed',
                 actions: enqueueActions(({ event, enqueue }) => {
                   // Type guard is satisfied by the guard above, but TypeScript needs help
                   const output = event.output as { type: 'completed'; pipeline: StreamlangDSL };
@@ -442,7 +476,8 @@ export const interactiveModeMachine = setup({
                 // Only continue polling if stream has no initial steps
                 guard: ({ context, event }) =>
                   event.output.type === 'in_progress' && context.initialStepRefs.length === 0,
-                target: 'pollingExistingSuggestion',
+                target: 'waitingForCompletion',
+                actions: [{ type: 'setSuggestionPollingDeadline' }],
               },
               {
                 // For 'none', 'failed', or when stream already has steps - go to idle
@@ -453,82 +488,21 @@ export const interactiveModeMachine = setup({
               target: 'idle',
             },
           },
-          on: {
-            'suggestion.cancel': {
-              target: 'idle',
-              actions: [
-                {
-                  type: 'cancelSuggestionTask',
-                  params: ({ context }) => ({ streamName: context.streamName }),
-                },
-                { type: 'clearSuggestion' },
-              ],
-            },
-          },
-        },
-        pollingExistingSuggestion: {
-          invoke: {
-            id: 'pollExistingSuggestionActor',
-            src: 'pollExistingSuggestion',
-            input: ({ context }) => ({
-              streamName: context.streamName,
-            }),
-            onDone: [
-              {
-                guard: ({ context, event }) =>
-                  event.output.type === 'completed' && context.initialStepRefs.length === 0,
-                target: 'viewingSuggestion',
-                actions: enqueueActions(({ event, enqueue }) => {
-                  const output = event.output as { type: 'completed'; pipeline: StreamlangDSL };
-                  enqueue({
-                    type: 'storeSuggestedPipeline',
-                    params: { pipeline: output.pipeline },
-                  });
-                  enqueue({
-                    type: 'overwriteSteps',
-                    params: { steps: output.pipeline.steps },
-                  });
-                }),
-              },
-              {
-                target: 'idle',
-              },
-            ],
-            onError: {
-              target: 'idle',
-            },
-          },
-          on: {
-            'suggestion.cancel': {
-              target: 'idle',
-              actions: [
-                {
-                  type: 'cancelSuggestionTask',
-                  params: ({ context }) => ({ streamName: context.streamName }),
-                },
-                { type: 'clearSuggestion' },
-                {
-                  type: 'overwriteSteps',
-                  params: () => ({ steps: [] }),
-                },
-                { type: 'syncToDSL' },
-                { type: 'sendStepsToSimulator' },
-              ],
-            },
-          },
         },
         idle: {
+          entry: [{ type: 'clearSuggestionPollingDeadline' }],
           on: {
             'suggestion.generate': {
               guard: ({ context }) => context.stepRefs.length === 0,
-              target: 'generatingSuggestion',
+              target: 'submittingSuggestionTask',
             },
           },
         },
-        generatingSuggestion: {
+        submittingSuggestionTask: {
+          entry: [{ type: 'setSuggestionPollingDeadline' }],
           invoke: {
-            id: 'suggestPipelineActor',
-            src: 'suggestPipeline',
+            id: 'schedulePipelineSuggestionTaskActor',
+            src: 'schedulePipelineSuggestionTask',
             input: ({ context, event }) => {
               assertEvent(event, ['suggestion.generate', 'suggestion.regenerate']);
               // Get preview documents from parent's data sources
@@ -540,19 +514,7 @@ export const interactiveModeMachine = setup({
                 documents,
               };
             },
-            onDone: {
-              target: 'viewingSuggestion',
-              actions: [
-                {
-                  type: 'storeSuggestedPipeline',
-                  params: ({ event }) => ({ pipeline: event.output }),
-                },
-                {
-                  type: 'overwriteSteps',
-                  params: ({ event }) => ({ steps: event.output.steps }),
-                },
-              ],
-            },
+            onDone: { target: 'checkingSuggestionStatus' },
             onError: [
               {
                 guard: ({ event }) => isNoSuggestionsError(event.error),
@@ -561,6 +523,7 @@ export const interactiveModeMachine = setup({
               {
                 target: 'idle',
                 actions: [
+                  { type: 'clearSuggestionPollingDeadline' },
                   {
                     type: 'notifySuggestionFailure',
                     params: ({ event }: { event: { error: unknown } }) => ({ event }),
@@ -569,29 +532,91 @@ export const interactiveModeMachine = setup({
               },
             ],
           },
-          on: {
-            'suggestion.cancel': {
+        },
+        checkingSuggestionStatus: {
+          invoke: {
+            id: 'getPipelineSuggestionStatusActor',
+            src: 'getPipelineSuggestionStatus',
+            input: ({ context }) => ({ streamName: context.streamName }),
+            onDone: [
+              {
+                guard: ({ context, event }) => {
+                  const output = event.output;
+                  return (
+                    context.initialStepRefs.length === 0 &&
+                    output.status === TaskStatus.Completed &&
+                    output.pipeline != null
+                  );
+                },
+                target: 'completed',
+                actions: enqueueActions(({ event, enqueue }) => {
+                  const output = event.output as {
+                    status: TaskStatus.Completed;
+                    pipeline: unknown | null;
+                  };
+                  const pipeline = streamlangDSLSchema.parse(output.pipeline);
+                  enqueue({ type: 'storeSuggestedPipeline', params: { pipeline } });
+                  enqueue({ type: 'overwriteSteps', params: { steps: pipeline.steps } });
+                }),
+              },
+              {
+                guard: ({ event }) =>
+                  event.output.status === TaskStatus.Completed && event.output.pipeline == null,
+                target: 'noSuggestionsFound',
+                actions: [{ type: 'clearSuggestionPollingDeadline' }],
+              },
+              {
+                guard: ({ event }) => event.output.status === TaskStatus.Acknowledged,
+                target: 'noSuggestionsFound',
+                actions: [{ type: 'clearSuggestionPollingDeadline' }],
+              },
+              {
+                guard: ({ event }) => event.output.status === TaskStatus.Failed,
+                target: 'idle',
+                actions: [{ type: 'clearSuggestionPollingDeadline' }],
+              },
+              {
+                guard: ({ event }) =>
+                  event.output.status === TaskStatus.InProgress ||
+                  event.output.status === TaskStatus.NotStarted ||
+                  event.output.status === TaskStatus.BeingCanceled,
+                target: 'waitingForCompletion',
+              },
+              {
+                target: 'idle',
+                actions: [{ type: 'clearSuggestionPollingDeadline' }],
+              },
+            ],
+            onError: {
               target: 'idle',
-              actions: [
-                {
-                  type: 'cancelSuggestionTask',
-                  params: ({ context }) => ({ streamName: context.streamName }),
-                },
-                { type: 'clearSuggestion' },
-                {
-                  type: 'overwriteSteps',
-                  params: () => ({ steps: [] }),
-                },
-                { type: 'syncToDSL' },
-                { type: 'sendStepsToSimulator' },
-              ],
+              actions: [{ type: 'clearSuggestionPollingDeadline' }],
             },
+          },
+        },
+        waitingForCompletion: {
+          after: {
+            [PIPELINE_SUGGESTION_POLLING_INTERVAL_MS]: [
+              {
+                guard: 'suggestionPollingTimedOut',
+                target: 'idle',
+                actions: [
+                  { type: 'clearSuggestionPollingDeadline' },
+                  {
+                    type: 'notifySuggestionFailure',
+                    params: () => ({
+                      event: { error: new Error('Pipeline suggestion timed out') },
+                    }),
+                  },
+                ],
+              },
+              { target: 'checkingSuggestionStatus' },
+            ],
           },
         },
         noSuggestionsFound: {
           on: {
             'suggestion.generate': {
-              target: 'generatingSuggestion',
+              target: 'submittingSuggestionTask',
             },
             'suggestion.dismiss': {
               target: 'idle',
@@ -604,7 +629,7 @@ export const interactiveModeMachine = setup({
             },
           },
         },
-        viewingSuggestion: {
+        completed: {
           entry: [{ type: 'syncToDSL' }, { type: 'sendStepsToSimulator' }],
           on: {
             'suggestion.accept': {
@@ -616,6 +641,7 @@ export const interactiveModeMachine = setup({
                 },
                 { type: 'syncToDSL' },
                 { type: 'clearSuggestion' },
+                { type: 'clearSuggestionPollingDeadline' },
               ],
             },
             'suggestion.dismiss': {
@@ -632,10 +658,11 @@ export const interactiveModeMachine = setup({
                 },
                 { type: 'syncToDSL' },
                 { type: 'sendStepsToSimulator' },
+                { type: 'clearSuggestionPollingDeadline' },
               ],
             },
             'suggestion.regenerate': {
-              target: 'generatingSuggestion',
+              target: 'submittingSuggestionTask',
               actions: [
                 { type: 'clearSuggestion' },
                 {
@@ -793,15 +820,15 @@ export const createInteractiveModeMachineImplementations = ({
   notifications,
 }: InteractiveModeMachineDeps): MachineImplementationsFrom<typeof interactiveModeMachine> => ({
   actors: {
-    suggestPipeline: createSuggestPipelineActor({
+    loadExistingSuggestion: createLoadExistingSuggestionActor({
+      streamsRepositoryClient,
+    }),
+    schedulePipelineSuggestionTask: createSchedulePipelineSuggestionTaskActor({
       streamsRepositoryClient,
       telemetryClient,
       notifications,
     }),
-    loadExistingSuggestion: createLoadExistingSuggestionActor({
-      streamsRepositoryClient,
-    }),
-    pollExistingSuggestion: createPollExistingSuggestionActor({
+    getPipelineSuggestionStatus: createGetPipelineSuggestionStatusActor({
       streamsRepositoryClient,
     }),
   },

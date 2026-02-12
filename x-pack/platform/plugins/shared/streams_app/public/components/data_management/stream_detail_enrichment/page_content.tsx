@@ -211,11 +211,14 @@ export function StreamDetailEnrichmentContentImpl() {
 
   // Pipeline suggestion state from interactive mode machine (defaults to false when not in interactive mode)
   const isLoadingSuggestion = useOptionalInteractiveModeSelector(
-    (snapshot) => snapshot.matches({ pipelineSuggestion: 'generatingSuggestion' }),
+    (snapshot) =>
+      snapshot.matches({ pipelineSuggestion: 'submittingSuggestionTask' }) ||
+      snapshot.matches({ pipelineSuggestion: 'checkingSuggestionStatus' }) ||
+      snapshot.matches({ pipelineSuggestion: 'waitingForCompletion' }),
     false
   );
   const isViewingSuggestion = useOptionalInteractiveModeSelector(
-    (snapshot) => snapshot.matches({ pipelineSuggestion: 'viewingSuggestion' }),
+    (snapshot) => snapshot.matches({ pipelineSuggestion: 'completed' }),
     false
   );
   const isSuggestionVisible = isLoadingSuggestion || isViewingSuggestion;

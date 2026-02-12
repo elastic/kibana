@@ -10,7 +10,7 @@ import type { IToasts, NotificationsStart } from '@kbn/core/public';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { streamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang';
 import type { FlattenRecord } from '@kbn/streams-schema';
-import { TaskStatus } from '@kbn/streams-schema';
+import { TaskStatus, type TaskResult } from '@kbn/streams-schema';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import {
   extractGrokPatternDangerouslySlow,
@@ -21,143 +21,15 @@ import { i18n } from '@kbn/i18n';
 import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import { getFormattedError } from '../../../../../util/errors';
 import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
-import {
-  NoSuggestionsError,
-  isNoSuggestionsError,
-} from '../../steps/blocks/action/utils/no_suggestions_error';
+import { isNoSuggestionsError } from '../../steps/blocks/action/utils/no_suggestions_error';
 import { PRIORITIZED_CONTENT_FIELDS, getDefaultTextField } from '../../utils';
 import { extractMessagesFromField } from '../../steps/blocks/action/utils/pattern_suggestion_helpers';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine/types';
 
-const POLLING_INTERVAL_MS = 2000;
-const MAX_POLLING_TIME_MS = 5 * 60 * 1000; // 5 minutes
-
-const POLLING_ABORTED_ERROR_NAME = 'PollingAbortedError';
-const POLLING_TIMEOUT_ERROR_NAME = 'PollingTimeoutError';
-
-const createNamedError = (name: string, message: string): Error => {
-  const error = new Error(message);
-  error.name = name;
-  return error;
-};
-
-const createPollingAbortedError = (message: string): Error =>
-  createNamedError(POLLING_ABORTED_ERROR_NAME, message);
-
-const createPollingTimeoutError = (message: string): Error =>
-  createNamedError(POLLING_TIMEOUT_ERROR_NAME, message);
-
-const isNamedError = (error: unknown, name: string): error is Error =>
-  error instanceof Error && error.name === name;
-
-const isPollingAbortedError = (error: unknown): error is Error =>
-  isNamedError(error, POLLING_ABORTED_ERROR_NAME);
-
-const isPollingTimeoutError = (error: unknown): error is Error =>
-  isNamedError(error, POLLING_TIMEOUT_ERROR_NAME);
-
-const pollWithTimeout = async <T>({
-  signal,
-  getNext,
-  shouldContinue,
-  intervalMs,
-  timeoutMs,
-  createAbortError,
-  createTimeoutError,
-}: {
-  signal: AbortSignal;
-  getNext: () => Promise<T>;
-  shouldContinue: (value: T) => boolean;
-  intervalMs: number;
-  timeoutMs: number;
-  createAbortError: () => Error;
-  createTimeoutError: () => Error;
-}): Promise<T> => {
-  const deadline = Date.now() + timeoutMs;
-  let timerId: ReturnType<typeof setTimeout> | undefined;
-  let settled = false;
-
-  const clearTimer = () => {
-    if (timerId !== undefined) {
-      clearTimeout(timerId);
-      timerId = undefined;
-    }
-  };
-
-  return await new Promise<T>((resolve, reject) => {
-    const settleReject = (error: unknown) => {
-      if (settled) return;
-      settled = true;
-      clearTimer();
-      signal.removeEventListener('abort', onAbort);
-      reject(error);
-    };
-
-    const settleResolve = (value: T) => {
-      if (settled) return;
-      settled = true;
-      clearTimer();
-      signal.removeEventListener('abort', onAbort);
-      resolve(value);
-    };
-
-    const onAbort = () => {
-      settleReject(createAbortError());
-    };
-
-    const poll = async (): Promise<void> => {
-      if (settled) return;
-
-      if (signal.aborted) {
-        settleReject(createAbortError());
-        return;
-      }
-
-      if (Date.now() > deadline) {
-        settleReject(createTimeoutError());
-        return;
-      }
-
-      let next: T;
-      try {
-        next = await getNext();
-      } catch (error) {
-        if (isRequestAbortedError(error)) {
-          settleReject(createAbortError());
-          return;
-        }
-        settleReject(error);
-        return;
-      }
-
-      if (!shouldContinue(next)) {
-        settleResolve(next);
-        return;
-      }
-
-      if (Date.now() > deadline) {
-        settleReject(createTimeoutError());
-        return;
-      }
-
-      timerId = setTimeout(() => {
-        void poll();
-      }, intervalMs);
-    };
-
-    signal.addEventListener('abort', onAbort, { once: true });
-    void poll();
-  });
-};
-
-// Minimal input needed from state machine (services injected in implementation)
-export interface SuggestPipelineInputMinimal {
+export interface SuggestPipelineInput {
   streamName: string;
   connectorId: string;
   documents: SampleDocumentWithUIAttributes[];
-}
-
-export interface SuggestPipelineInput extends SuggestPipelineInputMinimal {
   signal: AbortSignal;
   streamsRepositoryClient: StreamsRepositoryClient;
   telemetryClient: StreamsTelemetryClient;
@@ -173,118 +45,6 @@ interface ExtractedGrokPattern {
     messages: string[];
     nodes: GrokPatternNode[];
   }>;
-}
-
-export async function suggestPipelineLogic(input: SuggestPipelineInput): Promise<StreamlangDSL> {
-  const { streamName, connectorId, signal, streamsRepositoryClient } = input;
-
-  // Extract FlattenRecord documents from SampleDocumentWithUIAttributes
-  const documents: FlattenRecord[] = input.documents.map(
-    (doc) => flattenObjectNestedLast(doc.document) as FlattenRecord
-  );
-
-  // Step 1: CLIENT-SIDE - Extract patterns from documents
-  // This is compute-intensive and synchronous, so it stays client-side
-  const fieldName = getDefaultTextField(documents, PRIORITIZED_CONTENT_FIELDS);
-  const messages = extractMessagesFromField(documents, fieldName);
-
-  // Only grok extraction is CPU-intensive enough to warrant client-side processing
-  const grokPatterns = await extractGrokPatternsClientSide(messages, fieldName);
-
-  // Step 2: Schedule background task for server-side processing
-  const extractedPatterns = {
-    grok: grokPatterns
-      ? {
-          fieldName: grokPatterns.fieldName,
-          patternGroups: grokPatterns.patternGroups,
-        }
-      : null,
-    dissect:
-      messages.length > 0
-        ? {
-            fieldName,
-            messages,
-          }
-        : null,
-  };
-
-  await streamsRepositoryClient.fetch('POST /internal/streams/{name}/_pipeline_suggestion/_task', {
-    signal,
-    params: {
-      path: { name: streamName },
-      body: {
-        action: 'schedule' as const,
-        connectorId,
-        documents,
-        extractedPatterns,
-      },
-    },
-  });
-
-  // Step 3: Poll for task completion
-  const getStatus = async () => {
-    return streamsRepositoryClient.fetch(
-      'POST /internal/streams/{name}/_pipeline_suggestion/_status',
-      {
-        signal,
-        params: {
-          path: { name: streamName },
-        },
-      }
-    );
-  };
-
-  const taskResult = await pollWithTimeout({
-    signal,
-    getNext: getStatus,
-    shouldContinue: (result) =>
-      result.status === TaskStatus.InProgress || result.status === TaskStatus.NotStarted,
-    intervalMs: POLLING_INTERVAL_MS,
-    timeoutMs: MAX_POLLING_TIME_MS,
-    createAbortError: () => createPollingAbortedError('Pipeline suggestion was cancelled'),
-    createTimeoutError: () => createPollingTimeoutError('Pipeline suggestion timed out'),
-  });
-
-  // Step 4: Handle terminal states
-  switch (taskResult.status) {
-    case TaskStatus.Completed:
-      if (taskResult.pipeline) {
-        return streamlangDSLSchema.parse(taskResult.pipeline);
-      }
-      // Task completed but no pipeline (NoSuggestionsError case from server)
-      throw new NoSuggestionsError(
-        i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.noSuggestionsError',
-          {
-            defaultMessage: 'Could not generate suggestions',
-          }
-        )
-      );
-
-    case TaskStatus.Acknowledged:
-      // Task was acknowledged from another session - treat as already handled
-      throw new NoSuggestionsError(
-        i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.suggestionAlreadyHandled',
-          {
-            defaultMessage: 'This suggestion was already handled',
-          }
-        )
-      );
-
-    case TaskStatus.Failed:
-      throw new Error(taskResult.error || 'Pipeline suggestion failed');
-
-    case TaskStatus.Canceled:
-    case TaskStatus.BeingCanceled:
-      throw new Error('Pipeline suggestion was cancelled');
-
-    case TaskStatus.Stale:
-      throw new Error('Pipeline suggestion task became stale');
-
-    default:
-      throw new Error(`Unexpected task status: ${taskResult.status}`);
-  }
 }
 
 /**
@@ -323,7 +83,61 @@ async function extractGrokPatternsClientSide(
   }
 }
 
-export const createSuggestPipelineActor = ({
+export async function schedulePipelineSuggestionTaskLogic(input: SuggestPipelineInput): Promise<void> {
+  const { streamName, connectorId, signal, streamsRepositoryClient } = input;
+
+  // Extract FlattenRecord documents from SampleDocumentWithUIAttributes
+  const documents: FlattenRecord[] = input.documents.map(
+    (doc) => flattenObjectNestedLast(doc.document) as FlattenRecord
+  );
+
+  // CLIENT-SIDE - Extract patterns from documents
+  const fieldName = getDefaultTextField(documents, PRIORITIZED_CONTENT_FIELDS);
+  const messages = extractMessagesFromField(documents, fieldName);
+
+  // Only grok extraction is CPU-intensive enough to warrant client-side processing
+  const grokPatterns = await extractGrokPatternsClientSide(messages, fieldName);
+
+  // Schedule background task for server-side processing
+  const extractedPatterns = {
+    grok: grokPatterns
+      ? {
+          fieldName: grokPatterns.fieldName,
+          patternGroups: grokPatterns.patternGroups,
+        }
+      : null,
+    dissect:
+      messages.length > 0
+        ? {
+            fieldName,
+            messages,
+          }
+        : null,
+  };
+
+  await streamsRepositoryClient.fetch('POST /internal/streams/{name}/_pipeline_suggestion/_task', {
+    signal,
+    params: {
+      path: { name: streamName },
+      body: {
+        action: 'schedule' as const,
+        connectorId,
+        documents,
+        extractedPatterns,
+      },
+    },
+  });
+}
+
+// --- Schedule Suggestion Task Actor ---
+
+export interface SchedulePipelineSuggestionTaskInputMinimal {
+  streamName: string;
+  connectorId: string;
+  documents: SampleDocumentWithUIAttributes[];
+}
+
+export const createSchedulePipelineSuggestionTaskActor = ({
   streamsRepositoryClient,
   telemetryClient,
   notifications,
@@ -332,14 +146,58 @@ export const createSuggestPipelineActor = ({
   telemetryClient: StreamsTelemetryClient;
   notifications: NotificationsStart;
 }) => {
-  return fromPromise<StreamlangDSL, SuggestPipelineInputMinimal>(async ({ input, signal }) =>
-    suggestPipelineLogic({
+  return fromPromise<void, SchedulePipelineSuggestionTaskInputMinimal>(async ({ input, signal }) =>
+    schedulePipelineSuggestionTaskLogic({
       ...input,
       signal,
       streamsRepositoryClient,
       telemetryClient,
       notifications,
     })
+  );
+};
+
+// --- Get Suggestion Status Actor ---
+
+type PipelineSuggestionStatusPayload = { pipeline: unknown | null };
+export type PipelineSuggestionTaskStatusResult = TaskResult<PipelineSuggestionStatusPayload>;
+
+export interface GetPipelineSuggestionStatusInputMinimal {
+  streamName: string;
+}
+
+export async function getPipelineSuggestionStatusLogic({
+  streamName,
+  signal,
+  streamsRepositoryClient,
+}: {
+  streamName: string;
+  signal: AbortSignal;
+  streamsRepositoryClient: StreamsRepositoryClient;
+}): Promise<PipelineSuggestionTaskStatusResult> {
+  return await streamsRepositoryClient.fetch(
+    'POST /internal/streams/{name}/_pipeline_suggestion/_status',
+    {
+      signal,
+      params: {
+        path: { name: streamName },
+      },
+    }
+  );
+}
+
+export const createGetPipelineSuggestionStatusActor = ({
+  streamsRepositoryClient,
+}: {
+  streamsRepositoryClient: StreamsRepositoryClient;
+}) => {
+  return fromPromise<PipelineSuggestionTaskStatusResult, GetPipelineSuggestionStatusInputMinimal>(
+    async ({ input, signal }) =>
+      getPipelineSuggestionStatusLogic({
+        streamName: input.streamName,
+        signal,
+        streamsRepositoryClient,
+      })
   );
 };
 
@@ -471,106 +329,6 @@ export const createLoadExistingSuggestionActor = ({
   return fromPromise<LoadExistingSuggestionResult, LoadExistingSuggestionInputMinimal>(
     async ({ input, signal }) =>
       loadExistingSuggestionLogic({
-        ...input,
-        signal,
-        streamsRepositoryClient,
-      })
-  );
-};
-
-// --- Poll Existing Suggestion Actor ---
-
-/**
- * Input for polling an existing in-progress suggestion task.
- */
-export interface PollExistingSuggestionInputMinimal {
-  streamName: string;
-}
-
-export interface PollExistingSuggestionInput extends PollExistingSuggestionInputMinimal {
-  signal: AbortSignal;
-  streamsRepositoryClient: StreamsRepositoryClient;
-}
-
-/**
- * Result from polling an existing suggestion task.
- */
-export type PollExistingSuggestionResult =
-  | { type: 'completed'; pipeline: StreamlangDSL }
-  | { type: 'none' };
-
-/**
- * Poll the task status endpoint until the existing task completes or transitions to a terminal state.
- * This is used when the initial status check reported an in-progress task.
- */
-export async function pollExistingSuggestionLogic(
-  input: PollExistingSuggestionInput
-): Promise<PollExistingSuggestionResult> {
-  const { streamName, signal, streamsRepositoryClient } = input;
-
-  const getStatus = async () => {
-    return streamsRepositoryClient.fetch(
-      'POST /internal/streams/{name}/_pipeline_suggestion/_status',
-      {
-        signal,
-        params: {
-          path: { name: streamName },
-        },
-      }
-    );
-  };
-
-  let taskResult;
-  try {
-    taskResult = await pollWithTimeout({
-      signal,
-      getNext: getStatus,
-      shouldContinue: (result) =>
-        result.status === TaskStatus.InProgress || result.status === TaskStatus.BeingCanceled,
-      intervalMs: POLLING_INTERVAL_MS,
-      timeoutMs: MAX_POLLING_TIME_MS,
-      createAbortError: () => createPollingAbortedError('Polling was cancelled'),
-      createTimeoutError: () => createPollingTimeoutError('Polling timed out'),
-    });
-  } catch (error) {
-    if (isPollingAbortedError(error) || isPollingTimeoutError(error)) {
-      return { type: 'none' };
-    }
-    throw error;
-  }
-
-  switch (taskResult.status) {
-    case TaskStatus.Completed:
-      if (taskResult.pipeline) {
-        return {
-          type: 'completed',
-          pipeline: streamlangDSLSchema.parse(taskResult.pipeline),
-        };
-      }
-      return { type: 'none' };
-
-    case TaskStatus.Acknowledged:
-    case TaskStatus.NotStarted:
-    case TaskStatus.Stale:
-    case TaskStatus.Canceled:
-    case TaskStatus.Failed:
-    default:
-      return { type: 'none' };
-  }
-}
-
-/**
- * Actor factory for polling an existing suggestion state.
- * Used when the initial status check reported an in-progress task.
- */
-export const createPollExistingSuggestionActor = ({
-  streamsRepositoryClient,
-}: {
-  streamsRepositoryClient: StreamsRepositoryClient;
-}) => {
-  return fromPromise<PollExistingSuggestionResult, PollExistingSuggestionInputMinimal>(
-    async ({ input, signal }) =>
-      pollExistingSuggestionLogic({
         ...input,
         signal,
         streamsRepositoryClient,

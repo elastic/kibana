@@ -249,14 +249,15 @@ export const StepsEditor = React.memo(() => {
   // Pipeline suggestion state
   const isLoadingSuggestion = useInteractiveModeSelector(
     (snapshot) =>
-      snapshot.matches({ pipelineSuggestion: 'generatingSuggestion' }) ||
-      snapshot.matches({ pipelineSuggestion: 'pollingExistingSuggestion' })
+      snapshot.matches({ pipelineSuggestion: 'submittingSuggestionTask' }) ||
+      snapshot.matches({ pipelineSuggestion: 'checkingSuggestionStatus' }) ||
+      snapshot.matches({ pipelineSuggestion: 'waitingForCompletion' })
   );
   const suggestedPipeline = useInteractiveModeSelector(
     (snapshot) => snapshot.context.suggestedPipeline
   );
   const isViewingSuggestion = useInteractiveModeSelector((snapshot) =>
-    snapshot.matches({ pipelineSuggestion: 'viewingSuggestion' })
+    snapshot.matches({ pipelineSuggestion: 'completed' })
   );
   const isNoSuggestionsFound = useInteractiveModeSelector((snapshot) =>
     snapshot.matches({ pipelineSuggestion: 'noSuggestionsFound' })
