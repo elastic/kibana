@@ -674,6 +674,22 @@ export const interactiveModeMachine = setup({
               target: 'idle',
               actions: [{ type: 'reassignSteps' }, { type: 'syncToDSL' }],
             },
+            'step.filterByCondition': {
+              actions: [
+                { type: 'storeConditionFilter', params: ({ event }) => event },
+                {
+                  type: 'sendStepsToSimulator',
+                },
+              ],
+            },
+            'step.clearConditionFilter': {
+              actions: [
+                { type: 'storeConditionFilter', params: () => ({ conditionId: undefined }) },
+                {
+                  type: 'sendStepsToSimulator',
+                },
+              ],
+            },
           },
         },
         editing: {
@@ -696,6 +712,22 @@ export const interactiveModeMachine = setup({
             'step.save': {
               target: 'idle',
               actions: [{ type: 'reassignSteps' }, { type: 'syncToDSL' }],
+            },
+            'step.filterByCondition': {
+              actions: [
+                { type: 'storeConditionFilter', params: ({ event }) => event },
+                {
+                  type: 'sendStepsToSimulator',
+                },
+              ],
+            },
+            'step.clearConditionFilter': {
+              actions: [
+                { type: 'storeConditionFilter', params: () => ({ conditionId: undefined }) },
+                {
+                  type: 'sendStepsToSimulator',
+                },
+              ],
             },
           },
         },

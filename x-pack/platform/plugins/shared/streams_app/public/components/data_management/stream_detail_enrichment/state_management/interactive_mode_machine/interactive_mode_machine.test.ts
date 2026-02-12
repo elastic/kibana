@@ -12,6 +12,14 @@ import { createActor } from 'xstate5';
 import { interactiveModeMachine } from './interactive_mode_machine';
 import type { InteractiveModeParentRef } from './types';
 
+// Mock htmlIdGenerator to return unique IDs (the default EUI test-env mock returns
+// the same 'generated-id' for all calls, which breaks tests that create multiple steps)
+let mockIdCounter = 0;
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  htmlIdGenerator: () => () => `test-id-${mockIdCounter++}`,
+}));
+
 const createParentRef = () => {
   const send = jest.fn();
 
@@ -41,6 +49,11 @@ const createParentRef = () => {
 };
 
 describe('interactiveModeMachine condition focus behavior', () => {
+  beforeEach(() => {
+    // Reset the ID counter before each test
+    mockIdCounter = 0;
+  });
+
   it('does not clear auto-selected condition focus on processor save (Update)', () => {
     const { parentRef, send } = createParentRef();
 
@@ -52,7 +65,7 @@ describe('interactiveModeMachine condition focus behavior', () => {
         privileges: { manage: true, simulate: true },
         simulationMode: 'partial',
         streamName: 'test-stream',
-        grokCollection: {} as unknown as GrokCollection,
+        grokCollection: { setCustomPatterns: jest.fn() } as unknown as GrokCollection,
       },
     });
 
@@ -74,7 +87,12 @@ describe('interactiveModeMachine condition focus behavior', () => {
     expect(autoFilterEvent).toBeDefined();
     const conditionId = autoFilterEvent!.conditionId;
 
-    actor.send({ type: 'step.save', id: conditionId });
+    // Find the condition stepRef and save it (send to child, not parent)
+    const conditionStepRef = actor
+      .getSnapshot()
+      .context.stepRefs.find((ref) => ref.id === conditionId);
+    expect(conditionStepRef).toBeDefined();
+    conditionStepRef!.send({ type: 'step.save' });
 
     // Create a processor under that condition and persist it.
     const processor: StreamlangProcessorDefinition = {
@@ -92,19 +110,24 @@ describe('interactiveModeMachine condition focus behavior', () => {
       options: { parentId: conditionId },
     });
 
-    const processorId = actor
+    // Find the processor stepRef
+    const processorStepRef = actor
       .getSnapshot()
-      .context.stepRefs.map((ref) => ref.getSnapshot().context.step)
-      .find(
-        (step) => (step as any).action === 'set' && step.parentId === conditionId
-      )?.customIdentifier;
+      .context.stepRefs.find(
+        (ref) =>
+          (ref.getSnapshot().context.step as any).action === 'set' &&
+          ref.getSnapshot().context.step.parentId === conditionId
+      );
 
-    expect(processorId).toBeDefined();
-    actor.send({ type: 'step.save', id: processorId! });
+    expect(processorStepRef).toBeDefined();
+    const processorId = processorStepRef!.id;
+
+    // Save the processor (send to child)
+    processorStepRef!.send({ type: 'step.save' });
 
     // Start editing; the machine should auto-select the parent condition via a parent event.
     send.mockClear();
-    actor.send({ type: 'step.edit', id: processorId! });
+    actor.send({ type: 'step.edit', id: processorId });
 
     const editAutoSelect = send.mock.calls
       .map(([event]) => event)
@@ -120,7 +143,8 @@ describe('interactiveModeMachine condition focus behavior', () => {
 
     // Saving (clicking "Update") must NOT clear the auto condition filter/focus.
     send.mockClear();
-    actor.send({ type: 'step.save', id: processorId! });
+    // Send save to the child stepRef (this is how the UI does it)
+    processorStepRef!.send({ type: 'step.save' });
 
     const sentEventTypes = send.mock.calls.map(([event]) => event?.type);
     expect(sentEventTypes).not.toContain('simulation.clearAutoConditionFilter');
