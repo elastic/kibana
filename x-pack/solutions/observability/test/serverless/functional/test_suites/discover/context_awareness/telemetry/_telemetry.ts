@@ -130,7 +130,8 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       });
     });
 
-    describe('contextual profiles', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/252793
+    describe.skip('contextual profiles', () => {
       before(async () => {
         await esArchiver.loadIfNeeded(
           'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
