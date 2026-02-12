@@ -112,6 +112,44 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it("Should return 200 and status 'running' for host engine", async () => {
+        // Wait for Entity Store and all components to be fully installed
+        await retry.waitForWithTimeout(
+          'Entity Store host engine to be fully running with all components installed',
+          TIMEOUT_MS,
+          async () => {
+            const { body } = await supertest
+              .get('/api/entity_store/status')
+              .query({ include_components: true })
+              .expect(200);
+
+            const response: GetEntityStoreStatusResponse = body as GetEntityStoreStatusResponse;
+
+            if (response.status !== 'running') {
+              return false;
+            }
+
+            if (response.engines.length !== 1) {
+              return false;
+            }
+
+            const hostEngine = response.engines[0];
+            if (hostEngine.type !== 'host' || hostEngine.status !== 'started') {
+              return false;
+            }
+
+            // Check all components are installed
+            if (hostEngine.components) {
+              const allInstalled = hostEngine.components.every((c) => c.installed === true);
+              if (!allInstalled) {
+                return false;
+              }
+            }
+
+            return true;
+          }
+        );
+
+        // Final verification
         const { body } = await supertest
           .get('/api/entity_store/status')
           .query({ include_components: true })
