@@ -31,12 +31,13 @@ export function WiredAdvancedView({
     features: { contentPacks, significantEvents },
   } = useStreamsPrivileges();
   const aiFeatures = useAIFeatures();
+  const isSignificantEventsEnabled = Boolean(significantEvents?.enabled && significantEvents?.available);
 
   const { onPageReady } = usePerformanceContext();
 
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
-    if (definition && !contentPacks?.enabled && !significantEvents?.enabled) {
+    if (definition && !contentPacks?.enabled && !isSignificantEventsEnabled) {
       const streamType = getStreamTypeFromDefinition(definition.stream);
       onPageReady({
         meta: {
@@ -44,7 +45,7 @@ export function WiredAdvancedView({
         },
       });
     }
-  }, [definition, contentPacks?.enabled, significantEvents?.enabled, onPageReady]);
+  }, [definition, contentPacks?.enabled, isSignificantEventsEnabled, onPageReady]);
 
   return (
     <>
@@ -55,7 +56,7 @@ export function WiredAdvancedView({
         </>
       )}
 
-      {significantEvents?.enabled && (
+      {isSignificantEventsEnabled && (
         <>
           <StreamDescription
             definition={definition}
