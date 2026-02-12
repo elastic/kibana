@@ -8,6 +8,7 @@
  */
 
 import { z, isZod } from '@kbn/zod';
+import { z as z4 } from '@kbn/zod/v4';
 import { isPassThroughAny } from '@kbn/zod-helpers';
 import zodToJsonSchema, { jsonDescription } from 'zod-to-json-schema';
 import type { OpenAPIV3 } from 'openapi-types';
@@ -27,11 +28,85 @@ function assertInstanceOfZodType(schema: unknown): asserts schema is z.ZodTypeAn
   }
 }
 
+// ---------------------------------------------------------------------------
+// Zod v4 detection and type helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Detect Zod v4 schemas. V4 schemas have `_zod` but NOT `_def` (v3 has `_def`).
+ */
+function isZodV4(schema: unknown): boolean {
+  return (
+    !!schema &&
+    typeof schema === 'object' &&
+    '_zod' in schema &&
+    !('_def' in schema && typeof (schema as any)._def?.typeName === 'string')
+  );
+}
+
+/** Get the v4 def type string from a schema (e.g. "object", "string", "optional") */
+function getV4DefType(schema: any): string | undefined {
+  return schema?._zod?.def?.type;
+}
+
+/**
+ * Map from v3 ZodFirstPartyTypeKind enum values to v4 _zod.def.type strings.
+ * This allows `instanceofZodTypeKind` to work for both versions.
+ */
+const V3_TO_V4_TYPE_MAP: Record<string, string> = {
+  ZodObject: 'object',
+  ZodString: 'string',
+  ZodNumber: 'number',
+  ZodBoolean: 'boolean',
+  ZodBigInt: 'bigint',
+  ZodDate: 'date',
+  ZodOptional: 'optional',
+  ZodDefault: 'default',
+  ZodEffects: '_effects_', // special: v4 uses pipe/transform instead
+  ZodLazy: 'lazy',
+  ZodVoid: 'void',
+  ZodUndefined: 'undefined',
+  ZodNever: 'never',
+  ZodUnion: 'union',
+  ZodArray: 'array',
+  ZodIntersection: 'intersection',
+  ZodLiteral: 'literal',
+  ZodEnum: 'enum',
+  ZodNativeEnum: 'enum', // v4 unifies nativeEnum into enum
+  ZodRecord: 'record',
+  ZodMap: 'map',
+  ZodSet: 'set',
+  ZodAny: 'any',
+  ZodUnknown: 'unknown',
+  ZodNullable: 'nullable',
+  ZodTuple: 'tuple',
+};
+
+// ---------------------------------------------------------------------------
+// Type detection (v3 + v4)
+// ---------------------------------------------------------------------------
+
 const instanceofZodTypeKind = <Z extends z.ZodFirstPartyTypeKind>(
   type: z.ZodTypeAny,
   zodTypeKind: Z
 ): type is InstanceType<(typeof z)[Z]> => {
-  return type?._def?.typeName === zodTypeKind;
+  // v3 path
+  if (type?._def?.typeName === zodTypeKind) {
+    return true;
+  }
+  // v4 path
+  if (isZodV4(type)) {
+    const v4Type = V3_TO_V4_TYPE_MAP[zodTypeKind];
+    if (v4Type && v4Type !== '_effects_') {
+      return getV4DefType(type) === v4Type;
+    }
+    // For ZodEffects, v4 uses "pipe" or "transform"
+    if (zodTypeKind === z.ZodFirstPartyTypeKind.ZodEffects) {
+      const defType = getV4DefType(type);
+      return defType === 'pipe' || defType === 'transform' || defType === 'prefault';
+    }
+  }
+  return false;
 };
 
 const instanceofZodTypeObject = (type: z.ZodTypeAny): type is z.ZodObject<z.ZodRawShape> => {
@@ -48,7 +123,16 @@ const instanceofZodTypeLikeVoid = (type: z.ZodTypeAny): type is ZodTypeLikeVoid 
   );
 };
 
+// ---------------------------------------------------------------------------
+// Unwrap helpers (v3 + v4)
+// ---------------------------------------------------------------------------
+
 const unwrapZodLazy = (type: z.ZodTypeAny): z.ZodTypeAny => {
+  // v4 lazy
+  if (isZodV4(type) && getV4DefType(type) === 'lazy') {
+    return unwrapZodLazy((type as any)._zod.def.getter());
+  }
+  // v3 lazy
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLazy)) {
     return unwrapZodLazy(type._def.getter());
   }
@@ -63,24 +147,47 @@ const unwrapZodOptionalDefault = (
   isOptional: boolean;
   innerType: z.ZodTypeAny;
 } => {
-  let description: z.ZodTypeAny['description']; // To track the outer description if exists
+  let description: z.ZodTypeAny['description'];
   let defaultValue: unknown;
   let isOptional = false;
   let innerType = type;
 
-  while (
-    instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodOptional) ||
-    instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodDefault)
-  ) {
-    if (instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodOptional)) {
-      isOptional = innerType.isOptional();
-      description = !description ? innerType.description : description;
-      innerType = innerType.unwrap();
+  if (isZodV4(innerType)) {
+    // v4 path: use _zod.def for type detection and innerType access
+    while (true) {
+      const defType = getV4DefType(innerType);
+      if (defType === 'optional') {
+        isOptional = true;
+        description = !description ? (innerType as any).description : description;
+        innerType = (innerType as any)._zod.def.innerType;
+      } else if (defType === 'default') {
+        defaultValue = (innerType as any)._zod.def.defaultValue;
+        // In v4, defaultValue might be a getter function or a raw value
+        if (typeof defaultValue === 'function') {
+          defaultValue = (defaultValue as () => unknown)();
+        }
+        description = !description ? (innerType as any).description : description;
+        innerType = (innerType as any)._zod.def.innerType;
+      } else {
+        break;
+      }
     }
-    if (instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodDefault)) {
-      defaultValue = innerType._def.defaultValue();
-      description = !description ? innerType.description : description;
-      innerType = innerType.removeDefault();
+  } else {
+    // v3 path
+    while (
+      instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodOptional) ||
+      instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodDefault)
+    ) {
+      if (instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodOptional)) {
+        isOptional = innerType.isOptional();
+        description = !description ? innerType.description : description;
+        innerType = innerType.unwrap();
+      }
+      if (instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodDefault)) {
+        defaultValue = innerType._def.defaultValue();
+        description = !description ? innerType.description : description;
+        innerType = innerType.removeDefault();
+      }
     }
   }
 
@@ -88,6 +195,11 @@ const unwrapZodOptionalDefault = (
 };
 
 const unwrapZodType = (type: z.ZodTypeAny, unwrapPreprocess: boolean): z.ZodTypeAny => {
+  if (isZodV4(type)) {
+    return unwrapZodTypeV4(type, unwrapPreprocess);
+  }
+
+  // v3 path (unchanged)
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLazy)) {
     return unwrapZodType(unwrapZodLazy(type), unwrapPreprocess);
   }
@@ -114,6 +226,60 @@ const unwrapZodType = (type: z.ZodTypeAny, unwrapPreprocess: boolean): z.ZodType
   return type;
 };
 
+/**
+ * Unwrap Zod v4 schemas to find the underlying type.
+ *
+ * V4 uses "pipe" instead of "effects". The heuristic for pipes:
+ * - If `out._zod.def.type === 'transform'`, the original schema is in `in` (e.g. z.string().transform(fn))
+ * - Otherwise, the meaningful schema is in `out` (e.g. DeepStrict wrapping: pipe(unknown.check(), schema))
+ */
+const unwrapZodTypeV4 = (type: z.ZodTypeAny, unwrapPreprocess: boolean): z.ZodTypeAny => {
+  const defType = getV4DefType(type);
+
+  if (defType === 'lazy') {
+    return unwrapZodTypeV4(unwrapZodLazy(type), unwrapPreprocess);
+  }
+
+  if (defType === 'optional' || defType === 'default') {
+    const { innerType } = unwrapZodOptionalDefault(type);
+    return unwrapZodTypeV4(innerType, unwrapPreprocess);
+  }
+
+  if (defType === 'pipe') {
+    const pipeIn = (type as any)._zod.def.in;
+    const pipeOut = (type as any)._zod.def.out;
+
+    // If out is a transform, the real schema is in `in`
+    if (getV4DefType(pipeOut) === 'transform') {
+      return unwrapZodTypeV4(pipeIn, unwrapPreprocess);
+    }
+    // Otherwise (e.g. DeepStrict: pipe(unknown.check(), schema)), the real schema is in `out`
+    return unwrapZodTypeV4(pipeOut, unwrapPreprocess);
+  }
+
+  // Handle standalone transform: the input schema is not accessible, treat as pass-through
+  if (defType === 'transform') {
+    return type;
+  }
+
+  // Handle prefault (v4 equivalent of v3 preprocess)
+  if (defType === 'prefault') {
+    if (unwrapPreprocess) {
+      const innerType = (type as any)._zod.def.innerType;
+      if (innerType) {
+        return unwrapZodTypeV4(innerType, unwrapPreprocess);
+      }
+    }
+    return type;
+  }
+
+  return type;
+};
+
+// ---------------------------------------------------------------------------
+// String-like and coercible type detection (v3 + v4)
+// ---------------------------------------------------------------------------
+
 interface NativeEnumType {
   [k: string]: string | number;
   [nu: number]: string;
@@ -137,6 +303,14 @@ type ZodTypeCoercible = z.ZodNumber | z.ZodBoolean | z.ZodBigInt | z.ZodDate;
 
 const instanceofZodTypeCoercible = (_type: z.ZodTypeAny): _type is ZodTypeCoercible => {
   const type = unwrapZodType(_type, false);
+
+  if (isZodV4(type)) {
+    const defType = getV4DefType(type);
+    return (
+      defType === 'number' || defType === 'boolean' || defType === 'bigint' || defType === 'date'
+    );
+  }
+
   return (
     instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNumber) ||
     instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodBoolean) ||
@@ -151,6 +325,11 @@ const instanceofZodTypeLikeString = (
 ): _type is ZodTypeLikeString => {
   const type = unwrapZodType(_type, false);
 
+  if (isZodV4(type)) {
+    return isV4TypeLikeString(type, allowMixedUnion);
+  }
+
+  // v3 path (unchanged)
   if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
     if (type._def.effect.type === 'preprocess') {
       return true;
@@ -185,6 +364,59 @@ const instanceofZodTypeLikeString = (
   }
   return instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodString);
 };
+
+/**
+ * V4-specific string-like type detection.
+ */
+function isV4TypeLikeString(type: z.ZodTypeAny, allowMixedUnion: boolean): boolean {
+  const defType = getV4DefType(type);
+
+  // prefault (v4 equivalent of v3 preprocess effect)
+  if (defType === 'prefault') {
+    return true;
+  }
+
+  if (defType === 'union') {
+    const options: any[] = (type as any)._zod.def.options;
+    return !options.some(
+      (option) =>
+        !instanceofZodTypeLikeString(option, allowMixedUnion) &&
+        !(allowMixedUnion && instanceofZodTypeCoercible(option))
+    );
+  }
+
+  if (defType === 'array') {
+    return instanceofZodTypeLikeString((type as any)._zod.def.element, allowMixedUnion);
+  }
+
+  if (defType === 'intersection') {
+    return (
+      instanceofZodTypeLikeString((type as any)._zod.def.left, allowMixedUnion) &&
+      instanceofZodTypeLikeString((type as any)._zod.def.right, allowMixedUnion)
+    );
+  }
+
+  if (defType === 'literal') {
+    const values: unknown[] = (type as any)._zod.def.values;
+    return values.every((v) => typeof v === 'string');
+  }
+
+  if (defType === 'enum') {
+    // v4 enums: check if entries contain numeric values
+    const entries = (type as any)._zod.def.entries;
+    if (entries && typeof entries === 'object') {
+      return !Object.values(entries).some((value) => typeof value === 'number');
+    }
+    return true;
+  }
+
+  // "string" covers both z.string() and z.iso.datetime(), z.email(), etc.
+  return defType === 'string';
+}
+
+// ---------------------------------------------------------------------------
+// Converter functions (v3 + v4)
+// ---------------------------------------------------------------------------
 
 const convertObjectMembersToParameterObjects = (
   shape: z.ZodRawShape,
@@ -240,6 +472,14 @@ const getPassThroughShape = (knownParameters: KnownParameters, isPathParameter =
   return passThroughShape;
 };
 
+/**
+ * Extract the object shape from a schema, handling both v3 and v4.
+ * V4 objects also expose `.shape` in the classic API.
+ */
+function getObjectShape(schema: z.ZodTypeAny): z.ZodRawShape {
+  return (schema as any).shape;
+}
+
 export const convertQuery = (schema: unknown) => {
   assertInstanceOfZodType(schema);
   const unwrappedSchema = unwrapZodType(schema, true);
@@ -254,7 +494,7 @@ export const convertQuery = (schema: unknown) => {
   if (!instanceofZodTypeObject(unwrappedSchema)) {
     throw createError('Query schema must be an _object_ schema validator!');
   }
-  const shape = unwrappedSchema.shape;
+  const shape = getObjectShape(unwrappedSchema);
   return {
     query: convertObjectMembersToParameterObjects(shape, false),
     shared: {},
@@ -284,7 +524,7 @@ export const convertPathParameters = (schema: unknown, knownParameters: KnownPar
   if (!instanceofZodTypeObject(unwrappedSchema)) {
     throw createError('Parameters schema must be an _object_ schema validator!');
   }
-  const shape = unwrappedSchema.shape;
+  const shape = getObjectShape(unwrappedSchema);
   const schemaKeys = Object.keys(shape);
   validatePathParameters(paramKeys, schemaKeys);
   return {
@@ -293,7 +533,43 @@ export const convertPathParameters = (schema: unknown, knownParameters: KnownPar
   };
 };
 
+/**
+ * Apply the same JSON description extraction that zod-to-json-schema's jsonDescription does.
+ * If a schema description is valid JSON, spread its parsed fields into the schema object.
+ */
+function applyJsonDescription(jsonSchema: Record<string, any>, description?: string) {
+  if (description) {
+    try {
+      return { ...jsonSchema, ...JSON.parse(description) };
+    } catch {
+      // not JSON, leave as-is
+    }
+  }
+  return jsonSchema;
+}
+
 export const convert = (schema: z.ZodTypeAny) => {
+  if (isZodV4(schema)) {
+    // Use Zod v4's native toJSONSchema
+    const raw = z4.toJSONSchema(schema as unknown as z4.ZodType, {
+      unrepresentable: 'any',
+      io: 'input',
+    }) as Record<string, any>;
+
+    // Remove $schema (not valid inside OpenAPI schema objects)
+    const { $schema, ...jsonSchema } = raw;
+
+    // Apply the same JSON-description post-processing as v3
+    const description = (schema as any).description;
+    const processed = applyJsonDescription(jsonSchema, description);
+
+    return {
+      shared: {},
+      schema: processed as OpenAPIV3.SchemaObject,
+    };
+  }
+
+  // v3 path (unchanged)
   return {
     shared: {},
     schema: zodToJsonSchema(schema, {

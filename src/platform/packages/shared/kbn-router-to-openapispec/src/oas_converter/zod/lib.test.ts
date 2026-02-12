@@ -8,10 +8,13 @@
  */
 
 import { z } from '@kbn/zod';
+import { z as z4 } from '@kbn/zod/v4';
 import { BooleanFromString, PassThroughAny } from '@kbn/zod-helpers';
+import { PassThroughAny as PassThroughAnyV4 } from '@kbn/zod-helpers/v4';
+import { DeepStrict } from '@kbn/zod-helpers/v4';
 import { convert, convertPathParameters, convertQuery } from './lib';
 
-import { createLargeSchema } from './lib.test.util';
+import { createLargeSchema, createLargeSchemaV4 } from './lib.test.util';
 
 describe('zod', () => {
   describe('convert', () => {
@@ -268,6 +271,197 @@ describe('zod', () => {
     });
     test('handles passThrough', () => {
       expect(convertQuery(PassThroughAny)).toEqual({
+        query: [],
+        shared: {},
+      });
+    });
+  });
+});
+
+describe('zod v4', () => {
+  describe('convert', () => {
+    test('base case', () => {
+      const result = convert(createLargeSchemaV4());
+      expect(result.shared).toEqual({});
+      expect(result.schema).toMatchObject({
+        type: 'object',
+        properties: {
+          string: { type: 'string', maxLength: 10, minLength: 1 },
+          maybeNumber: { type: 'number', maximum: 1000, minimum: 1 },
+          booleanDefault: { type: 'boolean', default: true },
+          ipType: { type: 'string' },
+          literalType: expect.objectContaining({ type: 'string' }),
+          record: {
+            type: 'object',
+            additionalProperties: { type: 'string' },
+          },
+          uri: { type: 'string', default: 'prototest://something' },
+        },
+        required: expect.arrayContaining(['string', 'ipType', 'literalType', 'neverType']),
+      });
+    });
+  });
+
+  describe('convertPathParameters', () => {
+    test('base conversion', () => {
+      expect(
+        convertPathParameters(z4.object({ a: z4.string(), b: z4.enum(['val1', 'val2']) }), {
+          a: { optional: false },
+          b: { optional: true },
+        })
+      ).toEqual({
+        params: [
+          {
+            in: 'path',
+            name: 'a',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            in: 'path',
+            name: 'b',
+            required: true,
+            schema: {
+              enum: ['val1', 'val2'],
+              type: 'string',
+            },
+          },
+        ],
+        shared: {},
+      });
+    });
+
+    test('throws if known parameters not found', () => {
+      expect(() =>
+        convertPathParameters(z4.object({ b: z4.string() }), { a: { optional: false } })
+      ).toThrow(
+        'Path expects key "a" from schema but it was not found. Existing schema keys are: b'
+      );
+    });
+
+    test('handles passThrough', () => {
+      expect(
+        convertPathParameters(PassThroughAnyV4, {
+          a: { optional: false },
+          b: { optional: true },
+        })
+      ).toEqual({
+        params: [
+          {
+            in: 'path',
+            name: 'a',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            in: 'path',
+            name: 'b',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        shared: {},
+      });
+    });
+
+    test('handles DeepStrict-wrapped v4 schemas', () => {
+      const pathSchema = z4.object({ name: z4.string() });
+      const wrapped = DeepStrict(pathSchema);
+      expect(convertPathParameters(wrapped as any, { name: { optional: false } })).toEqual({
+        params: [
+          {
+            in: 'path',
+            name: 'name',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+        ],
+        shared: {},
+      });
+    });
+  });
+
+  describe('convertQuery', () => {
+    test('base conversion', () => {
+      expect(
+        convertQuery(z4.object({ a: z4.string(), b: z4.enum(['val1', 'val2']).optional() }))
+      ).toEqual({
+        query: [
+          {
+            in: 'query',
+            name: 'a',
+            required: true,
+            schema: {
+              type: 'string',
+            },
+          },
+          {
+            in: 'query',
+            name: 'b',
+            required: false,
+            schema: {
+              enum: ['val1', 'val2'],
+              type: 'string',
+            },
+          },
+        ],
+        shared: {},
+      });
+    });
+
+    test('handles transform schemas (like dateFromString)', () => {
+      const dateFromString = z4.string().transform((input) => new Date(input));
+      const schema = z4.object({ from: dateFromString, to: dateFromString });
+      const result = convertQuery(schema);
+      expect(result.query).toHaveLength(2);
+      expect(result.query[0]).toMatchObject({
+        name: 'from',
+        in: 'query',
+        required: true,
+        schema: { type: 'string' },
+      });
+      expect(result.query[1]).toMatchObject({
+        name: 'to',
+        in: 'query',
+        required: true,
+        schema: { type: 'string' },
+      });
+    });
+
+    test('handles DeepStrict-wrapped v4 query schemas', () => {
+      const querySchema = z4.object({ page: z4.string().optional(), size: z4.string() });
+      const wrapped = DeepStrict(querySchema);
+      const result = convertQuery(wrapped as any);
+      expect(result.query).toEqual([
+        {
+          in: 'query',
+          name: 'page',
+          required: false,
+          schema: {
+            type: 'string',
+          },
+        },
+        {
+          in: 'query',
+          name: 'size',
+          required: true,
+          schema: {
+            type: 'string',
+          },
+        },
+      ]);
+    });
+
+    test('handles passThrough', () => {
+      expect(convertQuery(PassThroughAnyV4)).toEqual({
         query: [],
         shared: {},
       });
