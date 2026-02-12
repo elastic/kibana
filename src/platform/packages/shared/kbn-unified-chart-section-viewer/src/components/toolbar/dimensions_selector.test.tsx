@@ -26,6 +26,7 @@ jest.mock('@kbn/shared-ux-toolbar-selector', () => {
       options,
       onChange,
       buttonLabel,
+      buttonTooltipContent,
       popoverContentBelowSearch,
       'data-test-subj': dataTestSubj,
       singleSelection,
@@ -33,12 +34,21 @@ jest.mock('@kbn/shared-ux-toolbar-selector', () => {
       options: any[];
       onChange?: (option: any) => void;
       buttonLabel: React.ReactNode;
+      buttonTooltipContent?: React.ReactNode;
       popoverContentBelowSearch?: React.ReactNode;
       'data-test-subj'?: string;
       singleSelection?: boolean;
     }) => (
       <div data-test-subj={dataTestSubj}>
-        <div data-test-subj={`${dataTestSubj}Button`}>{buttonLabel}</div>
+        <div
+          data-test-subj={`${dataTestSubj}Button`}
+          data-tooltip-content={buttonTooltipContent ? 'true' : 'false'}
+        >
+          {buttonLabel}
+          {buttonTooltipContent && (
+            <div data-test-subj={`${dataTestSubj}ButtonTooltip`}>{buttonTooltipContent}</div>
+          )}
+        </div>
         <div data-test-subj={`${dataTestSubj}Popover`}>
           {popoverContentBelowSearch}
           {options.map((option) => (
@@ -173,8 +183,11 @@ describe('DimensionsSelector', () => {
       expect(button).toHaveTextContent('Dimensions');
       expect(button).toHaveTextContent(String(MAX_DIMENSIONS_SELECTIONS));
 
-      const tooltipAnchor = button.querySelector('.euiToolTipAnchor');
-      expect(tooltipAnchor).toBeInTheDocument();
+      expect(button).toHaveAttribute('data-tooltip-content', 'true');
+      const tooltip = screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}ButtonTooltip`);
+      expect(tooltip).toBeInTheDocument();
+      expect(tooltip).toHaveTextContent('Maximum of');
+      expect(tooltip).toHaveTextContent(String(MAX_DIMENSIONS_SELECTIONS));
     });
   });
 
