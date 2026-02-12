@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type ScoutPage } from '@kbn/scout';
+import { type ScoutPage, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
@@ -43,91 +43,95 @@ async function setupMockPipelineResponse(page: ScoutPage) {
   );
 }
 
-test.describe('Stream data processing - Pipeline suggestions', { tag: ['@ess'] }, () => {
-  let llmSetup: LlmProxySetup;
+test.describe(
+  'Stream data processing - Pipeline suggestions',
+  { tag: tags.stateful.classic },
+  () => {
+    let llmSetup: LlmProxySetup;
 
-  test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, log }) => {
-    await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
-    llmSetup = await setupLlmProxyAndConnector(log, apiServices);
-  });
-
-  test.beforeEach(async ({ browserAuth, pageObjects, page, apiServices }) => {
-    await browserAuth.loginAsAdmin();
-    await apiServices.streams.clearStreamProcessors('logs-generic-default');
-    await pageObjects.streams.gotoProcessingTab('logs-generic-default');
-    await setupTestPage(page, llmSetup.llmProxy, llmSetup.connectorId);
-  });
-
-  test.afterAll(async ({ apiServices }) => {
-    await cleanupLlmProxyAndConnector(llmSetup, apiServices);
-    await apiServices.streams.clearStreamProcessors('logs-generic-default');
-  });
-
-  test('should show suggest pipeline button when no steps exist and hide when connector unavailable', async ({
-    page,
-    pageObjects,
-  }) => {
-    // Wait for the page content to load - the empty prompt should be visible
-    await expect(page.getByText('Extract fields from your data')).toBeVisible();
-
-    // Verify the Technical Preview badge is visible when AI suggestions are available
-    await expect(page.getByText('Technical Preview')).toBeVisible();
-
-    // Verify the generate button is visible with connector
-    await expect(pageObjects.streams.getSuggestPipelineButton()).toBeVisible();
-
-    // Mock no connectors and verify button is hidden
-    await page.route('**/internal/streams/connectors', async (route) => {
-      await route.fulfill({
-        status: 200,
-        body: JSON.stringify({ connectors: [] }),
-      });
+    test.beforeAll(async ({ apiServices, logsSynthtraceEsClient, log }) => {
+      await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
+      llmSetup = await setupLlmProxyAndConnector(log, apiServices);
     });
-    await page.reload();
-    // Wait for the page to load again
-    await expect(page.getByText('Extract fields from your data')).toBeVisible();
-    await expect(pageObjects.streams.getSuggestPipelineButton()).toBeHidden();
-  });
 
-  test('should generate suggestion and allow accept/reject', async ({ page, pageObjects }) => {
-    // Wait for page to load
-    await expect(page.getByText('Extract fields from your data')).toBeVisible();
-    await setupMockPipelineResponse(page);
+    test.beforeEach(async ({ browserAuth, pageObjects, page, apiServices }) => {
+      await browserAuth.loginAsAdmin();
+      await apiServices.streams.clearStreamProcessors('logs-generic-default');
+      await pageObjects.streams.gotoProcessingTab('logs-generic-default');
+      await setupTestPage(page, llmSetup.llmProxy, llmSetup.connectorId);
+    });
 
-    // Generate suggestion
-    await pageObjects.streams.clickSuggestPipelineButton();
-    await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeVisible();
-    await expect(page.getByText('Review processing suggestions')).toBeVisible();
+    test.afterAll(async ({ apiServices }) => {
+      await cleanupLlmProxyAndConnector(llmSetup, apiServices);
+      await apiServices.streams.clearStreamProcessors('logs-generic-default');
+    });
 
-    // Reject and verify we're back to empty state
-    await pageObjects.streams.rejectPipelineSuggestion();
-    await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeHidden();
-    await expect(page.getByText('Extract fields from your data')).toBeVisible();
-    expect(await pageObjects.streams.getProcessorsListItemsFast()).toHaveLength(0);
+    test('should show suggest pipeline button when no steps exist and hide when connector unavailable', async ({
+      page,
+      pageObjects,
+    }) => {
+      // Wait for the page content to load - the empty prompt should be visible
+      await expect(page.getByText('Extract fields from your data')).toBeVisible();
 
-    // Generate again and accept
-    await pageObjects.streams.clickSuggestPipelineButton();
-    await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeVisible();
-    await pageObjects.streams.acceptPipelineSuggestion();
+      // Verify the Technical Preview badge is visible when AI suggestions are available
+      await expect(page.getByText('Technical Preview')).toBeVisible();
 
-    // Verify processors exist after accept
-    await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeHidden();
-    const processors = await pageObjects.streams.getProcessorsListItems();
-    expect(processors.length).toBeGreaterThan(0);
-  });
+      // Verify the generate button is visible with connector
+      await expect(pageObjects.streams.getSuggestPipelineButton()).toBeVisible();
 
-  test('should regenerate suggestions', async ({ page, pageObjects }) => {
-    // Wait for page to load
-    await expect(page.getByText('Extract fields from your data')).toBeVisible();
-    await setupMockPipelineResponse(page);
+      // Mock no connectors and verify button is hidden
+      await page.route('**/internal/streams/connectors', async (route) => {
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({ connectors: [] }),
+        });
+      });
+      await page.reload();
+      // Wait for the page to load again
+      await expect(page.getByText('Extract fields from your data')).toBeVisible();
+      await expect(pageObjects.streams.getSuggestPipelineButton()).toBeHidden();
+    });
 
-    // Generate first suggestion
-    await pageObjects.streams.clickSuggestPipelineButton();
-    await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeVisible();
+    test('should generate suggestion and allow accept/reject', async ({ page, pageObjects }) => {
+      // Wait for page to load
+      await expect(page.getByText('Extract fields from your data')).toBeVisible();
+      await setupMockPipelineResponse(page);
 
-    // Regenerate
-    await pageObjects.streams.regeneratePipelineSuggestion();
-    await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeVisible();
-    await expect(page.getByTestId('streamsAppProcessorBlock')).toBeVisible();
-  });
-});
+      // Generate suggestion
+      await pageObjects.streams.clickSuggestPipelineButton();
+      await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeVisible();
+      await expect(page.getByText('Review processing suggestions')).toBeVisible();
+
+      // Reject and verify we're back to empty state
+      await pageObjects.streams.rejectPipelineSuggestion();
+      await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeHidden();
+      await expect(page.getByText('Extract fields from your data')).toBeVisible();
+      expect(await pageObjects.streams.getProcessorsListItemsFast()).toHaveLength(0);
+
+      // Generate again and accept
+      await pageObjects.streams.clickSuggestPipelineButton();
+      await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeVisible();
+      await pageObjects.streams.acceptPipelineSuggestion();
+
+      // Verify processors exist after accept
+      await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeHidden();
+      const processors = await pageObjects.streams.getProcessorsListItems();
+      expect(processors.length).toBeGreaterThan(0);
+    });
+
+    test('should regenerate suggestions', async ({ page, pageObjects }) => {
+      // Wait for page to load
+      await expect(page.getByText('Extract fields from your data')).toBeVisible();
+      await setupMockPipelineResponse(page);
+
+      // Generate first suggestion
+      await pageObjects.streams.clickSuggestPipelineButton();
+      await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeVisible();
+
+      // Regenerate
+      await pageObjects.streams.regeneratePipelineSuggestion();
+      await expect(pageObjects.streams.getPipelineSuggestionCallout()).toBeVisible();
+      await expect(page.getByTestId('streamsAppProcessorBlock')).toBeVisible();
+    });
+  }
+);
