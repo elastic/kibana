@@ -29,7 +29,7 @@ export function AgentBuilderNavControl() {
 
   const { show: hasShowPrivilege } = useUiPrivileges();
 
-  const toggleFlyout = useCallback(() => {
+  const toggleSidebar = useCallback(() => {
     agentBuilder.toggleConversationFlyout();
   }, [agentBuilder]);
 
@@ -54,10 +54,10 @@ export function AgentBuilderNavControl() {
     (event: KeyboardEvent) => {
       if (isSemicolon(event) && (isMac ? event.metaKey : event.ctrlKey)) {
         event.preventDefault();
-        toggleFlyout();
+        toggleSidebar();
       }
     },
-    [toggleFlyout]
+    [toggleSidebar]
   );
 
   if (!hasShowPrivilege) {
@@ -96,7 +96,7 @@ export function AgentBuilderNavControl() {
         <AgentBuilderButton
           aria-label={buttonLabel}
           onClick={() => {
-            toggleFlyout();
+            toggleSidebar();
           }}
           color="primary"
           size="s"
@@ -114,9 +114,12 @@ export function AgentBuilderNavControl() {
   );
 }
 
-const buttonLabel = i18n.translate('xpack.agentBuilder.navControl.openTheAgentBuilderFlyoutLabel', {
-  defaultMessage: 'Open Agent Builder',
-});
+const buttonLabel = i18n.translate(
+  'xpack.agentBuilder.navControl.openTheAgentBuilderSidebarLabel',
+  {
+    defaultMessage: 'Open Agent Builder',
+  }
+);
 
 const shortcutLabel = i18n.translate('xpack.agentBuilder.navControl.keyboardShortcutTooltip', {
   values: { keyboardShortcut: isMac ? '⌘ ;' : 'Ctrl ;' },

@@ -8,7 +8,7 @@
 import { BehaviorSubject } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { AgentBuilderInternalService } from '../services';
-import type { OpenConversationFlyoutOptions } from '../flyout/types';
+import type { OpenConversationSidebarOptions } from './types';
 import type { EmbeddableConversationProps } from '../embeddable/types';
 
 /**
@@ -32,7 +32,7 @@ export const setSidebarServices = (coreStart: CoreStart, services: AgentBuilderI
  * Runtime context set before each sidebar open
  */
 export interface SidebarRuntimeContext {
-  options: OpenConversationFlyoutOptions;
+  options: OpenConversationSidebarOptions;
   onClose?: () => void;
   onRegisterCallbacks?: (callbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
