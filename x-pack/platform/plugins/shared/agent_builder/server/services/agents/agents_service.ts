@@ -17,7 +17,7 @@ import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { Runner } from '@kbn/agent-builder-server';
 import { getCurrentSpaceId } from '../../utils/spaces';
-import type { AgentsServiceSetup, AgentsServiceStart } from './types';
+import type { AgentsServiceSetup, AgentsServiceStart, RemoveToolRefsParams } from './types';
 import type { ToolsServiceStart } from '../tools';
 import {
   createBuiltinAgentRegistry,
@@ -28,7 +28,7 @@ import {
 import { createPersistedProviderFn } from './persisted';
 import { createAgentRegistry } from './agent_registry';
 import { createStorage } from './persisted/client/storage';
-import { runToolReferenceCleanup } from './persisted/tool_reference_cleanup';
+import { runToolRefCleanup } from './persisted/tool_reference_cleanup';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;
@@ -103,15 +103,9 @@ export class AgentsService {
       });
     };
 
-    const removeToolReferencesFromAllAgents = async ({
-      request,
-      toolIds,
-    }: {
-      request: KibanaRequest;
-      toolIds: string[];
-    }) => {
+    const removeToolRefsFromAgents = async ({ request, toolIds }: RemoveToolRefsParams) => {
       const spaceId = getCurrentSpaceId({ request, spaces });
-      return runToolReferenceCleanup({
+      return runToolRefCleanup({
         storage: internalStorage,
         spaceId,
         toolIds,
@@ -123,7 +117,7 @@ export class AgentsService {
       execute: async (args) => {
         return getRunner().runAgent(args);
       },
-      removeToolReferencesFromAllAgents,
+      removeToolRefsFromAgents,
     };
   }
 }

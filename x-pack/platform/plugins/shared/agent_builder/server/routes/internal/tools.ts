@@ -64,7 +64,7 @@ export function registerInternalToolsRoutes({
       const { ids } = request.body;
       const { tools: toolService, agents: agentsService, auditLogService } = getInternalServices();
 
-      const { agentsUpdated } = await agentsService.removeToolReferencesFromAllAgents({
+      const { agentsUpdated } = await agentsService.removeToolRefsFromAgents({
         request,
         toolIds: ids,
       });

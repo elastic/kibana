@@ -330,7 +330,7 @@ export function registerToolsRoutes({
           auditLogService,
         } = getInternalServices();
 
-        const { agentsUpdated } = await agentsService.removeToolReferencesFromAllAgents({
+        const { agentsUpdated } = await agentsService.removeToolRefsFromAgents({
           request,
           toolIds: [toolId],
         });

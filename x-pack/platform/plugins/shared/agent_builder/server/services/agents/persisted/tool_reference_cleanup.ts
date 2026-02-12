@@ -5,26 +5,23 @@
  * 2.0.
  */
 
-import type { AgentProfileStorage, AgentProperties } from './client/storage';
+import type { AgentProfileStorage } from './client/storage';
+import type { ToolRefCleanupResult } from './types';
 import { updateRequestToEs } from './client/converters';
 import { removeToolIdsFromToolSelection } from './client/utils';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 
-export interface RunToolReferenceCleanupParams {
+export interface ToolRefCleanupParams {
   storage: AgentProfileStorage;
   spaceId: string;
   toolIds: string[];
 }
 
-export interface RunToolReferenceCleanupResult {
-  agentsUpdated: number;
-}
-
-export async function runToolReferenceCleanup({
+export async function runToolRefCleanup({
   storage,
   spaceId,
   toolIds,
-}: RunToolReferenceCleanupParams): Promise<RunToolReferenceCleanupResult> {
+}: ToolRefCleanupParams): Promise<ToolRefCleanupResult> {
   const idsSet = new Set(toolIds);
   const response = await storage.getClient().search({
     track_total_hits: false,
@@ -37,7 +34,7 @@ export async function runToolReferenceCleanup({
   });
 
   let agentsUpdated = 0;
-  const hits = response.hits.hits as Array<{ _id: string; _source?: AgentProperties }>;
+  const hits = response.hits.hits;
 
   for (const hit of hits) {
     const source = hit._source;
