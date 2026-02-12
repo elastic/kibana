@@ -68,8 +68,13 @@ export function fromColorByValueAPIToLensState(
 export function fromColorByValueLensStateToAPI(
   color: PaletteOutput<CustomPaletteParams> | undefined
 ): ColorByValueType | undefined {
-  if (!color || !color.params) {
+  console.log('fromColorByValueLensStateToAPI', color);
+  debugger;
+  if (!color) {
     return;
+  }
+  if (!color.params) {
+    return { type: 'palette' };
   }
   const rangeType = color.params.rangeType
     ? LEGACY_TO_API_RANGE_NAMES[color.params.rangeType]
@@ -180,9 +185,11 @@ function fromUnassignedColorLensStateToAPI(
 export function fromColorMappingLensStateToAPI(
   colorMapping: ColorMapping.Config | undefined
 ): ColorMappingType | undefined {
+  console.log('fromColorMappingLensStateToAPI', colorMapping);
   if (!colorMapping) {
     return;
   }
+  // debugger;
   const unassignedColor = fromUnassignedColorLensStateToAPI(
     colorMapping.specialAssignments[0]?.color
   );
@@ -284,9 +291,11 @@ function fromAPIMappingToAssignments(
 export function fromColorMappingAPIToLensState(
   colorMapping: ColorMappingType | undefined
 ): ColorMapping.Config | undefined {
+  console.log('fromColorMappingAPIToLensState');
   if (!colorMapping) {
     return;
   }
+  // debugger;
   const specialAssignments: ColorMapping.SpecialAssignment[] = [
     {
       rules: [
