@@ -135,6 +135,17 @@ export class WorkflowsManagementApi {
     return this.workflowsService.createWorkflow(workflow, spaceId, request);
   }
 
+  public async bulkCreateWorkflows(
+    workflows: CreateWorkflowCommand[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{
+    created: WorkflowDetailDto[];
+    failed: Array<{ index: number; error: string }>;
+  }> {
+    return this.workflowsService.bulkCreateWorkflows(workflows, spaceId, request);
+  }
+
   public async cloneWorkflow(
     workflow: WorkflowDetailDto,
     spaceId: string,

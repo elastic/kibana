@@ -118,7 +118,11 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
               {showResumeButton && execution ? (
                 <ResumeExecutionButton executionId={execution.id} autoOpen={shouldAutoResume} />
               ) : showCancelButton && execution ? (
-                <CancelExecutionButton executionId={execution.id} />
+                <CancelExecutionButton
+                  executionId={execution.id}
+                  workflowId={execution.workflowId}
+                  startedAt={execution.startedAt}
+                />
               ) : (
                 <>
                   {showDoneButton && (
