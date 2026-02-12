@@ -35,10 +35,28 @@ const mockDeleteDataStreamMutation = {
   variables: undefined as { dataStreamId: string } | undefined,
 };
 
+const mockReanalyzeMutate = jest.fn();
+const mockReanalyzeDataStreamMutation = {
+  mutate: mockReanalyzeMutate,
+  isLoading: false,
+  variables: undefined as
+    | { dataStreamId: string; integrationId: string; connectorId: string }
+    | undefined,
+};
+
 jest.mock('../../../../../common', () => ({
   useDeleteDataStream: () => ({
     deleteDataStreamMutation: mockDeleteDataStreamMutation,
   }),
+  useReanalyzeDataStream: () => ({
+    reanalyzeDataStreamMutation: mockReanalyzeDataStreamMutation,
+  }),
+}));
+
+// Mock useIntegrationForm hook
+const mockUseIntegrationForm = jest.fn();
+jest.mock('../../../forms/integration_form', () => ({
+  useIntegrationForm: () => mockUseIntegrationForm(),
 }));
 
 // Mock EUI theme provider
@@ -80,6 +98,12 @@ describe('DataStreamsTable', () => {
     jest.clearAllMocks();
     mockDeleteDataStreamMutation.isLoading = false;
     mockDeleteDataStreamMutation.variables = undefined;
+    mockReanalyzeDataStreamMutation.isLoading = false;
+    mockReanalyzeDataStreamMutation.variables = undefined;
+    // Set default return value for useIntegrationForm
+    mockUseIntegrationForm.mockReturnValue({
+      formData: { connectorId: 'test-connector-id' },
+    });
   });
 
   describe('rendering', () => {
@@ -256,6 +280,78 @@ describe('DataStreamsTable', () => {
 
       const refreshButton = screen.getByTestId('refreshDataStreamButton');
       expect(refreshButton).not.toBeDisabled();
+    });
+  });
+
+  describe('reanalyze functionality', () => {
+    it('should call reanalyze mutation when refresh button clicked', async () => {
+      const items = [createMockDataStream({ status: 'completed' })];
+
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
+
+      const refreshButton = screen.getByTestId('refreshDataStreamButton');
+      await userEvent.click(refreshButton);
+
+      expect(mockReanalyzeMutate).toHaveBeenCalledWith({
+        integrationId: 'integration-123',
+        dataStreamId: 'ds-1',
+        connectorId: 'test-connector-id',
+      });
+    });
+
+    it('should disable refresh button while reanalyzing that item', () => {
+      mockReanalyzeDataStreamMutation.isLoading = true;
+      mockReanalyzeDataStreamMutation.variables = {
+        dataStreamId: 'ds-1',
+        integrationId: 'integration-123',
+        connectorId: 'test-connector-id',
+      };
+
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+
+      const refreshButton = screen.getByTestId('refreshDataStreamButton');
+      expect(refreshButton).toBeDisabled();
+    });
+
+    it('should disable refresh button when deleting that item', () => {
+      mockDeleteDataStreamMutation.isLoading = true;
+      mockDeleteDataStreamMutation.variables = { dataStreamId: 'ds-1' };
+
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+
+      const refreshButton = screen.getByTestId('refreshDataStreamButton');
+      expect(refreshButton).toBeDisabled();
+    });
+
+    it('should allow reanalysis for failed data streams', async () => {
+      const items = [createMockDataStream({ status: 'failed' })];
+
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
+
+      const refreshButton = screen.getByTestId('refreshDataStreamButton');
+      expect(refreshButton).not.toBeDisabled();
+
+      await userEvent.click(refreshButton);
+
+      expect(mockReanalyzeMutate).toHaveBeenCalledWith({
+        integrationId: 'integration-123',
+        dataStreamId: 'ds-1',
+        connectorId: 'test-connector-id',
+      });
+    });
+
+    it('should disable refresh button when connectorId is not available', () => {
+      const items = [createMockDataStream({ status: 'completed' })];
+
+      // Override the mock to return no connectorId
+      mockUseIntegrationForm.mockReturnValue({
+        formData: { connectorId: undefined },
+      });
+
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
+
+      const refreshButton = screen.getByTestId('refreshDataStreamButton');
+      expect(refreshButton).toBeDisabled();
     });
   });
 

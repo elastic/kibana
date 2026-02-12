@@ -16,10 +16,11 @@ import {
 import { css } from '@emotion/css';
 import type { DataStreamResponse } from '../../../../../../common';
 import * as i18n from '../translations';
-import { useDeleteDataStream } from '../../../../../common';
+import { useDeleteDataStream, useReanalyzeDataStream } from '../../../../../common';
 import { InputTypesBadges } from './input_types_badges';
 import { Status } from './status';
 import { useUIState } from '../../../contexts';
+import { useIntegrationForm } from '../../../forms/integration_form';
 
 interface DataStreamsTableProps {
   integrationId: string;
@@ -29,7 +30,9 @@ interface DataStreamsTableProps {
 export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps) => {
   const { euiTheme } = useEuiTheme();
   const { deleteDataStreamMutation } = useDeleteDataStream();
+  const { reanalyzeDataStreamMutation } = useReanalyzeDataStream();
   const { openEditPipelineFlyout } = useUIState();
+  const { formData } = useIntegrationForm();
   const [dataStreamDeleteTarget, setDataStreamDeleteTarget] = useState<DataStreamResponse | null>(
     null
   );
@@ -65,6 +68,10 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
 
   const deletingDataStreamId = deleteDataStreamMutation.isLoading
     ? deleteDataStreamMutation.variables?.dataStreamId
+    : undefined;
+
+  const reanalyzingDataStreamId = reanalyzeDataStreamMutation.isLoading
+    ? reanalyzeDataStreamMutation.variables?.dataStreamId
     : undefined;
 
   const handleDeleteConfirm = () => {
@@ -151,13 +158,19 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
             icon: 'refresh',
             type: 'icon',
             'data-test-subj': 'refreshDataStreamButton',
-            onClick: () => {
-              // TODO: Implement refresh action
-              // run analyze operation with same data stream I think. Have to check if I have to delete existing
+            onClick: (item: DataStreamResponse) => {
+              if (!formData?.connectorId) return;
+              reanalyzeDataStreamMutation.mutate({
+                integrationId,
+                dataStreamId: item.dataStreamId,
+                connectorId: formData.connectorId,
+              });
             },
             enabled: (item: DataStreamResponse) =>
+              !!formData?.connectorId &&
               (item.status === 'completed' || item.status === 'failed') &&
-              item.dataStreamId !== deletingDataStreamId,
+              item.dataStreamId !== deletingDataStreamId &&
+              item.dataStreamId !== reanalyzingDataStreamId,
           },
           {
             name: i18n.TABLE_ACTIONS.delete,
@@ -175,7 +188,15 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
         width: '80px',
       },
     ];
-  }, [deletingDataStreamId, euiTheme, openEditPipelineFlyout]);
+  }, [
+    deletingDataStreamId,
+    reanalyzingDataStreamId,
+    openEditPipelineFlyout,
+    reanalyzeDataStreamMutation,
+    integrationId,
+    formData?.connectorId,
+    euiTheme,
+  ]);
 
   return (
     <>
