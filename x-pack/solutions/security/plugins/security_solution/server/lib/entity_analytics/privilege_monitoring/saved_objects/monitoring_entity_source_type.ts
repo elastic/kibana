@@ -8,10 +8,13 @@
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { Type } from '@kbn/config-schema';
-import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectModelDataBackfillFn,
+  SavedObjectModelTransformationDoc,
+  SavedObjectsModelVersion,
+} from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type {
-  Matcher,
   MonitoringEntitySourceAttributes,
   MonitoringEntitySourceType,
 } from '../../../../../common/api/entity_analytics';
@@ -127,6 +130,32 @@ type BaseMonitoringEntitySourceSchemaV2Props = {
   [Key in keyof BaseMonitoringEntitySourceSchemaV2Attributes]: Type<unknown>;
 };
 
+const backFillFnEntitySourceV2: SavedObjectModelDataBackfillFn<
+  BaseMonitoringEntitySourceSchemaV2Attributes,
+  BaseMonitoringEntitySourceSchemaV2Attributes
+> = (document: SavedObjectModelTransformationDoc<BaseMonitoringEntitySourceSchemaV2Attributes>) => {
+  const attrs = document.attributes as BaseMonitoringEntitySourceSchemaV2Attributes;
+
+  const defaultMatchers =
+    attrs.managed === true
+      ? getDefaultMatchersForSource(attrs.type as MonitoringEntitySourceType, attrs.integrationName)
+      : undefined;
+
+  const inferredModifiedByUser =
+    attrs.managed === true &&
+    Array.isArray(attrs.matchers) &&
+    defaultMatchers != null &&
+    !areMatchersEqual(attrs.matchers, defaultMatchers); // order-insensitive compare
+
+  return {
+    attributes: {
+      ...attrs,
+      matchersModifiedByUser: attrs.matchersModifiedByUser ?? inferredModifiedByUser,
+      managedVersion: attrs.managedVersion ?? MANAGED_SOURCES_VERSION,
+    },
+  };
+};
+
 const baseEntitySourceSchema = {
   type: schema.maybe(schema.string()),
   name: schema.maybe(schema.string()),
@@ -179,38 +208,7 @@ const monitoringEntitySourceModelVersion2: SavedObjectsModelVersion = {
     },
     {
       type: 'data_backfill',
-      backfillFn: (document) => {
-        const attrs = document.attributes as {
-          matchers?: Matcher[];
-          integrationName?: string;
-          type?: string;
-          managed?: boolean;
-          matchersModifiedByUser?: boolean;
-          managedVersion?: number;
-        };
-
-        const defaultMatchers =
-          attrs.managed === true
-            ? getDefaultMatchersForSource(
-              attrs.type as MonitoringEntitySourceType,
-              attrs.integrationName
-            )
-            : undefined;
-
-        const inferredModifiedByUser =
-          attrs.managed === true &&
-          Array.isArray(attrs.matchers) &&
-          defaultMatchers != null &&
-          !areMatchersEqual(attrs.matchers, defaultMatchers); // order-insensitive compare
-
-        return {
-          attributes: {
-            ...attrs,
-            matchersModifiedByUser: attrs.matchersModifiedByUser ?? inferredModifiedByUser,
-            managedVersion: attrs.managedVersion ?? MANAGED_SOURCES_VERSION,
-          },
-        };
-      },
+      backfillFn: backFillFnEntitySourceV2,
     },
   ],
   schemas: {
