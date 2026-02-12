@@ -103,22 +103,21 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   }
 
   public async run(): Promise<void> {
-    let input: any;
-    this.stepExecutionRuntime.startStep();
-    // flush event logs after start step
-    await this.stepExecutionRuntime.flushEventLogs();
-
-    // Create APM span for step execution visibility in traces
-    const stepSpan = apm.startSpan(`step: ${this.step.name}`, 'workflow', this.step.type);
-    if (stepSpan) {
-      stepSpan.setLabel('step_name', this.step.name);
-      stepSpan.setLabel('step_type', this.step.type);
-      stepSpan.setLabel('step_id', this.stepExecutionRuntime.stepExecutionId);
-    }
-
     try {
+      let input: any;
+      // flush event logs after start step
+      await this.stepExecutionRuntime.flushEventLogs();
+
+      // Create APM span for step execution visibility in traces
+      const stepSpan = apm.startSpan(`step: ${this.step.name}`, 'workflow', this.step.type);
+      if (stepSpan) {
+        stepSpan.setLabel('step_name', this.step.name);
+        stepSpan.setLabel('step_type', this.step.type);
+        stepSpan.setLabel('step_id', this.stepExecutionRuntime.stepExecutionId);
+      }
       input = await this.getInput();
-      this.stepExecutionRuntime.setInput(input);
+      this.stepExecutionRuntime.startStep(input);
+
       const result = await this._run(input);
 
       // Don't update step execution runtime if abort was initiated

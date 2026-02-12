@@ -25,7 +25,6 @@ export class EnterIfNodeImpl implements NodeImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    this.stepExecutionRuntime.startStep();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const successors: any[] = this.workflowGraph.getDirectSuccessors(this.node.id);
 
@@ -51,7 +50,7 @@ export class EnterIfNodeImpl implements NodeImplementation {
     const renderedCondition =
       this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(thenNode.condition);
     const evaluatedConditionResult = this.evaluateCondition(renderedCondition);
-    this.stepExecutionRuntime.setInput({
+    this.stepExecutionRuntime.startStep({
       condition: renderedCondition,
       conditionResult: evaluatedConditionResult,
     });

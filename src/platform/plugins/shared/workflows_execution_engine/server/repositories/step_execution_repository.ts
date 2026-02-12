@@ -8,52 +8,96 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type {
+  EsWorkflowStepExecution,
+  ExecutionStatus,
+  SerializedError,
+  StackFrame,
+} from '@kbn/workflows';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+import { JsonValue } from '@kbn/utility-types';
+
+export interface StepExecutionEventBase {
+  stepExecutionId: string;
+  workflowRunId: string;
+  workflowId: string;
+  spaceId: string;
+  '@timestamp': string;
+}
+
+export interface StepExecutionStartedEvent extends StepExecutionEventBase {
+  type: 'started';
+  scopeStack: StackFrame[];
+  workflowRunId: string;
+  workflowId: string;
+  stepId: string;
+  stepType?: string;
+  topologicalIndex: number;
+  globalExecutionIndex: number;
+  stepExecutionIndex: number;
+  input?: JsonValue;
+}
+
+export interface StepExecutionFinishedEvent extends StepExecutionEventBase {
+  type: 'finished';
+  error?: SerializedError;
+  output?: JsonValue;
+}
+
+export interface StepExecutionWaitingEvent extends StepExecutionEventBase {
+  type: 'waiting';
+  resumeAt: string;
+}
+
+export type StepExecutionEvent =
+  | StepExecutionStartedEvent
+  | StepExecutionFinishedEvent
+  | StepExecutionWaitingEvent;
 
 export class StepExecutionRepository {
   private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
 
   constructor(private esClient: ElasticsearchClient) {}
 
-  /**
-   * Searches for step executions by workflow execution ID.
-   *
-   * @param executionId - The ID of the workflow execution to search for step executions.
-   * @returns A promise that resolves to an array of step executions associated with the given execution ID.
-   */
-  public async searchStepExecutionsByExecutionId(
-    executionId: string
-  ): Promise<EsWorkflowStepExecution[]> {
-    const response = await this.esClient.search<EsWorkflowStepExecution>({
+  public async getStepExecutionEvents(
+    stepExecutionIds: string[]
+  ): Promise<Array<StepExecutionEvent>> {
+    const eventIds = stepExecutionIds.flatMap((id) => [`${id}-started`, `${id}-finished`]);
+
+    const mgetResponse = await this.esClient.mget<
+      StepExecutionStartedEvent | StepExecutionFinishedEvent
+    >({
       index: this.indexName,
-      query: {
-        match: { workflowRunId: executionId },
-      },
-      sort: 'startedAt:desc',
-      size: 10000, // TODO: without it, it returns up to 10 results by default. We should improve this.
+      ids: eventIds,
     });
 
-    return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);
+    const events: Array<StepExecutionEvent> = [];
+
+    for (const doc of mgetResponse.docs) {
+      if ('found' in doc && doc.found && doc._source) {
+        events.push(doc._source);
+      }
+    }
+    return events;
   }
 
-  public async bulkUpsert(stepExecutions: Array<Partial<EsWorkflowStepExecution>>): Promise<void> {
-    if (stepExecutions.length === 0) {
+  public async bulkUpsert(events: Array<StepExecutionEvent>): Promise<void> {
+    if (events.length === 0) {
       return;
     }
 
-    stepExecutions.forEach((stepExecution) => {
-      if (!stepExecution.id) {
-        throw new Error('Step execution ID is required for upsert');
+    events.forEach((stepExecution) => {
+      if (!stepExecution.stepExecutionId || !stepExecution.type) {
+        throw new Error('Event ID and type are required for upsert');
       }
     });
 
     const bulkResponse = await this.esClient.bulk({
       refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
       index: this.indexName,
-      body: stepExecutions.flatMap((stepExecution) => [
-        { update: { _id: stepExecution.id } },
-        { doc: stepExecution, doc_as_upsert: true },
+      body: events.flatMap((event) => [
+        { create: { _id: `${event.stepExecutionId}_${event.type}` } },
+        event,
       ]),
     });
 
@@ -67,9 +111,7 @@ export class StepExecutionRepository {
         }));
 
       throw new Error(
-        `Failed to upsert ${erroredDocuments.length} step executions: ${JSON.stringify(
-          erroredDocuments
-        )}`
+        `Failed to upsert ${erroredDocuments.length} events: ${JSON.stringify(erroredDocuments)}`
       );
     }
   }

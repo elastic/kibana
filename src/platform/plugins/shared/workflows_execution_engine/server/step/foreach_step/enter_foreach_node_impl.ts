@@ -30,11 +30,10 @@ export class EnterForeachNodeImpl implements NodeImplementation {
   }
 
   private async enterForeach(): Promise<void> {
-    this.stepExecutionRuntime.startStep();
-    let foreachState = this.stepExecutionRuntime.getCurrentStepState();
-    this.stepExecutionRuntime.setInput({
+    this.stepExecutionRuntime.startStep({
       foreach: this.node.configuration.foreach,
     });
+    let foreachState = this.stepExecutionRuntime.getCurrentStepState();
     const evaluatedItems = this.getItems();
 
     if (evaluatedItems.length === 0) {
