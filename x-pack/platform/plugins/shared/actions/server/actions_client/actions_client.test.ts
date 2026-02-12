@@ -397,9 +397,10 @@ describe('create()', () => {
           secrets: {},
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Field \\"param1\\": Required"`
-    );
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid input: expected string, received undefined
+        → at param1"
+    `);
   });
 
   test('validates connector: config and secrets', async () => {
@@ -2299,9 +2300,10 @@ describe('update()', () => {
           secrets: {},
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Field \\"param1\\": Required"`
-    );
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid input: expected string, received undefined
+        → at param1"
+    `);
   });
 
   test('validates connector: config and secrets', async () => {

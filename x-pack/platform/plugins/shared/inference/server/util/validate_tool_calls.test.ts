@@ -119,7 +119,7 @@ describe('validateToolCalls', () => {
       if (isToolValidationError(error)) {
         expect(error.meta).toEqual({
           arguments: JSON.stringify({ foo: 'bar' }),
-          errorsText: 'bar: Required',
+          errorsText: 'bar: Invalid input: expected string, received undefined',
           name: 'my_function',
           toolCalls: [
             {

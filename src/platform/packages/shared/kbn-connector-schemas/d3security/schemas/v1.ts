@@ -23,8 +23,8 @@ export const D3SecuritySecretsSchema = z.object({ token: z.string() }).strict();
 export const D3SecurityRunActionParamsSchema = z
   .object({
     body: z.string().optional(),
-    severity: z.string().default(D3SecuritySeverity.EMPTY).optional(),
-    eventType: z.string().default('').optional(),
+    severity: z.string().optional(),
+    eventType: z.string().optional(),
   })
   .strict();
 

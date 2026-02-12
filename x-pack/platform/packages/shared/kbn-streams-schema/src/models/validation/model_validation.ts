@@ -124,7 +124,7 @@ export function modelValidation(...args: [ModelValidation, ModelSchema] | [Model
                 processing: { ...prev.ingest?.processing, updated_at: new Date().toISOString() },
               },
             }))
-            .transform((prev) => rightPartial.Definition.parse(prev))
+            .pipe(rightPartial.Definition)
             // that should be removed after
             .transform((prev) => {
               delete prev.name;

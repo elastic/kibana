@@ -44,7 +44,7 @@ export const ConfigSchema = z.union([
       apiProvider: z.enum([OpenAiProviderType.Other]),
       apiUrl: z.string(),
       defaultModel: z.string(),
-      verificationMode: z.enum(['full', 'certificate', 'none']).default('full').optional(),
+      verificationMode: z.enum(['full', 'certificate', 'none']).optional(),
       headers: z.record(z.string(), z.string()).optional(),
       contextWindowLength: z.coerce.number().optional(),
       temperature: z.coerce.number().optional(),

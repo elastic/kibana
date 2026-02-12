@@ -141,13 +141,12 @@ describe('createPromptRestApi', () => {
     }).rejects.toThrowErrorMatchingInlineSnapshot(`
       "[
         {
-          \\"code\\": \\"invalid_type\\",
           \\"expected\\": \\"string\\",
-          \\"received\\": \\"undefined\\",
+          \\"code\\": \\"invalid_type\\",
           \\"path\\": [
             \\"question\\"
           ],
-          \\"message\\": \\"Required\\"
+          \\"message\\": \\"Invalid input: expected string, received undefined\\"
         }
       ]"
     `);

@@ -89,7 +89,16 @@ export const manualIngestPipelineProcessorSchema = processorBaseWithWhereSchema
       .literal('manual_ingest_pipeline')
       .describe('Manual ingest pipeline - executes raw Elasticsearch ingest processors'),
     processors: z
-      .array(z.record(z.enum(elasticsearchProcessorTypes), z.unknown()))
+      .array(
+        // In Zod v4, z.record(z.enum([...]), ...) fills in undefined for all missing
+        // enum keys (matching TS Record<Enum, V> semantics). We strip those phantom
+        // entries so downstream code can rely on Object.keys() reflecting the input.
+        z
+          .record(z.enum(elasticsearchProcessorTypes), z.unknown())
+          .transform((record) =>
+            Object.fromEntries(Object.entries(record).filter(([, v]) => v !== undefined))
+          )
+      )
       .describe('List of raw Elasticsearch ingest processors to run'),
     tag: z.optional(z.string()).describe('Optional ingest processor tag for Elasticsearch'),
     on_failure: z
@@ -422,11 +431,7 @@ export interface ReplaceProcessor extends ProcessorBaseWithWhere {
 export const replaceProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('replace'),
   from: StreamlangSourceField,
-  pattern: z
-    .string()
-    .nonempty()
-    .refine((val) => val.trim() !== '', 'No empty strings allowed')
-    .refine((val) => val.includes(' '), 'Must contain at least one space'), // Allows space " " as valid pattern
+  pattern: z.string().nonempty(), // Allows space " " as valid pattern
   replacement: z.string(), // Required, should be '' for empty replacement
   to: z.optional(StreamlangTargetField),
   ignore_missing: z.optional(z.boolean()),
