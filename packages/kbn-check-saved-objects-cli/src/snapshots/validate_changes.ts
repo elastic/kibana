@@ -9,6 +9,7 @@
 
 import equal from 'fast-deep-equal';
 import { cloneDeep, difference } from 'lodash';
+import type { SavedObjectsType, ModelVersionIdentifier } from '@kbn/core-saved-objects-server';
 import type { MigrationInfoRecord, ModelVersionSummary } from '../types';
 
 interface ValidateChangesExistingTypeParams {
@@ -80,9 +81,10 @@ export function validateChangesExistingType({ from, to }: ValidateChangesExistin
 
 interface ValidateChangesNewTypeParams {
   to: MigrationInfoRecord;
+  registeredType: SavedObjectsType;
 }
 
-export function validateChangesNewType({ to }: ValidateChangesNewTypeParams): void {
+export function validateChangesNewType({ to, registeredType }: ValidateChangesNewTypeParams): void {
   const name = to.name;
 
   if (to.migrationVersions?.length) {
@@ -99,8 +101,8 @@ export function validateChangesNewType({ to }: ValidateChangesNewTypeParams): vo
   // check that defined modelVersions are consecutive integer numbers, starting at 1
   validateLastModelVersion(name, to.modelVersions);
 
-  // validate that all mapping fields are declared across all model versions
-  validateAllMappingsInModelVersions(name, to);
+  // validate that all mapping fields are present in the latest model version schema
+  validateAllMappingsInModelVersion(name, to, registeredType);
 
   // validate that new mappings do not use index: false or enabled: false
   validateNoIndexOrEnabledFalse(name, to, to.modelVersions);
@@ -231,15 +233,15 @@ function validateNewMappingsInModelVersion(
   }
 }
 
-/**
- * Validate that all mapping fields are declared across all model versions' newMappings.
- */
-function validateAllMappingsInModelVersions(name: string, to: MigrationInfoRecord): void {
+function validateAllMappingsInModelVersion(
+  name: string,
+  to: MigrationInfoRecord,
+  registeredType: SavedObjectsType
+): void {
   if (!to.modelVersions?.length) {
     return;
   }
 
-  // Extract all unique field names from mappings
   const mappingFields = [...new Set(
     Object.keys(to.mappings)
       .filter((key) => key.startsWith('properties.'))
@@ -251,21 +253,34 @@ function validateAllMappingsInModelVersions(name: string, to: MigrationInfoRecor
       .filter((path): path is string => path !== null)
   )].sort();
 
-  // Aggregate all declared mappings from all model versions
-  const declaredMappings = [...new Set(
-    to.modelVersions.flatMap((mv) =>
-      mv.newMappings.map((m) => {
-        const lastDot = m.lastIndexOf('.');
-        return lastDot > 0 ? m.slice(0, lastDot) : m;
-      })
-    )
-  )].sort();
+  const modelVersionMap =
+    typeof registeredType.modelVersions === 'function'
+      ? registeredType.modelVersions()
+      : registeredType.modelVersions ?? {};
 
-  const undeclaredFields = mappingFields.filter((field) => !declaredMappings.includes(field));
+  const latestVersionKey = Object.keys(modelVersionMap)
+    .map(Number)
+    .sort((a, b) => a - b)
+    .pop();
+
+  if (!latestVersionKey) {
+    return;
+  }
+
+  const latestModelVersion = modelVersionMap[String(latestVersionKey) as ModelVersionIdentifier];
+  const createSchema = latestModelVersion?.schemas?.create;
+  if (!createSchema) {
+    return;
+  }
+
+  const schemaFields = (createSchema.getSchemaStructure() as Array<{ path: string[]; type: string }>)
+    .map(({ path }) => path.join('.'));
+
+  const undeclaredFields = mappingFields.filter((field) => !schemaFields.includes(field));
   if (undeclaredFields.length > 0) {
     throw new Error(
-      `❌ The SO type '${name}' has mapping fields that are not declared in any model version: ${undeclaredFields.join(', ')}. ` +
-        `All mapping fields must be declared via 'mappings_addition' changes in model versions.`
+      `❌ The SO type '${name}' has mapping fields not present in the latest model version schema: ${undeclaredFields.join(', ')}. ` +
+        `All mapping fields must be declared in the latest model version's 'create' schema.`
     );
   }
 }
