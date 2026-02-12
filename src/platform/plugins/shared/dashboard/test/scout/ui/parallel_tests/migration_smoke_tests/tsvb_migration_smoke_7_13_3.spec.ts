@@ -25,7 +25,7 @@ const DASHBOARD_TITLE = 'TSVB 7.13.3';
 
 let dashboardId = '';
 
-spaceTest.describe('TSVB migration smoke (7.13.3)', { tag: tags.ESS_ONLY }, () => {
+spaceTest.describe('TSVB migration smoke (7.13.3)', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     const imported = await scoutSpace.savedObjects.load(EXPORT_PATH);

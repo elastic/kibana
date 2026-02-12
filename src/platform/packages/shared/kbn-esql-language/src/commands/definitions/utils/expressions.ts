@@ -19,6 +19,7 @@ import { lastItem } from '../../../ast/visitor/utils';
 import type {
   FunctionDefinition,
   FunctionParameterType,
+  InlineCastingType,
   PromQLFunctionParamType,
   Signature,
   SupportedDataType,
@@ -67,7 +68,7 @@ export function getExpressionType(
   }
 
   if (isInlineCast(root)) {
-    const castFunction = getFunctionForInlineCast(root.castType);
+    const castFunction = getFunctionForInlineCast(root.castType as InlineCastingType);
     if (!castFunction) {
       return 'unknown';
     }
