@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { type ChangeTrackingAction, RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -43,6 +44,8 @@ import { validateScheduleLimit } from '../get_schedule_frequency';
 
 export interface CreateRuleOptions {
   id?: string;
+  action?: ChangeTrackingAction;
+  originalId?: string;
 }
 
 export interface CreateRuleParams<Params extends RuleParams = never> {
@@ -239,6 +242,21 @@ export async function createRule<Params extends RuleParams = never>(
         returnRuleAttributes: true,
       })
   );
+
+  // Success? Track changes
+  const change = {
+    id,
+    type: RULE_SAVED_OBJECT_TYPE,
+    next: ruleAttributes,
+    nextReferences: references,
+    module: ruleType.solution,
+  };
+  context.changeTrackingService?.log(change, {
+    action: options?.action ?? RuleChangeTrackingAction.ruleCreate,
+    userId: username ?? 'unknown',
+    spaceId: context.spaceId,
+    overrides: { metadata: { originalRuleId: options?.originalId } },
+  });
 
   // Convert ES RawRule back to domain rule object
   const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(

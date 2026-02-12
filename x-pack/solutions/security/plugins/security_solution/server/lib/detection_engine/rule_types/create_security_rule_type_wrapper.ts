@@ -133,6 +133,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           injectReferences({ logger, params, savedObjectReferences }),
       },
       autoRecoverAlerts: false,
+      trackChanges: config.experimentalFeatures.ruleChangeHistoryEnabled,
       getViewInAppRelativeUrl: ({ rule, start, end }) => {
         let startTime = null;
         let endTime = null;
