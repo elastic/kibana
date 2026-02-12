@@ -11,26 +11,23 @@
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.CallExpression} CallExpression */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.Identifier} Identifier */
 
-const ERROR_MSG =
-  'The `apiClient` fixture should be used in `apiTest` to call an endpoint and later verify response code and body.';
-
 const traverse = require('eslint-traverse');
 
 const isApiTestCall = (node) => node.callee.type === 'Identifier' && node.callee.name === 'apiTest';
 
-/** Get local param name for `apiClient` (supports `{ apiClient: alias }`). */
-const getApiClientLocalName = (fnNode) => {
+/** Get local param name for a fixture (supports `{ fixtureName: alias }`). */
+const getFixtureLocalName = (fnNode, fixtureName) => {
   const firstParam = fnNode.params[0];
   if (!firstParam || firstParam.type !== 'ObjectPattern') {
-    return 'apiClient';
+    return fixtureName;
   }
 
-  const apiClientProp = firstParam.properties.find((prop) => {
+  const fixtureProp = firstParam.properties.find((prop) => {
     if (prop.type === 'RestElement') return false;
-    return prop.key && prop.key.name === 'apiClient';
+    return prop.key && prop.key.name === fixtureName;
   });
 
-  return apiClientProp?.value?.name || 'apiClient';
+  return fixtureProp?.value?.name || fixtureName;
 };
 
 /** Helper: Check if an identifier is used anywhere in a function body (simple recursion). */
@@ -65,18 +62,18 @@ const paramUsesIdentifierInBody = (node, paramName) => {
 };
 
 /**
- * Determine whether `fnNode` uses `apiClient`.
+ * Determine whether `fnNode` uses the given `fixtureName`.
  *
  * Strategy: Single-pass traversal that:
- * 1. Collects variable aliases pointing to apiClient (e.g., `const client = apiClient`)
+ * 1. Collects variable aliases pointing to the fixture (e.g., `const client = apiClient`)
  * 2. Collects local function definitions and their parameter usage
- * 3. Detects member access on apiClient or calls passing apiClient to functions that use it
+ * 3. Detects member access on the fixture or calls passing it to functions that use it
  *
  * We avoid the ESLint scope manager to maintain consistency with other rules in this package.
  */
-const functionUsesApiClient = (fnNode, context) => {
-  const apiClientName = getApiClientLocalName(fnNode);
-  const variableAliases = new Set([apiClientName]);
+const functionUsesFixture = (fnNode, context, fixtureName) => {
+  const localName = getFixtureLocalName(fnNode, fixtureName);
+  const variableAliases = new Set([localName]);
   const localFnUsesParam = new Map();
   let found = false;
 
@@ -95,7 +92,7 @@ const functionUsesApiClient = (fnNode, context) => {
       // Pre-compute parameter usage for local function expressions
       if (node.init.type === 'FunctionExpression' || node.init.type === 'ArrowFunctionExpression') {
         const fnName = node.id.name;
-        const paramName = getApiClientLocalName(node.init);
+        const paramName = getFixtureLocalName(node.init, fixtureName);
         localFnUsesParam.set(fnName, paramUsesIdentifierInBody(node.init.body, paramName));
         // Skip traversing into nested function bodies to avoid false positives
         return traverse.SKIP;
@@ -105,13 +102,13 @@ const functionUsesApiClient = (fnNode, context) => {
     // Collect function declarations and pre-compute parameter usage
     if (node.type === 'FunctionDeclaration' && node.id?.type === 'Identifier') {
       const fnName = node.id.name;
-      const paramName = getApiClientLocalName(node);
+      const paramName = getFixtureLocalName(node, fixtureName);
       localFnUsesParam.set(fnName, paramUsesIdentifierInBody(node.body, paramName));
       // Skip traversing into nested function bodies to avoid false positives
       return traverse.SKIP;
     }
 
-    // Detect member access on apiClient (e.g., `apiClient.get(...)`)
+    // Detect member access on the fixture (e.g., `apiClient.get(...)`)
     if (
       node.type === 'MemberExpression' &&
       node.object?.type === 'Identifier' &&
@@ -121,7 +118,7 @@ const functionUsesApiClient = (fnNode, context) => {
       return traverse.SKIP;
     }
 
-    // Detect calls with apiClient passed as argument
+    // Detect calls with the fixture passed as argument
     if (node.type === 'CallExpression' && node.arguments) {
       for (const arg of node.arguments) {
         if (arg.type === 'Identifier' && variableAliases.has(arg.name)) {
@@ -140,7 +137,7 @@ const functionUsesApiClient = (fnNode, context) => {
         }
       }
 
-      // Also check if a local function is called that uses apiClient from closure (no args needed)
+      // Also check if a local function is called that uses the fixture from closure (no args needed)
       const callee = node.callee;
       if (callee.type === 'Identifier' && localFnUsesParam.has(callee.name)) {
         if (localFnUsesParam.get(callee.name)) {
@@ -154,6 +151,18 @@ const functionUsesApiClient = (fnNode, context) => {
   return found;
 };
 
+/** Build a human-readable error message listing all accepted fixtures. */
+const buildErrorMsg = (acceptedFixtures) => {
+  if (acceptedFixtures.length === 1) {
+    return `The \`${acceptedFixtures[0]}\` fixture should be used in \`apiTest\` to call an endpoint and later verify response code and body.`;
+  }
+  const formatted = acceptedFixtures.map((f) => `\`${f}\``);
+  const last = formatted.pop();
+  return `One of ${formatted.join(
+    ', '
+  )} or ${last} fixtures should be used in \`apiTest\` to interact with an endpoint and later verify the response.`;
+};
+
 /** @type {Rule} */
 module.exports = {
   meta: {
@@ -163,10 +172,27 @@ module.exports = {
       category: 'Best Practices',
     },
     fixable: null,
-    schema: [],
+    schema: [
+      {
+        type: 'object',
+        properties: {
+          alternativeFixtures: {
+            type: 'array',
+            items: { type: 'string' },
+            uniqueItems: true,
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
   },
 
   create(context) {
+    const options = context.options[0] || {};
+    const alternativeFixtures = options.alternativeFixtures || [];
+    const acceptedFixtures = ['apiClient', ...alternativeFixtures];
+    const errorMsg = buildErrorMsg(acceptedFixtures);
+
     return {
       CallExpression(node) {
         if (!isApiTestCall(node)) return;
@@ -193,10 +219,14 @@ module.exports = {
           return;
         }
 
-        if (!functionUsesApiClient(callbackArg, context)) {
+        const usesAcceptedFixture = acceptedFixtures.some((fixture) =>
+          functionUsesFixture(callbackArg, context, fixture)
+        );
+
+        if (!usesAcceptedFixture) {
           context.report({
             node,
-            message: ERROR_MSG,
+            message: errorMsg,
           });
         }
       },

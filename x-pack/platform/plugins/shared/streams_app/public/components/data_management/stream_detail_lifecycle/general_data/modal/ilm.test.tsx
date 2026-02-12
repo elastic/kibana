@@ -74,8 +74,8 @@ const renderI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nPr
 
 describe('IlmField', () => {
   const policies = [
-    { name: 'policyA', policy: { phases: { hot: { min_age: '0d' } } } },
-    { name: 'policyB', policy: { phases: { hot: { min_age: '0d' }, warm: { min_age: '30d' } } } },
+    { name: 'policyA', phases: { hot: { min_age: '0d' } } },
+    { name: 'policyB', phases: { hot: { min_age: '0d' }, warm: { min_age: '30d' } } },
   ] as any;
 
   it('loads and displays ILM policies', async () => {

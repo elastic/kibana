@@ -18,6 +18,7 @@ import { RunnerFactoryImpl } from './runner';
 import { ConversationServiceImpl } from './conversation';
 import { createChatService } from './chat';
 import { type AttachmentService, createAttachmentService } from './attachments';
+import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
 import { AuditLogService } from '../audit';
 
@@ -25,6 +26,7 @@ interface ServiceInstances {
   tools: ToolsService;
   agents: AgentsService;
   attachments: AttachmentService;
+  hooks: HooksService;
   skills: SkillService;
 }
 
@@ -38,6 +40,7 @@ export class ServiceManager {
       tools: new ToolsService(),
       agents: new AgentsService(),
       attachments: createAttachmentService(),
+      hooks: new HooksService(),
       skills: createSkillService(),
     };
 
@@ -45,6 +48,7 @@ export class ServiceManager {
       tools: this.services.tools.setup({ logger, workflowsManagement }),
       agents: this.services.agents.setup({ logger }),
       attachments: this.services.attachments.setup(),
+      hooks: this.services.hooks.setup({ logger }),
       skills: this.services.skills.setup(),
     };
 
@@ -98,6 +102,8 @@ export class ServiceManager {
       toolsService: tools,
     });
 
+    const hooks = this.services.hooks.start();
+
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
       security,
@@ -112,6 +118,7 @@ export class ServiceManager {
       attachmentsService: attachments,
       skillServiceStart: skillsServiceStart,
       trackingService,
+      hooks,
     });
     runner = runnerFactory.getRunner();
 
@@ -147,6 +154,7 @@ export class ServiceManager {
       runnerFactory,
       auditLogService,
       chat,
+      hooks,
     };
 
     return this.internalStart;
