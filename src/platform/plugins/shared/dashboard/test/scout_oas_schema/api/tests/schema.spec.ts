@@ -61,7 +61,7 @@ apiTest.describe('dashboard REST schema', { tag: tags.DEPLOYMENT_AGNOSTIC }, () 
       response.body.paths[oasPath].post.requestBody.content[
         'application/json; Elastic-Api-Version=1'
       ].schema;
-    const panelsSchema = createBodySchema.properties.panels;
+    const panelsSchema = createBodySchema.properties.data.properties.panels;
     expect(panelsSchema).toBeDefined();
     expect(panelsSchema.items?.anyOf?.length).toBeGreaterThan(0);
 
