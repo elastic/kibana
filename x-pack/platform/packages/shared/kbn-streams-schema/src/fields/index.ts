@@ -49,7 +49,7 @@ export type FieldDefinitionConfigAdvancedParameters = Omit<
   'type' | 'format'
 >;
 
-export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.intersection(
+export const fieldDefinitionConfigSchema = z.intersection(
   recursiveRecord,
   z.union([
     z.object({
