@@ -36,10 +36,11 @@ const ALL_LOCATIONS: UserMessagesDisplayLocationId[] = [
 
 function createUserMessage(
   locations: Array<Exclude<UserMessagesDisplayLocationId, 'dimensionButton'>> = ['embeddableBadge'],
-  severity: UserMessage['severity'] = 'error'
+  severity: UserMessage['severity'] = 'error',
+  id?: string
 ): UserMessage {
   return {
-    uniqueId: faker.string.uuid(),
+    uniqueId: id ?? faker.string.uuid(),
     severity: severity || 'error',
     shortMessage: faker.lorem.word(),
     longMessage: () => faker.lorem.sentence(),
@@ -297,15 +298,43 @@ describe('User Messages API', () => {
       expect(onBeforeBadgesRender).toHaveBeenCalled();
     });
 
-    it('should return both consumer and internal messages', () => {
-      const consumerMessage = createUserMessage(['embeddableBadge'], 'error');
+    it('should not add consumer messages when getConsumerMessages returns empty array', () => {
+      const getConsumerMessages = jest.fn(() => []);
+      const { userMessagesApi } = buildUserMessagesApi(undefined, {
+        visOverrides: { id: 'lnsXY' },
+        dataOverrides: { id: 'formBased' },
+        getConsumerMessages,
+      });
+
+      const result = userMessagesApi.getUserMessages('embeddableBadge');
+
+      expect(result).toHaveLength(0);
+      expect(getConsumerMessages).toHaveBeenCalled();
+    });
+
+    it('should treat undefined return from getConsumerMessages as no messages', () => {
+      const getConsumerMessages = jest.fn(() => undefined as unknown as UserMessage[]);
+      const { userMessagesApi } = buildUserMessagesApi(undefined, {
+        visOverrides: { id: 'lnsXY' },
+        dataOverrides: { id: 'formBased' },
+        getConsumerMessages,
+      });
+
+      const result = userMessagesApi.getUserMessages('embeddableBadge');
+
+      expect(result).toHaveLength(0);
+      expect(getConsumerMessages).toHaveBeenCalled();
+    });
+
+    it('should filter consumer and internal messages based on severity', () => {
+      const consumerMessage = createUserMessage(['embeddableBadge'], 'info');
       const getConsumerMessages = jest.fn(() => [consumerMessage]);
       const { userMessagesApi } = buildUserMessagesApi(undefined, {
         visOverrides: { id: 'lnsXY' },
         dataOverrides: { id: 'formBased' },
         getConsumerMessages,
       });
-      const internalMessage = createUserMessage(['embeddableBadge'], 'warning');
+      const internalMessage = createUserMessage(['embeddableBadge'], 'error');
       userMessagesApi.addUserMessages([internalMessage]);
 
       const result = userMessagesApi.getUserMessages('embeddableBadge');
@@ -313,10 +342,8 @@ describe('User Messages API', () => {
       expect(result).toHaveLength(2);
       expect(getConsumerMessages).toHaveBeenCalled();
 
-      expect(result[0]).toEqual(expect.objectContaining({ uniqueId: consumerMessage.uniqueId }));
-      expect(result[1]).toEqual(expect.objectContaining({ uniqueId: internalMessage.uniqueId }));
-
-      expect(result.length).toBeGreaterThanOrEqual(2);
+      expect(result[0]).toEqual(expect.objectContaining({ uniqueId: internalMessage.uniqueId }));
+      expect(result[1]).toEqual(expect.objectContaining({ uniqueId: consumerMessage.uniqueId }));
     });
 
     it('should return only consumer messages when no internal messages', () => {
@@ -330,8 +357,40 @@ describe('User Messages API', () => {
 
       const result = userMessagesApi.getUserMessages('embeddableBadge');
 
-      expect(result).toHaveLength(1);
       expect(result[0]).toEqual(expect.objectContaining({ uniqueId: consumerMessage.uniqueId }));
+    });
+
+    it('when consumer and internal share the same uniqueId, both appear in the result (no dedupe)', () => {
+      const sharedId = 'shared-message-id';
+      const consumerMessage = createUserMessage(['embeddableBadge'], 'error', sharedId);
+      const getConsumerMessages = jest.fn(() => [consumerMessage]);
+      const { userMessagesApi } = buildUserMessagesApi(undefined, {
+        visOverrides: { id: 'lnsXY' },
+        dataOverrides: { id: 'formBased' },
+        getConsumerMessages,
+      });
+      const internalMessage = createUserMessage(['embeddableBadge'], 'warning', sharedId);
+      userMessagesApi.addUserMessages([internalMessage]);
+
+      const result = userMessagesApi.getUserMessages('embeddableBadge');
+      expect(result).toHaveLength(2);
+    });
+
+    it('should return multiple consumer messages', () => {
+      const msg1 = createUserMessage(['embeddableBadge'], 'info');
+      const msg2 = createUserMessage(['embeddableBadge'], 'warning');
+      const getConsumerMessages = jest.fn(() => [msg1, msg2]);
+      const { userMessagesApi } = buildUserMessagesApi(undefined, {
+        visOverrides: { id: 'lnsXY' },
+        dataOverrides: { id: 'formBased' },
+        getConsumerMessages,
+      });
+
+      const result = userMessagesApi.getUserMessages('embeddableBadge');
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual(expect.objectContaining({ uniqueId: msg2.uniqueId }));
+      expect(result[1]).toEqual(expect.objectContaining({ uniqueId: msg1.uniqueId }));
     });
   });
 
