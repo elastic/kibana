@@ -52,6 +52,9 @@ export const EngineDescriptorTypeMappings: SavedObjectsType['mappings'] = {
         paginationTimestamp: {
           type: 'date',
         },
+        paginationId: {
+          type: 'keyword',
+        },
         lastExecutionTimestamp: {
           type: 'date',
         },
