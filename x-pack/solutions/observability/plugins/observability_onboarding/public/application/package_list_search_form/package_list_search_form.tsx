@@ -13,6 +13,7 @@ import React, { useRef, useMemo } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import { useCardUrlRewrite } from './use_card_url_rewrite';
 import { PackageList } from '../package_list/package_list';
+import { useFleetSettings } from '../../hooks/use_fleet_settings';
 
 interface Props {
   searchQuery: string;
@@ -29,6 +30,7 @@ interface Props {
 
 type WrapperProps = Props & {
   useAvailablePackages: AvailablePackagesHookType;
+  prereleaseIntegrationsEnabled: boolean;
 };
 
 const fetchAvailablePackagesHook = (): Promise<AvailablePackagesHookType> =>
@@ -46,9 +48,10 @@ const PackageListGridWrapper = ({
   customCards,
   flowCategory,
   excludePackageIdList = [],
+  prereleaseIntegrationsEnabled,
 }: WrapperProps) => {
   const { filteredCards: integrationCards, isLoading } = useAvailablePackages({
-    prereleaseIntegrationsEnabled: true,
+    prereleaseIntegrationsEnabled,
   });
   const rewriteUrl = useCardUrlRewrite({ category: flowCategory, search: searchQuery });
 
@@ -87,6 +90,7 @@ const PackageListGridWrapper = ({
 export const PackageListSearchForm = React.forwardRef(
   (props: Props, packageListRef?: React.Ref<HTMLDivElement>) => {
     const ref = useRef<AvailablePackagesHookType | null>(null);
+    const { prereleaseIntegrationsEnabled, isLoading: isLoadingSettings } = useFleetSettings();
 
     const {
       error: errorLoading,
@@ -127,13 +131,14 @@ export const PackageListSearchForm = React.forwardRef(
         </EuiCallOut>
       );
 
-    if (asyncLoading || ref.current === null) return <Loading />;
+    if (asyncLoading || ref.current === null || isLoadingSettings) return <Loading />;
 
     return (
       <PackageListGridWrapper
         {...props}
         useAvailablePackages={ref.current}
         packageListRef={packageListRef}
+        prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
       />
     );
   }

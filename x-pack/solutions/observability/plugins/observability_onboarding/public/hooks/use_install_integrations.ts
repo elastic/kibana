@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useTrackedPromise } from '@kbn/use-tracked-promise';
 import { i18n } from '@kbn/i18n';
 import type { HttpFetchOptions } from '@kbn/core/public';
 import { useKibana } from './use_kibana';
+import { useFleetSettings } from './use_fleet_settings';
 
 // Errors
 const UNAUTHORIZED_ERROR = i18n.translate(
@@ -43,13 +44,19 @@ export const useInstallIntegrations = ({
   const {
     services: { http },
   } = useKibana();
+  const { prereleaseIntegrationsEnabled, isLoading: isLoadingSettings } = useFleetSettings();
+
+  // Use a ref to get the latest prerelease setting value in the async function
+  const prereleaseRef = useRef(prereleaseIntegrationsEnabled);
+  prereleaseRef.current = prereleaseIntegrationsEnabled;
+
   const [requestState, callPerformRequest] = useTrackedPromise(
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
         const options: HttpFetchOptions = {
           headers: { 'Elastic-Api-Version': '2023-10-31' },
-          query: { prerelease: true },
+          query: { prerelease: prereleaseRef.current },
         };
 
         const integrations = [];
@@ -91,11 +98,15 @@ export const useInstallIntegrations = ({
   );
 
   const performRequest = useCallback(() => {
-    callPerformRequest();
-  }, [callPerformRequest]);
+    // Only perform the request if settings have loaded
+    if (!isLoadingSettings) {
+      callPerformRequest();
+    }
+  }, [callPerformRequest, isLoadingSettings]);
 
   return {
     performRequest,
     requestState,
+    isLoadingSettings,
   };
 };
