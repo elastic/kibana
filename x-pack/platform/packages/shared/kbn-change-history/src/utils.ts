@@ -6,21 +6,19 @@
  */
 
 import flatten from 'flat';
-import type { ChangeTrackingDiff, ChangeTrackingDiffParameters } from './types';
+import type { ChangeTrackingDiff, ChangeTrackingDiffOptions } from './types';
 
 /**
  * Returns a filtered diff of two JSON-equivalent objects
  * The diff contains a structure that helps convert one JSON object into the other.
  *
- * @param params - The parameters for the diff calculation.
- * @param params.a - The first JSON object.
- * @param params.b - The second JSON object.
- * @param params.excludeFields - The fields to exclude from the diff calculation.
+ * @param opts - The arguments for the diff calculation.
+ * @param opts.a - The first JSON object.
+ * @param opts.b - The second JSON object.
+ * @param opts.excludeFields - The fields to exclude from the diff calculation.
  * @returns a [Diff] that helps convert one object into the other.
  */
-export function standardDiffDocCalculation(
-  params: ChangeTrackingDiffParameters
-): ChangeTrackingDiff {
+export function standardDiffDocCalculation(opts: ChangeTrackingDiffOptions): ChangeTrackingDiff {
   const result: ChangeTrackingDiff = {
     stats: {
       total: 0,
@@ -34,14 +32,14 @@ export function standardDiffDocCalculation(
   };
 
   // Flatten both objects and work out diff
-  const { a, b, excludeFields } = params;
+  const { a, b, excludeFields } = opts;
   const stats = result.stats;
-  const opts = { safe: true };
-  const flatA = flatten(a ?? {}, opts) as Record<string, any>;
-  const flatB = flatten(b ?? {}, opts) as Record<string, any>;
+  const options = { safe: true };
+  const flatA = flatten(a ?? {}, options) as Record<string, any>;
+  const flatB = flatten(b ?? {}, options) as Record<string, any>;
   const allKeys = new Set([...Object.keys(flatA), ...Object.keys(flatB)]);
   const flatFilter =
-    (excludeFields && (flatten(excludeFields, opts) as Record<string, any>)) || undefined;
+    (excludeFields && (flatten(excludeFields, options) as Record<string, any>)) || undefined;
   // TODO: Might need better array comparison here though this works for now
   const arrayDeepEquals = (a1: any[] | ArrayBufferView, a2: any[] | ArrayBufferView) =>
     JSON.stringify(a1) === JSON.stringify(a2);

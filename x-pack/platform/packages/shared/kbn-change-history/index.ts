@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  SearchTotalHits,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type DataStreamDefinition, DataStreamClient } from '@kbn/data-streams';
 import type { ClientBulkOperation } from '@kbn/data-streams/src/types/es_api';
@@ -16,11 +20,14 @@ import type {
   ChangeHistoryDocument,
   GetHistoryResult,
   LogChangeHistoryOptions,
+  GetChangeHistoryOptions,
   ObjectChange,
 } from './src/types';
 import { standardDiffDocCalculation } from './src/utils';
 
 export * from './src/types';
+
+const MAX_RESULT_SIZE = 100;
 
 type ChangeHistoryDataStreamClient = DataStreamClient<
   typeof changeHistoryMappings,
@@ -28,19 +35,27 @@ type ChangeHistoryDataStreamClient = DataStreamClient<
 > & { startDate: Date };
 
 export interface IChangeHistoryClient {
+  dataStreamName: string;
   isInitialized(): boolean;
   initialize(elasticsearchClient: ElasticsearchClient): void;
   log(change: ObjectChange, opts: LogChangeHistoryOptions): void;
   logBulk(changes: ObjectChange[], opts: LogChangeHistoryOptions): void;
-  getHistory(objectType: string, objectId: string): Promise<GetHistoryResult>;
+  getHistory(
+    objectType: string,
+    objectId: string,
+    opts?: GetChangeHistoryOptions
+  ): Promise<GetHistoryResult>;
 }
 
 export class ChangeHistoryClient implements IChangeHistoryClient {
-  private client?: ChangeHistoryDataStreamClient;
-  private logger: Logger;
   private module: string;
   private dataset: string;
   private kibanaVersion: string;
+  private logger: Logger;
+  private client?: ChangeHistoryDataStreamClient;
+
+  // Data stream name is `public` to allow calling code to also access it directly.
+  public dataStreamName: string;
 
   constructor({
     module,
@@ -57,6 +72,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     this.dataset = dataset;
     this.kibanaVersion = kibanaVersion;
     this.logger = logger;
+    this.dataStreamName = `.kibana-change-history-${module}-${dataset}`;
   }
 
   /**
@@ -74,15 +90,12 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * @throws An error if the data stream is not initialized properly.
    */
   async initialize(elasticsearchClient: ElasticsearchClient) {
-    const { module, dataset } = this;
-    const dataStreamName = `.kibana-change-history-${module}-${dataset}`;
-
     // Step 1: Create data stream definition
     // TODO: What about ILM policy (defaults to none = keep forever)
     const mappings = { ...changeHistoryMappings };
     const now = new Date();
     const dataStream: DataStreamDefinition<typeof mappings> = {
-      name: dataStreamName,
+      name: this.dataStreamName,
       version: 1,
       hidden: true,
       template: {
@@ -101,7 +114,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     })) as ChangeHistoryDataStreamClient;
 
     if (!client) {
-      const err = new Error('Client not initialized properly');
+      const err = new Error(`Data stream not initialized: [${this.dataStreamName}]`);
       this.logger.error(err);
       throw err;
     }
@@ -111,7 +124,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       const {
         data_streams: [{ _meta: meta }],
       } = await elasticsearchClient.indices.getDataStream({
-        name: dataStreamName,
+        name: this.dataStreamName,
       });
       client.startDate = meta?.changeHistoryStartDate;
     } catch (err) {
@@ -137,6 +150,10 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * Log a bulk change for one or more objects.
    * @param changes - The changes to objects that were affected.
    * @param opts - The options for the bulk change.
+   * @param opts.correlationId - The correlation ID for the bulk change.
+   * @param opts.overrides - Optional overrides for the change history document.
+   * @param opts.excludeFields - Optional fields to exclude from the diff calculation.
+   * @param opts.diffDocCalculation - Optional function to calculate the diff between the current and next state of the object.
    * @returns A promise that resolves when the bulk change is logged.
    * @throws An error if the data stream is not initialized, or if an error occurs while logging the change.
    */
@@ -149,7 +166,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       opts.correlationId ?? changes.length > 1 ? crypto.randomBytes(16).toString('hex') : undefined;
     const { module, dataset, client, kibanaVersion } = this;
     if (!client) {
-      const err = new Error(`Data stream not initialized for ${module}-${dataset}`);
+      const err = new Error(`Data stream not initialized: [${this.dataStreamName}]`);
       this.logger.error(err);
       throw err;
     }
@@ -160,7 +177,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       const hash = crypto.createHash('sha256').update(JSON.stringify(change.next)).digest('hex');
       const document = this.createDocument(opts.overrides);
       document.user = { ...document.user, id: opts.userId };
-      document.event = { ...document.event, module, action: opts.action };
+      document.event = { ...document.event, module, dataset, action: opts.action };
       if (correlationId && !document.event.group) document.event.group = { id: correlationId };
       document.object = { id, type, hash, snapshot: change.next };
       document.kibana = { ...document.kibana, space_id: opts.spaceId, version: kibanaVersion };
@@ -192,30 +209,40 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * Get the change history of an object.
    * @param objectType - The type of the object.
    * @param objectId - The ID of the object.
-   * @param additionalFilters - Additional DSL filters to apply to the history search.
+   * @param opts - The options for the history query.
+   * @param opts.additionalFilters - Additional filters to apply to the history query.
+   * @param opts.sort - The sort order for the history query.
+   * @param opts.from - The starting index for the history query.
+   * @param opts.size - The number of results to return.
+   * @param opts.transportOpts - Additional ES transport options
    * @returns The history of the object.
    * @throws An error if the data stream is not initialized, or if an error occurs while getting the history.
    */
   async getHistory(
     objectType: string,
     objectId: string,
-    additionalFilters?: QueryDslQueryContainer[]
+    opts?: GetChangeHistoryOptions
   ): Promise<GetHistoryResult> {
-    this.logger.warn(
-      `ChangeTrackingService.getHistory(objectType: ${objectType}, objectId: ${objectId})`
-    );
     const client = this.client;
     if (!client) {
-      throw new Error(`Data stream not found for module: ${module}`);
+      throw new Error(`Data stream not initialized: [${this.dataStreamName}]`);
     }
-    const filter = [
-      { term: { 'object.id': objectId } },
+    const filter: QueryDslQueryContainer[] = [
       { term: { 'object.type': objectType } },
-      ...(additionalFilters ?? []),
+      { term: { 'object.id': objectId } },
+    ];
+    if (opts?.additionalFilters) {
+      filter.push(...opts.additionalFilters);
+    }
+    const defaultSort: SortCombinations[] = [
+      { '@timestamp': { order: 'desc' } },
+      { 'event.id': { order: 'desc' } },
     ];
     const history = await client.search<Record<string, ChangeHistoryDocument>>({
       query: { bool: { filter } },
-      sort: [{ '@timestamp': { order: 'desc' } }],
+      sort: opts?.sort ?? defaultSort,
+      size: opts?.size ?? MAX_RESULT_SIZE,
+      from: opts?.from,
     });
     return {
       startDate: client.startDate,
@@ -230,7 +257,6 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       '@timestamp': new Date().toISOString(),
       event: {
         id: event?.id || crypto.randomBytes(15).toString('base64url'),
-        dataset: this.dataset,
         type: event?.type ?? 'change',
         outcome: event?.outcome ?? 'success',
         reason: event?.reason,

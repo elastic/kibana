@@ -131,7 +131,6 @@ export class ChangeTrackingService implements IChangeTrackingService {
   }
 
   async getHistory(module: RuleTypeSolution, ruleId: string): Promise<GetHistoryResult> {
-    this.logger.warn(`ChangeTrackingService.getHistory(module: ${module}, ruleId: ${ruleId})`);
     const client = this.clients[module];
     if (!client) {
       const error = new Error('Change history client not initialized properly');

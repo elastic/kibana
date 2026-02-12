@@ -6,7 +6,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client/rules_client';
-import type { ChangeHistoryDocument } from '@kbn/alerting-plugin/server/rules_client/lib/change_tracking';
+import type { ChangeHistoryDocument } from '@kbn/change-history';
 import { RuleTypeSolutions } from '@kbn/alerting-types';
 import type {
   Page,

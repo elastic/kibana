@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import type { TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch';
+import type {
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/types';
+
 /**
  * Represents a single document in the change history.
  * Using ECS field notation as much as possible.
@@ -25,8 +31,8 @@ export interface ChangeHistoryDocument {
     module: string; // Kibana module that the event belongs to (e.g. `security`, etc.)
     dataset: string; // Name of the dataset that the event belongs to (e.g. `alerting-rules`, etc.)
     action: string; // The action performed (`rule-create`, `rule-update`, `rule-delete`, etc.)
-    type: 'change'; // ECS Categorization of the event performed (`creation`, `change`, `deletion`)
-    outcome: 'success'; // ECS Outcome of the event (`success`, `failure`, `unknown`)
+    type: 'change' | 'creation' | 'deletion'; // ECS Categorization of the event performed (`creation`, `change`, `deletion`)
+    outcome: 'success'; // ECS Outcome of the event (`success`)
     reason?: string; // Reason for the change. (Optional)
     start?: string; // ISO8601 timestamp of the event start time. (Optional)
     created?: string; // ISO8601 timestamp of the event creation time. (Optional)
@@ -38,10 +44,10 @@ export interface ChangeHistoryDocument {
   object: {
     id: string; // Unique id of the target object in kibana.
     type: string; // Type of the target object in kibana.
-    hash: string; // A hash of the object.snapshot to identify the payload.
+    hash: string; // SHA256 hash of the object.snapshot to identify the payload.
     changes?: string[]; // List of field names that changed. (Optional)
     oldvalues?: Record<string, unknown>; // Previous values for changed fields. (Optional)
-    snapshot?: Record<string, unknown>; // Full snapshot after the change. (Optional)
+    snapshot: Record<string, unknown>; // Full snapshot after the change. (Optional)
   };
 
   // Optional metadata about the event.
@@ -70,7 +76,15 @@ export interface LogChangeHistoryOptions {
   excludeFields?: ChangeTrackingExcludeFilter;
   sensitiveFields?: ChangeTrackingSensitiveDataFilter;
   // Optional diff to be used instead of standard diff calculation
-  diffDocCalculation?: (params: ChangeTrackingDiffParameters) => ChangeTrackingDiff;
+  diffDocCalculation?: (opts: ChangeTrackingDiffOptions) => ChangeTrackingDiff;
+}
+
+export interface GetChangeHistoryOptions {
+  additionalFilters?: QueryDslQueryContainer[];
+  sort?: SortCombinations[];
+  from?: number;
+  size?: number;
+  transportOpts?: TransportRequestOptionsWithOutMeta;
 }
 
 /**
@@ -104,7 +118,7 @@ export interface ChangeTrackingSensitiveDataFilter {
 /**
  * Input for the diff calculation
  */
-export interface ChangeTrackingDiffParameters {
+export interface ChangeTrackingDiffOptions {
   a?: Record<string, any>;
   b?: Record<string, any>;
   excludeFields?: ChangeTrackingExcludeFilter;

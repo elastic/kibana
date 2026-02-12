@@ -19,9 +19,9 @@ Solution-agnostic: use it from any plugin or module that needs audit-style histo
 - Pass a **change** (or array of changes) and an **options** object. Each change has `id`, `type`, `next` (post-change snapshot), and optional `current` (pre-change snapshot).
 - When `change.current` is provided, a diff is computed (using the optional custom `diffDocCalculation` or a default).
 
-**Query history** with `getHistory(objectType, objectId, additionalFilters?)`:
+**Query history** with `getHistory(objectType, objectId, opts?)`:
 
-- Returns change documents for that object (newest first), optionally narrowed by extra ES query filters.
+- Returns change documents for the given object `type` and `id`, sorted by `@timestamp` then `event.id` descending. Supports pagination and custom sort/filters via `opts`.
 
 All persisted documents follow the same schema (see below).
 
@@ -34,6 +34,10 @@ All persisted documents follow the same schema (see below).
 - **`new ChangeHistoryClient({ module, dataset, logger, kibanaVersion })`**
   Constructs a client for the given `module`, `dataset`, and `kibanaVersion`. Use one client per (module, dataset).
 
+- **`dataStreamName`** (read-only) — The data stream name used by this client (e.g. `.kibana-change-history-{module}-{dataset}`).
+
+- **`isInitialized()`** — Returns `true` if the client has been initialized (e.g. after `initialize()` has been called).
+
 - **`initialize(elasticsearchClient)`**
   Creates/ensures the data stream and stores the internal client. Call once before `log` / `logBulk` / `getHistory`.
 
@@ -43,10 +47,10 @@ All persisted documents follow the same schema (see below).
 - **`logBulk(changes, opts)`**
   Same as `log` for multiple changes in one bulk request. When `changes.length > 1`, documents are grouped with a shared event group id (or `opts.correlationId` if provided). `opts` is the same `LogChangeHistoryOptions` object.
 
-- **`LogChangeHistoryOptions`** — Options for logging a change. Required: `action`, `userId`, `spaceId`. Optional: `correlationId` (groups bulk events when set), `overrides` (partial `event` and `metadata` to merge into the document), `excludeFields` (nested key/value map to exclude fields from the diff), `sensitiveFields` (nested key/value map for fields to hash instead of store in plain form), `diffDocCalculation` (function `(params: ChangeTrackingDiffParameters) => ChangeTrackingDiff`; when omitted, a default diff is used).
+- **`LogChangeHistoryOptions`** — Options for logging a change. Required: `action`, `userId`, `spaceId`. Optional: `correlationId` (groups bulk events when set), `overrides` (partial `event` and `metadata` to merge into the document), `excludeFields` (nested key/value map to exclude fields from the diff), `sensitiveFields` (nested key/value map for fields to hash instead of store in plain form), `diffDocCalculation` (function `(opts: ChangeTrackingDiffOptions) => ChangeTrackingDiff`; when omitted, a default diff is used).
 
-- **`getHistory(objectType, objectId, additionalFilters?)`**
-  Returns a promise with `{ startDate?, total, items }` for the given object, sorted by `@timestamp` descending. Optional `additionalFilters` is an array of Elasticsearch query clause objects (`QueryDslQueryContainer[]`) that are combined with the object id/type filters (e.g. to filter by date range or user).
+- **`getHistory(objectType, objectId, opts?)`**
+  Returns a promise with `{ startDate?, total, items }`. Filters by `object.type` and `object.id`. Optional `opts` is `GetChangeHistoryOptions`: `additionalFilters` (array of ES query clauses), pagination options `sort`, `from`, `size` (default 100), `transportOpts`. Results are sorted by `@timestamp` then `event.id` descending by default.
 
 ### Elasticsearch mapping schema
 
@@ -66,7 +70,7 @@ The data stream uses `dynamic: false` and the following index mapping (defined b
 | `event.dataset`    | `keyword`          | Name of the dataset that the event belongs to (e.g. `alerting-rules`, etc.).                      |
 | `event.action`     | `keyword`          | The action performed (`rule-create`, `rule-update`, `rule-delete`, etc.).                         |
 | `event.type`       | `keyword`          | ECS categorization of the event performed (`creation`, `change`, `deletion`).                     |
-| `event.outcome`    | `keyword`          | ECS outcome of the event (`success`, `failure`, `unknown`).                                       |
+| `event.outcome`    | `keyword`          | ECS outcome of the event (`success`).                                                              |
 | `event.reason`     | `text`             | Reason for the change. (Optional)                                                                 |
 | `event.start`      | `date`             | ISO8601 timestamp of the event start time. (Optional)                                             |
 | `event.created`    | `date`             | ISO8601 timestamp of the event creation time. (Optional)                                          |
@@ -77,7 +81,7 @@ The data stream uses `dynamic: false` and the following index mapping (defined b
 | `object`           | `object`           | The tracked object.                                                                               |
 | `object.id`        | `keyword`          | Unique id of the target object in Kibana.                                                         |
 | `object.type`      | `keyword`          | Type of the target object in Kibana.                                                              |
-| `object.hash`      | `keyword`          | A hash of the object.snapshot to identify the payload.                                            |
+| `object.hash`      | `keyword`          | Hash of the `object.snapshot` to identify the payload.                                 |
 | `object.changes`   | `keyword`          | List of field names that changed. (Optional)                                                      |
 | `object.oldvalues` | `object` (dynamic) | Previous values for changed fields. (Optional)                                                    |
 | `object.snapshot`  | `object` (dynamic) | Full snapshot after the change. (Optional)                                                        |
@@ -124,16 +128,18 @@ const opts: LogChangeHistoryOptions = {
 };
 await client.log(change, opts);
 
-// To read history
+// To read history for an object
 const { startDate, total, items } = await client.getHistory('alerting-rule', ruleId);
 
-// To read history (optionally with extra filters, e.g. date range):
-const { startDate, total, items } = await client.getHistory('alerting-rule', ruleId, [
-  { range: { '@timestamp': { gte: '2024-01-01' } } },
-]);
+// With options (filters, pagination):
+const { startDate, total, items } = await client.getHistory('alerting-rule', ruleId, {
+  additionalFilters: [{ range: { '@timestamp': { gte: '2024-01-01' } } }],
+  size: 50,
+  from: 0,
+});
 
 console.log(
-  `Change tracking started on ${startDate}, there are currently ${items.length} versions available`
+  `Change tracking started on ${startDate}, there are currently ${total} versions available, the last item was modified on ${items[0]?.['@timestamp']}`
 );
 ```
 
