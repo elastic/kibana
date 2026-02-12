@@ -22,6 +22,7 @@ import {
   OTEL_SPAN_LINKS_TRACE_ID,
   PARENT_ID,
   PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   SPAN_COMPOSITE_COUNT,
   SPAN_COMPOSITE_SUM,
@@ -82,6 +83,7 @@ const optionalFields = asMutableArray([
   SPAN_COMPOSITE_COUNT,
   SPAN_COMPOSITE_SUM,
   SPAN_COMPOSITE_COMPRESSION_STRATEGY,
+  SERVICE_ENVIRONMENT,
 ] as const);
 
 export function getErrorsByDocId(unifiedTraceErrors: UnifiedTraceErrors) {
@@ -241,6 +243,7 @@ export async function getUnifiedTraceItems({
       errors: errorsByDocId[id] ?? [],
       parentId: event[PARENT_ID],
       serviceName: event[SERVICE_NAME],
+      serviceEnvironment: event[SERVICE_ENVIRONMENT],
       type: event[SPAN_SUBTYPE] || event[SPAN_TYPE] || event[KIND],
       sync: event[SPAN_SYNC],
       agentName: event[AGENT_NAME],
@@ -260,6 +263,7 @@ export async function getUnifiedTraceItems({
         event[SPAN_COMPOSITE_SUM],
         event[SPAN_COMPOSITE_COMPRESSION_STRATEGY]
       ),
+      docType: event[PROCESSOR_EVENT] === ProcessorEvent.transaction ? 'transaction' : 'span',
     } satisfies TraceItem;
   });
 

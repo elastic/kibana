@@ -78,6 +78,7 @@ const baseItem = {
   traceId: 'trace-1',
   serviceName: 'Test Service',
   spanLinksCount: { incoming: 0, outgoing: 0 },
+  docType: 'span',
 } as TraceWaterfallItem;
 
 describe('TraceItemRow', () => {
@@ -389,6 +390,7 @@ describe('getCriticalPathOverlays', () => {
       traceId: 'test-trace',
       serviceName: 'test-service',
       spanLinksCount: { incoming: 0, outgoing: 0 },
+      docType: 'span',
       ...overrides,
     } as TraceWaterfallItem);
 

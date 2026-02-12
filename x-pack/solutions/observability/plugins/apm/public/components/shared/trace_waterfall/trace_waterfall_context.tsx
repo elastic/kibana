@@ -80,7 +80,10 @@ export const TraceWaterfallContext = createContext<TraceWaterfallContextProps>({
   agentMarks: [],
 });
 
-export type OnNodeClick = (id: string) => void;
+export interface OnNodeClickOptions {
+  flyoutDetailTab?: string;
+}
+export type OnNodeClick = (id: string, options?: OnNodeClickOptions) => void;
 export type OnErrorClick = (params: {
   traceId: string;
   docId: string;
@@ -105,6 +108,10 @@ interface Props {
   errors?: Error[];
   agentMarks?: Record<string, number>;
   showCriticalPathControl?: boolean;
+  showCriticalPath?: boolean;
+  defaultShowCriticalPath?: boolean;
+  onShowCriticalPathChange?: (value: boolean) => void;
+  entryTransactionId?: string;
 }
 
 export function TraceWaterfallContextProvider({
@@ -123,6 +130,10 @@ export function TraceWaterfallContextProvider({
   errors,
   agentMarks,
   showCriticalPathControl,
+  showCriticalPath: controlledValue,
+  defaultShowCriticalPath = false,
+  onShowCriticalPathChange,
+  entryTransactionId,
 }: Props) {
   const {
     duration,
@@ -139,9 +150,23 @@ export function TraceWaterfallContextProvider({
     isFiltered,
     errors,
     onErrorClick,
+    entryTransactionId,
   });
 
-  const [showCriticalPath, setShowCriticalPath] = useState(false);
+  const [uncontrolledValue, setUncontrolledValue] = useState(defaultShowCriticalPath);
+  const isCriticalPathControlled = controlledValue !== undefined;
+  const showCriticalPath = isCriticalPathControlled ? controlledValue : uncontrolledValue;
+
+  const setShowCriticalPath = useCallback(
+    (newValue: boolean) => {
+      onShowCriticalPathChange?.(newValue);
+      if (!isCriticalPathControlled) {
+        setUncontrolledValue(newValue);
+      }
+    },
+    [isCriticalPathControlled, onShowCriticalPathChange]
+  );
+
   const [isAccordionOpen, setAccordionOpen] = useState(true);
   const [accordionStatesMap, setAccordionStateMap] = useState<
     Record<string, EuiAccordionProps['forceState']>

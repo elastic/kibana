@@ -5,9 +5,17 @@
  * 2.0.
  */
 
-import { groupByParent, filterMapByCriticalPath } from './trace_waterfall_context';
+import React from 'react';
+import { renderHook, act } from '@testing-library/react';
+import {
+  groupByParent,
+  filterMapByCriticalPath,
+  TraceWaterfallContextProvider,
+  useTraceWaterfallContext,
+} from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import type { CriticalPathSegment } from './critical_path';
+import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 
 describe('groupByParent', () => {
   it('groups items by their parentId', () => {
@@ -26,6 +34,7 @@ describe('groupByParent', () => {
         serviceName: 'svcA',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
       },
       {
         id: '2',
@@ -41,6 +50,7 @@ describe('groupByParent', () => {
         serviceName: 'svcB',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '3',
@@ -56,6 +66,7 @@ describe('groupByParent', () => {
         serviceName: 'svcC',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '4',
@@ -71,6 +82,7 @@ describe('groupByParent', () => {
         serviceName: 'svcD',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
     ];
 
@@ -98,6 +110,7 @@ describe('groupByParent', () => {
         serviceName: 'svcA',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'transaction',
       },
     ];
 
@@ -122,6 +135,7 @@ describe('groupByParent', () => {
         serviceName: 'svcB',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
       {
         id: '3',
@@ -137,6 +151,7 @@ describe('groupByParent', () => {
         serviceName: 'svcC',
         errors: [],
         spanLinksCount: { incoming: 0, outgoing: 0 },
+        docType: 'span',
       },
     ];
 
@@ -162,6 +177,7 @@ describe('filterMapByCriticalPath', () => {
     errors: [],
     spanLinksCount: { incoming: 0, outgoing: 0 },
     serviceName: 'test-service',
+    docType: 'span',
   });
 
   const mockSegment = (item: TraceWaterfallItem): CriticalPathSegment<TraceWaterfallItem> => ({
@@ -268,5 +284,118 @@ describe('filterMapByCriticalPath', () => {
     const result = filterMapByCriticalPath(map, criticalPathSegmentsById);
 
     expect(result.parent1[0]).toBe(child1);
+  });
+});
+
+describe('TraceWaterfallContextProvider - controlled/uncontrolled showCriticalPath', () => {
+  const mockTraceItem: TraceItem = {
+    id: '1',
+    parentId: undefined,
+    name: 'root',
+    traceId: 't1',
+    timestampUs: 1000,
+    duration: 100,
+    serviceName: 'svcA',
+    agentName: 'nodejs',
+    errors: [],
+    spanLinksCount: { incoming: 0, outgoing: 0 },
+    docType: 'transaction',
+  };
+
+  const createWrapper =
+    (props: Partial<React.ComponentProps<typeof TraceWaterfallContextProvider>>) =>
+    ({ children }: { children: React.ReactNode }) =>
+      (
+        <TraceWaterfallContextProvider
+          traceItems={[mockTraceItem]}
+          showAccordion={false}
+          isEmbeddable={false}
+          showLegend={false}
+          {...props}
+        >
+          {children}
+        </TraceWaterfallContextProvider>
+      );
+
+  describe('uncontrolled mode', () => {
+    it('uses defaultShowCriticalPath as initial value when no controlled value is provided', () => {
+      const { result } = renderHook(() => useTraceWaterfallContext(), {
+        wrapper: createWrapper({ defaultShowCriticalPath: true }),
+      });
+
+      expect(result.current.showCriticalPath).toBe(true);
+    });
+
+    it('defaults to false when defaultShowCriticalPath is not provided', () => {
+      const { result } = renderHook(() => useTraceWaterfallContext(), {
+        wrapper: createWrapper({}),
+      });
+
+      expect(result.current.showCriticalPath).toBe(false);
+    });
+
+    it('updates internal state when setShowCriticalPath is called', () => {
+      const { result } = renderHook(() => useTraceWaterfallContext(), {
+        wrapper: createWrapper({}),
+      });
+
+      expect(result.current.showCriticalPath).toBe(false);
+
+      act(() => {
+        result.current.setShowCriticalPath(true);
+      });
+
+      expect(result.current.showCriticalPath).toBe(true);
+    });
+
+    it('calls onShowCriticalPathChange when provided in uncontrolled mode', () => {
+      const onShowCriticalPathChange = jest.fn();
+      const { result } = renderHook(() => useTraceWaterfallContext(), {
+        wrapper: createWrapper({ onShowCriticalPathChange }),
+      });
+
+      act(() => {
+        result.current.setShowCriticalPath(true);
+      });
+
+      expect(onShowCriticalPathChange).toHaveBeenCalledWith(true);
+      expect(result.current.showCriticalPath).toBe(true);
+    });
+  });
+
+  describe('controlled mode', () => {
+    it('uses showCriticalPath prop as the value', () => {
+      const { result } = renderHook(() => useTraceWaterfallContext(), {
+        wrapper: createWrapper({ showCriticalPath: true }),
+      });
+
+      expect(result.current.showCriticalPath).toBe(true);
+    });
+
+    it('ignores defaultShowCriticalPath when showCriticalPath is provided', () => {
+      const { result } = renderHook(() => useTraceWaterfallContext(), {
+        wrapper: createWrapper({ showCriticalPath: false, defaultShowCriticalPath: true }),
+      });
+
+      expect(result.current.showCriticalPath).toBe(false);
+    });
+
+    it('does not update internal state when setShowCriticalPath is called', () => {
+      const onShowCriticalPathChange = jest.fn();
+      const { result } = renderHook(() => useTraceWaterfallContext(), {
+        wrapper: createWrapper({ showCriticalPath: false, onShowCriticalPathChange }),
+      });
+
+      expect(result.current.showCriticalPath).toBe(false);
+
+      act(() => {
+        result.current.setShowCriticalPath(true);
+      });
+
+      // Value should still be false because parent controls it
+      expect(result.current.showCriticalPath).toBe(false);
+      // But the callback should have been called
+      expect(onShowCriticalPathChange).toHaveBeenCalledWith(true);
+    });
   });
 });

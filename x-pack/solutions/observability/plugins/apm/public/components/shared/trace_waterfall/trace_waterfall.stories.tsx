@@ -41,6 +41,7 @@ export const ManyChildren: StoryFn<{}> = () => {
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
           errors: [{ errorDocId: '1' }],
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
         },
         ...Array(200)
           .fill(0)
@@ -54,6 +55,7 @@ export const ManyChildren: StoryFn<{}> = () => {
             traceId: 'ed1aacaf31264b93e0e405e42b00af74',
             errors: [],
             spanLinksCount: { incoming: 0, outgoing: 0 },
+            docType: 'span' as const,
           })),
       ]}
     />
@@ -75,6 +77,7 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
           errors: [{ errorDocId: '1' }],
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
         },
         {
           id: 'cdd3568d81149715',
@@ -86,6 +89,7 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
           errors: [],
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: 'a111aabbccddeeff',
@@ -97,6 +101,7 @@ export const ExampleClockSkew: StoryFn<{}> = () => {
           traceId: 'ed1aacaf31264b93e0e405e42b00af74',
           errors: [],
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
       ]}
     />
@@ -115,6 +120,7 @@ export const Example: StoryFn<{}> = () => {
           errors: [],
           serviceName: 'load-generator',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
         },
         {
           id: '2b18312dfedbf16a',
@@ -126,6 +132,7 @@ export const Example: StoryFn<{}> = () => {
           parentId: '06b480d1e6e2ac2e',
           serviceName: 'frontend',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: '41b39c13ec0166a8',
@@ -137,6 +144,7 @@ export const Example: StoryFn<{}> = () => {
           parentId: '2b18312dfedbf16a',
           serviceName: 'frontend',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: '255547a7b6b19871',
@@ -148,6 +156,7 @@ export const Example: StoryFn<{}> = () => {
           parentId: '41b39c13ec0166a8',
           serviceName: 'product-catalog',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
       ]}
       highlightedTraceId="41b39c13ec0166a8"
@@ -168,6 +177,7 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           errors: [],
           serviceName: 'load-generator',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
         },
         {
           id: '2b18312dfedbf16a',
@@ -179,6 +189,7 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           parentId: '06b480d1e6e2ac2e',
           serviceName: 'frontend',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: '41b39c13ec0166a8',
@@ -190,6 +201,7 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           parentId: '2b18312dfedbf16a',
           serviceName: 'frontend',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: '255547a7b6b19871',
@@ -201,6 +213,7 @@ export const ExampleWithServiceLegend: StoryFn<{}> = () => {
           parentId: '41b39c13ec0166a8',
           serviceName: 'product-catalog',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
       ]}
       highlightedTraceId="41b39c13ec0166a8"
@@ -222,6 +235,7 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           errors: [],
           serviceName: 'frontend',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
         },
         {
           id: '2b18312dfedbf16a',
@@ -234,6 +248,7 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           serviceName: 'frontend',
           type: 'http',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: '41b39c13ec0166a8',
@@ -246,6 +261,7 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           serviceName: 'frontend',
           type: 'http',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
         {
           id: '255547a7b6b19871',
@@ -258,6 +274,7 @@ export const ExampleWithTypeLegend: StoryFn<{}> = () => {
           serviceName: 'frontend',
           type: 'css',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'span',
         },
       ]}
       highlightedTraceId="41b39c13ec0166a8"
@@ -334,6 +351,7 @@ export const CompositeSpanExample: StoryFn<{}> = () => {
           errors: [],
           serviceName: 'api-service',
           spanLinksCount: { incoming: 0, outgoing: 0 },
+          docType: 'transaction',
         },
         {
           id: 'composite-span',
@@ -352,6 +370,7 @@ export const CompositeSpanExample: StoryFn<{}> = () => {
             sum: 4500000,
             compressionStrategy: 'exact_match',
           },
+          docType: 'span',
         },
       ]}
     />
