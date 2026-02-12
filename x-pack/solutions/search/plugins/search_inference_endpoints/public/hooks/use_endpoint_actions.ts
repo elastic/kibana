@@ -26,7 +26,6 @@ export const useEndpointActions = () => {
         () => {
           toasts?.addSuccess({
             title: message,
-            'aria-label': message,
           });
         },
         () => {
