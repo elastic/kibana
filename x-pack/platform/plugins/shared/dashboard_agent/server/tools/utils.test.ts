@@ -12,10 +12,18 @@ import { resolveLensConfig } from './utils';
 
 const createMockResultStore = (
   results: Map<string, { type: string; data: Record<string, unknown> }>
-): ToolResultStore => ({
-  has: (id: string) => results.has(id),
-  get: (id: string) => results.get(id) as ReturnType<ToolResultStore['get']>,
-});
+): ToolResultStore => {
+  return {
+    has: (id: string) => results.has(id),
+    get: (id: string) => {
+      const result = results.get(id);
+      return {
+        ...result,
+        tool_result_id: '',
+      } as ReturnType<ToolResultStore['get']>;
+    },
+  };
+};
 
 describe('resolveLensConfig', () => {
   // Minimal valid config for testing

@@ -21,7 +21,7 @@ describe('Embeddable helpers', () => {
     function getServices() {
       return makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
         visOverrides: { id: 'lnsXY' },
-        dataOverrides: { id: 'form_based' },
+        dataOverrides: { id: 'formBased' },
       });
     }
     it('should forward a by value state', async () => {

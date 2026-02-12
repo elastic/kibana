@@ -48,8 +48,8 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
-    - public/**/*
     - common/**/*
+    - public/**/*
     - server/**/*
     - '!target/**/*'
 tasks:

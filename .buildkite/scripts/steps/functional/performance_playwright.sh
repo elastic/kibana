@@ -31,6 +31,11 @@ fi
 rm -rf "$KIBANA_BUILD_LOCATION"
 .buildkite/scripts/download_build_artifacts.sh
 
+echo '--- Cleaning ports used by performance tests'
+# If a performance test shuts down uncleanly it might leave some ports bound
+# 6104 is the package registry running in docker
+force_clean_ports 6104
+
 if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-performance-data-set-extraction" ]; then
   # 'performance-data-set-extraction' uses 'n2-2-spot' agent, performance metrics don't matter
   # and we skip warmup phase for each test

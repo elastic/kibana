@@ -21,6 +21,13 @@ describe('useGroupTakeActionsItems', () => {
     tableId: 'mock-id',
     groupNumber: 0,
     selectedGroup: 'test',
+    closePopover: () => {},
+    groupBucket: {
+      key: ['bucket-test'],
+      key_as_string: 'bucket-test',
+      selectedGroup: 'test',
+      doc_count: 0,
+    },
   };
   it('returns all take actions items if showAlertStatusActions is true and currentStatus is undefined', async () => {
     const { result } = renderHook(

@@ -13,11 +13,11 @@ import {
   type FormConfig,
   type FormHook,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { IntegrationFormSchema, createIntegrationFormSchema } from './integration_form_validation';
+import { createFormSchema, REQUIRED_FIELDS } from './integration_form_validation';
 import type { IntegrationFormData } from './types';
-import { useKibana } from '../../../common/hooks/use_kibana';
-import { getInstalledPackages } from '../../../../common/lib/api';
+import { useKibana, getInstalledPackages } from '../../../common';
 import * as i18n from './translations';
+import { DEFAULT_DATA_STREAM_VALUES, DEFAULT_INTEGRATION_VALUES } from './constants';
 
 export interface IntegrationFormProviderProps {
   children?: React.ReactNode;
@@ -33,7 +33,7 @@ export const IntegrationFormProvider: React.FC<IntegrationFormProviderProps> = (
   const { http, notifications } = useKibana().services;
   const [packageNames, setPackageNames] = useState<Set<string>>();
 
-  // Load installed package names for duplicate validation
+  // Load installed package names for duplicate title validation
   useEffect(() => {
     const abortController = new AbortController();
     const deps = { http, abortSignal: abortController.signal };
@@ -57,7 +57,22 @@ export const IntegrationFormProvider: React.FC<IntegrationFormProviderProps> = (
     };
   }, [http, notifications]);
 
-  const schema = useMemo(() => createIntegrationFormSchema(packageNames), [packageNames]);
+  // For existing integrations, pass the current title to exclude from uniqueness check and
+  // avoid validation errors.
+  const currentIntegrationTitle = !initialValue?.integrationId ? undefined : initialValue?.title;
+  const schema = useMemo(
+    () => createFormSchema(packageNames, currentIntegrationTitle),
+    [packageNames, currentIntegrationTitle]
+  );
+
+  const defaultValue = useMemo((): IntegrationFormData => {
+    return {
+      integrationId: initialValue?.integrationId,
+      ...DEFAULT_INTEGRATION_VALUES,
+      ...DEFAULT_DATA_STREAM_VALUES,
+      ...initialValue,
+    };
+  }, [initialValue]);
 
   const handleSubmit: FormConfig<IntegrationFormData>['onSubmit'] = useCallback(
     async (formData: IntegrationFormData, isValid: boolean) => {
@@ -70,13 +85,7 @@ export const IntegrationFormProvider: React.FC<IntegrationFormProviderProps> = (
   );
 
   const { form } = useForm<IntegrationFormData>({
-    defaultValue: {
-      title: '',
-      description: '',
-      logo: undefined,
-      connectorId: '',
-      ...initialValue,
-    },
+    defaultValue,
     schema,
     onSubmit: handleSubmit,
     options: {
@@ -99,42 +108,40 @@ export const IntegrationFormProvider: React.FC<IntegrationFormProviderProps> = (
   );
 };
 
-// Derive required fields from schema (fields with isRequired marker from helper function)
-// Check if all required fields are filled instead of a static array without need for manual updates.
-const getRequiredFields = (): Array<keyof IntegrationFormData> => {
-  return (Object.keys(IntegrationFormSchema) as Array<keyof IntegrationFormData>).filter((key) => {
-    const fieldConfig = IntegrationFormSchema[key];
-    if (!fieldConfig || typeof fieldConfig !== 'object' || !('validations' in fieldConfig)) {
-      return false;
-    }
-    const validations = fieldConfig.validations as Array<{ isRequired?: boolean }> | undefined;
-    return validations?.some((v) => v.isRequired === true) ?? false;
-  });
-};
-
-const REQUIRED_FIELDS = getRequiredFields();
-
 export const useIntegrationForm = () => {
   const form = useFormContext<IntegrationFormData>();
   const [formData] = useFormData<IntegrationFormData>();
 
-  // Is valid when all required fields (derived from schema) are filled
+  // Check if all required fields for the current context are filled
   const isValid = useMemo(() => {
-    return REQUIRED_FIELDS.every((field) => {
-      const value = formData[field];
+    if (!formData) return false;
+
+    const baseFieldsValid = REQUIRED_FIELDS.every((field) => {
+      const value = formData[field as keyof IntegrationFormData];
       if (typeof value === 'string') {
         return value.trim().length > 0;
       }
+      if (Array.isArray(value)) {
+        return value.length > 0;
+      }
       return value != null;
     });
+
+    // Additional conditional validation for log source having a sample or an index selected
+    const logsSourceOption = formData.logsSourceOption;
+    const logSourceValid =
+      (logsSourceOption === 'upload' && !!formData.logSample) ||
+      (logsSourceOption === 'index' && formData.selectedIndex && formData.selectedIndex.trim());
+
+    return baseFieldsValid && logSourceValid;
   }, [formData]);
 
   return {
     form: form as FormHook<IntegrationFormData>,
     formData,
+    isValid,
     submit: () => form.submit(),
     reset: () => form.reset(),
     validate: () => form.validate(),
-    isValid,
   };
 };

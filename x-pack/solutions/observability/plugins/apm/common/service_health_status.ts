@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import type { NamedColor } from '@elastic/eui/src/components/icon/named_colors';
 
 export enum ServiceHealthStatus {
   healthy = 'healthy',
@@ -50,19 +51,16 @@ export function getServiceHealthStatusColor(
   }
 }
 
-export function getServiceHealthStatusBadgeColor(
-  euiTheme: EuiThemeComputed,
-  status: ServiceHealthStatus
-) {
+export function getServiceHealthStatusBadgeColor(status: ServiceHealthStatus): NamedColor {
   switch (status) {
     case ServiceHealthStatus.healthy:
-      return euiTheme.colors.severity.success;
+      return 'success';
     case ServiceHealthStatus.warning:
-      return euiTheme.colors.severity.warning;
+      return 'warning';
     case ServiceHealthStatus.critical:
-      return euiTheme.colors.severity.risk;
+      return 'danger';
     case ServiceHealthStatus.unknown:
-      return euiTheme.colors.mediumShade;
+      return 'default';
   }
 }
 

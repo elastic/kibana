@@ -23,7 +23,7 @@ import {
 import { css } from '@emotion/react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ActionType } from '@kbn/actions-plugin/common';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '..';
 import * as i18n from './translations';
 
 const ALLOWED_ACTION_TYPE_IDS = ['.bedrock', '.gen-ai', '.gemini', '.inference'];
@@ -150,14 +150,11 @@ export const ConnectorSetup: React.FC<ConnectorSetupProps> = ({ onConnectorCreat
                             size="xl"
                             color="text"
                             type={getIconForActionType(actionType.id)}
-                            data-test-subj="connectorActionId"
                           />
                         </Suspense>
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiText size="s" data-test-subj="connectorActionName">
-                          {actionType.name}
-                        </EuiText>
+                        <EuiText size="s">{actionType.name}</EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiPanel>

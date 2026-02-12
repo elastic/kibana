@@ -14,7 +14,12 @@ import type {
   ToolResult,
   UserIdAndName,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import {
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  ToolResultType,
+} from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
   ConversationCreateRequest,
@@ -23,7 +28,12 @@ import type {
   PersistentConversationRoundStep,
 } from './types';
 import type { ConversationProperties } from './storage';
-import { migrateRoundAttachments, needsMigration } from './migrate_attachments';
+import {
+  createAttachmentRefs,
+  migrateRoundAttachments,
+  needsMigration,
+  applyAttachmentRefsToRounds,
+} from './migrate_attachments';
 
 export type Document = Pick<
   GetResponse<ConversationProperties>,
@@ -64,6 +74,21 @@ function serializeStepResults(rounds: ConversationRound[]): PersistentConversati
   }));
 }
 
+/**
+ * Migrates legacy tool result types to their current names.
+ * This handles backward compatibility when tool result types are renamed.
+ */
+const migrateToolResultType = (result: ToolResult): ToolResult => {
+  // Migration: 'tabular_data' was renamed to 'esql_results'
+  if (result.type === 'tabular_data') {
+    return {
+      ...result,
+      type: ToolResultType.esqlResults,
+    };
+  }
+  return result;
+};
+
 function deserializeStepResults(rounds: PersistentConversationRound[]): ConversationRound[] {
   return rounds.map<ConversationRound>((round) => ({
     ...round,
@@ -81,10 +106,10 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
         return {
           ...step,
           results: (JSON.parse(step.results) as ToolResult[]).map((result) => {
-            return {
+            return migrateToolResultType({
               ...result,
               tool_result_id: result.tool_result_id ?? getToolResultId(),
-            };
+            });
           }),
           progression: step.progression ?? [],
         };
@@ -103,26 +128,42 @@ export const fromEs = (document: Document): Conversation => {
   const deserializedRounds = deserializeStepResults(rawRounds);
 
   const existingAttachments = document._source!.attachments;
+  const hasLegacyRoundAttachments = needsMigration(false, deserializedRounds);
+  const attachmentsForRefs =
+    existingAttachments && existingAttachments.length > 0
+      ? existingAttachments
+      : hasLegacyRoundAttachments
+      ? migrateRoundAttachments(deserializedRounds)
+      : [];
+
+  const refsByRound =
+    attachmentsForRefs.length > 0
+      ? createAttachmentRefs(deserializedRounds, attachmentsForRefs)
+      : new Map<number, AttachmentVersionRef[]>();
+
+  const roundsWithRefs = applyAttachmentRefsToRounds(deserializedRounds, refsByRound);
+
   if (existingAttachments && existingAttachments.length > 0) {
     return {
       ...base,
-      rounds: deserializedRounds,
+      rounds: roundsWithRefs,
       attachments: existingAttachments,
+      ...(document._source!.state && { state: document._source!.state }),
     };
   }
 
-  if (needsMigration(false, deserializedRounds)) {
-    const migratedAttachments = migrateRoundAttachments(deserializedRounds);
+  if (hasLegacyRoundAttachments) {
     return {
       ...base,
-      rounds: deserializedRounds,
-      ...(migratedAttachments.length > 0 && { attachments: migratedAttachments }),
+      rounds: roundsWithRefs,
+      ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
+      ...(document._source!.state && { state: document._source!.state }),
     };
   }
 
   return {
     ...base,
-    rounds: deserializedRounds,
+    rounds: roundsWithRefs,
     ...(document._source!.state && { state: document._source!.state }),
   };
 };

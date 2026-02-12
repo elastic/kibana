@@ -28,6 +28,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1920, 1080);
     });
 
+    afterEach(async () => {
+      await discover.resetQueryMode();
+    });
+
     it('should create a new tab in classic mode', async () => {
       // tab 0 - with the default data view
 

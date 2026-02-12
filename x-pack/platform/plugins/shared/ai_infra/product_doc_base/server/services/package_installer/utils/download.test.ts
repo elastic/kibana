@@ -6,7 +6,6 @@
  */
 
 import { createReadStream } from 'fs';
-import fetch from 'node-fetch';
 import { downloadToDisk } from './download';
 
 jest.mock('@kbn/fs', () => ({
@@ -35,7 +34,7 @@ jest.mock('stream/promises', () => ({
   pipeline: jest.fn(),
 }));
 
-jest.mock('node-fetch', () => jest.fn());
+const fetchMock = jest.spyOn(global, 'fetch');
 
 describe('downloadToDisk', () => {
   const mockFileUrl = 'http://example.com/file.txt';
@@ -47,18 +46,22 @@ describe('downloadToDisk', () => {
   });
 
   it('should download a file from a remote URL', async () => {
-    const mockResponseBody = {
-      pipe: jest.fn(),
-      on: jest.fn((event, callback) => {}),
-    };
-
-    (fetch as unknown as jest.Mock).mockResolvedValue({
-      body: mockResponseBody,
+    // Create a proper ReadableStream for the mock response body
+    // Readable.fromWeb() requires an actual ReadableStream instance
+    const mockResponseBody = new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('test content'));
+        controller.close();
+      },
     });
+
+    fetchMock.mockResolvedValue({
+      body: mockResponseBody,
+    } as unknown as Response);
 
     await downloadToDisk(mockFileUrl, mockFilePathAtVolume);
 
-    expect(fetch).toHaveBeenCalledWith(mockFileUrl);
+    expect(fetchMock).toHaveBeenCalledWith(mockFileUrl, {});
   });
 
   it('should copy a file from a local file URL', async () => {
@@ -71,7 +74,7 @@ describe('downloadToDisk', () => {
 
   it('should handle errors during the download process', async () => {
     const mockError = new Error('Download failed');
-    (fetch as unknown as jest.Mock).mockRejectedValue(mockError);
+    fetchMock.mockRejectedValue(mockError);
 
     await expect(downloadToDisk(mockFileUrl, mockFilePathAtVolume)).rejects.toThrow(
       'Download failed'

@@ -12,6 +12,7 @@ import { autocomplete } from './autocomplete';
 import { columnsAfter } from './columns_after';
 import type { ICommandContext } from '../types';
 import { validate } from './validate';
+import { Commands } from '../../definitions/keywords';
 
 const keepCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
@@ -20,7 +21,7 @@ const keepCommandMethods: ICommandMethods<ICommandContext> = {
 };
 
 export const keepCommand = {
-  name: 'keep',
+  name: Commands.KEEP,
   methods: keepCommandMethods,
   metadata: {
     description: i18n.translate('kbn-esql-language.esql.definitions.keepDoc', {

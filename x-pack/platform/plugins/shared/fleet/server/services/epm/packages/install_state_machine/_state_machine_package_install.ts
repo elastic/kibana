@@ -9,12 +9,11 @@ import type {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { PackageSavedObjectConflictError } from '../../../../errors';
-
-import type { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
 import { INSTALL_STATES } from '../../../../../common/types';
 import type { PackageInstallContext, StateNames, StateContext } from '../../../../../common/types';
 import type { PackageAssetReference } from '../../../../types';
@@ -75,7 +74,7 @@ export interface InstallContext extends StateContext<StateNames> {
   spaceId: string;
   force?: boolean;
   verificationResult?: PackageVerificationResult;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  request?: KibanaRequest;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
   retryFromLastState?: boolean;
@@ -91,7 +90,7 @@ export interface InstallContext extends StateContext<StateNames> {
 /**
  * This data structure defines the sequence of the states and the transitions
  */
-const regularStatesDefinition: StateMachineStates<StateNames> = {
+export const regularStatesDefinition: StateMachineStates<StateNames> = {
   create_restart_installation: {
     nextState: INSTALL_STATES.INSTALL_PRECHECK,
     onTransition: stepCreateRestartInstallation,
@@ -183,7 +182,7 @@ const regularStatesDefinition: StateMachineStates<StateNames> = {
   },
 };
 
-const streamingStatesDefinition: StateMachineStates<string> = {
+export const streamingStatesDefinition: StateMachineStates<string> = {
   create_restart_installation: {
     nextState: INSTALL_STATES.INSTALL_KIBANA_ASSETS,
     onTransition: stepCreateRestartInstallation,
@@ -205,6 +204,7 @@ const streamingStatesDefinition: StateMachineStates<string> = {
     onTransition: stepSaveKnowledgeBase,
     nextState: INSTALL_STATES.UPDATE_SO,
     onPostTransition: updateLatestExecutedState,
+    isAsync: true, // Knowledge base indexing runs in background
   },
   update_so: {
     onPreTransition: cleanUpUnusedKibanaAssetsStep,

@@ -19,7 +19,12 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 export interface ToolTypeDefinition<
   TType extends ToolType = ToolType,
   TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends ZodObject<any> = ZodObject<any>,
+  /**
+   * Configuration shape as it is persisted (e.g. legacy shapes).
+   * Most tool types will keep persistence and runtime config aligned.
+   */
+  TPersistedConfig extends object = TConfig
 > {
   toolType: TType;
   getDynamicProps: ToolHandlerDynamicPropsFn<TConfig, TSchema>;
@@ -28,6 +33,26 @@ export interface ToolTypeDefinition<
   updateSchema: ObjectType;
   validateForCreate: ToolTypeCreateValidator<TConfig>;
   validateForUpdate: ToolTypeUpdateValidator<TConfig>;
+
+  /**
+   * Optional conversion hook for persisted tool configurations.
+   * This is called when loading persisted tools, before building dynamic props.
+   *
+   * Useful for backward compatibility when the persisted schema changes.
+   */
+  convertFromPersistence?: (
+    config: TPersistedConfig,
+    context: ToolTypeConversionContext
+  ) => TConfig;
+
+  /**
+   * Optional conversion hook to produce a persisted config from the runtime config.
+   * This is called when creating/updating tools, just before writing to persistence.
+   *
+   * Useful for keeping runtime config free of persistence-only fields (e.g. schema_version),
+   * while still storing them for migrations and backward compatibility.
+   */
+  convertToPersistence?: (config: TConfig, context: ToolTypeConversionContext) => TPersistedConfig;
 
   /**
    * Whether to track execution health for tools of this type.

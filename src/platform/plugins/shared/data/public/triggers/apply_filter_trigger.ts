@@ -9,8 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import { APPLY_FILTER_TRIGGER } from '../../common';
 
-export const APPLY_FILTER_TRIGGER = 'FILTER_TRIGGER';
 export const applyFilterTrigger: Trigger = {
   id: APPLY_FILTER_TRIGGER,
   title: i18n.translate('data.triggers.applyFilterTitle', {

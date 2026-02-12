@@ -1,0 +1,771 @@
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "jkzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:05Z",
+      "entity": {
+        "id": "generic-id"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "d0zh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:00Z",
+      "host": {
+        "id": "host-123"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "eEzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:01Z",
+      "host": {
+        "domain": "example.com",
+        "name": "server-01"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "eEzh_5sBzpZGGHYpLUFD",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:02Z",
+      "host": {
+        "entity": {
+          "id": "host-with-entity-id"
+        },
+        "domain": "example.com",
+        "name": "server-01"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "eUzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:02Z",
+      "host": {
+        "domain": "corp.local",
+        "hostname": "workstation-05"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "ekzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:03Z",
+      "host": {
+        "domain": "test.org"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "e0zh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:04Z",
+      "host": {
+        "hostname": "laptop-01"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "fEzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:05Z",
+      "host": {
+        "name": "desktop-02"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "fUzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:06Z",
+      "host": {
+        "domain": "example.com",
+        "id": "host-456",
+        "name": "server-02"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "fkzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:07Z",
+      "host": {
+        "domain": "corp.local",
+        "hostname": "workstation-10",
+        "id": "host-789"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "f0zh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:08Z",
+      "host": {
+        "domain": "test.com",
+        "hostname": "backup-server",
+        "name": "server-03"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "gEzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:09Z",
+      "host": {
+        "domain": "example.org",
+        "id": "",
+        "name": "server-04"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "gUzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:10Z",
+      "host": {
+        "domain": "test.net",
+        "id": null,
+        "name": "server-05"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "gkzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:11Z",
+      "host": {
+        "domain": "example.com",
+        "name": ""
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "g0zh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:12Z",
+      "host": {
+        "domain": "corp.local",
+        "hostname": "workstation-20",
+        "name": null
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "hEzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:13Z",
+      "host": {
+        "domain": "",
+        "name": "server-06"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "hUzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:14Z",
+      "host": {
+        "domain": null,
+        "name": "server-07"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "hkzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:15Z",
+      "host": {
+        "domain": "test.org",
+        "hostname": ""
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "h0zh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:16Z",
+      "host": {
+        "domain": "example.com",
+        "hostname": null
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "iEzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:17Z",
+      "host": {
+        "domain": "corp.local",
+        "hostname": "laptop-02",
+        "name": "server-08"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "iUzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:18Z",
+      "host": {
+        "hostname": "workstation-30"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "ikzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:04Z",
+      "host": {
+        "entity": {
+          "id": "non-generated-host"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "i0zh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:04Z",
+      "host": {
+        "entity": {
+          "id": "non-generated-host"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "jEzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:04Z",
+      "service": {
+        "entity": {
+          "id": "non-generated-service-id"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "jUzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:05Z",
+      "service": {
+        "name": "service-name"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "Ykzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:00Z",
+      "host": {
+        "entity": {
+          "id": "host-123"
+        }
+      },
+      "user": {
+        "name": "john.doe"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "Y0zh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:01Z",
+      "host": {
+        "id": "host-456"
+      },
+      "user": {
+        "name": "jane.smith"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "ZEzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:02Z",
+      "host": {
+        "name": "server-01"
+      },
+      "user": {
+        "name": "bob.jones"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "ZUzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:03Z",
+      "user": {
+        "id": "user-789",
+        "name": "alice.brown"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "Zkzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:04Z",
+      "user": {
+        "id": "user-101"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "Z0zh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:04Z",
+      "user": {
+        "entity": {
+          "id": "non-generated-user"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "aEzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:05Z",
+      "user": {
+        "email": "test@example.com"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "aUzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:06Z",
+      "user": {
+        "domain": "corp",
+        "name": "charlie.wilson"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "akzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:07Z",
+      "user": {
+        "name": "david.lee"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "a0zh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:08Z",
+      "user": {
+        "id": "user-202",
+        "name": ""
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "bEzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:09Z",
+      "user": {
+        "id": "user-303",
+        "name": null
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "bUzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:10Z",
+      "host": {
+        "entity": {
+          "id": ""
+        },
+        "id": "host-404"
+      },
+      "user": {
+        "name": "eve.martin"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "bkzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:11Z",
+      "host": {
+        "entity": {
+          "id": null
+        },
+        "id": "",
+        "name": "workstation-05"
+      },
+      "user": {
+        "name": "frank.taylor"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "b0zh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:12Z",
+      "host": {
+        "entity": {
+          "id": null
+        },
+        "id": null,
+        "name": null
+      },
+      "user": {
+        "email": "grace@example.com",
+        "name": "grace.anderson"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "cEzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:13Z",
+      "user": {
+        "name": "henry.clark"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "cUzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:14Z",
+      "user": {
+        "domain": "",
+        "name": "iris.davis"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "ckzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:15Z",
+      "user": {
+        "domain": null,
+        "name": "jack.white"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "c0zh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:16Z",
+      "host": {
+        "entity": {
+          "id": "host-505"
+        }
+      },
+      "user": {
+        "id": "user-505",
+        "name": "karen.green"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "dEzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:17Z",
+      "host": {
+        "id": "host-606"
+      },
+      "user": {
+        "email": "larry@example.com",
+        "name": "larry.black"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "dUzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:18Z",
+      "host": {
+        "name": "server-07"
+      },
+      "user": {
+        "domain": "corp",
+        "name": "mary.blue"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": ".entities.v2.updates.security_default",
+    "id": "dkzh_5sBzpZGGHYpLUFB",
+    "index": ".ds-.entities.v2.updates.security_default-2026.01.27-000001",
+    "source": {
+      "@timestamp": "2026-01-20T12:05:19Z"
+    }
+  }
+}

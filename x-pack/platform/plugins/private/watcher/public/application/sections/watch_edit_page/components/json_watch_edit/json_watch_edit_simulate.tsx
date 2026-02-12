@@ -331,6 +331,12 @@ export const JsonWatchEditSimulate = ({
             <EuiBasicTable
               items={watchActions}
               itemId="simulateExecutionActionModesTable"
+              tableCaption={i18n.translate(
+                'xpack.watcher.sections.watchEdit.simulate.actionModesTableCaption',
+                {
+                  defaultMessage: 'Action modes for watch execution',
+                }
+              )}
               columns={columns}
             />
           </EuiFormRow>

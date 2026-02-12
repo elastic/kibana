@@ -10,6 +10,7 @@ import { createTGridMocks } from '@kbn/timelines-plugin/public/mock';
 import { createStartServicesMock } from '../kibana_react.mock';
 import { mockApm } from '../../apm/service.mock';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 const mockStartServicesMock = createStartServicesMock();
 
@@ -54,5 +55,6 @@ export const useKibana = jest.fn().mockReturnValue({
         getTableColumnDefinition: jest.fn(),
       },
     },
+    notifications: notificationServiceMock.createStartContract(),
   },
 });

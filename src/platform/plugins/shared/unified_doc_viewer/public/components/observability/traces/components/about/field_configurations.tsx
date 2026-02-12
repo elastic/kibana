@@ -35,7 +35,6 @@ import { ServiceNameLink } from '../service_name_link';
 import { TransactionNameLink } from '../transaction_name_link';
 import { HighlightField } from '../highlight_field';
 import { DependencyNameLink } from '../dependency_name_link';
-import { TraceIdLink } from '../trace_id_link';
 import { fieldDescriptions, fieldLabels } from '../../../constants';
 
 export const getSharedFieldConfigurations = (
@@ -73,15 +72,7 @@ export const getSharedFieldConfigurations = (
     [TRACE_ID]: {
       title: fieldLabels.TRACE_ID_LABEL,
       formatter: (value: unknown, formattedValue: string) => (
-        <HighlightField value={value as string} formattedValue={formattedValue}>
-          {({ content }) => (
-            <TraceIdLink
-              traceId={value as string}
-              formattedTraceId={content}
-              data-test-subj="unifiedDocViewerObservabilityTracesTraceIdLink"
-            />
-          )}
-        </HighlightField>
+        <HighlightField value={value as string} formattedValue={formattedValue} />
       ),
     },
   };

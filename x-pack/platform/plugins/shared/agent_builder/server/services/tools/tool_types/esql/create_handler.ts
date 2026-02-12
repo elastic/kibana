@@ -9,6 +9,7 @@ import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { z, ZodObject } from '@kbn/zod';
 import type { ToolHandlerFn } from '@kbn/agent-builder-server';
 import { interpolateEsqlQuery } from '@kbn/agent-builder-genai-utils/tools/utils';
+import type { EsqlToolParamValue } from '@kbn/agent-builder-common';
 import { type EsqlToolConfig, ToolResultType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 
@@ -20,8 +21,8 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
  */
 export const resolveToolParameters = (
   paramDefinitions: EsqlToolConfig['params'],
-  providedParams: Record<string, unknown>
-): Record<string, unknown> => {
+  providedParams: Record<string, EsqlToolParamValue>
+): Record<string, EsqlToolParamValue | null> => {
   return Object.keys(paramDefinitions).reduce((acc, paramName) => {
     const param = paramDefinitions[paramName];
     const providedValue = providedParams[paramName];
@@ -38,7 +39,7 @@ export const resolveToolParameters = (
     }
 
     return acc;
-  }, {} as Record<string, unknown>);
+  }, {} as Record<string, EsqlToolParamValue | null>);
 };
 
 export const createHandler = (
@@ -50,9 +51,7 @@ export const createHandler = (
     // Apply default values for parameters that weren't provided by the LLM
     const resolvedParams = resolveToolParameters(configuration.params, params);
 
-    const paramArray = Object.keys(configuration.params).map((param) => ({
-      [param]: resolvedParams[param] ?? null,
-    }));
+    const paramArray = Object.entries(resolvedParams).map(([param, value]) => ({ [param]: value }));
 
     const result = await client.esql.query({
       query: configuration.query,
@@ -73,7 +72,7 @@ export const createHandler = (
         },
         {
           tool_result_id: getToolResultId(),
-          type: ToolResultType.tabularData,
+          type: ToolResultType.esqlResults,
           data: {
             source: 'esql',
             query: interpolatedQuery,

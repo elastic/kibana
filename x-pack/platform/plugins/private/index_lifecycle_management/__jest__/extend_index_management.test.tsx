@@ -12,7 +12,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
-import type { Index } from '@kbn/index-management-plugin/common';
+import type { Index } from '../common/types';
 
 import { init } from '../integration_tests/helpers/http_requests';
 import {
@@ -66,8 +66,8 @@ const indexWithoutLifecyclePolicy: Index = {
   replica: 1,
   documents: 1,
   documents_deleted: 0,
-  size: '3.4kb',
-  primary_size: '3.4kb',
+  size: 3480,
+  primary_size: 3480,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -86,8 +86,8 @@ const indexWithLifecyclePolicy: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -115,8 +115,8 @@ const indexWithLifecycleError: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -148,8 +148,8 @@ const indexWithLifecyclePhaseDefinition: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -182,8 +182,8 @@ const indexWithLifecycleWaitingStep: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,
@@ -216,8 +216,8 @@ const indexWithNonExistentPolicyError: Index = {
   replica: 1,
   documents: 2,
   documents_deleted: 0,
-  size: '6.5kb',
-  primary_size: '6.5kb',
+  size: 6656,
+  primary_size: 6656,
   aliases: 'none',
   isFrozen: false,
   hidden: false,

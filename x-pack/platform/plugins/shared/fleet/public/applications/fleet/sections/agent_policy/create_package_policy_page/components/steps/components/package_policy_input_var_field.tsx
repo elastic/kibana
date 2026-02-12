@@ -63,6 +63,7 @@ export interface InputFieldProps {
   packageName?: string;
   datastreams?: DataStream[];
   isEditPage?: boolean;
+  isRequiredByVarGroup?: boolean;
 }
 
 type InputComponentProps = InputFieldProps & {
@@ -86,6 +87,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     packageName,
     datastreams = [],
     isEditPage = false,
+    isRequiredByVarGroup = false,
   }) => {
     const fleetStatus = useFleetStatus();
     const [isDirty, setIsDirty] = useState<boolean>(false);
@@ -96,7 +98,11 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     const fieldLabel = title || name;
     const fieldTestSelector = fieldLabel.replace(/\s/g, '-').toLowerCase();
     // Boolean cannot be optional by default set to false
-    const isOptional = useMemo(() => type !== 'bool' && !required, [required, type]);
+    // A var is optional if it's not a bool, not required by varDef, and not required by var_group
+    const isOptional = useMemo(
+      () => type !== 'bool' && !required && !isRequiredByVarGroup,
+      [required, type, isRequiredByVarGroup]
+    );
 
     const secretsStorageEnabled = fleetStatus.isReady && fleetStatus.isSecretsStorageEnabled;
     const useSecretsUi = secretsStorageEnabled && varDef.secret;

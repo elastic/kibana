@@ -1,0 +1,28 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import path from 'node:path';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+
+export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()), {
+  meta: { description: 'The parameters for the rule.' },
+});
+
+export const ruleParamsSchemaWithDefaultValue = schema.recordOf(
+  schema.string(),
+  schema.maybe(schema.any()),
+  {
+    defaultValue: {},
+    meta: { description: 'The parameters for the rule.' },
+  }
+);
+
+export const createRuleParamsExamples = () =>
+  path.join(__dirname, 'examples_create_rule_params.yaml');
+
+export type RuleParams = TypeOf<typeof ruleParamsSchema>;
+export type RuleParamsWithDefaultValue = TypeOf<typeof ruleParamsSchemaWithDefaultValue>;

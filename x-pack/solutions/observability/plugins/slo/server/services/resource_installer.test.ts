@@ -8,6 +8,7 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
+  HEALTH_INDEX_TEMPLATE_NAME,
   SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLI_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLI_INDEX_TEMPLATE_NAME,
@@ -72,7 +73,7 @@ describe('resourceInstaller', () => {
       4,
       expect.objectContaining({ name: SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME })
     );
-    expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
+    expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
     expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({ name: SLI_INDEX_TEMPLATE_NAME })
@@ -80,6 +81,10 @@ describe('resourceInstaller', () => {
     expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({ name: SUMMARY_INDEX_TEMPLATE_NAME })
+    );
+    expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({ name: HEALTH_INDEX_TEMPLATE_NAME })
     );
   });
 

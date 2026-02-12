@@ -26,7 +26,7 @@ import {
   useResizeObserver,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import type { FlyoutActionItem } from '../../customizations';
+import type { FlyoutActionItem } from './types';
 
 const MAX_VISIBLE_ACTIONS_BEFORE_THE_FOLD = 3;
 

@@ -90,7 +90,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'stackAlertsPage',
           'ruleTagFilter',
           'ruleStatusFilter',
-          'unifiedRulesPage',
         ])}`,
         `--uiSettings.overrides.workflows:ui:enabled=true`,
         `--workflowsManagement.enabled=true`,

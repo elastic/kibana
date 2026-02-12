@@ -32,17 +32,10 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
-import type {
-  UpdateCascadeGroupingActionPayload,
-  UpdateESQLQueryActionPayload,
-} from '../application/main/state_management/redux/types';
+import type { UpdateESQLQueryActionPayload } from '../application/main/state_management/redux/types';
 
 export type UpdateESQLQueryFn = (
   queryOrUpdater: UpdateESQLQueryActionPayload['queryOrUpdater']
-) => void;
-
-export type UpdateCascadeGroupingFn = (
-  groupingOrUpdater: UpdateCascadeGroupingActionPayload['groupingOrUpdater']
 ) => void;
 
 /**
@@ -190,6 +183,22 @@ export interface DocViewerExtension {
    * @returns The updated doc views registry
    */
   docViewsRegistry: (prevRegistry: DocViewsRegistry) => DocViewsRegistry;
+}
+
+/**
+ * Parameters passed to the additional cell actions extension
+ */
+export interface AdditionalCellActionsParams {
+  /**
+   * Available actions for the additional cell actions extension
+   */
+  actions?: {
+    /**
+     * Opens a new tab
+     * @param params The parameters for the open in new tab action
+     */
+    openInNewTab?: (params: OpenInNewTabParams) => void;
+  };
 }
 
 /**
@@ -510,7 +519,7 @@ export interface Profile {
    * Gets additional cell actions to show within expanded cell popovers in the data grid
    * @returns The additional cell actions to show in the data grid
    */
-  getAdditionalCellActions: () => AdditionalCellAction[];
+  getAdditionalCellActions: (params: AdditionalCellActionsParams) => AdditionalCellAction[];
 
   /**
    * Allows setting the pagination mode and its configuration

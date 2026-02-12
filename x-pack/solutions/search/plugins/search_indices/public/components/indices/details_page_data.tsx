@@ -20,7 +20,6 @@ import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 
 import type { UserStartPrivilegesResponse } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
-import { useIndexMapping } from '../../hooks/api/use_index_mappings';
 import type { IndexDocuments as IndexDocumentsType } from '../../hooks/api/use_document_search';
 import { IndexDocuments } from '../index_documents/index_documents';
 import { IndexSearchExample } from './details_search_example';
@@ -29,6 +28,7 @@ import { UpdateElserMappingsModal } from '../update_elser_mappings/update_elser_
 import { flattenMappings, hasElserOnMlNodeSemanticTextField } from '../update_elser_mappings/utils';
 import type { NormalizedFields } from '../update_elser_mappings/types';
 import { useLicense } from '../../hooks/use_license';
+import type { Mappings } from '../../types';
 
 interface IndexDetailsDataProps {
   indexName: string;
@@ -36,6 +36,7 @@ interface IndexDetailsDataProps {
   isInitialLoading: boolean;
   navigateToPlayground: () => void;
   userPrivileges?: UserStartPrivilegesResponse;
+  mappingData: Mappings | undefined;
 }
 
 export const IndexDetailsData = ({
@@ -44,9 +45,9 @@ export const IndexDetailsData = ({
   isInitialLoading,
   navigateToPlayground,
   userPrivileges,
+  mappingData,
 }: IndexDetailsDataProps) => {
   const { application, cloud } = useKibana().services;
-  const { data: mappingData } = useIndexMapping(indexName);
   const { isAtLeastEnterprise } = useLicense();
   const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
 

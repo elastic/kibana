@@ -12,6 +12,7 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Datatable, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import type { Trigger, RowClickContext } from '@kbn/ui-actions-plugin/public';
 import type { BooleanRelation } from '@kbn/es-query';
+import { CONTEXT_MENU_TRIGGER, SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '../../common';
 
 export type ValueClickContext = Partial<EmbeddableApiContext> & {
   data: {
@@ -64,7 +65,6 @@ export type ChartActionContext =
   | RangeSelectContext
   | RowClickContext;
 
-export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const contextMenuTrigger: Trigger = {
   id: CONTEXT_MENU_TRIGGER,
   title: i18n.translate('embeddableApi.contextMenuTrigger.title', {
@@ -97,7 +97,6 @@ export const panelNotificationTrigger: Trigger = {
   }),
 };
 
-export const SELECT_RANGE_TRIGGER = 'SELECT_RANGE_TRIGGER';
 export const selectRangeTrigger: Trigger = {
   id: SELECT_RANGE_TRIGGER,
   title: i18n.translate('embeddableApi.selectRangeTrigger.title', {
@@ -108,7 +107,6 @@ export const selectRangeTrigger: Trigger = {
   }),
 };
 
-export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
 export const valueClickTrigger: Trigger = {
   id: VALUE_CLICK_TRIGGER,
   title: i18n.translate('embeddableApi.valueClickTrigger.title', {

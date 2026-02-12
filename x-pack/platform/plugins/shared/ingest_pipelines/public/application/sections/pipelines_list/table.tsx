@@ -228,6 +228,9 @@ export const PipelineTable: FunctionComponent<Props> = ({
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
     itemId: 'name',
     'data-test-subj': 'pipelinesTable',
+    tableCaption: i18n.translate('xpack.ingestPipelines.list.table.tableCaption', {
+      defaultMessage: 'List of ingest pipelines',
+    }),
     sorting,
     selection: {
       onSelectionChange: setSelection,
@@ -268,7 +271,9 @@ export const PipelineTable: FunctionComponent<Props> = ({
           key="reloadButton"
           iconType="refresh"
           color="success"
-          aria-label="refresh button"
+          aria-label={i18n.translate('xpack.ingestPipelines.list.table.reloadButtonAriaLabel', {
+            defaultMessage: 'refresh',
+          })}
           data-test-subj="reloadButton"
           size="m"
           display="base"

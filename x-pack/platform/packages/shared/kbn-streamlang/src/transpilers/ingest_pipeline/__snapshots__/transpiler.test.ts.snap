@@ -231,19 +231,19 @@ Object {
 boolean allPresent = true;
 
 if (ctx.containsKey('field1') && ctx['field1'] != null) {
-  fields.add(ctx['field1']);
+  fields.add(ctx['field1'].toString());
 } else {
   allPresent = false;
 }
 
 if (ctx.containsKey('field2') && ctx['field2'] != null) {
-  fields.add(ctx['field2']);
+  fields.add(ctx['field2'].toString());
 } else {
   allPresent = false;
 }
 
 if (ctx.containsKey('field3') && ctx['field3'] != null) {
-  fields.add(ctx['field3']);
+  fields.add(ctx['field3'].toString());
 } else {
   allPresent = false;
 }

@@ -120,4 +120,8 @@ export const AttackDiscoveryAlert = z.object({
    * The optional array of user-IDs who have been assigned the attack
    */
   assignees: z.array(z.string()).optional(),
+  /**
+   * The optional array of tags assigned the attack
+   */
+  tags: z.array(z.string()).optional(),
 });

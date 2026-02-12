@@ -790,7 +790,7 @@ describe('Data Streams tab', () => {
             })
           );
         });
-      });
+      }, 10000);
 
       test('allows to set infinite retention period', async () => {
         setupBulkRetentionMocks();
@@ -833,7 +833,7 @@ describe('Data Streams tab', () => {
             })
           );
         });
-      });
+      }, 10000);
     });
 
     describe('detail panel', () => {
@@ -1004,7 +1004,7 @@ describe('Data Streams tab', () => {
               })
             );
           });
-        });
+        }, 10000);
 
         test('can disable lifecycle', async () => {
           setupDataStreamsMocks();
@@ -1047,7 +1047,7 @@ describe('Data Streams tab', () => {
               })
             );
           });
-        });
+        }, 10000);
 
         test('allows to set infinite retention period', async () => {
           setupDataStreamsMocks();

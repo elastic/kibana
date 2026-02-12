@@ -37,7 +37,7 @@ describe('formatHit', () => {
     const formatted = formatHit(
       row,
       dataViewMock,
-      (fieldName) => ['message', 'extension', 'object.value'].includes(fieldName),
+      (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
       220,
       fieldFormatsMock
     );
@@ -62,7 +62,7 @@ describe('formatHit', () => {
     const formatted = formatHit(
       highlightHit,
       dataViewMock,
-      (fieldName) => ['message', 'extension', 'object.value'].includes(fieldName),
+      (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
       220,
       fieldFormatsMock
     );
@@ -79,7 +79,7 @@ describe('formatHit', () => {
     const formatted = formatHit(
       row,
       dataViewMock,
-      (fieldName) => ['message', 'extension', 'object.value'].includes(fieldName),
+      (fieldName) => ['_index', 'message', 'extension', 'object.value'].includes(fieldName),
       2,
       fieldFormatsMock
     );
@@ -94,7 +94,7 @@ describe('formatHit', () => {
     const formatted = formatHit(
       row,
       dataViewMock,
-      (fieldName) => ['message', 'object.value'].includes(fieldName),
+      (fieldName) => ['_index', 'message', 'object.value'].includes(fieldName),
       220,
       fieldFormatsMock
     );
@@ -123,7 +123,7 @@ describe('formatHit', () => {
     const formatted = formatHit(
       highlightHit,
       dataViewMock,
-      (fieldName) => ['object'].includes(fieldName),
+      (fieldName) => ['_index', 'object'].includes(fieldName),
       220,
       fieldFormatsMock
     );
@@ -140,7 +140,7 @@ describe('formatHit', () => {
     const formatted = formatHit(
       row,
       dataViewMock,
-      (fieldName) => ['bytes'].includes(fieldName),
+      (fieldName) => ['_index', 'bytes'].includes(fieldName),
       220,
       fieldFormatsMock
     );

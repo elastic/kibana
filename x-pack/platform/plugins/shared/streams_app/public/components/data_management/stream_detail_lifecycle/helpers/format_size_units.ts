@@ -66,7 +66,7 @@ const timeUnitsLabels = {
   },
 };
 
-const splitSizeAndUnits = (field: string): { size: string; unit: string } => {
+export const splitSizeAndUnits = (field: string): { size: string; unit: string } => {
   let size = '';
   let unit = '';
 
@@ -88,4 +88,49 @@ export const getTimeSizeAndUnitLabel = (value: string | undefined) => {
   const labels = timeUnitsLabels[unit as keyof typeof timeUnitsLabels];
   if (!labels) return value;
   return `${size} ${Number(size) === 1 ? labels.singular : labels.plural}`;
+};
+
+const MS_IN_SECOND = 1000;
+const SECONDS_IN_MINUTE = 60;
+const MINUTES_IN_HOUR = 60;
+const HOURS_IN_DAY = 24;
+
+const getMsPerUnit = (unit: string): number | undefined => {
+  switch (unit) {
+    case 'nanos':
+      return 1 / (MS_IN_SECOND * MS_IN_SECOND);
+    case 'micros':
+      return 1 / MS_IN_SECOND;
+    case 'ms':
+      return 1;
+    case 's':
+      return MS_IN_SECOND;
+    case 'm':
+      return MS_IN_SECOND * SECONDS_IN_MINUTE;
+    case 'h':
+      return MS_IN_SECOND * SECONDS_IN_MINUTE * MINUTES_IN_HOUR;
+    case 'd':
+      return MS_IN_SECOND * SECONDS_IN_MINUTE * MINUTES_IN_HOUR * HOURS_IN_DAY;
+    default:
+      return undefined;
+  }
+};
+
+/**
+ * Converts a time value to milliseconds
+ */
+export const toMillis = (value?: string): number | undefined => {
+  if (!value) return undefined;
+
+  const { size, unit } = splitSizeAndUnits(value);
+  const multiplier = getMsPerUnit(unit);
+
+  return size && multiplier !== undefined ? Number(size) * multiplier : undefined;
+};
+
+export const isZeroAge = (value?: string): boolean => {
+  if (!value) return false;
+  const { size } = splitSizeAndUnits(value);
+  const amount = Number(size);
+  return Number.isFinite(amount) && amount === 0;
 };

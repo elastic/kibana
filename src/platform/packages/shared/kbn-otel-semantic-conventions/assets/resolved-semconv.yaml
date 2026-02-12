@@ -649,6 +649,11 @@ groups:
           that support query parsing SHOULD generate a summary following
           [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
+
+          For batch operations, if the individual operations are known to have the same query summary
+          then that query summary SHOULD be used prepended by `BATCH `,
+          otherwise `db.query.summary` SHOULD be `BATCH` or some other database
+          system specific term if more applicable.
         stability: stable
       - name: db.query.text
         type: string
@@ -852,6 +857,11 @@ groups:
           that support query parsing SHOULD generate a summary following
           [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
+
+          For batch operations, if the individual operations are known to have the same query summary
+          then that query summary SHOULD be used prepended by `BATCH `,
+          otherwise `db.query.summary` SHOULD be `BATCH` or some other database
+          system specific term if more applicable.
         stability: stable
       - name: db.query.text
         type: string
@@ -1167,6 +1177,10 @@ groups:
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
               stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
             - id: create_agent
               value: create_agent
               brief: Create GenAI agent
@@ -1389,6 +1403,10 @@ groups:
             - id: embeddings
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
               stability: development
             - id: create_agent
               value: create_agent
@@ -2035,6 +2053,10 @@ groups:
             - id: embeddings
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
               stability: development
             - id: create_agent
               value: create_agent
@@ -9604,6 +9626,49 @@ groups:
       A service is a logical component used in a system, product or application. Examples include a microservice, a database, a Kubernetes deployment.
     stability: stable
     attributes:
+      - name: service.criticality
+        type:
+          members:
+            - id: critical
+              value: critical
+              brief: |
+                Service is business-critical; downtime directly impacts revenue, user experience, or core functionality.
+              note: |
+                Examples include payment processing, authentication, and primary user-facing APIs.
+              stability: development
+            - id: high
+              value: high
+              brief: |
+                Service is important but has degradation tolerance or fallback mechanisms.
+              note: |
+                Examples include shopping cart, search, and recommendation engines.
+              stability: development
+            - id: medium
+              value: medium
+              brief: |
+                Service provides supplementary functionality; degradation has limited user impact.
+              note: |
+                Examples include analytics, reporting, and non-essential integrations.
+              stability: development
+            - id: low
+              value: low
+              brief: |
+                Service is non-essential to core operations; used for background tasks or internal tools.
+              note: |
+                Examples include batch processors, cleanup jobs, and internal dashboards.
+              stability: development
+        brief: |
+          The operational criticality of the service.
+        examples:
+          - critical
+          - high
+          - medium
+          - low
+        requirement_level: recommended
+        note: |
+          Application developers are encouraged to set `service.criticality` to express the operational importance of their services. Telemetry consumers MAY use this attribute to optimize telemetry collection or improve user experience.
+        stability: development
+        role: descriptive
       - name: service.name
         type: string
         brief: |
@@ -9631,6 +9696,16 @@ groups:
         registry_id: main
         path: /home/weaver/source/service/entities.yaml
       attributes:
+        service.criticality:
+          source_group: registry.service
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+            - role
         service.name:
           source_group: registry.service
           inherited_fields:
@@ -10840,6 +10915,10 @@ groups:
           - Can't convert 'int' object to str implicitly
         requirement_level:
           conditionally_required: Required if `exception.type` is not set, recommended otherwise.
+        note: |
+          > [!WARNING]
+          >
+          > This attribute may contain sensitive information.
         stability: stable
       - name: exception.stacktrace
         type: string
@@ -11758,6 +11837,10 @@ groups:
             - id: embeddings
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
               stability: development
             - id: create_agent
               value: create_agent
@@ -12901,18 +12984,27 @@ groups:
     note: |
       In the lifetime of an RPC stream, an event for each message sent/received on client and server spans SHOULD be created. In case of unary calls message events SHOULD NOT be recorded.
     stability: development
+    deprecated:
+      reason: obsoleted
+      note: Deprecated, no replacement at this time.
     attributes:
       - name: rpc.message.compressed_size
         type: int
         brief: Compressed size of the message in bytes.
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: obsoleted
+          note: Deprecated, no replacement at this time.
       - name: rpc.message.id
         type: int
         brief: MUST be calculated as two different counters starting from `1` one for sent messages and one for received message.
         requirement_level: recommended
         note: This way we guarantee that the values will be consistent between different implementations.
         stability: development
+        deprecated:
+          reason: obsoleted
+          note: Deprecated, no replacement at this time.
       - name: rpc.message.type
         type:
           members:
@@ -12925,45 +13017,55 @@ groups:
         brief: Whether this is a received or sent message.
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: obsoleted
+          note: Deprecated, no replacement at this time.
       - name: rpc.message.uncompressed_size
         type: int
         brief: Uncompressed size of the message in bytes.
         requirement_level: recommended
         stability: development
+        deprecated:
+          reason: obsoleted
+          note: Deprecated, no replacement at this time.
     name: rpc.message
     lineage:
       provenance:
         registry_id: main
-        path: /home/weaver/source/rpc/events.yaml
+        path: /home/weaver/source/rpc/deprecated/events-deprecated.yaml
       attributes:
         rpc.message.compressed_size:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
             - brief
+            - deprecated
             - note
             - stability
           locally_overridden_fields:
             - requirement_level
         rpc.message.id:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
             - brief
+            - deprecated
             - note
             - stability
           locally_overridden_fields:
             - requirement_level
         rpc.message.type:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
             - brief
+            - deprecated
             - note
             - stability
           locally_overridden_fields:
             - requirement_level
         rpc.message.uncompressed_size:
-          source_group: registry.rpc
+          source_group: registry.rpc.deprecated
           inherited_fields:
             - brief
+            - deprecated
             - note
             - stability
           locally_overridden_fields:
@@ -13610,6 +13712,10 @@ groups:
           - Can't convert 'int' object to str implicitly
         requirement_level:
           conditionally_required: Required if `exception.type` is not set, recommended otherwise.
+        note: |
+          > [!WARNING]
+          >
+          > This attribute may contain sensitive information.
         stability: stable
       - name: exception.stacktrace
         type: string
@@ -13760,6 +13866,10 @@ groups:
             - id: embeddings
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
               stability: development
             - id: create_agent
               value: create_agent
@@ -14164,6 +14274,10 @@ groups:
             - id: embeddings
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
               stability: development
             - id: create_agent
               value: create_agent
@@ -18169,6 +18283,10 @@ groups:
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
               stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
             - id: create_agent
               value: create_agent
               brief: Create GenAI agent
@@ -18415,6 +18533,10 @@ groups:
             - id: embeddings
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
               stability: development
             - id: create_agent
               value: create_agent
@@ -26424,6 +26546,11 @@ groups:
           that support query parsing SHOULD generate a summary following
           [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
+
+          For batch operations, if the individual operations are known to have the same query summary
+          then that query summary SHOULD be used prepended by `BATCH `,
+          otherwise `db.query.summary` SHOULD be `BATCH` or some other database
+          system specific term if more applicable.
         stability: stable
       - name: db.query.text
         type: string
@@ -26917,6 +27044,11 @@ groups:
           that support query parsing SHOULD generate a summary following
           [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
+
+          For batch operations, if the individual operations are known to have the same query summary
+          then that query summary SHOULD be used prepended by `BATCH `,
+          otherwise `db.query.summary` SHOULD be `BATCH` or some other database
+          system specific term if more applicable.
         stability: stable
       - name: db.query.text
         type: string
@@ -28392,6 +28524,10 @@ groups:
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
               stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
             - id: create_agent
               value: create_agent
               brief: Create GenAI agent
@@ -28632,6 +28768,10 @@ groups:
             - id: embeddings
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
               stability: development
             - id: create_agent
               value: create_agent
@@ -28921,6 +29061,10 @@ groups:
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
               stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
             - id: create_agent
               value: create_agent
               brief: Create GenAI agent
@@ -29162,6 +29306,10 @@ groups:
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
               stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
             - id: create_agent
               value: create_agent
               brief: Create GenAI agent
@@ -29393,6 +29541,10 @@ groups:
             - id: embeddings
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
               stability: development
             - id: create_agent
               value: create_agent
@@ -43931,6 +44083,10 @@ groups:
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
               stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
             - id: create_agent
               value: create_agent
               brief: Create GenAI agent
@@ -44615,6 +44771,10 @@ groups:
             - id: embeddings
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
               stability: development
             - id: create_agent
               value: create_agent
@@ -64340,6 +64500,11 @@ groups:
           that support query parsing SHOULD generate a summary following
           [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
+
+          For batch operations, if the individual operations are known to have the same query summary
+          then that query summary SHOULD be used prepended by `BATCH `,
+          otherwise `db.query.summary` SHOULD be `BATCH` or some other database
+          system specific term if more applicable.
         stability: stable
       - name: db.query.text
         type: string
@@ -65781,6 +65946,10 @@ groups:
           - Division by zero
           - Can't convert 'int' object to str implicitly
         requirement_level: recommended
+        note: |
+          > [!WARNING]
+          >
+          > This attribute may contain sensitive information.
         stability: stable
       - name: exception.stacktrace
         type: string
@@ -66973,6 +67142,10 @@ groups:
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
               stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
             - id: create_agent
               value: create_agent
               brief: Create GenAI agent
@@ -67256,6 +67429,46 @@ groups:
         examples:
           - gpt-4-0613
         requirement_level: recommended
+        stability: development
+      - name: gen_ai.retrieval.documents
+        type: any
+        brief: The documents retrieved.
+        examples:
+          - |
+            [
+              {
+                "id": "doc_123",
+                "score": 0.95
+              },
+              {
+                "id": "doc_456",
+                "score": 0.87
+              },
+              {
+                "id": "doc_789",
+                "score": 0.82
+              }
+            ]
+        requirement_level: recommended
+        note: |
+          Instrumentations MUST follow [Retrieval documents JSON schema](/docs/gen-ai/gen-ai-retrieval-documents.json).
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Each document object SHOULD contain at least the following properties:
+          `id` (string): A unique identifier for the document, `score` (double): The relevance score of the document
+        stability: development
+      - name: gen_ai.retrieval.query.text
+        type: string
+        brief: The query text used for retrieval.
+        examples:
+          - What is the capital of France?
+          - weather in Paris
+        requirement_level: recommended
+        note: |
+          > [!Warning]
+          > This attribute may contain sensitive information.
         stability: development
       - name: gen_ai.system_instructions
         type: any
@@ -71718,6 +71931,108 @@ groups:
         registry_id: main
         path: /home/weaver/source/opentracing/registry.yaml
     display_name: OpenTracing Attributes
+  - id: registry.oracle_cloud
+    type: attribute_group
+    brief: |
+      This section defines generic attributes for Oracle Cloud Infrastructure (OCI).
+    attributes:
+      - name: oracle_cloud.realm
+        type: string
+        brief: |
+          The OCI realm identifier that indicates the isolated partition in which the tenancy and its resources reside.
+        examples:
+          - oc1
+          - oc2
+        requirement_level: recommended
+        note: |
+          See [OCI documentation on realms](https://docs.oracle.com/iaas/Content/General/Concepts/regions.htm)
+        stability: development
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/oracle-cloud/registry.yaml
+    display_name: General Oracle Cloud Attributes
+  - id: registry.oracledb
+    type: attribute_group
+    brief: |
+      This section defines attributes for Oracle Database.
+    attributes:
+      - name: oracle.db.domain
+        type: string
+        brief: |
+          The database domain associated with the connection.
+        examples:
+          - example.com
+          - corp.internal
+          - prod.db.local
+        requirement_level: recommended
+        note: |
+          This attribute SHOULD be set to the value of the `DB_DOMAIN` initialization parameter,
+          as exposed in `v$parameter`. `DB_DOMAIN` defines the domain portion of the global
+          database name and SHOULD be configured when a database is, or may become, part of a
+          distributed environment. Its value consists of one or more valid identifiers
+          (alphanumeric ASCII characters) separated by periods.
+        stability: development
+      - name: oracle.db.instance.name
+        type: string
+        brief: |
+          The instance name associated with the connection in an Oracle Real Application Clusters environment.
+        examples:
+          - ORCL1
+          - ORCL2
+          - ORCL3
+        requirement_level: recommended
+        note: |
+          There can be multiple instances associated with a single database service. It indicates the
+          unique instance name to which the connection is currently bound. For non-RAC databases, this value
+          defaults to the `oracle.db.name`.
+        stability: development
+      - name: oracle.db.name
+        type: string
+        brief: |
+          The database name associated with the connection.
+        examples:
+          - ORCL1
+          - FREE
+        requirement_level: recommended
+        note: |
+          This attribute SHOULD be set to the value of the parameter `DB_NAME` exposed in `v$parameter`.
+        stability: development
+      - name: oracle.db.pdb
+        type: string
+        brief: |
+          The pluggable database (PDB) name associated with the connection.
+        examples:
+          - PDB1
+          - FREEPDB
+        requirement_level: recommended
+        note: |
+          This attribute SHOULD reflect the PDB that the session is currently connected to.
+          If instrumentation cannot reliably obtain the active PDB name for each operation
+          without issuing an additional query (such as `SELECT SYS_CONTEXT`), it is
+          RECOMMENDED to fall back to the PDB name specified at connection establishment.
+        stability: development
+      - name: oracle.db.service
+        type: string
+        brief: |
+          The service name currently associated with the database connection.
+        examples:
+          - order-processing-service
+          - db_low.adb.oraclecloud.com
+          - db_high.adb.oraclecloud.com
+        requirement_level: recommended
+        note: |
+          The effective service name for a connection can change during its lifetime,
+          for example after executing sql, `ALTER SESSION`. If an instrumentation cannot reliably
+          obtain the current service name for each operation without issuing an additional
+          query (such as `SELECT SYS_CONTEXT`), it is RECOMMENDED to fall back to the
+          service name originally provided at connection establishment.
+        stability: development
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/oracledb/registry.yaml
+    display_name: Oracle Database Attributes
   - id: registry.os
     type: attribute_group
     brief: |
@@ -72683,34 +72998,6 @@ groups:
     type: attribute_group
     brief: This document defines attributes for remote procedure calls.
     attributes:
-      - name: rpc.message.compressed_size
-        type: int
-        brief: Compressed size of the message in bytes.
-        requirement_level: recommended
-        stability: development
-      - name: rpc.message.id
-        type: int
-        brief: MUST be calculated as two different counters starting from `1` one for sent messages and one for received message.
-        requirement_level: recommended
-        note: This way we guarantee that the values will be consistent between different implementations.
-        stability: development
-      - name: rpc.message.type
-        type:
-          members:
-            - id: sent
-              value: SENT
-              stability: development
-            - id: received
-              value: RECEIVED
-              stability: development
-        brief: Whether this is a received or sent message.
-        requirement_level: recommended
-        stability: development
-      - name: rpc.message.uncompressed_size
-        type: int
-        brief: Uncompressed size of the message in bytes.
-        requirement_level: recommended
-        stability: development
       - name: rpc.method
         type: string
         brief: The fully-qualified logical name of the method from the RPC interface perspective.
@@ -72830,22 +73117,20 @@ groups:
     attributes:
       - name: message.compressed_size
         type: int
-        brief: Deprecated, use `rpc.message.compressed_size` instead.
+        brief: Deprecated, no replacement at this time.
         requirement_level: recommended
         stability: development
         deprecated:
-          reason: renamed
-          renamed_to: rpc.message.compressed_size
-          note: Replaced by `rpc.message.compressed_size`.
+          reason: obsoleted
+          note: Deprecated, no replacement at this time.
       - name: message.id
         type: int
-        brief: Deprecated, use `rpc.message.id` instead.
+        brief: Deprecated, no replacement at this time.
         requirement_level: recommended
         stability: development
         deprecated:
-          reason: renamed
-          renamed_to: rpc.message.id
-          note: Replaced by `rpc.message.id`.
+          reason: obsoleted
+          note: Deprecated, no replacement at this time.
       - name: message.type
         type:
           members:
@@ -72855,22 +73140,20 @@ groups:
             - id: received
               value: RECEIVED
               stability: development
-        brief: Deprecated, use `rpc.message.type` instead.
+        brief: Deprecated, no replacement at this time.
         requirement_level: recommended
         stability: development
         deprecated:
-          reason: renamed
-          renamed_to: rpc.message.type
-          note: Replaced by `rpc.message.type`.
+          reason: obsoleted
+          note: Deprecated, no replacement at this time.
       - name: message.uncompressed_size
         type: int
-        brief: Deprecated, use `rpc.message.uncompressed_size` instead.
+        brief: Deprecated, no replacement at this time.
         requirement_level: recommended
         stability: development
         deprecated:
-          reason: renamed
-          renamed_to: rpc.message.uncompressed_size
-          note: Replaced by `rpc.message.uncompressed_size`.
+          reason: obsoleted
+          note: Deprecated, no replacement at this time.
       - name: rpc.connect_rpc.error_code
         type:
           members:
@@ -73103,6 +73386,46 @@ groups:
           reason: renamed
           renamed_to: jsonrpc.protocol.version
           note: Replaced by `jsonrpc.protocol.version`.
+      - name: rpc.message.compressed_size
+        type: int
+        brief: Compressed size of the message in bytes.
+        requirement_level: recommended
+        stability: development
+        deprecated:
+          reason: obsoleted
+          note: Deprecated, no replacement at this time.
+      - name: rpc.message.id
+        type: int
+        brief: MUST be calculated as two different counters starting from `1` one for sent messages and one for received message.
+        requirement_level: recommended
+        note: This way we guarantee that the values will be consistent between different implementations.
+        stability: development
+        deprecated:
+          reason: obsoleted
+          note: Deprecated, no replacement at this time.
+      - name: rpc.message.type
+        type:
+          members:
+            - id: sent
+              value: SENT
+              stability: development
+            - id: received
+              value: RECEIVED
+              stability: development
+        brief: Whether this is a received or sent message.
+        requirement_level: recommended
+        stability: development
+        deprecated:
+          reason: obsoleted
+          note: Deprecated, no replacement at this time.
+      - name: rpc.message.uncompressed_size
+        type: int
+        brief: Uncompressed size of the message in bytes.
+        requirement_level: recommended
+        stability: development
+        deprecated:
+          reason: obsoleted
+          note: Deprecated, no replacement at this time.
       - name: rpc.service
         type: string
         brief: Deprecated, use fully-qualified `rpc.method` instead.
@@ -73269,6 +73592,48 @@ groups:
     brief: |
       A service instance.
     attributes:
+      - name: service.criticality
+        type:
+          members:
+            - id: critical
+              value: critical
+              brief: |
+                Service is business-critical; downtime directly impacts revenue, user experience, or core functionality.
+              note: |
+                Examples include payment processing, authentication, and primary user-facing APIs.
+              stability: development
+            - id: high
+              value: high
+              brief: |
+                Service is important but has degradation tolerance or fallback mechanisms.
+              note: |
+                Examples include shopping cart, search, and recommendation engines.
+              stability: development
+            - id: medium
+              value: medium
+              brief: |
+                Service provides supplementary functionality; degradation has limited user impact.
+              note: |
+                Examples include analytics, reporting, and non-essential integrations.
+              stability: development
+            - id: low
+              value: low
+              brief: |
+                Service is non-essential to core operations; used for background tasks or internal tools.
+              note: |
+                Examples include batch processors, cleanup jobs, and internal dashboards.
+              stability: development
+        brief: |
+          The operational criticality of the service.
+        examples:
+          - critical
+          - high
+          - medium
+          - low
+        requirement_level: recommended
+        note: |
+          Application developers are encouraged to set `service.criticality` to express the operational importance of their services. Telemetry consumers MAY use this attribute to optimize telemetry collection or improve user experience.
+        stability: development
       - name: service.instance.id
         type: string
         brief: |
@@ -76159,6 +76524,10 @@ groups:
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
               stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
             - id: create_agent
               value: create_agent
               brief: Create GenAI agent
@@ -77478,6 +77847,10 @@ groups:
             - id: embeddings
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
               stability: development
             - id: create_agent
               value: create_agent
@@ -79475,6 +79848,11 @@ groups:
           that support query parsing SHOULD generate a summary following
           [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
+
+          For batch operations, if the individual operations are known to have the same query summary
+          then that query summary SHOULD be used prepended by `BATCH `,
+          otherwise `db.query.summary` SHOULD be `BATCH` or some other database
+          system specific term if more applicable.
         stability: stable
       - name: db.query.text
         type: string
@@ -79915,6 +80293,11 @@ groups:
           that support query parsing SHOULD generate a summary following
           [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
+
+          For batch operations, if the individual operations are known to have the same query summary
+          then that query summary SHOULD be used prepended by `BATCH `,
+          otherwise `db.query.summary` SHOULD be `BATCH` or some other database
+          system specific term if more applicable.
         stability: stable
       - name: db.query.text
         type: string
@@ -81250,6 +81633,11 @@ groups:
           that support query parsing SHOULD generate a summary following
           [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
+
+          For batch operations, if the individual operations are known to have the same query summary
+          then that query summary SHOULD be used prepended by `BATCH `,
+          otherwise `db.query.summary` SHOULD be `BATCH` or some other database
+          system specific term if more applicable.
         stability: stable
       - name: db.query.text
         type: string
@@ -81280,7 +81668,7 @@ groups:
       - name: db.response.status_code
         type: string
         brief: |
-          [Maria DB error code](https://mariadb.com/kb/en/mariadb-error-code-reference/) represented as a string.
+          [Maria DB error code](https://mariadb.com/docs/server/reference/error-codes) represented as a string.
         examples:
           - '1008'
           - '3058'
@@ -81787,6 +82175,11 @@ groups:
           that support query parsing SHOULD generate a summary following
           [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
+
+          For batch operations, if the individual operations are known to have the same query summary
+          then that query summary SHOULD be used prepended by `BATCH `,
+          otherwise `db.query.summary` SHOULD be `BATCH` or some other database
+          system specific term if more applicable.
         stability: stable
       - name: db.query.text
         type: string
@@ -82037,21 +82430,16 @@ groups:
       - name: db.namespace
         type: string
         brief: |
-          The database associated with the connection, qualified by the instance name, database name and service name.
+          The unique identifier of the database associated with the connection.
         examples:
-          - ORCL1\|PDB1\|db_high.adb.oraclecloud.com
-          - ORCL1\|DB1\|db_low.adb.oraclecloud.com
-          - ORCL1\|DB1\|order-processing-service
+          - ORCL1
+          - ORCL2
+          - ORCL3
         requirement_level:
           conditionally_required: If available without an additional network call.
         sampling_relevant: true
         note: |
-          `db.namespace` SHOULD be set to the combination of instance name, database name and
-          service name following the `{service_name}|{database_name}|{instance_name}` pattern.
-          Any missing components (and their associated separators) SHOULD be omitted.
-
-          For CDB architecture, database name would be pdb name. For Non-CDB, it would be
-          `DB_NAME` parameter.
+          Use the value of `DB_UNIQUE_NAME` parameter. This defines the database's globally unique identifier and must remain unique across the enterprise.
         stability: stable
       - name: db.operation.batch.size
         type: int
@@ -82125,6 +82513,11 @@ groups:
           that support query parsing SHOULD generate a summary following
           [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
+
+          For batch operations, if the individual operations are known to have the same query summary
+          then that query summary SHOULD be used prepended by `BATCH `,
+          otherwise `db.query.summary` SHOULD be `BATCH` or some other database
+          system specific term if more applicable.
         stability: stable
       - name: db.query.text
         type: string
@@ -82196,6 +82589,82 @@ groups:
           When using canonical exception type name, instrumentation SHOULD do the best effort to report the most relevant type. For example, if the original exception is wrapped into a generic one, the original exception SHOULD be preferred.
           Instrumentations SHOULD document how `error.type` is populated.
         stability: stable
+      - name: oracle.db.domain
+        type: string
+        brief: |
+          The database domain associated with the connection.
+        examples:
+          - example.com
+          - corp.internal
+          - prod.db.local
+        requirement_level: recommended
+        sampling_relevant: true
+        note: |
+          This attribute SHOULD be set to the value of the `DB_DOMAIN` initialization parameter,
+          as exposed in `v$parameter`. `DB_DOMAIN` defines the domain portion of the global
+          database name and SHOULD be configured when a database is, or may become, part of a
+          distributed environment. Its value consists of one or more valid identifiers
+          (alphanumeric ASCII characters) separated by periods.
+        stability: development
+      - name: oracle.db.instance.name
+        type: string
+        brief: |
+          The instance name associated with the connection in an Oracle Real Application Clusters environment.
+        examples:
+          - ORCL1
+          - ORCL2
+          - ORCL3
+        requirement_level: recommended
+        sampling_relevant: true
+        note: |
+          There can be multiple instances associated with a single database service. It indicates the
+          unique instance name to which the connection is currently bound. For non-RAC databases, this value
+          defaults to the `oracle.db.name`.
+        stability: development
+      - name: oracle.db.name
+        type: string
+        brief: |
+          The database name associated with the connection.
+        examples:
+          - ORCL1
+          - FREE
+        requirement_level: recommended
+        sampling_relevant: true
+        note: |
+          This attribute SHOULD be set to the value of the parameter `DB_NAME` exposed in `v$parameter`.
+        stability: development
+      - name: oracle.db.pdb
+        type: string
+        brief: |
+          The pluggable database (PDB) name associated with the connection.
+        examples:
+          - PDB1
+          - FREEPDB
+        requirement_level: recommended
+        sampling_relevant: true
+        note: |
+          This attribute SHOULD reflect the PDB that the session is currently connected to.
+          If instrumentation cannot reliably obtain the active PDB name for each operation
+          without issuing an additional query (such as `SELECT SYS_CONTEXT`), it is
+          RECOMMENDED to fall back to the PDB name specified at connection establishment.
+        stability: development
+      - name: oracle.db.service
+        type: string
+        brief: |
+          The service name currently associated with the database connection.
+        examples:
+          - order-processing-service
+          - db_low.adb.oraclecloud.com
+          - db_high.adb.oraclecloud.com
+        requirement_level: recommended
+        sampling_relevant: true
+        note: |
+          The effective service name for a connection can change during its lifetime,
+          for example after executing sql, `ALTER SESSION`. If an instrumentation cannot reliably
+          obtain the current service name for each operation without issuing an additional
+          query (such as `SELECT SYS_CONTEXT`), it is RECOMMENDED to fall back to the
+          service name originally provided at connection establishment.
+        stability: development
       - name: server.address
         type: string
         brief: |
@@ -82329,6 +82798,56 @@ groups:
           locally_overridden_fields:
             - note
             - requirement_level
+        oracle.db.domain:
+          source_group: registry.oracledb
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - sampling_relevant
+        oracle.db.instance.name:
+          source_group: registry.oracledb
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - sampling_relevant
+        oracle.db.name:
+          source_group: registry.oracledb
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - sampling_relevant
+        oracle.db.pdb:
+          source_group: registry.oracledb
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - sampling_relevant
+        oracle.db.service:
+          source_group: registry.oracledb
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - requirement_level
+            - stability
+          locally_overridden_fields:
+            - sampling_relevant
         server.address:
           source_group: registry.server
           inherited_fields:
@@ -82469,6 +82988,11 @@ groups:
           that support query parsing SHOULD generate a summary following
           [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
+
+          For batch operations, if the individual operations are known to have the same query summary
+          then that query summary SHOULD be used prepended by `BATCH `,
+          otherwise `db.query.summary` SHOULD be `BATCH` or some other database
+          system specific term if more applicable.
         stability: stable
       - name: db.query.text
         type: string
@@ -83082,6 +83606,11 @@ groups:
           that support query parsing SHOULD generate a summary following
           [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
+
+          For batch operations, if the individual operations are known to have the same query summary
+          then that query summary SHOULD be used prepended by `BATCH `,
+          otherwise `db.query.summary` SHOULD be `BATCH` or some other database
+          system specific term if more applicable.
         stability: stable
       - name: db.query.text
         type: string
@@ -83454,6 +83983,11 @@ groups:
           that support query parsing SHOULD generate a summary following
           [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
+
+          For batch operations, if the individual operations are known to have the same query summary
+          then that query summary SHOULD be used prepended by `BATCH `,
+          otherwise `db.query.summary` SHOULD be `BATCH` or some other database
+          system specific term if more applicable.
         stability: stable
       - name: db.query.text
         type: string
@@ -83510,7 +84044,7 @@ groups:
           at all):
 
           - [DB2 SQL codes](https://www.ibm.com/docs/db2-for-zos/12?topic=codes-sql).
-          - [Maria DB error codes](https://mariadb.com/kb/en/mariadb-error-code-reference/)
+          - [Maria DB error codes](https://mariadb.com/docs/server/reference/error-codes)
           - [Microsoft SQL Server errors](https://docs.microsoft.com/sql/relational-databases/errors-events/database-engine-events-and-errors)
           - [MySQL error codes](https://dev.mysql.com/doc/mysql-errors/9.0/en/error-reference-introduction.html)
           - [Oracle error codes](https://docs.oracle.com/cd/B28359_01/server.111/b28278/toc.htm)
@@ -87590,6 +88124,10 @@ groups:
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
               stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
             - id: create_agent
               value: create_agent
               brief: Create GenAI agent
@@ -87915,6 +88453,10 @@ groups:
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
               stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
             - id: create_agent
               value: create_agent
               brief: Create GenAI agent
@@ -88228,6 +88770,10 @@ groups:
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
               stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
             - id: create_agent
               value: create_agent
               brief: Create GenAI agent
@@ -88535,6 +89081,10 @@ groups:
             - id: embeddings
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
               stability: development
             - id: create_agent
               value: create_agent
@@ -89361,6 +89911,10 @@ groups:
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
               stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
             - id: create_agent
               value: create_agent
               brief: Create GenAI agent
@@ -90029,6 +90583,351 @@ groups:
             - brief
             - requirement_level
             - sampling_relevant
+  - id: span.gen_ai.retrieval.client
+    type: span
+    brief: |
+      Describes GenAI retrieval span - a request to a Generative AI service or framework that retrieves relevant information or context from a vector database or search system.
+      The `gen_ai.operation.name` SHOULD be `retrieval`.
+      **Span name** SHOULD be `{gen_ai.operation.name} {gen_ai.data_source.id}`. Semantic conventions for individual GenAI providers and retrievers MAY specify different span name format.
+    stability: development
+    attributes:
+      - name: error.type
+        type:
+          members:
+            - id: other
+              value: _OTHER
+              brief: |
+                A fallback error value to be used when the instrumentation doesn't define a custom value.
+              stability: stable
+        brief: |
+          Describes a class of error the operation ended with.
+        examples:
+          - timeout
+          - java.net.UnknownHostException
+          - server_certificate_invalid
+          - '500'
+        requirement_level:
+          conditionally_required: if the operation ended in an error
+        note: |
+          The `error.type` SHOULD match the error code returned by the Generative AI provider or the client library,
+          the canonical name of exception that occurred, or another low-cardinality error identifier.
+          Instrumentations SHOULD document the list of errors they report.
+        stability: stable
+      - name: gen_ai.data_source.id
+        type: string
+        brief: The data source identifier.
+        examples:
+          - H7STPQYOND
+        requirement_level:
+          conditionally_required: when applicable
+        note: |
+          Data sources are used by AI agents and RAG applications to store grounding data. A data source may be an external database, object store, document collection, website, or any other storage system used by the GenAI agent or application. The `gen_ai.data_source.id` SHOULD match the identifier used by the GenAI system rather than a name specific to the external storage, such as a database or object store. Semantic conventions referencing `gen_ai.data_source.id` MAY also leverage additional attributes, such as `db.*`, to further identify and describe the data source.
+        stability: development
+      - name: gen_ai.operation.name
+        type:
+          members:
+            - id: chat
+              value: chat
+              brief: Chat completion operation such as [OpenAI Chat API](https://platform.openai.com/docs/api-reference/chat)
+              stability: development
+            - id: generate_content
+              value: generate_content
+              brief: Multimodal content generation operation such as [Gemini Generate Content](https://ai.google.dev/api/generate-content)
+              stability: development
+            - id: text_completion
+              value: text_completion
+              brief: Text completions operation such as [OpenAI Completions API (Legacy)](https://platform.openai.com/docs/api-reference/completions)
+              stability: development
+            - id: embeddings
+              value: embeddings
+              brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
+            - id: create_agent
+              value: create_agent
+              brief: Create GenAI agent
+              stability: development
+            - id: invoke_agent
+              value: invoke_agent
+              brief: Invoke GenAI agent
+              stability: development
+            - id: execute_tool
+              value: execute_tool
+              brief: Execute a tool
+              stability: development
+        brief: The name of the operation being performed.
+        requirement_level: required
+        note: |
+          If one of the predefined values applies, but specific system uses a different name it's RECOMMENDED to document it in the semantic conventions for specific GenAI system and use system-specific name in the instrumentation. If a different name is not documented, instrumentation libraries SHOULD use applicable predefined value.
+        stability: development
+      - name: gen_ai.provider.name
+        type:
+          members:
+            - id: openai
+              value: openai
+              brief: '[OpenAI](https://openai.com/)'
+              stability: development
+            - id: gcp.gen_ai
+              value: gcp.gen_ai
+              brief: Any Google generative AI endpoint
+              note: |
+                May be used when specific backend is unknown.
+              stability: development
+            - id: gcp.vertex_ai
+              value: gcp.vertex_ai
+              brief: '[Vertex AI](https://cloud.google.com/vertex-ai)'
+              note: |
+                Used when accessing the 'aiplatform.googleapis.com' endpoint.
+              stability: development
+            - id: gcp.gemini
+              value: gcp.gemini
+              brief: '[Gemini](https://cloud.google.com/products/gemini)'
+              note: |
+                Used when accessing the 'generativelanguage.googleapis.com' endpoint. Also known as the AI Studio API.
+              stability: development
+            - id: anthropic
+              value: anthropic
+              brief: '[Anthropic](https://www.anthropic.com/)'
+              stability: development
+            - id: cohere
+              value: cohere
+              brief: '[Cohere](https://cohere.com/)'
+              stability: development
+            - id: azure.ai.inference
+              value: azure.ai.inference
+              brief: Azure AI Inference
+              stability: development
+            - id: azure.ai.openai
+              value: azure.ai.openai
+              brief: '[Azure OpenAI](https://azure.microsoft.com/products/ai-services/openai-service/)'
+              stability: development
+            - id: ibm.watsonx.ai
+              value: ibm.watsonx.ai
+              brief: '[IBM Watsonx AI](https://www.ibm.com/products/watsonx-ai)'
+              stability: development
+            - id: aws.bedrock
+              value: aws.bedrock
+              brief: '[AWS Bedrock](https://aws.amazon.com/bedrock)'
+              stability: development
+            - id: perplexity
+              value: perplexity
+              brief: '[Perplexity](https://www.perplexity.ai/)'
+              stability: development
+            - id: x_ai
+              value: x_ai
+              brief: '[xAI](https://x.ai/)'
+              stability: development
+            - id: deepseek
+              value: deepseek
+              brief: '[DeepSeek](https://www.deepseek.com/)'
+              stability: development
+            - id: groq
+              value: groq
+              brief: '[Groq](https://groq.com/)'
+              stability: development
+            - id: mistral_ai
+              value: mistral_ai
+              brief: '[Mistral AI](https://mistral.ai/)'
+              stability: development
+        brief: The Generative AI provider as identified by the client or server instrumentation.
+        requirement_level:
+          conditionally_required: when applicable
+        note: |
+          The attribute SHOULD be set based on the instrumentation's best
+          knowledge and may differ from the actual model provider.
+
+          Multiple providers, including Azure OpenAI, Gemini, and AI hosting platforms
+          are accessible using the OpenAI REST API and corresponding client libraries,
+          but may proxy or host models from different providers.
+
+          The `gen_ai.request.model`, `gen_ai.response.model`, and `server.address`
+          attributes may help identify the actual system in use.
+
+          The `gen_ai.provider.name` attribute acts as a discriminator that
+          identifies the GenAI telemetry format flavor specific to that provider
+          within GenAI semantic conventions.
+          It SHOULD be set consistently with provider-specific attributes and signals.
+          For example, GenAI spans, metrics, and events related to AWS Bedrock
+          should have the `gen_ai.provider.name` set to `aws.bedrock` and include
+          applicable `aws.bedrock.*` attributes and are not expected to include
+          `openai.*` attributes.
+        stability: development
+      - name: gen_ai.request.model
+        type: string
+        brief: The name of the GenAI model a request is being made to.
+        examples: gpt-4
+        requirement_level:
+          conditionally_required: If available.
+        note: |
+          The name of the GenAI model a request is being made to. If the model is supplied by a vendor, then the value must be the exact name of the model requested. If the model is a fine-tuned custom model, the value should have a more specific name than the base model that's been fine-tuned.
+        stability: development
+      - name: gen_ai.request.top_k
+        type: double
+        brief: The top_k sampling setting for the GenAI request.
+        examples:
+          - 1
+        requirement_level: recommended
+        stability: development
+      - name: gen_ai.retrieval.documents
+        type: any
+        brief: The documents retrieved.
+        examples:
+          - |
+            [
+              {
+                "id": "doc_123",
+                "score": 0.95
+              },
+              {
+                "id": "doc_456",
+                "score": 0.87
+              },
+              {
+                "id": "doc_789",
+                "score": 0.82
+              }
+            ]
+        requirement_level: opt_in
+        note: |
+          Instrumentations MUST follow [Retrieval documents JSON schema](/docs/gen-ai/gen-ai-retrieval-documents.json).
+          When the attribute is recorded on events, it MUST be recorded in structured
+          form. When recorded on spans, it MAY be recorded as a JSON string if structured
+          format is not supported and SHOULD be recorded in structured form otherwise.
+
+          Each document object SHOULD contain at least the following properties:
+          `id` (string): A unique identifier for the document, `score` (double): The relevance score of the document
+        stability: development
+      - name: gen_ai.retrieval.query.text
+        type: string
+        brief: The query text used for retrieval.
+        examples:
+          - What is the capital of France?
+          - weather in Paris
+        requirement_level: opt_in
+        note: |
+          > [!Warning]
+          > This attribute may contain sensitive information.
+        stability: development
+      - name: server.address
+        type: string
+        brief: GenAI server address.
+        examples:
+          - example.com
+          - 10.1.2.80
+          - /tmp/my.sock
+        requirement_level: recommended
+        note: |
+          When observed from the client side, and when communicating through an intermediary, `server.address` SHOULD represent the server address behind any intermediaries, for example proxies, if it's available.
+        stability: stable
+      - name: server.port
+        type: int
+        brief: GenAI server port.
+        examples:
+          - 80
+          - 8080
+          - 443
+        requirement_level:
+          conditionally_required: If `server.address` is set.
+        note: |
+          When observed from the client side, and when communicating through an intermediary, `server.port` SHOULD represent the server port behind any intermediaries, for example proxies, if it's available.
+        stability: stable
+    span_kind: client
+    lineage:
+      provenance:
+        registry_id: main
+        path: /home/weaver/source/gen-ai/spans.yaml
+      attributes:
+        error.type:
+          source_group: registry.error
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        gen_ai.data_source.id:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.operation.name:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.provider.name:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.request.model:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - stability
+          locally_overridden_fields:
+            - note
+            - requirement_level
+        gen_ai.request.top_k:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.retrieval.documents:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        gen_ai.retrieval.query.text:
+          source_group: registry.gen_ai
+          inherited_fields:
+            - brief
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - requirement_level
+        server.address:
+          source_group: registry.server
+          inherited_fields:
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - brief
+            - requirement_level
+        server.port:
+          source_group: registry.server
+          inherited_fields:
+            - examples
+            - note
+            - stability
+          locally_overridden_fields:
+            - brief
+            - requirement_level
   - id: span.graphql.server
     type: span
     brief: |
@@ -91535,6 +92434,10 @@ groups:
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
               stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
             - id: create_agent
               value: create_agent
               brief: Create GenAI agent
@@ -92139,6 +93042,10 @@ groups:
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
               stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
+              stability: development
             - id: create_agent
               value: create_agent
               brief: Create GenAI agent
@@ -92698,6 +93605,10 @@ groups:
             - id: embeddings
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
               stability: development
             - id: create_agent
               value: create_agent
@@ -94038,7 +94949,7 @@ groups:
     type: span
     brief: This span represents an outgoing Remote Procedure Call (RPC).
     note: |
-      `rpc.system.name` MUST be set to `"connect_rpc"` and SHOULD be provided **at span creation time.**
+      `rpc.system.name` MUST be set to `"connectrpc"` and SHOULD be provided **at span creation time.**
 
       **Span name:** refer to the [Span Name](/docs/rpc/rpc-spans.md#span-name) section.
 
@@ -94392,7 +95303,7 @@ groups:
     type: span
     brief: This span represents an incoming Remote Procedure Call (RPC).
     note: |
-      `rpc.system.name` MUST be set to `"connect_rpc"` and SHOULD be provided **at span creation time.**
+      `rpc.system.name` MUST be set to `"connectrpc"` and SHOULD be provided **at span creation time.**
 
       **Span name:** refer to the [Span Name](/docs/rpc/rpc-spans.md#span-name) section.
 
@@ -96424,6 +97335,11 @@ groups:
           that support query parsing SHOULD generate a summary following
           [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
+
+          For batch operations, if the individual operations are known to have the same query summary
+          then that query summary SHOULD be used prepended by `BATCH `,
+          otherwise `db.query.summary` SHOULD be `BATCH` or some other database
+          system specific term if more applicable.
         stability: stable
       - name: db.query.text
         type: string
@@ -97104,6 +98020,11 @@ groups:
           that support query parsing SHOULD generate a summary following
           [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
+
+          For batch operations, if the individual operations are known to have the same query summary
+          then that query summary SHOULD be used prepended by `BATCH `,
+          otherwise `db.query.summary` SHOULD be `BATCH` or some other database
+          system specific term if more applicable.
         stability: stable
       - name: db.query.text
         type: string
@@ -97394,6 +98315,11 @@ groups:
           that support query parsing SHOULD generate a summary following
           [Generating query summary](/docs/db/database-spans.md#generating-a-summary-of-the-query)
           section.
+
+          For batch operations, if the individual operations are known to have the same query summary
+          then that query summary SHOULD be used prepended by `BATCH `,
+          otherwise `db.query.summary` SHOULD be `BATCH` or some other database
+          system specific term if more applicable.
         stability: stable
       - name: db.query.text
         type: string
@@ -97641,6 +98567,10 @@ groups:
             - id: embeddings
               value: embeddings
               brief: Embeddings operation such as [OpenAI Create embeddings API](https://platform.openai.com/docs/api-reference/embeddings/create)
+              stability: development
+            - id: retrieval
+              value: retrieval
+              brief: Retrieval operation such as [OpenAI Search Vector Store API](https://platform.openai.com/docs/api-reference/vector-stores/search)
               stability: development
             - id: create_agent
               value: create_agent

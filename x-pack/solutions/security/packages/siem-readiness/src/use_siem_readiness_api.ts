@@ -12,12 +12,20 @@ import type {
   CategoriesResponse,
   SiemReadinessPackageInfo,
   RelatedIntegrationRuleResponse,
+  DataQualityResultDocument,
+  PipelineStats,
 } from './types';
-import { GET_SIEM_READINESS_CATEGORIES_API_PATH } from './constants';
+import {
+  GET_SIEM_READINESS_CATEGORIES_API_PATH,
+  GET_SIEM_READINESS_PIPELINES_API_PATH,
+  GET_INDEX_RESULTS_LATEST_API_PATH,
+} from './constants';
 
-// Fix: Use 'as const' to make these readonly tuples for proper React Query typing
 const GET_READINESS_CATEGORIES_QUERY_KEY = ['readiness-categories'] as const;
+const GET_READINESS_PIPELINES_QUERY_KEY = ['readiness-pipelines'] as const;
 const GET_DETECTION_RULES_QUERY_KEY = ['detection-rules'] as const;
+const GET_INTEGRATIONS_QUERY_KEY = ['fleet-integrations-packages'] as const;
+const GET_INDEX_RESULTS_LATEST_QUERY_KEY = ['index-results-latest'] as const;
 
 export const useSiemReadinessApi = () => {
   const { http } = useKibana<CoreStart>().services;
@@ -30,7 +38,7 @@ export const useSiemReadinessApi = () => {
   });
 
   const getIntegrations = useQuery({
-    queryKey: ['siem-readiness', 'fleet', 'epm', 'packages', 'all-enabled-rules'] as const,
+    queryKey: GET_INTEGRATIONS_QUERY_KEY,
     queryFn: () => http.get<{ items: SiemReadinessPackageInfo[] }>('/api/fleet/epm/packages'),
   });
 
@@ -49,9 +57,27 @@ export const useSiemReadinessApi = () => {
     },
   });
 
+  const getIndexQualityResultsLatest = useQuery({
+    queryKey: GET_INDEX_RESULTS_LATEST_QUERY_KEY,
+    queryFn: () => {
+      return http.get<DataQualityResultDocument[]>(`${GET_INDEX_RESULTS_LATEST_API_PATH}/*`, {
+        version: '1',
+      });
+    },
+  });
+
+  const getReadinessPipelines = useQuery({
+    queryKey: GET_READINESS_PIPELINES_QUERY_KEY,
+    queryFn: () => {
+      return http.get<PipelineStats[]>(GET_SIEM_READINESS_PIPELINES_API_PATH);
+    },
+  });
+
   return {
     getReadinessCategories,
     getIntegrations,
     getDetectionRules,
+    getIndexQualityResultsLatest,
+    getReadinessPipelines,
   };
 };

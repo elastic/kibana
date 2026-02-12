@@ -19,12 +19,14 @@ import { NAVIGATION_SELECTOR_PREFIX, TOOLTIP_OFFSET } from '../../constants';
 import { focusMainContent } from '../../utils/focus_main_content';
 import { useHighContrastModeStyles } from '../../hooks/use_high_contrast_mode_styles';
 import { useTooltip } from '../../hooks/use_tooltip';
+import { NewItemIndicator } from '../new_item_indicator';
 
 export interface FooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, MenuItem {
   hasContent?: boolean;
   iconType: IconType;
   isCurrent?: boolean;
   isHighlighted: boolean;
+  isNew: boolean;
   label: string;
   onClick?: () => void;
   onKeyDown?: (e: KeyboardEvent) => void;
@@ -37,7 +39,7 @@ export interface FooterItemProps extends Omit<EuiButtonIconProps, 'iconType'>, M
  */
 export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
   (
-    { badgeType, hasContent, iconType, id, isCurrent, isHighlighted, label, ...props },
+    { badgeType, hasContent, iconType, id, isCurrent, isHighlighted, isNew, label, ...props },
     ref: ForwardedRef<HTMLAnchorElement>
   ) => {
     const { euiTheme } = useEuiTheme();
@@ -66,6 +68,11 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
       ${highContrastModeStyles}
     `;
 
+    const buttonWrapperStyles = css`
+      position: relative;
+      display: inline-flex;
+    `;
+
     const footerItemTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-footerItem-${id}`;
 
     const buttonProps: ComponentProps<typeof EuiButtonIcon> & {
@@ -88,9 +95,12 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
     };
 
     const menuItem = (
-      <Suspense fallback={<EuiButtonIcon buttonRef={ref} {...buttonProps} />}>
-        <EuiButtonIcon buttonRef={ref} {...buttonProps} iconType={iconType || 'empty'} />
-      </Suspense>
+      <div css={buttonWrapperStyles}>
+        <Suspense fallback={<EuiButtonIcon buttonRef={ref} {...buttonProps} />}>
+          <EuiButtonIcon buttonRef={ref} {...buttonProps} iconType={iconType || 'empty'} />
+        </Suspense>
+        {isNew && <NewItemIndicator isHighlighted={isHighlighted} />}
+      </div>
     );
 
     if (!hasContent) {

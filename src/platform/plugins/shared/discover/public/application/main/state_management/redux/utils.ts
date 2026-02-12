@@ -9,18 +9,16 @@
 
 import { isObject } from 'lodash';
 import { v4 as uuid } from 'uuid';
-
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DataViewListItem, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { ESQLControlState, ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
+import type { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { getNextTabNumber, type TabItem } from '@kbn/unified-tabs';
 import { createAsyncThunk, miniSerializeError } from '@reduxjs/toolkit';
-
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type {
   InternalStateDependencies,
   InternalStateDispatch,
@@ -121,7 +119,7 @@ export const getSerializedSearchSourceDataViewDetails = (
 
 export const parseControlGroupJson = (
   jsonString?: string | null
-): ControlPanelsState<ESQLControlState> => {
+): ControlPanelsState<OptionsListESQLControlState> => {
   try {
     return jsonString ? JSON.parse(jsonString) : {};
   } catch (e) {
@@ -138,16 +136,15 @@ export const parseControlGroupJson = (
  * @returns An array of ESQLControlVariable objects.
  */
 export const extractEsqlVariables = (
-  panels: ControlPanelsState<ESQLControlState> | null
+  panels: ControlPanelsState<OptionsListESQLControlState> | null
 ): ESQLControlVariable[] => {
   if (!panels || Object.keys(panels).length === 0) {
     return [];
   }
   const variables = Object.values(panels).reduce((acc: ESQLControlVariable[], panel) => {
     if (panel.type === ESQL_CONTROL) {
-      const typedPanel = panel as OptionsListESQLControlState;
-      const isSingleSelect = typedPanel.singleSelect ?? true;
-      const selectedValues = typedPanel.selectedOptions || [];
+      const isSingleSelect = panel.singleSelect ?? true;
+      const selectedValues = panel.selectedOptions || [];
 
       let value: string | number | (string | number)[];
 
@@ -161,8 +158,8 @@ export const extractEsqlVariables = (
       }
 
       acc.push({
-        key: typedPanel.variableName,
-        type: typedPanel.variableType as ESQLVariableType,
+        key: panel.variableName,
+        type: panel.variableType as ESQLVariableType,
         value,
       });
     }

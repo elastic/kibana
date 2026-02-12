@@ -22,6 +22,7 @@ import {
   type FilterCondition,
   getFilterOperator,
   getFilterValue,
+  isArrayOperator,
   isCondition,
   type OperatorKeys,
 } from '@kbn/streamlang';
@@ -33,6 +34,7 @@ import {
   alwaysToEmptyEquals,
   conditionNeedsValueField,
   emptyEqualsToAlways,
+  getFilterConditionOperator,
   isConditionEditableInUi,
 } from '../../../util/condition';
 import type { Suggestion } from './autocomplete_selector';
@@ -116,6 +118,15 @@ export function ConditionEditor(props: ConditionEditorProps) {
                   })}
                 </EuiLink>
               ),
+            }}
+          />
+        ) : isArrayOperator(getFilterConditionOperator(condition)) ? (
+          <FormattedMessage
+            id="xpack.streams.conditionEditor.arrayOperatorHelpText"
+            defaultMessage="Use {includes} for array/multivalue fields. For partial matches, use {contains}."
+            values={{
+              includes: <strong>includes</strong>,
+              contains: <strong>contains</strong>,
             }}
           />
         ) : undefined

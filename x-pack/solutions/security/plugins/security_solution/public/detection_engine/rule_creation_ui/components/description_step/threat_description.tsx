@@ -12,7 +12,7 @@ import type {
   MitreSubTechnique,
   MitreTactic,
   MitreTechnique,
-} from '../../../../detections/mitre/types';
+} from '../../../../../common/detection_engine/mitre/types';
 import ListTreeIcon from './assets/list_tree_icon.svg';
 
 const lazyMitreConfiguration = () => {
@@ -22,7 +22,7 @@ const lazyMitreConfiguration = () => {
    */
   return import(
     /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../detections/mitre/mitre_tactics_techniques'
+    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
   );
 };
 

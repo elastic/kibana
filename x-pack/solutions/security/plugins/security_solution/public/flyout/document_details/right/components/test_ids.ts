@@ -6,7 +6,7 @@
  */
 
 import { PREFIX } from '../../../shared/test_ids';
-import { CONTENT_TEST_ID, HEADER_TEST_ID } from './expandable_section';
+import { CONTENT_TEST_ID, HEADER_TEST_ID } from '../../../shared/components/expandable_section';
 
 /* Table */
 

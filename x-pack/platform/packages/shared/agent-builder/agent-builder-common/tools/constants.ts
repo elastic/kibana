@@ -8,7 +8,9 @@
 import { ToolType } from './definition';
 import { internalNamespaces } from '../base/namespaces';
 
-const platformCoreTool = (toolName: string) => {
+const platformCoreTool = <TName extends string>(
+  toolName: TName
+): `${typeof internalNamespaces.platformCore}.${TName}` => {
   return `${internalNamespaces.platformCore}.${toolName}`;
 };
 
@@ -35,6 +37,13 @@ export const platformCoreTools = {
   attachmentList: platformCoreTool('attachment_list'),
   attachmentDiff: platformCoreTool('attachment_diff'),
 } as const;
+
+export const filestoreTools = {
+  read: `${internalNamespaces.filestore}.read`,
+  ls: `${internalNamespaces.filestore}.ls`,
+  grep: `${internalNamespaces.filestore}.grep`,
+  glob: `${internalNamespaces.filestore}.glob`,
+};
 
 /**
  * List of tool types which can be created / edited by a user.

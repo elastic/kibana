@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { PromQLAstNode } from '../../embedded_languages/promql/types';
 import type {
   ESQLAstCommand,
   ESQLAstQueryExpression,
@@ -89,4 +90,13 @@ export const replaceProperties = (obj: object, replacement: object) => {
       delete (obj as any)[key];
   }
   Object.assign(obj, replacement);
+};
+
+export const isPromqlNode = (node: unknown): node is PromQLAstNode => {
+  return (
+    typeof node === 'object' &&
+    node !== null &&
+    'dialect' in node &&
+    (node as { dialect: unknown }).dialect === 'promql'
+  );
 };

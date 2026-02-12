@@ -512,7 +512,7 @@ exports[`LoginForm renders as expected 1`] = `
                 "badgeBackground": Computed {
                   "computer": [Function],
                   "dependencies": Array [
-                    "colors.backgroundLightText",
+                    "colors.backgroundFilledText",
                   ],
                 },
                 "badgeBackgroundSubdued": Computed {
@@ -950,7 +950,7 @@ exports[`LoginForm renders as expected 1`] = `
                 "badgeBackground": Computed {
                   "computer": [Function],
                   "dependencies": Array [
-                    "colors.backgroundLightText",
+                    "colors.backgroundFilledText",
                   ],
                 },
                 "badgeBackgroundSubdued": Computed {

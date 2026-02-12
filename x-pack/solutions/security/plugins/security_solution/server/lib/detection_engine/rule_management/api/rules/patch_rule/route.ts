@@ -8,7 +8,12 @@
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
+import {
+  EXCEPTIONS_API_ALL,
+  RULES_API_ALL,
+  RULES_API_READ,
+} from '@kbn/security-solution-features/constants';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   PatchRuleRequestBody,
@@ -29,7 +34,11 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
       path: DETECTION_ENGINE_RULES_URL,
       security: {
         authz: {
-          requiredPrivileges: [RULES_API_ALL],
+          requiredPrivileges: [
+            {
+              anyRequired: [RULES_API_ALL, { allOf: [RULES_API_READ, EXCEPTIONS_API_ALL] }],
+            },
+          ],
         },
       },
     })
@@ -53,8 +62,10 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
         }
         try {
           const params = request.body;
+          const securitySolutionCtx = await context.securitySolution;
+
           const rulesClient = await (await context.alerting).getRulesClient();
-          const detectionRulesClient = (await context.securitySolution).getDetectionRulesClient();
+          const detectionRulesClient = securitySolutionCtx.getDetectionRulesClient();
 
           const existingRule = await readRules({
             rulesClient,
@@ -69,6 +80,14 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
               statusCode: error.statusCode,
             });
           }
+
+          await validateRuleResponseActions({
+            endpointAuthz: await securitySolutionCtx.getEndpointAuthz(),
+            endpointService: securitySolutionCtx.getEndpointService(),
+            rulePayload: request.body,
+            spaceId: securitySolutionCtx.getSpaceId(),
+            existingRule,
+          });
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });
           await validateRuleDefaultExceptionList({

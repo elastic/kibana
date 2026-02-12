@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react';
 import type { EuiTourStepProps } from '@elastic/eui';
 import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useKibana } from '../../hooks/use_kibana';
 
 interface TourCalloutBaseProps
   extends Pick<
@@ -59,6 +60,9 @@ export const TourCallout = ({
   footerAction,
   ...rest
 }: TourCalloutProps) => {
+  const { notifications } = useKibana().services;
+  const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
+
   const [isStepOpen, setIsStepOpen] = useState<boolean>(false);
 
   const handleFinish = () => {
@@ -85,6 +89,8 @@ export const TourCallout = ({
       }
     };
   }, [isOpen]);
+
+  if (!isTourEnabled) return <>{children}</>;
 
   return (
     <EuiTourStep

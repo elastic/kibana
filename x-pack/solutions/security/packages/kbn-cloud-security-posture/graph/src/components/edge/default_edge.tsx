@@ -13,6 +13,7 @@ import { getMarkerEnd } from './markers';
 import { useEdgeColor } from './styles';
 import { STACK_NODE_HORIZONTAL_PADDING } from '../constants';
 import { GRAPH_EDGE_ID } from '../test_ids';
+import { isConnectorShape } from '../utils';
 
 type EdgeColor = EdgeViewModel['color'];
 
@@ -20,7 +21,7 @@ const dashedStyle = {
   strokeDasharray: '2 2',
 };
 
-const NODES_WITHOUT_MARKER = ['label', 'group'];
+const NODES_WITHOUT_MARKER = ['label', 'group', 'relationship'];
 
 export const DefaultEdge = memo(
   ({
@@ -35,9 +36,9 @@ export const DefaultEdge = memo(
     data,
   }: EdgeProps) => {
     const color: EdgeColor = data?.color || 'primary';
-    const entityToLabel = data?.sourceShape !== 'group' && data?.targetShape === 'label';
-    const labelToEntity = data?.sourceShape === 'label' && data?.targetShape !== 'group';
-    const isExtraAlignment = entityToLabel || labelToEntity;
+    const entityToConnector = data?.sourceShape !== 'group' && isConnectorShape(data?.targetShape);
+    const connectorToEntity = isConnectorShape(data?.sourceShape) && data?.targetShape !== 'group';
+    const isExtraAlignment = entityToConnector || connectorToEntity;
     const sourceMargin = getShapeHandlePosition(data?.sourceShape);
     const targetMargin = getShapeHandlePosition(data?.targetShape);
     const markerEnd =
@@ -56,7 +57,7 @@ export const DefaultEdge = memo(
         ? targetX + xOffset
         : targetX -
           xOffset +
-          (isExtraAlignment ? STACK_NODE_HORIZONTAL_PADDING / 2 : 0) * (labelToEntity ? 1 : -1);
+          (isExtraAlignment ? STACK_NODE_HORIZONTAL_PADDING / 2 : 0) * (connectorToEntity ? 1 : -1);
 
     const [edgePath] = getSmoothStepPath({
       // sourceX and targetX are adjusted to account for the shape handle position

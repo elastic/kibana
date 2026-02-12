@@ -13,7 +13,9 @@ import type {
   SavedObjectsFindResponse,
   StartServicesAccessor,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { v4 } from 'uuid';
 import {
   createDataSourceAndRelatedResources,
   deleteDataSourceAndRelatedResources,
@@ -25,11 +27,17 @@ import type {
   DataSourcesServerStartDependencies,
 } from '../types';
 import { convertSOtoAPIResponse, createDataSourceRequestSchema } from './schema';
-import { API_BASE_PATH } from '../../common/constants';
-
-// Constants
-const DEFAULT_PAGE_SIZE = 100;
-const MAX_PAGE_SIZE = 1000;
+import {
+  API_BASE_PATH,
+  DATASOURCES_SCOPE,
+  TASK_NOT_FOUND_ERROR,
+  TASK_MANAGER_NOT_AVAILABLE_ERROR,
+  DEFAULT_ITEMS_PER_PAGE,
+  PAGINATION_ITEMS_PER_PAGE_OPTIONS,
+  WORKFLOWS_SCOPE,
+  TOOLS_SCOPE,
+} from '../../common/constants';
+import { TYPE } from '../tasks/bulk_delete_task';
 
 function createErrorResponse(
   response: KibanaResponseFactory,
@@ -61,7 +69,19 @@ export function registerRoutes(dependencies: RouteDependencies) {
   router.get(
     {
       path: API_BASE_PATH,
-      validate: false,
+      validate: {
+        query: schema.object({
+          from: schema.number({
+            min: 0,
+            defaultValue: 0,
+          }),
+          size: schema.number({
+            min: 1,
+            defaultValue: DEFAULT_ITEMS_PER_PAGE,
+            max: Math.max(...PAGINATION_ITEMS_PER_PAGE_OPTIONS),
+          }),
+        }),
+      },
       security: {
         authz: {
           enabled: false,
@@ -69,8 +89,9 @@ export function registerRoutes(dependencies: RouteDependencies) {
         },
       },
     },
-    async (context, _request, response) => {
+    async (context, request, response) => {
       const coreContext = await context.core;
+      const query = request.query;
 
       try {
         const [, { dataCatalog }] = await getStartServices();
@@ -79,7 +100,8 @@ export function registerRoutes(dependencies: RouteDependencies) {
         const findResult: SavedObjectsFindResponse<DataSourceAttributes> =
           await savedObjectsClient.find({
             type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-            perPage: DEFAULT_PAGE_SIZE,
+            perPage: query.size,
+            page: Math.floor(query.from / query.size) + 1,
           });
 
         const dataSources = findResult.saved_objects.map((savedObject) => {
@@ -286,68 +308,137 @@ export function registerRoutes(dependencies: RouteDependencies) {
       },
     },
     async (context, request, response) => {
-      const coreContext = await context.core;
-
       try {
+        const coreContext = await context.core;
         const savedObjectsClient = coreContext.savedObjects.client;
-        const findResponse: SavedObjectsFindResponse<DataSourceAttributes> =
-          await savedObjectsClient.find({
-            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-            perPage: MAX_PAGE_SIZE,
-          });
-        const dataSources = findResponse.saved_objects;
 
-        logger.debug(`Found ${dataSources.length} data source(s) to delete`);
+        const [, plugins] = await getStartServices();
+        const taskManager = plugins.taskManager;
 
-        if (dataSources.length === 0) {
-          return response.ok({
+        if (!taskManager) {
+          logger.error(TASK_MANAGER_NOT_AVAILABLE_ERROR);
+          return response.customError({
+            statusCode: 503,
             body: {
-              success: true,
-              deletedCount: 0,
-              fullyDeletedCount: 0,
-              partiallyDeletedCount: 0,
+              message: TASK_MANAGER_NOT_AVAILABLE_ERROR,
             },
           });
         }
 
-        // Delete all related resources and saved objects for each data source
-        const [, { actions, agentBuilder }] = await getStartServices();
-        const actionsClient = await actions.getActionsClientWithRequest(request);
-        const toolRegistry = await agentBuilder.tools.getRegistry({ request });
-
-        let fullyDeletedCount = 0;
-        let partiallyDeletedCount = 0;
-
-        // Process each data source individually to handle partial failures
-        for (const dataSource of dataSources) {
-          const result = await deleteDataSourceAndRelatedResources({
-            dataSource,
-            savedObjectsClient,
-            actionsClient,
-            toolRegistry,
-            workflowManagement,
-            request,
-            logger,
-          });
-
-          if (result.fullyDeleted) {
-            fullyDeletedCount++;
-          } else {
-            partiallyDeletedCount++;
+        // Snapshot all data source IDs at queue time so the task only deletes these;
+        // any datasource created after the user clicks "delete all" is left intact.
+        const dataSourceIds: string[] = [];
+        const finder = savedObjectsClient.createPointInTimeFinder<DataSourceAttributes>({
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          perPage: 1000,
+          fields: [],
+        });
+        try {
+          for await (const resp of finder.find()) {
+            for (const so of resp.saved_objects) {
+              dataSourceIds.push(so.id);
+            }
           }
+        } finally {
+          await finder.close();
         }
 
+        const taskId = v4();
+        await taskManager.ensureScheduled(
+          {
+            id: taskId,
+            taskType: TYPE,
+            scope: [DATASOURCES_SCOPE, WORKFLOWS_SCOPE, TOOLS_SCOPE],
+            state: { isDone: false, deletedCount: 0, errors: [] },
+            runAt: new Date(Date.now() + 3 * 1000),
+            params: { dataSourceIds },
+          },
+          { request }
+        );
+
+        logger.info(`Scheduled bulk delete task: ${taskId}`);
         return response.ok({
           body: {
-            success: true,
-            deletedCount: dataSources.length,
-            fullyDeletedCount,
-            partiallyDeletedCount,
+            taskId,
           },
         });
       } catch (error) {
-        logger.error(`Failed to delete all data sources: ${(error as Error).message}`);
-        return createErrorResponse(response, 'Failed to delete all data sources', error as Error);
+        logger.error(`Failed to schedule bulk delete task: ${(error as Error).message}`);
+        return createErrorResponse(
+          response,
+          'Failed to schedule bulk delete task',
+          error as Error,
+          500
+        );
+      }
+    }
+  );
+
+  // Get bulk delete status
+  router.get(
+    {
+      path: `${API_BASE_PATH}/_tasks/{taskId}`,
+      validate: {
+        params: schema.object({ taskId: schema.string() }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Authorization is delegated to underlying service plugins',
+        },
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const [, plugins] = await getStartServices();
+        const taskManager = plugins.taskManager;
+
+        if (!taskManager) {
+          return response.customError({
+            statusCode: 503,
+            body: {
+              message: TASK_MANAGER_NOT_AVAILABLE_ERROR,
+            },
+          });
+        }
+
+        let task;
+        try {
+          task = await taskManager.get(request.params.taskId);
+        } catch (error) {
+          // If it's a "not found" error, return 404 response
+          if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
+            return response.notFound({
+              body: {
+                message: TASK_NOT_FOUND_ERROR,
+              },
+            });
+          }
+          // For other errors, rethrow to be caught by outer catch block
+          throw error;
+        }
+
+        const state = (task.state || {}) as {
+          isDone: boolean;
+          deletedCount: number;
+          errors: Array<{ dataSourceId: string; error: string }>;
+        };
+
+        return response.ok({
+          body: {
+            isDone: state.isDone || false,
+            deletedCount: state.deletedCount || 0,
+            errors: state.errors || [],
+          },
+        });
+      } catch (error) {
+        logger.error(`Failed to get bulk delete status: ${(error as Error).message}`);
+        return createErrorResponse(
+          response,
+          'Failed to get bulk delete status',
+          error as Error,
+          500
+        );
       }
     }
   );

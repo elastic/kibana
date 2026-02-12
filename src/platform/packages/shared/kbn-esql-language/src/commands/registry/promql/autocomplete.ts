@@ -10,29 +10,40 @@
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '../../../types';
 import { specialIndicesToSuggestions, sourceExists } from '../../definitions/utils/sources';
-import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
+import { getFragmentData, withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { getDateLiterals } from '../../definitions/utils/literals';
+import {
+  getPromqlFunctionSuggestions,
+  getPromqlFunctionSuggestionsForReturnTypes,
+  getMetricTypesForSignature,
+} from '../../definitions/utils/promql';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
+import { ESQL_NUMBER_TYPES, ESQL_STRING_TYPES } from '../../definitions/types';
 import {
   assignCompletionItem,
+  buildAddValuePlaceholder,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
   getPromqlParamKeySuggestions,
   pipeCompleteItem,
+  promqlByCompleteItem,
+  promqlLabelSelectorItem,
+  promqlRangeSelectorItem,
   valuePlaceholderConstant,
 } from '../complete_items';
 import {
   areRequiredPromqlParamsPresent,
   getPromqlParam,
   getUsedPromqlParamNames,
+  isAfterCustomColumnAssignment,
   PromqlParamValueType,
-} from './utils';
-import {
   getPosition,
   getIndexAssignmentContext,
   isParamValueComplete,
   isAtValidColumnSuggestionPosition,
 } from './utils';
+import { findPipeOutsideQuotes } from '../../definitions/utils/shared';
+import { SuggestionCategory } from '../../../language/autocomplete/utils';
 
 export async function autocomplete(
   query: string,
@@ -44,15 +55,16 @@ export async function autocomplete(
   const innerText = query.substring(0, cursorPosition);
   const commandStart = command.location.min; // Don't assume 0; PROMQL can start in a subquery in the future.
   const innerCommandText = innerText.substring(commandStart);
+  const cursorRelativeToCommand = cursorPosition - commandStart;
   // We can't rely on command.location.max: it can stop at a mis-parsed last param, so we'd either
   // truncate or include the wrong text. The first pipe is the only stable delimiter here for now.
-  const pipeIndex = query.indexOf('|', commandStart);
+  const pipeIndex = findPipeOutsideQuotes(query, commandStart);
   const commandText = query.substring(commandStart, pipeIndex === -1 ? query.length : pipeIndex);
-  const position = getPosition(innerText, command);
+  const position = getPosition(innerText, command, commandText);
+  const needsWrappedQuery = isAfterCustomColumnAssignment(innerCommandText);
 
   switch (position.type) {
     case 'after_command': {
-      // Scan full PROMQL command for used params.
       const usedParams = getUsedPromqlParamNames(commandText);
       const availableParamSuggestions = getPromqlParamKeySuggestions().filter(
         (suggestion) => !usedParams.has(suggestion.label)
@@ -60,46 +72,112 @@ export async function autocomplete(
 
       const canSuggestColumn =
         areRequiredPromqlParamsPresent(usedParams) &&
-        isAtValidColumnSuggestionPosition(commandText, cursorPosition - commandStart);
+        isAtValidColumnSuggestionPosition(commandText, cursorRelativeToCommand);
       const columnSuggestion = canSuggestColumn
         ? getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || '')
         : undefined;
 
-      const onComplete = [
-        commaCompleteItem,
+      const baseSuggestions = [
         ...availableParamSuggestions,
         ...(columnSuggestion ? [columnSuggestion] : []),
+        ...(canSuggestColumn
+          ? buildFieldSuggestions(context, ESQL_NUMBER_TYPES, needsWrappedQuery ? 'wrap' : 'plain')
+          : []),
+        ...(canSuggestColumn ? wrapFunctionSuggestions(needsWrappedQuery) : []),
       ];
 
       const indexSuggestions = suggestForIndexAssignment(
         innerCommandText,
         commandStart,
         context?.timeSeriesSources,
-        onComplete
+        [commaCompleteItem, ...baseSuggestions]
       );
 
-      if (indexSuggestions) {
-        return indexSuggestions;
-      }
-
-      return [...availableParamSuggestions, ...(columnSuggestion ? [columnSuggestion] : [])];
+      return indexSuggestions ?? baseSuggestions;
     }
 
     case 'after_param_keyword':
       return [assignCompletionItem];
 
     case 'after_param_equals':
-      if (isParamValueComplete(commandText, cursorPosition - commandStart, position.currentParam)) {
+      if (isParamValueComplete(commandText, cursorRelativeToCommand, position.currentParam)) {
         return [];
       }
+
       return suggestParamValues(position.currentParam, context);
 
-    case 'inside_query':
-      // TODO: Add PromQL autocomplete suggestions (functions, metrics, labels)
+    case 'inside_grouping':
+      return position.isCompleteLabel
+        ? [commaCompleteItem]
+        : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain');
+
+    // TODO: Re-enable label matcher suggestions when label signatures are implemented
+    // case 'after_label_brace':
+    //   return position.isCompleteLabel
+    //     ? [commaCompleteItem]
+    //     : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain');
+    // case 'after_label_name':
+    //   return getPromqlLabelMatcherSuggestions();
+    // case 'after_label_operator':
+    //   return [valuePlaceholderConstant];
+    case 'after_label_brace':
+    case 'after_label_name':
+    case 'after_label_operator':
       return [];
 
-    case 'after_query':
-      return [pipeCompleteItem];
+    case 'after_metric': {
+      return position.signatureTypes?.includes('range_vector') && !position.selector?.duration
+        ? [promqlLabelSelectorItem, promqlRangeSelectorItem]
+        : [promqlLabelSelectorItem];
+    }
+
+    case 'after_label_selector': {
+      return position.signatureTypes?.includes('range_vector') && position.canSuggestRangeSelector
+        ? [promqlRangeSelectorItem]
+        : [];
+    }
+
+    case 'inside_query':
+      return position.canAddGrouping ? [promqlByCompleteItem] : [];
+
+    case 'after_complete_arg':
+      return position.canSuggestCommaInFunctionArgs ? [commaCompleteItem] : [];
+
+    case 'after_open_paren':
+    case 'inside_function_args': {
+      if (position.canSuggestCommaInFunctionArgs) {
+        return [commaCompleteItem];
+      }
+      const signatureTypes = position.signatureTypes ?? [];
+      const types = getMetricTypesForSignature(signatureTypes);
+
+      const expectsOnlyScalar =
+        signatureTypes.length > 0 && signatureTypes.every((type) => type === 'scalar');
+      const scalarValues = expectsOnlyScalar ? [buildAddValuePlaceholder('number')] : [];
+
+      const metrics = expectsOnlyScalar
+        ? []
+        : buildFieldSuggestions(context, types, needsWrappedQuery ? 'wrap' : 'plain');
+
+      const functions = expectsOnlyScalar
+        ? []
+        : wrapFunctionSuggestions(
+            needsWrappedQuery,
+            getPromqlFunctionSuggestionsForReturnTypes(signatureTypes)
+          );
+
+      return [...scalarValues, ...metrics, ...functions];
+    }
+
+    case 'after_query': {
+      const suggestions: ISuggestionItem[] = [pipeCompleteItem];
+
+      if (position.canAddGrouping) {
+        suggestions.unshift(promqlByCompleteItem);
+      }
+
+      return suggestions;
+    }
 
     default:
       return [];
@@ -118,7 +196,7 @@ function suggestForIndexAssignment(
   sources: IndexAutocompleteItem[] | undefined,
   onComplete: ISuggestionItem[]
 ): ISuggestionItem[] | undefined {
-  const indexContext = getIndexAssignmentContext(commandText, 'index');
+  const indexContext = getIndexAssignmentContext(commandText);
   if (!indexContext) {
     return undefined;
   }
@@ -229,4 +307,47 @@ function suggestParamValues(
   }
 
   return [valuePlaceholderConstant];
+}
+
+// ============================================================================
+// Field Suggestions
+// ============================================================================
+
+/* Wraps function suggestions in parentheses when needed for column assignment syntax. */
+function wrapFunctionSuggestions(
+  wrap: boolean,
+  suggestions: ISuggestionItem[] = getPromqlFunctionSuggestions()
+): ISuggestionItem[] {
+  if (!wrap) {
+    return suggestions;
+  }
+
+  return suggestions.map((suggestion) => ({
+    ...suggestion,
+    text: `(${suggestion.text})`,
+  }));
+}
+
+function buildFieldSuggestions(
+  context: ICommandContext | undefined,
+  types: readonly string[] | undefined,
+  wrap: 'wrap' | 'plain'
+): ISuggestionItem[] {
+  if (!context?.columns) {
+    return [];
+  }
+
+  return Array.from(context.columns.values())
+    .filter((column) => !column.userDefined && (!types || types.includes(column.type)))
+    .map((column) => {
+      const text = wrap === 'wrap' ? `(${column.name})` : `${column.name} `;
+
+      return withAutoSuggest({
+        label: column.name,
+        text,
+        kind: 'Field',
+        detail: column.type,
+        category: SuggestionCategory.FIELD,
+      });
+    });
 }

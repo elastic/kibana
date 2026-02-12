@@ -69,6 +69,18 @@ If you want to allow anonymous authentication in Kibana, these settings are supp
 `vis_type_vega.enableExternalUrls`
 :   Set this value to `true` to allow Vega to use any URL to access external data sources and images. When `false`, Vega can only get data from {{es}}. **Default: `false`**
 
+### UI Settings [ec_ui_settings]
+
+#### Version 9.4+ [ec_ui_version_9_4]
+```{applies_to}
+stack: ga 9.4+
+```
+
+`uiSettings.globalOverrides.hideAnnouncements`
+:   Set to `true` to stop showing messages and tours that highlight new features. **Default: `false`**
+
+`uiSettings.globalOverrides.hideFeedback`
+:   Set to `true` to stop showing elements requesting user feedback. **Default: `false`**
 
 ## X-Pack configuration settings [ec-xpack-config]
 
@@ -95,6 +107,9 @@ stack: ga 9.2
 
 `xpack.actions.email.recipient_allowlist`
 :    A list of allowed email recipient patterns (`to`, `cc`, or `bcc`) that can be used with email connectors. If you attempt to send an email to a recipient that does not match the allowed patterns, the action will fail. The failure message indicates that the email is not allowed.
+
+`xpack.securitySolution.disableEndpointRuleAutoInstall` {applies_to}`stack: ga 9.2.4+`
+:   Set to `true` to disable the automatic installation of Elastic Defend SIEM rules when a new Endpoint integration policy is created. Default is `false`.
 
 ### Version 9.1+ [ec_version_9_1]
 ```{applies_to}

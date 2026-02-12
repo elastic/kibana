@@ -55,20 +55,7 @@ export const createThreatSignals = async ({
     completeRule,
     tuple,
     ruleExecutionLogger,
-    experimentalFeatures,
   } = sharedParams;
-
-  if (!experimentalFeatures.doesNotMatchForIndicatorMatchRuleEnabled) {
-    if (
-      completeRule.ruleParams.threatMapping.some((mapping) =>
-        mapping.entries.some((entry) => entry.negate)
-      )
-    ) {
-      throw new Error(
-        'Indicator match rules do not support DOES NOT MATCH condition. Please remove it from the rule or enable the experimental feature "xpack.securitySolution.enableExperimental: - doesNotMatchForIndicatorMatchRuleEnabled" in Kibana config'
-      );
-    }
-  }
 
   const {
     alertId,

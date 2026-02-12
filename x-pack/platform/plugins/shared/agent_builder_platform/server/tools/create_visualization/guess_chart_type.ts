@@ -30,8 +30,8 @@ const chartTypeSchema = z
 
 export async function guessChartType(
   modelProvider: ModelProvider,
-  existingType: string,
-  nlQuery: string
+  nlQuery: string,
+  existingType?: string
 ) {
   const model = await modelProvider.getDefaultModel();
 

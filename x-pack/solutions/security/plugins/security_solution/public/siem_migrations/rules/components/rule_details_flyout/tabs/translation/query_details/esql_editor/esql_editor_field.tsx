@@ -73,7 +73,6 @@ export const EsqlEditorField: React.FC<EsqlEditorFieldProps> = React.memo(
           dataErrorsControl={dataErrorsControl}
           hideRunQueryText
           disableSubmitAction
-          hideTimeFilterInfo
           hideQueryHistory
           hasOutline
           editorIsInline

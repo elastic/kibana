@@ -13,7 +13,7 @@ import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram'
 import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
-import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
+import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { i18n } from '@kbn/i18n';
 import { type UpdateESQLQueryFn, useProfileAccessor } from '../../../../context_awareness';

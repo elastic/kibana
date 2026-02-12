@@ -21,7 +21,7 @@ import type {
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  EXCEPTION_LIST_NAMESPACE,
+  EXCEPTION_LIST_NAMESPACE_AWARE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
 } from '@kbn/securitysolution-list-constants';
 
@@ -115,8 +115,8 @@ export type ExceptionsBuilderReturnExceptionItem =
   | CreateExceptionListItemSchema
   | CreateRuleExceptionListItemSchema;
 
-export const exceptionListSavedObjectType = EXCEPTION_LIST_NAMESPACE;
+export const exceptionListSavedObjectType = EXCEPTION_LIST_NAMESPACE_AWARE;
 export const exceptionListAgnosticSavedObjectType = EXCEPTION_LIST_NAMESPACE_AGNOSTIC;
 export type SavedObjectType =
-  | typeof EXCEPTION_LIST_NAMESPACE
+  | typeof EXCEPTION_LIST_NAMESPACE_AWARE
   | typeof EXCEPTION_LIST_NAMESPACE_AGNOSTIC;

@@ -60,7 +60,8 @@
     "@kbn/autoops-promotion-callout",
     "@kbn/react-query",
     "@kbn/response-ops-rule-params",
-    "@kbn/kql"
+    "@kbn/kql",
+    "@kbn/cloud-connect-plugin"
   ],
   "exclude": ["target/**/*"]
 }

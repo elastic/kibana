@@ -242,7 +242,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       fieldFormats,
       dataViews,
       inspector,
-      screenshotMode,
       scriptedFieldsEnabled,
       share,
       cps,
