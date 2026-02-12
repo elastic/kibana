@@ -367,7 +367,7 @@ export class SearchInterceptor {
         });
 
     const sendCancelRequest = once(() =>
-      this.deps.http.delete(`/internal/search/${strategy}/${id}`, { version: '1' })
+      this.deps.http.delete(`/internal/search/${String(strategy)}/${id}`, { version: '1' })
     );
 
     const cancel = async () => {
@@ -490,7 +490,7 @@ export class SearchInterceptor {
 
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
-        `/internal/search/${strategy}${request.id ? `/${request.id}` : ''}`,
+        `/internal/search/${String(strategy)}${request.id ? `/${request.id}` : ''}`,
         {
           version: '1',
           signal: abortSignal,
