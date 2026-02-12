@@ -174,11 +174,8 @@ export class DashboardPageLinks extends FtrService {
   }
 
   public async reorderLinks(linkLabel: string, startIndex: number, steps: number, reverse = false) {
-    this.log.debug(
-      `move the ${linkLabel} link from ${startIndex} to ${
-        reverse ? startIndex - steps : startIndex + steps
-      }`
-    );
+    const targetIndex = reverse ? startIndex - steps : startIndex + steps;
+    this.log.debug(`move the ${linkLabel} link from ${startIndex} to ${targetIndex}`);
     const linkToMove = await this.findDraggableLinkByIndex(startIndex);
     const draggableButton = await linkToMove.findByTestSubject(`panelEditorLink--dragHandle`);
     expect(await draggableButton.getAttribute('data-rfd-drag-handle-draggable-id')).to.equal(
@@ -193,6 +190,15 @@ export class DashboardPageLinks extends FtrService {
     await this.browser.pressKeys(this.browser.keys.SPACE);
     await this.retry.try(async () => {
       expect(await linkToMove.elementHasClass('euiDraggable--isDragging')).to.be(false);
+    });
+
+    // Verify the link moved to the expected position
+    await this.retry.try(async () => {
+      const movedLink = await this.findDraggableLinkByIndex(targetIndex);
+      const movedDragHandle = await movedLink.findByTestSubject(`panelEditorLink--dragHandle`);
+      expect(await movedDragHandle.getAttribute('data-rfd-drag-handle-draggable-id')).to.equal(
+        linkLabel
+      );
     });
   }
 

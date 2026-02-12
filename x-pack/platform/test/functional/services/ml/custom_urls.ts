@@ -164,7 +164,11 @@ export function MachineLearningCustomUrlsProvider({
 
     async clickTestCustomUrl(index: number) {
       await testSubjects.existOrFail(`mlJobEditCustomUrlItem_${index}`);
+      // Get current tab count before clicking
+      const tabsBefore = await browser.getAllWindowHandles();
       await testSubjects.click(`mlJobEditCustomUrlItem_${index} > mlJobEditTestCustomUrlButton`);
+      // Wait for new tab to open (custom URL test opens in new tab)
+      await browser.waitForTabCount(tabsBefore.length + 1);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 

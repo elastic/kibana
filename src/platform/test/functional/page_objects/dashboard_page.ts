@@ -16,6 +16,8 @@ import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 import type { CommonPageObject } from './common_page';
 
+const FAST_PROBE_TIMEOUT_MS = 1000;
+
 interface SaveDashboardOptions {
   /**
    * @default true
@@ -52,6 +54,7 @@ export class DashboardPageObject extends FtrService {
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly appsMenu = this.ctx.getService('appsMenu');
   private readonly toasts = this.ctx.getService('toasts');
+  private readonly retryDelay = this.config.get('timeouts.retryDelay');
 
   private readonly logstashIndex = this.config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
@@ -359,6 +362,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickCancelOutOfEditMode(accept = true) {
+    const start = Date.now();
     this.log.debug('clickCancelOutOfEditMode');
     if (!(await this.getIsInEditMode())) return;
 
@@ -375,14 +379,32 @@ export class DashboardPageObject extends FtrService {
       return !isDisabled;
     });
 
+    const t0 = Date.now();
+    await this.retry.tryForTime(
+      this.config.get('timeouts.waitFor'),
+      async () => {
+        const leaveEditModeButton = await this.testSubjects.find('dashboardViewOnlyMode');
+        const isDisabled = await leaveEditModeButton.getAttribute('disabled');
+        if (isDisabled) throw new Error('leave edit mode button disabled');
+      },
+      undefined,
+      this.retryDelay
+    );
+    this.common.logSlowTiming('dashboard.clickCancelOutOfEditMode wait(button enabled)', t0);
+
     await this.testSubjects.click('dashboardViewOnlyMode');
 
     if (accept) {
-      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      // Optional modal; avoid `testSubjects.exists()` retry delay for negative checks
+      const confirmation = await this.find.existsByCssSelector(
+        '[data-test-subj="confirmModalTitleText"]',
+        FAST_PROBE_TIMEOUT_MS
+      );
       if (confirmation) {
         await this.common.clickConfirmOnModal();
       }
     }
+    this.common.logSlowTiming('dashboard.clickCancelOutOfEditMode', start);
   }
 
   public async clickDiscardChanges(accept = true) {
@@ -401,11 +423,13 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async clickQuickSave() {
+    const start = Date.now();
     await this.retry.try(async () => {
       await this.expectQuickSaveButtonEnabled();
       this.log.debug('clickQuickSave');
       await this.testSubjects.click('dashboardQuickSaveMenuItem');
     });
+    this.common.logSlowTiming('dashboard.saveDashboard clickQuickSave', start);
   }
 
   public async clearUnsavedChanges() {
@@ -458,29 +482,57 @@ export class DashboardPageObject extends FtrService {
   public async clickNewDashboard(
     options: AddNewDashboardOptions = { continueEditing: false, expectWarning: false }
   ) {
+    const start = Date.now();
+    const stepStart = () => Date.now();
+    const slowLog = (label: string, t: number) =>
+      this.common.logSlowTiming(`dashboard.clickNewDashboard ${label}`, t);
     const { continueEditing, expectWarning } = options;
-    const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
+    const t0 = stepStart();
+    // This button is optional; keep the check fast to avoid spending seconds waiting for "not present".
+    const discardButtonExists = await this.find.existsByCssSelector(
+      '[data-test-subj="discardDashboardPromptButton"]',
+      FAST_PROBE_TIMEOUT_MS
+    );
     if (!continueEditing && discardButtonExists) {
       this.log.debug('found discard button');
       await this.testSubjects.click('discardDashboardPromptButton');
-      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
+      const confirmation = await this.find.existsByCssSelector(
+        '[data-test-subj="confirmModalTitleText"]',
+        FAST_PROBE_TIMEOUT_MS
+      );
       if (confirmation) {
         await this.common.clickConfirmOnModal();
       }
     }
+    slowLog('handleDiscardPrompt', t0);
+
+    const t1 = stepStart();
     await this.listingTable.clickNewButton();
+    slowLog('listingTable.clickNewButton', t1);
+
+    const t2 = stepStart();
     if (expectWarning) {
       await this.testSubjects.existOrFail('dashboardCreateConfirm');
     }
-    if (await this.testSubjects.exists('dashboardCreateConfirm')) {
+    // This confirm is optional; keep the check fast.
+    if (
+      await this.find.existsByCssSelector(
+        '[data-test-subj="dashboardCreateConfirm"]',
+        FAST_PROBE_TIMEOUT_MS
+      )
+    ) {
       if (continueEditing) {
         await this.testSubjects.click('dashboardCreateConfirmContinue');
       } else {
         await this.testSubjects.click('dashboardCreateConfirmStartOver');
       }
     }
+    slowLog('handleCreateConfirm', t2);
     // make sure the dashboard page is shown
+    const t3 = stepStart();
     await this.waitForRenderComplete();
+    slowLog('waitForRenderComplete', t3);
+    this.common.logSlowTiming('dashboard.clickNewDashboard', start);
   }
 
   public async clickCreateDashboardPrompt() {
@@ -493,7 +545,11 @@ export class DashboardPageObject extends FtrService {
 
   public async isSettingsOpen() {
     this.log.debug('isSettingsOpen');
-    return await this.testSubjects.exists('dashboardSettingsMenu');
+    // Optional; avoid `testSubjects.exists()` retry delay for negative checks
+    return await this.find.existsByCssSelector(
+      '[data-test-subj="dashboardSettingsMenu"]',
+      FAST_PROBE_TIMEOUT_MS
+    );
   }
 
   public async openSettingsFlyout() {
@@ -553,8 +609,15 @@ export class DashboardPageObject extends FtrService {
     dashboard: string,
     saveOptions: Pick<SaveDashboardOptions, 'storeTimeWithDashboard' | 'tags' | 'needsConfirm'> = {}
   ) {
-    await this.openSettingsFlyout();
+    const stepStart = () => Date.now();
+    const slowLog = (label: string, t: number) =>
+      this.common.logSlowTiming(`dashboard.saveDashboard ${label}`, t);
 
+    const t0 = stepStart();
+    await this.openSettingsFlyout();
+    slowLog('modifyExistingDashboardDetails openSettingsFlyout', t0);
+
+    const t1 = stepStart();
     await this.retry.try(async () => {
       this.log.debug('entering new title');
       await this.testSubjects.setValue('dashboardTitleInput', dashboard);
@@ -581,6 +644,7 @@ export class DashboardPageObject extends FtrService {
       this.log.debug('isCustomizeDashboardLoadingIndicatorVisible');
       return await this.expectUnsavedChangesNotificationExists(1500);
     });
+    slowLog('modifyExistingDashboardDetails applyChanges', t1);
   }
 
   /**
@@ -596,37 +660,67 @@ export class DashboardPageObject extends FtrService {
       saveAsNew: true,
     }
   ) {
+    const start = Date.now();
+    const stepStart = () => Date.now();
+    const slowLog = (label: string, t: number) =>
+      this.common.logSlowTiming(`dashboard.saveDashboard ${label}`, t);
+
     await this.retry.try(async () => {
+      const t0 = stepStart();
       if (saveOptions.saveAsNew) {
         await this.enterDashboardSaveModalApplyUpdatesAndClickSave(dashboardName, saveOptions);
       } else {
         await this.modifyExistingDashboardDetails(dashboardName, saveOptions);
         await this.clickQuickSave();
       }
+      slowLog(saveOptions.saveAsNew ? 'saveAsNew(clickSave)' : 'existing(clickQuickSave)', t0);
 
       if (saveOptions.needsConfirm) {
+        const t1 = stepStart();
         await this.ensureDuplicateTitleCallout();
         await this.clickSave();
+        slowLog('needsConfirm(clickSave)', t1);
       }
 
       // Confirm that the Dashboard has actually been saved
+      const t2 = stepStart();
       await this.testSubjects.existOrFail('saveDashboardSuccess');
+      slowLog('wait(saveDashboardSuccess)', t2);
     });
 
     let message;
 
     if (saveOptions.saveAsNew) {
+      const t3 = stepStart();
       message = await this.toasts.getTitleAndDismiss();
+      slowLog('toasts.getTitleAndDismiss', t3);
+
+      const t4 = stepStart();
       await this.header.waitUntilLoadingHasFinished();
+      slowLog('header.waitUntilLoadingHasFinished(1)', t4);
+
+      const t5 = stepStart();
       await this.common.waitForSaveModalToClose();
+      slowLog('common.waitForSaveModalToClose', t5);
     }
 
-    const isInViewMode = await this.testSubjects.exists('dashboardEditMode');
+    const t6 = stepStart();
+    const t6a = stepStart();
+    // This is a simple "am I in view mode?" probe; avoid `testSubjects.exists()` retry delay.
+    const isInViewMode = await this.find.existsByCssSelector(
+      '[data-test-subj="dashboardEditMode"]',
+      FAST_PROBE_TIMEOUT_MS
+    );
+    slowLog('exitFromEditMode checkViewMode', t6a);
     if (saveOptions.exitFromEditMode && !isInViewMode) {
       await this.clickCancelOutOfEditMode();
     }
-    await this.header.waitUntilLoadingHasFinished();
+    slowLog('exitFromEditMode', t6);
 
+    const t7 = stepStart();
+    await this.header.waitUntilLoadingHasFinished();
+    slowLog('header.waitUntilLoadingHasFinished(2)', t7);
+    this.common.logSlowTiming('dashboard.saveDashboard', start);
     return message;
   }
 
@@ -647,35 +741,61 @@ export class DashboardPageObject extends FtrService {
     dashboardTitle: string,
     saveOptions: Omit<SaveDashboardOptions, 'saveAsNew'> = { waitDialogIsClosed: true }
   ) {
-    const isSaveModalOpen = await this.testSubjects.exists('savedObjectSaveModal', {
-      timeout: 2000,
-    });
+    const stepStart = () => Date.now();
+    const slowLog = (label: string, t: number) =>
+      this.common.logSlowTiming(`dashboard.saveDashboard ${label}`, t);
+
+    const t0 = stepStart();
+    // Fast probe for whether the modal is already open; avoid `testSubjects.exists()` retry delay.
+    const isSaveModalOpen = await this.find.existsByCssSelector(
+      '[data-test-subj="savedObjectSaveModal"]',
+      FAST_PROBE_TIMEOUT_MS
+    );
+    slowLog('saveModal exists', t0);
 
     if (!isSaveModalOpen) {
       if (!(await this.testSubjects.exists('dashboardInteractiveSaveMenuItem'))) {
+        const t1 = stepStart();
         await this.openSaveSplitMenu();
+        slowLog('openSaveSplitMenu', t1);
       }
+      const t2 = stepStart();
       await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
+      slowLog('clickInteractiveSaveMenuItem', t2);
     }
 
+    const t3 = stepStart();
     const modalDialog = await this.testSubjects.find('savedObjectSaveModal');
+    slowLog('findSaveModal', t3);
 
     this.log.debug('entering new title');
     // Wait for the title input to be enabled before setting the value to avoid flakiness
+    const t4 = stepStart();
     await this.testSubjects.waitForEnabled('savedObjectTitle');
+    slowLog('waitForTitleEnabled', t4);
+    const t5 = stepStart();
     await this.testSubjects.setValue('savedObjectTitle', dashboardTitle);
+    slowLog('setTitle', t5);
 
     if (saveOptions.storeTimeWithDashboard !== undefined) {
+      const t6 = stepStart();
       await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
+      slowLog('setStoreTimeWithDashboard', t6);
     }
 
     if (saveOptions.tags) {
+      const t7 = stepStart();
       await this.selectDashboardTags(saveOptions.tags);
+      slowLog('selectDashboardTags', t7);
     }
 
+    const t8 = stepStart();
     await this.clickSave();
+    slowLog('clickSave', t8);
     if (saveOptions.waitDialogIsClosed) {
+      const t9 = stepStart();
       await this.testSubjects.waitForDeleted(modalDialog);
+      slowLog('waitForSaveModalClosed', t9);
     }
   }
 
@@ -720,6 +840,7 @@ export class DashboardPageObject extends FtrService {
 
   // use the search filter box to narrow the results down to a single entry
   private async _loadDashboard(dashboardName: string, openInEditMode: boolean) {
+    const start = Date.now();
     this.log.debug(`Load Saved Dashboard ${dashboardName}`);
 
     await this.gotoDashboardLandingPage();
@@ -735,6 +856,11 @@ export class DashboardPageObject extends FtrService {
       // check Dashboard landing page is not present
       await this.testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
     });
+
+    this.common.logSlowTiming(
+      `dashboard._loadDashboard(${openInEditMode ? 'edit' : 'view'})`,
+      start
+    );
   }
 
   public async loadSavedDashboard(dashboardName: string) {
@@ -875,10 +1001,12 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async waitForRenderComplete() {
+    const start = Date.now();
     this.log.debug('waitForRenderComplete');
     const count = await this.getSharedItemsCount();
     // eslint-disable-next-line radix
     await this.renderable.waitForRender(parseInt(count));
+    this.common.logSlowTiming('dashboard.waitForRenderComplete', start);
   }
 
   public async verifyNoRenderErrors() {

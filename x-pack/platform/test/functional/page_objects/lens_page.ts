@@ -1651,14 +1651,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         return Number(renderingCount);
       }
       await header.waitUntilLoadingHasFinished();
+      // Poll until rendering count is stable across consecutive checks
+      let lastCount: number | undefined;
+      let stablePolls = 0;
+      const requiredStablePolls = 3;
       await retry.waitFor('rendering count to stabilize', async () => {
-        const firstCount = await getRenderingCount();
+        const currentCount = await getRenderingCount();
 
-        await common.sleep(1000);
+        if (lastCount === currentCount) {
+          stablePolls++;
+        } else {
+          stablePolls = 0;
+        }
+        lastCount = currentCount;
 
-        const secondCount = await getRenderingCount();
-
-        return firstCount === secondCount;
+        return stablePolls >= requiredStablePolls;
       });
     },
 
@@ -1789,6 +1796,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
             return event;
           }
           function dispatchEvent(element, event, transferData) {
+            if (!element) {
+                throw new Error('Element not found for drag operation');
+            }
             if (transferData !== undefined) {
                 event.dataTransfer = transferData;
             }
@@ -1800,19 +1810,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           }
 
           const origin = document.querySelector(arguments[0]);
+          if (!origin) {
+            throw new Error('Drag origin element not found: ' + arguments[0]);
+          }
           const dragStartEvent = createEvent('dragstart');
           dispatchEvent(origin, dragStartEvent);
 
           setTimeout(() => {
             const target = document.querySelector(arguments[1]);
+            if (!target) {
+              console.error('Drag over target not found: ' + arguments[1]);
+              return;
+            }
             const dragenter = createEvent('dragenter');
             const dragover = createEvent('dragover');
             dispatchEvent(target, dragenter, dragStartEvent.dataTransfer);
             dispatchEvent(target, dragover, dragStartEvent.dataTransfer);
             setTimeout(() => {
-              const target = document.querySelector(arguments[2]);
+              const dropEl = document.querySelector(arguments[2]);
+              if (!dropEl) {
+                console.error('Drop target not found: ' + arguments[2]);
+                return;
+              }
               const dropEvent = createEvent('drop');
-              dispatchEvent(target, dropEvent, dragStartEvent.dataTransfer);
+              dispatchEvent(dropEl, dropEvent, dragStartEvent.dataTransfer);
               const dragEndEvent = createEvent('dragend');
               dispatchEvent(origin, dragEndEvent, dropEvent.dataTransfer);
             }, 200)

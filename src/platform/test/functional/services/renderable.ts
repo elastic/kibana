@@ -17,6 +17,7 @@ export class RenderableService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
+  private readonly common = this.ctx.getPageObject('common');
 
   /**
    * This method waits for a certain number of objects to finish rendering and loading, which is indicated
@@ -26,6 +27,7 @@ export class RenderableService extends FtrService {
    * @param count {Number} Number of RENDER_COMPLETE_SELECTORs to wait for.
    */
   public async waitForRender(count: number = 1): Promise<void> {
+    const start = Date.now();
     this.log.debug(`Renderable.waitForRender for ${count} elements`);
     // exit if there are no objects expected
     if (count === 0) {
@@ -54,6 +56,7 @@ export class RenderableService extends FtrService {
         throw new Error(`${stillLoadingElements.length} elements still loading contents`);
       }
     });
+    this.common.logSlowTiming(`renderable.waitForRender(${count})`, start);
   }
 
   public async getRenderCount(count: number = 1): Promise<Record<string, number>> {

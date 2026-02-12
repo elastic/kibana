@@ -121,6 +121,7 @@ export const schema = Joi.object()
         find: Joi.number().default(10000),
         try: Joi.number().default(120000),
         waitFor: Joi.number().default(20000),
+        retryDelay: Joi.number().default(100),
         esRequestTimeout: Joi.number().default(30000),
         kibanaReportCompletion: Joi.number().default(60_000),
         kibanaStabilize: Joi.number().default(15000),
