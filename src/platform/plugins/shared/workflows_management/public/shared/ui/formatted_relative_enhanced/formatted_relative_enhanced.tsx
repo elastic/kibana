@@ -13,7 +13,7 @@ import moment from 'moment';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelativeTime } from '@kbn/i18n-react';
-import { useFormattedDateTime } from '..';
+import { useFormattedDateTime } from '../use_formatted_date';
 
 export interface FormattedRelativeEnhancedProps extends Intl.RelativeTimeFormatOptions {
   value: Date | number | string;
