@@ -11,6 +11,7 @@ import {
   ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
   AttackDiscoveryScheduleParams,
 } from '@kbn/elastic-assistant-common';
+import type { z } from '@kbn/zod/v4';
 
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '../constants';
@@ -46,7 +47,11 @@ export const getAttackDiscoveryScheduleType = ({
       },
     },
     schemas: {
-      params: { type: 'zod', schema: AttackDiscoveryScheduleParams },
+      params: {
+        type: 'zod',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        schema: AttackDiscoveryScheduleParams as unknown as z.ZodObject<any>,
+      },
     },
     actionVariables: {
       context: [{ name: 'server', description: 'the server' }],

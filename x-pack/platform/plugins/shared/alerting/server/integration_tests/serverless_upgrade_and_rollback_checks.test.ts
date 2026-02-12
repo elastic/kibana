@@ -10,7 +10,7 @@ import {
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import { uniq } from 'lodash';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { z } from '@kbn/zod/v4';
 import { setupTestServers } from './lib';
 import type { RuleTypeRegistry } from '../rule_type_registry';
 
@@ -105,10 +105,16 @@ describe('Serverless upgrade and rollback checks', () => {
       }
       const schemaType = ruleType.schemas.params.type;
       if (schemaType === 'config-schema') {
-        // @ts-ignore-next-line getSchema() exists..
         expect(ruleType.schemas.params.schema.getSchema().describe()).toMatchSnapshot();
       } else if (schemaType === 'zod') {
-        expect(zodToJsonSchema(ruleType.schemas.params.schema)).toMatchSnapshot();
+        const { $schema, ...jsonSchema } = z.toJSONSchema(
+          ruleType.schemas.params.schema as z.ZodType,
+          {
+            unrepresentable: 'any',
+            io: 'input',
+          }
+        ) as Record<string, unknown>;
+        expect(jsonSchema).toMatchSnapshot();
       } else {
         throw new Error(`Support for ${schemaType} missing`);
       }

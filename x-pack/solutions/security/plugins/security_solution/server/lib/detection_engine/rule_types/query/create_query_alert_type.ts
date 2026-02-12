@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import type { z } from '@kbn/zod/v4';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import type { BucketHistory } from './alert_suppression/group_and_bulk_create';
@@ -45,7 +46,11 @@ export const createQueryAlertType = (
       },
     },
     schemas: {
-      params: { type: 'zod', schema: UnifiedQueryRuleParams },
+      params: {
+        type: 'zod',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        schema: UnifiedQueryRuleParams as unknown as z.ZodObject<any>,
+      },
     },
     actionGroups: [
       {

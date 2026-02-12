@@ -7,6 +7,7 @@
 
 import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import type { z } from '@kbn/zod/v4';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { EqlRuleParams } from '../../rule_schema';
@@ -40,7 +41,11 @@ export const createEqlAlertType = (): SecurityAlertType<EqlRuleParams, {}> => {
       },
     },
     schemas: {
-      params: { type: 'zod', schema: EqlRuleParams },
+      params: {
+        type: 'zod',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        schema: EqlRuleParams as unknown as z.ZodObject<any>,
+      },
     },
     actionGroups: [
       {
