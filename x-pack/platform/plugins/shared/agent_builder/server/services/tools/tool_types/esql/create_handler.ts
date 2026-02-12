@@ -43,12 +43,15 @@ export const resolveToolParameters = (
 
 export const createHandler = (
   configuration: EsqlToolConfig
-): ToolHandlerFn<Record<string, EsqlToolParamValue>> => {
+): ToolHandlerFn<Record<string, unknown>> => {
   return async (params, { esClient }) => {
     const client = esClient.asCurrentUser;
 
     // Apply default values for parameters that weren't provided by the LLM
-    const resolvedParams = resolveToolParameters(configuration.params, params);
+    const resolvedParams = resolveToolParameters(
+      configuration.params,
+      params as Record<string, EsqlToolParamValue>
+    );
 
     const paramArray = Object.entries(resolvedParams).map(([param, value]) => ({ [param]: value }));
 

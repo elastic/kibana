@@ -41,7 +41,7 @@ function convertJsonSchemaToZodSimple(schema: JSONSchema7): z.ZodTypeAny {
         }
         return z.object(shape);
       }
-      return z.record(z.any());
+      return z.record(z.string(), z.any());
     }
     default:
       return z.any();
