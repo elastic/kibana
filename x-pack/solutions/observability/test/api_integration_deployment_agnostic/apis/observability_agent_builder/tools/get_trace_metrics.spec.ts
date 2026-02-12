@@ -226,100 +226,85 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       describe('when sorting by metrics', () => {
-        const sortByMetrics = ['latency', 'throughput', 'failureRate'];
+        const parameters = [
+          { sortBy: 'latency', latencyType: 'avg' },
+          { sortBy: 'latency', latencyType: 'p95' },
+          { sortBy: 'latency', latencyType: 'p99' },
+          { sortBy: 'throughput' },
+          { sortBy: 'failureRate' },
+        ];
 
-        for (const metric of sortByMetrics) {
-          it(`returns values sorted by ${metric} descending when sortBy=${metric}`, async () => {
+        for (const params of parameters) {
+          it(`returns values sorted by ${params.sortBy} descending when sortBy=${params.sortBy} and latencyType=${params.latencyType}`, async () => {
             const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
               id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
               params: {
                 start: START,
                 end: END,
-                sortBy: metric,
+                sortBy: params.sortBy,
+                latencyType: params.latencyType,
               },
             });
             const { items } = results[0].data;
-            expect(items).to.eql(orderBy(items, metric, 'desc'));
+            expect(items.length).to.be.greaterThan(0);
+            expect(items).to.eql(orderBy(items, params.sortBy, 'desc'));
           });
         }
-      });
 
-      describe('when sorting by latency with different latency types', () => {
-        const latencyTypes = ['avg', 'p95', 'p99'] as const;
-        for (const latencyType of latencyTypes) {
-          it(`returns values sorted by "${latencyType}" latency descending when latencyType=${latencyType}`, async () => {
-            const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-              id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-              params: {
-                start: START,
-                end: END,
-                sortBy: 'latency',
-                latencyType,
-              },
+        describe('when sorting across different metric sets (document sources)', () => {
+          const metricSetFilters = [
+            {
+              name: 'raw transaction events (processor.event: transaction)',
+              kqlFilter: 'processor.event: "transaction"',
+            },
+            {
+              name: 'transaction metrics (metricset.name: transaction)',
+              kqlFilter: 'processor.event: "metric" AND metricset.name: "transaction"',
+            },
+            {
+              name: 'service transaction metrics (metricset.name: service_transaction)',
+              kqlFilter: 'processor.event: "metric" AND metricset.name: "service_transaction"',
+            },
+          ] as const;
+
+          const toItemsByGroup = (items: TraceMetricsItem[]) =>
+            new Map(items.map((item) => [item.group, item] as const));
+
+          for (const params of parameters) {
+            describe(`with sortBy=${params.sortBy} and latencyType=${params.latencyType}`, () => {
+              let rawEvents: TraceMetricsItem[];
+              let transactionMetrics: TraceMetricsItem[];
+              let serviceTransactionMetrics: TraceMetricsItem[];
+              before(async () => {
+                [rawEvents, transactionMetrics, serviceTransactionMetrics] = await Promise.all(
+                  metricSetFilters.map(async ({ name, kqlFilter }) => {
+                    const results =
+                      await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
+                        id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+                        params: {
+                          start: START,
+                          end: END,
+                          kqlFilter,
+                          sortBy: params.sortBy,
+                          latencyType: params.latencyType,
+                        },
+                      });
+
+                    return results[0].data.items;
+                  })
+                );
+              });
+
+              it(`returns the same number of items across all metric sets when sortBy=${params.sortBy} and latencyType=${params.latencyType}`, () => {
+                expect(rawEvents.length).to.be(transactionMetrics.length);
+                expect(rawEvents.length).to.be(serviceTransactionMetrics.length);
+
+                expect(toItemsByGroup(rawEvents)).to.eql(toItemsByGroup(transactionMetrics));
+                expect(toItemsByGroup(rawEvents)).to.eql(toItemsByGroup(serviceTransactionMetrics));
+              });
             });
-            const { items } = results[0].data;
-            expect(items).to.eql(orderBy(items, 'latency', 'desc'));
-          });
-        }
-      });
-
-      describe('when sorting across different metric sets (document sources)', () => {
-        const metricSetFilters = [
-          {
-            name: 'raw transaction events (processor.event: transaction)',
-            kqlFilter: 'processor.event: "transaction"',
-          },
-          {
-            name: 'transaction metrics (metricset.name: transaction)',
-            kqlFilter: 'processor.event: "metric" AND metricset.name: "transaction"',
-          },
-          {
-            name: 'service transaction metrics (metricset.name: service_transaction)',
-            kqlFilter: 'processor.event: "metric" AND metricset.name: "service_transaction"',
-          },
-        ] as const;
-
-        for (const metricSet of metricSetFilters) {
-          describe(`with ${metricSet.name}`, () => {
-            const sortByMetrics = ['latency', 'throughput', 'failureRate'] as const;
-
-            for (const metric of sortByMetrics) {
-              it(`returns values sorted by ${metric} descending when sortBy=${metric}`, async () => {
-                const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-                  id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-                  params: {
-                    start: START,
-                    end: END,
-                    kqlFilter: metricSet.kqlFilter,
-                    sortBy: metric,
-                  },
-                });
-                const { items } = results[0].data;
-                expect(items.length).to.be.greaterThan(0);
-                expect(items).to.eql(orderBy(items, metric, 'desc'));
-              });
-            }
-
-            const percentileLatencyTypes = ['p95', 'p99'] as const;
-            for (const latencyType of percentileLatencyTypes) {
-              it(`returns values sorted by latency descending when latencyType=${latencyType}`, async () => {
-                const results = await agentBuilderApiClient.executeTool<GetTraceMetricsToolResult>({
-                  id: OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
-                  params: {
-                    start: START,
-                    end: END,
-                    kqlFilter: metricSet.kqlFilter,
-                    sortBy: 'latency',
-                    latencyType,
-                  },
-                });
-                const { items } = results[0].data;
-                expect(items.length).to.be.greaterThan(0);
-                expect(items).to.eql(orderBy(items, 'latency', 'desc'));
-              });
-            }
-          });
-        }
+          }
+        });
       });
     });
 
