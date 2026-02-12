@@ -192,5 +192,6 @@ export async function stopExtractEntityTask({
 }): Promise<void> {
   const taskId = getExtractEntityTaskId(type, namespace);
   await taskManager.removeIfExists(taskId);
+  await taskManager.removeIfExists('entity-maintainer-task-test');
   logger.debug(`removed task: ${taskId}`);
 }

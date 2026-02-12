@@ -15,7 +15,10 @@ import type {
 } from './types';
 import { AssetManager } from './domain/asset_manager';
 import { FeatureFlags } from './infra/feature_flags';
-import { EngineDescriptorClient } from './domain/definitions/saved_objects';
+import {
+  EngineDescriptorClient,
+  EntityMaintainersTasksTypeName,
+} from './domain/definitions/saved_objects';
 import { LogsExtractionClient } from './domain/logs_extraction_client';
 
 interface EntityStoreApiRequestHandlerContextDeps {
@@ -34,8 +37,11 @@ export async function createRequestHandlerContext({
   isServerless,
 }: EntityStoreApiRequestHandlerContextDeps): Promise<EntityStoreApiRequestHandlerContext> {
   const core = await context.core;
-  const [, startPlugins] = await coreSetup.getStartServices();
+  const [coreStart, startPlugins] = await coreSetup.getStartServices();
   const taskManagerStart = startPlugins.taskManager;
+  const entityMaintainersTasksRepo = coreStart.savedObjects.createInternalRepository([
+    EntityMaintainersTasksTypeName,
+  ]);
 
   const namespace = startPlugins.spaces.spacesService.getSpaceId(request);
 
@@ -70,6 +76,7 @@ export async function createRequestHandlerContext({
       namespace,
       isServerless,
       logsExtractionClient,
+      entityMaintainersTasksRepo,
     }),
     featureFlags: new FeatureFlags(core.uiSettings.client),
     logsExtractionClient,

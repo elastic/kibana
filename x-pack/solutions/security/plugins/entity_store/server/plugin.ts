@@ -23,6 +23,7 @@ import {
   EngineDescriptorType,
   EntityMaintainersTasksType,
 } from './domain/definitions/saved_objects';
+import { registerEntityMaintainerTask } from './tasks/entity_maintainer_task';
 
 export class EntityStorePlugin
   implements
@@ -68,8 +69,27 @@ export class EntityStorePlugin
     core.savedObjects.registerType(EngineDescriptorType);
     core.savedObjects.registerType(EntityMaintainersTasksType);
 
+    registerEntityMaintainerTask(({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      config: {
+        description: 'Entity Maintainer Task',
+        id: 'entity-maintainer-task-test',
+        interval: '1m',
+        initialState: {a: 'a'},
+        run: async ({ status }) => {
+          this.logger.debug(' =================> Running entity maintainer RUN task status ==== ' + JSON.stringify(status));
+          return { ...status.state, b: 'b' };
+        },
+        setup: async ({ status }) => {
+          this.logger.debug(' =================> Running entity maintainer SETUP task');
+          return { ...status.state, b: 'b' };
+        },
+      },
+      core,
+    }));
     return {
-      registerEntityMaintainer: (_config) => {},
+      registerEntityMaintainer: (_config: any) => {},
     };
   }
 

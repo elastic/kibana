@@ -16,9 +16,53 @@ import {
   EntityMaintainersTasksTypeName,
   EntityMaintainersTasksSingletonId,
 } from '../../domain/definitions/saved_objects';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { KibanaRequest, ISavedObjectsRepository } from '@kbn/core/server';
 
 function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.Values.entityMaintainer].type}:${id}`;
+}
+
+export async function scheduleEntityMaintainerTask({
+  logger,
+  taskManager,
+  namespace,
+  request,
+  entityMaintainersTasksRepo,
+}: {
+  logger: Logger;
+  taskManager: TaskManagerStartContract;
+  namespace: string;
+  request: KibanaRequest;
+  entityMaintainersTasksRepo: ISavedObjectsRepository;
+}): Promise<void> {
+  try {
+    logger.debug(` =================> Scheduling entity maintainer tasks`);
+    const doc = await entityMaintainersTasksRepo.get<{
+      'entity-maintainers-tasks': Array<{ id: string; interval: string }>;
+    }>(EntityMaintainersTasksTypeName, EntityMaintainersTasksSingletonId);
+    logger.debug(` =================> Doc: ${JSON.stringify(doc)}`);
+    const tasks = doc.attributes['entity-maintainers-tasks'] ?? [];
+    logger.debug(` =================> Tasks: ${JSON.stringify(tasks)}`);
+    for (const { id, interval } of tasks) {
+      await taskManager.ensureScheduled(
+        {
+          id,
+          taskType: getTaskType(id),
+          schedule: { interval },
+          state: { namespace },
+          params: {},
+        },
+        { request }
+      );
+    }
+  } catch (err) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      return;
+    }
+    logger.error(`Failed to schedule entity maintainer tasks: ${(err as Error).message}`);
+    throw err;
+  }
 }
 
 export function registerEntityMaintainerTask({
@@ -39,7 +83,9 @@ export function registerEntityMaintainerTask({
     const type = getTaskType(id);
 
     core.getStartServices().then(([start]) => {
-      const internalRepo = start.savedObjects.createInternalRepository();
+      const internalRepo = start.savedObjects.createInternalRepository([
+        EntityMaintainersTasksTypeName,
+      ]);
       const newEntry = { id, interval };
       internalRepo
         .get<{ 'entity-maintainers-tasks': Array<{ id: string; interval: string }> }>(
@@ -48,6 +94,9 @@ export function registerEntityMaintainerTask({
         )
         .then((existing) => {
           const tasks = existing.attributes['entity-maintainers-tasks'] ?? [];
+          if (tasks.some((t) => t.id === id)) {
+            return;
+          }
           return internalRepo.update(
             EntityMaintainersTasksTypeName,
             EntityMaintainersTasksSingletonId,
@@ -73,24 +122,25 @@ export function registerEntityMaintainerTask({
         createTaskRunner: ({ taskInstance }) => ({
           run: async () => {
             const currentStatus = taskInstance.state;
+            logger.debug(` =================> Entity maintainer task run1: ${JSON.stringify(currentStatus)}`);
             const maintainerSatus: EntityMaintainerStatus = {
-              metaData: {
-                runs: currentStatus?.metaData?.runs || 0,
-                lastSuccessTimestamp: currentStatus?.metaData?.lastSuccessTimestamp || null,
-                lastErrorTimestamp: currentStatus?.metaData?.lastErrorTimestamp || null,
+              metadata: {
+                runs: currentStatus?.metadata?.runs || 0,
+                lastSuccessTimestamp: currentStatus?.metadata?.lastSuccessTimestamp || null,
+                lastErrorTimestamp: currentStatus?.metadata?.lastErrorTimestamp || null,
               },
-              state: currentStatus?.state?.runs ? currentStatus.state : initialState,
+              state: currentStatus?.metadata?.runs ? currentStatus.state : initialState,
             };
 
-            const isFirstRun = maintainerSatus.metaData.runs === 0;
+            const isFirstRun = maintainerSatus.metadata.runs === 0;
 
             if (isFirstRun && setup) {
-              maintainerSatus.state = await setup({ state: maintainerSatus });
+              maintainerSatus.state = await setup({ status: maintainerSatus });
             }
-            maintainerSatus.state = await run({ state: maintainerSatus });
-            maintainerSatus.metaData.runs++;
-            maintainerSatus.metaData.lastSuccessTimestamp = new Date().toISOString();
-
+            maintainerSatus.state = await run({ status: maintainerSatus });
+            maintainerSatus.metadata.runs++;
+            maintainerSatus.metadata.lastSuccessTimestamp = new Date().toISOString();
+            logger.debug(` =================> Entity maintainer task run2: ${JSON.stringify(maintainerSatus)}`);
             // TODO: Handle error
             return {
               state: maintainerSatus,
@@ -99,6 +149,9 @@ export function registerEntityMaintainerTask({
         }),
       },
     });
+
+
+    logger.debug(` =================> Entity maintainer task registered: ${type}`);
 
   } catch (e) {
     logger.error(`Error registering extract entity tasks, received ${e.message}`);

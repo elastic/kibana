@@ -9,7 +9,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 
 export interface EntityMaintainerWriter { }
 
-export interface EntityMaintainerStatusMetaData {
+export interface EntityMaintainerStatusMetadata {
   runs: number;
   lastSuccessTimestamp: string | null;
   lastErrorTimestamp: string | null;
@@ -23,12 +23,12 @@ interface EntityMaintainerState {
 }
 
 export interface EntityMaintainerStatus extends Record<string, unknown> {
-  metaData: EntityMaintainerStatusMetaData;
+  metadata: EntityMaintainerStatusMetadata;
   state: EntityMaintainerState;
 }
 
 interface EntityMaintainerTaskMethodContext {
-  state: EntityMaintainerStatus;
+  status: EntityMaintainerStatus;
 }
 
 export type EntityMaintainerTaskMethod = (context: EntityMaintainerTaskMethodContext) => Promise<EntityMaintainerState>;

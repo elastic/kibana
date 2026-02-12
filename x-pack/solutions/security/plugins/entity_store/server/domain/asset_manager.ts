@@ -6,7 +6,11 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  ISavedObjectsRepository,
+} from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getEntityDefinition } from '../../common/domain/definitions/registry';
@@ -15,6 +19,7 @@ import type {
   ManagedEntityDefinition,
 } from '../../common/domain/definitions/entity_schema';
 import { scheduleExtractEntityTask, stopExtractEntityTask } from '../tasks/extract_entity_task';
+import { scheduleEntityMaintainerTask } from '../tasks/entity_maintainer_task';
 import { installElasticsearchAssets, uninstallElasticsearchAssets } from './assets/install_assets';
 import type {
   EngineDescriptor,
@@ -48,6 +53,7 @@ interface AssetManagerDependencies {
   namespace: string;
   isServerless: boolean;
   logsExtractionClient: LogsExtractionClient;
+  entityMaintainersTasksRepo: ISavedObjectsRepository;
 }
 
 export class AssetManager {
@@ -58,6 +64,7 @@ export class AssetManager {
   private readonly namespace: string;
   private readonly isServerless: boolean;
   private readonly logsExtractionClient: LogsExtractionClient;
+  private readonly entityMaintainersTasksRepo: ISavedObjectsRepository;
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
@@ -67,6 +74,7 @@ export class AssetManager {
     this.namespace = deps.namespace;
     this.isServerless = deps.isServerless;
     this.logsExtractionClient = deps.logsExtractionClient;
+    this.entityMaintainersTasksRepo = deps.entityMaintainersTasksRepo;
   }
 
   public async initEntity(
@@ -93,6 +101,15 @@ export class AssetManager {
         namespace: this.namespace,
         request,
       });
+
+      await scheduleEntityMaintainerTask({
+        logger: this.logger,
+        taskManager: this.taskManager,
+        namespace: this.namespace,
+        request,
+        entityMaintainersTasksRepo: this.entityMaintainersTasksRepo,
+      });
+
     } catch (error) {
       this.logger.get(type).error(`Error starting extract entity task for type ${type}:`, error);
       throw error;
