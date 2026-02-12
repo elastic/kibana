@@ -6,11 +6,12 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { useService } from '@kbn/core-di-browser';
 import { RulesApi } from '../services/rules_api';
+import type { RuleDetails } from '../services/rules_api';
 
-const DEFAULT_RULE_VALUES: CreateRuleData = {
+const DEFAULT_RULE_VALUES: RuleDetails = {
+  id: '',
   name: '',
   kind: 'alert',
   tags: [],
@@ -20,13 +21,17 @@ const DEFAULT_RULE_VALUES: CreateRuleData = {
   timeField: '',
   lookbackWindow: '5m',
   groupingKey: [],
+  createdBy: null,
+  createdAt: undefined,
+  updatedBy: null,
+  updatedAt: undefined,
 };
 
 export function useExistingRule(ruleId: string | undefined) {
   const rulesApi = useService(RulesApi);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [rule, setRule] = useState<CreateRuleData | null>(null);
+  const [rule, setRule] = useState<RuleDetails | null>(null);
 
   useEffect(() => {
     if (!ruleId) {
@@ -41,9 +46,11 @@ export function useExistingRule(ruleId: string | undefined) {
       try {
         const fetchedRule = await rulesApi.getRule(ruleId);
 
-        const transformedRule: CreateRuleData = {
+        const transformedRule: RuleDetails = {
           ...DEFAULT_RULE_VALUES,
+          id: fetchedRule.id,
           name: fetchedRule.name,
+          kind: fetchedRule.kind ?? DEFAULT_RULE_VALUES.kind,
           tags: fetchedRule.tags ?? DEFAULT_RULE_VALUES.tags,
           enabled: fetchedRule.enabled ?? DEFAULT_RULE_VALUES.enabled,
           query: fetchedRule.query ?? DEFAULT_RULE_VALUES.query,
@@ -53,6 +60,10 @@ export function useExistingRule(ruleId: string | undefined) {
           schedule: fetchedRule.schedule?.custom
             ? { custom: fetchedRule.schedule.custom }
             : DEFAULT_RULE_VALUES.schedule,
+          createdBy: fetchedRule.createdBy ?? DEFAULT_RULE_VALUES.createdBy,
+          createdAt: fetchedRule.createdAt ?? DEFAULT_RULE_VALUES.createdAt,
+          updatedBy: fetchedRule.updatedBy ?? DEFAULT_RULE_VALUES.updatedBy,
+          updatedAt: fetchedRule.updatedAt ?? DEFAULT_RULE_VALUES.updatedAt,
         };
 
         setRule(transformedRule);
