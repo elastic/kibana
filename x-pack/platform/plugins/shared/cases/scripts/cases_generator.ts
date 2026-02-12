@@ -182,45 +182,34 @@ const generateAlertDocument = (alertNum: number) => {
   const processName = pick(processNames);
   const riskScore = Math.floor(Math.random() * 100);
 
+  // Use dot-notation for all ECS fields to conform to the existing index mappings
+  // managed by Kibana's alerting framework. Nested objects can create text mappings
+  // that conflict with the expected keyword mappings.
   return {
     _id: alertId,
     ruleId,
     ruleName: `Generated Rule ${alertNum + 1}`,
     _source: {
       '@timestamp': now.toISOString(),
-      event: {
-        kind: 'signal',
-        category: pick(categories),
-        action: pick(actions),
-        dataset: 'endpoint',
-        module: 'endpoint',
-      },
-      host: {
-        name: hostname,
-        ip: `10.0.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-        os: { name: 'Linux', version: '5.15.0' },
-      },
-      user: {
-        name: username,
-        domain: 'WORKGROUP',
-      },
-      process: {
-        name: processName,
-        pid: Math.floor(Math.random() * 65535),
-        executable: `/usr/bin/${processName}`,
-      },
-      file: {
-        name: processName,
-        path: `/tmp/${processName}`,
-        hash: {
-          sha256: uuidv4().replace(/-/g, '') + uuidv4().replace(/-/g, ''),
-        },
-      },
-      rule: {
-        id: ruleId,
-        name: `Generated Rule ${alertNum + 1}`,
-        description: `Auto-generated detection rule #${alertNum + 1}`,
-      },
+      'event.kind': 'signal',
+      'event.category': pick(categories),
+      'event.action': pick(actions),
+      'event.dataset': 'endpoint',
+      'event.module': 'endpoint',
+      'host.name': hostname,
+      'host.ip': `10.0.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+      'host.os.name': 'Linux',
+      'host.os.version': '5.15.0',
+      'user.name': username,
+      'process.name': processName,
+      'process.pid': Math.floor(Math.random() * 65535),
+      'process.executable': `/usr/bin/${processName}`,
+      'file.name': processName,
+      'file.path': `/tmp/${processName}`,
+      'file.hash.sha256': uuidv4().replace(/-/g, '') + uuidv4().replace(/-/g, ''),
+      'rule.id': ruleId,
+      'rule.name': `Generated Rule ${alertNum + 1}`,
+      'rule.description': `Auto-generated detection rule #${alertNum + 1}`,
       'kibana.alert.uuid': alertId,
       'kibana.alert.rule.rule_id': ruleId,
       'kibana.alert.rule.name': `Generated Rule ${alertNum + 1}`,
