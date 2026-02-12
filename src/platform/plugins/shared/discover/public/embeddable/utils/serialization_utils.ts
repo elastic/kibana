@@ -33,20 +33,41 @@ export const deserializeState = async ({
   const savedObjectId = (serializedState as SearchEmbeddableByReferenceState).savedObjectId;
   if (savedObjectId) {
     // by reference
-    const { get } = discoverServices.savedSearch;
-    const so = await get(savedObjectId, true);
+    const { getDiscoverSession } = discoverServices.savedSearch;
+    const session = await getDiscoverSession(savedObjectId);
 
-    const rawSavedObjectAttributes = pick(so, EDITABLE_SAVED_SEARCH_KEYS);
+    const selectedTabId = (serializedState as SearchEmbeddableByReferenceState).selectedTabId;
+    const selectedTab = selectedTabId
+      ? session.tabs.find((t) => t.id === selectedTabId)
+      : undefined;
+
+    const resolvedTab = selectedTab ?? session.tabs[0];
+    const isSelectedTabDeleted = Boolean(selectedTabId && !selectedTab);
+    const resolvedSelectedTabId = isSelectedTabDeleted
+      ? selectedTabId
+      : selectedTabId ?? resolvedTab?.id;
     const savedObjectOverride = pick(serializedState, EDITABLE_SAVED_SEARCH_KEYS);
+    const rawSavedObjectAttributes = isSelectedTabDeleted
+      ? savedObjectOverride
+      : pick(resolvedTab, EDITABLE_SAVED_SEARCH_KEYS);
+
+    // Build runtime state from the resolved tab's attributes
+    // ignore the time range from the tab - only global time range + panel time range matter
+    const runtimeSavedSearchState = isSelectedTabDeleted
+      ? savedObjectOverride
+      : omit(resolvedTab, 'timeRange');
+
     return {
-      // ignore the time range from the saved object - only global time range + panel time range matter
-      ...omit(so, 'timeRange'),
+      ...runtimeSavedSearchState,
       savedObjectId,
-      savedObjectTitle: so.title,
-      savedObjectDescription: so.description,
-      // Overwrite SO state with dashboard state for title, description, columns, sort, etc.
+      savedObjectTitle: session.title,
+      savedObjectDescription: session.description,
+      selectedTabId: resolvedSelectedTabId,
+      isSelectedTabDeleted,
+      tabs: session.tabs,
+
+      // Overwrite SO state with dashboard state for title, description, etc.
       ...panelState,
-      ...savedObjectOverride,
 
       // back up the original saved object attributes for comparison
       rawSavedObjectAttributes,
@@ -59,8 +80,11 @@ export const deserializeState = async ({
       serializedState as SearchEmbeddableByValueState,
       true
     );
+
+    const { tabs, ...savedSearchWithoutTabs } = savedSearch;
+
     return {
-      ...savedSearch,
+      ...savedSearchWithoutTabs,
       ...panelState,
       nonPersistedDisplayOptions: serializedState.nonPersistedDisplayOptions,
     };
@@ -75,6 +99,7 @@ export const serializeState = ({
   serializeTimeRange,
   serializeDynamicActions,
   savedObjectId,
+  selectedTabId,
 }: {
   uuid: string;
   initialState: SearchEmbeddableRuntimeState;
@@ -83,6 +108,7 @@ export const serializeState = ({
   serializeTimeRange: () => SerializedTimeRange;
   serializeDynamicActions: (() => DynamicActionsSerializedState) | undefined;
   savedObjectId?: string;
+  selectedTabId?: string;
 }): SearchEmbeddableState => {
   const searchSource = savedSearch.searchSource;
   const { searchSourceJSON, references: originalReferences } = searchSource.serialize();
@@ -90,15 +116,19 @@ export const serializeState = ({
 
   if (savedObjectId) {
     const editableAttributesBackup = initialState.rawSavedObjectAttributes ?? {};
-    const [{ attributes }] = savedSearchAttributes.tabs;
+    const attributes =
+      savedSearchAttributes.tabs?.[0]?.attributes ??
+      pick(savedSearchAttributes, EDITABLE_SAVED_SEARCH_KEYS);
 
     // only save the current state that is **different** than the saved object state
-    const overwriteState = EDITABLE_SAVED_SEARCH_KEYS.reduce((prev, key) => {
-      if (deepEqual(attributes[key], editableAttributesBackup[key])) {
-        return prev;
-      }
-      return { ...prev, [key]: attributes[key] };
-    }, {});
+    const overwriteState = initialState.isSelectedTabDeleted
+      ? pick(initialState, EDITABLE_SAVED_SEARCH_KEYS)
+      : EDITABLE_SAVED_SEARCH_KEYS.reduce((prev, key) => {
+          if (deepEqual(attributes[key], editableAttributesBackup[key])) {
+            return prev;
+          }
+          return { ...prev, [key]: attributes[key] };
+        }, {});
 
     return {
       // Serialize the current dashboard state into the panel state **without** updating the saved object
@@ -107,6 +137,7 @@ export const serializeState = ({
       ...serializeDynamicActions?.(),
       ...overwriteState,
       savedObjectId,
+      ...(selectedTabId ? { selectedTabId } : {}),
     };
   }
 
