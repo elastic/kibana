@@ -11,12 +11,12 @@ import { CreateTemplatePage } from './page';
 import { TestProviders } from '../../../../common/mock';
 import * as i18n from '../../translations';
 
-jest.mock('./form', () => ({
+jest.mock('../../components/template_form', () => ({
   CreateTemplateForm: () => <div data-test-subj="create-template-form" />,
 }));
 
-jest.mock('./preview', () => ({
-  CreateTemplatePreview: () => <div data-test-subj="create-template-preview" />,
+jest.mock('../../components/template_preview', () => ({
+  TemplatePreview: () => <div data-test-subj="create-template-preview" />,
 }));
 
 describe('CreateTemplatePage', () => {

@@ -8,8 +8,4 @@
  */
 
 export { registerIndexEditorActions } from './register_trigger_actions';
-export {
-  ACTION_EDIT_LOOKUP_INDEX,
-  EDIT_LOOKUP_INDEX_CONTENT_TRIGGER,
-  EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID,
-} from './constants';
+export { ACTION_EDIT_LOOKUP_INDEX } from './constants';
