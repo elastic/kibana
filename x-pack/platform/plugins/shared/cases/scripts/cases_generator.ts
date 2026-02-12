@@ -27,10 +27,10 @@ import { CaseSeverity, type CasePostRequest } from '../common';
 const getAlertsIndex = (owner: string, space: string): string => {
   const spaceId = space || 'default';
   if (owner === 'observability') {
-    return `.internal.alerts-observability.alerts-${spaceId}`;
+    return `.alerts-observability.alerts-${spaceId}`;
   }
   // securitySolution and cases both use the security alerts index
-  return `.internal.alerts-security.alerts-${spaceId}`;
+  return `.alerts-security.alerts-${spaceId}`;
 };
 
 const toolingLogger = new ToolingLog({
@@ -167,13 +167,6 @@ const generateAlertDocument = (alertNum: number) => {
   const hostnames = ['host-alpha', 'host-beta', 'host-gamma', 'host-delta'];
   const usernames = ['admin', 'root', 'operator', 'analyst'];
   const processNames = ['malware.exe', 'suspicious.sh', 'backdoor.py', 'crypto_miner'];
-  const categories = ['malware', 'process', 'network', 'file'];
-  const actions = [
-    'rule_detection',
-    'malicious_file',
-    'process_injection',
-    'suspicious_network_connection',
-  ];
 
   const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
   const severity = pick(severities);
@@ -182,49 +175,36 @@ const generateAlertDocument = (alertNum: number) => {
   const processName = pick(processNames);
   const riskScore = Math.floor(Math.random() * 100);
 
-  // Use dot-notation for all ECS fields to conform to the existing index mappings
-  // managed by Kibana's alerting framework. Nested objects can create text mappings
-  // that conflict with the expected keyword mappings.
+  // Only use kibana.alert.* fields that are guaranteed to be in the alerting
+  // framework's managed index mappings. Avoid ECS fields (host.name, user.name, etc.)
+  // that may not be mapped — ES dynamic mapping would create them as text fields,
+  // breaking the UI when it tries to aggregate/sort on them.
   return {
     _id: alertId,
     ruleId,
     ruleName: `Generated Rule ${alertNum + 1}`,
     _source: {
       '@timestamp': now.toISOString(),
-      'event.kind': 'signal',
-      'event.category': pick(categories),
-      'event.action': pick(actions),
-      'event.dataset': 'endpoint',
-      'event.module': 'endpoint',
-      'host.name': hostname,
-      'host.ip': `10.0.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
-      'host.os.name': 'Linux',
-      'host.os.version': '5.15.0',
-      'user.name': username,
-      'process.name': processName,
-      'process.pid': Math.floor(Math.random() * 65535),
-      'process.executable': `/usr/bin/${processName}`,
-      'file.name': processName,
-      'file.path': `/tmp/${processName}`,
-      'file.hash.sha256': uuidv4().replace(/-/g, '') + uuidv4().replace(/-/g, ''),
-      'rule.id': ruleId,
-      'rule.name': `Generated Rule ${alertNum + 1}`,
-      'rule.description': `Auto-generated detection rule #${alertNum + 1}`,
       'kibana.alert.uuid': alertId,
+      'kibana.alert.status': 'active',
+      'kibana.alert.rule.uuid': ruleId,
       'kibana.alert.rule.rule_id': ruleId,
       'kibana.alert.rule.name': `Generated Rule ${alertNum + 1}`,
-      'kibana.alert.rule.description': `Auto-generated detection rule #${alertNum + 1}`,
+      'kibana.alert.rule.description': `${processName} detected on ${hostname} by ${username}`,
       'kibana.alert.rule.category': 'Custom Query Rule',
       'kibana.alert.rule.consumer': 'siem',
       'kibana.alert.rule.rule_type_id': 'siem.queryRule',
+      'kibana.alert.rule.producer': 'siem',
       'kibana.alert.severity': severity,
       'kibana.alert.risk_score': riskScore,
       'kibana.alert.workflow_status': 'open',
-      'kibana.alert.reason': `${processName} detected on ${hostname} by user ${username}`,
+      'kibana.alert.reason': `${processName} detected on ${hostname} by ${username}`,
       'kibana.alert.original_time': new Date(
         now.getTime() - Math.floor(Math.random() * 3600000)
       ).toISOString(),
       'kibana.alert.start': now.toISOString(),
+      'kibana.space_ids': ['default'],
+      'kibana.version': '9.1.0',
     },
   };
 };
