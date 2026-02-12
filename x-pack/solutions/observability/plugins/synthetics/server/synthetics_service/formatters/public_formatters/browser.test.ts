@@ -7,7 +7,7 @@
 
 import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { throttlingFormatter } from './browser';
-import { publicTimeoutFormatter } from './timeout';
+import { publicTimeoutFormatter } from './formatting_utils';
 
 describe('formatters', () => {
   describe('throttling formatter', () => {
