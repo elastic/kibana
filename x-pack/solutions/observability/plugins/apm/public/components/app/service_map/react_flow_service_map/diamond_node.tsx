@@ -10,6 +10,7 @@ import { Handle, Position } from '@xyflow/react';
 import { useEuiTheme, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { getSpanIcon } from '@kbn/apm-ui-shared';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import {
   DEPENDENCY_NODE_DIAMOND_SIZE,
   DEPENDENCY_NODE_DIAMOND_CONTAINER_SIZE,
@@ -27,6 +28,8 @@ interface DiamondNodeProps {
   testSubjPrefix: string;
   iconAltFallback: string;
   badge?: ReactNode;
+  ariaLabel?: string;
+  groupedCount?: number;
 }
 
 export const DiamondNode = memo(
@@ -41,6 +44,8 @@ export const DiamondNode = memo(
     testSubjPrefix,
     iconAltFallback,
     badge,
+    ariaLabel: customAriaLabel,
+    groupedCount,
   }: DiamondNodeProps) => {
     const { euiTheme } = useEuiTheme();
 
@@ -52,6 +57,48 @@ export const DiamondNode = memo(
       }
       return null;
     }, [spanType, spanSubtype]);
+
+    const ariaLabel = useMemo(() => {
+      if (customAriaLabel) {
+        return customAriaLabel;
+      }
+
+      const parts = [
+        i18n.translate('xpack.apm.serviceMap.dependencyNode.ariaLabel', {
+          defaultMessage: 'Dependency: {dependencyName}',
+          values: { dependencyName: label },
+        }),
+      ];
+
+      if (groupedCount && groupedCount > 1) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.dependencyNode.groupedCount', {
+            defaultMessage: 'Contains {count} resources',
+            values: { count: groupedCount },
+          })
+        );
+      }
+
+      if (spanType) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.dependencyNode.typeInfo', {
+            defaultMessage: 'Type: {spanType}',
+            values: { spanType },
+          })
+        );
+      }
+
+      if (spanSubtype) {
+        parts.push(
+          i18n.translate('xpack.apm.serviceMap.dependencyNode.subtypeInfo', {
+            defaultMessage: 'Subtype: {spanSubtype}',
+            values: { spanSubtype },
+          })
+        );
+      }
+
+      return parts.join('. ');
+    }, [customAriaLabel, label, spanType, spanSubtype, groupedCount]);
 
     const containerStyles = css`
       position: relative;
@@ -79,6 +126,17 @@ export const DiamondNode = memo(
       box-sizing: border-box;
       cursor: pointer;
       pointer-events: all;
+
+      &:focus-visible {
+        outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+        outline-offset: ${euiTheme.size.xxs};
+      }
+
+      [data-id]:focus &,
+      [data-id]:focus-visible & {
+        outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+        outline-offset: ${euiTheme.size.xxs};
+      }
     `;
 
     const iconContainerStyles = css`
@@ -107,13 +165,20 @@ export const DiamondNode = memo(
         <EuiFlexItem grow={false} css={containerStyles}>
           <Handle type="target" position={targetPosition ?? Position.Left} css={handleStyles} />
           {badge}
-          <div css={diamondStyles}>
+          <div
+            css={diamondStyles}
+            role="button"
+            tabIndex={0}
+            aria-label={ariaLabel}
+            aria-pressed={selected}
+          >
             <div css={iconContainerStyles}>
               {iconUrl && (
                 <img
                   src={iconUrl}
                   alt={spanType || spanSubtype || iconAltFallback}
                   css={iconStyles}
+                  aria-hidden="true"
                 />
               )}
             </div>

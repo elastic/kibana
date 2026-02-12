@@ -19,10 +19,11 @@ import type {
 import { isToolCallStep, ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
-import type { AttachmentInput, Attachment } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
 import { storageKeys } from '../../storage_keys';
+import { buildOptimisticAttachments } from '../../utils/build_optimistic_attachments';
 import {
   createNewConversation,
   createNewRound,
@@ -40,6 +41,7 @@ export interface ConversationActions {
     attachments?: AttachmentInput[];
   }) => void;
   removeOptimisticRound: () => void;
+  clearLastRoundResponse: () => void;
   setAgentId: (agentId: string) => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
   addToolCall: ({ step }: { step: ToolCallStep }) => void;
@@ -125,13 +127,19 @@ const createConversationActions = ({
     }) => {
       setConversation(
         produce((draft) => {
-          const optimisticAttachments: Attachment[] =
-            attachments?.map((attachment, idx) => ({
-              id: `pending-attachment-${idx}`,
-              ...attachment,
-            })) ?? [];
+          const current = queryClient.getQueryData<Conversation>(queryKey);
+          const { fallbackAttachments, attachmentRefs } = buildOptimisticAttachments({
+            attachments,
+            conversationAttachments: current?.attachments,
+          });
 
-          const nextRound = createNewRound({ userMessage, attachments: optimisticAttachments });
+          const nextRound = createNewRound({
+            userMessage,
+            attachments: fallbackAttachments,
+          });
+          if (attachmentRefs.length) {
+            nextRound.input.attachment_refs = attachmentRefs;
+          }
 
           if (!draft) {
             const newConversation = createNewConversation();
@@ -149,6 +157,13 @@ const createConversationActions = ({
           draft?.rounds?.pop();
         })
       );
+    },
+    clearLastRoundResponse: () => {
+      setCurrentRound((round) => {
+        round.response.message = '';
+        round.steps = [];
+        round.status = ConversationRoundStatus.inProgress;
+      });
     },
     setAgentId: (agentId: string) => {
       // We allow to change agent only at the start of the conversation

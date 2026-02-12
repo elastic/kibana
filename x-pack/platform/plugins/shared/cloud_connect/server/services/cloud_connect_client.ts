@@ -280,4 +280,67 @@ export class CloudConnectClient {
       throw error;
     }
   }
+
+  /**
+   * Rotates the API key for a cluster
+   * Returns a new API key that should be stored
+   */
+  async rotateClusterApiKey(apiKey: string, clusterId: string): Promise<{ key: string }> {
+    try {
+      this.logger.debug(`Rotating API key for cluster ID: ${clusterId}`);
+
+      const response = await this.axiosInstance.post<{ key: string }>(
+        `/cloud-connected/clusters/${clusterId}/apikey/_rotate`,
+        {},
+        {
+          headers: {
+            Authorization: `apiKey ${apiKey}`,
+          },
+        }
+      );
+
+      this.logger.debug(`Successfully rotated API key for cluster: ${clusterId}`);
+
+      return response.data;
+    } catch (error) {
+      this.logger.error(`Failed to rotate API key for cluster ID: ${clusterId}`, { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Rotates the API key for a specific service on a cluster
+   * Returns a new API key that should be used to configure the service
+   */
+  async rotateServiceApiKey(
+    apiKey: string,
+    clusterId: string,
+    serviceKey: string
+  ): Promise<{ key: string }> {
+    try {
+      this.logger.debug(`Rotating API key for service ${serviceKey} on cluster ID: ${clusterId}`);
+
+      const response = await this.axiosInstance.post<{ key: string }>(
+        `/cloud-connected/clusters/${clusterId}/apikey/${serviceKey}/_rotate`,
+        {},
+        {
+          headers: {
+            Authorization: `apiKey ${apiKey}`,
+          },
+        }
+      );
+
+      this.logger.debug(
+        `Successfully rotated API key for service ${serviceKey} on cluster: ${clusterId}`
+      );
+
+      return response.data;
+    } catch (error) {
+      this.logger.error(
+        `Failed to rotate API key for service ${serviceKey} on cluster ID: ${clusterId}`,
+        { error }
+      );
+      throw error;
+    }
+  }
 }

@@ -17,6 +17,19 @@ import { EIS_PROMO_TOUR_TITLE, TOUR_CTA } from '../translations';
 
 jest.mock('../hooks/use_show_eis_promotional_content');
 
+const mockToursIsEnabled = jest.fn(() => true);
+jest.mock('../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      notifications: {
+        tours: {
+          isEnabled: mockToursIsEnabled,
+        },
+      },
+    },
+  }),
+}));
+
 describe('EisPromotionalTour', () => {
   const promoId = 'testPromo';
   const dataId = `${promoId}-eis-promo-tour`;
@@ -33,6 +46,7 @@ describe('EisPromotionalTour', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockToursIsEnabled.mockReturnValue(true);
   });
 
   it('renders children only when promo is not visible', () => {
@@ -40,6 +54,22 @@ describe('EisPromotionalTour', () => {
       isPromoVisible: false,
       onDismissPromo: jest.fn(),
     });
+
+    renderEisPromotionalTour();
+
+    // Child should render
+    expect(screen.getByTestId(childTestId)).toBeInTheDocument();
+
+    // Tour should not render
+    expect(screen.queryByTestId(dataId)).not.toBeInTheDocument();
+  });
+
+  it('renders children and does not render the tour when tours is disabled', () => {
+    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+      isPromoVisible: true,
+      onDismissPromo: jest.fn(),
+    });
+    mockToursIsEnabled.mockReturnValue(false);
 
     renderEisPromotionalTour();
 
