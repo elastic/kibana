@@ -6,7 +6,7 @@
  */
 /* eslint-disable max-classes-per-file */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { AxiosError } from 'axios';
 import type { ConnectorUsageCollector } from '../usage';
 import { SubActionConnector } from './sub_action_connector';

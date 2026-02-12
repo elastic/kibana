@@ -7,9 +7,9 @@
 
 import type { ZodIssue } from '@kbn/zod';
 import { ZodError } from '@kbn/zod';
-import { formatZodError } from './format_zod_error';
+import { formatZodV3Error } from './format_zod_v3_error';
 
-describe('formatZodError', () => {
+describe('formatZodV3Error', () => {
   it('formats a zod error with a single issue', () => {
     const issue: ZodIssue = {
       code: 'invalid_type',
@@ -18,7 +18,7 @@ describe('formatZodError', () => {
       path: ['routingKey'],
       message: 'Expected string, received boolean',
     };
-    expect(formatZodError(new ZodError([issue]))).toMatchInlineSnapshot(
+    expect(formatZodV3Error(new ZodError([issue]))).toMatchInlineSnapshot(
       `"Field \\"routingKey\\": Expected string, received boolean"`
     );
   });
@@ -39,7 +39,7 @@ describe('formatZodError', () => {
         message: `Unrecognized key(s) in object: 'extraKey'`,
       },
     ];
-    expect(formatZodError(new ZodError(issues))).toMatchInlineSnapshot(`
+    expect(formatZodV3Error(new ZodError(issues))).toMatchInlineSnapshot(`
       "2 errors:
        [1]: Unrecognized key(s) in object: 'extraKey';
        [2]: Field \\"routingKey\\": Expected string, received boolean"
@@ -92,7 +92,7 @@ describe('formatZodError', () => {
         message: `Unrecognized key(s) in object: 'extraKey'`,
       },
     ];
-    expect(formatZodError(new ZodError(issues))).toMatchInlineSnapshot(`
+    expect(formatZodV3Error(new ZodError(issues))).toMatchInlineSnapshot(`
       "6 errors:
        [1]: error parsing timestamp \\"1963-09-55 90:23:45\\";
        [2]: Unrecognized key(s) in object: 'extraKey';
@@ -138,7 +138,7 @@ describe('formatZodError', () => {
         message: `Invalid input`,
       },
     ];
-    expect(formatZodError(new ZodError(issues))).toMatchInlineSnapshot(`
+    expect(formatZodV3Error(new ZodError(issues))).toMatchInlineSnapshot(`
       "2 errors:
        [1]: Field \\"subAction\\": Invalid literal value, expected 'subaction1', Invalid literal value, expected 'subaction2';
        [2]: Field \\"subActionParams.message\\": Required"
@@ -178,7 +178,7 @@ describe('formatZodError', () => {
         message: 'Expected string, received boolean',
       },
     ];
-    expect(formatZodError(new ZodError(issues))).toMatchInlineSnapshot(
+    expect(formatZodV3Error(new ZodError(issues))).toMatchInlineSnapshot(
       `"Field \\"path1.path2.path3.path4.path5.path6.path7.path8.path9.path10.path11.path12.path13.path14.path15.path16.path17.path18.path19.path20.path21...\\": Unable to parse ZodError - too many levels deep"`
     );
   });

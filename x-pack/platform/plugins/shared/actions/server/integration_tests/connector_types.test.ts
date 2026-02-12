@@ -6,7 +6,7 @@
  */
 
 import zodToJsonSchema from 'zod-to-json-schema';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ActionTypeRegistry } from '../action_type_registry';
 import { setupTestServers } from './lib';
