@@ -126,12 +126,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     runner: context.runner,
   });
 
+  toolManager.setEventEmitter(eventEmitter);
+
   await Promise.all([
     toolManager.addTools({
       type: ToolManagerToolType.executable,
       tools: staticTools,
       logger,
-      eventEmitter,
     }),
     toolManager.addTools({
       type: ToolManagerToolType.browser,
@@ -142,7 +143,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
         type: ToolManagerToolType.executable,
         tools: dynamicTools,
         logger,
-        eventEmitter,
       },
       {
         dynamic: true,
