@@ -10,7 +10,8 @@ import { merge } from 'lodash';
 import { BaseDataGenerator } from './base_data_generator';
 import type { EndpointScript } from '../types';
 import { SUPPORTED_HOST_OS_TYPE } from '../constants';
-import { SCRIPT_TAGS } from '../service/scripts_library/constants';
+import type { SCRIPT_TAGS } from '../service/scripts_library/constants';
+import { SORTED_SCRIPT_TAGS_KEYS } from '../service/scripts_library/constants';
 
 export class EndpointScriptsGenerator extends BaseDataGenerator {
   generate(overrides: DeepPartial<EndpointScript> = {}): EndpointScript {
@@ -50,6 +51,7 @@ export class EndpointScriptsGenerator extends BaseDataGenerator {
         60
       )}`,
       example: `${this.randomString(30)}\n ${this.randomString(30)} \n ${this.randomString(30)}`,
+      pathToExecutable: `/usr/local/bin/${name}`,
       createdBy,
       createdAt,
       updatedAt,
@@ -106,11 +108,10 @@ export class EndpointScriptsGenerator extends BaseDataGenerator {
 
   protected randomTags(): Array<keyof typeof SCRIPT_TAGS> {
     const tags: Array<keyof typeof SCRIPT_TAGS> = [];
-    const tagKeys = Object.keys(SCRIPT_TAGS) as Array<keyof typeof SCRIPT_TAGS>;
-    const numberOfTags = this.randomN(tagKeys.length);
+    const numberOfTags = this.randomN(SORTED_SCRIPT_TAGS_KEYS.length);
     // Ensure unique tags and no duplicates, but random number of items
     while (tags.length < numberOfTags) {
-      const tag = this.randomChoice(tagKeys);
+      const tag = this.randomChoice(SORTED_SCRIPT_TAGS_KEYS);
       if (!tags.includes(tag)) {
         tags.push(tag);
       }

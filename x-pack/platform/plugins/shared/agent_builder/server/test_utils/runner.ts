@@ -23,6 +23,7 @@ import type {
   ScopedRunner,
   ToolProvider,
   ToolRegistry,
+  HooksServiceStart,
 } from '@kbn/agent-builder-server';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attachments_service';
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
@@ -246,6 +247,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     logger: loggerMock.create(),
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),
+    hooks: createHooksServiceStartMock(),
     filestore: createFileSystemStoreMock(),
     skills: createSkillsServiceMock(),
     toolManager: createToolManagerMock(),
@@ -302,6 +304,12 @@ export const createScopedRunnerMock = (): jest.Mocked<ScopedRunner> => {
   };
 };
 
+export const createHooksServiceStartMock = (): jest.Mocked<HooksServiceStart> => {
+  return {
+    run: jest.fn(async (_event: any, context: any) => context),
+  };
+};
+
 export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
@@ -320,6 +328,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     attachmentsService: createAttachmentsServiceStartMock(),
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),
+    hooks: createHooksServiceStartMock(),
     filestore: createFileSystemStoreMock(),
     skillServiceStart: createSkillServiceStartMock(),
     toolManager: createToolManagerMock(),
@@ -339,6 +348,7 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     agentsService: createAgentsServiceStartMock(),
     logger: loggerMock.create(),
     attachmentsService: createAttachmentsServiceStartMock(),
+    hooks: createHooksServiceStartMock(),
     skillServiceStart: createSkillServiceStartMock(),
     toolManager: createToolManagerMock(),
   };

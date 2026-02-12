@@ -10,6 +10,8 @@ import type { ISuggestionItem } from '../../registry/types';
 import type { ESQLAstPromqlCommand, ESQLMapEntry } from '../../../types';
 import { EDITOR_MARKER } from '../constants';
 import {
+  ESQL_NUMBER_TYPES,
+  ESQL_STRING_TYPES,
   PromQLFunctionDefinitionTypes,
   type PromQLFunctionDefinition,
   type PromQLFunctionParamType,
@@ -18,7 +20,7 @@ import { promqlFunctionDefinitions } from '../generated/promql_functions';
 import { buildFunctionDocumentation } from './documentation';
 import { withAutoSuggest } from './autocomplete/helpers';
 import { isIdentifier, isList, isSource } from '../../../ast/is';
-import { SuggestionCategory } from '../../../shared/sorting';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting';
 import { techPreviewLabel } from './shared';
 
 const INDEX_PARAM_REGEX = /\bindex\s*=\s*(\S+)/i;
@@ -179,4 +181,19 @@ export function getIndexFromPromQLParams({
 
   // same stuffs of getSourcesFromCommands for the other sources
   return indexMatch?.[1]?.includes(EDITOR_MARKER) ? undefined : indexMatch?.[1];
+}
+
+/** Derives ES|QL types from PromQL function signature types.*/
+export function getMetricTypesForSignature(
+  signatureTypes: PromQLFunctionParamType[]
+): readonly string[] {
+  if (!signatureTypes.length) {
+    return ESQL_NUMBER_TYPES;
+  }
+
+  const types = signatureTypes.flatMap((paramType) =>
+    paramType === 'string' ? ESQL_STRING_TYPES : ESQL_NUMBER_TYPES
+  );
+
+  return Array.from(new Set(types));
 }

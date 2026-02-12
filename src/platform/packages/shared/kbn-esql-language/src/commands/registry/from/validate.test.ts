@@ -86,6 +86,27 @@ describe('FROM Validation', () => {
         fromExpectErrors('FROM missingIndex*', []);
         fromExpectErrors('FROM *missingIndex, missing*Index2', []);
       });
+
+      test('no errors when using a view name from context.views', () => {
+        const contextWithViews = {
+          ...mockContext,
+          views: [
+            { name: 'my_saved_view', query: 'FROM logs | LIMIT 10' },
+            { name: 'my-view', query: 'FROM metrics' },
+          ],
+        };
+        fromExpectErrors('FROM my_saved_view', [], contextWithViews);
+        fromExpectErrors('FROM my_saved_view, index', [], contextWithViews);
+        fromExpectErrors('FROM "my-view"', [], contextWithViews);
+      });
+
+      test('errors on unknown view when views are provided but name is not in list', () => {
+        const contextWithViews = {
+          ...mockContext,
+          views: [{ name: 'my_saved_view', query: 'FROM logs' }],
+        };
+        fromExpectErrors('FROM other_view', ['Unknown index "other_view"'], contextWithViews);
+      });
     });
 
     describe('... METADATA <indices>', () => {
