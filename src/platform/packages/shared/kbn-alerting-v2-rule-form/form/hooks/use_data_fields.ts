@@ -6,12 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { useState, useEffect } from 'react';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { useQuery } from '@kbn/react-query';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import { getFields } from '../../flyout/utils';
-
 interface UseDataFieldsProps {
   query: string;
   http: HttpStart;
@@ -19,43 +17,25 @@ interface UseDataFieldsProps {
 }
 
 export const useDataFields = ({ query, http, dataViews }: UseDataFieldsProps) => {
-  const [fields, setFields] = useState<Array<{ name: string; type: string }>>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const fieldsQuery = useQuery({
+    queryKey: ['dataFields', query],
+    queryFn: async () => {
+      const dataView = await getESQLAdHocDataview({
+        dataViewsService: dataViews,
+        query,
+        http,
+      });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!query) {
-        setFields([]);
-        return;
+      if (!dataView) {
+        return {};
       }
 
-      setIsLoading(true);
-      setError(null);
+      const fields = dataView.fields.toSpec();
+      return fields || {};
+    },
+    enabled: Boolean(query),
+    refetchOnWindowFocus: false,
+  });
 
-      try {
-        const dataView = await getESQLAdHocDataview({
-          dataViewsService: dataViews,
-          query,
-          http,
-        });
-
-        if (dataView) {
-          const fetchedFields = await getFields(http, [dataView.getIndexPattern()]);
-          setFields(fetchedFields);
-        } else {
-          setFields([]);
-        }
-      } catch (e: any) {
-        setError(e);
-        setFields([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [query, http, dataViews]);
-
-  return { fields, isLoading, error };
+  return fieldsQuery;
 };

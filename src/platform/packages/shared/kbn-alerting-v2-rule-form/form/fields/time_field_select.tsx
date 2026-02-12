@@ -8,22 +8,37 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { HttpStart } from '@kbn/core/public';
+import { useWatch, useFormContext } from 'react-hook-form';
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { firstFieldOption, getTimeFieldOptions } from '../../flyout/utils';
+import { useDataFields } from '../hooks/use_data_fields';
 
 interface Props {
   value?: string;
   onChange: (value: string) => void;
-  fields: Array<{ name: string; type: string }>;
+  services: {
+    http: HttpStart;
+    dataViews: DataViewsPublicPluginStart;
+  };
 }
 
 export const TimeFieldSelect = React.forwardRef<HTMLSelectElement, Props>(
-  ({ value, onChange, fields }, ref) => {
+  ({ value, onChange, services }, ref) => {
     const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
+    const { control } = useFormContext();
+    const query = useWatch({ name: 'query', control });
+
+    const { data: fields } = useDataFields({
+      query,
+      http: services.http,
+      dataViews: services.dataViews,
+    });
 
     useEffect(() => {
-      if (fields.length) {
+      if (fields?.length) {
         const newTimeFieldOptions = getTimeFieldOptions(fields);
         setTimeFieldOptions([firstFieldOption, ...newTimeFieldOptions]);
         if (!newTimeFieldOptions.find((option) => option.value === value)) {

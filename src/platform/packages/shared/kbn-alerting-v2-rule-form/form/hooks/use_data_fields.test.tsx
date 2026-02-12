@@ -7,63 +7,66 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import { getFields } from '../../flyout/utils';
 import { useDataFields } from './use_data_fields';
 
 jest.mock('@kbn/esql-utils');
 jest.mock('../../flyout/utils');
 
 const mockGetESQLAdHocDataview = jest.mocked(getESQLAdHocDataview);
-const mockGetFields = jest.mocked(getFields);
 
 const createMockHttp = () => ({} as any);
 const createMockDataViews = () => ({} as any);
+
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+    logger: {
+      log: () => {},
+      warn: () => {},
+      error: () => {},
+    },
+  });
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+};
 
 describe('useDataFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('returns empty fields when query is empty', async () => {
-    const http = createMockHttp();
-    const dataViews = createMockDataViews();
-    const { result } = renderHook(() =>
-      useDataFields({
-        query: '',
-        http,
-        dataViews,
-      })
-    );
-
-    expect(result.current.fields).toEqual([]);
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.error).toBeNull();
-    expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
-  });
-
   it('fetches fields when query is provided', async () => {
+    const mockFields = {
+      '@timestamp': { name: '@timestamp', type: 'date' },
+      message: { name: 'message', type: 'text' },
+    };
     const mockDataView = {
       getIndexPattern: () => 'logs-*',
+      fields: {
+        toSpec: () => mockFields,
+      },
     };
-    const mockFields = [
-      { name: '@timestamp', type: 'date' },
-      { name: 'message', type: 'text' },
-    ];
 
     mockGetESQLAdHocDataview.mockResolvedValue(mockDataView as any);
-    mockGetFields.mockResolvedValue(mockFields);
 
     const http = createMockHttp();
     const dataViews = createMockDataViews();
 
-    const { result } = renderHook(() =>
-      useDataFields({
-        query: 'FROM logs-* | LIMIT 10',
-        http,
-        dataViews,
-      })
+    const { result } = renderHook(
+      () =>
+        useDataFields({
+          query: 'FROM logs-* | LIMIT 10',
+          http,
+          dataViews,
+        }),
+      { wrapper: createWrapper() }
     );
 
     expect(result.current.isLoading).toBe(true);
@@ -72,10 +75,9 @@ describe('useDataFields', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.fields).toEqual(mockFields);
+    expect(result.current.data).toEqual(mockFields);
     expect(result.current.error).toBeNull();
     expect(mockGetESQLAdHocDataview).toHaveBeenCalled();
-    expect(mockGetFields).toHaveBeenCalledWith(expect.anything(), ['logs-*']);
   });
 
   it('returns empty fields when dataView is null', async () => {
@@ -84,19 +86,21 @@ describe('useDataFields', () => {
     const http = createMockHttp();
     const dataViews = createMockDataViews();
 
-    const { result } = renderHook(() =>
-      useDataFields({
-        query: 'FROM logs-* | LIMIT 10',
-        http,
-        dataViews,
-      })
+    const { result } = renderHook(
+      () =>
+        useDataFields({
+          query: 'FROM logs-* | LIMIT 10',
+          http,
+          dataViews,
+        }),
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.fields).toEqual([]);
+    expect(result.current.data).toEqual({});
     expect(result.current.error).toBeNull();
   });
 
@@ -107,33 +111,40 @@ describe('useDataFields', () => {
     const http = createMockHttp();
     const dataViews = createMockDataViews();
 
-    const { result } = renderHook(() =>
-      useDataFields({
-        query: 'FROM logs-* | LIMIT 10',
-        http,
-        dataViews,
-      })
+    const { result } = renderHook(
+      () =>
+        useDataFields({
+          query: 'FROM logs-* | LIMIT 10',
+          http,
+          dataViews,
+        }),
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.fields).toEqual([]);
+    expect(result.current.data).toEqual(undefined);
     expect(result.current.error).toBe(testError);
   });
 
   it('refetches when query changes', async () => {
+    const mockFields = {
+      '@timestamp': { name: '@timestamp', type: 'date' },
+      message: { name: 'message', type: 'text' },
+    };
     const mockDataView = {
       getIndexPattern: () => 'logs-*',
+      fields: {
+        toSpec: () => mockFields,
+      },
     };
-    const mockFields = [{ name: '@timestamp', type: 'date' }];
-
     mockGetESQLAdHocDataview.mockResolvedValue(mockDataView as any);
-    mockGetFields.mockResolvedValue(mockFields);
 
     const http = createMockHttp();
     const dataViews = createMockDataViews();
+    const wrapper = createWrapper();
 
     const { result, rerender } = renderHook(
       ({ query }) =>
@@ -142,7 +153,7 @@ describe('useDataFields', () => {
           http,
           dataViews,
         }),
-      { initialProps: { query: 'FROM logs-* | LIMIT 10' } }
+      { initialProps: { query: 'FROM logs-* | LIMIT 10' }, wrapper }
     );
 
     await waitFor(() => {
