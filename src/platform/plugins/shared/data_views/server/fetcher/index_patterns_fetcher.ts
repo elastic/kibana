@@ -157,7 +157,7 @@ export class IndexPatternsFetcher {
 
   /**
    * Get existing index pattern list by providing string array index pattern list.
-   * @param indices - index pattern list
+   * @param indexPatterns - index pattern list
    * @returns index pattern list of index patterns that match indices
    */
   async getIndexPatternsWithMatches(indexPatterns: string[]): Promise<string[]> {
