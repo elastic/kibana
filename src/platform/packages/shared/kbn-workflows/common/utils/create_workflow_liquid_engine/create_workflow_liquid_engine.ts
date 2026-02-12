@@ -84,12 +84,12 @@ export const createWorkflowLiquidEngine = (options?: LiquidOptions): Liquid => {
     fs: noopFs,
     // Use an empty in-memory template store
     templates: {},
-    // Max total characters allowed in a single parse() call (100k)
-    parseLimit: 100_000,
+    // Max total characters allowed in a single parse() call (150k)
+    parseLimit: 150_000,
     // Max time in ms allowed for a single render() call (1s)
     renderLimit: 1_000,
-    // Max object allocations (array ops, string ops) per render (10M)
-    memoryLimit: 10_000_000,
+    // Max object allocations (array ops, string ops) per render (15M)
+    memoryLimit: 15_000_000,
   });
   removeDisallowedLiquidTags(engine);
   return engine;
