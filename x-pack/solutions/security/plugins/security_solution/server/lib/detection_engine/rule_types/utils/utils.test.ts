@@ -491,10 +491,7 @@ describe('utils', () => {
       };
 
       const { foundNoIndices } = await checkForNoReadableIndices({
-        timestampFieldCapsResponse: fieldCapsResponse as TransportResult<
-          estypes.FieldCapsResponse,
-          unknown
-        >,
+        fieldCapsResponse: fieldCapsResponse as TransportResult<estypes.FieldCapsResponse, unknown>,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleExecutionLogger,
       });
@@ -515,10 +512,7 @@ describe('utils', () => {
       });
 
       await checkForNoReadableIndices({
-        timestampFieldCapsResponse: fieldCapsResponse as TransportResult<
-          estypes.FieldCapsResponse,
-          unknown
-        >,
+        fieldCapsResponse: fieldCapsResponse as TransportResult<estypes.FieldCapsResponse, unknown>,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleExecutionLogger,
       });
@@ -544,10 +538,7 @@ describe('utils', () => {
       });
 
       await checkForNoReadableIndices({
-        timestampFieldCapsResponse: fieldCapsResponse as TransportResult<
-          estypes.FieldCapsResponse,
-          unknown
-        >,
+        fieldCapsResponse: fieldCapsResponse as TransportResult<estypes.FieldCapsResponse, unknown>,
         inputIndices: ['logs-endpoint.alerts-*'],
         ruleExecutionLogger,
       });

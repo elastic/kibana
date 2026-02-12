@@ -87,21 +87,21 @@ import { buildTimeRangeFilter } from './build_events_query';
 export const MAX_RULE_GAP_RATIO = 4;
 
 export const checkForNoReadableIndices = async (args: {
-  timestampFieldCapsResponse: TransportResult<estypes.FieldCapsResponse, unknown>;
+  fieldCapsResponse: TransportResult<estypes.FieldCapsResponse, unknown>;
   inputIndices: string[];
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }): Promise<{
   foundNoIndices: boolean;
   warningMessage: string | undefined;
 }> => {
-  const { timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
+  const { fieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
   const { ruleName } = ruleExecutionLogger.context;
 
   agent.setCustomContext({
-    [SECURITY_NUM_INDICES_MATCHING_PATTERN]: timestampFieldCapsResponse.body.indices.length,
+    [SECURITY_NUM_INDICES_MATCHING_PATTERN]: fieldCapsResponse.body.indices.length,
   });
 
-  if (isEmpty(timestampFieldCapsResponse.body.indices)) {
+  if (isEmpty(fieldCapsResponse.body.indices)) {
     const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ${JSON.stringify(
       inputIndices
     )} was found. This warning will continue to appear until a matching index is created or this rule is disabled. ${

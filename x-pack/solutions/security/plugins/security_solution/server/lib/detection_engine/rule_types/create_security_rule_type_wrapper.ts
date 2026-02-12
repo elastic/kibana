@@ -328,7 +328,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             }
 
             try {
-              const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
+              const fieldCapsResponse = await withSecuritySpan('fieldCaps', () =>
                 services.scopedClusterClient.asCurrentUser.fieldCaps(
                   {
                     index: inputIndex,
@@ -345,7 +345,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
               const { foundNoIndices, warningMessage: noIndicesWarning } =
                 await checkForNoReadableIndices({
-                  timestampFieldCapsResponse: timestampFieldCaps,
+                  fieldCapsResponse,
                   inputIndices: inputIndex,
                   ruleExecutionLogger,
                 });
@@ -357,7 +357,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               if (!foundNoIndices) {
                 const { warningMessage: missingTimestampWarning } = await hasTimestampFields({
                   timestampField: primaryTimestamp,
-                  timestampFieldCapsResponse: timestampFieldCaps,
+                  timestampFieldCapsResponse: fieldCapsResponse,
                   ruleExecutionLogger,
                 });
                 if (missingTimestampWarning) {
