@@ -1,15 +1,18 @@
 {
-  "lastModified": "2026-01-30T09:08:36.921Z",
-  "sha1": "9ff4c374e07f726b2ece916dd201b054b31c1a0b",
+  "lastModified": "2026-02-09T18:40:24.680Z",
+  "sha1": "a9a52816a7abff7332d8573055a61fea68f97904",
   "tests": [
     {
       "id": "bd77233fbb28a70-b95459eaf733782",
       "title": "Onboarding UI Validation validates main page structure and navigation",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
@@ -20,41 +23,32 @@
     {
       "id": "bd77233fbb28a70-2d3f3cfafbdcb6b",
       "title": "Onboarding UI Validation navigates correctly within Host Auto-Detect flow",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 85,
+        "line": 91,
         "column": 7
       }
     },
     {
       "id": "bd77233fbb28a70-4ba70b686a845a9",
       "title": "Onboarding UI Validation navigates correctly within Host OTel flow",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 95,
-        "column": 7
-      }
-    },
-    {
-      "id": "bd77233fbb28a70-44dc6eb47e723c0",
-      "title": "Onboarding UI Validation navigates correctly within Kubernetes Host flow",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
@@ -63,30 +57,52 @@
       }
     },
     {
-      "id": "bd77233fbb28a70-4ab634c0d169c88",
-      "title": "Onboarding UI Validation Navigates correctly within Kubernetes Host flow using the keyboard only",
-      "expectedStatus": "skipped",
+      "id": "bd77233fbb28a70-44dc6eb47e723c0",
+      "title": "Onboarding UI Validation navigates correctly within Kubernetes Host flow",
+      "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt",
-        "@svlLogsEssentials"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 121,
+        "line": 125,
+        "column": 7
+      }
+    },
+    {
+      "id": "bd77233fbb28a70-4ab634c0d169c88",
+      "title": "Onboarding UI Validation Navigates correctly within Kubernetes Host flow using the keyboard only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
+        "line": 145,
         "column": 7
       }
     },
     {
       "id": "bd77233fbb28a70-e9264fd8f89345b",
       "title": "Onboarding UI Validation validates logs-essentials tier restrictions",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
-        "@svlLogsEssentials"
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability_onboarding/test/scout/ui/tests/onboarding_ui_validation.spec.ts",
-        "line": 154,
+        "line": 184,
         "column": 7
       }
     }
