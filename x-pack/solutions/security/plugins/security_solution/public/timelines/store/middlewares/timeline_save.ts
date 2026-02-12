@@ -23,7 +23,6 @@ import {
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { PageScope } from '../../../data_view_manager/constants';
 import { sourcererAdapterSelector } from '../../../data_view_manager/redux/selectors';
-import { sourcererSelectors } from '../../../sourcerer/store';
 import {
   endTimelineSaving,
   saveTimeline,
@@ -55,7 +54,7 @@ function isSaveTimelineAction(action: Action): action is ReturnType<typeof saveT
 export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State> =
   // WARN: this is disabled because we need to support experimental data view picker here.
   // once it is stable, remove the override
-  // eslint-disable-next-line complexity
+
   (kibana: CoreStart) => (store) => (next) => async (action: Action) => {
     if (!isSaveTimelineAction(action)) {
       return next(action);
@@ -68,49 +67,28 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
       extractTimelineIdsAndVersions(timeline);
 
     const timelineTimeRange = inputsSelectors.timelineTimeRangeSelector(storeState);
-    const selectedDataViewIdSourcerer = sourcererSelectors.sourcererScopeSelectedDataViewId(
-      storeState,
-      PageScope.timeline
-    );
-    const selectedPatternsSourcerer = sourcererSelectors.sourcererScopeSelectedPatterns(
-      storeState,
-      PageScope.timeline
-    );
 
-    const { dataViewId: experimentalDataViewId } = sourcererAdapterSelector(PageScope.timeline)(
+    const { dataViewId: reduxDataViewId } = sourcererAdapterSelector(PageScope.timeline)(
       storeState
     );
 
-    const experimentalIsDataViewEnabled =
-      storeState.app.enableExperimental.newDataViewPickerEnabled;
-
-    let experimentalSelectedPatterns: string[] = [];
     let dataViewId: string | null = null;
-
-    if (!experimentalIsDataViewEnabled) {
-      dataViewId = selectedDataViewIdSourcerer;
-    }
-
-    // NOTE: remove eslint override above after the experimental picker is stabilized
-    if (experimentalIsDataViewEnabled && experimentalDataViewId) {
+    let indexNames: string[] = [];
+    if (reduxDataViewId) {
       const plugins = await kibana.plugins.onStart<{ dataViews: DataViewsPublicPluginStart }>(
         'dataViews'
       );
 
       if (plugins.dataViews.found) {
-        const experimentalDataView = await plugins.dataViews.contract.get(experimentalDataViewId);
+        const dataView = await plugins.dataViews.contract.get(reduxDataViewId);
 
-        if (experimentalDataView.isPersisted()) {
-          dataViewId = experimentalDataViewId;
+        if (dataView.isPersisted()) {
+          dataViewId = reduxDataViewId;
         }
 
-        experimentalSelectedPatterns = experimentalDataView.getIndexPattern().split(',');
+        indexNames = dataView.getIndexPattern().split(',');
       }
     }
-
-    const indexNames = experimentalIsDataViewEnabled
-      ? experimentalSelectedPatterns
-      : selectedPatternsSourcerer;
 
     store.dispatch(startTimelineSaving({ id: localTimelineId }));
 

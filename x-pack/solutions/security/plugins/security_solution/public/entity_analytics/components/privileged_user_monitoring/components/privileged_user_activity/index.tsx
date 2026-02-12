@@ -25,10 +25,10 @@ import { HeaderSection } from '../../../../../common/components/header_section';
 import { PAGE_SIZE, PRIVILEGED_USER_ACTIVITY_QUERY_ID } from './constants';
 import { EsqlDashboardPanel } from '../../../privileged_user_monitoring_onboarding/components/esql_dashboard_panel/esql_dashboard_panel';
 import {
+  useDiscoverPath,
   usePrivilegedUserActivityParams,
   useStackByOptions,
   useToggleOptions,
-  useDiscoverPath,
 } from './hooks';
 import type { TableItemType } from './types';
 import { VisualizationToggleOptions } from './types';
@@ -45,8 +45,8 @@ const TITLE = i18n.translate(
 );
 
 export const UserActivityPrivilegedUsersPanel: React.FC<{
-  sourcererDataView: DataViewSpec;
-}> = ({ sourcererDataView }) => {
+  dataViewSpec: DataViewSpec;
+}> = ({ dataViewSpec }) => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(PRIVILEGED_USER_ACTIVITY_QUERY_ID);
   const { from, to } = useGlobalTime();
   const [selectedToggleOption, setToggleOption] = useState<VisualizationToggleOptions>(
@@ -55,7 +55,7 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
 
   const { getAppUrl } = useNavigation();
   const { getLensAttributes, columns, generateVisualizationQuery, generateTableQuery } =
-    usePrivilegedUserActivityParams(selectedToggleOption, sourcererDataView);
+    usePrivilegedUserActivityParams(selectedToggleOption, dataViewSpec);
   const stackByOptions = useStackByOptions(selectedToggleOption);
   const stackByLabel = i18n.translate('xpack.securitySolution.genericDashboard.stackBy.label', {
     defaultMessage: 'Stack by',

@@ -18,9 +18,9 @@ import {
   getSingleDocumentData,
   GraphGroupedNodePreviewPanelKey,
   GROUP_PREVIEW_BANNER,
+  type NodeViewModel,
   groupedItemClick$,
   NETWORK_PREVIEW_BANNER,
-  type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import {
@@ -30,13 +30,11 @@ import {
 import { isEntityNodeEnriched } from '@kbn/cloud-security-posture-graph/src/components/utils';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
 import {
   ALERT_PREVIEW_BANNER,
@@ -62,14 +60,8 @@ const MAX_DOCUMENTS_TO_LOAD = 50;
  */
 export const GraphVisualization: React.FC = memo(() => {
   const toasts = useToasts();
-  const oldDataView = useGetScopedSourcererDataView({
-    sourcererScope: PageScope.default,
-  });
 
-  const { dataView: experimentalDataView } = useDataView(PageScope.default);
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
+  const { dataView } = useDataView(PageScope.default);
   const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
 
   const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser, scopeId } =

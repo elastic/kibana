@@ -9,18 +9,18 @@ import { render } from '@testing-library/react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { TestProviders } from '../../../../common/mock';
-import { HostEntityOverview, HOST_PREVIEW_BANNER } from './host_entity_overview';
+import { HOST_PREVIEW_BANNER, HostEntityOverview } from './host_entity_overview';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import {
-  ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LINK_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID,
   ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID,
+  ENTITIES_HOST_OVERVIEW_RISK_LEVEL_TEST_ID,
   ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID,
-  ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID,
 } from './test_ids';
 import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
@@ -38,7 +38,6 @@ const lastSeen = '2022-04-08T18:35:45.064Z';
 const lastSeenText = 'Apr 8, 2022 @ 18:35:45.064';
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.;000Z';
-const selectedPatterns = 'alerts';
 const hostData = { host: { os: { family: [osFamily] } } };
 const riskLevel = [{ host: { risk: { calculated_level: 'Medium' } } }];
 
@@ -86,13 +85,6 @@ const mockUseGlobalTime = jest.fn().mockReturnValue({ from, to });
 jest.mock('../../../../common/containers/use_global_time', () => {
   return {
     useGlobalTime: (...props: unknown[]) => mockUseGlobalTime(...props),
-  };
-});
-
-const mockUseSourcererDataView = jest.fn().mockReturnValue({ selectedPatterns });
-jest.mock('../../../../sourcerer/containers', () => {
-  return {
-    useSourcererDataView: (...props: unknown[]) => mockUseSourcererDataView(...props),
   };
 });
 

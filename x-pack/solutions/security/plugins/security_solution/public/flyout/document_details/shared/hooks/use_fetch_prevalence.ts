@@ -9,12 +9,9 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { IEsSearchRequest } from '@kbn/search-types';
 import { useQuery } from '@kbn/react-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { useSelector } from 'react-redux';
 import { createFetchData } from '../utils/fetch_data';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { sourcererSelectors } from '../../../../sourcerer/store';
 
 const QUERY_KEY = 'useFetchFieldValuePairWithAggregation';
 
@@ -104,20 +101,9 @@ export const useFetchPrevalence = ({
   } = useKibana();
 
   // retrieves detections and non-detections indices (for example, the alert security index from the current space and 'logs-*' indices)
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const oldSecurityDefaultPatterns =
-    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
-  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
-  const securityDefaultPatterns = newDataViewPickerEnabled
-    ? experimentalSecurityDefaultIndexPatterns
-    : oldSecurityDefaultPatterns;
+  const { indexPatterns } = useSecurityDefaultPatterns();
 
-  const searchRequest = buildSearchRequest(
-    highlightedFieldsFilters,
-    from,
-    to,
-    securityDefaultPatterns
-  );
+  const searchRequest = buildSearchRequest(highlightedFieldsFilters, from, to, indexPatterns);
 
   const { data, isLoading, isError } = useQuery(
     [QUERY_KEY, highlightedFieldsFilters, from, to],

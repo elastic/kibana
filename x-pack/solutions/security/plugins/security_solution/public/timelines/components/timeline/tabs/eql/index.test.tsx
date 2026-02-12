@@ -17,8 +17,6 @@ import EqlTabContentComponent from '.';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../../containers';
 import { useTimelineEventsDetails } from '../../../../containers/details';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import type { ExperimentalFeatures } from '../../../../../../common';
 import { allowedExperimentalValues } from '../../../../../../common';
@@ -43,7 +41,6 @@ jest.mock('../../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
 }));
 
-jest.mock('../../../../../sourcerer/containers');
 jest.mock('../../../../../sourcerer/containers/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
@@ -119,8 +116,6 @@ describe('EQL Tab', () => {
     ]);
     (useTimelineEvents as jest.Mock).mockImplementation(useTimelineEventsMock);
     (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
-
-    (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
 
     (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
       (feature: keyof ExperimentalFeatures) => {

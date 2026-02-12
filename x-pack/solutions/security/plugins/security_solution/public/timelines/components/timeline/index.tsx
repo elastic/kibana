@@ -8,14 +8,13 @@
 import { pick } from 'lodash/fp';
 import { EuiPanel, EuiProgress, EuiText } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { isTab } from '@kbn/timelines-plugin/public';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { DEFAULT_ALERTS_INDEX, DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
 import { PageScope } from '../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { timelineActions, timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
 import type { CellValueElementProps } from './cell_rendering';
@@ -23,8 +22,6 @@ import { TimelineModalHeader } from '../modal/header';
 import type { RowRenderer, TimelineId } from '../../../../common/types/timeline';
 import { TimelineTypeEnum } from '../../../../common/api/timeline';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import type { State } from '../../../common/store';
-import { sourcererSelectors } from '../../../common/store';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
 import * as i18n from './translations';
 import { TabsContent } from './tabs';
@@ -71,12 +68,6 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const selectedPatternsSourcerer = useSelector((state: State) => {
-    return sourcererSelectors.sourcererScopeSelectedPatterns(state, PageScope.timeline);
-  });
-  const selectedDataViewIdSourcerer = useSelector((state: State) => {
-    return sourcererSelectors.sourcererScopeSelectedDataViewId(state, PageScope.timeline);
-  });
   const {
     dataViewId: selectedDataViewIdTimeline,
     indexNames: selectedPatternsTimeline,
@@ -102,20 +93,11 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   const { timelineFullScreen } = useTimelineFullScreen();
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const spaceId = useSpaceId();
-  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
-  const { dataView: experimentalDataView, status } = useDataView(PageScope.timeline);
 
-  const selectedDataViewId = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalDataView.id ?? '' : selectedDataViewIdSourcerer),
-    [experimentalDataView.id, newDataViewPickerEnabled, selectedDataViewIdSourcerer]
-  );
-
-  const selectedPatterns = useMemo(
-    () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : selectedPatternsSourcerer),
-    [experimentalSelectedPatterns, newDataViewPickerEnabled, selectedPatternsSourcerer]
-  );
+  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const { dataView, status } = useDataView(PageScope.timeline);
+  const selectedDataViewId = useMemo(() => dataView.id ?? '', [dataView.id]);
 
   useEffect(() => {
     if (!savedObjectId && !initialized) {
@@ -175,13 +157,13 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   useEffect(() => {
     // NOTE: dont dispatch sourcerer events until the status is ready - for the new picker
-    if (newDataViewPickerEnabled && status !== 'ready') {
+    if (status !== 'ready') {
       return;
     }
 
     onSourcererChange();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDataViewId, selectedPatterns, newDataViewPickerEnabled, status]);
+  }, [selectedDataViewId, selectedPatterns, status]);
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
     const exitFullScreenButton = containerElement.current?.querySelector<HTMLButtonElement>(

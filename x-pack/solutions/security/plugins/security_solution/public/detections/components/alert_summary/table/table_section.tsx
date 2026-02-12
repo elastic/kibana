@@ -39,7 +39,6 @@ export interface TableSectionProps {
  * This component leverages the GroupedAlertsTable and the ResponseOps AlertsTable also used in the alerts page.
  */
 export const TableSection = memo(({ dataView, packages }: TableSectionProps) => {
-  const dataViewSpec = useMemo(() => dataView.toSpec(), [dataView]);
   const { to, from } = useGlobalTime();
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
@@ -70,7 +69,6 @@ export const TableSection = memo(({ dataView, packages }: TableSectionProps) => 
           accordionButtonContent={groupTitleRenderers}
           accordionExtraActionGroupStats={accordionExtraActionGroupStats}
           dataView={dataView}
-          dataViewSpec={dataViewSpec} // TODO: newDataViewPickerEnabled - can be removed when old sourcerer is removed
           defaultGroupingOptions={groupingOptions}
           from={from}
           globalFilters={filters}

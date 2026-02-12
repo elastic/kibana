@@ -28,7 +28,6 @@ import {
   EuiSwitch,
   EuiTextColor,
 } from '@elastic/eui';
-
 import type { Filter, Query } from '@kbn/es-query';
 import { buildFilter, FILTERS } from '@kbn/es-query';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
@@ -36,12 +35,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-
 import { PageScope } from '../../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { dataViewSpecToViewBase } from '../../../../../common/lib/kuery';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
-
 import {
   RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY,
   RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY,
@@ -58,7 +53,6 @@ import {
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../../common/components/utility_bar';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -162,11 +156,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     },
   } = useRuleDetailsContext();
 
-  // Index for `add filter` action and toasts for errors
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(PageScope.alerts);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
+  const { dataView } = useDataView(PageScope.alerts);
 
   const { addError, addSuccess, remove } = useAppToasts();
 
@@ -241,11 +231,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   // Cache UUID field from data view as it can be expensive to iterate all data view fields
   const uuidDataViewField = useMemo(
-    () =>
-      newDataViewPickerEnabled
-        ? experimentalDataView.fields?.getByName(EXECUTION_UUID_FIELD_NAME)
-        : oldSourcererDataView.fields?.[EXECUTION_UUID_FIELD_NAME],
-    [experimentalDataView, newDataViewPickerEnabled, oldSourcererDataView.fields]
+    () => dataView.fields?.getByName(EXECUTION_UUID_FIELD_NAME),
+    [dataView]
   );
 
   // Callbacks
@@ -311,20 +298,12 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   const onFilterByExecutionIdCallback = useCallback(
     (executionId: string, executionStart: string) => {
-      const dataViewAsViewBase = newDataViewPickerEnabled
-        ? experimentalDataView
-        : dataViewSpecToViewBase(oldSourcererDataView);
-
-      if (
-        uuidDataViewField != null &&
-        typeof uuidDataViewField !== 'undefined' &&
-        dataViewAsViewBase
-      ) {
+      if (uuidDataViewField != null && typeof uuidDataViewField !== 'undefined' && dataView) {
         // Update cached global query state with current state as a rollback point
         cachedGlobalQueryState.current = { filters, query, timerange };
         // Create filter & daterange constraints
         const filter = buildFilter(
-          dataViewAsViewBase,
+          dataView,
           uuidDataViewField,
           FILTERS.PHRASE,
           false,
@@ -370,9 +349,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
       }
     },
     [
-      newDataViewPickerEnabled,
-      experimentalDataView,
-      oldSourcererDataView,
+      dataView,
       uuidDataViewField,
       filters,
       query,

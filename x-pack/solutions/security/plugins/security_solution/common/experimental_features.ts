@@ -148,9 +148,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   crowdstrikeRunScriptEnabled: true,
 
-  /** Enables new Data View Picker */
-  newDataViewPickerEnabled: true,
-
   /**
    * Enables Microsoft Defender for Endpoint's RunScript command
    * Release: 8.19/9.1

@@ -10,7 +10,6 @@ import { useDispatch } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { PageScope } from '../../../data_view_manager/constants';
 import { PageLoader } from '../../../common/components/page_loader';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy';
@@ -23,7 +22,6 @@ import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { inputsSelectors } from '../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useNetworkDetails } from '../../../explore/network/containers/details';
 import { networkModel } from '../../../explore/network/store';
 import { useAnomaliesTableData } from '../../../common/components/ml/anomaly/use_anomalies_table_data';
@@ -77,34 +75,19 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
     services: { uiSettings },
   } = useKibana();
 
-  const {
-    indicesExist: oldIndicesExist,
-    sourcererDataView: oldSourcererDataView,
-    selectedPatterns: oldSelectedPatterns,
-  } = useSourcererDataView();
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
-  const { dataView: experimentalDataView, status } = useDataView();
-  const experimentalSelectedPatterns = useSelectedPatterns();
-
-  const indicesExist = newDataViewPickerEnabled
-    ? !!experimentalDataView.matchedIndices?.length
-    : oldIndicesExist;
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const { dataView, status } = useDataView();
+  const selectedPatterns = useSelectedPatterns();
+  const indicesExist = !!dataView.matchedIndices?.length;
 
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
         config: getEsQueryConfig(uiSettings),
-        dataViewSpec: oldSourcererDataView,
-        dataView: experimentalDataView,
+        dataView,
         queries: [query],
         filters,
       }),
-    [uiSettings, oldSourcererDataView, experimentalDataView, query, filters]
+    [uiSettings, dataView, query, filters]
   );
 
   const [loading, { id, networkDetails }] = useNetworkDetails({
@@ -126,7 +109,7 @@ export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
     aggregationInterval: 'auto',
   });
 
-  if (newDataViewPickerEnabled && status === 'pristine') {
+  if (status === 'pristine') {
     return <PageLoader />;
   }
 

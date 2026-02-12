@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { screen, render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { merge } from 'lodash';
@@ -15,7 +15,6 @@ import type { UseMessagesStorage } from '../../common/containers/local_storage/u
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { Overview } from '.';
 import { useUserPrivileges } from '../../common/components/user_privileges';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useFetchIndex } from '../../common/containers/source';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
 import { mockCtiLinksResponse, mockTiDataSources } from '../components/overview_cti_links/mock';
@@ -25,6 +24,7 @@ import { initialUserPrivilegesState } from '../../common/components/user_privile
 import type { EndpointPrivileges } from '../../../common/endpoint/types';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 const mockNavigateToApp = jest.fn();
 jest.mock('../../common/components/empty_prompt');
@@ -48,7 +48,6 @@ jest.mock('../../common/lib/kibana', () => {
   };
 });
 jest.mock('../../common/containers/source');
-jest.mock('../../sourcerer/containers');
 jest.mock('../../common/components/visualization_actions/lens_embeddable');
 jest.mock('../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
@@ -84,10 +83,9 @@ jest.mock('../../common/components/user_privileges', () => {
   };
 });
 jest.mock('../../common/containers/local_storage/use_messages_storage');
-
 jest.mock('../containers/overview_cti_links');
-
 jest.mock('../../common/components/visualization_actions/actions');
+jest.mock('../../data_view_manager/hooks/use_data_view');
 
 const useCtiDashboardLinksMock = useCtiDashboardLinks as jest.Mock;
 useCtiDashboardLinksMock.mockReturnValue(mockCtiLinksResponse);
@@ -104,15 +102,6 @@ jest.mock('../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
 
-jest.mock('../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    selectedPatterns: ['auditbeat-mytest-*'],
-    dataViewId: 'security-solution-my-test',
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
-}));
-
 const endpointNoticeMessage = (hasMessageValue: boolean) => {
   return {
     hasMessage: () => hasMessageValue,
@@ -122,7 +111,6 @@ const endpointNoticeMessage = (hasMessageValue: boolean) => {
     clearAllMessages: () => undefined,
   };
 };
-const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
 const mockUseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
@@ -148,6 +136,13 @@ describe('Overview', () => {
         indexExists: true,
       },
     ]);
+    (useDataView as jest.Mock).mockReturnValue({
+      dataView: {
+        hasMatchedIndices: jest.fn(),
+        matchedIndices: ['index-1'],
+      },
+      status: 'ready',
+    });
   });
 
   afterAll(() => {
@@ -158,13 +153,8 @@ describe('Overview', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
-    test('it DOES NOT render the Getting started text when an index is available', () => {
-      mockUseSourcererDataView.mockReturnValue({
-        selectedPatterns: [],
-        indicesExist: true,
-        indexPattern: {},
-      });
 
+    test('it DOES NOT render the Getting started text when an index is available', () => {
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
 
       render(
@@ -185,12 +175,6 @@ describe('Overview', () => {
           indexExists: false,
         },
       ]);
-      mockUseSourcererDataView.mockReturnValue({
-        selectedPatterns: [],
-        indicesExist: true,
-        indexPattern: {},
-      });
-
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
 
       render(
@@ -211,12 +195,6 @@ describe('Overview', () => {
           indexExists: false,
         },
       ]);
-      mockUseSourcererDataView.mockReturnValueOnce({
-        selectedPatterns: [],
-        indicesExist: true,
-        indexPattern: {},
-      });
-
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
 
       render(
@@ -231,12 +209,6 @@ describe('Overview', () => {
     });
 
     test('it does NOT render the Endpoint banner when the endpoint index is available AND storage is set', () => {
-      mockUseSourcererDataView.mockReturnValue({
-        selectedPatterns: [],
-        indexExists: true,
-        indexPattern: {},
-      });
-
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
 
       render(
@@ -251,12 +223,6 @@ describe('Overview', () => {
     });
 
     test('it does NOT render the Endpoint banner when an index IS available but storage is NOT set', () => {
-      mockUseSourcererDataView.mockReturnValue({
-        selectedPatterns: [],
-        indicesExist: true,
-        indexPattern: {},
-      });
-
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
 
       render(
@@ -270,12 +236,6 @@ describe('Overview', () => {
     });
 
     test('it does NOT render the Endpoint banner when Ingest is NOT available', () => {
-      mockUseSourcererDataView.mockReturnValue({
-        selectedPatterns: [],
-        indicesExist: true,
-        indexPattern: {},
-      });
-
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
       mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState({ canAccessFleet: false }));
 
@@ -292,15 +252,18 @@ describe('Overview', () => {
 
     describe('when no index is available', () => {
       beforeEach(() => {
-        mockUseSourcererDataView.mockReturnValue({
-          selectedPatterns: [],
-          indicesExist: false,
-        });
         mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState({ canAccessFleet: false }));
         mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
       });
 
       it('renders getting started page', () => {
+        (useDataView as jest.Mock).mockReturnValue({
+          dataView: {
+            matchedIndices: [],
+          },
+          status: 'ready',
+        });
+
         render(
           <TestProviders>
             <MemoryRouter>

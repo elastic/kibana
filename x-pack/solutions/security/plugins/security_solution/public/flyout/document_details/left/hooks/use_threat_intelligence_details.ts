@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { PageScope } from '../../../../data_view_manager/constants';
 import type { RunTimeMappings } from '../../../../../common/api/search_strategy';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import type { CtiEnrichment, EventFields } from '../../../../../common/search_strategy';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import {
@@ -19,7 +20,6 @@ import {
 } from '../../shared/utils/threat_intelligence';
 import { useInvestigationTimeEnrichment } from '../../shared/hooks/use_investigation_enrichment';
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useDocumentDetailsContext } from '../../shared/context';
 
@@ -62,14 +62,17 @@ export interface ThreatIntelligenceDetailsResult {
 export const useThreatIntelligenceDetails = (): ThreatIntelligenceDetailsResult => {
   const { indexName, eventId } = useDocumentDetailsContext();
   const [{ pageName }] = useRouteSpy();
-  const sourcererScope =
-    pageName === SecurityPageName.detections ? PageScope.alerts : PageScope.default;
-  const sourcererDataView = useSourcererDataView(sourcererScope);
+  const pageScope = pageName === SecurityPageName.detections ? PageScope.alerts : PageScope.default;
+  const { dataView } = useDataView(pageScope);
+  const runtimeMappings = useMemo(
+    () => dataView.getRuntimeMappings() as RunTimeMappings,
+    [dataView]
+  );
 
   const [isEventDataLoading, eventData] = useTimelineEventsDetails({
     indexName,
     eventId,
-    runtimeMappings: sourcererDataView.sourcererDataView.runtimeFieldMap as RunTimeMappings,
+    runtimeMappings,
     skip: !eventId,
   });
 

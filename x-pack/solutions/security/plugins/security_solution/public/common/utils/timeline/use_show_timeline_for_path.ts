@@ -7,7 +7,6 @@
 
 import { useCallback, useMemo } from 'react';
 import { matchPath } from 'react-router-dom';
-
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { NormalizedLink } from '../../links';
@@ -15,12 +14,9 @@ import { useNormalizedAppLinks } from '../../links/links_hooks';
 import { useKibana } from '../../lib/kibana';
 import { hasAccessToSecuritySolution } from '../../../helpers_access';
 
-import { useSourcererDataView } from '../../../sourcerer/containers';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-
 const useHiddenTimelineRoutes = () => {
   const normalizedLinks = useNormalizedAppLinks();
-  const hiddenTimelineRoutes = useMemo(
+  return useMemo(
     () =>
       Object.values(normalizedLinks).reduce((acc: string[], link: NormalizedLink) => {
         if (link.hideTimeline) {
@@ -30,30 +26,20 @@ const useHiddenTimelineRoutes = () => {
       }, []),
     [normalizedLinks]
   );
-  return hiddenTimelineRoutes;
 };
 
 export const useShowTimelineForGivenPath = () => {
   const { capabilities } = useKibana().services.application;
   const userHasSecuritySolutionVisible = hasAccessToSecuritySolution(capabilities);
 
-  const { indicesExist: oldIndicesExist, dataViewId } = useSourcererDataView(PageScope.timeline);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { dataView } = useDataView(PageScope.timeline);
-
-  const indicesExist = newDataViewPickerEnabled ? dataView.hasMatchedIndices() : oldIndicesExist;
+  const indicesExist = dataView.hasMatchedIndices();
 
   const hiddenTimelineRoutes = useHiddenTimelineRoutes();
-
-  const isTimelineAllowed = useMemo(() => {
-    // NOTE: with new Data View Picker, data view is always defined
-    if (newDataViewPickerEnabled) {
-      return userHasSecuritySolutionVisible && indicesExist;
-    }
-
-    return userHasSecuritySolutionVisible && (indicesExist || dataViewId === null);
-  }, [newDataViewPickerEnabled, userHasSecuritySolutionVisible, indicesExist, dataViewId]);
+  const isTimelineAllowed = useMemo(
+    () => userHasSecuritySolutionVisible && indicesExist,
+    [userHasSecuritySolutionVisible, indicesExist]
+  );
 
   const getIsTimelineVisible = useCallback(
     (pathname: string) => {

@@ -23,12 +23,10 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { InputsModelId } from '../../../common/store/inputs/constants';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { HeaderPage } from '../../../common/components/header_page';
 import { inputsSelectors } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { DashboardToolBar } from '../../components/dashboard_tool_bar';
-
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
 import { DashboardTitle } from '../../components/dashboard_title';
 
@@ -52,7 +50,6 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   );
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-  const { sourcererDataView: oldSourcererDataViewSpec } = useSourcererDataView();
 
   const { show: canReadDashboard } = useCapabilities<DashboardCapabilities>('dashboard_v2');
   const errorState = useMemo(
@@ -68,16 +65,12 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   const onDashboardToolBarLoad = useCallback((mode: ViewMode) => {
     setViewMode(mode);
   }, []);
-  const { dataView: experimentalDataView } = useDataView();
+  const { dataView } = useDataView();
 
   return (
     <>
       <FiltersGlobal>
-        <SiemSearchBar
-          dataView={experimentalDataView}
-          id={InputsModelId.global}
-          sourcererDataViewSpec={oldSourcererDataViewSpec} // TODO remove when we remove the newDataViewPickerEnabled feature flag
-        />
+        <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
       </FiltersGlobal>
       <SecuritySolutionPageWrapper>
         <EuiFlexGroup

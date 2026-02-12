@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { TestProviders } from '../../../../common/mock';
 import { SEARCH_BAR_TEST_ID, SearchBarSection } from './search_bar_section';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 jest.mock('../../../../common/components/filters_global', () => ({
   FiltersGlobal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -21,13 +21,12 @@ jest.mock('../../../../common/components/search_bar', () => ({
 }));
 
 const dataView: DataView = createStubDataView({ spec: {} });
-const dataViewSpec: DataViewSpec = dataView.toSpec();
 
 describe('<ChartsSection />', () => {
   it('should render correctly', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <SearchBarSection dataView={dataView} sourcererDataViewSpec={dataViewSpec} />
+        <SearchBarSection dataView={dataView} />
       </TestProviders>
     );
 

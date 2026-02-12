@@ -11,7 +11,6 @@ import { TestProviders } from '../../../common/mock';
 import type { AlertsTableComponentProps } from './alerts_sub_grouping';
 import { GroupedSubLevelComponent } from './alerts_sub_grouping';
 import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_query';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { groupingSearchResponse } from './grouping_settings/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
@@ -27,7 +26,6 @@ import {
 } from '../../containers/detection_engine/alerts/api';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');
-jest.mock('../../../sourcerer/containers');
 jest.mock('../../../data_view_manager/hooks/use_data_view');
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/detection_engine/alerts/api', () => ({
@@ -89,16 +87,6 @@ const testProps: AlertsTableComponentProps = {
   tableId: TableId.test,
 };
 
-const sourcererDataView = {
-  indicesExist: true,
-  loading: false,
-  indexPattern: {
-    fields: [],
-  },
-  browserFields: {},
-  sourcererDataView: {},
-};
-
 describe('GroupedSubLevelComponent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -106,7 +94,6 @@ describe('GroupedSubLevelComponent', () => {
       status: 'ready',
       dataView,
     });
-    (useSourcererDataView as jest.Mock).mockReturnValue(sourcererDataView);
     mockUseQueryAlerts.mockImplementation((i) => {
       if (i.skip) {
         return mockQueryResponse;

@@ -6,10 +6,9 @@
  */
 
 import type { AppMountParameters, CoreSetup, CoreStart, PackageInfo } from '@kbn/core/public';
-import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import type { DataPublicPluginStart, QueryStart } from '@kbn/data-plugin/public';
+import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { Logger } from '@kbn/logging';
 import { initTelemetry, TelemetryService } from './common/lib/telemetry';
 import { KibanaServices } from './common/lib/kibana/services';
 import type { ExperimentalFeatures } from '../common/experimental_features';
@@ -56,8 +55,7 @@ export class PluginServices {
     private readonly config: SecuritySolutionUiConfigType,
     private readonly experimentalFeatures: ExperimentalFeatures,
     private readonly contract: PluginContract,
-    private readonly packageInfo: PackageInfo,
-    private logger: Logger
+    private readonly packageInfo: PackageInfo
   ) {
     this.configSettings = parseConfigSettings(this.config.offeringSettings ?? {}).settings;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
@@ -149,7 +147,6 @@ export class PluginServices {
       apm,
       config: this.config,
       inference: startPlugins.inference,
-      logger: this.logger,
       configSettings: this.configSettings,
       savedObjectsTagging: savedObjectsTaggingOss.getTaggingApi(),
       storage: this.storage,

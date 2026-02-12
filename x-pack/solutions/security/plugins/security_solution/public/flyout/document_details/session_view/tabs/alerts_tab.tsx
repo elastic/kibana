@@ -13,7 +13,6 @@ import type { ProcessEvent } from '@kbn/session-view-plugin/common';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { LeftPanelVisualizeTab } from '../../left';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { SESSION_VIEW_ID } from '../../left/components/session_view';
 import {
   DocumentDetailsLeftPanelKey,
@@ -21,7 +20,6 @@ import {
 } from '../../shared/constants/panel_keys';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
 import { useSessionViewPanelContext } from '../context';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 /**
@@ -38,13 +36,7 @@ export const AlertsTab = memo(() => {
     hasNextPage: hasNextPageAlerts,
   } = useFetchSessionViewAlerts(sessionEntityId, sessionStartTime, investigatedAlertId);
 
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(PageScope.alerts);
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.alerts);
-
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
+  const selectedPatterns = useSelectedPatterns(PageScope.alerts);
 
   const alertsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 

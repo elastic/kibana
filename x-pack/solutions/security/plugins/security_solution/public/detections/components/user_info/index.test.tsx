@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { waitFor, renderHook } from '@testing-library/react';
-import { useUserInfo, ManageUserInfo } from '.';
+import { renderHook, waitFor } from '@testing-library/react';
+import { ManageUserInfo, useUserInfo } from '.';
 import type { Capabilities } from '@kbn/core/public';
 
 import { useKibana } from '../../../common/lib/kibana';
@@ -36,7 +36,6 @@ describe('useUserInfo', () => {
     });
 
     jest.spyOn(sourcererSelectors, 'signalIndexName').mockReturnValue(null);
-    jest.spyOn(sourcererSelectors, 'signalIndexMappingOutdated').mockReturnValue(null);
   });
   it('returns default state', async () => {
     const { result } = renderHook(() => useUserInfo(), {

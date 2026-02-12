@@ -12,11 +12,9 @@ import { EuiPanel } from '@elastic/eui';
 import type { Process } from '@kbn/session-view-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { PageScope } from '../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { CustomProcess } from '../../session_view/context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { SESSION_VIEW_TEST_ID } from './test_ids';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import {
   DocumentDetailsPreviewPanelKey,
   DocumentDetailsSessionViewPanelKey,
@@ -68,15 +66,7 @@ export const SessionView: FC = memo(() => {
   const isEnterprisePlus = useLicense().isEnterprise();
   const isEnabled = sessionViewConfig && isEnterprisePlus;
 
-  const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView(PageScope.alerts);
-
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.alerts);
-
-  const selectedPatterns = newDataViewPickerEnabled
-    ? experimentalSelectedPatterns
-    : oldSelectedPatterns;
-
+  const selectedPatterns = useSelectedPatterns(PageScope.alerts);
   const alertsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 
   const { openPreviewPanel, closePreviewPanel } = useExpandableFlyoutApi();

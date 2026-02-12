@@ -22,15 +22,6 @@ import { AlertTableCellContextProvider } from './cell_value_context';
 import { PageScope } from '../../../data_view_manager/constants';
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    browserFields: {},
-    defaultIndex: 'defaultIndex',
-    loading: false,
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
-}));
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';

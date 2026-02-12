@@ -25,7 +25,6 @@ import { convertToBuildEsQuery } from '../../../../common/lib/kuery';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { parseFilterQuery } from '../parse_filter_query';
 import type { SettingsOverrideOptions } from '../../results/history/types';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import * as i18n from './translations';
 import type { AlertsSelectionSettings } from '../types';
 
@@ -58,8 +57,7 @@ export const useSettingsView = ({
   const { euiTheme } = useEuiTheme();
   const { uiSettings } = useKibana().services;
   const filterManager = useRef<FilterManager>(new FilterManager(uiSettings));
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView();
-  const { dataView: experimentalDataView } = useDataView();
+  const { dataView } = useDataView();
 
   const [alertSummaryStackBy0, setAlertSummaryStackBy0] = useState<string>(DEFAULT_STACK_BY_FIELD);
 
@@ -141,8 +139,7 @@ export const useSettingsView = ({
     // Convert settings to filter query for overrides
     const [filterQuery, kqlError] = convertToBuildEsQuery({
       config: getEsQueryConfig(uiSettings),
-      dataViewSpec: oldSourcererDataView,
-      dataView: experimentalDataView,
+      dataView,
       queries: [settings.query],
       filters: settings.filters,
     });
@@ -158,10 +155,9 @@ export const useSettingsView = ({
       overrideStart: settings.start,
     });
   }, [
-    experimentalDataView,
+    dataView,
     handleSave,
     localConnectorId,
-    oldSourcererDataView,
     onGenerate,
     settings.end,
     settings.filters,

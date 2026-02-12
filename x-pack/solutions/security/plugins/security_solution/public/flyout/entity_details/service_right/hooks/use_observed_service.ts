@@ -6,7 +6,6 @@
  */
 
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../common/store';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
@@ -16,9 +15,7 @@ import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/se
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { isActiveTimeline } from '../../../../helpers';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
-import { sourcererSelectors } from '../../../../sourcerer/store';
 import { useObservedServiceDetails } from './observed_service_details';
 
 export const useObservedService = (
@@ -33,13 +30,7 @@ export const useObservedService = (
   const { to, from } = isActiveTimelines ? timelineTime : globalTime;
   const { isInitializing, setQuery, deleteQuery } = globalTime;
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const oldSecurityDefaultPatterns =
-    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
-  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
-  const securityDefaultPatterns = newDataViewPickerEnabled
-    ? experimentalSecurityDefaultIndexPatterns
-    : oldSecurityDefaultPatterns;
+  const { indexPatterns } = useSecurityDefaultPatterns();
 
   const [
     loadingObservedService,
@@ -48,7 +39,7 @@ export const useObservedService = (
     endDate: to,
     startDate: from,
     serviceName,
-    indexNames: securityDefaultPatterns,
+    indexNames: indexPatterns,
     skip: isInitializing,
   });
 
@@ -64,7 +55,7 @@ export const useObservedService = (
   const [loadingFirstSeen, { firstSeen }] = useFirstLastSeen({
     field: 'service.name',
     value: serviceName,
-    defaultIndex: securityDefaultPatterns,
+    defaultIndex: indexPatterns,
     order: Direction.asc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
   });
@@ -72,7 +63,7 @@ export const useObservedService = (
   const [loadingLastSeen, { lastSeen }] = useFirstLastSeen({
     field: 'service.name',
     value: serviceName,
-    defaultIndex: securityDefaultPatterns,
+    defaultIndex: indexPatterns,
     order: Direction.desc,
     filterQuery: NOT_EVENT_KIND_ASSET_FILTER,
   });

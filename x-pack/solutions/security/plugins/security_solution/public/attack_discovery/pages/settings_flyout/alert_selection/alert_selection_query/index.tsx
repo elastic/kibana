@@ -13,18 +13,12 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
 import { debounce } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-
 import { PageScope } from '../../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { getCommonTimeRanges } from '../helpers/get_common_time_ranges';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
-import { useCreateDataView } from '../../../../../common/hooks/use_create_data_view';
 import type { AlertsSelectionSettings } from '../../types';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 
-export const MAX_ALERTS = 500;
-export const MIN_ALERTS = 50;
 export const STEP = 50;
 export const NO_INDEX_PATTERNS: DataView[] = [];
 
@@ -50,24 +44,8 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
   } = useKibana().services;
   const { euiTheme } = useEuiTheme();
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView, status } = useDataView(PageScope.alerts);
-
-  // get the sourcerer `DataViewSpec` for alerts:
-  const { sourcererDataView: oldSourcererDataViewSpec, loading: oldIsLoadingIndexPattern } =
-    useSourcererDataView(PageScope.alerts);
-
-  // create a `DataView` from the `DataViewSpec`:
-  const { dataView: oldDataView, loading: oldIsLoadingDataView } = useCreateDataView({
-    dataViewSpec: oldSourcererDataViewSpec,
-    loading: oldIsLoadingIndexPattern,
-    skip: newDataViewPickerEnabled, // skip data view creation if the new data view picker is enabled
-  });
-
-  const alertsDataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
-  const isLoadingIndexPattern = newDataViewPickerEnabled
-    ? status !== 'ready'
-    : oldIsLoadingDataView;
+  const { dataView: alertsDataView, status } = useDataView(PageScope.alerts);
+  const isLoadingIndexPattern = status !== 'ready';
 
   // create a container for the alerts `DataView`, as required by the search bar:
   const indexPatterns: DataView[] = useMemo(

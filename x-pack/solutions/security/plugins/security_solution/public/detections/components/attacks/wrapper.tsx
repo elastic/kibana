@@ -19,7 +19,6 @@ import { i18n } from '@kbn/i18n';
 import { PageScope } from '../../../data_view_manager/constants';
 import { HeaderPage } from '../../../common/components/header_page';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { AttacksPageContent } from './content';
 import { PAGE_TITLE } from '../../pages/attacks/translations';
 
@@ -32,21 +31,13 @@ const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.attacksPage.dataVi
 });
 
 export const Wrapper = React.memo(() => {
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-
   const { dataView, status } = useDataView(PageScope.attacks);
 
-  const isLoading: boolean = useMemo(
-    () => (newDataViewPickerEnabled && status === 'loading') || status === 'pristine',
-    [status, newDataViewPickerEnabled]
-  );
+  const isLoading: boolean = useMemo(() => status === 'loading' || status === 'pristine', [status]);
 
   const isDataViewInvalid: boolean = useMemo(
-    () =>
-      !newDataViewPickerEnabled ||
-      status === 'error' ||
-      (status === 'ready' && !dataView.hasMatchedIndices()),
-    [dataView, status, newDataViewPickerEnabled]
+    () => status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices()),
+    [dataView, status]
   );
 
   return (

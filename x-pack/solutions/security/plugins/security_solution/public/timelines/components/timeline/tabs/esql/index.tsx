@@ -17,10 +17,8 @@ import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { APP_STATE_URL_KEY } from '@kbn/discover-plugin/common';
 import { PageScope } from '../../../../../data_view_manager/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { updateSavedSearchId } from '../../../../store/actions';
 import { useDiscoverInTimelineContext } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
@@ -34,7 +32,6 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { timelineDefaults } from '../../../../store/defaults';
 import { savedSearchComparator } from './utils';
 import { GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE } from './translations';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 
 const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
   [data-test-subj='searchSessionIndicator'] {
@@ -49,12 +46,7 @@ interface DiscoverTabContentProps {
 export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) => {
   const history = useHistory();
   const {
-    services: {
-      customDataService: discoverDataService,
-      discover,
-      savedSearch: savedSearchService,
-      dataViews: dataViewService,
-    },
+    services: { customDataService: discoverDataService, discover, savedSearch: savedSearchService },
   } = useKibana();
   const {
     timelinePrivileges: { crud: canSaveTimeline },
@@ -62,12 +54,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   const dispatch = useDispatch();
 
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { status: dataViewStatus } = useDataView(PageScope.alerts);
-
-  const { dataViewId } = useSourcererDataView(PageScope.alerts);
-
-  const [oldDataViewSpec, setDataViewSpec] = useState<DataViewSpec | undefined>();
 
   const [discoverTimerange, setDiscoverTimerange] = useState<TimeRange>();
 
@@ -75,12 +62,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const discoverInternalStateSubscription = useRef<Subscription>();
   const discoverSavedSearchStateSubscription = useRef<Subscription>();
   const discoverTimerangeSubscription = useRef<Subscription>();
-
-  // TODO: (DV_PICKER) should not be here, used to make discover container work I suppose
-  useEffect(() => {
-    if (!dataViewId || newDataViewPickerEnabled) return;
-    dataViewService.get(dataViewId).then((dv) => setDataViewSpec(dv?.toSpec?.()));
-  }, [dataViewId, dataViewService, newDataViewPickerEnabled]);
 
   const {
     discoverStateContainer,
@@ -296,9 +277,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   const DiscoverContainer = discover.DiscoverContainer;
 
-  const isLoading = newDataViewPickerEnabled
-    ? dataViewStatus === 'loading' || dataViewStatus === 'pristine'
-    : !oldDataViewSpec; // TODO: (DV_PICKER) this should not work like that
+  const isLoading = dataViewStatus === 'loading' || dataViewStatus === 'pristine';
 
   return (
     <EmbeddedDiscoverContainer data-test-subj="timeline-embedded-discover">

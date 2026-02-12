@@ -6,7 +6,6 @@
  */
 
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockDataViewManagerState } from '../mock';
 import { createInitListener } from './init_listener';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
@@ -61,7 +60,6 @@ const mockListenerApi = {
   getState: mockGetState,
 } as unknown as ListenerEffectAPI<RootState, Dispatch<AnyAction>>;
 
-const mockLogger = loggingSystemMock.createLogger();
 describe('createInitListener', () => {
   let listener: ReturnType<typeof createInitListener>;
 
@@ -78,7 +76,6 @@ describe('createInitListener', () => {
     listener = createInitListener(
       {
         dataViews: mockDataViewsService,
-        logger: mockLogger,
         http,
         application,
         uiSettings,
