@@ -5,7 +5,7 @@ mapped_pages:
 
 # Building a Kibana distributable [building-kibana]
 
-The following command will build a {{kib}} production distributable:
+To build a {{kib}} production distributable, use the following command:
 
 ```bash
 yarn build --skip-os-packages

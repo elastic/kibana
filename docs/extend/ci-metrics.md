@@ -15,7 +15,7 @@ In addition to running our tests, CI collects metrics about the Kibana build. Th
 
 ### Bundle size [ci-metric-types-bundle-size-metrics]
 
-These metrics help contributors know how they are impacting the size of the bundles Kibana creates, and help make sure that Kibana loads as fast as possible.
+These metrics track the impact of code changes on Kibana bundle sizes, ensuring optimal loading performance.
 
 $$$ci-metric-page-load-bundle-size$$$ `page load bundle size`
 :   The size of the entry file produced for each bundle/plugin. This file is always loaded on every page load, so it should be as small as possible. To reduce this metric you can put any code that isn’t necessary on every page load behind an [`async import()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports).
@@ -24,18 +24,18 @@ $$$ci-metric-page-load-bundle-size$$$ `page load bundle size`
 
 
 $$$ci-metric-async-chunks-size$$$ `async chunks size`
-:   An "async chunk" is created for the files imported by each [`async import()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports) statement. This metric tracks the sum size of these chunks, in bytes, broken down by plugin/bundle id. You can think of this as the amount of code users will have to download if they access all the components/applications within a bundle.
+:   Tracks the sum size (in bytes, by plugin/bundle ID) of "async chunks," which are created for files imported via [`async import()`](https://developer.mozilla.org/en-US/Web/JavaScript/Reference/Statements/import#Dynamic_Imports) statements. This metric reflects the amount of code downloaded when accessing all components within a bundle.
 
 $$$ci-metric-misc-asset-size$$$ `miscellaneous assets size`
-:   A "miscellaneous asset" is anything that isn’t an async chunk or entry chunk, often images. This metric tracks the sum size of these assets, in bytes, broken down by plugin/bundle id.
+:   Tracks the sum size (in bytes, by plugin/bundle ID) of assets that are not async or entry chunks, typically images.
 
 $$$ci-metric-bundle-module-count$$$ `@kbn/optimizer bundle module count`
-:   The number of separate modules included in each bundle/plugin. This is the best indicator we have for how long a specific bundle will take to be built by the `@kbn/optimizer`, so we report it to help people know when they’ve imported a module which might include a surprising number of sub-modules.
+:   The number of separate modules per bundle/plugin. This metric indicates the `@kbn/optimizer` build time for a bundle, highlighting potentially large module imports.
 
 
 ### Distributable size [ci-metric-types-distributable-size]
 
-The size of the Kibana distributable is an essential metric as it not only contributes to the time it takes to download, but it also impacts time it takes to extract the archive once downloaded.
+The Kibana distributable size is crucial, affecting both download and archive extraction times.
 
 There are several metrics that we don’t report on PRs because gzip-compression produces different file sizes even when provided the same input, so this metric would regularly show changes even though PR authors hadn’t made any relevant changes.
 
@@ -64,7 +64,7 @@ You can report new metrics by using the `CiStatsReporter` class provided by the 
 
 ## Resolving `page load bundle size` overages [ci-metric-resolving-overages]
 
-In order to prevent the page load bundles from growing unexpectedly large we limit the `page load asset size` metric for each plugin. When a PR increases this metric beyond the limit defined for that plugin in [`limits.yml`](https://github.com/elastic/kibana/blob/master/packages/kbn-optimizer/limits.yml) a failed commit status is set and the PR author needs to decide how to resolve this issue before the PR can be merged.
+To prevent unexpected growth, the `page load asset size` for each plugin is limited. If a PR exceeds this limit, defined in [`limits.yml`](https://github.com/elastic/kibana/blob/master/packages/kbn-optimizer/limits.yml), the PR author must resolve the overage before merging.
 
 In most cases the limit should be high enough that PRs shouldn’t trigger overages, but when they do make sure it’s clear what is causing the overage by trying the following:
 
