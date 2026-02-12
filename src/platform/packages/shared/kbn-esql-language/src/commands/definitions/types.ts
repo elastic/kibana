@@ -208,9 +208,11 @@ export enum PromQLFunctionDefinitionTypes {
   PROMQL_SCALAR = 'promql_scalar',
 }
 
+export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';
+
 export interface PromQLFunctionParameter {
   name: string;
-  type: string;
+  type: PromQLFunctionParamType;
   optional: boolean;
   description?: string;
 }
@@ -379,6 +381,22 @@ export interface ValidationErrors {
   promqlMissingQuery: {
     message: string;
     type: {};
+  };
+  promqlUnknownFunction: {
+    message: string;
+    type: { fn: string };
+  };
+  promqlWrongNumberArgs: {
+    message: string;
+    type: { fn: string; expected: string; actual: number };
+  };
+  promqlGroupingNotAllowed: {
+    message: string;
+    type: { fn: string };
+  };
+  promqlNoMatchingSignature: {
+    message: string;
+    type: { fn: string; required: string };
   };
   wrongDissectOptionArgumentType: {
     message: string;

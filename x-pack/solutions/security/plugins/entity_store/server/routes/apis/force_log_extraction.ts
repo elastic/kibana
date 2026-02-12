@@ -11,15 +11,15 @@ import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import { EntityType } from '../../domain/definitions/entity_schema';
+import { EntityType } from '../../../common/domain/definitions/entity_schema';
 
 const paramsSchema = z.object({
   entityType: EntityType,
 });
 
 const bodySchema = z.object({
-  fromDateISO: z.string().datetime().optional(),
-  toDateISO: z.string().datetime().optional(),
+  fromDateISO: z.string().datetime(),
+  toDateISO: z.string().datetime(),
 });
 
 export function registerForceLogExtraction(router: EntityStorePluginRouter) {
@@ -50,7 +50,9 @@ export function registerForceLogExtraction(router: EntityStorePluginRouter) {
         const logger = baseLogger.get('forceLogExtraction').get(entityType);
         logger.debug(`Force log extraction API called for entity type: ${entityType}`);
 
-        const summary = await logsExtractionClient.extractLogs(entityType, req.body);
+        const summary = await logsExtractionClient.extractLogs(entityType, {
+          specificWindow: req.body,
+        });
 
         return res.ok({
           body: summary,

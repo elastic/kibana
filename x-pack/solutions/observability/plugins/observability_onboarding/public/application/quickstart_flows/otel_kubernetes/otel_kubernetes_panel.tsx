@@ -118,6 +118,28 @@ export const OtelKubernetesPanel: React.FC = () => {
             ),
             children: (
               <>
+                <p>
+                  <FormattedMessage
+                    id="xpack.observability_onboarding.otelKubernetesPanel.addRepositoryDescription"
+                    defaultMessage="Run this command to add the Helm chart. Refer to the {docsLink} for information on supported Helm versions."
+                    values={{
+                      docsLink: (
+                        <EuiLink
+                          data-test-subj="observabilityOnboardingOtelKubernetesPanelQuickstartDocsLink"
+                          href="https://www.elastic.co/docs/solutions/observability/get-started/quickstart-unified-kubernetes-observability-with-elastic-distributions-of-opentelemetry-edot"
+                          external
+                          target="_blank"
+                        >
+                          {i18n.translate(
+                            'xpack.observability_onboarding.otelKubernetesPanel.quickstartDocsLinkLabel',
+                            { defaultMessage: 'quickstart guide' }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+                <EuiSpacer />
                 <EuiCodeBlock paddingSize="m" language="bash">
                   {addRepoCommand}
                 </EuiCodeBlock>

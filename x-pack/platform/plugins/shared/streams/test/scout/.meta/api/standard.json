@@ -1,0 +1,1985 @@
+{
+  "lastModified": "2026-02-09T18:40:19.390Z",
+  "sha1": "4b500cbbebb18d28d562eed10fcfb5492d58f97c",
+  "tests": [
+    {
+      "id": "dc6084aa7695e8a-26220f9b20676c1",
+      "title": "Setup environment for Streams API tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/global.setup.ts",
+        "line": 10,
+        "column": 16
+      }
+    },
+    {
+      "id": "fd79392c6460c17-fae630a87fbe60c",
+      "title": "Stream lifecycle - retention API should create stream with inherited lifecycle by default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 98,
+        "column": 12
+      }
+    },
+    {
+      "id": "fd79392c6460c17-e5c0c7b6a78910e",
+      "title": "Stream lifecycle - retention API should include effective_lifecycle in stream response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 119,
+        "column": 12
+      }
+    },
+    {
+      "id": "fd79392c6460c17-a5b83efdc1555f3",
+      "title": "Stream lifecycle - retention API should update stream with DSL retention of 7 days",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 140,
+        "column": 12
+      }
+    },
+    {
+      "id": "fd79392c6460c17-3c474ea63f60f99",
+      "title": "Stream lifecycle - retention API should update stream with DSL retention of 30 days",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 181,
+        "column": 12
+      }
+    },
+    {
+      "id": "fd79392c6460c17-3714c804fedc655",
+      "title": "Stream lifecycle - retention API should update stream with DSL retention of 90 days",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 220,
+        "column": 12
+      }
+    },
+    {
+      "id": "fd79392c6460c17-93a66e9579a74ee",
+      "title": "Stream lifecycle - retention API should update stream with DSL retention using hours unit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 255,
+        "column": 12
+      }
+    },
+    {
+      "id": "fd79392c6460c17-cb860532b1d48e4",
+      "title": "Stream lifecycle - retention API should switch from inherited to DSL lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 290,
+        "column": 12
+      }
+    },
+    {
+      "id": "fd79392c6460c17-7458a8dce6944da",
+      "title": "Stream lifecycle - retention API should switch from DSL back to inherited lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 329,
+        "column": 12
+      }
+    },
+    {
+      "id": "fd79392c6460c17-469cb64c2cad280",
+      "title": "Stream lifecycle - retention API should modify existing DSL retention value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 389,
+        "column": 12
+      }
+    },
+    {
+      "id": "fd79392c6460c17-f775e51d043f41c",
+      "title": "Stream lifecycle - retention API should read ingest settings via GET _ingest",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 447,
+        "column": 12
+      }
+    },
+    {
+      "id": "fd79392c6460c17-c266a3b8b19d574",
+      "title": "Stream lifecycle - retention API should update only lifecycle without affecting other ingest settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 470,
+        "column": 12
+      }
+    },
+    {
+      "id": "fd79392c6460c17-9989a095dbff3f2",
+      "title": "Stream lifecycle - retention API should return error for non-existent stream lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 514,
+        "column": 12
+      }
+    },
+    {
+      "id": "fd79392c6460c17-f5b4387854d3e76",
+      "title": "Stream lifecycle - retention API should return error when updating non-existent stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 530,
+        "column": 12
+      }
+    },
+    {
+      "id": "fd79392c6460c17-e6cd46014570785",
+      "title": "Stream lifecycle - retention API should return 400 for invalid lifecycle format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 559,
+        "column": 12
+      }
+    },
+    {
+      "id": "fd79392c6460c17-bb36453a689250b",
+      "title": "Stream lifecycle - retention API should inherit lifecycle from parent stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/lifecycle_retention.spec.ts",
+        "line": 589,
+        "column": 12
+      }
+    },
+    {
+      "id": "faca398aaec29e0-36420bb2df4af99",
+      "title": "Stream data processing - persistence API (CRUD) should create a single grok processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
+        "line": 76,
+        "column": 12
+      }
+    },
+    {
+      "id": "faca398aaec29e0-8dc6360fa1a8889",
+      "title": "Stream data processing - persistence API (CRUD) should create a dissect processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
+        "line": 123,
+        "column": 12
+      }
+    },
+    {
+      "id": "faca398aaec29e0-232dc0819291027",
+      "title": "Stream data processing - persistence API (CRUD) should create multiple processors in sequence",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
+        "line": 166,
+        "column": 12
+      }
+    },
+    {
+      "id": "faca398aaec29e0-1c1f9b570d38af2",
+      "title": "Stream data processing - persistence API (CRUD) should update an existing processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
+        "line": 221,
+        "column": 12
+      }
+    },
+    {
+      "id": "faca398aaec29e0-c6eb8dfabbe8959",
+      "title": "Stream data processing - persistence API (CRUD) should remove all processors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
+        "line": 293,
+        "column": 12
+      }
+    },
+    {
+      "id": "faca398aaec29e0-6889c9c3533c9cc",
+      "title": "Stream data processing - persistence API (CRUD) should create processor with conditional step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
+        "line": 357,
+        "column": 12
+      }
+    },
+    {
+      "id": "faca398aaec29e0-b99653aa3b88cfa",
+      "title": "Stream data processing - persistence API (CRUD) should create nested conditional steps",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
+        "line": 409,
+        "column": 12
+      }
+    },
+    {
+      "id": "faca398aaec29e0-8976c351db413d5",
+      "title": "Stream data processing - persistence API (CRUD) should reorder processors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
+        "line": 476,
+        "column": 12
+      }
+    },
+    {
+      "id": "faca398aaec29e0-e6f9d10f5be3aa0",
+      "title": "Stream data processing - persistence API (CRUD) should not affect lifecycle when updating processing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
+        "line": 545,
+        "column": 12
+      }
+    },
+    {
+      "id": "faca398aaec29e0-cc6a9a5a2dc600f",
+      "title": "Stream data processing - persistence API (CRUD) should return 400 for invalid processor action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
+        "line": 604,
+        "column": 12
+      }
+    },
+    {
+      "id": "faca398aaec29e0-857a26d8976475f",
+      "title": "Stream data processing - persistence API (CRUD) should return error when updating non-existent stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts",
+        "line": 638,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-58278be29d16cca",
+      "title": "Stream data processing - simulate processing API should simulate grok pattern with HTTP log format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 18,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-8576ae64fc4ff9e",
+      "title": "Stream data processing - simulate processing API should simulate grok with IP address extraction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 61,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-7ea2fee0a5bfd14",
+      "title": "Stream data processing - simulate processing API should simulate grok with multiple patterns (fallback)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 90,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-4408d3e86afb4e1",
+      "title": "Stream data processing - simulate processing API should handle non-matching grok pattern gracefully",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 129,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-6781e6bb18ae4ae",
+      "title": "Stream data processing - simulate processing API should simulate grok with custom pattern definitions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 165,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-8bc8e55d4500981",
+      "title": "Stream data processing - simulate processing API should simulate grok with ignore_missing option",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 198,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-282be3c54458623",
+      "title": "Stream data processing - simulate processing API should simulate dissect with key-value extraction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 223,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-7be5816e4435595",
+      "title": "Stream data processing - simulate processing API should simulate dissect with delimiter-based extraction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 255,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-53a4112ee7ce684",
+      "title": "Stream data processing - simulate processing API should simulate dissect with append separator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 287,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-2ccfa25c076f79f",
+      "title": "Stream data processing - simulate processing API should handle dissect with ignore_missing option",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 311,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-6822e91fa9d3813",
+      "title": "Stream data processing - simulate processing API should simulate date parsing with ISO format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 336,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-824d00b030a5b6a",
+      "title": "Stream data processing - simulate processing API should simulate date parsing with multiple formats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 365,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-be9798f81d3d87d",
+      "title": "Stream data processing - simulate processing API should simulate date parsing with timezone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 397,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-84c417a3f6328cc",
+      "title": "Stream data processing - simulate processing API should simulate rename processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 428,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-b438cec73200c88",
+      "title": "Stream data processing - simulate processing API should simulate set processor with literal value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 453,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-3357650c953f018",
+      "title": "Stream data processing - simulate processing API should simulate set processor with copy_from",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 476,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-7492c0530597ea4",
+      "title": "Stream data processing - simulate processing API should simulate remove processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 499,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-18e1dcb10409ca2",
+      "title": "Stream data processing - simulate processing API should simulate uppercase processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 527,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-5f7952dfe6281bb",
+      "title": "Stream data processing - simulate processing API should simulate lowercase processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 551,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-72d943af64bd882",
+      "title": "Stream data processing - simulate processing API should simulate trim processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 575,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-2604aa4444ba4e2",
+      "title": "Stream data processing - simulate processing API should simulate convert processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 603,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-d198a09dc039591",
+      "title": "Stream data processing - simulate processing API should simulate replace processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 628,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-7e75f516d1309a6",
+      "title": "Stream data processing - simulate processing API should simulate multiple processors in sequence",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 658,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-de9b653148589f9",
+      "title": "Stream data processing - simulate processing API should simulate conditional processing with where clause",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 701,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-a0aa5c60b9ed28c",
+      "title": "Stream data processing - simulate processing API should return 400 for missing required processor fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 732,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-b79ddc5a8557236",
+      "title": "Stream data processing - simulate processing API should return 400 for invalid action type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 757,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-c52ec84d3acae5c",
+      "title": "Stream data processing - simulate processing API should handle empty documents array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 779,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-7bba5284570ddf7",
+      "title": "Stream data processing - simulate processing API should handle empty steps array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 806,
+        "column": 12
+      }
+    },
+    {
+      "id": "a65f839dacde922-70060cf3c326fd2",
+      "title": "Stream data processing - simulate processing API should simulate join processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_simulate.spec.ts",
+        "line": 828,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-aa4e8c66c7e61f6",
+      "title": "Stream data routing - fork stream API (CRUD) should create a child stream via fork API with eq condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 27,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-4c1ef7d9f169ae1",
+      "title": "Stream data routing - fork stream API (CRUD) should create a child stream with neq condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 60,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-5f3a2b1888fd3f5",
+      "title": "Stream data routing - fork stream API (CRUD) should create a child stream with contains condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 78,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-f05aa25f01ae018",
+      "title": "Stream data routing - fork stream API (CRUD) should create a child stream with startsWith condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 99,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-067c44d5b1cb74e",
+      "title": "Stream data routing - fork stream API (CRUD) should create a child stream with endsWith condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 120,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-265d0c4deb60105",
+      "title": "Stream data routing - fork stream API (CRUD) should create a child stream with exists condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 141,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-3e8f9eefdf8e6c7",
+      "title": "Stream data routing - fork stream API (CRUD) should create a child stream with numeric comparisons",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 162,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-2bf913006b328e7",
+      "title": "Stream data routing - fork stream API (CRUD) should create a disabled routing rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 184,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-77c5515e2a61adc",
+      "title": "Stream data routing - fork stream API (CRUD) should default to enabled when status is omitted but condition matches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 213,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-22955f2a3422817",
+      "title": "Stream data routing - fork stream API (CRUD) should create nested child streams (2 levels)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 246,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-8875b837e4d720f",
+      "title": "Stream data routing - fork stream API (CRUD) should create multiple sibling streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 292,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-06b1f9b4ab36bf9",
+      "title": "Stream data routing - fork stream API (CRUD) should delete a child stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 331,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-2104cc25aa26b97",
+      "title": "Stream data routing - fork stream API (CRUD) should support AND condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 364,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-5a7361e0949447b",
+      "title": "Stream data routing - fork stream API (CRUD) should support OR condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 387,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-dc95eb478c72e7c",
+      "title": "Stream data routing - fork stream API (CRUD) should support NOT condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 410,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-ee546010bd8fc1a",
+      "title": "Stream data routing - fork stream API (CRUD) should support nested AND/OR conditions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 430,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-91e64c47cc51409",
+      "title": "Stream data routing - fork stream API (CRUD) should support always condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 458,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-ea6c832f7c2995f",
+      "title": "Stream data routing - fork stream API (CRUD) should support never condition (auto-disables)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 476,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-15726fab6d00165",
+      "title": "Stream data routing - fork stream API (CRUD) should support range condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 505,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-9d0f58f4dca554b",
+      "title": "Stream data routing - fork stream API (CRUD) should fail to fork with empty condition object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 527,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-b14724d44f40230",
+      "title": "Stream data routing - fork stream API (CRUD) should fail to fork to an existing stream name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 543,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-813fe769a12916f",
+      "title": "Stream data routing - fork stream API (CRUD) should fail to fork from non-existent parent stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 573,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-d2b69e87b48cafb",
+      "title": "Stream data routing - fork stream API (CRUD) should fail with missing stream name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 593,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-65846934a0b531c",
+      "title": "Stream data routing - fork stream API (CRUD) should fail with invalid status value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 609,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-566b60a7956e967",
+      "title": "Stream data routing - fork stream API (CRUD) should update routing rule condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 626,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-9c9df33ef262e1f",
+      "title": "Stream data routing - fork stream API (CRUD) should update routing rule status from enabled to disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 694,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-bdf6d3fb6af29d0",
+      "title": "Stream data routing - fork stream API (CRUD) should reorder routing rules",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 759,
+        "column": 12
+      }
+    },
+    {
+      "id": "0535b561936fc7d-fb6d13fa583c597",
+      "title": "Stream data routing - fork stream API (CRUD) should update routing rule to use complex condition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/routing_fork_stream.spec.ts",
+        "line": 853,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-2d81909c8010534",
+      "title": "Stream schema - field mapping API should get unmapped fields for a stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 18,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-0be104fbd03fbf8",
+      "title": "Stream schema - field mapping API should return error for non-existent stream unmapped fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 34,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-83b1ecc4fdfe407",
+      "title": "Stream schema - field mapping API should simulate field mapping with keyword type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 53,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-fb6c04b25e0ba43",
+      "title": "Stream schema - field mapping API should simulate single keyword field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 75,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-05ac03a7fb45010",
+      "title": "Stream schema - field mapping API should simulate field mapping with match_only_text type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 94,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-184338feb2495d9",
+      "title": "Stream schema - field mapping API should simulate field mapping with long type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 116,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-8c2d43ffdfbc4ba",
+      "title": "Stream schema - field mapping API should simulate single long field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 137,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-3c25de221d638fe",
+      "title": "Stream schema - field mapping API should simulate field mapping with double type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 156,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-fa8c1f744093729",
+      "title": "Stream schema - field mapping API should simulate single double field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 177,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-7d31f8801130a27",
+      "title": "Stream schema - field mapping API should simulate field mapping with boolean type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 196,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-74cacc695f4601f",
+      "title": "Stream schema - field mapping API should simulate multiple boolean fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 214,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-671af81b51cdb3a",
+      "title": "Stream schema - field mapping API should simulate field mapping with date type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 237,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-eb119f8dd624a2d",
+      "title": "Stream schema - field mapping API should simulate multiple date fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 255,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-6728fa1703813b2",
+      "title": "Stream schema - field mapping API should simulate field mapping with ip type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 278,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-cceb01b877ea4be",
+      "title": "Stream schema - field mapping API should simulate single ip field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 299,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-6a4486f044d1ede",
+      "title": "Stream schema - field mapping API should simulate field mapping with geo_point type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 318,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-fad83f4b17b3e65",
+      "title": "Stream schema - field mapping API should simulate multiple geo_point fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 339,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-67c61df9e5b530a",
+      "title": "Stream schema - field mapping API should simulate multiple field definitions of different types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 361,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-f8ce8ce1b03da5f",
+      "title": "Stream schema - field mapping API should handle deeply nested field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 391,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-c841dfc0d7c672c",
+      "title": "Stream schema - field mapping API should handle ECS-style field names",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 412,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-2cd6d3f29db291e",
+      "title": "Stream schema - field mapping API should return error for invalid field type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 437,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-860b828f66428c7",
+      "title": "Stream schema - field mapping API should handle empty field definitions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 454,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-e9db9fadbe3e671",
+      "title": "Stream schema - field mapping API should return error for non-existent stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 473,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-fde1a7bced25313",
+      "title": "Stream schema - field mapping API should handle missing field name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 491,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-e450695e5f203af",
+      "title": "Stream schema - field mapping API should handle missing field type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 508,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-15396eb1c1f45d8",
+      "title": "Stream schema - field mapping API should return simulation error for incompatible mapping",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 526,
+        "column": 12
+      }
+    },
+    {
+      "id": "f3127db8132e066-9dd7d64d44a032b",
+      "title": "Stream schema - field mapping API should provide simulation details in response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_field_mapping.spec.ts",
+        "line": 553,
+        "column": 12
+      }
+    },
+    {
+      "id": "605fb0f3e683a59-2b960289c4fb99a",
+      "title": "Stream schema - field mapping persistence API (CRUD) should map a single field with keyword type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
+        "line": 76,
+        "column": 12
+      }
+    },
+    {
+      "id": "605fb0f3e683a59-4eb0195196fe5e5",
+      "title": "Stream schema - field mapping persistence API (CRUD) should map a field with long type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
+        "line": 119,
+        "column": 12
+      }
+    },
+    {
+      "id": "605fb0f3e683a59-0455825af9f0ac5",
+      "title": "Stream schema - field mapping persistence API (CRUD) should map a field with double type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
+        "line": 158,
+        "column": 12
+      }
+    },
+    {
+      "id": "605fb0f3e683a59-94182d2ec42bd73",
+      "title": "Stream schema - field mapping persistence API (CRUD) should map a field with boolean type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
+        "line": 197,
+        "column": 12
+      }
+    },
+    {
+      "id": "605fb0f3e683a59-ded92cf6e290540",
+      "title": "Stream schema - field mapping persistence API (CRUD) should map a field with ip type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
+        "line": 236,
+        "column": 12
+      }
+    },
+    {
+      "id": "605fb0f3e683a59-a34f22459c2c3ed",
+      "title": "Stream schema - field mapping persistence API (CRUD) should map a field with date type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
+        "line": 275,
+        "column": 12
+      }
+    },
+    {
+      "id": "605fb0f3e683a59-84fe990636e2e0f",
+      "title": "Stream schema - field mapping persistence API (CRUD) should map multiple fields at once",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
+        "line": 314,
+        "column": 12
+      }
+    },
+    {
+      "id": "605fb0f3e683a59-0e1902324aef71c",
+      "title": "Stream schema - field mapping persistence API (CRUD) should unmap a field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
+        "line": 360,
+        "column": 12
+      }
+    },
+    {
+      "id": "605fb0f3e683a59-a43a9144c1063e4",
+      "title": "Stream schema - field mapping persistence API (CRUD) should add a new field and keep existing ones",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
+        "line": 432,
+        "column": 12
+      }
+    },
+    {
+      "id": "605fb0f3e683a59-d2455a1645840f7",
+      "title": "Stream schema - field mapping persistence API (CRUD) should not affect processing when updating field mappings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
+        "line": 498,
+        "column": 12
+      }
+    },
+    {
+      "id": "605fb0f3e683a59-e9e603bde462538",
+      "title": "Stream schema - field mapping persistence API (CRUD) should map deeply nested field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
+        "line": 564,
+        "column": 12
+      }
+    },
+    {
+      "id": "605fb0f3e683a59-6f8345613805406",
+      "title": "Stream schema - field mapping persistence API (CRUD) should return 400 for invalid field type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
+        "line": 606,
+        "column": 12
+      }
+    },
+    {
+      "id": "605fb0f3e683a59-7bbfb911242da11",
+      "title": "Stream schema - field mapping persistence API (CRUD) should return error when updating non-existent stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams/test/scout/api/tests/schema_persistence.spec.ts",
+        "line": 638,
+        "column": 12
+      }
+    }
+  ]
+}

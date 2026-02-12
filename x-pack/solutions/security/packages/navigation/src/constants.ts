@@ -36,5 +36,6 @@ export enum SecurityGroupName {
   alertDetections = 'securityGroup:alertDetections',
 }
 
-/** Feature flag for the alerts and attacks alignment feature */
-export const ATTACKS_ALERTS_ALIGNMENT_ENABLED = 'securitySolution.attacksAlertsAlignment' as const;
+/** This Kibana Advanced Setting allows users to enable/disable the Alerts and Attacks Alignment feature */
+export const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
+  'securitySolution:enableAlertsAndAttacksAlignment' as const;

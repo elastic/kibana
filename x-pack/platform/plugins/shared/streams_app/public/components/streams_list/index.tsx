@@ -22,45 +22,55 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
 import {
   Streams,
-  getIndexPatternsForStream,
   getSegments,
   isDescendantOf,
   isRootStreamDefinition,
+  getDiscoverEsqlQuery,
 } from '@kbn/streams-schema';
+import type { estypes } from '@elastic/elasticsearch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { NestedView } from '../nested_view';
 import { useKibana } from '../../hooks/use_kibana';
+
+export interface StreamListItem {
+  stream: Streams.all.Definition;
+  data_stream?: estypes.IndicesDataStream;
+}
 
 export interface StreamTree {
   name: string;
   type: 'wired' | 'root' | 'classic';
   stream: Streams.all.Definition;
+  data_stream?: estypes.IndicesDataStream;
   children: StreamTree[];
 }
 
-export function asTrees(streams: Streams.all.Definition[]) {
+export function asTrees(items: StreamListItem[]) {
   const trees: StreamTree[] = [];
-  const sortedStreams = streams
+  const sortedItems = items
     .slice()
-    .sort((a, b) => getSegments(a.name).length - getSegments(b.name).length);
+    .sort((a, b) => getSegments(a.stream.name).length - getSegments(b.stream.name).length);
 
-  sortedStreams.forEach((stream) => {
+  sortedItems.forEach((item) => {
     let currentTree = trees;
     let existingNode: StreamTree | undefined;
     // traverse the tree following the prefix of the current name.
     // once we reach the leaf, the current name is added as child - this works because the ids are sorted by depth
-    while ((existingNode = currentTree.find((node) => isDescendantOf(node.name, stream.name)))) {
+    while (
+      (existingNode = currentTree.find((node) => isDescendantOf(node.name, item.stream.name)))
+    ) {
       currentTree = existingNode.children;
     }
 
     if (!existingNode) {
       const newNode: StreamTree = {
-        name: stream.name,
+        name: item.stream.name,
         children: [],
-        stream,
-        type: Streams.ClassicStream.Definition.is(stream)
+        stream: item.stream,
+        data_stream: item.data_stream,
+        type: Streams.ClassicStream.Definition.is(item.stream)
           ? 'classic'
-          : isRootStreamDefinition(stream)
+          : isRootStreamDefinition(item.stream)
           ? 'root'
           : 'wired',
       };
@@ -76,7 +86,7 @@ export function StreamsList({
   query,
   showControls,
 }: {
-  streams: Streams.all.Definition[] | undefined;
+  streams: StreamListItem[] | undefined;
   query?: string;
   showControls: boolean;
 }) {
@@ -88,8 +98,8 @@ export function StreamsList({
 
   const filteredItems = useMemo(() => {
     return items
-      .filter((item) => showClassic || Streams.WiredStream.Definition.is(item))
-      .filter((item) => !query || item.name.toLowerCase().includes(query.toLowerCase()));
+      .filter((item) => showClassic || Streams.WiredStream.Definition.is(item.stream))
+      .filter((item) => !query || item.stream.name.toLowerCase().includes(query.toLowerCase()));
   }, [query, items, showClassic]);
 
   const treeView = useMemo(() => asTrees(filteredItems), [filteredItems]);
@@ -113,7 +123,7 @@ export function StreamsList({
                   iconType="fold"
                   size="s"
                   onClick={() =>
-                    setCollapsed(Object.fromEntries(items.map((item) => [item.name, true])))
+                    setCollapsed(Object.fromEntries(items.map((item) => [item.stream.name, true])))
                   }
                 >
                   {i18n.translate('xpack.streams.streamsTable.collapseAll', {
@@ -179,15 +189,23 @@ function StreamNode({
   );
 
   const discoverUrl = useMemo(() => {
-    const indexPatterns = getIndexPatternsForStream(node.stream);
+    if (!discoverLocator) {
+      return undefined;
+    }
 
-    if (!discoverLocator || !indexPatterns) {
+    // Use index_mode from data_stream (from listing data)
+    const esqlQuery = getDiscoverEsqlQuery({
+      definition: node.stream,
+      indexMode: node.data_stream?.index_mode,
+    });
+
+    if (!esqlQuery) {
       return undefined;
     }
 
     return discoverLocator.getRedirectUrl({
       query: {
-        esql: `FROM ${indexPatterns.join(', ')}`,
+        esql: esqlQuery,
       },
     });
   }, [discoverLocator, node]);
