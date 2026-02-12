@@ -96,19 +96,51 @@ export const DimensionsSelector = ({
     const mappedOptions = dimensions.map<SelectableEntry>((dimension) => {
       const isSelected = selectedNamesSet.has(dimension.name);
       const isIntersecting = intersectingDimensions.has(dimension.name);
+      const isDisabled = getOptionDisabledState({
+        singleSelection,
+        isSelected,
+        isIntersecting,
+        isAtMaxLimit,
+      });
+      
+      const tooltipContent = isAtMaxLimit && isDisabled ? (
+        <FormattedMessage
+          id="metricsExperience.dimensionsSelector.maxDimensionsWarning"
+          defaultMessage="Maximum of {maxDimensions} dimensions selected"
+          values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
+        />
+      ) : undefined;
 
-      return {
+      const option: SelectableEntry = {
         value: dimension.name,
         label: dimension.name,
         checked: isSelected ? 'on' : undefined,
-        disabled: getOptionDisabledState({
-          singleSelection,
-          isSelected,
-          isIntersecting,
-          isAtMaxLimit,
-        }),
+        disabled: isDisabled,
         key: dimension.name,
       };
+
+      if (tooltipContent) {
+        option.prepend = (
+          <EuiToolTip
+            content={tooltipContent}
+            position="top"
+            anchorProps={{
+              css: css`
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                pointer-events: auto;
+                z-index: 1;
+              `,
+            }}
+          >
+            <div />
+          </EuiToolTip>
+        );
+      }
+
+      return option;
     });
 
     return sortDimensionOptions(mappedOptions, localSelectedDimensions);
