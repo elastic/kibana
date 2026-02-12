@@ -10,28 +10,27 @@ import React from 'react';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import type {
+  RenderHookOptions,
+  RenderHookResult,
   RenderOptions,
   RenderResult,
-  RenderHookResult,
-  RenderHookOptions,
 } from '@testing-library/react';
 import {
   render as reactRender,
-  waitFor,
   renderHook as reactRenderHook,
+  waitFor,
 } from '@testing-library/react';
-import type { Action, Reducer, Store } from 'redux';
+import type { Store } from 'redux';
+import type { UseBaseQueryResult } from '@kbn/react-query';
 import { QueryClient } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from '@kbn/fleet-plugin/common';
-import type { UseBaseQueryResult } from '@kbn/react-query';
 import ReactDOM from 'react-dom';
 import type { DeepReadonly } from 'utility-types';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import type { UserPrivilegesState } from '../../components/user_privileges/user_privileges_context';
 import { getUserPrivilegesMockDefaultValue } from '../../components/user_privileges/__mocks__';
 import type { AppLinkItems } from '../../links/types';
-import { ExperimentalFeaturesService } from '../../experimental_features_service';
 import { applyIntersectionObserverMock } from '../intersection_observer_mock';
 import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
@@ -41,13 +40,11 @@ import type { State } from '../../store';
 import { AppRootProvider } from './app_root_provider';
 import { managementMiddlewareFactory } from '../../../management/store/middleware';
 import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
-import { SUB_PLUGINS_REDUCER, mockGlobalState, createMockStore } from '..';
-import type { ExperimentalFeatures } from '../../../../common/experimental_features';
-import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
+import { createMockStore, SUB_PLUGINS_REDUCER } from '..';
+import { APP_PATH, APP_UI_ID } from '../../../../common/constants';
 import { KibanaServices } from '../../lib/kibana';
 import { appLinks } from '../../../app/links';
 import { fleetGetPackageHttpMock } from '../../../management/mocks';
-import { allowedExperimentalValues } from '../../../../common/experimental_features';
 import type { EndpointPrivileges } from '../../../../common/endpoint/types';
 
 const REAL_REACT_DOM_CREATE_PORTAL = ReactDOM.createPortal;
@@ -170,13 +167,6 @@ export interface AppContextTestRender {
   renderReactQueryHook: ReactQueryHookRenderer;
 
   /**
-   * Set technical preview features on/off. Calling this method updates the Store with the new values
-   * for the given feature flags
-   * @param flags
-   */
-  setExperimentalFlag: (flags: Partial<ExperimentalFeatures>) => void;
-
-  /**
    * A helper method that will return an interface to more easily manipulate Endpoint related user authz.
    * Works in conjunction with `jest.mock()` at the test level.
    * @param useUserPrivilegesHookMock
@@ -218,33 +208,6 @@ export interface AppContextTestRender {
   queryClient: QueryClient;
 }
 
-// Defined a private custom reducer that reacts to an action that enables us to update the
-// store with new values for technical preview features/flags. Because the `action.type` is a `Symbol`,
-// and its not exported the action can only be `dispatch`'d from this module
-const UpdateExperimentalFeaturesTestActionType = Symbol('updateExperimentalFeaturesTestAction');
-
-type UpdateExperimentalFeaturesTestAction = Action<
-  typeof UpdateExperimentalFeaturesTestActionType
-> & {
-  payload: Partial<ExperimentalFeatures>;
-};
-
-const experimentalFeaturesReducer: Reducer<State['app'], UpdateExperimentalFeaturesTestAction> = (
-  state = mockGlobalState.app,
-  action
-) => {
-  if (action.type === UpdateExperimentalFeaturesTestActionType) {
-    return {
-      ...state,
-      enableExperimental: {
-        ...state.enableExperimental,
-        ...action.payload,
-      },
-    };
-  }
-  return state;
-};
-
 /**
  * Creates a mocked endpoint app context custom renderer that can be used to render
  * component that depend upon the application's surrounding context providers.
@@ -269,12 +232,7 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     };
   });
 
-  const storeReducer = {
-    ...SUB_PLUGINS_REDUCER,
-    // This is ok here because the store created by this testing utility (see below) does
-    // not pull in the non-sub-plugin reducers
-    app: experimentalFeaturesReducer,
-  };
+  const storeReducer = { ...SUB_PLUGINS_REDUCER };
 
   const store = createMockStore(undefined, storeReducer, undefined, undefined, [
     ...managementMiddlewareFactory(coreStart, depsStart),
@@ -355,22 +313,6 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     return hookResult.current;
   };
 
-  ExperimentalFeaturesService.init({ experimentalFeatures: allowedExperimentalValues });
-
-  const setExperimentalFlag: AppContextTestRender['setExperimentalFlag'] = (flags) => {
-    ExperimentalFeaturesService.init({
-      experimentalFeatures: {
-        ...allowedExperimentalValues,
-        ...flags,
-      },
-    });
-
-    store.dispatch({
-      type: UpdateExperimentalFeaturesTestActionType,
-      payload: flags,
-    });
-  };
-
   const getUserPrivilegesMockSetter: AppContextTestRender['getUserPrivilegesMockSetter'] = (
     useUserPrivilegesHookMock
   ) => {
@@ -418,7 +360,6 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     render,
     renderHook,
     renderReactQueryHook,
-    setExperimentalFlag,
     getUserPrivilegesMockSetter,
     queryClient,
     waitFor,

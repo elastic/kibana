@@ -22,6 +22,8 @@ import { isAgentTypeAndActionSupported } from '../../lib/endpoint';
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 
+jest.mock('../../experimental_features_service');
+
 describe('When using `useAlertResponseActionsSupport()` hook', () => {
   let appContextMock: AppContextTestRender;
   let alertDetailItemData: TimelineEventsDetailsItem[];
