@@ -122,6 +122,8 @@ export const fixedIntervalMustBeInteger: AnyValidationFunc = (
   })(...args);
 };
 
+// Elasticsearch enforces a minimum downsampling `fixed_interval` of 5 minutes for data stream lifecycle
+// downsampling rounds.
 export const fixedIntervalMustBeAtLeastFiveMinutes: AnyValidationFunc = (...args) => {
   const [{ value, formData, path }] = args as any as [
     { value: unknown; formData: Record<string, unknown>; path: string }
