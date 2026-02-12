@@ -40,22 +40,20 @@ const SORTED_COUNTS_DESC = [...TEST_DOCUMENTS]
  * It's important that we properly inject the `project_routing` parameter. Incorrect
  * injection can cause 400 errors for requests that should otherwise pass, and risk
  * of breaking requests to ES at a large scale. The integration tests send real requests
- * to a real ES server to empircally verify that such errors do not happen.
+ * to a real ES server to empirically verify that such errors do not happen.
  *
- * IMPORTANT: These tests require a serverless ES instance with CPS support enabled.
- * Currently, CPS is not available in serverless ES, so the tests are skipped.
- * Once CPS is available, these tests will run, and you can remove the `itIfCpsSupported()`.
+ * These tests start a serverless ES instance with CPS enabled (`enableCPS: true`).
  *
  * @see src/core/packages/elasticsearch/server-internal/src/elasticsearch_service.ts
  */
 describe('CPS project_routing on serverless ES', () => {
   let serverlessES: TestServerlessESUtils;
   let client: ElasticsearchClient;
-  let cpsSupported = false;
 
   beforeAll(async () => {
     const { startES } = createTestServerlessInstances({
       adjustTimeout: (timeout: number) => jest.setTimeout(timeout),
+      enableCPS: true,
     });
 
     serverlessES = await startES();
@@ -78,48 +76,12 @@ describe('CPS project_routing on serverless ES', () => {
     }
 
     await client.indices.refresh({ index: TEST_INDEX });
-
-    /**
-     * We assert that CPS is enabled ES-side by sending a test request with project_routing.
-     * This allows us to both implement the tests and wait for CPS to be enabled in ES.
-     * This branching logic can be removed once CPS is enabled in ES.
-     */
-    try {
-      await client.search(
-        { index: TEST_INDEX, size: 0 },
-        { querystring: { project_routing: LOCAL_PROJECT_ROUTING } }
-      );
-      cpsSupported = true;
-    } catch (error: any) {
-      if (error?.message?.includes('unrecognized parameter: [project_routing]')) {
-        cpsSupported = false;
-        // eslint-disable-next-line no-console
-        console.log(
-          '\n⚠️  CPS (project_routing) is not supported in this ES serverless image.\n' +
-            '   CPS-specific tests will be skipped. Once CPS is available, they will run automatically.\n'
-        );
-      } else {
-        throw error;
-      }
-    }
   });
 
   afterAll(async () => {
     await client?.indices.delete({ index: TEST_INDEX }).catch(() => {});
     await serverlessES?.stop();
   });
-
-  // can be removed once cps is enabled in ES (and migrate back to plain `it()`)
-  const itIfCpsSupported = (name: string, fn: () => Promise<void>) => {
-    it(name, async () => {
-      if (!cpsSupported) {
-        // eslint-disable-next-line no-console
-        console.log(`    ⏭️  Skipped: CPS not available in this ES version`);
-        return;
-      }
-      await fn();
-    });
-  };
 
   describe('baseline: requests without project_routing (no-op cases)', () => {
     it('search works without project_routing', async () => {
@@ -364,7 +326,7 @@ describe('CPS project_routing on serverless ES', () => {
   });
 
   describe('search API with project_routing', () => {
-    itIfCpsSupported('accepts project_routing parameter without error', async () => {
+    it('accepts project_routing parameter without error', async () => {
       const response = await client.search(
         {
           index: TEST_INDEX,
@@ -378,7 +340,7 @@ describe('CPS project_routing on serverless ES', () => {
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
     });
 
-    itIfCpsSupported('works with match query', async () => {
+    it('works with match query', async () => {
       const response = await client.search(
         {
           index: TEST_INDEX,
@@ -392,7 +354,7 @@ describe('CPS project_routing on serverless ES', () => {
       expect(response.hits.hits.length).toBe(DOCS_WITH_DOCUMENT_IN_TITLE);
     });
 
-    itIfCpsSupported('works with term query', async () => {
+    it('works with term query', async () => {
       const response = await client.search(
         {
           index: TEST_INDEX,
@@ -406,7 +368,7 @@ describe('CPS project_routing on serverless ES', () => {
       expect(response.hits.hits.length).toBe(ALPHA_CATEGORY_DOCS_COUNT);
     });
 
-    itIfCpsSupported('works with bool query', async () => {
+    it('works with bool query', async () => {
       const response = await client.search(
         {
           index: TEST_INDEX,
@@ -425,7 +387,7 @@ describe('CPS project_routing on serverless ES', () => {
       expect(response.hits.hits.length).toBe(BETA_CATEGORY_DOCS_COUNT);
     });
 
-    itIfCpsSupported('works with aggregations', async () => {
+    it('works with aggregations', async () => {
       const response = await client.search(
         {
           index: TEST_INDEX,
@@ -449,7 +411,7 @@ describe('CPS project_routing on serverless ES', () => {
       expect(response.aggregations!.avg_count).toBeDefined();
     });
 
-    itIfCpsSupported('works with sort', async () => {
+    it('works with sort', async () => {
       const response = await client.search(
         {
           index: TEST_INDEX,
@@ -466,7 +428,7 @@ describe('CPS project_routing on serverless ES', () => {
       expect(counts).toEqual(SORTED_COUNTS_DESC);
     });
 
-    itIfCpsSupported('works with pagination (from/size)', async () => {
+    it('works with pagination (from/size)', async () => {
       const pageSize = 2;
       const response = await client.search(
         {
@@ -484,7 +446,7 @@ describe('CPS project_routing on serverless ES', () => {
       expect(response.hits.hits.length).toBe(pageSize);
     });
 
-    itIfCpsSupported('works with _source filtering', async () => {
+    it('works with _source filtering', async () => {
       const response = await client.search(
         {
           index: TEST_INDEX,
@@ -503,7 +465,7 @@ describe('CPS project_routing on serverless ES', () => {
       expect(firstHit.count).toBeUndefined();
     });
 
-    itIfCpsSupported('works with highlight', async () => {
+    it('works with highlight', async () => {
       const response = await client.search(
         {
           index: TEST_INDEX,
@@ -521,7 +483,7 @@ describe('CPS project_routing on serverless ES', () => {
       expect(response.hits.hits[0].highlight).toBeDefined();
     });
 
-    itIfCpsSupported('works with wildcard index pattern', async () => {
+    it('works with wildcard index pattern', async () => {
       const response = await client.search(
         {
           index: 'cps-routing-*',
@@ -535,7 +497,7 @@ describe('CPS project_routing on serverless ES', () => {
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
     });
 
-    itIfCpsSupported('works with non-existent index pattern (allow_no_indices)', async () => {
+    it('works with non-existent index pattern (allow_no_indices)', async () => {
       const response = await client.search(
         {
           index: 'nonexistent-index-*',
@@ -553,7 +515,7 @@ describe('CPS project_routing on serverless ES', () => {
   });
 
   describe('msearch API with project_routing', () => {
-    itIfCpsSupported('accepts project_routing parameter without error', async () => {
+    it('accepts project_routing parameter without error', async () => {
       const response = await client.msearch(
         {
           searches: [
@@ -576,7 +538,7 @@ describe('CPS project_routing on serverless ES', () => {
   });
 
   describe('count API with project_routing', () => {
-    itIfCpsSupported('accepts project_routing parameter without error', async () => {
+    it('accepts project_routing parameter without error', async () => {
       const response = await client.count(
         {
           index: TEST_INDEX,
@@ -590,7 +552,7 @@ describe('CPS project_routing on serverless ES', () => {
       expect(response.count).toBe(TOTAL_DOCS_COUNT);
     });
 
-    itIfCpsSupported('works with filtered count', async () => {
+    it('works with filtered count', async () => {
       const response = await client.count(
         {
           index: TEST_INDEX,
@@ -606,32 +568,29 @@ describe('CPS project_routing on serverless ES', () => {
   });
 
   describe('PIT (Point-In-Time) operations', () => {
-    itIfCpsSupported(
-      'can open PIT without project_routing (PIT establishes its own scope)',
-      async () => {
-        const pitResponse = await client.openPointInTime({
-          index: TEST_INDEX,
-          keep_alive: '1m',
-        });
+    it('can open PIT without project_routing (PIT establishes its own scope)', async () => {
+      const pitResponse = await client.openPointInTime({
+        index: TEST_INDEX,
+        keep_alive: '1m',
+      });
 
-        expect(pitResponse.id).toBeDefined();
+      expect(pitResponse.id).toBeDefined();
 
-        // Search using PIT (no project_routing needed - PIT has its own scope)
-        const searchResponse = await client.search({
-          pit: { id: pitResponse.id, keep_alive: '1m' },
-          query: { match_all: {} },
-        });
+      // Search using PIT (no project_routing needed - PIT has its own scope)
+      const searchResponse = await client.search({
+        pit: { id: pitResponse.id, keep_alive: '1m' },
+        query: { match_all: {} },
+      });
 
-        expect(searchResponse.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
+      expect(searchResponse.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
 
-        // Close PIT
-        await client.closePointInTime({ id: pitResponse.id });
-      }
-    );
+      // Close PIT
+      await client.closePointInTime({ id: pitResponse.id });
+    });
   });
 
   describe('edge cases and error scenarios', () => {
-    itIfCpsSupported('handles empty query with project_routing', async () => {
+    it('handles empty query with project_routing', async () => {
       const response = await client.search(
         {
           index: TEST_INDEX,
@@ -644,7 +603,7 @@ describe('CPS project_routing on serverless ES', () => {
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
     });
 
-    itIfCpsSupported('works with track_total_hits', async () => {
+    it('works with track_total_hits', async () => {
       const response = await client.search(
         {
           index: TEST_INDEX,
@@ -659,7 +618,7 @@ describe('CPS project_routing on serverless ES', () => {
       expect((response.hits.total as any).value).toBe(TOTAL_DOCS_COUNT);
     });
 
-    itIfCpsSupported('works with explain', async () => {
+    it('works with explain', async () => {
       const response = await client.search(
         {
           index: TEST_INDEX,
@@ -675,7 +634,7 @@ describe('CPS project_routing on serverless ES', () => {
       expect(response.hits.hits[0]._explanation).toBeDefined();
     });
 
-    itIfCpsSupported('works with seq_no_primary_term', async () => {
+    it('works with seq_no_primary_term', async () => {
       const response = await client.search(
         {
           index: TEST_INDEX,
@@ -694,7 +653,7 @@ describe('CPS project_routing on serverless ES', () => {
   });
 
   describe('combined with other querystring params', () => {
-    itIfCpsSupported('works with pretty=true', async () => {
+    it('works with pretty=true', async () => {
       const response = await client.search(
         {
           index: TEST_INDEX,
@@ -711,7 +670,7 @@ describe('CPS project_routing on serverless ES', () => {
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
     });
 
-    itIfCpsSupported('works with request_cache=false', async () => {
+    it('works with request_cache=false', async () => {
       const response = await client.search(
         {
           index: TEST_INDEX,
@@ -728,7 +687,7 @@ describe('CPS project_routing on serverless ES', () => {
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
     });
 
-    itIfCpsSupported('works with timeout', async () => {
+    it('works with timeout', async () => {
       const response = await client.search(
         {
           index: TEST_INDEX,

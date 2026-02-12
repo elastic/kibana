@@ -115,6 +115,7 @@ function createServerlessES({ enableCPS = false }: { enableCPS?: boolean } = {})
         ...esServerlessImageParams,
         ...(enableCPS
           ? {
+              ssl: true,
               uiam: true,
               esArgs: [
                 'serverless.cross_project.enabled=true',
@@ -123,7 +124,7 @@ function createServerlessES({ enableCPS = false }: { enableCPS?: boolean } = {})
             }
           : {}),
       });
-      const client = getServerlessESClient({ port: esPort });
+      const client = getServerlessESClient({ port: esPort, ssl: enableCPS });
 
       return {
         getClient: () => client,
@@ -135,12 +136,13 @@ function createServerlessES({ enableCPS = false }: { enableCPS?: boolean } = {})
   };
 }
 
-const getServerlessESClient = ({ port }: { port: number }) => {
+const getServerlessESClient = ({ port, ssl = false }: { port: number; ssl?: boolean }) => {
   return new Client({
-    node: `http://localhost:${port}`,
+    node: `${ssl ? 'https' : 'http'}://localhost:${port}`,
     Connection: HttpConnection,
     requestTimeout: 30_000,
     auth: { ...systemIndicesSuperuser },
+    ...(ssl ? { tls: { rejectUnauthorized: false } } : {}),
   });
 };
 
