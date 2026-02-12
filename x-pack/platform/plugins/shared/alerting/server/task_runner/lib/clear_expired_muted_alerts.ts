@@ -45,9 +45,7 @@ export async function clearExpiredMutedAlerts(opts: ClearExpiredMutedAlertsOpts)
   if (expiredIds.size === 0) return;
 
   const updatedMutedAlerts = rule.mutedAlerts.filter((e) => !expiredIds.has(e.alertInstanceId));
-  const updatedMutedInstanceIds = (rule.mutedInstanceIds ?? []).filter(
-    (id) => !expiredIds.has(id)
-  );
+  const updatedMutedInstanceIds = (rule.mutedInstanceIds ?? []).filter((id) => !expiredIds.has(id));
 
   await partiallyUpdateRuleWithEs(
     esClient,
