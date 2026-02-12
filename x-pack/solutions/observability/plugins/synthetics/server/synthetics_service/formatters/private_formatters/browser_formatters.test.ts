@@ -80,16 +80,16 @@ describe('formatters', () => {
       ).toEqual('30s');
     });
 
-    it('returns minimum overhead for very small timeouts', () => {
+    it('returns zero overhead for timeouts greater than the Heartbeat overhead (safeguard against negative timeouts)', () => {
       expect(
         browserTimeoutFormatterPrivate!(
           {
             [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
-            [ConfigKey.TIMEOUT]: '20',
+            [ConfigKey.TIMEOUT]: '0',
           },
           ConfigKey.TIMEOUT
         )
-      ).toEqual('30s');
+      ).toEqual('0s');
     });
 
     it('returns raw timeout for non-browser monitors', () => {
