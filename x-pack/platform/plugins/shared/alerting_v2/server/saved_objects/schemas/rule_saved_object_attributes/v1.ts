@@ -23,8 +23,9 @@ export const ruleSavedObjectAttributesSchema = schema.object({
     name: schema.string(),
     owner: schema.maybe(schema.string()),
     labels: schema.maybe(schema.arrayOf(schema.string())),
-    time_field: schema.string(),
   }),
+
+  time_field: schema.string(),
 
   schedule: schema.object({
     every: schema.string(),
@@ -34,9 +35,7 @@ export const ruleSavedObjectAttributesSchema = schema.object({
   evaluation: schema.object({
     query: schema.object({
       base: schema.string(),
-      trigger: schema.object({
-        condition: schema.string(),
-      }),
+      condition: schema.string(),
     }),
   }),
 

@@ -20,7 +20,7 @@ import { hasState, type StateWith } from '../type_guards';
  * Returns the query to execute for this rule.
  *
  * Currently only `evaluation.query.base` is used. The separate
- * `evaluation.query.trigger.condition` exists to support no-data detection
+ * `evaluation.query.condition` exists to support no-data detection
  * in the future (the executor will need to run the base query *without*
  * the trigger condition to distinguish "no data at all" from "data exists
  * but doesn't match the condition"). That is not yet implemented, so the
@@ -60,7 +60,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
     const effectiveQuery = buildEffectiveQuery(rule.evaluation.query);
     // Use schedule.lookback if provided, otherwise fall back to the execution interval.
     const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
-    const timeField = rule.metadata.time_field;
+    const timeField = rule.time_field;
 
     const queryPayload = getQueryPayload({
       query: effectiveQuery,

@@ -34,21 +34,23 @@ const getRuleExecutorTaskIdMock = getRuleExecutorTaskId as jest.MockedFunction<
 
 const baseCreateData: CreateRuleParams['data'] = {
   kind: 'alert',
-  metadata: { name: 'rule-1', time_field: '@timestamp' },
+  metadata: { name: 'rule-1' },
+  time_field: '@timestamp',
   schedule: { every: '1m', lookback: '1m' },
   evaluation: {
     query: {
       base: 'FROM logs-* | LIMIT 1',
-      trigger: { condition: 'WHERE true' },
+      condition: 'WHERE true',
     },
   },
 };
 
 const baseSoAttrs = createRuleSoAttributes({
-  metadata: { name: 'rule-1', time_field: '@timestamp' },
+  metadata: { name: 'rule-1' },
+  time_field: '@timestamp',
   schedule: { every: '1m', lookback: '1m' },
   evaluation: {
-    query: { base: 'FROM logs-* | LIMIT 1', trigger: { condition: 'WHERE true' } },
+    query: { base: 'FROM logs-* | LIMIT 1', condition: 'WHERE true' },
   },
 });
 
@@ -198,7 +200,7 @@ describe('RulesClient', () => {
           data: {
             ...baseCreateData,
             evaluation: {
-              query: { base: 'FROM |', trigger: { condition: 'WHERE true' } },
+              query: { base: 'FROM |', condition: 'WHERE true' },
             },
           },
           options: { id: 'rule-id-5' },
@@ -375,7 +377,7 @@ describe('RulesClient', () => {
         references: [],
         score: 0,
         attributes: createRuleSoAttributes({
-          metadata: { name: 'rule-1', time_field: '@timestamp' },
+          metadata: { name: 'rule-1' },
         }),
       };
       const so2 = {
@@ -384,7 +386,7 @@ describe('RulesClient', () => {
         references: [],
         score: 0,
         attributes: createRuleSoAttributes({
-          metadata: { name: 'rule-2', time_field: '@timestamp' },
+          metadata: { name: 'rule-2' },
         }),
       };
 

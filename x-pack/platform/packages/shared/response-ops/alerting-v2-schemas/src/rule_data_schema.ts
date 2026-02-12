@@ -41,12 +41,6 @@ const metadataSchema = z
     name: z.string().min(1).max(256).describe('Unique rule name/identifier.'),
     owner: z.string().max(256).optional().describe('Owner of the rule.'),
     labels: z.array(z.string().max(64)).max(100).optional().describe('Labels for categorization.'),
-    time_field: z
-      .string()
-      .min(1)
-      .max(128)
-      .default('@timestamp')
-      .describe('Time field used for the lookback window range filter.'),
   })
   .strict()
   .describe('Rule metadata.');
@@ -68,12 +62,7 @@ const scheduleSchema = z
 const evaluationQuerySchema = z
   .object({
     base: esqlQuerySchema.describe('Base ES|QL query.'),
-    trigger: z
-      .object({
-        condition: z.string().min(1).max(5000).describe('Trigger condition (WHERE clause).'),
-      })
-      .strict()
-      .describe('Trigger condition.'),
+    condition: z.string().min(1).max(5000).describe('Trigger condition (WHERE clause).'),
   })
   .strict();
 
@@ -174,6 +163,12 @@ export const createRuleDataSchema = z
   .object({
     kind: ruleKindSchema,
     metadata: metadataSchema,
+    time_field: z
+      .string()
+      .min(1)
+      .max(128)
+      .default('@timestamp')
+      .describe('Time field used for the lookback window range filter.'),
     schedule: scheduleSchema,
     evaluation: evaluationSchema,
     recovery_policy: recoveryPolicySchema.optional(),
@@ -190,20 +185,15 @@ export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 
 export const updateRuleDataSchema = z
   .object({
-    kind: ruleKindSchema.optional(),
     metadata: metadataSchema.partial().optional(),
+    time_field: z.string().min(1).max(128).optional(),
     schedule: scheduleSchema.partial().optional(),
     evaluation: z
       .object({
         query: z
           .object({
             base: esqlQuerySchema.optional(),
-            trigger: z
-              .object({
-                condition: z.string().min(1).max(5000).optional(),
-              })
-              .strict()
-              .optional(),
+            condition: z.string().min(1).max(5000).optional(),
           })
           .strict()
           .optional(),

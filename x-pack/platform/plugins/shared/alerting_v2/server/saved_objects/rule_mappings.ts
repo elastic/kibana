@@ -19,9 +19,9 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         name: { type: 'text' },
         owner: { type: 'keyword' },
         labels: { type: 'keyword' },
-        time_field: { type: 'keyword' },
       },
     },
+    time_field: { type: 'keyword' },
     schedule: {
       properties: {
         every: { type: 'keyword' },
@@ -33,11 +33,7 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         query: {
           properties: {
             base: { type: 'text' },
-            trigger: {
-              properties: {
-                condition: { type: 'text' },
-              },
-            },
+            condition: { type: 'text' },
           },
         },
       },

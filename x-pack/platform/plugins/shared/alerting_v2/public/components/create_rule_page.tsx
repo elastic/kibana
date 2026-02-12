@@ -33,7 +33,8 @@ const DEFAULT_RULE_YAML = `kind: alert
 
 metadata:
   name: Example rule
-  time_field: "@timestamp"
+
+time_field: "@timestamp"
 
 schedule:
   every: 1m
@@ -44,20 +45,19 @@ evaluation:
     base: |
       FROM logs-*
       | LIMIT 1
-    trigger:
-      condition: "WHERE true"`;
+    condition: "WHERE true"`;
 
 const DEFAULT_RULE_VALUES: CreateRuleData = {
   kind: 'alert',
   metadata: {
     name: 'Example rule',
-    time_field: '@timestamp',
   },
+  time_field: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
   evaluation: {
     query: {
       base: 'FROM logs-*\n| LIMIT 1',
-      trigger: { condition: 'WHERE true' },
+      condition: 'WHERE true',
     },
   },
 };
@@ -130,8 +130,8 @@ export const CreateRulePage = () => {
             name: rule.metadata?.name ?? DEFAULT_RULE_VALUES.metadata.name,
             owner: rule.metadata?.owner,
             labels: rule.metadata?.labels,
-            time_field: rule.metadata?.time_field ?? DEFAULT_RULE_VALUES.metadata.time_field,
           },
+          time_field: rule.time_field ?? DEFAULT_RULE_VALUES.time_field,
           schedule: {
             every: rule.schedule?.every ?? DEFAULT_RULE_VALUES.schedule.every,
             lookback: rule.schedule?.lookback ?? DEFAULT_RULE_VALUES.schedule.lookback,
@@ -139,11 +139,8 @@ export const CreateRulePage = () => {
           evaluation: {
             query: {
               base: rule.evaluation?.query?.base ?? DEFAULT_RULE_VALUES.evaluation.query.base,
-              trigger: {
-                condition:
-                  rule.evaluation?.query?.trigger?.condition ??
-                  DEFAULT_RULE_VALUES.evaluation.query.trigger.condition,
-              },
+              condition:
+                rule.evaluation?.query?.condition ?? DEFAULT_RULE_VALUES.evaluation.query.condition,
             },
           },
           recovery_policy: rule.recovery_policy,

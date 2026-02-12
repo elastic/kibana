@@ -41,12 +41,13 @@ export function createRuleResponse(overrides: Partial<RuleResponse> = {}): RuleR
   return {
     id: 'rule-1',
     kind: 'alert',
-    metadata: { name: 'test-rule', time_field: '@timestamp' },
+    metadata: { name: 'test-rule' },
+    time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
     evaluation: {
       query: {
         base: 'FROM logs-* | LIMIT 10',
-        trigger: { condition: 'WHERE true' },
+        condition: 'WHERE true',
       },
     },
     grouping: { fields: [] },
@@ -67,12 +68,13 @@ export function createRuleSoAttributes(
 ): RuleSavedObjectAttributes {
   return {
     kind: 'alert',
-    metadata: { name: 'test-rule', time_field: '@timestamp' },
+    metadata: { name: 'test-rule' },
+    time_field: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
     evaluation: {
       query: {
         base: 'FROM logs-* | LIMIT 10',
-        trigger: { condition: 'WHERE true' },
+        condition: 'WHERE true',
       },
     },
     grouping: { fields: [] },

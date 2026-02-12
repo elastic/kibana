@@ -57,7 +57,7 @@ describe('ExecuteRuleQueryStep', () => {
     await step.execute(state);
 
     // Currently only evaluation.query.base is used as the effective query.
-    // trigger.condition is reserved for future no-data support.
+    // evaluation.query.condition is reserved for future no-data support.
     expect(mockEsClient.esql.query).toHaveBeenCalledWith(
       {
         query: rule.evaluation.query.base.trimEnd(),
