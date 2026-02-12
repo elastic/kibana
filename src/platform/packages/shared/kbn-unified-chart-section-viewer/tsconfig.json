@@ -32,6 +32,6 @@
     "@kbn/presentation-panel-plugin",
     "@kbn/expressions-plugin",
     "@kbn/ebt-tools",
-    "@kbn/es-query"
+    "@kbn/es-query",
   ]
 }
