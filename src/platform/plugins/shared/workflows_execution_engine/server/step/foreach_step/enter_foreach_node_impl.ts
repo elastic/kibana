@@ -75,10 +75,9 @@ export class EnterForeachNodeImpl implements NodeImplementation {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const foreachState = this.stepExecutionRuntime.getCurrentStepState()!;
     const index = foreachState.index + 1;
-    const { total } = foreachState;
 
     // Only persist index and total — no need to store the full items array.
-    this.stepExecutionRuntime.setCurrentStepState({ index, total });
+    this.stepExecutionRuntime.setCurrentStepState({ index, total: foreachState.total });
     // Enter a new scope for the new iteration
     this.wfExecutionRuntimeManager.enterScope(index.toString());
     this.wfExecutionRuntimeManager.navigateToNextNode();
