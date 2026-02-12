@@ -74,12 +74,6 @@ export const stringifyString = (value?: string) => {
   }
 };
 
-// export const secondsToCronFormatter: FormatterFn = (fields, key) => {
-//   const value = (fields[key] as string) ?? '';
-
-//   return value !== undefined && value !== null ? `${value}s` : null;
-// };
-
 export const privateTimeoutFormatter: FormatterFn = (fields) => {
   const value = (fields[ConfigKey.TIMEOUT] as string) ?? '';
   if (!value) return null;
