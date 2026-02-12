@@ -404,6 +404,12 @@ agentBuilder.skills.register({
 });
 ```
 
+### Defining new base paths for your skills
+
+Base paths are enforced to a specific list of values using the `DirectoryPath` type.
+
+To create new base paths to use for your skills, you need to add them to the [`SkillsDirectoryStructure`](x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/type_definition.ts)
+
 ### Defining sub-content for the skill
 
 You can define sub-content for the skill, using the `referencedContent` property of the skill definition.
