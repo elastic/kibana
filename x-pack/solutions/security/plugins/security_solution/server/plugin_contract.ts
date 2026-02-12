@@ -42,7 +42,7 @@ import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-
 import type { OsqueryPluginSetup } from '@kbn/osquery-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/server';
-import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
+import type { PluginSetup as KqlServerPluginSetup } from '@kbn/kql/server';
 import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
@@ -69,7 +69,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   usageCollection?: UsageCollectionPluginSetup;
   licensing: LicensingPluginSetup;
   osquery: OsqueryPluginSetup;
-  unifiedSearch: UnifiedSearchServerPluginSetup;
+  kql: KqlServerPluginSetup;
   share?: SharePluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
 }

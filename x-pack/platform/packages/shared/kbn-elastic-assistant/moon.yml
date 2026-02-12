@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/kibana-react-plugin'
   - '@kbn/core-analytics-browser'
+  - '@kbn/shared-ux-utility'
 tags:
   - shared-browser
   - package

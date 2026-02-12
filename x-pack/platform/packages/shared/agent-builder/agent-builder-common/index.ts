@@ -16,6 +16,7 @@ export {
   type ToolDefinition,
   type ToolDefinitionWithSchema,
   platformCoreTools,
+  filestoreTools,
   defaultAgentToolIds,
   editableToolTypes,
   isReservedToolId,
@@ -43,7 +44,7 @@ export {
   type ErrorResult,
   type QueryResult,
   type ResourceResult,
-  type TabularDataResult,
+  type EsqlResults,
   type OtherResult,
   type IndexSearchToolDefinitionWithSchema,
   type BrowserApiToolMetadata,
@@ -75,8 +76,12 @@ export {
   type AgentBuilderBadRequestError,
   type AgentBuilderRequestAbortedError,
   type AgentBuilderAgentExecutionError,
+  type AgentBuilderHooksExecutionError,
   type SerializedAgentBuilderError,
+  isHooksExecutionError,
+  createHooksExecutionError,
 } from './base/errors';
+export { HookLifecycle, HookExecutionMode } from './hooks/lifecycle';
 export { type UserIdAndName } from './base/users';
 export { EsResourceType } from './base/resources';
 export {
@@ -86,6 +91,7 @@ export {
   type AgentDefinition,
   type AgentConfiguration,
   type AgentConfigurationOverrides,
+  type RuntimeAgentConfigurationOverrides,
   type AgentCapabilities,
   type ResolvedAgentCapabilities,
   type AgentAnswerStepConfiguration,
@@ -112,6 +118,7 @@ export {
   ConversationRoundStatus,
   type ChatEventBase,
   type ChatEvent,
+  type ConversationAction,
   type ConversationCreatedEvent,
   type ConversationCreatedEventData,
   type ConversationUpdatedEvent,
@@ -121,6 +128,8 @@ export {
   type ChatAgentEvent,
   type ToolProgressEvent,
   type ToolProgressEventData,
+  type ToolUiEventData,
+  type ToolUiEvent,
   type ToolResultEvent,
   type ToolResultEventData,
   type ToolCallEvent,
@@ -152,3 +161,4 @@ export {
   isPromptRequestEvent,
 } from './chat';
 export * from './telemetry';
+export type { VersionedAttachment } from './attachments';

@@ -64,7 +64,10 @@ describe('RuleActionsOverflow', () => {
     });
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
-      rulesPrivileges: { read: true, edit: true },
+      rulesPrivileges: {
+        rules: { read: true, edit: true },
+        exceptions: { read: true, edit: true },
+      },
     });
   });
   describe('rules details menu panel', () => {
@@ -188,7 +191,10 @@ describe('RuleActionsOverflow', () => {
     test('should be enabled when user only has rule read permissions', async () => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         ...initialUserPrivilegesState(),
-        rulesPrivileges: { read: true, edit: false },
+        rulesPrivileges: {
+          rules: { read: true, edit: false },
+          exceptions: { read: true, edit: false },
+        },
       });
 
       const { getByTestId } = render(

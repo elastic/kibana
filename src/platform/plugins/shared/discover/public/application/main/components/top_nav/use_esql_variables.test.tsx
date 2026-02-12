@@ -6,12 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import type { ControlPanelsState, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
 import { BehaviorSubject, Observable, skip } from 'rxjs';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
 import { useESQLVariables } from './use_esql_variables';
 import type {
@@ -21,19 +21,24 @@ import type {
   EsqlControlType,
 } from '@kbn/esql-types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
-import React from 'react';
+import { internalStateActions } from '../../state_management/redux';
 
 // Mock ControlGroupRendererApi
 class MockControlGroupRendererApi {
-  inputSubject: BehaviorSubject<Record<string, ControlPanelsState<ESQLControlState>> | null>;
+  inputSubject: BehaviorSubject<{
+    initialChildControlState: ControlPanelsState<ESQLControlState>;
+  } | null>;
   addNewPanel: jest.Mock;
 
   constructor() {
-    this.inputSubject = new BehaviorSubject<Record<
-      string,
-      ControlPanelsState<ESQLControlState>
-    > | null>(null);
+    this.inputSubject = new BehaviorSubject<{
+      initialChildControlState: ControlPanelsState<ESQLControlState>;
+    } | null>(null);
     this.addNewPanel = jest.fn();
+  }
+
+  getInput() {
+    return this.inputSubject.getValue();
   }
 
   getInput$() {
@@ -41,18 +46,33 @@ class MockControlGroupRendererApi {
   }
 
   // Method to simulate new input coming from the API
-  simulateInput(input: Record<string, ControlPanelsState<ESQLControlState>>) {
+  simulateInput(input: { initialChildControlState: ControlPanelsState<ESQLControlState> }) {
     this.inputSubject.next(input);
   }
+
+  updateInput = jest.fn().mockImplementation(() => {
+    throw new Error('Should not be called');
+  });
 }
 
 // --- Test Suite ---
 describe('useESQLVariables', () => {
   let mockControlGroupAPI: MockControlGroupRendererApi;
-  const getStateContainer = () => getDiscoverStateMock({ isTimeBased: true });
+  const setup = async () => {
+    const toolkit = getDiscoverInternalStateMock();
+
+    await toolkit.initializeTabs();
+    const { stateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+
+    return {
+      stateContainer,
+    };
+  };
 
   const renderUseESQLVariables = async ({
-    stateContainer = getStateContainer(),
+    stateContainer: originalStateContainer,
     isEsqlMode = true,
     controlGroupApi = mockControlGroupAPI as unknown as ControlGroupRendererApi,
     currentEsqlVariables = [],
@@ -68,10 +88,11 @@ describe('useESQLVariables', () => {
       <DiscoverTestProvider stateContainer={stateContainer}>{children}</DiscoverTestProvider>
     );
 
+    const stateContainer = originalStateContainer ?? (await setup()).stateContainer;
+
     const hook = renderHook(
       () =>
         useESQLVariables({
-          stateContainer,
           isEsqlMode,
           controlGroupApi,
           currentEsqlVariables,
@@ -101,7 +122,7 @@ describe('useESQLVariables', () => {
 
   describe('useEffect for ControlGroupAPI input', () => {
     it('should not subscribe if not in ESQL mode or controlGroupAPI is missing', async () => {
-      const stateContainer = getStateContainer();
+      const { stateContainer } = await setup();
       const dispatchSpy = jest.spyOn(stateContainer.internalState, 'dispatch');
 
       const { hook } = await renderUseESQLVariables({
@@ -127,12 +148,8 @@ describe('useESQLVariables', () => {
         { key: 'foo', type: 'values', value: 'bar' },
       ] as ESQLControlVariable[];
 
-      const stateContainer = getStateContainer();
+      const { stateContainer } = await setup();
       const dispatchSpy = jest.spyOn(stateContainer.internalState, 'dispatch');
-      const updateControlStateSpy = jest.spyOn(
-        stateContainer.savedSearchState,
-        'updateControlState'
-      );
       const fetchSpy = jest.spyOn(stateContainer.dataState, 'fetch');
 
       await renderUseESQLVariables({
@@ -147,14 +164,15 @@ describe('useESQLVariables', () => {
 
       // Assert dispatches happened
       await waitFor(() => {
-        expect(dispatchSpy).toHaveBeenCalledTimes(2);
+        expect(dispatchSpy).toHaveBeenCalledTimes(3);
         const dispatchCalls = dispatchSpy.mock.calls;
         dispatchCalls.forEach((call) => {
           const action = call[0] as { type: string; payload?: unknown };
-          if (action.type === 'internalState/setControlGroupState') {
-            expect((action.payload as { controlGroupState: unknown }).controlGroupState).toEqual(
-              mockControlState
-            );
+          if (action.type === 'internalState/setAttributes') {
+            expect(
+              (action.payload as { attributes: { controlGroupState: unknown } }).attributes
+                .controlGroupState
+            ).toEqual(mockControlState);
           }
           if (action.type === 'internalState/setEsqlVariables') {
             expect((action.payload as { esqlVariables: unknown }).esqlVariables).toEqual(
@@ -165,19 +183,12 @@ describe('useESQLVariables', () => {
       });
 
       await waitFor(() => {
-        expect(updateControlStateSpy).toHaveBeenCalledWith({
-          nextControlState: mockControlState,
-        });
-      });
-
-      await waitFor(() => {
         expect(fetchSpy).toHaveBeenCalled();
       });
     });
 
     it('should unsubscribe on unmount', async () => {
       const mockUnsubscribeInput = jest.fn();
-      const mockUnsubscribeReset = jest.fn();
 
       // Mock the getInput$ observable
       jest.spyOn(mockControlGroupAPI.inputSubject, 'asObservable').mockReturnValue(
@@ -186,15 +197,7 @@ describe('useESQLVariables', () => {
         })
       );
 
-      // Mock the savedSearchState with getInitial$ observable
-      const stateContainer = getStateContainer();
-      const mockGetInitial$ = new BehaviorSubject(null) as unknown as BehaviorSubject<SavedSearch>;
-      jest.spyOn(mockGetInitial$, 'pipe').mockReturnValue(
-        new Observable(() => {
-          return () => mockUnsubscribeReset();
-        })
-      );
-      jest.spyOn(stateContainer.savedSearchState, 'getInitial$').mockReturnValue(mockGetInitial$);
+      const { stateContainer } = await setup();
 
       const { hook } = await renderUseESQLVariables({
         isEsqlMode: true,
@@ -207,39 +210,31 @@ describe('useESQLVariables', () => {
 
       // Both subscriptions should be unsubscribed
       expect(mockUnsubscribeInput).toHaveBeenCalledTimes(1);
-      expect(mockUnsubscribeReset).toHaveBeenCalledTimes(1);
     });
 
-    it('should reset control panels from saved search state when getInitial$ emits', async () => {
-      const mockInitialSavedSearch = {
-        controlGroupJson: JSON.stringify(mockControlState),
-        // other saved search properties
-      };
-      const mockGetInitial$ = new BehaviorSubject(mockInitialSavedSearch as SavedSearch);
-
-      const stateContainer = getStateContainer();
-
-      jest.spyOn(stateContainer.savedSearchState, 'getInitial$').mockReturnValue(mockGetInitial$);
+    it('should reset control panels when tab attributes change', async () => {
+      const { stateContainer } = await setup();
 
       // Create a mock control group API with a mock updateInput method
       const mockUpdateInput = jest.fn();
-      const mockControlGroupApiWithUpdate = {
-        ...mockControlGroupAPI,
-        updateInput: mockUpdateInput,
-        getInput$: jest.fn().mockReturnValue(new Observable()),
-      };
+      jest.spyOn(mockControlGroupAPI, 'updateInput').mockImplementation(mockUpdateInput);
 
       // Render the hook
       await renderUseESQLVariables({
         stateContainer,
-        controlGroupApi: mockControlGroupApiWithUpdate as unknown as ControlGroupRendererApi,
+        controlGroupApi: mockControlGroupAPI as unknown as ControlGroupRendererApi,
       });
 
       expect(mockUpdateInput).not.toHaveBeenCalled();
 
-      // Simulate getInitial$ emitting a new saved search
       act(() => {
-        mockGetInitial$.next(mockInitialSavedSearch as SavedSearch);
+        stateContainer.internalState.dispatch(
+          stateContainer.injectCurrentTab(internalStateActions.updateAttributes)({
+            attributes: {
+              controlGroupState: mockControlState,
+            },
+          })
+        );
       });
 
       await waitFor(() => {
@@ -269,9 +264,7 @@ describe('useESQLVariables', () => {
       expect(mockControlGroupAPI.addNewPanel).toHaveBeenCalledWith({
         panelType: 'esqlControl',
         serializedState: {
-          rawState: {
-            ...mockControlState,
-          },
+          ...mockControlState,
         },
       });
       expect(mockOnTextLangQueryChange).not.toHaveBeenCalled();
@@ -305,7 +298,7 @@ describe('useESQLVariables', () => {
     });
 
     it('should handle numeric type coercion for ESQL variable values', async () => {
-      const stateContainer = getStateContainer();
+      const { stateContainer } = await setup();
       const dispatchSpy = jest.spyOn(stateContainer.internalState, 'dispatch');
 
       await renderUseESQLVariables({
@@ -326,7 +319,7 @@ describe('useESQLVariables', () => {
           controlType: 'STATIC_VALUES' as EsqlControlType,
           order: 0,
         },
-      };
+      } as unknown as ControlPanelsState<ESQLControlState>;
 
       act(() => {
         mockControlGroupAPI.simulateInput({
@@ -366,7 +359,7 @@ describe('useESQLVariables', () => {
           controlType: 'STATIC_VALUES' as EsqlControlType,
           order: 0,
         },
-      };
+      } as unknown as ControlPanelsState<ESQLControlState>;
 
       act(() => {
         mockControlGroupAPI.simulateInput({

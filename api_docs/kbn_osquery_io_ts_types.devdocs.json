@@ -33,6 +33,8 @@
           "{ agents: string[]; allAgentsSelected: boolean; platformsSelected: string[]; policiesSelected: string[]; }"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -48,6 +50,8 @@
           "{ agents: string[]; allAgentsSelected: boolean; platformsSelected: string[]; policiesSelected: string[]; } | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 27,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -63,6 +67,8 @@
           "{ id: string; query: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; removed: boolean | undefined; snapshot: boolean | undefined; }[]"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 113,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -78,6 +84,8 @@
           "string"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -93,6 +101,8 @@
           "string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -108,6 +118,8 @@
           "{ [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 95,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -123,6 +135,8 @@
           "{ [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 97,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -138,6 +152,8 @@
           "{ name: string | undefined; url: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 84,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -153,6 +169,8 @@
           "{ name: string | undefined; url: string | undefined; } | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -168,6 +186,8 @@
           "string"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -183,6 +203,8 @@
           "string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -198,6 +220,8 @@
           "string"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 50,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -213,6 +237,8 @@
           "string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -228,6 +254,8 @@
           "{ [x: string]: { query: string; id: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; saved_query_id: string | undefined; removed: boolean | undefined; snapshot: boolean | undefined; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 127,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -243,6 +271,8 @@
           "string"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 75,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -258,6 +288,8 @@
           "string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 77,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -273,6 +305,8 @@
           "string"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 35,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -288,6 +322,8 @@
           "string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -303,6 +339,8 @@
           "{ id: string; query: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; removed: boolean | undefined; snapshot: boolean | undefined; }[] | { [x: string]: { query: string; id: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; saved_query_id: string | undefined; removed: boolean | undefined; snapshot: boolean | undefined; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 129,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -318,6 +356,8 @@
           "{ id: string; query: string; ecs_mapping: { [x: string]: { field?: string | undefined; value?: string | string[] | undefined; }; } | undefined; version: string | undefined; platform: string | undefined; removed: boolean | undefined; snapshot: boolean | undefined; }[] | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 131,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -333,6 +373,8 @@
           "string"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 40,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -348,6 +390,8 @@
           "string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -363,6 +407,8 @@
           "boolean"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -378,6 +424,8 @@
           "boolean | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 67,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -393,6 +441,8 @@
           "string"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -408,6 +458,8 @@
           "string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 72,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -423,6 +475,8 @@
           "boolean"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -438,6 +492,8 @@
           "boolean | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -453,6 +509,8 @@
           "string[] | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 100,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -468,6 +526,8 @@
           "number"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -483,6 +543,8 @@
           "number | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -498,6 +560,8 @@
           "string"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 45,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -513,6 +577,8 @@
           "string | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -545,6 +611,8 @@
           ">; }>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -579,6 +647,8 @@
           "]>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 26,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -645,6 +715,8 @@
           "]>; }>>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 102,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -660,6 +732,8 @@
           "StringC"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -680,6 +754,8 @@
           "]>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -710,6 +786,8 @@
           ">]>; }>>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 88,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -744,6 +822,8 @@
           "]>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 96,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -772,6 +852,8 @@
           "]>; }>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 79,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -804,6 +886,8 @@
           "]>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 85,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -819,6 +903,8 @@
           "StringC"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -839,6 +925,8 @@
           "]>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -854,6 +942,8 @@
           "StringC"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -874,6 +964,8 @@
           "]>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 51,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -948,6 +1040,8 @@
           "]>; }>>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 114,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -963,6 +1057,8 @@
           "StringC"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 74,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -983,6 +1079,8 @@
           "]>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 76,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -998,6 +1096,8 @@
           "StringC"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1018,6 +1118,8 @@
           "]>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 36,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1146,6 +1248,8 @@
           "]>; }>>]>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 128,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1216,6 +1320,8 @@
           "]>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 130,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1231,6 +1337,8 @@
           "StringC"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1251,6 +1359,8 @@
           "]>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1266,6 +1376,8 @@
           "BooleanC"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 64,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1286,6 +1398,8 @@
           "]>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 66,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1301,6 +1415,8 @@
           "StringC"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 69,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1321,6 +1437,8 @@
           "]>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 71,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1336,6 +1454,8 @@
           "BooleanC"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 59,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1356,6 +1476,8 @@
           "]>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 61,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1378,6 +1500,8 @@
           "]>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 99,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1394,6 +1518,8 @@
           "<number, number, unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 54,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1414,6 +1540,8 @@
           "]>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1429,6 +1557,8 @@
           "StringC"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 44,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1449,6 +1579,8 @@
           "]>"
         ],
         "path": "src/platform/packages/shared/kbn-osquery-io-ts-types/src/live_query/index.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

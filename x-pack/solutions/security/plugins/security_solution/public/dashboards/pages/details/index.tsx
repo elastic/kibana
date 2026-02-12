@@ -63,7 +63,8 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
   const [dashboardTitle, setDashboardTitle] = useState<string>();
 
-  const { dashboardContainer, handleDashboardLoaded } = useDashboardRenderer();
+  const { dashboardContainer, dashboardInternalApi, handleDashboardLoaded } =
+    useDashboardRenderer();
   const onDashboardToolBarLoad = useCallback((mode: ViewMode) => {
     setViewMode(mode);
   }, []);
@@ -86,7 +87,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
           data-test-subj="dashboard-view-wrapper"
         >
           <EuiFlexItem grow={false}>
-            {dashboardContainer && (
+            {dashboardContainer && dashboardInternalApi && (
               <HeaderPage
                 border
                 title={
@@ -98,6 +99,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
                 subtitle={
                   <DashboardToolBar
                     dashboardContainer={dashboardContainer}
+                    dashboardInternalApi={dashboardInternalApi}
                     onLoad={onDashboardToolBarLoad}
                   />
                 }

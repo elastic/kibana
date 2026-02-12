@@ -37,6 +37,13 @@ export const TerminalExecutionStatuses: readonly ExecutionStatus[] = [
   ExecutionStatus.TIMED_OUT,
 ] as const;
 
+export const NonTerminalExecutionStatuses: readonly ExecutionStatus[] = [
+  ExecutionStatus.PENDING,
+  ExecutionStatus.WAITING,
+  ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.RUNNING,
+] as const;
+
 export enum ExecutionType {
   TEST = 'test',
   PRODUCTION = 'production',
@@ -68,6 +75,14 @@ export interface StackFrame {
   nestedScopes: ScopeEntry[];
 }
 
+export interface QueueMetrics {
+  scheduledAt?: string;
+  runAt?: string;
+  startedAt: string;
+  queueDelayMs: number | null;
+  scheduleDelayMs: number | null;
+}
+
 export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
@@ -83,7 +98,8 @@ export interface EsWorkflowExecution {
   scopeStack: StackFrame[];
   createdAt: string;
   error: SerializedError | null;
-  createdBy: string;
+  createdBy?: string; // Keep for backwards compatibility with existing documents
+  executedBy?: string; // User who executed the workflow
   startedAt: string;
   finishedAt: string;
   cancelRequested: boolean;
@@ -92,9 +108,13 @@ export interface EsWorkflowExecution {
   cancelledBy?: string;
   duration: number;
   triggeredBy?: string; // 'manual' or 'scheduled'
+  taskRunAt?: string | null; // Task's runAt timestamp to link execution to specific scheduled run
   traceId?: string; // APM trace ID for observability
   entryTransactionId?: string; // APM root transaction ID for trace embeddable
   concurrencyGroupKey?: string; // Evaluated concurrency group key for grouping executions
+  queueMetrics?: QueueMetrics; // Queue delay metrics for observability
+  /** IDs of all step executions, enables O(1) mget lookup instead of search */
+  stepExecutionIds?: string[];
 }
 
 export interface ProviderInput {
@@ -177,9 +197,12 @@ export interface WorkflowExecutionDto {
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
   duration: number | null;
+  executedBy?: string; // User who executed the workflow
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
   context?: Record<string, unknown>;
+  traceId?: string; // APM trace ID for observability
+  entryTransactionId?: string; // APM root transaction ID for trace embeddable
 }
 
 export type WorkflowExecutionListItemDto = Omit<
@@ -224,6 +247,12 @@ export const CreateWorkflowCommandSchema = z.object({
   id: z.string().optional(),
 });
 
+export const BulkCreateWorkflowsCommandSchema = z.object({
+  workflows: z.array(CreateWorkflowCommandSchema),
+});
+
+export type BulkCreateWorkflowsCommand = z.infer<typeof BulkCreateWorkflowsCommandSchema>;
+
 export const UpdateWorkflowCommandSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
@@ -239,6 +268,7 @@ export const SearchWorkflowCommandSchema = z.object({
   createdBy: z.array(z.string()).optional(),
   // bool or number transformed to boolean
   enabled: z.array(z.union([z.boolean(), z.number().transform((val) => val === 1)])).optional(),
+  tags: z.array(z.string()).optional(),
   query: z.string().optional(),
   _full: z.boolean().default(false),
 });
@@ -363,6 +393,11 @@ export interface ConnectorInstance {
   name: string;
   isPreconfigured: boolean;
   isDeprecated: boolean;
+  config?: ConnectorInstanceConfig;
+}
+
+export interface ConnectorInstanceConfig {
+  taskType?: string;
 }
 
 export interface ConnectorTypeInfo {
@@ -376,11 +411,14 @@ export interface ConnectorTypeInfo {
   subActions: ConnectorSubAction[];
 }
 
+export type CompletionFn = () => Promise<
+  Array<{ label: string; value: string; detail?: string; documentation?: string }>
+>;
+
 export interface BaseConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
-  connectorIdRequired?: boolean;
-  connectorId?: z.ZodType;
+  hasConnectorId?: 'required' | 'optional' | false;
   outputSchema: z.ZodType;
   configSchema?: z.ZodObject;
   summary: string | null;
@@ -388,6 +426,11 @@ export interface BaseConnectorContract {
   /** Documentation URL for this API endpoint */
   documentation?: string | null;
   examples?: ConnectorExamples;
+  // Rich property handlers for completions, validation and decorations
+  editorHandlers?: {
+    config?: Record<string, StepPropertyHandler | undefined>;
+    input?: Record<string, StepPropertyHandler | undefined>;
+  };
 }
 
 export interface DynamicConnectorContract extends BaseConnectorContract {
@@ -431,6 +474,92 @@ export interface InternalConnectorContract extends BaseConnectorContract {
   };
 }
 
+export interface StepPropertyHandler<T = unknown> {
+  /**
+   * Entity selection configuration for the property.
+   * Provides a unified interface for search, resolution, and decoration of entity references.
+   */
+  selection?: PropertySelectionHandler<Exclude<T, undefined>>;
+  /**
+   * Connector ID selection configuration for the property.
+   * Used to resolve connector IDs for custom steps.
+   *
+   * **Note**: This handler is currently only supported for the `connector-id` property in the config schema.
+   */
+  connectorIdSelection?: ConnectorIdSelectionHandler;
+}
+
+export interface PropertySelectionHandler<T = unknown> {
+  /**
+   * Search for options matching the input query.
+   * Used by autocomplete dropdowns when the user types.
+   */
+  search: (input: string, context: SelectionContext) => Promise<SelectionOption<T>[]>;
+
+  /**
+   * Resolve an entity by its value.
+   * Used when loading existing values or when a value is pasted.
+   * Returns null if the entity is not found.
+   */
+  resolve: (value: T, context: SelectionContext) => Promise<SelectionOption<T> | null>;
+
+  /**
+   * Get detailed information for the current value.
+   * Used for decoration and metadata display in the editor.
+   * The option parameter is the resolved entity from `resolve`, if available.
+   */
+  getDetails: (
+    input: string,
+    context: SelectionContext,
+    option: SelectionOption<T> | null
+  ) => Promise<SelectionDetails>;
+}
+
+export interface SelectionOption<T = unknown> {
+  /** The value that will be stored in the YAML */
+  value: T;
+  /** The label displayed in the UI */
+  label: string;
+  /** Description shown in completion popup or tooltips (optional) */
+  description?: string;
+  /** Extended documentation shown in side panel (optional) */
+  documentation?: string;
+}
+
+export interface SelectionDetails {
+  /** Message to display (e.g., "✓ Agent connected" or "Agent not found") */
+  message: string;
+  /** Links to related actions (e.g., "Edit agent", "Create agent") */
+  links?: Array<{
+    /** Link text */
+    text: string;
+    /** Link path (relative or absolute URL) */
+    path: string;
+  }>;
+}
+
+export interface SelectionContext {
+  /** The step type ID (e.g., "onechat.runAgent") */
+  stepType: string;
+  /** The property path ("config" or "input") */
+  scope: 'config' | 'input';
+  /** The property key (e.g., "agent_id") */
+  propertyKey: string;
+}
+
+export interface ConnectorIdSelectionHandler {
+  /**
+   * The action type IDs to search for.
+   */
+  connectorTypes: string[];
+  /**
+   * Whether to disable creation of a new connector from the connector ID selection.
+   * If false (default), creation from the connector ID selection will be disabled.
+   * If true, creation from the connector ID selection will be enabled for the first type in the `connectorTypes` list.
+   */
+  enableCreation?: boolean;
+}
+
 export interface ConnectorExamples {
   params?: Record<string, string>;
   snippet?: string;
@@ -447,4 +576,15 @@ export interface WorkflowsSearchParams {
   query?: string;
   createdBy?: string[];
   enabled?: boolean[];
+  tags?: string[];
+}
+
+export interface RequestOptions {
+  method: string;
+  path: string;
+  body?: Record<string, unknown>;
+  query?: Record<string, string>;
+  headers?: Record<string, string>;
+  /** Bulk body for elasticsearch.bulk step */
+  bulkBody?: Array<Record<string, unknown>>;
 }

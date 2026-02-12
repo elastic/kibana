@@ -227,11 +227,7 @@ export class AddEditMonitorAPI {
   }
 
   initDefaultAlerts(name: string) {
-    const { server, savedObjectsClient, context, request } = this.routeContext;
-    const { gettingStarted } = request.query;
-    if (!gettingStarted) {
-      return;
-    }
+    const { server, savedObjectsClient, context } = this.routeContext;
 
     try {
       // we do this async, so we don't block the user, error handling will be done on the UI via separate api

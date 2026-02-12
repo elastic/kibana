@@ -56,6 +56,7 @@ describe('PanelFooter', () => {
       isAgentBuilderEnabled: false,
       hasAgentBuilderPrivilege: false,
       isAgentChatExperienceEnabled: false,
+      hasValidAgentBuilderLicense: true,
     });
   });
 
@@ -95,6 +96,7 @@ describe('PanelFooter', () => {
       isAgentBuilderEnabled: true,
       hasAgentBuilderPrivilege: true,
       isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: true,
     });
     const { getByTestId } = renderPanelFooter(false);
 

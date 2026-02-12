@@ -6,14 +6,11 @@
  */
 
 import { z } from '@kbn/zod';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type {
-  ObservabilityAgentBuilderPluginStart,
-  ObservabilityAgentBuilderPluginStartDependencies,
-} from '../../types';
+import type { ObservabilityAgentBuilderCoreSetup } from '../../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
@@ -27,7 +24,7 @@ const DEFAULT_TIME_RANGE = { start: 'now-1h', end: 'now' };
 const getDownstreamDependenciesToolSchema = z.object({
   ...timeRangeSchemaOptional(DEFAULT_TIME_RANGE),
   serviceName: z.string().min(1).describe('The name of the service'),
-  serviceEnvironment: z
+  environment: z
     .string()
     .optional()
     .describe(
@@ -40,22 +37,25 @@ export function createDownstreamDependenciesTool({
   dataRegistry,
   logger,
 }: {
-  core: CoreSetup<
-    ObservabilityAgentBuilderPluginStartDependencies,
-    ObservabilityAgentBuilderPluginStart
-  >;
+  core: ObservabilityAgentBuilderCoreSetup;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
   logger: Logger;
 }): StaticToolRegistration<typeof getDownstreamDependenciesToolSchema> {
   const toolDefinition: BuiltinToolDefinition<typeof getDownstreamDependenciesToolSchema> = {
     id: OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
     type: ToolType.builtin,
-    description: `Identifies downstream dependencies (other services, databases, external APIs) for a specific service.
+    description: `Retrieves downstream dependencies (other services, databases, external APIs) that a service calls, including health metrics.
+
+Returns for each dependency:
+- Service name (if resolved) or resource identifier (IP:port, hostname)
+- Error rate (0-1, where 1 = 100% failures)
+- Latency in milliseconds
+- Throughput (calls per minute)
 
 When to use:
-- Showing the topology for a service
-- Investigating if a dependency is causing issues
-- Understanding the blast radius of a failing service`,
+- Identifying which downstream dependencies are failing (high error rate)
+- Diagnosing if a service's errors are caused by a downstream outage
+- Mapping what external services/databases a service depends on`,
     schema: getDownstreamDependenciesToolSchema,
     tags: ['observability', 'apm', 'dependencies'],
     availability: {
@@ -65,12 +65,7 @@ When to use:
       },
     },
     handler: async (toolParams, context) => {
-      const {
-        serviceName,
-        serviceEnvironment,
-        start = DEFAULT_TIME_RANGE.start,
-        end = DEFAULT_TIME_RANGE.end,
-      } = toolParams;
+      const { serviceName, environment, start, end } = toolParams;
       const { request } = context;
 
       try {
@@ -78,7 +73,7 @@ When to use:
           request,
           dataRegistry,
           serviceName,
-          serviceEnvironment,
+          serviceEnvironment: environment,
           start,
           end,
         });

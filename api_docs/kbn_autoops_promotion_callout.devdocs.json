@@ -38,6 +38,8 @@
           ") => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+        "lineNumber": 25,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,6 +60,8 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+            "lineNumber": 25,
+            "columnNumber": 41,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -76,6 +80,8 @@
         "label": "AutoOpsPromotionCalloutProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -87,6 +93,8 @@
             "label": "learnMoreLink",
             "description": [],
             "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -101,6 +109,8 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+            "lineNumber": 17,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -115,6 +125,8 @@
               "((e: React.MouseEvent<Element, MouseEvent>) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -129,6 +141,8 @@
                   "React.MouseEvent<Element, MouseEvent>"
                 ],
                 "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+                "lineNumber": 18,
+                "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -147,6 +161,8 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+            "lineNumber": 19,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -163,6 +179,8 @@
               ", \"children\" | \"title\" | \"onDismiss\">> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-management/autoops_promotion_callout/src/callout.tsx",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }

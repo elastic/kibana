@@ -61,6 +61,12 @@ import {
   JiraServiceManagementCloseAlertParamsSchema,
   JiraServiceManagementCreateAlertParamsSchema,
   JiraServiceManagementResponseSchema,
+  McpCallToolParamsSchema,
+  McpCallToolResponseSchema,
+  McpListToolsParamsSchema,
+  McpListToolsResponseSchema,
+  McpTestParamsSchema,
+  McpTestResponseSchema,
   OpenAIParamsSchema,
   OpenAIResponseSchema,
   OpsgenieCloseAlertParamsSchema,
@@ -272,6 +278,14 @@ export const ConnectorActionInputSchemas = new Map<string, Record<string, z.ZodS
       test: GenAITestParamsSchema,
     },
   ],
+  [
+    '.mcp',
+    {
+      listTools: McpListToolsParamsSchema,
+      callTool: McpCallToolParamsSchema,
+      test: McpTestParamsSchema,
+    },
+  ],
 ]);
 
 /**
@@ -422,6 +436,14 @@ export const ConnectorActionOutputSchemas = new Map<string, Record<string, z.Zod
       test: GenAITestResponseSchema,
     },
   ],
+  [
+    '.mcp',
+    {
+      listTools: McpListToolsResponseSchema,
+      callTool: McpCallToolResponseSchema,
+      test: McpTestResponseSchema,
+    },
+  ],
 ]);
 
 /**
@@ -447,7 +469,6 @@ export const staticConnectors: BaseConnectorContract[] = [
   {
     type: 'elasticsearch.request',
     summary: 'Elasticsearch Request',
-    connectorIdRequired: false,
     paramsSchema: z.object({
       method: z.string(),
       path: z.string(),
@@ -463,7 +484,6 @@ export const staticConnectors: BaseConnectorContract[] = [
   {
     type: 'kibana.request',
     summary: 'Kibana Request',
-    connectorIdRequired: false,
     paramsSchema: z.object({
       method: z.string(),
       path: z.string(),

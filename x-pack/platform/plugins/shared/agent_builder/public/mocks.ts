@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import { EMPTY } from 'rxjs';
+import type {
+  AgentsServiceStartContract,
+  AttachmentServiceStartContract,
+  ToolServiceStartContract,
+} from '@kbn/agent-builder-browser';
 import type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
@@ -16,11 +22,45 @@ const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {
   return {};
 };
 
-const createStartContractMock = (): jest.Mocked<AgentBuilderPluginStart> => {
+export type AgentsServiceStartContractMock = jest.Mocked<AgentsServiceStartContract>;
+export type AttachmentServiceStartContractMock = jest.Mocked<AttachmentServiceStartContract>;
+export type ToolServiceStartContractMock = jest.Mocked<ToolServiceStartContract>;
+
+export type AgentBuilderPluginStartMock = jest.Mocked<AgentBuilderPluginStart> & {
+  agents: AgentsServiceStartContractMock;
+  attachments: AttachmentServiceStartContractMock;
+  tools: ToolServiceStartContractMock;
+};
+
+const createAgentStartMock = (): AgentsServiceStartContractMock => {
   return {
-    agents: {} as any,
-    attachments: {} as any,
-    tools: {} as any,
+    list: jest.fn(),
+  };
+};
+
+const createAttachmentStartMock = (): AttachmentServiceStartContractMock => {
+  return {
+    addAttachmentType: jest.fn(),
+    getAttachmentUiDefinition: jest.fn(),
+  };
+};
+
+const createToolStartMock = (): ToolServiceStartContractMock => {
+  return {
+    get: jest.fn(),
+    list: jest.fn(),
+    execute: jest.fn(),
+  };
+};
+
+const createStartContractMock = (): AgentBuilderPluginStartMock => {
+  return {
+    agents: createAgentStartMock(),
+    attachments: createAttachmentStartMock(),
+    tools: createToolStartMock(),
+    events: {
+      chat$: EMPTY,
+    },
     setConversationFlyoutActiveConfig: jest.fn(),
     clearConversationFlyoutActiveConfig: jest.fn(),
     toggleConversationFlyout: jest.fn(),

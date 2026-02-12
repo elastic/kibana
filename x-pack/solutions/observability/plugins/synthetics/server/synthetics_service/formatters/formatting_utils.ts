@@ -8,10 +8,18 @@
 import type { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
-import type { ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import { type ConfigKey, type MonitorFields } from '../../../common/runtime_types';
 import type { ParsedVars } from './lightweight_param_formatter';
 import { replaceVarsWithParams } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
+import { hasNoParams } from './param_utils';
+
+export {
+  hasNoParams,
+  extractParamReferences,
+  valueContainsParams,
+  monitorUsesGlobalParams,
+} from './param_utils';
 
 export type FormatterFn = (
   fields: Partial<MonitorFields>,
@@ -70,12 +78,6 @@ const allParamsAreMissing = (parsedVars: ParsedVars, params: Record<string, stri
   return varKeys.every((v) => !params[v]);
 };
 
-const SHELL_PARAMS_REGEX = /\$\{[a-zA-Z_][a-zA-Z0-9\._\-?:]*\}/g;
-
-export const hasNoParams = (strVal: string) => {
-  return strVal.match(SHELL_PARAMS_REGEX) === null;
-};
-
 export const secondsToCronFormatter: FormatterFn = (fields, key) => {
   const value = (fields[key] as string) ?? '';
 
@@ -125,10 +127,7 @@ export const formatMWs = (mws?: MaintenanceWindow[], strRes = true) => {
 };
 
 function escapeTemplateLiterals(script: string): string {
-  // Escape ${...} to prevent Elastic Agent from interpreting as policy variables.
-  // Using unicode escape \u0024 for $ - agent won't recognize as variable,
-  // but JavaScript will interpret \u0024 as $ when the script runs.
-  return script.replace(/\$\{/g, '\\u0024{');
+  return script.replace(/\$\{/g, '$$${');
 }
 
 export const inlineSourceFormatter: FormatterFn = (fields, key) => {

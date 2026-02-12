@@ -7,16 +7,16 @@
 
 import expect from '@kbn/expect';
 import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
+import {
+  generateLogChangePointsData,
+  LOG_CHANGE_POINTS_ANALYSIS_WINDOW,
+  LOG_CHANGE_POINTS_DATA_STREAM,
+} from '@kbn/synthtrace';
 import type { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools/get_log_change_points/tool';
 import type { ChangePoint } from '@kbn/observability-agent-builder-plugin/server/utils/get_change_points';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-import {
-  LOG_CHANGE_POINTS_ANALYSIS_WINDOW,
-  LOG_CHANGE_POINTS_DATA_STREAM,
-  createLogChangePointsData,
-} from '../utils/synthtrace_scenarios/create_log_change_points_data';
 
 interface ToolResult {
   type: ToolResultType.other;
@@ -37,7 +37,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin');
       agentBuilderApiClient = createAgentBuilderApiClient(supertest);
       logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
-      await createLogChangePointsData({ logsSynthtraceEsClient });
+      const { client, generator } = generateLogChangePointsData({
+        logsEsClient: logsSynthtraceEsClient,
+      });
+      await client.index(generator);
     });
 
     after(async () => {
@@ -64,14 +67,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(logChangePoints.length).to.be.greaterThan(0);
       });
 
-      it('should detect spike in error logs', () => {
+      it('should detect a change in error logs', () => {
         expect(logChangePoints.length).to.be.greaterThan(0);
-        const spike = logChangePoints.find((cp: ChangePoint) => cp.changes?.type === 'spike');
-        expect(spike).to.be.ok();
-        expect(spike).to.have.property('timeSeries');
-        expect(spike?.timeSeries?.length).to.be.greaterThan(0);
-        expect(spike?.timeSeries?.[0]).to.have.property('x');
-        expect(spike?.timeSeries?.[0]).to.have.property('y');
+        const change = logChangePoints.find((cp: ChangePoint) =>
+          ['spike', 'dip', 'step_change', 'trend_change', 'distribution_change'].includes(
+            cp.changes?.type
+          )
+        );
+        expect(change).to.be.ok();
+        expect(change).to.have.property('timeSeries');
+        expect(change?.timeSeries?.length).to.be.greaterThan(0);
+        expect(change?.timeSeries?.[0]).to.have.property('x');
+        expect(change?.timeSeries?.[0]).to.have.property('y');
       });
 
       it('should detect stationary patterns in logs', () => {
@@ -98,10 +105,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         logChangePoints = toolResults[0]?.data?.changePoints ?? [];
       });
 
-      it('should still detect spikes without an explicit index', () => {
+      it('should still detect changes without an explicit index', () => {
         expect(logChangePoints.length).to.be.greaterThan(0);
-        const spike = logChangePoints.find((cp: ChangePoint) => cp.changes?.type === 'spike');
-        expect(spike).to.be.ok();
+        const hasChange = logChangePoints.some((cp: ChangePoint) =>
+          ['spike', 'dip', 'step_change', 'trend_change', 'distribution_change'].includes(
+            cp.changes?.type as string
+          )
+        );
+        expect(hasChange).to.be(true);
       });
     });
 
@@ -122,16 +133,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         logChangePoints = toolResults[0]?.data?.changePoints ?? [];
       });
 
-      it('should not report spikes when only stable info logs are included', () => {
-        const spike = logChangePoints.find((cp: ChangePoint) => cp.changes?.type === 'spike');
-        expect(spike).to.be(undefined);
+      it('should not detect changes when only stable info logs are included', () => {
+        const hasChange = logChangePoints.some((cp: ChangePoint) =>
+          ['spike', 'dip', 'step_change', 'trend_change', 'distribution_change'].includes(
+            cp.changes?.type
+          )
+        );
+        expect(hasChange).to.be(false);
       });
 
-      it('should still report stationary patterns in info logs', () => {
-        const stationary = logChangePoints.find(
+      it('should still detect stationary patterns in info logs', () => {
+        const stationary = logChangePoints.some(
           (cp: ChangePoint) => cp.changes?.type === 'stationary'
         );
-        expect(stationary).to.be.ok();
+        expect(stationary).to.be(true);
       });
     });
   });

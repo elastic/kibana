@@ -21,7 +21,7 @@ const mockAttributes: LooseLensAttributes = {
   state: {
     visualization: {},
   },
-  version: 1,
+  version: 2,
   description: 'bar',
 };
 

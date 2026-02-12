@@ -93,7 +93,7 @@ export interface Setup {
    * on the spec. We aren't sure if this is a good function so it's marked
    * beta. That should be clear in the docs because of the js doc tag.
    *
-   * @param searchSpec Provide the settings neccessary to create a new Search Service
+   * @param searchSpec Provide the settings necessary to create a new Search Service
    *
    * @returns the id of the search service.
    *
@@ -105,7 +105,7 @@ export interface Setup {
    * This uses an inlined object type rather than referencing an exported type, which is discouraged.
    * prefer the way {@link getSearchService} is typed.
    *
-   * @param searchSpec Provide the settings neccessary to create a new Search Service
+   * @param searchSpec Provide the settings necessary to create a new Search Service
    */
   getSearchService2: (searchSpec: { username: string; password: string }) => string;
 
@@ -176,3 +176,41 @@ export class PluginA implements PluginMock<Setup, Start> {
     return { getSearchLanguage: () => SearchLanguage.EQL, anInternalStartFn: () => 'ho' };
   }
 }
+
+// Expected issues:
+//   missing comments (7):
+//     line 66 - getSearchLanguage
+//     line 110 - password
+//     line 110 - username
+//     line 123 - nestedVar
+//     line 135 - fn
+//     line 135 - foo
+//     line 135 - param
+//   param doc mismatches (1):
+//     line 135 - fn
+//   missing complex type info (1):
+//     line 135 - foo
+//   no references (23):
+//     line 19 - SearchSpec
+//     line 24 - username
+//     line 28 - password
+//     line 52 - Start
+//     line 66 - getSearchLanguage
+//     line 77 - Setup
+//     line 91 - getSearchService
+//     line 102 - searchSpec
+//     line 104 - getSearchService2
+//     line 110 - password
+//     line 110 - searchSpec
+//     line 110 - username
+//     line 112 - doTheThing
+//     line 123 - nestedVar
+//     line 123 - thingOne
+//     line 123 - thingThree
+//     line 123 - thingTwo
+//     line 125 - fnWithInlineParams
+//     line 134 - obj
+//     line 135 - fn
+//     line 135 - foo
+//     line 135 - param
+//     line 138 - id

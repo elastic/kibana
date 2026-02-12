@@ -15,7 +15,7 @@ export async function getToolHandler({
   esClient,
   logger,
   index,
-  timeFieldName = '@timestamp',
+  timeFieldName,
   baseline,
   deviation,
   searchQuery,
@@ -23,7 +23,7 @@ export async function getToolHandler({
   esClient: ElasticsearchClient;
   logger: Logger;
   index: string;
-  timeFieldName?: string;
+  timeFieldName: string;
   baseline: { start: string; end: string };
   deviation: { start: string; end: string };
   searchQuery?: Record<string, any>;

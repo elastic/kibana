@@ -31,7 +31,8 @@ import {
   EisUpdateCallout,
 } from '@kbn/search-api-panels';
 import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
-import type { Index } from '../../../../../../../common';
+import { type Index } from '../../../../../../../common';
+import { formatBytes } from '../../../../../lib/format_bytes';
 import { useAppContext } from '../../../../../app_context';
 import { documentationService, useLoadIndexMappings } from '../../../../../services';
 import { languageDefinitions, curlDefinition } from './languages';
@@ -46,6 +47,8 @@ import { useMappingsState } from '../../../../../components/mappings_editor/mapp
 import { hasElserOnMlNodeSemanticTextField } from '../../../../../components/mappings_editor/lib/utils';
 import { useMappingsStateListener } from '../../../../../components/mappings_editor/use_state_listener';
 import { parseMappings } from '../../../../../shared/parse_mappings';
+import { useUserPrivileges } from '../../../../../services/api';
+import { useLicense } from '../../../../../../hooks/use_license';
 
 interface Props {
   indexDetails: Index;
@@ -69,20 +72,21 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
     core,
     plugins: { cloud, share },
     services: { extensionsService },
-    canUseEis,
   } = useAppContext();
   const state = useMappingsState();
   const { data: mappingsData, resendRequest } = useLoadIndexMappings(name || '');
+  const { isAtLeastEnterprise } = useLicense();
 
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(curlDefinition);
   const [elasticsearchUrl, setElasticsearchUrl] = useState<string>('');
   const hasElserOnMlNodeSemanticText = hasElserOnMlNodeSemanticTextField(state.mappingViewFields);
   const [isUpdatingElserMappings, setIsUpdatingElserMappings] = useState<boolean>(false);
 
-  // Setting undefined here because we don't have user privileges data in index management
-  // If the user doesn't have update mappings privileges we let the api handle the error
-  // TODO: Add route and api to get user privileges data in index management plugin
-  const hasUpdateMappingsPrivileges = undefined;
+  const { data } = useUserPrivileges(indexDetails.name);
+  const hasUpdateMappingsPrivileges = data?.privileges?.canManageIndex === true;
+
+  const sizeFormatted = formatBytes(size);
+  const primarySizeFormatted = formatBytes(primarySize);
 
   const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
     url: elasticsearchUrl,
@@ -93,7 +97,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
   const isLarge = useIsWithinBreakpoints(['xl']);
 
   const shouldShowEisUpdateCallout =
-    (cloud?.isCloudEnabled && (canUseEis || cloud?.isServerlessEnabled)) ?? false;
+    (cloud?.isCloudEnabled && (isAtLeastEnterprise() || cloud?.isServerlessEnabled)) ?? false;
 
   const { parsedDefaultValue } = useMemo(
     () => parseMappings(mappingsData ?? undefined),
@@ -141,7 +145,12 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
       )}
 
       <EuiFlexGrid columns={isLarge ? 3 : 1}>
-        <StorageDetails size={size} primarySize={primarySize} primary={primary} replica={replica} />
+        <StorageDetails
+          size={sizeFormatted}
+          primarySize={primarySizeFormatted}
+          primary={primary}
+          replica={replica}
+        />
 
         <StatusDetails
           documents={documents}
@@ -150,7 +159,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({ indexDetai
           health={health}
         />
 
-        <SizeDocCountDetails size={size} documents={documents} />
+        <SizeDocCountDetails size={sizeFormatted} documents={documents} />
 
         <AliasesDetails aliases={aliases} />
 

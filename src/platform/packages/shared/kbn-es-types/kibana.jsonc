@@ -2,8 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/es-types",
   "owner": [
-    "@elastic/kibana-core",
-    "@elastic/obs-knowledge-team"
+    "@elastic/kibana-core"
   ],
   "group": "platform",
   "visibility": "shared"

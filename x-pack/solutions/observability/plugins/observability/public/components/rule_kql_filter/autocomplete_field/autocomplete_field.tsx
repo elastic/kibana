@@ -8,7 +8,7 @@
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import type { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import type { QuerySuggestion } from '@kbn/kql/public';
 import { css } from '@emotion/react';
 import { SuggestionItem } from './suggestion_item';
 

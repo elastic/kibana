@@ -21,6 +21,7 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import { FormBasedDimensionEditorComponent } from './dimension_panel';
 import type { IUiSettingsClient, HttpSetup, CoreStart, NotificationsStart } from '@kbn/core/public';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import { generateId } from '../../../id_generator';
@@ -229,6 +230,7 @@ describe('FormBasedDimensionEditor', () => {
       http: {} as HttpSetup,
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
+      kql: kqlPluginMock.createStartContract(),
       dataViews: dataViewPluginMocks.createStartContract(),
       notifications: {} as NotificationsStart,
       data: {

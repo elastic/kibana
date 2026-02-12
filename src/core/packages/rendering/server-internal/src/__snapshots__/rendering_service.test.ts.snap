@@ -16,6 +16,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -103,6 +104,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -186,6 +188,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -273,6 +276,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -356,6 +360,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -439,6 +444,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -526,6 +532,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -609,6 +616,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -692,6 +700,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -775,6 +784,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -863,6 +873,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -950,6 +961,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -1040,6 +1052,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -1132,6 +1145,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -1215,6 +1229,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -1303,6 +1318,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -1395,6 +1411,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -1483,6 +1500,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -1571,6 +1589,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,
@@ -1661,6 +1680,7 @@ Object {
   },
   "customBranding": Object {},
   "env": Object {
+    "airgapped": Any<Boolean>,
     "mode": Object {
       "dev": Any<Boolean>,
       "name": Any<String>,

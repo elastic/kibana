@@ -26,6 +26,7 @@ import { NameConfigurationPanel } from './name_configuration_panel';
 import { useSourceConfigurationFormState } from './source_configuration_form_state';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { settingsTitle } from '../../../translations';
+
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;
   http?: HttpSetup;
@@ -155,6 +156,7 @@ export const SourceConfigurationSettings = ({
           <EuiSpacer />
         </>
       )}
+      <EuiSpacer />
       {errors.length > 0 ? (
         <>
           <EuiCallOut announceOnMount color="danger">

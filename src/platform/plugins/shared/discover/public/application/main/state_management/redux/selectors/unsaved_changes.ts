@@ -182,7 +182,7 @@ const getAdjustedDataViewId = (searchSource: SerializedSearchSourceFields) =>
     ? searchSource.index.id
     : searchSource.index;
 
-const searchSourceComparator: TabComparators['serializedSearchSource'] = (
+export const searchSourceComparator: TabComparators['serializedSearchSource'] = (
   searchSourceA,
   searchSourceB
 ) => {
@@ -235,5 +235,10 @@ const TAB_COMPARATORS: TabComparators = {
   breakdownField: fieldComparator('breakdownField', ''),
   density: fieldComparator('density', DataGridDensity.COMPACT),
   visContext: visContextComparator,
-  controlGroupJson: fieldComparator('controlGroupJson', '{}'),
+  controlGroupJson: (a, b) => {
+    // ignore the order of keys when comparing JSON strings
+    const testA = JSON.parse(a ?? '{}');
+    const testB = JSON.parse(b ?? '{}');
+    return isEqual(testA, testB);
+  },
 };

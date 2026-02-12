@@ -14,6 +14,8 @@
           "(props: { showShadow?: boolean | undefined; showBorder?: boolean | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/private/kbn-panel-loader/index.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -25,6 +27,8 @@
             "label": "props",
             "description": [],
             "path": "src/platform/packages/private/kbn-panel-loader/index.tsx",
+            "lineNumber": 14,
+            "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -39,6 +43,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-panel-loader/index.tsx",
+                "lineNumber": 15,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -53,6 +59,8 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-panel-loader/index.tsx",
+                "lineNumber": 16,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -67,6 +75,8 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/private/kbn-panel-loader/index.tsx",
+                "lineNumber": 17,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }

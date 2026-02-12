@@ -59,19 +59,12 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       return;
     }
 
-    if (GITHUB_PR_LABELS.includes('ci:beta-faster-pr-build')) {
-      await runPreBuild();
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base_merged_phases.yml', false));
-    } else {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/pick_test_groups.yml'));
-    }
+    await runPreBuild();
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
     if (prHasFIPSLabel()) {
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml'));
     }
-
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
 
     if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));
@@ -274,7 +267,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
         /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
         /^x-pack\/platform\/plugins\/shared\/task_manager/,
-        /^x-pack\/platform\/plugins\/shared\/timelines/,
+        /^x-pack\/solutions\/security\/plugins\/timelines/,
         /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
         /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
         /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/server\/connector_types\/openai/,
@@ -362,7 +355,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
         /^x-pack\/platform\/plugins\/shared\/task_manager/,
         /^x-pack\/solutions\/security\/plugins\/threat_intelligence/,
-        /^x-pack\/platform\/plugins\/shared\/timelines/,
+        /^x-pack\/solutions\/security\/plugins\/timelines/,
         /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui/,
         /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
@@ -425,7 +418,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
         /^x-pack\/platform\/plugins\/shared\/task_manager/,
         /^x-pack\/solutions\/security\/plugins\/threat_intelligence/,
-        /^x-pack\/platform\/plugins\/shared\/timelines/,
+        /^x-pack\/solutions\/security\/plugins\/timelines/,
         /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui/,
         /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
         /^x-pack\/test\/functional\/es_archives\/security_solution/,
@@ -544,6 +537,20 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       GITHUB_PR_LABELS.includes('ci:bench-jest')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^src\/platform\/packages\/shared\/kbn-es/,
+        /^src\/platform\/packages\/shared\/kbn-ftr-benchmarks/,
+        /^src\/platform\/packages\/shared\/kbn-ftr-common-functional-services/,
+        /^src\/platform\/packages\/shared\/kbn-ftr-common-functional-ui-services/,
+        /^src\/platform\/packages\/shared\/kbn-test/,
+        /^src\/setup_node_env/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:bench-ftr')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ftr_bench.yml'));
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));

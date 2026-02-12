@@ -24,14 +24,15 @@ import type {
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 import {
-  controlsCollectorFactory,
   collectPanelsByType,
   getEmptyDashboardData,
   collectSectionsAndAccessControl,
+  collectPinnedControls,
 } from './dashboard_telemetry';
 import type {
   DashboardSavedObjectAttributes,
   SavedDashboardPanel,
+  StoredControlGroupInput,
 } from '../dashboard_saved_object';
 import type { DashboardHit } from './types';
 
@@ -95,18 +96,20 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
     return {
       async run() {
         let dashboardData = getEmptyDashboardData();
-        const controlsCollector = controlsCollectorFactory(embeddable);
         const processDashboards = (dashboards: DashboardHit[]) => {
           for (const dashboard of dashboards) {
             dashboardData = collectSectionsAndAccessControl(dashboard, dashboardData);
-            dashboardData = controlsCollector(dashboard.attributes, dashboardData);
 
             try {
               const panels = JSON.parse(
                 dashboard.attributes.panelsJSON as string
               ) as unknown as SavedDashboardPanel[];
-
               collectPanelsByType(panels, dashboardData, embeddable);
+
+              const controls = JSON.parse(
+                dashboard.attributes.controlGroupInput?.panelsJSON as string
+              ) as unknown as StoredControlGroupInput['panels'];
+              collectPinnedControls(controls, dashboardData, embeddable);
             } catch (e) {
               logger.warn('Unable to parse panelsJSON for telemetry collection');
             }

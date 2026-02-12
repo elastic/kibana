@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { useAbortController } from '@kbn/react-hooks';
-import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
-import { isIlmLifecycle } from '@kbn/streams-schema';
+import { type IngestStreamLifecycle, type Streams, type IlmPolicy } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { omit } from 'lodash';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -18,12 +16,13 @@ import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { getFormattedError } from '../../../../util/errors';
 import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
-import { IngestionCard } from './cards/ingestion_card';
+import { SectionPanel } from '../common/section_panel';
+import { EditLifecycleModal } from './modal';
 import { RetentionCard } from './cards/retention_card';
 import { StorageSizeCard } from './cards/storage_size_card';
-import { IlmSummary } from './ilm_summary';
+import { IngestionCard } from './cards/ingestion_card';
+import { LifecycleSummary } from './lifecycle_summary';
 import { IngestionRate } from './ingestion_rate';
-import { EditLifecycleModal } from './modal';
 
 export const StreamDetailGeneralData = ({
   definition,
@@ -35,7 +34,7 @@ export const StreamDetailGeneralData = ({
   data: ReturnType<typeof useDataStreamStats>;
 }) => {
   const {
-    core: { http, notifications },
+    core: { notifications },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
@@ -51,10 +50,9 @@ export const StreamDetailGeneralData = ({
 
   const { signal } = useAbortController();
 
-  const getIlmPolicies = () =>
-    http.get<PolicyFromES[]>('/api/index_lifecycle_management/policies', {
-      signal,
-    });
+  const getIlmPolicies = async (): Promise<IlmPolicy[]> => {
+    return streamsRepositoryClient.fetch('GET /internal/streams/lifecycle/_policies', { signal });
+  };
 
   const updateLifecycle = async (lifecycle: IngestStreamLifecycle) => {
     try {
@@ -89,11 +87,10 @@ export const StreamDetailGeneralData = ({
         }),
       });
     } catch (error) {
-      notifications.toasts.addError(error, {
+      notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate('xpack.streams.streamDetailLifecycle.failed', {
           defaultMessage: 'Failed to update lifecycle',
         }),
-        toastMessage: getFormattedError(error).message,
       });
     } finally {
       setUpdateInProgress(false);
@@ -112,37 +109,61 @@ export const StreamDetailGeneralData = ({
         />
       )}
       <EuiTitle size="xs">
-        <h4>
-          {i18n.translate('xpack.streams.streamDetailLifecycle.generalData', {
-            defaultMessage: 'General data',
-          })}
-        </h4>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="checkInCircleFilled" color="success" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <h4>
+              {i18n.translate('xpack.streams.streamDetailLifecycle.successfulIngestData', {
+                defaultMessage: 'Successful ingest data',
+              })}
+            </h4>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiTitle>
-      <EuiFlexGroup gutterSize="m">
-        <EuiFlexItem>
+
+      {/* Retention Section */}
+      <SectionPanel
+        topCard={
           <RetentionCard definition={definition} openEditModal={() => setIsEditModalOpen(true)} />
-        </EuiFlexItem>
-        <EuiFlexItem>
+        }
+        bottomCard={
           <StorageSizeCard
             hasMonitorPrivileges={definition.privileges?.monitor}
             stats={data.stats?.ds.stats}
             statsError={data.error}
           />
-        </EuiFlexItem>
-        <EuiFlexItem>
+        }
+      >
+        {definition.privileges.lifecycle ? (
+          <LifecycleSummary
+            definition={definition}
+            stats={data.stats?.ds.stats}
+            refreshDefinition={refreshDefinition}
+          />
+        ) : null}
+      </SectionPanel>
+
+      {/* Ingestion Section */}
+      <SectionPanel
+        topCard={
           <IngestionCard
+            period="daily"
             hasMonitorPrivileges={definition.privileges?.monitor}
             stats={data.stats?.ds.stats}
             statsError={data.error}
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {definition.privileges.lifecycle && isIlmLifecycle(definition.effective_lifecycle) ? (
-        <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>
-          <IlmSummary definition={definition} stats={data.stats?.ds.stats} />
-        </EuiPanel>
-      ) : null}
-      <EuiPanel hasShadow={false} hasBorder paddingSize="m" grow={false}>
+        }
+        bottomCard={
+          <IngestionCard
+            period="monthly"
+            hasMonitorPrivileges={definition.privileges?.monitor}
+            stats={data.stats?.ds.stats}
+            statsError={data.error}
+          />
+        }
+      >
         <IngestionRate
           definition={definition}
           isLoadingStats={data.isLoading}
@@ -151,7 +172,7 @@ export const StreamDetailGeneralData = ({
           statsError={data.error}
           aggregations={data.stats?.ds.aggregations}
         />
-      </EuiPanel>
+      </SectionPanel>
     </EuiFlexGroup>
   );
 };

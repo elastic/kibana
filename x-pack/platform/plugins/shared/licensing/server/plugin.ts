@@ -49,7 +49,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
   private readonly isElasticsearchAvailable$ = new ReplaySubject<boolean>(1);
   private readonly logger: Logger;
   private readonly config: LicenseConfigType;
-  private loggingSubscription?: Subscription;
+  private licenseSubscription?: Subscription;
   private featureUsage = new FeatureUsageService();
 
   private refresh?: () => Promise<ILicense>;
@@ -132,7 +132,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       licenseFetcher
     );
 
-    this.loggingSubscription = license$.subscribe((license) =>
+    this.licenseSubscription = license$.subscribe((license) => {
       this.logger.debug(
         () =>
           'Imported license information from Elasticsearch:' +
@@ -141,8 +141,8 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
             `status: ${license.status}`,
             `expiry date: ${moment(license.expiryDateInMillis, 'x').format()}`,
           ].join(' | ')
-      )
-    );
+      );
+    });
 
     return {
       refresh: async () => {
@@ -170,9 +170,9 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     this.stop$.next();
     this.stop$.complete();
 
-    if (this.loggingSubscription !== undefined) {
-      this.loggingSubscription.unsubscribe();
-      this.loggingSubscription = undefined;
+    if (this.licenseSubscription !== undefined) {
+      this.licenseSubscription.unsubscribe();
+      this.licenseSubscription = undefined;
     }
   }
 }

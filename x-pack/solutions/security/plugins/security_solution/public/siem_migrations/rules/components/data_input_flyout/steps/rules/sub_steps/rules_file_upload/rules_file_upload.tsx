@@ -49,7 +49,7 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
         createMigration({
           migrationName,
           rules: rulesToUpload,
-          migrationSource: MigrationSource.SPLUNK,
+          vendor: MigrationSource.SPLUNK,
         });
       }
     }, [createMigration, migrationName, rulesToUpload]);

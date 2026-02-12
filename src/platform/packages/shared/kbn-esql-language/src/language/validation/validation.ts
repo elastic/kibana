@@ -13,12 +13,15 @@ import { EsqlQuery } from '../../composer';
 import { esqlCommandRegistry } from '../../commands/registry';
 import { walk } from '../../ast';
 import type { ICommandCallbacks } from '../../commands/registry/types';
+import { UnmappedFieldsStrategy } from '../../commands/registry/types';
 import { getMessageFromId } from '../../commands/definitions/utils';
 import type { ESQLAstAllCommands } from '../../types';
 import { QueryColumns } from '../../query_columns_service';
 import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 import { getSubqueriesToValidate } from './subqueries';
+import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
+import { areNewUnmappedFieldsAllowed } from '../../query_columns_service/helpers';
 
 /**
  * ES|QL validation public API
@@ -66,7 +69,7 @@ async function validateAst(
 
   const rootCommands = parsingResult.ast.commands;
 
-  const [sources, availablePolicies, joinIndices] = await Promise.all([
+  const [sources, availablePolicies, joinIndices, timeSeriesSources, views] = await Promise.all([
     shouldValidateCallback(callbacks, 'getSources')
       ? retrieveSources(rootCommands, callbacks)
       : new Set<string>(),
@@ -74,6 +77,10 @@ async function validateAst(
       ? retrievePolicies(rootCommands, callbacks)
       : new Map(),
     shouldValidateCallback(callbacks, 'getJoinIndices') ? callbacks?.getJoinIndices?.() : undefined,
+    shouldValidateCallback(callbacks, 'getTimeseriesIndices')
+      ? callbacks?.getTimeseriesIndices?.()
+      : undefined,
+    shouldValidateCallback(callbacks, 'getViews') ? callbacks?.getViews?.() : undefined,
   ]);
 
   const sourceQuery = queryString.split('|')[0];
@@ -106,6 +113,8 @@ async function validateAst(
       policies: availablePolicies,
       query: queryString,
       joinIndices: joinIndices?.indices || [],
+      timeSeriesSources: timeSeriesSources?.indices,
+      views: views?.views ?? [],
     };
 
     const commandMessages = validateCommand(command, references, rootCommands, {
@@ -115,23 +124,30 @@ async function validateAst(
     messages.push(...commandMessages);
   }
 
+  const unmappedFieldsStrategyFromHeader = getUnmappedFieldsStrategy(headerCommands);
+
   /**
    * Even though we are validating single commands, we work with subqueries.
    *
    * The reason is that building the list of columns available in each command requires
    * the full command subsequence that precedes that command.
    */
-  const subqueries = getSubqueriesToValidate(rootCommands);
+  const subqueries = getSubqueriesToValidate(rootCommands, headerCommands);
   for (const subquery of subqueries) {
     const currentCommand = subquery.commands[subquery.commands.length - 1];
 
     const subqueryForColumns =
-      currentCommand.name === 'join'
+      currentCommand.name === 'join' || currentCommand.name === 'promql'
         ? subquery
         : { ...subquery, commands: subquery.commands.slice(0, -1) };
 
+    const queryForColumns =
+      currentCommand.name === 'promql'
+        ? queryString.slice(0, currentCommand.location.max + 1)
+        : queryString;
+
     const columns = shouldValidateCallback(callbacks, 'getColumnsFor')
-      ? await new QueryColumns(subqueryForColumns, queryString, callbacks, options).asMap()
+      ? await new QueryColumns(subqueryForColumns, queryForColumns, callbacks, options).asMap()
       : new Map();
 
     const references: ReferenceMaps = {
@@ -140,12 +156,24 @@ async function validateAst(
       policies: availablePolicies,
       query: queryString,
       joinIndices: joinIndices?.indices || [],
+      timeSeriesSources: timeSeriesSources?.indices,
+      views: views?.views ?? [],
     };
 
-    const commandMessages = validateCommand(currentCommand, references, rootCommands, {
-      ...callbacks,
-      hasMinimumLicenseRequired,
-    });
+    const unmappedFieldsStrategy = areNewUnmappedFieldsAllowed(subqueryForColumns.commands)
+      ? unmappedFieldsStrategyFromHeader
+      : UnmappedFieldsStrategy.FAIL;
+
+    const commandMessages = validateCommand(
+      currentCommand,
+      references,
+      rootCommands,
+      {
+        ...callbacks,
+        hasMinimumLicenseRequired,
+      },
+      unmappedFieldsStrategy
+    );
     messages.push(...commandMessages);
   }
 
@@ -172,7 +200,8 @@ function validateCommand(
   command: ESQLAstAllCommands,
   references: ReferenceMaps,
   rootCommands: ESQLCommand[],
-  callbacks?: ICommandCallbacks
+  callbacks?: ICommandCallbacks,
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
   if (command.incomplete) {
@@ -208,6 +237,9 @@ function validateCommand(
     policies: references.policies,
     sources: [...references.sources].map((source) => ({ name: source })),
     joinSources: references.joinIndices,
+    timeSeriesSources: references.timeSeriesSources,
+    views: references.views,
+    unmappedFieldsStrategy,
   };
 
   if (commandDefinition.methods.validate) {

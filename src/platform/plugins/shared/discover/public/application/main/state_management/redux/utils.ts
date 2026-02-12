@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isObject } from 'lodash';
 import { v4 as uuid } from 'uuid';
-import { i18n } from '@kbn/i18n';
-import { getNextTabNumber, type TabItem } from '@kbn/unified-tabs';
-import { createAsyncThunk, miniSerializeError } from '@reduxjs/toolkit';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import type { ControlPanelsState } from '@kbn/controls-plugin/public';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { DataViewListItem, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import { isObject } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DiscoverInternalState, TabState } from './types';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import { i18n } from '@kbn/i18n';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import { getNextTabNumber, type TabItem } from '@kbn/unified-tabs';
+import { createAsyncThunk, miniSerializeError } from '@reduxjs/toolkit';
 import type {
-  InternalStateDispatch,
   InternalStateDependencies,
+  InternalStateDispatch,
   TabActionPayload,
 } from './internal_state';
+import type { DiscoverInternalState, TabState } from './types';
 
 // For some reason if this is not explicitly typed, TypeScript fails with the following error:
 // TS7056: The inferred type of this node exceeds the maximum length the compiler will serialize. An explicit type annotation is needed.

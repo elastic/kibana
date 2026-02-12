@@ -5,28 +5,27 @@
  * 2.0.
  */
 
-import type { SubAgent } from '../types';
+import type { SubAgent, SubAgentParams } from '../types';
 import { TEXT_TO_ECS_PROMPT } from '../prompts';
 
 /**
  * Creates a text-to-ECS mapping agent.
  * This agent maps user-provided field names and data to their correct ECS field equivalents.
  *
- * @param params - SubAgent parameters
- * @param params.name - Name of the agent
- * @param params.description - Description of the agent (optional)
- * @param params.prompt - Prompt for the agent (optional, defaults to TEXT_TO_ECS_PROMPT)
- * @param params.tools - Tools for the agent (optional)
- * @returns Text-to-ECS mapping agent configured with the provided parameters
+ * @param params - SubAgent parameters (tools and optional extra prompt)
+ * @returns Text-to-ECS mapping agent configured with the provided parameters.
  */
-const createTextToEcsAgent = (): SubAgent => {
+export const createTextToEcsAgent = (
+  params: Omit<SubAgentParams, 'name' | 'description' | 'sampleCount'>
+): SubAgent => {
+  const userPrompt = params.prompt;
   return {
     name: 'text_to_ecs',
     description:
       'Maps user-provided field names and data to their correct ECS (Elastic Common Schema) field equivalents.',
-    prompt: TEXT_TO_ECS_PROMPT,
-    tools: [],
+    // Allow callers to append additional guidance after the base system prompt,
+    // similar to how the logs analyzer sub-agent works.
+    prompt: TEXT_TO_ECS_PROMPT + (userPrompt ? `\n\n${userPrompt}` : ''),
+    tools: params.tools,
   };
 };
-
-export const textToEcsSubAgent = createTextToEcsAgent();

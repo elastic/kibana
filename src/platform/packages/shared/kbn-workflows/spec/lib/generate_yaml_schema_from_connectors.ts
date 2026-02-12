@@ -8,7 +8,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { convertLegacyInputsToJsonSchema } from './input_conversion';
 import { type ConnectorContractUnion } from '../..';
+import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
 import {
   BaseConnectorStepSchema,
   DataSetStepSchema,
@@ -20,9 +22,11 @@ import {
   getParallelStepSchema,
   getWorkflowSettingsSchema,
   WaitStepSchema,
-  WorkflowSchema,
+  WorkflowSchemaBase,
+  WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
 } from '../schema';
+import type { JsonModelSchema } from '../schema/common/json_model_schema';
 
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior
@@ -40,15 +44,43 @@ export function generateYamlSchemaFromConnectors(
   const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
 
   if (loose) {
-    return WorkflowSchema.partial().extend({
+    // For loose mode, use WorkflowSchemaForAutocompleteBase which already handles partial fields
+    // We use the base schema (without transform) so we can extend it
+    return WorkflowSchemaForAutocompleteBase.extend({
       settings: WorkflowSettingsSchema.optional(),
       steps: z.array(recursiveStepSchema).optional(),
-    });
+    }).transform((data) => ({
+      ...data,
+      version: '1' as const,
+    }));
   }
 
-  return WorkflowSchema.extend({
+  // For strict mode, extend WorkflowSchemaBase (without transform) and apply the same transform as WorkflowSchema
+  return WorkflowSchemaBase.extend({
     settings: getWorkflowSettingsSchema(recursiveStepSchema, loose).optional(),
     steps: z.array(recursiveStepSchema),
+  }).transform((data) => {
+    // Transform inputs from legacy array format to JSON Schema format (same logic as WorkflowSchema)
+    let normalizedInputs: z.infer<typeof JsonModelSchema> | undefined;
+    if (data.inputs) {
+      if (
+        'properties' in data.inputs &&
+        typeof data.inputs === 'object' &&
+        !Array.isArray(data.inputs)
+      ) {
+        normalizedInputs = data.inputs as z.infer<typeof JsonModelSchema>;
+      } else if (Array.isArray(data.inputs)) {
+        normalizedInputs = convertLegacyInputsToJsonSchema(data.inputs);
+      }
+    }
+
+    // Return the data with normalized inputs, preserving all other fields as-is
+    const { inputs: _, ...rest } = data;
+    return {
+      ...rest,
+      version: '1' as const,
+      ...(normalizedInputs !== undefined && { inputs: normalizedInputs }),
+    };
   });
 }
 
@@ -71,6 +103,10 @@ function createRecursiveStepSchema(
       generateStepSchemaForConnector(c, stepSchema, loose)
     );
 
+    // Generate alias schemas for backward compatibility
+    // These allow old type names to still validate, but they won't appear in autocomplete
+    const aliasSchemas = generateAliasSchemas(connectors, stepSchema, loose);
+
     // Return discriminated union with all step types
     // This creates proper JSON schema validation that Monaco YAML can handle
     return z.discriminatedUnion('type', [
@@ -82,6 +118,7 @@ function createRecursiveStepSchema(
       DataSetStepSchema,
       httpSchema,
       ...connectorSchemas,
+      ...aliasSchemas,
     ]);
   });
 
@@ -93,13 +130,50 @@ function generateStepSchemaForConnector(
   stepSchema: z.ZodType,
   loose: boolean = false
 ) {
+  const connectorIdSchema: Record<string, z.ZodType> = {};
+  // Add connector-id schema if hasConnectorId has a value
+  if (connector.hasConnectorId) {
+    connectorIdSchema['connector-id'] =
+      connector.hasConnectorId === 'required' ? z.string() : z.string().optional();
+  }
+
   return BaseConnectorStepSchema.extend({
     type: connector.description
       ? z.literal(connector.type).describe(connector.description)
       : z.literal(connector.type),
-    'connector-id': connector.connectorIdRequired ? z.string() : z.string().optional(),
     with: connector.paramsSchema,
+    ...connectorIdSchema,
     'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
     ...(connector.configSchema && connector.configSchema.shape),
   });
+}
+
+/**
+ * Generate schemas for backward-compatible type aliases.
+ * These schemas use the old type names but reference the same connector definition.
+ * They are included in validation but not shown in autocomplete suggestions.
+ */
+function generateAliasSchemas(
+  connectors: ConnectorContractUnion[],
+  stepSchema: z.ZodType,
+  loose: boolean = false
+): ReturnType<typeof generateStepSchemaForConnector>[] {
+  const aliasSchemas: ReturnType<typeof generateStepSchemaForConnector>[] = [];
+
+  for (const [oldType, newType] of Object.entries(KIBANA_TYPE_ALIASES)) {
+    // Find the connector with the new type name
+    const connector = connectors.find((c) => c.type === newType);
+    if (connector) {
+      // Create a schema with the old type name but same params/output
+      const newSchema = generateStepSchemaForConnector(connector, stepSchema, loose);
+      aliasSchemas.push(
+        newSchema.extend({
+          // Mark as deprecated in description so it's clear this is a legacy alias
+          type: z.literal(oldType).describe(`Deprecated: Use ${newType} instead`),
+        })
+      );
+    }
+  }
+
+  return aliasSchemas;
 }

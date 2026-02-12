@@ -19,12 +19,7 @@ import {
   VERSION,
   _VERSION,
 } from '../../constants/index.mock';
-import {
-  ENDPOINT_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_NAME,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 import type { ExceptionListSchema } from '.';
 
@@ -35,7 +30,7 @@ export const getExceptionListSchemaMock = (): ExceptionListSchema => ({
   description: DESCRIPTION,
   id: '1',
   immutable: IMMUTABLE,
-  list_id: ENDPOINT_LIST_ID,
+  list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
   meta: META,
   name: 'Sample Endpoint Exception List',
   namespace_type: 'agnostic',
@@ -51,9 +46,9 @@ export const getExceptionListSchemaMock = (): ExceptionListSchema => ({
 export const getTrustedAppsListSchemaMock = (): ExceptionListSchema => {
   return {
     ...getExceptionListSchemaMock(),
-    description: ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION,
-    list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
-    name: ENDPOINT_TRUSTED_APPS_LIST_NAME,
+    description: ENDPOINT_ARTIFACT_LISTS.trustedApps.description,
+    list_id: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+    name: ENDPOINT_ARTIFACT_LISTS.trustedApps.name,
   };
 };
 

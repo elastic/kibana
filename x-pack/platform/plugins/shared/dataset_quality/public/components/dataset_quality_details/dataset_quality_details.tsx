@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { usePerformanceContext } from '@kbn/ebt-tools';
+import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { useDatasetDetailsTelemetry, useDatasetQualityDetailsState } from '../../hooks';
 import { DataStreamNotFoundPrompt } from './index_not_found_prompt';
 import { Header } from './header';
@@ -24,8 +25,10 @@ export default function DatasetQualityDetails() {
   const { onPageReady } = usePerformanceContext();
   const { startTracking } = useDatasetDetailsTelemetry();
 
-  const { isIndexNotFoundError, dataStream, isQualityIssueFlyoutOpen, view } =
+  const { isIndexNotFoundError, dataStream, isQualityIssueFlyoutOpen, view, timeRange } =
     useDatasetQualityDetailsState();
+
+  const queryRangeSeconds = getTimeDifferenceInSeconds(timeRange);
 
   const [ruleType, setRuleType] = useState<typeof DEGRADED_DOCS_RULE_TYPE_ID | null>(null);
 
@@ -38,9 +41,11 @@ export default function DatasetQualityDetails() {
       customMetrics: {
         key1: 'isIndexNotFoundError',
         value1: isIndexNotFoundError ? 1 : 0,
+        key2: 'queryRangeSeconds',
+        value2: queryRangeSeconds,
       },
     });
-  }, [isIndexNotFoundError, onPageReady]);
+  }, [isIndexNotFoundError, onPageReady, queryRangeSeconds]);
 
   return isIndexNotFoundError ? (
     <DataStreamNotFoundPrompt dataStream={dataStream} />

@@ -33,11 +33,11 @@ import {
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
   ENABLE_ASSET_INVENTORY_SETTING,
+  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   ENABLE_CCS_READ_WARNING_SETTING,
   ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
   ENABLE_NEWS_FEED_SETTING,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   ENABLE_SIEM_READINESS_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
@@ -227,13 +227,36 @@ export const initUiSettings = (
         }
       ),
       type: 'boolean',
-      value: true,
+      value: false,
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
       technicalPreview: true,
     },
+    ...(experimentalFeatures.enableAlertsAndAttacksAlignment && {
+      [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: {
+        name: i18n.translate(
+          'xpack.securitySolution.uiSettings.enableAlertsAndAttacksAlignmentLabel',
+          {
+            defaultMessage: 'Enable alerts and attacks alignment',
+          }
+        ),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.enableAlertsAndAttacksAlignmentDescription',
+          {
+            defaultMessage:
+              'Enabling this setting will reveal a new Attacks page under the Detections navigation item. Similarly, the Alerts page will be part of the Detections navigation item.',
+          }
+        ),
+        type: 'boolean',
+        value: false,
+        category: [APP_ID],
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
+      },
+    }),
     [ENABLE_ASSET_INVENTORY_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
         defaultMessage: 'Enable Security Asset Inventory',
@@ -467,28 +490,6 @@ export const initUiSettings = (
       value: [],
       category: [APP_ID],
       requiresPageReload: false,
-      solutionViews: ['classic', 'security'],
-    },
-    [ENABLE_PRIVILEGED_USER_MONITORING_SETTING]: {
-      name: i18n.translate(
-        'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringLabel',
-        {
-          defaultMessage: 'Privileged user monitoring',
-        }
-      ),
-      value: true,
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringDescription',
-        {
-          defaultMessage:
-            '<p>Enables the privileged user monitoring dashboard and onboarding experience which are in technical preview.</p>',
-          values: { p: (chunks) => `<p>${chunks}</p>` },
-        }
-      ),
-      type: 'boolean',
-      category: [APP_ID],
-      requiresPageReload: true,
-      schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
     },
     ...getDefaultValueReportSettings(),

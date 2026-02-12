@@ -7,6 +7,7 @@
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
+import { EXTENDED_TIMEOUT } from '../constants';
 
 export class TransactionDetailsPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
@@ -53,7 +54,7 @@ export class TransactionDetailsPage {
         offset: '1d',
       })}`
     );
-    await waitForApmSettingsHeaderLink(this.page);
+    await this.waitForPageToLoad(this.page);
   }
 
   async reload() {
@@ -65,6 +66,12 @@ export class TransactionDetailsPage {
     const searchBar = this.page.getByTestId('apmUnifiedSearchBar');
     await searchBar.fill(query);
     await searchBar.press('Enter');
+  }
+
+  async waitForPageToLoad(page: ScoutPage) {
+    await page
+      .getByTestId('superDatePickerToggleQuickMenuButton')
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   // Span links methods
@@ -99,5 +106,29 @@ export class TransactionDetailsPage {
    */
   async clickTransactionWithAriaControls(transactionId: string) {
     await this.page.locator(`[aria-controls="${transactionId}"]`).click();
+  }
+
+  // Action menu methods
+
+  /**
+   * Open the transaction action menu by clicking the "Investigate" button
+   */
+  async openActionMenu() {
+    const investigateButton = this.page.getByTestId('apmActionMenuButtonInvestigateButton');
+    await investigateButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await investigateButton.scrollIntoViewIfNeeded();
+    await investigateButton.click();
+    // Wait for the popup to be visible
+    const popup = this.page.getByTestId('apmActionMenuInvestigateButtonPopup');
+    await popup.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+  }
+
+  /**
+   * Get the href attribute of a custom link by its label
+   */
+  async getCustomLinkHref(label: string): Promise<string | null> {
+    const link = this.page.getByRole('link', { name: label });
+    await link.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    return await link.getAttribute('href');
   }
 }

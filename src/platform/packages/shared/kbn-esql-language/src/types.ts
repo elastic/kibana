@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { PromQLAstQueryExpression } from './embedded_languages/promql/types';
 
 /**
  * @deprecated A full query AST is represented by {@link ESQLAstQueryExpression} type.
@@ -46,7 +47,8 @@ export type ESQLSingleAstItem =
   | ESQLOrderExpression
   | ESQLUnknownItem
   | ESQLMap
-  | ESQLMapEntry;
+  | ESQLMapEntry
+  | PromQLAstQueryExpression;
 
 /**
  * A field is either an index field `this.is.field`, or it is a field assignment
@@ -61,7 +63,7 @@ export type ESQLSingleAstItem =
  * EVAL ?param = 123
  * ```
  */
-export type ESQLAstField = ESQLColumn | ESQLBinaryExpression | ESQLParam;
+export type ESQLAstField = ESQLColumn | ESQLBinaryExpression | ESQLAstExpression | ESQLParam;
 
 /**
  * An array of AST nodes represents different things in different contexts.
@@ -153,26 +155,48 @@ export interface ESQLAstForkCommand extends ESQLCommand<'fork'> {
  * Represents a PROMQL command.
  *
  * ```
- * PROMQL <params_map> ( <query> )
+ * PROMQL query
+ * PROMQL ( name = )? ( query )
+ * PROMQL key1=value1 key2=value2... query
+ * PROMQL key1=value1 key2=value2... ( name = )? ( query )
  * ```
+ *
+ * - Optional params use assignment syntax: "key = value"
+ * - Optional `name` assignment before parentheses: name = ( query )
+ * - Query can be specified without parentheses
  */
 export interface ESQLAstPromqlCommand extends ESQLCommand<'promql'> {
-  args:
-    | // Full version of args
-    [
-        /** The parameters map for the PROMQL query. */
-        params: ESQLMap,
-        /** The embedded PromQL query expression wrapped in parentheses. */
-        query: ESQLParens
-      ]
-
-    // Below versions are in case the command is `.incomplete: true`.
-    | [
-        /** The parameters map for the PROMQL query. */
-        params: ESQLMap
-      ]
-    | [];
+  params?: ESQLMap;
+  query?: ESQLAstPromqlCommandQuery;
+  args: ESQLAstPromqlCommandArgs;
 }
+
+export type ESQLAstPromqlCommandArgs =
+  /** With params map and query */
+  | [params: ESQLMap, query: ESQLAstPromqlCommandQuery]
+
+  /** Query only, without params */
+  | [query: ESQLAstPromqlCommandQuery]
+
+  /** Below versions are in case the command is `.incomplete: true`. */
+  | [params: ESQLMap]
+  | [];
+
+export type ESQLAstPromqlCommandQuery =
+  /** query */
+  | ESQLAstPromqlQuery
+
+  /** ( query ) */
+  | ESQLParens
+
+  /** name = ( query ) */
+  | ESQLBinaryExpression<'='>;
+
+/**
+ * This will be replaced in the future with a proper PROMQL query AST.
+ * For now, we just represent the query as an "unknown" node.
+ */
+export type ESQLAstPromqlQuery = PromQLAstQueryExpression;
 
 /**
  * Represents a header pseudo-command, such as SET.
@@ -326,33 +350,10 @@ export type BinaryExpressionMatchOperator = ':';
 export type BinaryExpressionIn = 'in' | 'not in';
 export type BinaryExpressionLogical = 'and' | 'or';
 
-// from https://github.com/elastic/elasticsearch/blob/122e7288200ee03e9087c98dff6cebbc94e774aa/docs/reference/esql/functions/kibana/inline_cast.json
-export type InlineCastingType =
-  | 'bool'
-  | 'boolean'
-  | 'cartesian_point'
-  | 'cartesian_shape'
-  | 'date_nanos'
-  | 'date_period'
-  | 'datetime'
-  | 'double'
-  | 'geo_point'
-  | 'geo_shape'
-  | 'int'
-  | 'integer'
-  | 'ip'
-  | 'keyword'
-  | 'long'
-  | 'string'
-  | 'text'
-  | 'time_duration'
-  | 'unsigned_long'
-  | 'version';
-
 export interface ESQLInlineCast<ValueType = ESQLAstItem> extends ESQLAstBaseItem {
   type: 'inlineCast';
   value: ValueType;
-  castType: InlineCastingType;
+  castType: string;
 }
 
 /**
@@ -486,12 +487,15 @@ export interface ESQLList extends ESQLAstBaseItem {
   type: 'list';
 
   /**
-   * The list can be a literal list (uses square brackets) or a tuple list (uses
-   * round brackets). If not specified, the list is assumed to be a literal list.
+   * Represents various types of lists in ES|QL language.
+   *
+   * - `literal` - a literal list using square brackets, e.g. `[1, 2, 3]`
+   * - `tuple` - a tuple list using round brackets, e.g. `(a, b, c)`
+   * - `bare` - a bare list without any enclosing brackets, e.g. `a, b, c`
    *
    * @default 'literal'
    */
-  subtype?: 'literal' | 'tuple';
+  subtype?: 'literal' | 'tuple' | 'bare';
 
   values: ESQLAstExpression[];
 }
@@ -521,8 +525,14 @@ export interface ESQLMap extends ESQLAstBaseItem {
    * ```
    * key1 value1 key2 value2
    * ```
+   *
+   * `assignment` example:
+   *
+   * ```
+   * key1=value1  key2=value2
+   * ```
    */
-  representation?: 'map' | 'listpairs';
+  representation?: 'map' | 'listpairs' | 'assignment';
 }
 
 /**
@@ -672,6 +682,7 @@ export interface ESQLMessage {
   code: string;
   errorType?: 'semantic';
   requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
+  underlinedWarning?: boolean;
 }
 
 export interface EditorError {

@@ -181,6 +181,7 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
             initialConversationId={conversationId}
             knowledgeBase={knowledgeBase}
             showLinkToConversationsApp={false}
+            eisCalloutZIndex={0}
             onConversationUpdate={handleConversationUpdate}
             navigateToConversation={navigateToConversation}
             setIsUpdatingConversationList={setIsUpdatingConversationList}

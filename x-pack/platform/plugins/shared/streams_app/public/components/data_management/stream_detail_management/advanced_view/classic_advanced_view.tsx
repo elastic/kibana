@@ -8,11 +8,11 @@
 import React from 'react';
 import type { Streams } from '@kbn/streams-schema';
 import { EuiSpacer } from '@elastic/eui';
-import { StreamDescription } from '../../../stream_detail_features/stream_description';
+import { StreamDescription } from '../../../stream_detail_systems/stream_description';
 import { DeleteStreamPanel } from './delete_stream';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
-import { StreamFeatureConfiguration } from '../../../stream_detail_features/stream_feature_configuration';
+import { StreamDiscoveryConfiguration } from '../../../stream_detail_systems/stream_discovery_configuration';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
 
 export function ClassicAdvancedView({
@@ -29,7 +29,7 @@ export function ClassicAdvancedView({
 
   return (
     <>
-      {significantEvents?.enabled ? (
+      {significantEvents?.enabled && significantEvents?.available ? (
         <>
           <StreamDescription
             definition={definition}
@@ -37,7 +37,7 @@ export function ClassicAdvancedView({
             aiFeatures={aiFeatures}
           />
           <EuiSpacer />
-          <StreamFeatureConfiguration definition={definition.stream} aiFeatures={aiFeatures} />
+          <StreamDiscoveryConfiguration definition={definition.stream} aiFeatures={aiFeatures} />
           <EuiSpacer />
         </>
       ) : null}

@@ -107,7 +107,10 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send()
+        .send({
+          page: 1,
+          per_page: 10_000,
+        })
         .expect(200);
 
       expect(reviewPrebuiltRulesForInstallationResponse.rules.length).toBeGreaterThan(0);

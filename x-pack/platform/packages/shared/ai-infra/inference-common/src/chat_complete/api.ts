@@ -139,6 +139,10 @@ export type ChatCompleteOptions = {
    * Defaults to false.
    */
   stream?: boolean;
+  /**
+   * The timeout for the chat completion request.
+   */
+  timeout?: number;
 } & ToolOptions;
 
 export interface ChatCompleteRetryConfiguration {
@@ -209,6 +213,10 @@ export interface ChatCompleteResponse<
    * Token counts
    */
   tokens?: ChatCompletionTokenCount;
+  /**
+   * Model effectively used, as specified by the response
+   */
+  model?: string;
 }
 
 /**

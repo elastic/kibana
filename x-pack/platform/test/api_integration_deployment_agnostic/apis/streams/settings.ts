@@ -331,5 +331,210 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       }
     });
+
+    describe('Settings validation with dry_run', () => {
+      describe('Wired streams', () => {
+        it('rejects invalid settings with 400 error', async () => {
+          const rootDefinition = await getStream(apiClient, 'logs');
+          const response = await apiClient
+            .fetch('PUT /api/streams/{name} 2023-10-31', {
+              params: {
+                path: { name: 'logs' },
+                body: {
+                  ...emptyAssets,
+                  stream: {
+                    description: '',
+                    ingest: {
+                      ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+                      processing: omit(
+                        (rootDefinition as Streams.WiredStream.GetResponse).stream.ingest
+                          .processing,
+                        'updated_at'
+                      ),
+                      settings: {
+                        'index.refresh_interval': { value: 'invalid_value' },
+                      },
+                    },
+                  },
+                },
+              },
+            })
+            .expect(400);
+
+          expect(response.body).to.have.property('statusCode', 400);
+          const body = response.body as unknown as { message?: string };
+          expect(body.message ?? '').to.contain('Invalid stream settings');
+        });
+
+        it('rejects invalid settings on child stream update', async () => {
+          await putStream(apiClient, 'logs.validation_test', {
+            ...emptyAssets,
+            stream: {
+              description: '',
+              ingest: {
+                settings: {},
+                processing: { steps: [] },
+                lifecycle: { inherit: {} },
+                wired: { fields: {}, routing: [] },
+                failure_store: { inherit: {} },
+              },
+            },
+          });
+
+          const response = await apiClient
+            .fetch('PUT /api/streams/{name} 2023-10-31', {
+              params: {
+                path: { name: 'logs.validation_test' },
+                body: {
+                  ...emptyAssets,
+                  stream: {
+                    description: '',
+                    ingest: {
+                      settings: {
+                        'index.refresh_interval': { value: 'not_a_valid_interval' },
+                      },
+                      processing: { steps: [] },
+                      lifecycle: { inherit: {} },
+                      wired: { fields: {}, routing: [] },
+                      failure_store: { inherit: {} },
+                    },
+                  },
+                },
+              },
+            })
+            .expect(400);
+
+          expect(response.body).to.have.property('statusCode', 400);
+          const body = response.body as unknown as { message?: string };
+          expect(body.message ?? '').to.contain('Invalid stream settings');
+
+          await deleteStream(apiClient, 'logs.validation_test');
+        });
+
+        describe('Serverless-only settings validation', function () {
+          this.tags(['skipStateful']);
+
+          it('rejects disallowed settings on new stream creation via API', async () => {
+            const response = await apiClient
+              .fetch('PUT /api/streams/{name} 2023-10-31', {
+                params: {
+                  path: { name: 'logs.creation_validation_test' },
+                  body: {
+                    ...emptyAssets,
+                    stream: {
+                      description: '',
+                      ingest: {
+                        settings: {
+                          'index.number_of_replicas': { value: 2 },
+                        },
+                        processing: { steps: [] },
+                        lifecycle: { inherit: {} },
+                        wired: { fields: {}, routing: [] },
+                        failure_store: { inherit: {} },
+                      },
+                    },
+                  },
+                },
+              })
+              .expect(400);
+
+            expect(response.body).to.have.property('statusCode', 400);
+            const body = response.body as unknown as { message?: string };
+            expect(body.message ?? '').to.contain('not allowed in serverless');
+          });
+        });
+        it('accepts valid settings on new stream creation via API', async () => {
+          const response = await putStream(apiClient, 'logs.creation_valid_test', {
+            ...emptyAssets,
+            stream: {
+              description: '',
+              ingest: {
+                settings: {
+                  'index.refresh_interval': { value: '30s' },
+                },
+                processing: { steps: [] },
+                lifecycle: { inherit: {} },
+                wired: { fields: {}, routing: [] },
+                failure_store: { inherit: {} },
+              },
+            },
+          });
+
+          expect(response).to.have.property('acknowledged', true);
+
+          await deleteStream(apiClient, 'logs.creation_valid_test');
+        });
+      });
+
+      describe('Classic streams', () => {
+        const classicStreamName = 'logs-settings-validation-test';
+
+        beforeEach(async () => {
+          await esClient.indices.createDataStream({ name: classicStreamName });
+        });
+
+        afterEach(async () => {
+          try {
+            await deleteStream(apiClient, classicStreamName);
+          } catch {
+            // Stream may not exist if test failed early
+          }
+          try {
+            await esClient.indices.deleteDataStream({ name: classicStreamName });
+          } catch {
+            // Data stream may already be deleted
+          }
+        });
+
+        it('rejects invalid settings with 400 error', async () => {
+          const response = await apiClient
+            .fetch('PUT /api/streams/{name} 2023-10-31', {
+              params: {
+                path: { name: classicStreamName },
+                body: {
+                  ...emptyAssets,
+                  stream: {
+                    description: '',
+                    ingest: {
+                      settings: {
+                        'index.refresh_interval': { value: 'invalid_interval_value' },
+                      },
+                      processing: { steps: [] },
+                      lifecycle: { inherit: {} },
+                      classic: {},
+                      failure_store: { inherit: {} },
+                    },
+                  },
+                },
+              },
+            })
+            .expect(400);
+
+          expect(response.body).to.have.property('statusCode', 400);
+          const body = response.body as unknown as { message?: string };
+          expect(body.message ?? '').to.contain('Invalid stream settings');
+        });
+
+        it('accepts valid settings', async () => {
+          const response = await putStream(apiClient, classicStreamName, {
+            ...emptyAssets,
+            stream: {
+              description: '',
+              ingest: {
+                settings: {
+                  'index.refresh_interval': { value: '30s' },
+                },
+                processing: { steps: [] },
+                lifecycle: { inherit: {} },
+                classic: {},
+                failure_store: { inherit: {} },
+              },
+            },
+          });
+
+          expect(response).to.have.property('acknowledged', true);
+        });
+      });
+    });
   });
 }

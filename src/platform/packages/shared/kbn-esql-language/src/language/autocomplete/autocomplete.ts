@@ -17,10 +17,13 @@ import type {
 } from '../../types';
 import { EsqlQuery } from '../../composer';
 import { esqlCommandRegistry } from '../../commands';
-import { Walker } from '../../ast';
+import { isHeaderCommand, Walker } from '../../ast';
 import { parse } from '../../parser';
-import { SuggestionOrderingEngine } from '../../shared';
-import { getCommandAutocompleteDefinitions } from '../../commands/registry/complete_items';
+import {
+  getCommandAutocompleteDefinitions,
+  createIndicesBrowserSuggestion,
+} from '../../commands/registry/complete_items';
+import { SuggestionOrderingEngine } from './utils';
 import { ESQL_VARIABLES_PREFIX } from '../../commands/registry/constants';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '../../commands/registry/options/recommended_queries';
 import type {
@@ -33,10 +36,12 @@ import { correctQuerySyntax } from '../../commands/definitions/utils/ast';
 import { getCursorContext } from '../shared/get_cursor_context';
 import { getFromCommandHelper } from '../shared/resources_helpers';
 import { getCommandContext } from './get_command_context';
+import { buildResourceBrowserCommandArgs } from './autocomplete_utils';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
 import { getQueryForFields } from '../shared/get_query_for_fields';
 import type { GetColumnMapFn } from '../shared/columns_retrieval_helpers';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
+import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 
 function isSourceCommandSuggestion({ label }: { label: string }) {
   const sourceCommands = esqlCommandRegistry
@@ -245,6 +250,9 @@ async function getSuggestionsWithinCommandExpression(
     return findNewUserDefinedColumn(allUserDefinedColumns);
   };
 
+  const headers = commands.filter((cmd) => isHeaderCommand(cmd));
+  const unmappedFieldsStrategy = getUnmappedFieldsStrategy(headers);
+
   // Get the context that might be needed by the command itself
   const additionalCommandContext = await getCommandContext(
     astContext.command,
@@ -257,6 +265,7 @@ async function getSuggestionsWithinCommandExpression(
     ...additionalCommandContext,
     activeProduct: callbacks?.getActiveProduct?.(),
     isCursorInSubquery: astContext.isCursorInSubquery,
+    unmappedFieldsStrategy,
   };
 
   // does it make sense to have a different context per command?
@@ -272,12 +281,32 @@ async function getSuggestionsWithinCommandExpression(
           }
         : undefined,
       hasMinimumLicenseRequired,
+      getKqlSuggestions: callbacks?.getKqlSuggestions,
       canCreateLookupIndex: callbacks?.canCreateLookupIndex,
       isServerless: callbacks?.isServerless,
     },
     context,
     offset
   );
+
+  const commandName = astContext.command.name.toLowerCase();
+  const isTSorFROMCommand = commandName === 'from' || commandName === 'ts';
+  const isInsideSubquery = astContext.isCursorInSubquery; // We only show the resource browser in the main query
+  const isResourceBrowserEnabled = (await callbacks?.isResourceBrowserEnabled?.()) ?? false;
+  if (isTSorFROMCommand && isResourceBrowserEnabled && !isInsideSubquery) {
+    const { rangeToReplace, filterText } =
+      suggestions.find((s) => s.rangeToReplace && s.filterText) ?? {};
+    const insertText = rangeToReplace
+      ? fullText.substring(rangeToReplace.start, rangeToReplace.end - 1) // end is exclusive
+      : '';
+    const commandArgs = buildResourceBrowserCommandArgs({
+      sources: context.sources,
+      timeSeriesSources: context.timeSeriesSources,
+    });
+    suggestions.unshift(
+      createIndicesBrowserSuggestion(rangeToReplace, filterText, insertText, commandArgs)
+    );
+  }
 
   // Apply context-aware ordering
   const orderedSuggestions = orderingEngine.sort(suggestions, {

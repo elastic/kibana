@@ -17,6 +17,8 @@ import {
 } from './test_utils';
 import type { WorkflowsManagementApi } from '../workflows_management_api';
 
+jest.mock('../lib/with_license_check');
+
 describe('POST /api/workflowExecutions/{workflowExecutionId}/cancel', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: any;

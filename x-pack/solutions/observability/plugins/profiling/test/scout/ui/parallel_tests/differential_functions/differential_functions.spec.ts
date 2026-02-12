@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { tags } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 
-test.describe('Differential Functions page', { tag: ['@ess'] }, () => {
+test.describe('Differential Functions page', { tag: tags.stateful.classic }, () => {
   const { rangeFrom, rangeTo } = testData.PROFILING_TEST_DATES;
   const comparisonRangeFrom = '2023-04-18T00:01:00.000Z';
   const comparisonRangeTo = '2023-04-18T00:01:30.000Z';
@@ -26,9 +27,6 @@ test.describe('Differential Functions page', { tag: ['@ess'] }, () => {
       rangeTo,
       comparisonRangeFrom,
       comparisonRangeTo
-    );
-    await page.waitForResponse((response) =>
-      response.url().includes('/internal/profiling/topn/functions')
     );
 
     await expect(page.getByText('Baseline functions')).toBeVisible();
@@ -76,9 +74,6 @@ test.describe('Differential Functions page', { tag: ['@ess'] }, () => {
       rangeFrom,
       rangeTo
     );
-    await page.waitForResponse((response) =>
-      response.url().includes('/internal/profiling/topn/functions')
-    );
     const overallPerformanceTitle = page.getByTestId('overallPerformance_summary_title');
 
     await expect(overallPerformanceTitle).toContainText('Lost overall performance by');
@@ -113,9 +108,6 @@ test.describe('Differential Functions page', { tag: ['@ess'] }, () => {
       comparisonRangeTo,
       rangeFrom,
       rangeTo
-    );
-    await page.waitForResponse((response) =>
-      response.url().includes('/internal/profiling/topn/functions')
     );
 
     await expect(

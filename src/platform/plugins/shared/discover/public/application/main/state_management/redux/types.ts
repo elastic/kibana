@@ -7,30 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
-import type { DataGridDensity, UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
-import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-metrics-grid';
-import type {
-  UnifiedFieldListRestorableState,
-  UnifiedFieldListSidebarContainerProps,
-} from '@kbn/unified-field-list';
-import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
-import type { TabItem } from '@kbn/unified-tabs';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type {
   DiscoverGridSettings,
   DiscoverSession,
   VIEW_MODE,
 } from '@kbn/saved-search-plugin/common';
+import type { DataGridDensity, UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
+import type {
+  UnifiedFieldListRestorableState,
+  UnifiedFieldListSidebarContainerProps,
+} from '@kbn/unified-field-list';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
+import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
+import type { UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
+import type { TabItem } from '@kbn/unified-tabs';
+import type { DocViewerRestorableState } from '@kbn/unified-doc-viewer';
 import type { SerializedError } from '@reduxjs/toolkit';
-import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 import type { DiscoverDataSource } from '../../../../../common/data_sources';
+import type { DiscoverLayoutRestorableState } from '../../components/layout/discover_layout_restorable_state';
 
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute: TimeRange | undefined;
@@ -116,6 +117,11 @@ export interface DiscoverAppState {
   density?: DataGridDensity;
 }
 
+export interface CascadedDocumentsState {
+  availableCascadeGroups: string[];
+  selectedCascadeGroups: string[];
+}
+
 export enum TabInitializationStatus {
   NotStarted = 'NotStarted',
   InProgress = 'InProgress',
@@ -132,24 +138,25 @@ export interface TabState extends TabItem {
   // Initial state for the tab (provided before the tab is initialized).
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
-    visContext?: UnifiedHistogramVisContext | {};
-    controlGroupJson?: string;
     searchSessionId?: string;
+  };
+
+  // Persistable attributes of the tab (stored in Discover Session and in local storage).
+  attributes: {
+    visContext: UnifiedHistogramVisContext | {} | undefined;
+    controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
   };
 
   // The following properties are used to manage the tab's state after it has been initialized.
   globalState: TabStateGlobalState;
   appState: DiscoverAppState;
   previousAppState: DiscoverAppState;
-  controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
-  /**
-   * ESQL query variables
-   */
+  cascadedDocumentsState: CascadedDocumentsState;
   esqlVariables: ESQLControlVariable[] | undefined;
   forceFetchOnSelect: boolean;
   isDataViewLoading: boolean;
   dataRequestParams: InternalStateDataRequestParams;
-  overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
+  overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saving of the Discover Session
   resetDefaultProfileState: {
     resetId: string;
     columns: boolean;
@@ -165,7 +172,10 @@ export interface TabState extends TabItem {
     layout?: Partial<DiscoverLayoutRestorableState>;
     searchDraft?: Partial<UnifiedSearchDraft>;
     metricsGrid?: Partial<UnifiedMetricsGridRestorableState>;
+    docViewer?: Partial<DocViewerRestorableState>;
   };
+  expandedDoc: DataTableRecord | undefined;
+  initialDocViewerTabId?: string;
 }
 
 export interface RecentlyClosedTabState extends TabState {
@@ -185,8 +195,6 @@ export interface DiscoverInternalState {
   hasUnsavedChanges: boolean;
   savedDataViews: DataViewListItem[];
   defaultProfileAdHocDataViewIds: string[];
-  expandedDoc: DataTableRecord | undefined;
-  initialDocViewerTabId?: string;
   isESQLToDataViewTransitionModalVisible: boolean;
   tabsBarVisibility: TabsBarVisibility;
   tabs: {
@@ -205,4 +213,9 @@ export interface DiscoverInternalState {
      */
     unsafeCurrentId: string;
   };
+}
+
+export interface UpdateESQLQueryActionPayload {
+  tabId: string;
+  queryOrUpdater: string | ((prevQuery: string) => string);
 }

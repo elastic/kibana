@@ -65,6 +65,7 @@ dependsOn:
   - '@kbn/charts-theme'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/licensing-types'
+  - '@kbn/kql'
 tags:
   - plugin
   - prod

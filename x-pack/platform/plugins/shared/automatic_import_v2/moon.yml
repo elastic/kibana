@@ -43,6 +43,20 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/task-manager-plugin'
   - '@kbn/logging'
+  - '@kbn/i18n-react'
+  - '@kbn/es-ui-shared-plugin'
+  - '@kbn/ai-assistant-connector-selector-action'
+  - '@kbn/management-settings-ids'
+  - '@kbn/langchain'
+  - '@kbn/core-lifecycle-browser-mocks'
+  - '@kbn/core-http-server-mocks'
+  - '@kbn/shared-ux-router'
+  - '@kbn/react-query'
+  - '@kbn/elastic-assistant'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/ingest-pipelines-plugin'
+  - '@kbn/utility-types'
+  - '@kbn/code-editor'
 tags:
   - plugin
   - prod

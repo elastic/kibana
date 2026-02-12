@@ -11,16 +11,19 @@ import type { ICommandMethods } from '../registry';
 import { autocomplete } from './autocomplete';
 import { validate } from './validate';
 import { columnsAfter } from './columns_after';
+import { summary } from './summary';
 import type { ICommandContext } from '../types';
+import { Commands } from '../../definitions/keywords';
 
 const statsCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
   validate,
   columnsAfter,
+  summary,
 };
 
 export const statsCommand = {
-  name: 'stats',
+  name: Commands.STATS,
   methods: statsCommandMethods,
   metadata: {
     description: i18n.translate('kbn-esql-language.esql.definitions.statsDoc', {

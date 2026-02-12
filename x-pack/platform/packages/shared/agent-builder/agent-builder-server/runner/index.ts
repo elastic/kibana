@@ -24,7 +24,6 @@ export {
   type AgentBuilderToolEvent,
   type ToolEventHandlerFn,
   type ToolEventEmitter,
-  type ToolProgressEmitterFn,
   type InternalToolProgressEvent,
 } from './events';
 export type {
@@ -44,7 +43,24 @@ export type {
   ModelProviderStats,
   ModelCallInfo,
 } from './model_provider';
-export type { ToolResultStore, WritableToolResultStore } from './result_store';
+export type { ToolResultStore, WritableToolResultStore, ToolResultWithMeta } from './result_store';
 export type { AttachmentsService } from './attachments_service';
-export type { PromptManager, ToolPromptManager } from './prompt_manager';
+export type { SkillsService } from './skills_service';
+export type { ToolManager } from './tool_manager';
+export { ToolManagerToolType } from './tool_manager';
+export type { SkillsStore, WritableSkillsStore } from './skills_store';
+export type { PromptManager, ToolPromptManager, ConfirmationInfo } from './prompt_manager';
 export type { ConversationStateManager, ToolStateManager } from './state_manager';
+export { FileEntryType } from './filestore';
+export type {
+  IToolFileStore,
+  IFileStore,
+  LsEntry,
+  FsEntry,
+  DirEntry,
+  DirEntryWithChildren,
+  GrepMatch,
+  FileEntry,
+  FileEntryMetadata,
+  FileEntryContent,
+} from './filestore';

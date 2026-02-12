@@ -3,7 +3,7 @@ navigation_title: "Notion"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/notion-action-type.html
 applies_to:
-  stack: preview
+  stack: preview 9.3
   serverless: preview
 ---
 

@@ -8,10 +8,6 @@
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { getWebhookSecretHeadersKeyRoute } from './get_webhook_secret_headers_key';
 import Boom from '@hapi/boom';
-import {
-  allowedExperimentalValues,
-  type ExperimentalFeatures,
-} from '../../common/experimental_features';
 
 describe('getWebhookSecretHeadersKeyRoute', () => {
   const router = httpServiceMock.createRouter();
@@ -25,10 +21,6 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
         secretHeaders: [{ key: 'secretKey', value: 'supersecret', type: 'secret' }],
       },
     }),
-  };
-
-  const mockExperimentalFeatures: ExperimentalFeatures = {
-    ...allowedExperimentalValues,
   };
 
   const getStartServices = jest.fn().mockResolvedValue([
@@ -57,7 +49,7 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
   ]);
 
   it('returns secret headers', async () => {
-    getWebhookSecretHeadersKeyRoute(router, getStartServices, mockExperimentalFeatures);
+    getWebhookSecretHeadersKeyRoute(router, getStartServices);
 
     const routeHandler = router.get.mock.calls[0][1];
 
@@ -73,7 +65,7 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
   });
 
   it('throws error if the connector is not an allowed type', async () => {
-    getWebhookSecretHeadersKeyRoute(router, getStartServices, mockExperimentalFeatures);
+    getWebhookSecretHeadersKeyRoute(router, getStartServices);
 
     const routeHandler = router.get.mock.calls[0][1];
 
@@ -116,13 +108,13 @@ describe('getWebhookSecretHeadersKeyRoute', () => {
 
     expect(mockResponse.badRequest).toHaveBeenCalledWith({
       body: {
-        message: 'Connector must be one of the following types: .webhook, .cases-webhook',
+        message: 'Connector must be one of the following types: .webhook, .cases-webhook, .mcp',
       },
     });
   });
 
   it('throws an error if user is not authorized to get the headers', async () => {
-    getWebhookSecretHeadersKeyRoute(router, getStartServices, mockExperimentalFeatures);
+    getWebhookSecretHeadersKeyRoute(router, getStartServices);
 
     const routeHandler = router.get.mock.calls[0][1];
 

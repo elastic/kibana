@@ -52,9 +52,7 @@ export class EsqlService {
     const sources = (await client.indices.resolveIndex({
       name: sourcesToQuery,
       expand_wildcards: 'open',
-      querystring: {
-        mode,
-      },
+      mode,
     })) as ResolveIndexResponse;
 
     sources.indices?.forEach((index) => {
@@ -171,6 +169,21 @@ export class EsqlService {
         };
       }) ?? []
     );
+  }
+
+  /**
+   * Get all ES|QL views from the cluster (GET _query/view).
+   * @returns A promise that resolves to the views response (list of view names and queries).
+   */
+  public async getViews(): Promise<{ views: Array<{ name: string; query: string }> }> {
+    const { client } = this.options;
+    const response = await client.transport.request<{
+      views: Array<{ name: string; query: string }>;
+    }>({
+      method: 'GET',
+      path: '/_query/view',
+    });
+    return response ?? { views: [] };
   }
 
   /**

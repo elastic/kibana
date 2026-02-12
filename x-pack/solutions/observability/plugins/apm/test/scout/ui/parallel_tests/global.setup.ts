@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { globalSetupHook } from '@kbn/scout-oblt';
+import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { opbeans } from '../fixtures/synthtrace/opbeans';
 import { servicesDataFromTheLast24Hours } from '../fixtures/synthtrace/last_24_hours';
@@ -19,8 +19,9 @@ import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_error
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   async ({ apmSynthtraceEsClient, apiServices, log, config, esClient }) => {
+    const startTime = Date.now();
     if (!config.isCloud) {
       await apiServices.fleet.internal.setup();
       log.info('Fleet infrastructure setup completed');
@@ -83,5 +84,6 @@ globalSetupHook(
       await esClient.ml.deleteJob({ job_id: job.job_id, force: true });
       log.info(`Deleted job: ${job.job_id}`);
     }
+    log.info(`APM data ingestion took ${Date.now() - startTime} ms`);
   }
 );

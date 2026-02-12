@@ -31,7 +31,6 @@ const wiredStreamManagementSubTabs = [
   'significantEvents',
   'dataQuality',
   'attachments',
-  'references',
 ] as const;
 
 type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number];
@@ -114,7 +113,7 @@ export function WiredStreamDetailManagement({
               'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
           })}
         >
-          <span tabIndex={0}>
+          <span data-test-subj="retentionTab" tabIndex={0}>
             {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
               defaultMessage: 'Retention',
             })}
@@ -130,7 +129,7 @@ export function WiredStreamDetailManagement({
         defaultMessage: 'Partitioning',
       }),
     },
-    processing,
+    ...(processing ? { processing } : {}),
     schema: {
       content: (
         <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />

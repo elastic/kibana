@@ -44,7 +44,7 @@ export const convertToRawColorMappingsFn = (
 
     const convertedColumns = state.columns.map((column) => {
       if (column.colorMapping?.assignments || column.colorMapping?.specialAssignments) {
-        const columnMeta = getColumnMeta?.(state.layerId, column.columnId);
+        const columnMeta = getColumnMeta?.(state.layerId, [column.columnId]);
 
         return {
           ...column,

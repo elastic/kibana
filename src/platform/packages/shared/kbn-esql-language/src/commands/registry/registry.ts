@@ -9,7 +9,13 @@
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-types';
 import type { ESQLMessage, ESQLCommand, ESQLAstAllCommands } from '../../types';
-import type { ISuggestionItem, ICommandCallbacks, ESQLColumnData } from './types';
+import type {
+  ISuggestionItem,
+  ICommandCallbacks,
+  ESQLColumnData,
+  ESQLCommandSummary,
+  UnmappedFieldsStrategy,
+} from './types';
 
 /**
  * Interface defining the methods that each ES|QL command should register.
@@ -55,6 +61,7 @@ export interface ICommandMethods<TContext = any> {
    * This is crucial for chaining commands and ensuring type compatibility.
    * @param command The parsed Abstract Syntax Tree.
    * @param previousColumns An array of columns inherited from the preceding command.
+   * @param query The ESQL query string.
    * @param context Additional context (e.g., schema information).
    * @returns An array of column names or more detailed column definitions.
    */
@@ -62,13 +69,23 @@ export interface ICommandMethods<TContext = any> {
     command: ESQLCommand,
     previousColumns: ESQLColumnData[],
     query: string,
-    newFields: IAdditionalFields
+    newFields: IAdditionalFields,
+    unmappedFieldsStrategy: UnmappedFieldsStrategy
   ) => Promise<ESQLColumnData[]> | ESQLColumnData[];
+
+  /**
+   * Returns useful information about the command.
+   * @param command The parsed Abstract Syntax Tree.
+   * @param query The ESQL query string.
+   * @returns A summary object containing details about the command.
+   */
+  summary?: (command: ESQLCommand, query: string) => ESQLCommandSummary;
 }
 
 export interface ICommandMetadata {
   preview?: boolean; // Optional property to indicate if the command is in preview mode
   subquerySupport?: boolean; // Optional property to indicate if the command supports subqueries (ONLY FROM). This is temporary and we will remove it when subqueries in FROM move to Technical Preview.
+  viewsSupport?: boolean; // Optional property to indicate if the command suggests/validates ES|QL views (ONLY FROM). This is temporary and we will remove it when views in FROM move to Preview.
   description: string; // Optional property for a brief description of the command
   declaration: string; // The pattern for declaring this command statement. Displayed in the autocomplete.
   examples: string[]; // A list of examples of how to use the command. Displayed in the autocomplete.
@@ -139,6 +156,7 @@ export interface IAdditionalFields {
   fromJoin: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
   fromEnrich: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
   fromFrom: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
+  fromPromql?: (cmd: ESQLCommand) => Promise<ESQLFieldWithMetadata[]>;
 }
 
 /**

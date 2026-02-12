@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
+  EuiButton,
   EuiCallOut,
   EuiFlexItem,
   EuiLink,
@@ -31,7 +32,7 @@ import type {
   ActionConnector,
   ObservableTypeConfiguration,
 } from '../../../common/types/domain';
-import { useKibana } from '../../common/lib/kibana';
+import { KibanaServices, useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
@@ -44,7 +45,7 @@ import { getConnectorById, addOrReplaceField } from '../utils';
 import { HeaderPage } from '../header_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
-import { CasesDeepLinkId } from '../../common/navigation';
+import { CasesDeepLinkId, useCasesTemplatesNavigation } from '../../common/navigation';
 import { CustomFields } from '../custom_fields';
 import { CommonFlyout } from './flyout';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
@@ -115,13 +116,15 @@ const addNewCustomFieldToTemplates = ({
 
 export const ConfigureCases: React.FC = React.memo(() => {
   const { permissions } = useCasesContext();
-  const { triggersActionsUi } = useKibana().services;
+  const { triggersActionsUi, docLinks } = useKibana().services;
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
   const license = useLicense();
   const hasMinimumLicensePermissions = license.isAtLeastGold();
   const hasMinimumLicensePermissionsForObservables = license.isAtLeastPlatinum();
 
   const { isObservablesFeatureEnabled } = useCasesFeatures();
+  const config = KibanaServices.getConfig();
+  const isTemplatesEnabled = config?.templates?.enabled ?? false;
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [flyOutVisibility, setFlyOutVisibility] = useState<Flyout | null>(null);
@@ -178,7 +181,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
     },
     [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]
   );
-
   const onConnectorCreated = useCallback(
     async (createdConnector: ActionConnector) => {
       const caseConnector = normalizeActionConnector(createdConnector);
@@ -624,6 +626,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
       </CommonFlyout>
     ) : null;
 
+  const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
+
   return (
     <EuiPageSection restrictWidth={true}>
       <HeaderPage data-test-subj="case-configure-title" title={i18n.CONFIGURE_CASES_PAGE_TITLE} />
@@ -646,7 +650,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
                         id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
                         values={{
                           appropriateLicense: (
-                            <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                            <EuiLink href={docLinks.links.subscriptions} target="_blank">
                               {i18n.LINK_APPROPRIATE_LICENSE}
                             </EuiLink>
                           ),
@@ -716,6 +720,18 @@ export const ConfigureCases: React.FC = React.memo(() => {
             </EuiFlexItem>
           </div>
 
+          {isTemplatesEnabled && (
+            <>
+              <EuiSpacer size="xl" />
+              <div css={sectionWrapperCss}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton onClick={() => navigateToCasesTemplates()}>
+                    {i18n.SHOW_ALL_TEMPLATES}
+                  </EuiButton>
+                </EuiFlexItem>
+              </div>
+            </>
+          )}
           {hasMinimumLicensePermissionsForObservables && isObservablesFeatureEnabled && (
             <>
               <EuiSpacer size="xl" />

@@ -48,6 +48,8 @@
           "[]) => number"
         ],
         "path": "x-pack/platform/packages/shared/ml/chi2test/compute_chi_2_pvalue.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -71,6 +73,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/ml/chi2test/compute_chi_2_pvalue.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -95,6 +99,8 @@
               "[]"
             ],
             "path": "x-pack/platform/packages/shared/ml/chi2test/compute_chi_2_pvalue.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -120,6 +126,8 @@
           "(chi2Statistic: number, df: number) => number"
         ],
         "path": "x-pack/platform/packages/shared/ml/chi2test/critical_table_lookup.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -136,6 +144,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/chi2test/critical_table_lookup.ts",
+            "lineNumber": 19,
+            "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -153,6 +163,8 @@
               "number"
             ],
             "path": "x-pack/platform/packages/shared/ml/chi2test/critical_table_lookup.ts",
+            "lineNumber": 19,
+            "columnNumber": 60,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -175,6 +187,8 @@
           "\nInterface for the Histogram type used by computeChi2PValue."
         ],
         "path": "x-pack/platform/packages/shared/ml/chi2test/types.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -188,6 +202,8 @@
               "\nThe doc count."
             ],
             "path": "x-pack/platform/packages/shared/ml/chi2test/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -204,6 +220,8 @@
               "string | number"
             ],
             "path": "x-pack/platform/packages/shared/ml/chi2test/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           },
@@ -220,6 +238,8 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ml/chi2test/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -242,6 +262,8 @@
           "number[][]"
         ],
         "path": "x-pack/platform/packages/shared/ml/chi2test/constants.ts",
+        "lineNumber": 45,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -259,6 +281,8 @@
           "number[]"
         ],
         "path": "x-pack/platform/packages/shared/ml/chi2test/constants.ts",
+        "lineNumber": 1030,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

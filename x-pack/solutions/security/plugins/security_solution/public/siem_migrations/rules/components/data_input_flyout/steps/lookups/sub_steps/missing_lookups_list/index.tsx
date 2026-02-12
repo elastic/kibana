@@ -38,7 +38,11 @@ export const useMissingLookupsListStep = ({
     (lookupName: string) => {
       // Saving the lookup with an empty content to omit it.
       // The translation will ignore this lookup and will not cause partial translations.
-      upsertResources(migrationStats.id, [{ type: 'lookup', name: lookupName, content: '' }]);
+      upsertResources({
+        migrationId: migrationStats.id,
+        vendor: migrationStats.vendor,
+        data: [{ type: 'lookup', name: lookupName, content: '' }],
+      });
     },
     [upsertResources, migrationStats]
   );

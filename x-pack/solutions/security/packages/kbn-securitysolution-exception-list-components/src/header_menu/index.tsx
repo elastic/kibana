@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
+import * as i18n from '../translations';
 
 export interface Action {
   key: string;
@@ -38,6 +39,7 @@ interface HeaderMenuComponentProps {
   useCustomActions?: boolean;
   anchorPosition?: PopoverAnchorPosition;
   panelPaddingSize?: PanelPaddingSize;
+  ariaLabel?: string;
 }
 
 const popoverHeightStyle = css`
@@ -57,6 +59,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
   iconSide = 'left',
   anchorPosition = 'downCenter',
   panelPaddingSize = 's',
+  ariaLabel = i18n.ACTIONS_ARIA_LABEL,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -93,7 +96,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
               iconType={iconType ? iconType : undefined}
               iconSide={iconSide}
               data-test-subj={`${dataTestSubj || ''}EmptyButton`}
-              aria-label="Header menu Button Empty"
+              aria-label={ariaLabel}
             >
               {text}
             </EuiButtonEmpty>
@@ -103,7 +106,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
               onClick={onAffectedRulesClick}
               iconType={iconType ? iconType : 'boxesHorizontal'}
               data-test-subj={`${dataTestSubj || ''}ButtonIcon`}
-              aria-label="Header menu Button Icon"
+              aria-label={ariaLabel}
             >
               {text}
             </EuiButtonIcon>

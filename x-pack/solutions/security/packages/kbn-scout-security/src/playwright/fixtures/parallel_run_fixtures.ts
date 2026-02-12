@@ -14,6 +14,7 @@ import type {
 } from './types';
 import {
   getDetectionRuleApiService,
+  getDetectionAlertsApiService,
   getEntityAnalyticsApiService,
   getCloudConnectorApiService,
 } from './worker';
@@ -46,17 +47,24 @@ export const spaceTest = securityParallelFixtures.extend<
       {
         apiServices,
         kbnClient,
+        esClient,
         log,
         scoutSpace,
       }: {
         apiServices: ApiServicesFixture;
         kbnClient: SecurityParallelWorkerFixtures['kbnClient'];
+        esClient: SecurityParallelWorkerFixtures['esClient'];
         log: SecurityParallelWorkerFixtures['log'];
         scoutSpace: SecurityParallelWorkerFixtures['scoutSpace'];
       },
       use: (extendedApiServices: SecurityApiServicesFixture) => Promise<void>
     ) => {
       const extendedApiServices = apiServices as SecurityApiServicesFixture;
+      extendedApiServices.detectionAlerts = getDetectionAlertsApiService({
+        esClient,
+        log,
+        scoutSpace,
+      });
       extendedApiServices.detectionRule = getDetectionRuleApiService({
         kbnClient,
         log,

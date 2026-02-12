@@ -15,6 +15,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const fleetAndAgents = getService('fleetAndAgents');
+  const es = getService('es');
 
   describe('fleet_cloud_connectors', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -1511,6 +1512,196 @@ export default function (providerContext: FtrProviderContext) {
         // Verify packagePolicyCount is preserved (still 0 since no package policies reference this connector)
         expect(updatedConnector.item.packagePolicyCount).to.equal(0);
         expect(updatedConnector.item.name).to.equal('updated-azure-name-preserve-count');
+      });
+    });
+
+    describe('DELETE /api/fleet/cloud_connectors/{id} - Secret cleanup', () => {
+      const SECRETS_INDEX_NAME = '.fleet-secrets';
+
+      const createSecret = async (id: string, value: string) => {
+        await es.index({
+          index: SECRETS_INDEX_NAME,
+          id,
+          body: {
+            value,
+          },
+          refresh: 'wait_for',
+        });
+      };
+
+      const secretExists = async (id: string): Promise<boolean> => {
+        try {
+          await es.get({
+            index: SECRETS_INDEX_NAME,
+            id,
+          });
+          return true;
+        } catch (err) {
+          if (err.meta?.statusCode === 404) {
+            return false;
+          }
+          throw err;
+        }
+      };
+
+      afterEach(async () => {
+        // Clean up any remaining secrets
+        try {
+          await es.deleteByQuery({
+            index: SECRETS_INDEX_NAME,
+            refresh: true,
+            query: {
+              match_all: {},
+            },
+          });
+        } catch (err) {
+          // Index might not exist, that's fine
+        }
+      });
+
+      it('should delete AWS cloud connector secrets when connector is deleted', async () => {
+        // External ID must be exactly 20 chars to match EXTERNAL_ID_REGEX validation /^[a-zA-Z0-9_-]{20}$/
+        const timestamp = Date.now().toString();
+        const externalIdSecretId = `awstest${timestamp.slice(-13)}`; // 'awstest' (7) + 13 digits = 20 chars
+        const secretValue = 'test-external-id-value-123';
+
+        // Create the secret in .fleet-secrets index
+        await createSecret(externalIdSecretId, secretValue);
+
+        // Verify secret exists
+        expect(await secretExists(externalIdSecretId)).to.be(true);
+
+        // Create AWS cloud connector with the secret reference
+        const { body: createResponse } = await supertest
+          .post(`/api/fleet/cloud_connectors`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `aws-secret-cleanup-test-${Date.now()}`,
+            cloudProvider: 'aws',
+            vars: {
+              role_arn: { value: 'arn:aws:iam::123456789012:role/test-cleanup', type: 'text' },
+              external_id: {
+                type: 'password',
+                value: {
+                  id: externalIdSecretId,
+                  isSecretRef: true,
+                },
+              },
+            },
+          })
+          .expect(200);
+
+        const connectorId = createResponse.item.id;
+
+        // Delete the cloud connector
+        await supertest
+          .delete(`/api/fleet/cloud_connectors/${connectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        // Verify the secret was deleted
+        expect(await secretExists(externalIdSecretId)).to.be(false);
+      });
+
+      it('should delete Azure cloud connector secrets when connector is deleted', async () => {
+        const tenantIdSecretId = `azure-tenant-cleanup-test-${Date.now()}`;
+        const clientIdSecretId = `azure-client-cleanup-test-${Date.now()}`;
+        const tenantSecretValue = 'test-tenant-id-value-456';
+        const clientSecretValue = 'test-client-id-value-789';
+
+        // Create the secrets in .fleet-secrets index
+        await createSecret(tenantIdSecretId, tenantSecretValue);
+        await createSecret(clientIdSecretId, clientSecretValue);
+
+        // Verify secrets exist
+        expect(await secretExists(tenantIdSecretId)).to.be(true);
+        expect(await secretExists(clientIdSecretId)).to.be(true);
+
+        // Create Azure cloud connector with the secret references
+        const { body: createResponse } = await supertest
+          .post(`/api/fleet/cloud_connectors`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `azure-secret-cleanup-test-${Date.now()}`,
+            cloudProvider: 'azure',
+            vars: {
+              tenant_id: {
+                type: 'password',
+                value: {
+                  id: tenantIdSecretId,
+                  isSecretRef: true,
+                },
+              },
+              client_id: {
+                type: 'password',
+                value: {
+                  id: clientIdSecretId,
+                  isSecretRef: true,
+                },
+              },
+              azure_credentials_cloud_connector_id: {
+                value: 'test-azure-cleanup-id',
+                type: 'text',
+              },
+            },
+          })
+          .expect(200);
+
+        const connectorId = createResponse.item.id;
+
+        // Delete the cloud connector
+        await supertest
+          .delete(`/api/fleet/cloud_connectors/${connectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        // Verify both secrets were deleted
+        expect(await secretExists(tenantIdSecretId)).to.be(false);
+        expect(await secretExists(clientIdSecretId)).to.be(false);
+      });
+
+      it('should delete secrets even when force deleting a connector', async () => {
+        // External ID must be exactly 20 chars to match EXTERNAL_ID_REGEX validation /^[a-zA-Z0-9_-]{20}$/
+        const timestamp = Date.now().toString();
+        const externalIdSecretId = `forcedl${timestamp.slice(-13)}`; // 'forcedl' (7) + 13 digits = 20 chars
+        const secretValue = 'test-force-delete-value';
+
+        // Create the secret in .fleet-secrets index
+        await createSecret(externalIdSecretId, secretValue);
+
+        // Verify secret exists
+        expect(await secretExists(externalIdSecretId)).to.be(true);
+
+        // Create AWS cloud connector with the secret reference
+        const { body: createResponse } = await supertest
+          .post(`/api/fleet/cloud_connectors`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `aws-force-delete-test-${Date.now()}`,
+            cloudProvider: 'aws',
+            vars: {
+              role_arn: { value: 'arn:aws:iam::123456789012:role/test-force', type: 'text' },
+              external_id: {
+                type: 'password',
+                value: {
+                  id: externalIdSecretId,
+                  isSecretRef: true,
+                },
+              },
+            },
+          })
+          .expect(200);
+
+        const connectorId = createResponse.item.id;
+
+        // Force delete the cloud connector
+        await supertest
+          .delete(`/api/fleet/cloud_connectors/${connectorId}?force=true`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        // Verify the secret was deleted even with force=true
+        expect(await secretExists(externalIdSecretId)).to.be(false);
       });
     });
   });

@@ -48,6 +48,12 @@ export enum ProductFeatureSecurityKey {
    * Enables endpoint policy views that enables user to manage endpoint security policies
    */
   endpointPolicyManagement = 'endpoint_policy_management',
+
+  /**
+   * Enables the ablity to manage or view scripts used with Elastic Defend reponse actions
+   */
+  endpointScriptsManagement = 'endpoint_scripts_management',
+
   /**
    * Enables Endpoint Policy protections (like Malware, Ransomware, etc)
    */
@@ -173,6 +179,11 @@ export enum ProductFeatureRulesKey {
    * Enables customization of prebuilt Elastic rules
    */
   prebuiltRuleCustomization = 'prebuilt_rule_customization',
+
+  /**
+   * Enables Exceptions
+   */
+  exceptions = 'exceptions',
 }
 
 // Merges the two enums.
@@ -210,6 +221,7 @@ export enum SecuritySubFeatureId {
   eventFilters = 'eventFiltersSubFeature',
   globalArtifactManagement = 'globalArtifactManagementSubFeature',
   policyManagement = 'policyManagementSubFeature',
+  scriptsManagement = 'scriptsManagementSubFeature',
   responseActionsHistory = 'responseActionsHistorySubFeature',
   workflowInsights = 'workflowInsightsSubFeature',
   socManagement = 'socManagementSubFeature',
@@ -238,4 +250,9 @@ export enum AssistantSubFeatureId {
 /** Sub-features IDs for Security Attack Discovery */
 export enum AttackDiscoverySubFeatureId {
   updateSchedule = 'updateScheduleSubFeature',
+}
+
+/** Sub-features IDs for Security Rules */
+export enum RulesSubFeatureId {
+  exceptions = 'exceptionsSubFeature',
 }

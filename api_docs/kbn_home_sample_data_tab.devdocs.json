@@ -32,6 +32,8 @@
           "() => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/home/sample_data_tab/src/sample_data_tab.tsx",
+        "lineNumber": 34,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -53,6 +55,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/home/sample_data_tab/src/services.tsx",
+        "lineNumber": 93,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -69,6 +73,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/home/sample_data_tab/src/services.tsx",
+            "lineNumber": 95,
+            "columnNumber": 6,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -92,6 +98,8 @@
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/home/sample_data_tab/src/services.tsx",
+        "lineNumber": 50,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -108,6 +116,8 @@
               ">"
             ],
             "path": "src/platform/packages/shared/home/sample_data_tab/src/services.tsx",
+            "lineNumber": 50,
+            "columnNumber": 85,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -133,6 +143,8 @@
           "\"goToDemoEnvButton\""
         ],
         "path": "src/platform/packages/shared/home/sample_data_tab/src/constants.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -150,6 +162,8 @@
           "\"showSampleDataAccordion\""
         ],
         "path": "src/platform/packages/shared/home/sample_data_tab/src/constants.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -167,6 +181,8 @@
           "\"showSampleDataButton\""
         ],
         "path": "src/platform/packages/shared/home/sample_data_tab/src/constants.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
