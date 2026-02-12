@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.slack.find'
-description: 'Resolve Slack channel IDs for use with other Slack workflows. Actions and inputs: resolveChannelId (name, optional types, optional match, optional exclude_archived, optional limit, optional max_pages, optional cursor). Output: { ok, found, id, name, pagesFetched, nextCursor }. Use the returned `id` as the `channel` input to sources.slack.send_message. Tip: prefer match=exact with a full channel name; use match=contains only when you only know part of the name.'
+description: 'Resolve Slack public channel IDs for use with other Slack workflows. Actions and inputs: resolveChannelId (name, optional match, optional exclude_archived, optional limit, optional max_pages, optional cursor). Output: { ok, found, id, name, pagesFetched, nextCursor }. Use the returned `id` as the `channel` input to sources.slack.send_message. Tip: prefer match=exact with a full channel name; use match=contains only when you only know part of the name.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -10,13 +10,6 @@ inputs:
     type: string
     required: true
     description: 'Channel name to resolve (e.g. "general" or "#general").'
-  - name: types
-    type: array
-    required: false
-    default:
-      - 'public_channel'
-      - 'private_channel'
-    description: 'Conversation types to search. Valid: public_channel, private_channel, im, mpim.'
   - name: exclude_archived
     type: boolean
     required: false
@@ -50,7 +43,6 @@ steps:
     connector-id: <%= stackConnectorId %>
     with:
       name: "${{ inputs.name }}"
-      types: ${{ inputs.types }}
       match: "${{ inputs.match }}"
       excludeArchived: ${{ inputs.exclude_archived }}
       limit: ${{ inputs.limit }}

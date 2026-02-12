@@ -174,13 +174,16 @@ async function slackGetWithRateLimitRetry(params: {
  * Slack connector using OAuth2 Authorization Code flow.
  *
  * Required Slack App scopes:
+ * MVP (public channels only):
  * - channels:read,channels:history - to list public channels and read public channel history
- * - groups:read,groups:history - to list private channels and read private channel history (if enabled)
- * - im:read,im:history - to list DMs and read DM history (if enabled)
- * - mpim:read,mpim:history - to list group DMs and read group DM history (if enabled)
- * - chat:write - for sending messages
+ * - chat:write - for sending messages to public channels
  * - search:read - for searching messages (requires a user token)
- * - users:read - to look up user IDs and profiles (helpful for sending DMs)
+ *
+ * Optional (not required for MVP):
+ * - groups:read,groups:history - to support private channels
+ * - im:read,im:history - to support DMs
+ * - mpim:read,mpim:history - to support group DMs
+ * - users:read,users:read.email - to support user-targeted lookups (not used in MVP)
  */
 export const Slack: ConnectorSpec = {
   metadata: {
@@ -201,7 +204,7 @@ export const Slack: ConnectorSpec = {
           authorizationUrl: 'https://slack.com/oauth/v2/authorize',
           tokenUrl: 'https://slack.com/api/oauth.v2.access',
           scope:
-            'channels:read,channels:history,groups:read,groups:history,im:read,im:history,mpim:read,mpim:history,chat:write,search:read,users:read',
+            'channels:read,channels:history,chat:write,search:read',
           scopeQueryParam: 'user_scope', // Slack OAuth v2 uses user_scope for user token scopes
           tokenExtractor: 'slackUserToken', // extract authed_user.access_token for user-token-only scopes (e.g. search:read)
           useBasicAuth: false, // Slack uses POST body for client credentials
@@ -512,7 +515,7 @@ export const Slack: ConnectorSpec = {
               'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.types.description',
               {
                 defaultMessage:
-                  'Conversation types to search. Defaults to public_channel + private_channel. Valid: public_channel, private_channel, im, mpim.',
+                  'Conversation types to search. Defaults to public_channel. Valid: public_channel, private_channel, im, mpim.',
               }
             )
           ),
@@ -612,9 +615,7 @@ export const Slack: ConnectorSpec = {
         const types =
           typedInput.types && typedInput.types.length > 0
             ? typedInput.types
-            : (['public_channel', 'private_channel'] as Array<
-                (typeof SLACK_CONVERSATION_TYPES)[number]
-              >);
+            : (['public_channel'] as Array<(typeof SLACK_CONVERSATION_TYPES)[number]>);
         const match = typedInput.match ?? 'exact';
         const excludeArchived = typedInput.excludeArchived ?? true;
         const limit = typedInput.limit ?? 1000;
