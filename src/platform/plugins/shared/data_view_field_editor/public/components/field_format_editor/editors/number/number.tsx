@@ -58,7 +58,7 @@ export class NumberFormatEditor extends DefaultFormatEditor<NumberFormatEditorPa
                   defaultMessage="Documentation"
                 />
                 &nbsp;
-                <EuiIcon type="link" />
+                <EuiIcon type="link" aria-hidden={true} />
               </EuiLink>
             </span>
           }

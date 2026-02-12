@@ -120,7 +120,11 @@ export function SpanLinksTable({ items }: Props) {
           return (
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type={getSpanIcon(details.spanType, details.spanSubtype)} size="l" />
+                <EuiIcon
+                  type={getSpanIcon(details.spanType, details.spanSubtype)}
+                  size="l"
+                  aria-hidden={true}
+                />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiLink

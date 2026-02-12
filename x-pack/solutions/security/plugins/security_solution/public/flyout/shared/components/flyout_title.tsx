@@ -67,6 +67,7 @@ export const FlyoutTitle: FC<FlyoutTitleProps> = memo(
           css={css`
             margin-right: ${euiTheme.size.xs};
           `}
+          aria-hidden={true}
         />
       ) : null;
     }, [iconType, iconColor, dataTestSubj, euiTheme.size.xs]);
@@ -90,6 +91,7 @@ export const FlyoutTitle: FC<FlyoutTitleProps> = memo(
             margin-bottom: ${euiTheme.size.xs};
           `}
           data-test-subj={`${dataTestSubj}LinkIcon`}
+          aria-hidden={true}
         />
       );
     }, [dataTestSubj, euiTheme.size.xs]);

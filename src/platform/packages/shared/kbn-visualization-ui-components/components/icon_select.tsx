@@ -32,7 +32,7 @@ const IconView = (props: { value?: string; label: string; icon?: IconType }) => 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiIcon type={props.icon ?? props.value} />
+        <EuiIcon type={props.icon ?? props.value} aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem>{props.label}</EuiFlexItem>
     </EuiFlexGroup>
@@ -75,7 +75,7 @@ export function IconSelect<Icon extends string>({
       aria-label={iconDecorationLabel}
       prepend={
         hasIcon(selectedIcon.value) ? (
-          <EuiIcon type={selectedIcon.icon ?? selectedIcon.value} />
+          <EuiIcon type={selectedIcon.icon ?? selectedIcon.value} aria-hidden={true} />
         ) : undefined
       }
     />

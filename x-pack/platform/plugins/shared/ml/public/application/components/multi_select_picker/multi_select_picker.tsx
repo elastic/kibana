@@ -29,7 +29,7 @@ export interface Option {
 const NoFilterItems = () => {
   return (
     <EuiSelectableMessage>
-      <EuiIcon type="minusInCircle" />
+      <EuiIcon type="minusInCircle" aria-hidden={true} />
       <EuiSpacer size="xs" />
       <p>
         <FormattedMessage

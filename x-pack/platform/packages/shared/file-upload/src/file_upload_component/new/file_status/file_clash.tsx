@@ -131,7 +131,7 @@ export const FileClashIcon: FC<Props> = ({ fileClash }) => {
       return (
         <EuiToolTip content={getClashText(fileClash)}>
           <EuiBadge color={euiTheme.colors.backgroundBaseDanger}>
-            <EuiIcon type="alert" color="danger" size="s" />
+            <EuiIcon type="alert" color="danger" size="s" aria-hidden={true} />
           </EuiBadge>
         </EuiToolTip>
       );
@@ -139,7 +139,7 @@ export const FileClashIcon: FC<Props> = ({ fileClash }) => {
       return (
         <EuiToolTip content={getClashText(fileClash)}>
           <EuiBadge color={euiTheme.colors.backgroundBaseWarning}>
-            <EuiIcon type="warning" color="warning" size="s" />
+            <EuiIcon type="warning" color="warning" size="s" aria-hidden={true} />
           </EuiBadge>
         </EuiToolTip>
       );

@@ -125,6 +125,7 @@ const VisLegendItemComponent = ({
         type="dot"
         color={getColor(item.label)}
         data-test-subj={`legendSelectedColor-${getColor(item.label)}`}
+        aria-hidden={true}
       />
       <span className="visLegend__valueTitle">{item.label}</span>
     </EuiButtonEmpty>

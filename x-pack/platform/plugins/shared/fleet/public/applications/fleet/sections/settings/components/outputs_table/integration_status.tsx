@@ -298,6 +298,7 @@ export const IntegrationStatus: React.FunctionComponent<{
                           ? 'warning'
                           : 'checkInCircleFilled'
                       }
+                      aria-hidden={true}
                     />
                   )
                 }

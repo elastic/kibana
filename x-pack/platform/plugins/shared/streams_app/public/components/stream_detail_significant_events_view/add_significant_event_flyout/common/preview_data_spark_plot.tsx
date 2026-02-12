@@ -124,12 +124,12 @@ export function PreviewDataSparkPlot({
 
     if (previewFetch.error) {
       if (compressed) {
-        return <EuiIcon type="cross" color="danger" size="l" />;
+        return <EuiIcon type="cross" color="danger" size="l" aria-hidden={true} />;
       }
 
       return (
         <>
-          <EuiIcon type="cross" color="danger" size="xl" />
+          <EuiIcon type="cross" color="danger" size="xl" aria-hidden={true} />
           <EuiText size="s" textAlign="center">
             {i18n.translate(
               'xpack.streams.addSignificantEventFlyout.manualFlow.previewChartError',
@@ -144,7 +144,9 @@ export function PreviewDataSparkPlot({
 
     if (noOccurrencesFound) {
       if (compressed) {
-        return <EuiIcon type="visLine" color={euiTheme.colors.disabled} size="l" />;
+        return (
+          <EuiIcon type="visLine" color={euiTheme.colors.disabled} size="l" aria-hidden={true} />
+        );
       }
 
       return (

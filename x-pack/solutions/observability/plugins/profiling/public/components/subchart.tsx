@@ -328,7 +328,7 @@ export function SubChart({
                   opacity: 0.5,
                 },
               }}
-              marker={<EuiIcon type="dot" />}
+              marker={<EuiIcon type="dot" aria-hidden={true} />}
               markerPosition={Position.Top}
               hideTooltips
             />

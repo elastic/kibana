@@ -40,7 +40,7 @@ export const SearchIndexDetailsPageMenuItemPopover = ({
     showApiReference && (
       <EuiContextMenuItem
         key="apiReference"
-        icon={<EuiIcon type="documentation" />}
+        icon={<EuiIcon type="documentation" aria-hidden={true} />}
         href={docLinks.links.apiReference}
         size="s"
         target="_blank"
@@ -56,7 +56,9 @@ export const SearchIndexDetailsPageMenuItemPopover = ({
     ),
     <EuiContextMenuItem
       key="deleteIndex"
-      icon={<EuiIcon color={canManageIndex ? 'danger' : undefined} type="trash" />}
+      icon={
+        <EuiIcon color={canManageIndex ? 'danger' : undefined} type="trash" aria-hidden={true} />
+      }
       size="s"
       onClick={handleDeleteIndexModal}
       data-test-subj="moreOptionsDeleteIndex"

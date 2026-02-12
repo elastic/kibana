@@ -516,7 +516,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 iconType="warning"
               >
                 <p>
-                  <EuiIcon color="warning" type="warning" />
+                  <EuiIcon color="warning" type="warning" aria-hidden={true} />
                   &nbsp;
                   {getRuleStatusWarningReasonText()}
                   &nbsp;
@@ -537,7 +537,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                 size="s"
               >
                 <p>
-                  <EuiIcon color="warning" type="warning" />
+                  <EuiIcon color="warning" type="warning" aria-hidden={true} />
                   &nbsp;
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.ruleDetails.actionWithBrokenConnectorWarningBannerTitle"

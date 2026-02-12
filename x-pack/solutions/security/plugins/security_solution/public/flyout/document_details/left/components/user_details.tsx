@@ -297,7 +297,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({ userName, timestamp, s
     () => (
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="storage" />
+          <EuiIcon type="storage" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">

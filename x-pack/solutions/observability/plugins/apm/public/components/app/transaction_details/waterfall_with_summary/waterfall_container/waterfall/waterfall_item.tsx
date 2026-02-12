@@ -142,7 +142,7 @@ function PrefixIcon({ item }: { item: IWaterfallSpanOrTransaction }) {
       // icon for database spans
       const isDbType = spanType.startsWith('db');
       if (isDbType) {
-        return <EuiIcon type="database" />;
+        return <EuiIcon type="database" aria-hidden={true} />;
       }
 
       // omit icon for other spans
@@ -151,11 +151,11 @@ function PrefixIcon({ item }: { item: IWaterfallSpanOrTransaction }) {
     case 'transaction': {
       // icon for RUM agent transactions
       if (isRumAgentName(item.doc.agent.name)) {
-        return <EuiIcon type="globe" />;
+        return <EuiIcon type="globe" aria-hidden={true} />;
       }
 
       // icon for other transactions
-      return <EuiIcon type="merge" />;
+      return <EuiIcon type="merge" aria-hidden={true} />;
     }
     default:
       return null;

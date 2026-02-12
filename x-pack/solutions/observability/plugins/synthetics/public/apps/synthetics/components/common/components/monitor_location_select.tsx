@@ -64,7 +64,8 @@ export const MonitorLocationSelect = ({
           onClick={openLocationList}
           disabled={isDisabled}
         >
-          {selectedLocation.label} {!isDisabled ? <EuiIcon type="arrowDown" /> : null}
+          {selectedLocation.label}{' '}
+          {!isDisabled ? <EuiIcon type="arrowDown" aria-hidden={true} /> : null}
         </EuiLink>
       );
 

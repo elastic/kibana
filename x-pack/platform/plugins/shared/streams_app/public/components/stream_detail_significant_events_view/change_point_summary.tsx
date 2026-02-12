@@ -75,7 +75,7 @@ function SummaryItem({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="dot" color={theme.colors[change.color]} />
+                  <EuiIcon type="dot" color={theme.colors[change.color]} aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs">{change.label}</EuiText>

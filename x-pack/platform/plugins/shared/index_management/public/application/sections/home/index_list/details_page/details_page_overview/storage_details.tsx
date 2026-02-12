@@ -85,7 +85,7 @@ export const StorageDetails: FunctionComponent<{
         left: (
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="shard" color="subdued" />
+              <EuiIcon type="shard" color="subdued" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTextColor color="subdued">

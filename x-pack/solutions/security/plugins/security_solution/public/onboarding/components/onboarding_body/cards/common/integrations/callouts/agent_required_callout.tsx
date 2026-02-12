@@ -56,7 +56,7 @@ export const AgentRequiredCallout = React.memo(() => {
                 />
               </LinkAnchor>
             ),
-            icon: <EuiIcon type="arrowRight" size="s" />,
+            icon: <EuiIcon type="arrowRight" size="s" aria-hidden={true} />,
           }}
         />
       }

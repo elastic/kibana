@@ -82,7 +82,11 @@ export const NewAgentBuilderAttachment = memo(function NewAgentBuilderAttachment
     >
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type={agentBuilderIconType} color={color === 'primary' ? 'default' : color} />
+          <EuiIcon
+            type={agentBuilderIconType}
+            color={color === 'primary' ? 'default' : color}
+            aria-hidden={true}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{i18n.ADD_TO_CHAT}</EuiFlexItem>
       </EuiFlexGroup>

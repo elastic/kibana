@@ -151,6 +151,7 @@ export function Timeline({ events, start, end, xFormatter }: TimelineProps) {
                       stroke-width: 1px;
                     }
                   `}
+                  aria-hidden={true}
                 />
               );
             }}

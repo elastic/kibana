@@ -122,7 +122,7 @@ export const SeverityMappingItem = ({ severityMappingItem }: SeverityMappingItem
       </EuiToolTip>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiIcon type={'sortRight'} />
+      <EuiIcon type={'sortRight'} aria-hidden={true} />
     </EuiFlexItem>
     <EuiFlexItem>
       <SeverityBadge
@@ -160,7 +160,7 @@ export const RiskScoreMappingItem = ({ riskScoreMappingItem }: RiskScoreMappingI
       </EuiToolTip>
     </OverrideColumn>
     <EuiFlexItem grow={false}>
-      <EuiIcon type={'sortRight'} />
+      <EuiIcon type={'sortRight'} aria-hidden={true} />
     </EuiFlexItem>
     <EuiFlexItem data-test-subj="riskScoreOverridePropertyOverride">{ALERT_RISK_SCORE}</EuiFlexItem>
   </EuiFlexGroup>

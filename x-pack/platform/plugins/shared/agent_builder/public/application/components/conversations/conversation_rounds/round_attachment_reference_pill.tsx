@@ -145,7 +145,7 @@ export const AttachmentReferencePill: React.FC<AttachmentReferencePillProps> = (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <div className={iconContainerStyles}>
-            <EuiIcon type={iconType} size="m" color="primary" />
+            <EuiIcon type={iconType} size="m" color="primary" aria-hidden={true} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 0 }}>

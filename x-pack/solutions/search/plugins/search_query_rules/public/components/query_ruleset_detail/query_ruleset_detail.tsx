@@ -241,7 +241,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
             {
               text: (
                 <>
-                  <EuiIcon size="s" type="arrowLeft" />{' '}
+                  <EuiIcon size="s" type="arrowLeft" aria-hidden={true} />{' '}
                   {i18n.translate('xpack.queryRules.queryRulesetDetail.backButton', {
                     defaultMessage: 'Back',
                   })}

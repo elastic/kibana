@@ -64,7 +64,7 @@ export const IndexItem: React.FC<UsageProps> = ({ usageItem }) => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiLink data-test-subj="navigateToIndexPage" onClick={navigateToIndex}>
-              <EuiIcon size="s" type="popout" />
+              <EuiIcon size="s" type="popout" aria-hidden={true} />
             </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>

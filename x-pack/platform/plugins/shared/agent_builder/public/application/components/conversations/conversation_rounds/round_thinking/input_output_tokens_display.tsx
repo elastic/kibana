@@ -24,7 +24,7 @@ const tooltipLabels = {
 const TokenDisplay = ({ type, value }: { type: 'input' | 'output'; value: number }) => (
   <EuiToolTip content={tooltipLabels[type]}>
     <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
-      <EuiIcon color="subdued" type={type === 'input' ? 'sortUp' : 'sortDown'} />
+      <EuiIcon color="subdued" type={type === 'input' ? 'sortUp' : 'sortDown'} aria-hidden={true} />
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.agentBuilder.tokenDisplay.tokenUsage"

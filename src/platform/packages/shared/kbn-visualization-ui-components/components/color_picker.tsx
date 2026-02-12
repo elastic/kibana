@@ -129,7 +129,13 @@ export const ColorPicker = ({
             {inputLabel}
             {!disableHelpTooltip && (
               <>
-                <EuiIcon type="question" color="subdued" size="s" className="eui-alignTop" />
+                <EuiIcon
+                  type="question"
+                  color="subdued"
+                  size="s"
+                  className="eui-alignTop"
+                  aria-hidden={true}
+                />
               </>
             )}
           </span>

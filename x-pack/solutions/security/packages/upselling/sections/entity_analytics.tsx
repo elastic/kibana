@@ -46,7 +46,7 @@ export const EntityAnalyticsUpsellingSection = memo(
     return (
       <StyledEuiCard
         betaBadgeProps={{ label: upgradeToLabel }}
-        icon={<EuiIcon size="xl" type="lock" />}
+        icon={<EuiIcon size="xl" type="lock" aria-hidden={true} />}
         display="subdued"
         title={
           <h3>

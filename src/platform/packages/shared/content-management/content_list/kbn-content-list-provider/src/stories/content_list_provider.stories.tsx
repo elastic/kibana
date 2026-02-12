@@ -129,7 +129,7 @@ const SortControls = () => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <EuiIcon type="sortable" />
+        <EuiIcon type="sortable" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s">Sort by:</EuiText>

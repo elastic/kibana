@@ -76,7 +76,7 @@ export const SidePanelContentManager = memo(() => {
               id="xpack.securitySolution.console.sidePanel.helpDescription"
               defaultMessage="Use the add ({icon}) button to populate a response action to the text bar. Add additional parameters or comments as necessary."
               values={{
-                icon: <EuiIcon type="plusInCircle" />,
+                icon: <EuiIcon type="plusInCircle" aria-hidden={true} />,
               }}
             />
           </EuiText>

@@ -69,7 +69,7 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
         {(Object.keys(jobDetails) as Array<keyof typeof jobDetails>).map((jobType) => (
           <EuiFlexItem key={jobType} grow={1}>
             <EuiCard
-              icon={<EuiIcon size="xl" type={jobDetails[jobType].icon} />}
+              icon={<EuiIcon size="xl" type={jobDetails[jobType].icon} aria-hidden={true} />}
               title={jobDetails[jobType].title}
               description={jobDetails[jobType].helpText}
               data-test-subj={`mlAnalyticsCreation-${jobType}-option${

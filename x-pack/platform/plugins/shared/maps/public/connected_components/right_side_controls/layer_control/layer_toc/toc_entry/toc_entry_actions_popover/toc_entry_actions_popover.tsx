@@ -123,7 +123,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
     const actionItems = [
       {
         name: FIT_TO_DATA_LABEL,
-        icon: <EuiIcon type="expand" size="m" />,
+        icon: <EuiIcon type="expand" size="m" aria-hidden={true} />,
         'data-test-subj': 'fitToBoundsButton',
         toolTipContent: this.props.supportsFitToBounds
           ? null
@@ -138,7 +138,13 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
       },
       {
         name: getVisibilityToggleLabel(this.props.layer.isVisible()),
-        icon: <EuiIcon type={getVisibilityToggleIcon(this.props.layer.isVisible())} size="m" />,
+        icon: (
+          <EuiIcon
+            type={getVisibilityToggleIcon(this.props.layer.isVisible())}
+            size="m"
+            aria-hidden={true}
+          />
+        ),
         'data-test-subj': 'layerVisibilityToggleButton',
         toolTipContent: null,
         onClick: () => {
@@ -152,7 +158,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         name: i18n.translate('xpack.maps.layerTocActions.showThisLayerOnlyTitle', {
           defaultMessage: 'Show this layer only',
         }),
-        icon: <EuiIcon type="eye" size="m" />,
+        icon: <EuiIcon type="eye" size="m" aria-hidden={true} />,
         'data-test-subj': 'showThisLayerOnlyButton',
         toolTipContent: null,
         onClick: () => {
@@ -166,7 +172,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
       actionItems.push({
         disabled: this.props.isEditButtonDisabled,
         name: EDIT_LAYER_SETTINGS_LABEL,
-        icon: <EuiIcon type="pencil" size="m" />,
+        icon: <EuiIcon type="pencil" size="m" aria-hidden={true} />,
         'data-test-subj': 'layerSettingsButton',
         toolTipContent: null,
         onClick: () => {
@@ -177,7 +183,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
       if (this.state.supportsFeatureEditing) {
         actionItems.push({
           name: EDIT_FEATURES_LABEL,
-          icon: <EuiIcon type="vector" size="m" />,
+          icon: <EuiIcon type="vector" size="m" aria-hidden={true} />,
           'data-test-subj': 'editLayerButton',
           toolTipContent: this.state.isFeatureEditingEnabled
             ? null
@@ -206,7 +212,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         name: i18n.translate('xpack.maps.layerTocActions.cloneLayerTitle', {
           defaultMessage: 'Clone layer',
         }),
-        icon: <EuiIcon type="copy" size="m" />,
+        icon: <EuiIcon type="copy" size="m" aria-hidden={true} />,
         toolTipContent: null,
         'data-test-subj': 'cloneLayerButton',
         onClick: () => {
@@ -219,7 +225,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           name: i18n.translate('xpack.maps.layerTocActions.ungroupLayerTitle', {
             defaultMessage: 'Ungroup layers',
           }),
-          icon: <EuiIcon type="layers" size="m" />,
+          icon: <EuiIcon type="layers" size="m" aria-hidden={true} />,
           toolTipContent: null,
           'data-test-subj': 'removeLayerButton',
           onClick: () => {
@@ -233,7 +239,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         name: i18n.translate('xpack.maps.layerTocActions.removeLayerTitle', {
           defaultMessage: 'Remove layer',
         }),
-        icon: <EuiIcon type="trash" size="m" />,
+        icon: <EuiIcon type="trash" size="m" aria-hidden={true} />,
         toolTipContent: null,
         'data-test-subj': 'removeLayerButton',
         onClick: () => {

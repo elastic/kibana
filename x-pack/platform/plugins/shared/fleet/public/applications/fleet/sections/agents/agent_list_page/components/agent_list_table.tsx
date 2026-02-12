@@ -240,7 +240,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           <span tabIndex={0}>
             <FormattedMessage id="xpack.fleet.agentList.cpuTitle" defaultMessage="CPU" />
             &nbsp;
-            <EuiIcon type="info" />
+            <EuiIcon type="info" aria-hidden={true} />
           </span>
         </EuiToolTip>
       ),
@@ -268,7 +268,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           <span tabIndex={0}>
             <FormattedMessage id="xpack.fleet.agentList.memoryTitle" defaultMessage="Memory" />
             &nbsp;
-            <EuiIcon type="info" />
+            <EuiIcon type="info" aria-hidden={true} />
           </span>
         </EuiToolTip>
       ),

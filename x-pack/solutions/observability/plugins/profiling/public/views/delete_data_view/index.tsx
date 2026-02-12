@@ -22,7 +22,7 @@ export function DeleteDataView() {
       <div style={{ display: 'flex', flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
         <EuiCard
           style={{ flexGrow: 0, maxWidth: '500px' }}
-          icon={<EuiIcon color="danger" size="xxl" type="warning" />}
+          icon={<EuiIcon color="danger" size="xxl" type="warning" aria-hidden={true} />}
           title="You have existing profiling data"
           description="To proceed with the Universal Profiling setup, please delete existing profiling data following the steps described in the link below."
           footer={

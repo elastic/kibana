@@ -322,7 +322,8 @@ export const ComponentTable: FunctionComponent<Props> = ({
         truncateText: true,
         align: 'center',
         sortable: true,
-        render: (hasMappings: boolean) => (hasMappings ? <EuiIcon type="check" /> : null),
+        render: (hasMappings: boolean) =>
+          hasMappings ? <EuiIcon type="check" aria-hidden={true} /> : null,
       },
       {
         field: 'hasSettings',
@@ -332,7 +333,8 @@ export const ComponentTable: FunctionComponent<Props> = ({
         truncateText: true,
         align: 'center',
         sortable: true,
-        render: (hasSettings: boolean) => (hasSettings ? <EuiIcon type="check" /> : null),
+        render: (hasSettings: boolean) =>
+          hasSettings ? <EuiIcon type="check" aria-hidden={true} /> : null,
       },
       {
         field: 'hasAliases',
@@ -342,7 +344,8 @@ export const ComponentTable: FunctionComponent<Props> = ({
         truncateText: true,
         align: 'center',
         sortable: true,
-        render: (hasAliases: boolean) => (hasAliases ? <EuiIcon type="check" /> : null),
+        render: (hasAliases: boolean) =>
+          hasAliases ? <EuiIcon type="check" aria-hidden={true} /> : null,
       },
       {
         name: (

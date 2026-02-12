@@ -21,6 +21,7 @@ export const getEuiTableColumn = ({ label }: { label: string }): CustomFieldEuiT
         customField?.value ? 'check' : 'cross'
       }`}
       type={customField?.value ? 'check' : 'cross'}
+      aria-hidden={true}
     />
   ),
   'data-test-subj': 'toggle-custom-field-column',

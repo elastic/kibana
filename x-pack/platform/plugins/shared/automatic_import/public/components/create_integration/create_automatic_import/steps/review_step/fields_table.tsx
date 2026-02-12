@@ -65,7 +65,7 @@ const columns: Array<EuiBasicTableColumn<FieldObject>> = [
                 />
               </EuiToolTip>
             ) : (
-              <EuiIcon type="question" />
+              <EuiIcon type="question" aria-hidden={true} />
             )}
           </EuiFlexItem>
 

@@ -1340,7 +1340,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           data-document-number={0}
         >
           <EuiText size="xs" color="subdued" textAlign="center">
-            <EuiIcon type="discoverApp" size="m" color="subdued" />
+            <EuiIcon type="discoverApp" size="m" color="subdued" aria-hidden={true} />
             <EuiSpacer size="s" />
             <FormattedMessage
               id="unifiedDataTable.noResultsFound"

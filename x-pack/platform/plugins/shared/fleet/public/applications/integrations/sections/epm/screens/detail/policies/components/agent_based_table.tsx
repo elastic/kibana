@@ -197,7 +197,7 @@ export const AgentBasedPackagePoliciesTable = ({
                 </EuiText>
               ) : (
                 <EuiText color="subdued" size="xs">
-                  <EuiIcon size="m" type="warning" color="warning" />
+                  <EuiIcon size="m" type="warning" color="warning" aria-hidden={true} />
                   &nbsp;
                   <FormattedMessage
                     id="xpack.fleet.epm.packageDetails.integrationList.agentPolicyDeletedWarning"

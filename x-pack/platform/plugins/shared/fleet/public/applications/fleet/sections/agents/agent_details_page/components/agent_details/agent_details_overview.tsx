@@ -77,7 +77,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                             defaultMessage="CPU"
                           />
                           &nbsp;
-                          <EuiIcon type="info" />
+                          <EuiIcon type="info" aria-hidden={true} />
                         </span>
                       </EuiToolTip>
                     ),
@@ -99,7 +99,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                             defaultMessage="Memory"
                           />
                           &nbsp;
-                          <EuiIcon type="info" />
+                          <EuiIcon type="info" aria-hidden={true} />
                         </span>
                       </EuiToolTip>
                     ),

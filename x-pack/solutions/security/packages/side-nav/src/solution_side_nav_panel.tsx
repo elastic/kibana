@@ -391,7 +391,7 @@ const ItemLabel: React.FC<{ item: SolutionSideNavItem }> = React.memo(function I
 }) {
   return (
     <>
-      {label} {openInNewTab && <EuiIcon type="popout" size="s" />}
+      {label} {openInNewTab && <EuiIcon type="popout" size="s" aria-hidden={true} />}
     </>
   );
 });

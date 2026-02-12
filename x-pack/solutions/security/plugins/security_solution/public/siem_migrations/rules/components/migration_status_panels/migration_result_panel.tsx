@@ -139,7 +139,7 @@ export const RuleMigrationResultPanel = React.memo<RuleMigrationResultPanelProps
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type={AssistantIcon} size="m" />
+                    <EuiIcon type={AssistantIcon} size="m" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <PanelText size="s" semiBold>

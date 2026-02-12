@@ -74,7 +74,7 @@ export function SuggestionItem(props: Props) {
       onKeyDown={onKeyDown}
     >
       <div css={[suggestionItemFieldCss, suggestionItemIconFieldCss]}>
-        <EuiIcon type={getEuiIconType(suggestion.type)} />
+        <EuiIcon type={getEuiIconType(suggestion.type)} aria-hidden={true} />
       </div>
       <div css={[suggestionItemFieldCss, suggestionItemTextFieldCss]}>{suggestion.text}</div>
       <div css={[suggestionItemFieldCss, suggestionItemDescriptionFieldCss]}>

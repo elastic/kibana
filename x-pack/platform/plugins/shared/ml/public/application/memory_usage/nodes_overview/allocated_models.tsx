@@ -131,7 +131,13 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
             {i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.allocationHeader', {
               defaultMessage: 'Allocation',
             })}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </span>
         </EuiToolTip>
       ),
@@ -189,7 +195,13 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
                 defaultMessage: 'Throughput',
               }
             )}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </span>
         </EuiToolTip>
       ),
@@ -225,7 +237,13 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
               </span>
             </EuiFlexItem>
             <EuiFlexItem grow={false} css={{ minWidth: euiTheme.euiTheme.size.m }}>
-              <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+              <EuiIcon
+                size="s"
+                color="subdued"
+                type="question"
+                className="eui-alignTop"
+                aria-hidden={true}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiToolTip>

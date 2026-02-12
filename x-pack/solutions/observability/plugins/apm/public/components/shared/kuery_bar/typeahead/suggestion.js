@@ -102,7 +102,7 @@ function Suggestion(props) {
       onMouseEnter={props.onMouseEnter}
     >
       <Icon type={props.suggestion.type}>
-        <EuiIcon type={getEuiIconType(props.suggestion.type)} />
+        <EuiIcon type={getEuiIconType(props.suggestion.type)} aria-hidden={true} />
       </Icon>
       <TextValue>{props.suggestion.text}</TextValue>
       <Description>{props.suggestion.description}</Description>

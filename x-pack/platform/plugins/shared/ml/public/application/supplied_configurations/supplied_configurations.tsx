@@ -172,7 +172,11 @@ export const SuppliedConfigurations = () => {
               <EuiCard
                 data-test-subj={`mlSuppliedConfigurationsCard ${id}`}
                 layout="horizontal"
-                icon={isLogoObject(logo) ? <EuiIcon size="xxl" type={logo.icon} /> : null}
+                icon={
+                  isLogoObject(logo) ? (
+                    <EuiIcon size="xxl" type={logo.icon} aria-hidden={true} />
+                  ) : null
+                }
                 title={title}
                 description={description}
                 onClick={() => {

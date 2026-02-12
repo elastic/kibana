@@ -83,7 +83,7 @@ export const SaveModal = ({
       confirmButtonLabel={
         <>
           <div>
-            <EuiIcon type="save" />
+            <EuiIcon type="save" aria-hidden={true} />
           </div>
           <div>
             {i18n.translate(

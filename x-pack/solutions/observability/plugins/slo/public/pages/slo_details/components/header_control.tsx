@@ -204,6 +204,7 @@ export function HeaderControl({ slo }: Props) {
       css={{
         marginLeft: '10px',
       }}
+      aria-hidden={true}
     />
   ) : null;
 

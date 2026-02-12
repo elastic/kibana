@@ -99,14 +99,14 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
         items: [
           {
             name: ADD_FIELD_LABEL,
-            icon: <EuiIcon type="plusInCircle" size="m" />,
+            icon: <EuiIcon type="plusInCircle" size="m" aria-hidden={true} />,
             panel: 1,
           },
           timelineType === TimelineTypeEnum.template
             ? {
                 disabled: timelineType !== TimelineTypeEnum.template,
                 name: ADD_TEMPLATE_FIELD_LABEL,
-                icon: <EuiIcon type="visText" size="m" />,
+                icon: <EuiIcon type="visText" size="m" aria-hidden={true} />,
                 panel: 2,
               }
             : null,

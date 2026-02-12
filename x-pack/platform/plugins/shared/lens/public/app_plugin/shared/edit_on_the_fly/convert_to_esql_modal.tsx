@@ -95,7 +95,7 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         field: 'icon',
         name: '',
         width: euiTheme.size.l,
-        render: (icon: string) => <EuiIcon type={icon} />,
+        render: (icon: string) => <EuiIcon type={icon} aria-hidden={true} />,
       },
       {
         field: 'name',

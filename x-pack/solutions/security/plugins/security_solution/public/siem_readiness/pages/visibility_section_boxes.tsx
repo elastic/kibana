@@ -225,7 +225,11 @@ export const VisibilitySectionBoxes: React.FC<VisibilitySectionBoxesProps> = ({
                       grow={false}
                       style={{ width: '50px', height: '50px', alignSelf: 'end' }}
                     >
-                      <EuiIcon type={box.illustration} css={{ width: '100%', height: '100%' }} />
+                      <EuiIcon
+                        type={box.illustration}
+                        css={{ width: '100%', height: '100%' }}
+                        aria-hidden={true}
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>

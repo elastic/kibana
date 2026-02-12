@@ -13,7 +13,7 @@ export const LoadingIssuesError: FC<PropsWithChildren<unknown>> = ({ children })
   <EuiText color="subdued" data-test-subj="loadingIssuesError">
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiIcon type="warning" color="danger" />
+        <EuiIcon type="warning" color="danger" aria-hidden={true} />
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>{children}</EuiFlexItem>

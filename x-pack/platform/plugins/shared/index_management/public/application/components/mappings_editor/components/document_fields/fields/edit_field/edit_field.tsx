@@ -229,7 +229,7 @@ export const EditField = React.memo(
                               }
                             )}
                           </EuiTextColor>
-                          <EuiIcon type="question" />
+                          <EuiIcon type="question" aria-hidden={true} />
                         </span>
                       </EuiToolTip>
                     </p>

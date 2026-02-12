@@ -81,7 +81,7 @@ export const ThresholdIndicator = ({
 
   const content =
     previous === null ? (
-      <EuiIcon type="minus" size={asStat ? 'l' : 'm'} color="subdued" />
+      <EuiIcon type="minus" size={asStat ? 'l' : 'm'} color="subdued" aria-hidden={true} />
     ) : (
       <EuiToolTip
         content={getToolTipContent()}
@@ -95,9 +95,10 @@ export const ThresholdIndicator = ({
             type={delta > 0 ? 'sortUp' : 'sortDown'}
             size={asStat ? 'l' : 'm'}
             color={getColor()}
+            aria-hidden={true}
           />
         ) : (
-          <EuiIcon type="minus" size={asStat ? 'l' : 'm'} color="subdued" />
+          <EuiIcon type="minus" size={asStat ? 'l' : 'm'} color="subdued" aria-hidden={true} />
         )}
       </EuiToolTip>
     );

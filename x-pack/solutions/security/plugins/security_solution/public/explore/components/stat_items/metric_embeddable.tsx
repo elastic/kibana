@@ -41,6 +41,7 @@ const MetricEmbeddableComponent = ({
                   color={field.color}
                   size="l"
                   data-test-subj="stat-icon"
+                  aria-hidden={true}
                 />
               </FlexItem>
             )}

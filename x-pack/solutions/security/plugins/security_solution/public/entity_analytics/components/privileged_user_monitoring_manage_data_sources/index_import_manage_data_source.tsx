@@ -36,7 +36,7 @@ export const IndexImportManageDataSource = ({
     <>
       <EuiFlexGroup alignItems="flexStart" direction="column">
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          <EuiIcon size="l" type="indexOpen" />
+          <EuiIcon size="l" type="indexOpen" aria-hidden={true} />
           <EuiText>
             <h1>
               <FormattedMessage

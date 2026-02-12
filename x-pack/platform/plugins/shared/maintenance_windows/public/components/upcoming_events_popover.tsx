@@ -110,7 +110,7 @@ export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React
                 css={{ width: '300px' }}
               >
                 <EuiFlexItem grow={false}>
-                  <EuiIcon color="subdued" type="calendar" />
+                  <EuiIcon color="subdued" type="calendar" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText color="subdued" size="s">

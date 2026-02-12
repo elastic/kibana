@@ -47,7 +47,7 @@ export const StepIcon = React.memo(
     if (actionTypeIcon) {
       return (
         <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-          <EuiIcon type={actionTypeIcon} size="m" />
+          <EuiIcon type={actionTypeIcon} size="m" aria-hidden={true} />
         </Suspense>
       );
     }
@@ -56,7 +56,7 @@ export const StepIcon = React.memo(
     if (stepDefinition?.icon) {
       return (
         <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-          <EuiIcon type={stepDefinition.icon} size="m" />
+          <EuiIcon type={stepDefinition.icon} size="m" aria-hidden={true} />
         </Suspense>
       );
     }

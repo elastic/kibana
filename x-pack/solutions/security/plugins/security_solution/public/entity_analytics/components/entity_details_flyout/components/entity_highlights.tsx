@@ -181,7 +181,7 @@ export const EntityHighlightsAccordion: React.FC<{
                 id="xpack.securitySolution.flyout.entityDetails.highlights.title"
                 defaultMessage="Entity summary"
               />{' '}
-              <EuiIcon type="sparkles" css={iconGradientStyle} />
+              <EuiIcon type="sparkles" css={iconGradientStyle} aria-hidden={true} />
             </h3>
           </EuiTitle>
         }

@@ -33,7 +33,7 @@ export const ThinkingTimeDisplay = ({ timeToFirstToken }: { timeToFirstToken: nu
         `}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type="clock" />
+          <EuiIcon type="clock" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">

@@ -145,7 +145,7 @@ export const DatasetComponent: React.FC<{
           <>
             <EuiSpacer size="xs" />
             <EuiText size="xs" color="warning">
-              <EuiIcon type="warning" />
+              <EuiIcon type="warning" aria-hidden={true} />
               &nbsp;
               <FormattedMessage
                 id="xpack.fleet.datasetCombo.warning"

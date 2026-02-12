@@ -54,5 +54,5 @@ export function getConnectorIcon(iconType: string, size: IconSize = 'l'): JSX.El
   }
 
   // Otherwise, it's a string icon name, render directly
-  return <EuiIcon type={iconTypeOrComponent} size={size} />;
+  return <EuiIcon type={iconTypeOrComponent} size={size} aria-hidden={true} />;
 }

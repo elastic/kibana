@@ -57,6 +57,7 @@ export const TruncatedCopyableText = ({ textToCopy }: { textToCopy: string }) =>
             `}
             onClick={copy}
             type="copy"
+            aria-hidden={true}
           />
         )}
       </EuiCopy>

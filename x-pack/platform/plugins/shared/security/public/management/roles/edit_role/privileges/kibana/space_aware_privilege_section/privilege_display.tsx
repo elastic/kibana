@@ -44,7 +44,7 @@ function getDisplayValue(privilege: string | string[] | undefined) {
     (privileges.length === 1 && privileges.includes(constants.NO_PRIVILEGE_VALUE));
 
   if (isPrivilegeMissing) {
-    displayValue = <EuiIcon color="subdued" type={'minusInCircle'} />;
+    displayValue = <EuiIcon color="subdued" type={'minusInCircle'} aria-hidden={true} />;
   } else {
     displayValue = privileges.map((p) => _.upperFirst(p)).join(', ');
   }

@@ -86,11 +86,11 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
       `;
       return (
         <EuiPanel hasBorder={false} hasShadow={false} css={panelStyles} paddingSize="xs">
-          <EuiIcon type={iconType} size={iconSize} />
+          <EuiIcon type={iconType} size={iconSize} aria-hidden={true} />
         </EuiPanel>
       );
     }
-    return <EuiIcon type={iconType} size={iconSize} />;
+    return <EuiIcon type={iconType} size={iconSize} aria-hidden={true} />;
   }
 
   let type: 'user' | 'space' | undefined;

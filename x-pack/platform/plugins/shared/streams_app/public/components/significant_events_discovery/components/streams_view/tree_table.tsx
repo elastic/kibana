@@ -342,9 +342,23 @@ export function StreamsTreeTable({
                     return '-';
                   case TaskStatus.Completed:
                   case TaskStatus.Acknowledged:
-                    return <EuiIcon type="checkInCircleFilled" color="success" size="m" />;
+                    return (
+                      <EuiIcon
+                        type="checkInCircleFilled"
+                        color="success"
+                        size="m"
+                        aria-hidden={true}
+                      />
+                    );
                   case TaskStatus.Stale:
-                    return <EuiIcon type="checkInCircleFilled" color="subdued" size="m" />;
+                    return (
+                      <EuiIcon
+                        type="checkInCircleFilled"
+                        color="subdued"
+                        size="m"
+                        aria-hidden={true}
+                      />
+                    );
                   case TaskStatus.Failed:
                     return (
                       <EuiIconTip

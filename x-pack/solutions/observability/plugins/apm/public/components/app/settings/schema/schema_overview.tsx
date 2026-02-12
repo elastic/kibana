@@ -102,7 +102,7 @@ export function SchemaOverview({
         <EuiFlexItem />
         <EuiFlexItem style={{ minWidth: '250px' }}>
           <EuiCard
-            icon={<EuiIcon size="xxl" type="node" />}
+            icon={<EuiIcon size="xxl" type="node" aria-hidden={true} />}
             title={i18n.translate('xpack.apm.settings.schema.migrate.classicIndices.title', {
               defaultMessage: 'APM Server binary',
             })}

@@ -138,7 +138,7 @@ export const SessionPreview: FC = () => {
       data-test-subj={SESSION_PREVIEW_TEST_ID}
     >
       <ValueContainer>
-        <EuiIcon type="user" />
+        <EuiIcon type="user" aria-hidden={true} />
         &nbsp;
         <span css={emphasisStyles}>{userName}</span>
       </ValueContainer>

@@ -216,7 +216,7 @@ export const renderEventModule = ({
             }
           >
             <EuiLink href={endpointRefUrl} target="_blank">
-              <EuiIcon type={endPointSvg} size="m" />
+              <EuiIcon type={endPointSvg} size="m" aria-hidden={true} />
             </EuiLink>
           </EuiToolTip>
         </EuiFlexItem>

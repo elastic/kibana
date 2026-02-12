@@ -101,7 +101,7 @@ export const ActionFactory: React.FC<ActionFactoryProps> = ({
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           {!!icon && (
             <EuiFlexItem grow={false}>
-              <EuiIcon type={icon} size="m" />
+              <EuiIcon type={icon} size="m" aria-hidden={true} />
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={true}>

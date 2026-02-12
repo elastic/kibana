@@ -133,7 +133,7 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
                   defaultMessage: 'Sort host handle',
                 })}
               >
-                <EuiIcon color="text" type="grab" />
+                <EuiIcon color="text" type="grab" aria-hidden={true} />
               </DraggableDiv>
             </EuiFlexItem>
             <EuiFlexItem>

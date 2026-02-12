@@ -51,13 +51,14 @@ export const EndpointPolicyCreateMultiStepExtension = memo(() => {
         width: ${logoSize};
         height: ${logoSize};
       `}
+      aria-hidden={true}
     />
   );
 
   const features = (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="check" />
+        <EuiIcon type="check" aria-hidden={true} />
       </EuiFlexItem>
 
       <EuiFlexItem>

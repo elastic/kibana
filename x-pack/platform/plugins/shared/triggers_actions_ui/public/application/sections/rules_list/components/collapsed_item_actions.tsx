@@ -319,7 +319,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           title: (
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="bellSlash" />
+                <EuiIcon type="bellSlash" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {i18n.translate(

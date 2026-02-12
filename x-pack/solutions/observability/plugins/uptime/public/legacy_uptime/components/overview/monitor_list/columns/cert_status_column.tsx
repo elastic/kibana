@@ -42,7 +42,7 @@ export const CertStatusColumn: React.FC<Props> = ({ expiry, boldStyle = false })
     return (
       <EuiToolTip content={moment(notAfter).format('L LT')}>
         <EuiText size="s" tabIndex={0}>
-          <EuiIcon color={color} type="lock" size="s" />
+          <EuiIcon color={color} type="lock" size="s" aria-hidden={true} />
           {boldStyle ? (
             <H4Text>
               {text} {relativeDate}

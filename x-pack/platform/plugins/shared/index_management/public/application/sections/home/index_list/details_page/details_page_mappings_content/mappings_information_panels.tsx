@@ -111,7 +111,7 @@ export const MappingsInformationPanels = ({
         <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="info" />
+              <EuiIcon type="info" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="xs">
@@ -151,7 +151,7 @@ export const MappingsInformationPanels = ({
         <EuiPanel grow={false} paddingSize="l" hasShadow={false} hasBorder>
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="info" />
+              <EuiIcon type="info" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="xs">

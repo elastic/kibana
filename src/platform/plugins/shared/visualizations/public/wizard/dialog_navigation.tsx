@@ -21,7 +21,7 @@ function DialogNavigation(props: DialogNavigationProps) {
       <EuiLink data-test-subj="goBackLink" onClick={props.goBack}>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="arrowLeft" />
+            <EuiIcon type="arrowLeft" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>
             {i18n.translate('visualizations.newVisWizard.goBackLink', {

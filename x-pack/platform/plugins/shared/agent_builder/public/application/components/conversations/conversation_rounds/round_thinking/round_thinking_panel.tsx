@@ -91,7 +91,7 @@ export const RoundThinkingPanel = ({
             <EuiTitle size="xs">
               <p>{reasoningLabel}</p>
             </EuiTitle>
-            <EuiIcon type="arrowDown" color="subdued" size="m" />
+            <EuiIcon type="arrowDown" color="subdued" size="m" aria-hidden={true} />
           </EuiFlexGroup>
         </EuiFlexGroup>
 

@@ -133,6 +133,7 @@ export function WorkflowYamlValidationAccordion({
         type="checkInCircleFilled"
         color={euiTheme.colors.vis.euiColorVisSuccess0}
         size="m"
+        aria-hidden={true}
       />
     );
     buttonContent = 'No validation errors';
@@ -142,6 +143,7 @@ export function WorkflowYamlValidationAccordion({
         type={highestSeverity === 'error' ? 'errorFilled' : 'warningFilled'}
         color={highestSeverity === 'error' ? 'danger' : euiTheme.colors.vis.euiColorVis8}
         size="m"
+        aria-hidden={true}
       />
     );
     const errorCount = allValidationErrors?.filter((error) => error.severity === 'error').length;
@@ -237,6 +239,7 @@ export function WorkflowYamlValidationAccordion({
                   }
                   size="s"
                   css={styles.validationErrorIcon}
+                  aria-hidden={true}
                 />
               </EuiFlexItem>
               <EuiFlexItem css={styles.validationErrorText}>

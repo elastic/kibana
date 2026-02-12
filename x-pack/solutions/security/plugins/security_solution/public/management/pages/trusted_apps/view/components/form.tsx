@@ -887,7 +887,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             <EuiSpacer size="s" />
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="warningFilled" size="s" color="warning" />
+                <EuiIcon type="warningFilled" size="s" color="warning" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText

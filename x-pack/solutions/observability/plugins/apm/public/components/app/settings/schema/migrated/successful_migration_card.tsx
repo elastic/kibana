@@ -13,7 +13,7 @@ import { CardFooterContent } from './card_footer_content';
 export function SuccessfulMigrationCard() {
   return (
     <EuiCard
-      icon={<EuiIcon size="xxl" type="checkInCircleFilled" color="success" />}
+      icon={<EuiIcon size="xxl" type="checkInCircleFilled" color="success" aria-hidden={true} />}
       title={i18n.translate('xpack.apm.settings.schema.success.title', {
         defaultMessage: 'Elastic Agent successfully setup!',
       })}

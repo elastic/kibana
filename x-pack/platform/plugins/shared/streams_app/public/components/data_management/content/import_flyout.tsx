@@ -148,7 +148,7 @@ export function ImportContentPackFlyout({
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexGroup alignItems="center" gutterSize="m">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="package" />
+                    <EuiIcon type="package" aria-hidden={true} />
                   </EuiFlexItem>
 
                   <EuiFlexItem grow={false}>

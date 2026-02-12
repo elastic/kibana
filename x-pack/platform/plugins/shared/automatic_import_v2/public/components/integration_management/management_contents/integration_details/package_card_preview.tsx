@@ -73,7 +73,11 @@ export const PackageCardPreview = React.memo<PackageCardPreviewProps>(({}) => {
           titleSize="xs"
           hasBorder
           icon={
-            <EuiIcon size={'xl'} type={logo ? `data:image/svg+xml;base64,${logo}` : 'package'} />
+            <EuiIcon
+              size={'xl'}
+              type={logo ? `data:image/svg+xml;base64,${logo}` : 'package'}
+              aria-hidden={true}
+            />
           }
           betaBadgeProps={{
             label: i18n.PREVIEW,

@@ -267,7 +267,7 @@ function FieldListItemComponent(
 
             {isMultiField && (
               <EuiFlexItem grow={false}>
-                <EuiIcon color="subdued" type="documents" />
+                <EuiIcon color="subdued" type="documents" aria-hidden={true} />
               </EuiFlexItem>
             )}
 

@@ -118,7 +118,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
       .map(({ label, iconType, href, content }: UserMenuLink) => ({
         name: label,
-        icon: <EuiIcon type={iconType} size="m" />,
+        icon: <EuiIcon type={iconType} size="m" aria-hidden={true} />,
         href,
         'data-test-subj': `userMenuLink__${label}`,
         content,
@@ -137,7 +137,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
           defaultMessage="Edit profile"
         />
       ),
-      icon: <EuiIcon type="user" size="m" />,
+      icon: <EuiIcon type="user" size="m" aria-hidden={true} />,
       href: editProfileUrl,
       onClick: () => {
         setIsPopoverOpen(false);
@@ -161,7 +161,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
         defaultMessage="Log out"
       />
     ),
-    icon: <EuiIcon type="exit" size="m" />,
+    icon: <EuiIcon type="exit" size="m" aria-hidden={true} />,
     href: logoutUrl,
     'data-test-subj': 'logoutLink',
   });

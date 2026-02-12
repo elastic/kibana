@@ -64,7 +64,12 @@ export const AlertProcessingKeyInsight: React.FC<Props> = ({ isLoading, valueMet
           data-test-subj="alertProcessingKeyInsightsGreetingGroup"
         >
           <EuiFlexItem grow={false}>
-            <EuiIcon type="logoElastic" size="m" data-test-subj="alertProcessingKeyInsightsLogo" />
+            <EuiIcon
+              type="logoElastic"
+              size="m"
+              data-test-subj="alertProcessingKeyInsightsLogo"
+              aria-hidden={true}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="xs">

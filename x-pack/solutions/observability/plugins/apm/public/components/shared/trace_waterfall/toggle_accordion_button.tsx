@@ -39,7 +39,7 @@ export function ToggleAccordionButton({ isOpen, childrenCount, onClick }: Props)
       })}
     >
       <EuiFlexItem grow={false}>
-        <EuiIcon type={isOpen ? 'arrowDown' : 'arrowRight'} />
+        <EuiIcon type={isOpen ? 'arrowDown' : 'arrowRight'} aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <div

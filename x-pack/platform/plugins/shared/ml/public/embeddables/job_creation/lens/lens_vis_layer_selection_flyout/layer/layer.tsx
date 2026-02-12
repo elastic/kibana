@@ -35,7 +35,7 @@ export const Layer: FC<Props> = ({ layer, layerIndex, embeddable }) => {
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             {layer.icon && (
               <EuiFlexItem grow={false}>
-                <EuiIcon type={layer.icon} />
+                <EuiIcon type={layer.icon} aria-hidden={true} />
               </EuiFlexItem>
             )}
             <EuiFlexItem grow>

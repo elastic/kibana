@@ -148,7 +148,7 @@ export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> =
                   }
                 )}
               >
-                <EuiIcon type="grab" />
+                <EuiIcon type="grab" aria-hidden={true} />
               </EuiPanel>
             ) : (
               <EuiPanel

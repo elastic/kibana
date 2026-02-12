@@ -181,7 +181,7 @@ export const ConfirmBulkUpgradeModal: React.FunctionComponent<{
         </EuiFormRow>
         <EuiSpacer size="m" />
         <EuiText size="xs" color="subdued">
-          <EuiIcon type="info" size="m" />
+          <EuiIcon type="info" size="m" aria-hidden={true} />
           &nbsp;
           <FormattedMessage
             id="xpack.fleet.installedIntegrations.bulkUpgradeModal.policiesCallout"

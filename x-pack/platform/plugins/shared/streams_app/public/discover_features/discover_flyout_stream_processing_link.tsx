@@ -71,6 +71,7 @@ export function DiscoverFlyoutStreamProcessingLink({
             css={css`
               margin-left: ${euiTheme.size.s};
             `}
+            aria-hidden={true}
           />
           <EuiText size="xs" className="eui-textTruncate">
             {message}

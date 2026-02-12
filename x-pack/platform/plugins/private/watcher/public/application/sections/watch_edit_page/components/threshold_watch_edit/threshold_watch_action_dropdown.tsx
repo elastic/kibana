@@ -114,7 +114,7 @@ export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings,
             >
               <EuiFlexGroup responsive={false}>
                 <EuiFlexItem grow={false} css={styles.watcherTresholdActionContextMenuItem}>
-                  <EuiIcon type={action.iconClass} />
+                  <EuiIcon type={action.iconClass} aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <strong>{action.typeName}</strong>

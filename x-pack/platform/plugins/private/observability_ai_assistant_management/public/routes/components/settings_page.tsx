@@ -169,6 +169,7 @@ export function SettingsPage() {
                 css={css`
                   ${headerIconShadow};
                 `}
+                aria-hidden={true}
               />
             </EuiFlexItem>
           ))}

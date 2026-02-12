@@ -83,6 +83,7 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(
                   size="l"
                   color="text"
                   type={actionTypeRegistry.get(actionType.id).iconClass}
+                  aria-hidden={true}
                 />
               ),
               isDisabled: !actionType.enabled,
@@ -105,6 +106,7 @@ export const ConnectorSetup = React.memo<ConnectorSetupProps>(
                           color="text"
                           type={actionTypeRegistry.get(actionType.id).iconClass}
                           data-test-subj="connectorActionId"
+                          aria-hidden={true}
                         />
                       </EuiFlexItem>
                       <EuiFlexItem>

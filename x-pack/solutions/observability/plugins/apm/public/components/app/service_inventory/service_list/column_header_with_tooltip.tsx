@@ -34,7 +34,7 @@ export function ColumnHeaderWithTooltip({
         panelPaddingSize="s"
         button={
           <button onClick={onButtonClick} data-test-subj="apmViewTableColumnPopoverButton">
-            <EuiIcon type="question" />
+            <EuiIcon type="question" aria-hidden={true} />
           </button>
         }
         isOpen={isPopoverOpen}

@@ -138,9 +138,9 @@ export const ActivityItem: React.FunctionComponent<{
     ROLLOUT_PASSED: {
       icon:
         action.nbAgentsFailed > 0 ? (
-          <EuiIcon size="m" type="warning" color="danger" />
+          <EuiIcon size="m" type="warning" color="danger" aria-hidden={true} />
         ) : (
-          <EuiIcon size="m" type="checkInCircleFilled" color="success" />
+          <EuiIcon size="m" type="checkInCircleFilled" color="success" aria-hidden={true} />
         ),
       title: completeTitle,
       titleColor:
@@ -155,7 +155,7 @@ export const ActivityItem: React.FunctionComponent<{
         ),
     },
     COMPLETE: {
-      icon: <EuiIcon size="m" type="checkInCircleFilled" color="success" />,
+      icon: <EuiIcon size="m" type="checkInCircleFilled" color="success" aria-hidden={true} />,
       title: completeTitle,
       titleColor: theme.euiTheme.colors.textSuccess,
       description:
@@ -191,13 +191,13 @@ export const ActivityItem: React.FunctionComponent<{
         ),
     },
     FAILED: {
-      icon: <EuiIcon size="m" type="warning" color="danger" />,
+      icon: <EuiIcon size="m" type="warning" color="danger" aria-hidden={true} />,
       title: completeTitle,
       titleColor: theme.euiTheme.colors.textDanger,
       description: failedDescription,
     },
     CANCELLED: {
-      icon: <EuiIcon size="m" type="warning" color="subdued" />,
+      icon: <EuiIcon size="m" type="warning" color="subdued" aria-hidden={true} />,
       titleColor: theme.euiTheme.colors.textSubdued,
       title: (
         <EuiText>
@@ -223,7 +223,7 @@ export const ActivityItem: React.FunctionComponent<{
       ),
     },
     EXPIRED: {
-      icon: <EuiIcon size="m" type="warning" color="subdued" />,
+      icon: <EuiIcon size="m" type="warning" color="subdued" aria-hidden={true} />,
       titleColor: theme.euiTheme.colors.textSubdued,
       title: (
         <EuiText>

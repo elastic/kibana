@@ -53,6 +53,7 @@ const noConnectorOption = {
           `}
           type="minusInCircle"
           size={ICON_SIZE}
+          aria-hidden={true}
         />
       </EuiFlexItem>
       <EuiFlexItem>
@@ -96,6 +97,7 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                         : suspendedComponentWithProps(iconClass)
                     }
                     size={ICON_SIZE}
+                    aria-hidden={true}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

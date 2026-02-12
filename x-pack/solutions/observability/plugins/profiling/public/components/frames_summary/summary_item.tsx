@@ -71,7 +71,13 @@ function BaseValue({
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
       {icon ? (
         <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-          <EuiIcon data-test-subj={`${id}_${icon}_${color}`} type={icon} color={color} size="l" />
+          <EuiIcon
+            data-test-subj={`${id}_${icon}_${color}`}
+            type={icon}
+            color={color}
+            size="l"
+            aria-hidden={true}
+          />
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>

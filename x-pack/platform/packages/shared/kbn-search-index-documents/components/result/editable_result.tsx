@@ -120,7 +120,7 @@ export const EditableResult: React.FC<EditableResultProps> = ({
               responsive={false}
             >
               <EuiFlexItem grow={false}>
-                {error && <EuiIcon type="warning" color="danger" />}
+                {error && <EuiIcon type="warning" color="danger" aria-hidden={true} />}
                 {!error &&
                   hasIndexSelector &&
                   (isLoading ? (
@@ -185,7 +185,7 @@ export const EditableResult: React.FC<EditableResultProps> = ({
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiText color="danger" size="xs">
-                <EuiIcon type="warning" />
+                <EuiIcon type="warning" aria-hidden={true} />
                 &nbsp;
                 {error}
               </EuiText>

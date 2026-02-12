@@ -111,7 +111,7 @@ export const ChangePointTypeFilter: FC<ChangePointTypeFilterProps> = ({ value, o
       <EuiToolTip position="left" content={description}>
         <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="info" color={'primary'} />
+            <EuiIcon type="info" color={'primary'} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>{label}</EuiFlexItem>
         </EuiFlexGroup>

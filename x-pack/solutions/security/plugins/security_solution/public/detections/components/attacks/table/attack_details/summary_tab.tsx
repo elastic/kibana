@@ -125,7 +125,7 @@ export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized 
           wrap={false}
         >
           <EuiFlexItem grow={false}>
-            <EuiIcon data-test-subj={TIMELINE_ICON_TEST_ID} type="timeline" />
+            <EuiIcon data-test-subj={TIMELINE_ICON_TEST_ID} type="timeline" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem data-test-subj={INVESTIGATE_IN_TIMELINE_LABEL_TEST_ID} grow={false}>
             {i18n.INVESTIGATE_IN_TIMELINE}

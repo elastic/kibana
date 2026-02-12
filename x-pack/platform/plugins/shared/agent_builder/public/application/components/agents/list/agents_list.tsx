@@ -157,7 +157,7 @@ export const AgentsList: React.FC = () => {
             return (
               <EuiToolTip position="right" content={actionLabels.deleteDescription} delay="long">
                 <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-                  <EuiIcon type="trash" color="danger" />
+                  <EuiIcon type="trash" color="danger" aria-hidden={true} />
                   <EuiLink
                     data-test-subj={`agentBuilderAgentsListDelete-${agent.id}`}
                     onClick={() => {

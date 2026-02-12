@@ -105,7 +105,9 @@ export class Assigned extends React.Component {
     // TODO: redesign for shard allocation
     const name = <EuiLink href={generateQueryAndLink(data)}>{data.name}</EuiLink>;
     const master =
-      data.node_type === 'master' ? <EuiIcon type="starFilledSpace" color="primary" /> : null;
+      data.node_type === 'master' ? (
+        <EuiIcon type="starFilledSpace" color="primary" aria-hidden={true} />
+      ) : null;
     const shards = sortBy(data.children, 'shard').map(this.createShard);
 
     return (

@@ -174,6 +174,7 @@ export function SloItemActions({
       css={{
         marginLeft: '10px',
       }}
+      aria-hidden={true}
     />
   ) : null;
 

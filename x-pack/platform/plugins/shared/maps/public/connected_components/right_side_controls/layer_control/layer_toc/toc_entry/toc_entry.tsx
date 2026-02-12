@@ -277,6 +277,7 @@ export class TOCEntry extends Component<Props, State> {
             className="eui-alignBaseline"
             type={isLegendDetailsOpen ? 'arrowUp' : 'arrowDown'}
             size="s"
+            aria-hidden={true}
           />
         </button>
       </span>
@@ -357,7 +358,7 @@ export class TOCEntry extends Component<Props, State> {
 
         {this.props.isFeatureEditorOpenForLayer && (
           <div className="mapTocEntry-isInEditingMode__row">
-            <EuiIcon type="vector" size="s" />
+            <EuiIcon type="vector" size="s" aria-hidden={true} />
             <span className="mapTocEntry-isInEditingMode__editFeatureText">
               <FormattedMessage
                 id="xpack.maps.layerControl.tocEntry.EditFeatures"

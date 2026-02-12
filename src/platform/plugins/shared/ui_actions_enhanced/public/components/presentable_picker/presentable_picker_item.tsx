@@ -55,7 +55,9 @@ export const PresentablePickerItem: React.FC<PresentablePickerItemProps> = ({
       betaBadgeLabel={item.isBeta ? txtBetaActionFactoryLabel : undefined}
       betaBadgeTooltipContent={item.isBeta ? txtBetaActionFactoryTooltip : undefined}
     >
-      {item.getIconType(context) && <EuiIcon type={item.getIconType(context)!} size="m" />}
+      {item.getIconType(context) && (
+        <EuiIcon type={item.getIconType(context)!} size="m" aria-hidden={true} />
+      )}
     </EuiKeyPadMenuItem>
   );
 

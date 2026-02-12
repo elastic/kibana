@@ -78,7 +78,7 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
             >
               {/* setting the key to remount the element as a workaround for https://github.com/elastic/kibana/issues/119951*/}
               <MLManageJobsLink jobId={jobId} key={jobId}>
-                <EuiIcon type="gear" />
+                <EuiIcon type="gear" aria-hidden={true} />
               </MLManageJobsLink>
             </EuiToolTip>
           </EuiFlexItem>
@@ -92,7 +92,7 @@ const columns: Array<ITableColumn<Jobs[0]>> = [
               )}
             >
               <MLExplorerLink jobId={jobId}>
-                <EuiIcon type="visTable" />
+                <EuiIcon type="visTable" aria-hidden={true} />
               </MLExplorerLink>
             </EuiToolTip>
           </EuiFlexItem>

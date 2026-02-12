@@ -158,7 +158,7 @@ const AttackDiscoveryTabComponent: React.FC<Props> = ({
               wrap={false}
             >
               <EuiFlexItem grow={false}>
-                <EuiIcon data-test-subj="timelineIcon" type="timeline" />
+                <EuiIcon data-test-subj="timelineIcon" type="timeline" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem data-test-subj="investigateInTimelineLabel" grow={false}>
                 {i18n.INVESTIGATE_IN_TIMELINE}

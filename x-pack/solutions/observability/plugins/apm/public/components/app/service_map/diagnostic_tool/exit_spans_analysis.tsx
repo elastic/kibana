@@ -53,7 +53,7 @@ export function ExitSpansAnalysis({
         <>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="checkInCircleFilled" color="success" />
+              <EuiIcon type="checkInCircleFilled" color="success" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
@@ -92,7 +92,7 @@ export function ExitSpansAnalysis({
         <>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="crossInCircle" color="danger" />
+              <EuiIcon type="crossInCircle" color="danger" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>

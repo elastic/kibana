@@ -203,7 +203,7 @@ export const AssetCriticalityTitle = () => (
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="info" color="subdued" />
+        <EuiIcon type="info" color="subdued" aria-hidden={true} />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiToolTip>

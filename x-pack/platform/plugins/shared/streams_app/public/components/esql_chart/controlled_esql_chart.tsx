@@ -140,7 +140,7 @@ export function ControlledEsqlChart<T extends string>({
                   style={{ fontWeight: 'normal' }}
                 >
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="info" />
+                    <EuiIcon type="info" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
                 </EuiFlexGroup>

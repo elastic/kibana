@@ -61,7 +61,9 @@ const CenterLabel = i18n.translate('securitySolutionPackages.csp.graph.controls.
   defaultMessage: 'Center',
 });
 
-const fitToViewIconFn = () => <EuiIcon type={fitToViewIcon} size="m" color="text" />;
+const fitToViewIconFn = () => (
+  <EuiIcon type={fitToViewIcon} size="m" color="text" aria-hidden={true} />
+);
 
 export const Controls = ({
   showZoom = true,

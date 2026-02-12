@@ -11,7 +11,7 @@ import { EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 export const WorkflowFeatureBullet = ({ feature }: { feature: string }) => (
   <EuiFlexGroup gutterSize="m" alignItems="center">
     <EuiFlexItem grow={false}>
-      <EuiIcon type="checkInCircleFilled" color="subdued" size="s" />
+      <EuiIcon type="checkInCircleFilled" color="subdued" size="s" aria-hidden={true} />
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiText size="s">

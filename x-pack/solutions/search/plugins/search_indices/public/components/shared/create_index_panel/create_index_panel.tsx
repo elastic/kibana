@@ -94,7 +94,7 @@ export const CreateIndexPanel = ({
         >
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="logoElasticsearch" size="xl" />
+              <EuiIcon type="logoElasticsearch" size="xl" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiTitle size="xs">

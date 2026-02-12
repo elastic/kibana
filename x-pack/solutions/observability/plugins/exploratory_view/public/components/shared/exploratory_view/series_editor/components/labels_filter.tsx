@@ -57,7 +57,7 @@ export function LabelsFieldFilter(props: FilterProps) {
     return {
       label: field.name,
       searchableLabel: field.name,
-      append: <EuiIcon type="arrowRight" />,
+      append: <EuiIcon type="arrowRight" aria-hidden={true} />,
       showIcons: false,
     };
   });

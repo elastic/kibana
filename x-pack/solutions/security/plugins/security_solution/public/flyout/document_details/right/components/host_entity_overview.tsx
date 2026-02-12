@@ -231,7 +231,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type={HOST_ICON} />
+            <EuiIcon type={HOST_ICON} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <PreviewLink

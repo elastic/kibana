@@ -408,7 +408,7 @@ export function AlertDetails() {
           />
           {rule?.artifacts?.investigation_guide?.blob && (
             <EuiNotificationBadge color="success" css={{ marginLeft: '5px' }}>
-              <EuiIcon type="dot" size="s" />
+              <EuiIcon type="dot" size="s" aria-hidden={true} />
             </EuiNotificationBadge>
           )}
         </>

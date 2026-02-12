@@ -83,7 +83,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
       >
         {item.icon && (
           <EuiFlexItem grow={false}>
-            <EuiIcon type={item.icon} data-test-subj="apmBarDetailsIcon" />
+            <EuiIcon type={item.icon} data-test-subj="apmBarDetailsIcon" aria-hidden={true} />
           </EuiFlexItem>
         )}
         <EuiFlexItem
@@ -148,6 +148,7 @@ export function BarDetails({ item, left }: { item: TraceWaterfallItem; left: num
                 color={theme.euiTheme.colors.danger}
                 size="s"
                 data-test-subj="apmBarDetailsErrorIcon"
+                aria-hidden={true}
               />
             )}
           </EuiFlexItem>

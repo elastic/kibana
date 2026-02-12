@@ -61,6 +61,7 @@ const getCustomColumn = (dataViews: DataView[]) => {
                         css={css`
                           margin-top: -3px;
                         `}
+                        aria-hidden={true}
                       />
                     ),
                   }}

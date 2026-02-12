@@ -180,7 +180,7 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
               direction={isLandscape ? 'row' : 'column'}
             >
               <EuiFlexItem grow={false}>
-                <EuiIcon size="xl" type="error" color="danger" />
+                <EuiIcon size="xl" type="error" color="danger" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 {searchErrorDisplay?.body ?? (

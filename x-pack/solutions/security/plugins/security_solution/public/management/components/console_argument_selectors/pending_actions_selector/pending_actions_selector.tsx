@@ -151,6 +151,7 @@ export const PendingActionsSelector = memo<
                   size="s"
                   color="subdued"
                   data-test-subj={`${option.label}-disabled-icon`}
+                  aria-hidden={true}
                 />
               </EuiFlexItem>
             )}

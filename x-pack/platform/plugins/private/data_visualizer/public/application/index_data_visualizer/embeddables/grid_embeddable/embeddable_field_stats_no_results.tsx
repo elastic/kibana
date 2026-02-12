@@ -20,7 +20,7 @@ export const EmbeddableNoResultsEmptyPrompt = () => (
     })}
   >
     <EuiText size="xs" color="subdued">
-      <EuiIcon type="visualizeApp" size="m" color="subdued" />
+      <EuiIcon type="visualizeApp" size="m" color="subdued" aria-hidden={true} />
       <EuiSpacer size="m" />
       <FormattedMessage
         id="xpack.dataVisualizer.index.embeddableNoResultsMessage"

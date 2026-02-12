@@ -135,7 +135,7 @@ export const CreateIndexForm = ({
           <EuiFlexItem>
             {showAPIKeyCreateLabel && (
               <EuiFlexGroup gutterSize="s">
-                <EuiIcon size="m" type="key" color="subdued" />
+                <EuiIcon size="m" type="key" color="subdued" aria-hidden={true} />
                 <EuiText size="s" data-test-subj="apiKeyLabel">
                   <p>
                     {i18n.translate(

@@ -55,6 +55,7 @@ export const PackageCardPreview = React.memo<PackageCardPreviewProps>(({ integra
               ? `data:image/svg+xml;base64,${integrationSettings.logo}`
               : 'package'
           }
+          aria-hidden={true}
         />
       }
       betaBadgeProps={{

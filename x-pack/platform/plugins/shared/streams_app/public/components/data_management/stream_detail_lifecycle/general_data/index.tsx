@@ -111,7 +111,7 @@ export const StreamDetailGeneralData = ({
       <EuiTitle size="xs">
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" color="success" />
+            <EuiIcon type="checkInCircleFilled" color="success" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <h4>

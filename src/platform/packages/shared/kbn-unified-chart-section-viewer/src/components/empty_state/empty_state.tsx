@@ -53,7 +53,7 @@ export const EmptyState = ({ isLoading = false }: EmptyStateProps) => (
               justify-content: end;
             `}
           >
-            <EuiIcon type={IconChartBarStacked as IconType} size="l" />
+            <EuiIcon type={IconChartBarStacked as IconType} size="l" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="xs" data-test-subj="metricsExperienceNoData">

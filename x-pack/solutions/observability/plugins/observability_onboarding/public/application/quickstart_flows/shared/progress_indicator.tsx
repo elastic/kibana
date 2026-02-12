@@ -36,7 +36,7 @@ export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({
             </EuiFlexItem>
           ) : iconType ? (
             <EuiFlexItem grow={false}>
-              <EuiIcon type={iconType} color={color} size={rest.size} />
+              <EuiIcon type={iconType} color={color} size={rest.size} aria-hidden={true} />
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem>{title}</EuiFlexItem>

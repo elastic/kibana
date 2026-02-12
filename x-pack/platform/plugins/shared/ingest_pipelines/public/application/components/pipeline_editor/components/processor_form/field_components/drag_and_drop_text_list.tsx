@@ -160,7 +160,7 @@ function DragAndDropTextListComponent({
                         <EuiFlexGroup css={styles.item} justifyContent="center" gutterSize="none">
                           <EuiFlexItem grow={false}>
                             <div {...provided.dragHandleProps} css={styles.grabIcon}>
-                              <EuiIcon type="grab" />
+                              <EuiIcon type="grab" aria-hidden={true} />
                             </div>
                           </EuiFlexItem>
                           <EuiFlexItem>
@@ -206,7 +206,7 @@ function DragAndDropTextListComponent({
                               />
                             ) : (
                               // Render a no-op placeholder button
-                              <EuiIcon css={styles.removeButton} type="empty" />
+                              <EuiIcon css={styles.removeButton} type="empty" aria-hidden={true} />
                             )}
                           </EuiFlexItem>
                         </EuiFlexGroup>

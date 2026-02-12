@@ -63,7 +63,7 @@ const MonitorDetailsLink = ({ name, configId }: Props) => {
 const MonitorLink = ({ href, name }: { href: string; name: string }) => {
   return (
     <EuiLink data-test-subj="syntheticsMonitorDetailsLinkLink" href={href}>
-      <EuiIcon type="arrowLeft" /> {name}
+      <EuiIcon type="arrowLeft" aria-hidden={true} /> {name}
     </EuiLink>
   );
 };

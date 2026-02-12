@@ -143,7 +143,7 @@ const FromBuilderItem = ({
                   defaultMessage: 'Drag Handle',
                 })}
               >
-                <EuiIcon type="grab" />
+                <EuiIcon type="grab" aria-hidden={true} />
               </EuiPanel>
             </EuiFlexItem>
           )}

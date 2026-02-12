@@ -59,6 +59,7 @@ const CollapsiblePanelTitle = ({
                     margin-right: ${euiTheme.size.s};
                     vertical-align: text-bottom;
                   `}
+                  aria-hidden={true}
                 />{' '}
               </Fragment>
             )}

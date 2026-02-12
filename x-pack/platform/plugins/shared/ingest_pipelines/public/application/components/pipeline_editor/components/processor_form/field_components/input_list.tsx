@@ -167,7 +167,7 @@ export function InputList({
                     size="s"
                   />
                 ) : (
-                  <EuiIcon css={styles.removeButton} type="empty" />
+                  <EuiIcon css={styles.removeButton} type="empty" aria-hidden={true} />
                 )}
               </EuiFlexItem>
             </EuiFlexGroup>

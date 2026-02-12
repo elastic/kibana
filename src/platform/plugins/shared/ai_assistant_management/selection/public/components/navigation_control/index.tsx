@@ -213,10 +213,10 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                         justifyContent="center"
                       >
                         <EuiFlexItem grow={false}>
-                          <EuiIcon size="xxl" type="logoObservability" />
+                          <EuiIcon size="xxl" type="logoObservability" aria-hidden={true} />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiIcon size="xxl" type="logoEnterpriseSearch" />
+                          <EuiIcon size="xxl" type="logoEnterpriseSearch" aria-hidden={true} />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     }
@@ -239,7 +239,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
                       }
                     )}
                     titleSize="xs"
-                    icon={<EuiIcon size="xxl" type="logoSecurity" />}
+                    icon={<EuiIcon size="xxl" type="logoSecurity" aria-hidden={true} />}
                     data-test-subj="aiAssistantSecurityCard"
                     isDisabled={!isSecurityAIAssistantEnabled}
                   />

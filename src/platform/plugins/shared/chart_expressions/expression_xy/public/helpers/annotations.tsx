@@ -214,7 +214,7 @@ export function Marker({
     if (hasReducedPadding && label) {
       return <MarkerBody label={label} isHorizontal={isHorizontal} />;
     }
-    return <EuiIcon type="empty" />;
+    return <EuiIcon type="empty" aria-hidden={true} />;
   }
   return null;
 }

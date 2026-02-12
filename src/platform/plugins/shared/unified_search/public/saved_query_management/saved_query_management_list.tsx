@@ -164,7 +164,7 @@ const itemLabel = (attributes: SavedQueryAttributes) => {
   if (attributes.description) {
     label = (
       <>
-        {label} <EuiIcon type="info" color="subdued" size="s" />
+        {label} <EuiIcon type="info" color="subdued" size="s" aria-hidden={true} />
       </>
     );
   }
@@ -172,7 +172,7 @@ const itemLabel = (attributes: SavedQueryAttributes) => {
   if (attributes.timefilter) {
     label = (
       <>
-        {label} <EuiIcon type="clock" color="subdued" size="s" />
+        {label} <EuiIcon type="clock" color="subdued" size="s" aria-hidden={true} />
       </>
     );
   }

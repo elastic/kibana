@@ -303,7 +303,7 @@ const VisGroup = ({ visType, onVisTypeSelected, shouldStretch = false }: VisCard
           </>
         }
         layout="horizontal"
-        icon={<EuiIcon type={visType.icon || 'empty'} size="xl" />}
+        icon={<EuiIcon type={visType.icon || 'empty'} size="xl" aria-hidden={true} />}
       />
     </EuiFlexItem>
   );

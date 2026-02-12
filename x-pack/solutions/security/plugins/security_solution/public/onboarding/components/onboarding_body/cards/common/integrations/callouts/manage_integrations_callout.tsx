@@ -55,7 +55,7 @@ export const ManageIntegrationsCallout = React.memo(
               id="xpack.securitySolution.onboarding.integrationsCard.button.completeLink"
               defaultMessage="Manage integrations"
             />
-            <EuiIcon type="arrowRight" size="s" />
+            <EuiIcon type="arrowRight" size="s" aria-hidden={true} />
           </LinkAnchor>
         }
       />

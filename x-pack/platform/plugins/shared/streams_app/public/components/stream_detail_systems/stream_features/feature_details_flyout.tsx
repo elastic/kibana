@@ -168,7 +168,7 @@ export function FeatureDetailsFlyout({
                       items={[
                         <EuiContextMenuItem
                           key="delete"
-                          icon={<EuiIcon type="trash" color="danger" />}
+                          icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
                           css={css`
                             color: ${euiTheme.colors.danger};
                           `}

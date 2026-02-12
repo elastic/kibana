@@ -48,9 +48,9 @@ const disabledToolResultIconTypes: string[] = [ToolResultType.error, ToolResultT
 
 const getItemIcon = (isLastItem: boolean, isLoading: boolean): ReactNode => {
   if (isLastItem && isLoading) {
-    return <EuiIcon type="doubleArrowRight" color="text" />;
+    return <EuiIcon type="doubleArrowRight" color="text" aria-hidden={true} />;
   }
-  return <EuiIcon type="check" color="success" />;
+  return <EuiIcon type="check" color="success" aria-hidden={true} />;
 };
 
 type ItemFactory = (icon?: ReactNode, textColor?: string) => ReactNode;

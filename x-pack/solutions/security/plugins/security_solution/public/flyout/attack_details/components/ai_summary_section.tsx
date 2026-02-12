@@ -58,6 +58,7 @@ export const AISummarySection = memo(() => {
             `}
             type="sparkles"
             color="primary"
+            aria-hidden={true}
           />
         </>
       }

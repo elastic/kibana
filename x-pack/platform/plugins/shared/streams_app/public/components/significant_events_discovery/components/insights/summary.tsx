@@ -163,7 +163,7 @@ export function Summary({ count }: { count: number }) {
             style={{ minHeight: '30vh', minWidth: '40vh' }}
           >
             <EuiFlexItem grow={false}>
-              <EuiIcon type="createAdvancedJob" size="xxl" />
+              <EuiIcon type="createAdvancedJob" size="xxl" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">

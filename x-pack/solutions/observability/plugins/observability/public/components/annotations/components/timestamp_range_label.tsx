@@ -23,6 +23,7 @@ export function TimestampRangeLabel({
           css={{
             margin: '0 5px',
           }}
+          aria-hidden={true}
         />
         {formatDate(annotation.event?.end, 'longDateTime')}
       </div>

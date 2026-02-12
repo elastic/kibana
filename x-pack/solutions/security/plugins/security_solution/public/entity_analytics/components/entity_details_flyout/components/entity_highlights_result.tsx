@@ -81,7 +81,7 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
           <EuiHorizontalRule margin="m" />
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="documentation" size="m" css={iconGradientStyle} />
+              <EuiIcon type="documentation" size="m" css={iconGradientStyle} aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiTitle size="xxs">

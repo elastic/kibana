@@ -59,6 +59,7 @@ export function TruncateHeightSection({ children, previewHeight }: Props) {
                 transform: `rotate(${isOpen ? 90 : 0}deg)`,
               }}
               type="arrowRight"
+              aria-hidden={true}
             />{' '}
             {isOpen
               ? i18n.translate('xpack.apm.toggleHeight.showLessButtonLabel', {

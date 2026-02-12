@@ -38,6 +38,7 @@ export const StatusIcon: React.FunctionComponent<StatusIconProps> = ({ type, lab
       data-test-subj="statusIcon"
       type="dot"
       color={icon}
+      aria-hidden={true}
     />
   );
 };

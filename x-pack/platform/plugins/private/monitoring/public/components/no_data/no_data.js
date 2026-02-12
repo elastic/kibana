@@ -91,7 +91,7 @@ export function NoData(props) {
         </EuiScreenReaderOnly>
         <EuiPageBody restrictWidth={600}>
           <EuiPageTemplate.EmptyPrompt
-            icon={<EuiIcon type="monitoringApp" size="xxl" />}
+            icon={<EuiIcon type="monitoringApp" size="xxl" aria-hidden={true} />}
             title={
               <h2>
                 <FormattedMessage
@@ -149,7 +149,7 @@ export function NoData(props) {
               </>
             )}
           <EuiPageTemplate.EmptyPrompt
-            icon={<EuiIcon type="monitoringApp" size="xxl" />}
+            icon={<EuiIcon type="monitoringApp" size="xxl" aria-hidden={true} />}
             body={
               <>
                 <NoDataMessage {...props} />
@@ -206,7 +206,7 @@ export function NoData(props) {
             </>
           )}
         <EuiPageTemplate.EmptyPrompt
-          icon={<EuiIcon type="monitoringApp" size="xxl" />}
+          icon={<EuiIcon type="monitoringApp" size="xxl" aria-hidden={true} />}
           title={
             <h2>
               <FormattedMessage

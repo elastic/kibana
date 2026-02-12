@@ -71,7 +71,12 @@ export const LifecyclePhaseButton = ({
         style={{ width: '100%', height: '100%' }}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon size="m" type="trash" data-test-subj="dataLifecycle-delete-icon" />
+          <EuiIcon
+            size="m"
+            type="trash"
+            data-test-subj="dataLifecycle-delete-icon"
+            aria-hidden={true}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     ) : (

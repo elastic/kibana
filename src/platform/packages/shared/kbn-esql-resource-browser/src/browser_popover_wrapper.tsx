@@ -125,7 +125,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
       css={filterButtonStyle}
       onClick={() => setIsFilterOpen(!isFilterOpen)}
     >
-      <EuiIcon type="filter" />
+      <EuiIcon type="filter" aria-hidden={true} />
     </EuiFilterButton>
   );
 

@@ -93,7 +93,7 @@ export const DetailsPanel: FunctionComponent<Props> = ({
       name: i18n.translate('xpack.ingestPipelines.list.pipelineDetails.duplicateActionLabel', {
         defaultMessage: 'Duplicate',
       }),
-      icon: <EuiIcon type="copy" />,
+      icon: <EuiIcon type="copy" aria-hidden={true} />,
       onClick: () => onCloneClick(pipeline.name),
     },
     /**
@@ -103,7 +103,7 @@ export const DetailsPanel: FunctionComponent<Props> = ({
       name: i18n.translate('xpack.ingestPipelines.list.pipelineDetails.deleteActionLabel', {
         defaultMessage: 'Delete',
       }),
-      icon: <EuiIcon type="trash" />,
+      icon: <EuiIcon type="trash" aria-hidden={true} />,
       'data-test-subj': 'deletePipelineButton',
       onClick: () => {
         setShowPopover(false);

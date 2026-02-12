@@ -48,7 +48,7 @@ export function PartitionAppearanceSettings(
     emptySizeRatioOptions.map(({ id, label, icon }) => ({
       value: id,
       label,
-      prepend: icon ? <EuiIcon type={icon} /> : undefined,
+      prepend: icon ? <EuiIcon type={icon} aria-hidden={true} /> : undefined,
     }));
 
   const selectedOption = emptySizeRatioOptions
@@ -76,7 +76,11 @@ export function PartitionAppearanceSettings(
         options={options}
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
-        prepend={selectedOption?.icon ? <EuiIcon type={selectedOption.icon} /> : undefined}
+        prepend={
+          selectedOption?.icon ? (
+            <EuiIcon type={selectedOption.icon} aria-hidden={true} />
+          ) : undefined
+        }
       />
     </EuiFormRow>
   );

@@ -302,7 +302,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
     () => (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="user" />
+          <EuiIcon type="user" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxxs">

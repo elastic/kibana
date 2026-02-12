@@ -15,7 +15,7 @@ export const IntegrationsManageDataSource = () => {
   return (
     <EuiFlexGroup alignItems="flexStart" direction="column">
       <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiIcon size="l" type="plugs" />
+        <EuiIcon size="l" type="plugs" aria-hidden={true} />
         <EuiText>
           <h1>
             <FormattedMessage

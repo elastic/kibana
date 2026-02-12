@@ -27,7 +27,7 @@ export function MetricWithSparkline({ id, formatter, value, timeseries, color }:
   if (!value) {
     return (
       <EuiTextColor color="subdued">
-        <EuiIcon type="visLine" />
+        <EuiIcon type="visLine" aria-hidden={true} />
          
         <FormattedMessage
           id="xpack.observability.metricWithSparkline.nATextColorLabel"

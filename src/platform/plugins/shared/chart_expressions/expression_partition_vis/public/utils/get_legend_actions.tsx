@@ -83,7 +83,7 @@ export const getLegendActions = (
             defaultMessage: 'Filter for',
           }),
           'data-test-subj': `legend-${title}-filterIn`,
-          icon: <EuiIcon type="plusInCircle" size="m" />,
+          icon: <EuiIcon type="plusInCircle" size="m" aria-hidden={true} />,
           onClick: () => {
             setPopoverOpen(false);
             onFilter(filterData);
@@ -94,7 +94,7 @@ export const getLegendActions = (
             defaultMessage: 'Filter out',
           }),
           'data-test-subj': `legend-${title}-filterOut`,
-          icon: <EuiIcon type="minusInCircle" size="m" />,
+          icon: <EuiIcon type="minusInCircle" size="m" aria-hidden={true} />,
           onClick: () => {
             setPopoverOpen(false);
             onFilter(filterData, true);
@@ -108,7 +108,7 @@ export const getLegendActions = (
       panelItems.push({
         name: action.displayName,
         'data-test-subj': `legend-${title}-${action.id}`,
-        icon: <EuiIcon type={action.iconType} size="m" />,
+        icon: <EuiIcon type={action.iconType} size="m" aria-hidden={true} />,
         onClick: () => {
           action.execute([{ columnMeta, value: pieSeries.key }]);
           setPopoverOpen(false);
@@ -149,7 +149,7 @@ export const getLegendActions = (
           defaultMessage: 'Legend actions',
         })}
       >
-        <EuiIcon size="s" type="boxesVertical" />
+        <EuiIcon size="s" type="boxesVertical" aria-hidden={true} />
       </div>
     );
 

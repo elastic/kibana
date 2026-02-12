@@ -52,6 +52,7 @@ function ErrorComponent({ onLoaded, parentNode, error }: ErrorComponentProps) {
               width: buttonSize,
             }}
             type="warning"
+            aria-hidden={true}
           />
         }
         isOpen={isPopoverOpen}

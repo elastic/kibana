@@ -134,7 +134,12 @@ const CostSavingsKeyInsightView: React.FC<ViewProps> = ({ insight, isLoading }) 
           ref={containerRef}
         >
           <EuiFlexItem grow={false}>
-            <EuiIcon type="logoElastic" size="m" data-test-subj="alertProcessingKeyInsightsLogo" />
+            <EuiIcon
+              type="logoElastic"
+              size="m"
+              data-test-subj="alertProcessingKeyInsightsLogo"
+              aria-hidden={true}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="xs">

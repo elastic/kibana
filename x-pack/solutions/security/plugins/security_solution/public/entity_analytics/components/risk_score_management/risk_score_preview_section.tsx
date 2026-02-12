@@ -138,7 +138,7 @@ const RiskScorePreviewPanel = ({
         buttonContent={trigger === 'closed' ? showMessage : hideMessage}
         forceState={trigger}
         onToggle={onToggle}
-        extraAction={<EuiIcon type={EntityIconByType[type]} />}
+        extraAction={<EuiIcon type={EntityIconByType[type]} aria-hidden={true} />}
       >
         <>
           <EuiSpacer size={'m'} />

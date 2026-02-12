@@ -337,7 +337,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                               isSupportedLogo(integration.pkgName) ? (
                                 <LogoIcon size="l" logo={integration.pkgName} />
                               ) : (
-                                <EuiIcon type="desktop" size="l" />
+                                <EuiIcon type="desktop" size="l" aria-hidden={true} />
                               )
                             }
                             title={i18n.translate(
@@ -372,7 +372,7 @@ export const AutoDetectPanel: FunctionComponent = () => {
                     {customIntegrations.length > 0 && (
                       <AccordionWithIcon
                         id={`${accordionId}_custom`}
-                        icon={<EuiIcon type="documents" size="l" />}
+                        icon={<EuiIcon type="documents" size="l" aria-hidden={true} />}
                         title={i18n.translate(
                           'xpack.observability_onboarding.autoDetectPanel.h3.getStartedWithlogLabel',
                           { defaultMessage: 'Get started with custom .log files' }

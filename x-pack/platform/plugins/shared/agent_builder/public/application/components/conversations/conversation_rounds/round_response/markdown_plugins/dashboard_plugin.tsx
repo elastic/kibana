@@ -68,7 +68,7 @@ const DashboardCard: React.FC<{
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
           <div className={iconContainerStyles}>
-            <EuiIcon type="dashboardApp" size="l" color="ghost" />
+            <EuiIcon type="dashboardApp" size="l" color="ghost" aria-hidden={true} />
           </div>
         </EuiFlexItem>
         <EuiFlexItem>

@@ -42,9 +42,9 @@ export const PhaseIcon: FunctionComponent<Props> = ({ enabled, phase }) => {
   return (
     <div css={styles.container}>
       {enabled ? (
-        <EuiIcon type={phase === 'delete' ? 'trash' : 'check'} />
+        <EuiIcon type={phase === 'delete' ? 'trash' : 'check'} aria-hidden={true} />
       ) : (
-        <EuiIcon type={'dot'} size={'s'} />
+        <EuiIcon type={'dot'} size={'s'} aria-hidden={true} />
       )}
     </div>
   );

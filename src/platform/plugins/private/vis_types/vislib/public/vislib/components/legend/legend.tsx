@@ -390,7 +390,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
             open && visLegendStyles.openToggle,
           ]}
         >
-          <EuiIcon color="text" type="list" />
+          <EuiIcon color="text" type="list" aria-hidden={true} />
         </button>
         {open && this.renderLegend(anchorPosition)}
       </div>

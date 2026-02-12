@@ -46,13 +46,13 @@ export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
             disabled={!op.hasChildren}
             onClick={() => setChildrenVisible(!childrenVisible)}
           >
-            <EuiIcon type={childrenVisible ? 'arrowDown' : 'arrowRight'} />
+            <EuiIcon type={childrenVisible ? 'arrowDown' : 'arrowRight'} aria-hidden={true} />
 
             {' ' + op.query_type}
           </EuiLink>
         ) : (
           <>
-            <EuiIcon type="dot" />
+            <EuiIcon type="dot" aria-hidden={true} />
             {' ' + op.query_type}
           </>
         )}

@@ -327,7 +327,7 @@ function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
                   }}
                 />
               ) : (
-                <EuiIcon type={phase.icon} />
+                <EuiIcon type={phase.icon} aria-hidden={true} />
               )}
             </EuiFlexItem>
 

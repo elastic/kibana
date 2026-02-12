@@ -206,6 +206,7 @@ export const ColorPicker = ({
                 className="visColorPicker__valueDot"
                 style={{ color }}
                 data-test-subj={`visColorPickerColor-${color}`}
+                aria-hidden={true}
               />
               <EuiScreenReaderOnly>
                 <span>{color}</span>

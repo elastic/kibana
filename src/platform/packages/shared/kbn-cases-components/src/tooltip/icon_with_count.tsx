@@ -21,6 +21,7 @@ export const IconWithCount = React.memo<{
         size="s"
         type={icon}
         data-test-subj="comment-count-icon"
+        aria-hidden={true}
       />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>

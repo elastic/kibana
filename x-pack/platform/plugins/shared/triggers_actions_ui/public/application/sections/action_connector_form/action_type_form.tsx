@@ -647,7 +647,7 @@ export const ActionTypeForm = ({
                 </EuiFlexItem>
               ) : (
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
+                  <EuiIcon type={actionTypeRegistered.iconClass} size="m" aria-hidden={true} />
                 </EuiFlexItem>
               )}
               <EuiFlexItem>

@@ -30,6 +30,7 @@ export const getIgnoreGlobalFilterIcon = ({
         css={css`
           margin-top: 5px;
         `}
+        aria-hidden={true}
       />
     ),
     tooltipValue: i18n.translate('xpack.lens.layerPanel.ignoreGlobalFilters', {
