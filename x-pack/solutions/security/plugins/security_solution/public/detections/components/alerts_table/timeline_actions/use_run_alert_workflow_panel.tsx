@@ -14,7 +14,7 @@ import { WorkflowSelector } from '@kbn/workflows-ui';
 import { useRunWorkflowAction } from '@kbn/workflows-management-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { RunWorkflowResponseDto, WorkflowListDto } from '@kbn/workflows';
+import type { RunWorkflowResponseDto } from '@kbn/workflows';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
@@ -117,20 +117,11 @@ export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelPr
     alertIds,
   ]);
 
-  const isAlertWorkflow = (workflows: WorkflowListDto['results']): WorkflowListDto['results'] => {
-    return workflows.filter((workflow) => {
-      return workflow.definition?.triggers.some((trigger) => {
-        return trigger.type === 'alert';
-      });
-    });
-  };
-
   const workflowSelector = useMemo(
     () => (
       <WorkflowSelector
         selectedWorkflowId={selectedId || undefined}
         onWorkflowChange={setSelectedId}
-        config={{ filterFunction: isAlertWorkflow }}
       />
     ),
     [selectedId]
