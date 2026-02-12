@@ -19,6 +19,7 @@ const INDEX_NAME = 'test-discover-message-patterns';
 const BODY_TEXT_INDEX_NAME = 'test-discover-body-text-patterns';
 const BOTH_FIELDS_INDEX_NAME = 'test-discover-both-fields';
 const NO_TEXT_FIELD_INDEX_NAME = 'test-discover-no-text-field';
+const SHORT_PATTERNS_INDEX_NAME = 'test-discover-short-patterns';
 const PATTERN_COUNT = 100;
 /**
  * Each pattern needs enough documents so the random_sampler (probability 0.1)
@@ -271,11 +272,60 @@ describe('discoverMessagePatterns integration', () => {
 
     const noTextBulk = await esClient.bulk({ operations: noTextOps, refresh: 'wait_for' });
     expect(noTextBulk.errors).toBe(false);
+
+    // Create index with short-pattern messages (< MIN_EXCLUSION_TOKENS meaningful tokens)
+    await esClient.indices.create({
+      index: SHORT_PATTERNS_INDEX_NAME,
+      mappings: {
+        properties: {
+          message: { type: 'text' },
+          '@timestamp': { type: 'date' },
+        },
+      },
+    });
+
+    // Short patterns: only 1-2 meaningful words plus placeholders.
+    // After placeholder stripping these have fewer than MIN_EXCLUSION_TOKENS tokens.
+    const shortPatternTemplates = [
+      'request {ip}',
+      'sent {num}',
+      'error {id}',
+      'timeout {uuid}',
+      'retry {num}',
+      'denied {ip}',
+      'closed {id}',
+      'started {uuid}',
+      'stopped {num}',
+      'failed {ip}',
+    ];
+
+    const shortOps: Array<
+      { index: { _index: string } } | { message: string; '@timestamp': string }
+    > = [];
+
+    for (const template of shortPatternTemplates) {
+      for (let i = 0; i < DOCS_PER_PATTERN; i++) {
+        shortOps.push({ index: { _index: SHORT_PATTERNS_INDEX_NAME } });
+        shortOps.push({
+          message: instantiateTemplate(template),
+          '@timestamp': docTimestamp.toISOString(),
+        });
+      }
+    }
+
+    const shortBulk = await esClient.bulk({ operations: shortOps, refresh: 'wait_for' });
+    expect(shortBulk.errors).toBe(false);
   }, 120_000);
 
   afterAll(async () => {
     await esClient.indices.delete({
-      index: [INDEX_NAME, BODY_TEXT_INDEX_NAME, BOTH_FIELDS_INDEX_NAME, NO_TEXT_FIELD_INDEX_NAME],
+      index: [
+        INDEX_NAME,
+        BODY_TEXT_INDEX_NAME,
+        BOTH_FIELDS_INDEX_NAME,
+        NO_TEXT_FIELD_INDEX_NAME,
+        SHORT_PATTERNS_INDEX_NAME,
+      ],
       ignore_unavailable: true,
     });
     await kbnRoot?.shutdown();
@@ -306,16 +356,17 @@ describe('discoverMessagePatterns integration', () => {
         start,
         end,
         excludePatterns: excludePatterns.length > 0 ? excludePatterns : undefined,
+        size: 10,
       });
 
       const { categories, randomSampleDocuments, categorizationField } = result;
 
       expect(categorizationField).toBe(expectedField);
-      expect(randomSampleDocuments.length).toBeGreaterThan(0);
 
       if (categories.length === 0) {
         break;
       }
+      expect(randomSampleDocuments.length).toBeGreaterThan(0);
 
       for (const category of categories) {
         expect(typeof category.pattern).toBe('string');
@@ -394,6 +445,24 @@ describe('discoverMessagePatterns integration', () => {
     // Each random sample should have the expected fields
     for (const doc of randomSampleDocuments) {
       expect(doc).toHaveProperty('status_code');
+    }
+  }, 60_000);
+
+  it('marks short patterns as not meaningful for exclusion', async () => {
+    const SAMPLE_SIZE = 10;
+    const { categories, randomSampleDocuments } = await discoverMessagePatterns({
+      esClient,
+      index: SHORT_PATTERNS_INDEX_NAME,
+      start,
+      end,
+      size: SAMPLE_SIZE,
+    });
+
+    expect(categories.length).toBeGreaterThan(0);
+    expect(randomSampleDocuments).toHaveLength(SAMPLE_SIZE);
+
+    for (const category of categories) {
+      expect(category.isMeaningfulPattern).toBe(false);
     }
   }, 60_000);
 });

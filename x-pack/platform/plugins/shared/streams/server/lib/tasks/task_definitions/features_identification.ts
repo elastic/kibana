@@ -117,6 +117,7 @@ const getSampleDocuments = async ({
     start,
     end,
     excludePatterns: excludePatterns.map((p) => p.pattern),
+    size,
   });
 
   const categoryDocuments = categories.flatMap((c) => c.sampleDocuments);

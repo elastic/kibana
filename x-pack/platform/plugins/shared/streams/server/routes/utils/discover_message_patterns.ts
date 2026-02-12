@@ -66,6 +66,26 @@ const PLACEHOLDER_CHAR_FILTERS = PLACEHOLDER_REPLACEMENTS.map(
     } as unknown as string)
 );
 
+/** Similarity threshold (0..100) for categorize_text to merge similar categories. */
+const SIMILARITY_THRESHOLD = 70;
+
+/**
+ * Buffer added on top of {@link SIMILARITY_THRESHOLD} for the exclusion
+ * `minimum_should_match` percentage, so the exclusion query is slightly
+ * stricter than categorization to reduce false positives.
+ */
+const EXCLUSION_THRESHOLD_BUFFER = 5;
+
+/**
+ * Minimum number of meaningful tokens a cleaned pattern must have to be useful
+ * as an exclusion query. Patterns with fewer tokens (e.g. "request", "sent to")
+ * are too generic and would over-exclude unrelated documents.
+ *
+ * Also used as the threshold in {@link EXCLUSION_MINIMUM_SHOULD_MATCH}: patterns
+ * with ≤ this many tokens require all terms to match.
+ */
+const MIN_EXCLUSION_TOKENS = 3;
+
 /**
  * Minimum-should-match spec for the `match` exclusion queries.
  *
@@ -77,11 +97,15 @@ const PLACEHOLDER_CHAR_FILTERS = PLACEHOLDER_REPLACEMENTS.map(
  *
  * A bag-of-words `match` query with `minimum_should_match` mirrors the
  * categorization semantics much more closely:
- *   • ≤ 3 query terms → all must appear (avoids over-excluding on tiny patterns)
- *   • > 3 query terms → 75 % must appear (slightly above the 70 % similarity
- *     threshold to reduce false positives)
+ *   • ≤ {@link MIN_EXCLUSION_TOKENS} query terms → all must appear
+ *     (avoids over-excluding on tiny patterns)
+ *   • > {@link MIN_EXCLUSION_TOKENS} query terms → percentage derived from
+ *     {@link SIMILARITY_THRESHOLD} plus {@link EXCLUSION_THRESHOLD_BUFFER}
+ *     to reduce false positives
  */
-const EXCLUSION_MINIMUM_SHOULD_MATCH = '3<75%';
+const EXCLUSION_MINIMUM_SHOULD_MATCH = `${MIN_EXCLUSION_TOKENS}<${
+  SIMILARITY_THRESHOLD + EXCLUSION_THRESHOLD_BUFFER
+}%`;
 
 /**
  * Removes categorization placeholder tokens from a pattern and returns the
@@ -95,33 +119,17 @@ export const stripPlaceholderTokens = (pattern: string): string => {
     .trim();
 };
 
-/**
- * Minimum number of meaningful tokens a cleaned pattern must have to be useful
- * as an exclusion query. Patterns with fewer tokens (e.g. "request", "sent to")
- * are too generic and would over-exclude unrelated documents.
- */
-const MIN_EXCLUSION_TOKENS = 3;
-
 /** Target number of documents for the adaptive random_sampler probability. */
 const TARGET_SAMPLE_SIZE = 100_000;
 
 /** Minimum document count for a category to be returned by categorize_text. */
 const MIN_DOC_COUNT = 10;
 
-/** Maximum number of categories returned by categorize_text. */
-const CATEGORIES_SIZE = 10;
-
-/** Similarity threshold (0..100) for categorize_text to merge similar categories. */
-const SIMILARITY_THRESHOLD = 70;
-
 /** Minimum token length kept by the token length filter. */
 const MIN_TOKEN_LENGTH = 3;
 
-/** Number of sample documents returned per category via top_hits. */
-const SAMPLE_DOCS_PER_CATEGORY = 2;
-
-/** Number of random documents returned as fallback when categorization yields no results. */
-const RANDOM_SAMPLE_SIZE = CATEGORIES_SIZE * SAMPLE_DOCS_PER_CATEGORY;
+/** Default total number of sample documents when no explicit size is provided. */
+const DEFAULT_SAMPLE_SIZE = 20;
 
 /**
  * Candidate fields for categorize_text, in order of preference.
@@ -143,6 +151,8 @@ export interface DiscoverPatternsResult {
   categories: MessageCategory[];
   /** Random sample documents, used as fallback when categorization yields no results. */
   randomSampleDocuments: Array<Record<string, unknown>>;
+  /** The text field used for categorize_text, or `undefined` if no suitable field was found. */
+  categorizationField: string | undefined;
 }
 
 /**
@@ -191,12 +201,14 @@ export const discoverMessagePatterns = async ({
   start,
   end,
   excludePatterns,
+  size = DEFAULT_SAMPLE_SIZE,
 }: {
   esClient: ElasticsearchClient;
   index: string;
   start: number;
   end: number;
   excludePatterns?: string[];
+  size?: number;
 }): Promise<DiscoverPatternsResult> => {
   const categorizationField = await resolveCategorizationField({ esClient, index, start, end });
 
@@ -218,7 +230,7 @@ export const discoverMessagePatterns = async ({
   const samplerSubAggs: Record<string, AggregationsAggregationContainer> = {
     random_docs: {
       top_hits: {
-        size: RANDOM_SAMPLE_SIZE,
+        size,
         _source: true,
       },
     },
@@ -229,7 +241,7 @@ export const discoverMessagePatterns = async ({
       categorize_text: {
         field: categorizationField,
         min_doc_count: MIN_DOC_COUNT,
-        size: CATEGORIES_SIZE,
+        size,
         similarity_threshold: SIMILARITY_THRESHOLD,
         categorization_analyzer: {
           tokenizer: 'ml_standard',
@@ -252,7 +264,7 @@ export const discoverMessagePatterns = async ({
       aggs: {
         sample: {
           top_hits: {
-            size: SAMPLE_DOCS_PER_CATEGORY,
+            size: 1,
             _source: true,
             sort: { _score: { order: 'desc' as const } },
           },
@@ -261,15 +273,18 @@ export const discoverMessagePatterns = async ({
     };
   }
 
-  const countResponse = await esClient.count({
-    index,
-    query: {
-      bool: {
-        filter: dateRangeQuery(start, end),
-        must_not: mustNot.length > 0 ? mustNot : undefined,
-      },
+  const query: QueryDslQueryContainer = {
+    bool: {
+      filter: dateRangeQuery(start, end),
+      must_not: mustNot.length > 0 ? mustNot : undefined,
     },
-  });
+  };
+
+  const countResponse = await esClient.count({ index, query });
+
+  if (countResponse.count === 0) {
+    return { categories: [], randomSampleDocuments: [], categorizationField };
+  }
 
   const rawProbability = TARGET_SAMPLE_SIZE / countResponse.count;
   const samplingProbability = rawProbability >= 0.5 ? 1 : rawProbability;
@@ -278,12 +293,7 @@ export const discoverMessagePatterns = async ({
     index,
     size: 0,
     track_total_hits: false,
-    query: {
-      bool: {
-        filter: dateRangeQuery(start, end),
-        must_not: mustNot.length > 0 ? mustNot : undefined,
-      },
-    },
+    query,
     aggregations: {
       sampler: {
         random_sampler: {
@@ -317,5 +327,5 @@ export const discoverMessagePatterns = async ({
     (hit) => hit._source
   );
 
-  return { categories, randomSampleDocuments };
+  return { categories, randomSampleDocuments, categorizationField };
 };
