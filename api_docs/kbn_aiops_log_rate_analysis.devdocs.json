@@ -177,7 +177,7 @@
             "tags": [],
             "label": "buckets",
             "description": [
-              "- An object where keys are bucket timestamps as strings\n  and values are numeric values associated with each bucket."
+              "- An object where keys are bucket timestamps as strings"
             ],
             "signature": [
               "Record<string, number>"
@@ -196,7 +196,7 @@
             "tags": [],
             "label": "changePointTs",
             "description": [
-              "- The timestamp of the change point as a number. This timestamp must\n  be one of the keys in the `buckets` object."
+              "- The timestamp of the change point as a number. This timestamp must"
             ],
             "signature": [
               "number"
@@ -724,7 +724,7 @@
             "tags": [],
             "label": "clickTimeUpper",
             "description": [
-              "optional timestamp to treat clicktime and clickTimeUpper\nas a time range instead of point in time"
+              "optional timestamp to treat clicktime and clickTimeUpper"
             ],
             "signature": [
               "number | undefined"
@@ -809,7 +809,7 @@
             "tags": [],
             "label": "startRange",
             "description": [
-              "The start timestamp or window parameters. If a number,\nit's the start timestamp; if an object, it's assumed to be\nwindow parameters and is returned directly."
+              "The start timestamp or window parameters. If a number,"
             ],
             "signature": [
               "number | ",
@@ -835,7 +835,7 @@
             "tags": [],
             "label": "interval",
             "description": [
-              "Interval in milliseconds for extending the window or\nadjusting the start range."
+              "Interval in milliseconds for extending the window or"
             ],
             "signature": [
               "number"
@@ -892,7 +892,7 @@
             "tags": [],
             "label": "changePoint",
             "description": [
-              "Optional change point with `startTs` and `endTs`\nproperties. Adjusts window parameters if within `startRange`."
+              "Optional change point with `startTs` and `endTs`"
             ],
             "signature": [
               {

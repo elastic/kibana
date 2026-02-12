@@ -38,7 +38,7 @@
             "tags": [],
             "label": "props",
             "description": [
-              "{@link TrackApplicationViewProps }"
+              "{@link TrackApplicationViewProps}"
             ],
             "signature": [
               {
@@ -102,7 +102,7 @@
               "\nThe React component to be tracked."
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/plugins/shared/usage_collection/public/components/track_application_view/types.ts",
             "lineNumber": 22,
@@ -1797,7 +1797,7 @@
                 "tags": [],
                 "label": "params",
                 "description": [
-                  "{@link IncrementCounterParams }"
+                  "{@link IncrementCounterParams}"
                 ],
                 "signature": [
                   "IncrementCounterParams"

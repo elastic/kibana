@@ -27,7 +27,9 @@
             "type": "Object",
             "tags": [],
             "label": "error",
-            "description": [],
+            "description": [
+              "{Error} the error"
+            ],
             "path": "src/platform/plugins/shared/saved_objects/public/saved_object/helpers/save_saved_object.ts",
             "lineNumber": 16,
             "columnNumber": 40,
@@ -284,7 +286,7 @@
             "section": "def-public.ShowSaveModalMinimalSaveModalProps",
             "text": "ShowSaveModalMinimalSaveModalProps"
           },
-          ", string | React.JSXElementConstructor<any>>, Wrapper: React.FC<{ children?: React.ReactNode; }> | undefined) => void"
+          ">, Wrapper: React.FC<{ children?: React.ReactNode; }> | undefined) => void"
         ],
         "path": "src/platform/plugins/shared/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
         "lineNumber": 37,

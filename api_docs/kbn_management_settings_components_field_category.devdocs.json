@@ -89,7 +89,7 @@
             "tags": [],
             "label": "props",
             "description": [
-              "- the props to pass to the {@link FieldCategory } component."
+              "- the props to pass to the {@link FieldCategory} component."
             ],
             "signature": [
               {
@@ -535,7 +535,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/services.tsx",
             "lineNumber": 23,

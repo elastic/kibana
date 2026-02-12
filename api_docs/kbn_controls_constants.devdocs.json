@@ -255,7 +255,7 @@
         "label": "DEFAULT_SEARCH_TECHNIQUE",
         "description": [],
         "signature": [
-          "\"prefix\""
+          "\"wildcard\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/options_list_constants.ts",
         "lineNumber": 15,

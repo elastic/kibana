@@ -59,7 +59,7 @@
               "\nMode Kibana currently run in (development or production)."
             ],
             "signature": [
-              "{ readonly name: \"production\" | \"development\"; readonly dev: boolean; readonly prod: boolean; }"
+              "{ readonly name: \"development\" | \"production\"; readonly dev: boolean; readonly prod: boolean; }"
             ],
             "path": "src/platform/packages/shared/kbn-config/src/env.ts",
             "lineNumber": 81,
@@ -1007,7 +1007,7 @@
             "label": "name",
             "description": [],
             "signature": [
-              "\"production\" | \"development\""
+              "\"development\" | \"production\""
             ],
             "path": "src/platform/packages/shared/kbn-config/src/types.ts",
             "lineNumber": 28,

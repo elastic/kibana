@@ -30,7 +30,7 @@
             "tags": [],
             "label": "props",
             "description": [
-              "The {@link FormProps } for the {@link Form } component."
+              "The {@link FormProps} for the {@link Form} component."
             ],
             "signature": [
               "FormProps"

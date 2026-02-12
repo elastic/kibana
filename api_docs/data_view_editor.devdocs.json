@@ -10,7 +10,7 @@
         "label": "DataViewEditorService",
         "description": [],
         "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-        "lineNumber": 94,
+        "lineNumber": 96,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -26,7 +26,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-            "lineNumber": 95,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -36,13 +36,13 @@
                 "id": "def-public.DataViewEditorService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    services: { http, dataViews },\n    initialValues: {\n      type: initialType = INDEX_PATTERN_TYPE.DEFAULT,\n      indexPattern: initialIndexPattern = '',\n      name: initialName = '',\n    },\n    requireTimestampField = false,\n  }",
+                "label": "{\n    services: { http, dataViews, cpsManager },\n    initialValues: {\n      type: initialType = INDEX_PATTERN_TYPE.DEFAULT,\n      indexPattern: initialIndexPattern = '',\n      name: initialName = '',\n    },\n    requireTimestampField = false,\n  }",
                 "description": [],
                 "signature": [
                   "DataViewEditorServiceConstructorArgs"
                 ],
                 "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-                "lineNumber": 95,
+                "lineNumber": 97,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -63,7 +63,7 @@
               "<string[]>"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-            "lineNumber": 155,
+            "lineNumber": 166,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -82,7 +82,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-            "lineNumber": 164,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -99,7 +99,7 @@
               "<boolean>"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-            "lineNumber": 165,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -116,7 +116,7 @@
               "<boolean>"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-            "lineNumber": 166,
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -135,7 +135,7 @@
               "[]>"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-            "lineNumber": 167,
+            "lineNumber": 179,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -152,7 +152,7 @@
               "<string | null | undefined>"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-            "lineNumber": 170,
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -171,7 +171,7 @@
               " | undefined>"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-            "lineNumber": 172,
+            "lineNumber": 184,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -190,7 +190,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-            "lineNumber": 176,
+            "lineNumber": 188,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -206,7 +206,7 @@
               "(indexPattern: string) => void"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-            "lineNumber": 282,
+            "lineNumber": 294,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -222,7 +222,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-                "lineNumber": 282,
+                "lineNumber": 294,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -242,7 +242,7 @@
               "(allowHidden: boolean) => void"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-            "lineNumber": 287,
+            "lineNumber": 299,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -258,7 +258,7 @@
                   "boolean"
                 ],
                 "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-                "lineNumber": 287,
+                "lineNumber": 299,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -286,7 +286,7 @@
               ") => void"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-            "lineNumber": 292,
+            "lineNumber": 304,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -308,7 +308,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-                "lineNumber": 292,
+                "lineNumber": 304,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -330,7 +330,7 @@
               "; }>"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-            "lineNumber": 400,
+            "lineNumber": 414,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -348,7 +348,7 @@
               "() => void"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/data_view_editor_service.ts",
-            "lineNumber": 422,
+            "lineNumber": 436,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -369,7 +369,7 @@
         "label": "DataViewEditorProps",
         "description": [],
         "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-        "lineNumber": 42,
+        "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -395,7 +395,7 @@
               ") => void"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-            "lineNumber": 44,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -417,7 +417,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-                "lineNumber": 48,
+                "lineNumber": 50,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -439,7 +439,7 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-            "lineNumber": 49,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -459,7 +459,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-            "lineNumber": 53,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -477,7 +477,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-            "lineNumber": 57,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -502,7 +502,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-            "lineNumber": 61,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -520,7 +520,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-            "lineNumber": 65,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -538,7 +538,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-            "lineNumber": 70,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -556,7 +556,7 @@
               "(() => void) | undefined"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-            "lineNumber": 74,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -576,7 +576,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-            "lineNumber": 78,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -602,7 +602,7 @@
               ") => React.ReactNode) | undefined"
             ],
             "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-            "lineNumber": 82,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -624,7 +624,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-                "lineNumber": 85,
+                "lineNumber": 87,
                 "columnNumber": 26,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -648,7 +648,7 @@
       "label": "PluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-      "lineNumber": 92,
+      "lineNumber": 94,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -672,7 +672,7 @@
             ") => () => void"
           ],
           "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-          "lineNumber": 93,
+          "lineNumber": 95,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -694,7 +694,7 @@
                 }
               ],
               "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-              "lineNumber": 93,
+              "lineNumber": 95,
               "columnNumber": 14,
               "deprecated": false,
               "trackAdoption": false,
@@ -722,7 +722,7 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-          "lineNumber": 94,
+          "lineNumber": 96,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -773,7 +773,7 @@
             "{ editDataView: () => boolean; }"
           ],
           "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-          "lineNumber": 95,
+          "lineNumber": 97,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -793,7 +793,7 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/data_view_editor/public/types.ts",
-          "lineNumber": 98,
+          "lineNumber": 100,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,

@@ -333,7 +333,7 @@
         "label": "generateLinkedRulesMenuItems",
         "description": [],
         "signature": [
-          "({ dataTestSubj, linkedRules, securityLinkAnchorComponent, leftIcon, }: MenuItemLinkedRulesProps) => React.ReactElement<any, string | React.JSXElementConstructor<any>>[] | null"
+          "({ dataTestSubj, linkedRules, securityLinkAnchorComponent, leftIcon, }: MenuItemLinkedRulesProps) => React.ReactElement<any>[] | null"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-exception-list-components/src/generate_linked_rules_menu_item/index.tsx",
         "lineNumber": 22,

@@ -6959,7 +6959,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
-        "lineNumber": 17,
+        "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6972,7 +6972,7 @@
             "label": "{\n  term,\n  target,\n  size = 10,\n  model,\n  esClient,\n  logger,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
-            "lineNumber": 24,
+            "lineNumber": 31,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -6985,7 +6985,7 @@
                 "label": "term",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
-                "lineNumber": 25,
+                "lineNumber": 32,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -6998,7 +6998,7 @@
                 "label": "target",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
-                "lineNumber": 26,
+                "lineNumber": 33,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -7014,7 +7014,7 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
-                "lineNumber": 27,
+                "lineNumber": 34,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -7036,7 +7036,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
-                "lineNumber": 28,
+                "lineNumber": 35,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -8040,7 +8040,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
-                "lineNumber": 29,
+                "lineNumber": 36,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -8062,7 +8062,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/relevance_search.ts",
-                "lineNumber": 30,
+                "lineNumber": 37,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -8123,7 +8123,7 @@
             "section": "def-common.ToolResult",
             "text": "ToolResult"
           },
-          "<Record<string, unknown>>>[]>"
+          ">[]>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/search/run_search_tool.ts",
         "lineNumber": 16,

@@ -193,7 +193,7 @@
               "\nLabel for the button"
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "lineNumber": 18,
@@ -211,7 +211,7 @@
               "\nIcon representing the field type.\nRecommend using FieldIcon"
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "lineNumber": 22,
@@ -229,7 +229,7 @@
               "\nAn optional node to place inside and at the end of the <button>"
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "lineNumber": 27,
@@ -247,7 +247,7 @@
               "\nAn optional node to place outside of and to the right of the <button>"
             ],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "lineNumber": 31,
@@ -283,7 +283,7 @@
               "\nCustom drag handle element"
             ],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+              "React.ReactElement<any> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_button/field_button.tsx",
             "lineNumber": 39,

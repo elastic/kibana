@@ -71,7 +71,7 @@
             "tags": [],
             "label": "decoded",
             "description": [
-              "The decoded either which has either an existing error or the\ndecoded object which could have additional keys stripped from it."
+              "The decoded either which has either an existing error or the"
             ],
             "signature": [
               "Either",

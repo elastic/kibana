@@ -739,7 +739,7 @@
                 "tags": [],
                 "label": "clientConfig",
                 "description": [
-                  "A config consists of Elasticsearch JS client options and\nvalid sub-set of Elasticsearch service config.\nWe fill all the missing properties in the `clientConfig` using the default\nElasticsearch config so that we don't depend on default values set and\ncontrolled by underlying Elasticsearch JS client.\nWe don't run validation against the passed config and expect it to be valid."
+                  "A config consists of Elasticsearch JS client options and"
                 ],
                 "signature": [
                   "Partial<",
@@ -1001,7 +1001,7 @@
                 "tags": [],
                 "label": "clientConfig",
                 "description": [
-                  "A config consists of Elasticsearch JS client options and\nvalid sub-set of Elasticsearch service config.\nWe fill all the missing properties in the `clientConfig` using the default\nElasticsearch config so that we don't depend on default values set and\ncontrolled by underlying Elasticsearch JS client.\nWe don't run validation against the passed config and expect it to be valid."
+                  "A config consists of Elasticsearch JS client options and"
                 ],
                 "signature": [
                   "Partial<",

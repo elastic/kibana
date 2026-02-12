@@ -376,7 +376,9 @@
             "type": "Object",
             "tags": [],
             "label": "opts",
-            "description": [],
+            "description": [
+              "- Scroll options"
+            ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
             "lineNumber": 130,
             "columnNumber": 9,
@@ -389,7 +391,9 @@
                 "type": "number",
                 "tags": [],
                 "label": "top",
-                "description": [],
+                "description": [
+                  "- The number of pixels to scroll (positive = down, negative = up)"
+                ],
                 "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
                 "lineNumber": 131,
                 "columnNumber": 5,
@@ -402,7 +406,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "behavior",
-                "description": [],
+                "description": [
+                  "- The scroll behavior ('auto' or 'smooth'). Default is 'auto'"
+                ],
                 "signature": [
                   "ScrollBehavior | undefined"
                 ],
@@ -461,7 +467,9 @@
             "type": "Object",
             "tags": [],
             "label": "opts",
-            "description": [],
+            "description": [
+              "- Scroll options"
+            ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
             "lineNumber": 68,
             "columnNumber": 9,
@@ -474,7 +482,9 @@
                 "type": "number",
                 "tags": [],
                 "label": "top",
-                "description": [],
+                "description": [
+                  "- The vertical position to scroll to in pixels"
+                ],
                 "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
                 "lineNumber": 69,
                 "columnNumber": 5,
@@ -487,7 +497,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "behavior",
-                "description": [],
+                "description": [
+                  "- The scroll behavior ('auto' or 'smooth'). Default is 'auto'"
+                ],
                 "signature": [
                   "ScrollBehavior | undefined"
                 ],
@@ -546,7 +558,9 @@
             "type": "Object",
             "tags": [],
             "label": "opts",
-            "description": [],
+            "description": [
+              "- Scroll options"
+            ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
             "lineNumber": 99,
             "columnNumber": 9,
@@ -559,7 +573,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "behavior",
-                "description": [],
+                "description": [
+                  "- The scroll behavior ('auto' or 'smooth'). Default is 'auto'"
+                ],
                 "signature": [
                   "ScrollBehavior | undefined"
                 ],
@@ -618,7 +634,9 @@
             "type": "Object",
             "tags": [],
             "label": "opts",
-            "description": [],
+            "description": [
+              "- Scroll options"
+            ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-utils/src/scroll.ts",
             "lineNumber": 84,
             "columnNumber": 9,
@@ -631,7 +649,9 @@
                 "type": "CompoundType",
                 "tags": [],
                 "label": "behavior",
-                "description": [],
+                "description": [
+                  "- The scroll behavior ('auto' or 'smooth'). Default is 'auto'"
+                ],
                 "signature": [
                   "ScrollBehavior | undefined"
                 ],
