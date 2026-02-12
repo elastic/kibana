@@ -13,10 +13,8 @@ export {
 } from './src/systems/identify_systems';
 export { partitionStream } from './workflows/partition_stream';
 export { suggestProcessingPipeline } from './workflows/suggest_processing_pipeline';
-export {
-  generateSignificantEvents,
-  type SignificantEventsToolUsage,
-} from './src/significant_events/generate_significant_events';
+export { generateSignificantEvents } from './src/significant_events/generate_significant_events';
+export { createDefaultSignificantEventsToolUsage, type SignificantEventsToolUsage } from './src/significant_events/tools/tool_usage';
 export { sumTokens } from './src/helpers/sum_tokens';
 export { identifyFeatures, type IdentifyFeaturesOptions } from './src/features/identify_features';
 export { generateAllComputedFeatures } from './src/features/computed';

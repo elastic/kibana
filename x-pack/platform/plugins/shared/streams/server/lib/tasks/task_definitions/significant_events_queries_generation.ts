@@ -14,6 +14,7 @@ import {
 } from '@kbn/streams-schema';
 import pLimit from 'p-limit';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import { createDefaultSignificantEventsToolUsage } from '@kbn/streams-ai';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
 import type { TaskContext } from '.';
 import type { TaskParams } from '../types';
@@ -109,15 +110,16 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                     { queries: [], tokensUsed: { prompt: 0, completion: 0 } }
                   );
 
-                const toolUsage = resultsArray.reduce(
-                  (acc, result) => {
-                    acc.calls += result.toolUsage.get_stream_features.calls;
-                    acc.failures += result.toolUsage.get_stream_features.failures;
-                    acc.latency_ms += result.toolUsage.get_stream_features.latency_ms;
-                    return acc;
-                  },
-                  { calls: 0, failures: 0, latency_ms: 0 }
-                );
+                const toolUsage = resultsArray.reduce((acc, result) => {
+                  acc.get_stream_features.calls += result.toolUsage.get_stream_features.calls;
+                  acc.get_stream_features.failures += result.toolUsage.get_stream_features.failures;
+                  acc.get_stream_features.latency_ms +=
+                    result.toolUsage.get_stream_features.latency_ms;
+                  acc.add_queries.calls += result.toolUsage.add_queries.calls;
+                  acc.add_queries.failures += result.toolUsage.add_queries.failures;
+                  acc.add_queries.latency_ms += result.toolUsage.add_queries.latency_ms;
+                  return acc;
+                }, createDefaultSignificantEventsToolUsage());
 
                 taskContext.telemetry.trackSignificantEventsQueriesGenerated({
                   count: combinedResults.queries.length,
@@ -126,9 +128,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   stream_type: getStreamTypeFromDefinition(stream),
                   input_tokens_used: combinedResults.tokensUsed.prompt,
                   output_tokens_used: combinedResults.tokensUsed.completion,
-                  tool_calls: toolUsage.calls,
-                  tool_failures: toolUsage.failures,
-                  tool_latency_ms: toolUsage.latency_ms,
+                  tool_usage: toolUsage,
                 });
 
                 await taskClient.complete<

@@ -6,6 +6,7 @@
  */
 
 import type { Feature } from '@kbn/streams-schema';
+import { pick } from 'lodash';
 
 export type LlmFeature = Pick<
   Feature,
@@ -21,15 +22,15 @@ export type LlmFeature = Pick<
 >;
 
 export function toLlmFeature(feature: Feature): LlmFeature {
-  return {
-    id: feature.id,
-    type: feature.type,
-    subtype: feature.subtype,
-    title: feature.title,
-    description: feature.description,
-    confidence: feature.confidence,
-    properties: feature.properties,
-    evidence: feature.evidence,
-    tags: feature.tags,
-  };
+  return pick(feature, [
+    'id',
+    'type',
+    'subtype',
+    'title',
+    'description',
+    'confidence',
+    'properties',
+    'evidence',
+    'tags',
+  ]);
 }

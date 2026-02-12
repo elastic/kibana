@@ -17,6 +17,10 @@ import type { SignificantEventType } from './types';
 import { sumTokens } from '../helpers/sum_tokens';
 import { getComputedFeatureInstructions } from '../features/computed';
 import { toLlmFeature } from './tools/features_tool';
+import {
+  createDefaultSignificantEventsToolUsage,
+  type SignificantEventsToolUsage,
+} from './tools/tool_usage';
 
 interface Query {
   kql: string;
@@ -24,14 +28,6 @@ interface Query {
   category: SignificantEventType;
   severity_score: number;
   evidence?: string[];
-}
-
-export interface SignificantEventsToolUsage {
-  get_stream_features: {
-    calls: number;
-    failures: number;
-    latency_ms: number;
-  };
 }
 
 function getErrorMessage(error: unknown): string {
@@ -66,10 +62,8 @@ export async function generateSignificantEvents({
   toolUsage: SignificantEventsToolUsage;
 }> {
   logger.debug('Starting significant event generation');
-  const toolUsage: SignificantEventsToolUsage = {
-    get_stream_features: { calls: 0, failures: 0, latency_ms: 0 },
-  };
 
+  const toolUsage = createDefaultSignificantEventsToolUsage();
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
 
   logger.trace('Generating significant events via reasoning agent');
@@ -84,9 +78,7 @@ export async function generateSignificantEvents({
       prompt,
       inferenceClient,
       toolCallbacks: {
-        // Context is retrieved on-demand through tools to keep prompts compact
-        // and to make this pattern reusable for future context providers.
-        get_stream_features: async (toolCall) => {
+        get_stream_features: async (_toolCall) => {
           toolUsage.get_stream_features.calls += 1;
           const startTime = Date.now();
           try {
@@ -94,7 +86,6 @@ export async function generateSignificantEvents({
               getFeatures()
             );
             const llmFeatures = features.map(toLlmFeature);
-            toolUsage.get_stream_features.latency_ms += Date.now() - startTime;
 
             return {
               response: {
@@ -104,7 +95,6 @@ export async function generateSignificantEvents({
             };
           } catch (error) {
             toolUsage.get_stream_features.failures += 1;
-            toolUsage.get_stream_features.latency_ms += Date.now() - startTime;
             const errorMessage = getErrorMessage(error);
             logger.warn(`Failed to fetch stream features: ${errorMessage}`);
             return {
@@ -114,24 +104,36 @@ export async function generateSignificantEvents({
                 error: errorMessage,
               },
             };
+          } finally {
+            toolUsage.get_stream_features.latency_ms += Date.now() - startTime;
           }
         },
         add_queries: async (toolCall) => {
+          toolUsage.add_queries.calls += 1;
+          const startTime = Date.now();
+
           const queries = toolCall.function.arguments.queries;
 
           const queryValidationResults = queries.map((query) => {
-            let validation: { valid: true } | { valid: false; error: Error } = { valid: true };
             try {
               fromKueryExpression(query.kql);
+              return {
+                query,
+                valid: true,
+                status: 'Added',
+                error: undefined,
+              };
             } catch (error) {
-              validation = { valid: false, error };
+              toolUsage.add_queries.failures += 1;
+              return {
+                query,
+                valid: false,
+                status: 'Failed to add',
+                error: getErrorMessage(error),
+              };
+            } finally {
+              toolUsage.add_queries.latency_ms += Date.now() - startTime;
             }
-            return {
-              query,
-              valid: validation.valid,
-              status: validation.valid ? 'Added' : 'Failed to add',
-              error: 'error' in validation ? validation.error.message : undefined,
-            };
           });
 
           return {
@@ -146,26 +148,10 @@ export async function generateSignificantEvents({
   );
 
   const queries = response.input.flatMap((message) => {
-    if (message.role === MessageRole.Tool) {
-      const responsePayload = message.response;
-      if (
-        !responsePayload ||
-        typeof responsePayload !== 'object' ||
-        !('queries' in responsePayload)
-      ) {
-        return [];
-      }
-      const queriesFromResponse = responsePayload.queries;
-      if (!Array.isArray(queriesFromResponse)) {
-        return [];
-      }
-      return queriesFromResponse.flatMap((query) => {
-        if (query.valid) {
-          return [query.query];
-        }
-        return [];
-      });
+    if (message.role === MessageRole.Tool && message.name === 'add_queries') {
+      return message.response.queries.flatMap(({ valid, query }) => (valid ? [query] : []));
     }
+
     return [];
   });
 

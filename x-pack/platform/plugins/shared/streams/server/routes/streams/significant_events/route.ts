@@ -167,12 +167,16 @@ const generateSignificantEventsRoute = createServerRoute({
         .describe(
           'Optional connector ID. If not provided, the default AI connector from settings will be used.'
         ),
-      from: dateFromString.describe(
-        'Time range start. Kept for API compatibility; feature-based generation does not sample raw logs.'
-      ).optional(),
-      to: dateFromString.describe(
-        'Time range end. Kept for API compatibility; feature-based generation does not sample raw logs.'
-      ).optional(),
+      from: dateFromString
+        .describe(
+          'Time range start. Kept for API compatibility; feature-based generation does not sample raw logs.'
+        )
+        .optional(),
+      to: dateFromString
+        .describe(
+          'Time range end. Kept for API compatibility; feature-based generation does not sample raw logs.'
+        )
+        .optional(),
       sampleDocsSize: z
         .number()
         .optional()
@@ -187,7 +191,8 @@ const generateSignificantEventsRoute = createServerRoute({
   options: {
     access: 'public',
     summary: 'Generate significant events',
-    description: 'Generate significant events queries based on stream context and extracted features',
+    description:
+      'Generate significant events queries based on stream context and extracted features',
     availability: {
       since: '9.2.0',
       stability: 'experimental',
@@ -206,14 +211,8 @@ const generateSignificantEventsRoute = createServerRoute({
     logger,
     telemetry,
   }): Promise<SignificantEventsGenerateResponse> => {
-    const {
-      streamsClient,
-      licensing,
-      inferenceClient,
-      uiSettingsClient,
-      soClient,
-      featureClient,
-    } = await getScopedClients({ request });
+    const { streamsClient, licensing, inferenceClient, uiSettingsClient, soClient, featureClient } =
+      await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
