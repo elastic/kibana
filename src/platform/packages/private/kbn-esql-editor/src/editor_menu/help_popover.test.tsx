@@ -15,7 +15,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { createStubDataView, stubLogstashFieldSpecMap } from '@kbn/data-plugin/public/stubs';
 import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
 import { coreMock, notificationServiceMock } from '@kbn/core/public/mocks';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import { HelpPopover } from './help_popover';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 
