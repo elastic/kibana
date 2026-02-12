@@ -259,22 +259,22 @@ export class ElasticsearchService
   }
 
   private getOnRequestHandler(): OnRequestHandler | undefined {
-    if (!this.isServerless) return undefined;
+    if (!this.isServerless || !this.cpsEnabled) return undefined;
 
     return ({ scoped }, params, options) => {
       if (!scoped) return;
-      if (!this.cpsEnabled) return;
-      if (!isPlainObject(params.body)) return;
-      const body = params.body as Record<string, unknown>;
-      if (body.project_routing != null) return;
+      const body = params.body;
+      if (
+        isPlainObject(body) &&
+        ((body as Record<string, unknown>).project_routing != null ||
+          (body as Record<string, unknown>).pit != null)
+      )
+        return;
 
       const acceptedParams = params.meta?.acceptedParams;
       const apiSupportsProjectRouting = acceptedParams?.includes('project_routing') ?? false;
       if (!apiSupportsProjectRouting) return;
-
-      if (body?.pit != null) return;
-
-      set(body, 'project_routing', '_tag._alias:_local');
+      set(params, 'body.project_routing', '_tag._alias:_local');
     };
   }
 }
