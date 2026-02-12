@@ -74,21 +74,7 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconUrlvoid" */ './specs/urlvoid/icon')),
   ],
   [
-<<<<<<< slack-v2-connector
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconslack2" */ './specs/slack/icon')),
-=======
-    '.jira-cloud',
-    lazy(
-      () =>
-        import(/* webpackChunkName: "connectorIconJiraCloud" */ './specs/atlassian/jira-cloud/icon')
-    ),
-  ],
-  [
-    '.google_drive',
-    lazy(
-      () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
-    ),
->>>>>>> main
   ],
 ]);
