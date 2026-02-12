@@ -37,6 +37,7 @@ import {
 import {
   ALLOWED_SCHEDULES_IN_MINUTES,
   DEFAULT_FIELDS,
+  HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS,
 } from '../../../common/constants/monitor_defaults';
 
 type MonitorCodecType =
@@ -165,7 +166,7 @@ export function validateMonitor(monitorFields: MonitorFields, spaceId: string): 
     const timeout = monitorFields[ConfigKey.TIMEOUT];
     if (timeout) {
       const timeoutSeconds = typeof timeout === 'string' ? parseInt(timeout, 10) : timeout;
-      if (timeoutSeconds < 30) {
+      if (timeoutSeconds < HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS) {
         return {
           valid: false,
           reason: BROWSER_INVALID_TIMEOUT_ERROR,
@@ -550,6 +551,6 @@ const BROWSER_INVALID_TIMEOUT_ERROR = i18n.translate(
 const BROWSER_INVALID_TIMEOUT_DETAILS = (timeout: number) =>
   i18n.translate('xpack.synthetics.server.monitors.invalidTimeoutDetails', {
     defaultMessage:
-      'Invalid timeout {timeout} seconds supplied. Minimum timeout for browser monitors is 30 seconds.',
-    values: { timeout },
+      `Invalid timeout {timeout} seconds supplied. Minimum timeout for browser monitors is ${HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS} seconds.`,
+    values: { timeout, heartbeatTimeoutOverhead: HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS },
   });
