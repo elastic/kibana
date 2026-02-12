@@ -18,7 +18,7 @@ inputs:
 steps:
   - name: get-projects
     type: jira-cloud.getProjects
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= jira-cloud-stack-connector-id %>
     with:
       maxResults: ${{inputs.maxResults}}
       startAt: ${{inputs.startAt}}
