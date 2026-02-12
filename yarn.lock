@@ -12074,10 +12074,10 @@
     leven "^3.1.0"
     picocolors "^1.1.1"
 
-"@readme/openapi-parser@^5.0.1":
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/@readme/openapi-parser/-/openapi-parser-5.0.1.tgz#6d68b9df5efe8248ee8add4b81f147df36ed00aa"
-  integrity sha512-qLHoqkBcqHmCFqLNuK9vH2DiOg+RM4Jk4ncgm6BkW1h796NAPqY6i4ux90PsgM19c4LVcZKgrEp+/oEGAAmCmA==
+"@readme/openapi-parser@^5.4.0":
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/@readme/openapi-parser/-/openapi-parser-5.4.0.tgz#9561cc30f4f4219b629fcc71340c3babcd070145"
+  integrity sha512-B02OhOTyNE62CadM06jaeXdDe2ujXNfeZVp66jS5ZWDB0kQbBYN9RtyxlLBZxgIc7nnw+DmVOaCiu/hoO5xYUw==
   dependencies:
     "@apidevtools/json-schema-ref-parser" "^14.1.1"
     "@readme/better-ajv-errors" "^2.3.2"
@@ -27608,12 +27608,12 @@ oas-validator@^5.0.8:
     should "^13.2.1"
     yaml "^1.10.0"
 
-oas@28.1.0:
-  version "28.1.0"
-  resolved "https://registry.yarnpkg.com/oas/-/oas-28.1.0.tgz#4e22d524fef762f1ac7c2d61131dfac10cdb96cd"
-  integrity sha512-W9Gu512dmOtcq0f3E3kN47UYVJDmKSoy51UIGGxC3f/QyhEMOMsGVlKkckDvhZKa4L5NrLmSUcne2S1JiKRc9Q==
+oas@28.7.0:
+  version "28.7.0"
+  resolved "https://registry.yarnpkg.com/oas/-/oas-28.7.0.tgz#97c0453721d4faf6fc3cec5402d757c0efbd24da"
+  integrity sha512-9lX/qThyOYs6DURDW8C7JUUn0jsI/fZY3QPlG3kmmCg1svlYTnC5xTvj9sShRuIboEL+oaVvHQ+iyLleeacSrg==
   dependencies:
-    "@readme/openapi-parser" "^5.0.1"
+    "@readme/openapi-parser" "^5.4.0"
     "@types/json-schema" "^7.0.11"
     json-schema-merge-allof "^0.8.1"
     jsonpath-plus "^10.0.0"
@@ -27621,7 +27621,7 @@ oas@28.1.0:
     memoizee "^0.4.16"
     openapi-types "^12.1.1"
     path-to-regexp "^8.1.0"
-    remove-undefined-objects "^6.0.0"
+    remove-undefined-objects "^7.0.0"
 
 object-assign@^4, object-assign@^4.0.1, object-assign@^4.1.1:
   version "4.1.1"
@@ -30618,10 +30618,10 @@ remove-trailing-separator@^1.1.0:
   resolved "https://registry.yarnpkg.com/remove-trailing-separator/-/remove-trailing-separator-1.1.0.tgz#c24bce2a283adad5bc3f58e0d48249b92379d8ef"
   integrity sha1-wkvOKig62tW8P1jg1IJJuSN52O8=
 
-remove-undefined-objects@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/remove-undefined-objects/-/remove-undefined-objects-6.0.0.tgz#1663ce4560879e91642c8b351dd8345c7e9dfc44"
-  integrity sha512-8fR4QQFV2xMKTYXazi1944rpr1f+JOzQu58TgUFi3xDu41fDon5qMXtjJ1/nhquOouTtJ621bKDrhE1IlOSP+A==
+remove-undefined-objects@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/remove-undefined-objects/-/remove-undefined-objects-7.0.0.tgz#ad38e96c982a6b1d6fe856c289fdb3097535f9a7"
+  integrity sha512-+9ycqqqpv6EdaOvHpyOkf81SXJ4MjARKX450Je6AmshEYeqAuiVcfbLx1coNICO3KulleXlOHd0GSHFkEdB3YQ==
 
 renderkid@^3.0.0:
   version "3.0.0"
