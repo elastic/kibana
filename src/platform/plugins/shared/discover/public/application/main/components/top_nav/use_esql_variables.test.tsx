@@ -9,7 +9,6 @@
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { ControlGroupRendererApi, ControlPanelsState } from '@kbn/control-group-renderer';
-import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { BehaviorSubject, Observable, skip } from 'rxjs';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
