@@ -14,26 +14,59 @@ import {
 
 describe('ScriptNameNavLink component', () => {
   let mockedContext: AppContextTestRender;
-  let render: (props: ScriptNameNavLinkProps) => ReturnType<AppContextTestRender['render']>;
+  let render: (props?: ScriptNameNavLinkProps) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
+  let defaultProps: ScriptNameNavLinkProps;
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
-    render = (props: ScriptNameNavLinkProps) => {
-      renderResult = mockedContext.render(<ScriptNameNavLink {...props} data-test-subj="test" />);
+
+    defaultProps = {
+      name: 'Test Script',
+      queryParams: { page: 1, pageSize: 10, sortField: 'name', sortDirection: 'asc' },
+      scriptId: 'script-1',
+      onClick: jest.fn(),
+      'data-test-subj': 'test',
+    };
+    render = (props?: ScriptNameNavLinkProps) => {
+      renderResult = mockedContext.render(
+        <ScriptNameNavLink {...(props ?? defaultProps)} data-test-subj="test" />
+      );
       return renderResult;
     };
   });
 
   it('should render correctly', () => {
-    const { getByTestId } = render({ name: 'Test Script', href: '/test-script' });
-    const badgesContainer = getByTestId('test');
-    expect(badgesContainer).toHaveTextContent('Test Script');
+    const { getByTestId } = render();
+    const nameElement = getByTestId('test-name-link');
+    expect(nameElement).toHaveTextContent('Test Script');
   });
 
-  it('should set the correct href', () => {
-    const { getByTestId } = render({ name: 'Test Script', href: '/test-script?show=details' });
-    const linkElement = getByTestId('test') as HTMLAnchorElement;
-    expect(linkElement.href).toContain('/test-script?show=details');
+  it('should call onClick when name is clicked', () => {
+    const { getByTestId } = render();
+    const nameElement = getByTestId('test-name-link');
+    nameElement.click();
+    expect(defaultProps.onClick).toHaveBeenCalled();
+  });
+
+  it('should have correct href for navigation', () => {
+    const { getByTestId } = render();
+    const nameElement = getByTestId('test-name-link');
+    expect(nameElement).toHaveAttribute(
+      'href',
+      '/app/security/administration/scripts_library?page=1&pageSize=10&sortField=name&sortDirection=asc&selectedScriptId=script-1&show=details'
+    );
+  });
+
+  it('should update the href for navigation when queryParams change', () => {
+    const { getByTestId } = render({
+      ...defaultProps,
+      queryParams: { page: 2, pageSize: 20, sortField: 'updatedAt', sortDirection: 'desc' },
+    });
+    const nameElement = getByTestId('test-name-link');
+    expect(nameElement).toHaveAttribute(
+      'href',
+      '/app/security/administration/scripts_library?page=2&pageSize=20&sortField=updatedAt&sortDirection=desc&selectedScriptId=script-1&show=details'
+    );
   });
 });

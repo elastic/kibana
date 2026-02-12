@@ -45,6 +45,12 @@ export function plugin() {
 //     line 30 - config
 //     line 30 - foo
 //     line 30 - new
+//   param doc mismatches (1):
+//     line 30 - new
+//   missing complex type info (3):
+//     line 24 - InterfaceWithIndexSignature
+//     line 28 - ClassConstructorWithStaticProperties
+//     line 30 - config
 //   any usage (1):
 //     line 20 - imAnAny
 //   no references (9):

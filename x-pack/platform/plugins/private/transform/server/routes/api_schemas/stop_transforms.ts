@@ -15,7 +15,8 @@ export const stopTransformsRequestSchema = schema.arrayOf(
   schema.object({
     id: schema.string(),
     state: transformStateSchema,
-  })
+  }),
+  { maxSize: 1000 }
 );
 
 export type StopTransformsRequestSchema = TypeOf<typeof stopTransformsRequestSchema>;
