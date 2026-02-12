@@ -9,12 +9,12 @@ import type { ProjectMonitor, SyntheticsMonitor } from '../../../common/runtime_
 import { ConfigKey, MonitorTypeEnum } from '../../../common/runtime_types';
 
 interface MonitorWarning {
-  id: string;
+  monitorId: string;
   message: string;
 }
 
 const buildBrowserTimeoutWarning = (monitorId: string): MonitorWarning => ({
-  id: monitorId,
+  monitorId: monitorId,
   message: i18n.translate(
     'xpack.synthetics.server.monitors.browserTimeoutNoPrivateLocationsWarning',
     {
