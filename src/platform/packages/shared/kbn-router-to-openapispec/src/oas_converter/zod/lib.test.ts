@@ -12,7 +12,7 @@ import { z as z4 } from '@kbn/zod/v4';
 import { BooleanFromString, PassThroughAny } from '@kbn/zod-helpers';
 import { PassThroughAny as PassThroughAnyV4 } from '@kbn/zod-helpers/v4';
 import { DeepStrict } from '@kbn/zod-helpers/v4';
-import { convert, convertPathParameters, convertQuery } from './lib';
+import { convert, convertPathParameters, convertQuery, resetDefsCounter } from './lib';
 
 import { createLargeSchema, createLargeSchemaV4 } from './lib.test.util';
 
@@ -347,6 +347,8 @@ describe('DeepStrict-wrapped v3 schemas (mixed v3/v4)', () => {
 
 describe('zod v4', () => {
   describe('convert', () => {
+    beforeEach(() => resetDefsCounter());
+
     test('base case', () => {
       const result = convert(createLargeSchemaV4() as any);
       expect(result.shared).toEqual({});
@@ -365,6 +367,51 @@ describe('zod v4', () => {
           uri: { type: 'string', default: 'prototest://something' },
         },
         required: expect.arrayContaining(['string', 'ipType', 'literalType', 'neverType']),
+      });
+    });
+
+    test('extracts $defs from recursive schemas to shared components', () => {
+      // Simulate a recursive FilterCondition-like schema (and/or/not self-references)
+      const filterCondition: z4.ZodType = z4.lazy(() =>
+        z4.union([
+          z4.object({ field: z4.string(), eq: z4.string() }),
+          z4.object({ and: z4.array(filterCondition) }),
+          z4.object({ or: z4.array(filterCondition) }),
+          z4.object({ not: filterCondition }),
+        ])
+      );
+      const bodySchema = z4.object({
+        condition: filterCondition,
+        name: z4.string(),
+      });
+
+      const result = convert(bodySchema as any);
+
+      // $defs should NOT appear in the schema (moved to shared)
+      expect(result.schema).not.toHaveProperty('$defs');
+
+      // shared should contain the extracted recursive definition(s)
+      const sharedKeys = Object.keys(result.shared);
+      expect(sharedKeys.length).toBeGreaterThan(0);
+      expect(sharedKeys[0]).toMatch(/^_zod_v4_\d+___schema\d+$/);
+
+      // The schema should reference components/schemas instead of $defs
+      const schemaStr = JSON.stringify(result.schema);
+      expect(schemaStr).not.toContain('#/$defs/');
+      expect(schemaStr).toContain('#/components/schemas/_zod_v4_');
+
+      // The shared definitions should also have rewritten self-references
+      const sharedStr = JSON.stringify(result.shared);
+      expect(sharedStr).not.toContain('#/$defs/');
+
+      // The schema should still have the expected top-level structure
+      expect(result.schema).toMatchObject({
+        type: 'object',
+        required: expect.arrayContaining(['condition', 'name']),
+        properties: {
+          name: { type: 'string' },
+          condition: { $ref: expect.stringContaining('#/components/schemas/_zod_v4_') },
+        },
       });
     });
   });

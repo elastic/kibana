@@ -548,6 +548,72 @@ function applyJsonDescription(jsonSchema: Record<string, any>, description?: str
   return jsonSchema;
 }
 
+/**
+ * Counter used to generate unique keys when hoisting `$defs` entries
+ * from `z4.toJSONSchema()` into OpenAPI `components/schemas`.
+ * Ensures no key collisions across multiple `convert()` calls.
+ */
+let defsCounter = 0;
+
+/** @internal Exposed for testing only — resets the `$defs` counter. */
+export const resetDefsCounter = () => {
+  defsCounter = 0;
+};
+
+/**
+ * Recursively rewrite every `$ref` value that starts with `#/$defs/`
+ * to point to `#/components/schemas/<uniqueKey>` instead.
+ */
+function rewriteDefsRefs(
+  obj: unknown,
+  replacements: Record<string, string>
+): unknown {
+  if (typeof obj !== 'object' || obj === null) return obj;
+  if (Array.isArray(obj)) return obj.map((item) => rewriteDefsRefs(item, replacements));
+
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+    if (key === '$ref' && typeof value === 'string' && replacements[value]) {
+      result[key] = replacements[value];
+    } else {
+      result[key] = rewriteDefsRefs(value, replacements);
+    }
+  }
+  return result;
+}
+
+/**
+ * Extract `$defs` from a JSON Schema produced by `z4.toJSONSchema()`, move
+ * the entries into `shared` (→ `components/schemas`), and rewrite all
+ * `$ref: '#/$defs/...'` pointers so they resolve correctly in the OpenAPI
+ * document root.
+ */
+function extractDefsToShared(
+  defs: Record<string, unknown>,
+  jsonSchema: Record<string, unknown>
+): { schema: Record<string, unknown>; shared: Record<string, OpenAPIV3.SchemaObject> } {
+  const batchId = defsCounter++;
+  const replacements: Record<string, string> = {};
+  const shared: Record<string, OpenAPIV3.SchemaObject> = {};
+
+  for (const [key, value] of Object.entries(defs)) {
+    const uniqueKey = `_zod_v4_${batchId}_${key}`;
+    replacements[`#/$defs/${key}`] = `#/components/schemas/${uniqueKey}`;
+    shared[uniqueKey] = value as OpenAPIV3.SchemaObject;
+  }
+
+  // Rewrite $ref paths in the main schema
+  const fixedSchema = rewriteDefsRefs(jsonSchema, replacements) as Record<string, unknown>;
+
+  // Rewrite $ref paths inside the shared definitions too (recursive schemas
+  // reference themselves via $defs pointers)
+  for (const [key, value] of Object.entries(shared)) {
+    shared[key] = rewriteDefsRefs(value, replacements) as OpenAPIV3.SchemaObject;
+  }
+
+  return { schema: fixedSchema, shared };
+}
+
 export const convert = (schema: z.ZodTypeAny) => {
   // Unwrap DeepStrict pipes, optional/default wrappers, transforms, etc.
   // This is critical because makeZodValidationObject wraps ALL Zod schemas
@@ -563,14 +629,26 @@ export const convert = (schema: z.ZodTypeAny) => {
     }) as Record<string, any>;
 
     // Remove $schema (not valid inside OpenAPI schema objects)
-    const { $schema, ...jsonSchema } = raw;
+    const { $schema, $defs, ...jsonSchema } = raw;
+
+    let shared: Record<string, OpenAPIV3.SchemaObject> = {};
+    let processedSchema: Record<string, unknown> = jsonSchema;
+
+    // z4.toJSONSchema() emits `$defs` for recursive schemas (e.g. FilterCondition
+    // with self-referencing and/or/not). OpenAPI 3.0 doesn't support inline `$defs`
+    // — refs must point to `#/components/schemas/...`. Extract them.
+    if ($defs && typeof $defs === 'object' && Object.keys($defs).length > 0) {
+      const extracted = extractDefsToShared($defs, jsonSchema);
+      processedSchema = extracted.schema;
+      shared = extracted.shared;
+    }
 
     // Apply the same JSON-description post-processing as v3
     const description = (unwrapped as any).description;
-    const processed = applyJsonDescription(jsonSchema, description);
+    const processed = applyJsonDescription(processedSchema as Record<string, any>, description);
 
     return {
-      shared: {},
+      shared,
       schema: processed as OpenAPIV3.SchemaObject,
     };
   }
