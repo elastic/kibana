@@ -24,41 +24,45 @@ const options = {
       updateCache: false,
     },
     help: `
-        --bail            Stop on the first linting error
-        --update-cache    Updates Moon's caches for the lint targets
+        --update-cache    Update Moon's caches locally, ignores cache in CI
         --fix             Fix files
       `,
   },
 };
 
-run(async ({ log, flags }) => {
-  const bail = !!(flags.bail || false);
+const env = {
+  CI_STATS_DISABLED: 'true',
+  PATH: process.env.PATH + `:${path.join('node_modules', '.bin')}`,
+  MOON_NO_ACTIONS: 'true',
+  MOON_CONCURRENCY: '' + (os.availableParallelism() - 1),
+} as Record<string, string>;
 
+run(async ({ log, flags }) => {
   const moonCommand = IS_CI ? 'ci' : 'run';
   const lintCommand = flags.fix ? ':eslint-fix' : ':eslint';
-  const cacheFlag = IS_CI ? [] : flags.updateCache ? ['-u'] : [];
+  const fullArgs = [moonCommand, lintCommand];
 
-  const fullArgs = [moonCommand, lintCommand, ...cacheFlag];
+  if (flags.updateCache) {
+    if (!IS_CI) {
+      fullArgs.push('-u');
+    } else {
+      // moon ci doesn't support -u; use MOON_CACHE=off when update-cache requested in CI
+      env.MOON_CACHE = 'off';
+    }
+  }
 
   log.info(`Running ESLint: 'moon ${fullArgs.join(' ')}'`);
 
   const { exitCode } = await execa('moon', fullArgs, {
     cwd: REPO_ROOT,
-    env: {
-      // Disable CI stats for individual runs, to avoid overloading ci-stats
-      CI_STATS_DISABLED: 'true',
-      PATH: process.env.PATH + `:${path.join('node_modules', '.bin')}`,
-      MOON_NO_ACTIONS: 'true',
-      MOON_CONCURRENCY: '' + (os.availableParallelism() - 1),
-    },
+    env,
     stdio: 'inherit',
-    reject: bail, // Don't throw on non-zero exit code
+    reject: false,
   });
 
   if (exitCode > 0) {
     log.error(`Linting errors found ❌`);
     process.exit(exitCode);
-  } else {
-    log.info('Linting successful ✅');
   }
+  log.info('Linting successful ✅');
 }, options);

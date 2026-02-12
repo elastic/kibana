@@ -35,6 +35,7 @@ tasks:
       - '$projectSource'
       - '--no-error-on-unmatched-pattern'
       - '--fix'
+      - '--break-on-fix' # This is to prevent unwanted caching
     options:
       runFromWorkspaceRoot: true
       cache: true
