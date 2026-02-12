@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ZodObject } from '@kbn/zod';
+import type { ZodObject } from '@kbn/zod/v4';
 import type { EsqlToolDefinition, ToolDefinition } from '@kbn/agent-builder-common';
 import type {
   IndexSearchToolDefinition,

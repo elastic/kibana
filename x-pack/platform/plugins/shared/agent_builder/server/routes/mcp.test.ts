@@ -11,7 +11,7 @@ import { registerMCPRoutes, filterToolsByNamespace } from './mcp';
 import type { RouteDependencies } from './types';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
 import { ToolType } from '@kbn/agent-builder-common';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { MCP_SERVER_PATH } from '../../common/mcp';
 
 const createMockTool = (

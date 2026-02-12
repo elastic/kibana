@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import { createReasoningEvent } from '@kbn/agent-builder-genai-utils/langchain';

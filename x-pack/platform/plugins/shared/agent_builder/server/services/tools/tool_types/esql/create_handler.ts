@@ -6,7 +6,7 @@
  */
 
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
-import type { z, ZodObject } from '@kbn/zod';
+import type { z, ZodObject } from '@kbn/zod/v4';
 import type { ToolHandlerFn } from '@kbn/agent-builder-server';
 import { interpolateEsqlQuery } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type { EsqlToolParamValue } from '@kbn/agent-builder-common';

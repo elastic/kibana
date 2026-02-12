@@ -11,7 +11,7 @@ import {
   isInProtectedNamespace,
   hasNamespaceName,
 } from '@kbn/agent-builder-common/base/namespaces';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export const sharedI18nMessages = {
   toolId: {
@@ -59,18 +59,23 @@ export const sharedValidationSchemas = {
     .min(1, { message: sharedI18nMessages.toolId.requiredError })
     .max(toolIdMaxLength, { message: sharedI18nMessages.toolId.tooLongError })
     .regex(toolIdRegexp, { message: sharedI18nMessages.toolId.formatError })
-    .refine(
-      (name) => !isReservedToolId(name),
-      (name) => ({
-        message: sharedI18nMessages.toolId.reservedError(name),
-      })
-    )
-    .refine(
-      (name) => !isInProtectedNamespace(name) && !hasNamespaceName(name),
-      (name) => ({
-        message: sharedI18nMessages.toolId.protectedNamespaceError(name),
-      })
-    ),
+    .check((ctx) => {
+      const name = ctx.value as string;
+      if (isReservedToolId(name)) {
+        ctx.issues.push({
+          code: 'custom',
+          message: sharedI18nMessages.toolId.reservedError(name),
+          input: name,
+        });
+      }
+      if (isInProtectedNamespace(name) || hasNamespaceName(name)) {
+        ctx.issues.push({
+          code: 'custom',
+          message: sharedI18nMessages.toolId.protectedNamespaceError(name),
+          input: name,
+        });
+      }
+    }),
 
   description: z.string().min(1, { message: sharedI18nMessages.description.requiredError }),
 

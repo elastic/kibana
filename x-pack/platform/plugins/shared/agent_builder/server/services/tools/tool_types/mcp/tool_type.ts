@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { McpToolConfig } from '@kbn/agent-builder-common/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -245,7 +245,7 @@ export const getMcpToolType = ({
 
           if (inputSchema) {
             const zodSchema = jsonSchemaToZod(inputSchema);
-            return zodSchema as z.ZodObject<any>;
+            return zodSchema as unknown as z.ZodObject<any>;
           }
 
           return z.object({});

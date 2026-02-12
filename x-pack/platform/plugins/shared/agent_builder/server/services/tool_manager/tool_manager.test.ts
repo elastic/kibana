@@ -11,7 +11,7 @@ import { ToolManagerToolType } from '@kbn/agent-builder-server/runner/tool_manag
 import type { ExecutableTool } from '@kbn/agent-builder-server';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import { loggerMock } from '@kbn/logging-mocks';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 // Mock dependencies
 jest.mock('@kbn/agent-builder-genai-utils/langchain', () => ({

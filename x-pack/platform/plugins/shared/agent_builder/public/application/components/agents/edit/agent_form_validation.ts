@@ -11,7 +11,7 @@ import {
   isInProtectedNamespace,
   hasNamespaceName,
 } from '@kbn/agent-builder-common/base/namespaces';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { isValidAgentAvatarColor } from '../../../utils/color';
 
 export const agentFormSchema = z.object({
@@ -33,15 +33,19 @@ export const agentFormSchema = z.object({
           'Agent ID must start and end with a letter or number, and can only contain lowercase letters, numbers, hyphens, and underscores.',
       }),
     })
-    .refine(
-      (name) => !isInProtectedNamespace(name) && !hasNamespaceName(name),
-      (name) => ({
-        message: i18n.translate('xpack.agentBuilder.agents.form.id.protectedNamespaceError', {
-          defaultMessage: 'Agent ID "{name}" uses a protected namespace.',
-          values: { name },
-        }),
-      })
-    ),
+    .check((ctx) => {
+      const name = ctx.value as string;
+      if (isInProtectedNamespace(name) || hasNamespaceName(name)) {
+        ctx.issues.push({
+          code: 'custom',
+          message: i18n.translate('xpack.agentBuilder.agents.form.id.protectedNamespaceError', {
+            defaultMessage: 'Agent ID "{name}" uses a protected namespace.',
+            values: { name },
+          }),
+          input: name,
+        });
+      }
+    }),
   name: z.string().min(1, {
     message: i18n.translate('xpack.agentBuilder.agents.form.nameRequired', {
       defaultMessage: 'Agent name is required.',
