@@ -75,7 +75,6 @@ export function getTransformIn(transformDrilldownsIn: DrilldownTransforms['trans
       state: {
         ...storedState,
         attributes: {
-
           ...omit(storedState.attributes, 'references'),
           tabs,
         },
