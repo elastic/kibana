@@ -13,7 +13,6 @@ import { ruleDetailsUrl } from '../../../../urls/rule_details';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
 import {
-  goToExecutionEventsTab,
   getExecutionEventsTableRows,
   filterExecutionEventsByMessage,
   filterExecutionEventsByLogLevel,
@@ -64,11 +63,10 @@ describe(
           enabled: true,
         }),
       }).then((rule) => {
-        visit(ruleDetailsUrl(rule.body.id));
+        visit(ruleDetailsUrl(rule.body.id, 'execution_events'));
       });
 
       waitForTheRuleToBeExecuted();
-      goToExecutionEventsTab();
     });
 
     it('should display the execution events table', function () {
