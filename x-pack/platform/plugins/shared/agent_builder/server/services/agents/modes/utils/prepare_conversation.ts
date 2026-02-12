@@ -26,7 +26,6 @@ import type {
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import type { AttachmentRepresentation } from '@kbn/agent-builder-server/attachments';
 import {
   prepareAttachmentPresentation,
   type AttachmentPresentation,
