@@ -35,7 +35,8 @@ export const byValueToSavedSearch = async <
 
   return await convertToSavedSearch(
     {
-      ...splitReferences(result.attributes),
+      ...result,
+      references: [],
       savedSearchId: undefined,
       sharingSavedObjectProps,
       managed,
@@ -43,16 +44,4 @@ export const byValueToSavedSearch = async <
     createGetSavedSearchDeps(services),
     serializable
   );
-};
-
-const splitReferences = (attributes: SavedSearchByValueAttributes) => {
-  const { references, ...attrs } = attributes;
-
-  return {
-    references,
-    attributes: {
-      ...attrs,
-      description: attrs.description ?? '',
-    },
-  };
 };

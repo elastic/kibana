@@ -9,7 +9,6 @@
 
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { getSearchEmbeddableTransforms } from './search_embeddable_transforms';
-import { extract, inject } from './search_inject_extract';
 import type {
   SearchEmbeddableByValueState,
   StoredSearchEmbeddableByValueState,
@@ -17,13 +16,6 @@ import type {
   SearchEmbeddableByReferenceState,
   SearchEmbeddableState,
 } from './types';
-
-jest.mock('./search_inject_extract', () => {
-  return {
-    inject: jest.fn((state, references) => state),
-    extract: jest.fn((state) => ({ state, references: [] })),
-  };
-});
 
 const mockDrilldownTransforms = {
   transformIn: jest.fn().mockImplementation((state: SearchEmbeddableState) => ({
@@ -80,10 +72,6 @@ describe('searchEmbeddableTransforms', () => {
       };
       const result = getSearchEmbeddableTransforms(mockDrilldownTransforms).transformOut?.(
         state,
-        references
-      );
-      expect(inject).toHaveBeenCalledWith(
-        { type: 'search', ...{ ...state, attributes: expectedAttributes } },
         references
       );
       expect(result).toEqual({
@@ -204,7 +192,6 @@ describe('searchEmbeddableTransforms', () => {
               searchSourceJSON: '{"query":{"match_all":{}}}',
             },
             tabs: [],
-            references: [],
           },
           title: 'Panel Title',
         };
@@ -212,10 +199,6 @@ describe('searchEmbeddableTransforms', () => {
         const result =
           getSearchEmbeddableTransforms(mockDrilldownTransforms).transformIn!(serializedState);
 
-        expect(extract).toHaveBeenCalledWith({
-          type: 'search',
-          attributes: serializedState.attributes,
-        });
         expect(result.state as StoredSearchEmbeddableByValueState).toEqual(serializedState);
         expect(result.references).toEqual([]);
       });
@@ -244,10 +227,6 @@ describe('searchEmbeddableTransforms', () => {
 
         expect(result.references).toEqual([]);
         expect(mockDrilldownTransforms.transformIn).toHaveBeenCalledWith(serializedState);
-        expect(extract).toHaveBeenCalledWith({
-          type: 'search',
-          attributes: serializedState.attributes,
-        });
       });
     });
   });
