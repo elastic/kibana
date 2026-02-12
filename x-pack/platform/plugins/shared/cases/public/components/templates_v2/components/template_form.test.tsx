@@ -8,12 +8,12 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useForm, FormProvider } from 'react-hook-form';
-import { CreateTemplateForm } from './form';
-import { useCreateTemplate } from '../../hooks/use_create_template';
-import { useCasesContext } from '../../../cases_context/use_cases_context';
-import { useAvailableCasesOwners } from '../../../app/use_available_owners';
-import { TestProviders } from '../../../../common/mock';
-import * as i18n from '../../translations';
+import { CreateTemplateForm } from './template_form';
+import { useCreateTemplate } from '../hooks/use_create_template';
+import { useCasesContext } from '../../cases_context/use_cases_context';
+import { useAvailableCasesOwners } from '../../app/use_available_owners';
+import { TestProviders } from '../../../common/mock';
+import * as i18n from '../translations';
 
 jest.mock('@kbn/code-editor', () => ({
   CodeEditor: ({ value, onChange }: { value: string; onChange: (code: string) => void }) => (
@@ -25,9 +25,9 @@ jest.mock('@kbn/code-editor', () => ({
   ),
 }));
 
-jest.mock('../../hooks/use_create_template');
-jest.mock('../../../cases_context/use_cases_context');
-jest.mock('../../../app/use_available_owners');
+jest.mock('../hooks/use_create_template');
+jest.mock('../../cases_context/use_cases_context');
+jest.mock('../../app/use_available_owners');
 
 describe('CreateTemplateForm', () => {
   const mutateAsync = jest.fn();
