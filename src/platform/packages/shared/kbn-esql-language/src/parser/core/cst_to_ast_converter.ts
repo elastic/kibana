@@ -2180,7 +2180,7 @@ export class CstToAstConverter {
       return;
     }
 
-    const limitOption = this.toOption(limitToken.getText().toLocaleLowerCase(), limitValueCtx);
+    const limitOption = this.toOption(limitToken.getText().toLowerCase(), limitValueCtx);
 
     limitOption.args.push(this.fromConstantToArray(limitValueCtx));
     limitOption.location.min = limitToken.symbol.start;
