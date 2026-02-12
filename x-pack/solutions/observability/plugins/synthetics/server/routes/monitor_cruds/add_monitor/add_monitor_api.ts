@@ -77,7 +77,6 @@ export class AddEditMonitorAPI {
     });
 
     try {
-      // ToDo: ensure that timeout is stores as it is in SO
       const newMonitorPromise = this.routeContext.monitorConfigRepository.create({
         normalizedMonitor: monitorWithNamespace,
         id: newMonitorId,
