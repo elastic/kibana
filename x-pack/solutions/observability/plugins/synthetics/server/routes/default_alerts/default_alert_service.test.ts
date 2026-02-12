@@ -41,6 +41,7 @@ describe('DefaultAlertService', () => {
         defaultEmail: undefined,
         defaultStatusRuleEnabled: true,
         defaultTLSRuleEnabled: true,
+        privateLocationsSyncInterval: 5,
       });
       expect(soClient.get).toHaveBeenCalledTimes(1);
     });
