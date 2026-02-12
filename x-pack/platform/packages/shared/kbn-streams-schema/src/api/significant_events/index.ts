@@ -50,6 +50,31 @@ interface SignificantEventsGetResponse {
   aggregated_occurrences: SignificantEventOccurrence[];
 }
 
+/**
+ * Discovery Queries (Significant Events Discovery)
+ *
+ * These endpoints are used by the discovery UI to render the queries table
+ * and the aggregated occurrences histogram above it.
+ */
+interface DiscoveryQueriesGetResponse {
+  queries: SignificantEventsResponse[];
+  page: number;
+  perPage: number;
+  total: number;
+}
+
+interface DiscoveryQueriesOccurrencesBucket {
+  /** ISO8601 timestamp string */
+  x: string;
+  /** Integer count of occurrences in this bucket */
+  y: number;
+}
+
+interface DiscoveryQueriesOccurrencesGetResponse {
+  aggregated_occurrences: DiscoveryQueriesOccurrencesBucket[];
+  total_occurrences: number;
+}
+
 type SignificantEventsPreviewResponse = Pick<
   SignificantEventsResponse,
   'occurrences' | 'change_points' | 'kql'
@@ -99,6 +124,8 @@ type SignificantEventsQueriesGenerationTaskResult =
 export type {
   SignificantEventsResponse,
   SignificantEventsGetResponse,
+  DiscoveryQueriesGetResponse,
+  DiscoveryQueriesOccurrencesGetResponse,
   SignificantEventsPreviewResponse,
   GeneratedSignificantEventQuery,
   SignificantEventsGenerateResponse,
