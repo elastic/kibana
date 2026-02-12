@@ -11,11 +11,11 @@ import { type RuleExecutionEvent } from '../../../../../common/api/detection_eng
 
 import * as i18n from './translations';
 
-interface ExecutionEventsTableRowDetailsProps {
+interface ExecutionEventsTableDetailsCellProps {
   item: RuleExecutionEvent;
 }
 
-const ExecutionEventsTableRowDetailsComponent: React.FC<ExecutionEventsTableRowDetailsProps> = ({
+const ExecutionEventsTableDetailsCellComponent: React.FC<ExecutionEventsTableDetailsCellProps> = ({
   item,
 }) => {
   const listItems = [];
@@ -65,5 +65,5 @@ const ExecutionEventsTableRowDetailsComponent: React.FC<ExecutionEventsTableRowD
   );
 };
 
-export const ExecutionEventsTableRowDetails = React.memo(ExecutionEventsTableRowDetailsComponent);
-ExecutionEventsTableRowDetails.displayName = 'ExecutionEventsTableRowDetails';
+export const ExecutionEventsTableDetailsCell = React.memo(ExecutionEventsTableDetailsCellComponent);
+ExecutionEventsTableDetailsCell.displayName = 'ExecutionEventsTableDetailsCell';

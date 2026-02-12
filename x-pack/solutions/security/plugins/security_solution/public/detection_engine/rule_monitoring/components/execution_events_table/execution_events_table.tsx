@@ -20,7 +20,7 @@ import type { RuleExecutionEvent } from '../../../../../common/api/detection_eng
 import { HeaderSection } from '../../../../common/components/header_section';
 import { EventTypeFilter } from '../basic/filters/event_type_filter';
 import { LogLevelFilter } from '../basic/filters/log_level_filter';
-import { ExecutionEventsTableRowDetails } from './execution_events_table_row_details';
+import { ExecutionEventsTableDetailsCell } from './execution_events_table_row_details';
 
 import { useFilters } from './use_filters';
 import { useSorting } from '../basic/tables/use_sorting';
@@ -48,7 +48,7 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
   }, []);
 
   const renderExpandedItem = useCallback((item: RuleExecutionEvent) => {
-    return <ExecutionEventsTableRowDetails item={item} />;
+    return <ExecutionEventsTableDetailsCell item={item} />;
   }, []);
 
   const rows = useExpandableRows<RuleExecutionEvent>({

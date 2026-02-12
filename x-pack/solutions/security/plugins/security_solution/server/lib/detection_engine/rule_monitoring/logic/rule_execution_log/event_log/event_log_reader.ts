@@ -279,8 +279,6 @@ const normalizeEventDetails = (
     );
     return { metrics: event.kibana.alert.rule.execution.metrics };
   }
-
-  return undefined;
 };
 
 const normalizeExecutionId = (event: RawEvent): string => {

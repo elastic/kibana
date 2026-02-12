@@ -21,11 +21,11 @@ import { RuleStatusBadge } from '../../../common/components/rule_execution_statu
 
 import * as i18n from './translations';
 
-interface ExecutionEventsTableRowSummaryProps {
+interface ExecutionEventsTableSummaryCellProps {
   event: RuleExecutionEvent;
 }
 
-export const ExecutionEventsTableRowSummary: React.FC<ExecutionEventsTableRowSummaryProps> = ({
+export const ExecutionEventsTableSummaryCell: React.FC<ExecutionEventsTableSummaryCellProps> = ({
   event,
 }) => {
   switch (event.type) {

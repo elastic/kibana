@@ -20,7 +20,7 @@ import { EventTypeIndicator } from '../basic/indicators/event_type_indicator';
 import { LogLevelIndicator } from '../basic/indicators/log_level_indicator';
 
 import * as i18n from './translations';
-import { ExecutionEventsTableRowSummary } from './execution_events_table_row_summary';
+import { ExecutionEventsTableSummaryCell } from './execution_events_table_row_summary';
 
 type TableColumn = EuiBasicTableColumn<RuleExecutionEvent>;
 
@@ -75,7 +75,7 @@ const eventTypeColumn: TableColumn = {
 
 const summaryColumn: TableColumn = {
   name: i18n.COLUMN_SUMMARY,
-  render: (item: RuleExecutionEvent) => <ExecutionEventsTableRowSummary event={item} />,
+  render: (item: RuleExecutionEvent) => <ExecutionEventsTableSummaryCell event={item} />,
   truncateText: true,
   width: '64%',
 };
