@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { Reference } from '@kbn/content-management-utils';
 import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type {
   VisualizeByReferenceState,
   VisualizeByValueState,
@@ -24,24 +24,19 @@ import type {
 
 export const VIS_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
-export function getTransformIn(
-  transformEnhancementsIn: EmbeddableSetup['transformEnhancementsIn']
-) {
+export function getTransformIn(transformDrilldownsIn: DrilldownTransforms['transformIn']) {
   function transformIn(state: VisualizeEmbeddableState): {
     state: StoredVisualizeEmbeddableState;
     references: Reference[];
   } {
-    const enhancementsResults = state.enhancements
-      ? transformEnhancementsIn(state.enhancements)
-      : { state: undefined, references: [] };
+    const { state: storedState, references: drilldownReferences } = transformDrilldownsIn(state);
 
     // by ref
-    if ((state as VisualizeByReferenceState).savedObjectId) {
-      const { savedObjectId, ...rest } = state as VisualizeByReferenceState;
+    if ((storedState as VisualizeByReferenceState).savedObjectId) {
+      const { savedObjectId, ...rest } = storedState as VisualizeByReferenceState;
       return {
         state: {
           ...rest,
-          ...(enhancementsResults.state ? { enhancements: enhancementsResults.state } : {}),
         } as StoredVisualizeByReferenceState,
         references: [
           {
@@ -49,33 +44,31 @@ export function getTransformIn(
             type: VISUALIZE_SAVED_OBJECT_TYPE,
             id: savedObjectId!,
           },
-          ...enhancementsResults.references,
+          ...drilldownReferences,
         ],
       };
     }
 
     // by value
-    if ((state as VisualizeByValueState).savedVis) {
+    if ((storedState as VisualizeByValueState).savedVis) {
       const { references, savedVis } = extractVisReferences(
-        (state as VisualizeByValueState).savedVis
+        (storedState as VisualizeByValueState).savedVis
       );
 
       return {
         state: {
-          ...state,
-          ...(enhancementsResults.state ? { enhancements: enhancementsResults.state } : {}),
+          ...storedState,
           savedVis,
         } as StoredVisualizeByValueState,
-        references: [...references, ...enhancementsResults.references],
+        references: [...references, ...drilldownReferences],
       };
     }
 
     return {
       state: {
-        ...state,
-        ...(enhancementsResults.state ? { enhancements: enhancementsResults.state } : {}),
+        ...storedState,
       } as StoredVisualizeEmbeddableState,
-      references: enhancementsResults.references,
+      references: drilldownReferences,
     };
   }
   return transformIn;

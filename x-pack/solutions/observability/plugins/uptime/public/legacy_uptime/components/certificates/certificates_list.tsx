@@ -102,6 +102,7 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
 
   return (
     <EuiBasicTable
+      data-test-subj="uptimeCertificatesTable"
       loading={certificates.loading}
       columns={columns}
       items={certificates?.certs ?? []}
@@ -113,13 +114,7 @@ export const CertificateList: React.FC<Props> = ({ page, certificates, sort, onC
           direction: sort.direction,
         },
       }}
-      noItemsMessage={
-        certificates.loading ? (
-          LOADING_CERTIFICATES
-        ) : (
-          <span data-test-subj="uptimeCertsEmptyMessage">{NO_CERTS_AVAILABLE}</span>
-        )
-      }
+      noItemsMessage={certificates.loading ? LOADING_CERTIFICATES : NO_CERTS_AVAILABLE}
     />
   );
 };

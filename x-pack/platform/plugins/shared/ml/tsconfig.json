@@ -77,7 +77,6 @@
     "@kbn/ml-date-utils",
     "@kbn/ml-error-utils",
     "@kbn/ml-field-stats-flyout",
-    "@kbn/ml-in-memory-table",
     "@kbn/ml-is-defined",
     "@kbn/ml-is-populated-object",
     "@kbn/ml-local-storage",

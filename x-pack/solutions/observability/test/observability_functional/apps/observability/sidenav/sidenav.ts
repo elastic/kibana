@@ -64,9 +64,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           panelNavLinkId: 'logs:log-categories',
         });
 
-        await solutionNavigation.sidenav.clickPanelLink('visualize');
+        await solutionNavigation.sidenav.clickPanelLink('maps');
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Visualize library',
+          text: 'Maps',
         });
 
         // Open machine learning popover

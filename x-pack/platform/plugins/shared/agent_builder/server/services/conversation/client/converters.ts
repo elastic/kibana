@@ -15,7 +15,11 @@ import type {
   UserIdAndName,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
-import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  ToolResultType,
+} from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
   ConversationCreateRequest,
@@ -70,6 +74,21 @@ function serializeStepResults(rounds: ConversationRound[]): PersistentConversati
   }));
 }
 
+/**
+ * Migrates legacy tool result types to their current names.
+ * This handles backward compatibility when tool result types are renamed.
+ */
+const migrateToolResultType = (result: ToolResult): ToolResult => {
+  // Migration: 'tabular_data' was renamed to 'esql_results'
+  if (result.type === 'tabular_data') {
+    return {
+      ...result,
+      type: ToolResultType.esqlResults,
+    };
+  }
+  return result;
+};
+
 function deserializeStepResults(rounds: PersistentConversationRound[]): ConversationRound[] {
   return rounds.map<ConversationRound>((round) => ({
     ...round,
@@ -87,10 +106,10 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
         return {
           ...step,
           results: (JSON.parse(step.results) as ToolResult[]).map((result) => {
-            return {
+            return migrateToolResultType({
               ...result,
               tool_result_id: result.tool_result_id ?? getToolResultId(),
-            };
+            });
           }),
           progression: step.progression ?? [],
         };
@@ -129,6 +148,7 @@ export const fromEs = (document: Document): Conversation => {
       ...base,
       rounds: roundsWithRefs,
       attachments: existingAttachments,
+      ...(document._source!.state && { state: document._source!.state }),
     };
   }
 
@@ -137,6 +157,7 @@ export const fromEs = (document: Document): Conversation => {
       ...base,
       rounds: roundsWithRefs,
       ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
+      ...(document._source!.state && { state: document._source!.state }),
     };
   }
 

@@ -8,10 +8,7 @@
 import React from 'react';
 import type { Node, Parent } from 'unist';
 import { render, screen } from '@testing-library/react';
-import {
-  ToolResultType,
-  type TabularDataResult,
-} from '@kbn/agent-builder-common/tools/tool_result';
+import { ToolResultType, type EsqlResults } from '@kbn/agent-builder-common/tools/tool_result';
 import { cloneDeep } from 'lodash';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
@@ -60,9 +57,9 @@ const useConversationContextMock = useConversationContext as jest.MockedFunction
   typeof useConversationContext
 >;
 
-const toolResult: TabularDataResult = {
+const toolResult: EsqlResults = {
   tool_result_id: '6K4K',
-  type: ToolResultType.tabularData,
+  type: ToolResultType.esqlResults,
   data: {
     query:
       'FROM metrics-apm.transaction.1m-default\n| WHERE @timestamp >= NOW() - 1 hour\n| STATS avg_duration = AVG(transaction.duration.summary) BY minute_bucket = BUCKET(@timestamp, 1 minute)\n| SORT minute_bucket\n| LIMIT 100',
@@ -130,6 +127,7 @@ describe('chat_message_text', () => {
         setTimeToFirstToken: jest.fn(),
         setPendingPrompt: jest.fn(),
         clearPendingPrompt: jest.fn(),
+        clearLastRoundResponse: jest.fn(),
       },
     });
   });

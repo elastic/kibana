@@ -174,7 +174,8 @@ export function TableSortSelect({
     return opts;
   });
 
-  const selectedOptionLabel = options.find(({ checked }) => checked === 'on')?.label ?? '';
+  const selectedOptionLabel =
+    options.find(({ checked }) => checked === 'on')?.label ?? i18nText.nameAscSort;
 
   const panelHeaderCSS = css`
     border-bottom: ${euiTheme.border.thin};

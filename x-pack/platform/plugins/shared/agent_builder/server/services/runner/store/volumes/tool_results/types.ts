@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { ToolResultType } from '@kbn/agent-builder-common';
 import type { FileEntry } from '@kbn/agent-builder-server/runner/filestore';
 
 export interface ToolCallEntryMeta {
-  tool_result_type: ToolResultType;
+  tool_result_type: string;
   tool_id: string;
   tool_call_id: string;
 }

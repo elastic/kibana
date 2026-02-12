@@ -119,6 +119,12 @@ export class AgentBuilderPlugin
       attachments: {
         registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),
       },
+      hooks: {
+        register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
+      },
+      skill: {
+        registerSkill: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
+      },
     };
   }
 

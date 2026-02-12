@@ -40,7 +40,7 @@ export function getOptions(type: LinkType, options: LinkOptions) {
         'boolean' && {
         use_time_range: (dashboardOptions as { useCurrentDateRange?: boolean }).useCurrentDateRange,
       }),
-    };
+    } as DashboardLink['options'];
   }
 
   const urlOptions = options as Required<ExternalLink>['options'];

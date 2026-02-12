@@ -8,16 +8,12 @@
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import {
   type EvaluationScoreRepository,
-  type DatasetScoreWithStats,
+  type EvaluatorStats,
   type ReportDisplayOptions,
-  calculateOverallStats,
-  formatReportData,
-  type EvaluationReport,
   type EvaluationReporter,
   createTable,
 } from '@kbn/evals';
 import chalk from 'chalk';
-import { sumBy } from 'lodash';
 
 /**
  * Extracts scenario name from dataset name using pattern "scenario: dataset-name"
@@ -35,53 +31,74 @@ function extractScenarioName(datasetName: string, log: SomeDevLog): string {
 }
 
 /**
- * Aggregates multiple datasets into scenario-level synthetic datasets
- * Each returned dataset represents a scenario with aggregated statistics
+ * Aggregates stats by scenario, combining all datasets that belong to the same scenario.
+ * Returns a flat EvaluatorStats[] with scenario names as datasetName.
  */
-function aggregateDatasetsByScenario(
-  datasets: DatasetScoreWithStats[],
-  log: SomeDevLog
-): DatasetScoreWithStats[] {
-  const scenarioMap = new Map<string, DatasetScoreWithStats[]>();
+function aggregateStatsByScenario(stats: EvaluatorStats[], log: SomeDevLog): EvaluatorStats[] {
+  const scenarioEvaluatorMap = new Map<string, Map<string, EvaluatorStats[]>>();
 
-  datasets.forEach((dataset) => {
-    const scenarioName = extractScenarioName(dataset.name, log);
-    if (!scenarioMap.has(scenarioName)) {
-      scenarioMap.set(scenarioName, []);
+  stats.forEach((stat) => {
+    const scenarioName = extractScenarioName(stat.datasetName, log);
+
+    if (!scenarioEvaluatorMap.has(scenarioName)) {
+      scenarioEvaluatorMap.set(scenarioName, new Map());
     }
-    scenarioMap.get(scenarioName)!.push(dataset);
+
+    const evaluatorMap = scenarioEvaluatorMap.get(scenarioName)!;
+    if (!evaluatorMap.has(stat.evaluatorName)) {
+      evaluatorMap.set(stat.evaluatorName, []);
+    }
+    evaluatorMap.get(stat.evaluatorName)!.push(stat);
   });
 
-  return Array.from(scenarioMap.entries())
-    .map(([scenarioName, scenarioDatasets]) => {
-      // Collect unique evaluator names from all datasets in this scenario
-      const evaluatorNamesSet = new Set<string>();
-      scenarioDatasets.forEach((d) => {
-        d.evaluatorScores.forEach((_, evaluatorName) => {
-          evaluatorNamesSet.add(evaluatorName);
+  const result: EvaluatorStats[] = [];
+
+  scenarioEvaluatorMap.forEach((evaluatorMap, scenarioName) => {
+    evaluatorMap.forEach((evaluatorStats, evaluatorName) => {
+      const totalCount = evaluatorStats.reduce((sum, s) => sum + s.stats.count, 0);
+
+      if (totalCount === 0) {
+        result.push({
+          datasetId: scenarioName,
+          datasetName: scenarioName,
+          evaluatorName,
+          stats: { mean: 0, median: 0, stdDev: 0, min: 0, max: 0, count: 0 },
         });
-      });
+        return;
+      }
 
-      // Aggregate raw scores from all datasets in this scenario (not used directly in the reports now, but will be when statistcal tests are added)
-      const aggregatedScores = new Map<string, number[]>();
-      evaluatorNamesSet.forEach((evaluatorName) => {
-        const allScores = scenarioDatasets.flatMap(
-          (d) => d.evaluatorScores.get(evaluatorName) || []
-        );
-        aggregatedScores.set(evaluatorName, allScores);
-      });
+      const weightedMean =
+        evaluatorStats.reduce((sum, s) => sum + s.stats.mean * s.stats.count, 0) / totalCount;
 
-      return {
-        id: scenarioName,
-        name: scenarioName,
-        numExamples: sumBy(scenarioDatasets, (d) => d.numExamples),
-        // experimentId is not meaningful for aggregated scenarios (multiple experiments/datasets combined)
-        experimentId: '_',
-        evaluatorScores: aggregatedScores,
-        evaluatorStats: calculateOverallStats(scenarioDatasets),
-      };
-    })
-    .sort((a, b) => a.name.localeCompare(b.name));
+      const pooledVariance =
+        totalCount > 1
+          ? evaluatorStats.reduce((sum, s) => {
+              return (
+                sum +
+                (s.stats.count - 1) * s.stats.stdDev ** 2 +
+                s.stats.count * (s.stats.mean - weightedMean) ** 2
+              );
+            }, 0) /
+            (totalCount - 1)
+          : 0;
+
+      result.push({
+        datasetId: scenarioName,
+        datasetName: scenarioName,
+        evaluatorName,
+        stats: {
+          mean: weightedMean,
+          median: weightedMean,
+          stdDev: Math.sqrt(pooledVariance),
+          min: Math.min(...evaluatorStats.map((s) => s.stats.min)),
+          max: Math.max(...evaluatorStats.map((s) => s.stats.max)),
+          count: totalCount,
+        },
+      });
+    });
+  });
+
+  return result.sort((a, b) => a.datasetName.localeCompare(b.datasetName));
 }
 
 /**
@@ -92,22 +109,27 @@ async function buildScenarioReport(
   scoreRepository: EvaluationScoreRepository,
   runId: string,
   log: SomeDevLog
-): Promise<EvaluationReport> {
+): Promise<{
+  stats: EvaluatorStats[];
+  totalRepetitions: number;
+  taskModel: { id?: string; family: string; provider: string };
+  evaluatorModel: { id?: string; family: string; provider: string };
+}> {
   log.info(`Building scenario report for run ID: ${runId}`);
 
-  const docs = await scoreRepository.getScoresByRunId(runId);
+  const runStats = await scoreRepository.getStatsByRunId(runId);
 
-  if (!docs || docs.length === 0) {
+  if (!runStats || runStats.stats.length === 0) {
     throw new Error(`No scores found for run ID: ${runId}`);
   }
 
-  const baseReport = formatReportData(docs);
-
-  const scenarioDatasets = aggregateDatasetsByScenario(baseReport.datasetScoresWithStats, log);
+  const scenarioStats = aggregateStatsByScenario(runStats.stats, log);
 
   return {
-    ...baseReport,
-    datasetScoresWithStats: scenarioDatasets,
+    stats: scenarioStats,
+    totalRepetitions: runStats.totalRepetitions,
+    taskModel: runStats.taskModel,
+    evaluatorModel: runStats.evaluatorModel,
   };
 }
 
@@ -129,19 +151,19 @@ export function createScenarioSummaryReporter(
 
       const report = await buildScenarioReport(scoreRepository, runId, log);
 
-      if (!report.datasetScoresWithStats || report.datasetScoresWithStats.length === 0) {
+      if (!report.stats || report.stats.length === 0) {
         log.warning('⚠️ No scenarios found to display');
         return;
       }
 
       log.info(`\n${chalk.bold.blue('📋 Run Metadata:')}`);
       log.info(
-        `Run: ${chalk.cyan(report.runId)} - Model: ${chalk.yellow(
-          report.model.id || 'Unknown'
+        `Run: ${chalk.cyan(runId)} - Model: ${chalk.yellow(
+          report.taskModel.id || 'Unknown'
         )} - Evaluator: ${chalk.yellow(report.evaluatorModel.id || 'Unknown')}`
       );
-      if (report.repetitions > 1) {
-        log.info(`Repetitions: ${chalk.cyan(report.repetitions.toString())}`);
+      if (report.totalRepetitions > 1) {
+        log.info(`Repetitions: ${chalk.cyan(report.totalRepetitions.toString())}`);
       }
 
       log.info(`\n${chalk.bold.blue('═══ SCENARIO SUMMARY ═══')}`);
@@ -150,9 +172,9 @@ export function createScenarioSummaryReporter(
       );
       evaluatorDisplayOptions.set('Criteria', {
         decimalPlaces: 1,
-        statsToInclude: ['mean', 'percentage', 'stdDev'],
+        statsToInclude: ['mean', 'stdDev'],
       });
-      const scenarioTable = createTable(report.datasetScoresWithStats, report.repetitions, {
+      const scenarioTable = createTable(report.stats, report.totalRepetitions, {
         firstColumnHeader: 'Scenario',
         styleRowName: (name) => chalk.bold.white(name),
         evaluatorDisplayOptions,

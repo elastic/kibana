@@ -243,10 +243,10 @@ export const SearchIndexDetailsPage = () => {
             pageTitle={index?.name}
             bottomBorder={false}
             rightSideItems={[
-              <EuiFlexGroup gutterSize="m">
-                {hasDocuments ? (
-                  <>
-                    <EuiFlexItem>
+              {
+                ...(hasDocuments ? (
+                  <EuiFlexGroup>
+                    <div>
                       <EuiButtonEmpty
                         isLoading={isInitialLoading}
                         data-test-subj="viewInDiscoverLink"
@@ -257,8 +257,8 @@ export const SearchIndexDetailsPage = () => {
                           defaultMessage="View in Discover"
                         />
                       </EuiButtonEmpty>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
+                    </div>
+                    <EuiFlexGroup>
                       <EuiButton
                         isLoading={isInitialLoading}
                         data-test-subj="useInPlaygroundLink"
@@ -271,10 +271,15 @@ export const SearchIndexDetailsPage = () => {
                           defaultMessage="Search in Playground"
                         />
                       </EuiButton>
-                    </EuiFlexItem>
-                  </>
+                      <SearchIndexDetailsPageMenuItemPopover
+                        handleDeleteIndexModal={handleDeleteIndexModal}
+                        showApiReference={hasDocuments}
+                        userPrivileges={userPrivileges}
+                      />
+                    </EuiFlexGroup>
+                  </EuiFlexGroup>
                 ) : (
-                  <EuiFlexItem>
+                  <EuiFlexGroup>
                     <EuiButtonEmpty
                       href={docLinks.links.apis.restApis}
                       target="_blank"
@@ -287,16 +292,14 @@ export const SearchIndexDetailsPage = () => {
                         defaultMessage="API Reference"
                       />
                     </EuiButtonEmpty>
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem>
-                  <SearchIndexDetailsPageMenuItemPopover
-                    handleDeleteIndexModal={handleDeleteIndexModal}
-                    showApiReference={hasDocuments}
-                    userPrivileges={userPrivileges}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>,
+                    <SearchIndexDetailsPageMenuItemPopover
+                      handleDeleteIndexModal={handleDeleteIndexModal}
+                      showApiReference={hasDocuments}
+                      userPrivileges={userPrivileges}
+                    />
+                  </EuiFlexGroup>
+                )),
+              },
             ]}
           />
           <EuiPageTemplate.Section

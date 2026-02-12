@@ -18,6 +18,7 @@ import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../primitive.gen';
 import {
+  LangSmithOptions,
   DataStream,
   AllIntegrationsResponseIntegration,
   InputType,
@@ -31,6 +32,10 @@ export const ApproveIntegrationRequest = z
      * The version of the integration
      */
     version: NonEmptyString,
+    /**
+     * The LangSmith tracing options
+     */
+    langSmithOptions: LangSmithOptions.optional(),
   })
   .strict();
 
@@ -76,6 +81,10 @@ export const CreateAutoImportIntegrationRequestBody = z
      * The description of the integration
      */
     description: NonEmptyString,
+    /**
+     * The LangSmith tracing options
+     */
+    langSmithOptions: LangSmithOptions.optional(),
     /**
      * The logo of the integration
      */
@@ -166,6 +175,10 @@ export const UpdateAutoImportIntegrationRequestBody = z
      * Integration logo image blob
      */
     logo: NonEmptyString.optional(),
+    /**
+     * The LangSmith tracing options
+     */
+    langSmithOptions: LangSmithOptions.optional(),
     /**
      * The data streams of the integration
      */

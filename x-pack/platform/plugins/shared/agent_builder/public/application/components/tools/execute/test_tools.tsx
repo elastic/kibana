@@ -232,7 +232,7 @@ const renderFormField = ({
               data-test-subj={`agentBuilderToolTestInput-${name}`}
               value={(value as number) ?? ''}
               type="number"
-              onChange={(e) => onChange(e.target.valueAsNumber || e.target.value)}
+              onChange={(e) => onChange(e.target.valueAsNumber ?? e.target.value)}
               placeholder={i18nMessages.inputPlaceholder(label)}
               fullWidth
             />
@@ -262,7 +262,6 @@ const renderFormField = ({
         return (
           <Controller
             {...commonProps}
-            defaultValue={new Date().toISOString()}
             render={({ field: { onChange, value, ref, ...field } }) => (
               <EuiDatePicker
                 {...field}
@@ -282,7 +281,6 @@ const renderFormField = ({
         return (
           <Controller
             {...commonProps}
-            defaultValue={[]}
             render={({ field: { onChange, value } }) => {
               const arrayValue: Array<string | number> = Array.isArray(value) ? value : [];
 

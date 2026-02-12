@@ -9,7 +9,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { PublicStepRegistry } from './step_registry';
-import type { PublicStepDefinition } from './step_registry/types';
 import { registerInternalStepDefinitions } from './steps';
 import type {
   WorkflowsExtensionsPublicPluginSetup,
@@ -40,10 +39,7 @@ export class WorkflowsExtensionsPublicPlugin
     registerInternalStepDefinitions(this.stepRegistry);
 
     return {
-      registerStepDefinition: (metadata) => {
-        // Casting here to prevent type errors with a narrow type definition and to avoid forcing consumers to cast manually
-        this.stepRegistry.register(metadata as PublicStepDefinition);
-      },
+      registerStepDefinition: (definition) => this.stepRegistry.register(definition),
     };
   }
 

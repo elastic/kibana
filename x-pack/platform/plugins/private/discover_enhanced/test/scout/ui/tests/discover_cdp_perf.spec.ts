@@ -12,7 +12,7 @@ import { testData } from '../fixtures';
 
 test.describe(
   'Discover App - Performance Metrics & Bundle Analysis',
-  { tag: [...tags.DEPLOYMENT_AGNOSTIC, ...tags.PERFORMANCE] },
+  { tag: [...tags.deploymentAgnostic, ...tags.performance] },
   () => {
     let cdp: CDPSession;
 
@@ -71,6 +71,7 @@ test.describe(
       ).toStrictEqual([
         'aiops',
         'discover',
+        'embeddableEnhanced',
         'eventAnnotation',
         'expressionXY',
         'kbn-ui-shared-deps-npm',

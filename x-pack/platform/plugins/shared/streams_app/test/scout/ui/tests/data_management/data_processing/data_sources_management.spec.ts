@@ -8,13 +8,13 @@
 /* eslint-disable playwright/expect-expect */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { DATE_RANGE, generateLogsData } from '../../../fixtures/generators';
 
-// Failing: See https://github.com/elastic/kibana/issues/250734
-test.describe.skip(
+test.describe(
   'Stream data processing - data sources management',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
@@ -51,9 +51,10 @@ test.describe.skip(
       await kqlDataSourceCard
         .locator('[data-test-subj="superDatePickerShowDatesButton"]:not([disabled])')
         .click();
-      await pageObjects.datePicker.typeAbsoluteRange({
+      await pageObjects.datePicker.setAbsoluteRangeInRootContainer({
         from: DATE_RANGE.from,
         to: DATE_RANGE.to,
+        containerLocator: kqlDataSourceCard,
       });
       await pageObjects.datePicker.waitToBeHidden();
       await kqlDataSourceCard

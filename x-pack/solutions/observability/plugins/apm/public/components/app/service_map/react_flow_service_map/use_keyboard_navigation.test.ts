@@ -366,6 +366,100 @@ describe('useKeyboardNavigation', () => {
 
       expect(result.current.screenReaderAnnouncement).toBe('');
     });
+
+    it('announces when a node is selected via Enter', () => {
+      const nodes = [createNode('test-node', 100, 100, 'Test Service')];
+      const nodeElement = document.createElement('div');
+      nodeElement.setAttribute('data-id', 'test-node');
+      nodeElement.tabIndex = 0;
+      document.body.appendChild(nodeElement);
+
+      const { result } = renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          nodes,
+          onNodeSelect: jest.fn(),
+        })
+      );
+
+      nodeElement.focus();
+
+      act(() => {
+        const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
+        document.dispatchEvent(event);
+      });
+
+      expect(result.current.screenReaderAnnouncement).toBe(
+        'Selected Test Service. Press Escape to close.'
+      );
+
+      document.body.removeChild(nodeElement);
+    });
+
+    it('announces when a node is selected via Space', () => {
+      const nodes = [createNode('test-node', 100, 100, 'Test Service')];
+      const nodeElement = document.createElement('div');
+      nodeElement.setAttribute('data-id', 'test-node');
+      nodeElement.tabIndex = 0;
+      document.body.appendChild(nodeElement);
+
+      const { result } = renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          nodes,
+          onNodeSelect: jest.fn(),
+        })
+      );
+
+      nodeElement.focus();
+
+      act(() => {
+        const event = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
+        document.dispatchEvent(event);
+      });
+
+      expect(result.current.screenReaderAnnouncement).toBe(
+        'Selected Test Service. Press Escape to close.'
+      );
+
+      document.body.removeChild(nodeElement);
+    });
+
+    it('announces when navigating to a node via Arrow keys', () => {
+      const nodes = [
+        createNode('node-a', 0, 100, 'Service A'),
+        createNode('node-b', 200, 100, 'Service B'),
+      ];
+
+      const nodeElementA = document.createElement('div');
+      nodeElementA.setAttribute('data-id', 'node-a');
+      nodeElementA.tabIndex = 0;
+      document.body.appendChild(nodeElementA);
+
+      const nodeElementB = document.createElement('div');
+      nodeElementB.setAttribute('data-id', 'node-b');
+      nodeElementB.tabIndex = 0;
+      document.body.appendChild(nodeElementB);
+
+      const { result } = renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          nodes,
+        })
+      );
+
+      nodeElementA.focus();
+
+      act(() => {
+        const event = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true });
+        document.dispatchEvent(event);
+      });
+
+      expect(result.current.screenReaderAnnouncement).toBe('Focused on Service B');
+
+      document.body.removeChild(nodeElementA);
+      document.body.removeChild(nodeElementB);
+    });
   });
 
   describe('keyboard event handling', () => {
@@ -425,6 +519,348 @@ describe('useKeyboardNavigation', () => {
       });
 
       expect(onPopoverClose).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Enter/Space on node elements', () => {
+    let nodeElement: HTMLDivElement;
+
+    beforeEach(() => {
+      nodeElement = document.createElement('div');
+      nodeElement.setAttribute('data-id', 'test-node');
+      nodeElement.tabIndex = 0;
+      document.body.appendChild(nodeElement);
+    });
+
+    afterEach(() => {
+      document.body.removeChild(nodeElement);
+    });
+
+    it('calls onNodeSelect when Enter is pressed on a focused node', () => {
+      const onNodeSelect = jest.fn();
+      const nodes = [createNode('test-node', 100, 100, 'Test Node')];
+
+      renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          nodes,
+          onNodeSelect,
+        })
+      );
+
+      nodeElement.focus();
+
+      act(() => {
+        const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
+        document.dispatchEvent(event);
+      });
+
+      expect(onNodeSelect).toHaveBeenCalledWith(nodes[0]);
+    });
+
+    it('calls onNodeSelect when Space is pressed on a focused node', () => {
+      const onNodeSelect = jest.fn();
+      const nodes = [createNode('test-node', 100, 100, 'Test Node')];
+
+      renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          nodes,
+          onNodeSelect,
+        })
+      );
+
+      nodeElement.focus();
+
+      act(() => {
+        const event = new KeyboardEvent('keydown', { key: ' ', bubbles: true });
+        document.dispatchEvent(event);
+      });
+
+      expect(onNodeSelect).toHaveBeenCalledWith(nodes[0]);
+    });
+
+    it('calls onPopoverClose when Enter is pressed on already selected node', () => {
+      const onPopoverClose = jest.fn();
+      const nodes = [createNode('test-node', 100, 100, 'Test Node')];
+
+      renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          nodes,
+          selectedNodeId: 'test-node',
+          onPopoverClose,
+        })
+      );
+
+      nodeElement.focus();
+
+      act(() => {
+        const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
+        document.dispatchEvent(event);
+      });
+
+      expect(onPopoverClose).toHaveBeenCalled();
+    });
+
+    it('does not call onNodeSelect when node is not found in nodes array', () => {
+      const onNodeSelect = jest.fn();
+      const nodes = [createNode('other-node', 100, 100)];
+
+      renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          nodes,
+          onNodeSelect,
+        })
+      );
+
+      nodeElement.focus();
+
+      act(() => {
+        const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
+        document.dispatchEvent(event);
+      });
+
+      expect(onNodeSelect).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Enter/Space on edge elements', () => {
+    let edgeElement: HTMLDivElement;
+
+    beforeEach(() => {
+      edgeElement = document.createElement('div');
+      edgeElement.classList.add('react-flow__edge');
+      edgeElement.setAttribute('data-id', 'a->b');
+      edgeElement.tabIndex = 0;
+      document.body.appendChild(edgeElement);
+    });
+
+    afterEach(() => {
+      document.body.removeChild(edgeElement);
+    });
+
+    const pressKeyOnEdge = (key: string) => {
+      edgeElement.focus();
+      act(() => {
+        const event = new KeyboardEvent('keydown', { key, bubbles: true });
+        document.dispatchEvent(event);
+      });
+    };
+
+    it('calls onEdgeSelect when Enter is pressed on a focused edge', () => {
+      const onEdgeSelect = jest.fn();
+      const edges = [createEdge('a', 'b')];
+
+      renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          edges,
+          onEdgeSelect,
+        })
+      );
+
+      pressKeyOnEdge('Enter');
+
+      expect(onEdgeSelect).toHaveBeenCalledWith(edges[0]);
+    });
+
+    it('calls onEdgeSelect when Space is pressed on a focused edge', () => {
+      const onEdgeSelect = jest.fn();
+      const edges = [createEdge('a', 'b')];
+
+      renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          edges,
+          onEdgeSelect,
+        })
+      );
+
+      pressKeyOnEdge(' ');
+
+      expect(onEdgeSelect).toHaveBeenCalledWith(edges[0]);
+    });
+
+    it('calls onPopoverClose when Enter is pressed on already selected edge', () => {
+      const onPopoverClose = jest.fn();
+      const edges = [createEdge('a', 'b')];
+
+      renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          edges,
+          selectedEdgeForPopover: edges[0],
+          onPopoverClose,
+        })
+      );
+
+      pressKeyOnEdge('Enter');
+
+      expect(onPopoverClose).toHaveBeenCalled();
+    });
+
+    it('does not call onEdgeSelect when edge data-id is missing', () => {
+      const onEdgeSelect = jest.fn();
+      const edges = [createEdge('a', 'b')];
+      edgeElement.removeAttribute('data-id');
+
+      renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          edges,
+          onEdgeSelect,
+        })
+      );
+
+      pressKeyOnEdge('Enter');
+
+      expect(onEdgeSelect).not.toHaveBeenCalled();
+    });
+
+    it('does not call onEdgeSelect when edge is not found in edges array', () => {
+      const onEdgeSelect = jest.fn();
+      const edges = [createEdge('x', 'y')];
+
+      renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          edges,
+          onEdgeSelect,
+        })
+      );
+
+      pressKeyOnEdge('Enter');
+
+      expect(onEdgeSelect).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Arrow key navigation with DOM elements', () => {
+    let nodeElementA: HTMLDivElement;
+    let nodeElementB: HTMLDivElement;
+
+    beforeEach(() => {
+      nodeElementA = document.createElement('div');
+      nodeElementA.setAttribute('data-id', 'a');
+      nodeElementA.tabIndex = 0;
+      document.body.appendChild(nodeElementA);
+
+      nodeElementB = document.createElement('div');
+      nodeElementB.setAttribute('data-id', 'b');
+      nodeElementB.tabIndex = 0;
+      document.body.appendChild(nodeElementB);
+    });
+
+    afterEach(() => {
+      document.body.removeChild(nodeElementA);
+      document.body.removeChild(nodeElementB);
+    });
+
+    it('focuses next node when ArrowRight is pressed on a node', () => {
+      const nodes = [createNode('a', 0, 100), createNode('b', 200, 100)];
+
+      renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          nodes,
+        })
+      );
+
+      nodeElementA.focus();
+
+      act(() => {
+        const event = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true });
+        document.dispatchEvent(event);
+      });
+
+      expect(document.activeElement).toBe(nodeElementB);
+    });
+
+    it('focuses next node when ArrowLeft is pressed', () => {
+      const nodes = [createNode('a', 200, 100), createNode('b', 0, 100)];
+
+      renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          nodes,
+        })
+      );
+
+      nodeElementA.focus();
+
+      act(() => {
+        const event = new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true });
+        document.dispatchEvent(event);
+      });
+
+      expect(document.activeElement).toBe(nodeElementB);
+    });
+
+    it('does not change focus when no node is in the arrow direction', () => {
+      const nodes = [createNode('a', 100, 100), createNode('b', 100, 100)];
+
+      renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          nodes,
+        })
+      );
+
+      nodeElementA.focus();
+
+      act(() => {
+        const event = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true });
+        document.dispatchEvent(event);
+      });
+
+      expect(document.activeElement).toBe(nodeElementA);
+    });
+
+    it('does not navigate when modifier keys are pressed', () => {
+      const nodes = [createNode('a', 0, 100), createNode('b', 200, 100)];
+
+      renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          nodes,
+        })
+      );
+
+      nodeElementA.focus();
+
+      act(() => {
+        const event = new KeyboardEvent('keydown', {
+          key: 'ArrowRight',
+          shiftKey: true,
+          bubbles: true,
+        });
+        document.dispatchEvent(event);
+      });
+
+      expect(document.activeElement).toBe(nodeElementA);
+    });
+
+    it('does nothing when node element has no data-id', () => {
+      const nodes = [createNode('a', 0, 100), createNode('b', 200, 100)];
+      nodeElementA.removeAttribute('data-id');
+
+      renderHook(() =>
+        useKeyboardNavigation({
+          ...defaultProps,
+          nodes,
+        })
+      );
+
+      nodeElementA.focus();
+
+      act(() => {
+        const event = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true });
+        document.dispatchEvent(event);
+      });
+
+      expect(document.activeElement).toBe(nodeElementA);
     });
   });
 

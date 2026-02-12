@@ -17,7 +17,6 @@ export {
   cellValueTrigger,
   CELL_VALUE_TRIGGER,
   contextMenuTrigger,
-  CONTEXT_MENU_TRIGGER,
   isMultiValueClickTriggerContext,
   isRangeSelectTriggerContext,
   isRowClickTriggerContext,
@@ -27,9 +26,8 @@ export {
   panelNotificationTrigger,
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
 } from './ui_actions/triggers';
+export { CONTEXT_MENU_TRIGGER, SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '../common';
 export type {
   CellValueContext,
   ChartActionContext,

@@ -15,11 +15,15 @@ import type {
   TextBasedLayerColumn,
   TextBasedPrivateState,
   TypedLensSerializedState,
-  DatasourceStates,
   ValueFormatConfig,
 } from '@kbn/lens-common';
 
-import type { ConvertibleLayer, EsqlConversionData } from './convert_to_esql_modal';
+import type {
+  ConvertibleLayer,
+  ConvertToEsqlParams,
+  EsqlConversionData,
+  LayerConversionData,
+} from './esql_conversion_types';
 
 // Map Lens DataType to DatatableColumnType
 // Some Lens types (counter, gauge, document) aren't valid DatatableColumnTypes
@@ -32,16 +36,6 @@ const getMetaTypeFromDataType = (dataType: DataType): DatatableColumnType => {
   }
   return dataType;
 };
-
-interface LayerConversionData {
-  layerId: string;
-  layer: FormBasedLayer;
-  conversionResult: {
-    esql: string;
-    partialRows: boolean;
-    esAggsIdMap: EsqlConversionData['esAggsIdMap'];
-  };
-}
 
 /**
  * Retrieves conversion data for a form-based layer.
@@ -156,18 +150,6 @@ function buildTextBasedState(
       name: ip.name,
     })),
   };
-}
-
-interface ConvertToEsqlParams {
-  /**
-   * The ConvertibleLayer objects selected for conversion.
-   * Contains the ES|QL query and column mappings from useEsqlConversionCheck.
-   */
-  layersToConvert: ConvertibleLayer[];
-  attributes: TypedLensSerializedState['attributes'];
-  visualizationState: unknown;
-  datasourceStates: DatasourceStates;
-  framePublicAPI: FramePublicAPI;
 }
 
 /**
