@@ -305,6 +305,12 @@ export class AutomaticImportService {
     options?: SavedObjectsDeleteOptions
   ): Promise<void> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
+    // Mark the data stream as deleting first so we can track if deletion is in progress
+    await this.savedObjectService.updateDataStreamStatus(
+      dataStreamId,
+      integrationId,
+      TASK_STATUSES.deleting
+    );
     // Remove the data stream creation task
     await this.taskManagerService.removeDataStreamCreationTask({
       integrationId,

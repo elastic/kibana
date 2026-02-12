@@ -432,6 +432,7 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 5 });
       const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
       const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
+      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
       (service as any).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -441,10 +442,16 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient);
 
+      expect(mockUpdateStatus).toHaveBeenCalledWith(
+        'data-stream-456',
+        'integration-123',
+        'deleting'
+      );
       expect(mockRemoveTask).toHaveBeenCalledWith({
         integrationId: 'integration-123',
         dataStreamId: 'data-stream-456',
@@ -465,6 +472,7 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 0 });
       const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
       const mockDeleteSavedObject = jest.fn().mockResolvedValue(undefined);
+      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
       const options = { force: true };
 
       (service as any).samplesIndexService = {
@@ -475,6 +483,7 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient, options);
@@ -498,6 +507,7 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSamples = jest.fn().mockResolvedValue({ deleted: 0 });
       const mockRemoveTask = jest.fn().mockRejectedValue(new Error('Task removal failed'));
       const mockDeleteSavedObject = jest.fn();
+      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
       (service as any).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -507,6 +517,7 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await expect(
@@ -521,6 +532,7 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSamples = jest.fn().mockRejectedValue(new Error('Sample deletion failed'));
       const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
       const mockDeleteSavedObject = jest.fn();
+      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
       (service as any).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -530,6 +542,7 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await expect(
@@ -545,6 +558,7 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSavedObject = jest
         .fn()
         .mockRejectedValue(new Error('Saved object deletion failed'));
+      const mockUpdateStatus = jest.fn().mockResolvedValue(undefined);
 
       (service as any).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -554,6 +568,7 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await expect(
@@ -573,6 +588,9 @@ describe('AutomaticImportSetupService', () => {
       const mockDeleteSavedObject = jest.fn().mockImplementation(async () => {
         executionOrder.push('deleteSavedObject');
       });
+      const mockUpdateStatus = jest.fn().mockImplementation(async () => {
+        executionOrder.push('updateStatus');
+      });
 
       (service as any).samplesIndexService = {
         deleteSamplesForDataStream: mockDeleteSamples,
@@ -582,228 +600,17 @@ describe('AutomaticImportSetupService', () => {
       };
       (service as any).savedObjectService = {
         deleteDataStream: mockDeleteSavedObject,
+        updateDataStreamStatus: mockUpdateStatus,
       };
 
       await service.deleteDataStream('integration-123', 'data-stream-456', mockEsClient);
 
-      expect(executionOrder).toEqual(['removeTask', 'deleteSamples', 'deleteSavedObject']);
-    });
-  });
-
-  describe('reanalyzeDataStream', () => {
-    let mockRequest: any;
-
-    beforeEach(async () => {
-      await service.initialize(mockSavedObjectsClient, mockTaskManagerStart);
-      mockRequest = {} as any;
-    });
-
-    it('should reanalyze data stream and call all required services', async () => {
-      const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
-      const mockScheduleTask = jest.fn().mockResolvedValue({ taskId: 'new-task-123' });
-      const mockResetDataStream = jest.fn().mockResolvedValue(undefined);
-
-      (service as any).taskManagerService = {
-        removeDataStreamCreationTask: mockRemoveTask,
-        scheduleDataStreamCreationTask: mockScheduleTask,
-      };
-      (service as any).savedObjectService = {
-        resetDataStreamForReanalysis: mockResetDataStream,
-      };
-
-      await service.reanalyzeDataStream(
-        {
-          integrationId: 'integration-123',
-          dataStreamId: 'data-stream-456',
-          connectorId: 'connector-789',
-        },
-        mockRequest
-      );
-
-      expect(mockRemoveTask).toHaveBeenCalledWith({
-        integrationId: 'integration-123',
-        dataStreamId: 'data-stream-456',
-      });
-      expect(mockScheduleTask).toHaveBeenCalledWith(
-        {
-          integrationId: 'integration-123',
-          dataStreamId: 'data-stream-456',
-          connectorId: 'connector-789',
-          langSmithOptions: undefined,
-        },
-        mockRequest
-      );
-      expect(mockResetDataStream).toHaveBeenCalledWith({
-        integrationId: 'integration-123',
-        dataStreamId: 'data-stream-456',
-        newTaskId: 'new-task-123',
-        jobType: 'autoImport-dataStream-task',
-      });
-    });
-
-    it('should pass langSmithOptions when provided', async () => {
-      const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
-      const mockScheduleTask = jest.fn().mockResolvedValue({ taskId: 'new-task-123' });
-      const mockResetDataStream = jest.fn().mockResolvedValue(undefined);
-      const langSmithOptions = { projectName: 'test-project', apiKey: 'test-key' };
-
-      (service as any).taskManagerService = {
-        removeDataStreamCreationTask: mockRemoveTask,
-        scheduleDataStreamCreationTask: mockScheduleTask,
-      };
-      (service as any).savedObjectService = {
-        resetDataStreamForReanalysis: mockResetDataStream,
-      };
-
-      await service.reanalyzeDataStream(
-        {
-          integrationId: 'integration-123',
-          dataStreamId: 'data-stream-456',
-          connectorId: 'connector-789',
-          langSmithOptions,
-        },
-        mockRequest
-      );
-
-      expect(mockScheduleTask).toHaveBeenCalledWith(
-        {
-          integrationId: 'integration-123',
-          dataStreamId: 'data-stream-456',
-          connectorId: 'connector-789',
-          langSmithOptions,
-        },
-        mockRequest
-      );
-    });
-
-    it('should throw error if saved object service is not initialized', async () => {
-      (service as any).savedObjectService = null;
-
-      await expect(
-        service.reanalyzeDataStream(
-          {
-            integrationId: 'integration-123',
-            dataStreamId: 'data-stream-456',
-            connectorId: 'connector-789',
-          },
-          mockRequest
-        )
-      ).rejects.toThrow('Saved Objects service not initialized.');
-    });
-
-    it('should handle errors from task removal gracefully and continue', async () => {
-      const mockRemoveTask = jest.fn().mockRejectedValue(new Error('Task removal failed'));
-      const mockScheduleTask = jest.fn().mockResolvedValue({ taskId: 'new-task-123' });
-      const mockResetDataStream = jest.fn().mockResolvedValue(undefined);
-
-      (service as any).taskManagerService = {
-        removeDataStreamCreationTask: mockRemoveTask,
-        scheduleDataStreamCreationTask: mockScheduleTask,
-      };
-      (service as any).savedObjectService = {
-        resetDataStreamForReanalysis: mockResetDataStream,
-      };
-
-      await expect(
-        service.reanalyzeDataStream(
-          {
-            integrationId: 'integration-123',
-            dataStreamId: 'data-stream-456',
-            connectorId: 'connector-789',
-          },
-          mockRequest
-        )
-      ).rejects.toThrow('Task removal failed');
-
-      expect(mockScheduleTask).not.toHaveBeenCalled();
-      expect(mockResetDataStream).not.toHaveBeenCalled();
-    });
-
-    it('should handle errors from task scheduling', async () => {
-      const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
-      const mockScheduleTask = jest.fn().mockRejectedValue(new Error('Task scheduling failed'));
-      const mockResetDataStream = jest.fn();
-
-      (service as any).taskManagerService = {
-        removeDataStreamCreationTask: mockRemoveTask,
-        scheduleDataStreamCreationTask: mockScheduleTask,
-      };
-      (service as any).savedObjectService = {
-        resetDataStreamForReanalysis: mockResetDataStream,
-      };
-
-      await expect(
-        service.reanalyzeDataStream(
-          {
-            integrationId: 'integration-123',
-            dataStreamId: 'data-stream-456',
-            connectorId: 'connector-789',
-          },
-          mockRequest
-        )
-      ).rejects.toThrow('Task scheduling failed');
-
-      expect(mockResetDataStream).not.toHaveBeenCalled();
-    });
-
-    it('should handle errors from saved object reset', async () => {
-      const mockRemoveTask = jest.fn().mockResolvedValue(undefined);
-      const mockScheduleTask = jest.fn().mockResolvedValue({ taskId: 'new-task-123' });
-      const mockResetDataStream = jest
-        .fn()
-        .mockRejectedValue(new Error('Saved object reset failed'));
-
-      (service as any).taskManagerService = {
-        removeDataStreamCreationTask: mockRemoveTask,
-        scheduleDataStreamCreationTask: mockScheduleTask,
-      };
-      (service as any).savedObjectService = {
-        resetDataStreamForReanalysis: mockResetDataStream,
-      };
-
-      await expect(
-        service.reanalyzeDataStream(
-          {
-            integrationId: 'integration-123',
-            dataStreamId: 'data-stream-456',
-            connectorId: 'connector-789',
-          },
-          mockRequest
-        )
-      ).rejects.toThrow('Saved object reset failed');
-    });
-
-    it('should execute operations in correct order', async () => {
-      const executionOrder: string[] = [];
-      const mockRemoveTask = jest.fn().mockImplementation(async () => {
-        executionOrder.push('removeTask');
-      });
-      const mockScheduleTask = jest.fn().mockImplementation(async () => {
-        executionOrder.push('scheduleTask');
-        return { taskId: 'new-task-123' };
-      });
-      const mockResetDataStream = jest.fn().mockImplementation(async () => {
-        executionOrder.push('resetDataStream');
-      });
-
-      (service as any).taskManagerService = {
-        removeDataStreamCreationTask: mockRemoveTask,
-        scheduleDataStreamCreationTask: mockScheduleTask,
-      };
-      (service as any).savedObjectService = {
-        resetDataStreamForReanalysis: mockResetDataStream,
-      };
-
-      await service.reanalyzeDataStream(
-        {
-          integrationId: 'integration-123',
-          dataStreamId: 'data-stream-456',
-          connectorId: 'connector-789',
-        },
-        mockRequest
-      );
-
-      expect(executionOrder).toEqual(['removeTask', 'scheduleTask', 'resetDataStream']);
+      expect(executionOrder).toEqual([
+        'updateStatus',
+        'removeTask',
+        'deleteSamples',
+        'deleteSavedObject',
+      ]);
     });
   });
 

@@ -74,6 +74,13 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
     ? reanalyzeDataStreamMutation.variables?.dataStreamId
     : undefined;
 
+  // Check if item is being deleted (either actively loading or server-side status)
+  const isDeleting = useMemo(
+    () => (item: DataStreamResponse) =>
+      item.status === 'deleting' || item.dataStreamId === deletingDataStreamId,
+    [deletingDataStreamId]
+  );
+
   const handleDeleteConfirm = () => {
     if (dataStreamDeleteTarget) {
       setDataStreamDeleteTarget(null);
@@ -108,8 +115,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
             onClick: (item: DataStreamResponse) => {
               openEditPipelineFlyout(item);
             },
-            enabled: (item: DataStreamResponse) =>
-              item.status === 'completed' && item.dataStreamId !== deletingDataStreamId,
+            enabled: (item: DataStreamResponse) => item.status === 'completed' && !isDeleting(item),
           },
         ],
         width: '48px',
@@ -145,7 +151,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
         name: i18n.TABLE_COLUMN_HEADERS.status,
         sortable: true,
         render: (status: DataStreamResponse['status'], item: DataStreamResponse) => (
-          <Status status={status} isDeleting={item.dataStreamId === deletingDataStreamId} />
+          <Status status={status} isDeleting={isDeleting(item)} />
         ),
         width: '120px',
       },
@@ -169,7 +175,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
             enabled: (item: DataStreamResponse) =>
               !!formData?.connectorId &&
               (item.status === 'completed' || item.status === 'failed') &&
-              item.dataStreamId !== deletingDataStreamId &&
+              !isDeleting(item) &&
               item.dataStreamId !== reanalyzingDataStreamId,
           },
           {
@@ -182,15 +188,15 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
             onClick: (item: DataStreamResponse) => {
               setDataStreamDeleteTarget(item);
             },
-            enabled: (item: DataStreamResponse) => item.dataStreamId !== deletingDataStreamId,
+            enabled: (item: DataStreamResponse) => !isDeleting(item),
           },
         ],
         width: '80px',
       },
     ];
   }, [
-    deletingDataStreamId,
     reanalyzingDataStreamId,
+    isDeleting,
     openEditPipelineFlyout,
     reanalyzeDataStreamMutation,
     integrationId,

@@ -526,6 +526,41 @@ export class AutomaticImportSavedObjectService {
   }
 
   /**
+   * Updates only the status of a data stream's job_info.
+   * @param dataStreamId - The ID of the data stream
+   * @param integrationId - The ID of the integration
+   * @param status - The new status to set
+   */
+  public async updateDataStreamStatus(
+    dataStreamId: string,
+    integrationId: string,
+    status: keyof typeof TASK_STATUSES
+  ): Promise<void> {
+    try {
+      const dataStream = await this.getDataStream(dataStreamId, integrationId);
+      const compositeId = this.getDataStreamCompositeId(integrationId, dataStreamId);
+
+      const updatedAttributes: Partial<DataStreamAttributes> = {
+        job_info: {
+          ...dataStream.attributes.job_info,
+          status,
+        },
+      };
+
+      await this.savedObjectsClient.update(
+        DATA_STREAM_SAVED_OBJECT_TYPE,
+        compositeId,
+        updatedAttributes
+      );
+
+      this.logger.debug(`Data stream ${dataStreamId} status updated to ${status}`);
+    } catch (error) {
+      this.logger.error(`Failed to update data stream ${dataStreamId} status: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
    * Delete a data stream by ID
    * @param dataStreamId - The ID of the data stream
    * @param integrationId - The ID of the integration
