@@ -6,7 +6,7 @@
  */
 
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import type { RegisterEntityMaintainerConfig, EntityMaintainerState } from './types';
+import type { EntityMaintainerState, RegisterEntityMaintainerConfig } from './types';
 import { TasksConfig } from "../config";
 import { EntityStoreTaskType } from "../constants";
 import type { Logger } from '@kbn/logging';
@@ -22,21 +22,32 @@ export function registerEntityMaintainerTask({
 }): void {
   try {
     const {type, title} = TasksConfig[EntityStoreTaskType.Values.entityMaintainer];
-    const {run, interval, stateSchema, description, name, id, setup} = config;
+    const {run, interval, initialState, description, name, id, setup} = config;
+
     taskManager.registerTaskDefinitions({
       [type]: {
         title: title,
         createTaskRunner: ({ taskInstance }) => ({
           run: async () => {
-            const state = taskInstance.state as EntityMaintainerState;
-            const isFirstRun = !state.setupDone;
+            const taskState = taskInstance.state;
+
+            const maintainerState: EntityMaintainerState = {
+              metaData: {
+                runs: taskState?.metaData?.runs || 0,
+                lastSuccessTimestamp: taskState?.metaData?.lastSuccessTimestamp || null,
+                lastErrorTimestamp: taskState?.metaData?.lastErrorTimestamp || null,
+              },
+              state: taskState?.state?.runs ? taskState.state : initialState,
+            };
+
+            const isFirstRun = maintainerState.metaData.runs === 0;
 
             if (isFirstRun && setup) {
-              await setup();
+              await setup({ state: initialState });
             }
             await run();
             return {
-              state: { ...taskInstance.state, setupDone: true },
+              state: { ...state, setupDone: true },
             };
           },
         }),

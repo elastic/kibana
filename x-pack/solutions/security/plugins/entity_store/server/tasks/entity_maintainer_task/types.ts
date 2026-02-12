@@ -7,28 +7,38 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
-export interface EntityMaintainerWriter {}
+export interface EntityMaintainerWriter { }
+
+export interface EntityMaintainerMetaData {
+  runs: number;
+  lastSuccessTimestamp: string | null;
+  lastErrorTimestamp: string | null;
+}
+
+
+type JsonPrimitive = string | number | boolean | null;
+type JsonValue = JsonPrimitive | JsonObject | JsonValue[];
+interface JsonObject {
+  [key: string]: JsonValue;
+}
 
 export interface EntityMaintainerState {
-  /** Set to true after the first run so setup is only executed once. */
-  setupDone: boolean;
+  metaData: EntityMaintainerMetaData;
+  state: JsonObject;
 }
 
-export interface EntityMaintainerTaskMethodContext {
-  writer: EntityMaintainerWriter;
+interface EntityMaintainerTaskMethodContext {
   state: EntityMaintainerState;
-  soClient: SavedObjectsClientContract;
 }
 
-// export type EntityMaintainerTaskMethod = (context: EntityMaintainerTaskMethodContext) => Promise<void>;
-export type EntityMaintainerTaskMethod = () => Promise<void>;
+export type EntityMaintainerTaskMethod = (context: EntityMaintainerTaskMethodContext) => Promise<JsonObject>;
 
 export interface RegisterEntityMaintainerConfig {
   id: string;
   name: string;
   description?: string;
   interval: string;
-  stateSchema: Record<string, unknown>;
+  initialState: JsonObject;
   run: EntityMaintainerTaskMethod;
   setup?: EntityMaintainerTaskMethod;
 }
