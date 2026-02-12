@@ -13,6 +13,7 @@ export { useLoadConnectors } from './hooks/use_load_connectors';
 export { useValidateIndex } from './hooks/use_validate_index';
 export { useUploadSamples } from './hooks/use_upload_samples';
 export { useDeleteDataStream } from './hooks/use_delete_data_stream';
+export { useGetDataStreamResults } from './hooks/use_get_data_stream_results';
 
 export {
   INDEX_VALIDATION_FAILED,
@@ -32,7 +33,11 @@ export {
   getIntegrationById,
 } from './lib/api';
 
-export type { CreateUpdateIntegrationRequest, UploadSamplesRequest } from './lib/api';
+export type {
+  CreateUpdateIntegrationRequest,
+  UploadSamplesRequest,
+  GetDataStreamResultsResponse,
+} from './lib/api';
 
 export { getLangSmithOptions } from './lib/lang_smith';
 export type { LangSmithOptions } from './lib/lang_smith';

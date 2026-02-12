@@ -36,49 +36,49 @@ steps:
   - name: get-all-sites
     type: sharepoint-online.getAllSites
     if: "${{ inputs.list_action == 'getAllSites' }}"
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= sharepoint-online-stack-connector-id %>
     with: {}
   - name: get-site-by-id
     type: sharepoint-online.getSite
     if: "${{ inputs.list_action == 'getSite' and inputs.site_id }}"
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= sharepoint-online-stack-connector-id %>
     with:
       siteId: "${{ inputs.site_id }}"
   - name: get-site-by-relative-url
     type: sharepoint-online.getSite
     if: "${{ inputs.list_action == 'getSite' and inputs.relative_url }}"
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= sharepoint-online-stack-connector-id %>
     with:
       relativeUrl: "${{ inputs.relative_url }}"
   - name: get-site-pages
     type: sharepoint-online.getSitePages
     if: "${{ inputs.list_action == 'getSitePages' and inputs.site_id }}"
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= sharepoint-online-stack-connector-id %>
     with:
       siteId: "${{ inputs.site_id }}"
   - name: get-site-drives
     type: sharepoint-online.getSiteDrives
     if: "${{ inputs.list_action == 'getSiteDrives' and inputs.site_id }}"
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= sharepoint-online-stack-connector-id %>
     with:
       siteId: "${{ inputs.site_id }}"
   - name: get-site-lists
     type: sharepoint-online.getSiteLists
     if: "${{ inputs.list_action == 'getSiteLists' and inputs.site_id }}"
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= sharepoint-online-stack-connector-id %>
     with:
       siteId: "${{ inputs.site_id }}"
   - name: get-site-list-items
     type: sharepoint-online.getSiteListItems
     if: "${{ inputs.list_action == 'getSiteListItems' and inputs.site_id and inputs.list_id }}"
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= sharepoint-online-stack-connector-id %>
     with:
       siteId: "${{ inputs.site_id }}"
       listId: "${{ inputs.list_id }}"
   - name: get-drive-items
     type: sharepoint-online.getDriveItems
     if: "${{ inputs.list_action == 'getDriveItems' and inputs.drive_id }}"
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= sharepoint-online-stack-connector-id %>
     with:
       driveId: "${{ inputs.drive_id }}"
       path: "${{ inputs.path }}"

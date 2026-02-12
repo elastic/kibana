@@ -41,8 +41,6 @@ examples/share_examples @elastic/appex-sharedux
 examples/sidebar_examples @elastic/appex-sharedux
 examples/sse_example @elastic/kibana-core
 examples/state_containers_examples @elastic/appex-sharedux
-examples/ui_action_examples @elastic/appex-sharedux
-examples/ui_actions_explorer @elastic/appex-sharedux
 examples/unified_doc_viewer @elastic/kibana-data-discovery
 examples/unified_field_list_examples @elastic/kibana-data-discovery
 examples/unified_tabs_examples @elastic/kibana-data-discovery
@@ -421,9 +419,12 @@ src/platform/packages/shared/content-management/access_control/access_control_se
 src/platform/packages/shared/content-management/content_editor @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_public @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_server @elastic/appex-sharedux
+src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-provider @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client @elastic/appex-sharedux
+src/platform/packages/shared/content-management/content_list/kbn-content-list-table @elastic/appex-sharedux
+src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_common @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_public @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_server @elastic/appex-sharedux
@@ -889,7 +890,6 @@ x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualization
 x-pack/examples/third_party_maps_source_example @elastic/kibana-presentation
 x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
 x-pack/examples/triggers_actions_ui_example @elastic/response-ops
-x-pack/examples/ui_actions_enhanced_examples @elastic/appex-sharedux
 x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
 x-pack/packages/ai-infra/security-labs-artifact-builder @elastic/security-generative-ai
 x-pack/packages/kbn-synthetics-private-location @elastic/actionable-obs-team
@@ -1455,6 +1455,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/services/esql.ts @elastic/kibana-esql
 /src/platform/test/functional/page_objects/index_editor.ts @elastic/kibana-esql
 /src/platform/packages/shared/kbn-monaco/src/languages/esql @elastic/kibana-esql
+/src/platform/packages/shared/kbn-monaco/src/languages/promql @elastic/kibana-esql
 x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions @elastic/obs-exploration-team
 
 # Global Experience
@@ -2311,7 +2312,6 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /.github/codeql @elastic/kibana-security
 /.github/workflows/codeql.yml @elastic/kibana-security
 /.github/workflows/codeql-pr.yml @elastic/kibana-security
-/.github/workflows/codeql-stats.yml @elastic/kibana-security
 /.github/instructions/security.instructions.md @elastic/kibana-security
 /.github/instructions/codeql.instructions.md @elastic/kibana-security
 /.github/workflows/evaluate-dependency-health.yml @elastic/kibana-security
@@ -3197,12 +3197,10 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/functional/page_objects/settings_page.ts @elastic/appex-sharedux
 /src/platform/test/functional/apps/sharing/*.ts @elastic/appex-sharedux
 /src/platform/test/functional/apps/kibana_overviews @elastic/appex-sharedux
-/x-pack/platform/test/product_intercepts_functional @elastic/appex-sharedux
 /src/platform/test/examples/ui_actions/*.ts @elastic/appex-sharedux
 /src/platform/test/examples/state_sync/*.ts @elastic/appex-sharedux
 /src/platform/test/examples/error_boundary/index.ts @elastic/appex-sharedux
 /src/platform/test/examples/content_management/*.ts @elastic/appex-sharedux
-/x-pack/platform/test/banners_functional @elastic/appex-sharedux
 /x-pack/platform/test/custom_branding @elastic/appex-sharedux
 /x-pack/platform/test/api_integration/apis/content_management @elastic/appex-sharedux
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/intercepts @elastic/appex-sharedux
@@ -3263,10 +3261,21 @@ x-pack/platform/test/moon.yml @elastic/kibana-operations
 x-pack/solutions/observability/test/moon.yml @elastic/kibana-operations
 x-pack/solutions/security/test/moon.yml @elastic/kibana-operations
 
-# Leads approval
+# These files influence agent behavior and are loaded into every new agent session.
+# Changes here can have repo-wide impact (what instructions/tools/context an agent sees), so require
+# tech lead review by default.
 /AGENTS.md @elastic/kibana-tech-leads
 .cursorignore @elastic/kibana-tech-leads
 /.claude/ @elastic/kibana-tech-leads
+/.agent/skills/ @elastic/kibana-tech-leads
+
+# Delegate day-to-day edits of currently-existing skills to the QA team without requiring tech lead
+# codeowner review. Any new skill directory will fall back to the `/.agent/skills/` rule above.
+/.agent/skills/ftr-testing/** @elastic/appex-qa
+/.agent/skills/scout-best-practices-reviewer/** @elastic/appex-qa
+/.agent/skills/scout-create-scaffold/** @elastic/appex-qa
+/.agent/skills/scout-migrate-from-ftr/** @elastic/appex-qa
+/.agent/skills/scout-testing/** @elastic/appex-qa
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
