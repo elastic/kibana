@@ -72,7 +72,6 @@ test.describe(
         'aiops',
         'discover',
         'embeddableEnhanced',
-        'esql',
         'eventAnnotation',
         'expressionXY',
         'kbn-ui-shared-deps-npm',
