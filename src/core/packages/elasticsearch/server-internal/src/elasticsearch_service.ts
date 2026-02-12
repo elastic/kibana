@@ -8,6 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
+import { set } from '@kbn/safer-lodash-set';
 import { map, takeUntil, firstValueFrom, Subject } from 'rxjs';
 
 import type { Logger } from '@kbn/logging';
@@ -30,6 +31,7 @@ import {
   type OnRequestHandler,
 } from '@kbn/core-elasticsearch-client-server-internal';
 
+import { isPlainObject } from 'lodash';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { ElasticsearchConfigType } from './elasticsearch_config';
 import { ElasticsearchConfig } from './elasticsearch_config';
@@ -262,27 +264,17 @@ export class ElasticsearchService
     return ({ scoped }, params, options) => {
       if (!scoped) return;
       if (!this.cpsEnabled) return;
+      if (!isPlainObject(params.body)) return;
+      const body = params.body as Record<string, unknown>;
+      if (body.project_routing != null) return;
 
       const acceptedParams = params.meta?.acceptedParams;
       const apiSupportsProjectRouting = acceptedParams?.includes('project_routing') ?? false;
-      const querystring = options.querystring as Record<string, unknown> | undefined;
-      if (!apiSupportsProjectRouting) {
-        if (querystring?.project_routing != null) {
-          const { project_routing: _, ...rest } = querystring;
-          options.querystring = Object.keys(rest).length > 0 ? rest : undefined;
-        }
-        return;
-      }
+      if (!apiSupportsProjectRouting) return;
 
-      if (querystring?.project_routing != null) return;
-
-      const body = params.body as Record<string, unknown> | undefined;
       if (body?.pit != null) return;
 
-      options.querystring = {
-        ...querystring,
-        project_routing: '_tag._alias:_local',
-      };
+      set(body, 'project_routing', '_tag._alias:_local');
     };
   }
 }
