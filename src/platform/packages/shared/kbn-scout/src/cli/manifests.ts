@@ -46,7 +46,7 @@ async function updateScoutConfigManifests(onlyOutdated: boolean, reload: boolean
       if (config.manifest.sha1 !== configDirSHA1) {
         log.info(
           `Manifest file is outdated for Scout test config at ${config.path} ` +
-          `(expected parent directory git object hash '${config.manifest.sha1}' but got '${configDirSHA1}')`
+            `(expected parent directory git object hash '${config.manifest.sha1}' but got '${configDirSHA1}')`
         );
       }
     } else {
