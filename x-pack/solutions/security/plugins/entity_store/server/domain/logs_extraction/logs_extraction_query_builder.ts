@@ -196,11 +196,12 @@ function customFieldEvalLogic(type: EntityType, entityTypeFallback?: string) {
     // Save the engine type
     `${ENGINE_METADATA_TYPE_FIELD} = "${type}"`,
 
-    // Hash the id
+    // Hash the id to be used as the _id in the elasticsearch document
     `${HASHED_ID_FIELD} = HASH("${HASH_ALG}", ${recentData(MAIN_ENTITY_ID_FIELD)})`,
   ];
 
   if (entityTypeFallback) {
+    // If type doesn't exist, fallback to the entity type fallback
     evals.push(`entity.type = COALESCE(entity.type, "${entityTypeFallback}")`);
   }
 
@@ -300,12 +301,4 @@ export function extractPaginationParams(
     timestampCursor,
     idCursor,
   };
-}
-
-function getRecoveryWhereClause(fromDateISO: string, recoveryId?: string) {
-  if (!recoveryId) {
-    return '';
-  }
-
-  return ` | WHERE ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} > TO_DATETIME("${recoveryId}")`;
 }
