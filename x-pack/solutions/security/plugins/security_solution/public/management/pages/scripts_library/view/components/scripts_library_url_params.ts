@@ -6,11 +6,11 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { SCRIPT_LIBRARY_SORTABLE_FIELDS } from '../../../../../../common/endpoint/service/scripts_library/constants';
 import type {
   SortableScriptLibraryFields,
   SortDirection,
 } from '../../../../../../common/endpoint/types';
-import { SCRIPT_LIBRARY_SORTABLE_FIELDS } from '../../../../common/constants';
 import { useUrlParams } from '../../../../hooks/use_url_params';
 
 export interface ScriptsLibraryUrlParams {
@@ -20,7 +20,7 @@ export interface ScriptsLibraryUrlParams {
   sortField?: SortableScriptLibraryFields;
   sortDirection?: SortDirection;
   selectedScriptId?: string;
-  show?: 'details' | 'edit';
+  show?: 'create' | 'delete' | 'details' | 'edit';
 }
 
 interface ScriptLibraryUrlParamSetters {
