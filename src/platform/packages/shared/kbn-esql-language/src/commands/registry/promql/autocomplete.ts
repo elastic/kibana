@@ -109,15 +109,15 @@ export async function autocomplete(
     case 'inside_grouping':
       return position.isCompleteLabel
         ? [commaCompleteItem]
-        : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain', false);
+        : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain');
 
     // TODO: Re-enable label matcher suggestions when label signatures are implemented
     // case 'after_label_brace':
     //   return position.isCompleteLabel
     //     ? [commaCompleteItem]
-    //     : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain', true);
+    //     : buildFieldSuggestions(context, ESQL_STRING_TYPES, 'plain');
     // case 'after_label_name':
-    //   return [];
+    //   return getPromqlLabelMatcherSuggestions();
     // case 'after_label_operator':
     //   return [valuePlaceholderConstant];
     case 'after_label_brace':
@@ -330,21 +330,15 @@ function wrapFunctionSuggestions(
 
 function buildFieldSuggestions(
   context: ICommandContext | undefined,
-  types: readonly string[],
-  wrap: 'wrap' | 'plain',
-  onlyDimensions: boolean = false
+  types: readonly string[] | undefined,
+  wrap: 'wrap' | 'plain'
 ): ISuggestionItem[] {
   if (!context?.columns) {
     return [];
   }
 
   return Array.from(context.columns.values())
-    .filter(
-      (column) =>
-        !column.userDefined &&
-        types.includes(column.type) &&
-        (!onlyDimensions || column.isTimeSeriesDimension)
-    )
+    .filter((column) => !column.userDefined && (!types || types.includes(column.type)))
     .map((column) => {
       const text = wrap === 'wrap' ? `(${column.name})` : `${column.name} `;
 

@@ -23,7 +23,6 @@ import {
   getEsqlPolicies,
   getInferenceEndpoints,
   getTimeseriesIndices,
-  getViews,
 } from '@kbn/esql-utils';
 import type { getEsqlColumns, getESQLSources } from '@kbn/esql-utils';
 import { clearCacheWhenOld } from './helpers';
@@ -79,7 +78,6 @@ interface UseEsqlCallbacksParams {
   memoizedHistoryStarredItems: MemoizedHistoryStarredItems;
   favoritesClient: FavoritesClient<StarredQueryMetadata>;
   getJoinIndicesCallback: Required<ESQLCallbacks>['getJoinIndices'];
-  isResourceBrowserEnabled: () => Promise<boolean>;
 }
 
 export const useEsqlCallbacks = ({
@@ -101,7 +99,6 @@ export const useEsqlCallbacks = ({
   memoizedHistoryStarredItems,
   favoritesClient,
   getJoinIndicesCallback,
-  isResourceBrowserEnabled,
 }: UseEsqlCallbacksParams): ESQLCallbacks => {
   const getSources = useCallback(async () => {
     clearCacheWhenOld(dataSourcesCache, minimalQueryRef.current);
@@ -116,44 +113,21 @@ export const useEsqlCallbacks = ({
         // Check if there's a stale entry and clear it
         clearCacheWhenOld(esqlFieldsCache, `${queryToExecute} | limit 0`);
         const timeRange = data.query.timefilter.timefilter.getTime();
-        const [fields, dataView] = await Promise.all([
-          memoizedFieldsFromESQL({
+        return (
+          (await memoizedFieldsFromESQL({
             esqlQuery: queryToExecute,
             search: data.search.search,
             timeRange,
             signal: abortControllerRef.current.signal,
             variables: esqlService?.variablesService?.esqlVariables,
             dropNullColumns: true,
-          }).result,
-          // Enrich fields with timeSeriesDimension for PromQL label suggestions.
-          getESQLAdHocDataview({
-            dataViewsService: data.dataViews,
-            query: queryToExecute,
-            http: core.http,
-          }).catch(() => undefined),
-        ]);
-
-        if (!dataView) {
-          return fields || [];
-        }
-
-        const dimensionFields = new Set(
-          dataView.fields
-            .filter(({ timeSeriesDimension }) => timeSeriesDimension)
-            .map(({ name }) => name)
+          }).result) || []
         );
-
-        return (fields || []).map((field) => ({
-          ...field,
-          isTimeSeriesDimension: dimensionFields.has(field.name),
-        }));
       }
       return [];
     },
     [
-      core.http,
       data.query.timefilter.timefilter,
-      data.dataViews,
       data.search.search,
       esqlFieldsCache,
       memoizedFieldsFromESQL,
@@ -185,10 +159,6 @@ export const useEsqlCallbacks = ({
 
   const getTimeseriesIndicesCallback = useCallback(async () => {
     return (await getTimeseriesIndices(core.http)) || [];
-  }, [core.http]);
-
-  const getViewsCallback = useCallback(async () => {
-    return await getViews(core.http);
   }, [core.http]);
 
   const getEditorExtensionsCallback = useCallback(
@@ -278,7 +248,6 @@ export const useEsqlCallbacks = ({
       canSuggestVariables,
       getJoinIndices: getJoinIndicesCallback,
       getTimeseriesIndices: getTimeseriesIndicesCallback,
-      getViews: getViewsCallback,
       getEditorExtensions: getEditorExtensionsCallback,
       getInferenceEndpoints: getInferenceEndpointsCallback,
       getLicense,
@@ -287,7 +256,6 @@ export const useEsqlCallbacks = ({
       canCreateLookupIndex,
       isServerless,
       getKqlSuggestions,
-      isResourceBrowserEnabled,
     }),
     [
       getSources,
@@ -299,7 +267,6 @@ export const useEsqlCallbacks = ({
       canSuggestVariables,
       getJoinIndicesCallback,
       getTimeseriesIndicesCallback,
-      getViewsCallback,
       getEditorExtensionsCallback,
       getInferenceEndpointsCallback,
       getLicense,
@@ -308,7 +275,6 @@ export const useEsqlCallbacks = ({
       canCreateLookupIndex,
       isServerless,
       getKqlSuggestions,
-      isResourceBrowserEnabled,
     ]
   );
 };
