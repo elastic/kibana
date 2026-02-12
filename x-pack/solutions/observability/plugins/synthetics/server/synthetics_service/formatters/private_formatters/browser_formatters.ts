@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_THROTTLING_VALUE, HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS } from '../../../../common/constants/monitor_defaults';
+import { DEFAULT_THROTTLING_VALUE } from '../../../../common/constants/monitor_defaults';
 import type { Formatter } from './common_formatters';
 import { commonFormatters } from './common_formatters';
 import {
@@ -16,7 +16,7 @@ import {
 
 import { tlsFormatters } from './tls_formatters';
 import type { BrowserFields } from '../../../../common/runtime_types';
-import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 

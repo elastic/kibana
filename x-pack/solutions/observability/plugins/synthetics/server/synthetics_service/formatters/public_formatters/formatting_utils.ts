@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ConfigKey, MonitorFields, MonitorTypeEnum } from '../../../../common/runtime_types';
+import type { MonitorFields } from '../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { secondsToCronFormatter } from '../formatting_utils';
 
 type FormatterFn = (

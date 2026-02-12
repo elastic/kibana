@@ -181,10 +181,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
 
       editMonitorAPI.initDefaultAlerts(editedMonitorSavedObject.attributes.name);
 
-      const warning = getBrowserTimeoutWarningForMonitor(
-        monitorWithRevision,
-        monitorId
-      );
+      const warning = getBrowserTimeoutWarningForMonitor(monitorWithRevision, monitorId);
       const monitorResponse = mapSavedObjectToMonitor({
         internal: reqQuery.internal,
         monitor: {

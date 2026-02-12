@@ -19,7 +19,6 @@ import {
 import type { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
 import { AddEditMonitorAPI } from './add_monitor/add_monitor_api';
 import type { SyntheticsRestApiRouteFactory } from '../types';
-import type { MonitorFields } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { normalizeAPIConfig, validateMonitor } from './monitor_validation';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
@@ -145,10 +144,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       addMonitorAPI.initDefaultAlerts(newMonitor.attributes.name);
       addMonitorAPI.setupGettingStarted(newMonitor.id);
 
-      const warning = getBrowserTimeoutWarningForMonitor(
-        normalizedMonitor,
-        newMonitor.id
-      );
+      const warning = getBrowserTimeoutWarningForMonitor(normalizedMonitor, newMonitor.id);
       const monitorResponse = mapSavedObjectToMonitor({ monitor: newMonitor, internal });
       return warning ? { ...monitorResponse, warnings: [warning] } : monitorResponse;
     } catch (error) {
