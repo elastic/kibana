@@ -34,7 +34,7 @@ export const TableHiddenBar: React.FC<TableHiddenBarProps> = ({
       alignItems="center"
       responsive={false}
       css={css`
-        padding-left: ${euiTheme.size.s};
+        padding: ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.size.s};
       `}
       data-test-subj="dscTableHiddenBar"
     >

@@ -46,13 +46,30 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   const isTableHidden = useAppStateSelector((state) => Boolean(state.hideDataTable));
   const viewMode = useAppStateSelector((state) => state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL);
 
+  // Mutual exclusion: you can't collapse both chart and table at the same time.
+  // If one is collapsed and the user collapses the other, it acts as a swap/toggle:
+  // the collapsed one opens while the other one closes.
+  const isInDocumentView = viewMode === VIEW_MODE.DOCUMENT_LEVEL;
+
   const onToggleChart = useCallback(() => {
-    dispatch(updateAppState({ appState: { hideChart: !isChartHidden } }));
-  }, [dispatch, isChartHidden, updateAppState]);
+    const willHideChart = !isChartHidden;
+    if (willHideChart && isTableHidden && isInDocumentView) {
+      // Swap: hide chart, show table
+      dispatch(updateAppState({ appState: { hideChart: true, hideDataTable: false } }));
+    } else {
+      dispatch(updateAppState({ appState: { hideChart: willHideChart } }));
+    }
+  }, [dispatch, isChartHidden, isTableHidden, isInDocumentView, updateAppState]);
 
   const onToggleTable = useCallback(() => {
-    dispatch(updateAppState({ appState: { hideDataTable: !isTableHidden } }));
-  }, [dispatch, isTableHidden, updateAppState]);
+    const willHideTable = !isTableHidden;
+    if (willHideTable && isChartHidden && isChartAvailable) {
+      // Swap: hide table, show chart
+      dispatch(updateAppState({ appState: { hideDataTable: true, hideChart: false } }));
+    } else {
+      dispatch(updateAppState({ appState: { hideDataTable: willHideTable } }));
+    }
+  }, [dispatch, isTableHidden, isChartHidden, isChartAvailable, updateAppState]);
 
   const sidebarToggleState = useObservable(sidebarToggleState$);
   const isSidebarCollapsed = sidebarToggleState?.isCollapsed ?? false;
@@ -114,7 +131,7 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
               : i18n.translate('discover.panelsToggle.hideTableButton', {
                   defaultMessage: 'Hide table',
                 }),
-            iconType: isTableHidden ? 'transitionTopIn' : 'transitionTopOut',
+            iconType: isTableHidden ? 'transitionTopOut' : 'transitionTopIn',
             'data-test-subj': isTableHidden ? 'dscShowTableButton' : 'dscHideTableButton',
             'aria-expanded': !isTableHidden,
             'aria-controls': 'discoverDocTable',

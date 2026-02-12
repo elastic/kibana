@@ -164,13 +164,11 @@ export const DiscoverMainContent = ({
           gutterSize="none"
           responsive={false}
           justifyContent={
-            viewMode === VIEW_MODE.DOCUMENT_LEVEL && !showDataTable
-              ? 'flexEnd'
-              : undefined
+            viewMode === VIEW_MODE.DOCUMENT_LEVEL && !showDataTable ? 'flexEnd' : undefined
           }
           data-test-subj="dscMainContent"
         >
-          {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
+          {showChart && isChartAvailable && showDataTable && <EuiHorizontalRule margin="none" />}
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL && showDataTable ? (
             <DiscoverDocuments
               viewModeToggle={viewModeToggle}
