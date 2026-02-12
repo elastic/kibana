@@ -7,45 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FS } from 'liquidjs';
-import { Liquid } from 'liquidjs';
-import { removeDisallowedLiquidTags } from '@kbn/workflows';
-
-/**
- * A no-op filesystem implementation for the LiquidJS engine.
- * Workflow templates do not support file operations.
- */
-const noopFs: FS = {
-  exists: async () => false,
-  existsSync: () => false,
-  readFile: async (filepath: string) => {
-    throw new Error(
-      `File reading is not supported in workflow templates. Attempted to read: ${filepath}`
-    );
-  },
-  readFileSync: (filepath: string) => {
-    throw new Error(
-      `File reading is not supported in workflow templates. Attempted to read: ${filepath}`
-    );
-  },
-  resolve: (_dir: string, file: string, _ext: string) => file,
-  contains: () => false,
-};
+import { createWorkflowLiquidEngine } from '@kbn/workflows';
 
 export class WorkflowTemplatingEngine {
-  private readonly engine: Liquid;
+  private readonly engine;
 
   constructor() {
-    this.engine = new Liquid({
+    this.engine = createWorkflowLiquidEngine({
       strictFilters: true,
       strictVariables: false,
-      ownPropertyOnly: true,
-      fs: noopFs,
-      templates: {}
     });
-
-    // Remove unsupported tags so LiquidJS treats them as unknown (parse error).
-    removeDisallowedLiquidTags(this.engine);
 
     // register json_parse filter that converts JSON string to object
     this.engine.registerFilter('json_parse', (value: unknown): unknown => {

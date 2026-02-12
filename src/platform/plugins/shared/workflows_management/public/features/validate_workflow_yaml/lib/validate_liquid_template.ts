@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Liquid } from 'liquidjs';
-import { removeDisallowedLiquidTags } from '@kbn/workflows';
+import type { Liquid } from 'liquidjs';
+import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { extractLiquidErrorPosition } from './extract_liquid_error_position';
 import type { YamlValidationResult } from '../model/types';
 
@@ -17,11 +17,10 @@ let liquidInstance: Liquid | null = null;
 
 function getLiquidInstance(): Liquid {
   if (!liquidInstance) {
-    liquidInstance = new Liquid({
+    liquidInstance = createWorkflowLiquidEngine({
       strictFilters: true,
       strictVariables: false, // Allow undefined variables during validation
     });
-    removeDisallowedLiquidTags(liquidInstance);
     // register filters, for validation purposes only
     liquidInstance.registerFilter('json_parse', (value: unknown): unknown => {
       return value;

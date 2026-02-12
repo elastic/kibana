@@ -7,15 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Liquid } from 'liquidjs';
 import { monaco } from '@kbn/monaco';
-import { removeDisallowedLiquidTags } from '@kbn/workflows';
+import { createWorkflowLiquidEngine } from '@kbn/workflows';
 
-const liquidEngine = new Liquid({
+const liquidEngine = createWorkflowLiquidEngine({
   strictFilters: false,
   strictVariables: false,
 });
-removeDisallowedLiquidTags(liquidEngine);
 
 export interface TemplateExpressionInfo {
   /** Whether cursor is inside a template expression */

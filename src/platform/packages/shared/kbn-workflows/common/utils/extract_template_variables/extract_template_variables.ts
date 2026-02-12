@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Liquid } from 'liquidjs';
-import { removeDisallowedLiquidTags } from '../liquid_allowed_tags/liquid_allowed_tags';
+import { createWorkflowLiquidEngine } from '../create_workflow_liquid_engine/create_workflow_liquid_engine';
 
-const liquidEngine = new Liquid({
+const liquidEngine = createWorkflowLiquidEngine({
   strictFilters: false,
   strictVariables: false,
 });
-removeDisallowedLiquidTags(liquidEngine);
 
 function isLiteral(value: string): boolean {
   // Check if it's a string literal (quoted with ' or ")

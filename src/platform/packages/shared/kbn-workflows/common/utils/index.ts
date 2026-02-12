@@ -16,5 +16,5 @@ export { isPropertyAccess } from './is_property_access/is_property_access';
 export { getOrResolveObject } from './json_schema/get_or_resolve_object';
 export {
   LIQUID_ALLOWED_TAGS,
-  removeDisallowedLiquidTags,
-} from './liquid_allowed_tags/liquid_allowed_tags';
+  createWorkflowLiquidEngine,
+} from './create_workflow_liquid_engine/create_workflow_liquid_engine';
