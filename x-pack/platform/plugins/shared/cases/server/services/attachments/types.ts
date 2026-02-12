@@ -35,6 +35,7 @@ export interface AttachedToCaseArgs {
 
 export interface GetAttachmentArgs {
   attachmentId: string;
+  caseId: string;
 }
 
 export type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'>;
@@ -75,12 +76,14 @@ export interface CountActionsAttachedToCaseArgs extends AttachedToCaseArgs {
 
 export interface DeleteAttachmentArgs extends IndexRefresh {
   attachmentIds: string[];
+  caseId: string;
 }
 
 export interface CreateAttachmentArgs extends IndexRefresh {
   attributes: AttachmentAttributes;
   references: SavedObjectReference[];
   id: string;
+  caseId: string;
 }
 
 export interface BulkCreateAttachments extends IndexRefresh {
@@ -89,6 +92,7 @@ export interface BulkCreateAttachments extends IndexRefresh {
     references: SavedObjectReference[];
     id: string;
   }>;
+  caseId: string;
 }
 
 export interface UpdateArgs {
@@ -97,8 +101,9 @@ export interface UpdateArgs {
   options?: Omit<SavedObjectsUpdateOptions<AttachmentAttributes>, 'upsert'>;
 }
 
-export type UpdateAttachmentArgs = UpdateArgs;
+export type UpdateAttachmentArgs = UpdateArgs & { caseId: string };
 
 export interface BulkUpdateAttachmentArgs extends IndexRefresh {
   comments: UpdateArgs[];
+  caseId: string;
 }

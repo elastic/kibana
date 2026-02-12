@@ -13,7 +13,6 @@ import type { CasesDeleteRequest } from '../../../common/types/api';
 import { CasesDeleteRequestRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 import {
-  CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   MAX_FILES_PER_CASE,
@@ -33,7 +32,7 @@ export async function deleteCases(
   clientArgs: CasesClientArgs
 ): Promise<void> {
   const {
-    services: { caseService, attachmentService, userActionService, alertsService },
+    services: { caseService, userActionService, alertsService },
     logger,
     authorization,
     fileService,
@@ -63,15 +62,11 @@ export async function deleteCases(
       entities: [...Array.from(entities.values()), ...fileEntities],
     });
 
-    const attachmentIds = await attachmentService.getter.getAttachmentIdsForCases({
-      caseIds: ids,
-    });
-
+    // Attachments are now embedded in the case SO, so no separate attachment SO deletion needed.
     const userActionIds = await userActionService.getUserActionIdsForCases(ids);
 
     const bulkDeleteEntities: SavedObjectsBulkDeleteObject[] = [
       ...ids.map((id) => ({ id, type: CASE_SAVED_OBJECT })),
-      ...attachmentIds.map((id) => ({ id, type: CASE_COMMENT_SAVED_OBJECT })),
       ...userActionIds.map((id) => ({ id, type: CASE_USER_ACTION_SAVED_OBJECT })),
     ];
 

@@ -26,6 +26,7 @@ import {
   modelVersion6,
   modelVersion7,
   modelVersion8,
+  modelVersion9,
 } from './model_versions';
 import { handleImport } from '../import_export/import';
 
@@ -271,6 +272,17 @@ export const createCaseSavedObjectType = (
           },
         },
       },
+      attachments: {
+        dynamic: false,
+        properties: {
+          id: {
+            type: 'keyword',
+          },
+          type: {
+            type: 'keyword',
+          },
+        },
+      },
     },
   },
   migrations: caseMigrations,
@@ -283,6 +295,7 @@ export const createCaseSavedObjectType = (
     6: modelVersion6,
     7: modelVersion7,
     8: modelVersion8,
+    9: modelVersion9,
   },
   management: {
     importableAndExportable: true,

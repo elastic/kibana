@@ -19,7 +19,6 @@ import type { BulkGetArgs } from './types';
 import type { BulkOptionalAttributes, OptionalAttributes } from '../../services/attachments/types';
 import type { CasesClient } from '../client';
 import type { AttachmentSavedObject, SOWithErrors } from '../../common/types';
-import { partitionByCaseAssociation } from '../../common/partitioning';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 import type { AttachmentAttributes } from '../../../common/types/domain';
 
@@ -45,7 +44,7 @@ export async function bulkGet(
     // perform an authorization check for the case
     await casesClient.cases.resolve({ id: caseID });
 
-    const attachments = await attachmentService.getter.bulkGet(request.ids);
+    const attachments = await attachmentService.getter.bulkGet(request.ids, caseID);
 
     const { validAttachments, attachmentsWithErrors, invalidAssociationAttachments } =
       partitionAttachments(caseID, attachments);
@@ -89,15 +88,12 @@ const partitionAttachments = (
   attachments: BulkOptionalAttributes<AttachmentAttributes>
 ): PartitionedAttachments => {
   const [attachmentsWithoutErrors, errors] = partitionBySOError(attachments.saved_objects);
-  const [caseAttachments, invalidAssociationAttachments] = partitionByCaseAssociation(
-    caseId,
-    attachmentsWithoutErrors
-  );
-
+  // With embedded attachments, all attachments from a case are inherently associated.
+  // No need to check references for case association.
   return {
-    validAttachments: caseAttachments,
+    validAttachments: attachmentsWithoutErrors,
     attachmentsWithErrors: errors,
-    invalidAssociationAttachments,
+    invalidAssociationAttachments: [],
   };
 };
 

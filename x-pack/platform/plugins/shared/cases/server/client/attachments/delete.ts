@@ -10,7 +10,6 @@ import Boom from '@hapi/boom';
 import type { AlertAttachmentPayload } from '../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import { decodeOrThrow } from '../../common/runtime_types';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getAlertInfoFromComments, isCommentRequestTypeAlert } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
@@ -53,13 +52,7 @@ export async function deleteAll(
     await attachmentService.bulkDelete({
       attachmentIds: comments.saved_objects.map((so) => so.id),
       refresh: true,
-    });
-
-    await updateCaseAttachmentStats({
-      caseService: clientArgs.services.caseService,
-      attachmentService: clientArgs.services.attachmentService,
       caseId: caseID,
-      user,
     });
 
     await userActionService.creator.bulkCreateAttachmentDeletion({
@@ -101,6 +94,7 @@ export async function deleteComment(
   try {
     const attachment = await attachmentService.getter.get({
       attachmentId: attachmentID,
+      caseId: caseID,
     });
 
     if (attachment == null) {
@@ -112,24 +106,10 @@ export async function deleteComment(
       operation: Operations.deleteComment,
     });
 
-    const type = CASE_SAVED_OBJECT;
-    const id = caseID;
-
-    const caseRef = attachment.references.find((c) => c.type === type);
-    if (caseRef == null || (caseRef != null && caseRef.id !== id)) {
-      throw Boom.notFound(`This comment ${attachmentID} does not exist in ${id}.`);
-    }
-
     await attachmentService.bulkDelete({
       attachmentIds: [attachmentID],
       refresh: true,
-    });
-
-    await updateCaseAttachmentStats({
-      caseService: clientArgs.services.caseService,
-      attachmentService: clientArgs.services.attachmentService,
       caseId: caseID,
-      user,
     });
 
     // we only want to store the fields related to the original request of the attachment, not fields like
@@ -141,7 +121,7 @@ export async function deleteComment(
       userAction: {
         type: UserActionTypes.comment,
         action: UserActionActions.delete,
-        caseId: id,
+        caseId: caseID,
         attachmentId: attachmentID,
         payload: { attachment: attachmentRequestAttributes },
         user,
@@ -149,7 +129,7 @@ export async function deleteComment(
       },
     });
 
-    await handleAlerts({ alertsService, attachments: [attachment.attributes], caseId: id });
+    await handleAlerts({ alertsService, attachments: [attachment.attributes], caseId: caseID });
   } catch (error) {
     throw createCaseError({
       message: `Failed to delete comment: ${caseID} comment id: ${attachmentID}: ${error}`,

@@ -51,6 +51,7 @@ export function transformUpdateResponseToExternalModel(
     status,
     total_alerts,
     total_comments,
+    attachments: _attachmentsUpdate,
     customFields,
     settings,
     ...restUpdateAttributes
@@ -179,7 +180,7 @@ export function transformESModelToCase(
 
   const externalService = transformESExternalService(caseData.external_service, references);
 
-  const { total_alerts, total_comments, total_events, ...caseAttributes } = caseData;
+  const { total_alerts, total_comments, total_events, attachments: _embeddedAttachments, ...caseAttributes } = caseData;
 
   const severity = SEVERITY_ESMODEL_TO_EXTERNAL[caseAttributes.severity] ?? CaseSeverity.LOW;
   const status = STATUS_ESMODEL_TO_EXTERNAL[caseAttributes.status] ?? CaseStatuses.open;
@@ -255,7 +256,7 @@ export function transformSavedObjectToExternalModel(
     caseSavedObject.references
   );
 
-  const { total_alerts, total_comments, ...caseSavedObjectAttributes } =
+  const { total_alerts, total_comments, attachments: _attachments, ...caseSavedObjectAttributes } =
     caseSavedObject.attributes ??
     ({
       total_alerts: -1,

@@ -136,32 +136,56 @@ export class CasesService {
   > {
     try {
       this.log.debug(`Attempting to GET all cases for alert id ${alertId}`);
-      const combinedFilter = combineFilters([
-        nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`, alertId),
-        filter,
-      ]);
 
-      const response = await this.unsecuredSavedObjectsClient.find<
-        { owner: string },
-        GetCaseIdsByAlertIdAggs
-      >({
-        type: CASE_COMMENT_SAVED_OBJECT,
-        fields: includeFieldsRequiredForAuthentication(),
+      // With embedded attachments, scan cases and check their embedded arrays for the alert ID
+      const allCases = await this.unsecuredSavedObjectsClient.find<CasePersistedAttributes>({
+        type: CASE_SAVED_OBJECT,
         page: 1,
-        perPage: 1,
+        perPage: MAX_DOCS_PER_PAGE,
         sortField: defaultSortField,
-        aggs: this.buildCaseIdsAggs(MAX_DOCS_PER_PAGE),
-        filter: combinedFilter,
       });
 
-      const owners: Array<SavedObjectsFindResult<{ owner: string }>> = [];
-      for (const so of response.saved_objects) {
-        const validatedAttributes = decodeOrThrow(OwnerRt)(so.attributes);
-
-        owners.push(Object.assign(so, { attributes: validatedAttributes }));
+      const matchingCases: Array<SavedObjectsFindResult<CasePersistedAttributes>> = [];
+      for (const caseSO of allCases.saved_objects) {
+        const attachments = caseSO.attributes.attachments ?? [];
+        const hasAlert = attachments.some((a) => {
+          if (a.type !== 'alert') return false;
+          const ids = Array.isArray(a.alertId) ? a.alertId : [a.alertId];
+          return ids.includes(alertId);
+        });
+        if (hasAlert) {
+          matchingCases.push(caseSO);
+        }
       }
 
-      return Object.assign(response, { saved_objects: owners });
+      // Build the response structure expected by getCaseIDsFromAlertAggs
+      const savedObjects = matchingCases.map((c) => ({
+        id: c.id,
+        type: CASE_COMMENT_SAVED_OBJECT,
+        attributes: { owner: c.attributes.owner },
+        score: 0,
+        references: [],
+        namespaces: c.namespaces,
+      })) as Array<SavedObjectsFindResult<{ owner: string }>>;
+
+      const buckets = matchingCases.map((c) => ({
+        key: c.id,
+        doc_count: 1,
+      }));
+
+      return {
+        page: 1,
+        per_page: MAX_DOCS_PER_PAGE,
+        total: savedObjects.length,
+        saved_objects: savedObjects,
+        aggregations: {
+          references: {
+            caseIds: {
+              buckets,
+            },
+          },
+        },
+      } as SavedObjectsFindResponse<{ owner: string }, GetCaseIdsByAlertIdAggs>;
     } catch (error) {
       this.log.error(`Error on GET all cases for alert id ${alertId}: ${error}`);
       throw error;
@@ -553,12 +577,14 @@ export class CasesService {
   }: FindCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentTransformedAttributes>> {
     try {
       this.log.debug(`Attempting to GET all comments internal for id ${JSON.stringify(id)}`);
+      const caseId = Array.isArray(id) ? id[0] : id;
       if (options?.page !== undefined || options?.perPage !== undefined) {
         return this.attachmentService.find({
           options: {
             sortField: defaultSortField,
             ...options,
           },
+          caseId,
         });
       }
 
@@ -569,6 +595,7 @@ export class CasesService {
           sortField: defaultSortField,
           ...options,
         },
+        caseId,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments internal for ${JSON.stringify(id)}: ${error}`);

@@ -150,6 +150,7 @@ export async function find(
         hasReference: { type: CASE_SAVED_OBJECT, id: caseID },
         filter,
       },
+      caseId: caseID,
     });
 
     ensureSavedObjectsAreAuthorized(
@@ -187,6 +188,7 @@ export async function get(
   try {
     const comment = await attachmentService.getter.get({
       attachmentId: attachmentID,
+      caseId: caseID,
     });
 
     await authorization.ensureAuthorized({

@@ -36,7 +36,6 @@ import { AttachmentLimitChecker } from '../limiter_checker';
 import type { AlertInfo } from '../types';
 import type { CaseSavedObjectTransformed } from '../types/case';
 import {
-  countAlertsForID,
   flattenCommentSavedObjects,
   transformNewComment,
   getOrUpdateLensReferences,
@@ -44,7 +43,6 @@ import {
   getAlertInfoFromComments,
   getIDsAndIndicesAsArrays,
   isCommentRequestTypeEvent,
-  countEventsForID,
 } from '../utils';
 import { decodeOrThrow } from '../runtime_types';
 import type { AttachmentRequest, AttachmentPatchRequest } from '../../../common/types/api';
@@ -108,6 +106,7 @@ export class CaseCommentModel {
       if (queryRestAttributes.type === AttachmentType.user && queryRestAttributes?.comment) {
         const currentComment = (await this.params.services.attachmentService.getter.get({
           attachmentId: id,
+          caseId: this.caseInfo.id,
         })) as SavedObject<UserCommentAttachmentPayload>;
 
         const updatedReferences = getOrUpdateLensReferences(
@@ -123,18 +122,22 @@ export class CaseCommentModel {
         options.references = updatedReferences;
       }
 
-      const [comment, commentableCase] = await Promise.all([
-        this.params.services.attachmentService.update({
-          attachmentId: id,
-          updatedAttributes: {
-            ...queryRestAttributes,
-            updated_at: updatedAt,
-            updated_by: this.params.user,
-          },
-          options,
-        }),
-        this.partialUpdateCaseWithAttachmentDataSkipRefresh({ date: updatedAt }),
-      ]);
+      // Run sequentially to avoid version conflicts on the case SO
+      // (both update() and partialUpdate write to the same case document)
+      const comment = await this.params.services.attachmentService.update({
+        attachmentId: id,
+        updatedAttributes: {
+          ...queryRestAttributes,
+          updated_at: updatedAt,
+          updated_by: this.params.user,
+        },
+        options,
+        caseId: this.caseInfo.id,
+      });
+
+      const commentableCase = await this.partialUpdateCaseWithAttachmentDataSkipRefresh({
+        date: updatedAt,
+      });
 
       await commentableCase.createUpdateCommentUserAction(comment, updateRequest, owner);
 
@@ -167,26 +170,27 @@ export class CaseCommentModel {
     refresh: RefreshSetting;
   }): Promise<CaseCommentModel> {
     try {
-      const { totalComments, totalAlerts, totalEvents } = await this.getAttachmentStats();
-
-      const updatedCase = await this.params.services.caseService.patchCase({
-        originalCase: this.caseInfo,
-        caseId: this.caseInfo.id,
-        updatedAttributes: {
-          updated_at: date,
-          updated_by: { ...this.params.user },
-          total_comments: totalComments,
-          total_alerts: totalAlerts,
-          total_events: totalEvents,
-        },
-        refresh,
-      });
+      // Stats (total_alerts, total_comments, total_events) are already computed and written
+      // by the attachment service during create/update/delete operations.
+      // Here we only update the case timestamps. We use a direct SO update (no patchCase)
+      // to avoid overwriting attachment-namespaced references with stale data.
+      const updatedCase =
+        await this.params.unsecuredSavedObjectsClient.update<Record<string, unknown>>(
+          CASE_SAVED_OBJECT,
+          this.caseInfo.id,
+          {
+            updated_at: date,
+            updated_by: { ...this.params.user },
+          },
+          { refresh }
+        );
 
       return this.newObjectWithInfo({
         ...this.caseInfo,
         attributes: {
           ...this.caseInfo.attributes,
-          ...updatedCase.attributes,
+          updated_at: date,
+          updated_by: { ...this.params.user },
         },
         version: updatedCase.version ?? this.caseInfo.version,
       });
@@ -275,6 +279,7 @@ export class CaseCommentModel {
         references,
         id,
         refresh: true,
+        caseId: this.caseInfo.id,
       });
 
       const commentableCase = await this.partialUpdateCaseWithAttachmentDataSkipRefresh({
@@ -522,14 +527,14 @@ export class CaseCommentModel {
         },
       });
 
-      const totalAlerts = countAlertsForID({ comments, id: this.caseInfo.id }) ?? 0;
-      const totalEvents = countEventsForID({ comments }) ?? 0;
+      // Compute stats from embedded attachments directly (not from references)
+      const { totalAlerts, totalEvents, totalComments } = await this.getAttachmentStats();
 
       const caseResponse = {
         comments: flattenCommentSavedObjects(comments.saved_objects),
         totalAlerts,
         totalEvents,
-        ...this.formatForEncoding(comments.total),
+        ...this.formatForEncoding(totalComments),
       };
 
       return decodeOrThrow(CaseRt)(caseResponse);
@@ -571,6 +576,7 @@ export class CaseCommentModel {
           };
         }),
         refresh: true,
+        caseId: this.caseInfo.id,
       });
 
       const commentableCase = await this.partialUpdateCaseWithAttachmentDataSkipRefresh({
