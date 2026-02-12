@@ -1,14 +1,14 @@
 {
-  "lastModified": "2025-12-11T11:22:51.017Z",
-  "sha1": "b139e2db2dc7a0317167d71c34cd86dfbfbb56ba",
+  "lastModified": "2026-02-12T15:58:17.226Z",
+  "sha1": "f0decc696152f2923abf0a7828aa4944813f9808",
   "tests": [
     {
-      "id": "77cd5c401e41e83-1054e603e578b92",
+      "id": "4402bb6f4421c38-1054e603e578b92",
       "title": "Ingest archives to Elasticsearch",
       "expectedStatus": "passed",
       "tags": [],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/global_setup.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/global.setup.ts",
         "line": 11,
         "column": 16
       }
@@ -18,13 +18,15 @@
       "title": "Expandable flyout state sync should test flyout url sync",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSecurity"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/flyout/alert_details_url_sync.spec.ts",
-        "line": 25,
-        "column": 12
+        "line": 32,
+        "column": 14
       }
     }
   ]
