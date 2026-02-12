@@ -50,9 +50,13 @@ import { useKibana, useUiSetting$ } from '../common/lib/kibana/kibana_react';
 
 interface Features {
   deHealthUIEnabled: boolean;
+  ruleHealthUIEnabled: boolean;
 }
 
-const getRulesSubRoutes = (capabilities: Capabilities, { deHealthUIEnabled }: Features) => [
+const getRulesSubRoutes = (
+  capabilities: Capabilities,
+  { deHealthUIEnabled, ruleHealthUIEnabled }: Features
+) => [
   ...(hasCapabilities(capabilities, RULES_UI_READ_PRIVILEGE) // regular detection rules are enabled
     ? [
         {
@@ -80,6 +84,10 @@ const getRulesSubRoutes = (capabilities: Capabilities, { deHealthUIEnabled }: Fe
                 main: DetectionEngineSpaceRulesHealthPage,
                 exact: true,
               },
+            ]
+          : []),
+        ...(ruleHealthUIEnabled
+          ? [
               {
                 path: DE_RULE_HEALTH_PATH,
                 main: DetectionEngineRuleHealthPage,
@@ -118,16 +126,20 @@ const RulesContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
   const { capabilities } = useKibana().services.application;
   const deHealthUiFFEnabled = useIsExperimentalFeatureEnabled('deHealthUIEnabled');
+  const ruleHealthUiFFEnabled = useIsExperimentalFeatureEnabled('ruleHealthUIEnabled');
   const [deHealthUIAdvancedSetting] = useUiSetting$<boolean>(ENABLE_DE_HEALTH_UI_SETTING, false);
   const deHealthUIEnabled = deHealthUiFFEnabled && deHealthUIAdvancedSetting;
+  const ruleHealthUIEnabled = ruleHealthUiFFEnabled && deHealthUIAdvancedSetting;
 
   const subRoutes = useMemo(() => {
-    return getRulesSubRoutes(capabilities, { deHealthUIEnabled }).map((route) => (
-      <Route key={`rules-route-${route.path}`} path={route.path} exact={route?.exact ?? false}>
-        <route.main />
-      </Route>
-    ));
-  }, [capabilities, deHealthUIEnabled]);
+    return getRulesSubRoutes(capabilities, { deHealthUIEnabled, ruleHealthUIEnabled }).map(
+      (route) => (
+        <Route key={`rules-route-${route.path}`} path={route.path} exact={route?.exact ?? false}>
+          <route.main />
+        </Route>
+      )
+    );
+  }, [capabilities, deHealthUIEnabled, ruleHealthUIEnabled]);
 
   return (
     <PluginTemplateWrapper>

@@ -217,10 +217,14 @@ export const allowedExperimentalValues = Object.freeze({
   splunkV2DashboardsEnabled: false,
 
   /**
-   * Enables Detection Engine Health UI. A set of pages aggregating various health metrics
-   * related to the Detection Engine.
+   * Enables Detection Engine Health UI
    */
   deHealthUIEnabled: false,
+
+  /**
+   * Enables Rule Health UI
+   */
+  ruleHealthUIEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
