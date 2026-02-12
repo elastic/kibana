@@ -43,7 +43,6 @@ import { getDefaultProfileState } from './utils/get_default_profile_state';
 import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import { internalStateActions, selectTabRuntimeState } from './redux';
 import { buildEsqlFetchSubscribe } from './utils/build_esql_fetch_subscribe';
-import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { createSearchSource } from './utils/create_search_source';
 
 export interface SavedSearchData {
@@ -159,7 +158,6 @@ export function getDataStateContainer({
   searchSessionManager,
   internalState,
   runtimeStateManager,
-  savedSearchContainer,
   injectCurrentTab,
   getCurrentTab,
 }: {
@@ -167,7 +165,6 @@ export function getDataStateContainer({
   searchSessionManager: DiscoverSearchSessionManager;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
-  savedSearchContainer: DiscoverSavedSearchContainer;
   injectCurrentTab: TabActionInjector;
   getCurrentTab: () => TabState;
 }): DiscoverDataStateContainer {

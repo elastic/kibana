@@ -10,20 +10,19 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
-import {
-  toSavedSearchAttributes,
-  type DiscoverSession,
-  type SavedSearchByValueAttributes,
+import type {
+  DiscoverSession,
+  SavedSearchByValueAttributes,
 } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../../../../build_services';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import {
+  fromTabStateToByValueAttributes,
   getSerializedSearchSourceDataViewDetails,
   internalStateActions,
   selectAllTabs,
   selectTabRuntimeState,
 } from '../../../state_management/redux';
-import { createSearchSource } from '../../../state_management/utils/create_search_source';
 import type { DiscoverSessionSaveModalOnSaveCallback } from './save_modal';
 import { DiscoverSessionSaveModal } from './save_modal';
 
@@ -43,22 +42,23 @@ export const onSaveDiscoverSession = async ({
   onSaveCb,
 }: OnSaveDiscoverSessionParams) => {
   if (services.embeddableEditor.isByValueEditor()) {
-    const savedSearch = state.savedSearchState.getState();
     const currentTab = state.getCurrentTab();
     const currentDataView = selectTabRuntimeState(
       state.runtimeStateManager,
       currentTab.id
     ).currentDataView$.getValue();
-    const searchSource = createSearchSource({
+
+    if (!currentDataView) {
+      return;
+    }
+
+    const attributes = fromTabStateToByValueAttributes({
+      tab: currentTab,
       dataView: currentDataView,
-      appState: currentTab.appState,
-      globalState: currentTab.globalState,
       services,
     });
-    const { searchSourceJSON, references } = searchSource.serialize();
-    const attributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
-    onSaveCb?.({ ...attributes, references });
+    onSaveCb?.(attributes);
   } else {
     const internalState = state.internalState.getState();
     const persistedDiscoverSession = internalState.persistedDiscoverSession;

@@ -477,7 +477,6 @@ export function getDiscoverStateMock({
   if (finalSavedSearch) {
     const dataView = finalSavedSearch.searchSource.getField('index');
 
-    container.savedSearchState.set(finalSavedSearch);
     tabRuntimeState.currentDataView$.next(dataView);
 
     if (dataView) {

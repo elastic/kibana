@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type {
+  DiscoverSession,
+  DiscoverSessionTab,
+  SavedSearchByValueAttributes,
+} from '@kbn/saved-search-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isObject } from 'lodash';
@@ -227,5 +231,70 @@ export const fromSavedSearchToSavedObjectTab = ({
         ? JSON.stringify(tab.attributes.controlGroupState)
         : undefined
       : savedSearch.controlGroupJson,
+  };
+};
+
+/**
+ * Converts a TabState to SavedSearchByValueAttributes for use in by-value embeddables.
+ * This is used when saving a Discover session embedded in another application (e.g., Dashboard).
+ */
+export const fromTabStateToByValueAttributes = ({
+  tab,
+  dataView,
+  services,
+}: {
+  tab: TabState;
+  dataView: DataView;
+  services: DiscoverServices;
+}): SavedSearchByValueAttributes => {
+  const searchSource = createSearchSource({
+    dataView,
+    appState: tab.appState,
+    globalState: tab.globalState,
+    services,
+  });
+  const { searchSourceJSON, references } = searchSource.serialize();
+  const usesAdHocDataView = isObject(searchSource.getSerializedFields().index);
+  const timeRestore = tab.attributes.timeRestore ?? false;
+
+  // Tab-specific attributes (shared between top-level and tabs array)
+  const tabAttributes = {
+    kibanaSavedObjectMeta: { searchSourceJSON },
+    sort: (tab.appState.sort ?? []) as SortOrder[],
+    columns: tab.appState.columns ?? [],
+    grid: tab.appState.grid ?? {},
+    hideChart: tab.appState.hideChart ?? false,
+    viewMode: tab.appState.viewMode,
+    hideAggregatedPreview: tab.appState.hideAggregatedPreview,
+    rowHeight: tab.appState.rowHeight,
+    headerRowHeight: tab.appState.headerRowHeight,
+    isTextBasedQuery: isOfAggregateQueryType(tab.appState.query),
+    usesAdHocDataView,
+    timeRestore,
+    timeRange: timeRestore ? tab.globalState.timeRange : undefined,
+    refreshInterval: timeRestore ? tab.globalState.refreshInterval : undefined,
+    rowsPerPage: tab.appState.rowsPerPage,
+    sampleSize: tab.appState.sampleSize,
+    breakdownField: tab.appState.breakdownField,
+    chartInterval: tab.appState.interval,
+    density: tab.appState.density,
+    visContext: tab.attributes.visContext,
+    controlGroupJson: tab.attributes.controlGroupState
+      ? JSON.stringify(tab.attributes.controlGroupState)
+      : undefined,
+  };
+
+  return {
+    ...tabAttributes,
+    title: tab.label ?? '',
+    description: '',
+    tabs: [
+      {
+        id: tab.id,
+        label: tab.label ?? '',
+        attributes: tabAttributes,
+      },
+    ],
+    references,
   };
 };
