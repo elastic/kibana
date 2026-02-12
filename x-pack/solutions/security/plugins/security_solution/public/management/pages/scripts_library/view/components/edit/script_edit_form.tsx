@@ -159,7 +159,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
             data-test-subj={`${dataTestSubj}-fakeFilePicker`}
           >
             <EuiFlexItem grow={false}>
-              <EuiIcon type="download" size="l" />
+              <EuiIcon type="download" size="l" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="m">
@@ -192,6 +192,14 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
     const selectedTags = useMemo(
       () => scriptItem?.tags?.sort().map((tag) => ({ label: SCRIPT_TAGS[tag] })) || [],
       [scriptItem?.tags]
+    );
+
+    const isSubmitFileError = useMemo(() => submitError?.body?.statusCode === 400, [submitError]);
+    // extract script name from error message for existing file error display
+    const scriptNameWithExistingFileError = useMemo(
+      () =>
+        isSubmitFileError ? submitError?.body?.message?.match(/named \[([^\]]+)\]/)?.[1] ?? '' : '',
+      [isSubmitFileError, submitError]
     );
 
     const onChangeFile = useCallback(
@@ -325,7 +333,7 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
       <EuiForm
         component="div"
         error={
-          submitError ? (
+          submitError && !isSubmitFileError ? (
             <FormattedError error={submitError} data-test-subj={`${dataTestSubj}-submitError`} />
           ) : undefined
         }
@@ -334,15 +342,21 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
         data-test-subj={`${dataTestSubj}-form`}
       >
         {/* file picker */}
-        {showFakeFilePicker ? (
+        {showFakeFilePicker && !isSubmitFileError ? (
           fakeFilePicker
         ) : (
           <EuiFormRow
-            isInvalid={hasFileError && hasFileBeenChanged}
-            error={SCRIPT_LIBRARY_LABELS.flyout.body.edit.filePickerPrompt.validationErrorMessage}
+            isInvalid={(hasFileError && hasFileBeenChanged) || isSubmitFileError}
+            error={
+              isSubmitFileError
+                ? SCRIPT_LIBRARY_LABELS.flyout.body.upload.fileAlreadyExists(
+                    scriptNameWithExistingFileError
+                  )
+                : SCRIPT_LIBRARY_LABELS.flyout.body.edit.filePickerPrompt.validationErrorMessage
+            }
           >
             <EuiFilePicker
-              isInvalid={hasFileError && hasFileBeenChanged}
+              isInvalid={(hasFileError && hasFileBeenChanged) || isSubmitFileError}
               id={filePickerUUID}
               initialPromptText={SCRIPT_LIBRARY_LABELS.flyout.body.edit.filePickerPrompt.label}
               onChange={onChangeFile}
