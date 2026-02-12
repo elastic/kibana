@@ -193,7 +193,7 @@ export const DimensionsSelector = ({
               values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
             />
           ) : (
-            <EuiFlexGroup alignItems="center">
+            <EuiFlexGroup alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
                 <FormattedMessage
                   id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabelWithSelection"
