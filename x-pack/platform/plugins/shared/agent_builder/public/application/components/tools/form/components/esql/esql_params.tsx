@@ -164,7 +164,7 @@ export const EsqlParams = () => {
   });
 
   const hasArrayType = useMemo(() => {
-    return params.some((param) => param.type === EsqlToolFieldType.ARRAY);
+    return params?.some((param) => param.type === EsqlToolFieldType.ARRAY);
   }, [params]);
 
   const handleAppend = useCallback(
