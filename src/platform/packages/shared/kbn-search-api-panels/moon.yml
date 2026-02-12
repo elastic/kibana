@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/core'
   - '@kbn/i18n-react'
+  - '@kbn/cloud-plugin'
 tags:
   - shared-browser
   - package
