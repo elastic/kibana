@@ -24,7 +24,7 @@ import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { type DashboardAttachmentData } from '@kbn/dashboard-agent-common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/common/constants';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/public';
 import {
   type AttachmentPanel,
   isLensAttachmentPanel,
