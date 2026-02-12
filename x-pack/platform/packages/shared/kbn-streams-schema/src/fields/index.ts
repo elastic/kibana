@@ -7,14 +7,24 @@
 
 import type {
   MappingBooleanProperty,
+  MappingByteNumberProperty,
+  MappingDateNanosProperty,
   MappingDateProperty,
   MappingDoubleNumberProperty,
+  MappingFloatNumberProperty,
   MappingGeoPointProperty,
+  MappingHalfFloatNumberProperty,
+  MappingIntegerNumberProperty,
   MappingIpProperty,
   MappingKeywordProperty,
   MappingLongNumberProperty,
   MappingMatchOnlyTextProperty,
   MappingProperty,
+  MappingShortNumberProperty,
+  MappingTextProperty,
+  MappingUnsignedLongNumberProperty,
+  MappingVersionProperty,
+  MappingWildcardProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
 
@@ -29,6 +39,16 @@ export const FIELD_DEFINITION_TYPES = [
   'boolean',
   'ip',
   'geo_point',
+  'integer',
+  'short',
+  'byte',
+  'float',
+  'half_float',
+  'text',
+  'wildcard',
+  'version',
+  'unsigned_long',
+  'date_nanos',
 ] as const;
 
 export type FieldDefinitionType = (typeof FIELD_DEFINITION_TYPES)[number];
@@ -79,7 +99,17 @@ export type AllowedMappingProperty =
   | MappingDateProperty
   | MappingBooleanProperty
   | MappingIpProperty
-  | MappingGeoPointProperty;
+  | MappingGeoPointProperty
+  | MappingIntegerNumberProperty
+  | MappingShortNumberProperty
+  | MappingByteNumberProperty
+  | MappingFloatNumberProperty
+  | MappingHalfFloatNumberProperty
+  | MappingTextProperty
+  | MappingWildcardProperty
+  | MappingVersionProperty
+  | MappingUnsignedLongNumberProperty
+  | MappingDateNanosProperty;
 
 export type StreamsMappingProperties = Record<string, AllowedMappingProperty>;
 

@@ -627,6 +627,18 @@ export const convert = (schema: z.ZodTypeAny) => {
     const raw = z4.toJSONSchema(unwrapped as unknown as z4.ZodType, {
       unrepresentable: 'any',
       io: 'input',
+      override: ({ zodSchema, jsonSchema: js }) => {
+        // z.never() is "unrepresentable" and gets converted to {} (any) by
+        // the 'any' strategy. In JSON Schema / OpenAPI, the correct
+        // representation of "never" is { not: {} }, so fix it up here.
+        if ('_zod' in zodSchema && (zodSchema as any)._zod?.def?.type === 'never') {
+          // Clear all existing keys and set { not: {} }
+          for (const key of Object.keys(js)) {
+            delete (js as any)[key];
+          }
+          (js as any).not = {};
+        }
+      },
     }) as Record<string, any>;
 
     // Remove $schema (not valid inside OpenAPI schema objects)
