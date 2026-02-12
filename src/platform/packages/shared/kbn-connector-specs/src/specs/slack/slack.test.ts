@@ -123,67 +123,79 @@ describe('Slack', () => {
 
       await expect(
         Slack.actions.searchMessages.handler(mockContext, { query: 'test' })
-      ).rejects.toThrow('Slack API error: invalid_auth');
+      ).rejects.toThrow('Slack searchMessages error: invalid_auth');
     });
   });
 
-  describe('listConversations action', () => {
-    it('should list conversations with defaults', async () => {
+  describe('resolveChannelId action', () => {
+    it('should resolve a channel id by exact name match (and cache it)', async () => {
       const mockResponse = {
         data: {
           ok: true,
-          channels: [],
+          channels: [
+            { id: 'C1', name: 'general', is_archived: false },
+            { id: 'C2', name: 'random', is_archived: false },
+          ],
+          response_metadata: { next_cursor: 'next123' },
         },
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = await Slack.actions.listConversations.handler(mockContext, {});
+      const result = await Slack.actions.resolveChannelId.handler(mockContext, { name: '#general' });
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://slack.com/api/conversations.list?types=public_channel'
+        'https://slack.com/api/conversations.list?types=public_channel%2Cprivate_channel&exclude_archived=true&limit=1000'
       );
-      expect(result).toEqual(mockResponse.data);
-    });
-
-    it('should include optional parameters', async () => {
-      const mockResponse = {
-        data: {
-          ok: true,
-          channels: [],
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      await Slack.actions.listConversations.handler(mockContext, {
-        types: 'public_channel',
-        excludeArchived: true,
-        limit: 200,
-        cursor: 'cursor123',
+      expect(result).toEqual({
+        ok: true,
+        found: true,
+        id: 'C1',
+        name: 'general',
+        source: 'conversations.list',
+        pagesFetched: 1,
+        nextCursor: 'next123',
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://slack.com/api/conversations.list?types=public_channel&exclude_archived=true&limit=200&cursor=cursor123'
-      );
-    });
+      jest.clearAllMocks();
 
-    it('should throw when unsupported conversation types are requested', async () => {
-      await expect(
-        Slack.actions.listConversations.handler(mockContext, { types: 'private_channel' })
-      ).rejects.toThrow('Only "public_channel" is supported');
-    });
-
-    it('should throw error when Slack API returns error', async () => {
-      const mockResponse = {
-        data: {
-          ok: false,
-          error: 'invalid_auth',
-        },
+      const cachedResult = (await Slack.actions.resolveChannelId.handler(mockContext, {
+        name: 'general',
+      })) as {
+        ok: boolean;
+        found: boolean;
+        id?: string;
+        source?: string;
       };
-      mockClient.get.mockResolvedValue(mockResponse);
+      expect(mockClient.get).not.toHaveBeenCalled();
+      expect(cachedResult.ok).toBe(true);
+      expect(cachedResult.found).toBe(true);
+      expect(cachedResult.id).toBe('C1');
+      expect(cachedResult.source).toBe('cache');
+    });
 
-      await expect(
-        Slack.actions.listConversations.handler(mockContext, {})
-      ).rejects.toThrow('Slack API error: invalid_auth');
+    it('should paginate until found (contains match)', async () => {
+      mockClient.get
+        .mockResolvedValueOnce({
+          data: { ok: true, channels: [{ id: 'C9', name: 'zzz' }], response_metadata: { next_cursor: 'c2' } },
+        })
+        .mockResolvedValueOnce({
+          data: { ok: true, channels: [{ id: 'C7', name: 'alerts-prod' }], response_metadata: { next_cursor: '' } },
+        });
+
+      const result = await Slack.actions.resolveChannelId.handler(mockContext, {
+        name: 'alerts',
+        match: 'contains',
+        maxPages: 5,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledTimes(2);
+      expect(result).toMatchObject({
+        ok: true,
+        found: true,
+        id: 'C7',
+        source: 'conversations.list',
+        pagesFetched: 2,
+      });
     });
   });
 
@@ -232,7 +244,7 @@ describe('Slack', () => {
 
       await expect(
         Slack.actions.getConversationHistory.handler(mockContext, { channel: 'C123' })
-      ).rejects.toThrow('Slack API error: invalid_auth');
+      ).rejects.toThrow('Slack getConversationHistory error: invalid_auth');
     });
   });
 
@@ -346,7 +358,7 @@ describe('Slack', () => {
           channel: 'invalid-channel',
           text: 'Hello',
         })
-      ).rejects.toThrow('Slack API error: channel_not_found');
+      ).rejects.toThrow('Slack sendMessage error: channel_not_found');
     });
   });
 

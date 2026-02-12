@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.slack.send_message'
-description: 'Send a message to a Slack public channel. Returns Slack API response including channel and message timestamp (ts). Requires chat:write and access to the channel.'
+description: 'Send a message to a Slack conversation (channel/DM) by conversation ID. Actions and inputs: sendMessage (channel, text, optional thread_ts, optional unfurl_links, optional unfurl_media). Use sources.slack.find first to resolve a channel name (e.g. "#general") into a conversation id (C.../G...). Requires chat:write and access to the conversation.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -8,7 +8,7 @@ triggers:
 inputs:
   - name: channel
     type: string
-    description: 'Channel ID to send the message to (e.g. C123...).'
+    description: 'Conversation ID to send the message to (e.g. C... for public channels, G... for private channels, D... for DMs).'
   - name: text
     type: string
     description: 'Message text.'

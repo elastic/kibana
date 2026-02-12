@@ -5,41 +5,6 @@
  * 2.0.
  */
 
-export function generateListConversationsWorkflow(stackConnectorId: string): string {
-  return `version: '1'
-name: 'sources.slack.list_conversations'
-description: 'List Slack conversations (channels/DMs) available to the authorized token'
-enabled: true
-triggers:
-  - type: 'manual'
-inputs:
-  - name: types
-    type: string
-    required: false
-    description: 'Comma-separated conversation types (public_channel,private_channel,im,mpim)'
-  - name: exclude_archived
-    type: boolean
-    required: false
-    default: true
-  - name: limit
-    type: number
-    required: false
-    default: 100
-  - name: cursor
-    type: string
-    required: false
-steps:
-  - name: list-conversations
-    type: slack2.listConversations
-    connector-id: ${stackConnectorId}
-    with:
-      types: "\${{inputs.types}}"
-      excludeArchived: \${{inputs.exclude_archived}}
-      limit: \${{inputs.limit}}
-      cursor: "\${{inputs.cursor}}"
-`;
-}
-
 export function generateGetConversationHistoryWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.slack.get_conversation_history'

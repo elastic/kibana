@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.slack.get_conversation_history'
-description: 'Fetch message history for a specific Slack public channel. Returns Slack API response including messages plus pagination fields (has_more / response_metadata.next_cursor when present). Requires channels:history and access to the channel.'
+description: 'Fetch message history for a Slack conversation by conversation ID. Actions and inputs: getConversationHistory (channel, optional oldest, optional latest, optional inclusive, optional limit, optional cursor). Use sources.slack.find to resolve a channel name to an ID (C.../G...). Requires the appropriate Slack history scope for the conversation type (e.g. channels:history for public channels, groups:history for private channels, im:history for DMs, mpim:history for group DMs) and access to the conversation.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -8,7 +8,7 @@ triggers:
 inputs:
   - name: channel
     type: string
-    description: 'Channel ID (e.g. C123...).'
+    description: 'Conversation ID (e.g. C.../G.../D...).'
   - name: oldest
     type: string
     required: false

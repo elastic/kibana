@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.slack.search_messages'
-description: 'Search Slack messages and return compact results (text, channel, sender, mentions, permalink). Requires a user token with search:read.'
+description: 'Search Slack messages and return compact results suitable for LLM summaries and follow-up navigation. Actions and inputs: searchMessages (query, optional in_channel, optional from_user, optional after, optional before, optional sort, optional sort_dir, optional count, optional page, optional highlight, optional raw). Output (compact default): matches with text, channel {id,name}, sender, mentions, and permalink. Requires a user token with search:read.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:

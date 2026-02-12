@@ -13,6 +13,162 @@ import type { ConnectorSpec } from '../../connector_spec';
 
 const SLACK_API_BASE = 'https://slack.com/api';
 const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Temporary: remove once OAuth UX is fully unblocked.
+const SLACK_CONVERSATION_TYPES = ['public_channel', 'private_channel', 'im', 'mpim'] as const;
+
+function formatSlackApiErrorMessage(params: {
+  action: string;
+  responseData?: any;
+  responseHeaders?: Record<string, unknown>;
+}) {
+  const { action, responseData, responseHeaders } = params;
+  const error = responseData?.error ?? 'unknown_error';
+  const needed = responseData?.needed;
+  const provided = responseData?.provided;
+
+  // Slack frequently returns these headers on Web API responses; they’re the most reliable way
+  // to understand which scopes a token actually has vs. what an endpoint requires.
+  const accepted = (responseHeaders as any)?.['x-accepted-oauth-scopes'];
+  const scopes = (responseHeaders as any)?.['x-oauth-scopes'];
+
+  const extras: string[] = [];
+  if (needed) extras.push(`needed=${needed}`);
+  if (provided) extras.push(`provided=${provided}`);
+  if (accepted) extras.push(`acceptedScopes=${accepted}`);
+  if (scopes) extras.push(`tokenScopes=${scopes}`);
+
+  return extras.length > 0
+    ? `Slack ${action} error: ${error} (${extras.join(', ')})`
+    : `Slack ${action} error: ${error}`;
+}
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function getSlackRetryDelayMs(params: {
+  responseHeaders?: Record<string, unknown>;
+  attempt: number;
+  defaultBaseDelayMs?: number;
+}) {
+  const { responseHeaders, attempt, defaultBaseDelayMs = 1000 } = params;
+  const retryAfter = (responseHeaders as any)?.['retry-after'];
+  const retryAfterSeconds =
+    typeof retryAfter === 'string' ? Number(retryAfter) : typeof retryAfter === 'number' ? retryAfter : NaN;
+
+  if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
+    // Add a small jitter so multiple callers don't retry in lockstep.
+    const jitterMs = Math.floor(Math.random() * 250);
+    return Math.min(60_000, Math.floor(retryAfterSeconds * 1000) + jitterMs);
+  }
+
+  // Fallback exponential backoff with jitter.
+  const exp = Math.min(6, Math.max(0, attempt)); // cap at 2^6
+  const base = defaultBaseDelayMs * Math.pow(2, exp);
+  const jitterMs = Math.floor(Math.random() * 250);
+  return Math.min(60_000, base + jitterMs);
+}
+
+type CacheEntry<T> = { value: T; expiresAt: number };
+const slackResolveChannelIdCache = new Map<string, CacheEntry<string>>();
+const getCached = <T,>(cache: Map<string, CacheEntry<T>>, key: string): T | undefined => {
+  const entry = cache.get(key);
+  if (!entry) return undefined;
+  if (Date.now() > entry.expiresAt) {
+    cache.delete(key);
+    return undefined;
+  }
+  return entry.value;
+};
+const setCached = <T,>(cache: Map<string, CacheEntry<T>>, key: string, value: T, ttlMs: number) => {
+  cache.set(key, { value, expiresAt: Date.now() + ttlMs });
+};
+
+type SlackSearchMatch = {
+  score?: number;
+  iid?: string;
+  team?: string;
+  text?: string;
+  permalink?: string;
+  user?: string;
+  username?: string;
+  ts?: string;
+  channel?: { id?: string; name?: string };
+  blocks?: unknown;
+};
+
+function extractMentionedUserIds(match: SlackSearchMatch): string[] {
+  const ids = new Set<string>();
+
+  const text = typeof match.text === 'string' ? match.text : '';
+  const re = /<@([A-Z0-9]+)(?:\\|[^>]+)?>/g;
+  for (let m = re.exec(text); m; m = re.exec(text)) {
+    if (m[1]) ids.add(m[1]);
+  }
+
+  const stack: unknown[] = match.blocks ? [match.blocks] : [];
+  const seen = new Set<unknown>();
+  let visited = 0;
+
+  // Walk the blocks tree to find user mentions like { type: 'user', user_id: 'U...' }.
+  while (stack.length > 0) {
+    const cur = stack.pop();
+    visited += 1;
+    if (visited > 5000) break;
+    if (!cur || typeof cur !== 'object') continue;
+    if (seen.has(cur)) continue;
+    seen.add(cur);
+
+    const rec = cur as Record<string, unknown>;
+    if (rec.type === 'user' && typeof rec.user_id === 'string') {
+      ids.add(rec.user_id);
+    }
+
+    for (const v of Object.values(rec)) {
+      if (Array.isArray(v)) stack.push(...v);
+      else if (v && typeof v === 'object') stack.push(v);
+    }
+  }
+
+  return Array.from(ids);
+}
+
+async function slackGetWithRateLimitRetry(params: {
+  ctx: { client: { get: (url: string) => Promise<any> }; log: { debug: (msg: string) => void } };
+  url: string;
+  action: string;
+  maxRetries?: number;
+}) {
+  const { ctx, url, action, maxRetries = 3 } = params;
+
+  let attempt = 0;
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    try {
+      return await ctx.client.get(url);
+    } catch (error) {
+      const err = error as {
+        response?: { status?: number; headers?: Record<string, unknown>; data?: any };
+        message?: string;
+      };
+
+      const status = err.response?.status;
+      const isRateLimited =
+        status === 429 || err.response?.data?.error === 'ratelimited' || err.message?.includes('ratelimited');
+
+      if (!isRateLimited || attempt >= maxRetries) {
+        throw error;
+      }
+
+      const delayMs = getSlackRetryDelayMs({
+        responseHeaders: err.response?.headers,
+        attempt,
+      });
+      ctx.log.debug(
+        `Slack ${action} rate limited (attempt ${attempt + 1}/${maxRetries}). Sleeping ${delayMs}ms before retry.`
+      );
+      await sleep(delayMs);
+      attempt += 1;
+    }
+  }
+}
 
 /**
  * Slack connector using OAuth2 Authorization Code flow.
@@ -24,6 +180,7 @@ const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Temporary: remove once OAuth
  * - mpim:read,mpim:history - to list group DMs and read group DM history (if enabled)
  * - chat:write - for sending messages
  * - search:read - for searching messages (requires a user token)
+ * - users:read - to look up user IDs and profiles (helpful for sending DMs)
  */
 export const Slack: ConnectorSpec = {
   metadata: {
@@ -44,7 +201,7 @@ export const Slack: ConnectorSpec = {
           authorizationUrl: 'https://slack.com/oauth/v2/authorize',
           tokenUrl: 'https://slack.com/api/oauth.v2.access',
           scope:
-            'channels:read,channels:history,groups:read,groups:history,im:read,im:history,mpim:read,mpim:history,chat:write,search:read',
+            'channels:read,channels:history,groups:read,groups:history,im:read,im:history,mpim:read,mpim:history,chat:write,search:read,users:read',
           scopeQueryParam: 'user_scope', // Slack OAuth v2 uses user_scope for user token scopes
           tokenExtractor: 'slackUserToken', // extract authed_user.access_token for user-token-only scopes (e.g. search:read)
           useBasicAuth: false, // Slack uses POST body for client credentials
@@ -275,61 +432,18 @@ export const Slack: ConnectorSpec = {
           );
 
           if (!response.data.ok) {
-            throw new Error(`Slack API error: ${response.data.error}`);
+            throw new Error(
+              formatSlackApiErrorMessage({
+                action: 'searchMessages',
+                responseData: response.data,
+                responseHeaders: response.headers,
+              })
+            );
           }
 
           if (typedInput.raw) {
             return response.data;
           }
-
-          type SlackSearchMatch = {
-            score?: number;
-            iid?: string;
-            team?: string;
-            text?: string;
-            permalink?: string;
-            user?: string;
-            username?: string;
-            ts?: string;
-            channel?: { id?: string; name?: string };
-            blocks?: unknown;
-          };
-
-          const extractMentionedUserIds = (match: SlackSearchMatch): string[] => {
-            const ids = new Set<string>();
-
-            const text = typeof match.text === 'string' ? match.text : '';
-            const re = /<@([A-Z0-9]+)(?:\\|[^>]+)?>/g;
-            for (let m = re.exec(text); m; m = re.exec(text)) {
-              if (m[1]) ids.add(m[1]);
-            }
-
-            const blocks = (match as { blocks?: unknown }).blocks;
-            const stack: unknown[] = blocks ? [blocks] : [];
-            const seen = new Set<unknown>();
-            let visited = 0;
-
-            while (stack.length > 0) {
-              const cur = stack.pop();
-              visited += 1;
-              if (visited > 5000) break;
-              if (!cur || typeof cur !== 'object') continue;
-              if (seen.has(cur)) continue;
-              seen.add(cur);
-
-              const rec = cur as Record<string, unknown>;
-              if (rec.type === 'user' && typeof rec.user_id === 'string') {
-                ids.add(rec.user_id);
-              }
-
-              for (const v of Object.values(rec)) {
-                if (Array.isArray(v)) stack.push(...v);
-                else if (v && typeof v === 'object') stack.push(v);
-              }
-            }
-
-            return Array.from(ids);
-          };
 
           const matches: SlackSearchMatch[] =
             (response.data?.messages?.matches as SlackSearchMatch[]) ?? [];
@@ -365,25 +479,52 @@ export const Slack: ConnectorSpec = {
       },
     },
 
+    // Helper for LLMs: resolve a channel ID (C.../G...) from a human name (e.g. "#general").
+    // Deterministic (uses conversations.list) and caches results briefly to avoid repeat pagination.
     // https://api.slack.com/methods/conversations.list
-    listConversations: {
+    resolveChannelId: {
       isTool: true,
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.listConversations.description',
+        'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.description',
         {
-          defaultMessage: 'List public channels in Slack',
+          defaultMessage:
+            'Resolve a Slack channel/conversation ID from a channel name (rate-limit-aware pagination + short-lived cache)',
         }
       ),
       input: z.object({
-        types: z
+        name: z
           .string()
+          .min(1)
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.name.description',
+              {
+                defaultMessage:
+                  'Channel name to resolve (e.g. "general" or "#general"). Returns the matching conversation ID (C.../G...).',
+              }
+            )
+          ),
+        types: z
+          .array(z.enum(SLACK_CONVERSATION_TYPES))
           .optional()
           .describe(
             i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.listConversations.input.types.description',
+              'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.types.description',
               {
                 defaultMessage:
-                  'Conversation type filter. Only "public_channel" is supported by this connector.',
+                  'Conversation types to search. Defaults to public_channel + private_channel. Valid: public_channel, private_channel, im, mpim.',
+              }
+            )
+          ),
+        match: z
+          .enum(['exact', 'contains'])
+          .optional()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.match.description',
+              {
+                defaultMessage:
+                  'How to match the channel name. exact is fastest/most precise. contains can help when you only know part of the name.',
               }
             )
           ),
@@ -392,9 +533,21 @@ export const Slack: ConnectorSpec = {
           .optional()
           .describe(
             i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.listConversations.input.excludeArchived.description',
+              'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.excludeArchived.description',
               {
-                defaultMessage: 'Exclude archived conversations',
+                defaultMessage: 'Exclude archived channels (default true)',
+              }
+            )
+          ),
+        cursor: z
+          .string()
+          .optional()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.cursor.description',
+              {
+                defaultMessage:
+                  'Optional cursor to resume a previous scan (advanced). Usually omit.',
               }
             )
           ),
@@ -406,86 +559,148 @@ export const Slack: ConnectorSpec = {
           .optional()
           .describe(
             i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.listConversations.input.limit.description',
+              'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.limit.description',
               {
-                defaultMessage: 'Maximum number of results to return (1-1000)',
+                defaultMessage: 'Channels per page to request (1-1000). Defaults to 1000.',
               }
             )
           ),
-        cursor: z
-          .string()
+        maxPages: z
+          .number()
+          .int()
+          .min(1)
+          .max(100)
           .optional()
           .describe(
             i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.listConversations.input.cursor.description',
+              'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.maxPages.description',
               {
-                defaultMessage: 'Pagination cursor from a previous response',
+                defaultMessage:
+                  'Maximum number of pages to scan before giving up. Defaults to 10.',
+              }
+            )
+          ),
+        cacheTtlMs: z
+          .number()
+          .int()
+          .min(1_000)
+          .max(86_400_000)
+          .optional()
+          .describe(
+            i18n.translate(
+              'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.cacheTtlMs.description',
+              {
+                defaultMessage:
+                  'How long to cache successful resolutions in-memory (ms). Defaults to 10 minutes.',
               }
             )
           ),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
-          types?: string;
+          name: string;
+          types?: Array<(typeof SLACK_CONVERSATION_TYPES)[number]>;
+          match?: 'exact' | 'contains';
           excludeArchived?: boolean;
-          limit?: number;
           cursor?: string;
+          limit?: number;
+          maxPages?: number;
+          cacheTtlMs?: number;
         };
 
-        const params = new URLSearchParams();
+        const nameNorm = typedInput.name.trim().replace(/^#/, '').toLowerCase();
+        const types =
+          typedInput.types && typedInput.types.length > 0
+            ? typedInput.types
+            : (['public_channel', 'private_channel'] as Array<
+                (typeof SLACK_CONVERSATION_TYPES)[number]
+              >);
+        const match = typedInput.match ?? 'exact';
+        const excludeArchived = typedInput.excludeArchived ?? true;
+        const limit = typedInput.limit ?? 1000;
+        const maxPages = typedInput.maxPages ?? 10;
+        const cacheTtlMs = typedInput.cacheTtlMs ?? 10 * 60 * 1000;
 
-        if (typedInput.types) {
-          const requestedTypes = typedInput.types
-            .split(',')
-            .map((t) => t.trim())
-            .filter(Boolean);
-          const allowedTypes = new Set(['public_channel']);
-          const invalidTypes = requestedTypes.filter((t) => !allowedTypes.has(t));
-          if (invalidTypes.length > 0) {
-            throw new Error(
-              `Unsupported conversation types requested: ${invalidTypes.join(
-                ', '
-              )}. Only "public_channel" is supported.`
-            );
-          }
-          params.append('types', 'public_channel');
-        } else {
-          // Default to public channels only
-          params.append('types', 'public_channel');
-        }
-        if (typedInput.excludeArchived !== undefined) {
-          params.append('exclude_archived', typedInput.excludeArchived ? 'true' : 'false');
-        }
-        if (typedInput.limit) {
-          params.append('limit', typedInput.limit.toString());
-        }
-        if (typedInput.cursor) {
-          params.append('cursor', typedInput.cursor);
+        const cacheKey = `${types.join(',')}|${nameNorm}|${match}|${excludeArchived}`;
+        const cached = getCached(slackResolveChannelIdCache, cacheKey);
+        if (cached) {
+          return {
+            ok: true,
+            found: true,
+            id: cached,
+            name: nameNorm,
+            source: 'cache',
+            pagesFetched: 0,
+            nextCursor: undefined,
+          };
         }
 
-        try {
-          ctx.log.debug(`Slack listConversations request`);
-          const response = await ctx.client.get(
-            `${SLACK_API_BASE}/conversations.list?${params.toString()}`
-          );
+        let cursor = typedInput.cursor;
+        let pagesFetched = 0;
+
+        while (pagesFetched < maxPages) {
+          const params = new URLSearchParams();
+          params.append('types', types.join(','));
+          params.append('exclude_archived', excludeArchived ? 'true' : 'false');
+          params.append('limit', limit.toString());
+          if (cursor) params.append('cursor', cursor);
+
+          ctx.log.debug(`Slack resolveChannelId scan (page ${pagesFetched + 1})`);
+          const response = await slackGetWithRateLimitRetry({
+            ctx,
+            action: 'resolveChannelId',
+            url: `${SLACK_API_BASE}/conversations.list?${params.toString()}`,
+            maxRetries: 5,
+          });
 
           if (!response.data.ok) {
-            throw new Error(`Slack API error: ${response.data.error}`);
+            throw new Error(
+              formatSlackApiErrorMessage({
+                action: 'resolveChannelId',
+                responseData: response.data,
+                responseHeaders: response.headers,
+              })
+            );
           }
 
-          return response.data;
-        } catch (error) {
-          const err = error as {
-            message?: string;
-            response?: { status?: number; data?: unknown };
-          };
-          ctx.log.error(
-            `Slack listConversations failed: ${err.message}, Status: ${err.response?.status}, Data: ${JSON.stringify(
-              err.response?.data
-            )}`
-          );
-          throw error;
+          const channels: Array<any> = response.data.channels ?? [];
+          const found = channels.find((c) => {
+            const cName = (c.name ?? '').toString().toLowerCase();
+            if (!cName) return false;
+            return match === 'exact' ? cName === nameNorm : cName.includes(nameNorm);
+          });
+
+          if (found?.id) {
+            setCached(slackResolveChannelIdCache, cacheKey, found.id, cacheTtlMs);
+            return {
+              ok: true,
+              found: true,
+              id: found.id,
+              name: found.name ?? nameNorm,
+              source: 'conversations.list',
+              pagesFetched: pagesFetched + 1,
+              nextCursor: response.data.response_metadata?.next_cursor,
+            };
+          }
+
+          const next = response.data.response_metadata?.next_cursor;
+          pagesFetched += 1;
+          if (!next) {
+            cursor = undefined;
+            break;
+          }
+          cursor = next;
         }
+
+        return {
+          ok: true,
+          found: false,
+          id: undefined,
+          name: nameNorm,
+          source: 'conversations.list',
+          pagesFetched,
+          nextCursor: cursor,
+        };
       },
     },
 
@@ -598,7 +813,13 @@ export const Slack: ConnectorSpec = {
           );
 
           if (!response.data.ok) {
-            throw new Error(`Slack API error: ${response.data.error}`);
+            throw new Error(
+              formatSlackApiErrorMessage({
+                action: 'getConversationHistory',
+                responseData: response.data,
+                responseHeaders: response.headers,
+              })
+            );
           }
 
           return response.data;
@@ -634,7 +855,8 @@ export const Slack: ConnectorSpec = {
             i18n.translate(
               'core.kibanaConnectorSpecs.slack.actions.sendMessage.input.channel.description',
               {
-                defaultMessage: 'Channel ID, user ID, or conversation ID to send the message to',
+                defaultMessage:
+                  'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs). Use resolveChannelId to discover channel IDs.',
               }
             )
           ),
@@ -717,7 +939,13 @@ export const Slack: ConnectorSpec = {
           });
 
           if (!response.data.ok) {
-            throw new Error(`Slack API error: ${response.data.error}`);
+            throw new Error(
+              formatSlackApiErrorMessage({
+                action: 'sendMessage',
+                responseData: response.data,
+                responseHeaders: response.headers,
+              })
+            );
           }
 
           return response.data;
@@ -751,7 +979,11 @@ export const Slack: ConnectorSpec = {
         if (!response.data.ok) {
           return {
             ok: false,
-            message: `Slack API error: ${response.data.error}`,
+            message: formatSlackApiErrorMessage({
+              action: 'test',
+              responseData: response.data,
+              responseHeaders: response.headers,
+            }),
           };
         }
 

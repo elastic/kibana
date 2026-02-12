@@ -1,0 +1,63 @@
+version: '1'
+name: 'sources.slack.find'
+description: 'Resolve Slack channel IDs for use with other Slack workflows. Actions and inputs: resolveChannelId (name, optional types, optional match, optional exclude_archived, optional limit, optional max_pages, optional cursor). Output: { ok, found, id, name, pagesFetched, nextCursor }. Use the returned `id` as the `channel` input to sources.slack.send_message. Tip: prefer match=exact with a full channel name; use match=contains only when you only know part of the name.'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: name
+    type: string
+    required: true
+    description: 'Channel name to resolve (e.g. "general" or "#general").'
+  - name: types
+    type: array
+    required: false
+    default:
+      - 'public_channel'
+      - 'private_channel'
+    description: 'Conversation types to search. Valid: public_channel, private_channel, im, mpim.'
+  - name: exclude_archived
+    type: boolean
+    required: false
+    default: true
+    description: 'If true, exclude archived channels.'
+  - name: limit
+    type: number
+    required: false
+    default: 1000
+    description: 'Channels per page to request (1-1000). Higher values reduce pagination.'
+  - name: cursor
+    type: string
+    required: false
+    description: 'Optional pagination cursor from a previous response (nextCursor).'
+  - name: max_pages
+    type: number
+    required: false
+    default: 10
+    description: 'Maximum number of pages to scan before giving up.'
+  - name: match
+    type: choice
+    required: false
+    default: 'exact'
+    options:
+      - 'exact'
+      - 'contains'
+    description: 'How to match the channel name.'
+steps:
+  - name: resolve-channel-id
+    type: slack2.resolveChannelId
+    connector-id: <%= stackConnectorId %>
+    with:
+      name: "${{ inputs.name }}"
+      types: ${{ inputs.types }}
+      match: "${{ inputs.match }}"
+      excludeArchived: ${{ inputs.exclude_archived }}
+      limit: ${{ inputs.limit }}
+      cursor: "${{ inputs.cursor }}"
+      maxPages: ${{ inputs.max_pages }}
+  - name: set-find-result
+    type: data.set
+    with:
+      result: "${{ steps.resolve-channel-id.output }}"
+
