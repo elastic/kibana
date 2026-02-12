@@ -13,7 +13,7 @@ import {
   MOCK_IDP_UIAM_SERVICE_URL,
   MOCK_IDP_UIAM_SHARED_SECRET,
 } from '@kbn/mock-idp-utils';
-import { apiTest } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../../common/constants';
@@ -22,7 +22,7 @@ import { COMMON_HEADERS, COMMON_UNSAFE_HEADERS, extractAttributeValue } from '..
 // These tests cannot be run on MKI because we cannot obtain the raw UIAM tokens and spin up Mock IdP plugin.
 apiTest.describe(
   '[NON-MKI] Use internal UIAM credentials for various purposes in real and fake requests',
-  { tag: ['@local-serverless-security_complete'] },
+  { tag: [...tags.serverless.security.complete] },
   () => {
     let userSessionCookieFactory: () => Promise<[string, { accessToken: string }]>;
     apiTest.beforeAll(async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
@@ -67,16 +67,17 @@ apiTest.describe(
         // 2. Grant an internal API key using the UIAM access token .
         const internalUiamApiKeyResponse = await grantUiamApiKey(accessToken);
         expect(internalUiamApiKeyResponse.status).toBe(200);
+        const internalUiamApiKey = await internalUiamApiKeyResponse.json();
 
         // 3. Verify that the granted API key can be used in fake requests.
-        const response = await apiClient.post('mock_idp/uiam/call_scoped_client_with_api_key', {
+        const response = await apiClient.post('test_endpoints/uiam/scoped_client/_call', {
           headers: { ...COMMON_UNSAFE_HEADERS },
           responseType: 'json',
-          body: { apiKey: (await internalUiamApiKeyResponse.json()).key },
+          body: { apiKey: internalUiamApiKey.key },
         });
         expect(response).toHaveStatusCode(200);
         expect(response.body).toStrictEqual(
-          expect.objectContaining({ message: 'Successfully authenticated with API Key to ES' })
+          expect.objectContaining({ username: internalUiamApiKey.id })
         );
       }
     );
@@ -88,7 +89,7 @@ apiTest.describe(
         const [userSessionCookie] = await userSessionCookieFactory();
 
         // 2. Grant a native Elasticsearch API key.
-        const nativeApiKeyResponse = await apiClient.post('mock_idp/grant_api_key', {
+        const nativeApiKeyResponse = await apiClient.post('test_endpoints/api_keys/_grant', {
           headers: { ...COMMON_UNSAFE_HEADERS, Cookie: userSessionCookie },
           responseType: 'json',
           body: {},
@@ -107,7 +108,7 @@ apiTest.describe(
         expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
 
         // 4. Invalidate the API key.
-        response = await apiClient.post('mock_idp/invalidate_api_key', {
+        response = await apiClient.post('test_endpoints/api_keys/_invalidate', {
           headers: { ...COMMON_UNSAFE_HEADERS, Cookie: userSessionCookie },
           responseType: 'json',
           body: { ids: [nativeApiKeyResponse.body.id] },
@@ -140,7 +141,7 @@ apiTest.describe(
         const [userSessionCookie] = await userSessionCookieFactory();
 
         // 2. Verify that credentials can be used as secondary credentials.
-        const response = await apiClient.post('mock_idp/uiam/secondary_auth', {
+        const response = await apiClient.post('test_endpoints/uiam/secondary_auth', {
           headers: { ...COMMON_UNSAFE_HEADERS, Cookie: userSessionCookie },
           responseType: 'json',
           body: {},
@@ -161,7 +162,7 @@ apiTest.describe(
         expect(internalUiamApiKeyResponse.status).toBe(200);
 
         // 2. Verify that credentials can be used as secondary credentials.
-        const response = await apiClient.post('mock_idp/uiam/secondary_auth', {
+        const response = await apiClient.post('test_endpoints/uiam/secondary_auth', {
           headers: { ...COMMON_UNSAFE_HEADERS },
           responseType: 'json',
           body: { apiKey: (await internalUiamApiKeyResponse.json()).key },
