@@ -5,17 +5,33 @@
  * 2.0.
  */
 
-import type { Template } from '../../../../common/types/domain/template/v1';
+import { INTERNAL_TEMPLATES_URL } from '../../../../common/constants';
+import { KibanaServices } from '../../../common/lib/kibana';
+import type { Template, CreateTemplateInput } from '../../../../common/types/domain/template/v1';
 import { MOCK_TEMPLATES } from './sample_data';
 import type {
   TemplatesFindResponse,
-  TemplateRequest,
   TemplateUpdateRequest,
   DeleteTemplateResponse,
   BulkDeleteTemplatesResponse,
   ExportTemplateResponse,
   BulkExportTemplatesResponse,
 } from '../types';
+
+export const postTemplate = async ({
+  template,
+  signal,
+}: {
+  template: CreateTemplateInput;
+  signal?: AbortSignal;
+}): Promise<Template> => {
+  const response = await KibanaServices.get().http.fetch<Template>(INTERNAL_TEMPLATES_URL, {
+    method: 'POST',
+    body: JSON.stringify(template),
+    signal,
+  });
+  return response;
+};
 
 // TODO: Uncomment when API is available
 // import { KibanaServices } from '../../common/lib/kibana';
@@ -84,33 +100,6 @@ export const getTemplates = async ({
     perPage,
     total: filteredTemplates.length,
   };
-};
-
-export const postTemplate = async ({
-  template,
-}: {
-  template: TemplateRequest;
-  signal?: AbortSignal;
-}): Promise<Template> => {
-  // TODO: Replace with actual API call when available
-  // const response = await KibanaServices.get().http.fetch<Template>(TEMPLATES_URL, {
-  //   method: 'POST',
-  //   body: JSON.stringify(template),
-  //   signal,
-  // });
-  // return response;
-
-  // Return mock data
-  const newTemplate: Template = {
-    ...template,
-    templateId: `template-${Date.now()}`,
-    templateVersion: 1,
-    deletedAt: null,
-    usageCount: 0,
-    lastUsedAt: new Date().toISOString(),
-  };
-
-  return newTemplate;
 };
 
 export const patchTemplate = async ({
