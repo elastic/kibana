@@ -7,21 +7,20 @@
 
 import type { OpenAPIV3 } from 'openapi-types';
 import { z } from '@kbn/zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
-  NonEmptyString,
-  conditionSchema,
-  filterConditionSchema,
-  shorthandBinaryFilterConditionSchema,
-  shorthandUnaryFilterConditionSchema,
-  andConditionSchema,
-  orConditionSchema,
-  notConditionSchema,
-  neverConditionSchema,
-  alwaysConditionSchema,
-  rangeConditionSchema,
-  stringOrNumberOrBoolean,
-  processorBaseWithWhereSchema,
+  // NonEmptyString,
+  // conditionSchema,
+  // filterConditionSchema,
+  // shorthandBinaryFilterConditionSchema,
+  // shorthandUnaryFilterConditionSchema,
+  // andConditionSchema,
+  // orConditionSchema,
+  // notConditionSchema,
+  // neverConditionSchema,
+  // alwaysConditionSchema,
+  // rangeConditionSchema,
+  // stringOrNumberOrBoolean,
+  // processorBaseWithWhereSchema,
   grokProcessorSchema,
   dissectProcessorSchema,
   dateProcessorSchema,
@@ -55,25 +54,28 @@ export const pipelineDefinitionSchema = z
 export type PipelineDefinition = z.infer<typeof pipelineDefinitionSchema>;
 
 export function getPipelineDefinitionJsonSchema(schema: z.ZodSchema) {
-  return zodToJsonSchema(schema, {
-    target: 'openApi3',
-    $refStrategy: 'root',
-    name: 'PipelineDefinition',
-    // Manually add recurring schemas for cleaner output
-    definitions: {
-      NonEmptyString,
-      StringOrNumberOrBoolean: stringOrNumberOrBoolean,
-      RangeCondition: rangeConditionSchema,
-      ShorthandBinaryFilterCondition: shorthandBinaryFilterConditionSchema,
-      ShorthandUnaryFilterCondition: shorthandUnaryFilterConditionSchema,
-      FilterCondition: filterConditionSchema,
-      AndCondition: andConditionSchema,
-      OrCondition: orConditionSchema,
-      NotCondition: notConditionSchema,
-      NeverCondition: neverConditionSchema,
-      AlwaysCondition: alwaysConditionSchema,
-      Condition: conditionSchema,
-      ProcessorBase: processorBaseWithWhereSchema,
-    },
+  return schema.meta({ title: 'PipelineDefinition' }).toJSONSchema({
+    target: 'openapi-3.0',
+    cycles: 'ref',
+    reused: 'ref',
+    // TODO: add recurring schemas for cleaner output using the new registry system
+    // // Manually add recurring schemas for cleaner output
+    // external: {
+    //   defs: {
+    //     NonEmptyString,
+    //     StringOrNumberOrBoolean: stringOrNumberOrBoolean,
+    //     RangeCondition: rangeConditionSchema,
+    //     ShorthandBinaryFilterCondition: shorthandBinaryFilterConditionSchema,
+    //     ShorthandUnaryFilterCondition: shorthandUnaryFilterConditionSchema,
+    //     FilterCondition: filterConditionSchema,
+    //     AndCondition: andConditionSchema,
+    //     OrCondition: orConditionSchema,
+    //     NotCondition: notConditionSchema,
+    //     NeverCondition: neverConditionSchema,
+    //     AlwaysCondition: alwaysConditionSchema,
+    //     Condition: conditionSchema,
+    //     ProcessorBase: processorBaseWithWhereSchema,
+    //   },
+    // },
   }) as OpenAPIV3.SchemaObject;
 }

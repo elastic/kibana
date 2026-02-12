@@ -85,9 +85,10 @@ class ToolRegistryImpl implements ToolRegistry {
     return [this.builtinProvider, this.persistedProvider];
   }
 
-  async execute<TParams extends object = Record<string, unknown>, TResult = unknown>(
-    params: ScopedRunnerRunToolsParams<TParams>
-  ): Promise<RunToolReturn> {
+  async execute<
+    TParams extends Record<string, unknown> = Record<string, unknown>,
+    TResult = unknown
+  >(params: ScopedRunnerRunToolsParams<TParams>): Promise<RunToolReturn> {
     const { toolId, ...otherParams } = params;
     const tool = await this.get(toolId);
     if (!(await this.isAvailable(tool))) {

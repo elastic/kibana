@@ -102,7 +102,7 @@ export interface Prompt<TInput = any, TPromptVersions extends PromptVersion[] = 
   /**
    * A zod schema that will validate and transform the input variables for a prompt.
    */
-  input: z.Schema<TInput>;
+  input: z.ZodType<unknown, TInput>;
   /**
    * The model-specific variants of the prompt.
    */

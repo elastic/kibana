@@ -427,7 +427,6 @@ export default ({ getService }: FtrProviderContext) => {
           await createRule(supertest, log, existingRule);
 
           const { threshold, ...rule } = existingRule;
-          // @ts-expect-error we're testing the invalid payload here
           const { body } = await detectionsApi.updateRule({ body: rule }).expect(400);
 
           expect(body).to.eql({

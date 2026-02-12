@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ZodFirstPartyTypeKind } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import React from 'react';
 import { EuiCheckbox, EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
 
@@ -22,15 +22,15 @@ export const settingComponentRegistry = new Map<
   (settingsconfig: SettingsConfig & { disabled?: boolean }) => React.ReactElement
 >();
 
-settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodObject, ({ disabled, ...settingsConfig }) => (
+settingComponentRegistry.set('object', ({ disabled, ...settingsConfig }) => (
   <SettingsFieldGroup settingsConfig={settingsConfig} disabled={disabled} />
 ));
 
-settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNumber, ({ disabled, ...settingsConfig }) => {
+settingComponentRegistry.set('number', ({ disabled, ...settingsConfig }) => {
   return (
     <SettingsFieldWrapper
       settingsConfig={settingsConfig}
-      typeName={ZodFirstPartyTypeKind.ZodNumber}
+      typeName="number"
       renderItem={({ fieldKey, fieldValue, handleChange, isInvalid, coercedSchema }: any) => (
         <EuiFieldNumber
           fullWidth
@@ -47,12 +47,12 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodNumber, ({ disabled, ...se
   );
 });
 
-settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, ({ disabled, ...settingsConfig }) => {
+settingComponentRegistry.set('string', ({ disabled, ...settingsConfig }) => {
   if (settingsConfig.type === 'yaml') {
     return (
       <SettingsFieldWrapper
         settingsConfig={settingsConfig}
-        typeName={ZodFirstPartyTypeKind.ZodString}
+        typeName="string"
         renderItem={({ fieldKey, fieldValue, handleChange, isInvalid, coercedSchema }: any) => (
           <YamlCodeEditorWithPlaceholder
             value={fieldValue}
@@ -73,7 +73,7 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, ({ disabled, ...se
   return (
     <SettingsFieldWrapper
       settingsConfig={settingsConfig}
-      typeName={ZodFirstPartyTypeKind.ZodString}
+      typeName="string"
       renderItem={({ fieldKey, fieldValue, handleChange, isInvalid }: any) => (
         <EuiFieldText
           fullWidth
@@ -88,12 +88,12 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodString, ({ disabled, ...se
   );
 });
 
-settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodEnum, ({ disabled, ...settingsConfig }) => {
+settingComponentRegistry.set('enum', ({ disabled, ...settingsConfig }) => {
   return (
     <SettingsFieldWrapper
       disabled={disabled}
       settingsConfig={settingsConfig}
-      typeName={ZodFirstPartyTypeKind.ZodEnum}
+      typeName="enum"
       renderItem={({ fieldKey, fieldValue, handleChange }: any) => (
         <EuiSelect
           data-test-subj={fieldKey}
@@ -110,7 +110,7 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodEnum, ({ disabled, ...sett
           options={
             settingsConfig.options
               ? settingsConfig.options
-              : settingsConfig.schema._def.innerType._def.values.map((value: string) => ({
+              : Object.values((settingsConfig.schema as z.ZodEnum).def.entries).map((value) => ({
                   text: value,
                   value,
                 }))
@@ -121,29 +121,26 @@ settingComponentRegistry.set(ZodFirstPartyTypeKind.ZodEnum, ({ disabled, ...sett
   );
 });
 
-settingComponentRegistry.set(
-  ZodFirstPartyTypeKind.ZodBoolean,
-  ({ disabled, ...settingsConfig }) => {
-    return (
-      <SettingsFieldWrapper
-        disabled={disabled}
-        settingsConfig={settingsConfig}
-        typeName={ZodFirstPartyTypeKind.ZodBoolean}
-        renderItem={({ fieldKey, fieldValue, handleChange }: any) => (
-          <EuiCheckbox
-            data-test-subj={fieldKey}
-            id={fieldKey}
-            label={i18n.translate('xpack.fleet.configuredSettings.genericCheckboxLabel', {
-              defaultMessage: 'Enable',
-            })}
-            checked={fieldValue}
-            onChange={handleChange}
-          />
-        )}
-      />
-    );
-  }
-);
+settingComponentRegistry.set('boolean', ({ disabled, ...settingsConfig }) => {
+  return (
+    <SettingsFieldWrapper
+      disabled={disabled}
+      settingsConfig={settingsConfig}
+      typeName="boolean"
+      renderItem={({ fieldKey, fieldValue, handleChange }: any) => (
+        <EuiCheckbox
+          data-test-subj={fieldKey}
+          id={fieldKey}
+          label={i18n.translate('xpack.fleet.configuredSettings.genericCheckboxLabel', {
+            defaultMessage: 'Enable',
+          })}
+          checked={fieldValue}
+          onChange={handleChange}
+        />
+      )}
+    />
+  );
+});
 
 export function ConfiguredSettings({
   configuredSettings,
@@ -160,7 +157,7 @@ export function ConfiguredSettings({
           const Component = settingComponentRegistry.get(getInnerType(configuredSetting.schema));
 
           if (!Component) {
-            throw new Error(`Unknown setting type: ${configuredSetting.schema._type}`);
+            throw new Error(`Unknown setting type: ${configuredSetting.schema.def.type}`);
           }
 
           return (

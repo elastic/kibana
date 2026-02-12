@@ -45,11 +45,11 @@ export function joinValidation<TLeft extends IModel, TRights extends [TLeft, TLe
 }
 
 export type ModelOfSchema<TModelSchema extends ModelSchema> = {
-  [key in keyof TModelSchema & ModelRepresentation]: z.input<TModelSchema[key]>;
+  [key in keyof TModelSchema & ModelRepresentation]: z.infer<TModelSchema[key]>;
 };
 
 export type ModelSchema<TModel extends IModel = IModel> = {
-  [key in keyof TModel & ModelRepresentation]: z.Schema<TModel[key]>;
+  [key in keyof TModel & ModelRepresentation]: z.Schema<TModel[key], any>;
 };
 
 export function modelValidation<
@@ -71,10 +71,10 @@ export function modelValidation(...args: [ModelValidation, ModelSchema] | [Model
 
     return modelValidation(
       {
-        Definition: validation(z.any(), z.object({})),
-        Source: validation(z.any(), z.object({})),
-        GetResponse: validation(z.any(), z.object({})),
-        UpsertRequest: validation(z.any(), z.object({})),
+        Definition: validation(z.any(), z.record(z.string(), z.any())),
+        Source: validation(z.any(), z.record(z.string(), z.any())),
+        GetResponse: validation(z.any(), z.record(z.string(), z.any())),
+        UpsertRequest: validation(z.any(), z.record(z.string(), z.any())),
       },
       right
     );
@@ -82,7 +82,7 @@ export function modelValidation(...args: [ModelValidation, ModelSchema] | [Model
 
   const left = mapValues(args[0], (value) => value.right);
 
-  const rightPartial = args[1];
+  const rightPartial = args[1] as ModelSchema;
 
   const right = {
     Definition: z.intersection(left.Definition, rightPartial.Definition),
@@ -110,12 +110,12 @@ export function modelValidation(...args: [ModelValidation, ModelSchema] | [Model
               updated_at: z.undefined().optional(),
               ingest: z
                 .object({
-                  processing: z.object({ updated_at: z.undefined().optional() }).passthrough(),
+                  processing: z.object({ updated_at: z.undefined().optional() }).loose(),
                 })
-                .passthrough()
+                .loose()
                 .optional(),
             })
-            .passthrough()
+            .loose()
             // but the definition requires them, so we set a default
             .transform((prev) => ({
               ...prev,
@@ -149,11 +149,11 @@ export function modelValidation(...args: [ModelValidation, ModelSchema] | [Model
 }
 
 type WithDefaults<TRightSchema extends ModelSchema> = {
-  Source: z.input<TRightSchema['Definition']>;
+  Source: z.infer<TRightSchema['Definition']>;
   GetResponse: {
-    stream: z.input<TRightSchema['Definition']>;
+    stream: z.infer<TRightSchema['Definition']>;
   };
   UpsertRequest: {
-    stream: OmitUpsertProps<{} & z.input<TRightSchema['Definition']>>;
+    stream: OmitUpsertProps<{} & z.infer<TRightSchema['Definition']>>;
   };
 } & ModelOfSchema<TRightSchema>;

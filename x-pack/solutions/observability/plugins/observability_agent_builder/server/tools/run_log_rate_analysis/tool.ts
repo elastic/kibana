@@ -32,7 +32,7 @@ const logRateAnalysisSchema = z.object({
     .object(timeRangeSchemaRequired)
     .describe('Time range representing the time period with unusual behavior.'),
   searchQuery: z
-    .record(z.any())
+    .record(z.string(), z.any())
     .describe(
       'Optional Elasticsearch query DSL filter that limits which documents are analyzed. Defaults to a match_all query.'
     )

@@ -22,7 +22,7 @@ import { processStructuredAnswerResponse } from './action_utils';
 export const structuredOutputSchema = z.object({
   response: z.string().describe("The response to the user's query"),
   data: z
-    .record(z.unknown())
+    .record(z.string(), z.unknown())
     .optional()
     .describe('Optional structured data to include in the response'),
 });

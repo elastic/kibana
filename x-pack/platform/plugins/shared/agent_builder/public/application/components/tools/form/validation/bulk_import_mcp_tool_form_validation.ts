@@ -93,12 +93,14 @@ export const useBulkImportMcpToolFormValidationSchema = () => {
         .min(1, { message: bulkImportMcpI18nMessages.namespace.requiredError })
         .max(toolIdMaxLength, { message: bulkImportMcpI18nMessages.namespace.tooLongError })
         .regex(toolIdRegexp, { message: bulkImportMcpI18nMessages.namespace.formatError })
-        .refine(
-          (name) => !isInProtectedNamespace(name) && !hasNamespaceName(name),
-          (name) => ({
-            message: bulkImportMcpI18nMessages.namespace.protectedNamespaceError(name),
-          })
-        ),
+        .superRefine((name, ctx) => {
+          if (isInProtectedNamespace(name) || hasNamespaceName(name)) {
+            ctx.addIssue({
+              code: 'custom',
+              message: bulkImportMcpI18nMessages.namespace.protectedNamespaceError(name),
+            });
+          }
+        }),
       labels: z.array(z.string()),
     })
     .superRefine(async (data, ctx) => {

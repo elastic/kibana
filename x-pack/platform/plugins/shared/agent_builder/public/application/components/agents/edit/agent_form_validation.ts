@@ -33,15 +33,17 @@ export const agentFormSchema = z.object({
           'Agent ID must start and end with a letter or number, and can only contain lowercase letters, numbers, hyphens, and underscores.',
       }),
     })
-    .refine(
-      (name) => !isInProtectedNamespace(name) && !hasNamespaceName(name),
-      (name) => ({
-        message: i18n.translate('xpack.agentBuilder.agents.form.id.protectedNamespaceError', {
-          defaultMessage: 'Agent ID "{name}" uses a protected namespace.',
-          values: { name },
-        }),
-      })
-    ),
+    .superRefine((name, ctx) => {
+      if (isInProtectedNamespace(name) || hasNamespaceName(name)) {
+        ctx.addIssue({
+          code: 'custom',
+          message: i18n.translate('xpack.agentBuilder.agents.form.id.protectedNamespaceError', {
+            defaultMessage: 'Agent ID "{name}" uses a protected namespace.',
+            values: { name },
+          }),
+        });
+      }
+    }),
   name: z.string().min(1, {
     message: i18n.translate('xpack.agentBuilder.agents.form.nameRequired', {
       defaultMessage: 'Agent name is required.',

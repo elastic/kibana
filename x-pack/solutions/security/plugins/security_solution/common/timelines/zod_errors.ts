@@ -25,5 +25,7 @@ const parseRuntimeType =
   };
 
 export const parseOrThrowErrorFactory =
-  (createError: ErrorFactory) => (runtimeType: ZodType) => (inputValue: unknown) =>
+  (createError: ErrorFactory) =>
+  <T>(runtimeType: ZodType<T>) =>
+  (inputValue: unknown): T =>
     pipe(parseRuntimeType(runtimeType)(inputValue), fold(throwErrors(createError), identity));

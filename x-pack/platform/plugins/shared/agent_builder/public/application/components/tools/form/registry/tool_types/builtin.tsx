@@ -33,5 +33,5 @@ export const builtinToolRegistryEntry: ToolTypeRegistryEntry<BuiltinToolFormData
   formDataToUpdatePayload: () => {
     throw new Error('Built-in tools cannot be updated');
   },
-  getValidationResolver: () => zodResolver(z.any({})),
+  getValidationResolver: () => zodResolver(z.any()),
 };

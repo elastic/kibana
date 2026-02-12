@@ -11,11 +11,7 @@ import type { ConfigSchema, SecretsSchema, ParamsSchema, AttachmentSchema } from
 
 // config definition
 // due to https://github.com/colinhacks/zod/issues/2491
-type ConfigSchemaType = z.ZodSchema<
-  z.output<typeof ConfigSchema>,
-  z.ZodTypeDef,
-  z.input<typeof ConfigSchema>
->;
+type ConfigSchemaType = z.ZodSchema<z.output<typeof ConfigSchema>, z.input<typeof ConfigSchema>>;
 export type ConnectorTypeConfigType = z.infer<ConfigSchemaType>;
 
 // secrets definition

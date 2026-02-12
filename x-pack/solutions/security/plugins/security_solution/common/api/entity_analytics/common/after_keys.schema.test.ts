@@ -6,12 +6,12 @@
  */
 
 import { AfterKeys } from '.';
-import type { SafeParseSuccess } from '@kbn/zod';
+import type { ZodSafeParseSuccess } from '@kbn/zod';
 
 describe('after_keys schema', () => {
   it('allows an empty object', () => {
     const payload = {};
-    const decoded = AfterKeys.safeParse(payload) as SafeParseSuccess<object>;
+    const decoded = AfterKeys.safeParse(payload) as ZodSafeParseSuccess<object>;
 
     expect(decoded.success).toBeTruthy();
     expect(decoded.data).toEqual(payload);
@@ -19,7 +19,7 @@ describe('after_keys schema', () => {
 
   it('allows a valid host key', () => {
     const payload = { host: { 'host.name': 'hello' } };
-    const decoded = AfterKeys.safeParse(payload) as SafeParseSuccess<object>;
+    const decoded = AfterKeys.safeParse(payload) as ZodSafeParseSuccess<object>;
 
     expect(decoded.success).toBeTruthy();
     expect(decoded.data).toEqual(payload);
@@ -27,7 +27,7 @@ describe('after_keys schema', () => {
 
   it('allows a valid user key', () => {
     const payload = { user: { 'user.name': 'hello' } };
-    const decoded = AfterKeys.safeParse(payload) as SafeParseSuccess<object>;
+    const decoded = AfterKeys.safeParse(payload) as ZodSafeParseSuccess<object>;
 
     expect(decoded.success).toBeTruthy();
     expect(decoded.data).toEqual(payload);
@@ -35,7 +35,7 @@ describe('after_keys schema', () => {
 
   it('allows both valid host and user keys', () => {
     const payload = { user: { 'user.name': 'hello' }, host: { 'host.name': 'hello' } };
-    const decoded = AfterKeys.safeParse(payload) as SafeParseSuccess<object>;
+    const decoded = AfterKeys.safeParse(payload) as ZodSafeParseSuccess<object>;
 
     expect(decoded.success).toBeTruthy();
     expect(decoded.data).toEqual(payload);
@@ -44,7 +44,7 @@ describe('after_keys schema', () => {
   it('removes an unknown identifier key if used', () => {
     const payload = { bad: 'key' };
 
-    const decoded = AfterKeys.safeParse(payload) as SafeParseSuccess<object>;
+    const decoded = AfterKeys.safeParse(payload) as ZodSafeParseSuccess<object>;
 
     expect(decoded.success).toBeTruthy();
     expect(decoded.data).toEqual({});

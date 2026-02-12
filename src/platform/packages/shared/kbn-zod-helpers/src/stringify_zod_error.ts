@@ -21,9 +21,9 @@ export function stringifyZodError(err: ZodError<any>) {
     const issue = issues.shift()!;
 
     // If the issue is an invalid union, we need to traverse all issues in the
-    // "unionErrors" array
+    // "errors" array
     if (issue.code === 'invalid_union') {
-      issues.push(...issue.unionErrors.flatMap((e) => e.issues));
+      issues.push(...issue.errors.flat());
       continue;
     }
 

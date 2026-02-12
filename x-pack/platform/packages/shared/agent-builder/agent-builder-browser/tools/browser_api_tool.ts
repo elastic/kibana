@@ -7,7 +7,6 @@
 
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
 import type { ZodSchema } from '@kbn/zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 
 /**
  * Definition of a browser API tool that can be provided by consumers
@@ -51,6 +50,6 @@ export function toToolMetadata<TParams>(
   return {
     id: tool.id,
     description: tool.description,
-    schema: zodToJsonSchema(tool.schema),
+    schema: tool.schema.toJSONSchema(),
   };
 }

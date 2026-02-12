@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SafeParseError, SafeParseReturnType } from '@kbn/zod';
+import type { ZodSafeParseError, ZodSafeParseResult } from '@kbn/zod';
 
-export function expectParseError<Input, Output>(
-  result: SafeParseReturnType<Input, Output>
-): asserts result is SafeParseError<Input> {
+export function expectParseError<Output>(
+  result: ZodSafeParseResult<Output>
+): asserts result is ZodSafeParseError<Output> {
   expect(result.success).toEqual(false);
 }

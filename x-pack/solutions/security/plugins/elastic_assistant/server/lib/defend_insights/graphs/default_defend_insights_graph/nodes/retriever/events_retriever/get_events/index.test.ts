@@ -88,7 +88,7 @@ describe('getAnonymizedEvents', () => {
     mockEsClient.search.mockResolvedValue({} as SearchResponse);
 
     const result = await getAnonymizedEvents({
-      insightType: DefendInsightType.Enum.incompatible_antivirus,
+      insightType: DefendInsightType.enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
       kbDataClient: null,
@@ -99,7 +99,7 @@ describe('getAnonymizedEvents', () => {
 
   it('should properly handle required parameters', async () => {
     const result = await getAnonymizedEvents({
-      insightType: DefendInsightType.Enum.incompatible_antivirus,
+      insightType: DefendInsightType.enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
       kbDataClient: null,
@@ -112,7 +112,7 @@ describe('getAnonymizedEvents', () => {
 
   it('should call getRawDataOrDefault with correct fields', async () => {
     await getAnonymizedEvents({
-      insightType: DefendInsightType.Enum.incompatible_antivirus,
+      insightType: DefendInsightType.enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
       kbDataClient: null,
@@ -129,7 +129,7 @@ describe('getAnonymizedEvents', () => {
     const onNewReplacements = jest.fn();
 
     await getAnonymizedEvents({
-      insightType: DefendInsightType.Enum.incompatible_antivirus,
+      insightType: DefendInsightType.enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
       kbDataClient: null,
@@ -149,7 +149,7 @@ describe('getAnonymizedEvents', () => {
     const onNewReplacements = jest.fn();
 
     await getAnonymizedEvents({
-      insightType: DefendInsightType.Enum.incompatible_antivirus,
+      insightType: DefendInsightType.enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
       kbDataClient: null,
@@ -170,7 +170,7 @@ describe('getAnonymizedEvents', () => {
     const end = 'now';
 
     await getAnonymizedEvents({
-      insightType: DefendInsightType.Enum.incompatible_antivirus,
+      insightType: DefendInsightType.enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
       kbDataClient: null,
@@ -202,7 +202,7 @@ describe('getAnonymizedEvents', () => {
     const size = 5;
 
     await getAnonymizedEvents({
-      insightType: DefendInsightType.Enum.incompatible_antivirus,
+      insightType: DefendInsightType.enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
       kbDataClient: null,
@@ -238,7 +238,7 @@ describe('getAnonymizedEvents', () => {
 
     await expect(
       getAnonymizedEvents({
-        insightType: DefendInsightType.Enum.incompatible_antivirus,
+        insightType: DefendInsightType.enum.incompatible_antivirus,
         endpointIds: ['test-endpoint'],
         esClient: mockEsClient,
         kbDataClient: null,
@@ -256,7 +256,7 @@ describe('getAnonymizedEvents', () => {
     } as unknown as SearchResponse);
 
     const result = await getAnonymizedEvents({
-      insightType: DefendInsightType.Enum.incompatible_antivirus,
+      insightType: DefendInsightType.enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
       kbDataClient: null,
@@ -270,7 +270,7 @@ describe('getAnonymizedEvents', () => {
     mockedTransformRawData.mockReturnValue(transformedValue);
 
     const result = await getAnonymizedEvents({
-      insightType: DefendInsightType.Enum.incompatible_antivirus,
+      insightType: DefendInsightType.enum.incompatible_antivirus,
       endpointIds: ['test-endpoint'],
       esClient: mockEsClient,
       kbDataClient: null,

@@ -18,7 +18,7 @@ export enum NetworkUsersFields {
 }
 
 export const networkUsersSchema = requestOptionsPaginatedSchema.extend({
-  ip: z.string().ip(),
+  ip: z.union([z.ipv4(), z.ipv6()]),
   flowTarget,
   sort,
   timerange,

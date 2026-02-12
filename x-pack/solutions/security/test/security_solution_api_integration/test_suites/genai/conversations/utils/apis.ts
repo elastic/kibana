@@ -15,7 +15,7 @@ import type {
   BulkActionBase,
   ConversationCreateProps,
   ConversationUpdateProps,
-  FindConversationsRequestQuery,
+  FindConversationsRequestQueryInput,
 } from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
@@ -96,7 +96,7 @@ export const getConversationsApis = ({
       kibanaSpace = 'default',
       expectedHttpCode = 200,
     }: {
-      query: FindConversationsRequestQuery;
+      query: FindConversationsRequestQueryInput;
       kibanaSpace?: string;
       expectedHttpCode?: number;
     }) => {

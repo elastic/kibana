@@ -49,18 +49,19 @@ export type FieldDefinitionConfigAdvancedParameters = Omit<
   'type' | 'format'
 >;
 
-export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.intersection(
-  recursiveRecord,
-  z.union([
-    z.object({
-      type: z.enum(FIELD_DEFINITION_TYPES),
-      format: z.optional(NonEmptyString),
-    }),
-    z.object({
-      type: z.literal('system'),
-    }),
-  ])
-);
+export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig, FieldDefinitionConfig> =
+  z.intersection(
+    recursiveRecord,
+    z.union([
+      z.object({
+        type: z.enum(FIELD_DEFINITION_TYPES),
+        format: z.optional(NonEmptyString),
+      }),
+      z.object({
+        type: z.literal('system'),
+      }),
+    ])
+  );
 
 export interface FieldDefinition {
   [x: string]: FieldDefinitionConfig;

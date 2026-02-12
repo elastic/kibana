@@ -24,7 +24,7 @@ import type {
   GetDashboardMigrationDashboardsRequestQuery,
   GetDashboardMigrationResourcesRequestQuery,
   GetDashboardMigrationResourcesResponse,
-  UpsertDashboardMigrationResourcesRequestBody,
+  UpsertDashboardMigrationResourcesRequestBodyInput,
   UpsertDashboardMigrationResourcesResponse,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import {
@@ -57,7 +57,7 @@ export type GetDashboardMigrationDashboardsParams = MigrationRequestParams & {
 };
 
 export type UpsertDashboardMigrationResourcesParams = MigrationRequestParams & {
-  body: UpsertDashboardMigrationResourcesRequestBody;
+  body: UpsertDashboardMigrationResourcesRequestBodyInput;
   expectedStatusCode?: number;
 };
 

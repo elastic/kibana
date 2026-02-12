@@ -122,7 +122,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     if (isConfigSchema(validationRule)) {
       return validationRule.validate(data, {}, namespace);
     } else if (isZod(validationRule)) {
-      return validationRule.parse(data);
+      return validationRule.parse(data) as T;
     } else if (typeof validationRule === 'function') {
       return this.validateFunction(validationRule, data, namespace);
     } else {

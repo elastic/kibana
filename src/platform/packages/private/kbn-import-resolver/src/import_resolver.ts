@@ -160,10 +160,10 @@ export class ImportResolver {
     }
 
     // zod migration from v3 to v4
-    if (req.startsWith('zod/v4')) {
-      return Path.resolve(REPO_ROOT, `node_modules/zod/v4/index.cjs`);
+    if (req.startsWith('zod') || req.startsWith('zod/v4')) {
+      return Path.resolve(REPO_ROOT, `node_modules/zod/index.cjs`);
     }
-    if (req.startsWith('zod') || req.startsWith('zod/v3')) {
+    if (req.startsWith('zod/v3')) {
       return Path.resolve(REPO_ROOT, `node_modules/zod/v3/index.cjs`);
     }
 

@@ -98,11 +98,17 @@ export function populateAlertActions({
         actions.push(recoveredAction);
         break;
       case SERVICE_NOW_ACTION_ID:
-        action.params = getServiceNowActionParams(translations);
+        // Property 'subActionParams' is incompatible with index signature.
+        //       Type 'Record<string, unknown>' is not assignable to type 'SavedObjectAttribute'.
+        //         Type 'Record<string, unknown>' is missing the following properties from type 'SavedObjectAttributeSingle[]': length, pop, push, concat, and 35 more.
+        action.params = getServiceNowActionParams(translations) as unknown as RuleAction['params'];
         // Recovery action for service now is not implemented yet
         break;
       case JIRA_ACTION_ID:
-        action.params = getJiraActionParams(translations);
+        // Property 'subActionParams' is incompatible with index signature.
+        //       Type 'Record<string, unknown>' is not assignable to type 'SavedObjectAttribute'.
+        //         Type 'Record<string, unknown>' is missing the following properties from type 'SavedObjectAttributeSingle[]': length, pop, push, concat, and 35 more.
+        action.params = getJiraActionParams(translations) as RuleAction['params'];
         // Recovery action for Jira is not implemented yet
         break;
       case WEBHOOK_ACTION_ID:

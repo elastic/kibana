@@ -99,7 +99,7 @@ export const PushToServiceIncidentSchema = {
 };
 
 // Reserved for future implementation
-export const ExecutorSubActionCommonFieldsParamsSchema = z.object({}).strict();
+export const ExecutorSubActionCommonFieldsParamsSchema = z.record(z.string(), z.unknown());
 export const ExecutorSubActionGetIncidentTypesParamsSchema = z.object({}).strict();
 export const ExecutorSubActionGetSeverityParamsSchema = z.object({}).strict();
 

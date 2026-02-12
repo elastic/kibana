@@ -92,7 +92,7 @@ export const pagingStrategySchema = z.enum(['pit', 'scroll']);
 const locatorObjectSchema = z.object({
   id: z.string().max(1024).optional(),
   version: z.string().max(32).optional(),
-  params: z.record(z.any()).optional(),
+  params: z.record(z.string(), z.any()).optional(),
 });
 
 const locatorParamsSchema = z.array(locatorObjectSchema).max(1).or(locatorObjectSchema);

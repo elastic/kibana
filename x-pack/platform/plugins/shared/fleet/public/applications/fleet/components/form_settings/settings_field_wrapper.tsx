@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, ZodFirstPartyTypeKind } from '@kbn/zod';
+import { z } from '@kbn/zod';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eui';
@@ -13,11 +13,8 @@ import { EuiCode, EuiDescribedFormGroup, EuiFormRow, EuiLink } from '@elastic/eu
 import type { SettingsConfig } from '../../../../../common/settings/types';
 import { useAgentPolicyFormContext } from '../../sections/agent_policy/components/agent_policy_form';
 
-export const convertValue = (
-  value: string | boolean,
-  type: keyof typeof ZodFirstPartyTypeKind
-): any => {
-  if (type === ZodFirstPartyTypeKind.ZodNumber) {
+export const convertValue = (value: string | boolean, type: string): any => {
+  if (type === 'number') {
     if (value === '') {
       return 0;
     }
@@ -40,7 +37,7 @@ const renderer = {
 
 export const SettingsFieldWrapper: React.FC<{
   settingsConfig: SettingsConfig;
-  typeName: keyof typeof ZodFirstPartyTypeKind;
+  typeName: z.core.$ZodTypeDef['type'];
   renderItem: Function;
   disabled?: boolean;
 }> = ({ settingsConfig, typeName, renderItem, disabled }) => {
@@ -48,14 +45,14 @@ export const SettingsFieldWrapper: React.FC<{
   const agentPolicyFormContext = useAgentPolicyFormContext();
 
   const fieldKey = `configuredSetting-${settingsConfig.name}`;
-  const defaultValue: number =
+  const defaultValue: number | undefined =
     settingsConfig.schema instanceof z.ZodDefault
-      ? settingsConfig.schema._def.defaultValue()
+      ? (settingsConfig.schema.def.defaultValue as number)
       : undefined;
   const coercedSchema = settingsConfig.schema as z.ZodString;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = typeName === ZodFirstPartyTypeKind.ZodBoolean ? e.target.checked : e.target.value;
+    const value = typeName === 'boolean' ? e.target.checked : e.target.value;
     const newValue = convertValue(value, typeName);
     const validationError = validateSchema(coercedSchema, newValue);
 
@@ -104,14 +101,9 @@ export const SettingsFieldWrapper: React.FC<{
   );
 };
 
-export const getInnerType = (schema: z.ZodType<any, any>) => {
-  if (schema._def.innerType) {
-    return schema._def.innerType._def.typeName === 'ZodEffects'
-      ? schema._def.innerType._def.schema._def.typeName
-      : schema._def.innerType._def.typeName;
+export const getInnerType = (schema: z.ZodType<any, any>): string => {
+  if ('innerType' in schema.def) {
+    return getInnerType(schema.def.innerType as z.ZodType);
   }
-  if (schema._def.typeName === 'ZodEffects') {
-    return schema._def.schema._def.typeName;
-  }
-  return schema._def.typeName;
+  return schema.def.type;
 };

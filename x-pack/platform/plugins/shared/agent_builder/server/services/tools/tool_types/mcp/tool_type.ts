@@ -11,7 +11,6 @@ import type { McpToolConfig } from '@kbn/agent-builder-common/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { ListToolsResponse } from '@kbn/mcp-client';
-import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
 import type { Logger } from '@kbn/core/server';
 import type { ToolTypeDefinition } from '../definitions';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
@@ -244,7 +243,7 @@ export const getMcpToolType = ({
           });
 
           if (inputSchema) {
-            const zodSchema = jsonSchemaToZod(inputSchema);
+            const zodSchema = z.fromJSONSchema(inputSchema);
             return zodSchema as z.ZodObject<any>;
           }
 

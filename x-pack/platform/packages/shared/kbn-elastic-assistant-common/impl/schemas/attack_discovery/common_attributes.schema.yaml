@@ -207,6 +207,7 @@ components:
                 type: string
               metadata:
                 type: object
+                additionalProperties: true
               pageContent:
                 type: string
             type: object

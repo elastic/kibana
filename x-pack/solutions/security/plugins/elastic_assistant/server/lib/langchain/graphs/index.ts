@@ -72,12 +72,12 @@ export const ASSISTANT_GRAPH_MAP: Record<string, GraphMetadata> = {
   DefaultDefendInsightsIncompatibleAntivirusGraph: {
     getDefaultDefendInsightsGraph,
     graphType: DEFEND_INSIGHTS_ID,
-    insightType: DefendInsightType.Enum.incompatible_antivirus,
+    insightType: DefendInsightType.enum.incompatible_antivirus,
   },
   DefaultDefendInsightsPolicyResponseFailureGraphBar: {
     getDefaultDefendInsightsGraph,
     graphType: DEFEND_INSIGHTS_ID,
-    insightType: DefendInsightType.Enum.policy_response_failure,
+    insightType: DefendInsightType.enum.policy_response_failure,
   },
 };
 

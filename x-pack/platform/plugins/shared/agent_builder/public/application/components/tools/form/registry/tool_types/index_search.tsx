@@ -46,6 +46,8 @@ export const indexSearchToolRegistryEntry: ToolTypeRegistryEntry<IndexSearchTool
     if (!services?.toolsService) {
       throw new Error('toolsService is required for index search validation');
     }
-    return zodResolver(createIndexSearchFormValidationSchema(services.toolsService));
+    return zodResolver<IndexSearchToolFormData>(
+      createIndexSearchFormValidationSchema(services.toolsService)
+    );
   },
 };

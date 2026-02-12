@@ -17,12 +17,14 @@ export const buildInitRequestBodyValidation =
     schema: ZodSchema
   ): RouteValidationFunction<Type> =>
   (inputValue: unknown, validationResultFactory: RouteValidationResultFactory) => {
-    const zodValidationResult = buildRouteValidationWithZod(schema)(
+    const zodValidationResult = buildRouteValidationWithZod<ZodSchema, Type>(schema)(
       inputValue,
       validationResultFactory
     );
     if (zodValidationResult.error) return zodValidationResult;
-    const additionalValidationResult = validateInitializationRequestBody(zodValidationResult.value);
+    const additionalValidationResult = validateInitializationRequestBody(
+      zodValidationResult.value as InitEntityEngineRequestBody
+    );
     if (additionalValidationResult)
       return validationResultFactory.badRequest(additionalValidationResult);
     return zodValidationResult;

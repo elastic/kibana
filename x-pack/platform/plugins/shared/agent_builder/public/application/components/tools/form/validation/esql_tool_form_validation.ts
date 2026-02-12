@@ -93,7 +93,7 @@ export const esqlFormValidationSchema = z
             .string()
             .min(1, { message: esqlI18nMessages.params.descriptionRequiredError }),
           type: z.custom<EsqlToolFieldTypes>((data) =>
-            Object.values(EsqlToolFieldType).includes(data)
+            Object.values(EsqlToolFieldType).includes(data as EsqlToolFieldType)
           ),
           source: z.nativeEnum(EsqlParamSource),
           optional: z.boolean(),

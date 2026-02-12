@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v3';
 
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
-export type ToolDefinitionInputSchema = z.ZodObject<any, any, any, any, any>;
+export type ToolDefinitionInputSchema = z.ZodObject<any>;
 
 export interface ToolDefinition<T extends ToolDefinitionInputSchema> {
   name: string;

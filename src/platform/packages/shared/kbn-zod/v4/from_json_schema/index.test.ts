@@ -9,7 +9,7 @@
 
 import { z } from '..';
 import { fromJSONSchema } from '.';
-import type { ZodType, ZodDiscriminatedUnion } from 'zod/v4';
+import type { ZodType, ZodDiscriminatedUnion } from 'zod';
 
 const getMeta = (schema: ZodType) => {
   return z.globalRegistry.get(schema) || {};

@@ -72,12 +72,12 @@ type OmitWiredStreamUpsertProps<
 };
 
 type WiredStreamsDefaults = {
-  Source: z.input<IWiredStreamSchema['Definition']>;
+  Source: z.infer<IWiredStreamSchema['Definition']>;
   GetResponse: {
-    stream: z.input<IWiredStreamSchema['Definition']>;
+    stream: z.infer<IWiredStreamSchema['Definition']>;
   };
   UpsertRequest: {
-    stream: OmitWiredStreamUpsertProps<{} & z.input<IWiredStreamSchema['Definition']>>;
+    stream: OmitWiredStreamUpsertProps<{} & z.infer<IWiredStreamSchema['Definition']>>;
   };
 } & ModelOfSchema<IWiredStreamSchema>;
 
@@ -125,11 +125,11 @@ const WiredStreamSchema = {
 };
 type IWiredStreamSchema = typeof WiredStreamSchema;
 
-export const WiredStream: ModelValidation<BaseStream.Model, WiredStream.Model> = modelValidation<
+export const WiredStream = modelValidation<
   BaseStream.Model,
   IWiredStreamSchema,
   WiredStreamsDefaults
->(BaseStream, WiredStreamSchema);
+>(BaseStream, WiredStreamSchema) as unknown as ModelValidation<BaseStream.Model, WiredStream.Model>;
 
 // Optimized implementation for Definition check - the fallback is a zod-based check
 WiredStream.Definition.is = (

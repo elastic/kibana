@@ -425,8 +425,8 @@ function getSchemaTypeName(schema: z.ZodType): string | null {
  * Dynamically generates a user-friendly error message for union validation failures
  * This analyzes the actual union schema from the error context
  */
-function getDynamicUnionErrorMessage(issue: any): string | null {
-  if (issue.code !== 'invalid_union' || !issue.unionErrors || !Array.isArray(issue.unionErrors)) {
+function getDynamicUnionErrorMessage(issue: z.core.$ZodIssue): string | null {
+  if (issue.code !== 'invalid_union' || !issue.errors || !Array.isArray(issue.errors)) {
     return null;
   }
 
@@ -437,10 +437,10 @@ function getDynamicUnionErrorMessage(issue: any): string | null {
   // Analyze the union errors to extract option information
   const options: Array<{ name: string; description: string }> = [];
 
-  for (const unionError of issue.unionErrors) {
-    if (unionError.issues && Array.isArray(unionError.issues)) {
+  for (const unionError of issue.errors) {
+    if (unionError && Array.isArray(unionError)) {
       // Analyze each union option's validation errors to understand the expected structure
-      const optionInfo = analyzeUnionErrorForOption(unionError.issues);
+      const optionInfo = analyzeUnionErrorForOption(unionError);
       if (optionInfo) {
         options.push(optionInfo);
       }
@@ -454,7 +454,7 @@ function getDynamicUnionErrorMessage(issue: any): string | null {
   // Generate user-friendly message
   const optionDescriptions = options.map((option, index) => `  - ${option.description}`).join('\n');
 
-  return `${fieldName} should be oneOf:\n${optionDescriptions}`;
+  return `${String(fieldName)} should be oneOf:\n${optionDescriptions}`;
 }
 
 /**

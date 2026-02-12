@@ -61,7 +61,7 @@ apiTest.describe('Painless runtime field translation', { tag: ENTITY_STORE_TAGS 
     expect(response.statusCode).toBe(200);
   });
 
-  for (const entityType of Object.values(EntityType.Values)) {
+  for (const entityType of Object.values(EntityType.enum)) {
     apiTest(
       `${entityType}: runtime field from getEuidPainlessEvaluation matches expected euid for all documents`,
       async ({ esClient }) => {

@@ -9,13 +9,13 @@
 
 import { z, isZod } from '@kbn/zod';
 import { isPassThroughAny } from '@kbn/zod-helpers';
-import zodToJsonSchema, { jsonDescription } from 'zod-to-json-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 
+import type { Writable } from '@kbn/utility-types';
 import type { KnownParameters } from '../../type';
 import { validatePathParameters } from '../common';
 
-// Adapted from from https://github.com/jlalmes/trpc-openapi/blob/aea45441af785518df35c2bc173ae2ea6271e489/src/utils/zod.ts#L1
+// Adapted from from https://github.com/mcampa/trpc-to-openapi/blob/6fefcad64aa0d9e03b0cd1a60706d242d878272e/src/utils/zod.ts
 
 const createError = (message: string): Error => {
   return new Error(`[Zod converter] ${message}`);
@@ -27,30 +27,32 @@ function assertInstanceOfZodType(schema: unknown): asserts schema is z.ZodTypeAn
   }
 }
 
-const instanceofZodTypeKind = <Z extends z.ZodFirstPartyTypeKind>(
-  type: z.ZodTypeAny,
+const instanceofZodTypeKind = <Z extends z.core.$ZodTypeDef['type']>(
+  type: z.core.$ZodType,
   zodTypeKind: Z
-): type is InstanceType<(typeof z)[Z]> => {
-  return type?._def?.typeName === zodTypeKind;
+): type is z.core.$ZodTypes => {
+  return type?._zod?.def?.type === zodTypeKind;
 };
 
-const instanceofZodTypeObject = (type: z.ZodTypeAny): type is z.ZodObject<z.ZodRawShape> => {
-  return instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodObject);
+export const instanceofZodTypeObject = (
+  type: z.core.$ZodType
+): type is z.ZodObject<z.ZodRawShape> => {
+  return instanceofZodTypeKind(type, 'object');
 };
 
 type ZodTypeLikeVoid = z.ZodVoid | z.ZodUndefined | z.ZodNever;
 
 const instanceofZodTypeLikeVoid = (type: z.ZodTypeAny): type is ZodTypeLikeVoid => {
   return (
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodVoid) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUndefined) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNever)
+    instanceofZodTypeKind(type, 'void') ||
+    instanceofZodTypeKind(type, 'undefined') ||
+    instanceofZodTypeKind(type, 'never')
   );
 };
 
 const unwrapZodLazy = (type: z.ZodTypeAny): z.ZodTypeAny => {
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLazy)) {
-    return unwrapZodLazy(type._def.getter());
+  if (instanceofZodTypeKind(type, 'lazy')) {
+    return unwrapZodLazy((type as z.ZodLazy<z.ZodTypeAny>).def.getter());
   }
   return type;
 };
@@ -69,121 +71,120 @@ const unwrapZodOptionalDefault = (
   let innerType = type;
 
   while (
-    instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodOptional) ||
-    instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodDefault)
+    instanceofZodTypeKind(innerType, 'optional') ||
+    instanceofZodTypeKind(innerType, 'default')
   ) {
-    if (instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodOptional)) {
-      isOptional = innerType.isOptional();
+    if (instanceofZodTypeKind(innerType, 'optional')) {
+      isOptional = innerType.safeParse(undefined).success;
       description = !description ? innerType.description : description;
-      innerType = innerType.unwrap();
+      innerType = (innerType as z.ZodOptional<z.ZodTypeAny>).unwrap();
     }
-    if (instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodDefault)) {
-      defaultValue = innerType._def.defaultValue();
+    if (instanceofZodTypeKind(innerType, 'default')) {
+      defaultValue = (innerType as z.ZodDefault<z.ZodTypeAny>).def.defaultValue;
       description = !description ? innerType.description : description;
-      innerType = innerType.removeDefault();
+      innerType = (innerType as z.ZodDefault<z.ZodTypeAny>).unwrap();
     }
   }
 
   return { description, defaultValue, isOptional, innerType };
 };
 
-const unwrapZodType = (type: z.ZodTypeAny, unwrapPreprocess: boolean): z.ZodTypeAny => {
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLazy)) {
-    return unwrapZodType(unwrapZodLazy(type), unwrapPreprocess);
+export const unwrapZodType = (
+  type: z.core.$ZodType,
+  unwrapPreprocess: boolean
+): z.core.$ZodType => {
+  if (instanceofZodTypeKind(type, 'array')) {
+    return unwrapZodType((type as z.ZodArray<z.core.$ZodTypes>).element, unwrapPreprocess);
   }
-
-  if (
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodOptional) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDefault)
-  ) {
-    const { innerType } = unwrapZodOptionalDefault(type);
-    return unwrapZodType(innerType, unwrapPreprocess);
+  if (instanceofZodTypeKind(type, 'enum')) {
+    return unwrapZodType(z.string(), unwrapPreprocess);
   }
-
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
-    if (type._def.effect.type === 'refinement') {
-      return unwrapZodType(type._def.schema, unwrapPreprocess);
-    }
-    if (type._def.effect.type === 'transform') {
-      return unwrapZodType(type._def.schema, unwrapPreprocess);
-    }
-    if (unwrapPreprocess && type._def.effect.type === 'preprocess') {
-      return unwrapZodType(type._def.schema, unwrapPreprocess);
-    }
+  if (instanceofZodTypeKind(type, 'nullable')) {
+    return unwrapZodType((type as z.ZodNullable<z.core.$ZodTypes>).unwrap(), unwrapPreprocess);
   }
-  return type;
+  if (instanceofZodTypeKind(type, 'optional')) {
+    return unwrapZodType((type as z.ZodOptional<z.core.$ZodTypes>).unwrap(), unwrapPreprocess);
+  }
+  if (instanceofZodTypeKind(type, 'default')) {
+    return unwrapZodType((type as z.ZodDefault<z.core.$ZodTypes>).unwrap(), unwrapPreprocess);
+  }
+  if (instanceofZodTypeKind(type, 'lazy')) {
+    return unwrapZodType((type as z.ZodLazy<z.core.$ZodTypes>).def.getter(), unwrapPreprocess);
+  }
+  if (instanceofZodTypeKind(type, 'pipe') && unwrapPreprocess) {
+    return unwrapZodType((type as z.ZodPipe<z.core.$ZodTypes>).def.out, unwrapPreprocess);
+  }
+  return type as z.core.$ZodType;
 };
-
-interface NativeEnumType {
-  [k: string]: string | number;
-  [nu: number]: string;
-}
 
 type ZodTypeLikeString =
   | z.ZodString
-  | z.ZodOptional<ZodTypeLikeString>
-  | z.ZodDefault<ZodTypeLikeString>
-  | z.ZodEffects<ZodTypeLikeString, unknown, unknown>
-  | z.ZodUnion<[ZodTypeLikeString, ...ZodTypeLikeString[]]>
-  | z.ZodIntersection<ZodTypeLikeString, ZodTypeLikeString>
-  | z.ZodLazy<ZodTypeLikeString>
+  | z.ZodOptional<z.core.$ZodTypes>
+  | z.ZodDefault<z.core.$ZodTypes>
+  | z.ZodUnion<[z.core.$ZodTypes, ...z.core.$ZodTypes[]]>
+  | z.ZodIntersection<z.core.$ZodTypes, z.core.$ZodTypes>
+  | z.ZodLazy<z.core.$ZodTypes>
   | z.ZodLiteral<string>
-  | z.ZodEnum<[string, ...string[]]>
-  | z.ZodNativeEnum<NativeEnumType>;
+  | z.ZodEnum<Record<string, string | number>>;
 
 const zodSupportsCoerce = 'coerce' in z;
 
 type ZodTypeCoercible = z.ZodNumber | z.ZodBoolean | z.ZodBigInt | z.ZodDate;
 
-const instanceofZodTypeCoercible = (_type: z.ZodTypeAny): _type is ZodTypeCoercible => {
+const instanceofZodTypeCoercible = (_type: z.core.$ZodType): _type is ZodTypeCoercible => {
   const type = unwrapZodType(_type, false);
   return (
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNumber) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodBoolean) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodBigInt) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDate)
+    instanceofZodTypeKind(type, 'number') ||
+    instanceofZodTypeKind(type, 'boolean') ||
+    instanceofZodTypeKind(type, 'bigint') ||
+    instanceofZodTypeKind(type, 'date')
   );
 };
-
 const instanceofZodTypeLikeString = (
-  _type: z.ZodTypeAny,
+  _type: z.core.$ZodType,
   allowMixedUnion: boolean
 ): _type is ZodTypeLikeString => {
   const type = unwrapZodType(_type, false);
 
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
-    if (type._def.effect.type === 'preprocess') {
-      return true;
-    }
+  if (instanceofZodTypeKind(type, 'pipe')) {
+    return true;
   }
 
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUnion)) {
-    return !type._def.options.some(
+  if (instanceofZodTypeKind(type, 'union')) {
+    return !(type as z.ZodUnion<z.core.$ZodTypes[]>).options.some(
       (option) =>
         !instanceofZodTypeLikeString(option, allowMixedUnion) &&
         !(allowMixedUnion && instanceofZodTypeCoercible(option))
     );
   }
 
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodArray)) {
-    return instanceofZodTypeLikeString(type._def.type, allowMixedUnion);
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodIntersection)) {
-    return (
-      instanceofZodTypeLikeString(type._def.left, allowMixedUnion) &&
-      instanceofZodTypeLikeString(type._def.right, allowMixedUnion)
+  if (instanceofZodTypeKind(type, 'array')) {
+    return instanceofZodTypeLikeString(
+      (type as z.ZodArray<z.core.$ZodTypes>).element,
+      allowMixedUnion
     );
   }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLiteral)) {
-    return typeof type._def.value === 'string';
+  if (instanceofZodTypeKind(type, 'intersection')) {
+    return (
+      instanceofZodTypeLikeString(
+        (type as z.ZodIntersection<z.core.$ZodTypes, z.core.$ZodTypes>).def.left,
+        allowMixedUnion
+      ) &&
+      instanceofZodTypeLikeString(
+        (type as z.ZodIntersection<z.core.$ZodTypes, z.core.$ZodTypes>).def.right,
+        allowMixedUnion
+      )
+    );
   }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEnum)) {
-    return true;
+  if (instanceofZodTypeKind(type, 'literal')) {
+    return (type as z.ZodLiteral<string>).values
+      .values()
+      .every((value) => typeof value === 'string');
   }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNativeEnum)) {
-    return !Object.values(type._def.values).some((value) => typeof value === 'number');
+  if (instanceofZodTypeKind(type, 'enum')) {
+    return !Object.values((type as z.ZodEnum).enum).some((value) => typeof value === 'number');
   }
-  return instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodString);
+  return instanceofZodTypeKind(type, 'string');
 };
 
 const convertObjectMembersToParameterObjects = (
@@ -192,7 +193,7 @@ const convertObjectMembersToParameterObjects = (
   knownParameters: KnownParameters = {}
 ): OpenAPIV3.ParameterObject[] => {
   return Object.entries(shape).map(([shapeKey, subShape]) => {
-    const typeWithoutLazy = unwrapZodLazy(subShape);
+    const typeWithoutLazy = unwrapZodLazy(subShape as z.ZodTypeAny);
     const {
       description: outerDescription,
       isOptional,
@@ -233,7 +234,7 @@ const convertObjectMembersToParameterObjects = (
 
 // Returns a z.ZodRawShape to passes through all known parameters with z.any
 const getPassThroughShape = (knownParameters: KnownParameters, isPathParameter = false) => {
-  const passThroughShape: z.ZodRawShape = {};
+  const passThroughShape: Writable<z.ZodRawShape> = {};
   for (const [key, { optional }] of Object.entries(knownParameters)) {
     passThroughShape[key] = optional && !isPathParameter ? z.string().optional() : z.string();
   }
@@ -267,7 +268,7 @@ export const convertPathParameters = (schema: unknown, knownParameters: KnownPar
   const paramKeys = Object.keys(knownParameters);
   const paramsCount = paramKeys.length;
 
-  if (paramsCount === 0 && instanceofZodTypeLikeVoid(unwrappedSchema)) {
+  if (paramsCount === 0 && instanceofZodTypeLikeVoid(unwrappedSchema as z.ZodTypeAny)) {
     return { params: [], shared: {} };
   }
 
@@ -293,14 +294,57 @@ export const convertPathParameters = (schema: unknown, knownParameters: KnownPar
   };
 };
 
+const seenReferences = new Set<string>();
+
 export const convert = (schema: z.ZodTypeAny) => {
+  let finalSchema = schema.toJSONSchema({
+    target: 'openapi-3.0',
+    cycles: 'ref',
+    reused: 'inline',
+    unrepresentable: 'any',
+  }) as OpenAPIV3.SchemaObject;
+
+  const shared: Record<string, OpenAPIV3.SchemaObject> = {};
+  if ('definitions' in finalSchema) {
+    // Zod describes the references inside "definitions", and references them like `#/definitions/...`.
+    // However, OAS expects Components instead (and references like `#/components/schemas/...`)
+    let schemaString = JSON.stringify(finalSchema).replaceAll(
+      '#/definitions/',
+      '#/components/schemas/'
+    );
+
+    const keyMap = new Map<string, string>();
+
+    // Zod seems to create reference names like `__schema0`, `__schema1`, etc.
+    // The problem is that different schemas might have the same reference name, which is a problem when we combine the schemas into a single OpenAPI document.
+    Object.keys(finalSchema.definitions as Record<string, OpenAPIV3.SchemaObject>).forEach(
+      (key) => {
+        let finalKey = key;
+        if (seenReferences.has(finalKey)) {
+          finalKey = `__schema${seenReferences.size}`;
+        }
+        seenReferences.add(finalKey);
+        keyMap.set(key, finalKey);
+
+        schemaString = schemaString.replaceAll(
+          `"#/components/schemas/${key}"`,
+          `"#/components/schemas/${finalKey}"`
+        );
+      }
+    );
+
+    const { definitions, ...rest } = JSON.parse(schemaString);
+    finalSchema = rest;
+
+    // Copy the definitions under the new keys to the shared object
+    Object.entries(definitions).forEach(([key, value]) => {
+      shared[keyMap.get(key)!] = value as OpenAPIV3.SchemaObject;
+    });
+  }
+
   return {
-    shared: {},
-    schema: zodToJsonSchema(schema, {
-      target: 'openApi3',
-      $refStrategy: 'none',
-      postProcess: jsonDescription,
-    }) as OpenAPIV3.SchemaObject,
+    shared,
+    schema: finalSchema,
   };
 };
 

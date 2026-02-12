@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v3';
 import fs from 'fs';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';

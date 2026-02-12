@@ -151,7 +151,9 @@ export const processVersionedRouter = async ({
       assignToPaths(paths, route.path, path);
     } catch (e) {
       // Enrich the error message with a bit more context
-      e.message = `Error generating OpenAPI for route '${route.path}' using newest version '${version}': ${e.message}`;
+      e.message = `Error generating OpenAPI for route '${route.method.toUpperCase()} ${
+        route.path
+      }' using newest version '${version}': ${e.message}`;
       throw e;
     }
   }

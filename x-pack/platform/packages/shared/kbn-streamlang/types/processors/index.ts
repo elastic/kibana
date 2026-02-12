@@ -91,7 +91,7 @@ export const manualIngestPipelineProcessorSchema = processorBaseWithWhereSchema
       .describe('List of raw Elasticsearch ingest processors to run'),
     tag: z.optional(z.string()).describe('Optional ingest processor tag for Elasticsearch'),
     on_failure: z
-      .optional(z.array(z.record(z.unknown())))
+      .optional(z.array(z.record(z.string(), z.unknown())))
       .describe('Fallback processors to run when a processor fails'),
   })
   .describe(
@@ -117,7 +117,7 @@ export const grokProcessorSchema = processorBaseWithWhereSchema
       .array(NonEmptyString)
       .nonempty()
       .describe('Grok patterns applied in order to extract fields'),
-    pattern_definitions: z.optional(z.record(z.string())),
+    pattern_definitions: z.optional(z.record(z.string(), z.string())),
     ignore_missing: z
       .optional(z.boolean())
       .describe('Skip processing when source field is missing'),
@@ -420,7 +420,7 @@ export const redactProcessorSchema = processorBaseWithWhereSchema
         'Grok patterns to match sensitive data (for example, "%{IP:client}", "%{EMAILADDRESS:email}")'
       ),
     pattern_definitions: z
-      .optional(z.record(z.string()))
+      .optional(z.record(z.string(), z.string()))
       .describe('Custom pattern definitions to use in the patterns'),
     prefix: z
       .optional(z.string())
@@ -647,17 +647,17 @@ export type ProcessorType = StreamlangProcessorDefinition['action'];
  * Get all processor types as a string array (derived from the Zod schema)
  */
 export const processorTypes: ProcessorType[] = (
-  streamlangProcessorSchema._def.options as Array<
-    z.ZodObject<any, any, any, any, any> | z.ZodEffects<any, any, any> | z.ZodUnion<any>
-  >
+  streamlangProcessorSchema.def.options as unknown as Array<z.ZodObject<any> | z.ZodUnion<any>>
 ).map((schema) => {
-  // Handle ZodEffects (from .refine()) by unwrapping to get the base schema
-  let baseSchema = '_def' in schema && 'schema' in schema._def ? schema._def.schema : schema;
+  // Handle any wrapped schemas by checking for inner schema in def
+  let baseSchema = ('def' in schema && 'schema' in schema.def ? schema.def.schema : schema) as
+    | z.ZodObject
+    | z.ZodUnion<z.ZodObject[]>;
 
   // Handle ZodUnion (from z.union()) by getting the first option's action
   // All options in the union should have the same action value
-  if ('_def' in baseSchema && 'options' in baseSchema._def) {
-    baseSchema = baseSchema._def.options[0];
+  if ('options' in baseSchema) {
+    baseSchema = baseSchema.options[0];
   }
 
   return baseSchema.shape.action.value;

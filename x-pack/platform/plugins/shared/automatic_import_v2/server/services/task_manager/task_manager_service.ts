@@ -6,6 +6,7 @@
  */
 
 import assert from 'assert';
+import type { estypes } from '@elastic/elasticsearch';
 import type { CoreSetup, KibanaRequest, Logger, LoggerFactory } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
@@ -222,7 +223,9 @@ export class TaskManagerService {
       this.logger.debug(`Task ${taskId} completed successfully`);
 
       const pipelineObject = (result.current_pipeline || {}) as Pipeline;
-      const pipelineGenerationResultsObjects = result.pipeline_generation_results;
+      const pipelineGenerationResultsObjects = result.pipeline_generation_results as
+        | estypes.IngestSimulateDocumentResult[]
+        | undefined;
 
       this.logger.debug(`Pipeline object: ${JSON.stringify(pipelineObject)}`);
       this.logger.debug(

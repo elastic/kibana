@@ -90,7 +90,7 @@ export type BarePinnedEventWithoutExternalRefs = Omit<BarePinnedEvent, 'timeline
 export type BareNoteWithoutExternalRefs = Omit<BareNote, 'timelineId'>;
 
 export const RowRendererCount = Object.keys(RowRendererIdEnum).length;
-export const RowRendererValues = Object.values(RowRendererId.Values);
+export const RowRendererValues = RowRendererId.options as RowRendererId[];
 
 /**
  * Import/export timelines

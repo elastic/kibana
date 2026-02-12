@@ -183,7 +183,7 @@ async function runGeneration({
     }
     logSamples = analyzeLogsResult.results.parsedSamples;
     samplesFormat = analyzeLogsResult.results.samplesFormat;
-    additionalProcessors = analyzeLogsResult.additionalProcessors;
+    additionalProcessors = analyzeLogsResult.additionalProcessors as ESProcessorItem[] | undefined;
   }
 
   const ecsRequest: EcsMappingRequestBody = {

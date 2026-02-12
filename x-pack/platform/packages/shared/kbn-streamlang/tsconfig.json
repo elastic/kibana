@@ -21,6 +21,7 @@
     "@kbn/datemath",
     "@kbn/esql-language",
     "@kbn/tinymath",
-    "@kbn/grok-ui"
+    "@kbn/grok-ui",
+    "@kbn/utility-types"
   ]
 }

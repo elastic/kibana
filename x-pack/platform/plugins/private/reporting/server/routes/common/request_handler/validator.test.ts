@@ -13,7 +13,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00Z',
@@ -38,7 +38,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report<script>alert("xss")</script>',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00Z',
@@ -52,7 +52,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard<script>alert("xss")</script>',
       forceNow: '2024-01-01T00:00:00Z',
@@ -66,7 +66,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0<script>alert("")</script>',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00Z',
@@ -80,7 +80,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00<script/>',
@@ -94,7 +94,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'invalid/timezone',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00',
@@ -117,7 +117,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: true,
       forceNow: '2024-01-01T00:00:00',
@@ -142,7 +142,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: true,
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00',
@@ -167,7 +167,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0 very long version that exceeds the maximum length of thirty-two characters',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00',
@@ -194,7 +194,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: 'very long version that exceeds the maximum length of thirty-two characters',
@@ -221,7 +221,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: 800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: 800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00',
@@ -281,7 +281,7 @@ describe('validateJobParams', () => {
     const validParams = {
       title: 'Monthly Report',
       version: '8.0.0',
-      layout: { id: idSchema.Enum.print, dimensions: { width: -800, height: 600 } },
+      layout: { id: idSchema.enum.print, dimensions: { width: -800, height: 600 } },
       browserTimezone: 'UTC',
       objectType: 'dashboard',
       forceNow: '2024-01-01T00:00:00',
@@ -311,7 +311,7 @@ describe('validateJobParams', () => {
       title: 'Monthly Report',
       version: '8.0.0',
       layout: {
-        id: idSchema.Enum.print,
+        id: idSchema.enum.print,
         dimensions: { width: 800, height: 600 },
         unknownField: 'value',
       },
@@ -341,7 +341,7 @@ describe('validateJobParams', () => {
       title: 'Monthly Report',
       version: '8.0.0',
       layout: {
-        id: idSchema.Enum.print,
+        id: idSchema.enum.print,
         dimensions: { width: 800, height: 600, unknownField: 'value' },
       },
       browserTimezone: 'UTC',

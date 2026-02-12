@@ -61,7 +61,7 @@ export const ParamsSchema = z
         const date = moment(convertedTimestamp);
         if (!date.isValid()) {
           ctx.addIssue({
-            code: z.ZodIssueCode.invalid_date,
+            code: z.ZodIssueCode.custom,
             message: i18n.translate(
               'xpack.stackConnectors.pagerduty.invalidTimestampErrorMessage',
               {
@@ -76,7 +76,7 @@ export const ParamsSchema = z
         }
       } catch (err) {
         ctx.addIssue({
-          code: z.ZodIssueCode.invalid_date,
+          code: z.ZodIssueCode.custom,
           message: i18n.translate(
             'xpack.stackConnectors.pagerduty.timestampParsingFailedErrorMessage',
             {

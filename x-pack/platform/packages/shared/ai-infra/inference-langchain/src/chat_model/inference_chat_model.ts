@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ZodSchema } from '@kbn/zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import { z } from '@kbn/zod';
 import {
   BaseChatModel,
   type BaseChatModelParams,
@@ -340,7 +339,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
           function: {
             name: functionName,
             description,
-            parameters: zodToJsonSchema(schema as unknown as ZodSchema),
+            parameters: z.toJSONSchema(schema as z.ZodType),
           },
         },
       ];
