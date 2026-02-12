@@ -208,7 +208,6 @@ export const DimensionsSelector = ({
 
   const buttonLabel = useMemo(() => {
     const count = localSelectedDimensions.length;
-    const isAtMaxDimensions = count >= MAX_DIMENSIONS_SELECTIONS;
 
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
@@ -233,21 +232,7 @@ export const DimensionsSelector = ({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {isAtMaxDimensions ? (
-                  <EuiToolTip
-                    content={
-                      <FormattedMessage
-                        id="metricsExperience.dimensionsSelector.maxDimensionsWarning"
-                        defaultMessage="Maximum of {maxDimensions} dimensions selected"
-                        values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
-                      />
-                    }
-                  >
-                    <EuiNotificationBadge>{count}</EuiNotificationBadge>
-                  </EuiToolTip>
-                ) : (
-                  <EuiNotificationBadge>{count}</EuiNotificationBadge>
-                )}
+                <EuiNotificationBadge>{count}</EuiNotificationBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
@@ -260,6 +245,24 @@ export const DimensionsSelector = ({
       </EuiFlexGroup>
     );
   }, [localSelectedDimensions, isLoading]);
+
+  // Create tooltip content for when at max dimensions
+  const buttonTooltipContent = useMemo(() => {
+    const count = localSelectedDimensions.length;
+    const isAtMaxDimensions = count >= MAX_DIMENSIONS_SELECTIONS;
+
+    if (isAtMaxDimensions) {
+      return (
+        <FormattedMessage
+          id="metricsExperience.dimensionsSelector.maxDimensionsWarning"
+          defaultMessage="Maximum of {maxDimensions} dimensions selected"
+          values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
+        />
+      );
+    }
+
+    return undefined;
+  }, [localSelectedDimensions]);
 
   const popoverContentBelowSearch = useMemo(() => {
     const count = localSelectedDimensions.length;
@@ -303,6 +306,7 @@ export const DimensionsSelector = ({
       data-selected-value={[...selectedNamesSet]}
       searchable
       buttonLabel={buttonLabel}
+      buttonTooltipContent={buttonTooltipContent}
       popoverContentBelowSearch={popoverContentBelowSearch}
       optionMatcher={comboBoxFieldOptionMatcher}
       options={options}
