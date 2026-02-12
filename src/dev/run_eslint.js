@@ -75,10 +75,14 @@ function runEslintWithBreakOnFix(passalongArgs) {
   const diffArgs = ['diff', '--stat', '--', ...passalongArgs];
   const preRunDiff = spawnSync('git', diffArgs, { encoding: 'utf-8' }).stdout;
 
-  const child = spawnSync(process.execPath, [eslintBinPath, ...childArgs, ...passalongArgs], {
-    stdio: ['inherit', 'pipe', 'pipe'],
-    cwd: process.cwd(),
-  });
+  const child = spawnSync(
+    process.execPath,
+    ['--require=@kbn/babel-register/install', eslintBinPath, ...childArgs, ...passalongArgs],
+    {
+      stdio: ['inherit', 'pipe', 'pipe'],
+      cwd: process.cwd(),
+    }
+  );
 
   const stderr = child.stderr?.toString() ?? '';
   if (stderr) {
