@@ -59,9 +59,9 @@ For example, if activating a GitHub data source (bearer token):
 > Then let me know when the file is ready.
 
 **Important:**
-- Do NOT read `/tmp/ds_credentials` or any credentials file the user creates
-- Do NOT use the Read tool on the credentials file
-- Do NOT `cat` or otherwise inspect the credentials file
+- NEVER read `/tmp/ds_credentials` or any credentials file the user creates
+- NEVER use the Read tool on the credentials file
+- NEVER `cat` or otherwise inspect the credentials file
 - The `activate.sh` script handles reading and deleting it
 
 ## Credential Reference
