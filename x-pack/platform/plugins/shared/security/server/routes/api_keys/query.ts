@@ -67,7 +67,7 @@ export function defineQueryApiKeysAndAggregationsRoute({
           ),
           searchAfter: schema.maybe(
             schema.arrayOf(schema.nullable(schema.oneOf([schema.string(), schema.number()])), {
-              maxSize: 1,
+              maxSize: 10,
             })
           ),
         }),

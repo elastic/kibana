@@ -619,6 +619,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
+      it('should disable Next button when there are no more results', async () => {
+        await retry.try(async () => {
+          const isNextEnabled = await pageObjects.apiKeys.isNextPageButtonEnabled();
+          expect(isNextEnabled).to.be(false);
+        });
+      });
+
       it('should navigate back to first page when clicking Previous', async () => {
         await pageObjects.apiKeys.clickPreviousPageButton();
 
