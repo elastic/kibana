@@ -664,6 +664,23 @@ describe('WorkflowTemplatingEngine', () => {
       });
     });
 
+    describe('engine limits', () => {
+      it('should reject templates exceeding parse limit', () => {
+        expect(() => {
+          templatingEngine.render('x'.repeat(200_000), {});
+        }).toThrow('parse length limit exceeded');
+      });
+
+      it('should reject templates that allocate too much memory', () => {
+        expect(() => {
+          templatingEngine.render(
+            '{% for i in (1..99999999) %}{{ i }}{% endfor %}',
+            {}
+          );
+        }).toThrow('memory alloc limit exceeded');
+      });
+    });
+
     describe('safe templates still work', () => {
       it('should allow normal variable interpolation', () => {
         const result = templatingEngine.render('Hello {{ name }}!', { name: 'World' });
