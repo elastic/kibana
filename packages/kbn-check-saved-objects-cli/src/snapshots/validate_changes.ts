@@ -8,7 +8,7 @@
  */
 
 import equal from 'fast-deep-equal';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, difference } from 'lodash';
 import type { MigrationInfoRecord, ModelVersionSummary } from '../types';
 
 interface ValidateChangesExistingTypeParams {
@@ -64,6 +64,18 @@ export function validateChangesExistingType({ from, to }: ValidateChangesExistin
       `❌ The '${name}' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.`
     );
   }
+
+  // validate that newly added mapping fields are declared in the new model version
+  validateNewMappingsInModelVersion(name, from, to);
+
+  // validate that new mappings do not use index: false or enabled: false
+  if (to.modelVersions.length > from.modelVersions.length) {
+    const newModelVersion = to.modelVersions[to.modelVersions.length - 1];
+    validateNoIndexOrEnabledFalse(name, to, [newModelVersion]);
+  }
+
+  // validate that name and title fields are of type "text"
+  validateNameTitleFieldTypes(name, to);
 }
 
 interface ValidateChangesNewTypeParams {
@@ -86,6 +98,15 @@ export function validateChangesNewType({ to }: ValidateChangesNewTypeParams): vo
 
   // check that defined modelVersions are consecutive integer numbers, starting at 1
   validateLastModelVersion(name, to.modelVersions);
+
+  // validate that all mapping fields are declared across all model versions
+  validateAllMappingsInModelVersions(name, to);
+
+  // validate that new mappings do not use index: false or enabled: false
+  validateNoIndexOrEnabledFalse(name, to, to.modelVersions);
+
+  // validate that name and title fields are of type "text"
+  validateNameTitleFieldTypes(name, to);
 }
 
 function validateModelVersionNumbers(name: string, mvs: ModelVersionSummary[]) {
@@ -164,4 +185,143 @@ function getMutatedModelVersions(
 
 function mappingsUpdated(infoBefore: MigrationInfoRecord, infoAfter: MigrationInfoRecord): boolean {
   return !equal(infoBefore.mappings, infoAfter.mappings);
+}
+
+function validateNewMappingsInModelVersion(
+  name: string,
+  from: MigrationInfoRecord,
+  to: MigrationInfoRecord
+): void {
+  if (to.modelVersions.length <= from.modelVersions.length) {
+    return;
+  }
+
+  // Extract field names from mappings
+  const getFieldNames = (mappings: Record<string, unknown>): string[] =>
+    [...new Set(
+      Object.keys(mappings)
+        .filter((key) => key.startsWith('properties.'))
+        .map((key) => {
+          const withoutPrefix = key.slice('properties.'.length);
+          const lastDotIndex = withoutPrefix.lastIndexOf('.');
+          return lastDotIndex > 0 ? withoutPrefix.slice(0, lastDotIndex) : null;
+        })
+        .filter((path): path is string => path !== null)
+    )].sort();
+
+  const newMappingFields = difference(getFieldNames(to.mappings), getFieldNames(from.mappings));
+  if (newMappingFields.length === 0) {
+    return;
+  }
+
+  const newModelVersion = to.modelVersions[to.modelVersions.length - 1];
+  const declaredMappings = new Set(
+    newModelVersion.newMappings.map((m) => {
+      const lastDot = m.lastIndexOf('.');
+      return lastDot > 0 ? m.slice(0, lastDot) : m;
+    })
+  );
+
+  const undeclaredFields = newMappingFields.filter((field) => !declaredMappings.has(field));
+  if (undeclaredFields.length > 0) {
+    throw new Error(
+      `❌ The SO type '${name}' has new mapping fields that are not declared in model version '${newModelVersion.version}': ${undeclaredFields.join(', ')}. ` +
+        `All new mapping fields must be declared via 'mappings_addition' changes in the corresponding model version.`
+    );
+  }
+}
+
+/**
+ * Validate that all mapping fields are declared across all model versions' newMappings.
+ */
+function validateAllMappingsInModelVersions(name: string, to: MigrationInfoRecord): void {
+  if (!to.modelVersions?.length) {
+    return;
+  }
+
+  // Extract all unique field names from mappings
+  const mappingFields = [...new Set(
+    Object.keys(to.mappings)
+      .filter((key) => key.startsWith('properties.'))
+      .map((key) => {
+        const withoutPrefix = key.slice('properties.'.length);
+        const lastDotIndex = withoutPrefix.lastIndexOf('.');
+        return lastDotIndex > 0 ? withoutPrefix.slice(0, lastDotIndex) : null;
+      })
+      .filter((path): path is string => path !== null)
+  )].sort();
+
+  // Aggregate all declared mappings from all model versions
+  const declaredMappings = [...new Set(
+    to.modelVersions.flatMap((mv) =>
+      mv.newMappings.map((m) => {
+        const lastDot = m.lastIndexOf('.');
+        return lastDot > 0 ? m.slice(0, lastDot) : m;
+      })
+    )
+  )].sort();
+
+  const undeclaredFields = mappingFields.filter((field) => !declaredMappings.includes(field));
+  if (undeclaredFields.length > 0) {
+    throw new Error(
+      `❌ The SO type '${name}' has mapping fields that are not declared in any model version: ${undeclaredFields.join(', ')}. ` +
+        `All mapping fields must be declared via 'mappings_addition' changes in model versions.`
+    );
+  }
+}
+
+function validateNoIndexOrEnabledFalse(
+  name: string,
+  to: MigrationInfoRecord,
+  modelVersionsToCheck: ModelVersionSummary[]
+): void {
+  const fieldsWithIndexFalse: string[] = [];
+  const fieldsWithEnabledFalse: string[] = [];
+
+  modelVersionsToCheck.forEach((modelVersion) => {
+    modelVersion.newMappings.forEach((mapping) => {
+      const lastDot = mapping.lastIndexOf('.');
+      const fieldPath = lastDot > 0 ? mapping.slice(0, lastDot) : mapping;
+
+      if (to.mappings[`properties.${fieldPath}.index`] === false) {
+        fieldsWithIndexFalse.push(fieldPath);
+      }
+      if (to.mappings[`properties.${fieldPath}.enabled`] === false) {
+        fieldsWithEnabledFalse.push(fieldPath);
+      }
+    });
+  });
+
+  if (fieldsWithIndexFalse.length > 0) {
+    throw new Error(
+      `❌ The SO type '${name}' has new mapping fields with 'index: false': ${fieldsWithIndexFalse.join(', ')}. ` +
+        `This option cannot be updated without reindexing. Use 'dynamic: false' instead or omit the mapping.`
+    );
+  }
+
+  if (fieldsWithEnabledFalse.length > 0) {
+    throw new Error(
+      `❌ The SO type '${name}' has new mapping fields with 'enabled: false': ${fieldsWithEnabledFalse.join(', ')}. ` +
+        `This option cannot be updated without reindexing. Use 'dynamic: false' instead or omit the mapping.`
+    );
+  }
+}
+
+function validateNameTitleFieldTypes(name: string, to: MigrationInfoRecord): void {
+  const invalidFields: string[] = [];
+
+  if ('properties.name.type' in to.mappings && to.mappings['properties.name.type'] !== 'text') {
+    invalidFields.push(`name (type: ${to.mappings['properties.name.type']}, expected: text)`);
+  }
+
+  if ('properties.title.type' in to.mappings && to.mappings['properties.title.type'] !== 'text') {
+    invalidFields.push(`title (type: ${to.mappings['properties.title.type']}, expected: text)`);
+  }
+
+  if (invalidFields.length > 0) {
+    throw new Error(
+      `❌ The SO type '${name}' has 'name' or 'title' fields with incorrect types: ${invalidFields.join(', ')}. ` +
+        `These fields must be of type 'text' for Search API compatibility.`
+    );
+  }
 }

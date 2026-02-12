@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { validateChangesExistingType } from './validate_changes';
+import { validateChangesExistingType, validateChangesNewType } from './validate_changes';
 import type { MigrationSnapshot } from '../types';
 import path from 'path';
 import fs from 'fs';
@@ -103,6 +103,71 @@ describe('validateChangesExistingType', () => {
 
     expect(() => validateChangesWrapper({ from, to, name: 'usage-counter' })).toThrowError(
       `❌ The new model version '1' for SO type 'usage-counter' is defining mappings' changes. For backwards-compatibility reasons, the initial model version can only include schema definitions.`
+    );
+  });
+
+  it('should throw if new mapping fields are not declared in the model version', () => {
+    const from = loadSnapshot('baseline.json');
+    const to = loadSnapshot('new_mappings_not_in_model_version.json');
+
+    expect(() => validateChangesWrapper({ from, to, name: 'task' })).toThrowError(
+      /The SO type 'task' has new mapping fields that are not declared in model version '7': newUndeclaredField/
+    );
+  });
+
+  it('should throw if new mapping fields have index: false', () => {
+    const from = loadSnapshot('baseline.json');
+    const to = loadSnapshot('index_false_in_new_mappings.json');
+
+    expect(() => validateChangesWrapper({ from, to, name: 'task' })).toThrowError(
+      /The SO type 'task' has new mapping fields with 'index: false': fieldWithIndexFalse/
+    );
+  });
+
+  it('should throw if new mapping fields have enabled: false', () => {
+    const from = loadSnapshot('baseline.json');
+    const to = loadSnapshot('enabled_false_in_new_mappings.json');
+
+    expect(() => validateChangesWrapper({ from, to, name: 'task' })).toThrowError(
+      /The SO type 'task' has new mapping fields with 'enabled: false': fieldWithEnabledFalse/
+    );
+  });
+
+  it('should throw if name or title fields have wrong type', () => {
+    const to = loadSnapshot('name_title_wrong_type.json');
+
+    // Use validateChangesNewType since this is a new type
+    expect(() =>
+      validateChangesNewType({ to: to.typeDefinitions['type-with-wrong-name-title'] })
+    ).toThrowError(
+      /The SO type 'type-with-wrong-name-title' has 'name' or 'title' fields with incorrect types.*name \(type: keyword, expected: text\).*title \(type: keyword, expected: text\)/
+    );
+  });
+});
+
+describe('validateChangesNewType', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  const validateNewTypeWrapper = ({ to, name }: { to: MigrationSnapshot; name: string }) => {
+    const typeTo = to.typeDefinitions[name];
+    return validateChangesNewType({ to: typeTo });
+  };
+
+  it('should throw if mapping fields are not declared in any model version', () => {
+    const to = loadSnapshot('mapping_fields_not_declared.json');
+
+    expect(() =>
+      validateNewTypeWrapper({ to, name: 'new-type-with-undeclared-fields' })
+    ).toThrowError(
+      /The SO type 'new-type-with-undeclared-fields' has mapping fields that are not declared in any model version: undeclaredField/
+    );
+  });
+
+  it('should throw if name or title fields have wrong type for new types', () => {
+    const to = loadSnapshot('name_title_wrong_type.json');
+
+    expect(() => validateNewTypeWrapper({ to, name: 'type-with-wrong-name-title' })).toThrowError(
+      /The SO type 'type-with-wrong-name-title' has 'name' or 'title' fields with incorrect types.*name \(type: keyword, expected: text\).*title \(type: keyword, expected: text\)/
     );
   });
 });
