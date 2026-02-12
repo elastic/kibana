@@ -8,34 +8,17 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiIcon, EuiComboBox, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { parse, stringify } from 'query-string';
 import { useLocation } from 'react-router-dom';
 
-import { useNavigation } from '../../common/lib/kibana';
+import { useNavigation } from '../../../common/lib/kibana';
 import {
   ENTITY_ANALYTICS_THREAT_HUNTING_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
-} from '../../../common/constants';
-
-interface WatchlistGroupLabel {
-  id: string;
-  label: string;
-  isGroupLabelOption: true;
-  groupicon: string;
-  prepend?: React.ReactNode;
-  checked?: never;
-}
-
-interface WatchlistItem {
-  id: string;
-  label: string;
-  isGroupLabelOption?: false;
-  checked?: 'on' | 'off';
-  groupicon?: never;
-  prepend?: React.ReactNode;
-}
-
-type WatchlistOption = WatchlistGroupLabel | WatchlistItem;
+} from '../../../../common/constants';
+import { WATCHLIST_I18N } from './constants';
+import { WatchlistItem, WatchlistOption } from './types';
 
 interface WatchlistFilterProps {
   onChangeSelectedId?: (id: string) => void;
@@ -47,26 +30,38 @@ const WATCHLIST_QUERY_PARAM = 'watchlist_id';
 // Demo atm, replacing with real data with crud
 const WATCHLIST_OPTIONS: WatchlistOption[] = [
   {
-    prepend: <EuiIcon type="pin" aria-label="pin" style={{ marginRight: 8 }} />,
+    prepend: (
+      <EuiIcon
+        type="pin"
+        aria-label={WATCHLIST_I18N.iconPin}
+        style={{ marginRight: 8 }}
+      />
+    ),
     id: 'group-prebuilt',
-    label: 'Prebuilt',
+    label: WATCHLIST_I18N.groupPrebuilt,
     isGroupLabelOption: true,
     groupicon: 'pin',
   },
-  { id: 'prebuilt-priv', label: 'Privileged users' },
-  { id: 'prebuilt-llm', label: 'Unauthorized LLM access' },
-  { id: 'prebuilt-depart', label: 'Departing employees' },
+  { id: 'prebuilt-priv', label: WATCHLIST_I18N.prebuiltPrivilegedUsers },
+  { id: 'prebuilt-llm', label: WATCHLIST_I18N.prebuiltUnauthorizedLlmAccess },
+  { id: 'prebuilt-depart', label: WATCHLIST_I18N.prebuiltDepartingEmployees },
 
   {
-    prepend: <EuiIcon type="gear" aria-label="gear" style={{ marginRight: 8 }} />,
+    prepend: (
+      <EuiIcon
+        type="gear"
+        aria-label={WATCHLIST_I18N.iconGear}
+        style={{ marginRight: 8 }}
+      />
+    ),
     id: 'group-custom',
-    label: 'Custom',
+    label: WATCHLIST_I18N.groupCustom,
     isGroupLabelOption: true,
     groupicon: 'gear',
   },
-  { id: 'custom-clevel', label: 'C-level users' },
-  { id: 'custom-highrisk', label: 'High-risk users' },
-  { id: 'custom-3', label: 'Custom watchlist #3' },
+  { id: 'custom-clevel', label: WATCHLIST_I18N.customCLevelUsers },
+  { id: 'custom-highrisk', label: WATCHLIST_I18N.customHighRiskUsers },
+  { id: 'custom-3', label: WATCHLIST_I18N.customWatchlist3 },
 ];
 
 export const WatchlistFilter = ({
@@ -166,16 +161,7 @@ export const WatchlistFilter = ({
           onChange={onChangeComboBox}
           isClearable={true}
         />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="gear"
-          aria-label="Watchlist settings"
-          display="base"
-          color="primary"
-          size="m"
-        />
-      </EuiFlexItem>
+      </EuiFlexItem>     
     </EuiFlexGroup>
   );
 };
