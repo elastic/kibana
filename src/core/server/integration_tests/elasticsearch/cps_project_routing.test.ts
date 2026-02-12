@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TestServerlessESUtils } from '@kbn/core-test-helpers-kbn-server';
+import type {
+  TestServerlessESUtils,
+  TestServerlessKibanaUtils,
+} from '@kbn/core-test-helpers-kbn-server';
 import { createTestServerlessInstances } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-const TEST_INDEX = 'cps-routing-integration-test';
+const TEST_INDEX = '.kibana_cps-routing-integration-test';
 const LOCAL_PROJECT_ROUTING = '_tag._alias:_local';
 
 // Test documents - defined at module scope so we can derive counts from them
@@ -48,19 +51,21 @@ const SORTED_COUNTS_DESC = [...TEST_DOCUMENTS]
  */
 describe('CPS project_routing on serverless ES', () => {
   let serverlessES: TestServerlessESUtils;
+  let serverlessKibana: TestServerlessKibanaUtils;
   let client: ElasticsearchClient;
 
   beforeAll(async () => {
-    const { startES } = createTestServerlessInstances({
+    const { startES, startKibana } = createTestServerlessInstances({
       adjustTimeout: (timeout: number) => jest.setTimeout(timeout),
       enableCPS: true,
     });
-
     serverlessES = await startES();
-    client = serverlessES.getClient();
+    serverlessKibana = await startKibana();
+    client = serverlessKibana.coreStart.elasticsearch.client.asInternalUser;
 
     await client.indices.create({
       index: TEST_INDEX,
+      settings: { hidden: true },
       mappings: {
         properties: {
           title: { type: 'text' },
@@ -80,6 +85,7 @@ describe('CPS project_routing on serverless ES', () => {
 
   afterAll(async () => {
     await client?.indices.delete({ index: TEST_INDEX }).catch(() => {});
+    await serverlessKibana?.stop();
     await serverlessES?.stop();
   });
 
@@ -327,84 +333,64 @@ describe('CPS project_routing on serverless ES', () => {
 
   describe('search API with project_routing', () => {
     it('accepts project_routing parameter without error', async () => {
-      const response = await client.search(
-        {
-          index: TEST_INDEX,
-          query: { match_all: {} },
-        },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+      const response = await client.search({
+        index: TEST_INDEX,
+        query: { match_all: {} },
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
     });
 
     it('works with match query', async () => {
-      const response = await client.search(
-        {
-          index: TEST_INDEX,
-          query: { match: { title: 'document' } },
-        },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+      const response = await client.search({
+        index: TEST_INDEX,
+        query: { match: { title: 'document' } },
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       expect(response.hits.hits.length).toBe(DOCS_WITH_DOCUMENT_IN_TITLE);
     });
 
     it('works with term query', async () => {
-      const response = await client.search(
-        {
-          index: TEST_INDEX,
-          query: { term: { category: 'alpha' } },
-        },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+      const response = await client.search({
+        index: TEST_INDEX,
+        query: { term: { category: 'alpha' } },
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       expect(response.hits.hits.length).toBe(ALPHA_CATEGORY_DOCS_COUNT);
     });
 
     it('works with bool query', async () => {
-      const response = await client.search(
-        {
-          index: TEST_INDEX,
-          query: {
-            bool: {
-              must: [{ match: { title: 'document' } }],
-              filter: [{ term: { category: 'beta' } }],
-            },
+      const response = await client.search({
+        index: TEST_INDEX,
+        query: {
+          bool: {
+            must: [{ match: { title: 'document' } }],
+            filter: [{ term: { category: 'beta' } }],
           },
         },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       expect(response.hits.hits.length).toBe(BETA_CATEGORY_DOCS_COUNT);
     });
 
     it('works with aggregations', async () => {
-      const response = await client.search(
-        {
-          index: TEST_INDEX,
-          size: 0,
-          aggs: {
-            categories: {
-              terms: { field: 'category' },
-            },
-            avg_count: {
-              avg: { field: 'count' },
-            },
+      const response = await client.search({
+        index: TEST_INDEX,
+        size: 0,
+        aggs: {
+          categories: {
+            terms: { field: 'category' },
+          },
+          avg_count: {
+            avg: { field: 'count' },
           },
         },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       expect(response.aggregations).toBeDefined();
       expect(response.aggregations!.categories).toBeDefined();
@@ -412,16 +398,12 @@ describe('CPS project_routing on serverless ES', () => {
     });
 
     it('works with sort', async () => {
-      const response = await client.search(
-        {
-          index: TEST_INDEX,
-          query: { match_all: {} },
-          sort: [{ count: 'desc' }],
-        },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+      const response = await client.search({
+        index: TEST_INDEX,
+        query: { match_all: {} },
+        sort: [{ count: 'desc' }],
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
       const counts = response.hits.hits.map((hit: any) => hit._source.count);
@@ -430,33 +412,25 @@ describe('CPS project_routing on serverless ES', () => {
 
     it('works with pagination (from/size)', async () => {
       const pageSize = 2;
-      const response = await client.search(
-        {
-          index: TEST_INDEX,
-          query: { match_all: {} },
-          from: 2,
-          size: pageSize,
-          sort: [{ count: 'asc' }],
-        },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+      const response = await client.search({
+        index: TEST_INDEX,
+        query: { match_all: {} },
+        from: 2,
+        size: pageSize,
+        sort: [{ count: 'asc' }],
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       expect(response.hits.hits.length).toBe(pageSize);
     });
 
     it('works with _source filtering', async () => {
-      const response = await client.search(
-        {
-          index: TEST_INDEX,
-          query: { match_all: {} },
-          _source: ['title', 'category'],
-        },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+      const response = await client.search({
+        index: TEST_INDEX,
+        query: { match_all: {} },
+        _source: ['title', 'category'],
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
       const firstHit = response.hits.hits[0]._source as any;
@@ -466,48 +440,36 @@ describe('CPS project_routing on serverless ES', () => {
     });
 
     it('works with highlight', async () => {
-      const response = await client.search(
-        {
-          index: TEST_INDEX,
-          query: { match: { title: 'First' } },
-          highlight: {
-            fields: { title: {} },
-          },
+      const response = await client.search({
+        index: TEST_INDEX,
+        query: { match: { title: 'First' } },
+        highlight: {
+          fields: { title: {} },
         },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       expect(response.hits.hits.length).toBe(FIRST_TITLE_DOCS_COUNT);
       expect(response.hits.hits[0].highlight).toBeDefined();
     });
 
     it('works with wildcard index pattern', async () => {
-      const response = await client.search(
-        {
-          index: 'cps-routing-*',
-          query: { match_all: {} },
-        },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+      const response = await client.search({
+        index: 'cps-routing-*',
+        query: { match_all: {} },
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
     });
 
     it('works with non-existent index pattern (allow_no_indices)', async () => {
-      const response = await client.search(
-        {
-          index: 'nonexistent-index-*',
-          query: { match_all: {} },
-          allow_no_indices: true,
-        },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+      const response = await client.search({
+        index: 'nonexistent-index-*',
+        query: { match_all: {} },
+        allow_no_indices: true,
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       // Non-existent index returns no hits
       expect(response.hits.hits).toHaveLength(0);
@@ -516,19 +478,15 @@ describe('CPS project_routing on serverless ES', () => {
 
   describe('msearch API with project_routing', () => {
     it('accepts project_routing parameter without error', async () => {
-      const response = await client.msearch(
-        {
-          searches: [
-            { index: TEST_INDEX },
-            { query: { match_all: {} } },
-            { index: TEST_INDEX },
-            { query: { term: { category: 'alpha' } } },
-          ],
-        },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+      const response = await client.msearch({
+        searches: [
+          { index: TEST_INDEX },
+          { query: { match_all: {} } },
+          { index: TEST_INDEX },
+          { query: { term: { category: 'alpha' } } },
+        ],
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       const expectedMsearchQueries = 2; // Two searches in the msearch request above
       expect(response.responses.length).toBe(expectedMsearchQueries);
@@ -539,29 +497,21 @@ describe('CPS project_routing on serverless ES', () => {
 
   describe('count API with project_routing', () => {
     it('accepts project_routing parameter without error', async () => {
-      const response = await client.count(
-        {
-          index: TEST_INDEX,
-          query: { match_all: {} },
-        },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+      const response = await client.count({
+        index: TEST_INDEX,
+        query: { match_all: {} },
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       expect(response.count).toBe(TOTAL_DOCS_COUNT);
     });
 
     it('works with filtered count', async () => {
-      const response = await client.count(
-        {
-          index: TEST_INDEX,
-          query: { term: { category: 'alpha' } },
-        },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+      const response = await client.count({
+        index: TEST_INDEX,
+        query: { term: { category: 'alpha' } },
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       expect(response.count).toBe(ALPHA_CATEGORY_DOCS_COUNT);
     });
@@ -591,60 +541,44 @@ describe('CPS project_routing on serverless ES', () => {
 
   describe('edge cases and error scenarios', () => {
     it('handles empty query with project_routing', async () => {
-      const response = await client.search(
-        {
-          index: TEST_INDEX,
-        },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+      const response = await client.search({
+        index: TEST_INDEX,
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
     });
 
     it('works with track_total_hits', async () => {
-      const response = await client.search(
-        {
-          index: TEST_INDEX,
-          query: { match_all: {} },
-          track_total_hits: true,
-        },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+      const response = await client.search({
+        index: TEST_INDEX,
+        query: { match_all: {} },
+        track_total_hits: true,
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       expect((response.hits.total as any).value).toBe(TOTAL_DOCS_COUNT);
     });
 
     it('works with explain', async () => {
-      const response = await client.search(
-        {
-          index: TEST_INDEX,
-          query: { match: { title: 'First' } },
-          explain: true,
-        },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+      const response = await client.search({
+        index: TEST_INDEX,
+        query: { match: { title: 'First' } },
+        explain: true,
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       expect(response.hits.hits.length).toBe(FIRST_TITLE_DOCS_COUNT);
       expect(response.hits.hits[0]._explanation).toBeDefined();
     });
 
     it('works with seq_no_primary_term', async () => {
-      const response = await client.search(
-        {
-          index: TEST_INDEX,
-          query: { match_all: {} },
-          seq_no_primary_term: true,
-        },
-        {
-          querystring: { project_routing: LOCAL_PROJECT_ROUTING },
-        }
-      );
+      const response = await client.search({
+        index: TEST_INDEX,
+        query: { match_all: {} },
+        seq_no_primary_term: true,
+        project_routing: LOCAL_PROJECT_ROUTING,
+      });
 
       expect(response.hits.hits.length).toBe(TOTAL_DOCS_COUNT);
       expect(response.hits.hits[0]._seq_no).toBeDefined();
@@ -658,10 +592,10 @@ describe('CPS project_routing on serverless ES', () => {
         {
           index: TEST_INDEX,
           query: { match_all: {} },
+          project_routing: LOCAL_PROJECT_ROUTING,
         },
         {
           querystring: {
-            project_routing: LOCAL_PROJECT_ROUTING,
             pretty: true,
           },
         }
@@ -675,10 +609,10 @@ describe('CPS project_routing on serverless ES', () => {
         {
           index: TEST_INDEX,
           query: { match_all: {} },
+          project_routing: LOCAL_PROJECT_ROUTING,
         },
         {
           querystring: {
-            project_routing: LOCAL_PROJECT_ROUTING,
             request_cache: false,
           },
         }
@@ -692,10 +626,10 @@ describe('CPS project_routing on serverless ES', () => {
         {
           index: TEST_INDEX,
           query: { match_all: {} },
+          project_routing: LOCAL_PROJECT_ROUTING,
         },
         {
           querystring: {
-            project_routing: LOCAL_PROJECT_ROUTING,
             timeout: '30s',
           },
         }

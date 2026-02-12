@@ -16,8 +16,9 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { esTestConfig } from '@kbn/test';
 import type { CliArgs } from '@kbn/config';
-import { kibanaDevServiceAccount } from '@kbn/dev-utils';
+import { kibanaDevServiceAccount, CA_CERT_PATH } from '@kbn/dev-utils';
 import { systemIndicesSuperuser } from '@kbn/test';
+import { set } from '@kbn/safer-lodash-set';
 import { createRoot, type TestElasticsearchUtils, type TestKibanaUtils } from './create_root';
 
 export type TestServerlessESUtils = Pick<TestElasticsearchUtils, 'stop' | 'es'> & {
@@ -65,6 +66,19 @@ export function createTestServerlessInstances({
   adjustTimeout?.(150_000);
 
   const esUtils = createServerlessES({ enableCPS });
+
+  if (enableCPS) {
+    if (!kibana.settings) kibana.settings = {};
+    set(kibana.settings, 'cps.cpsEnabled', true);
+    set(kibana.settings, 'elasticsearch', {
+      hosts: [`https://localhost:${esTestConfig.getPort()}`],
+      serviceAccountToken: kibanaDevServiceAccount.token,
+      ssl: {
+        certificateAuthorities: CA_CERT_PATH,
+      },
+    });
+    kibana.cliArgs = { ...kibana.cliArgs, uiam: true, serverless: true };
+  }
   const kbUtils = createServerlessKibana(kibana.settings, kibana.cliArgs);
 
   return {
