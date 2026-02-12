@@ -29,7 +29,15 @@ export interface GetStreamFeaturesInput {
 
 export type LlmFeature = Pick<
   Feature,
-  'id' | 'type' | 'subtype' | 'title' | 'description' | 'confidence' | 'properties' | 'evidence' | 'tags'
+  | 'id'
+  | 'type'
+  | 'subtype'
+  | 'title'
+  | 'description'
+  | 'confidence'
+  | 'properties'
+  | 'evidence'
+  | 'tags'
 >;
 
 export function resolveFeatureTypeFilters(

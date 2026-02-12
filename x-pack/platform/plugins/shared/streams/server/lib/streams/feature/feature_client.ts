@@ -8,7 +8,7 @@
 import { dateRangeQuery, termQuery, termsQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import type { Feature } from '@kbn/streams-schema';
+import type { Feature, FeatureStatus } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
   STREAM_NAME,
@@ -76,7 +76,7 @@ export class FeatureClient {
 
   async getFeatures(
     stream: string,
-    filters?: { type?: string[]; id?: string[] }
+    filters?: { type?: string[]; id?: string[]; status?: FeatureStatus[] }
   ): Promise<{ hits: Feature[]; total: number }> {
     const filterClauses: QueryDslQueryContainer[] = [
       ...termQuery(STREAM_NAME, stream),
@@ -96,6 +96,15 @@ export class FeatureClient {
       filterClauses.push({
         bool: {
           should: filters.type.flatMap((type) => termQuery(FEATURE_TYPE, type)),
+          minimum_should_match: 1,
+        },
+      });
+    }
+
+    if (filters?.status?.length) {
+      filterClauses.push({
+        bool: {
+          should: filters.status.flatMap((status) => termQuery(FEATURE_STATUS, status)),
           minimum_should_match: 1,
         },
       });

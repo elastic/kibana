@@ -51,7 +51,7 @@ export function createGenerateSignificantEventsPrompt({ systemPrompt }: { system
                 type: 'array',
                 items: {
                   type: 'string',
-                  enum: [...SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES],
+                  enum: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES,
                 },
               },
             },
