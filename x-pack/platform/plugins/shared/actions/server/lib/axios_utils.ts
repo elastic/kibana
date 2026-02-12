@@ -6,6 +6,7 @@
  */
 
 import { isObjectLike, isEmpty } from 'lodash';
+import { Agent } from 'agent-base';
 import type {
   AxiosInstance,
   Method,
@@ -61,8 +62,13 @@ export const request = async <T = unknown>({
     sslOverrides
   );
 
-  if (keepAlive && httpsAgent) {
-    httpsAgent.options.keepAlive = keepAlive;
+  if (keepAlive) {
+    if (httpsAgent) {
+      httpsAgent.options.keepAlive = keepAlive;
+    }
+    if (httpAgent) {
+      (httpAgent as Agent).options.keepAlive = keepAlive;
+    }
   }
 
   const { maxContentLength, timeout: settingsTimeout } =
