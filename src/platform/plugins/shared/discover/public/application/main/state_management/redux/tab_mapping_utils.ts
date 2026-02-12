@@ -11,13 +11,14 @@ import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plug
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isObject } from 'lodash';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { createDataSource } from '../../../../../common/data_sources';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DEFAULT_TAB_STATE } from './constants';
 import { parseControlGroupJson } from './utils';
+import { createSearchSource } from '../utils/create_search_source';
 
 export const fromSavedObjectTabToTabState = ({
   tab,
@@ -120,15 +121,26 @@ export const fromTabStateToSavedObjectTab = ({
   tab,
   overridenTimeRestore,
   services,
-  serializedSearchSource,
+  dataView,
 }: {
   tab: TabState;
   overridenTimeRestore?: boolean;
   services: DiscoverServices;
-  serializedSearchSource?: SerializedSearchSourceFields;
+  dataView?: DataView;
 }): DiscoverSessionTab => {
   const allowedSampleSize = getAllowedSampleSize(tab.appState.sampleSize, services.uiSettings);
   const timeRestore = overridenTimeRestore ?? tab.attributes.timeRestore ?? false;
+
+  const serializedSearchSource = dataView
+    ? createSearchSource({
+        dataView,
+        appState: tab.appState,
+        globalState: tab.globalState,
+        services,
+      }).getSerializedFields()
+    : tab.initialInternalState?.serializedSearchSource ?? {};
+
+  const usesAdHocDataView = isObject(serializedSearchSource.index);
 
   return {
     id: tab.id,
@@ -138,9 +150,8 @@ export const fromTabStateToSavedObjectTab = ({
     grid: tab.appState.grid ?? {},
     hideChart: tab.appState.hideChart ?? false,
     isTextBasedQuery: isOfAggregateQueryType(tab.appState.query),
-    usesAdHocDataView: isObject(tab.initialInternalState?.serializedSearchSource?.index),
-    serializedSearchSource:
-      serializedSearchSource ?? tab.initialInternalState?.serializedSearchSource ?? {},
+    usesAdHocDataView,
+    serializedSearchSource,
     viewMode: tab.appState.viewMode,
     hideAggregatedPreview: tab.appState.hideAggregatedPreview,
     rowHeight: tab.appState.rowHeight,

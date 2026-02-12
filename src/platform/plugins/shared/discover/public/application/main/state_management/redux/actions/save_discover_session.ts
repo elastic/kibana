@@ -24,7 +24,6 @@ import { selectTabRuntimeState } from '../runtime_state';
 import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 import { appendAdHocDataViews, replaceAdHocDataViewWithId } from './data_views';
 import { resetDiscoverSession } from './reset_discover_session';
-import { createSearchSource } from '../../utils/create_search_source';
 
 type AdHocDataViewAction = 'copy' | 'replace';
 
@@ -76,18 +75,12 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
 
         if (tabStateContainer) {
           const currentDataView = tabRuntimeState.currentDataView$.getValue();
-          const serializedSearchSource = createSearchSource({
-            dataView: currentDataView,
-            appState: tab.appState,
-            globalState: tab.globalState,
-            services,
-          }).getSerializedFields();
 
           updatedTab = cloneDeep(
             fromTabStateToSavedObjectTab({
               tab,
               overridenTimeRestore: newTimeRestore,
-              serializedSearchSource,
+              dataView: currentDataView,
               services,
             })
           );
