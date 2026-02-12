@@ -480,8 +480,10 @@ describe('utils', () => {
   });
 
   describe('checkForNoReadableIndices', () => {
+    let fieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>>;
+
     test('returns foundNoIndices true when the fieldCapsResponse is empty', async () => {
-      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
+      fieldCapsResponse = {
         body: {
           indices: [],
           fields: {},
@@ -489,7 +491,7 @@ describe('utils', () => {
       };
 
       const { foundNoIndices } = await checkForNoReadableIndices({
-        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
+        timestampFieldCapsResponse: fieldCapsResponse as TransportResult<
           estypes.FieldCapsResponse,
           unknown
         >,
@@ -501,7 +503,7 @@ describe('utils', () => {
     });
 
     test('logs a special Endpoint Security message when the rule name is "Endpoint Security"', async () => {
-      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
+      fieldCapsResponse = {
         body: {
           indices: [],
           fields: {},
@@ -513,7 +515,7 @@ describe('utils', () => {
       });
 
       await checkForNoReadableIndices({
-        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
+        timestampFieldCapsResponse: fieldCapsResponse as TransportResult<
           estypes.FieldCapsResponse,
           unknown
         >,
@@ -529,7 +531,7 @@ describe('utils', () => {
     });
 
     test('logs a generic missing-index message when the rule name is not "Endpoint Security"', async () => {
-      const timestampFieldCapsResponse: Partial<TransportResult<FieldCapsResponse, unknown>> = {
+      fieldCapsResponse = {
         body: {
           indices: [],
           fields: {},
@@ -542,7 +544,7 @@ describe('utils', () => {
       });
 
       await checkForNoReadableIndices({
-        timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
+        timestampFieldCapsResponse: fieldCapsResponse as TransportResult<
           estypes.FieldCapsResponse,
           unknown
         >,
