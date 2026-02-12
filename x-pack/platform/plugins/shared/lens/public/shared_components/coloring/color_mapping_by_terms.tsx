@@ -72,6 +72,7 @@ export function ColorMappingByTerms({
   allowCustomMatch,
 }: ColorMappingByTermsProps) {
   const { euiTheme } = useEuiTheme();
+  console.log({ colorMapping, palette });
   const [useLegacyPalettes, setUseLegacyPalettes] = useState(!colorMapping);
 
   return (

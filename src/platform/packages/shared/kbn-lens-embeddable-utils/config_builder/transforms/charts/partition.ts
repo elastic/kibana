@@ -15,6 +15,7 @@ import {
   type TypedLensSerializedState,
 } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/server';
+import type { PaletteOutput } from '@kbn/coloring';
 import type {
   PartitionState,
   PartitionStateESQL,
@@ -519,10 +520,11 @@ function convertLensStateToAPIGrouping(
   vizLayer: LensPartitionLayerState,
   layer: DataSourceStateLayer,
   groupByAccessors: string[],
-  groupIndexForColorMapping: number
+  groupIndexForColorMapping: number,
+  legacyPalette?: PaletteOutput
 ) {
   console.log('convertLensStateToAPIGrouping', { vizLayer });
-  const colorMapping = fromColorMappingLensStateToAPI(vizLayer.colorMapping);
+  const colorMapping = fromColorMappingLensStateToAPI(vizLayer.colorMapping, legacyPalette);
   if (isTextBasedLayer(layer)) {
     return groupByAccessors.map(
       (id, index) =>
@@ -561,7 +563,8 @@ function fromLensStateToAPIGroups(
     vizLayer,
     layer,
     groupByAccessors,
-    groupIndexForColorMapping
+    groupIndexForColorMapping,
+    visualization.palette
   );
   return groups?.length ? groups : undefined;
 }

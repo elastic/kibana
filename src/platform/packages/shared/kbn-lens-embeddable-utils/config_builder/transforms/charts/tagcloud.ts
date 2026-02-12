@@ -79,9 +79,7 @@ function buildVisualizationState(config: TagcloudState): LensTagCloudState {
     minFontSize: layer.font_size?.min ?? LENS_TAGCLOUD_DEFAULT_STATE.minFontSize,
     showLabel: layer.metric?.show_metric_label ?? LENS_TAGCLOUD_DEFAULT_STATE.showLabel,
     tagAccessor: getAccessorName('tag'),
-    ...(layer.tag_by.color
-      ? { colorMapping: fromColorMappingAPIToLensState(layer.tag_by.color) }
-      : {}),
+    ...(layer.tag_by.color ? { ...fromColorMappingAPIToLensState(layer.tag_by.color) } : {}),
   };
 }
 
@@ -130,12 +128,7 @@ function getTagcloudTagBy(
     throw new Error('Tag accessor is missing in the visualization state');
   }
 
-  let color: ColorMappingType | undefined;
-  if (visualization.palette) {
-    color = { mode: 'categorical', palette: visualization.palette.name, mapping: [] };
-  } else {
-    color = fromColorMappingLensStateToAPI(visualization.colorMapping);
-  }
+  const color = fromColorMappingLensStateToAPI(visualization.colorMapping, visualization.palette);
 
   return {
     ...(isTextBasedLayer(layer)
@@ -233,8 +226,7 @@ export function fromAPItoLensState(
   const references = regularDataViews.length
     ? buildReferences({ [DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
     : [];
-  console.log({ config });
-  return {
+  const after = {
     visualizationType: 'lnsTagcloud',
     ...getSharedChartAPIToLensState(config),
     references,
@@ -245,6 +237,8 @@ export function fromAPItoLensState(
       adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
     },
   };
+  console.log('fromAPItoLensState', { before: config, after });
+  return after;
 }
 
 export function fromLensStateToAPI(
@@ -255,7 +249,6 @@ export function fromLensStateToAPI(
   const visualization = state.visualization as LensTagCloudState;
   const layers = getDatasourceLayers(state);
   const [layerId, layer] = getLensStateLayer(layers, visualization.layerId);
-  console.log(' fromLensStateToAPI', { state });
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),
     ...reverseBuildVisualizationState(
@@ -268,5 +261,6 @@ export function fromLensStateToAPI(
     ),
   };
 
+  console.log('fromLensStateToAPI', { before: state, after: visualizationState });
   return visualizationState;
 }

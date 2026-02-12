@@ -191,7 +191,7 @@ export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSeri
   }
 
   const attributes = builder.fromAPIFormat(state.attributes);
-  console.log({ transformFromApiConfig: { ...state, attributes } });
+  // console.log({ transformFromApiConfig: { ...state, attributes } });
   return {
     ...state,
     attributes,
@@ -230,10 +230,10 @@ export function transformToApiConfig(state: LensSerializedState): LensByValueSer
     visualizationType: state.attributes.visualizationType ?? LENS_UNKNOWN_VIS,
   });
 
-  console.log('transformToApiConfig', {
-    before: state,
-    after: { ...state, attributes: apiConfigAttributes },
-  }); // NEED GRADIENT TO BE DEFINED HERE
+  // console.log('transformToApiConfig', {
+  //   before: state,
+  //   after: { ...state, attributes: apiConfigAttributes },
+  // }); // NEED GRADIENT TO BE DEFINED HERE
 
   return {
     ...state,
