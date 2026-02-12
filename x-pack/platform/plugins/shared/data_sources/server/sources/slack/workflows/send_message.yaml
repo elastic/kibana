@@ -27,7 +27,7 @@ inputs:
 steps:
   - name: send-message
     type: slack2.sendMessage
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= slack2-stack-connector-id %>
     with:
       channel: "${{inputs.channel}}"
       text: "${{inputs.text}}"

@@ -58,7 +58,7 @@ inputs:
 steps:
   - name: search-messages
     type: slack2.searchMessages
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= slack2-stack-connector-id %>
     with:
       query: "${{inputs.query}}"
       inChannel: "${{inputs.in_channel}}"

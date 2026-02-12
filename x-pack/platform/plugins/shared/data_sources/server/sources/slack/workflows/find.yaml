@@ -40,7 +40,7 @@ inputs:
 steps:
   - name: resolve-channel-id
     type: slack2.resolveChannelId
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= slack2-stack-connector-id %>
     with:
       name: "${{ inputs.name }}"
       match: "${{ inputs.match }}"
