@@ -42,16 +42,29 @@ const projectType: ServerlessProjectType = 'es';
 export function createTestServerlessInstances({
   adjustTimeout,
   kibana = {},
+  enableCPS = false,
 }: {
   kibana?: {
     settings?: {};
     cliArgs?: Partial<CliArgs>;
   };
   adjustTimeout?: (timeout: number) => void;
+  /**
+   * Enable Cross-Project Search (CPS) mode on the serverless ES instance.
+   * When true, starts ES with UIAM support and the required CPS settings:
+   *  - `serverless.cross_project.enabled=true`
+   *  - `remote_cluster_server.enabled=true`
+   *
+   * Equivalent to running:
+   *  `yarn es serverless --uiam -E serverless.cross_project.enabled=true -E remote_cluster_server.enabled=true`
+   *
+   * @default false
+   */
+  enableCPS?: boolean;
 } = {}): TestServerlessUtils {
   adjustTimeout?.(150_000);
 
-  const esUtils = createServerlessES();
+  const esUtils = createServerlessES({ enableCPS });
   const kbUtils = createServerlessKibana(kibana.settings, kibana.cliArgs);
 
   return {
@@ -78,7 +91,7 @@ export function createTestServerlessInstances({
   };
 }
 
-function createServerlessES() {
+function createServerlessES({ enableCPS = false }: { enableCPS?: boolean } = {}) {
   const log = new ToolingLog({
     level: 'info',
     writeTo: process.stdout,
@@ -100,6 +113,15 @@ function createServerlessES() {
         kill: true,
         waitForReady: true,
         ...esServerlessImageParams,
+        ...(enableCPS
+          ? {
+              uiam: true,
+              esArgs: [
+                'serverless.cross_project.enabled=true',
+                'remote_cluster_server.enabled=true',
+              ],
+            }
+          : {}),
       });
       const client = getServerlessESClient({ port: esPort });
 
