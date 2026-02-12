@@ -13,7 +13,7 @@ import type { Evaluator } from '../../types';
 import { EsqlEquivalencePrompt } from './prompt';
 import type { EsqlEquivalenceAnalysis } from './types';
 
-type EsqlPredicitonExtractor<T = unknown> = (output: T) => string;
+type EsqlPredictionExtractor<T = unknown> = (output: T) => string;
 type EsqlGroundTruthExtractor<T = unknown> = (expected: T) => string;
 
 export const ESQL_EQUIVALENCE_EVALUATOR_NAME = 'ES|QL Functional Equivalence';
@@ -26,7 +26,7 @@ export function createEsqlEquivalenceEvaluator({
 }: {
   inferenceClient: BoundInferenceClient;
   log: ToolingLog;
-  predictionExtractor: EsqlPredicitonExtractor;
+  predictionExtractor: EsqlPredictionExtractor;
   groundTruthExtractor: EsqlGroundTruthExtractor;
 }): Evaluator {
   return {
@@ -101,7 +101,7 @@ export function createEsqlEquivalenceEvaluator({
         },
       });
 
-      const isEquivalent = equivalent === 'Yes';
+      const isEquivalent = equivalent?.trim().toLowerCase() === 'yes';
       return {
         explanation: reason,
         label: isEquivalent ? 'Equivalent ES|QL query' : 'Non-equivalent ES|QL query',

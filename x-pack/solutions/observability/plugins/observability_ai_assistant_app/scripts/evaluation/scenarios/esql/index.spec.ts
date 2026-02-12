@@ -956,7 +956,7 @@ describe('ES|QL query generation', () => {
               emp_no: {
                 type: 'integer',
               },
-              salary: {
+              compensation: {
                 type: 'integer',
               },
             },
@@ -968,7 +968,7 @@ describe('ES|QL query generation', () => {
           document: {
             hire_date: '2024-01-23T12:30:00.000Z',
             emp_no: 1,
-            salary: 100,
+            compensation: 100,
           },
         });
       });
