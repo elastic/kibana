@@ -66,6 +66,7 @@ export {
   hasOnlySourceCommand,
   isComputedColumn,
   getQuerySummary,
+  getEsqlControls,
   type ESQLStatsQueryMeta,
 } from './src';
 
