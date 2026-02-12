@@ -34,7 +34,7 @@ export interface BaseToolFormData {
 export interface EsqlToolFormData extends BaseToolFormData {
   type: ToolType.esql;
   esql: string;
-  params: EsqlParamFormData[] | undefined;
+  params: EsqlParamFormData[];
 }
 
 export interface BuiltinToolFormData extends BaseToolFormData {
