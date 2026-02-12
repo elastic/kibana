@@ -223,9 +223,7 @@ export const checkPublicLocationsPermissions = async (
 };
 
 const getBrowserTimeoutWarningsForSucceededProjectMonitors = (monitors: ProjectMonitor[]) => {
-  const failedIds = new Set(
-    monitors.map((m) => m.id)
-  );
+  const failedIds = new Set(monitors.map((m) => m.id));
   const succeededMonitors = monitors.filter((m) => !failedIds.has(m.id));
   return getBrowserTimeoutWarningsForProjectMonitors(succeededMonitors);
 };

@@ -80,7 +80,6 @@ export const secondsToCronFormatter: FormatterFn = (fields, key) => {
   return value ? `${value}s` : null;
 };
 
-
 export const privateTimeoutFormatter: FormatterFn = (fields) => {
   const value = (fields[ConfigKey.TIMEOUT] as string) ?? '';
   if (!value) return null;

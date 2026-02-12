@@ -550,7 +550,9 @@ const BROWSER_INVALID_TIMEOUT_ERROR = i18n.translate(
 
 const BROWSER_INVALID_TIMEOUT_DETAILS = (timeout: number) =>
   i18n.translate('xpack.synthetics.server.monitors.invalidTimeoutDetails', {
-    defaultMessage:
-      `Invalid timeout {timeout} seconds supplied. Minimum timeout for browser monitors is ${HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS} seconds.`,
-    values: { timeout, heartbeatTimeoutOverhead: HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS },
+    defaultMessage: `Invalid timeout {timeout} seconds supplied. Minimum timeout for browser monitors is ${HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS} seconds.`,
+    values: {
+      timeout,
+      heartbeatTimeoutOverhead: HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS,
+    },
   });
