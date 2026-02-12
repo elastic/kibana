@@ -402,6 +402,7 @@
     "logExtractionState.lastExecutionTimestamp",
     "logExtractionState.lookbackPeriod",
     "logExtractionState.paginationTimestamp",
+    "logExtractionState.paginationId",
     "logExtractionState.timeout",
     "status",
     "type",

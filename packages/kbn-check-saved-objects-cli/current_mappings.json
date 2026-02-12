@@ -1327,6 +1327,9 @@
           "paginationTimestamp": {
             "type": "date"
           },
+          "paginationId": {
+            "type": "keyword"
+          },
           "timeout": {
             "type": "keyword"
           }
