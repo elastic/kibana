@@ -77,114 +77,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let apiClient: StreamsSupertestRepositoryClient;
   const esClient = getService('es');
 
-  describe('Root stream', () => {
-    before(async () => {
-      apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
-      await enableStreams(apiClient);
-    });
-
-    after(async () => {
-      await disableStreams(apiClient);
-    });
-
-    it('Should not allow processing changes', async () => {
-      const body: Streams.WiredStream.UpsertRequest = {
-        ...emptyAssets,
-        stream: {
-          description: '',
-          ingest: {
-            ...rootStreamDefinition.ingest,
-            processing: {
-              steps: [
-                {
-                  action: 'grok' as const,
-                  from: 'body.text',
-                  patterns: [
-                    '%{TIMESTAMP_ISO8601:attributes.inner_timestamp} %{LOGLEVEL:severity_text} %{GREEDYDATA:attributes.message2}',
-                  ],
-                  where: { always: {} },
-                },
-              ],
-            },
-          },
-        },
-      };
-      const response = await putStream(apiClient, 'logs', body, 400);
-      expect(response).to.have.property(
-        'message',
-        'Desired stream state is invalid: Root stream processing rules cannot be changed'
-      );
-    });
-
-    it('Should not allow fields changes', async () => {
-      const body: Streams.WiredStream.UpsertRequest = {
-        ...emptyAssets,
-        stream: {
-          description: '',
-          ingest: {
-            ...rootStreamDefinition.ingest,
-            processing: omit(rootStreamDefinition.ingest.processing, 'updated_at'),
-            wired: {
-              ...rootStreamDefinition.ingest.wired,
-              fields: {
-                ...rootStreamDefinition.ingest.wired.fields,
-                'log.level': {
-                  type: 'boolean',
-                },
-              },
-            },
-          },
-        },
-      };
-      const response = await putStream(apiClient, 'logs', body, 400);
-
-      expect(response).to.have.property(
-        'message',
-        'Desired stream state is invalid: Root stream fields cannot be changed'
-      );
-    });
-
-    it('Should allow routing changes', async () => {
-      const body: Streams.WiredStream.UpsertRequest = {
-        ...emptyAssets,
-        stream: {
-          description: '',
-          ingest: {
-            ...rootStreamDefinition.ingest,
-            processing: omit(rootStreamDefinition.ingest.processing, 'updated_at'),
-            wired: {
-              ...rootStreamDefinition.ingest.wired,
-              routing: [
-                {
-                  destination: 'logs.gcpcloud',
-                  where: {
-                    field: 'cloud.provider',
-                    eq: 'gcp',
-                  },
-                  status: 'enabled',
-                },
-              ],
-            },
-          },
-        },
-      };
-      const response = await putStream(apiClient, 'logs', body);
-      expect(response).to.have.property('acknowledged', true);
-    });
-
-    it('Should not allow sending data directly to a child stream', async () => {
-      const doc = {
-        '@timestamp': '2024-01-01T00:00:20.000Z',
-        message: 'test',
-      };
-      const response = await indexDocument(esClient, 'logs.gcpcloud', doc, false);
-      expect(response.failure_store).to.be('used');
-    });
-  });
-
-  // Test logs.otel and logs.ecs root streams with the same validation rules
-  ['logs.otel', 'logs.ecs'].forEach((rootStream) => {
-    describe(`${rootStream} root stream`, () => {
+  describe('Root streams API', () => {
+    describe('Root stream', () => {
       before(async () => {
         apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
         await enableStreams(apiClient);
@@ -216,7 +110,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         };
-        const response = await putStream(apiClient, rootStream, body, 400);
+        const response = await putStream(apiClient, 'logs', body, 400);
         expect(response).to.have.property(
           'message',
           'Desired stream state is invalid: Root stream processing rules cannot be changed'
@@ -243,7 +137,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         };
-        const response = await putStream(apiClient, rootStream, body, 400);
+        const response = await putStream(apiClient, 'logs', body, 400);
 
         expect(response).to.have.property(
           'message',
@@ -263,7 +157,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 ...rootStreamDefinition.ingest.wired,
                 routing: [
                   {
-                    destination: `${rootStream}.gcpcloud`,
+                    destination: 'logs.gcpcloud',
                     where: {
                       field: 'cloud.provider',
                       eq: 'gcp',
@@ -275,7 +169,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         };
-        const response = await putStream(apiClient, rootStream, body);
+        const response = await putStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
       });
 
@@ -284,45 +178,153 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           '@timestamp': '2024-01-01T00:00:20.000Z',
           message: 'test',
         };
-        const response = await indexDocument(esClient, `${rootStream}.gcpcloud`, doc, false);
+        const response = await indexDocument(esClient, 'logs.gcpcloud', doc, false);
         expect(response.failure_store).to.be('used');
       });
     });
-  });
 
-  describe('Root stream deletion', () => {
-    before(async () => {
-      apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
-      await enableStreams(apiClient);
+    // Test logs.otel and logs.ecs root streams with the same validation rules
+    ['logs.otel', 'logs.ecs'].forEach((rootStream) => {
+      describe(`${rootStream} root stream`, () => {
+        before(async () => {
+          apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
+          await enableStreams(apiClient);
+        });
+
+        after(async () => {
+          await disableStreams(apiClient);
+        });
+
+        it('Should not allow processing changes', async () => {
+          const body: Streams.WiredStream.UpsertRequest = {
+            ...emptyAssets,
+            stream: {
+              description: '',
+              ingest: {
+                ...rootStreamDefinition.ingest,
+                processing: {
+                  steps: [
+                    {
+                      action: 'grok' as const,
+                      from: 'body.text',
+                      patterns: [
+                        '%{TIMESTAMP_ISO8601:attributes.inner_timestamp} %{LOGLEVEL:severity_text} %{GREEDYDATA:attributes.message2}',
+                      ],
+                      where: { always: {} },
+                    },
+                  ],
+                },
+              },
+            },
+          };
+          const response = await putStream(apiClient, rootStream, body, 400);
+          expect(response).to.have.property(
+            'message',
+            'Desired stream state is invalid: Root stream processing rules cannot be changed'
+          );
+        });
+
+        it('Should not allow fields changes', async () => {
+          const body: Streams.WiredStream.UpsertRequest = {
+            ...emptyAssets,
+            stream: {
+              description: '',
+              ingest: {
+                ...rootStreamDefinition.ingest,
+                processing: omit(rootStreamDefinition.ingest.processing, 'updated_at'),
+                wired: {
+                  ...rootStreamDefinition.ingest.wired,
+                  fields: {
+                    ...rootStreamDefinition.ingest.wired.fields,
+                    'log.level': {
+                      type: 'boolean',
+                    },
+                  },
+                },
+              },
+            },
+          };
+          const response = await putStream(apiClient, rootStream, body, 400);
+
+          expect(response).to.have.property(
+            'message',
+            'Desired stream state is invalid: Root stream fields cannot be changed'
+          );
+        });
+
+        it('Should allow routing changes', async () => {
+          const body: Streams.WiredStream.UpsertRequest = {
+            ...emptyAssets,
+            stream: {
+              description: '',
+              ingest: {
+                ...rootStreamDefinition.ingest,
+                processing: omit(rootStreamDefinition.ingest.processing, 'updated_at'),
+                wired: {
+                  ...rootStreamDefinition.ingest.wired,
+                  routing: [
+                    {
+                      destination: `${rootStream}.gcpcloud`,
+                      where: {
+                        field: 'cloud.provider',
+                        eq: 'gcp',
+                      },
+                      status: 'enabled',
+                    },
+                  ],
+                },
+              },
+            },
+          };
+          const response = await putStream(apiClient, rootStream, body);
+          expect(response).to.have.property('acknowledged', true);
+        });
+
+        it('Should not allow sending data directly to a child stream', async () => {
+          const doc = {
+            '@timestamp': '2024-01-01T00:00:20.000Z',
+            message: 'test',
+          };
+          const response = await indexDocument(esClient, `${rootStream}.gcpcloud`, doc, false);
+          expect(response.failure_store).to.be('used');
+        });
+      });
     });
 
-    after(async () => {
-      await disableStreams(apiClient);
-    });
+    describe('Root stream deletion', () => {
+      before(async () => {
+        apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
+        await enableStreams(apiClient);
+      });
 
-    it('should allow deletion of legacy logs root stream and disable it in ES', async () => {
-      // Verify stream is enabled before deletion
-      const statusBefore = await apiClient.fetch('GET /api/streams/_status').expect(200);
-      expect(statusBefore.body.logs).to.be(true);
+      after(async () => {
+        await disableStreams(apiClient);
+      });
 
-      // Delete the stream
-      const response = await deleteStream(apiClient, 'logs', 200);
-      expect(response).to.have.property('acknowledged', true);
-      expect(response).to.have.property('result', 'deleted');
+      it('should allow deletion of legacy logs root stream and disable it in ES', async () => {
+        // Verify stream is enabled before deletion
+        const statusBefore = await apiClient.fetch('GET /api/streams/_status').expect(200);
+        expect(statusBefore.body.logs).to.be(true);
 
-      // Verify stream is no longer enabled in ES
-      const statusAfter = await apiClient.fetch('GET /api/streams/_status').expect(200);
-      expect(statusAfter.body.logs).to.be(false);
-    });
+        // Delete the stream
+        const response = await deleteStream(apiClient, 'logs', 200);
+        expect(response).to.have.property('acknowledged', true);
+        expect(response).to.have.property('result', 'deleted');
 
-    it('should NOT allow deletion of logs.otel root stream', async () => {
-      const response = await deleteStream(apiClient, 'logs.otel', 400);
-      expect(response).to.have.property('message', 'Cannot delete root stream');
-    });
+        // Verify stream is no longer enabled in ES
+        const statusAfter = await apiClient.fetch('GET /api/streams/_status').expect(200);
+        expect(statusAfter.body.logs).to.be(false);
+      });
 
-    it('should NOT allow deletion of logs.ecs root stream', async () => {
-      const response = await deleteStream(apiClient, 'logs.ecs', 400);
-      expect(response).to.have.property('message', 'Cannot delete root stream');
+      it('should NOT allow deletion of logs.otel root stream', async () => {
+        const response = await deleteStream(apiClient, 'logs.otel', 400);
+        expect(response).to.have.property('message', 'Cannot delete root stream');
+      });
+
+      it('should NOT allow deletion of logs.ecs root stream', async () => {
+        const response = await deleteStream(apiClient, 'logs.ecs', 400);
+        expect(response).to.have.property('message', 'Cannot delete root stream');
+      });
     });
   });
 }
