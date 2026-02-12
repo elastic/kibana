@@ -55,9 +55,9 @@ export function normalizeCommonRuleFields(
     rule_source: normalizedRuleSource,
     version: params.version,
     revision: rule.revision,
-    updated_at: rule.updatedAt.toISOString(),
+    updated_at: new Date(rule.updatedAt).toISOString(),
     updated_by: rule.updatedBy ?? 'elastic',
-    created_at: rule.createdAt.toISOString(),
+    created_at: new Date(rule.createdAt).toISOString(),
     created_by: rule.createdBy ?? 'elastic',
 
     // Rule schedule and execution-related data

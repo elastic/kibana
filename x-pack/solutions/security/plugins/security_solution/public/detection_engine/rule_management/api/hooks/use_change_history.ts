@@ -24,6 +24,7 @@ export const ChangeHistoryResult = z.object({
   changes: z.array(z.string()),
   oldvalues: z.object({}).passthrough().optional(),
   snapshot: z.object({}).passthrough().optional(),
+  ruleResponse: z.object({}).passthrough().optional(), // TODO: find a better name
   metadata: z
     .object({
       originalRuleId: z.string(),

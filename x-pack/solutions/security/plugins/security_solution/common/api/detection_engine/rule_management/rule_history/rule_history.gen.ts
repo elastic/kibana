@@ -28,6 +28,7 @@ export const RuleHistoryResult = z.object({
   changes: z.array(z.string()).optional(),
   oldvalues: z.object({}).passthrough().optional(),
   snapshot: z.object({}).passthrough().optional(),
+  ruleResponse: z.object({}).passthrough().optional(),
   metadata: z.object({}).passthrough().optional(),
 });
 

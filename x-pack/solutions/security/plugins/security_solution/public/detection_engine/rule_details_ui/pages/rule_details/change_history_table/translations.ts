@@ -28,38 +28,16 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
   }
 );
 
-export const COLUMN_REVISION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.revisionColumn',
+export const CHANGE_DETAILS_FLYOUT_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.changeDetailsFlyoutTitle',
   {
-    defaultMessage: 'Revision',
+    defaultMessage: 'Event change details',
   }
 );
 
-export const COLUMN_REVISION_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.revisionColumnTooltip',
+export const CHANGE_DETAILS_PANEL_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.changeDetailsPanelTitle',
   {
-    defaultMessage:
-      'Each change increments the revision number. Numbering starts when change history was introduced',
-  }
-);
-
-export const COLUMN_USER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.userColumn',
-  {
-    defaultMessage: 'User',
-  }
-);
-
-export const COLUMN_MESSAGE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.messageColumn',
-  {
-    defaultMessage: 'Message',
-  }
-);
-
-export const COLUMN_MESSAGE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.ruleChangeHistory.messageColumnTooltip',
-  {
-    defaultMessage: 'Relevant message from execution outcome.',
+    defaultMessage: 'Event change details',
   }
 );

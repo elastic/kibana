@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { isEqual, omit } from 'lodash';
 import type { SavedObject } from '@kbn/core/server';
+import type { ChangeTrackingAction } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { SanitizedRule, RawRule } from '../../../../types';
 import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
@@ -49,6 +50,7 @@ export interface UpdateRuleParams<Params extends RuleParams = never> {
   data: UpdateRuleData<Params>;
   allowMissingConnectorSecrets?: boolean;
   shouldIncrementRevision?: ShouldIncrementRevision;
+  action?: ChangeTrackingAction;
 }
 
 export async function updateRule<Params extends RuleParams = never>(
@@ -72,6 +74,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
     allowMissingConnectorSecrets,
     id,
     shouldIncrementRevision = () => true,
+    action,
   } = updateParams;
 
   // Validate update rule data schema
@@ -198,6 +201,7 @@ async function updateWithOCC<Params extends RuleParams = never>(
     originalRuleSavedObject,
     shouldIncrementRevision,
     isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
+    action,
   });
 
   // Log warning if schedule interval is less than the minimum but we're not enforcing it
@@ -252,6 +256,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   originalRuleSavedObject,
   shouldIncrementRevision,
   isSystemAction,
+  action,
 }: {
   context: RulesClientContext;
   updateRuleData: UpdateRuleData<Params>;
@@ -259,6 +264,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   validatedRuleTypeParams: Params;
   shouldIncrementRevision: (params?: Params) => boolean;
   isSystemAction: (connectorId: string) => boolean;
+  action: ChangeTrackingAction;
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 }): Promise<SanitizedRule<Params>> {
   await bulkMigrateLegacyActions({ context, rules: [originalRuleSavedObject] });
@@ -353,7 +359,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
       next: updatedRuleAttributes,
     };
     context.changeTrackingService?.log(change, {
-      action: RuleChangeTrackingAction.ruleUpdate,
+      action: action ?? RuleChangeTrackingAction.ruleUpdate,
       userId: username ?? 'unknown',
       spaceId: context.spaceId,
     });

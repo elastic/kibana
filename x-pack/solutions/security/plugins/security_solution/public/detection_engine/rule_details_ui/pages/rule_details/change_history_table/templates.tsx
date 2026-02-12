@@ -52,11 +52,18 @@ export const CHANGE_HISTORY_ACTION_TEMPLATE = {
       {' when installing the rule.'}
     </>
   ),
+  [SecurityRuleChangeTrackingAction.ruleUpgrade]: (item) => (
+    <>
+      {' made Elastic version '}
+      <EuiBadge color="hollow">{item.version}</EuiBadge>
+      {' when upgrading the rule.'}
+    </>
+  ),
   [RuleChangeTrackingAction.ruleUpdate]: (item, euiTheme) => {
     const INLINE_LIMIT = 3;
     const MAX_TOOLTIP_ITEMS = 30;
     const changes = item.changes
-      .map((f) => f.replace(/^(\w|\.)+\./, ''))
+      .map((f) => f.split('.').pop())
       .reduce((res, c, i, arr) => {
         if (i < INLINE_LIMIT)
           res.push(

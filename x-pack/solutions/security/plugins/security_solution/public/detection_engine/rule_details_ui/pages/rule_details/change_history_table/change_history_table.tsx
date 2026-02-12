@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import moment from 'moment';
 import { css } from '@emotion/react';
 import {
@@ -33,12 +33,14 @@ import { HeaderSection } from '../../../../../common/components/header_section';
 // import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 // import { useKibana } from '../../../../../common/lib/kibana';
 import * as i18n from './translations';
+import type { ChangeHistoryResult } from '../../../../rule_management/api/hooks/use_change_history';
 import { useChangeHistory } from '../../../../rule_management/api/hooks/use_change_history';
 import { RuleDetailTabs } from '../use_rule_details_tabs';
 import { useRuleDetailsContext } from '../rule_details_context';
 import { CHANGE_HISTORY_ACTION_TEMPLATE } from './templates';
+import { ChangeHistoryFlyout } from './change_history_flyout';
 
-const IGNORED_FIELDS = [
+export const IGNORED_FIELDS = [
   'updatedAt',
   'revision',
   'params.meta.kibana_siem_app_url',
@@ -63,6 +65,8 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
   //     telemetry,
   //   } = useKibana().services;
   const { euiTheme } = useEuiTheme();
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [changeItem, setChangeItem] = useState<ChangeHistoryResult>();
   const { backgroundBaseSubdued, backgroundBasePrimary } = euiTheme.colors;
   const {
     [RuleDetailTabs.history]: {
@@ -116,7 +120,12 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
           {![RuleChangeTrackingAction.ruleEnable, RuleChangeTrackingAction.ruleDisable].includes(
             item.action as RuleChangeTrackingAction
           ) && (
-            <EuiLink>
+            <EuiLink
+              onClick={() => {
+                setIsFlyoutOpen(true);
+                setChangeItem(item);
+              }}
+            >
               {`View `}
               <EuiIcon type="expand" />
             </EuiLink>
@@ -202,6 +211,11 @@ const ChangeHistoryTableComponent: React.FC<ChangeHistoryTableProps> = ({ ruleId
         data-test-subj="executionsTable"
       /> */}
       <EuiTimeline aria-label="Change History table">{items}</EuiTimeline>
+      <ChangeHistoryFlyout
+        isOpen={isFlyoutOpen}
+        onClose={() => setIsFlyoutOpen(false)}
+        change={changeItem}
+      />
     </EuiPanel>
   );
 };
