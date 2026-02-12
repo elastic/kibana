@@ -95,7 +95,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
 
       await pushMonitorFormatter.configureAllProjectMonitors();
 
-      const warnings = getBrowserTimeoutWarningsForProjectMonitors(monitors);
+      const warnings = getBrowserTimeoutWarningsForSucceededProjectMonitors(monitors);
 
       return {
         createdMonitors: pushMonitorFormatter.createdMonitors,
@@ -220,6 +220,14 @@ export const checkPublicLocationsPermissions = async (
   if (!elasticManagedLocationsEnabled) {
     return ELASTIC_MANAGED_LOCATIONS_DISABLED;
   }
+};
+
+const getBrowserTimeoutWarningsForSucceededProjectMonitors = (monitors: ProjectMonitor[]) => {
+  const failedIds = new Set(
+    monitors.map((m) => m.id)
+  );
+  const succeededMonitors = monitors.filter((m) => !failedIds.has(m.id));
+  return getBrowserTimeoutWarningsForProjectMonitors(succeededMonitors);
 };
 
 export const ELASTIC_MANAGED_LOCATIONS_DISABLED = i18n.translate(

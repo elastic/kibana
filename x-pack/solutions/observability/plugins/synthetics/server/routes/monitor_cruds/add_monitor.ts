@@ -146,7 +146,7 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       addMonitorAPI.setupGettingStarted(newMonitor.id);
 
       const warning = getBrowserTimeoutWarningForMonitor(
-        normalizedMonitor as MonitorFields,
+        normalizedMonitor,
         newMonitor.id
       );
       const monitorResponse = mapSavedObjectToMonitor({ monitor: newMonitor, internal });

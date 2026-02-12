@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { MonitorFields, ProjectMonitor } from '../../../common/runtime_types';
+import type { MonitorFields, ProjectMonitor, SyntheticsMonitor } from '../../../common/runtime_types';
 import { ConfigKey, MonitorTypeEnum } from '../../../common/runtime_types';
 
 interface MonitorWarning {
@@ -26,7 +26,7 @@ const buildBrowserTimeoutWarning = (monitorId: string): MonitorWarning => ({
 });
 
 export const getBrowserTimeoutWarningForMonitor = (
-  monitor: MonitorFields,
+  monitor: SyntheticsMonitor,
   monitorId: string
 ): MonitorWarning | null => {
   if (monitor[ConfigKey.MONITOR_TYPE] !== MonitorTypeEnum.BROWSER) {
