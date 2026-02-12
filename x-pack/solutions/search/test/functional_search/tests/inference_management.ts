@@ -51,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           );
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByViewToBeDisplayed();
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByTable(
-            '.elser_model_2'
+            'elser_model'
           );
         });
 
@@ -66,21 +66,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('can collapse group accordions', async () => {
+          const modelGroup = 'elser_model';
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByViewToBeDisplayed();
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByAccordionsToBeOpen(
-            '.elser_model_2'
+            modelGroup
           );
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.toggleGroupByAccordion(
-            '.elser_model_2'
+            modelGroup
           );
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByAccordionsToBeClosed(
-            '.elser_model_2'
+            modelGroup
           );
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.toggleGroupByAccordion(
-            '.elser_model_2'
+            modelGroup
           );
           await pageObjects.searchInferenceManagementPage.InferenceTabularPage.expectGroupByAccordionsToBeOpen(
-            '.elser_model_2'
+            modelGroup
           );
         });
       });

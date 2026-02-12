@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type TdHTMLAttributes, useMemo } from 'react';
+import React from 'react';
 import {
   EuiAccordion,
   type EuiBasicTableColumn,
@@ -19,7 +19,7 @@ import {
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { i18n } from '@kbn/i18n';
 import { useGroupedData } from '../../../hooks/use_grouped_data';
-import { GroupByOptions, type FilterOptions } from '../../../types';
+import type { GroupByOptions, FilterOptions } from '../../../types';
 import { GroupPanelStyle } from './styles';
 import { GroupByHeaderButton } from './group_header_button';
 import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from '../types';
@@ -40,16 +40,6 @@ export const GroupedEndpointsTables = ({
   columns,
 }: GroupedEndpointsTablesProps) => {
   const { data } = useGroupedData(inferenceEndpoints, groupBy, filterOptions, searchKey);
-  const tableColumns = useMemo(() => {
-    switch (groupBy) {
-      case GroupByOptions.Model:
-        return columns.filter(
-          (c: TdHTMLAttributes<HTMLTableCellElement>) => c?.id !== 'model-column'
-        );
-      default:
-        return columns;
-    }
-  }, [groupBy, columns]);
 
   if (inferenceEndpoints.length === 0 || Object.keys(data).length === 0) {
     // No data after filters / search key
@@ -95,7 +85,7 @@ export const GroupedEndpointsTables = ({
               data-test-subj={`${groupId}-table`}
               itemId="inference_id"
               items={groupedData.endpoints}
-              columns={tableColumns}
+              columns={columns}
               pagination={
                 groupedData.endpoints.length > INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES[0]
                   ? {
@@ -114,7 +104,7 @@ export const GroupedEndpointsTables = ({
                 {
                   defaultMessage: 'Inference endpoints list grouped by {groupBy}: {groupId}',
                   values: {
-                    groupBy: groupBy,
+                    groupBy,
                     groupId,
                   },
                 }
