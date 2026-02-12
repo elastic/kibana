@@ -18,15 +18,15 @@ project:
   metadata:
     sourceRoot: src/platform/plugins/shared/workflows_execution_engine
 dependsOn:
-  - '@kbn/datemath'
+  - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/actions-plugin'
   - '@kbn/workflows'
   - '@kbn/task-manager-plugin'
   - '@kbn/es-query'
-  - '@kbn/datemath'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/cloud-plugin'
+  - '@kbn/datemath'
   - '@kbn/utility-types'
   - '@kbn/zod'
   - '@kbn/core-data-streams-server'
