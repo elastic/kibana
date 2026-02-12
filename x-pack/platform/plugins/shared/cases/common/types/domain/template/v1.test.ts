@@ -123,10 +123,6 @@ describe('FieldSchema', () => {
     name: 'test_field',
     label: 'Test Field',
     type: 'keyword' as const,
-    metadata: {
-      required: true,
-      default: 'default value',
-    },
   };
 
   it('validates a valid field', () => {
@@ -143,7 +139,6 @@ describe('FieldSchema', () => {
       control: 'INPUT_TEXT',
       name: 'test_field',
       type: 'keyword' as const,
-      metadata: {},
     };
 
     const result = FieldSchema.safeParse(fieldWithoutLabel);
@@ -167,8 +162,12 @@ describe('FieldSchema', () => {
 
   it('accepts metadata with any structure', () => {
     const fieldWithComplexMetadata = {
-      ...validField,
+      control: 'SELECT_BASIC',
+      name: 'test_field',
+      label: 'Test Field',
+      type: 'keyword' as const,
       metadata: {
+        options: ['a', 'b'],
         nested: {
           deeply: {
             value: 123,
@@ -191,12 +190,12 @@ describe('ParsedTemplateSchema', () => {
     name: 'Test Template',
     owner: 'securitySolution',
     definition: {
+      name: 'template-definition-name',
       fields: [
         {
           control: 'INPUT_TEXT',
           name: 'field1',
           type: 'keyword' as const,
-          metadata: {},
         },
         {
           control: 'SELECT_BASIC',
@@ -226,6 +225,7 @@ describe('ParsedTemplateSchema', () => {
     const templateWithNoFields = {
       ...validParsedTemplate,
       definition: {
+        name: 'template-definition-name',
         fields: [],
       },
     };
@@ -258,6 +258,7 @@ describe('ParsedTemplateSchema', () => {
     const templateWithInvalidField = {
       ...validParsedTemplate,
       definition: {
+        name: 'template-definition-name',
         fields: [
           {
             control: 'INPUT_TEXT',
@@ -308,7 +309,6 @@ describe('ParsedTemplateSchema', () => {
 
 describe('CreateTemplateInputSchema', () => {
   const validCreateInput = {
-    name: 'New Template',
     owner: 'securitySolution',
     definition: 'fields:\n  - name: test_field\n    type: keyword',
   };
@@ -381,7 +381,6 @@ describe('CreateTemplateInputSchema', () => {
 
 describe('UpdateTemplateInputSchema', () => {
   const validUpdateInput = {
-    name: 'Updated Template',
     owner: 'securitySolution',
     definition: 'fields:\n  - name: updated_field\n    type: keyword',
   };
@@ -437,9 +436,19 @@ describe('UpdateTemplateInputSchema', () => {
     }
   });
 
-  it('requires all fields (PUT semantics)', () => {
+  it('accepts update input without name', () => {
+    const updateWithoutName = {
+      owner: 'securitySolution',
+      definition: 'fields:\n  - name: updated_field\n    type: keyword',
+    };
+
+    const result = UpdateTemplateInputSchema.safeParse(updateWithoutName);
+
+    expect(result.success).toBe(true);
+  });
+
+  it('requires owner and definition (PUT semantics)', () => {
     const partialUpdate = {
-      name: 'Just updating name',
       // missing owner and definition
     };
 
