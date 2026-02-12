@@ -30,7 +30,7 @@ export const ExecutionEventsTableRowSummary: React.FC<ExecutionEventsTableRowSum
 }) => {
   switch (event.type) {
     case RuleExecutionEventTypeEnum.message:
-      return <TruncatedText text={event.message} />;
+      return <MessageSummary message={event.message} />;
     case RuleExecutionEventTypeEnum['status-change']:
       return <StatusChangeSummary details={event.details} />;
     case RuleExecutionEventTypeEnum['execution-metrics']:
@@ -38,6 +38,11 @@ export const ExecutionEventsTableRowSummary: React.FC<ExecutionEventsTableRowSum
     default:
       assertUnreachable(event.type, 'Unknown rule execution event type');
   }
+};
+
+const MessageSummary: React.FC<{ message: string }> = ({ message }) => {
+  const firstLineOnly = message.split('\n')[0];
+  return <TruncatedText text={firstLineOnly} />;
 };
 
 interface StatusChangeSummaryProps {
