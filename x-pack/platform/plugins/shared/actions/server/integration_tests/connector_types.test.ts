@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import zodToJsonSchema from 'zod-to-json-schema';
-import type { z } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ActionTypeRegistry } from '../action_type_registry';
 import { setupTestServers } from './lib';
@@ -128,15 +127,17 @@ describe('Connector type config checks', () => {
         });
       }
 
-      expect(
-        zodToJsonSchema(config.schema as z.ZodType, { name: 'config', $refStrategy: 'none' })
-      ).toMatchSnapshot();
-      expect(
-        zodToJsonSchema(secrets.schema as z.ZodType, { name: 'secrets', $refStrategy: 'none' })
-      ).toMatchSnapshot();
-      expect(
-        zodToJsonSchema(params!.schema as z.ZodType, { name: 'params', $refStrategy: 'none' })
-      ).toMatchSnapshot();
+      const toJsonSchema = (schema: z.ZodType) => {
+        const { $schema, ...jsonSchema } = z.toJSONSchema(schema, {
+          unrepresentable: 'any',
+          io: 'input',
+        }) as Record<string, unknown>;
+        return jsonSchema;
+      };
+
+      expect(toJsonSchema(config.schema as z.ZodType)).toMatchSnapshot();
+      expect(toJsonSchema(secrets.schema as z.ZodType)).toMatchSnapshot();
+      expect(toJsonSchema(params!.schema as z.ZodType)).toMatchSnapshot();
     });
   }
 });
