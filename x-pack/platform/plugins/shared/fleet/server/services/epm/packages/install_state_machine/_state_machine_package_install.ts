@@ -90,7 +90,7 @@ export interface InstallContext extends StateContext<StateNames> {
 /**
  * This data structure defines the sequence of the states and the transitions
  */
-const regularStatesDefinition: StateMachineStates<StateNames> = {
+export const regularStatesDefinition: StateMachineStates<StateNames> = {
   create_restart_installation: {
     nextState: INSTALL_STATES.INSTALL_PRECHECK,
     onTransition: stepCreateRestartInstallation,
@@ -182,7 +182,7 @@ const regularStatesDefinition: StateMachineStates<StateNames> = {
   },
 };
 
-const streamingStatesDefinition: StateMachineStates<string> = {
+export const streamingStatesDefinition: StateMachineStates<string> = {
   create_restart_installation: {
     nextState: INSTALL_STATES.INSTALL_KIBANA_ASSETS,
     onTransition: stepCreateRestartInstallation,
@@ -204,6 +204,7 @@ const streamingStatesDefinition: StateMachineStates<string> = {
     onTransition: stepSaveKnowledgeBase,
     nextState: INSTALL_STATES.UPDATE_SO,
     onPostTransition: updateLatestExecutedState,
+    isAsync: true, // Knowledge base indexing runs in background
   },
   update_so: {
     onPreTransition: cleanUpUnusedKibanaAssetsStep,

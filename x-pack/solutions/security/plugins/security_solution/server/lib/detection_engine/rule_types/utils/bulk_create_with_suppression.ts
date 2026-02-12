@@ -83,7 +83,7 @@ export const bulkCreateWithSuppression = async <
       });
       return enrichedAlerts;
     } catch (error) {
-      ruleExecutionLogger.error(`Alerts enrichment failed: ${error}`);
+      ruleExecutionLogger.error(`Error enriching alerts\nError: ${error}.`);
       throw error;
     } finally {
       enrichmentsTimeFinish = performance.now();
@@ -112,7 +112,7 @@ export const bulkCreateWithSuppression = async <
 
   const end = performance.now();
 
-  ruleExecutionLogger.debug(`Alerts bulk process took ${makeFloatString(end - start)} ms`);
+  ruleExecutionLogger.debug(`Bulk processing alerts took ${makeFloatString(end - start)}ms.`);
 
   // query rule type suppression does not happen in memory, so we can't just count createdAlerts and suppressedAlerts
   // for this rule type we need to look into alerts suppression properties, extract those values and sum up
@@ -124,7 +124,7 @@ export const bulkCreateWithSuppression = async <
     : suppressedAlerts.length;
 
   if (!isEmpty(errors)) {
-    ruleExecutionLogger.warn(`Alerts bulk process finished with errors: ${JSON.stringify(errors)}`);
+    ruleExecutionLogger.warn(`Error bulk processing alerts\nError: ${JSON.stringify(errors)}.`);
     return {
       errors: Object.keys(errors),
       success: false,

@@ -37,13 +37,21 @@ export const ManagementLandingPage = ({
     coreStart,
     cloud,
     hasEnterpriseLicense,
+    getAutoOpsStatusHook,
   } = useAppContext();
   setBreadcrumbs();
+
+  // Check AutoOps status
+  const useAutoOpsStatus = getAutoOpsStatusHook();
+  const autoOpsStatus = useAutoOpsStatus();
 
   // Check if cloud services are available
   const isCloudEnabled = cloud?.isCloudEnabled || false;
   // AutoOps promotion callout should only be shown for self-managed instances with an enterprise license
-  const shouldShowAutoOpsPromotion = !isCloudEnabled && hasEnterpriseLicense;
+  // and not already connected to AutoOps
+  const isAutoOpsEligible = !isCloudEnabled && hasEnterpriseLicense;
+  const shouldShowAutoOpsPromotion =
+    isAutoOpsEligible && !autoOpsStatus.isLoading && !autoOpsStatus.isCloudConnectAutoopsEnabled;
   const learnMoreLink = coreStart.docLinks.links.cloud.connectToAutoops;
   const cloudConnectUrl = coreStart.application.getUrlForApp('cloud_connect');
   const handleConnectClick = (e: React.MouseEvent) => {
