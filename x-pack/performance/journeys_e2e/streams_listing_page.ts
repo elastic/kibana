@@ -23,14 +23,16 @@ export const journey = new Journey({
     await page.waitForSelector(subj('streamsTable'), { timeout: 120000 });
   })
   .step('Search for a classic stream', async ({ page, inputDelays }) => {
-    const searchBox = page.locator(subj('streamsTable')).locator(STREAMS_SEARCH_SELECTOR).first();
+    // Note: EUI's EuiInMemoryTable renders the search bar OUTSIDE the data-test-subj container,
+    // so we cannot scope this locator inside 'streamsTable'. The aria-label is unique on the page.
+    const searchBox = page.locator(STREAMS_SEARCH_SELECTOR).first();
     await searchBox.waitFor({ state: 'visible', timeout: 60000 });
     await searchBox.fill('');
     await searchBox.type('logs-perf-classic-00001', { delay: inputDelays.TYPING });
     await page.waitForSelector(subj('streamsTable'));
   })
   .step('Clear search and expand all streams', async ({ page }) => {
-    const searchBox = page.locator(subj('streamsTable')).locator(STREAMS_SEARCH_SELECTOR).first();
+    const searchBox = page.locator(STREAMS_SEARCH_SELECTOR).first();
     await searchBox.waitFor({ state: 'visible', timeout: 60000 });
     await searchBox.fill('');
     await page.waitForSelector(subj('streamsTable'));
