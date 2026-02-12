@@ -70,7 +70,11 @@ interface CreateProfileParams {
 interface UpdateProfileParams {
   name?: string;
   description?: string;
-  rules?: CreateProfileParams['rules'];
+  rules?: {
+    fieldRules: CreateProfileParams['rules']['fieldRules'];
+    regexRules?: CreateProfileParams['rules']['regexRules'];
+    nerRules?: CreateProfileParams['rules']['nerRules'];
+  };
   updatedBy: string;
 }
 

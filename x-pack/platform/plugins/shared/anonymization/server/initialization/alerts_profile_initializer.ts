@@ -10,8 +10,8 @@ import type { ProfilesRepository } from '../repository';
 import type { SaltService } from '../salt';
 import { getDefaultAlertFieldRules } from './default_field_rules';
 
-/** Well-known target ID for the alerts data view profile. */
-export const ALERTS_DATA_VIEW_TARGET_ID = 'security-solution-default';
+/** Well-known target ID for the alerts data view profile (space-aware). */
+export const getAlertsDataViewTargetId = (namespace: string) => `security-solution-${namespace}`;
 export const ALERTS_DATA_VIEW_TARGET_TYPE = 'data_view' as const;
 
 /**
@@ -36,44 +36,46 @@ export const ensureAlertsDataViewProfile = async ({
   logger: Logger;
 }): Promise<void> => {
   try {
+    const targetId = getAlertsDataViewTargetId(namespace);
+
     // Check if the profile already exists (do not overwrite)
     const existing = await profilesRepo.findByTarget(
       namespace,
       ALERTS_DATA_VIEW_TARGET_TYPE,
-      ALERTS_DATA_VIEW_TARGET_ID
+      targetId
     );
 
     if (existing) {
       logger.debug(`Alerts data view anonymization profile already exists in space: ${namespace}`);
-      return;
+    } else {
+      // Ensure salt exists for this space
+      await saltService.getSalt(namespace);
+      const saltId = `salt-${namespace}`;
+
+      // Create the default profile
+      await profilesRepo.create({
+        name: 'Security Default Anonymization Profile',
+        description: 'Default allow/anonymize/deny rules for SOC workflows',
+        targetType: ALERTS_DATA_VIEW_TARGET_TYPE,
+        targetId,
+        rules: {
+          fieldRules: getDefaultAlertFieldRules(),
+          regexRules: [],
+          nerRules: [],
+        },
+        saltId,
+        namespace,
+        createdBy: 'system',
+      });
+
+      logger.info(`Created alerts data view anonymization profile in space: ${namespace}`);
     }
 
-    // Ensure salt exists for this space
-    await saltService.getSalt(namespace);
-    const saltId = `salt-${namespace}`;
-
-    // Create the default profile
-    await profilesRepo.create({
-      name: 'Security Default Anonymization Profile',
-      description: 'Default allow/anonymize/deny rules for SOC workflows',
-      targetType: ALERTS_DATA_VIEW_TARGET_TYPE,
-      targetId: ALERTS_DATA_VIEW_TARGET_ID,
-      rules: {
-        fieldRules: getDefaultAlertFieldRules(),
-        regexRules: [],
-        nerRules: [],
-      },
-      saltId,
-      namespace,
-      createdBy: 'system',
-    });
-
-    // Only run advanced settings migration during automatic profile creation.
+    // Run the idempotent legacy migration after ensure flow so it applies
+    // both when the profile already exists and immediately after first create.
     if (migrateLegacySettings) {
       await migrateLegacySettings();
     }
-
-    logger.info(`Created alerts data view anonymization profile in space: ${namespace}`);
   } catch (err) {
     // If another node created it concurrently, that's fine
     if ((err as any).statusCode === 409) {

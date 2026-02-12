@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   ensureAlertsDataViewProfile,
-  ALERTS_DATA_VIEW_TARGET_ID,
+  getAlertsDataViewTargetId,
   ALERTS_DATA_VIEW_TARGET_TYPE,
 } from './alerts_profile_initializer';
 import type { ProfilesRepository } from '../repository';
@@ -45,14 +45,14 @@ describe('ensureAlertsDataViewProfile', () => {
       expect.objectContaining({
         name: 'Security Default Anonymization Profile',
         targetType: ALERTS_DATA_VIEW_TARGET_TYPE,
-        targetId: ALERTS_DATA_VIEW_TARGET_ID,
+        targetId: getAlertsDataViewTargetId('default'),
         namespace: 'default',
         createdBy: 'system',
       })
     );
   });
 
-  it('runs legacy settings migration only when auto-creating profile', async () => {
+  it('runs legacy settings migration when auto-creating profile', async () => {
     const migrateLegacySettings = jest.fn().mockResolvedValue(undefined);
     (mockProfilesRepo.findByTarget as jest.Mock).mockResolvedValue(null);
     (mockProfilesRepo.create as jest.Mock).mockResolvedValue({ id: 'test-id' });
@@ -81,7 +81,7 @@ describe('ensureAlertsDataViewProfile', () => {
     });
 
     expect(mockProfilesRepo.create).not.toHaveBeenCalled();
-    expect(migrateLegacySettings).not.toHaveBeenCalled();
+    expect(migrateLegacySettings).toHaveBeenCalledTimes(1);
   });
 
   it('handles concurrent creation gracefully (409 conflict)', async () => {

@@ -31,7 +31,7 @@ import { SaltService, ANONYMIZATION_SALT_SAVED_OBJECT_TYPE } from './salt';
 import { ProfilesRepository } from './repository';
 import { registerFeatures } from './features';
 import {
-  ALERTS_DATA_VIEW_TARGET_ID,
+  getAlertsDataViewTargetId,
   ALERTS_DATA_VIEW_TARGET_TYPE,
   ensureAlertsDataViewProfile,
 } from './initialization';
@@ -116,22 +116,17 @@ export class AnonymizationPlugin
     // Initialize services
     const saltService = new SaltService(core.savedObjects, deps.encryptedSavedObjects, this.logger);
     const profilesRepo = new ProfilesRepository(esClient);
-    const globalUiSettingsClient = core.uiSettings.globalAsScopedToClient(
-      core.savedObjects.getUnsafeInternalClient()
-    );
-
     const runLegacySettingsMigration = async (namespace: string): Promise<void> => {
-      if (namespace !== 'default') {
-        this.logger.debug(
-          `Skipping ai:anonymizationSettings migration for non-default namespace: ${namespace}`
-        );
-        return;
-      }
+      const namespaceScopedClient = core.savedObjects
+        .getUnsafeInternalClient()
+        .asScopedToNamespace(namespace);
+      const namespaceUiSettingsClient =
+        core.uiSettings.globalAsScopedToClient(namespaceScopedClient);
 
       await migrateAnonymizationSettings({
         namespace,
         esClient,
-        uiSettings: globalUiSettingsClient,
+        uiSettings: namespaceUiSettingsClient,
         logger: this.logger,
       });
     };
@@ -153,7 +148,7 @@ export class AnonymizationPlugin
       resolveEffectivePolicy: async (namespace, target) => {
         if (
           target.type === ALERTS_DATA_VIEW_TARGET_TYPE &&
-          target.id === ALERTS_DATA_VIEW_TARGET_ID
+          target.id === getAlertsDataViewTargetId(namespace)
         ) {
           // Lazily ensure the alerts profile in the request namespace.
           await ensureAlertsDataViewProfile({

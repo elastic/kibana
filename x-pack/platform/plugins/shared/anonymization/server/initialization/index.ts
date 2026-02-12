@@ -7,7 +7,7 @@
 
 export {
   ensureAlertsDataViewProfile,
-  ALERTS_DATA_VIEW_TARGET_ID,
+  getAlertsDataViewTargetId,
   ALERTS_DATA_VIEW_TARGET_TYPE,
 } from './alerts_profile_initializer';
 export { getDefaultAlertFieldRules } from './default_field_rules';
