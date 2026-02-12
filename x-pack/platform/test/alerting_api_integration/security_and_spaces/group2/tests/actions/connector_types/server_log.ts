@@ -57,6 +57,7 @@ export default function serverLogTest({ getService }: FtrProviderContext) {
         is_missing_secrets: false,
         config: {},
         is_connector_type_deprecated: false,
+        auth_mode: 'shared',
       });
     });
 
