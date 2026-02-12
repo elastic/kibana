@@ -7,4 +7,5 @@
 
 export * from './engine_descriptor_type';
 export * from './engine_descriptor';
+export * from './entity_maintainers_tasks_type';
 export * from './constants';

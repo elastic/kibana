@@ -19,7 +19,10 @@ import { createRequestHandlerContext } from './request_context_factory';
 import { PLUGIN_ID } from '../common';
 import { registerTasks } from './tasks/register_tasks';
 import { registerUiSettings } from './infra/feature_flags/register';
-import { EngineDescriptorType } from './domain/definitions/saved_objects';
+import {
+  EngineDescriptorType,
+  EntityMaintainersTasksType,
+} from './domain/definitions/saved_objects';
 
 export class EntityStorePlugin
   implements
@@ -61,8 +64,9 @@ export class EntityStorePlugin
     this.logger.debug('Registering ui settings');
     registerUiSettings(core.uiSettings);
 
-    this.logger.debug('Registering saved objects type');
+    this.logger.debug('Registering saved objects types');
     core.savedObjects.registerType(EngineDescriptorType);
+    core.savedObjects.registerType(EntityMaintainersTasksType);
 
     return {
       registerEntityMaintainer: (_config) => {},

@@ -6,23 +6,65 @@
  */
 
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EntityMaintainerStatus, RegisterEntityMaintainerConfig } from './types';
 import { TasksConfig } from "../config";
 import { EntityStoreTaskType } from "../constants";
 import type { Logger } from '@kbn/logging';
+import { EntityStoreCoreSetup } from '../../types';
+import {
+  EntityMaintainersTasksTypeName,
+  EntityMaintainersTasksSingletonId,
+} from '../../domain/definitions/saved_objects';
+
+function getTaskType(id: string): string {
+  return `${TasksConfig[EntityStoreTaskType.Values.entityMaintainer].type}:${id}`;
+}
 
 export function registerEntityMaintainerTask({
   taskManager,
   logger,
   config,
+  core,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   config: RegisterEntityMaintainerConfig;
+  core: EntityStoreCoreSetup;
 }): void {
   try {
-    const { type, title } = TasksConfig[EntityStoreTaskType.Values.entityMaintainer];
-    const { run, interval, initialState, description, name, id, setup } = config;
+    
+    const { title } = TasksConfig[EntityStoreTaskType.Values.entityMaintainer];
+    const { run, interval, initialState, description, id, setup } = config;
+    const type = getTaskType(id);
+
+    core.getStartServices().then(([start]) => {
+      const internalRepo = start.savedObjects.createInternalRepository();
+      const newEntry = { id, interval };
+      internalRepo
+        .get<{ 'entity-maintainers-tasks': Array<{ id: string; interval: string }> }>(
+          EntityMaintainersTasksTypeName,
+          EntityMaintainersTasksSingletonId
+        )
+        .then((existing) => {
+          const tasks = existing.attributes['entity-maintainers-tasks'] ?? [];
+          return internalRepo.update(
+            EntityMaintainersTasksTypeName,
+            EntityMaintainersTasksSingletonId,
+            { 'entity-maintainers-tasks': [...tasks, newEntry] }
+          );
+        })
+        .catch((err: Error) => {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return internalRepo.create(
+              EntityMaintainersTasksTypeName,
+              { 'entity-maintainers-tasks': [newEntry] },
+              { id: EntityMaintainersTasksSingletonId }
+            );
+          }
+          logger.error(`Failed to register entity maintainer task in saved object: ${err.message}`);
+        });
+    });
 
     taskManager.registerTaskDefinitions({
       [type]: {
