@@ -50,7 +50,7 @@ describe('GET /spaces/space', () => {
 
     const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
-      .setup({ config$: Rx.of(spacesConfig) }, undefined)
+      .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
 
     const service = new SpacesService();

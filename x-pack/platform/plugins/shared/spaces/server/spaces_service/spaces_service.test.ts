@@ -70,12 +70,9 @@ const createService = (serverBasePath: string = '') => {
   });
 
   const spacesClientService = new SpacesClientService(jest.fn(), 'traditional');
-  spacesClientService.setup(
-    {
-      config$: Rx.of(spacesConfig),
-    },
-    undefined
-  );
+  spacesClientService.setup({
+    config$: Rx.of(spacesConfig),
+  });
 
   const spacesClientServiceStart = spacesClientService.start(
     coreStart,
