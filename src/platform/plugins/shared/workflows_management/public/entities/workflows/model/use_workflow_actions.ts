@@ -11,11 +11,11 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type {
   RunStepCommand,
-  RunWorkflowCommand,
   RunWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowListDto,
 } from '@kbn/workflows';
+import { useRunWorkflowAction } from './use_run_workflow_action';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 
@@ -220,17 +220,7 @@ export function useWorkflowActions() {
     },
   });
 
-  const runWorkflow = useMutation<
-    RunWorkflowResponseDto,
-    HttpError,
-    RunWorkflowCommand & { id: string; triggerTab?: 'manual' | 'alert' | 'index' }
-  >({
-    mutationKey: ['POST', 'workflows', 'id', 'run'],
-    mutationFn: ({ id, inputs }) => {
-      return http.post(`/api/workflows/${id}/run`, {
-        body: JSON.stringify({ inputs }),
-      });
-    },
+  const runWorkflow = useRunWorkflowAction({
     onSuccess: (_, variables) => {
       const inputCount = Object.keys(variables.inputs || {}).length;
 

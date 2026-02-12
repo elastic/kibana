@@ -11,6 +11,7 @@ import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiButton, EuiPanel, EuiFlexGroup } from '@elastic/eui';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { WorkflowSelector } from '@kbn/workflows-ui';
+import { useRunWorkflowAction } from '@kbn/workflows-management-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { RunWorkflowResponseDto, WorkflowListDto } from '@kbn/workflows';
@@ -20,7 +21,6 @@ import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { AlertTriggerInput } from '@kbn/workflows-management-plugin/common/types/alert_types';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { useMutation } from '@kbn/react-query';
 import { Loader } from '../../../../common/components/loader';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { AlertTableContextMenuItem } from '../types';
@@ -44,24 +44,6 @@ export interface AlertWorkflowsPanelProps {
   alertIds: AlertWorkflowAlertId[];
   onClose: () => void;
 }
-
-const useRunWorkflowAction = () => {
-  const {
-    services: { http },
-  } = useKibana();
-
-  return useMutation<RunWorkflowResponseDto, Error, { id: string; inputs: AlertTriggerInput }>({
-    mutationKey: ['POST', 'workflows', 'id', 'run'],
-    mutationFn: ({ id, inputs }) => {
-      if (!http) {
-        throw new Error('HTTP service is unavailable');
-      }
-      return http.post(`/api/workflows/${id}/run`, {
-        body: JSON.stringify({ inputs }),
-      });
-    },
-  });
-};
 
 export const AlertWorkflowsPanel = ({ alertIds, onClose }: AlertWorkflowsPanelProps) => {
   const {
