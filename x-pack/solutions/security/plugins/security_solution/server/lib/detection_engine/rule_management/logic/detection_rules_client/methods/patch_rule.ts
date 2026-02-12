@@ -65,8 +65,8 @@ export const patchRule = async ({
   }
 
   await validateMlAuth(mlAuthz, rulePatch.type ?? existingRule.type);
-
   validateNonCustomizablePatchFields(rulePatch, existingRule);
+  validateFieldWritePermissions(rulePatch, rulesAuthz);
 
   const patchedRule = await applyRulePatch({
     prebuiltRuleAssetClient,
@@ -80,18 +80,15 @@ export const patchRule = async ({
    * Certain fields on the rule object are still able to be modified even if the user only has read permissions,
    * given they have crud permissions for the specific fields they're modifying.
    *
-   * If the user does not have permission to edit rules but all fields in the PATCH request (besides id/rule_id) are
-   * included in the `ReadAuthRuleUpdateProps` type, we check if the user has read authz privileges for the fields
-   * and use the `bulkEditRuleParamsWithReadAuth` method provided by the alerting rules client to update the rule fields
-   * individually. Otherwise the user will need `all` privileges for rules.
+   * If all fields in the PATCH request (besides id/rule_id) are included in the `ReadAuthRuleUpdateProps` type,
+   * we check if the user has read authz privileges for the fields and use the `bulkEditRuleParamsWithReadAuth`
+   * method provided by the alerting rules client to update the rule fields individually. Otherwise the user
+   * will need `all` privileges for rules.
    */
   if (
-    !rulesAuthz.canEditRules &&
     !isEmpty(rulePatchObjWithoutIds) &&
     Object.keys(rulePatchObjWithoutIds).every((key) => isReadAuthEditField(key))
   ) {
-    validateFieldWritePermissions(rulePatch, rulesAuthz);
-
     // We remove the `enabled` field from the `updateReadAuthEditRuleFields` as it only modifies `RuleParams` type fields
     // `enabled` is modified later if it exists in the PATCH object
     const { enabled: unusedField, ...fieldsToPatch } = rulePatchObjWithoutIds;

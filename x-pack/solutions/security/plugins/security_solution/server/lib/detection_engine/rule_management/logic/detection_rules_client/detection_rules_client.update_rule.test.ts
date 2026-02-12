@@ -558,35 +558,6 @@ describe('DetectionRulesClient.updateRule', () => {
       rulesClient = rulesClientMock.create();
     });
 
-    it('uses standard update when user has canEditRules even for read-auth fields', async () => {
-      const savedObjectsClient = savedObjectsClientMock.create();
-      detectionRulesClient = createDetectionRulesClient({
-        actionsClient,
-        rulesClient,
-        mlAuthz,
-        rulesAuthz: getMockRulesAuthz(), // Full access
-        savedObjectsClient,
-        license: licenseMock.createLicenseMock(),
-        productFeaturesService: createProductFeaturesServiceMock(),
-      });
-
-      const existingRule = getRulesSchemaMock();
-      (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
-
-      const ruleUpdate = {
-        ...existingRule,
-        id: undefined,
-        note: 'Updated investigation guide',
-      };
-
-      rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-
-      await detectionRulesClient.updateRule({ ruleUpdate });
-
-      expect(rulesClient.update).toHaveBeenCalled();
-      expect(rulesClient.bulkEditRuleParamsWithReadAuth).not.toHaveBeenCalled();
-    });
-
     describe('`note` field', () => {
       describe('with canEditInvestigationGuides permission', () => {
         beforeEach(() => {
