@@ -22,8 +22,10 @@ jest.mock('./query_utils', () => ({
     calculatePercentilesFromBuckets: jest.fn(),
     getTTFTMetrics: jest.fn(),
     getTTLTMetrics: jest.fn(),
-    getLatencyByModel: jest.fn(),
-    getLatencyByAgentType: jest.fn(),
+    getTokensByModel: jest.fn(),
+    getQueryToResultTimeByModel: jest.fn(),
+    getQueryToResultTimeByAgentType: jest.fn(),
+    getToolCallsByModel: jest.fn(),
   })),
   isIndexNotFoundError: jest.fn(),
 }));
@@ -196,24 +198,44 @@ describe('telemetry_collector', () => {
           mean: 1500,
           total_samples: 1000,
         }),
-        getLatencyByModel: jest.fn().mockResolvedValue([
+        getTokensByModel: jest.fn().mockResolvedValue([
           {
             model: 'gpt-4',
-            ttft_p50: 100,
-            ttft_p95: 500,
-            ttlt_p50: 1000,
-            ttlt_p95: 5000,
-            sample_count: 500,
+            total_tokens: 20000,
+            avg_tokens_per_round: 200,
+            sample_count: 100,
           },
         ]),
-        getLatencyByAgentType: jest.fn().mockResolvedValue([
+        getQueryToResultTimeByModel: jest.fn().mockResolvedValue([
+          {
+            model: 'gpt-4',
+            p50: 900,
+            p75: 1200,
+            p90: 1500,
+            p95: 2000,
+            p99: 2500,
+            mean: 1100,
+            total_samples: 100,
+            sample_count: 100,
+          },
+        ]),
+        getQueryToResultTimeByAgentType: jest.fn().mockResolvedValue([
           {
             agent_id: 'default',
-            ttft_p50: 120,
-            ttft_p95: 550,
-            ttlt_p50: 1100,
-            ttlt_p95: 5500,
+            p50: 1000,
+            p75: 2000,
+            p90: 4000,
+            p95: 6000,
+            p99: 8000,
+            mean: 1500,
+            total_samples: 300,
             sample_count: 300,
+          },
+        ]),
+        getToolCallsByModel: jest.fn().mockResolvedValue([
+          {
+            model: 'gpt-4',
+            count: 15,
           },
         ]),
         getCountersByPrefix: jest.fn().mockImplementation((domain, prefix) => {
@@ -306,13 +328,57 @@ describe('telemetry_collector', () => {
       });
 
       expect(result.query_to_result_time).toEqual({
-        p50: 500,
+        p50: 1000,
         p75: 2000,
         p90: 4000,
         p95: 6000,
         p99: 8000,
         mean: 1500,
       });
+
+      expect(result.tokens_by_model).toEqual([
+        {
+          model: 'gpt-4',
+          total_tokens: 20000,
+          avg_tokens_per_round: 200,
+          sample_count: 100,
+        },
+      ]);
+
+      expect(result.query_to_result_time_by_model).toEqual([
+        {
+          model: 'gpt-4',
+          p50: 900,
+          p75: 1200,
+          p90: 1500,
+          p95: 2000,
+          p99: 2500,
+          mean: 1100,
+          total_samples: 100,
+          sample_count: 100,
+        },
+      ]);
+
+      expect(result.query_to_result_time_by_agent_type).toEqual([
+        {
+          agent_id: 'default',
+          p50: 1000,
+          p75: 2000,
+          p90: 4000,
+          p95: 6000,
+          p99: 8000,
+          mean: 1500,
+          total_samples: 300,
+          sample_count: 300,
+        },
+      ]);
+
+      expect(result.tool_calls_by_model).toEqual([
+        {
+          model: 'gpt-4',
+          count: 15,
+        },
+      ]);
 
       expect(result.tool_calls).toEqual({
         total: 190, // 100 + 50 + 25 + 10 + 5
@@ -381,17 +447,10 @@ describe('telemetry_collector', () => {
           mean: 0,
           total_samples: 0,
         },
-        time_to_last_token: {
-          p50: 0,
-          p75: 0,
-          p90: 0,
-          p95: 0,
-          p99: 0,
-          mean: 0,
-          total_samples: 0,
-        },
-        latency_by_model: [],
-        latency_by_agent_type: [],
+        tokens_by_model: [],
+        query_to_result_time_by_model: [],
+        query_to_result_time_by_agent_type: [],
+        tool_calls_by_model: [],
         tool_calls: {
           total: 0,
           by_source: {
@@ -521,31 +580,6 @@ describe('telemetry_collector', () => {
       const result: OnechatTelemetry = await registeredCollector.fetch(mockContext);
 
       expect(result.errors.avg_errors_per_conversation).toBe(0);
-    });
-
-    it('handles missing tool_call counters with default 0', async () => {
-      mockQueryUtils.getCountersByPrefix.mockImplementation((domain: string, prefix: string) => {
-        if (prefix === `${ONECHAT_USAGE_DOMAIN}_tool_call_`) {
-          return Promise.resolve(
-            new Map([
-              [`${ONECHAT_USAGE_DOMAIN}_tool_call_default_agent`, 10],
-              // Missing other sources
-            ])
-          );
-        }
-        return Promise.resolve(new Map());
-      });
-
-      const result: OnechatTelemetry = await registeredCollector.fetch(mockContext);
-
-      expect(result.tool_calls.by_source).toEqual({
-        default_agent: 10,
-        custom_agent: 0,
-        mcp: 0,
-        api: 0,
-        a2a: 0,
-      });
-      expect(result.tool_calls.total).toBe(10);
     });
   });
 });

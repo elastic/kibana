@@ -272,6 +272,48 @@ describe('Cases webhook service', () => {
         },
       });
     });
+
+    it('headers work as expected if secrets are undefined', () => {
+      createExternalService(
+        actionId,
+        {
+          config: { ...config, hasAuth: false },
+          // @ts-expect-error: should not happen but it does with very old SOs
+          secrets: undefined,
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          'content-type': 'application/json',
+          foo: 'bar',
+        },
+      });
+    });
+
+    it('headers work as expected if secrets are null', () => {
+      createExternalService(
+        actionId,
+        {
+          config: { ...config, hasAuth: false },
+          // @ts-expect-error: should not happen but it does with very old SOs
+          secrets: null,
+        },
+        logger,
+        configurationUtilities,
+        connectorUsageCollector
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          'content-type': 'application/json',
+          foo: 'bar',
+        },
+      });
+    });
   });
 
   describe('getIncident', () => {

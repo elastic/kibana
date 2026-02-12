@@ -645,6 +645,27 @@ export const ENTITY_ENGINE_DELETION_EVENT: EventTypeOpts<{
   },
 };
 
+export const ENTITY_HIGHLIGHTS_USAGE_EVENT: EventTypeOpts<{
+  entityType: string;
+  spaceId: string;
+}> = {
+  eventType: 'entity_highlights_usage',
+  schema: {
+    entityType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entity highlights have been request for  (e.g. "host")',
+      },
+    },
+    spaceId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Space where the highlight request originated (e.g. "default")',
+      },
+    },
+  },
+};
+
 export const ENTITY_STORE_USAGE_EVENT: EventTypeOpts<{
   storeSize: number;
   entityType: string;
@@ -1715,6 +1736,7 @@ export const events = [
   ENTITY_ENGINE_INITIALIZATION_EVENT,
   ENTITY_ENGINE_DELETION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
+  ENTITY_HIGHLIGHTS_USAGE_EVENT,
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,

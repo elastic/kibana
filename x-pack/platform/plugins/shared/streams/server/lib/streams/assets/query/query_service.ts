@@ -7,6 +7,7 @@
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { StreamsPluginStartDependencies } from '../../../../types';
 import { createFakeRequestBoundToDefaultSpace } from '../../helpers/fake_request_factory';
 import type { AssetClient } from '../asset_client';
@@ -32,8 +33,12 @@ export class QueryService {
     const isSignificantEventsEnabled =
       (await uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS)) ?? false;
 
-    const fakeRequest = createFakeRequestBoundToDefaultSpace(request);
-    const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(fakeRequest);
+    const rulesClientRequest =
+      !pluginStart.spaces ||
+      pluginStart.spaces.spacesService.getSpaceId(request) === DEFAULT_SPACE_ID
+        ? request
+        : createFakeRequestBoundToDefaultSpace(request);
+    const rulesClient = await pluginStart.alerting.getRulesClientWithRequest(rulesClientRequest);
 
     return new QueryClient(
       {

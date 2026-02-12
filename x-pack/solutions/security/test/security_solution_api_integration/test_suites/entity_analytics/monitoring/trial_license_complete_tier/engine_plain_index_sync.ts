@@ -7,12 +7,10 @@
 
 import expect from 'expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { enablePrivmonSetting, disablePrivmonSetting } from '../../utils';
 import { PrivMonUtils, PlainIndexSyncUtils } from './utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const api = getService('entityAnalyticsApi');
-  const kibanaServer = getService('kibanaServer');
   const privMonUtils = PrivMonUtils(getService);
   const log = getService('log');
 
@@ -23,14 +21,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       beforeEach(async () => {
         await indexSyncUtils.createIndex();
-        await enablePrivmonSetting(kibanaServer);
         await privMonUtils.initPrivMonEngine();
       });
 
       afterEach(async () => {
         await indexSyncUtils.deleteIndex();
         await api.deleteMonitoringEngine({ query: { data: true } });
-        await disablePrivmonSetting(kibanaServer);
       });
 
       it('should not create duplicate users', async () => {

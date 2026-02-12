@@ -53,6 +53,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('filters on labels', async function () {
       await onechat.selectAgentLabel(agents[0].labels[0]);
+      // Press Escape to ensure the popover is closed and doesn't block subsequent clicks
+      await browser.pressKeys(browser.keys.ESCAPE);
       expect(await onechat.countAgentsListRows()).to.equal(1);
       await onechat.agentExistsOrFail(agents[0].id);
     });

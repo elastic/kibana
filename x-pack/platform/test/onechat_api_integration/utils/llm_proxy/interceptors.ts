@@ -8,10 +8,13 @@
 import type { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import { last } from 'lodash';
 import type { LlmProxy } from '.';
-import type { ToolMessage } from './types';
+import type { ToolMessage, LLmError } from './types';
 
 type LLMMessage = string[] | ToolMessage | string | undefined;
-type LLMResponseFnOrString = LLMMessage | ((body: ChatCompletionStreamParams) => LLMMessage);
+type LLMResponseFnOrString =
+  | LLMMessage
+  | LLmError
+  | ((body: ChatCompletionStreamParams) => LLMMessage);
 
 export function createInterceptors(proxy: LlmProxy) {
   return {

@@ -30,6 +30,10 @@ export const NewConversationPrompt: React.FC<{}> = () => {
     gap: ${euiTheme.size.base};
   `;
 
+  const inputPaddingStyles = css`
+    padding-bottom: ${euiTheme.size.base};
+  `;
+
   return (
     <EuiFlexGroup
       responsive={false}
@@ -51,7 +55,7 @@ export const NewConversationPrompt: React.FC<{}> = () => {
       </EuiFlexItem>
       <EuiFlexItem
         grow={false}
-        css={[conversationElementWidthStyles, conversationElementPaddingStyles]}
+        css={[conversationElementWidthStyles, conversationElementPaddingStyles, inputPaddingStyles]}
       >
         <ConversationInput />
       </EuiFlexItem>

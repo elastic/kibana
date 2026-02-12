@@ -3,6 +3,7 @@ plugins:
   enabled:
     - apm
     - console
+    - dashboard
     - discover_enhanced
     - index_management
     - infra
@@ -11,11 +12,13 @@ plugins:
     - observability_onboarding
     - painless_lab
     - profiling
+    - search_homepage
     - security_solution
     - slo
     - spaces
     - streams_app
     - workflows_extensions
+    - transform
   disabled:
 
 packages:

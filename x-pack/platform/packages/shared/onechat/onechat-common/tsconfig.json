@@ -17,5 +17,6 @@
     "@kbn/sse-utils",
     "@kbn/visualization-utils",
     "@kbn/zod",
+    "@kbn/core",
   ]
 }

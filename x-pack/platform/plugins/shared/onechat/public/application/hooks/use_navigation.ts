@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { ONECHAT_APP_ID } from '../../../common/features';
 import { useKibana } from './use_kibana';
 
@@ -13,6 +13,9 @@ export interface LocationState {
   shouldStickToBottom?: boolean;
   initialMessage?: string;
 }
+
+const MANAGEMENT_APP_ID = 'management';
+const manageConnectorsPath = '/insightsAndAlerting/triggersActionsConnectors/connectors';
 
 export const useNavigation = () => {
   const {
@@ -41,9 +44,14 @@ export const useNavigation = () => {
   );
 
   const navigateToManageConnectors = useCallback(
+    () => application.navigateToApp(MANAGEMENT_APP_ID, { path: manageConnectorsPath }),
+    [application]
+  );
+
+  const manageConnectorsUrl = useMemo(
     () =>
-      application.navigateToApp('management', {
-        path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
+      application.getUrlForApp(MANAGEMENT_APP_ID, {
+        path: manageConnectorsPath,
       }),
     [application]
   );
@@ -52,5 +60,6 @@ export const useNavigation = () => {
     createOnechatUrl,
     navigateToOnechatUrl,
     navigateToManageConnectors,
+    manageConnectorsUrl,
   };
 };

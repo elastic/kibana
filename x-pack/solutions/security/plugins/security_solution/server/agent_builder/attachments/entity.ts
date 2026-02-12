@@ -9,7 +9,9 @@ import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
 import type { Attachment } from '@kbn/onechat-common/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from '../tools';
-const riskEntityAttachmentDataSchema = z.object({
+import { securityAttachmentDataSchema } from './security_attachment_data_schema';
+
+const riskEntityAttachmentDataSchema = securityAttachmentDataSchema.extend({
   identifierType: z.enum(['host', 'user', 'service', 'generic']),
   identifier: z.string().min(1),
 });

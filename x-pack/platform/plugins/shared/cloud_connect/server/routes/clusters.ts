@@ -8,14 +8,18 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { i18n } from '@kbn/i18n';
 import axios from 'axios';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import { createStorageService } from '../lib/create_storage_service';
 import { enableInferenceCCM, disableInferenceCCM } from '../services/inference_ccm';
+import { updateDefaultLLMActions } from '../lib/update_default_llm_actions';
+import { waitForInferenceEndpoint } from '../lib/wait_for_inference_endpoint';
 
 interface CloudConnectedStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  actions: ActionsPluginStart;
 }
 
 export interface ClustersRouteOptions {
@@ -106,40 +110,25 @@ export const registerClustersRoute = ({
         logger.error('Failed to retrieve cluster details', { error });
 
         if (axios.isAxiosError(error)) {
-          const status = error.response?.status;
           const errorData = error.response?.data;
+          const apiStatusCode = error.response?.status;
 
-          if (status === 401) {
-            return response.unauthorized({
-              body: {
-                message: 'Invalid or expired API key',
-              },
-            });
-          }
+          // Extract error message from backend response
+          const errorMessage =
+            errorData?.errors?.[0]?.message ||
+            errorData?.message ||
+            'Failed to retrieve cluster details';
 
-          if (status === 403) {
-            return response.forbidden({
-              body: {
-                message: 'Insufficient permissions to access cluster details',
-              },
-            });
-          }
+          // Use 500 for 401 errors to prevent Kibana logout
+          // For all other errors, use the status code from the API
+          const statusCode = apiStatusCode === 401 ? 500 : apiStatusCode || 500;
 
-          if (status === 404) {
-            return response.notFound({
-              body: {
-                message: 'Cluster not found',
-              },
-            });
-          }
-
-          if (status === 400) {
-            return response.badRequest({
-              body: {
-                message: errorData?.message || 'Invalid request',
-              },
-            });
-          }
+          return response.customError({
+            statusCode,
+            body: {
+              message: errorMessage,
+            },
+          });
         }
 
         return response.customError({
@@ -206,12 +195,13 @@ export const registerClustersRoute = ({
         logger.error('Failed to disconnect cluster', { error });
 
         if (axios.isAxiosError(error)) {
-          const status = error.response?.status || 500;
           const errorData = error.response?.data;
 
           return response.customError({
-            statusCode: status,
-            body: errorData || { message: 'An error occurred while disconnecting the cluster' },
+            statusCode: 500,
+            body: errorData || {
+              message: 'An error occurred while disconnecting the cluster',
+            },
           });
         }
 
@@ -269,10 +259,10 @@ export const registerClustersRoute = ({
 
         // Update cluster services via Cloud Connect API
         const cloudConnectClient = new CloudConnectClient(logger, cloudApiUrl);
-        const updatedCluster = await cloudConnectClient.updateClusterServices(
+        const updatedCluster = await cloudConnectClient.updateCluster(
           apiKeyData.apiKey,
           apiKeyData.clusterId,
-          request.body.services
+          { services: request.body.services }
         );
 
         logger.debug(`Successfully updated cluster services: ${updatedCluster.id}`);
@@ -293,13 +283,11 @@ export const registerClustersRoute = ({
             );
 
             try {
-              await cloudConnectClient.updateClusterServices(
-                apiKeyData.apiKey,
-                apiKeyData.clusterId,
-                {
+              await cloudConnectClient.updateCluster(apiKeyData.apiKey, apiKeyData.clusterId, {
+                services: {
                   eis: { enabled: false },
-                }
-              );
+                },
+              });
               logger.info('Successfully rolled back EIS enablement in Cloud API');
             } catch (rollbackError) {
               logger.error('Failed to rollback Cloud API changes', { error: rollbackError });
@@ -313,6 +301,7 @@ export const registerClustersRoute = ({
             });
           }
 
+          // Update elastic inference ccm settings
           try {
             if (eisRequest?.enabled) {
               await enableInferenceCCM(esClient, eisKey!, logger);
@@ -327,13 +316,11 @@ export const registerClustersRoute = ({
             // If enabling the inference CCM settings failed, we need to rollback the service state
             const rollbackEnabled = !eisRequest.enabled;
             try {
-              await cloudConnectClient.updateClusterServices(
-                apiKeyData.apiKey,
-                apiKeyData.clusterId,
-                {
+              await cloudConnectClient.updateCluster(apiKeyData.apiKey, apiKeyData.clusterId, {
+                services: {
                   eis: { enabled: rollbackEnabled },
-                }
-              );
+                },
+              });
               logger.info(
                 `Successfully rolled back EIS to enabled=${rollbackEnabled} in Cloud API`
               );
@@ -359,6 +346,21 @@ export const registerClustersRoute = ({
               },
             });
           }
+
+          // Update default LLM actions if needed, this always needs to happen
+          // after updating the service.
+          //
+          // We poll for a known inference endpoint to verify CCM setup is complete
+          // before creating the default LLM connectors. This avoids race conditions
+          // where the inference endpoints aren't ready yet.
+          try {
+            if (eisRequest?.enabled) {
+              await waitForInferenceEndpoint(esClient, logger);
+              await updateDefaultLLMActions(getStartServices, request, logger);
+            }
+          } catch (llmActionsError) {
+            logger.warn('Failed to update default LLM actions', { error: llmActionsError });
+          }
         }
 
         return response.ok({ body: { success: true } });
@@ -366,7 +368,6 @@ export const registerClustersRoute = ({
         logger.error('Failed to update cluster services', { error });
 
         if (axios.isAxiosError(error)) {
-          const status = error.response?.status || 500;
           const errorData = error.response?.data;
 
           // Extract error code from Cloud Connect API error format
@@ -387,7 +388,7 @@ export const registerClustersRoute = ({
           }
 
           return response.customError({
-            statusCode: status,
+            statusCode: 500,
             body: {
               message: errorMessage,
               ...(errorCode && { code: errorCode }),

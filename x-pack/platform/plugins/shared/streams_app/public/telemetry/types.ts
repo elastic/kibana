@@ -11,6 +11,8 @@ import type { EnrichmentDataSource } from '../../common/url_schema';
 
 type StreamType = 'wired' | 'classic' | 'unknown';
 
+type ConfigurationMode = 'interactive' | 'yaml';
+
 type StreamsAttachmentCountProps = {
   name: string;
 } & Record<AttachmentType, number>;
@@ -83,6 +85,7 @@ interface WiredStreamsStatusChangedProps {
 interface StreamsProcessingSavedProps {
   processors_count: number;
   stream_type: StreamType;
+  configuration_mode: ConfigurationMode;
 }
 
 interface StreamsRetentionChangedProps {
@@ -180,6 +183,7 @@ interface StreamsTabVisitedProps {
 }
 
 export {
+  type ConfigurationMode,
   type StreamsAttachmentCountProps,
   type StreamsAttachmentClickEventProps,
   type StreamsAttachmentLinkChangedProps,

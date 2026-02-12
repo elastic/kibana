@@ -9,7 +9,14 @@ import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+} from '@elastic/eui';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -25,7 +32,12 @@ import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const ANALYZE_GRAPH_ID = 'analyze_graph';
+export const DATA_VIEW_LOADING_TEST_ID = 'analyzer-data-view-loading';
+export const DATA_VIEW_ERROR_TEST_ID = 'analyzer-data-view-error';
 
+const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.analyzer.dataViewError', {
+  defaultMessage: 'Unable to retrieve the data view for analyzer',
+});
 export const ANALYZER_PREVIEW_BANNER = {
   title: i18n.translate(
     'xpack.securitySolution.flyout.left.visualizations.analyzer.panelPreviewTitle',
@@ -55,6 +67,8 @@ export const AnalyzeGraph: FC = () => {
     ? experimentalAnalyzerPatterns
     : oldAnalyzerPatterns;
 
+  const { dataView, status } = useDataView(PageScope.analyzer);
+
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const onClick = useCallback(() => {
@@ -67,7 +81,36 @@ export const AnalyzeGraph: FC = () => {
     });
   }, [openPreviewPanel, key, scopeId]);
 
-  return isEnabled ? (
+  if (!isEnabled) {
+    return (
+      <EuiPanel hasShadow={false}>
+        <AnalyzerPreviewNoDataMessage />
+      </EuiPanel>
+    );
+  }
+
+  if (status === 'loading' || status === 'pristine') {
+    return (
+      <EuiFlexGroup gutterSize="m" justifyContent="center" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner data-test-subj={DATA_VIEW_LOADING_TEST_ID} size="xxl" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices())) {
+    return (
+      <EuiEmptyPrompt
+        color="danger"
+        data-test-subj={DATA_VIEW_ERROR_TEST_ID}
+        iconType="error"
+        title={<h2>{DATAVIEW_ERROR}</h2>}
+      />
+    );
+  }
+
+  return (
     <div data-test-subj={ANALYZER_GRAPH_TEST_ID}>
       <Resolver
         databaseDocumentID={eventId}
@@ -79,10 +122,6 @@ export const AnalyzeGraph: FC = () => {
         showPanelOnClick={onClick}
       />
     </div>
-  ) : (
-    <EuiPanel hasShadow={false}>
-      <AnalyzerPreviewNoDataMessage />
-    </EuiPanel>
   );
 };
 

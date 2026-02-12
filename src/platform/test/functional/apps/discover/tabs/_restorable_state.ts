@@ -479,6 +479,49 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await discover.getHitCount()).to.be('50');
       });
 
+      it('should restore the search bar state also after running the updated query', async () => {
+        await discover.selectTextBaseLang();
+        await discover.waitUntilTabIsLoaded();
+        const defaultQuery = 'FROM logstash-*';
+
+        const expectState = async (query: string, isDirty: boolean) => {
+          await retry.try(async () => {
+            expect(await monacoEditor.getCodeEditorValue()).to.be(query);
+          });
+          expect(await testSubjects.getAttribute('querySubmitButton', 'aria-label')).to.be(
+            isDirty ? 'Run query' : 'Refresh query'
+          );
+        };
+
+        const draftQuery0 =
+          'from logstash-* | sort @timestamp desc | limit 50 // edit and run this';
+        await expectState(defaultQuery, false);
+        await monacoEditor.setCodeEditorValue(draftQuery0);
+        await expectState(draftQuery0, true);
+        await queryBar.clickQuerySubmitButton();
+        await discover.waitUntilTabIsLoaded();
+        await expectState(draftQuery0, false);
+        expect(await discover.getHitCount()).to.be('50');
+
+        const draftQuery1 = 'from logstash-* | sort @timestamp desc | limit 150 // only edit this';
+        await unifiedTabs.createNewTab();
+        await discover.waitUntilTabIsLoaded();
+        await expectState(defaultQuery, false);
+        await monacoEditor.setCodeEditorValue(draftQuery1);
+        await expectState(draftQuery1, true);
+        expect(await discover.getHitCount()).to.be('1,000');
+
+        await unifiedTabs.selectTab(0);
+        await discover.waitUntilTabIsLoaded();
+        await expectState(draftQuery0, false);
+        expect(await discover.getHitCount()).to.be('50');
+
+        await unifiedTabs.selectTab(1);
+        await discover.waitUntilTabIsLoaded();
+        await expectState(draftQuery1, true);
+        expect(await discover.getHitCount()).to.be('1,000');
+      });
+
       it('should restore ES|QL editor state', async () => {
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();

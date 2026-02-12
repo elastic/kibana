@@ -218,6 +218,7 @@ export class SpaceTestApiClient {
   ): Promise<GetOnePackagePolicyResponse> {
     const res = await this.supertest
       .get(`${this.getBaseUrl(spaceId)}/api/fleet/package_policies/${packagePolicyId}`)
+      .auth(this.auth.username, this.auth.password)
       .send();
 
     expectStatusCode200(res);

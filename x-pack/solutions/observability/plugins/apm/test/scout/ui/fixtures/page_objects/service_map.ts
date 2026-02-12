@@ -6,7 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
 
 export class ServiceMapPage {
@@ -46,8 +46,9 @@ export class ServiceMapPage {
 
   async typeInTheSearchBar(text: string) {
     await this.getSearchBar();
-    await this.page.testSubj.typeWithDelay('apmUnifiedSearchBar', text);
-    return this.page.getByTestId('querySubmitButton').press('Enter');
+    await this.page.testSubj.typeWithDelay('apmUnifiedSearchBar', text, { delay: 150 });
+    // extra delay needed for MKI/ECH environments to process the input
+    await this.page.getByTestId('querySubmitButton').press('Enter');
   }
 
   async waitForServiceMapToLoad() {

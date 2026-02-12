@@ -145,6 +145,12 @@ export const PackagePolicyEditorDatastreamPipelines: React.FunctionComponent<
       <EuiFlexItem grow={false}>
         <EuiBasicTable
           loading={isLoading}
+          tableCaption={i18n.translate(
+            'xpack.fleet.packagePolicyEditor.datastreamIngestPipelinesTableCaption',
+            {
+              defaultMessage: 'List of ingest pipelines',
+            }
+          )}
           items={pipelines}
           columns={[
             {

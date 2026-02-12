@@ -19,15 +19,12 @@ import { getInfraRequestHandlerContext } from '../utils/get_infra_request_handle
 import type { InfraPluginRequestHandlerContext } from '../types';
 import { getApmDataAccessClient } from '../lib/helpers/get_apm_data_access_client';
 
-// Default metrics to retrieve - same as HOST_TABLE_METRICS in infra plugin
 const DEFAULT_HOST_METRICS = [
   'cpuV2',
   'memory',
   'memoryFree',
   'diskSpaceUsage',
   'normalizedLoad1m',
-  'rxV2',
-  'txV2',
 ] as const;
 
 export function registerDataProviders({
@@ -48,27 +45,8 @@ export function registerDataProviders({
 
   observabilityAgentBuilder.registerDataProvider(
     'infraHosts',
-    async ({ request, from, to, limit, kqlFilter }) => {
-      const infraToolResources = await buildInfraToolResources({
-        core,
-        plugins,
-        libs,
-        request,
-      });
-
-      // Build query filter
-      const mustFilters: unknown[] = [];
-
-      if (kqlFilter) {
-        mustFilters.push({
-          query_string: {
-            query: kqlFilter,
-            analyze_wildcard: true,
-          },
-        });
-      }
-
-      const query = mustFilters.length > 0 ? { bool: { must: mustFilters } } : undefined;
+    async ({ request, from, to, limit, query }) => {
+      const infraToolResources = await buildInfraToolResources({ core, plugins, libs, request });
 
       const fromMs = new Date(from).getTime();
       const toMs = new Date(to).getTime();

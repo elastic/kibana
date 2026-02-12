@@ -138,9 +138,7 @@ describe('migration actions', () => {
     })();
   });
 
-  afterAll(async () => {
-    await esServer.stop();
-  });
+  afterAll(async () => await esServer?.stop());
 
   describe('fetchIndices', () => {
     afterAll(async () => {

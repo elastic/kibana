@@ -22,12 +22,19 @@ export const useStreamDescriptionApi = ({
   definition,
   refreshDefinition,
   aiFeatures,
+  silent = false,
 }: {
   definition: Streams.all.GetResponse;
   refreshDefinition: () => void;
   aiFeatures: AIFeatures | null;
+  silent?: boolean;
 }) => {
-  const { signal } = useAbortController();
+  const { signal, abort: abortController, refresh } = useAbortController();
+
+  const abort = useCallback(() => {
+    abortController();
+    refresh();
+  }, [abortController, refresh]);
 
   const updateStream = useUpdateStreams(definition.stream.name);
 
@@ -47,7 +54,7 @@ export const useStreamDescriptionApi = ({
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  // Save the updated description; show success and error toasts
+  // Save the updated description; show success and error toasts unless silent
   const save = useCallback(
     async (nextDescription: string) => {
       setIsUpdating(true);
@@ -79,25 +86,29 @@ export const useStreamDescriptionApi = ({
         })
       )
         .then(() => {
-          notifications.toasts.addSuccess({
-            title: i18n.translate(
-              'xpack.streams.streamDetailView.streamDescription.saveSuccessTitle',
-              {
-                defaultMessage: 'Description saved',
-              }
-            ),
-          });
+          if (!silent) {
+            notifications.toasts.addSuccess({
+              title: i18n.translate(
+                'xpack.streams.streamDetailView.streamDescription.saveSuccessTitle',
+                {
+                  defaultMessage: 'Description saved',
+                }
+              ),
+            });
+          }
         })
         .catch((error) => {
-          notifications.toasts.addError(error, {
-            title: i18n.translate(
-              'xpack.streams.streamDetailView.streamDescription.saveErrorTitle',
-              {
-                defaultMessage: 'Failed to save description',
-              }
-            ),
-            toastMessage: getFormattedError(error).message,
-          });
+          if (!silent) {
+            notifications.toasts.addError(error, {
+              title: i18n.translate(
+                'xpack.streams.streamDetailView.streamDescription.saveErrorTitle',
+                {
+                  defaultMessage: 'Failed to save description',
+                }
+              ),
+              toastMessage: getFormattedError(error).message,
+            });
+          }
         })
         .finally(() => {
           setIsUpdating(false);
@@ -105,6 +116,7 @@ export const useStreamDescriptionApi = ({
         });
     },
     [
+      silent,
       updateStream,
       definition.dashboards,
       definition.queries,
@@ -154,17 +166,20 @@ export const useStreamDescriptionApi = ({
       if (error.name === 'AbortError') {
         return;
       }
-      notifications.toasts.addError(error, {
-        title: i18n.translate(
-          'xpack.streams.streamDetailView.streamDescription.generateErrorTitle',
-          { defaultMessage: 'Failed to generate description' }
-        ),
-        toastMessage: getFormattedError(error).message,
-      });
+      if (!silent) {
+        notifications.toasts.addError(error, {
+          title: i18n.translate(
+            'xpack.streams.streamDetailView.streamDescription.generateErrorTitle',
+            { defaultMessage: 'Failed to generate description' }
+          ),
+          toastMessage: getFormattedError(error).message,
+        });
+      }
     } finally {
       setIsGenerating(false);
     }
   }, [
+    silent,
     aiFeatures?.genAiConnectors.selectedConnector,
     streams.streamsRepositoryClient,
     signal,
@@ -182,7 +197,9 @@ export const useStreamDescriptionApi = ({
 
   const onGenerateDescription = useCallback(async () => {
     const result = await generate();
-    setIsEditing(true);
+    if (result) {
+      setIsEditing(true);
+    }
     return result;
   }, [generate, setIsEditing]);
 
@@ -214,5 +231,6 @@ export const useStreamDescriptionApi = ({
     onGenerateDescription,
     onStartEditing,
     onSaveDescription,
+    abort,
   };
 };

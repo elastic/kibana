@@ -116,11 +116,6 @@ export const allowedExperimentalValues = Object.freeze({
   bulkEditAlertSuppressionEnabled: true,
 
   /**
-   * Enables the ability to use does not match condition for indicator match rules
-   */
-  doesNotMatchForIndicatorMatchRuleEnabled: true,
-
-  /**
    * Disables Security's Entity Store engine routes. The Entity Store feature is available by default, but
    * can be disabled if necessary in a given environment.
    */
@@ -188,11 +183,11 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    *  Enables the QRadar rules import feature
    */
-  qradarRulesMigration: false,
+  qradarRulesMigration: true,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
-  kubernetesEnabled: false,
+  kubernetesEnabled: true,
 
   /**
    * Enables the Entity Analytics Watchlist feature.

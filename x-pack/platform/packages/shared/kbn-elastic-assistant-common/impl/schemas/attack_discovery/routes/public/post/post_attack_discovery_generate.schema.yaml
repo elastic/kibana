@@ -949,12 +949,11 @@ paths:
               }'
       x-labels: [ess, serverless]
       operationId: PostAttackDiscoveryGenerate
-      x-state: Technical Preview; added in 9.2.0
       summary: Generate attack discoveries from alerts
       description: >-
         Initiates the generation of attack discoveries by analyzing security alerts using AI.
         Returns an execution UUID that can be used to track the generation progress and
-        retrieve results. Results may also be retrieved via the find endpoint. `Technical preview`
+        retrieve results. Results may also be retrieved via the find endpoint.
       requestBody:
         required: true
         content:

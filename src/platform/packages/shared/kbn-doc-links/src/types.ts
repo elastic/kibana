@@ -57,6 +57,7 @@ export interface DocLinks {
     readonly indexManagement: string;
     readonly cloudConnect: string;
     readonly connectToAutoops: string;
+    readonly cloudPricing: string;
   };
   readonly console: {
     readonly guide: string;

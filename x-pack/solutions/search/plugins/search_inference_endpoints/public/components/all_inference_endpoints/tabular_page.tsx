@@ -56,9 +56,11 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
 
   const copyContent = useCallback(
     (inferenceId: string) => {
+      const message = i18n.ENDPOINT_COPY_SUCCESS(inferenceId);
       navigator.clipboard.writeText(inferenceId).then(() => {
         toasts?.addSuccess({
-          title: i18n.ENDPOINT_COPY_SUCCESS(inferenceId),
+          title: message,
+          'aria-label': message,
         });
       });
     },
@@ -238,7 +240,9 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           promoId="inferenceEndpointManagement"
           isSelfManaged={!cloud?.isCloudEnabled}
           direction="row"
-          navigateToApp={() => application.navigateToApp(CLOUD_CONNECT_NAV_ID)}
+          navigateToApp={() =>
+            application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
+          }
         />
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">

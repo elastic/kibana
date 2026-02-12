@@ -25,11 +25,11 @@
  */
 export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string }> = [
   {
-    id: 'ai.prompt',
-    handlerHash: 'fa1e9cfa78ed6c6cbebabe3533286b88ff9b3715dfb1b64b3d460251f72f9838',
+    id: 'ai.agent',
+    handlerHash: '4f61ed4415041b7423c43fb4a2ef0d19032360092cef14b99587c2003ba7667e',
   },
   {
-    id: 'onechat.runAgent',
-    handlerHash: '4f61ed4415041b7423c43fb4a2ef0d19032360092cef14b99587c2003ba7667e',
+    id: 'ai.prompt',
+    handlerHash: 'fa1e9cfa78ed6c6cbebabe3533286b88ff9b3715dfb1b64b3d460251f72f9838',
   },
 ];

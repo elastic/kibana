@@ -10,8 +10,9 @@ import type { Attachment } from '@kbn/onechat-common/attachments';
 import { platformCoreTools } from '@kbn/onechat-common';
 import { z } from '@kbn/zod';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
+import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
-export const ruleAttachmentDataSchema = z.object({
+export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
   text: z.string(),
 });
 

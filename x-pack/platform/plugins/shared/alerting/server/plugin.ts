@@ -669,11 +669,11 @@ export class AlertingPlugin {
       return rulesSettingsClientFactory!.create(request);
     };
 
-    const getMaintenanceWindowClientInternal = (request: KibanaRequest) => {
+    const getMaintenanceWindowClient = (request: KibanaRequest) => {
       if (!plugins.maintenanceWindows) {
         return;
       }
-      return plugins.maintenanceWindows.getMaintenanceWindowClientInternal(request);
+      return plugins.maintenanceWindows.getMaintenanceWindowClientWithoutAuth(request);
     };
 
     taskRunnerFactory.initialize({
@@ -695,7 +695,7 @@ export class AlertingPlugin {
       maintenanceWindowsService: new MaintenanceWindowsService({
         cacheInterval: this.config.rulesSettings.cacheInterval,
         logger,
-        getMaintenanceWindowClientInternal,
+        getMaintenanceWindowClient,
       }),
       maxAlerts: this.config.rules.run.alerts.max,
       ruleTypeRegistry: this.ruleTypeRegistry!,

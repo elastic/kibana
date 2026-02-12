@@ -20,6 +20,10 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory, SavedObjectsClientContract } from '@kbn/core/server';
 import { errors, type estypes } from '@elastic/elasticsearch';
 
+import {
+  AGENT_STATUS_CHANGE_DATA_STREAM,
+  AGENT_STATUS_CHANGE_DATA_STREAM_NAME,
+} from '../../common/constants/agent';
 import { agentPolicyService, appContextService } from '../services';
 import { bulkUpdateAgents, fetchAllAgentsByKuery } from '../services/agents';
 import type { Agent } from '../types';
@@ -35,12 +39,6 @@ const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '1m';
 const TIMEOUT = '1m';
 const AGENTS_BATCHSIZE = 10000;
-const AGENT_STATUS_CHANGE_DATA_STREAM = {
-  type: 'logs',
-  dataset: 'elastic_agent.status_change',
-  namespace: 'default',
-};
-const AGENT_STATUS_CHANGE_DATA_STREAM_NAME = `${AGENT_STATUS_CHANGE_DATA_STREAM.type}-${AGENT_STATUS_CHANGE_DATA_STREAM.dataset}-${AGENT_STATUS_CHANGE_DATA_STREAM.namespace}`;
 
 export const HAS_CHANGED_RUNTIME_FIELD: estypes.SearchRequest['runtime_mappings'] = {
   hasChanged: {

@@ -36,6 +36,7 @@ export function registerChatRoutes({
   getInternalServices,
   coreSetup,
   logger,
+  analyticsService,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
@@ -83,7 +84,12 @@ export function registerChatRoutes({
             })
           ),
         }),
-        { meta: { description: 'Optional attachments to send with the message.' } }
+        {
+          meta: {
+            description:
+              '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.',
+          },
+        }
       )
     ),
     capabilities: schema.maybe(
@@ -194,14 +200,13 @@ export function registerChatRoutes({
       access: 'public',
       summary: 'Send chat message',
       description:
-        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.',
+        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },
@@ -399,7 +404,6 @@ export function registerChatRoutes({
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
           since: '9.2.0',
         },
       },

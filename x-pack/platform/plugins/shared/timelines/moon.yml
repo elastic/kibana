@@ -34,7 +34,6 @@ dependsOn:
   - '@kbn/ui-theme'
   - '@kbn/i18n-react'
   - '@kbn/i18n'
-  - '@kbn/security-plugin'
   - '@kbn/safer-lodash-set'
   - '@kbn/alerts-as-data-utils'
   - '@kbn/logging'

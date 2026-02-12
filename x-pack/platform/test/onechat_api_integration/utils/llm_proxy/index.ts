@@ -7,3 +7,5 @@
 
 export { createLlmProxy, type LlmProxy } from './proxy';
 export { createToolCallMessage } from './mocks';
+export type { LLmError } from './types';
+export { isLlmError } from './types';

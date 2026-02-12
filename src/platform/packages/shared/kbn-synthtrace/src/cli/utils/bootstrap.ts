@@ -31,7 +31,7 @@ export async function bootstrap({
     logger,
   });
 
-  const client = new Client({
+  const esClient = new Client({
     node: esUrl,
     ...(runOptions.apiKey && { auth: { apiKey: runOptions.apiKey } }),
     tls: getEsClientTlsSettings(esUrl, runOptions.insecure),
@@ -40,7 +40,7 @@ export async function bootstrap({
   });
 
   const clientManager = new SynthtraceClientsManager({
-    client,
+    client: esClient,
     logger,
     concurrency: runOptions.concurrency,
   });
@@ -66,6 +66,7 @@ export async function bootstrap({
   }
 
   return {
+    esClient,
     kibanaClient,
     clients,
     logger,

@@ -102,7 +102,6 @@
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/management-settings-ids",
     "@kbn/onechat-plugin",
-    "@kbn/ai-assistant-common"
   ],
   "exclude": [
     "target/**/*",

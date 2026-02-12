@@ -67,6 +67,7 @@ import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
+import type { Logger } from '@kbn/logging';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -209,6 +210,7 @@ export type StartServices = CoreStart &
     timelineDataService: DataPublicPluginStart;
     siemMigrations: SiemMigrationsService;
     productDocBase: ProductDocBasePluginStart;
+    logger: Logger;
   };
 
 export type StartRenderServices = Pick<

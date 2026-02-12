@@ -90,6 +90,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     // Calling `retrieve_elastic_doc` via the chat/complete endpoint
     describe('POST /internal/observability_ai_assistant/chat/complete', function () {
+      // FLAKY on Serverless: https://github.com/elastic/kibana/issues/246371
+      this.tags(['skipServerless']);
       let llmProxy: LlmProxy;
       let connectorId: string;
       let messageAddedEvents: MessageAddEvent[];

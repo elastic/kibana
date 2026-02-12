@@ -12,6 +12,10 @@ import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { analyticsServiceMock } from '@kbn/core/server/mocks';
+import {
+  ELASTIC_MANAGED_LLM_CONNECTOR_ID,
+  LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
+} from '@kbn/elastic-assistant-common';
 
 import { attackDiscoveryScheduleExecutor } from './executor';
 import { findDocuments } from '../../../../ai_assistant_data_clients/find';
@@ -542,5 +546,35 @@ describe('attackDiscoveryScheduleExecutor', () => {
     expect(firstCallArg.alertsParams.enableFieldRendering).toBe(true);
 
     spy.mockRestore();
+  });
+
+  it('should resolve outdated connector ID to the new one before generating discoveries', async () => {
+    const options = {
+      ...executorOptions,
+      params: {
+        ...params,
+        apiConfig: {
+          ...params.apiConfig,
+          connectorId: ELASTIC_MANAGED_LLM_CONNECTOR_ID,
+        },
+      },
+    } as unknown as RuleExecutorOptions;
+
+    await attackDiscoveryScheduleExecutor({
+      options,
+      logger: mockLogger,
+      publicBaseUrl: undefined,
+      telemetry: mockTelemetry,
+    });
+
+    expect(generateAttackDiscoveries).toHaveBeenCalledWith(
+      expect.objectContaining({
+        config: expect.objectContaining({
+          apiConfig: expect.objectContaining({
+            connectorId: LATEST_ELASTIC_MANAGED_CONNECTOR_ID,
+          }),
+        }),
+      })
+    );
   });
 });

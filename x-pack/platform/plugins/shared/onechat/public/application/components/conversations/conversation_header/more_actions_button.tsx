@@ -28,7 +28,7 @@ import {
 import { useKibana } from '../../../hooks/use_kibana';
 import { searchParamNames } from '../../../search_param_names';
 import { appPaths } from '../../../utils/app_paths';
-import { DeleteConversationModal } from './delete_conversation_modal';
+import { DeleteConversationModal } from '../delete_conversation_modal';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { RobotIcon } from '../../common/icons/robot';
@@ -77,7 +77,7 @@ const fullscreenLabels = {
     defaultMessage: 'Delete',
   }),
   genAiSettings: i18n.translate('xpack.onechat.conversationActions.genAiSettings', {
-    defaultMessage: 'Gen AI Settings',
+    defaultMessage: 'GenAI Settings',
   }),
   externalLinkAriaLabel: i18n.translate('xpack.onechat.conversationActions.externalLinkAriaLabel', {
     defaultMessage: 'Open in new tab',

@@ -73,6 +73,7 @@ const renderEisUpdateCallout = (props?: Partial<UpdateElserMappingsModalProps>) 
         setIsModalOpen={setIsModalOpen}
         refetchMapping={refetchMapping}
         hasUpdatePrivileges={props?.hasUpdatePrivileges ?? true}
+        modalId="testModal"
       />
     </IntlProvider>
   );

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { CreateTool } from '../components/tools/create_tool';
+import { ToolsProvider } from '../context/tools_provider';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
@@ -22,5 +23,9 @@ export const OnechatToolCreatePage = () => {
       path: appPaths.tools.new,
     },
   ]);
-  return <CreateTool />;
+  return (
+    <ToolsProvider>
+      <CreateTool />
+    </ToolsProvider>
+  );
 };

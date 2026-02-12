@@ -31,6 +31,7 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { EuiThemeProvider } from '@elastic/eui';
+import { of } from 'rxjs';
 import { MAJOR_VERSION } from '../../../common';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { httpService } from '../../../public/application/services/http';
@@ -84,7 +85,12 @@ const appDependencies = {
     executionContext: executionContextServiceMock.createStartContract(),
     http: httpServiceMock.createSetupContract(),
     application: applicationService,
-    chrome: chromeServiceMock.createStartContract(),
+    chrome: {
+      ...chromeServiceMock.createStartContract(),
+      // Used by `CreateIndexButton` via `useObservable(chrome.getActiveSolutionNavId$())`.
+      // Returning a non-`'es'` value keeps tests on the modal flow (not a link).
+      getActiveSolutionNavId$: () => of(undefined),
+    },
     fatalErrors: fatalErrorsServiceMock.createSetupContract(),
   },
   plugins: {
@@ -121,7 +127,10 @@ const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   uiSettings: uiSettingsServiceMock.createSetupContract(),
   settings: settingsServiceMock.createStartContract(),
   theme: themeServiceMock.createStartContract(),
-  chrome: chromeServiceMock.createStartContract(),
+  chrome: {
+    ...chromeServiceMock.createStartContract(),
+    getActiveSolutionNavId$: () => of('es'),
+  },
   application: applicationService,
   kibanaVersion: {
     get: () => kibanaVersion,
@@ -145,7 +154,10 @@ export const WithAppDependencies =
         services: { httpService },
       },
       appDependencies,
-      overridingDependencies
+      overridingDependencies,
+      // Ensure components that pull `core.http` from app context use the same mocked client
+      // instance (`httpSetup`) configured by `setupEnvironment()`.
+      { core: { http: httpSetup } }
     );
     return (
       <KibanaReactContextProvider>

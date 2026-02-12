@@ -8,7 +8,6 @@
 import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { ToolType } from '@kbn/onechat-common';
-import { AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID } from '@kbn/management-settings-ids';
 import { queryKeys } from '../../query_keys';
 import { useOnechatServices } from '../use_onechat_service';
 import { useKibana } from '../use_kibana';
@@ -29,18 +28,11 @@ export const useToolTypes = () => {
     [settings]
   );
 
-  const mcpEnabled = useMemo(
-    () => settings.client.get(AGENT_BUILDER_EXTERNAL_MCP_SETTING_ID, false),
-    [settings]
-  );
-
   const toolTypes = useMemo(() => {
     return serverToolTypes.filter(
-      (toolType) =>
-        (mcpEnabled || toolType.type !== ToolType.mcp) &&
-        (workflowsEnabled || toolType.type !== ToolType.workflow)
+      (toolType) => workflowsEnabled || toolType.type !== ToolType.workflow
     );
-  }, [serverToolTypes, workflowsEnabled, mcpEnabled]);
+  }, [serverToolTypes, workflowsEnabled]);
 
   return { toolTypes, isLoading };
 };

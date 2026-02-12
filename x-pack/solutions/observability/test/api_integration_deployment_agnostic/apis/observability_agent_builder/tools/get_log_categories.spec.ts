@@ -6,13 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
+import { timerange } from '@kbn/synthtrace-client';
+import { type LogsSynthtraceEsClient, generateLogCategoriesData } from '@kbn/synthtrace';
 import { OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID } from '@kbn/observability-agent-builder-plugin/server/tools';
-import type { GetLogCategoriesToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_log_categories/get_log_categories';
-import { first } from 'lodash';
+import type { GetLogCategoriesToolResult } from '@kbn/observability-agent-builder-plugin/server/tools/get_log_categories/tool';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-import { createSyntheticLogsWithCategories } from '../utils/synthtrace_scenarios';
 
 const SERVICE_NAME = 'payment-service';
 const START = 'now-15m';
@@ -20,6 +19,7 @@ const END = 'now';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
 
   describe(`tool: ${OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
@@ -29,10 +29,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
       agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
-      ({ logsSynthtraceEsClient } = await createSyntheticLogsWithCategories({
-        getService,
+      logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
+      await logsSynthtraceEsClient.clean();
+
+      const range = timerange(START, END);
+      const { client, generator } = generateLogCategoriesData({
+        range,
+        logsEsClient: logsSynthtraceEsClient,
         serviceName: SERVICE_NAME,
-      }));
+      });
+
+      await client.index(generator);
     });
 
     after(async () => {
@@ -45,7 +52,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         params: {
           start: START,
           end: END,
-          terms: { 'service.name': SERVICE_NAME },
+          kqlFilter: `service.name:"${SERVICE_NAME}"`,
         },
       });
 
@@ -73,7 +80,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         params: {
           start: START,
           end: END,
-          terms: { 'service.name': SERVICE_NAME },
+          kqlFilter: `service.name:"${SERVICE_NAME}"`,
         },
       });
 
@@ -104,15 +111,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(category).to.have.property('count');
         expect(category.count).to.be.greaterThan(0);
 
-        // Sample should include requested fields
+        // Sample should include core fields
         expect(category.sample).to.have.property('message');
         expect(category.sample).to.have.property('@timestamp');
-        expect(category.sample).to.have.property('service.name');
-        expect(first(category.sample['service.name'])).to.be(SERVICE_NAME);
       });
     });
 
-    it('works without terms filter', async () => {
+    it('works without kqlFilter', async () => {
       const results = await agentBuilderApiClient.executeTool<GetLogCategoriesToolResult>({
         id: OBSERVABILITY_GET_LOG_CATEGORIES_TOOL_ID,
         params: {

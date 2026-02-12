@@ -8,6 +8,7 @@
  */
 
 import {
+  EuiHighlight,
   EuiIcon,
   EuiLink,
   EuiScreenReaderOnly,
@@ -31,6 +32,7 @@ export const PresentationPanelTitle = ({
   hideTitle,
   panelTitle,
   panelDescription,
+  titleHighlight,
 }: {
   api: unknown;
   headerId: string;
@@ -38,6 +40,7 @@ export const PresentationPanelTitle = ({
   panelTitle?: string;
   panelDescription?: string;
   viewMode?: ViewMode;
+  titleHighlight?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -60,10 +63,19 @@ export const PresentationPanelTitle = ({
       }
     `;
 
+    const titleContent =
+      titleHighlight && panelTitle ? (
+        <EuiHighlight strict={false} highlightAll search={titleHighlight}>
+          {panelTitle ?? ''}
+        </EuiHighlight>
+      ) : (
+        panelTitle
+      );
+
     if (viewMode !== 'edit' || !isApiCompatibleWithCustomizePanelAction(api)) {
       return (
         <span data-test-subj="embeddablePanelTitle" css={titleStyles}>
-          {panelTitle}
+          {titleContent}
         </span>
       );
     }
@@ -79,10 +91,10 @@ export const PresentationPanelTitle = ({
         })}
         data-test-subj="embeddablePanelTitle"
       >
-        {panelTitle}
+        {titleContent}
       </EuiLink>
     );
-  }, [onClick, hideTitle, panelTitle, viewMode, api, euiTheme]);
+  }, [onClick, hideTitle, panelTitle, viewMode, api, euiTheme, titleHighlight]);
 
   const describedPanelTitleElement = useMemo(() => {
     if (hideTitle) return null;

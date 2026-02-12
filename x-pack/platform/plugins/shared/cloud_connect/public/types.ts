@@ -8,6 +8,7 @@
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { CloudConnectTelemetryService } from './telemetry/client';
 import type { CloudConnectApiService } from './lib/api';
 
@@ -24,6 +25,7 @@ export interface CloudConnectConfig {
 
 export interface CloudConnectApiConfig {
   hasEncryptedSOEnabled: boolean;
+  hasAnyDefaultLLMConnectors?: boolean;
   license?: {
     type: string;
     uid: string;
@@ -40,6 +42,10 @@ export interface CloudConnectedSetupDeps {
   cloud?: CloudSetup;
 }
 
+export interface CloudConnectedStartDeps {
+  licensing: LicensingPluginStart;
+}
+
 export interface CloudConnectedAppComponentProps {
   chrome: CoreStart['chrome'];
   application: CoreStart['application'];
@@ -50,6 +56,7 @@ export interface CloudConnectedAppComponentProps {
   cloudUrl: string;
   telemetryService: CloudConnectTelemetryService;
   apiService: CloudConnectApiService;
+  licensing: LicensingPluginStart;
 }
 
 export interface ServiceMetadata {

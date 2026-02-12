@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiOverflowScroll, useEuiScrollBar } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiOverflowScroll,
+  useEuiScrollBar,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useRef } from 'react';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
@@ -28,6 +34,7 @@ import { useAppLeave } from '../../context/app_leave_context';
 import { useNavigationAbort } from '../../hooks/use_navigation_abort';
 
 export const Conversation: React.FC<{}> = () => {
+  const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
   const { isResponseLoading } = useSendMessage();
@@ -82,6 +89,10 @@ export const Conversation: React.FC<{}> = () => {
     ${useEuiOverflowScroll('y')}
   `;
 
+  const inputPaddingStyles = css`
+    padding-bottom: ${euiTheme.size.base};
+  `;
+
   if (!hasActiveConversation) {
     return <NewConversationPrompt />;
   }
@@ -102,7 +113,7 @@ export const Conversation: React.FC<{}> = () => {
         {showScrollButton && <ScrollButton onClick={scrollToMostRecentRoundBottom} />}
       </EuiFlexItem>
       <EuiFlexItem
-        css={[conversationElementWidthStyles, conversationElementPaddingStyles]}
+        css={[conversationElementWidthStyles, conversationElementPaddingStyles, inputPaddingStyles]}
         grow={false}
       >
         <ConversationInput onSubmit={scrollToMostRecentRoundTop} />

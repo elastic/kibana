@@ -24,8 +24,10 @@ import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
+import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { StartConversationButton } from './start_conversation_button';
 import { AiInsightErrorBanner } from './ai_insight_error_banner';
+import { OBSERVABILITY_AGENT_ID } from '../../../common/constants';
 
 export interface AiInsightResponse {
   summary: string;
@@ -62,6 +64,8 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
   const [chatExperience] = useUiSetting$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
   const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
 
+  const { hasConnectors } = useGenAIConnectors();
+
   const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
   const hasAgentBuilderAccess = application?.capabilities.agentBuilder?.show === true;
 
@@ -84,12 +88,14 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
 
     onechat.openConversationFlyout({
       newConversation: true,
+      agentId: OBSERVABILITY_AGENT_ID,
       attachments: buildAttachments(summary, context),
     });
   }, [onechat, buildAttachments, summary, context]);
 
   if (
     !onechat ||
+    !hasConnectors ||
     !isAgentChatExperienceEnabled ||
     !hasAgentBuilderAccess ||
     !hasEnterpriseLicense
@@ -125,7 +131,7 @@ export function AiInsight({ title, fetchInsight, buildAttachments }: AiInsightPr
               <EuiText size="s" css={{ color: euiTheme.colors.textSubdued }}>
                 <span>
                   {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.description', {
-                    defaultMessage: 'Get helpful insights from our Elastic AI Agent',
+                    defaultMessage: 'Get helpful insights from our Observability Agent',
                   })}
                 </span>
               </EuiText>

@@ -26,10 +26,12 @@ export const completionChunkToLangchain = (chunk: ChatCompletionChunkEvent): AIM
     };
   });
 
+  const additionalKwargs = chunk.refusal ? { refusal: chunk.refusal } : {};
+
   return new AIMessageChunk({
     content: chunk.content,
     tool_call_chunks: toolCallChunks,
-    additional_kwargs: {},
+    additional_kwargs: additionalKwargs,
     response_metadata: {},
   });
 };

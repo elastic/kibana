@@ -9,11 +9,13 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
 import axios from 'axios';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import type { OnboardClusterResponse } from '../types';
 import { getCurrentClusterData } from '../lib/cluster_info';
 import { createStorageService } from '../lib/create_storage_service';
+import { hasAnyDefaultLLMConnectors } from '../lib/update_default_llm_actions';
 
 const bodySchema = schema.object({
   apiKey: schema.string({ minLength: 1 }),
@@ -21,6 +23,7 @@ const bodySchema = schema.object({
 
 interface CloudConnectedStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  actions: ActionsPluginStart;
 }
 
 export interface AuthenticateRouteOptions {
@@ -56,6 +59,7 @@ export const registerAuthenticateRoute = ({
       try {
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
+        const [, pluginsStart] = await getStartServices();
 
         // Fetch cluster and license information from Elasticsearch
         const [licenseResponse, clusterResponse] = await Promise.all([
@@ -63,9 +67,19 @@ export const registerAuthenticateRoute = ({
           esClient.info(),
         ]);
 
+        // Check if any default LLM connectors exist
+        let hasDefaultLLMConnectors = false;
+        try {
+          const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
+          hasDefaultLLMConnectors = await hasAnyDefaultLLMConnectors(actionsClient);
+        } catch (actionsError) {
+          logger.debug('Failed to check for default LLM connectors', { error: actionsError });
+        }
+
         return response.ok({
           body: {
             hasEncryptedSOEnabled,
+            hasAnyDefaultLLMConnectors: hasDefaultLLMConnectors,
             license: {
               type: licenseResponse.license.type,
               uid: licenseResponse.license.uid,
