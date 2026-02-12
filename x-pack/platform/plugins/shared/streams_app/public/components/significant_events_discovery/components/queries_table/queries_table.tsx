@@ -113,11 +113,7 @@ export function QueriesTable() {
     page: pagination.index + 1,
     perPage: pagination.size,
   });
-  const {
-    data: occurrencesData,
-    isLoading: occurrencesLoading,
-    isError: hasOccurrencesError,
-  } = useFetchDiscoveryQueriesOccurrences({ query: searchQuery });
+  const { data: occurrencesData } = useFetchDiscoveryQueriesOccurrences({ query: searchQuery });
   const {
     data: streamsData,
     isLoading: streamsLoading,
@@ -279,12 +275,12 @@ export function QueriesTable() {
     ];
   }, [share.url.locators, streamsData, timeState]);
 
-  const isLoading = queriesLoading || occurrencesLoading || streamsLoading;
+  const isLoading = queriesLoading || streamsLoading;
   if (isLoading) {
     return <LoadingPanel size="l" />;
   }
 
-  const hasError = hasQueriesError || hasOccurrencesError || hasStreamsError;
+  const hasError = hasQueriesError || hasStreamsError;
   if (hasError) {
     return (
       <EuiEmptyPrompt
@@ -382,10 +378,8 @@ export function QueriesTable() {
           columns={columns}
           itemId={(item) => item.query.id}
           items={tableItems}
-          loading={queriesLoading || occurrencesLoading || streamsLoading}
-          noItemsMessage={
-            !queriesLoading && !occurrencesLoading && !streamsLoading ? NO_ITEMS_MESSAGE : ''
-          }
+          loading={queriesLoading || streamsLoading}
+          noItemsMessage={!queriesLoading && !streamsLoading ? NO_ITEMS_MESSAGE : ''}
           pagination={{
             pageIndex: pagination.index,
             pageSize: pagination.size,
