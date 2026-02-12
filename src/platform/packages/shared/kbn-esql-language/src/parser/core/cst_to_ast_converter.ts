@@ -2124,7 +2124,7 @@ export class CstToAstConverter {
     this.parseMmrOnOption(ctx, command);
     this.parseMmrLimitOption(ctx, command);
     this.parseMmrWithOption(ctx, command);
-    console.log('command', command);
+
     return command;
   }
 
