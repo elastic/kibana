@@ -35,6 +35,7 @@ const env = {
   PATH: process.env.PATH + `:${path.join('node_modules', '.bin')}`,
   MOON_NO_ACTIONS: 'true',
   MOON_CONCURRENCY: '' + (os.availableParallelism() - 1),
+  MOON_NO_BAIL: 'true',
 } as Record<string, string>;
 
 run(async ({ log, flags }) => {
@@ -49,6 +50,10 @@ run(async ({ log, flags }) => {
       // moon ci doesn't support -u, set it to 'write' if it's not set already
       env.MOON_CACHE = env.MOON_CACHE ?? 'write';
     }
+  }
+
+  if (!IS_CI) {
+    fullArgs.push('--summary');
   }
 
   log.info(`Running ESLint: 'moon ${fullArgs.join(' ')}'`);

@@ -67,8 +67,13 @@ if (process.argv.includes('--help') || process.argv.includes('-h')) {
 function runEslintWithBreakOnFix(passalongArgs) {
   const childArgs = process.argv
     .slice(2)
-    .flatMap((arg) => (arg === '--break-on-fix' ? ['--format', 'json'] : [arg]))
-    .filter((arg) => arg !== '--quiet');
+    .flatMap((arg) => (arg === '--break-on-fix' ? ['--format', 'json'] : [arg]));
+
+  // Capture git state before ESLint to detect fixes on disk, scoped to the
+  // target paths so parallel runs on different projects don't interfere.
+  // (--quiet suppresses fix results from JSON output, so we compare file state instead)
+  const diffArgs = ['diff', '--stat', '--', ...passalongArgs];
+  const preRunDiff = spawnSync('git', diffArgs, { encoding: 'utf-8' }).stdout;
 
   const child = spawnSync(process.execPath, [eslintBinPath, ...childArgs, ...passalongArgs], {
     stdio: ['inherit', 'pipe', 'pipe'],
@@ -81,18 +86,17 @@ function runEslintWithBreakOnFix(passalongArgs) {
   }
 
   const stdout = child.stdout?.toString() ?? '';
-  let hadFixes = false;
+
+  // Detect fixes by comparing git state before and after ESLint (same scoped paths)
+  const postRunDiff = spawnSync('git', diffArgs, { encoding: 'utf-8' }).stdout;
+  const hadFixes = preRunDiff !== postRunDiff;
+
   let hadFailures = false;
   try {
     const results = JSON.parse(stdout || '[]');
 
-    const fixed = results.filter((r) => r.output);
-    if (fixed.length > 0) {
-      console.warn(`ESLint: Fixed ${fixed.length} file(s):`);
-      for (const r of fixed) {
-        console.warn(r.filePath);
-      }
-      hadFixes = true;
+    if (hadFixes) {
+      console.warn('ESLint: Fixed file(s)');
     }
 
     const failed = results.filter((r) => r.errorCount > 0);
@@ -115,7 +119,13 @@ function runEslintWithBreakOnFix(passalongArgs) {
     console.error('ESLint: Failed to fix some files, please fix them manually.');
     process.exit(1);
   } else if (child.status !== 0) {
-    console.error('ESLint: Failed to run, please check the output for errors.');
+    if (child.signal === 'SIGINT') {
+      console.error(
+        'ESLint: Process was interrupted, unable to determine if there were errors or fixes.'
+      );
+    } else {
+      console.error('ESLint: Failed to run, please check the output for errors.');
+    }
     process.exit(child.status ?? 1);
   } else {
     console.log('✅ no eslint errors found');
