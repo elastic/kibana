@@ -333,14 +333,14 @@ export const featuresTaskRoute = createServerRoute({
                   logger,
                 });
 
-                const validPatterns = await getPreviousDiscoveredPatterns(name, taskClient);
+                const patternState = await getPreviousDiscoveredPatterns(name, taskClient);
 
                 return {
                   connectorId,
                   start: body.from.getTime(),
                   end: body.to.getTime(),
                   streamName: name,
-                  discoveredPatterns: validPatterns,
+                  ...patternState,
                 };
               })(),
               request,

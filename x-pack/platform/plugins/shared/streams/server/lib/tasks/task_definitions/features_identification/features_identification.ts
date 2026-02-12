@@ -12,31 +12,21 @@ import { isComputedFeature, type BaseFeature } from '@kbn/streams-schema';
 import { identifyFeatures, generateAllComputedFeatures } from '@kbn/streams-ai';
 import { v4 as uuid, v5 as uuidv5 } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import { discoverMessagePatterns } from '../../../routes/utils/discover_message_patterns';
-import type { StreamsTaskType, TaskContext } from '.';
-import type { TaskClient } from '../task_client';
-import type { TaskParams } from '../types';
-import { PromptsConfigService } from '../../saved_objects/significant_events/prompts_config_service';
-import { cancellableTask } from '../cancellable_task';
-import { MAX_FEATURE_AGE_MS } from '../../streams/feature/feature_client';
+import { formatInferenceProviderError } from '../../../../routes/utils/create_connector_sse_error';
+import type { StreamsTaskType, TaskContext } from '..';
+import type { TaskClient } from '../../task_client';
+import type { TaskParams } from '../../types';
+import { PromptsConfigService } from '../../../saved_objects/significant_events/prompts_config_service';
+import { cancellableTask } from '../../cancellable_task';
+import { MAX_FEATURE_AGE_MS } from '../../../streams/feature/feature_client';
+import { getSampleDocuments } from './get_sample_documents';
+import type { FeaturesIdentificationTaskParams, PreviousPatternState } from './types';
 
-export interface DiscoveredPattern {
-  pattern: string;
-  discoveredAt: number;
-}
-
-/** Maximum age of a discovered pattern before it expires and can be re-discovered. */
-export const PATTERN_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-
-export interface FeaturesIdentificationTaskParams {
-  connectorId: string;
-  start: number;
-  end: number;
-  streamName: string;
-  discoveredPatterns: DiscoveredPattern[];
-}
+/**
+ * Maximum age of the discovered-patterns set before it is cleared and
+ * accumulation restarts from scratch.
+ */
+export const PATTERN_RESET_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export const FEATURES_IDENTIFICATION_TASK_TYPE = 'streams_features_identification';
 
@@ -44,108 +34,42 @@ export function getFeaturesIdentificationTaskId(streamName: string) {
   return `${FEATURES_IDENTIFICATION_TASK_TYPE}_${streamName}`;
 }
 
+const getDefaultPatternState = (): PreviousPatternState => {
+  return {
+    discoveredPatterns: [],
+    lastPatternResetAt: Date.now(),
+  };
+};
+
 /**
- * Retrieves non-expired discovered patterns from the previous features
- * identification task for the given stream. Returns an empty array if
- * no previous task exists.
+ * Retrieves the discovered-pattern state from the previous features
+ * identification task for the given stream. If the stored pattern set
+ * has expired (older than {@link PATTERN_RESET_MS}), an empty set with
+ * a fresh `lastPatternResetAt` is returned.
  */
 export async function getPreviousDiscoveredPatterns(
   streamName: string,
   taskClient: TaskClient<StreamsTaskType>
-): Promise<DiscoveredPattern[]> {
+): Promise<PreviousPatternState> {
   try {
     const taskId = getFeaturesIdentificationTaskId(streamName);
     const previousTask = await taskClient.get<FeaturesIdentificationTaskParams>(taskId);
+    const { discoveredPatterns, lastPatternResetAt } = previousTask.task.params;
+
+    if (!discoveredPatterns || !lastPatternResetAt) {
+      return getDefaultPatternState();
+    }
+
     const now = Date.now();
-    return (previousTask.task.params.discoveredPatterns ?? []).filter(
-      (p) => now - p.discoveredAt < PATTERN_TTL_MS
-    );
+    if (now - lastPatternResetAt >= PATTERN_RESET_MS) {
+      return getDefaultPatternState();
+    }
+
+    return { discoveredPatterns, lastPatternResetAt };
   } catch {
-    return [];
+    return getDefaultPatternState();
   }
 }
-
-const MIN_NEW_PATTERNS = 2;
-
-const MAX_DISCOVERED_PATTERNS = 200;
-
-/** Target number of sample documents to return for feature identification. */
-const DEFAULT_SAMPLE_SIZE = 20;
-
-/**
- * Merges previously discovered patterns with newly discovered ones, capping the
- * total at {@link MAX_DISCOVERED_PATTERNS}.
- *
- * New patterns are always retained so they appear in the next exclusion round.
- * When the combined count exceeds the cap, the oldest previous patterns
- * (highest-volume, discovered first by `categorize_text`) are kept and the most
- * recently discovered previous patterns (lowest-volume) are evicted.
- */
-const mergeDiscoveredPatterns = ({
-  previousPatterns,
-  newPatterns,
-}: {
-  previousPatterns: DiscoveredPattern[];
-  newPatterns: DiscoveredPattern[];
-}): DiscoveredPattern[] => {
-  const sortedPrevious = [...previousPatterns].sort((a, b) => a.discoveredAt - b.discoveredAt);
-  const remainingSlots = Math.max(0, MAX_DISCOVERED_PATTERNS - newPatterns.length);
-  const keptPrevious = sortedPrevious.slice(0, remainingSlots);
-
-  return [...keptPrevious, ...newPatterns].slice(0, MAX_DISCOVERED_PATTERNS);
-};
-
-const getSampleDocuments = async ({
-  esClient,
-  index,
-  start,
-  end,
-  excludePatterns,
-  size = DEFAULT_SAMPLE_SIZE,
-}: {
-  esClient: ElasticsearchClient;
-  index: string;
-  start: number;
-  end: number;
-  excludePatterns: DiscoveredPattern[];
-  size?: number;
-}) => {
-  // Discover message patterns, excluding previously found ones
-  const { categories, randomSampleDocuments } = await discoverMessagePatterns({
-    esClient,
-    index,
-    start,
-    end,
-    excludePatterns: excludePatterns.map((p) => p.pattern),
-    size,
-  });
-
-  const categoryDocuments = categories.flatMap((c) => c.sampleDocuments);
-  const sampleDocuments = [
-    ...categoryDocuments,
-    ...randomSampleDocuments.slice(0, Math.max(0, size - categoryDocuments.length)),
-  ].slice(0, size);
-
-  const now = Date.now();
-  // Only persist meaningful patterns for future exclusion
-  const newPatterns: DiscoveredPattern[] = categories
-    .filter((c) => c.isMeaningfulPattern)
-    .map((c) => ({
-      pattern: c.pattern,
-      discoveredAt: now,
-    }));
-
-  return {
-    updatedPatterns:
-      newPatterns.length < MIN_NEW_PATTERNS
-        ? []
-        : mergeDiscoveredPatterns({
-            previousPatterns: excludePatterns,
-            newPatterns,
-          }),
-    sampleDocuments,
-  };
-};
 
 export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext) {
   return {
@@ -163,7 +87,8 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                 start,
                 end,
                 streamName,
-                discoveredPatterns: previousPatterns,
+                discoveredPatterns,
+                lastPatternResetAt,
                 _task,
               } = runContext.taskInstance.params as TaskParams<FeaturesIdentificationTaskParams>;
 
@@ -189,12 +114,17 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
 
                 const boundInferenceClient = inferenceClient.bindTo({ connectorId });
                 const esClient = scopedClusterClient.asCurrentUser;
-                const { sampleDocuments, updatedPatterns } = await getSampleDocuments({
+                const {
+                  sampleDocuments,
+                  updatedPatterns,
+                  lastPatternResetAt: updatedResetAt,
+                } = await getSampleDocuments({
                   esClient,
                   index: stream.name,
                   start,
                   end,
-                  excludePatterns: previousPatterns,
+                  discoveredPatterns: discoveredPatterns ?? [],
+                  lastPatternResetAt: lastPatternResetAt ?? Date.now(),
                 });
 
                 const [{ features: inferredBaseFeatures }, computedFeatures] = await Promise.all([
@@ -260,6 +190,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     end,
                     streamName,
                     discoveredPatterns: updatedPatterns,
+                    lastPatternResetAt: updatedResetAt,
                   },
                   { features }
                 );
@@ -290,7 +221,8 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
                     start,
                     end,
                     streamName,
-                    discoveredPatterns: previousPatterns,
+                    discoveredPatterns,
+                    lastPatternResetAt,
                   },
                   errorMessage
                 );

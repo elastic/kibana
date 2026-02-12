@@ -78,7 +78,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                 for (const step of steps) {
                   switch (step) {
                     case OnboardingStep.FeaturesIdentification:
-                      const previousPatterns = await getPreviousDiscoveredPatterns(
+                      const patternState = await getPreviousDiscoveredPatterns(
                         streamName,
                         taskClient
                       );
@@ -88,7 +88,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                           start: from,
                           end: to,
                           streamName,
-                          discoveredPatterns: previousPatterns,
+                          ...patternState,
                         },
                         taskClient,
                         runContext.fakeRequest

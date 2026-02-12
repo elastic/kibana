@@ -356,7 +356,7 @@ describe('discoverMessagePatterns integration', () => {
         start,
         end,
         excludePatterns: excludePatterns.length > 0 ? excludePatterns : undefined,
-        size: 10,
+        sampleSize: 10,
       });
 
       const { categories, randomSampleDocuments, categorizationField } = result;
@@ -455,7 +455,7 @@ describe('discoverMessagePatterns integration', () => {
       index: SHORT_PATTERNS_INDEX_NAME,
       start,
       end,
-      size: SAMPLE_SIZE,
+      sampleSize: SAMPLE_SIZE,
     });
 
     expect(categories.length).toBeGreaterThan(0);

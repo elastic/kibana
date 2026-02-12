@@ -201,14 +201,16 @@ export const discoverMessagePatterns = async ({
   start,
   end,
   excludePatterns,
-  size = DEFAULT_SAMPLE_SIZE,
+  sampleSize = DEFAULT_SAMPLE_SIZE,
+  categorySize,
 }: {
   esClient: ElasticsearchClient;
   index: string;
   start: number;
   end: number;
   excludePatterns?: string[];
-  size?: number;
+  sampleSize?: number;
+  categorySize?: number;
 }): Promise<DiscoverPatternsResult> => {
   const categorizationField = await resolveCategorizationField({ esClient, index, start, end });
 
@@ -230,7 +232,7 @@ export const discoverMessagePatterns = async ({
   const samplerSubAggs: Record<string, AggregationsAggregationContainer> = {
     random_docs: {
       top_hits: {
-        size,
+        size: sampleSize,
         _source: true,
       },
     },
@@ -241,7 +243,7 @@ export const discoverMessagePatterns = async ({
       categorize_text: {
         field: categorizationField,
         min_doc_count: MIN_DOC_COUNT,
-        size,
+        size: categorySize ?? sampleSize,
         similarity_threshold: SIMILARITY_THRESHOLD,
         categorization_analyzer: {
           tokenizer: 'ml_standard',
