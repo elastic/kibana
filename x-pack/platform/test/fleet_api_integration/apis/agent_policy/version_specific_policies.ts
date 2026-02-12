@@ -123,6 +123,23 @@ export default function (providerContext: FtrProviderContext) {
           .send({ agentPolicyId: agentPolicyWithPPId })
           .expect(200);
       });
+      it('should include agents on version-specific policies in agent count when getting policy', async () => {
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyWithPPId}`)
+          .expect(200);
+        // One agent on parent policy (agentId), one on version-specific (upgradedAgentId); both counted under parent
+        expect(body.item.agents).to.eql(2);
+      });
+
+      it('should include agents on version-specific policies in agent count when listing with withAgentCount', async () => {
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies?withAgentCount=true&perPage=100`)
+          .expect(200);
+        const policy = body.items.find((p: { id: string }) => p.id === agentPolicyWithPPId);
+        expect(policy).to.be.ok();
+        expect(policy.agents).to.eql(2);
+      });
+
       it('should create version specific policies with common agent versions and package level agent version condition', async () => {
         const { body } = await supertest
           .get(`/api/fleet/agent_policies/${agentPolicyWithPPId}`)

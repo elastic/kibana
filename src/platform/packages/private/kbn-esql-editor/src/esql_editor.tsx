@@ -47,12 +47,14 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
 import { ESQLLang, ESQL_LANG_ID, monaco } from '@kbn/monaco';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import { DataSourceBrowser } from '@kbn/esql-resource-browser';
 import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { firstValueFrom, of } from 'rxjs';
 import { QuerySource } from '@kbn/esql-types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './lookup_join';
 import { EditorFooter } from './editor_footer';
@@ -94,6 +96,8 @@ import {
   addTabKeybindingRules,
 } from './custom_editor_commands';
 import { useEsqlCallbacks } from './use_esql_callbacks';
+import { useDataSourceBrowser } from './resource_browser/use_data_source_browser';
+import { useSourcesBadge } from './resource_browser/use_resource_browser_badge';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -130,6 +134,7 @@ const ESQLEditorInternal = function ESQLEditor({
   hideQuickSearch,
   queryStats,
   openVisorOnSourceCommands,
+  enableResourceBrowser = false,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -630,6 +635,11 @@ const ESQLEditorInternal = function ESQLEditor({
     [telemetryService, setIsHistoryOpen]
   );
 
+  const isResourceBrowserEnabled = useCallback(async () => {
+    const currentApp = await firstValueFrom(application?.currentAppId$ ?? of(undefined));
+    return Boolean(enableResourceBrowser && currentApp === 'discover');
+  }, [application?.currentAppId$, enableResourceBrowser]);
+
   const esqlCallbacks = useEsqlCallbacks({
     core,
     data,
@@ -649,6 +659,28 @@ const ESQLEditorInternal = function ESQLEditor({
     memoizedHistoryStarredItems,
     favoritesClient,
     getJoinIndicesCallback,
+    isResourceBrowserEnabled,
+  });
+
+  const {
+    isDataSourceBrowserOpen,
+    setIsDataSourceBrowserOpen,
+    browserPopoverPosition: dataSourceBrowserPosition,
+    allSources,
+    isLoadingSources,
+    selectedSources,
+    openIndicesBrowser,
+    handleDataSourceBrowserSelect,
+  } = useDataSourceBrowser({
+    editorRef,
+    editorModel,
+    esqlCallbacks,
+  });
+
+  const { addSourcesDecorator, sourcesBadgeStyle, sourcesLabelClickHandler } = useSourcesBadge({
+    editorRef,
+    editorModel,
+    openIndicesBrowser,
   });
 
   const queryRunButtonProperties = useMemo(() => {
@@ -1000,6 +1032,7 @@ const ESQLEditorInternal = function ESQLEditor({
       <Global
         styles={css`
           ${lookupIndexBadgeStyle}
+          ${sourcesBadgeStyle}
         `}
       />
       {Boolean(editorIsInline) && (formLabel || !hideRunQueryButton) ? (
@@ -1100,6 +1133,9 @@ const ESQLEditorInternal = function ESQLEditor({
                   if (model) {
                     editorModel.current = model;
                     await addLookupIndicesDecorator();
+                    if (enableResourceBrowser) {
+                      addSourcesDecorator();
+                    }
                   }
 
                   // Register custom commands
@@ -1116,6 +1152,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     esqlVariables: esqlVariablesRef,
                     controlsContext: controlsContextRef,
                     openTimePickerPopover,
+                    openIndicesBrowser: enableResourceBrowser ? openIndicesBrowser : undefined,
                   });
 
                   // Add editor key bindings
@@ -1135,6 +1172,12 @@ const ESQLEditorInternal = function ESQLEditor({
                   editor.onMouseDown(() => {
                     if (datePickerOpenStatusRef.current) {
                       setPopoverPosition({});
+                    }
+                  });
+
+                  editor.onMouseDown((e) => {
+                    if (enableResourceBrowser) {
+                      sourcesLabelClickHandler(e);
                     }
                   });
 
@@ -1175,6 +1218,9 @@ const ESQLEditorInternal = function ESQLEditor({
                   editor.onDidChangeModelContent(async () => {
                     trackInputLatencyOnKeystroke(editor.getValue() ?? '');
                     await addLookupIndicesDecorator();
+                    if (enableResourceBrowser) {
+                      addSourcesDecorator();
+                    }
                     maybeTriggerSuggestions();
                   });
 
@@ -1320,6 +1366,19 @@ const ESQLEditorInternal = function ESQLEditor({
         ),
         document.body
       )}
+      {enableResourceBrowser &&
+        createPortal(
+          <DataSourceBrowser
+            isOpen={isDataSourceBrowserOpen}
+            isLoading={isLoadingSources}
+            allSources={allSources}
+            selectedSources={selectedSources}
+            position={dataSourceBrowserPosition}
+            onSelect={handleDataSourceBrowserSelect}
+            onClose={() => setIsDataSourceBrowserOpen(false)}
+          />,
+          document.body
+        )}
     </>
   );
 

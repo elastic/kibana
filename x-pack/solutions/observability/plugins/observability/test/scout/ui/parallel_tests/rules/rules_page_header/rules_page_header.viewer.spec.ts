@@ -5,35 +5,40 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../fixtures';
 
-test.describe('Rules Page - Header', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsViewer();
-    // Navigate to the rules list page
-    await pageObjects.rulesPage.goto();
-    // Verify we're on the rules page
-    await expect(pageObjects.rulesPage.pageTitle).toBeVisible();
-  });
+test.describe(
+  'Rules Page - Header',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsViewer();
+      // Navigate to the rules list page
+      await pageObjects.rulesPage.goto();
+      // Verify we're on the rules page
+      await expect(pageObjects.rulesPage.pageTitle).toBeVisible();
+    });
 
-  test('should open settings flyout, verify buttons state, and close successfully', async ({
-    pageObjects,
-  }) => {
-    // Open the settings flyout
-    await pageObjects.rulesPage.openSettingsFlyout();
-    await pageObjects.rulesPage.expectSettingsFlyoutVisible();
+    test('should open settings flyout, verify buttons state, and close successfully', async ({
+      pageObjects,
+    }) => {
+      // Open the settings flyout
+      await pageObjects.rulesPage.openSettingsFlyout();
+      await pageObjects.rulesPage.expectSettingsFlyoutVisible();
 
-    // Verify buttons are visible and enabled
-    await expect(pageObjects.rulesPage.settingsFlyoutCancelButton).toBeVisible();
-    await expect(pageObjects.rulesPage.settingsFlyoutCancelButton).toBeEnabled();
-    await expect(pageObjects.rulesPage.settingsFlyoutSaveButton).toBeVisible();
-    await expect(pageObjects.rulesPage.settingsFlyoutSaveButton).toBeDisabled();
+      // Verify buttons are visible and enabled
+      await expect(pageObjects.rulesPage.settingsFlyoutCancelButton).toBeVisible();
+      await expect(pageObjects.rulesPage.settingsFlyoutCancelButton).toBeEnabled();
+      await expect(pageObjects.rulesPage.settingsFlyoutSaveButton).toBeVisible();
+      await expect(pageObjects.rulesPage.settingsFlyoutSaveButton).toBeDisabled();
 
-    // Close the flyout
-    await pageObjects.rulesPage.closeSettingsFlyout();
+      // Close the flyout
+      await pageObjects.rulesPage.closeSettingsFlyout();
 
-    // Verify the flyout is closed
-    await expect(pageObjects.rulesPage.settingsFlyout).toBeHidden();
-  });
-});
+      // Verify the flyout is closed
+      await expect(pageObjects.rulesPage.settingsFlyout).toBeHidden();
+    });
+  }
+);
