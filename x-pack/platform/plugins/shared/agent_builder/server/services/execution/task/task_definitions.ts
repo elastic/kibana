@@ -35,7 +35,6 @@ export const registerTaskDefinitions = ({
       maxAttempts: 1,
       cost: TaskCost.Normal,
       priority: TaskPriority.NormalLongRunning,
-      maxConcurrency: 5,
       createTaskRunner: (context) => {
         const { taskInstance, fakeRequest } = context;
 
