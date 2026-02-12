@@ -13,7 +13,7 @@ import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 
 import { flattenFilters } from '../lib/flatten_filters';
 
-export const getFilterKeysForApplicability = (filter: Filter): string[] => {
+export const getFilterKeys = (filter: Filter): string[] => {
   const keys = flattenFilters([filter])
     .map((f) => f.meta?.key)
     .filter((key): key is string => typeof key === 'string' && key.length > 0);

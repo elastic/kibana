@@ -31,7 +31,7 @@ import { FilterView } from '../filter_view';
 import type { FilterPanelOption } from '../../types';
 import type { WithCloseFilterEditorConfirmModalProps } from '../filter_editor';
 import { withCloseFilterEditorConfirmModal } from '../filter_editor';
-import { getFilterKeysForApplicability, isFilterApplicable } from './is_filter_applicable';
+import { getFilterKeys, isFilterApplicable } from './is_filter_applicable';
 
 export interface FilterItemProps extends WithCloseFilterEditorConfirmModalProps {
   id: string;
@@ -285,33 +285,18 @@ function FilterItemComponent(props: FilterItemProps) {
         id: 'unifiedSearch.filter.filterBar.labelWarningText',
         defaultMessage: `Warning`,
       });
-      const fieldNames = getFilterKeysForApplicability(filter);
-      if (fieldNames.length === 1) {
-        label.message = props.intl.formatMessage(
-          {
-            id: 'unifiedSearch.filter.filterBar.labelWarningInfo',
-            defaultMessage: 'Field {fieldName} does not exist in current view',
-          },
-          {
-            fieldName: fieldNames[0],
-          }
-        );
-      } else if (fieldNames.length > 1) {
-        label.message = props.intl.formatMessage(
-          {
-            id: 'unifiedSearch.filter.filterBar.labelWarningMultipleFieldsInfo',
-            defaultMessage: 'Fields {fieldNames} do not exist in current view',
-          },
-          {
-            fieldNames: fieldNames.join(', '),
-          }
-        );
-      } else {
-        label.message = props.intl.formatMessage({
-          id: 'unifiedSearch.filter.filterBar.labelWarningUnknownFieldInfo',
-          defaultMessage: 'This filter does not exist in the current view',
-        });
-      }
+      const fieldNames = getFilterKeys(filter);
+      label.message = props.intl.formatMessage(
+        {
+          id: 'unifiedSearch.filter.filterBar.labelWarningFieldDoesNotExistInCurrentView',
+          defaultMessage:
+            '{fieldCount, plural, =0 {This filter does not exist in the current view} one {Field {fieldNames} does not exist in the current view} other {Fields {fieldNames} do not exist in the current view}}',
+        },
+        {
+          fieldCount: fieldNames.length,
+          fieldNames: fieldNames.join(', '),
+        }
+      );
     }
 
     return label;

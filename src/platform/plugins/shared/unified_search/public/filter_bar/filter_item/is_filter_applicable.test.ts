@@ -10,7 +10,7 @@
 import type { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
-import { getFilterKeysForApplicability, isFilterApplicable } from './is_filter_applicable';
+import { getFilterKeys, isFilterApplicable } from './is_filter_applicable';
 
 const mockGetIndexPatternFromFilter = jest.fn();
 
@@ -104,7 +104,7 @@ describe('is_filter_applicable', () => {
       buildPhraseFilter('fieldB'),
     ]);
 
-    expect(getFilterKeysForApplicability(combined).sort()).toEqual(['fieldA', 'fieldB']);
+    expect(getFilterKeys(combined).sort()).toEqual(['fieldA', 'fieldB']);
   });
 
   it('extracts keys from nested combined filters', () => {
@@ -113,6 +113,6 @@ describe('is_filter_applicable', () => {
       buildCombinedFilter([buildPhraseFilter('fieldB')]),
     ]);
 
-    expect(getFilterKeysForApplicability(combined).sort()).toEqual(['fieldA', 'fieldB']);
+    expect(getFilterKeys(combined).sort()).toEqual(['fieldA', 'fieldB']);
   });
 });
