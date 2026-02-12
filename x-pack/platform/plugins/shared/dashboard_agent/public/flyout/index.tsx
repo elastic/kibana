@@ -14,7 +14,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { DashboardFlyout } from './dashboard_flyout';
-import type { AttachmentStore } from '../services/attachment_store';
+import type { DashboardAttachmentStore } from '../services/attachment_store';
 
 /**
  * Creates a flyout consumer that subscribes to attachmentStore and opens/updates the flyout.
@@ -26,7 +26,7 @@ export const createFlyoutConsumer = ({
   chat$,
   share,
 }: {
-  attachmentStore: AttachmentStore;
+  attachmentStore: DashboardAttachmentStore;
   core: CoreStart;
   chat$: Observable<ChatEvent>;
   share?: SharePluginStart;
@@ -72,7 +72,7 @@ export const createFlyoutConsumer = ({
   };
 
   // Subscribe to store state changes
-  const subscription = attachmentStore.state.subscribe((state) => {
+  const subscription = attachmentStore.state$.subscribe((state) => {
     if (state) {
       openFlyout(state.attachmentId, state.data);
     }

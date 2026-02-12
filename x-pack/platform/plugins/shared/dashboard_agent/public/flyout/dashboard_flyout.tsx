@@ -45,7 +45,7 @@ import {
   SMALL_CHART_TYPES,
 } from './panel_constants';
 
-import type { AttachmentStore } from '../services/attachment_store';
+import type { DashboardAttachmentStore } from '../services/attachment_store';
 import { DashboardFlyoutFooter, type DashboardFlyoutInitialInput } from './dashboard_flyout_footer';
 
 const arePanelsEqual = (
@@ -306,7 +306,7 @@ const getDashboardFlyoutStyles = (euiTheme: ReturnType<typeof useEuiTheme>['euiT
 export interface DashboardFlyoutProps {
   initialData: DashboardAttachmentData;
   attachmentId: string;
-  attachmentStore: AttachmentStore;
+  attachmentStore: DashboardAttachmentStore;
   chat$: Observable<ChatEvent>;
   onClose: () => void;
   share?: SharePluginStart;
@@ -392,7 +392,7 @@ export const DashboardFlyout: React.FC<DashboardFlyoutProps> = ({
 
   // Subscribe to attachment store for state updates
   useEffect(() => {
-    const subscription = attachmentStore.state.subscribe((state) => {
+    const subscription = attachmentStore.state$.subscribe((state) => {
       if (state?.attachmentId === attachmentId && state.data) {
         // Only update confirmed panel IDs when we receive a confirmed attachment update
         if (state.isConfirmed) {

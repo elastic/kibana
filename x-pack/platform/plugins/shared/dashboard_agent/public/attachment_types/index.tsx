@@ -23,7 +23,7 @@ import {
 } from '@kbn/dashboard-agent-common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
-import { AttachmentStore } from '../services/attachment_store';
+import { DashboardAttachmentStore } from '../services/attachment_store';
 import { createFlyoutConsumer } from '../flyout';
 
 /**
@@ -41,9 +41,9 @@ export const registerDashboardAttachmentUiDefinition = ({
   share?: SharePluginStart;
   core: CoreStart;
 }): (() => void) => {
-  const attachmentStore = new AttachmentStore();
+  const attachmentStore = new DashboardAttachmentStore();
 
-  // Create flyout consumer - it subscribes to attachmentStore.state
+  // Create flyout consumer - it subscribes to attachmentStore.state$
   const unsubscribeFlyout = createFlyoutConsumer({ attachmentStore, core, chat$, share });
 
   attachments.addAttachmentType<DashboardAttachment>(DASHBOARD_ATTACHMENT_TYPE, {
@@ -57,7 +57,7 @@ export const registerDashboardAttachmentUiDefinition = ({
     },
     getIcon: () => 'productDashboard',
     onClick: ({ attachment }) => {
-      const data = attachment.data as DashboardAttachmentData | undefined;
+      const data = attachment.data;
       if (!data) return;
 
       attachmentStore.setAttachment(attachment.id, data);
@@ -73,7 +73,7 @@ export const registerDashboardAttachmentUiDefinition = ({
         DASHBOARD_PANEL_ADDED_EVENT
       )
     ) {
-      const { dashboardAttachmentId, panel } = event.data.data as PanelAddedEventData;
+      const { dashboardAttachmentId, panel } = event.data.data;
       attachmentStore.addPanel(dashboardAttachmentId, panel);
     }
 
@@ -84,7 +84,7 @@ export const registerDashboardAttachmentUiDefinition = ({
         DASHBOARD_PANELS_REMOVED_EVENT
       )
     ) {
-      const { dashboardAttachmentId, panelIds } = event.data.data as PanelsRemovedEventData;
+      const { dashboardAttachmentId, panelIds } = event.data.data;
       attachmentStore.removePanels(dashboardAttachmentId, panelIds);
     }
 

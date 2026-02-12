@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { isLensAttachmentPanel } from '@kbn/dashboard-agent-common';
 import type {
@@ -20,7 +21,7 @@ export interface AttachmentState {
   isConfirmed: boolean;
 }
 
-/** Event types emitted by the AttachmentStore */
+/** Event types emitted by the DashboardAttachmentStore */
 export type AttachmentStoreEvent =
   | { type: 'attachment_updated'; attachmentId: string; data: DashboardAttachmentData }
   | { type: 'panel_added'; attachmentId: string; data: DashboardAttachmentData }
@@ -32,23 +33,21 @@ export type AttachmentStoreListener = (event: AttachmentStoreEvent) => void;
  * Store for managing dashboard attachment state.
  * Emits events when attachments are updated, allowing multiple listeners to react.
  */
-export class AttachmentStore {
-  private readonly state$ = new BehaviorSubject<AttachmentState | null>(null);
+export class DashboardAttachmentStore {
+  private readonly _state$ = new BehaviorSubject<AttachmentState | null>(null);
   private readonly listeners = new Set<AttachmentStoreListener>();
   private attachmentCache = new Map<string, DashboardAttachmentData>();
 
   /**
    * Observable of the current attachment state.
    */
-  public get state() {
-    return this.state$.asObservable();
-  }
+  public readonly state$: Observable<AttachmentState | null> = this._state$.asObservable();
 
   /**
    * Get the current attachment state synchronously.
    */
   getState(): AttachmentState | null {
-    return this.state$.getValue();
+    return this._state$.getValue();
   }
 
   /**
@@ -66,21 +65,42 @@ export class AttachmentStore {
     }
   }
 
+  private commitState({
+    attachmentId,
+    data,
+    isConfirmed,
+    eventType,
+  }: {
+    attachmentId: string;
+    data: DashboardAttachmentData;
+    isConfirmed: boolean;
+    eventType?: AttachmentStoreEvent['type'];
+  }): void {
+    this.attachmentCache.set(attachmentId, data);
+    this._state$.next({ attachmentId, data, isConfirmed });
+
+    if (eventType) {
+      this.emit({ type: eventType, attachmentId, data });
+    }
+  }
+
   /**
    * Set the current attachment state.
    */
   setAttachment(attachmentId: string, data: DashboardAttachmentData): void {
-    this.attachmentCache.set(attachmentId, data);
-    this.state$.next({ attachmentId, data, isConfirmed: true });
+    this.commitState({ attachmentId, data, isConfirmed: true });
   }
 
   /**
    * Update the attachment data and emit event for listeners.
    */
   updateAttachment(attachmentId: string, data: DashboardAttachmentData): void {
-    this.attachmentCache.set(attachmentId, data);
-    this.state$.next({ attachmentId, data, isConfirmed: true });
-    this.emit({ type: 'attachment_updated', attachmentId, data });
+    this.commitState({
+      attachmentId,
+      data,
+      isConfirmed: true,
+      eventType: 'attachment_updated',
+    });
   }
 
   /**
@@ -108,9 +128,12 @@ export class AttachmentStore {
       panels: [...baseData.panels, attachmentPanel],
     };
 
-    this.attachmentCache.set(attachmentId, updatedData);
-    this.state$.next({ attachmentId, data: updatedData, isConfirmed: false });
-    this.emit({ type: 'panel_added', attachmentId, data: updatedData });
+    this.commitState({
+      attachmentId,
+      data: updatedData,
+      isConfirmed: false,
+      eventType: 'panel_added',
+    });
   }
 
   /**
@@ -119,14 +142,22 @@ export class AttachmentStore {
   removePanels(attachmentId: string, panelIds: string[]): void {
     const cachedData = this.attachmentCache.get(attachmentId);
     if (!cachedData) return;
+    if (panelIds.length === 0) return;
+
+    const panelIdSet = new Set(panelIds);
+    const panels = cachedData.panels.filter((p) => !panelIdSet.has(p.panelId));
+    if (panels.length === cachedData.panels.length) return;
 
     const updatedData: DashboardAttachmentData = {
       ...cachedData,
-      panels: cachedData.panels.filter((p) => !panelIds.includes(p.panelId)),
+      panels,
     };
 
-    this.attachmentCache.set(attachmentId, updatedData);
-    this.state$.next({ attachmentId, data: updatedData, isConfirmed: false });
-    this.emit({ type: 'panels_removed', attachmentId, data: updatedData });
+    this.commitState({
+      attachmentId,
+      data: updatedData,
+      isConfirmed: false,
+      eventType: 'panels_removed',
+    });
   }
 }
