@@ -83,14 +83,14 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
             services,
           }).getSerializedFields();
 
-          updatedTab = cloneDeep({
-            ...fromTabStateToSavedObjectTab({
+          updatedTab = cloneDeep(
+            fromTabStateToSavedObjectTab({
               tab,
               overridenTimeRestore: newTimeRestore,
+              serializedSearchSource,
               services,
-            }),
-            serializedSearchSource,
-          });
+            })
+          );
         } else {
           updatedTab = cloneDeep(
             fromTabStateToSavedObjectTab({
