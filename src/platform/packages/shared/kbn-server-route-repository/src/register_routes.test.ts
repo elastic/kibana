@@ -10,7 +10,7 @@
 import type { CoreSetup } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import * as t from 'io-ts';
 import { NEVER } from 'rxjs';
 import * as makeZodValidationObject from './make_zod_validation_object';

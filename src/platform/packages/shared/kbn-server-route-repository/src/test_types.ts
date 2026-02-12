@@ -8,7 +8,7 @@
  */
 
 import * as t from 'io-ts';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import type {
   EndpointOf,
