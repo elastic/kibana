@@ -231,7 +231,7 @@ export const createThreatSignals = async ({
         results = combineConcurrentResults(results, searchesPerformed);
       }
       documentCount -= list.hits.hits.length;
-      ruleExecutionLogger.debug(
+      ruleExecutionLogger.trace(
         `Alert candidates found: ${results.createdSignalsCount}.\nConcurrent indicator match searches completed. Search took: ${results.searchAfterTimes}ms. Bulk create times (ms): ${results.bulkCreateTimes}. Are all operations successful: ${results.success}.`
       );
 
@@ -254,7 +254,7 @@ export const createThreatSignals = async ({
       ) {
         // warning should be already set
         ruleExecutionLogger.debug(
-          `Max alerts per run reached\nIndicator match has reached its max signals count ${
+          `Max alerts per run reached\nIndicator match has reached its max alerts count ${
             MAX_SIGNALS_SUPPRESSION_MULTIPLIER * params.maxSignals
           }. Additional ${documentCount} documents are not checked.`
         );
