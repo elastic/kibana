@@ -348,7 +348,7 @@ describe('DeepStrict-wrapped v3 schemas (mixed v3/v4)', () => {
 describe('zod v4', () => {
   describe('convert', () => {
     test('base case', () => {
-      const result = convert(createLargeSchemaV4());
+      const result = convert(createLargeSchemaV4() as any);
       expect(result.shared).toEqual({});
       expect(result.schema).toMatchObject({
         type: 'object',
