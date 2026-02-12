@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { RuleTagArray } from '../../model';
 import type { RuleResponse } from '../../model/rule_schema';
 import { PrebuiltRuleAssetsFilter } from '../common/prebuilt_rule_assets_filter';

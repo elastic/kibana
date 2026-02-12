@@ -14,7 +14,7 @@
  *   version: 1.0.0
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { AlertIds, AlertTags } from '../../model/alert.gen';
 
