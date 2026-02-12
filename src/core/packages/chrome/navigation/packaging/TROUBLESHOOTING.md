@@ -1,113 +1,27 @@
 # Troubleshooting
 
-Common issues when using `@kbn/one-navigation`.
+## Common issues
 
-## TypeScript: Cannot Find Module
+### `Module not found: @kbn/i18n`
 
-Ensure TypeScript can resolve the package:
+The webpack aliases are not resolving. Ensure you are building via
+`./scripts/build.sh` (or the root-level convenience script) and not invoking
+webpack with a different config.
 
-```json
-// tsconfig.json
-{
-  "compilerOptions": {
-    "moduleResolution": "node",
-    "esModuleInterop": true
-  }
-}
-```
+### Type errors after updating the source component
 
-## Styles Not Rendering
+Run the packaging build — the type-validation step will report mismatches
+between source types and the standalone `packaging/react/types.ts`. Update
+the standalone types to match.
 
-Wrap your app with `EuiProvider`:
+### Runtime `Cannot read properties of undefined`
 
-```tsx
-import { EuiProvider } from '@elastic/eui';
+The most likely cause is a missing peer dependency. Ensure `@elastic/eui`,
+`@emotion/react`, `@emotion/css`, `react`, and `react-dom` are installed in the
+consuming application.
 
-<EuiProvider colorMode="light">
-  <OneNavigation {...props} />
-</EuiProvider>
-```
+### CSS / styling issues
 
-## Wrong EUI Version
-
-Use the same `@elastic/eui` version as Kibana. Check `kibana/package.json` for the current version.
-
-## Navigation Overlaps Content
-
-Use `setWidth` callback to add margin:
-
-```tsx
-const [navWidth, setNavWidth] = useState(0);
-
-<OneNavigation setWidth={setNavWidth} />
-<main style={{ marginLeft: `${navWidth}px` }}>
-  {/* content */}
-</main>
-```
-
-## Active Item Not Highlighting
-
-Update `activeItemId` in `onItemClick`:
-
-```tsx
-const [activeItemId, setActiveItemId] = useState('dashboard');
-
-<OneNavigation
-  activeItemId={activeItemId}
-  onItemClick={(item) => setActiveItemId(item.id)}
-/>
-```
-
-## Component Not Rendering
-
-**Required props:**
-- `items` (NavigationStructure)
-- `logo` (SideNavLogo)
-- `activeItemId` (string)
-- `isCollapsed` (boolean)
-- `onItemClick` (function)
-- `setWidth` (function)
-
-**Requirements:**
-- Wrap with `<EuiProvider>`
-- React 18+
-
-## Console Warnings
-
-**Unique key warnings:** Ensure all items have unique `id` properties
-
-**Failed prop type:** Verify structure matches expected types (check `id`, `label`, `iconType`)
-
-**EUI theme warnings:** Ensure `EuiProvider` has valid `colorMode`
-
-## Nested Menu Not Expanding
-
-Primary item needs `sections` array:
-
-```tsx
-{
-  id: 'analytics',
-  label: 'Analytics',
-  iconType: 'graphApp',
-  href: '#/analytics',
-  sections: [
-    {
-      id: 'section-1',
-      label: 'Reports',
-      items: [...]
-    }
-  ]
-}
-```
-
-## Performance Issues
-
-1. Memoize navigation items with `useMemo`
-2. Use `useCallback` for event handlers
-3. Limit nested sections and total items
-
-## Need Help?
-
-- **Example app**: [example/README.md](./example/README.md)
-- **Slack**: #appex-sharedux
-- **GitHub**: [Kibana Issues](https://github.com/elastic/kibana/issues)
+The component relies on EUI's theme provider. Wrap your application in
+`<EuiProvider>` (or the equivalent in your EUI version) before rendering
+`<OneNavigation>`.

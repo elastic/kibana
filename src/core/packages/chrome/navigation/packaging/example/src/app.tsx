@@ -10,19 +10,41 @@
 /* eslint-disable @kbn/imports/no_unresolvable_imports */
 
 import React, { useState } from 'react';
-import { EuiProvider, EuiSpacer, EuiText, EuiCode } from '@elastic/eui';
+import { css } from '@emotion/css';
+import { EuiProvider, EuiSpacer, EuiText, EuiCode, useEuiTheme } from '@elastic/eui';
 
-// @ts-expect-error - have to build the package.
+// @ts-expect-error — package must be built first.
 import { OneNavigation } from '@kbn/one-navigation';
-// @ts-expect-error - have to build the package.
+// @ts-expect-error — package must be built first.
 import type { MenuItem, SecondaryMenuItem, SideNavLogo } from '@kbn/one-navigation';
 
-function App() {
+/** Returns a `className` that adds a divider after the Dashboard nav item. */
+const useNavDividerClass = () => {
+  const { euiTheme } = useEuiTheme();
+  return css`
+    .euiPopover:has(#dashboard) {
+      position: relative;
+      margin-bottom: ${euiTheme.size.m};
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: calc(((${euiTheme.size.m} + ${euiTheme.size.l}) / 2) * -1);
+        width: 32px;
+        left: 50%;
+        transform: translateX(-50%);
+        height: ${euiTheme.border.width.thin};
+        background-color: ${euiTheme.colors.borderBaseSubdued};
+      }
+    }
+  `;
+};
+
+const App = () => {
   const [navigationWidth, setNavigationWidth] = useState(0);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activeItemId, setActiveItemId] = useState('dashboard');
 
-  // Define navigation structure
   const navigationItems = {
     primaryItems: [
       {
@@ -41,33 +63,15 @@ function App() {
             id: 'reports-section',
             label: 'Reports',
             items: [
-              {
-                id: 'analytics-overview',
-                label: 'Overview',
-                href: '#/analytics',
-              },
-              {
-                id: 'sales-report',
-                label: 'Sales Report',
-                href: '#/analytics/sales',
-              },
-              {
-                id: 'traffic-report',
-                label: 'Traffic Report',
-                href: '#/analytics/traffic',
-              },
+              { id: 'analytics-overview', label: 'Overview', href: '#/analytics' },
+              { id: 'sales-report', label: 'Sales Report', href: '#/analytics/sales' },
+              { id: 'traffic-report', label: 'Traffic Report', href: '#/analytics/traffic' },
             ],
           },
           {
             id: 'metrics-section',
             label: 'Metrics',
-            items: [
-              {
-                id: 'performance',
-                label: 'Performance',
-                href: '#/analytics/performance',
-              },
-            ],
+            items: [{ id: 'performance', label: 'Performance', href: '#/analytics/performance' }],
           },
         ],
       },
@@ -80,16 +84,8 @@ function App() {
           {
             id: 'data-section',
             items: [
-              {
-                id: 'data-sources',
-                label: 'Data Sources',
-                href: '#/data/sources',
-              },
-              {
-                id: 'data-quality',
-                label: 'Data Quality',
-                href: '#/data/quality',
-              },
+              { id: 'data-sources', label: 'Data Sources', href: '#/data/sources' },
+              { id: 'data-quality', label: 'Data Quality', href: '#/data/quality' },
             ],
           },
         ],
@@ -101,12 +97,6 @@ function App() {
         label: 'Settings',
         iconType: 'gear',
         href: '#/settings',
-      },
-      {
-        id: 'toggle-navigation',
-        label: isCollapsed ? 'Expand navigation' : 'Collapse navigation',
-        iconType: isCollapsed ? 'menuRight' : 'menuLeft',
-        href: '#',
       },
     ],
   };
@@ -121,37 +111,28 @@ function App() {
   const handleItemClick = (item: MenuItem | SecondaryMenuItem | SideNavLogo) => {
     // eslint-disable-next-line no-console
     console.log('Navigation item clicked:', item);
-
-    // Handle toggle navigation collapse/expand
-    if (item.id === 'toggle-navigation') {
-      setIsCollapsed(!isCollapsed);
-      return;
-    }
-
     setActiveItemId(item.id);
 
-    // Prevent default link behavior for demo
     if (item.href) {
       window.history.pushState({}, '', item.href);
     }
   };
 
+  const navDividerClass = useNavDividerClass();
+
   return (
     <EuiProvider colorMode="light">
-      <div style={{ display: 'flex', minHeight: '100vh' }}>
+      <div className={navDividerClass} style={{ display: 'flex', minHeight: '100vh' }}>
         <OneNavigation
+          {...{ activeItemId, logo }}
           items={navigationItems}
-          logo={logo}
           isCollapsed={isCollapsed}
-          activeItemId={activeItemId}
           onItemClick={handleItemClick}
+          onToggleCollapsed={setIsCollapsed}
           setWidth={setNavigationWidth}
-          mainContentSelectors={['main', '[role="main"]']}
-          mainScrollContainerId="app-content"
         />
 
         <main
-          id="app-content"
           role="main"
           style={{
             flex: 1,
@@ -165,66 +146,33 @@ function App() {
               <EuiCode>OneNavigation</EuiCode> Example
             </h1>
             <p>
-              Current active item: <EuiCode>{activeItemId}</EuiCode>
+              Active item: <EuiCode>{activeItemId}</EuiCode>
             </p>
             <p>
               Navigation width: <EuiCode>{navigationWidth}px</EuiCode>
             </p>
             <p>
-              Collapsed: <EuiCode>{isCollapsed ? 'true' : 'false'}</EuiCode>
+              Collapsed: <EuiCode>{String(isCollapsed)}</EuiCode>
             </p>
           </EuiText>
 
           <EuiSpacer />
 
           <EuiText>
-            <h2>Package Information</h2>
+            <h2>Test cases</h2>
             <ul>
-              <li>
-                <strong>Package</strong>: <EuiCode>@kbn/one-navigation</EuiCode>
-              </li>
-              <li>
-                <strong>Bundle Size</strong>: 25.8 KB (minified)
-              </li>
-              <li>
-                <strong>Dependencies</strong>: React, EUI, Emotion (peer deps)
-              </li>
-              <li>
-                <strong>i18n</strong>: No-op (default English messages)
-              </li>
+              <li>Click navigation items — state updates above.</li>
+              <li>Toggle collapsed via the built-in collapse button.</li>
+              <li>Hover collapsed items to see popovers.</li>
+              <li>Test nested navigation items (Analytics, Data).</li>
+              <li>Resize the window to test responsive behaviour.</li>
             </ul>
-          </EuiText>
-
-          <EuiSpacer />
-
-          <EuiText>
-            <h2>Test Cases</h2>
-            <ul>
-              <li>Click navigation items to see state updates</li>
-              <li>Toggle collapsed state using the footer toggle item</li>
-              <li>Hover over collapsed items to see popovers</li>
-              <li>Test nested navigation items (Analytics, Data)</li>
-              <li>Click footer items (Settings)</li>
-              <li>Verify the footer toggle icon changes (menuLeft ↔ menuRight)</li>
-              <li>Verify responsive behavior (resize window)</li>
-              <li>Check console for errors</li>
-            </ul>
-          </EuiText>
-
-          <EuiSpacer />
-
-          <EuiText>
-            <h2>HMR Compatible</h2>
-            <p>
-              This example application is HMR compatible. You can edit the code and see the changes
-              live without having to refresh the page.
-            </p>
           </EuiText>
         </main>
       </div>
     </EuiProvider>
   );
-}
+};
 
 // eslint-disable-next-line import/no-default-export
 export default App;

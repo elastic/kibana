@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Import type validation to ensure packaged types match source types
-// This will cause build failure if types diverge
+// Build-time type validation — causes build failure if types diverge.
 import './type_validation';
 
 import React from 'react';
@@ -22,10 +21,9 @@ import type {
   SideNavLogo,
 } from '../../types';
 
-// React import is needed for JSX transform
+// React import is needed for JSX transform.
 void React;
 
-// Re-export types
 export type {
   BadgeType,
   MenuItem,
@@ -36,32 +34,16 @@ export type {
   SideNavLogo,
 };
 
-// OneNavigationProps is identical to NavigationProps
+/** Alias for the external package. */
 export type OneNavigationProps = NavigationProps;
 
 /**
- * OneNavigation - Standalone Navigation component for external applications.
+ * `OneNavigation` — standalone navigation component for non-Kibana applications.
  *
- * This component provides Elastic's navigation UI for non-Kibana applications.
- * i18n is handled automatically via webpack aliases that redirect
- * @kbn/i18n and @kbn/i18n-react to no-op implementations.
- *
- * @example
- * ```tsx
- * <OneNavigation
- *   items={navigationItems}
- *   logo={logoConfig}
- *   isCollapsed={false}
- *   activeItemId="dashboard"
- *   onItemClick={handleClick}
- *   setWidth={setWidth}
- *   mainContentSelectors={['main', '#app-content']}  // Optional
- *   mainScrollContainerId="app-content"              // Optional
- * />
- * ```
+ * Wraps the internal `Navigation` component. Kibana-specific dependencies
+ * (`@kbn/i18n`, `@kbn/core-chrome-layout-constants`) are replaced at build
+ * time via webpack aliases.
  */
 export const OneNavigation = (props: OneNavigationProps) => {
-  // No wrapper needed - Navigation component uses i18n which is
-  // aliased to no-op implementation via webpack
   return <Navigation {...props} />;
 };

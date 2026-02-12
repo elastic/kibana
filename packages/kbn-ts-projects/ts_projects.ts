@@ -13,11 +13,10 @@ export const TS_PROJECTS = TsProject.loadAll({
   /** Array of repo-relative paths to projects which should be ignored and not treated as a TS project in the repo */
   ignore: [
     '**/__fixtures__/**/*',
-    // chrome/navigation packaging tsconfig: Used only for build-time type validation (--noEmit)
-    // to ensure duplicated types in the standalone package remain compatible with source types.
-    // It intentionally imports from parent directories (../src, ../types.ts) which conflicts
-    // with the main package tsconfig. The main tsconfig handles regular type-checking of these files.
-    // See: src/core/packages/chrome/navigation/packaging/react/type_validation.ts
+    // The packaging build tsconfig for one-navigation is used only for standalone
+    // build-time type validation and intentionally imports from parent directories,
+    // which conflicts with the main package tsconfig.
+    // See: `src/core/packages/chrome/navigation/packaging/react/type_validation.ts`.
     'src/core/packages/chrome/navigation/packaging/tsconfig.json',
   ],
 

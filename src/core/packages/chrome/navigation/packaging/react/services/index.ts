@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Service exports
-export * from './i18n';
+export { i18n, translate, FormattedMessage, I18nProvider } from './i18n';

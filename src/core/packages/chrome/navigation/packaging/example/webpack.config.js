@@ -24,7 +24,7 @@ module.exports = {
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
     alias: {
       // Point to the built OneNavigation package
-      '@kbn/one-navigation': path.resolve(__dirname, '../target'),
+      '@kbn/one-navigation': path.resolve(__dirname, '../../target'),
     },
     // Use Kibana's node_modules for all dependencies
     modules: [path.resolve(KIBANA_ROOT, 'node_modules'), 'node_modules'],

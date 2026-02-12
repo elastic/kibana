@@ -9,26 +9,29 @@
 
 import React from 'react';
 
-// No-op i18n implementation
-// Returns the defaultMessage from i18n.translate() calls
-// Consumers provide their own labels via navigation items, so translations aren't needed
-
 /**
- * No-op i18n.translate function that returns default messages
+ * No-op i18n implementation for the standalone package.
+ *
+ * Consumer-facing labels (e.g. "Dashboards", "Settings") are provided through
+ * navigation items and do not need translation here. Internal labels like
+ * "More" and screen-reader instructions use `i18n.translate()` in the source
+ * and will render their `defaultMessage` values through this stub.
  */
-export const translate = (id: string, options?: { defaultMessage?: string; values?: any }) => {
-  return options?.defaultMessage || id;
+
+/** No-op `i18n.translate` that returns `defaultMessage`. */
+export const translate = (
+  _id: string,
+  options?: { defaultMessage?: string; values?: Record<string, unknown> }
+) => {
+  return options?.defaultMessage ?? _id;
 };
 
-/**
- * No-op FormattedMessage component that renders default message
- */
+/** No-op `FormattedMessage` component that renders `defaultMessage`. */
 export const FormattedMessage: React.FC<{
   id: string;
   defaultMessage?: string;
-  values?: Record<string, any>;
+  values?: Record<string, unknown>;
 }> = ({ id, defaultMessage, values }) => {
-  // Simple string interpolation for values like {count}
   if (values && defaultMessage) {
     return (
       <>
@@ -39,28 +42,12 @@ export const FormattedMessage: React.FC<{
       </>
     );
   }
-  return <>{defaultMessage || id}</>;
+  return <>{defaultMessage ?? id}</>;
 };
 
-/**
- * No-op I18nProvider that simply renders children
- */
+/** No-op `I18nProvider` that renders children unchanged. */
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return <>{children}</>;
 };
 
-/**
- * No-op i18n object for compatibility with @kbn/i18n
- */
-export const i18n = {
-  translate,
-};
-
-/**
- * Initialize the no-op i18n system
- * This is called by the OneNavigation wrapper
- */
-export const initializeI18n = () => {
-  // No initialization needed for no-op implementation
-  // The webpack aliases will redirect imports to this file
-};
+export const i18n = { translate };

@@ -29,7 +29,7 @@ module.exports = {
 
   target: 'web',
 
-  // Externalize peer dependencies
+  // Externalize peer dependencies.
   externals: {
     '@elastic/eui': 'commonjs @elastic/eui',
     '@emotion/css': 'commonjs @emotion/css',
@@ -58,12 +58,16 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
 
-    // CRITICAL: Alias @kbn/i18n imports to our no-op implementation
+    // Redirect @kbn/* imports to local stubs so the source files can be
+    // bundled without any Kibana-specific packages installed at runtime.
     alias: {
-      // Redirect all @kbn/i18n imports to our no-op i18n service
       '@kbn/i18n$': path.resolve(__dirname, 'react/services/i18n.tsx'),
       '@kbn/i18n/react': path.resolve(__dirname, 'react/services/i18n.tsx'),
       '@kbn/i18n-react': path.resolve(__dirname, 'react/services/i18n.tsx'),
+      '@kbn/core-chrome-layout-constants': path.resolve(
+        __dirname,
+        'react/services/layout_constants.ts'
+      ),
     },
   },
 
