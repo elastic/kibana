@@ -1127,22 +1127,6 @@ export class StreamsApp {
     await this.page.getByText(label).click();
   }
 
-  async clickPreviewTableRowExpand(rowIndex: number) {
-    // Click the expand button in the leading control column for the specified row
-    const rows = await this.getPreviewTableRows();
-    const row = rows[rowIndex];
-    const expandButton = row.locator('button[aria-label^="Select row"]');
-    await expandButton.click();
-  }
-
-  async expectDocumentFlyoutVisible() {
-    await expect(this.page.getByTestId('esqlRowDetailsFlyout')).toBeVisible();
-  }
-
-  async expectDocumentFlyoutHidden() {
-    await expect(this.page.getByTestId('esqlRowDetailsFlyout')).toBeHidden();
-  }
-
   async clickAddConcatField() {
     await this.page.getByTestId('streamsAppConcatAddFieldButton').click();
   }
