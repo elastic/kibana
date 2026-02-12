@@ -56,7 +56,7 @@ export const EarsConnectionsSection: React.FC = () => {
 
   const urlParams = new URLSearchParams(window.location.search);
 
-  const [code, _] = useState<string | null>(urlParams.get('code'));
+  const code = urlParams.get('code');
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [earsLoading, setEarsLoading] = useState(false);
