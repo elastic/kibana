@@ -7,14 +7,11 @@
 
 import {
   getAncestors,
-  getParentId,
   getSegments,
   isDescendantOf,
   isRootStreamDefinition,
   LOGS_ECS_STREAM_NAME,
   LOGS_OTEL_STREAM_NAME,
-  ROOT_STREAM_NAMES,
-  type RootStreamName,
   Streams,
 } from '@kbn/streams-schema';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
@@ -45,17 +42,6 @@ export type TableRow = EnrichedStream & {
 };
 export interface StreamTree extends ListStreamDetail {
   children: StreamTree[];
-}
-
-export function isParentName(parent: string, descendant: string) {
-  // If descendant is a root stream, it cannot be a child of anything
-  if (ROOT_STREAM_NAMES.includes(descendant as RootStreamName)) {
-    return false;
-  }
-
-  // Use getParentId to find the actual parent, accounting for multi-segment roots
-  const actualParent = getParentId(descendant);
-  return actualParent === parent;
 }
 
 export function shouldComposeTree(sortField: SortableField) {

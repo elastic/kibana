@@ -13,6 +13,7 @@ import {
   getAncestorsAndSelf,
   isChildOf,
   isDescendantOf,
+  isParentName,
   getSegments,
 } from './hierarchy';
 
@@ -306,20 +307,108 @@ describe('hierarchy', () => {
     });
   });
 
+  describe('isParentName', () => {
+    describe('direct parent relationships', () => {
+      it('should return true for direct parent of single-segment root children', () => {
+        expect(isParentName('logs', 'logs.child')).toBe(true);
+        expect(isParentName('logs', 'logs.app1')).toBe(true);
+        expect(isParentName('metrics', 'metrics.host')).toBe(true);
+      });
+
+      it('should return true for direct parent of multi-segment root children', () => {
+        expect(isParentName('logs.otel', 'logs.otel.nginx')).toBe(true);
+        expect(isParentName('logs.otel', 'logs.otel.child')).toBe(true);
+        expect(isParentName('logs.ecs', 'logs.ecs.apache')).toBe(true);
+        expect(isParentName('logs.ecs', 'logs.ecs.child')).toBe(true);
+      });
+
+      it('should return true for parent-child at any nesting level', () => {
+        expect(isParentName('logs.otel.nginx', 'logs.otel.nginx.access')).toBe(true);
+        expect(isParentName('logs.ecs.child', 'logs.ecs.child.child')).toBe(true);
+        expect(isParentName('logs.otel.a.b', 'logs.otel.a.b.c')).toBe(true);
+      });
+    });
+
+    describe('non-parent relationships', () => {
+      it('should return false for grandparent relationships', () => {
+        expect(isParentName('logs', 'logs.child.child')).toBe(false);
+        expect(isParentName('logs.otel', 'logs.otel.child.child')).toBe(false);
+        expect(isParentName('logs.ecs', 'logs.ecs.a.b')).toBe(false);
+      });
+
+      it('should return false for sibling relationships', () => {
+        expect(isParentName('logs.child1', 'logs.child2')).toBe(false);
+        expect(isParentName('logs.otel.a', 'logs.otel.b')).toBe(false);
+        expect(isParentName('logs.ecs.child1', 'logs.ecs.child2')).toBe(false);
+      });
+
+      it('should return false for unrelated streams', () => {
+        expect(isParentName('logs', 'metrics.host')).toBe(false);
+        expect(isParentName('logs.otel', 'logs.ecs.child')).toBe(false);
+        expect(isParentName('metrics', 'logs.child')).toBe(false);
+      });
+
+      it('should return false when descendant is ancestor', () => {
+        expect(isParentName('logs.child', 'logs')).toBe(false);
+        expect(isParentName('logs.otel.child', 'logs.otel')).toBe(false);
+      });
+    });
+
+    describe('root stream edge cases', () => {
+      it('should return false when descendant is a root stream', () => {
+        expect(isParentName('logs', 'logs.otel')).toBe(false);
+        expect(isParentName('logs', 'logs.ecs')).toBe(false);
+        expect(isParentName('something', 'logs')).toBe(false);
+      });
+
+      it('should return false when both are root streams', () => {
+        expect(isParentName('logs', 'logs')).toBe(false);
+        expect(isParentName('logs.otel', 'logs.otel')).toBe(false);
+        expect(isParentName('logs.ecs', 'logs.ecs')).toBe(false);
+      });
+    });
+
+    describe('cross-root boundaries', () => {
+      it('should return false for streams from different root hierarchies', () => {
+        expect(isParentName('logs', 'logs.otel.child')).toBe(false);
+        expect(isParentName('logs', 'logs.ecs.child')).toBe(false);
+        expect(isParentName('logs.otel', 'logs.child')).toBe(false);
+        expect(isParentName('logs.ecs', 'logs.child')).toBe(false);
+      });
+    });
+  });
+
   describe('getSegments', () => {
-    it('should split stream names by dot', () => {
+    it('should return single-segment root streams as single segment', () => {
       expect(getSegments('logs')).toEqual(['logs']);
+    });
+
+    it('should return multi-segment root streams as single segment', () => {
+      // Multi-segment roots like logs.otel and logs.ecs should be treated as single segments
+      expect(getSegments('logs.otel')).toEqual(['logs.otel']);
+      expect(getSegments('logs.ecs')).toEqual(['logs.ecs']);
+    });
+
+    it('should split children of single-segment roots correctly', () => {
+      // Children of 'logs' root
       expect(getSegments('logs.child')).toEqual(['logs', 'child']);
-      expect(getSegments('logs.ecs.child')).toEqual(['logs', 'ecs', 'child']);
+      expect(getSegments('logs.a.b')).toEqual(['logs', 'a', 'b']);
     });
 
-    it('should handle multi-segment roots', () => {
-      expect(getSegments('logs.otel')).toEqual(['logs', 'otel']);
-      expect(getSegments('logs.ecs')).toEqual(['logs', 'ecs']);
+    it('should split children of multi-segment roots correctly', () => {
+      // Children of 'logs.otel' root
+      expect(getSegments('logs.otel.child')).toEqual(['logs.otel', 'child']);
+      expect(getSegments('logs.otel.a.b')).toEqual(['logs.otel', 'a', 'b']);
+      // Children of 'logs.ecs' root
+      expect(getSegments('logs.ecs.child')).toEqual(['logs.ecs', 'child']);
+      expect(getSegments('logs.ecs.a.b.c')).toEqual(['logs.ecs', 'a', 'b', 'c']);
     });
 
-    it('should handle deep nesting', () => {
-      expect(getSegments('logs.ecs.a.b.c')).toEqual(['logs', 'ecs', 'a', 'b', 'c']);
+    it('should handle unknown stream types with simple split', () => {
+      // Unknown stream types should fall back to simple dot split
+      expect(getSegments('metrics')).toEqual(['metrics']);
+      expect(getSegments('metrics.system')).toEqual(['metrics', 'system']);
+      expect(getSegments('traces.app.endpoint')).toEqual(['traces', 'app', 'endpoint']);
     });
   });
 

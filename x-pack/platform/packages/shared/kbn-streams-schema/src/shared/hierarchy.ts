@@ -58,6 +58,26 @@ export function isChildOf(parent: string, child: string) {
 }
 
 /**
+ * Check if parent is the direct parent of descendant.
+ * This is the inverse of isChildOf - checks from parent's perspective.
+ *
+ * Examples:
+ *   - isParentName("logs.otel", "logs.otel.nginx") → true
+ *   - isParentName("logs.otel", "logs.otel.nginx.access") → false (grandparent)
+ *   - isParentName("logs", "logs.otel") → false (logs.otel is a root)
+ */
+export function isParentName(parent: string, descendant: string) {
+  // If descendant is a root stream, it cannot be a child of anything
+  if (ROOT_STREAM_NAMES.includes(descendant as RootStreamName)) {
+    return false;
+  }
+
+  // Use getParentId to find the actual parent, accounting for multi-segment roots
+  const actualParent = getParentId(descendant);
+  return actualParent === parent;
+}
+
+/**
  * Get parent stream ID. Returns undefined for root streams.
  *
  * Examples:
@@ -145,7 +165,21 @@ export function getAncestorsAndSelf(id: string): string[] {
 }
 
 export function getSegments(id: string): string[] {
-  return id.split('.');
+  // First check if this is a known root stream
+  const matchedRoot = matchesAnyRoot(id);
+  if (!matchedRoot) {
+    // Unknown stream type, fall back to simple split
+    return id.split('.');
+  }
+
+  // If this IS the root, return it as a single segment
+  if (id === matchedRoot) {
+    return [id];
+  }
+
+  // Otherwise, return root + segments after root
+  const afterRoot = id.slice(matchedRoot.length + 1); // +1 for the dot
+  return [matchedRoot, ...afterRoot.split('.')];
 }
 
 export const MAX_NESTING_LEVEL = 5;

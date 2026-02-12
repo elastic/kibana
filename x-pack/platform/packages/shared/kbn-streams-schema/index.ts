@@ -60,6 +60,7 @@ export { isSchema, createIsNarrowSchema } from './src/shared/type_guards';
 export {
   isChildOf,
   isDescendantOf,
+  isParentName,
   getAncestors,
   getAncestorsAndSelf,
   getParentId,
