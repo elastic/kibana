@@ -159,34 +159,12 @@ export class WorkflowExecuteSyncStrategy {
 
         // Check if sub-workflow failed before finishing the step
         if (execution.status === ExecutionStatus.FAILED) {
-          let error: Error;
-          if (execution.error) {
-            // Create ExecutionError from the child's error
-            // If message is empty, try to get it from context.output.message (workflow.fail pattern)
-            if (!execution.error.message || execution.error.message.trim() === '') {
-              const errorMessage =
-                (execution.context?.output as Record<string, unknown>)?.message ||
-                'Sub-workflow execution failed';
-
-              error = new ExecutionError({
-                type: execution.error.type || 'Error',
-                message: typeof errorMessage === 'string' ? errorMessage : String(errorMessage),
-                ...(execution.error.details && { details: execution.error.details }),
+          const error = execution.error
+            ? new ExecutionError(execution.error)
+            : new ExecutionError({
+                type: 'Error',
+                message: 'Sub-workflow execution failed',
               });
-            } else {
-              error = new ExecutionError(execution.error);
-            }
-          } else {
-            // No error object, but workflow failed - try to get message from context.output
-            const errorMessage =
-              (execution.context?.output as Record<string, unknown>)?.message ||
-              'Sub-workflow execution failed';
-
-            error = new ExecutionError({
-              type: 'Error',
-              message: typeof errorMessage === 'string' ? errorMessage : String(errorMessage),
-            });
-          }
           return { status: 'failed', error };
         }
 

@@ -8,12 +8,12 @@
  */
 
 /**
- * Initial polling interval in milliseconds. First wait uses this (in-process for short workflows).
+ * Initial polling interval in seconds. First wait uses this (in-process for short workflows).
  */
 export const INITIAL_POLL_INTERVAL = 1;
 
 /**
- * Maximum polling interval in milliseconds. Intervals above 5s yield to Task Manager
+ * Maximum polling interval in seconds. Intervals above 5s yield to Task Manager
  * (see SHORT_DURATION_THRESHOLD in handle_execution_delay).
  */
 export const MAX_POLL_INTERVAL = 30;
