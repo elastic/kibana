@@ -167,25 +167,52 @@ const streamsSignificantEventsQueriesGeneratedSchema: RootSchema<StreamsSignific
         description: 'The name of the Stream',
       },
     },
-    tool_calls: {
-      type: 'long',
-      _meta: {
-        description: 'Total number of tool calls during significant events generation',
-        optional: true,
-      },
-    },
-    tool_failures: {
-      type: 'long',
-      _meta: {
-        description: 'Total number of failed tool calls during significant events generation',
-        optional: true,
-      },
-    },
-    tool_latency_ms: {
-      type: 'long',
-      _meta: {
-        description: 'Total tool callback latency in milliseconds during significant events generation',
-        optional: true,
+    tool_usage: {
+      properties: {
+        get_stream_features: {
+          properties: {
+            calls: {
+              type: 'long',
+              _meta: {
+                description: 'The number of calls to the get_stream_features tool',
+              },
+            },
+            failures: {
+              type: 'long',
+              _meta: {
+                description: 'The number of failures to the get_stream_features tool',
+              },
+            },
+            latency_ms: {
+              type: 'long',
+              _meta: {
+                description: 'The latency of the get_stream_features tool in milliseconds',
+              },
+            },
+          },
+        },
+        add_queries: {
+          properties: {
+            calls: {
+              type: 'long',
+              _meta: {
+                description: 'The number of calls to the add_queries tool',
+              },
+            },
+            failures: {
+              type: 'long',
+              _meta: {
+                description: 'The number of failures to the add_queries tool',
+              },
+            },
+            latency_ms: {
+              type: 'long',
+              _meta: {
+                description: 'The latency of the add_queries tool in milliseconds',
+              },
+            },
+          },
+        },
       },
     },
   };
