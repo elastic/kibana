@@ -62961,7 +62961,570 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: {}
+            schema:
+              anyOf:
+                - anyOf:
+                    - allOf:
+                        - additionalProperties: {}
+                          type: object
+                          properties: {}
+                        - type: object
+                          properties:
+                            stream:
+                              additionalProperties: {}
+                              type: object
+                              properties:
+                                ingest:
+                                  additionalProperties: {}
+                                  type: object
+                                  properties:
+                                    processing:
+                                      additionalProperties: {}
+                                      type: object
+                                      properties:
+                                        updated_at: {}
+                                  required:
+                                    - processing
+                                name: {}
+                                updated_at: {}
+                          required:
+                            - stream
+                        - type: object
+                          properties:
+                            dashboards:
+                              items:
+                                type: string
+                              type: array
+                            queries:
+                              items:
+                                allOf:
+                                  - type: object
+                                    properties:
+                                      id:
+                                        minLength: 1
+                                        type: string
+                                      title:
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                      - id
+                                      - title
+                                  - type: object
+                                    properties:
+                                      evidence:
+                                        items:
+                                          type: string
+                                        type: array
+                                      feature:
+                                        type: object
+                                        properties:
+                                          filter:
+                                            $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_0___schema0'
+                                          name:
+                                            minLength: 1
+                                            type: string
+                                          type:
+                                            const: system
+                                            type: string
+                                        required:
+                                          - name
+                                          - filter
+                                          - type
+                                      kql:
+                                        type: object
+                                        properties:
+                                          query:
+                                            type: string
+                                        required:
+                                          - query
+                                      severity_score:
+                                        type: number
+                                    required:
+                                      - kql
+                              type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                            - dashboards
+                            - rules
+                            - queries
+                        - type: object
+                          properties:
+                            stream:
+                              additionalProperties: {}
+                              type: object
+                              properties:
+                                ingest:
+                                  additionalProperties: {}
+                                  type: object
+                                  properties:
+                                    processing:
+                                      additionalProperties: {}
+                                      type: object
+                                      properties:
+                                        updated_at: {}
+                                  required:
+                                    - processing
+                                name: {}
+                                updated_at: {}
+                          required:
+                            - stream
+                        - additionalProperties: {}
+                          type: object
+                          properties: {}
+                        - type: object
+                          properties:
+                            stream:
+                              additionalProperties: {}
+                              type: object
+                              properties:
+                                ingest:
+                                  additionalProperties: {}
+                                  type: object
+                                  properties:
+                                    processing:
+                                      additionalProperties: {}
+                                      type: object
+                                      properties:
+                                        updated_at: {}
+                                  required:
+                                    - processing
+                                name: {}
+                                updated_at: {}
+                          required:
+                            - stream
+                        - type: object
+                          properties:
+                            dashboards:
+                              items:
+                                type: string
+                              type: array
+                            queries:
+                              items:
+                                allOf:
+                                  - type: object
+                                    properties:
+                                      id:
+                                        minLength: 1
+                                        type: string
+                                      title:
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                      - id
+                                      - title
+                                  - type: object
+                                    properties:
+                                      evidence:
+                                        items:
+                                          type: string
+                                        type: array
+                                      feature:
+                                        type: object
+                                        properties:
+                                          filter:
+                                            $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_0___schema0'
+                                          name:
+                                            minLength: 1
+                                            type: string
+                                          type:
+                                            const: system
+                                            type: string
+                                        required:
+                                          - name
+                                          - filter
+                                          - type
+                                      kql:
+                                        type: object
+                                        properties:
+                                          query:
+                                            type: string
+                                        required:
+                                          - query
+                                      severity_score:
+                                        type: number
+                                    required:
+                                      - kql
+                              type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                            - dashboards
+                            - rules
+                            - queries
+                        - type: object
+                          properties:
+                            stream:
+                              additionalProperties: {}
+                              type: object
+                              properties:
+                                ingest:
+                                  additionalProperties: {}
+                                  type: object
+                                  properties:
+                                    processing:
+                                      additionalProperties: {}
+                                      type: object
+                                      properties:
+                                        updated_at: {}
+                                  required:
+                                    - processing
+                                name: {}
+                                updated_at: {}
+                          required:
+                            - stream
+                        - type: object
+                          properties: {}
+                        - type: object
+                          properties: {}
+                    - allOf:
+                        - additionalProperties: {}
+                          type: object
+                          properties: {}
+                        - type: object
+                          properties:
+                            stream:
+                              additionalProperties: {}
+                              type: object
+                              properties:
+                                ingest:
+                                  additionalProperties: {}
+                                  type: object
+                                  properties:
+                                    processing:
+                                      additionalProperties: {}
+                                      type: object
+                                      properties:
+                                        updated_at: {}
+                                  required:
+                                    - processing
+                                name: {}
+                                updated_at: {}
+                          required:
+                            - stream
+                        - type: object
+                          properties:
+                            dashboards:
+                              items:
+                                type: string
+                              type: array
+                            queries:
+                              items:
+                                allOf:
+                                  - type: object
+                                    properties:
+                                      id:
+                                        minLength: 1
+                                        type: string
+                                      title:
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                      - id
+                                      - title
+                                  - type: object
+                                    properties:
+                                      evidence:
+                                        items:
+                                          type: string
+                                        type: array
+                                      feature:
+                                        type: object
+                                        properties:
+                                          filter:
+                                            $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_0___schema0'
+                                          name:
+                                            minLength: 1
+                                            type: string
+                                          type:
+                                            const: system
+                                            type: string
+                                        required:
+                                          - name
+                                          - filter
+                                          - type
+                                      kql:
+                                        type: object
+                                        properties:
+                                          query:
+                                            type: string
+                                        required:
+                                          - query
+                                      severity_score:
+                                        type: number
+                                    required:
+                                      - kql
+                              type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                            - dashboards
+                            - rules
+                            - queries
+                        - type: object
+                          properties:
+                            stream:
+                              additionalProperties: {}
+                              type: object
+                              properties:
+                                ingest:
+                                  additionalProperties: {}
+                                  type: object
+                                  properties:
+                                    processing:
+                                      additionalProperties: {}
+                                      type: object
+                                      properties:
+                                        updated_at: {}
+                                  required:
+                                    - processing
+                                name: {}
+                                updated_at: {}
+                          required:
+                            - stream
+                        - additionalProperties: {}
+                          type: object
+                          properties: {}
+                        - type: object
+                          properties:
+                            stream:
+                              additionalProperties: {}
+                              type: object
+                              properties:
+                                ingest:
+                                  additionalProperties: {}
+                                  type: object
+                                  properties:
+                                    processing:
+                                      additionalProperties: {}
+                                      type: object
+                                      properties:
+                                        updated_at: {}
+                                  required:
+                                    - processing
+                                name: {}
+                                updated_at: {}
+                          required:
+                            - stream
+                        - type: object
+                          properties:
+                            dashboards:
+                              items:
+                                type: string
+                              type: array
+                            queries:
+                              items:
+                                allOf:
+                                  - type: object
+                                    properties:
+                                      id:
+                                        minLength: 1
+                                        type: string
+                                      title:
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                      - id
+                                      - title
+                                  - type: object
+                                    properties:
+                                      evidence:
+                                        items:
+                                          type: string
+                                        type: array
+                                      feature:
+                                        type: object
+                                        properties:
+                                          filter:
+                                            $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_0___schema0'
+                                          name:
+                                            minLength: 1
+                                            type: string
+                                          type:
+                                            const: system
+                                            type: string
+                                        required:
+                                          - name
+                                          - filter
+                                          - type
+                                      kql:
+                                        type: object
+                                        properties:
+                                          query:
+                                            type: string
+                                        required:
+                                          - query
+                                      severity_score:
+                                        type: number
+                                    required:
+                                      - kql
+                              type: array
+                            rules:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                            - dashboards
+                            - rules
+                            - queries
+                        - type: object
+                          properties:
+                            stream:
+                              additionalProperties: {}
+                              type: object
+                              properties:
+                                ingest:
+                                  additionalProperties: {}
+                                  type: object
+                                  properties:
+                                    processing:
+                                      additionalProperties: {}
+                                      type: object
+                                      properties:
+                                        updated_at: {}
+                                  required:
+                                    - processing
+                                name: {}
+                                updated_at: {}
+                          required:
+                            - stream
+                        - type: object
+                          properties: {}
+                        - type: object
+                          properties: {}
+                - allOf:
+                    - additionalProperties: {}
+                      type: object
+                      properties: {}
+                    - type: object
+                      properties:
+                        stream:
+                          additionalProperties: {}
+                          type: object
+                          properties:
+                            ingest:
+                              additionalProperties: {}
+                              type: object
+                              properties:
+                                processing:
+                                  additionalProperties: {}
+                                  type: object
+                                  properties:
+                                    updated_at: {}
+                              required:
+                                - processing
+                            name: {}
+                            updated_at: {}
+                      required:
+                        - stream
+                    - type: object
+                      properties:
+                        dashboards:
+                          items:
+                            type: string
+                          type: array
+                        queries:
+                          items:
+                            allOf:
+                              - type: object
+                                properties:
+                                  id:
+                                    minLength: 1
+                                    type: string
+                                  title:
+                                    minLength: 1
+                                    type: string
+                                required:
+                                  - id
+                                  - title
+                              - type: object
+                                properties:
+                                  evidence:
+                                    items:
+                                      type: string
+                                    type: array
+                                  feature:
+                                    type: object
+                                    properties:
+                                      filter:
+                                        $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_0___schema0'
+                                      name:
+                                        minLength: 1
+                                        type: string
+                                      type:
+                                        const: system
+                                        type: string
+                                    required:
+                                      - name
+                                      - filter
+                                      - type
+                                  kql:
+                                    type: object
+                                    properties:
+                                      query:
+                                        type: string
+                                    required:
+                                      - query
+                                  severity_score:
+                                    type: number
+                                required:
+                                  - kql
+                          type: array
+                        rules:
+                          items:
+                            type: string
+                          type: array
+                      required:
+                        - dashboards
+                        - rules
+                        - queries
+                    - type: object
+                      properties:
+                        stream:
+                          additionalProperties: {}
+                          type: object
+                          properties:
+                            ingest:
+                              additionalProperties: {}
+                              type: object
+                              properties:
+                                processing:
+                                  additionalProperties: {}
+                                  type: object
+                                  properties:
+                                    updated_at: {}
+                              required:
+                                - processing
+                            name: {}
+                            updated_at: {}
+                      required:
+                        - stream
+                    - type: object
+                      properties:
+                        stream:
+                          additionalProperties: {}
+                          type: object
+                          properties:
+                            query:
+                              type: object
+                              properties:
+                                esql:
+                                  type: string
+                                view:
+                                  type: string
+                              required:
+                                - view
+                                - esql
+                          required:
+                            - query
+                      required:
+                        - stream
       responses: {}
       summary: Create or update a stream
       tags:
@@ -62997,7 +63560,26 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: {}
+            schema:
+              type: object
+              properties:
+                status:
+                  enum:
+                    - enabled
+                    - disabled
+                  type: string
+                stream:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                  required:
+                    - name
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_1___schema0'
+              required:
+                - stream
+                - where
       responses: {}
       summary: Fork a stream
       tags:
@@ -63067,7 +63649,390 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: {}
+            schema:
+              type: object
+              properties:
+                ingest:
+                  anyOf:
+                    - allOf:
+                        - type: object
+                          properties:
+                            failure_store:
+                              anyOf:
+                                - type: object
+                                  properties:
+                                    inherit:
+                                      additionalProperties: false
+                                      type: object
+                                      properties: {}
+                                  required:
+                                    - inherit
+                                - type: object
+                                  properties:
+                                    disabled:
+                                      additionalProperties: false
+                                      type: object
+                                      properties: {}
+                                  required:
+                                    - disabled
+                                - anyOf:
+                                    - type: object
+                                      properties:
+                                        lifecycle:
+                                          type: object
+                                          properties:
+                                            enabled:
+                                              type: object
+                                              properties:
+                                                data_retention:
+                                                  minLength: 1
+                                                  type: string
+                                          required:
+                                            - enabled
+                                      required:
+                                        - lifecycle
+                                    - type: object
+                                      properties:
+                                        lifecycle:
+                                          type: object
+                                          properties:
+                                            disabled:
+                                              additionalProperties: false
+                                              type: object
+                                              properties: {}
+                                          required:
+                                            - disabled
+                                      required:
+                                        - lifecycle
+                            lifecycle:
+                              anyOf:
+                                - type: object
+                                  properties:
+                                    dsl:
+                                      type: object
+                                      properties:
+                                        data_retention:
+                                          minLength: 1
+                                          type: string
+                                        downsample:
+                                          items:
+                                            type: object
+                                            properties:
+                                              after:
+                                                minLength: 1
+                                                type: string
+                                              fixed_interval:
+                                                minLength: 1
+                                                type: string
+                                            required:
+                                              - after
+                                              - fixed_interval
+                                          type: array
+                                  required:
+                                    - dsl
+                                - type: object
+                                  properties:
+                                    ilm:
+                                      type: object
+                                      properties:
+                                        policy:
+                                          minLength: 1
+                                          type: string
+                                      required:
+                                        - policy
+                                  required:
+                                    - ilm
+                                - type: object
+                                  properties:
+                                    inherit:
+                                      additionalProperties: false
+                                      type: object
+                                      properties: {}
+                                  required:
+                                    - inherit
+                            processing:
+                              type: object
+                              properties:
+                                steps:
+                                  items:
+                                    $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema0'
+                                  type: array
+                                updated_at: {}
+                              required:
+                                - steps
+                            settings:
+                              type: object
+                              properties:
+                                index.number_of_replicas:
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.number_of_shards:
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.refresh_interval:
+                                  type: object
+                                  properties:
+                                    value:
+                                      anyOf:
+                                        - type: string
+                                        - const: -1
+                                          type: number
+                                  required:
+                                    - value
+                          required:
+                            - lifecycle
+                            - processing
+                            - settings
+                            - failure_store
+                        - type: object
+                          properties:
+                            wired:
+                              type: object
+                              properties:
+                                fields:
+                                  additionalProperties:
+                                    allOf:
+                                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema2'
+                                      - anyOf:
+                                          - type: object
+                                            properties:
+                                              format:
+                                                minLength: 1
+                                                type: string
+                                              type:
+                                                enum:
+                                                  - keyword
+                                                  - match_only_text
+                                                  - long
+                                                  - double
+                                                  - date
+                                                  - boolean
+                                                  - ip
+                                                  - geo_point
+                                                type: string
+                                            required:
+                                              - type
+                                          - type: object
+                                            properties:
+                                              type:
+                                                const: system
+                                                type: string
+                                            required:
+                                              - type
+                                  propertyNames:
+                                    type: string
+                                  type: object
+                                routing:
+                                  items:
+                                    type: object
+                                    properties:
+                                      destination:
+                                        minLength: 1
+                                        type: string
+                                      status:
+                                        enum:
+                                          - enabled
+                                          - disabled
+                                        type: string
+                                      where:
+                                        $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                                    required:
+                                      - destination
+                                      - where
+                                  type: array
+                              required:
+                                - fields
+                                - routing
+                          required:
+                            - wired
+                    - allOf:
+                        - type: object
+                          properties:
+                            failure_store:
+                              anyOf:
+                                - type: object
+                                  properties:
+                                    inherit:
+                                      additionalProperties: false
+                                      type: object
+                                      properties: {}
+                                  required:
+                                    - inherit
+                                - type: object
+                                  properties:
+                                    disabled:
+                                      additionalProperties: false
+                                      type: object
+                                      properties: {}
+                                  required:
+                                    - disabled
+                                - anyOf:
+                                    - type: object
+                                      properties:
+                                        lifecycle:
+                                          type: object
+                                          properties:
+                                            enabled:
+                                              type: object
+                                              properties:
+                                                data_retention:
+                                                  minLength: 1
+                                                  type: string
+                                          required:
+                                            - enabled
+                                      required:
+                                        - lifecycle
+                                    - type: object
+                                      properties:
+                                        lifecycle:
+                                          type: object
+                                          properties:
+                                            disabled:
+                                              additionalProperties: false
+                                              type: object
+                                              properties: {}
+                                          required:
+                                            - disabled
+                                      required:
+                                        - lifecycle
+                            lifecycle:
+                              anyOf:
+                                - type: object
+                                  properties:
+                                    dsl:
+                                      type: object
+                                      properties:
+                                        data_retention:
+                                          minLength: 1
+                                          type: string
+                                        downsample:
+                                          items:
+                                            type: object
+                                            properties:
+                                              after:
+                                                minLength: 1
+                                                type: string
+                                              fixed_interval:
+                                                minLength: 1
+                                                type: string
+                                            required:
+                                              - after
+                                              - fixed_interval
+                                          type: array
+                                  required:
+                                    - dsl
+                                - type: object
+                                  properties:
+                                    ilm:
+                                      type: object
+                                      properties:
+                                        policy:
+                                          minLength: 1
+                                          type: string
+                                      required:
+                                        - policy
+                                  required:
+                                    - ilm
+                                - type: object
+                                  properties:
+                                    inherit:
+                                      additionalProperties: false
+                                      type: object
+                                      properties: {}
+                                  required:
+                                    - inherit
+                            processing:
+                              type: object
+                              properties:
+                                steps:
+                                  items:
+                                    $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema0'
+                                  type: array
+                                updated_at: {}
+                              required:
+                                - steps
+                            settings:
+                              type: object
+                              properties:
+                                index.number_of_replicas:
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.number_of_shards:
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: number
+                                  required:
+                                    - value
+                                index.refresh_interval:
+                                  type: object
+                                  properties:
+                                    value:
+                                      anyOf:
+                                        - type: string
+                                        - const: -1
+                                          type: number
+                                  required:
+                                    - value
+                          required:
+                            - lifecycle
+                            - processing
+                            - settings
+                            - failure_store
+                        - type: object
+                          properties:
+                            classic:
+                              type: object
+                              properties:
+                                field_overrides:
+                                  additionalProperties:
+                                    allOf:
+                                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema2'
+                                      - anyOf:
+                                          - type: object
+                                            properties:
+                                              format:
+                                                minLength: 1
+                                                type: string
+                                              type:
+                                                enum:
+                                                  - keyword
+                                                  - match_only_text
+                                                  - long
+                                                  - double
+                                                  - date
+                                                  - boolean
+                                                  - ip
+                                                  - geo_point
+                                                type: string
+                                            required:
+                                              - type
+                                          - type: object
+                                            properties:
+                                              type:
+                                                const: system
+                                                type: string
+                                            required:
+                                              - type
+                                  propertyNames:
+                                    type: string
+                                  type: object
+                          required:
+                            - classic
+              required:
+                - ingest
       responses: {}
       summary: Update ingest stream settings
       tags:
@@ -63137,7 +64102,18 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: {}
+            schema:
+              type: object
+              properties:
+                query:
+                  type: object
+                  properties:
+                    esql:
+                      type: string
+                  required:
+                    - esql
+              required:
+                - query
       responses: {}
       summary: Upsert query stream settings
       tags:
@@ -63173,7 +64149,22 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: {}
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                include:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_3___schema0'
+                name:
+                  type: string
+                version:
+                  type: string
+              required:
+                - name
+                - description
+                - version
+                - include
       responses: {}
       summary: Export stream content
       tags:
@@ -63208,7 +64199,15 @@ paths:
       requestBody:
         content:
           multipart/form-data:
-            schema: {}
+            schema:
+              type: object
+              properties:
+                content: {}
+                include:
+                  type: string
+              required:
+                - include
+                - content
       responses: {}
       summary: Import content into a stream
       tags:
@@ -63278,7 +64277,75 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: {}
+            schema:
+              type: object
+              properties:
+                operations:
+                  items:
+                    anyOf:
+                      - type: object
+                        properties:
+                          index:
+                            allOf:
+                              - type: object
+                                properties:
+                                  id:
+                                    minLength: 1
+                                    type: string
+                                  title:
+                                    minLength: 1
+                                    type: string
+                                required:
+                                  - id
+                                  - title
+                              - type: object
+                                properties:
+                                  evidence:
+                                    items:
+                                      type: string
+                                    type: array
+                                  feature:
+                                    type: object
+                                    properties:
+                                      filter:
+                                        $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_7___schema0'
+                                      name:
+                                        minLength: 1
+                                        type: string
+                                      type:
+                                        const: system
+                                        type: string
+                                    required:
+                                      - name
+                                      - filter
+                                      - type
+                                  kql:
+                                    type: object
+                                    properties:
+                                      query:
+                                        type: string
+                                    required:
+                                      - query
+                                  severity_score:
+                                    type: number
+                                required:
+                                  - kql
+                        required:
+                          - index
+                      - type: object
+                        properties:
+                          delete:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                            required:
+                              - id
+                        required:
+                          - delete
+                  type: array
+              required:
+                - operations
       responses: {}
       summary: Bulk update queries
       tags:
@@ -63365,7 +64432,43 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: {}
+            schema:
+              type: object
+              properties:
+                evidence:
+                  items:
+                    type: string
+                  type: array
+                feature:
+                  type: object
+                  properties:
+                    filter:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_6___schema0'
+                    name:
+                      minLength: 1
+                      type: string
+                    type:
+                      const: system
+                      type: string
+                  required:
+                    - name
+                    - filter
+                    - type
+                kql:
+                  type: object
+                  properties:
+                    query:
+                      type: string
+                  required:
+                    - query
+                severity_score:
+                  type: number
+                title:
+                  minLength: 1
+                  type: string
+              required:
+                - title
+                - kql
       responses: {}
       summary: Upsert a query to a stream
       tags:
@@ -63479,7 +64582,26 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: {}
+            schema:
+              type: object
+              properties:
+                system:
+                  type: object
+                  properties:
+                    description:
+                      type: string
+                    filter:
+                      $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_5___schema0'
+                    name:
+                      type: string
+                    type:
+                      const: system
+                      type: string
+                  required:
+                    - type
+                    - name
+                    - description
+                    - filter
       responses: {}
       summary: Generate significant events
       tags:
@@ -63530,7 +64652,37 @@ paths:
       requestBody:
         content:
           application/json:
-            schema: {}
+            schema:
+              type: object
+              properties:
+                query:
+                  type: object
+                  properties:
+                    feature:
+                      type: object
+                      properties:
+                        filter:
+                          $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_4___schema0'
+                        name:
+                          type: string
+                        type:
+                          const: system
+                          type: string
+                      required:
+                        - name
+                        - filter
+                        - type
+                    kql:
+                      type: object
+                      properties:
+                        query:
+                          type: string
+                      required:
+                        - query
+                  required:
+                    - kql
+              required:
+                - query
       responses: {}
       summary: Preview significant events
       tags:
@@ -63670,7 +64822,51 @@ paths:
                     - delete:
                         id: rule-456
                         type: rule
-            schema: {}
+            schema:
+              type: object
+              properties:
+                operations:
+                  items:
+                    anyOf:
+                      - type: object
+                        properties:
+                          index:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              type:
+                                enum:
+                                  - dashboard
+                                  - rule
+                                  - slo
+                                type: string
+                            required:
+                              - id
+                              - type
+                        required:
+                          - index
+                      - type: object
+                        properties:
+                          delete:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                              type:
+                                enum:
+                                  - dashboard
+                                  - rule
+                                  - slo
+                                type: string
+                            required:
+                              - id
+                              - type
+                        required:
+                          - delete
+                  type: array
+              required:
+                - operations
       responses:
         '200':
           content:
@@ -74731,6 +75927,1963 @@ components:
           type: boolean
       required:
         - data_view
+    Kibana_HTTP_APIs__zod_v4_0___schema0:
+      anyOf:
+        - anyOf:
+            - description: A condition that compares a field to a value or range using an operator as the key.
+              type: object
+              properties:
+                contains:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Contains comparison value.
+                endsWith:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Ends-with comparison value.
+                eq:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Equality comparison value.
+                field:
+                  description: The document field to filter on.
+                  minLength: 1
+                  type: string
+                gt:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Greater-than comparison value.
+                gte:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Greater-than-or-equal comparison value.
+                includes:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Checks if multivalue field includes the value.
+                lt:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Less-than comparison value.
+                lte:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Less-than-or-equal comparison value.
+                neq:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Inequality comparison value.
+                range:
+                  description: Range comparison values.
+                  type: object
+                  properties:
+                    gt:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    gte:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    lt:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    lte:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                startsWith:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Starts-with comparison value.
+              required:
+                - field
+            - description: A condition that checks for the existence or non-existence of a field.
+              type: object
+              properties:
+                exists:
+                  description: Indicates whether the field exists or not.
+                  type: boolean
+                field:
+                  description: The document field to check.
+                  minLength: 1
+                  type: string
+              required:
+                - field
+          description: A basic filter condition, either unary or binary.
+        - description: A logical AND that groups multiple conditions.
+          type: object
+          properties:
+            and:
+              description: An array of conditions. All sub-conditions must be true for this condition to be true.
+              items:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_0___schema0'
+              type: array
+          required:
+            - and
+        - description: A logical OR that groups multiple conditions.
+          type: object
+          properties:
+            or:
+              description: An array of conditions. At least one sub-condition must be true for this condition to be true.
+              items:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_0___schema0'
+              type: array
+          required:
+            - or
+        - description: A logical NOT that negates a condition.
+          type: object
+          properties:
+            not:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_0___schema0'
+              description: A condition that negates another condition.
+          required:
+            - not
+        - description: A condition that always evaluates to false.
+          type: object
+          properties:
+            never:
+              additionalProperties: false
+              description: An empty object. This condition never matches.
+              type: object
+              properties: {}
+          required:
+            - never
+        - description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+          type: object
+          properties:
+            always:
+              additionalProperties: false
+              description: An empty object. This condition always matches.
+              type: object
+              properties: {}
+          required:
+            - always
+      description: The root condition object. It can be a simple filter or a combination of other conditions.
+    Kibana_HTTP_APIs__zod_v4_1___schema0:
+      anyOf:
+        - anyOf:
+            - description: A condition that compares a field to a value or range using an operator as the key.
+              type: object
+              properties:
+                contains:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Contains comparison value.
+                endsWith:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Ends-with comparison value.
+                eq:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Equality comparison value.
+                field:
+                  description: The document field to filter on.
+                  minLength: 1
+                  type: string
+                gt:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Greater-than comparison value.
+                gte:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Greater-than-or-equal comparison value.
+                includes:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Checks if multivalue field includes the value.
+                lt:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Less-than comparison value.
+                lte:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Less-than-or-equal comparison value.
+                neq:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Inequality comparison value.
+                range:
+                  description: Range comparison values.
+                  type: object
+                  properties:
+                    gt:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    gte:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    lt:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    lte:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                startsWith:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Starts-with comparison value.
+              required:
+                - field
+            - description: A condition that checks for the existence or non-existence of a field.
+              type: object
+              properties:
+                exists:
+                  description: Indicates whether the field exists or not.
+                  type: boolean
+                field:
+                  description: The document field to check.
+                  minLength: 1
+                  type: string
+              required:
+                - field
+          description: A basic filter condition, either unary or binary.
+        - description: A logical AND that groups multiple conditions.
+          type: object
+          properties:
+            and:
+              description: An array of conditions. All sub-conditions must be true for this condition to be true.
+              items:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_1___schema0'
+              type: array
+          required:
+            - and
+        - description: A logical OR that groups multiple conditions.
+          type: object
+          properties:
+            or:
+              description: An array of conditions. At least one sub-condition must be true for this condition to be true.
+              items:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_1___schema0'
+              type: array
+          required:
+            - or
+        - description: A logical NOT that negates a condition.
+          type: object
+          properties:
+            not:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_1___schema0'
+              description: A condition that negates another condition.
+          required:
+            - not
+        - description: A condition that always evaluates to false.
+          type: object
+          properties:
+            never:
+              additionalProperties: false
+              description: An empty object. This condition never matches.
+              type: object
+              properties: {}
+          required:
+            - never
+        - description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+          type: object
+          properties:
+            always:
+              additionalProperties: false
+              description: An empty object. This condition always matches.
+              type: object
+              properties: {}
+          required:
+            - always
+      description: The root condition object. It can be a simple filter or a combination of other conditions.
+    Kibana_HTTP_APIs__zod_v4_2___schema0:
+      anyOf:
+        - anyOf:
+            - description: Grok processor - Extract fields from text using grok patterns
+              type: object
+              properties:
+                action:
+                  const: grok
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                from:
+                  description: Source field to parse with grok patterns
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  description: Skip processing when source field is missing
+                  type: boolean
+                pattern_definitions:
+                  additionalProperties:
+                    type: string
+                  propertyNames:
+                    type: string
+                  type: object
+                patterns:
+                  description: Grok patterns applied in order to extract fields
+                  items:
+                    minLength: 1
+                    type: string
+                  minItems: 1
+                  type: array
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+                - patterns
+            - description: Dissect processor - Extract fields from text using a lightweight, delimiter-based parser
+              type: object
+              properties:
+                action:
+                  const: dissect
+                  type: string
+                append_separator:
+                  description: Separator inserted when target fields are concatenated
+                  minLength: 1
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                from:
+                  description: Source field to parse with dissect pattern
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  description: Skip processing when source field is missing
+                  type: boolean
+                pattern:
+                  description: Dissect pattern describing field boundaries
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+                - pattern
+            - description: Date processor - Parse dates from strings using one or more expected formats
+              type: object
+              properties:
+                action:
+                  const: date
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                formats:
+                  description: Accepted input date formats, tried in order
+                  items:
+                    minLength: 1
+                    type: string
+                  type: array
+                from:
+                  description: Source field containing the date/time text
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                locale:
+                  description: Optional locale for date parsing
+                  minLength: 1
+                  type: string
+                output_format:
+                  description: Optional output format for storing the parsed date as text
+                  minLength: 1
+                  type: string
+                timezone:
+                  description: Optional timezone for date parsing
+                  minLength: 1
+                  type: string
+                to:
+                  description: Target field for the parsed date (defaults to source)
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+                - formats
+            - type: object
+              properties:
+                action:
+                  const: drop_document
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+            - type: object
+              properties:
+                action:
+                  const: math
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                expression:
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  type: boolean
+                to:
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - expression
+                - to
+            - description: Rename processor - Change a field name and optionally its location
+              type: object
+              properties:
+                action:
+                  const: rename
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                from:
+                  description: Existing source field to rename or move
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  description: Skip when source field is missing
+                  type: boolean
+                override:
+                  description: Allow overwriting the target field if it already exists
+                  type: boolean
+                to:
+                  description: New field name or destination path
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+                - to
+            - description: Set processor - Assign a literal or copied value to a field (mutually exclusive inputs)
+              type: object
+              properties:
+                action:
+                  const: set
+                  type: string
+                copy_from:
+                  description: Copy value from another field instead of providing a literal
+                  minLength: 1
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                override:
+                  description: Allow overwriting an existing target field
+                  type: boolean
+                to:
+                  description: Target field to set or create
+                  minLength: 1
+                  type: string
+                value:
+                  description: Literal value to assign to the target field
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - to
+            - description: Append processor - Append one or more values to an existing or new array field
+              type: object
+              properties:
+                action:
+                  const: append
+                  type: string
+                allow_duplicates:
+                  description: If true, do not deduplicate appended values
+                  type: boolean
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                to:
+                  description: Array field to append values to
+                  minLength: 1
+                  type: string
+                value:
+                  description: Values to append (must be literal, no templates)
+                  items: {}
+                  minItems: 1
+                  type: array
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - to
+                - value
+            - description: Remove by prefix processor - Remove a field and all nested fields matching the prefix
+              type: object
+              properties:
+                action:
+                  const: remove_by_prefix
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                from:
+                  description: Field to remove along with all its nested fields
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+              required:
+                - action
+                - from
+            - description: Remove processor - Delete one or more fields from the document
+              type: object
+              properties:
+                action:
+                  const: remove
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                from:
+                  description: Field to remove from the document
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  description: Skip processing when source field is missing
+                  type: boolean
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+            - type: object
+              properties:
+                action:
+                  const: replace
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                from:
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  type: boolean
+                pattern:
+                  minLength: 1
+                  type: string
+                replacement:
+                  type: string
+                to:
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+                - pattern
+                - replacement
+            - description: Redact processor - Mask sensitive data using Grok patterns
+              type: object
+              properties:
+                action:
+                  const: redact
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                from:
+                  description: Source field to redact sensitive data from
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  description: Skip processing when source field is missing (defaults to true)
+                  type: boolean
+                pattern_definitions:
+                  additionalProperties:
+                    type: string
+                  description: Custom pattern definitions to use in the patterns
+                  propertyNames:
+                    type: string
+                  type: object
+                patterns:
+                  description: Grok patterns to match sensitive data (for example, "%{IP:client}", "%{EMAILADDRESS:email}")
+                  items:
+                    minLength: 1
+                    type: string
+                  minItems: 1
+                  type: array
+                prefix:
+                  description: Prefix to prepend to the redacted pattern name (defaults to "<")
+                  type: string
+                suffix:
+                  description: Suffix to append to the redacted pattern name (defaults to ">")
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+                - patterns
+            - type: object
+              properties:
+                action:
+                  const: uppercase
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                from:
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  type: boolean
+                to:
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+            - type: object
+              properties:
+                action:
+                  const: lowercase
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                from:
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  type: boolean
+                to:
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+            - type: object
+              properties:
+                action:
+                  const: trim
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                from:
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  type: boolean
+                to:
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+            - type: object
+              properties:
+                action:
+                  const: join
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                delimiter:
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                from:
+                  items:
+                    minLength: 1
+                    type: string
+                  minItems: 1
+                  type: array
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  type: boolean
+                to:
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+                - delimiter
+                - to
+            - description: Convert processor - Change the data type of a field value (integer, long, double, boolean, or string)
+              type: object
+              properties:
+                action:
+                  const: convert
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                from:
+                  description: Source field to convert to a different data type
+                  minLength: 1
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  description: Skip processing when source field is missing
+                  type: boolean
+                to:
+                  description: Target field for the converted value (defaults to source)
+                  minLength: 1
+                  type: string
+                type:
+                  description: 'Target data type: integer, long, double, boolean, or string'
+                  enum:
+                    - integer
+                    - long
+                    - double
+                    - boolean
+                    - string
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+                - type
+            - type: object
+              properties:
+                action:
+                  const: concat
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                from:
+                  items:
+                    anyOf:
+                      - type: object
+                        properties:
+                          type:
+                            const: field
+                            type: string
+                          value:
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                          - value
+                      - type: object
+                        properties:
+                          type:
+                            const: literal
+                            type: string
+                          value:
+                            type: string
+                        required:
+                          - type
+                          - value
+                  minItems: 1
+                  type: array
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                ignore_missing:
+                  type: boolean
+                to:
+                  minLength: 1
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - from
+                - to
+            - description: Manual ingest pipeline wrapper around native Elasticsearch processors
+              type: object
+              properties:
+                action:
+                  const: manual_ingest_pipeline
+                  description: Manual ingest pipeline - executes raw Elasticsearch ingest processors
+                  type: string
+                customIdentifier:
+                  description: Custom identifier to correlate this processor across outputs
+                  minLength: 1
+                  type: string
+                description:
+                  description: Human-readable notes about this processor step
+                  type: string
+                ignore_failure:
+                  description: Continue pipeline execution if this processor fails
+                  type: boolean
+                on_failure:
+                  description: Fallback processors to run when a processor fails
+                  items:
+                    additionalProperties: {}
+                    propertyNames:
+                      type: string
+                    type: object
+                  type: array
+                processors:
+                  description: List of raw Elasticsearch ingest processors to run
+                  items:
+                    additionalProperties: {}
+                    propertyNames:
+                      enum:
+                        - append
+                        - attachment
+                        - bytes
+                        - circle
+                        - community_id
+                        - convert
+                        - csv
+                        - date
+                        - date_index_name
+                        - dissect
+                        - dot_expander
+                        - drop
+                        - enrich
+                        - fail
+                        - fingerprint
+                        - foreach
+                        - ip_location
+                        - geo_grid
+                        - geoip
+                        - grok
+                        - gsub
+                        - html_strip
+                        - inference
+                        - join
+                        - json
+                        - kv
+                        - lowercase
+                        - network_direction
+                        - pipeline
+                        - redact
+                        - registered_domain
+                        - remove
+                        - rename
+                        - reroute
+                        - script
+                        - set
+                        - set_security_user
+                        - sort
+                        - split
+                        - terminate
+                        - trim
+                        - uppercase
+                        - urldecode
+                        - uri_parts
+                        - user_agent
+                      type: string
+                    type: object
+                  type: array
+                tag:
+                  description: Optional ingest processor tag for Elasticsearch
+                  type: string
+                where:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                  description: Conditional expression controlling whether this processor runs
+              required:
+                - action
+                - processors
+        - type: object
+          properties:
+            condition:
+              allOf:
+                - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+                - type: object
+                  properties:
+                    steps:
+                      items:
+                        $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema0'
+                      type: array
+                  required:
+                    - steps
+            customIdentifier:
+              type: string
+          required:
+            - condition
+    Kibana_HTTP_APIs__zod_v4_2___schema1:
+      anyOf:
+        - anyOf:
+            - description: A condition that compares a field to a value or range using an operator as the key.
+              type: object
+              properties:
+                contains:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Contains comparison value.
+                endsWith:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Ends-with comparison value.
+                eq:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Equality comparison value.
+                field:
+                  description: The document field to filter on.
+                  minLength: 1
+                  type: string
+                gt:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Greater-than comparison value.
+                gte:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Greater-than-or-equal comparison value.
+                includes:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Checks if multivalue field includes the value.
+                lt:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Less-than comparison value.
+                lte:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Less-than-or-equal comparison value.
+                neq:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Inequality comparison value.
+                range:
+                  description: Range comparison values.
+                  type: object
+                  properties:
+                    gt:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    gte:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    lt:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    lte:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                startsWith:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Starts-with comparison value.
+              required:
+                - field
+            - description: A condition that checks for the existence or non-existence of a field.
+              type: object
+              properties:
+                exists:
+                  description: Indicates whether the field exists or not.
+                  type: boolean
+                field:
+                  description: The document field to check.
+                  minLength: 1
+                  type: string
+              required:
+                - field
+          description: A basic filter condition, either unary or binary.
+        - description: A logical AND that groups multiple conditions.
+          type: object
+          properties:
+            and:
+              description: An array of conditions. All sub-conditions must be true for this condition to be true.
+              items:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+              type: array
+          required:
+            - and
+        - description: A logical OR that groups multiple conditions.
+          type: object
+          properties:
+            or:
+              description: An array of conditions. At least one sub-condition must be true for this condition to be true.
+              items:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+              type: array
+          required:
+            - or
+        - description: A logical NOT that negates a condition.
+          type: object
+          properties:
+            not:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema1'
+              description: A condition that negates another condition.
+          required:
+            - not
+        - description: A condition that always evaluates to false.
+          type: object
+          properties:
+            never:
+              additionalProperties: false
+              description: An empty object. This condition never matches.
+              type: object
+              properties: {}
+          required:
+            - never
+        - description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+          type: object
+          properties:
+            always:
+              additionalProperties: false
+              description: An empty object. This condition always matches.
+              type: object
+              properties: {}
+          required:
+            - always
+      description: The root condition object. It can be a simple filter or a combination of other conditions.
+    Kibana_HTTP_APIs__zod_v4_2___schema2:
+      additionalProperties:
+        anyOf:
+          - anyOf:
+              - type: string
+              - type: number
+              - type: boolean
+              - type: 'null'
+              - {}
+          - items:
+              anyOf:
+                - type: string
+                - type: number
+                - type: boolean
+                - type: 'null'
+                - {}
+            type: array
+          - items: {}
+            type: array
+          - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_2___schema2'
+      propertyNames:
+        type: string
+      type: object
+    Kibana_HTTP_APIs__zod_v4_3___schema0:
+      anyOf:
+        - type: object
+          properties:
+            objects:
+              type: object
+              properties:
+                all:
+                  additionalProperties: false
+                  type: object
+                  properties: {}
+              required:
+                - all
+          required:
+            - objects
+        - type: object
+          properties:
+            objects:
+              type: object
+              properties:
+                mappings:
+                  type: boolean
+                queries:
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                    required:
+                      - id
+                  type: array
+                routing:
+                  items:
+                    allOf:
+                      - $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_3___schema0'
+                      - type: object
+                        properties:
+                          destination:
+                            type: string
+                        required:
+                          - destination
+                  type: array
+              required:
+                - mappings
+                - queries
+                - routing
+          required:
+            - objects
+    Kibana_HTTP_APIs__zod_v4_4___schema0:
+      anyOf:
+        - anyOf:
+            - description: A condition that compares a field to a value or range using an operator as the key.
+              type: object
+              properties:
+                contains:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Contains comparison value.
+                endsWith:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Ends-with comparison value.
+                eq:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Equality comparison value.
+                field:
+                  description: The document field to filter on.
+                  minLength: 1
+                  type: string
+                gt:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Greater-than comparison value.
+                gte:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Greater-than-or-equal comparison value.
+                includes:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Checks if multivalue field includes the value.
+                lt:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Less-than comparison value.
+                lte:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Less-than-or-equal comparison value.
+                neq:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Inequality comparison value.
+                range:
+                  description: Range comparison values.
+                  type: object
+                  properties:
+                    gt:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    gte:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    lt:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    lte:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                startsWith:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Starts-with comparison value.
+              required:
+                - field
+            - description: A condition that checks for the existence or non-existence of a field.
+              type: object
+              properties:
+                exists:
+                  description: Indicates whether the field exists or not.
+                  type: boolean
+                field:
+                  description: The document field to check.
+                  minLength: 1
+                  type: string
+              required:
+                - field
+          description: A basic filter condition, either unary or binary.
+        - description: A logical AND that groups multiple conditions.
+          type: object
+          properties:
+            and:
+              description: An array of conditions. All sub-conditions must be true for this condition to be true.
+              items:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_4___schema0'
+              type: array
+          required:
+            - and
+        - description: A logical OR that groups multiple conditions.
+          type: object
+          properties:
+            or:
+              description: An array of conditions. At least one sub-condition must be true for this condition to be true.
+              items:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_4___schema0'
+              type: array
+          required:
+            - or
+        - description: A logical NOT that negates a condition.
+          type: object
+          properties:
+            not:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_4___schema0'
+              description: A condition that negates another condition.
+          required:
+            - not
+        - description: A condition that always evaluates to false.
+          type: object
+          properties:
+            never:
+              additionalProperties: false
+              description: An empty object. This condition never matches.
+              type: object
+              properties: {}
+          required:
+            - never
+        - description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+          type: object
+          properties:
+            always:
+              additionalProperties: false
+              description: An empty object. This condition always matches.
+              type: object
+              properties: {}
+          required:
+            - always
+      description: The root condition object. It can be a simple filter or a combination of other conditions.
+    Kibana_HTTP_APIs__zod_v4_5___schema0:
+      anyOf:
+        - anyOf:
+            - description: A condition that compares a field to a value or range using an operator as the key.
+              type: object
+              properties:
+                contains:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Contains comparison value.
+                endsWith:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Ends-with comparison value.
+                eq:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Equality comparison value.
+                field:
+                  description: The document field to filter on.
+                  minLength: 1
+                  type: string
+                gt:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Greater-than comparison value.
+                gte:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Greater-than-or-equal comparison value.
+                includes:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Checks if multivalue field includes the value.
+                lt:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Less-than comparison value.
+                lte:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Less-than-or-equal comparison value.
+                neq:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Inequality comparison value.
+                range:
+                  description: Range comparison values.
+                  type: object
+                  properties:
+                    gt:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    gte:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    lt:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    lte:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                startsWith:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Starts-with comparison value.
+              required:
+                - field
+            - description: A condition that checks for the existence or non-existence of a field.
+              type: object
+              properties:
+                exists:
+                  description: Indicates whether the field exists or not.
+                  type: boolean
+                field:
+                  description: The document field to check.
+                  minLength: 1
+                  type: string
+              required:
+                - field
+          description: A basic filter condition, either unary or binary.
+        - description: A logical AND that groups multiple conditions.
+          type: object
+          properties:
+            and:
+              description: An array of conditions. All sub-conditions must be true for this condition to be true.
+              items:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_5___schema0'
+              type: array
+          required:
+            - and
+        - description: A logical OR that groups multiple conditions.
+          type: object
+          properties:
+            or:
+              description: An array of conditions. At least one sub-condition must be true for this condition to be true.
+              items:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_5___schema0'
+              type: array
+          required:
+            - or
+        - description: A logical NOT that negates a condition.
+          type: object
+          properties:
+            not:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_5___schema0'
+              description: A condition that negates another condition.
+          required:
+            - not
+        - description: A condition that always evaluates to false.
+          type: object
+          properties:
+            never:
+              additionalProperties: false
+              description: An empty object. This condition never matches.
+              type: object
+              properties: {}
+          required:
+            - never
+        - description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+          type: object
+          properties:
+            always:
+              additionalProperties: false
+              description: An empty object. This condition always matches.
+              type: object
+              properties: {}
+          required:
+            - always
+      description: The root condition object. It can be a simple filter or a combination of other conditions.
+    Kibana_HTTP_APIs__zod_v4_6___schema0:
+      anyOf:
+        - anyOf:
+            - description: A condition that compares a field to a value or range using an operator as the key.
+              type: object
+              properties:
+                contains:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Contains comparison value.
+                endsWith:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Ends-with comparison value.
+                eq:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Equality comparison value.
+                field:
+                  description: The document field to filter on.
+                  minLength: 1
+                  type: string
+                gt:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Greater-than comparison value.
+                gte:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Greater-than-or-equal comparison value.
+                includes:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Checks if multivalue field includes the value.
+                lt:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Less-than comparison value.
+                lte:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Less-than-or-equal comparison value.
+                neq:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Inequality comparison value.
+                range:
+                  description: Range comparison values.
+                  type: object
+                  properties:
+                    gt:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    gte:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    lt:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    lte:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                startsWith:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Starts-with comparison value.
+              required:
+                - field
+            - description: A condition that checks for the existence or non-existence of a field.
+              type: object
+              properties:
+                exists:
+                  description: Indicates whether the field exists or not.
+                  type: boolean
+                field:
+                  description: The document field to check.
+                  minLength: 1
+                  type: string
+              required:
+                - field
+          description: A basic filter condition, either unary or binary.
+        - description: A logical AND that groups multiple conditions.
+          type: object
+          properties:
+            and:
+              description: An array of conditions. All sub-conditions must be true for this condition to be true.
+              items:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_6___schema0'
+              type: array
+          required:
+            - and
+        - description: A logical OR that groups multiple conditions.
+          type: object
+          properties:
+            or:
+              description: An array of conditions. At least one sub-condition must be true for this condition to be true.
+              items:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_6___schema0'
+              type: array
+          required:
+            - or
+        - description: A logical NOT that negates a condition.
+          type: object
+          properties:
+            not:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_6___schema0'
+              description: A condition that negates another condition.
+          required:
+            - not
+        - description: A condition that always evaluates to false.
+          type: object
+          properties:
+            never:
+              additionalProperties: false
+              description: An empty object. This condition never matches.
+              type: object
+              properties: {}
+          required:
+            - never
+        - description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+          type: object
+          properties:
+            always:
+              additionalProperties: false
+              description: An empty object. This condition always matches.
+              type: object
+              properties: {}
+          required:
+            - always
+      description: The root condition object. It can be a simple filter or a combination of other conditions.
+    Kibana_HTTP_APIs__zod_v4_7___schema0:
+      anyOf:
+        - anyOf:
+            - description: A condition that compares a field to a value or range using an operator as the key.
+              type: object
+              properties:
+                contains:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Contains comparison value.
+                endsWith:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Ends-with comparison value.
+                eq:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Equality comparison value.
+                field:
+                  description: The document field to filter on.
+                  minLength: 1
+                  type: string
+                gt:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Greater-than comparison value.
+                gte:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Greater-than-or-equal comparison value.
+                includes:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Checks if multivalue field includes the value.
+                lt:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Less-than comparison value.
+                lte:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Less-than-or-equal comparison value.
+                neq:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Inequality comparison value.
+                range:
+                  description: Range comparison values.
+                  type: object
+                  properties:
+                    gt:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    gte:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    lt:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                    lte:
+                      anyOf:
+                        - type: string
+                        - type: number
+                        - type: boolean
+                      description: A value that can be a string, number, or boolean.
+                startsWith:
+                  anyOf:
+                    - type: string
+                    - type: number
+                    - type: boolean
+                  description: Starts-with comparison value.
+              required:
+                - field
+            - description: A condition that checks for the existence or non-existence of a field.
+              type: object
+              properties:
+                exists:
+                  description: Indicates whether the field exists or not.
+                  type: boolean
+                field:
+                  description: The document field to check.
+                  minLength: 1
+                  type: string
+              required:
+                - field
+          description: A basic filter condition, either unary or binary.
+        - description: A logical AND that groups multiple conditions.
+          type: object
+          properties:
+            and:
+              description: An array of conditions. All sub-conditions must be true for this condition to be true.
+              items:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_7___schema0'
+              type: array
+          required:
+            - and
+        - description: A logical OR that groups multiple conditions.
+          type: object
+          properties:
+            or:
+              description: An array of conditions. At least one sub-condition must be true for this condition to be true.
+              items:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_7___schema0'
+              type: array
+          required:
+            - or
+        - description: A logical NOT that negates a condition.
+          type: object
+          properties:
+            not:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs__zod_v4_7___schema0'
+              description: A condition that negates another condition.
+          required:
+            - not
+        - description: A condition that always evaluates to false.
+          type: object
+          properties:
+            never:
+              additionalProperties: false
+              description: An empty object. This condition never matches.
+              type: object
+              properties: {}
+          required:
+            - never
+        - description: A condition that always evaluates to true. Useful for catch-all scenarios, but use with caution as partitions are ordered.
+          type: object
+          properties:
+            always:
+              additionalProperties: false
+              description: An empty object. This condition always matches.
+              type: object
+              properties: {}
+          required:
+            - always
+      description: The root condition object. It can be a simple filter or a combination of other conditions.
     Kibana_HTTP_APIs_core_status_redactedResponse:
       additionalProperties: false
       description: A minimal representation of Kibana's operational status.
