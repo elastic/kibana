@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ZodIssueCode, z } from '@kbn/zod';
+import { ZodIssueCode, z } from '@kbn/zod/v4';
 
 // @kbn/config-schema objects and records supports a json string as input if it can be
 // safely parsed using JSON.parse and if the resulting value is a plain object.

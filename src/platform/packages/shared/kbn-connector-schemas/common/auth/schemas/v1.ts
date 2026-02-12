@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { AuthType, SSLCertType } from '../constants';
 
 export const authTypeSchema = z

@@ -6,17 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { ConfigSchema, SecretsSchema, ParamsSchema, AttachmentSchema } from '../schemas/v1';
 
 // config definition
-// due to https://github.com/colinhacks/zod/issues/2491
-type ConfigSchemaType = z.ZodSchema<
-  z.output<typeof ConfigSchema>,
-  z.ZodTypeDef,
-  z.input<typeof ConfigSchema>
->;
-export type ConnectorTypeConfigType = z.infer<ConfigSchemaType>;
+export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;
 
 // secrets definition
 export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;

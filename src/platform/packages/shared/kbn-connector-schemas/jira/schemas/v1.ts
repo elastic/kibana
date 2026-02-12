@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { Coerced, validateKeysAllowed, validateRecordMaxKeys } from '../../common/utils';
 import { MAX_OTHER_FIELDS_LENGTH } from '../constants';
 
@@ -45,10 +45,15 @@ const incidentSchemaObject = {
   priority: z.string().nullable().default(null),
   labels: z
     .array(
-      z.string().refine(
-        (val) => !val.match(/\s/g),
-        (val) => ({ message: `The label ${val} cannot contain spaces` })
-      )
+      z.string().check((ctx) => {
+        if ((ctx.value as string).match(/\s/g)) {
+          ctx.issues.push({
+            code: 'custom',
+            message: `The label ${ctx.value} cannot contain spaces`,
+            input: ctx.value,
+          });
+        }
+      })
     )
     .nullable()
     .default(null),

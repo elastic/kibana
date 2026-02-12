@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export const FIELDS_MAX_LENGTH_ERROR = (length: number, fieldName: string) =>
   i18n.translate('xpack.stackConnectors.schema.otherFieldsLengthError', {
