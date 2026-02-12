@@ -16,6 +16,7 @@ import { SecuritySolutionApiProvider as EntityAnalyticsApiProvider } from '@kbn/
 import { SecuritySolutionApiProvider as ExceptionsApiProvider } from '@kbn/security-solution-test-api-clients/supertest/exceptions.gen';
 import { SpacesServiceProvider } from '../services/spaces_service';
 import { SecuritySolutionESSUtils } from '../services/security_solution_ess_utils';
+import { RolesUsersProvider } from '../services/security_solution_edr_workflows_roles_users';
 
 export const services = {
   ...commonFunctionalServices,
@@ -32,4 +33,5 @@ export const services = {
   spaces: SpacesServiceProvider,
   securitySolutionUtils: SecuritySolutionESSUtils,
   kibana_ebt_server: KibanaEBTServerProvider,
+  rolesUsersProvider: RolesUsersProvider,
 };
