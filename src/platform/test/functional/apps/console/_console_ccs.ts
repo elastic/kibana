@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.enterText(
           '\nGET ftr-remote:logstash-*/_search\n {\n "query": {\n "bool": {\n "must": [\n {"match": {"extension" : "jpg"} \n}\n]\n}\n}\n}'
         );
-        await PageObjects.console.focusInputEditor();
+
         await PageObjects.console.clickPlay();
 
         await retry.waitFor('console response status badge to appear', async () => {
