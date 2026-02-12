@@ -7,6 +7,7 @@
 
 import type { EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
 import { EuiInMemoryTable, useEuiFontSize } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
@@ -106,6 +107,12 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
       `}
       search={euiTableSearchOptions}
       compressed={compressed}
+      tableCaption={i18n.translate(
+        'xpack.securitySolution.threatIntelligence.indicator.fieldsTable.caption',
+        {
+          defaultMessage: 'Indicator fields',
+        }
+      )}
     />
   );
 };

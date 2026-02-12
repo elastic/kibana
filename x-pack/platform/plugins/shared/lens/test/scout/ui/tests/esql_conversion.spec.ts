@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
@@ -28,7 +29,7 @@ const KBN_ARCHIVES = {
 const ESQL_CONVERSION_DASHBOARD_TEST_ID = 'dashboardListingTitleLink-ES|QL-Conversion-Dashboard';
 const METRIC_VISUALIZATION_ID = 'fb4626b8-d8ce-42d3-913a-081af94cfb51';
 
-test.describe('Lens ES|QL', { tag: ['@ess'] }, () => {
+test.describe('Lens ES|QL', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings, apiServices }) => {
     await apiServices.core.settings({
       'feature_flags.overrides': {
