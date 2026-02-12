@@ -33,6 +33,7 @@ interface DataLifecycleSummaryProps {
   loading?: boolean;
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void;
   downsampleSteps?: DownsampleStep[];
+  testSubjPrefix?: string;
   isIlm?: boolean;
   onRemovePhase?: (phaseName: string) => void;
   onRemoveDownsampleStep?: (stepNumber: number) => void;
@@ -44,6 +45,7 @@ export const DataLifecycleSummary = ({
   loading = false,
   onPhaseClick,
   downsampleSteps,
+  testSubjPrefix,
   isIlm,
   onRemovePhase,
   onRemoveDownsampleStep,
@@ -95,6 +97,7 @@ export const DataLifecycleSummary = ({
                   gridTemplateColumns={gridTemplateColumns}
                   phaseColumnSpans={phaseColumnSpans}
                   onPhaseClick={onPhaseClick}
+                  testSubjPrefix={testSubjPrefix}
                   isIlm={isIlm}
                   onRemovePhase={onRemovePhase}
                   canManageLifecycle={canManageLifecycle}
