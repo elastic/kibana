@@ -63,6 +63,15 @@ export const DiscoverHistogramLayout = ({
       css={css`
         height: 100%;
         min-height: 0;
+
+        ${hideDataTable
+          ? `
+          [data-test-subj='unifiedHistogramResizableButton'] {
+            pointer-events: none;
+            cursor: default;
+          }
+        `
+          : ''}
       `}
     >
       <UnifiedHistogramLayout
