@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * List of internal / built-in attachment types.
@@ -58,11 +58,18 @@ export const screenContextAttachmentDataSchema = z
     url: z.string().optional(),
     app: z.string().optional(),
     description: z.string().optional(),
-    additional_data: z.record(z.string()).optional(),
+    additional_data: z.record(z.string(), z.string()).optional(),
   })
-  .refine((data) => {
+  .check((ctx) => {
     // at least one of the fields must be present
-    return data.url || data.app || data.description || data.additional_data;
+    const data = ctx.value;
+    if (!data.url && !data.app && !data.description && !data.additional_data) {
+      ctx.issues.push({
+        code: 'custom',
+        message: 'At least one of url, app, description, or additional_data must be present',
+        input: data,
+      });
+    }
   });
 
 /**
