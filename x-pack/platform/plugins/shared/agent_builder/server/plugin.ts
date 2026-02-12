@@ -122,8 +122,8 @@ export class AgentBuilderPlugin
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
       },
-      skill: {
-        registerSkill: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
+      skills: {
+        register: serviceSetups.skills.registerSkill.bind(serviceSetups.skills),
       },
     };
   }

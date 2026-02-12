@@ -98,7 +98,7 @@ export const eqlExecutor = async ({
       tiebreakerField: ruleParams.tiebreakerField,
     });
 
-    ruleExecutionLogger.trace(`EQL query to execute\n${JSON.stringify(request)}`);
+    ruleExecutionLogger.debug(`EQL query request: ${JSON.stringify(request)}`);
     const exceptionsWarning = getUnprocessedExceptionsWarnings(sharedParams.unprocessedExceptions);
     if (exceptionsWarning) {
       result.warningMessages.push(exceptionsWarning);
