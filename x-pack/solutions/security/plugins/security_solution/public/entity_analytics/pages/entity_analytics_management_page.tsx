@@ -116,6 +116,7 @@ export const EntityAnalyticsManagementPage = () => {
 
   return (
     <>
+      {/* Comment to trigger CI build */}
       <RiskEnginePrivilegesCallOut privileges={privileges} />
       <EuiPageHeader
         pageTitle={
