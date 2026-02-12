@@ -39,7 +39,7 @@ apiTest.describe(
       createdIds = [];
     });
 
-    apiTest('can create an index_pattern with just a title', async ({ apiClient, log }) => {
+    apiTest('can create an index_pattern with just a title', async ({ apiClient }) => {
       const title = `foo-${Date.now()}-${Math.random()}*`;
 
       const response = await apiClient.post(DATA_VIEW_PATH_LEGACY, {
