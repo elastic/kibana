@@ -6,3 +6,5 @@
  */
 
 export { ReactFlowServiceMap } from './react_flow_graph';
+export { applyDagreLayout, type LayoutOptions } from './layout';
+export * from './constants';

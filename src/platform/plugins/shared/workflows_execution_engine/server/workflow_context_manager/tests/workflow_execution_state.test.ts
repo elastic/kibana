@@ -197,9 +197,10 @@ describe('WorkflowExecutionState', () => {
 
       await underTest.flush();
 
-      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
-        updatedWorkflowExecution
-      );
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith({
+        ...updatedWorkflowExecution,
+        stepExecutionIds: [], // Always includes step execution IDs (empty when no steps)
+      });
     });
 
     it('should flush workflow execution changes with execution id even if execution id is not in change', async () => {

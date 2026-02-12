@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-
-import { useValues } from 'kea';
+import React from 'react';
 
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -21,12 +18,10 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorStatus } from '@kbn/search-connectors';
 
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
-import { KibanaLogic } from '../../../../shared/kibana';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
 import { SyncsContextMenu } from '../../shared/header_actions/syncs_context_menu';
@@ -46,18 +41,9 @@ export const WhatsNextBox: React.FC<WhatsNextBoxProps> = ({
   connectorId,
   connectorIndex,
   connectorStatus,
-  disabled = false,
   isSyncing = false,
   isWaitingForConnector = false,
 }) => {
-  const { share } = useValues(KibanaLogic);
-  const onStartPlaygroundClick = useCallback(() => {
-    if (!share) return;
-    const playgroundLocator = share.url.locators.get('PLAYGROUND_LOCATOR_ID');
-    if (playgroundLocator) {
-      playgroundLocator.navigate({ 'default-index': connectorIndex });
-    }
-  }, [connectorIndex, share]);
   const isConfigured = !(
     connectorStatus === ConnectorStatus.NEEDS_CONFIGURATION ||
     connectorStatus === ConnectorStatus.CREATED
@@ -83,19 +69,6 @@ export const WhatsNextBox: React.FC<WhatsNextBoxProps> = ({
       </EuiText>
       <EuiSpacer />
       <EuiFlexGroup responsive={false} gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="enterpriseSearchWhatsNextBoxSearchPlaygroundButton"
-            iconType="sparkles"
-            disabled={!connectorIndex || disabled}
-            onClick={onStartPlaygroundClick}
-          >
-            <FormattedMessage
-              id="xpack.enterpriseSearch.whatsNextBox.searchPlaygroundButtonLabel"
-              defaultMessage="Search Playground"
-            />
-          </EuiButton>
-        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonTo
             data-test-subj="entSearchContent-connector-configuration-setScheduleAndSync"

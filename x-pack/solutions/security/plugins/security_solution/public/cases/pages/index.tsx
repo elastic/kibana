@@ -54,7 +54,9 @@ const CaseContainerComponent: React.FC = () => {
   const { openFlyout } = useExpandableFlyoutApi();
   const {
     timelinePrivileges: { read: canSeeTimeline },
-    rulesPrivileges: { read: canReadRules },
+    rulesPrivileges: {
+      rules: { read: canReadRules },
+    },
   } = useUserPrivileges();
   const { hasAlertsRead, hasAlertsAll } = useAlertsPrivileges();
 

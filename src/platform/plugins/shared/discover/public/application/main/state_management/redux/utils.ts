@@ -9,18 +9,15 @@
 
 import { isObject } from 'lodash';
 import { v4 as uuid } from 'uuid';
-
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DataViewListItem, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { ESQLControlState, ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { getNextTabNumber, type TabItem } from '@kbn/unified-tabs';
 import { createAsyncThunk, miniSerializeError } from '@reduxjs/toolkit';
-
 import type {
   InternalStateDependencies,
   InternalStateDispatch,
@@ -145,9 +142,8 @@ export const extractEsqlVariables = (
   }
   const variables = Object.values(panels).reduce((acc: ESQLControlVariable[], panel) => {
     if (panel.type === ESQL_CONTROL) {
-      const typedPanel = panel as OptionsListESQLControlState;
-      const isSingleSelect = typedPanel.singleSelect ?? true;
-      const selectedValues = typedPanel.selectedOptions || [];
+      const isSingleSelect = panel.singleSelect ?? true;
+      const selectedValues = panel.selectedOptions || [];
 
       let value: string | number | (string | number)[];
 
@@ -161,8 +157,8 @@ export const extractEsqlVariables = (
       }
 
       acc.push({
-        key: typedPanel.variableName,
-        type: typedPanel.variableType as ESQLVariableType,
+        key: panel.variableName,
+        type: panel.variableType,
         value,
       });
     }

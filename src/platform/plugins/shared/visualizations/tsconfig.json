@@ -81,8 +81,9 @@
     "@kbn/css-utils",
     "@kbn/visualizations-common",
     "@kbn/lens-common",
+    "@kbn/visualization-listing-components",
     "@kbn/cps",
-    "@kbn/kql",
+    "@kbn/kql"
   ],
   "exclude": ["target/**/*"]
 }

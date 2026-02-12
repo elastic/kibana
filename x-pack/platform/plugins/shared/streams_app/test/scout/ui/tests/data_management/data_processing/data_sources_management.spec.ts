@@ -7,13 +7,14 @@
 
 /* eslint-disable playwright/expect-expect */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { DATE_RANGE, generateLogsData } from '../../../fixtures/generators';
 
 test.describe(
   'Stream data processing - data sources management',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
@@ -47,21 +48,15 @@ test.describe(
         .getByTestId('streamsAppKqlSamplesDataSourceNameField')
         .fill('Kql Samples');
       // Set date range within the KQL data source card
-      await kqlDataSourceCard.getByTestId('superDatePickerShowDatesButton').click();
-      await kqlDataSourceCard.getByTestId('superDatePickerendDatePopoverButton').click();
-      await page.getByRole('tab', { name: 'End date: Absolute' }).click();
-      const endDateInput = page.getByTestId('superDatePickerAbsoluteDateInput');
-      await endDateInput.clear();
-      await endDateInput.fill(DATE_RANGE.to);
-      await page.getByTestId('parseAbsoluteDateFormat').click();
-      await page.keyboard.press('Escape');
-      await kqlDataSourceCard.getByTestId('superDatePickerstartDatePopoverButton').click();
-      await page.getByRole('tab', { name: 'Start date: Absolute' }).click();
-      const startDateInput = page.getByTestId('superDatePickerAbsoluteDateInput');
-      await startDateInput.clear();
-      await startDateInput.fill(DATE_RANGE.from);
-      await page.getByTestId('parseAbsoluteDateFormat').click();
-      await page.keyboard.press('Escape');
+      await kqlDataSourceCard
+        .locator('[data-test-subj="superDatePickerShowDatesButton"]:not([disabled])')
+        .click();
+      await pageObjects.datePicker.setAbsoluteRangeInRootContainer({
+        from: DATE_RANGE.from,
+        to: DATE_RANGE.to,
+        containerLocator: kqlDataSourceCard,
+      });
+      await pageObjects.datePicker.waitToBeHidden();
       await kqlDataSourceCard
         .getByTestId('unifiedQueryInput')
         .getByRole('textbox')
