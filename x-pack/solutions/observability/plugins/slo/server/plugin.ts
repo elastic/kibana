@@ -288,7 +288,7 @@ export class SLOPlugin
       config: this.config,
     });
 
-     plugins.embeddable.registerTransforms(SLO_OVERVIEW_EMBEDDABLE_ID, {
+    plugins.embeddable.registerTransforms(SLO_OVERVIEW_EMBEDDABLE_ID, {
       getSchema: () => sloOverviewEmbeddableSchema,
     });
 
