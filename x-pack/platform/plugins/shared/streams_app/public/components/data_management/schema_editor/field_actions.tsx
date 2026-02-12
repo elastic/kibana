@@ -45,6 +45,9 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
     const openFlyout = (
       props: { isEditingByDefault?: boolean; applyGeoPointSuggestion?: boolean } = {}
     ) => {
+      if (!Streams.ingest.all.Definition.is(stream)) {
+        return;
+      }
       const overlay = core.overlays.openFlyout(
         toMountPoint(
           <StreamsAppContextProvider context={context}>

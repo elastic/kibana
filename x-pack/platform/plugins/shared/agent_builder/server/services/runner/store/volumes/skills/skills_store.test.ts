@@ -9,11 +9,6 @@ import { createSkillsStore, SkillsStoreImpl } from './skills_store';
 import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { FileEntryType } from '@kbn/agent-builder-server/runner/filestore';
 
-// Mock SKILLS_ENABLED
-jest.mock('../../../../skills/constants', () => ({
-  SKILLS_ENABLED: true,
-}));
-
 describe('SkillsStore', () => {
   const createMockSkill = (overrides: Partial<SkillDefinition> = {}): SkillDefinition => ({
     id: 'test-skill-1',
@@ -46,12 +41,12 @@ describe('SkillsStore', () => {
   });
 
   describe('constructor', () => {
-    it('initializes with empty skills when SKILLS_ENABLED is true', () => {
+    it('initializes with empty skills', () => {
       const store = new SkillsStoreImpl({ skills: [] });
       expect(store.has('any-skill')).toBe(false);
     });
 
-    it('adds skills to store when SKILLS_ENABLED is true', () => {
+    it('adds skills to store', () => {
       const skill = createMockSkill({ id: 'skill-1' });
       const store = new SkillsStoreImpl({ skills: [skill] });
       expect(store.has('skill-1')).toBe(true);

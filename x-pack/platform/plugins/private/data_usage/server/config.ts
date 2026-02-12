@@ -38,6 +38,7 @@ export const configSchema = schema.object({
    */
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],
+    maxSize: 1000,
   }),
 });
 

@@ -8,7 +8,8 @@
  */
 
 import type { DebugState } from '@elastic/charts';
-import { spaceTest, expect, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { PageObjects } from '@kbn/scout';
 import type { ScoutPage } from '@kbn/scout';
 import {
@@ -93,7 +94,7 @@ const createBaseXYCharts = async (
   await pageObjects.dashboard.waitForPanelsToLoad(2);
 };
 
-spaceTest.describe('Sync colors', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Sync colors', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     await scoutSpace.savedObjects.load(LENS_BASIC_KIBANA_ARCHIVE);

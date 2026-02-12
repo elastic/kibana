@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/core-analytics-browser'
   - '@kbn/licensing-plugin'
   - '@kbn/licensing-types'
+  - '@kbn/home-plugin'
 tags:
   - plugin
   - prod

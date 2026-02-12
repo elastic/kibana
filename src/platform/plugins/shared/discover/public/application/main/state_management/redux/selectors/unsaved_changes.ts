@@ -89,7 +89,7 @@ export const selectHasUnsavedChanges = (
           services,
         }),
       }),
-      timeRestore: Boolean(persistedTab.timeRestore),
+      overridenTimeRestore: Boolean(persistedTab.timeRestore),
       services,
     });
 
@@ -104,7 +104,7 @@ export const selectHasUnsavedChanges = (
         })
       : fromTabStateToSavedObjectTab({
           tab: tabState,
-          timeRestore: Boolean(persistedTab.timeRestore),
+          overridenTimeRestore: Boolean(persistedTab.timeRestore),
           services,
         });
 
@@ -182,7 +182,7 @@ const getAdjustedDataViewId = (searchSource: SerializedSearchSourceFields) =>
     ? searchSource.index.id
     : searchSource.index;
 
-const searchSourceComparator: TabComparators['serializedSearchSource'] = (
+export const searchSourceComparator: TabComparators['serializedSearchSource'] = (
   searchSourceA,
   searchSourceB
 ) => {

@@ -41,6 +41,7 @@ import {
   selectEditorYamlDocument,
   selectSchema,
   setCursorPosition,
+  setIsYamlSynced,
   setYamlString,
 } from '../../../entities/workflows/store';
 import {
@@ -153,6 +154,13 @@ export const WorkflowYAMLEditor = ({
   const onChange = useCallback(
     (yaml: string) => {
       dispatch(setYamlString(yaml));
+    },
+    [dispatch]
+  );
+
+  const onSyncStateChange = useCallback(
+    (isSynced: boolean) => {
+      dispatch(setIsYamlSynced(isSynced));
     },
     [dispatch]
   );
@@ -470,9 +478,6 @@ export const WorkflowYAMLEditor = ({
       if (isTriggerType(action.id)) {
         insertTriggerSnippet(model, yamlDocumentCurrent, action.id, editor);
       } else {
-        if (!yamlDocumentCurrent) {
-          return;
-        }
         insertStepSnippet(model, yamlDocumentCurrent, action.id, cursorPosition, editor);
       }
       closeActionsPopover();
@@ -586,10 +591,12 @@ export const WorkflowYAMLEditor = ({
           editorDidMount={handleEditorDidMount}
           editorWillUnmount={handleEditorWillUnmount}
           onChange={onChange}
+          onSyncStateChange={onSyncStateChange}
           options={options}
           schemas={schemas}
           value={workflowYaml}
           enableFindAction={true}
+          dataTestSubj="workflowYamlEditor"
         />
       </div>
       <div css={styles.validationErrorsContainer}>

@@ -103,6 +103,17 @@ describe('MaintenanceWindowClient - archive', () => {
       count: 4,
     } as MaintenanceWindowAttributes['rRule'];
 
+    const schedule = {
+      custom: {
+        start: '2023-02-26T00:00:00.000Z',
+        duration: '1h',
+        recurring: {
+          every: '1w',
+          occurrences: 4,
+        },
+      },
+    };
+
     const mockMaintenanceWindow = getMockMaintenanceWindow({
       expirationDate: moment(new Date()).tz('UTC').add(1, 'year').toISOString(),
     });
@@ -113,6 +124,7 @@ describe('MaintenanceWindowClient - archive', () => {
         rRule,
         events: [],
         expirationDate: new Date().toISOString(),
+        schedule,
       },
       version: '123',
       id: 'test-id',
@@ -140,6 +152,7 @@ describe('MaintenanceWindowClient - archive', () => {
       {
         ...mockMaintenanceWindow,
         rRule,
+        schedule,
         events: [
           { gte: '2023-02-26T00:00:00.000Z', lte: '2023-02-26T01:00:00.000Z' },
           { gte: '2023-03-05T00:00:00.000Z', lte: '2023-03-05T01:00:00.000Z' },

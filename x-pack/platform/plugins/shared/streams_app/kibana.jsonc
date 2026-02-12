@@ -32,6 +32,7 @@
     "optionalPlugins": ["cloud", "spaces", "indexLifecycleManagement"],
     "requiredBundles": [
       "discover",
+      "esql",
       "kibanaReact",
       "kibanaUtils",
       "observabilityAIAssistant",

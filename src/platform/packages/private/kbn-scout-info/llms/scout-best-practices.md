@@ -229,7 +229,7 @@ To **trigger the Flaky Test Runner**, either navigate to the [dedicated page](ht
 
 ### Design tests with a cloud-first mindset
 
-Scout is designed to be **deployment-agnostic**. Write your Scout test and Playwright config **once**, and run it everywhere: locally and on Elastic Cloud. Use tags to specify which deployment types your test supports (e.g., `@ess`, `@svlOblt`, `@svlSecurity`).
+Scout is designed to be **deployment-agnostic**. Write your Scout test and Playwright config **once**, and run it everywhere: locally and on Elastic Cloud. Use tags to specify which deployment types your test supports (e.g., `@local-stateful-classic`, `@local-serverless-observability_complete`, `@cloud-serverless-security_essentials`).
 
 > **Cloud-first principle:** Scout tests should run as-is against a freshly created Elastic Cloud deployment — no extra configuration or setup required. If your test needs special deployment settings, consider an alternative approach.
 

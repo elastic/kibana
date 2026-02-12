@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 import { Provider } from 'react-redux';
 import { createWorkflowsStore } from './store';
 import { useKibana } from '../../../hooks/use_kibana';
+import type { WorkflowsPublicPluginStart } from '../../../types';
 
 /**
  * Provides a workflow detail Redux store context to child components.
@@ -18,7 +19,15 @@ import { useKibana } from '../../../hooks/use_kibana';
  */
 export function WorkflowDetailStoreProvider({ children }: React.PropsWithChildren) {
   const { services } = useKibana(); // Services are pre-wired in the Kibana services context, they never change.
-  const workflowsStore = useMemo(() => createWorkflowsStore(services), [services]);
+  // Services should include workflowsManagement (added in createWorkflowsStartServices)
+  // Cast to include workflowsManagement for proper type checking
+  const servicesWithWorkflowsManagement = services as typeof services & {
+    workflowsManagement?: WorkflowsPublicPluginStart;
+  };
+  const workflowsStore = useMemo(
+    () => createWorkflowsStore(servicesWithWorkflowsManagement),
+    [servicesWithWorkflowsManagement]
+  );
 
   return <Provider store={workflowsStore}>{children}</Provider>;
 }

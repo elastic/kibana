@@ -59,6 +59,7 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
           try {
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
+            const { experimentalFeatures } = ctx.securitySolution.getConfig();
 
             await siemMigrationAuditLogger.logUploadResources({ migrationId });
 
@@ -90,7 +91,9 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
             }
 
             if (rule.original_rule.vendor === 'splunk') {
-              const resourceIdentifier = new RuleResourceIdentifier(rule.original_rule.vendor);
+              const resourceIdentifier = new RuleResourceIdentifier(rule.original_rule.vendor, {
+                experimentalFeatures,
+              });
               const identifiedMissingResources = await resourceIdentifier.fromResources(resources);
               const resourcesToCreate =
                 identifiedMissingResources.map<CreateSiemMigrationResourceInput>((resource) => ({

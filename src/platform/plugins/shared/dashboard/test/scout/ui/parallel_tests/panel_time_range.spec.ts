@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, expect, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { PageObjects } from '@kbn/scout';
 import {
   LENS_BASIC_KIBANA_ARCHIVE,
@@ -43,7 +44,7 @@ const removeCustomTimeRange = async (pageObjects: PageObjects) => {
   await pageObjects.dashboard.saveCustomizePanel();
 };
 
-spaceTest.describe('Panel time range (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Panel time range (dashboard)', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     await scoutSpace.savedObjects.load(LENS_BASIC_KIBANA_ARCHIVE);
