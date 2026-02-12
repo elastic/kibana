@@ -12,25 +12,38 @@ import React from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiPanel, euiOverflowScroll } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
-const bodyStyles = (theme: UseEuiTheme) => {
+const bodyStyles = (scrollable: boolean) => (theme: UseEuiTheme) => {
   const { euiTheme } = theme;
 
   return css`
-    ${euiOverflowScroll(theme, { direction: 'y' })};
+    ${scrollable && euiOverflowScroll(theme, { direction: 'y' })};
     padding: ${euiTheme.size.m};
     flex-grow: 1;
   `;
 };
 
+const sidebarContentLabel = i18n.translate('core.ui.chrome.sidebar.sidebarContentLabel', {
+  defaultMessage: 'Side panel content',
+});
+
 export interface SidebarBodyProps {
   children: ReactNode;
+  /** Makes the body keyboard-scrollable with `tabIndex={0}` and announces it as a region. Defaults to false. */
+  scrollable?: boolean;
 }
 
-/** Scrollable body component for sidebar apps */
-export const SidebarBody: FC<SidebarBodyProps> = ({ children }) => {
+/** Body component for sidebar apps */
+export const SidebarBody: FC<SidebarBodyProps> = ({ children, scrollable = false }) => {
   return (
-    <EuiPanel css={bodyStyles} hasShadow={false} paddingSize="none" data-test-subj="sidebarBody">
+    <EuiPanel
+      {...(scrollable && { tabIndex: 0, role: 'region', 'aria-label': sidebarContentLabel })}
+      css={bodyStyles(scrollable)}
+      hasShadow={false}
+      paddingSize="none"
+      data-test-subj="sidebarBody"
+    >
       {children}
     </EuiPanel>
   );

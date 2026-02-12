@@ -99,8 +99,8 @@ export function registerRestoreRoutes({
 
   // Restore snapshot
   const restoreParamsSchema = schema.object({
-    repository: schema.string(),
-    snapshot: schema.string(),
+    repository: schema.string({ maxLength: 1000 }),
+    snapshot: schema.string({ maxLength: 1000 }),
   });
 
   router.post(

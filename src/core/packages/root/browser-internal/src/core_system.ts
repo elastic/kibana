@@ -378,7 +378,6 @@ export class CoreSystem {
         theme,
         userProfile,
         uiSettings,
-        analytics,
         featureFlags,
       });
       const deprecations = this.deprecations.start({ http });

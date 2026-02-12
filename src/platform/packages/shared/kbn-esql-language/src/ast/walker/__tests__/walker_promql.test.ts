@@ -28,7 +28,7 @@ import type {
   PromQLAt,
   PromQLModifier,
   PromQLGroupModifier,
-} from '../../../promql/types';
+} from '../../../embedded_languages/promql/types';
 import type { ESQLCommand } from '../../../types';
 
 describe('Walker PromQL support', () => {
