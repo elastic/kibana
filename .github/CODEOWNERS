@@ -41,8 +41,6 @@ examples/share_examples @elastic/appex-sharedux
 examples/sidebar_examples @elastic/appex-sharedux
 examples/sse_example @elastic/kibana-core
 examples/state_containers_examples @elastic/appex-sharedux
-examples/ui_action_examples @elastic/appex-sharedux
-examples/ui_actions_explorer @elastic/appex-sharedux
 examples/unified_doc_viewer @elastic/kibana-data-discovery
 examples/unified_field_list_examples @elastic/kibana-data-discovery
 examples/unified_tabs_examples @elastic/kibana-data-discovery
@@ -421,9 +419,12 @@ src/platform/packages/shared/content-management/access_control/access_control_se
 src/platform/packages/shared/content-management/content_editor @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_public @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_insights/content_insights_server @elastic/appex-sharedux
+src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-provider @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client @elastic/appex-sharedux
+src/platform/packages/shared/content-management/content_list/kbn-content-list-table @elastic/appex-sharedux
+src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_common @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_public @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_server @elastic/appex-sharedux
@@ -2309,7 +2310,6 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /.github/codeql @elastic/kibana-security
 /.github/workflows/codeql.yml @elastic/kibana-security
 /.github/workflows/codeql-pr.yml @elastic/kibana-security
-/.github/workflows/codeql-stats.yml @elastic/kibana-security
 /.github/instructions/security.instructions.md @elastic/kibana-security
 /.github/instructions/codeql.instructions.md @elastic/kibana-security
 /.github/workflows/evaluate-dependency-health.yml @elastic/kibana-security
@@ -3195,12 +3195,10 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/functional/page_objects/settings_page.ts @elastic/appex-sharedux
 /src/platform/test/functional/apps/sharing/*.ts @elastic/appex-sharedux
 /src/platform/test/functional/apps/kibana_overviews @elastic/appex-sharedux
-/x-pack/platform/test/product_intercepts_functional @elastic/appex-sharedux
 /src/platform/test/examples/ui_actions/*.ts @elastic/appex-sharedux
 /src/platform/test/examples/state_sync/*.ts @elastic/appex-sharedux
 /src/platform/test/examples/error_boundary/index.ts @elastic/appex-sharedux
 /src/platform/test/examples/content_management/*.ts @elastic/appex-sharedux
-/x-pack/platform/test/banners_functional @elastic/appex-sharedux
 /x-pack/platform/test/custom_branding @elastic/appex-sharedux
 /x-pack/platform/test/api_integration/apis/content_management @elastic/appex-sharedux
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/intercepts @elastic/appex-sharedux

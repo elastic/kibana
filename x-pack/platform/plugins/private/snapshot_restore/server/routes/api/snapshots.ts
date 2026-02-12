@@ -282,7 +282,8 @@ export function registerSnapshotsRoutes({
     schema.object({
       repository: schema.string(),
       snapshot: schema.string(),
-    })
+    }),
+    { maxSize: 1000 }
   );
 
   // DELETE one or multiple snapshots

@@ -16,11 +16,9 @@
     "@kbn/es-query",
     "@kbn/monaco",
     "@kbn/std",
-    "@kbn/image-embeddable-plugin",
     "@kbn/core-ui-settings-browser",
     "@kbn/presentation-publishing",
     "@kbn/config-schema",
-    "@kbn/ui-actions-browser"
   ],
   "exclude": [
     "target/**/*",

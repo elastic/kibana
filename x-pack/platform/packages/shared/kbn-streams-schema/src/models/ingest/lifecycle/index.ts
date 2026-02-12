@@ -155,3 +155,18 @@ export interface IlmPolicyPhases {
   frozen?: IlmPolicyPhase;
   delete?: IlmPolicyDeletePhase;
 }
+
+export interface IlmPolicy {
+  name: string;
+  phases: IlmPolicyPhases;
+  meta?: Record<string, unknown>;
+  deprecated?: boolean;
+}
+
+export interface IlmPolicyUsage {
+  in_use_by: {
+    data_streams: string[];
+    indices: string[];
+  };
+}
+export type IlmPolicyWithUsage = IlmPolicy & IlmPolicyUsage;

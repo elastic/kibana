@@ -54,7 +54,6 @@
       "savedObjects",
       "kibanaUtils",
       "kibanaReact",
-      "embeddable",
       "fieldFormats",
       "charts",
       "esqlDataGrid",

@@ -32,7 +32,6 @@ import {
 import { jobForCloningSchema, jobIdSchema } from './schemas/anomaly_detectors_schema';
 
 import { jobServiceProvider } from '../models/job_service';
-import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { Datafeed, Job } from '../../common/types/anomaly_detection_jobs';
 
 /**
@@ -944,7 +943,6 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
                 } as estypes.MlPreviewDatafeedRequest);
 
           const body = await mlClient.previewDatafeed(payload, {
-            ...getAuthorizationHeader(request),
             maxRetries: 0,
           });
           return response.ok({
@@ -1031,7 +1029,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
             job: Job;
             datafeed: Datafeed;
           }>;
-          const body = await bulkCreate(jobs, getAuthorizationHeader(request));
+          const body = await bulkCreate(jobs);
           return response.ok({
             body,
           });
