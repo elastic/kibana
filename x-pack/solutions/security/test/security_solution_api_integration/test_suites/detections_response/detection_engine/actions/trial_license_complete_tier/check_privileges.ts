@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllRules(supertest, log);
     });
 
-    context('when all indices exist but user cannot read host_alias', () => {
+    context('when user cannot read host_alias', () => {
       const noReadableIndicesTestCases = [['host_alias'], ['host_alias*']];
 
       const mixedReadabilityTestCases = [
