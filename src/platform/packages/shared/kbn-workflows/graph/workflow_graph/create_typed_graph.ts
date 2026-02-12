@@ -8,12 +8,11 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import type { GraphNodeUnion } from '../types';
 
 export function createTypedGraph(opt?: {
   directed?: boolean;
   multigraph?: boolean;
   compound?: boolean;
-}): graphlib.Graph<GraphNodeUnion> {
-  return new graphlib.Graph<GraphNodeUnion>(opt);
+}): graphlib.Graph {
+  return new graphlib.Graph(opt);
 }

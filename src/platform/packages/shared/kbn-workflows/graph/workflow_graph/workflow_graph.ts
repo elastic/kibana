@@ -29,11 +29,11 @@ import type { GraphNodeUnion } from '../types';
  * ```
  */
 export class WorkflowGraph {
-  private graph: graphlib.Graph<GraphNodeUnion>;
+  private graph: graphlib.Graph;
   private __topologicalOrder: string[] | null = null;
   private stepIdsSet: Set<string> | null = null;
 
-  constructor(graph: graphlib.Graph<GraphNodeUnion>) {
+  constructor(graph: graphlib.Graph) {
     this.graph = graph;
   }
 
@@ -52,7 +52,7 @@ export class WorkflowGraph {
   }
 
   public getNode(nodeId: string): GraphNodeUnion {
-    return this.graph.node(nodeId);
+    return this.graph.node(nodeId) as unknown as GraphNodeUnion;
   }
 
   /**
@@ -72,9 +72,8 @@ export class WorkflowGraph {
 
     for (const prefix of nodePrefixes) {
       const nodeId = `${prefix}${stepId}`;
-      const node = this.graph.node(nodeId);
-      if (node) {
-        return node;
+      if (this.graph.hasNode(nodeId)) {
+        return this.getNode(nodeId);
       }
     }
 
@@ -98,7 +97,7 @@ export class WorkflowGraph {
   }
 
   public getAllNodes(): GraphNodeUnion[] {
-    return this.graph.nodes().map((nodeId) => this.graph.node(nodeId));
+    return this.graph.nodes().map((nodeId) => this.getNode(nodeId));
   }
 
   public getEdges(): Array<{ v: string; w: string }> {
@@ -169,7 +168,7 @@ export class WorkflowGraph {
 
   public getDirectSuccessors(nodeId: string): GraphNodeUnion[] {
     const successors = this.graph.successors(nodeId) || [];
-    return successors.map((id) => this.graph.node(id));
+    return successors.map((id) => this.getNode(id));
   }
 
   public getAllPredecessors(nodeId: string): GraphNodeUnion[] {
@@ -187,6 +186,6 @@ export class WorkflowGraph {
 
     const directPredecessors = this.graph.predecessors(nodeId) || [];
     directPredecessors.forEach((predId) => collectPredecessors(predId));
-    return Array.from(visited).map((id) => this.graph.node(id));
+    return Array.from(visited).map((id) => this.getNode(id));
   }
 }

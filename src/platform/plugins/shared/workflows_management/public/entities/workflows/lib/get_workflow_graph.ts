@@ -31,7 +31,7 @@ export interface WorkflowGraphNodeLabel {
   type: WorkflowGraphNodeType;
 }
 
-export type WorkflowGraph = graphlib.Graph<WorkflowGraphNodeLabel>;
+export type WorkflowGraph = graphlib.Graph;
 
 export const flowNodeTypes = ['if', 'merge', 'parallel', 'foreach', 'atomic', 'http', 'trigger'];
 
@@ -222,7 +222,7 @@ export function getWorkflowGraph<T extends WorkflowYaml>(workflow: T) {
     workflow.steps ?? []
   );
 
-  const dagreGraph = new graphlib.Graph<WorkflowGraphNodeLabel>();
+  const dagreGraph = new graphlib.Graph();
   dagreGraph.setDefaultEdgeLabel(() => ({}));
 
   nodes.forEach((node) => {
