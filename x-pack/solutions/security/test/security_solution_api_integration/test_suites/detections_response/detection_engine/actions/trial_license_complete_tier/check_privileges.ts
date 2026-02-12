@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
       ];
 
       noReadableIndicesTestCases.forEach((index) => {
-        it(`warns when no indices match the index pattern`, async () => {
+        it(`sets rule status to partial failure for KQL rule with index param: ${index}`, async () => {
           const rule = {
             ...getRuleForAlertTesting(index),
             query: 'process.executable: "/usr/bin/sudo"',
