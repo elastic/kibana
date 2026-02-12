@@ -76,12 +76,6 @@ export class ConsolePageObject extends FtrService {
     return await outputViewDiv.getVisibleText();
   }
 
-  public async waitForOutputPanelLoaded() {
-    await this.retry.waitFor('console output panel to be visible', async () => {
-      return await this.testSubjects.exists('consoleMonacoOutput');
-    });
-  }
-
   public async pressEnter() {
     const textArea = await this.getTextArea();
     await textArea.pressKeys(Key.ENTER);
