@@ -48,7 +48,7 @@ test.describe(
 
     test.afterEach(async ({ apiServices }) => {
       try {
-        await apiServices.streams.clearStreamChildren('logs');
+        await apiServices.streams.clearStreamChildren('logs.otel');
       } catch {
         // Ignore errors if stream doesn't exist
       }
@@ -112,14 +112,14 @@ test.describe(
       browserAuth,
       pageObjects,
     }) => {
-      await apiServices.streams.forkStream('logs', 'logs.existing', {
+      await apiServices.streams.forkStream('logs.otel', 'logs.otel.existing', {
         field: 'service.name',
         eq: 'existing-service',
       });
 
       await page.reload();
       await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoPartitioningTab('logs');
+      await pageObjects.streams.gotoPartitioningTab('logs.otel');
       await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
 
       await setupTestPage(page, llmSetup.llmProxy, llmSetup.connectorId);

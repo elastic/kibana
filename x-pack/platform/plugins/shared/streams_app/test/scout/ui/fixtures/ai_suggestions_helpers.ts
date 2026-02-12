@@ -157,7 +157,7 @@ export function setupPartitionLogsInterceptor(
     name: 'partition_logs',
     arguments: () =>
       JSON.stringify({
-        index: 'logs',
+        index: 'logs.otel',
         partitions,
       }),
     when: partitionLogsWhenCondition,
@@ -287,7 +287,7 @@ export async function setupAiSuggestionsTest(
   dateRange: { from: string; to: string }
 ): Promise<void> {
   await browserAuth.loginAsAdmin();
-  await pageObjects.streams.gotoPartitioningTab('logs');
+  await pageObjects.streams.gotoPartitioningTab('logs.otel');
   await pageObjects.datePicker.setAbsoluteRange(dateRange);
 
   await setupTestPage(page, llmSetup.llmProxy, llmSetup.connectorId);
@@ -298,6 +298,6 @@ export async function setupAiSuggestionsTest(
 /**
  * Gets the full stream name (with prefix) for a suggestion
  */
-export function getStreamName(suggestionName: string, parentStream = 'logs'): string {
+export function getStreamName(suggestionName: string, parentStream = 'logs.otel'): string {
   return `${parentStream}.${suggestionName}`;
 }

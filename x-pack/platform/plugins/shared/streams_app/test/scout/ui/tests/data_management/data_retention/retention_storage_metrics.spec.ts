@@ -77,8 +77,8 @@ test.describe(
       await saveRetentionChanges(page);
 
       // Navigate away and back
-      await pageObjects.streams.gotoPartitioningTab('logs.nginx');
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      await pageObjects.streams.gotoPartitioningTab('logs.otel.nginx');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
       // Retention should still be displayed correctly
       await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('14 days');

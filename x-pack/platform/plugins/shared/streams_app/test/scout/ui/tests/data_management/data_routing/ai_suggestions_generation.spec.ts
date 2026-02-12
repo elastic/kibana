@@ -35,7 +35,7 @@ test.describe(
 
     test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.streams.gotoPartitioningTab('logs');
+      await pageObjects.streams.gotoPartitioningTab('logs.otel');
       await pageObjects.datePicker.setAbsoluteRange(DATE_RANGE);
 
       await setupTestPage(page, llmSetup.llmProxy, llmSetup.connectorId);

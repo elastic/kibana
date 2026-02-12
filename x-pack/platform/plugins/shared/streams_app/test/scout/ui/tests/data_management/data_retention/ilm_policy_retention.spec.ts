@@ -85,7 +85,9 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
     await saveRetentionChanges(page);
 
     // Verify the policy name is displayed using the badge test ID
-    await expect(page.getByTestId('lifecycleBadge-logs.nginx')).toContainText('.alerts-ilm-policy');
+    await expect(page.getByTestId('lifecycleBadge-logs.otel.nginx')).toContainText(
+      '.alerts-ilm-policy'
+    );
   });
 
   test('should persist ILM policy selection across page reload', async ({ page, pageObjects }) => {
@@ -99,11 +101,13 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
     await saveRetentionChanges(page);
 
     // Reload page
-    await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+    await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
     // Verify ILM policy persists
     await expect(page.getByTestId('retention-metric-subtitle')).toContainText('ILM policy');
-    await expect(page.getByTestId('lifecycleBadge-logs.nginx')).toContainText('.alerts-ilm-policy');
+    await expect(page.getByTestId('lifecycleBadge-logs.otel.nginx')).toContainText(
+      '.alerts-ilm-policy'
+    );
   });
 
   test('should open ILM lifecycle phase popup and display phase details', async ({ page }) => {
@@ -162,8 +166,8 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
     });
 
     try {
-      const extraStreamName = 'logs.downsample';
-      await apiServices.streams.forkStream('logs', extraStreamName, {
+      const extraStreamName = 'logs.otel.downsample';
+      await apiServices.streams.forkStream('logs.otel', extraStreamName, {
         field: 'service.name',
         eq: 'downsample',
       });
@@ -240,8 +244,8 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
     });
 
     try {
-      const extraStreamName = 'logs.downsample-save-as-new';
-      await apiServices.streams.forkStream('logs', extraStreamName, {
+      const extraStreamName = 'logs.otel.downsample-save-as-new';
+      await apiServices.streams.forkStream('logs.otel', extraStreamName, {
         field: 'service.name',
         eq: 'downsample-save-as-new',
       });
@@ -279,7 +283,7 @@ test.describe('Stream data retention - ILM policy', { tag: tags.stateful.classic
       await page.getByTestId('createPolicyModal-policyNameInput').fill(newPolicyName);
       await page.getByTestId('createPolicyModal-saveButton').click();
 
-      await expect(page.getByTestId('lifecycleBadge-logs.nginx')).toContainText(newPolicyName);
+      await expect(page.getByTestId('lifecycleBadge-logs.otel.nginx')).toContainText(newPolicyName);
       await expect(page.getByTestId('downsamplingBar-label')).toHaveCount(0);
     } finally {
       await esClient.ilm.deleteLifecycle({ name: policyName }).catch(() => {});

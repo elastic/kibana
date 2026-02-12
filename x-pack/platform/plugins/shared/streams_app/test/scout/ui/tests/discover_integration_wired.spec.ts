@@ -90,8 +90,8 @@ test.describe(
       // Navigate to Discover
       await pageObjects.discover.goto();
       await pageObjects.discover.waitUntilFieldListHasCountOfFields();
-      await pageObjects.discover.selectDataView('logs.child');
-      await expect(pageObjects.discover.getSelectedDataView()).toHaveText('logs.child');
+      await pageObjects.discover.selectDataView('logs.otel.child');
+      await expect(pageObjects.discover.getSelectedDataView()).toHaveText('logs.otel.child');
       await pageObjects.discover.waitUntilFieldListHasCountOfFields();
 
       // Switch to ES|QL mode by clicking the button and waiting for doc table to load

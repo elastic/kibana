@@ -72,7 +72,7 @@ test.describe(
       await verifyRetentionDisplay(page, '30 days');
 
       // Refresh the page
-      await pageObjects.streams.gotoDataRetentionTab('logs.nginx');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel.nginx');
 
       // Verify the value persists
       await verifyRetentionDisplay(page, '30 days');

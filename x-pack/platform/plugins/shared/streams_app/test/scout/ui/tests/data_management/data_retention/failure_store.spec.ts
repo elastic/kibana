@@ -245,7 +245,7 @@ test.describe('Stream data retention - updating failure store', () => {
     'should not inherit failure store for root wired streams',
     { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ page, pageObjects }) => {
-      await pageObjects.streams.gotoDataRetentionTab('logs');
+      await pageObjects.streams.gotoDataRetentionTab('logs.otel');
 
       // Try to enable inherit failure store - the switch should not be visible for root streams
       await page.getByTestId('streamFailureStoreEditRetention').click();

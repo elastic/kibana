@@ -91,10 +91,10 @@ test.describe(
       await pageObjects.streams.saveRoutingRule();
 
       // Edit first rule
-      await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+      await pageObjects.streams.clickEditRoutingRule('logs.otel.edit-test');
 
       // Switch to edit second rule without saving
-      await pageObjects.streams.clickEditRoutingRule('logs.edit-test-2');
+      await pageObjects.streams.clickEditRoutingRule('logs.otel.edit-test-2');
 
       // Should now be editing the second rule
       expect(await pageObjects.streams.conditionEditorValueComboBox.getSelectedValue()).toBe(
@@ -103,26 +103,26 @@ test.describe(
     });
 
     test('should remove routing rule with confirmation', async ({ pageObjects }) => {
-      await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+      await pageObjects.streams.clickEditRoutingRule('logs.otel.edit-test');
 
       await pageObjects.streams.removeRoutingRule();
 
       // Confirm deletion in modal
-      await pageObjects.streams.confirmStreamDeleteInModal('logs.edit-test');
+      await pageObjects.streams.confirmStreamDeleteInModal('logs.otel.edit-test');
 
-      await pageObjects.streams.expectRoutingRuleHidden('logs.edit-test');
+      await pageObjects.streams.expectRoutingRuleHidden('logs.otel.edit-test');
       await pageObjects.toasts.waitFor();
     });
 
     test('should cancel rule removal', async ({ pageObjects }) => {
-      await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+      await pageObjects.streams.clickEditRoutingRule('logs.otel.edit-test');
       await pageObjects.streams.removeRoutingRule();
 
       // Cancel deletion
       await pageObjects.streams.cancelDeleteInModal();
 
       // Verify rule still exists
-      await pageObjects.streams.expectRoutingRuleVisible('logs.edit-test');
+      await pageObjects.streams.expectRoutingRuleVisible('logs.otel.edit-test');
     });
   }
 );
