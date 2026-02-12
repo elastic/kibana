@@ -393,6 +393,7 @@
     "error.message",
     "logExtractionState",
     "logExtractionState.additionalIndexPattern",
+    "logExtractionState.additionalIndexPatterns",
     "logExtractionState.delay",
     "logExtractionState.docsLimit",
     "logExtractionState.fieldHistoryLength",

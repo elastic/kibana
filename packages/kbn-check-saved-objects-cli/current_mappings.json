@@ -1300,6 +1300,9 @@
           "additionalIndexPattern": {
             "type": "keyword"
           },
+          "additionalIndexPatterns": {
+            "type": "keyword"
+          },
           "delay": {
             "type": "keyword"
           },
