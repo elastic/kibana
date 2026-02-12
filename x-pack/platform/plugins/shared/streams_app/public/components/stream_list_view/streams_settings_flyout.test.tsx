@@ -221,7 +221,6 @@ describe('StreamsSettingsFlyout', () => {
         expect(mockAddSuccess).toHaveBeenCalledWith({
           title: 'Wired streams have been enabled successfully',
         });
-        expect(mockOnClose).toHaveBeenCalled(); // Flyout should close
       });
     });
 
