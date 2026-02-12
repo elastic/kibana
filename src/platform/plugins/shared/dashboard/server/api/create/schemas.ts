@@ -14,7 +14,11 @@ import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_sc
 export const createRequestParamsSchema = schema.maybe(
   schema.object(
     {
-      id: schema.maybe(schema.string()),
+      id: schema.maybe(
+        schema.string({
+          meta: { description: 'A unique identifier for the dashboard.' },
+        })
+      ),
     },
     { unknowns: 'forbid' }
   )
