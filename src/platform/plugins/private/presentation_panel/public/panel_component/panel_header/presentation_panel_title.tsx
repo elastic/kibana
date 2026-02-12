@@ -99,8 +99,35 @@ export const PresentationPanelTitle = ({
   const describedPanelTitleElement = useMemo(() => {
     if (hideTitle) return null;
 
+    const panelTitleHeading = (
+      <h2
+        css={css`
+          margin: 0;
+          font-size: inherit;
+          line-height: inherit;
+          overflow: hidden;
+        `}
+      >
+        <EuiScreenReaderOnly>
+          <span id={headerId}>
+            {panelTitle
+              ? i18n.translate('presentationPanel.ariaLabel', {
+                  defaultMessage: 'Panel: {title}',
+                  values: {
+                    title: panelTitle,
+                  },
+                })
+              : i18n.translate('presentationPanel.untitledPanelAriaLabel', {
+                  defaultMessage: 'Untitled panel',
+                })}
+          </span>
+        </EuiScreenReaderOnly>
+        {panelTitleElement}
+      </h2>
+    );
+
     if (!panelDescription) {
-      return panelTitleElement;
+      return panelTitleHeading;
     }
     return (
       <EuiToolTip
@@ -124,28 +151,7 @@ export const PresentationPanelTitle = ({
           tabIndex={0}
         >
           {!hideTitle ? (
-            <h2
-              // styles necessary for applying ellipsis and showing the info icon if description is present
-              css={css`
-                overflow: hidden;
-              `}
-            >
-              <EuiScreenReaderOnly>
-                <span id={headerId}>
-                  {panelTitle
-                    ? i18n.translate('presentationPanel.ariaLabel', {
-                        defaultMessage: 'Panel: {title}',
-                        values: {
-                          title: panelTitle,
-                        },
-                      })
-                    : i18n.translate('presentationPanel.untitledPanelAriaLabel', {
-                        defaultMessage: 'Untitled panel',
-                      })}
-                </span>
-              </EuiScreenReaderOnly>
-              {panelTitleElement}
-            </h2>
+            panelTitleHeading
           ) : null}
           <EuiIcon
             type="info"

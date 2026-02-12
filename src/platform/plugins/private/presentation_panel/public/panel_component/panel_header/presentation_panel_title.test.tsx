@@ -49,4 +49,36 @@ describe('PresentationPanelTitle', () => {
       expect(mark?.textContent?.toLowerCase()).toBe('cpu');
     });
   });
+
+  describe('accessibility and heading semantics', () => {
+    it('renders a heading with header id when panel description is not provided', () => {
+      const { container } = renderWithTheme(
+        <PresentationPanelTitle {...defaultProps} panelTitle="CPU Usage" />
+      );
+
+      const heading = container.querySelector('h2');
+      expect(heading).toBeInTheDocument();
+
+      const labelledElement = container.querySelector(`#${defaultProps.headerId}`);
+      expect(labelledElement).toBeInTheDocument();
+      expect(labelledElement).toHaveTextContent('Panel: CPU Usage');
+    });
+
+    it('renders a heading with header id when panel description is provided', () => {
+      const { container } = renderWithTheme(
+        <PresentationPanelTitle
+          {...defaultProps}
+          panelTitle="CPU Usage"
+          panelDescription="Panel description"
+        />
+      );
+
+      const heading = container.querySelector('h2');
+      expect(heading).toBeInTheDocument();
+
+      const labelledElement = container.querySelector(`#${defaultProps.headerId}`);
+      expect(labelledElement).toBeInTheDocument();
+      expect(labelledElement).toHaveTextContent('Panel: CPU Usage');
+    });
+  });
 });
