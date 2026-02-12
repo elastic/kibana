@@ -493,27 +493,25 @@ export const Slack: ConnectorSpec = {
 
   auth: {
     types: [
-      // Temporarily disabled until OAuth UX is fully unblocked!
-      //
-      // {
-      //   type: 'oauth_authorization_code',
-      //   defaults: {
-      //     authorizationUrl: 'https://slack.com/oauth/v2/authorize',
-      //     tokenUrl: 'https://slack.com/api/oauth.v2.access',
-      //     scope:
-      //       'channels:read,channels:history,groups:read,im:read,mpim:read,chat:write,search:read',
-      //     scopeQueryParam: 'user_scope', // Slack OAuth v2 uses user_scope for user token scopes
-      //     tokenExtractor: 'slackUserToken', // extract authed_user.access_token for user-token-only scopes (e.g. search:read)
-      //     useBasicAuth: false, // Slack uses POST body for client credentials
-      //   },
-      //   overrides: {
-      //     meta: {
-      //       scope: { hidden: true },
-      //       authorizationUrl: { hidden: true },
-      //       tokenUrl: { hidden: true },
-      //     },
-      //   },
-      // },
+      {
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://slack.com/oauth/v2/authorize',
+          tokenUrl: 'https://slack.com/api/oauth.v2.access',
+          scope:
+            'channels:read,channels:history,groups:read,im:read,mpim:read,chat:write,search:read',
+          scopeQueryParam: 'user_scope', // Slack OAuth v2 uses user_scope for user token scopes
+          tokenExtractor: 'slackUserToken', // extract authed_user.access_token for user-token-only scopes (e.g. search:read)
+          useBasicAuth: false, // Slack uses POST body for client credentials
+        },
+        overrides: {
+          meta: {
+            scope: { hidden: true },
+            authorizationUrl: { hidden: true },
+            tokenUrl: { hidden: true },
+          },
+        },
+      },
       ...(ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH
         ? ([
             {
