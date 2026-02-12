@@ -1,0 +1,330 @@
+{
+  "lastModified": "2026-02-09T13:45:46.419Z",
+  "sha1": "63686bda12a3b15365bd180d5238b3f9426e2568",
+  "tests": [
+    {
+      "id": "65fe2f541b6ad11-864f48536870f42",
+      "title": "dashboards - create should create a dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
+        "line": 34,
+        "column": 10
+      }
+    },
+    {
+      "id": "65fe2f541b6ad11-199709156bcdd3f",
+      "title": "dashboards - create can create a dashboard with a specific id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
+        "line": 57,
+        "column": 10
+      }
+    },
+    {
+      "id": "65fe2f541b6ad11-742d7665562ba1c",
+      "title": "dashboards - create can create a dashboard in a defined space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
+        "line": 80,
+        "column": 10
+      }
+    },
+    {
+      "id": "65fe2f541b6ad11-e1850999201863d",
+      "title": "dashboards - create return error if provided id already exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
+        "line": 102,
+        "column": 10
+      }
+    },
+    {
+      "id": "65fe2f541b6ad11-f92bd664c9b50a8",
+      "title": "dashboards - create validation - returns error when title is not provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
+        "line": 123,
+        "column": 10
+      }
+    },
+    {
+      "id": "65fe2f541b6ad11-8d4dbb980c8c577",
+      "title": "dashboards - create validation - returns error if panels is not an array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/create_dashboard.spec.ts",
+        "line": 141,
+        "column": 10
+      }
+    },
+    {
+      "id": "04c61aca5175965-8cedae59ae599ce",
+      "title": "dashboards - delete should return 404 for a non-existent dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/delete_dashboard.spec.ts",
+        "line": 33,
+        "column": 10
+      }
+    },
+    {
+      "id": "04c61aca5175965-82af63ae1d9919a",
+      "title": "dashboards - delete should return 200 if the dashboard is deleted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/delete_dashboard.spec.ts",
+        "line": 49,
+        "column": 10
+      }
+    },
+    {
+      "id": "5bad7053ebe10e4-b0be02f38ce4b19",
+      "title": "dashboards - get should return 200 with an existing dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/get_dashboard.spec.ts",
+        "line": 34,
+        "column": 10
+      }
+    },
+    {
+      "id": "5bad7053ebe10e4-ebed35738bee962",
+      "title": "dashboards - get should return 404 with a non-existing dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/get_dashboard.spec.ts",
+        "line": 52,
+        "column": 10
+      }
+    },
+    {
+      "id": "d188e7edb1b6249-3da446951280e27",
+      "title": "dashboards - search should retrieve a paginated list of dashboards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
+        "line": 29,
+        "column": 10
+      }
+    },
+    {
+      "id": "d188e7edb1b6249-e1ba09c19952828",
+      "title": "dashboards - search should narrow results by search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
+        "line": 45,
+        "column": 10
+      }
+    },
+    {
+      "id": "d188e7edb1b6249-eed3ddc459f9b11",
+      "title": "dashboards - search should allow users to set a per page limit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
+        "line": 62,
+        "column": 10
+      }
+    },
+    {
+      "id": "d188e7edb1b6249-cd3ae57760d0065",
+      "title": "dashboards - search should allow users to paginate through the list of dashboards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/search_dashboards.spec.ts",
+        "line": 79,
+        "column": 10
+      }
+    },
+    {
+      "id": "2e698b8125bdc32-c7b1636b298cd21",
+      "title": "dashboards - update should return 200 with an updated dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
+        "line": 34,
+        "column": 10
+      }
+    },
+    {
+      "id": "2e698b8125bdc32-1e425d53d08dff0",
+      "title": "dashboards - update should return 404 when updating a non-existent dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
+        "line": 53,
+        "column": 10
+      }
+    },
+    {
+      "id": "2e698b8125bdc32-9fabebf4da42d14",
+      "title": "dashboards - update validation - returns error when object is not provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
+        "line": 74,
+        "column": 10
+      }
+    },
+    {
+      "id": "2e698b8125bdc32-7e1b6c03b8cfb6a",
+      "title": "dashboards - update validation - returns error if panels is not an array",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
+        "line": 92,
+        "column": 10
+      }
+    }
+  ]
+}

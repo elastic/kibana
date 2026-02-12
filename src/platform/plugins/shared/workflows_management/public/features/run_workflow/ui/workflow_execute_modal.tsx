@@ -22,7 +22,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
-import capitalize from 'lodash/capitalize';
+import { capitalize } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { parseDocument } from 'yaml';
 import { i18n } from '@kbn/i18n';
@@ -194,6 +194,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
           onClose={onClose}
           maxWidth={1400}
           style={{ width: '1200px', height: '100vh' }}
+          data-test-subj="workflowExecuteModal"
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle id={modalTitleId}>
