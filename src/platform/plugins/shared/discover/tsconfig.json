@@ -1,4 +1,3 @@
-
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
@@ -126,7 +125,10 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/core-chrome-app-menu",
     "@kbn/es-query-constants",
+    "@kbn/alerting-v2-rule-form",
     "@kbn/esql",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

@@ -40,6 +40,7 @@ export type RuleKind = z.infer<typeof ruleKindSchema>;
 export const createRuleDataSchema = z
   .object({
     name: z.string().min(1).max(64).describe('Human-readable rule name.'),
+    description: z.string().max(1024).optional().describe('Detailed description of the rule.'),
     kind: ruleKindSchema,
     tags: z
       .array(z.string().max(64).describe('Rule tag.'))
@@ -91,3 +92,17 @@ export const updateRuleDataSchema = z
   .strip();
 
 export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
+
+/**
+ * Schema for rule response data returned from the API.
+ * Extends the create rule schema with server-generated fields.
+ */
+export const ruleResponseSchema = createRuleDataSchema.extend({
+  id: z.string().describe('Unique rule identifier.'),
+  createdBy: z.string().nullable().describe('User who created the rule.'),
+  createdAt: z.string().describe('ISO timestamp when the rule was created.'),
+  updatedBy: z.string().nullable().describe('User who last updated the rule.'),
+  updatedAt: z.string().describe('ISO timestamp when the rule was last updated.'),
+});
+
+export type RuleResponse = z.infer<typeof ruleResponseSchema>;

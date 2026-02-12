@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { CreateRulePage } from './create_rule_page';
+import { CreateRulePage } from './create_rule/create_rule_page';
 import { RulesListPage } from './rules_list_page';
 
 export const App = () => {

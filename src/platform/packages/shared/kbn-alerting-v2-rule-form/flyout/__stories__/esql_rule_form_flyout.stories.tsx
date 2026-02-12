@@ -1,0 +1,91 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { Meta, StoryObj } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
+import { ESQLRuleFormFlyout } from '../esql_rule_form_flyout';
+
+const mockServices = {
+  http: {
+    post: async (path: string, options: any) => {
+      action('http.post')(path, options);
+      return { id: 'mock-rule-id', name: 'Mock Rule' };
+    },
+  } as any,
+  data: {
+    search: {
+      search: () => ({
+        subscribe: () => ({ unsubscribe: () => {} }),
+      }),
+    },
+  } as any,
+  dataViews: {
+    getIdsWithTitle: async () => [],
+    get: async () => ({
+      fields: {
+        getByType: () => [{ name: '@timestamp', type: 'date' }],
+      },
+      getIndexPattern: () => 'logs-*',
+      timeFieldName: '@timestamp',
+    }),
+    create: async () => ({
+      fields: {
+        getByType: () => [{ name: '@timestamp', type: 'date' }],
+      },
+      getIndexPattern: () => 'logs-*',
+      timeFieldName: '@timestamp',
+    }),
+  } as any,
+  notifications: {
+    toasts: {
+      addSuccess: action('toast.success'),
+      addDanger: action('toast.danger'),
+    },
+  } as any,
+};
+
+const meta: Meta<typeof ESQLRuleFormFlyout> = {
+  title: 'Alerting V2/ESQLRuleFormFlyout',
+  component: ESQLRuleFormFlyout,
+  parameters: {
+    layout: 'fullscreen',
+  },
+  argTypes: {
+    push: {
+      control: 'boolean',
+      description: 'Whether to use a push flyout or overlay',
+    },
+    query: {
+      control: 'text',
+      description: 'The ES|QL query',
+    },
+    defaultTimeField: {
+      control: 'text',
+      description: 'Default time field for the rule',
+    },
+    isQueryInvalid: {
+      control: 'boolean',
+      description: 'Whether the query has validation errors',
+    },
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof ESQLRuleFormFlyout>;
+
+export const Default: Story = {
+  args: {
+    services: mockServices,
+    query: 'FROM logs-* | WHERE @timestamp > NOW() - 5m | STATS count = COUNT(*)',
+    defaultTimeField: '@timestamp',
+    push: true,
+    isQueryInvalid: false,
+    onClose: action('onClose'),
+  },
+};

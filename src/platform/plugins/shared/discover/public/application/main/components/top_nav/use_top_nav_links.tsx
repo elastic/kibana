@@ -47,6 +47,7 @@ import {
 import type { DiscoverAppState } from '../../state_management/redux';
 import { onSaveDiscoverSession } from './save_discover_session';
 import { useDataState } from '../../hooks/use_data_state';
+import { getCreateRuleMenuItem } from './app_menu_actions/get_create_rule';
 
 /**
  * Helper function to build the top nav links
@@ -114,7 +115,26 @@ export const useTopNavLinks = ({
     const inspectAppMenuItem = getInspectAppMenuItem({ onOpenInspector });
     items.push(inspectAppMenuItem);
 
-    if (services.triggersActionsUi && discoverParams.authorizedRuleTypeIds.length) {
+    // Alerting V2: alertingVTwo.uiEnabled capability is enabled (controlled by xpack.alerting_v2.ui.enabled)
+    const canCreateESQLRule =
+      (services.capabilities.alertingVTwo as { uiEnabled?: boolean } | undefined)?.uiEnabled ??
+      false;
+    const showCreateRuleV2 = discoverParams.isEsqlMode && canCreateESQLRule;
+    const showLegacyAlerts =
+      services.triggersActionsUi &&
+      discoverParams.authorizedRuleTypeIds.length &&
+      (!canCreateESQLRule || !discoverParams.isEsqlMode);
+
+    if (showCreateRuleV2) {
+      const createRuleV2 = getCreateRuleMenuItem({
+        discoverParams,
+        services,
+        stateContainer: state,
+      });
+      items.push(createRuleV2);
+    }
+
+    if (showLegacyAlerts) {
       const alertsAppMenuItem = getAlertsAppMenuItem({
         discoverParams,
         services,
