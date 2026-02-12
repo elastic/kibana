@@ -167,6 +167,9 @@ export function DiagnosticsApmDocuments() {
         }}
         rowHeader="firstName"
         columns={columns}
+        tableCaption={i18n.translate('xpack.apm.diagnosticsApmDocuments.documentsCaption', {
+          defaultMessage: 'Diagnostic document overview',
+        })}
         onChange={({ sort }) => {
           if (sort) {
             setSortField(sort.field);
