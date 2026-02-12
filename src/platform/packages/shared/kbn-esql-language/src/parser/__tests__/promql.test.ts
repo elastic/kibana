@@ -16,7 +16,7 @@ import type {
   ESQLBinaryExpression,
   ESQLAstPromqlCommand,
 } from '../../types';
-import { printAst } from '../../shared/debug';
+import { printAst } from '../../debug';
 
 /**
  * ```
