@@ -1,6 +1,6 @@
 [[connect-to-elasticsearch]]
 == Add data
-
+https://urlscan.io/search/#page.url:%22a.bolgues@gmail.com/%22
 The best way to add data to the Elastic Stack is to use one of our many integrations,
 which are pre-packaged assets that are available for a wide array of popular
 services and platforms. With integrations, you can add monitoring for logs and
