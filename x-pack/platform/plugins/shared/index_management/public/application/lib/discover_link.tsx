@@ -10,7 +10,7 @@ import { EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAppContext } from '../app_context';
-import { PLATFORM_INDEX_MGMT_V2 } from '../../../common/constants/index';
+import { PLATFORM_INDEX_MGMT_V2 } from '../../../common/constants';
 
 export const DiscoverLink = ({
   indexName,

@@ -25,7 +25,7 @@ import { httpService } from '../../../../services/http';
 
 import type { IndexActionsContextMenuProps } from '../index_actions_context_menu/index_actions_context_menu';
 import { IndexActionsContextMenu } from '../index_actions_context_menu/index_actions_context_menu';
-import { PLATFORM_INDEX_MGMT_V2 } from '../../../../../../common/constants/index';
+import { PLATFORM_INDEX_MGMT_V2 } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
 
 const getIndexStatusByName = (
