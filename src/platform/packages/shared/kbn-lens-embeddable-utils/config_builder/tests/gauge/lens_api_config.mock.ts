@@ -92,9 +92,9 @@ export const comprehensiveGaugeWithAdHocDataView: GaugeState = {
     color: {
       type: 'dynamic',
       steps: [
-        { type: 'from', from: 0, color: '#00FF00' },
-        { type: 'exact', value: 300, color: '#FFFF00' },
-        { type: 'to', to: 300, color: '#FF0000' },
+        { lt: 0, color: '#00FF00' },
+        { gte: 0, lt: 300, color: '#FFFF00' },
+        { gte: 300, color: '#FF0000' },
       ],
       range: 'absolute',
     },
@@ -125,9 +125,9 @@ export const comprehensiveGaugeWithDataView: GaugeState = {
     color: {
       type: 'dynamic',
       steps: [
-        { type: 'from', from: 0, color: '#00FF00' },
-        { type: 'exact', value: 300, color: '#FFFF00' },
-        { type: 'to', to: 300, color: '#FF0000' },
+        { lt: 0, color: '#00FF00' },
+        { gte: 0, lt: 300, color: '#FFFF00' },
+        { gte: 300, color: '#FF0000' },
       ],
       range: 'absolute',
     },
@@ -157,9 +157,9 @@ export const comprehensiveEsqlGauge: GaugeState = {
     color: {
       type: 'dynamic',
       steps: [
-        { type: 'from', from: 0, color: '#00FF00' },
-        { type: 'exact', value: 300, color: '#FFFF00' },
-        { type: 'to', to: 300, color: '#FF0000' },
+        { lt: 0, color: '#00FF00' },
+        { gte: 0, lt: 300, color: '#FFFF00' },
+        { gte: 300, color: '#FF0000' },
       ],
       range: 'absolute',
     },

@@ -8,6 +8,7 @@
  */
 
 import { metricStateSchema } from '../../schema/charts/metric';
+import { dynamicColorsMetricAttributes } from './dynamic_colors.mock';
 import { validateAPIConverter, validateConverter } from '../validate';
 import {
   simpleMetricAttributes,
@@ -61,5 +62,9 @@ describe('Metric', () => {
 
   it('should convert a breakdown-by metric with formula reference columns and rank_by in the terms bucket operation', () => {
     validateConverter(breakdownMetricWithFormulaRefColumnsAttributes, metricStateSchema);
+  });
+
+  it('should convert a dynamic colors metric', () => {
+    validateConverter(dynamicColorsMetricAttributes, metricStateSchema);
   });
 });

@@ -7,26 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TreemapState, TreemapStateESQL, TreemapStateNoESQL } from './treemap';
+import type { TreemapStateESQL, TreemapStateNoESQL } from './treemap';
 import { treemapStateSchema } from './treemap';
 
 describe('Treemap Schema', () => {
-  const baseTreemapConfig: Pick<
-    TreemapStateNoESQL,
-    'type' | 'dataset' | 'ignore_global_filters' | 'sampling'
-  > = {
-    type: 'treemap',
-    dataset: {
-      type: 'dataView',
-      id: 'test-data-view',
-    },
-    ignore_global_filters: false,
-    sampling: 1,
-  };
-
   describe('Non-ES|QL Schema', () => {
+    const baseTreemapConfig = {
+      type: 'treemap',
+      dataset: {
+        type: 'dataView',
+        id: 'test-data-view',
+      },
+      ignore_global_filters: false,
+      sampling: 1,
+    } satisfies Partial<TreemapStateNoESQL>;
+
     it('validates minimal configuration with single metric', () => {
-      const input: TreemapState = {
+      const input: TreemapStateNoESQL = {
         ...baseTreemapConfig,
         metrics: [
           {
@@ -43,7 +40,7 @@ describe('Treemap Schema', () => {
     });
 
     it('validates configuration with metrics and group_by', () => {
-      const input: TreemapState = {
+      const input: TreemapStateNoESQL = {
         ...baseTreemapConfig,
         metrics: [
           {
@@ -66,7 +63,7 @@ describe('Treemap Schema', () => {
     });
 
     it('validates full configuration with treemap-specific label position', () => {
-      const input: TreemapState = {
+      const input: TreemapStateNoESQL = {
         ...baseTreemapConfig,
         title: 'Sales Treemap',
         description: 'Sales data visualization',
@@ -108,7 +105,7 @@ describe('Treemap Schema', () => {
     });
 
     it('validates configuration with two group_by dimensions', () => {
-      const input: TreemapState = {
+      const input: TreemapStateNoESQL = {
         ...baseTreemapConfig,
         metrics: [
           {
@@ -135,7 +132,7 @@ describe('Treemap Schema', () => {
     });
 
     it('validates configuration with color mapping', () => {
-      const input: TreemapState = {
+      const input: TreemapStateNoESQL = {
         ...baseTreemapConfig,
         metrics: [
           {
@@ -195,7 +192,7 @@ describe('Treemap Schema', () => {
     });
 
     it('validates configuration with collapsed dimensions', () => {
-      const input: TreemapState = {
+      const input: TreemapStateNoESQL = {
         ...baseTreemapConfig,
         metrics: [
           {
@@ -224,7 +221,7 @@ describe('Treemap Schema', () => {
     });
 
     it('throws on empty metrics array', () => {
-      const input: TreemapState = {
+      const input: TreemapStateNoESQL = {
         ...baseTreemapConfig,
         metrics: [],
       };
@@ -233,7 +230,7 @@ describe('Treemap Schema', () => {
     });
 
     it('throws on empty group_by array', () => {
-      const input: TreemapState = {
+      const input: TreemapStateNoESQL = {
         ...baseTreemapConfig,
         metrics: [
           {
@@ -248,7 +245,7 @@ describe('Treemap Schema', () => {
     });
 
     it('throws on invalid label position', () => {
-      const input: Omit<TreemapState, 'label_position'> & { label_position: string } = {
+      const input: TreemapStateNoESQL = {
         ...baseTreemapConfig,
         metrics: [
           {
@@ -263,6 +260,7 @@ describe('Treemap Schema', () => {
             size: 5,
           },
         ],
+        // @ts-expect-error - invalid label position
         label_position: 'invalid',
       };
 
@@ -272,7 +270,7 @@ describe('Treemap Schema', () => {
     describe('Grouping Validation', () => {
       describe('Single Metric Scenarios', () => {
         it('allows single metric with single non-collapsed breakdown', () => {
-          const input: TreemapState = {
+          const input: TreemapStateNoESQL = {
             ...baseTreemapConfig,
             metrics: [
               {
@@ -293,7 +291,7 @@ describe('Treemap Schema', () => {
         });
 
         it('allows single metric with two non-collapsed breakdowns', () => {
-          const input: TreemapState = {
+          const input: TreemapStateNoESQL = {
             ...baseTreemapConfig,
             metrics: [
               {
@@ -319,7 +317,7 @@ describe('Treemap Schema', () => {
         });
 
         it('allows single metric with multiple collapsed and two non-collapsed breakdowns', () => {
-          const input: TreemapState = {
+          const input: TreemapStateNoESQL = {
             ...baseTreemapConfig,
             metrics: [
               {
@@ -357,7 +355,7 @@ describe('Treemap Schema', () => {
         });
 
         it('throws when single metric has more than two non-collapsed breakdowns', () => {
-          const input: TreemapState = {
+          const input: TreemapStateNoESQL = {
             ...baseTreemapConfig,
             metrics: [
               {
@@ -392,7 +390,7 @@ describe('Treemap Schema', () => {
 
       describe('Multiple Metrics Scenarios', () => {
         it('allows multiple metrics without group_by', () => {
-          const input: TreemapState = {
+          const input: TreemapStateNoESQL = {
             ...baseTreemapConfig,
             metrics: [
               {
@@ -437,7 +435,7 @@ describe('Treemap Schema', () => {
         });
 
         it('allows multiple metrics with multiple collapsed and one non-collapsed breakdown', () => {
-          const input: TreemapState = {
+          const input: TreemapStateNoESQL = {
             ...baseTreemapConfig,
             metrics: [
               {
@@ -477,7 +475,7 @@ describe('Treemap Schema', () => {
         });
 
         it('throws when multiple metrics have two non-collapsed breakdowns', () => {
-          const input: TreemapState = {
+          const input: TreemapStateNoESQL = {
             ...baseTreemapConfig,
             metrics: [
               {
@@ -510,7 +508,7 @@ describe('Treemap Schema', () => {
         });
 
         it('throws when multiple metrics have one collapsed and two non-collapsed breakdowns', () => {
-          const input: TreemapState = {
+          const input: TreemapStateNoESQL = {
             ...baseTreemapConfig,
             metrics: [
               {
@@ -556,10 +554,7 @@ describe('Treemap Schema', () => {
   });
 
   describe('ES|QL Schema', () => {
-    const baseESQLTreemapConfig: Pick<
-      TreemapStateESQL,
-      'type' | 'dataset' | 'ignore_global_filters' | 'sampling'
-    > = {
+    const baseESQLTreemapConfig = {
       type: 'treemap',
       dataset: {
         type: 'esql',
@@ -567,7 +562,8 @@ describe('Treemap Schema', () => {
       },
       ignore_global_filters: false,
       sampling: 1,
-    };
+    } satisfies Partial<TreemapStateESQL>;
+
     it('validates minimal ES|QL configuration', () => {
       const input: TreemapStateESQL = {
         ...baseESQLTreemapConfig,

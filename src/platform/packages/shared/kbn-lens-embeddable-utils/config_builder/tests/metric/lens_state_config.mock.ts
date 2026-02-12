@@ -149,7 +149,7 @@ export const breakdownMetricAttributes: LensAttributes = {
           },
         },
       },
-      // @ts-expect-error why is this type erroring?
+      // @ts-expect-error - deprecated layer
       indexpattern: {
         layers: {},
       },
@@ -245,7 +245,7 @@ export const complexMetricAttributes: LensAttributes = {
           },
         },
       },
-      // @ts-expect-error why is this type erroring?
+      // @ts-expect-error - deprecated layer
       indexpattern: {
         layers: {},
       },
@@ -311,7 +311,7 @@ export const simpleMetricAttributes: LensAttributes = {
           },
         },
       },
-      // @ts-expect-error why is this type erroring?
+      // @ts-expect-error - deprecated layer
       indexpattern: {
         layers: {},
       },
@@ -475,7 +475,7 @@ export const breakdownMetricWithFormulaRefColumnsAttributes: LensAttributes = {
           },
         },
       },
-      // @ts-expect-error
+      // @ts-expect-error - deprecated layer
       indexpattern: {
         layers: {},
       },

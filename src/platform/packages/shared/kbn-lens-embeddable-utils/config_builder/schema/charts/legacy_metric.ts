@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { esqlColumnOperationWithLabelAndFormatSchema } from '../metric_ops';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { layerSettingsSchema, sharedPanelInfoSchema, dslOnlyPanelInfoSchema } from '../shared';
-import { applyColorToSchema, colorByValueAbsolute } from '../color';
+import { applyColorToSchema, colorByValueAbsoluteSchema } from '../color';
 import { horizontalAlignmentSchema, verticalAlignmentSchema } from '../alignments';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 
@@ -73,7 +73,7 @@ const legacyMetricStateMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(colorByValueAbsolute),
+  color: schema.maybe(colorByValueAbsoluteSchema),
 };
 
 export const legacyMetricStateSchemaNoESQL = schema.object(

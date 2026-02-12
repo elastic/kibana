@@ -141,15 +141,18 @@ export interface CustomPaletteParams {
   reverse?: boolean;
   rangeType?: 'number' | 'percent';
   continuity?: PaletteContinuity;
+  /**
+   * @deprecated - appears to be unused
+   */
   progression?: 'fixed';
-  rangeMin?: number;
-  rangeMax?: number;
-  /** lower color stops */
+  rangeMin?: number; // this can be null
+  rangeMax?: number; // this can be null
+  /** upper bounds of color stops ranges */
   stops?: ColorStop[];
-  /** upper color stops */
+  /** lower bounds of color stops ranges */
   colorStops?: ColorStop[];
   steps?: number;
-  maxSteps?: number | undefined;
+  maxSteps?: number;
 }
 
 export type RequiredPaletteParamTypes = Assign<
@@ -159,5 +162,5 @@ export type RequiredPaletteParamTypes = Assign<
 
 export interface ColorStop {
   color: string;
-  stop: number;
+  stop: number; // this can be null
 }
