@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -50,7 +50,6 @@ import { SeverityBadge } from '../severity_badge/severity_badge';
 import { useFetchStreams } from '../../hooks/use_fetch_streams';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { buildDiscoverParams } from '../../utils/discover_helpers';
-import { useKbnUrlStateStorageFromRouterContext } from '../../../../util/kbn_url_state_context';
 import {
   ACTIONS_COLUMN_TITLE,
   BACKED_STATUS_COLUMN,
@@ -84,37 +83,8 @@ import {
 } from './translations';
 import { PromoteAction } from './promote_action';
 
-const QUERIES_TABLE_URL_STATE_KEY = 'streamsDiscoveryQueriesTable';
-const DEFAULT_PAGE_SIZE = 10;
-const DEFAULT_PAGE_INDEX = 0;
+const DEFAULT_PAGINATION = { index: 0, size: 10 };
 const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
-
-const coercePaginationFromUrlState = (value: unknown): { pageIndex: number; pageSize: number } => {
-  const parsed =
-    typeof value === 'object' && value !== null
-      ? (value as { page?: unknown; perPage?: unknown })
-      : undefined;
-
-  const page =
-    typeof parsed?.page === 'number' && Number.isInteger(parsed.page) && parsed.page >= 1
-      ? parsed.page
-      : undefined;
-
-  const perPage =
-    typeof parsed?.perPage === 'number' &&
-    Number.isInteger(parsed.perPage) &&
-    parsed.perPage >= 1 &&
-    parsed.perPage <= 1000
-      ? parsed.perPage
-      : undefined;
-
-  const nextPageSize = perPage ?? DEFAULT_PAGE_SIZE;
-
-  return {
-    pageIndex: (page ?? DEFAULT_PAGE_INDEX + 1) - 1,
-    pageSize: nextPageSize,
-  };
-};
 
 export function QueriesTable() {
   const { euiTheme } = useEuiTheme();
@@ -125,39 +95,14 @@ export function QueriesTable() {
     core: {
       notifications: { toasts },
     },
-    appParams: { history },
   } = useKibana();
   const { timeState } = useTimefilter();
-  const urlStateStorage = useKbnUrlStateStorageFromRouterContext();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const [{ pageIndex, pageSize }, setPagination] = useState<{
-    pageIndex: number;
-    pageSize: number;
-  }>(() => coercePaginationFromUrlState(urlStateStorage.get(QUERIES_TABLE_URL_STATE_KEY)));
-
-  const persistPaginationToUrl = useCallback(
-    (next: { pageIndex: number; pageSize: number }) => {
-      urlStateStorage.set(
-        QUERIES_TABLE_URL_STATE_KEY,
-        { page: next.pageIndex + 1, perPage: next.pageSize },
-        { replace: false }
-      );
-    },
-    [urlStateStorage]
-  );
-
-  useEffect(() => {
-    return history.listen(() => {
-      const next = coercePaginationFromUrlState(urlStateStorage.get(QUERIES_TABLE_URL_STATE_KEY));
-      setPagination((prev) => {
-        if (prev.pageIndex === next.pageIndex && prev.pageSize === next.pageSize) {
-          return prev;
-        }
-        return next;
-      });
-    });
-  }, [history, urlStateStorage]);
+  const [pagination, setPagination] = useState<{
+    index: number;
+    size: number;
+  }>({ ...DEFAULT_PAGINATION });
 
   const {
     data: queriesData,
@@ -165,8 +110,8 @@ export function QueriesTable() {
     isError: hasQueriesError,
   } = useFetchDiscoveryQueries({
     query: searchQuery,
-    page: pageIndex + 1,
-    perPage: pageSize,
+    page: pagination.index + 1,
+    perPage: pagination.size,
   });
   const {
     data: occurrencesData,
@@ -197,6 +142,14 @@ export function QueriesTable() {
       });
     }
   }, [promoteAll, queryClient, toasts]);
+
+  const onTableChange = useCallback(({ page }: CriteriaWithPagination<SignificantEventItem>) => {
+    if (!page) {
+      return;
+    }
+
+    setPagination(page);
+  }, []);
 
   const tableItems = queriesData?.queries ?? [];
 
@@ -326,20 +279,6 @@ export function QueriesTable() {
     ];
   }, [share.url.locators, streamsData, timeState]);
 
-  const onTableChange = useCallback(
-    ({ page }: CriteriaWithPagination<SignificantEventItem>) => {
-      if (!page) return;
-
-      const nextPageSize = page.size;
-      const nextPageIndex = page.size !== pageSize ? 0 : page.index;
-
-      const next = { pageIndex: nextPageIndex, pageSize: nextPageSize };
-      setPagination(next);
-      persistPaginationToUrl(next);
-    },
-    [pageSize, persistPaginationToUrl]
-  );
-
   const isLoading = queriesLoading || occurrencesLoading || streamsLoading;
   if (isLoading) {
     return <LoadingPanel size="l" />;
@@ -393,9 +332,7 @@ export function QueriesTable() {
               disableQueryLanguageSwitcher
               onQuerySubmit={(queryPayload) => {
                 setSearchQuery(String(queryPayload.query?.query ?? ''));
-                const next = { pageIndex: 0, pageSize };
-                setPagination(next);
-                persistPaginationToUrl(next);
+                setPagination((currentPagination) => ({ index: 0, size: currentPagination.size }));
               }}
               query={{
                 query: searchQuery,
@@ -450,8 +387,8 @@ export function QueriesTable() {
             !queriesLoading && !occurrencesLoading && !streamsLoading ? NO_ITEMS_MESSAGE : ''
           }
           pagination={{
-            pageIndex,
-            pageSize,
+            pageIndex: pagination.index,
+            pageSize: pagination.size,
             totalItemCount: queriesData?.total ?? 0,
             pageSizeOptions: [...PAGE_SIZE_OPTIONS],
           }}
