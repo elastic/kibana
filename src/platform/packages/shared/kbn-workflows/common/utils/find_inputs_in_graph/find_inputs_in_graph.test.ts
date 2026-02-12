@@ -68,7 +68,7 @@ describe('findInputsInGraph', () => {
         expect(inputs).toEqual({});
       });
 
-      it('should extract template variables from foreach expression with template syntax', () => {
+      it('should extract template variables from foreach expression with template syntax {{}}', () => {
         const workflowWithTemplateForEach = {
           steps: [
             {
@@ -95,7 +95,7 @@ describe('findInputsInGraph', () => {
         });
       });
 
-      it('should extract template variables from foreach expression with template syntax', () => {
+      it('should extract template variables from foreach expression with expression syntax ${{}}', () => {
         const workflowWithTemplateForEach = {
           steps: [
             {

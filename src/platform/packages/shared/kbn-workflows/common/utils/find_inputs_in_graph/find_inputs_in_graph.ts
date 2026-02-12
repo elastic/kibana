@@ -21,9 +21,7 @@ function scanValueForVariablesRecursively(value: unknown): string[] {
   }
 
   if (typeof value === 'object' && value !== null) {
-    return Object.values(value as object).flatMap((value) =>
-      scanValueForVariablesRecursively(value)
-    );
+    return Object.values(value as object).flatMap((v) => scanValueForVariablesRecursively(v));
   }
 
   return [];
