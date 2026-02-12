@@ -144,7 +144,7 @@ describe('Slack', () => {
       const result = await Slack.actions.resolveChannelId.handler(mockContext, { name: '#general' });
 
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://slack.com/api/conversations.list?types=public_channel%2Cprivate_channel&exclude_archived=true&limit=1000'
+        'https://slack.com/api/conversations.list?types=public_channel&exclude_archived=true&limit=1000'
       );
       expect(result).toEqual({
         ok: true,

@@ -15,20 +15,55 @@ const SLACK_API_BASE = 'https://slack.com/api';
 const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Temporary: remove once OAuth UX is fully unblocked.
 const SLACK_CONVERSATION_TYPES = ['public_channel', 'private_channel', 'im', 'mpim'] as const;
 
+type SlackHeaders = Record<string, unknown>;
+interface SlackHttpResponse<TData> {
+  data: TData;
+  headers?: SlackHeaders;
+}
+
+const isRecord = (v: unknown): v is Record<string, unknown> =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);
+
+const asString = (v: unknown): string | undefined => (typeof v === 'string' ? v : undefined);
+
+function getHeader(headers: SlackHeaders | undefined, headerName: string): string | undefined {
+  if (!headers) return undefined;
+  const needle = headerName.toLowerCase();
+  for (const [k, v] of Object.entries(headers)) {
+    if (k.toLowerCase() !== needle) continue;
+    if (typeof v === 'string') return v;
+    if (Array.isArray(v) && typeof v[0] === 'string') return v[0];
+  }
+  return undefined;
+}
+
+interface SlackErrorFields {
+  error?: string;
+  needed?: string;
+  provided?: string;
+}
+function getSlackErrorFields(responseData: unknown): SlackErrorFields {
+  if (!isRecord(responseData)) return {};
+  return {
+    error: asString(responseData.error),
+    needed: asString(responseData.needed),
+    provided: asString(responseData.provided),
+  };
+}
+
 function formatSlackApiErrorMessage(params: {
   action: string;
-  responseData?: any;
-  responseHeaders?: Record<string, unknown>;
+  responseData?: unknown;
+  responseHeaders?: SlackHeaders;
 }) {
   const { action, responseData, responseHeaders } = params;
-  const error = responseData?.error ?? 'unknown_error';
-  const needed = responseData?.needed;
-  const provided = responseData?.provided;
+  const { error: slackError, needed, provided } = getSlackErrorFields(responseData);
+  const error = slackError ?? 'unknown_error';
 
   // Slack frequently returns these headers on Web API responses; they’re the most reliable way
   // to understand which scopes a token actually has vs. what an endpoint requires.
-  const accepted = (responseHeaders as any)?.['x-accepted-oauth-scopes'];
-  const scopes = (responseHeaders as any)?.['x-oauth-scopes'];
+  const accepted = getHeader(responseHeaders, 'x-accepted-oauth-scopes');
+  const scopes = getHeader(responseHeaders, 'x-oauth-scopes');
 
   const extras: string[] = [];
   if (needed) extras.push(`needed=${needed}`);
@@ -44,14 +79,13 @@ function formatSlackApiErrorMessage(params: {
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function getSlackRetryDelayMs(params: {
-  responseHeaders?: Record<string, unknown>;
+  responseHeaders?: SlackHeaders;
   attempt: number;
   defaultBaseDelayMs?: number;
 }) {
   const { responseHeaders, attempt, defaultBaseDelayMs = 1000 } = params;
-  const retryAfter = (responseHeaders as any)?.['retry-after'];
-  const retryAfterSeconds =
-    typeof retryAfter === 'string' ? Number(retryAfter) : typeof retryAfter === 'number' ? retryAfter : NaN;
+  const retryAfter = getHeader(responseHeaders, 'retry-after');
+  const retryAfterSeconds = typeof retryAfter === 'string' ? Number(retryAfter) : NaN;
 
   if (Number.isFinite(retryAfterSeconds) && retryAfterSeconds > 0) {
     // Add a small jitter so multiple callers don't retry in lockstep.
@@ -66,9 +100,12 @@ function getSlackRetryDelayMs(params: {
   return Math.min(60_000, base + jitterMs);
 }
 
-type CacheEntry<T> = { value: T; expiresAt: number };
+interface CacheEntry<T> {
+  value: T;
+  expiresAt: number;
+}
 const slackResolveChannelIdCache = new Map<string, CacheEntry<string>>();
-const getCached = <T,>(cache: Map<string, CacheEntry<T>>, key: string): T | undefined => {
+const getCached = <T>(cache: Map<string, CacheEntry<T>>, key: string): T | undefined => {
   const entry = cache.get(key);
   if (!entry) return undefined;
   if (Date.now() > entry.expiresAt) {
@@ -77,11 +114,11 @@ const getCached = <T,>(cache: Map<string, CacheEntry<T>>, key: string): T | unde
   }
   return entry.value;
 };
-const setCached = <T,>(cache: Map<string, CacheEntry<T>>, key: string, value: T, ttlMs: number) => {
+const setCached = <T>(cache: Map<string, CacheEntry<T>>, key: string, value: T, ttlMs: number) => {
   cache.set(key, { value, expiresAt: Date.now() + ttlMs });
 };
 
-type SlackSearchMatch = {
+interface SlackSearchMatch {
   score?: number;
   iid?: string;
   team?: string;
@@ -92,7 +129,7 @@ type SlackSearchMatch = {
   ts?: string;
   channel?: { id?: string; name?: string };
   blocks?: unknown;
-};
+}
 
 function extractMentionedUserIds(match: SlackSearchMatch): string[] {
   const ids = new Set<string>();
@@ -130,28 +167,32 @@ function extractMentionedUserIds(match: SlackSearchMatch): string[] {
   return Array.from(ids);
 }
 
-async function slackGetWithRateLimitRetry(params: {
-  ctx: { client: { get: (url: string) => Promise<any> }; log: { debug: (msg: string) => void } };
+async function slackGetWithRateLimitRetry<TData>(params: {
+  ctx: {
+    client: { get: (url: string) => Promise<SlackHttpResponse<TData>> };
+    log: { debug: (msg: string) => void };
+  };
   url: string;
   action: string;
   maxRetries?: number;
-}) {
+}): Promise<SlackHttpResponse<TData>> {
   const { ctx, url, action, maxRetries = 3 } = params;
 
   let attempt = 0;
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     try {
       return await ctx.client.get(url);
     } catch (error) {
       const err = error as {
-        response?: { status?: number; headers?: Record<string, unknown>; data?: any };
+        response?: { status?: number; headers?: SlackHeaders; data?: unknown };
         message?: string;
       };
 
       const status = err.response?.status;
+      const slackError = getSlackErrorFields(err.response?.data).error;
       const isRateLimited =
-        status === 429 || err.response?.data?.error === 'ratelimited' || err.message?.includes('ratelimited');
+        status === 429 || slackError === 'ratelimited' || err.message?.includes('ratelimited');
 
       if (!isRateLimited || attempt >= maxRetries) {
         throw error;
@@ -162,7 +203,9 @@ async function slackGetWithRateLimitRetry(params: {
         attempt,
       });
       ctx.log.debug(
-        `Slack ${action} rate limited (attempt ${attempt + 1}/${maxRetries}). Sleeping ${delayMs}ms before retry.`
+        `Slack ${action} rate limited (attempt ${
+          attempt + 1
+        }/${maxRetries}). Sleeping ${delayMs}ms before retry.`
       );
       await sleep(delayMs);
       attempt += 1;
@@ -180,9 +223,12 @@ async function slackGetWithRateLimitRetry(params: {
  * - search:read - for searching messages (requires a user token)
  *
  * Optional (not required for MVP):
- * - groups:read,groups:history - to support private channels
- * - im:read,im:history - to support DMs
- * - mpim:read,mpim:history - to support group DMs
+ * - groups:read - to list private channels (future)
+ * - im:read - to list DMs (future)
+ * - mpim:read - to list group DMs (future)
+ * - groups:history - to read private channel history (future)
+ * - im:history - to read DM history (future)
+ * - mpim:history - to read group DM history (future)
  * - users:read,users:read.email - to support user-targeted lookups (not used in MVP)
  */
 export const Slack: ConnectorSpec = {
@@ -190,7 +236,8 @@ export const Slack: ConnectorSpec = {
     id: '.slack2',
     displayName: 'Slack (v2)',
     description: i18n.translate('core.kibanaConnectorSpecs.slack.metadata.description', {
-      defaultMessage: 'List public channels, fetch message history, and send messages to Slack channels',
+      defaultMessage:
+        'List public channels, fetch message history, and send messages to Slack channels',
     }),
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows'],
@@ -204,7 +251,7 @@ export const Slack: ConnectorSpec = {
           authorizationUrl: 'https://slack.com/oauth/v2/authorize',
           tokenUrl: 'https://slack.com/api/oauth.v2.access',
           scope:
-            'channels:read,channels:history,chat:write,search:read',
+            'channels:read,channels:history,groups:read,im:read,mpim:read,chat:write,search:read',
           scopeQueryParam: 'user_scope', // Slack OAuth v2 uses user_scope for user token scopes
           tokenExtractor: 'slackUserToken', // extract authed_user.access_token for user-token-only scopes (e.g. search:read)
           useBasicAuth: false, // Slack uses POST body for client credentials
@@ -473,9 +520,9 @@ export const Slack: ConnectorSpec = {
             response?: { status?: number; data?: unknown };
           };
           ctx.log.error(
-            `Slack searchMessages failed: ${err.message}, Status: ${err.response?.status}, Data: ${JSON.stringify(
-              err.response?.data
-            )}`
+            `Slack searchMessages failed: ${err.message}, Status: ${
+              err.response?.status
+            }, Data: ${JSON.stringify(err.response?.data)}`
           );
           throw error;
         }
@@ -578,8 +625,7 @@ export const Slack: ConnectorSpec = {
             i18n.translate(
               'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.maxPages.description',
               {
-                defaultMessage:
-                  'Maximum number of pages to scan before giving up. Defaults to 10.',
+                defaultMessage: 'Maximum number of pages to scan before giving up. Defaults to 10.',
               }
             )
           ),
@@ -647,7 +693,14 @@ export const Slack: ConnectorSpec = {
           if (cursor) params.append('cursor', cursor);
 
           ctx.log.debug(`Slack resolveChannelId scan (page ${pagesFetched + 1})`);
-          const response = await slackGetWithRateLimitRetry({
+          const response = await slackGetWithRateLimitRetry<{
+            ok: boolean;
+            error?: string;
+            needed?: string;
+            provided?: string;
+            channels?: Array<{ id?: string; name?: string }>;
+            response_metadata?: { next_cursor?: string };
+          }>({
             ctx,
             action: 'resolveChannelId',
             url: `${SLACK_API_BASE}/conversations.list?${params.toString()}`,
@@ -664,7 +717,7 @@ export const Slack: ConnectorSpec = {
             );
           }
 
-          const channels: Array<any> = response.data.channels ?? [];
+          const channels = response.data.channels ?? [];
           const found = channels.find((c) => {
             const cName = (c.name ?? '').toString().toLowerCase();
             if (!cName) return false;
@@ -822,9 +875,9 @@ export const Slack: ConnectorSpec = {
             response?: { status?: number; data?: unknown };
           };
           ctx.log.error(
-            `Slack sendMessage failed: ${err.message}, Status: ${err.response?.status}, Data: ${JSON.stringify(
-              err.response?.data
-            )}`
+            `Slack sendMessage failed: ${err.message}, Status: ${
+              err.response?.status
+            }, Data: ${JSON.stringify(err.response?.data)}`
           );
           throw error;
         }
