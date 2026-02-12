@@ -89,12 +89,13 @@ describe('UserPanel', () => {
       isLoading: true,
     });
 
-    const { getByTestId } = render(
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <UserPanel {...mockProps} />
       </TestProviders>
     );
 
-    expect(getByTestId('securitySolutionFlyoutLoading')).toBeInTheDocument();
+    expect(queryByTestId('securitySolutionFlyoutLoading')).not.toBeInTheDocument();
+    expect(getByTestId('observedDataSectionLoadingSpinner')).toBeInTheDocument();
   });
 });

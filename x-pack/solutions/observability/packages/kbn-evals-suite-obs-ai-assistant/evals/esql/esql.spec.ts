@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
 import {
   generateApacheErrorSpikeLogs,
@@ -38,7 +39,7 @@ function createEsqlCriteria({
     to the expected query or produce the same results, even if the syntax, structure, or column naming differs. If multiple expected queries are provided,
     a match with any one of them is acceptable. Minor differences, such as variations in column names, formatting, or use of equivalent syntax, are acceptable
     as long as they do not alter the semantics or outcome of the query.
-    
+
     Expected: ${expectedQuery}`,
       ]
     : [];
@@ -52,7 +53,7 @@ function createEsqlCriteria({
   return [...baseCriteria, ...executionCriteria, ...specificCriteria];
 }
 
-evaluate.describe('ES|QL query generation', { tag: '@svlOblt' }, () => {
+evaluate.describe('ES|QL query generation', { tag: tags.serverless.observability.complete }, () => {
   // --- Test Suite for Logs Data ---
   evaluate.describe('with Logs data', () => {
     evaluate.beforeAll(async ({ logsSynthtraceEsClient }) => {
