@@ -30,7 +30,7 @@ require('@kbn/setup-node-env');
 
 var path = require('path');
 var fs = require('fs');
-var yaml = require('js-yaml');
+const { parse } = require('yaml');
 var getopts = require('getopts');
 var elasticsearch = require('@elastic/elasticsearch');
 var Client = elasticsearch.Client;
@@ -54,7 +54,7 @@ function readKibanaConfig(configPath, log) {
 
   if (fs.existsSync(configPathToUse)) {
     try {
-      var loaded = yaml.load(fs.readFileSync(configPathToUse, 'utf8')) || {};
+      var loaded = parse(fs.readFileSync(configPathToUse, 'utf8')) || {};
       // Support flat keys (elasticsearch.hosts) or nested (elasticsearch: { hosts })
       if (loaded.elasticsearch && typeof loaded.elasticsearch === 'object') {
         esConfigValues = loaded.elasticsearch;
