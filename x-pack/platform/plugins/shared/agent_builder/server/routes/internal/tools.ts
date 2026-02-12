@@ -36,7 +36,6 @@ import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
 import { getToolTypeInfo, bulkCreateMcpTools } from '../../services/tools/utils';
 import { toConnectorItem } from '../utils';
-import { removeToolIdsFromToolSelection } from '../../services/agents/persisted/client/utils';
 
 export function registerInternalToolsRoutes({
   router,
@@ -64,25 +63,11 @@ export function registerInternalToolsRoutes({
     wrapHandler(async (ctx, request, response) => {
       const { ids } = request.body;
       const { tools: toolService, agents: agentsService, auditLogService } = getInternalServices();
-      const agentRegistry = await agentsService.getRegistry({ request });
-      const agents = await agentRegistry.list();
-      const idsSet = new Set(ids);
-      const agentsWithMatchingTools = agents.filter((item) =>
-        (item.configuration?.tools ?? []).some((tool) =>
-          (tool.tool_ids ?? []).some((toolId) => idsSet.has(toolId))
-        )
-      );
-      let agentsUpdated = 0;
-      for (const agent of agentsWithMatchingTools) {
-        const currentTools = agent.configuration?.tools ?? [];
-        const newTools = removeToolIdsFromToolSelection(currentTools, ids);
-        try {
-          await agentRegistry.update(agent.id, { configuration: { tools: newTools } });
-          agentsUpdated += 1;
-        } catch (err) {
-          logger.debug?.(`Skip updating agent ${agent.id} (e.g. read-only): ${err}`);
-        }
-      }
+
+      const { agentsUpdated } = await agentsService.removeToolReferencesFromAllAgents({
+        request,
+        toolIds: ids,
+      });
 
       const registry = await toolService.getRegistry({ request });
       const deleteResults = await Promise.allSettled(ids.map((id) => registry.delete(id)));

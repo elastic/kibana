@@ -14,7 +14,19 @@ export interface AgentsServiceSetup {
   register(agent: BuiltInAgentDefinition): void;
 }
 
+export interface RemoveToolReferencesFromAllAgentsParams {
+  request: KibanaRequest;
+  toolIds: string[];
+}
+
+export interface RemoveToolReferencesFromAllAgentsResult {
+  agentsUpdated: number;
+}
+
 export interface AgentsServiceStart {
   execute: RunAgentFn;
   getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
+  removeToolReferencesFromAllAgents: (
+    params: RemoveToolReferencesFromAllAgentsParams
+  ) => Promise<RemoveToolReferencesFromAllAgentsResult>;
 }

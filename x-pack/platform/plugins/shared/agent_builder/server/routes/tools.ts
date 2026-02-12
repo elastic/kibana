@@ -24,7 +24,6 @@ import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 import { asError } from '../utils/as_error';
-import { removeToolIdsFromToolSelection } from '../services/agents/persisted/client/utils';
 
 export function registerToolsRoutes({
   router,
@@ -330,26 +329,11 @@ export function registerToolsRoutes({
           agents: agentsService,
           auditLogService,
         } = getInternalServices();
-        const agentRegistry = await agentsService.getRegistry({ request });
-        const agents = await agentRegistry.list();
-        const idsSet = new Set([toolId]);
-        const agentsWithMatchingTools = agents.filter((item) =>
-          (item.configuration?.tools ?? []).some((tool) =>
-            (tool.tool_ids ?? []).some((tid) => idsSet.has(tid))
-          )
-        );
 
-        let agentsUpdated = 0;
-        for (const agent of agentsWithMatchingTools) {
-          const currentTools = agent.configuration?.tools ?? [];
-          const newTools = removeToolIdsFromToolSelection(currentTools, [toolId]);
-          try {
-            await agentRegistry.update(agent.id, { configuration: { tools: newTools } });
-            agentsUpdated += 1;
-          } catch (err) {
-            logger.debug?.(`Skip updating agent ${agent.id} (e.g. read-only): ${err}`);
-          }
-        }
+        const { agentsUpdated } = await agentsService.removeToolReferencesFromAllAgents({
+          request,
+          toolIds: [toolId],
+        });
 
         const registry = await toolService.getRegistry({ request });
         try {

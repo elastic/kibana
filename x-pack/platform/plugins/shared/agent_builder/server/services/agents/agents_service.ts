@@ -27,6 +27,8 @@ import {
 } from './builtin';
 import { createPersistedProviderFn } from './persisted';
 import { createAgentRegistry } from './agent_registry';
+import { createStorage } from './persisted/client/storage';
+import { runToolReferenceCleanup } from './persisted/tool_reference_cleanup';
 
 export interface AgentsServiceSetupDeps {
   logger: Logger;
@@ -76,6 +78,11 @@ export class AgentsService {
     const { getRunner, security, elasticsearch, spaces, toolsService, uiSettings, savedObjects } =
       startDeps;
 
+    const internalStorage = createStorage({
+      logger,
+      esClient: elasticsearch.client.asInternalUser,
+    });
+
     const builtinProviderFn = createBuiltinProviderFn({ registry: this.builtinRegistry });
     const persistedProviderFn = createPersistedProviderFn({
       elasticsearch,
@@ -96,11 +103,27 @@ export class AgentsService {
       });
     };
 
+    const removeToolReferencesFromAllAgents = async ({
+      request,
+      toolIds,
+    }: {
+      request: KibanaRequest;
+      toolIds: string[];
+    }) => {
+      const spaceId = getCurrentSpaceId({ request, spaces });
+      return runToolReferenceCleanup({
+        storage: internalStorage,
+        spaceId,
+        toolIds,
+      });
+    };
+
     return {
       getRegistry,
       execute: async (args) => {
         return getRunner().runAgent(args);
       },
+      removeToolReferencesFromAllAgents,
     };
   }
 }
