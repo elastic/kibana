@@ -169,11 +169,14 @@ export async function createBulkDataStreams(
 ) {
   log.info(`Creating ${count} unmanaged data streams with prefix '${prefix}' via ES bulk API...`);
 
-  // 1. Raise the max shards per node limit (default 1000 is too low for 5000 data streams)
+  // 1. Raise max shards per node with headroom for system/async indices.
+  //    5000 streams + Kibana/ES system indices can saturate count + 1000 and break async-search.
+  const shardHeadroom = 3000;
+  const maxShardsPerNode = count + shardHeadroom;
   await es.cluster.putSettings({
-    persistent: { 'cluster.max_shards_per_node': String(count + 1000) },
+    persistent: { 'cluster.max_shards_per_node': String(maxShardsPerNode) },
   });
-  log.info(`  Raised cluster.max_shards_per_node to ${count + 1000}`);
+  log.info(`  Raised cluster.max_shards_per_node to ${maxShardsPerNode}`);
 
   // 2. Create an index template matching the naming pattern
   await es.indices.putIndexTemplate({

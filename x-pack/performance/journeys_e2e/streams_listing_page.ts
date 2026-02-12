@@ -9,6 +9,9 @@ import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 import { setupListingPageData } from '../synthtrace_data/streams_data';
 
+const STREAMS_SEARCH_SELECTOR =
+  'input[aria-label="Search streams by name"], [role="searchbox"], input[type="search"]';
+
 export const journey = new Journey({
   beforeSteps: async ({ kibanaServer, es, log }) => {
     await setupListingPageData(kibanaServer, es, log);
@@ -19,13 +22,15 @@ export const journey = new Journey({
     await page.waitForSelector(subj('streamsTable'), { timeout: 120000 });
   })
   .step('Search for a classic stream', async ({ page, inputDelays }) => {
-    const searchBox = page.locator('[role="searchbox"]');
+    const searchBox = page.locator(STREAMS_SEARCH_SELECTOR).first();
+    await searchBox.waitFor({ state: 'visible', timeout: 60000 });
     await searchBox.fill('');
     await searchBox.type('logs-perf-classic-00001', { delay: inputDelays.TYPING });
     await page.waitForSelector(subj('streamsTable'));
   })
   .step('Clear search and expand all streams', async ({ page }) => {
-    const searchBox = page.locator('[role="searchbox"]');
+    const searchBox = page.locator(STREAMS_SEARCH_SELECTOR).first();
+    await searchBox.waitFor({ state: 'visible', timeout: 60000 });
     await searchBox.fill('');
     await page.waitForSelector(subj('streamsTable'));
     // Initial state has streams collapsed, so "Expand all" button is shown
