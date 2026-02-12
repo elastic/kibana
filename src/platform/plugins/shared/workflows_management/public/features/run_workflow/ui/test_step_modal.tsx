@@ -17,6 +17,7 @@ import {
   euiFontSize,
   EuiModal,
   EuiModalBody,
+  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   useGeneratedHtmlId,
@@ -143,7 +144,12 @@ export function TestStepModal({
   }
 
   return (
-    <EuiModal aria-labelledby={modalTitleId} maxWidth={false} onClose={onClose}>
+    <EuiModal
+      aria-labelledby={modalTitleId}
+      maxWidth={false}
+      onClose={onClose}
+      data-test-subj="workflowTestStepModal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           <EuiFlexGroup direction="column" gutterSize="xs">
@@ -204,6 +210,18 @@ export function TestStepModal({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButton
+          onClick={handleSubmit}
+          disabled={!isJsonValid}
+          color="success"
+          iconType="play"
+          size="s"
+          data-test-subj="workflowSubmitStepRun"
+        >
+          <FormattedMessage id="workflows.testStepModal.submitRunBtn" defaultMessage="Run" />
+        </EuiButton>
+      </EuiModalFooter>
     </EuiModal>
   );
 }

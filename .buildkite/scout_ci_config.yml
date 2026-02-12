@@ -20,6 +20,7 @@ plugins:
     - streams_app
     - transform
     - workflows_extensions
+    - workflows_management
   disabled:
 
 packages:

@@ -80,7 +80,7 @@ jest.mock('../../../features/run_workflow/ui/test_step_modal', () => ({
     <div data-test-subj="test-step-modal">
       <button
         type="button"
-        data-test-subj="submit-step-run"
+        data-test-subj="workflowSubmitStepRun"
         onClick={() => onSubmit({ stepInputs: {} })}
       >
         {'Submit'}
@@ -250,7 +250,7 @@ describe('WorkflowDetailEditor', () => {
         expect(queryByTestId('test-step-modal')).toBeInTheDocument();
       });
 
-      const submitButton = getByTestId('submit-step-run');
+      const submitButton = getByTestId('workflowSubmitStepRun');
       await act(async () => {
         submitButton.click();
       });

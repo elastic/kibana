@@ -13,8 +13,7 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
+import { parseYamlToJSONWithoutValidation } from '../../../../common/lib/yaml';
 
 const meta: Meta<typeof WorkflowStepExecutionTree> = {
   component: WorkflowStepExecutionTree,
@@ -93,9 +92,9 @@ steps:
     with:
       message: '--------------------------'
 `;
-const result = parseWorkflowYamlToJSON(yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any -- it's a storybook story, we don't need to type it
-const definition = (result as any).data as WorkflowYaml;
+const result = parseYamlToJSONWithoutValidation(yaml);
+// @ts-expect-error -- it's a storybook story, we don't need to type it
+const definition = result.json as WorkflowYaml;
 
 // export interface WorkflowExecutionDto {
 //   spaceId: string;
@@ -131,6 +130,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
       stepExecutions: [
         {
           stepId: 'analysis',
+          stepType: 'inference.completion',
           topologicalIndex: 0,
           status: ExecutionStatus.PENDING,
           startedAt: '2025-09-02T20:43:57.466Z',
@@ -153,6 +153,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'debug_ai_response',
+          stepType: 'console',
           topologicalIndex: 1,
           status: ExecutionStatus.RUNNING,
           startedAt: '2025-09-02T20:44:02.142Z',
@@ -175,6 +176,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'print-enter-dash',
+          stepType: 'slack',
           topologicalIndex: 2,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:03.171Z',
@@ -195,6 +197,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'foreachstep',
+          stepType: 'foreach',
           topologicalIndex: 4,
           status: ExecutionStatus.SKIPPED,
           startedAt: '2025-09-02T20:44:05.233Z',
@@ -235,6 +238,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'log-name-surname',
+          stepType: 'console',
           topologicalIndex: 5,
           status: ExecutionStatus.WAITING_FOR_INPUT,
           startedAt: '2025-09-02T20:44:12.598Z',
@@ -260,6 +264,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'log-name-surname',
+          stepType: 'console',
           topologicalIndex: 5,
           status: ExecutionStatus.WAITING,
           startedAt: '2025-09-02T20:44:10.456Z',
@@ -285,6 +290,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'log-name-surname',
+          stepType: 'console',
           topologicalIndex: 5,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:08.396Z',
@@ -310,6 +316,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'log-name-surname',
+          stepType: 'console',
           topologicalIndex: 5,
           status: ExecutionStatus.FAILED,
           startedAt: '2025-09-02T20:44:06.265Z',
@@ -335,6 +342,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'slack_it',
+          stepType: 'slack',
           topologicalIndex: 6,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:13.480Z',
@@ -360,6 +368,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'slack_it',
+          stepType: 'slack',
           topologicalIndex: 6,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:11.422Z',
@@ -385,6 +394,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'slack_it',
+          stepType: 'slack',
           topologicalIndex: 6,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:09.363Z',
@@ -410,6 +420,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'slack_it',
+          stepType: 'slack',
           topologicalIndex: 6,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:07.300Z',
@@ -435,6 +446,7 @@ export const Default: StoryObj<typeof WorkflowStepExecutionTree> = {
         },
         {
           stepId: 'print-exit-dash',
+          stepType: 'slack',
           topologicalIndex: 8,
           status: ExecutionStatus.COMPLETED,
           startedAt: '2025-09-02T20:44:15.553Z',
