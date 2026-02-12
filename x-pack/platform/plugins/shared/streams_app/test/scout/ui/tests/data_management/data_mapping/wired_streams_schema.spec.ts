@@ -6,12 +6,13 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 import { generateLogsData } from '../../../fixtures/generators';
 
 test.describe(
   'Stream data mapping - schema editor - Wired Streams',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
       // Clear existing rules
