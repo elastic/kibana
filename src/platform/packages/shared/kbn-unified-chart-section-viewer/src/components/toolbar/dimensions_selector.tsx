@@ -231,17 +231,16 @@ export const DimensionsSelector = ({
 
   const popoverContentBelowSearch = useMemo(() => {
     const count = localSelectedDimensions.length;
-    if (count === 0) {
-      return undefined;
-    }
     return (
       <EuiFlexGroup
         gutterSize="xs"
         css={css`
           padding: 8px 0;
+          min-height: 24px;
         `}
         justifyContent="spaceBetween"
         alignItems="center"
+        responsive={false}
       >
         <EuiFlexItem>
           <EuiText size="xs" color="subdued">
@@ -252,14 +251,18 @@ export const DimensionsSelector = ({
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty size="xs" flush="right" onClick={handleClearAll}>
-            <FormattedMessage
-              id="metricsExperience.dimensionsSelector.clearSelection"
-              defaultMessage="Clear selection"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        {
+          count > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty size="xs" flush="right" onClick={handleClearAll}>
+                <FormattedMessage
+                  id="metricsExperience.dimensionsSelector.clearSelection"
+                  defaultMessage="Clear selection"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )
+        }
       </EuiFlexGroup>
     );
   }, [localSelectedDimensions.length, handleClearAll]);
