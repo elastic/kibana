@@ -63,6 +63,12 @@ export function getInitialAppState({
     mergedState.hideDataTable = undefined;
   }
 
+  // Mutual exclusion: both chart and table can't be collapsed at the same time.
+  // If URL state has both hidden, show the table (keep chart hidden).
+  if (mergedState.hideChart && mergedState.hideDataTable) {
+    mergedState.hideDataTable = false;
+  }
+
   // Don't allow URL state to overwrite the data source if there's an ES|QL query
   if (isOfAggregateQueryType(mergedState.query) && !isEsqlSource(mergedState.dataSource)) {
     mergedState.dataSource = createEsqlDataSource();

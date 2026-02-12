@@ -83,9 +83,10 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({
   const showChartToggle =
     isInsideHistogram || (isInsideDiscoverContent && isChartHidden);
 
-  // Table toggle: only in tabs context when in document view
+  // Table toggle: only in tabs context when in document view and chart is available,
+  // since collapsing the table requires a chart to expand into
   const showTableToggle =
-    isInTabsContext && viewMode === VIEW_MODE.DOCUMENT_LEVEL;
+    isInTabsContext && viewMode === VIEW_MODE.DOCUMENT_LEVEL && isChartAvailable;
 
   const buttons = [
     ...((isInsideHistogram && isSidebarCollapsed) ||

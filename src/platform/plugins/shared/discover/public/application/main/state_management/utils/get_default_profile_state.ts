@@ -48,11 +48,11 @@ export const getDefaultProfileState = ({
         stateUpdate.hideChart = defaultState.hideChart;
       }
 
-      if (
-        resetDefaultProfileState.hideDataTable &&
-        defaultState.hideDataTable !== undefined
-      ) {
-        stateUpdate.hideDataTable = defaultState.hideDataTable;
+      if (resetDefaultProfileState.hideDataTable) {
+        // Reset to the profile's default, or false (show table) if the profile doesn't define it.
+        // This ensures that switching away from a profile where the table was collapsed
+        // (e.g. metrics) restores the table for profiles that don't manage this state.
+        stateUpdate.hideDataTable = defaultState.hideDataTable ?? false;
       }
 
       return Object.keys(stateUpdate).length ? stateUpdate : undefined;
