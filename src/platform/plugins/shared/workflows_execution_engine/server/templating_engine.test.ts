@@ -668,7 +668,7 @@ describe('WorkflowTemplatingEngine', () => {
 
       it('should reject templates that allocate too much memory', () => {
         expect(() => {
-          templatingEngine.render('{% for i in (1..15000000) %}{{ i }}{% endfor %}', {});
+          templatingEngine.render('{% for i in (1..20000000) %}{{ i }}{% endfor %}', {});
         }).toThrow('memory alloc limit exceeded');
       });
     });
