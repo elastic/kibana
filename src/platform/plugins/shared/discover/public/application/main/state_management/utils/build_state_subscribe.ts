@@ -12,6 +12,7 @@ import {
   internalStateActions,
   type InternalStateStore,
   type RuntimeStateManager,
+  selectTabRuntimeState,
   type TabState,
 } from '../redux';
 import type { DiscoverServices } from '../../../../build_services';
@@ -84,6 +85,7 @@ export const buildStateSubscribe =
     const sampleSizeChanged = nextState.sampleSize !== sampleSize;
     const docTableSortChanged = !isEqual(nextState.sort, sort) && !isEsqlMode;
     const dataSourceChanged = !isEqual(nextState.dataSource, dataSource) && !isEsqlMode;
+    const appFiltersChanged = !isEqual(nextState.filters, prevState.filters) && !isEsqlMode;
 
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.dataSource && dataSourceChanged) {
@@ -93,6 +95,10 @@ export const buildStateSubscribe =
 
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView({
         dataViewId,
+        currentDataView: selectTabRuntimeState(
+          runtimeStateManager,
+          getCurrentTab().id
+        )?.currentDataView$.getValue(),
         isEsqlMode,
         internalState,
         runtimeStateManager,
@@ -130,11 +136,18 @@ export const buildStateSubscribe =
       return;
     }
 
-    if (sampleSizeChanged || docTableSortChanged || dataSourceChanged || queryChanged) {
+    if (
+      sampleSizeChanged ||
+      docTableSortChanged ||
+      dataSourceChanged ||
+      queryChanged ||
+      appFiltersChanged
+    ) {
       const logData = {
         docTableSortChanged: logEntry(docTableSortChanged, sort, nextState.sort),
         dataSourceChanged: logEntry(dataSourceChanged, dataSource, nextState.dataSource),
         queryChanged: logEntry(queryChanged, prevState.query, nextState.query),
+        appFiltersChanged: logEntry(queryChanged, prevState.filters, nextState.filters),
       };
 
       if (dataState.disableNextFetchOnStateChange$.getValue()) {

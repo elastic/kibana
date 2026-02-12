@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, merge, startWith } from 'rxjs';
+import { combineLatest, startWith, merge } from 'rxjs';
 import {
   connectToQueryState,
   noSearchSessionStorageCapabilityMessage,
@@ -49,12 +49,13 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     }
 
     dispatch(stopSyncing({ tabId }));
-    const { appState$, appStateContainer, globalStateContainer } = createUrlSyncObservables({
-      tabId,
-      dispatch,
-      getState,
-      internalState$: getInternalState$(),
-    });
+    const { appState$, appStateContainer, globalState$, globalStateContainer } =
+      createUrlSyncObservables({
+        tabId,
+        dispatch,
+        getState,
+        internalState$: getInternalState$(),
+      });
 
     const getCurrentTab = () => selectTab(getState(), tabId);
     const getAppState = (): DiscoverAppState => {
@@ -96,7 +97,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     const initializeAndSyncUrlState = () => {
       const currentSavedSearch = savedSearchContainer.getState();
 
-      addLog('[appState] initialize state and sync with URL', currentSavedSearch);
+      addLog('[tab_sync] initialize state and sync with URL', currentSavedSearch);
 
       // Set the default profile state only if not loading a saved search,
       // to avoid overwriting saved search state
@@ -176,7 +177,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
         ?.getProjectRouting$()
         .subscribe(() => {
           dispatch(internalStateActions.markNonActiveTabsForRefetch());
-          addLog('[getDiscoverStateContainer] projectRouting changes triggers data fetching');
+          addLog('[tab_sync] projectRouting changes triggers data fetching');
           dispatch(internalStateActions.fetchData({ tabId }));
         });
 
@@ -202,22 +203,6 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       };
     };
 
-    const syncLocallyPersistedTabState = () =>
-      dispatch(
-        internalStateActions.syncLocallyPersistedTabState({
-          tabId,
-        })
-      );
-
-    // This needs to be the first thing that's wired up because initializeAndSyncUrlState is pulling the current state from the URL which
-    // might change the time filter and thus needs to re-check whether the saved search has changed.
-    const timefilerUnsubscribe = merge(
-      services.timefilter.getTimeUpdate$(),
-      services.timefilter.getRefreshIntervalUpdate$()
-    ).subscribe(() => {
-      syncLocallyPersistedTabState();
-    });
-
     // Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
     const unsubscribeUrlTracking = initializeUrlTracking();
 
@@ -235,28 +220,33 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       })
     );
 
-    const savedSearchChangesSubscription = savedSearchContainer
-      .getCurrent$()
-      .subscribe(syncLocallyPersistedTabState);
-
-    const tabAttributesSubscription = createTabAttributesObservable({
-      tabId,
-      internalState$: getInternalState$(),
-      getState,
-    }).subscribe(syncLocallyPersistedTabState);
-
-    // start subscribing to dataStateContainer, triggering data fetching
-    const unsubscribeData = stateContainer.dataState.subscribe();
-
-    // triggers data fetching when query or filters change
-    const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(() => {
-      addLog('[getDiscoverStateContainer] filter changes triggers data fetching');
+    const globalStateSubscription = globalState$.subscribe(() => {
+      addLog('[tab_sync] global state changes triggers data fetching');
       dispatch(
         internalStateActions.fetchData({
           tabId,
         })
       );
     });
+
+    const tabStateSubscription = merge(
+      appState$,
+      globalState$,
+      createTabAttributesObservable({
+        tabId,
+        internalState$: getInternalState$(),
+        getState,
+      })
+    ).subscribe(() => {
+      dispatch(
+        internalStateActions.syncLocallyPersistedTabState({
+          tabId,
+        })
+      );
+    });
+
+    // start subscribing to dataStateContainer, triggering data fetching
+    const unsubscribeData = stateContainer.dataState.subscribe();
 
     services.data.search.session.enableStorage(
       createSearchSessionRestorationDataProvider({
@@ -277,14 +267,12 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
     );
 
     const unsubscribeFn = () => {
-      savedSearchChangesSubscription.unsubscribe();
-      tabAttributesSubscription.unsubscribe();
       unsubscribeData();
       appStateSubscription.unsubscribe();
+      globalStateSubscription.unsubscribe();
+      tabStateSubscription.unsubscribe();
       unsubscribeUrlState();
       unsubscribeUrlTracking();
-      filterUnsubscribe.unsubscribe();
-      timefilerUnsubscribe.unsubscribe();
     };
 
     tabRuntimeState.unsubscribeFn$.next(unsubscribeFn);

@@ -39,7 +39,9 @@ describe('buildStateSubscribe', () => {
   });
 
   it('should set the data view if the index has changed, and refetch should be triggered', async () => {
+    const currentAppState = stateContainer.getCurrentTab().appState;
     await getSubscribeFn()({
+      ...currentAppState,
       dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
     });
 
@@ -70,32 +72,45 @@ describe('buildStateSubscribe', () => {
     expect(stateContainer.dataState.reset).not.toHaveBeenCalled();
   });
 
-  it('should call refetch$ if the chart is hidden', async () => {
-    await getSubscribeFn()({ hideChart: true });
+  it('should not call refetch$ if the chart is hidden', async () => {
+    const currentAppState = stateContainer.getCurrentTab().appState;
+    await getSubscribeFn()({ ...currentAppState, hideChart: true });
 
-    expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
+    expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
-  it('should call refetch$ if the chart interval has changed', async () => {
-    await getSubscribeFn()({ interval: 's' });
+  it('should not call refetch$ if the chart interval has changed', async () => {
+    const currentAppState = stateContainer.getCurrentTab().appState;
+    await getSubscribeFn()({ ...currentAppState, interval: 's' });
 
-    expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
+    expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
-  it('should call refetch$ if breakdownField has changed', async () => {
-    await getSubscribeFn()({ breakdownField: '💣' });
+  it('should not call refetch$ if breakdownField has changed', async () => {
+    const currentAppState = stateContainer.getCurrentTab().appState;
+    await getSubscribeFn()({ ...currentAppState, breakdownField: '💣' });
 
-    expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
-  });
-
-  it('should call refetch$ if interval has changed', async () => {
-    await getSubscribeFn()({ interval: 'm' });
-
-    expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
+    expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
   });
 
   it('should call refetch$ if sort has changed', async () => {
-    await getSubscribeFn()({ sort: [['field', 'test']] });
+    const currentAppState = stateContainer.getCurrentTab().appState;
+    await getSubscribeFn()({ ...currentAppState, sort: [['field', 'test']] });
+
+    expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
+  });
+
+  it('should call refetch$ if filters have changed', async () => {
+    const currentAppState = stateContainer.getCurrentTab().appState;
+    await getSubscribeFn()({
+      ...currentAppState,
+      filters: [
+        {
+          meta: { index: 'test-index', disabled: false, negate: false, alias: null },
+          query: { match: { field: 'value' } },
+        },
+      ],
+    });
 
     expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
   });
@@ -103,15 +118,21 @@ describe('buildStateSubscribe', () => {
   it('should not execute setState function if initialFetchStatus is UNINITIALIZED', async () => {
     const stateSubscribeFn = getSubscribeFn();
     stateContainer.dataState.getInitialFetchStatus = jest.fn(() => FetchStatus.UNINITIALIZED);
+    const currentAppState = stateContainer.getCurrentTab().appState;
     await stateSubscribeFn({
+      ...currentAppState,
       dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
     });
 
     expect(stateContainer.dataState.reset).toHaveBeenCalled();
   });
   it('should not execute setState twice if the identical data view change is propagated twice', async () => {
+    const currentAppState = stateContainer.getCurrentTab().appState;
+    const newDataSource = createDataViewDataSource({ dataViewId: dataViewComplexMock.id! });
+
     await getSubscribeFn()({
-      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
+      ...currentAppState,
+      dataSource: newDataSource,
     });
 
     expect(stateContainer.dataState.reset).toBeCalledTimes(1);
@@ -119,13 +140,15 @@ describe('buildStateSubscribe', () => {
     stateContainer.internalState.dispatch(
       stateContainer.injectCurrentTab(internalStateActions.resetAppState)({
         appState: {
-          dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
+          dataSource: newDataSource,
         },
       })
     );
 
+    const updatedAppState = stateContainer.getCurrentTab().appState;
     await getSubscribeFn()({
-      dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
+      ...updatedAppState,
+      dataSource: newDataSource,
     });
     expect(stateContainer.dataState.reset).toBeCalledTimes(1);
   });

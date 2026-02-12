@@ -73,7 +73,7 @@ export function fetchAll(
     scopedProfilesManager,
     scopedEbtManager,
     inspectorAdapters,
-    searchSource,
+    searchSource: originalSearchSource,
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
@@ -81,6 +81,7 @@ export function fetchAll(
   const { data, expressions } = services;
 
   try {
+    const searchSource = originalSearchSource.createChild();
     const dataView = searchSource.getField('index')!;
     const { query, sort } = getCurrentTab().appState;
     const isEsqlQuery = isOfAggregateQueryType(query);
@@ -237,9 +238,10 @@ export function fetchAll(
 }
 
 export async function fetchMoreDocuments(params: CommonFetchParams): Promise<void> {
-  const { dataSubjects, services, searchSource, getCurrentTab } = params;
+  const { dataSubjects, services, searchSource: originalSearchSource, getCurrentTab } = params;
 
   try {
+    const searchSource = originalSearchSource.createChild();
     const dataView = searchSource.getField('index')!;
     const { query, sort } = getCurrentTab().appState;
     const isEsqlQuery = isOfAggregateQueryType(query);

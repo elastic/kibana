@@ -34,15 +34,14 @@ export function createSearchSource({
     searchSource.setField('index', dataView);
   }
 
-  if (appState) {
-    const appFilters = appState.filters ? cloneDeep(appState.filters) : [];
-    const globalFilters = globalState?.filters ? cloneDeep(globalState.filters) : [];
+  if (appState?.query !== undefined) {
+    searchSource.setField('query', appState.query);
+  }
 
-    // Only set query field if it has a value (not undefined)
-    if (appState.query !== undefined) {
-      searchSource.setField('query', appState.query);
-    }
-    
+  const appFilters = appState?.filters ? cloneDeep(appState.filters) : [];
+  const globalFilters = globalState?.filters ? cloneDeep(globalState.filters) : [];
+
+  if (appState || globalState) {
     searchSource.setField('filter', [...globalFilters, ...appFilters]);
   }
 
