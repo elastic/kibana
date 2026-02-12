@@ -13,7 +13,7 @@ import {
   MOCK_IDP_UIAM_SERVICE_URL,
   MOCK_IDP_UIAM_SHARED_SECRET,
 } from '@kbn/mock-idp-utils';
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../../common/constants';
@@ -22,7 +22,7 @@ import { COMMON_HEADERS, COMMON_UNSAFE_HEADERS, extractAttributeValue } from '..
 // These tests cannot be run on MKI because we cannot obtain the raw UIAM tokens and spin up Mock IdP plugin.
 apiTest.describe(
   '[NON-MKI] Use internal UIAM credentials for various purposes in real and fake requests',
-  { tag: [...tags.serverless.security.complete] },
+  { tag: ['@local-serverless-security_complete'] },
   () => {
     let userSessionCookieFactory: () => Promise<[string, { accessToken: string }]>;
     apiTest.beforeAll(async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
