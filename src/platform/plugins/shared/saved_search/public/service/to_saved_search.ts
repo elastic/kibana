@@ -36,7 +36,7 @@ export const byValueToSavedSearch = async <
   return await convertToSavedSearch(
     {
       ...result,
-      references: [],
+      references: result.attributes.references ?? [],
       savedSearchId: undefined,
       sharingSavedObjectProps,
       managed,
