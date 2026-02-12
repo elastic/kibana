@@ -370,10 +370,9 @@ const ESQLEditorInternal = function ESQLEditor({
   }, [code, reportInputLatency]);
 
   useEffect(() => {
-    if (editorRef.current) {
-      if (code !== fixedQuery) {
-        setCode(fixedQuery);
-      }
+    const nextCode = fixedQuery ?? '';
+    if (code !== nextCode) {
+      setCode(nextCode);
     }
   }, [code, fixedQuery]);
 

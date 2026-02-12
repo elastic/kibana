@@ -6,8 +6,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
-import { useService, CoreStart } from '@kbn/core-di-browser';
+import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
+import { useService } from '@kbn/core-di-browser';
+import { RulesApi } from '../services/rules_api';
 
 const DEFAULT_RULE_VALUES: CreateRuleData = {
   name: '',
@@ -22,10 +23,10 @@ const DEFAULT_RULE_VALUES: CreateRuleData = {
 };
 
 export function useExistingRule(ruleId: string | undefined) {
+  const rulesApi = useService(RulesApi);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rule, setRule] = useState<CreateRuleData | null>(null);
-  const http = useService(CoreStart('http'));
 
   useEffect(() => {
     if (!ruleId) {
@@ -38,7 +39,7 @@ export function useExistingRule(ruleId: string | undefined) {
       setError(null);
 
       try {
-        const fetchedRule = await http.get<RuleResponse>(`/internal/alerting/v2/rule/${ruleId}`);
+        const fetchedRule = await rulesApi.getRule(ruleId);
 
         const transformedRule: CreateRuleData = {
           ...DEFAULT_RULE_VALUES,
@@ -63,7 +64,7 @@ export function useExistingRule(ruleId: string | undefined) {
     };
 
     loadRule();
-  }, [ruleId, http]);
+  }, [ruleId, rulesApi]);
 
   return { rule, isLoading, error };
 }
