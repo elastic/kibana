@@ -367,6 +367,7 @@ export const DiscoverTopNav = ({
         displayStyle="detached"
         textBasedLanguageModeErrors={esqlModeErrors ? [esqlModeErrors] : undefined}
         textBasedLanguageModeWarning={esqlModeWarning}
+        enableResourceBrowser={isEsqlMode}
         prependFilterBar={
           searchBarCustomization?.PrependFilterBar ? (
             <searchBarCustomization.PrependFilterBar />
