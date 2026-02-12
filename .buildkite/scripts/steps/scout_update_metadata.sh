@@ -48,9 +48,17 @@ PR_TITLE='[Scout] Update test config manifests'
 BRANCH_NAME="scout_metadata_update_$(date +%s)"
 
 # Check if an open PR with the same title targeting this base already exists
-existing_pr_title=$(gh pr list --base "$TARGET_BRANCH" --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME" --limit 1 --json title -q '.[].title' 2>/dev/null || true)
+existing_pr_json=$(gh pr list --base "$TARGET_BRANCH" --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME" --limit 1 --json number,headRefName,title 2>/dev/null || true)
+existing_pr_title=$(echo "$existing_pr_json" | jq -r '.[0].title // empty')
 if [[ "$existing_pr_title" == "$PR_TITLE" ]]; then
-  echo "An open PR for Scout metadata update (base $TARGET_BRANCH) already exists. Exiting."
+  existing_branch=$(echo "$existing_pr_json" | jq -r '.[0].headRefName // empty')
+  existing_pr_number=$(echo "$existing_pr_json" | jq -r '.[0].number // empty')
+  echo "An open PR for Scout metadata update (base $TARGET_BRANCH) already exists. Updating PR #$existing_pr_number (branch: $existing_branch) via force-push."
+  git checkout -b "$BRANCH_NAME"
+  git add -A
+  git commit -m "[Scout] Update test config manifests"
+  git push origin "$BRANCH_NAME:$existing_branch" --force
+  echo "Updated existing PR: https://github.com/elastic/kibana/pull/$existing_pr_number"
   exit 0
 fi
 
