@@ -74,7 +74,7 @@ export function generateOtelcolConfig(
             ? {
                 service: {
                   ...stream.service,
-                  pipelines: maybeAddApmToPipelines(
+                  pipelines: conditionallyAddApmToPipelines(
                     addSuffixToOtelcolComponentsConfig(
                       'pipelines',
                       suffix,
@@ -261,7 +261,7 @@ function addSuffixToOtelcolComponentsConfig(
   return { [type]: generated };
 }
 
-function maybeAddApmToPipelines(
+function conditionallyAddApmToPipelines(
   pipelines: Record<OTelCollectorPipelineID, any>,
   shouldAddAPMConfig: boolean
 ): Record<OTelCollectorPipelineID, any> {
