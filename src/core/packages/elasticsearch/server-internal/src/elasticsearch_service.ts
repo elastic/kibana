@@ -259,9 +259,11 @@ export class ElasticsearchService
   }
 
   private getOnRequestHandler(): OnRequestHandler | undefined {
-    if (!this.isServerless || !this.cpsEnabled) return undefined;
+    if (!this.isServerless) return undefined;
 
     return (ctx, params, options) => {
+      // Note: this.cpsEnabled may be set at a later point in time
+      if (!this.cpsEnabled) return;
       const body = params.body;
       if (
         isPlainObject(body) &&
@@ -273,7 +275,7 @@ export class ElasticsearchService
       const acceptedParams = params.meta?.acceptedParams;
       const apiSupportsProjectRouting = acceptedParams?.includes('project_routing') ?? false;
       if (!apiSupportsProjectRouting) return;
-      set(params, 'body.project_routing', '_tag._alias:_local');
+      set(params, 'body.project_routing', '_alias:_origin');
     };
   }
 }
