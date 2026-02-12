@@ -59,6 +59,7 @@ export {
   getEsqlPolicies,
   getJoinIndices,
   getTimeseriesIndices,
+  getViews,
   getInferenceEndpoints,
   getEditorExtensions,
   getProjectRoutingFromEsqlQuery,
