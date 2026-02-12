@@ -15,6 +15,7 @@ import {
   getSegments,
   isInheritLifecycle,
   getInheritedFieldsFromAncestors,
+  validateStreamName,
 } from '@kbn/streams-schema';
 import {
   getAncestors,
@@ -32,7 +33,6 @@ import {
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { validateStreamlang } from '@kbn/streamlang';
-import { validateStreamName } from '../../../../../common/constants';
 import { generateLayer } from '../../component_templates/generate_layer';
 import { getComponentTemplateName } from '../../component_templates/name';
 import { isDefinitionNotFoundError } from '../../errors/definition_not_found_error';
