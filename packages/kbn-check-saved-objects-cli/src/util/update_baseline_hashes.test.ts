@@ -40,7 +40,9 @@ const createType = (overrides: Partial<MigrationInfoRecord>): MigrationInfoRecor
   ...overrides,
 });
 
-const createSnapshot = (typeDefinitions: Record<string, MigrationInfoRecord>): MigrationSnapshot => ({
+const createSnapshot = (
+  typeDefinitions: Record<string, MigrationInfoRecord>
+): MigrationSnapshot => ({
   meta: {
     date: '2025-01-01T00:00:00.000Z',
     kibanaCommitHash: 'commit',

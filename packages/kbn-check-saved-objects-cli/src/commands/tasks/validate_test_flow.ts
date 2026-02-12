@@ -22,10 +22,9 @@ export const validateTestFlow: Task = (ctx, task) => {
       task: async (_, subtask) => {
         const { updated, path } = await updateBaselineHashes(TEST_TYPES, baselineSnapshotPath);
         if (updated.length > 0) {
-          subtask.title +=
-            `: Updated hashes for ${updated.length} type(s) in baseline_snapshot.json: ${updated.join(
-              ', '
-            )}; file: ${path}`;
+          subtask.title += `: Updated hashes for ${
+            updated.length
+          } type(s) in baseline_snapshot.json: ${updated.join(', ')}; file: ${path}`;
         }
       },
     },

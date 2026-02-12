@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { takeSnapshot } from '../snapshots/take_snapshot';
 import type { MigrationInfoRecord, MigrationSnapshot } from '../types';
 import { fileToJson, jsonToFile } from './json';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 
 /**
  * Refreshes computed hashes in `baseline_snapshot.json` while preserving
