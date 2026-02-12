@@ -194,7 +194,7 @@ Use KQL to generate the queries.
 ## Tool usage
 
 Available tools:
-- `get_stream_features`: Fetch stream features. Call this first (or whenever more context is needed). Optional `feature_types` values: `dataset_analysis`, `log_samples`, `log_patterns`, `error_logs`.
+- `get_stream_features`: Fetch stream features. Call this first (or whenever more context is needed) to get full feature context.
 - `add_queries`: Add one or more query suggestions (`title`, `kql`, `category`, `severity_score`, optional `evidence`).
 
 Every call to `add_queries` returns success/failure details for each query, including syntax errors. You can and should add multiple queries in one go. Only call `add_queries` again if you wish to retry invalid queries or add additional high-value queries. Once you're satisfied with the result, call `complete()`.

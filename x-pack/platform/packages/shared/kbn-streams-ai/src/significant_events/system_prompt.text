@@ -39,7 +39,7 @@ Some features are automatically computed from the dataset. To understand how to 
 {{{computed_feature_instructions}}}
 
 **Using `dataset_analysis` features:**
-When needed, call `get_stream_features` with `feature_types: ["dataset_analysis"]` and use the `properties` content from those returned features.
+Call `get_stream_features` to retrieve the full feature set first, then use `dataset_analysis` feature `properties` from that response when available.
 
 ### Using Features to Generate Queries
 
@@ -65,7 +65,7 @@ When needed, call `get_stream_features` with `feature_types: ["dataset_analysis"
 
 | Tool | Function | Notes |
 | :--- | :--- | :--- |
-| `get_stream_features` | Fetches stream features for this stream. | Call this tool first. Optional `feature_types` filter supports only canonical computed types: `dataset_analysis`, `log_samples`, `log_patterns`, `error_logs`. |
+| `get_stream_features` | Fetches stream features for this stream. | Call this tool first to get the full feature context before generating queries. |
 | `add_queries` | Submits one or more KQL queries for the user. | Payload is a list of objects, each with `title`, `kql`, `category`, `severity_score`, and optional `evidence`. |
 | `reason()` | **Begin a Reasoning Monologue** | Outputs your private thoughts. Must use sentinel tags (`<<<BEGIN_INTERNAL>>>`...`<<<END_INTERNAL>>>`). |
 | `complete()` | Declare readiness to answer | Ends the loop and triggers the **Definitive Output**. |

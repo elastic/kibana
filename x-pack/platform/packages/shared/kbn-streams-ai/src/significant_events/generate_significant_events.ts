@@ -16,11 +16,7 @@ import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
 import { sumTokens } from '../helpers/sum_tokens';
 import { getComputedFeatureInstructions } from '../features/computed';
-import {
-  getFeatureTypesFromToolArgs,
-  resolveFeatureTypeFilters,
-  toLlmFeature,
-} from './tools/features_tool';
+import { toLlmFeature } from './tools/features_tool';
 
 interface Query {
   kql: string;
@@ -94,14 +90,8 @@ export async function generateSignificantEvents({
           toolUsage.get_stream_features.calls += 1;
           const startTime = Date.now();
           try {
-            // Keep this intentionally permissive: ignore unknown tool args instead of failing generation.
-            const featureTypes = getFeatureTypesFromToolArgs(toolCall.function.arguments);
-            const typeFilters = resolveFeatureTypeFilters(featureTypes);
             const features = await withSpan('get_stream_features_for_significant_events', () =>
-              getFeatures({
-                ...(typeFilters ? { type: typeFilters } : {}),
-                status: ['active'],
-              })
+              getFeatures({ status: ['active'] })
             );
             const llmFeatures = features.map(toLlmFeature);
             toolUsage.get_stream_features.latency_ms += Date.now() - startTime;
