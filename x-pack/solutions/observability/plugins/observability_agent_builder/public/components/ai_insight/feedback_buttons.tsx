@@ -61,9 +61,12 @@ export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
               size="s"
               onClick={handleClickPositive}
             >
-              {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.feedbackButtons.yesLabel', {
-                defaultMessage: 'Yes',
-              })}
+              {i18n.translate(
+                'xpack.observabilityAgentBuilder.aiInsight.feedbackButtons.yesLabel',
+                {
+                  defaultMessage: 'Yes',
+                }
+              )}
             </EuiButtonEmpty>
           </EuiFlexItem>
 
