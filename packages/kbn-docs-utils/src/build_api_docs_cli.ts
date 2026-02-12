@@ -9,7 +9,7 @@
 
 import Path from 'path';
 
-import apm, { type Transaction } from 'elastic-apm-node';
+import apm, { type Transaction, startSpan } from 'elastic-apm-node';
 
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
