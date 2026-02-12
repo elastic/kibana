@@ -17,7 +17,7 @@ import { defaultConfig } from '../../default/stateful/base.config';
  * all example plugins from the `examples/` directory.
  *
  * Usage:
- *   node scripts/scout.js start-server --stateful --config-set examples
+ *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet examples
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
