@@ -564,10 +564,12 @@ describe('Discover state', () => {
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": undefined,
+          "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": undefined,
           "sampleSize": undefined,
           "sort": Array [],
+          "timeRange": undefined,
         }
       `);
       const { currentDataView$ } = selectTabRuntimeState(
