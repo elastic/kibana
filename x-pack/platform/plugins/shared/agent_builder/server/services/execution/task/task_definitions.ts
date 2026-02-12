@@ -6,7 +6,6 @@
  */
 
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { TaskHandler } from './task_handler';
 
 export const taskTypes = {
@@ -33,8 +32,6 @@ export const registerTaskDefinitions = ({
       title: 'Agent Builder: Run agent execution',
       timeout: '20m',
       maxAttempts: 1,
-      cost: TaskCost.Normal,
-      priority: TaskPriority.NormalLongRunning,
       createTaskRunner: (context) => {
         const { taskInstance, fakeRequest } = context;
 
