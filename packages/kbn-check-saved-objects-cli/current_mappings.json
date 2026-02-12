@@ -1300,9 +1300,6 @@
           "additionalIndexPattern": {
             "type": "keyword"
           },
-          "additionalIndexPatterns": {
-            "type": "keyword"
-          },
           "delay": {
             "type": "keyword"
           },
@@ -1326,9 +1323,6 @@
           },
           "paginationTimestamp": {
             "type": "date"
-          },
-          "paginationId": {
-            "type": "keyword"
           },
           "timeout": {
             "type": "keyword"
