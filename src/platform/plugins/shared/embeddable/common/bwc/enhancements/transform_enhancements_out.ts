@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/common';
 import type { SerializedDrilldowns } from '../../../server';
 import { generateRefName } from './dynamic_actions/dashboard_drilldown_persistable_state';
 import type { DynamicActionsState, SerializedEvent } from './dynamic_actions/types';
@@ -51,11 +52,17 @@ export function transformEnhancementsOut<StoredState extends SerializedDrilldown
 function convertToDashboardDrilldown(event: SerializedEvent) {
   const { openInNewTab, useCurrentDateRange, useCurrentFilters } = event.action.config;
 
+  const trigger = event.triggers[0] ?? 'unknown';
+
   return {
     dashboardRefName: generateRefName(event.eventId),
     label: event.action.name,
     open_in_new_tab: openInNewTab ?? false,
-    trigger: event.triggers[0] ?? 'unknown',
+    // Initially dashboard drilldown relied on VALUE_CLICK & RANGE_SELECT - versions unknown
+    trigger:
+      trigger === 'VALUE_CLICK_TRIGGER' || trigger === 'SELECT_RANGE_TRIGGER'
+        ? APPLY_FILTER_TRIGGER
+        : trigger,
     type: 'dashboard_drilldown',
     use_filters: useCurrentFilters ?? true,
     use_time_range: useCurrentDateRange ?? true,
