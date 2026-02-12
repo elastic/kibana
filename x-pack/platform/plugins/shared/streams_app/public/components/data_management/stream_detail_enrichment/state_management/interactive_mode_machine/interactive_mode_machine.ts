@@ -209,16 +209,6 @@ export const interactiveModeMachine = setup({
         };
       }
     ),
-    maybeClearAutoConditionFilter: ({ context }, params: { id?: string }) => {
-      if (!params.id) return;
-      const stepRef = context.stepRefs.find((ref) => ref.id === params.id);
-      const step = stepRef?.getSnapshot()?.context.step;
-
-      // Only clear on processor (action) save/cancel; never clear for condition blocks.
-      if (step && isActionBlock(step)) {
-        context.parentRef.send({ type: 'simulation.clearAutoConditionFilter' });
-      }
-    },
     maybeAutoSelectParentConditionForProcessor: ({ context }, params: { id?: string }) => {
       if (!params.id) return;
 
@@ -679,7 +669,6 @@ export const interactiveModeMachine = setup({
             },
             'step.cancel': {
               target: 'idle',
-              actions: [{ type: 'maybeClearAutoConditionFilter', params: ({ event }) => event }],
             },
             'step.save': {
               target: 'idle',
@@ -698,7 +687,6 @@ export const interactiveModeMachine = setup({
             },
             'step.cancel': {
               target: 'idle',
-              actions: [{ type: 'maybeClearAutoConditionFilter', params: ({ event }) => event }],
             },
             'step.delete': {
               target: 'idle',
