@@ -69,10 +69,10 @@ describe('generateToken', () => {
     expect(hashPart).toHaveLength(32);
   });
 
-  it('trims whitespace from values before hashing', () => {
+  it('preserves whitespace in values before hashing', () => {
     const token1 = generateToken(secret, entityClass, field, '  my-server-01  ');
     const token2 = generateToken(secret, entityClass, field, 'my-server-01');
 
-    expect(token1).toBe(token2);
+    expect(token1).not.toBe(token2);
   });
 });

@@ -13,6 +13,7 @@ const createRepository = () => {
   const esClientMock = {
     search: jest.fn(),
     index: jest.fn(),
+    update: jest.fn(),
   };
 
   const esClient = esClientMock as unknown as ElasticsearchClient;
@@ -100,5 +101,78 @@ describe('ProfilesRepository.create', () => {
     await expect(repository.create(profileCreateParams)).rejects.toMatchObject({
       statusCode: 409,
     });
+  });
+});
+
+describe('ProfilesRepository.update', () => {
+  it('preserves regex and NER rules when omitted from update payload', async () => {
+    const { repository, esClientMock } = createRepository();
+    const getSpy = jest.spyOn(repository, 'get');
+
+    const existingProfile = {
+      id: 'profile-id',
+      name: 'Existing Profile',
+      targetType: 'data_view' as const,
+      targetId: 'security-solution-default',
+      rules: {
+        fieldRules: [{ field: 'host.name', allowed: true, anonymized: false }],
+        regexRules: [
+          {
+            id: 'regex-1',
+            type: 'regex' as const,
+            entityClass: 'EMAIL',
+            pattern: '.*',
+            enabled: true,
+          },
+        ],
+        nerRules: [
+          {
+            id: 'ner-1',
+            type: 'ner' as const,
+            modelId: 'model-1',
+            allowedEntityClasses: ['PER'],
+            enabled: true,
+          },
+        ],
+      },
+      saltId: 'salt-default',
+      namespace: 'default',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      createdBy: 'tester',
+      updatedBy: 'tester',
+    };
+
+    const updatedProfile = {
+      ...existingProfile,
+      rules: {
+        ...existingProfile.rules,
+        fieldRules: [{ field: 'host.name', allowed: false, anonymized: false }],
+      },
+    };
+
+    getSpy.mockResolvedValueOnce(existingProfile).mockResolvedValueOnce(updatedProfile);
+    esClientMock.update.mockResolvedValueOnce({});
+
+    await repository.update('default', 'profile-id', {
+      rules: {
+        fieldRules: [{ field: 'host.name', allowed: false, anonymized: false }],
+      },
+      updatedBy: 'updater',
+    });
+
+    expect(esClientMock.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        doc: expect.objectContaining({
+          rules: expect.objectContaining({
+            field_rules: [
+              expect.objectContaining({ field: 'host.name', allowed: false, anonymized: false }),
+            ],
+            regex_rules: [expect.objectContaining({ id: 'regex-1' })],
+            ner_rules: [expect.objectContaining({ id: 'ner-1' })],
+          }),
+        }),
+      })
+    );
   });
 });

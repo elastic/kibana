@@ -249,6 +249,9 @@ export class ProfilesRepository {
       updateDoc.description = params.description;
     }
     if (params.rules !== undefined) {
+      const regexRules = params.rules.regexRules ?? existing.rules.regexRules ?? [];
+      const nerRules = params.rules.nerRules ?? existing.rules.nerRules ?? [];
+
       updateDoc.rules = {
         field_rules: params.rules.fieldRules.map((r) => ({
           field: r.field,
@@ -256,14 +259,14 @@ export class ProfilesRepository {
           anonymized: r.anonymized,
           entity_class: r.entityClass,
         })),
-        regex_rules: (params.rules.regexRules ?? []).map((r) => ({
+        regex_rules: regexRules.map((r) => ({
           id: r.id,
           type: r.type,
           entity_class: r.entityClass,
           pattern: r.pattern,
           enabled: r.enabled,
         })),
-        ner_rules: (params.rules.nerRules ?? []).map((r) => ({
+        ner_rules: nerRules.map((r) => ({
           id: r.id,
           type: r.type,
           model_id: r.modelId,

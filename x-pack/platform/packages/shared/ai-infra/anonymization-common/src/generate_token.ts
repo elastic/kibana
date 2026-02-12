@@ -34,8 +34,7 @@ export const generateToken = (
   value: string,
   hashLength: number = DEFAULT_HASH_LENGTH
 ): string => {
-  const normalizedValue = value.trim();
-  const hmacInput = `${entityClass}:${field}:${normalizedValue}`;
+  const hmacInput = `${entityClass}:${field}:${value}`;
   const hash = createHmac('sha256', secret).update(hmacInput).digest('hex');
   const truncatedHash = hash.substring(0, hashLength);
 

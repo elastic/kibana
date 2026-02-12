@@ -30,6 +30,12 @@ import { ensureProfilesIndex } from './system_index';
 import { SaltService, ANONYMIZATION_SALT_SAVED_OBJECT_TYPE } from './salt';
 import { ProfilesRepository } from './repository';
 import { registerFeatures } from './features';
+import {
+  ALERTS_DATA_VIEW_TARGET_ID,
+  ALERTS_DATA_VIEW_TARGET_TYPE,
+  ensureAlertsDataViewProfile,
+} from './initialization';
+import { migrateAnonymizationSettings } from './migration';
 
 interface AnonymizationSetupDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
@@ -110,9 +116,53 @@ export class AnonymizationPlugin
     // Initialize services
     const saltService = new SaltService(core.savedObjects, deps.encryptedSavedObjects, this.logger);
     const profilesRepo = new ProfilesRepository(esClient);
+    const globalUiSettingsClient = core.uiSettings.globalAsScopedToClient(
+      core.savedObjects.getUnsafeInternalClient()
+    );
+
+    const runLegacySettingsMigration = async (namespace: string): Promise<void> => {
+      if (namespace !== 'default') {
+        this.logger.debug(
+          `Skipping ai:anonymizationSettings migration for non-default namespace: ${namespace}`
+        );
+        return;
+      }
+
+      await migrateAnonymizationSettings({
+        namespace,
+        esClient,
+        uiSettings: globalUiSettingsClient,
+        logger: this.logger,
+      });
+    };
+
+    // Ensure a default alerts data view profile exists in the default space at startup.
+    ensureAlertsDataViewProfile({
+      namespace: 'default',
+      profilesRepo,
+      saltService,
+      migrateLegacySettings: () => runLegacySettingsMigration('default'),
+      logger: this.logger,
+    }).catch((err: Error) => {
+      this.logger.error(`Failed to initialize default alerts anonymization profile: ${err.message}`);
+    });
 
     this.policyService = {
       resolveEffectivePolicy: async (namespace, target) => {
+        if (
+          target.type === ALERTS_DATA_VIEW_TARGET_TYPE &&
+          target.id === ALERTS_DATA_VIEW_TARGET_ID
+        ) {
+          // Lazily ensure the alerts profile in the request namespace.
+          await ensureAlertsDataViewProfile({
+            namespace,
+            profilesRepo,
+            saltService,
+            migrateLegacySettings: () => runLegacySettingsMigration(namespace),
+            logger: this.logger,
+          });
+        }
+
         // For data_view targets: load data view profile + any contributing index pattern profiles
         // For index_pattern / index targets: load that target's profile only
         const profile = await profilesRepo.findByTarget(namespace, target.type, target.id);

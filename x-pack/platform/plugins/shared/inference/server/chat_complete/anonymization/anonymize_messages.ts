@@ -31,7 +31,9 @@ export async function anonymizeMessages({
   effectivePolicy?: EffectivePolicy;
 }): Promise<AnonymizationOutput> {
   const rules = anonymizationRules.filter((rule) => rule.enabled);
-  if (!rules.length) {
+  const hasEffectivePolicy = Boolean(effectivePolicy && Object.keys(effectivePolicy).length > 0);
+
+  if (!rules.length && !hasEffectivePolicy) {
     return {
       messages,
       anonymizations: [],
