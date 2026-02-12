@@ -85,8 +85,7 @@ export class GenAiSettingsPlugin
               return NO_DEFAULT_CONNECTOR;
             }
             const [, startServices] = await core.getStartServices();
-            const actionsClient =
-              await startServices.actions.getActionsClientWithRequest(request);
+            const actionsClient = await startServices.actions.getActionsClientWithRequest(request);
             const connectors = await actionsClient.getAll();
             const preferredExists = connectors.some(
               (connector) => connector.id === FALLBACK_DEFAULT_CONNECTOR_ID
