@@ -39,7 +39,7 @@ components:
         details:
           type: object
           additionalProperties: true
-          description: Event details. Different event types have different details.
+          description: Event details. The details vary per event type.
       required:
         - timestamp
         - sequence
