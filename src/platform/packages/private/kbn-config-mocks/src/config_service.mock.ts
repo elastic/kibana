@@ -37,6 +37,7 @@ const createConfigServiceMock = ({
     addDynamicConfigPaths: jest.fn(),
     setDynamicConfigOverrides: jest.fn(),
     setGlobalStripUnknownKeys: jest.fn(),
+    listAllSettings: jest.fn(),
   });
 
   return mocked;
