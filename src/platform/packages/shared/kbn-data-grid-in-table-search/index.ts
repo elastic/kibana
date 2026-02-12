@@ -9,6 +9,7 @@
 
 export {
   useDataGridInTableSearch,
+  InTableSearchProvider,
   type UseDataGridInTableSearchProps,
   type UseDataGridInTableSearchReturn,
 } from './src';
@@ -23,3 +24,4 @@ export {
 } from './src/constants';
 
 export type { InTableSearchRestorableState } from './src/types';
+export type { InTableSearchContextValue } from './src/in_table_search_context';
