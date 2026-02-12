@@ -154,10 +154,10 @@ export interface ESQLAstForkCommand extends ESQLCommand<'fork'> {
 }
 
 export interface ESQLAstMmrCommand extends ESQLCommand<'mmr'> {
-  queryVector?: ESQLAstItem;
-  diversifyField: ESQLAstItem;
-  limit: ESQLAstItem;
-  namedParameters: ESQLAstItem;
+  queryVector?: ESQLSingleAstItem;
+  diversifyField: ESQLSingleAstItem;
+  limit: ESQLSingleAstItem;
+  namedParameters?: ESQLSingleAstItem;
 }
 
 /**

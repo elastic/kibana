@@ -2118,28 +2118,47 @@ export class CstToAstConverter {
   // --------------------------------------------------------------------- MMR
 
   private fromMmrCommand(ctx: cst.MmrCommandContext): ast.ESQLCommand<'mmr'> {
-    const command = this.createCommand<'mmr', ast.ESQLAstMmrCommand>('mmr', ctx);
+    const args: ast.ESQLAstItem[] = [];
 
-    this.parseMmrQueryVectorParam(ctx, command);
-    this.parseMmrOnOption(ctx, command);
-    this.parseMmrLimitOption(ctx, command);
-    this.parseMmrWithOption(ctx, command);
+    const queryVector = this.fromMmrQueryVectorParam(ctx.mmrQueryVectorParams());
+    if (queryVector) args.push(queryVector);
+
+    const onOption = this.fromMmrOnOption(ctx);
+    args.push(onOption);
+    const diversifyField = onOption.args[0]
+      ? (onOption.args[0] as ast.ESQLColumn).args[0]
+      : undefined;
+
+    const limitOption = this.fromMmrLimitOption(ctx);
+    args.push(limitOption);
+    const limit = limitOption.args[0] as ast.ESQLLiteral;
+
+    const withOption = this.fromMmrWithOption(ctx.commandNamedParameters());
+    if (withOption) args.push(withOption);
+    const namedParameters = withOption ? (withOption.args[0] as ast.ESQLMap) : undefined;
+
+    const command = this.createCommand<'mmr', ast.ESQLAstMmrCommand>('mmr', ctx, {
+      args,
+      queryVector,
+      diversifyField,
+      limit,
+      namedParameters,
+    });
+    command.incomplete ||= limitOption.incomplete;
+    command.incomplete ||= withOption?.incomplete ?? false;
 
     return command;
   }
 
-  private parseMmrQueryVectorParam(
-    ctx: cst.MmrCommandContext,
-    command: ast.ESQLAstMmrCommand
-  ): void {
-    const queryVectorCtx = ctx.mmrQueryVectorParams();
-
-    if (!queryVectorCtx || queryVectorCtx.children === null) {
+  private fromMmrQueryVectorParam(
+    queryVectorContext: cst.MmrQueryVectorParamsContext
+  ): ast.ESQLAstExpression | ast.ESQLParam | undefined {
+    if (!queryVectorContext || queryVectorContext.children === null) {
       return;
     }
 
-    const childContext = queryVectorCtx.children[0];
-    let queryVector;
+    const childContext = queryVectorContext.children[0];
+    let queryVector: ast.ESQLAstExpression | ast.ESQLParam | undefined;
 
     if (childContext instanceof cst.PrimaryExpressionContext) {
       queryVector = this.fromPrimaryExpression(childContext);
@@ -2147,19 +2166,12 @@ export class CstToAstConverter {
       queryVector = this.fromParameter(childContext);
     }
 
-    if (queryVector) {
-      command.queryVector = queryVector;
-      command.args.push(queryVector);
-    }
+    return queryVector;
   }
 
-  private parseMmrOnOption(ctx: cst.MmrCommandContext, command: ast.ESQLAstMmrCommand): void {
+  private fromMmrOnOption(ctx: cst.MmrCommandContext): ast.ESQLCommandOption {
     const onToken = ctx.ON();
     const diversifyFieldCtx = ctx.qualifiedName();
-
-    if (!onToken) {
-      return;
-    }
 
     const diversifyField = this.toColumn(diversifyFieldCtx);
     const onOption = this.toOption(onToken.getText().toLowerCase(), diversifyFieldCtx);
@@ -2168,17 +2180,12 @@ export class CstToAstConverter {
     onOption.location.min = onToken.symbol.start;
     onOption.location.max = diversifyField.location.max;
 
-    command.diversifyField = diversifyField.args[0];
-    command.args.push(onOption);
+    return onOption;
   }
 
-  private parseMmrLimitOption(ctx: cst.MmrCommandContext, command: ast.ESQLAstMmrCommand): void {
+  private fromMmrLimitOption(ctx: cst.MmrCommandContext): ast.ESQLCommandOption {
     const limitToken = ctx.MMR_LIMIT();
     const limitValueCtx = ctx.integerValue();
-
-    if (!limitToken) {
-      return;
-    }
 
     const limitOption = this.toOption(limitToken.getText().toLowerCase(), limitValueCtx);
 
@@ -2186,35 +2193,24 @@ export class CstToAstConverter {
     limitOption.location.min = limitToken.symbol.start;
     limitOption.location.max = limitValueCtx.stop?.stop ?? limitToken.symbol.stop;
 
-    command.limit = limitOption.args[0];
-    command.incomplete = limitOption.incomplete;
-    command.args.push(limitOption);
+    return limitOption;
   }
 
-  private parseMmrWithOption(ctx: cst.MmrCommandContext, command: ast.ESQLAstMmrCommand): void {
-    const namedParametersCtx = ctx.commandNamedParameters();
-
-    if (!namedParametersCtx) {
-      return;
-    }
-
+  private fromMmrWithOption(
+    namedParametersCtx: cst.CommandNamedParametersContext
+  ): ast.ESQLCommandOption | undefined {
     const withOption = this.fromCommandNamedParameters(namedParametersCtx);
-    if (!withOption) {
-      return;
-    }
 
     const mapArg = withOption.args[0] as ast.ESQLMap | undefined;
 
     if (mapArg) {
       const incomplete =
         mapArg.entries.some((entry) => entry.incomplete) || mapArg.entries.length === 0;
-      withOption.incomplete = incomplete;
-      command.incomplete = incomplete;
 
-      if (!withOption.incomplete) {
-        command.namedParameters = withOption.args[0];
-        command.args.push(withOption);
-      }
+      mapArg.incomplete = incomplete;
+      withOption.incomplete = incomplete;
+
+      return withOption;
     }
   }
 
