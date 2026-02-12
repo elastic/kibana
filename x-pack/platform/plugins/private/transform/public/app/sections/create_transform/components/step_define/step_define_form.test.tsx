@@ -27,7 +27,7 @@ import { kqlPluginMock } from '@kbn/kql/public/mocks';
 
 jest.mock('../../../../app_dependencies');
 jest.mock('@kbn/saved-objects-finder-plugin/public', () => ({
-  SavedObjectFinder: ({ children }: any) => <div>{children}</div>,
+  SavedObjectFinder: (props: any) => <div>{props.children}</div>,
 }));
 
 const startMock = coreMock.createStart();
@@ -105,6 +105,47 @@ describe('Transform: <DefinePivotForm />', () => {
       expect(mockOnChange).toBeCalled();
     });
   }, 10000);
+
+  test('shows Dev Console copy button when Discover session selected', async () => {
+    const queryClient = new QueryClient();
+
+    const searchItems = {
+      dataView: {
+        getIndexPattern: () => 'the-data-view-index-pattern',
+        fields: [] as any[],
+      } as any,
+      savedSearch: {
+        id: 'the-saved-search-id',
+        title: 'the-saved-search-title',
+      },
+      combinedQuery: { match_all: {} },
+    };
+
+    // mock services for QueryStringInput
+    const services = {
+      ...startMock,
+      data: dataPluginMock.createStartContract(),
+      kql: kqlPluginMock.createStartContract(),
+      appName: 'the-test-app',
+      storage: createMockStorage(),
+    };
+
+    const { getByTestId } = render(
+      <I18nProvider>
+        <QueryClientProvider client={queryClient}>
+          <KibanaContextProvider services={services}>
+            <DatePickerContextProvider {...getMockedDatePickerDependencies()}>
+              <StepDefineForm onChange={jest.fn()} searchItems={searchItems as any} />
+            </DatePickerContextProvider>
+          </KibanaContextProvider>
+        </QueryClientProvider>
+      </I18nProvider>
+    );
+
+    await waitFor(() => {
+      expect(getByTestId('transformDiscoverSessionCopyDevConsoleStatementButton')).toBeInTheDocument();
+    });
+  });
 });
 
 describe('Transform: isAggNameConflict()', () => {

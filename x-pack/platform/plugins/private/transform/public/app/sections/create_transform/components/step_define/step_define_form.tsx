@@ -317,6 +317,28 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
           onSelectSavedObjectId={props.onSelectSavedObjectId}
         />
 
+        {searchItems.savedSearch?.id !== undefined && (
+          <EuiFormRow>
+            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiCopy
+                  beforeMessage={copyToClipboardSourceDescription}
+                  textToCopy={copyToClipboardSource}
+                >
+                  {(copy: () => void) => (
+                    <EuiButtonIcon
+                      onClick={copy}
+                      iconType="copyClipboard"
+                      aria-label={copyToClipboardSourceDescription}
+                      data-test-subj="transformDiscoverSessionCopyDevConsoleStatementButton"
+                    />
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        )}
+
         {hasValidTimeField && (
           <EuiFormRow
             fullWidth
