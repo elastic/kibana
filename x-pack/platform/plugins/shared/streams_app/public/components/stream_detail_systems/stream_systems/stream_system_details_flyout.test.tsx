@@ -65,19 +65,21 @@ jest.mock('../../../hooks/use_streams_app_fetch', () => ({
   }),
 }));
 
-jest.mock('../../data_management/shared', () => ({
-  EditableConditionPanel: (props: any) => {
-    const { useEffect, createElement } = require('react');
-    useEffect(() => {
-      if (!props.isEditingCondition) return;
+jest.mock('../../data_management/shared', () => {
+  const ReactMock = jest.requireActual('react') as typeof import('react');
 
-      props.setCondition({ field: 'service.name', eq: 'updated' });
-      props.onValidityChange(false);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.isEditingCondition]);
-    return createElement('div', { 'data-test-subj': 'mockEditableConditionPanel' });
-  },
-}));
+  return {
+    EditableConditionPanel: (props: any) => {
+      ReactMock.useEffect(() => {
+        if (!props.isEditingCondition) return;
+
+        props.setCondition({ field: 'service.name', eq: 'updated' });
+        props.onValidityChange(false);
+      }, [props.isEditingCondition]);
+      return ReactMock.createElement('div', { 'data-test-subj': 'mockEditableConditionPanel' });
+    },
+  };
+});
 
 describe('StreamSystemDetailsFlyout', () => {
   it('disables save changes when the condition editor is invalid', async () => {

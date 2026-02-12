@@ -36,6 +36,11 @@ test.describe('Stream systems - condition editor validity', { tag: ['@ess', '@sv
     });
   });
 
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsAdmin();
+    await pageObjects.streams.gotoAdvancedTab(STREAM_NAME);
+  });
+
   test.afterAll(async ({ kbnClient }) => {
     await kbnClient.request({
       path: `/internal/streams/${STREAM_NAME}/systems/_bulk`,
@@ -44,11 +49,6 @@ test.describe('Stream systems - condition editor validity', { tag: ['@ess', '@sv
         operations: [{ delete: { system: { name: SYSTEM_NAME } } }],
       },
     });
-  });
-
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
-    await pageObjects.streams.gotoAdvancedTab(STREAM_NAME);
   });
 
   test('disables saving when syntax editor JSON is invalid', async ({ page, pageObjects }) => {
