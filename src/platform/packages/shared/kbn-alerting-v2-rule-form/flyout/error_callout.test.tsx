@@ -9,9 +9,27 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { useForm, FormProvider } from 'react-hook-form';
 import type { FieldErrors } from 'react-hook-form';
 import type { FormValues } from '../form/types';
 import { ErrorCallOut } from './error_callout';
+
+// Wrapper component that provides form context with configurable state
+const TestWrapper: React.FC<{
+  errors?: FieldErrors<FormValues>;
+  isSubmitted?: boolean;
+  children: React.ReactNode;
+}> = ({ errors = {}, isSubmitted = false, children }) => {
+  const methods = useForm<FormValues>({
+    defaultValues: { name: '', query: '' },
+  });
+
+  // Override formState with test values
+  Object.defineProperty(methods.formState, 'errors', { value: errors, writable: true });
+  Object.defineProperty(methods.formState, 'isSubmitted', { value: isSubmitted, writable: true });
+
+  return <FormProvider {...methods}>{children}</FormProvider>;
+};
 
 describe('ErrorCallOut', () => {
   const createErrors = (
@@ -26,17 +44,25 @@ describe('ErrorCallOut', () => {
         name: { message: 'Name is required' },
       });
 
-      const { container } = render(<ErrorCallOut errors={errors} isSubmitted={false} />);
+      const { container } = render(
+        <TestWrapper errors={errors} isSubmitted={false}>
+          <ErrorCallOut />
+        </TestWrapper>
+      );
 
-      expect(container.firstChild).toBeNull();
+      expect(container.querySelector('.euiCallOut')).toBeNull();
     });
   });
 
   describe('when form is submitted', () => {
     it('returns null when there are no errors', () => {
-      const { container } = render(<ErrorCallOut errors={{}} isSubmitted={true} />);
+      const { container } = render(
+        <TestWrapper errors={{}} isSubmitted={true}>
+          <ErrorCallOut />
+        </TestWrapper>
+      );
 
-      expect(container.firstChild).toBeNull();
+      expect(container.querySelector('.euiCallOut')).toBeNull();
     });
 
     it('displays the error callout with a single error message', () => {
@@ -44,7 +70,11 @@ describe('ErrorCallOut', () => {
         name: { message: 'Name is required' },
       });
 
-      render(<ErrorCallOut errors={errors} isSubmitted={true} />);
+      render(
+        <TestWrapper errors={errors} isSubmitted={true}>
+          <ErrorCallOut />
+        </TestWrapper>
+      );
 
       expect(screen.getByText('Please address the highlighted errors.')).toBeInTheDocument();
       expect(screen.getByText('Name is required')).toBeInTheDocument();
@@ -57,7 +87,11 @@ describe('ErrorCallOut', () => {
         timeField: { message: 'Time field is required' },
       });
 
-      render(<ErrorCallOut errors={errors} isSubmitted={true} />);
+      render(
+        <TestWrapper errors={errors} isSubmitted={true}>
+          <ErrorCallOut />
+        </TestWrapper>
+      );
 
       expect(screen.getByText('Name is required')).toBeInTheDocument();
       expect(screen.getByText('Query is invalid')).toBeInTheDocument();
@@ -71,7 +105,11 @@ describe('ErrorCallOut', () => {
         timeField: { message: '' },
       });
 
-      render(<ErrorCallOut errors={errors} isSubmitted={true} />);
+      render(
+        <TestWrapper errors={errors} isSubmitted={true}>
+          <ErrorCallOut />
+        </TestWrapper>
+      );
 
       expect(screen.getByText('Name is required')).toBeInTheDocument();
       expect(screen.queryByText('')).not.toBeInTheDocument();
@@ -86,7 +124,11 @@ describe('ErrorCallOut', () => {
         name: { message: 'Name is required' },
       });
 
-      render(<ErrorCallOut errors={errors} isSubmitted={true} />);
+      render(
+        <TestWrapper errors={errors} isSubmitted={true}>
+          <ErrorCallOut />
+        </TestWrapper>
+      );
 
       const callout = screen.getByRole('complementary');
       expect(callout).toHaveClass('euiCallOut--danger');

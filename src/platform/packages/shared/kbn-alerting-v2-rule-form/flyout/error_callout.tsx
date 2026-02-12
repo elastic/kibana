@@ -9,15 +9,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import type { FieldErrors } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import type { FormValues } from '../form/types';
 
-interface ErrorCallOutProps {
-  errors: FieldErrors<FormValues>;
-  isSubmitted: boolean;
-}
+export const ErrorCallOut: React.FC = () => {
+  const {
+    formState: { errors, isSubmitted },
+  } = useFormContext<FormValues>();
 
-export const ErrorCallOut: React.FC<ErrorCallOutProps> = ({ errors, isSubmitted }) => {
   const errorMessages = Object.values(errors)
     .map((error) => error?.message)
     .filter((message): message is string => typeof message === 'string' && message.length > 0);
