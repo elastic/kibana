@@ -8,10 +8,10 @@
 import { useCallback, useState } from 'react';
 import type { Template } from '../../../../common/types/domain/template/v1';
 import { useCasesEditTemplateNavigation } from '../../../common/navigation';
-import { useDeleteTemplate } from './use_delete_template';
+import { useBulkDeleteTemplates } from './use_bulk_delete_templates';
 import { useUpdateTemplate } from './use_update_template';
 import { useCreateTemplate } from './use_create_template';
-import { useExportTemplate } from './use_export_template';
+import { useBulkExportTemplates } from './use_bulk_export_templates';
 import { useCasesToast } from '../../../common/use_cases_toast';
 import * as i18n from '../../templates/translations';
 
@@ -22,7 +22,7 @@ interface UseTemplatesActionsProps {
 export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProps = {}) => {
   const { navigateToCasesEditTemplate } = useCasesEditTemplateNavigation();
   const { showSuccessToast } = useCasesToast();
-  const { mutate: deleteTemplate, isLoading: isDeleting } = useDeleteTemplate({
+  const { mutate: bulkDeleteTemplates, isLoading: isDeleting } = useBulkDeleteTemplates({
     onSuccess: onDeleteSuccess,
   });
 
@@ -37,7 +37,7 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
     disableDefaultSuccessToast: true,
   });
 
-  const { mutate: exportTemplate, isLoading: isExporting } = useExportTemplate();
+  const { mutate: bulkExportTemplates, isLoading: isExporting } = useBulkExportTemplates();
 
   const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null);
 
@@ -88,9 +88,9 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
 
   const handleExport = useCallback(
     (template: Template) => {
-      exportTemplate({ templateId: template.templateId });
+      bulkExportTemplates({ templateIds: [template.templateId] });
     },
-    [exportTemplate]
+    [bulkExportTemplates]
   );
 
   const handleDelete = useCallback((template: Template) => {
@@ -99,10 +99,10 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
 
   const confirmDelete = useCallback(() => {
     if (templateToDelete) {
-      deleteTemplate({ templateId: templateToDelete.templateId });
+      bulkDeleteTemplates({ templateIds: [templateToDelete.templateId] });
       setTemplateToDelete(null);
     }
-  }, [templateToDelete, deleteTemplate]);
+  }, [templateToDelete, bulkDeleteTemplates]);
 
   const cancelDelete = useCallback(() => {
     setTemplateToDelete(null);
