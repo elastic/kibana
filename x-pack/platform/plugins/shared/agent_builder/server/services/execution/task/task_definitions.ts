@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { TaskCost, TaskManagerSetupContract, TaskPriority } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { TaskHandler } from './task_handler';
 
 export const taskTypes = {
