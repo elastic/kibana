@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -69,6 +69,17 @@ export const MetricsGrid = ({
       esqlQuery: flyoutState.esqlQuery,
     };
   }, [flyoutState, fields]);
+
+  // TODO: Remove this cleanup once we have metrics_info that provides consistent
+  // metric identification across pages. Currently needed because flyoutState may
+  // persist with a gridPosition that references a metric from a different page
+  // (e.g., when duplicating a tab from page 2, the new tab resets to page 0 but
+  // flyoutState still references a metric from page 2).
+  useEffect(() => {
+    if (flyoutState?.metricUniqueKey && fields.length > 0 && !flyoutData) {
+      onFlyoutStateChange(undefined);
+    }
+  }, [flyoutState?.metricUniqueKey, fields.length, flyoutData, onFlyoutStateChange]);
 
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(fields.length / gridColumns);
