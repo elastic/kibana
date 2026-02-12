@@ -14,6 +14,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { HooksServiceSetup, HooksServiceStart } from '@kbn/agent-builder-server';
 import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './runner';
 import type { AgentsServiceSetup, AgentsServiceStart } from './agents';
@@ -29,6 +30,7 @@ export interface InternalSetupServices {
   tools: ToolsServiceSetup;
   agents: AgentsServiceSetup;
   attachments: AttachmentServiceSetup;
+  hooks: HooksServiceSetup;
   skills: SkillServiceSetup;
 }
 
@@ -40,6 +42,7 @@ export interface InternalStartServices {
   conversations: ConversationService;
   chat: ChatService;
   runnerFactory: RunnerFactory;
+  hooks: HooksServiceStart;
   auditLogService: AuditLogService;
 }
 
