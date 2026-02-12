@@ -64,6 +64,8 @@ describe('BedrockConnectorFields renders', () => {
 
     expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
     expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(bedrockConnector.config.apiUrl);
+    expect(getAllByTestId('config.region-input')[0]).toBeInTheDocument();
+    expect(getAllByTestId('config.region-input')[0]).toHaveValue('');
     expect(getAllByTestId('config.defaultModel-input')[0]).toBeInTheDocument();
     expect(getAllByTestId('config.defaultModel-input')[0]).toHaveValue(
       bedrockConnector.config.defaultModel
