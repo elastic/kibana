@@ -59,6 +59,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
     });
 
+    afterEach(async function () {
+      await discover.resetQueryMode();
+    });
+
     it('should show highlights for in-table search', async () => {
       expect(await dataGrid.getCurrentPageNumber()).to.be('1');
 

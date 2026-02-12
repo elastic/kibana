@@ -9,12 +9,8 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { Logger } from '@kbn/core/server';
 import type { MCPConnectorConfig } from '@kbn/connector-schemas/mcp';
 import type { StackConnectorConfig } from '@kbn/data-catalog-plugin';
-import { bulkCreateMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/utils/bulk_create_mcp_tools';
-import type { ToolRegistry } from '@kbn/agent-builder-plugin/server/services/tools';
-import { getNamedMcpTools } from '@kbn/agent-builder-plugin/server/services/tools/tool_types/mcp/tool_type';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import type { ConnectorSecrets } from '@kbn/data-catalog-plugin/common/data_source_spec';
 
@@ -101,60 +97,12 @@ function buildSecretsFromMCPConnectorConfig(
   return secrets;
 }
 
-async function importMcpTools(
-  registry: ToolRegistry,
-  actions: ActionsPluginStart,
-  request: KibanaRequest,
-  connectorId: string,
-  toolNames: string[],
-  name: string,
-  logger: Logger
-): Promise<string[]> {
-  if (toolNames.length === 0) {
-    return [];
-  }
-
-  const mcpTools = await getNamedMcpTools({
-    actions,
-    request,
-    connectorId,
-    toolNames,
-    logger,
-  });
-
-  if (mcpTools === undefined) {
-    throw new Error(`No imported connector tools found for ${name}`);
-  }
-
-  let importedToolIds: string[] = [];
-  try {
-    if (mcpTools && mcpTools.length > 0) {
-      const { results } = await bulkCreateMcpTools({
-        registry,
-        actions,
-        request,
-        connectorId,
-        tools: mcpTools,
-        namespace: name,
-      });
-      importedToolIds = results.map((result) => result.toolId);
-      logger.info(`Imported tools for Data Source '${name}': ${JSON.stringify(importedToolIds)}`);
-    }
-  } catch (error) {
-    throw new Error(`Error bulk importing MCP tools for ${name}: ${error}`);
-  }
-  return importedToolIds;
-}
-
 export const createStackConnector = async (
-  registry: ToolRegistry,
   actions: ActionsPluginStart,
   request: KibanaRequest,
-  stackConnectorConfig: StackConnectorConfig,
   name: string,
-  toolIds: string[],
-  credentials: string,
-  logger: Logger
+  stackConnectorConfig: StackConnectorConfig,
+  credentials: string
 ) => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
   const connectorType = stackConnectorConfig.type;
@@ -171,24 +119,12 @@ export const createStackConnector = async (
 
   const stackConnector: ActionResult = await actionsClient.create({
     action: {
-      name: `${connectorType} stack connector for data connector '${name}'`,
+      name,
       actionTypeId: connectorType,
       config: connectorConfig,
       secrets,
     },
   });
 
-  if (connectorType === '.mcp' && stackConnectorConfig.importedTools) {
-    const importedToolIds = await importMcpTools(
-      registry,
-      actions,
-      request,
-      stackConnector.id,
-      stackConnectorConfig.importedTools,
-      name,
-      logger
-    );
-    toolIds.push(...importedToolIds);
-  }
   return stackConnector;
 };

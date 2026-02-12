@@ -21,6 +21,9 @@ import {
 export function migrateOnRead(definition: Record<string, unknown>): Streams.all.Definition {
   let migratedDefinition = definition;
   let hasBeenMigrated = false;
+  if ('group' in migratedDefinition) {
+    return migratedDefinition as unknown as Streams.all.Definition;
+  }
   // Add required description
   if (typeof migratedDefinition.description !== 'string') {
     migratedDefinition = {
@@ -166,6 +169,16 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
           updated_at: new Date(0).toISOString(),
         },
       },
+    };
+    hasBeenMigrated = true;
+  }
+
+  // Initialize query_streams as empty array for ingest streams (WiredStream and ClassicStream)
+  // that don't have this field yet
+  if (isObject(migratedDefinition.ingest) && !('query_streams' in migratedDefinition)) {
+    migratedDefinition = {
+      ...migratedDefinition,
+      query_streams: [],
     };
     hasBeenMigrated = true;
   }

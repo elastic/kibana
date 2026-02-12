@@ -361,7 +361,12 @@ export function StreamsTreeTable({
               name: FEATURES_COLUMN_HEADER,
               width: '120px',
               align: 'left',
-              render: (item: TableRow) => <FeaturesColumn stream={item.stream} />,
+              render: (item: TableRow) => (
+                <FeaturesColumn
+                  stream={item.stream}
+                  streamOnboardingResult={streamOnboardingResultMap[item.stream.name]}
+                />
+              ),
             },
             {
               name: QUERIES_COLUMN_HEADER,

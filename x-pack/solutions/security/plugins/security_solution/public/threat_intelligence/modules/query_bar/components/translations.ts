@@ -32,3 +32,9 @@ export const FILTER_IN_ANNOUNCEMENT = (field: string, value: string) =>
     defaultMessage: 'Filter applied showing only entries where {field} is {value}. Chart updated',
     values: { field, value },
   });
+
+export const ADD_TO_TIMELINE_ANNOUNCEMENT = (value: string) =>
+  i18n.translate('xpack.securitySolution.threatIntelligence.queryBar.addToTimelineAnnouncement', {
+    defaultMessage: 'Added {value} to timeline',
+    values: { value },
+  });

@@ -17,7 +17,7 @@ import type {
 import { getEntityDefinition } from '../../common/domain/definitions/registry';
 import {
   buildLogsExtractionEsqlQuery,
-  HASHED_ID,
+  HASHED_ID_FIELD,
 } from './logs_extraction/logs_extraction_query_builder';
 import { getLatestEntitiesIndexName } from './assets/latest_index';
 import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
@@ -167,7 +167,7 @@ export class LogsExtractionClient {
       await ingestEntities({
         esClient: this.esClient,
         esqlResponse,
-        esIdField: HASHED_ID,
+        esIdField: HASHED_ID_FIELD,
         targetIndex: latestIndex,
         logger: this.logger,
         abortController: opts?.abortController,

@@ -34,7 +34,7 @@ const storageSettings = {
 } satisfies IndexStorageSettings;
 
 export interface ConversationProperties {
-  user_id: string;
+  user_id?: string;
   user_name: string;
   agent_id: string;
   space: string;

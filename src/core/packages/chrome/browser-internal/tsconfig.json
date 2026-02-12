@@ -69,6 +69,7 @@
     "@kbn/core-chrome-sidebar-internal",
     "@kbn/core-chrome-sidebar-context",
     "@kbn/core-chrome-sidebar-components",
+    "@kbn/core-chrome-sidebar",
   ],
   "exclude": [
     "target/**/*",

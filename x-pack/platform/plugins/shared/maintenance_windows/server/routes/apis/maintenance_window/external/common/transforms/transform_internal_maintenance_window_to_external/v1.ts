@@ -6,7 +6,6 @@
  */
 
 import type { MaintenanceWindow } from '../../../../../../../application/types';
-import { transformRRuleToCustomScheduleV1 } from '../../../../../../schemas/schedule';
 import type { MaintenanceWindowResponseV1 } from '../../../../../../schemas/maintenance_window/external/response';
 
 /**
@@ -16,18 +15,13 @@ import type { MaintenanceWindowResponseV1 } from '../../../../../../schemas/main
 export const transformInternalMaintenanceWindowToExternal = (
   maintenanceWindow: MaintenanceWindow
 ): MaintenanceWindowResponseV1 => {
-  const kql = maintenanceWindow.scopedQuery?.kql;
-
-  const custom = transformRRuleToCustomScheduleV1({
-    duration: maintenanceWindow.duration,
-    rRule: maintenanceWindow.rRule,
-  });
+  const kql = maintenanceWindow.scope?.alerting?.kql;
 
   return {
     id: maintenanceWindow.id,
     title: maintenanceWindow.title,
     enabled: maintenanceWindow.enabled,
-    schedule: { custom },
+    schedule: maintenanceWindow.schedule,
     created_by: maintenanceWindow.createdBy,
     updated_by: maintenanceWindow.updatedBy,
     created_at: maintenanceWindow.createdAt,

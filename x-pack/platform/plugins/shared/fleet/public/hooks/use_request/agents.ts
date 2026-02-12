@@ -30,6 +30,8 @@ import type {
   PostAgentRollbackResponse,
   PostBulkAgentRollbackRequest,
   PostBulkAgentRollbackResponse,
+  PostGenerateAgentsReportRequest,
+  PostGenerateAgentsReportResponse,
 } from '../../../common/types';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -461,6 +463,15 @@ export function sendPostBulkAgentRollback(body: PostBulkAgentRollbackRequest['bo
     path: agentRouteService.postBulkAgentRollback(),
     method: 'post',
     version: API_VERSIONS.public.v1,
+    body,
+  });
+}
+
+export function sendPostGenerateAgentsReport(body: PostGenerateAgentsReportRequest['body']) {
+  return sendRequestForRq<PostGenerateAgentsReportResponse>({
+    path: agentRouteService.postGenerateAgentsReport(),
+    method: 'post',
+    version: API_VERSIONS.internal.v1,
     body,
   });
 }

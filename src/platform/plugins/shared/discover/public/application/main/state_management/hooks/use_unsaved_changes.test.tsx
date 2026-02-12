@@ -41,7 +41,6 @@ describe('useUnsavedChanges', () => {
           serializedSearchSource: { index: dataViewWithTimefieldMock.id },
         },
       }),
-      timeRestore: false,
       services,
     });
 

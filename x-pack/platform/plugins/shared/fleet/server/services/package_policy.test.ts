@@ -274,6 +274,11 @@ jest.mock('./epm/packages/get', () => ({
   }),
 }));
 
+jest.mock('./utils/version_specific_policies', () => ({
+  ...jest.requireActual('./utils/version_specific_policies'),
+  getAgentVersionsForVersionSpecificPolicies: jest.fn().mockResolvedValue([]),
+}));
+
 jest.mock('./agent_policy');
 const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 jest.mock('./epm/packages/cleanup', () => {
