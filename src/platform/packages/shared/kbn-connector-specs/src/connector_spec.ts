@@ -77,14 +77,11 @@ export interface ConnectorMetadata {
 
 // Auth schemas defined in ./auth_types
 export interface GetTokenOpts {
-  grantType?: 'client_credentials' | 'authorization_code';
   tokenUrl: string;
   scope?: string;
   clientId: string;
   clientSecret: string;
   additionalFields?: Record<string, unknown>;
-  useBasicAuth?: boolean;
-  tokenExtractor?: string;
 }
 
 export interface AuthContext {
@@ -95,14 +92,11 @@ export interface AuthContext {
   sslSettings: SSLSettings;
 }
 
-export type AuthMode = 'per-user' | 'shared';
-
 export interface AuthTypeSpec<T extends Record<string, unknown>> {
   id: string;
   schema: z.ZodObject<Record<string, z.ZodType>>;
   normalizeSchema?: (defaults?: Record<string, unknown>) => z.ZodObject<Record<string, z.ZodType>>;
   configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
-  authMode?: AuthMode;
 }
 
 export type NormalizedAuthType = AuthTypeSpec<Record<string, unknown>>;
