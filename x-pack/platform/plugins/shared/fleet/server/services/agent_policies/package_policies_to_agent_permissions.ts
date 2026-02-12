@@ -16,6 +16,7 @@ import {
   FLEET_UNIVERSAL_PROFILING_COLLECTOR_PACKAGE,
   FLEET_UNIVERSAL_PROFILING_SYMBOLIZER_PACKAGE,
   OTEL_COLLECTOR_INPUT_TYPE,
+  USE_APM_VAR_NAME,
 } from '../../../common/constants';
 
 import { getNormalizedDataStreams } from '../../../common/services';
@@ -179,6 +180,17 @@ export function storedPackagePoliciesToAgentPermissions(
                       dynamic_namespace: stream.data_stream.elasticsearch?.dynamic_namespace,
                     },
                   });
+
+                  if (stream.vars?.[USE_APM_VAR_NAME]?.value === true) {
+                    dataStreams_.push({
+                      type: 'metrics',
+                      dataset: 'generic',
+                      elasticsearch: {
+                        dynamic_dataset: true,
+                        dynamic_namespace: true,
+                      },
+                    });
+                  }
                 }
               });
 

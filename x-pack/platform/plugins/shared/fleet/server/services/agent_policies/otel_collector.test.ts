@@ -208,6 +208,40 @@ describe('generateOtelcolConfig', () => {
     ],
   };
 
+  const otelTracesInputWithAPM: FullAgentPolicyInput = {
+    type: OTEL_COLLECTOR_INPUT_TYPE,
+    id: 'test-traces',
+    name: 'test-traces',
+    revision: 0,
+    data_stream: {
+      namespace: 'default',
+    },
+    use_output: 'default',
+    package_policy_id: 'tracespolicy',
+    streams: [
+      {
+        id: 'stream-id-1',
+        data_stream: {
+          dataset: 'zipkinreceiver',
+          type: 'traces',
+        },
+        use_apm: true,
+        receivers: {
+          zipkin: {
+            endpoint: 'localhost:9411',
+          },
+        },
+        service: {
+          pipelines: {
+            traces: {
+              receivers: ['zipkin'],
+            },
+          },
+        },
+      },
+    ],
+  };
+
   it('should be empty if there is no input', () => {
     const inputs: FullAgentPolicyInput[] = [];
     expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({});
@@ -554,6 +588,69 @@ describe('generateOtelcolConfig', () => {
               'transform/test-3-stream-id-1-routing',
             ],
             exporters: ['forward'],
+          },
+          metrics: {
+            receivers: ['forward'],
+            exporters: ['elasticsearch/default'],
+          },
+        },
+      },
+    });
+  });
+
+  it('should add elasticapm connector and processor for traces input with use_apm enabled', () => {
+    const inputs: FullAgentPolicyInput[] = [otelTracesInputWithAPM];
+    expect(generateOtelcolConfig(inputs, defaultOutput)).toEqual({
+      receivers: {
+        'zipkin/test-traces-stream-id-1': {
+          endpoint: 'localhost:9411',
+        },
+      },
+      processors: {
+        'transform/test-traces-stream-id-1-routing': {
+          trace_statements: [
+            {
+              context: 'span',
+              statements: [
+                'set(attributes["data_stream.type"], "traces")',
+                'set(attributes["data_stream.dataset"], "zipkinreceiver")',
+                'set(attributes["data_stream.namespace"], "default")',
+              ],
+            },
+            {
+              context: 'spanevent',
+              statements: [
+                'set(attributes["data_stream.type"], "logs")',
+                'set(attributes["data_stream.namespace"], "default")',
+              ],
+            },
+          ],
+        },
+        elasticapm: {},
+      },
+      connectors: {
+        elasticapm: {},
+        forward: {},
+      },
+      exporters: {
+        'elasticsearch/default': {
+          endpoints: ['http://localhost:9200'],
+        },
+      },
+      service: {
+        pipelines: {
+          'traces/test-traces-stream-id-1': {
+            receivers: ['zipkin/test-traces-stream-id-1'],
+            exporters: ['elasticapm', 'forward'],
+            processors: ['elasticapm', 'transform/test-traces-stream-id-1-routing'],
+          },
+          'metrics/aggregated-otel-metrics': {
+            receivers: ['elasticapm'],
+            exporters: ['forward'],
+          },
+          traces: {
+            receivers: ['forward'],
+            exporters: ['elasticsearch/default'],
           },
           metrics: {
             receivers: ['forward'],

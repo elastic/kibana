@@ -14,7 +14,12 @@ import type {
   OTelCollectorPipelineID,
   PackageInfo,
 } from '../../../common/types';
-import { OTEL_COLLECTOR_INPUT_TYPE, outputType } from '../../../common/constants';
+import {
+  dataTypes,
+  OTEL_COLLECTOR_INPUT_TYPE,
+  outputType,
+  USE_APM_VAR_NAME,
+} from '../../../common/constants';
 import { FleetError } from '../../errors';
 import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpers';
 import { pkgToPkgKey } from '../epm/registry';
@@ -53,29 +58,52 @@ export function generateOtelcolConfig(
           packageInfo,
           stream.service?.pipelines
         );
-        return appendOtelComponents(
-          {
-            ...addSuffixToOtelcolComponentsConfig('extensions', suffix, stream?.extensions),
-            ...addSuffixToOtelcolComponentsConfig('receivers', suffix, stream?.receivers),
-            ...addSuffixToOtelcolComponentsConfig('processors', suffix, stream?.processors),
-            ...addSuffixToOtelcolComponentsConfig('connectors', suffix, stream?.connectors),
-            ...addSuffixToOtelcolComponentsConfig('exporters', suffix, stream?.exporters),
-            ...(stream?.service
-              ? {
-                  service: {
-                    ...stream.service,
-                    ...addSuffixToOtelcolComponentsConfig(
+
+        const shouldAddAPMConfig =
+          stream.data_stream.type === dataTypes.Traces && stream[USE_APM_VAR_NAME] === true;
+
+        let otelConfig: OTelCollectorConfig = {
+          ...addSuffixToOtelcolComponentsConfig('extensions', suffix, stream?.extensions),
+          ...addSuffixToOtelcolComponentsConfig('receivers', suffix, stream?.receivers),
+          ...addSuffixToOtelcolComponentsConfig('processors', suffix, stream?.processors),
+          ...addSuffixToOtelcolComponentsConfig('connectors', suffix, stream?.connectors),
+          ...addSuffixToOtelcolComponentsConfig('exporters', suffix, stream?.exporters),
+          ...(stream?.service
+            ? {
+                service: {
+                  ...stream.service,
+                  pipelines: maybeAddApmToPipelines(
+                    addSuffixToOtelcolComponentsConfig(
                       'pipelines',
                       suffix,
                       addSuffixToOtelcolPipelinesComponents(stream.service.pipelines, suffix)
-                    ),
-                  },
-                }
-              : {}),
-          },
-          'processors',
-          [attributesTransform]
-        );
+                    ).pipelines ?? {},
+                    shouldAddAPMConfig
+                  ),
+                },
+              }
+            : {}),
+        };
+
+        otelConfig = appendOtelComponents(otelConfig, 'processors', [attributesTransform]);
+
+        if (stream.data_stream.type === dataTypes.Traces && stream[USE_APM_VAR_NAME] === true) {
+          if (!otelConfig?.connectors) {
+            otelConfig.connectors = {};
+          }
+          if (!otelConfig?.processors) {
+            otelConfig.processors = {};
+          }
+
+          otelConfig.connectors.elasticapm = {};
+          otelConfig.processors.elasticapm = {};
+
+          otelConfig.service!.pipelines!['metrics/aggregated-otel-metrics'] = {
+            receivers: ['elasticapm'],
+          };
+        }
+
+        return otelConfig;
       });
 
       return otelInputs;
@@ -196,7 +224,7 @@ function appendOtelComponents(
   components: Record<string, Record<string, any>>[]
 ): OTelCollectorConfig {
   components.forEach((component) => {
-    Object.assign(config, config, {
+    Object.assign(config, {
       [type]: {
         ...Object.entries(config).find(([key]) => key === type)?.[1],
         ...component,
@@ -229,6 +257,33 @@ function addSuffixToOtelcolComponentsConfig(
   });
 
   return { [type]: generated };
+}
+
+function maybeAddApmToPipelines(
+  pipelines: Record<OTelCollectorPipelineID, any>,
+  shouldAddAPMConfig: boolean
+): Record<OTelCollectorPipelineID, any> {
+  if (!shouldAddAPMConfig) {
+    return pipelines;
+  }
+  pipelines = addCompomentToPipelines(pipelines, 'elasticapm', 'exporters');
+  pipelines = addCompomentToPipelines(pipelines, 'elasticapm', 'processors');
+  return pipelines;
+}
+
+function addCompomentToPipelines(
+  pipelines: any,
+  componentId: string,
+  type: string
+): Record<OTelCollectorPipelineID, any> {
+  for (const pipelineId in pipelines) {
+    if (pipelines[pipelineId][type]) {
+      pipelines[pipelineId][type] = pipelines[pipelineId][type].concat([componentId]);
+    } else {
+      pipelines[pipelineId][type] = [componentId];
+    }
+  }
+  return pipelines;
 }
 
 function addSuffixToOtelcolPipelinesComponents(
