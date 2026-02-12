@@ -10,7 +10,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiIconTip } from '@elastic/eui';
-import { Controller, type Control, type FieldErrors, type UseFormSetValue } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -20,13 +20,9 @@ import { RuleSchedule } from '../fields/rule_schedule';
 import { TimeFieldSelect } from '../fields/time_field_select';
 import { LookbackWindow } from '../fields/lookback_window';
 import { GroupBySelect } from '../fields/group_by_select';
-import { useDataFields } from '../hooks/use_data_fields';
 import { useQueryColumns } from '../hooks/use_query_columns';
 
 interface RuleExecutionFieldGroupProps {
-  control: Control<FormValues>;
-  errors: FieldErrors<FormValues>;
-  setValue: UseFormSetValue<FormValues>;
   services: {
     http: HttpStart;
     data: DataPublicPluginStart;
@@ -39,20 +35,17 @@ const SCHEDULE_ROW_ID = 'ruleV2FormScheduleField';
 const LOOKBACK_WINDOW_ROW_ID = 'ruleV2FormLookbackWindowField';
 
 export const RuleExecutionFieldGroup: React.FC<RuleExecutionFieldGroupProps> = ({
-  control,
-  errors,
-  setValue,
   query,
   services,
 }) => {
-  // Time fields come from the data view (used for filtering before query runs)
-  const { fields: timeFields } = useDataFields({
-    query,
-    http: services.http,
-    dataViews: services.dataViews,
-  });
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext<FormValues>();
+
   // Columns come from the ES|QL query result (used for grouping)
   const { columns } = useQueryColumns({ query, search: services.data.search.search });
+
   return (
     <FieldGroup
       title={i18n.translate('xpack.esqlRuleForm.ruleExecution', {
@@ -98,7 +91,7 @@ export const RuleExecutionFieldGroup: React.FC<RuleExecutionFieldGroupProps> = (
         <Controller
           name="timeField"
           control={control}
-          render={({ field }) => <TimeFieldSelect {...field} fields={timeFields} />}
+          render={({ field }) => <TimeFieldSelect {...field} services={services} />}
         />
       </EuiFormRow>
 
@@ -117,7 +110,7 @@ export const RuleExecutionFieldGroup: React.FC<RuleExecutionFieldGroupProps> = (
         />
       </EuiFormRow>
 
-      <GroupBySelect control={control} columns={columns} setValue={setValue} />
+      <GroupBySelect columns={columns} />
     </FieldGroup>
   );
 };

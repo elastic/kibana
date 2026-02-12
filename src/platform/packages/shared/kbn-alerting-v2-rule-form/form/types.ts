@@ -8,6 +8,7 @@
  */
 
 export interface FormValues {
+  kind: 'signal' | 'alert';
   name: string;
   description: string;
   tags: string[];

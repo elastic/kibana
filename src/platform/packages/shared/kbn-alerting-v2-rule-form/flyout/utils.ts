@@ -8,12 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { HttpStart } from '@kbn/core/public';
-
-interface Field {
-  name: string;
-  type: string;
-}
+import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 
 type TimeUnit = 's' | 'm' | 'h' | 'd';
 
@@ -38,9 +33,11 @@ export const getTimeOptions = (val: number = 1) =>
     text: val > 1 ? TIME_UNITS[value] : TIME_UNITS[value].slice(0, -1),
   }));
 
-export const getTimeFieldOptions = (fields: Field[]): Array<{ text: string; value: string }> => {
+export const getTimeFieldOptions = (
+  fields: DataViewFieldMap
+): Array<{ text: string; value: string }> => {
   const options: Array<{ text: string; value: string }> = [];
-  fields.forEach((field) => {
+  Object.values(fields).forEach((field) => {
     if (field.type === 'date' || field.type === 'date_nanos') {
       options.push({
         text: field.name,
@@ -49,16 +46,6 @@ export const getTimeFieldOptions = (fields: Field[]): Array<{ text: string; valu
     }
   });
   return options;
-};
-
-export const getFields = async (http: HttpStart, indexes: string[]): Promise<Field[]> => {
-  const { fields } = await http.post<{ fields: Field[] }>(
-    `/internal/triggers_actions_ui/data/_fields`,
-    {
-      body: JSON.stringify({ indexPatterns: indexes }),
-    }
-  );
-  return fields;
 };
 
 export const firstFieldOption = {

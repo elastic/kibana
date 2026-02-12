@@ -7,19 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { useEffect, useMemo } from 'react';
-import { Controller, useWatch } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Control, UseFormSetValue } from 'react-hook-form';
 import type { FormValues } from '../types';
 
 interface GroupBySelectProps {
-  control: Control<FormValues>;
   columns: Array<{ name: string; type: string }>;
-  setValue: UseFormSetValue<FormValues>;
 }
 
-export const GroupBySelect: React.FC<GroupBySelectProps> = ({ control, columns, setValue }) => {
+export const GroupBySelect: React.FC<GroupBySelectProps> = ({ columns }) => {
+  const { control, setValue } = useFormContext<FormValues>();
   const options = useMemo(
     () => columns.map((col) => ({ label: col.name, value: col.name })),
     [columns]

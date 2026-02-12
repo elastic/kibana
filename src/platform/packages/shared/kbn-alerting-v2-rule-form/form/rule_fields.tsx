@@ -8,45 +8,61 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
-import type { FieldErrors, Control, UseFormSetValue } from 'react-hook-form';
+import { EuiSpacer, EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Controller, useFormContext } from 'react-hook-form';
 import type { HttpStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FormValues } from './types';
 import { RuleExecutionFieldGroup } from './field_groups/rule_execution_field_group';
 import { RuleDetailsFieldGroup } from './field_groups/rule_details_field_group';
+import { KindField } from './fields/kind_field';
+
+export interface RuleFieldsServices {
+  http: HttpStart;
+  data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+}
 
 export interface RuleFieldsProps {
-  control: Control<FormValues>;
-  errors: FieldErrors<FormValues>;
-  setValue: UseFormSetValue<FormValues>;
-  services: {
-    http: HttpStart;
-    data: DataPublicPluginStart;
-    dataViews: DataViewsPublicPluginStart;
-  };
+  services: RuleFieldsServices;
   query: string;
 }
 
-export const RuleFields: React.FC<RuleFieldsProps> = ({
-  control,
-  errors,
-  setValue,
-  services,
-  query,
-}) => {
+export const RuleFields: React.FC<RuleFieldsProps> = ({ services, query }) => {
+  const formContext = useFormContext<FormValues>();
+
+  if (!formContext) {
+    throw new Error(
+      'RuleFields must be used within a FormProvider. ' +
+        'If using RuleFields standalone, wrap it with FormProvider from react-hook-form.'
+    );
+  }
+
+  const { control } = formContext;
+
   return (
     <>
-      <RuleDetailsFieldGroup control={control} errors={errors} />
+      <EuiFormRow
+        label={i18n.translate('xpack.esqlRuleForm.kindLabel', {
+          defaultMessage: 'Rule kind',
+        })}
+        helpText={i18n.translate('xpack.esqlRuleForm.kindHelpText', {
+          defaultMessage: 'Choose whether this rule creates monitors or alerts.',
+        })}
+      >
+        <Controller
+          name="kind"
+          control={control}
+          render={({ field }) => <KindField {...field} />}
+        />
+      </EuiFormRow>
       <EuiSpacer size="m" />
-      <RuleExecutionFieldGroup
-        control={control}
-        errors={errors}
-        setValue={setValue}
-        services={services}
-        query={query}
-      />
+      <RuleDetailsFieldGroup />
+      <EuiSpacer size="m" />
+      <EuiSpacer size="m" />
+      <RuleExecutionFieldGroup services={services} query={query} />
     </>
   );
 };

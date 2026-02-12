@@ -10,22 +10,18 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText, EuiTextArea, EuiComboBox, EuiSwitch } from '@elastic/eui';
-import { Controller, type Control, type FieldErrors } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { FieldGroup } from './field_group';
-
-interface RuleDetailsFieldGroupProps {
-  control: Control<FormValues>;
-  errors: FieldErrors<FormValues>;
-}
 
 const NAME_ROW_ID = 'ruleV2FormNameField';
 const DESCRIPTION_ROW_ID = 'ruleV2FormDescriptionField';
 
-export const RuleDetailsFieldGroup: React.FC<RuleDetailsFieldGroupProps> = ({
-  control,
-  errors,
-}) => {
+export const RuleDetailsFieldGroup: React.FC = () => {
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext<FormValues>();
   return (
     <FieldGroup
       title={i18n.translate('xpack.esqlRuleForm.ruleDetails', {

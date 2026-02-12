@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { NotificationsStart } from '@kbn/core/public';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -25,7 +25,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useForm } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import type { HttpStart } from '@kbn/core/public';
 import type { FormValues } from '../form/types';
 import { ErrorCallOut } from './error_callout';
@@ -55,14 +55,7 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
   services,
   isQueryInvalid,
 }) => {
-  const {
-    control,
-    handleSubmit,
-    setValue,
-    setError,
-    clearErrors,
-    formState: { errors, isSubmitted },
-  } = useForm<FormValues>({
+  const form = useForm<FormValues>({
     mode: 'onBlur',
     defaultValues: {
       kind: 'alert',
@@ -78,6 +71,7 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
       groupingKey: [],
     },
   });
+  const { setValue, setError, clearErrors, handleSubmit } = form;
   const { http, notifications } = services;
 
   const flyoutTitleId = 'ruleV2FormFlyoutTitle';
@@ -126,62 +120,58 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
   }, [isQueryInvalid, setError, clearErrors]);
 
   return (
-    <EuiForm id={formId} component="form" onSubmit={handleSubmit(onSubmit)}>
-      <EuiFlyout
-        session="start"
-        flyoutMenuProps={{
-          title: 'Create Alert Rule',
-          hideTitle: true,
-        }}
-        type={push ? 'push' : 'overlay'}
-        onClose={handleClose}
-        aria-labelledby={flyoutTitleId}
-        size="s"
-      >
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m" id={flyoutTitleId}>
-            <h2>
-              <FormattedMessage
-                id="xpack.esqlRuleForm.flyoutTitle"
-                defaultMessage="Create Alert Rule"
-              />
-            </h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <ErrorCallOut errors={errors} isSubmitted={isSubmitted} />
-          <RuleFields
-            control={control}
-            errors={errors}
-            setValue={setValue}
-            query={query}
-            services={services}
-          />
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose} isLoading={isLoading}>
+    <FormProvider {...form}>
+      <EuiForm id={formId} component="form" onSubmit={handleSubmit(onSubmit)}>
+        <EuiFlyout
+          session="start"
+          flyoutMenuProps={{
+            title: 'Create Alert Rule',
+            hideTitle: true,
+          }}
+          type={push ? 'push' : 'overlay'}
+          onClose={handleClose}
+          aria-labelledby={flyoutTitleId}
+          size="s"
+        >
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m" id={flyoutTitleId}>
+              <h2>
                 <FormattedMessage
-                  id="xpack.esqlRuleForm.cancelButtonLabel"
-                  defaultMessage="Cancel"
+                  id="xpack.esqlRuleForm.flyoutTitle"
+                  defaultMessage="Create Alert Rule"
                 />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton fill isLoading={isLoading} form={formId} type="submit">
-                <FormattedMessage id="xpack.esqlRuleForm.saveButtonLabel" defaultMessage="Save" />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
-    </EuiForm>
+              </h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <ErrorCallOut />
+            <RuleFields query={query} services={services} />
+          </EuiFlyoutBody>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={onClose} isLoading={isLoading}>
+                  <FormattedMessage
+                    id="xpack.esqlRuleForm.cancelButtonLabel"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton fill isLoading={isLoading} form={formId} type="submit">
+                  <FormattedMessage id="xpack.esqlRuleForm.saveButtonLabel" defaultMessage="Save" />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </EuiFlyout>
+      </EuiForm>
+    </FormProvider>
   );
 };
 
 export const ESQLRuleFormFlyout: React.FC<ESQLRuleFormFlyoutProps> = (props) => {
-  const [queryClient] = useMemo(() => new QueryClient(), []);
+  const queryClient = useMemo(() => new QueryClient(), []);
   return (
     <QueryClientProvider client={queryClient}>
       <ESQLRuleFormFlyoutComponent {...props} />
