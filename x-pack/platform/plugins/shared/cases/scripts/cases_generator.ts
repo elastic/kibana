@@ -97,7 +97,7 @@ const createEsClient = ({ node, ssl }: { node: string; ssl: boolean }): Client =
   let clientOptions: ClientOptions = {
     Connection: HttpConnection,
     node,
-    requestTimeout: 30_000,
+    requestTimeout: 60_000,
   };
 
   if (ssl) {
@@ -260,23 +260,29 @@ const indexAlerts = async (
 
   const alerts = Array.from({ length: totalAlerts }, (_, i) => generateAlertDocument(i));
 
-  // Bulk index
-  const operations = alerts.flatMap((alert) => [
-    { index: { _index: alertIndex, _id: alert._id } },
-    alert._source,
-  ]);
+  // Bulk index in chunks to avoid connection issues with large payloads
+  const CHUNK_SIZE = 500;
+  for (let start = 0; start < alerts.length; start += CHUNK_SIZE) {
+    const chunk = alerts.slice(start, start + CHUNK_SIZE);
+    const operations = chunk.flatMap((alert) => [
+      { index: { _index: alertIndex, _id: alert._id } },
+      alert._source,
+    ]);
 
-  const bulkResponse = await esClient.bulk({
-    operations,
-    refresh: 'wait_for',
-  });
+    const bulkResponse = await esClient.bulk({
+      operations,
+      refresh: start + CHUNK_SIZE >= alerts.length ? 'wait_for' : false,
+    });
 
-  if (bulkResponse.errors) {
-    const errorItems = bulkResponse.items.filter((item) => item.index?.error);
-    toolingLogger.error(`Bulk index errors: ${JSON.stringify(errorItems.slice(0, 3))}`);
+    if (bulkResponse.errors) {
+      const errorItems = bulkResponse.items.filter((item) => item.index?.error);
+      toolingLogger.error(`Bulk index errors: ${JSON.stringify(errorItems.slice(0, 3))}`);
+    }
+
+    toolingLogger.info(
+      `Indexed ${Math.min(start + CHUNK_SIZE, alerts.length)}/${alerts.length} alerts`
+    );
   }
-
-  toolingLogger.info(`Indexed ${totalAlerts} alert documents into ${alertIndex}`);
 
   return alerts.map((alert) => ({
     alertId: alert._id,
