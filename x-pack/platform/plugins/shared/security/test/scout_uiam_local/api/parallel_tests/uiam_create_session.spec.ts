@@ -8,7 +8,7 @@
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS } from '../fixtures';
 
 apiTest.describe('Create new UIAM session', { tag: tags.serverless.security.complete }, () => {
   apiTest('should be able to authenticate as UIAM user', async ({ apiClient, samlAuth }) => {

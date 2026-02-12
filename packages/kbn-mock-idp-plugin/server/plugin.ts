@@ -195,6 +195,77 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
 
       router.post(
         {
+          path: '/mock_idp/grant_api_key',
+          validate: false,
+          security: { authz: { enabled: false, reason: 'Mock IDP plugin for testing' } },
+        },
+        async (_, request, response) => {
+          const [{ security }] = await core.getStartServices();
+
+          const result = await security.authc.apiKeys.grantAsInternalUser(request, {
+            name: 'mock-idp-api-key',
+            kibana_role_descriptors: {},
+          });
+
+          return result
+            ? response.ok({ body: result })
+            : response.badRequest({ body: { message: 'Failed to grant API key' } });
+        }
+      );
+
+      router.post(
+        {
+          path: '/mock_idp/invalidate_api_key',
+          validate: {
+            body: schema.object({ ids: schema.arrayOf(schema.string(), { minSize: 1 }) }),
+          },
+          security: { authz: { enabled: false, reason: 'Mock IDP plugin for testing' } },
+        },
+        async (_, request, response) => {
+          const [{ security }] = await core.getStartServices();
+
+          const result = await security.authc.apiKeys.invalidateAsInternalUser({
+            ids: request.body.ids,
+          });
+
+          return result
+            ? response.ok({ body: result })
+            : response.badRequest({ body: { message: 'Failed to invalidate API key(s)' } });
+        }
+      );
+
+      router.post(
+        {
+          path: '/mock_idp/uiam/secondary_auth',
+          validate: {
+            body: schema.object({ apiKey: schema.maybe(schema.string()) }),
+          },
+          security: {
+            authc: { enabled: 'optional' },
+            authz: { enabled: false, reason: 'Mock IDP plugin for testing' },
+          },
+        },
+        async (_, request, response) => {
+          const [{ elasticsearch }] = await core.getStartServices();
+
+          const result = await elasticsearch.client
+            .asScoped(
+              request.body.apiKey
+                ? { headers: { authorization: `ApiKey ${request.body.apiKey}` } }
+                : request
+            )
+            .asSecondaryAuthUser.transport.request({ method: 'GET', path: `/_metering/stats` });
+
+          return result
+            ? response.ok({ body: result })
+            : response.badRequest({
+                body: { message: 'Failed to perform secondary authentication' },
+              });
+        }
+      );
+
+      router.post(
+        {
           path: '/mock_idp/uiam/grant_api_key',
           validate: {
             body: schema.object({
