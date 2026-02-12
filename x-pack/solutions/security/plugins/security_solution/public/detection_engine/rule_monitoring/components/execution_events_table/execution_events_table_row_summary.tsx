@@ -25,9 +25,7 @@ interface ExecutionEventsTableSummaryCellProps {
   event: RuleExecutionEvent;
 }
 
-export const ExecutionEventsTableSummaryCell: React.FC<ExecutionEventsTableSummaryCellProps> = ({
-  event,
-}) => {
+export function ExecutionEventsTableSummaryCell({ event }: ExecutionEventsTableSummaryCellProps) {
   switch (event.type) {
     case RuleExecutionEventTypeEnum.message:
       return <MessageSummary message={event.message} />;
@@ -38,18 +36,18 @@ export const ExecutionEventsTableSummaryCell: React.FC<ExecutionEventsTableSumma
     default:
       assertUnreachable(event.type, 'Unknown rule execution event type');
   }
-};
+}
 
-const MessageSummary: React.FC<{ message: string }> = ({ message }) => {
+function MessageSummary({ message }: { message: string }) {
   const firstLineOnly = message.split('\n')[0];
   return <TruncatedText text={firstLineOnly} />;
-};
+}
 
 interface StatusChangeSummaryProps {
   details?: { status?: RuleExecutionStatus };
 }
 
-const StatusChangeSummary: React.FC<StatusChangeSummaryProps> = ({ details }) => {
+function StatusChangeSummary({ details }: StatusChangeSummaryProps) {
   const status = details?.status;
 
   if (!status) {
@@ -64,13 +62,13 @@ const StatusChangeSummary: React.FC<StatusChangeSummaryProps> = ({ details }) =>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+}
 
 interface ExecutionMetricsSummaryProps {
   details?: { metrics?: RuleExecutionMetrics };
 }
 
-const ExecutionMetricsSummary: React.FC<ExecutionMetricsSummaryProps> = ({ details }) => {
+function ExecutionMetricsSummary({ details }: ExecutionMetricsSummaryProps) {
   const metrics = details?.metrics;
 
   const summaryMetrics: string[] = [];
@@ -86,4 +84,4 @@ const ExecutionMetricsSummary: React.FC<ExecutionMetricsSummaryProps> = ({ detai
   }
 
   return <TruncatedText text={summaryMetrics.join(', ')} />;
-};
+}
