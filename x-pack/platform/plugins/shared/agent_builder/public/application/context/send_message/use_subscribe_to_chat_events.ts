@@ -24,7 +24,7 @@ import {
 } from '@kbn/agent-builder-common/chat/conversation';
 import { finalize, type Observable, type Subscription } from 'rxjs';
 import { isBrowserToolCallEvent } from '@kbn/agent-builder-common/chat/events';
-import { useRef, type MutableRefObject } from 'react';
+import { useRef } from 'react';
 import { useConversationContext } from '../conversation/conversation_context';
 import type { BrowserToolExecutor } from '../../services/browser_tool_executor';
 
@@ -33,18 +33,15 @@ export const useSubscribeToChatEvents = ({
   setIsResponseLoading,
   isAborted,
   browserToolExecutor,
-  isRegeneratingRef,
 }: {
   setAgentReasoning: (agentReasoning: string) => void;
   setIsResponseLoading: (isResponseLoading: boolean) => void;
   isAborted: () => boolean;
   browserToolExecutor?: BrowserToolExecutor;
-  isRegeneratingRef?: MutableRefObject<boolean>;
 }) => {
   const { conversationActions, browserApiTools } = useConversationContext();
   const unsubscribedRef = useRef(false);
   const subscriptionRef = useRef<Subscription | null>(null);
-  const hasClearedForRegenerateRef = useRef(false);
 
   const unsubscribeFromChatEvents = () => {
     unsubscribedRef.current = true;
@@ -52,12 +49,6 @@ export const useSubscribeToChatEvents = ({
   };
 
   const nextChatEvent = (event: ChatEvent) => {
-    // Clear previous response on first event when regenerating.
-    // Runs synchronously before any content-updating logic to avoid race with React batched updates.
-    if (isRegeneratingRef?.current && !hasClearedForRegenerateRef.current) {
-      hasClearedForRegenerateRef.current = true;
-    }
-
     // chunk received, we append it to the chunk buffer
     if (isMessageChunkEvent(event)) {
       conversationActions.addAssistantMessageChunk({ messageChunk: event.data.text_chunk });
@@ -144,7 +135,6 @@ export const useSubscribeToChatEvents = ({
         resolve();
         return;
       }
-      hasClearedForRegenerateRef.current = false;
       subscriptionRef.current = events$
         .pipe(
           finalize(() => {

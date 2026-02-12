@@ -154,7 +154,6 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
     setIsResponseLoading,
     isAborted: () => Boolean(messageControllerRef?.current?.signal?.aborted),
     browserToolExecutor,
-    isRegeneratingRef,
   });
 
   const sendMessage = async ({ message, action }: SendMessageParams) => {
