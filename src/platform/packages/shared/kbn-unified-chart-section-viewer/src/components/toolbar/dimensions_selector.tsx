@@ -251,18 +251,16 @@ export const DimensionsSelector = ({
             />
           </EuiText>
         </EuiFlexItem>
-        {
-          count > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="xs" flush="right" onClick={handleClearAll}>
-                <FormattedMessage
-                  id="metricsExperience.dimensionsSelector.clearSelection"
-                  defaultMessage="Clear selection"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )
-        }
+        {count > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="xs" flush="right" onClick={handleClearAll}>
+              <FormattedMessage
+                id="metricsExperience.dimensionsSelector.clearSelection"
+                defaultMessage="Clear selection"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }, [localSelectedDimensions.length, handleClearAll]);
