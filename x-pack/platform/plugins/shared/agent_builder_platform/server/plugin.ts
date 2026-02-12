@@ -16,6 +16,7 @@ import type {
 } from './types';
 import { registerTools } from './tools';
 import { registerAttachmentTypes } from './attachment_types';
+import { dataExplorationSkill } from './skills';
 
 export class AgentBuilderPlatformPlugin
   implements
@@ -26,7 +27,6 @@ export class AgentBuilderPlatformPlugin
       PluginStartDependencies
     >
 {
-  // @ts-expect-error unused for now
   private logger: Logger;
   // @ts-expect-error unused for now
   private config: AgentBuilderConfig;
@@ -47,6 +47,11 @@ export class AgentBuilderPlatformPlugin
     registerAttachmentTypes({
       coreSetup,
       setupDeps,
+    });
+
+    // Register built-in skills
+    setupDeps.agentBuilder.skill.registerSkill(dataExplorationSkill).catch((err) => {
+      this.logger.error(`Failed to register built-in data-exploration skill: ${err.message}`);
     });
 
     return {};

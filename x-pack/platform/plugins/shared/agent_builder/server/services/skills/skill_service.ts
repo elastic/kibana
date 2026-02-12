@@ -15,8 +15,8 @@ import { createClient } from './client';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import { getSkillEntryPath } from '../runner/store/volumes/skills/utils';
 import { createSkillRegistry } from './skill_registry';
-import type { SkillProvider, SkillRegistry } from './skill_registry';
-import { persistedSkillToPublicDefinition } from './utils';
+import type { SkillRegistry } from './skill_registry';
+import { createPersistedProvider } from './persisted_provider';
 
 export interface SkillServiceSetup {
   registerSkill(skill: SkillDefinition): Promise<void>;
@@ -92,37 +92,7 @@ class SkillServiceImpl implements SkillService {
         const space = getCurrentSpaceId({ request, spaces });
         const esClient = elasticsearch.client.asInternalUser;
         const skillClient = createClient({ space, esClient, logger });
-
-        const persistedProvider: SkillProvider = {
-          id: 'persisted',
-          async has(skillId: string) {
-            return skillClient.has(skillId);
-          },
-          async get(skillId: string) {
-            try {
-              const skill = await skillClient.get(skillId);
-              return persistedSkillToPublicDefinition(skill);
-            } catch {
-              return undefined;
-            }
-          },
-          async list() {
-            const skills = await skillClient.list();
-            return skills.map(persistedSkillToPublicDefinition);
-          },
-          async create(createRequest) {
-            const skill = await skillClient.create(createRequest);
-            return persistedSkillToPublicDefinition(skill);
-          },
-          async update(skillId, updateRequest) {
-            const skill = await skillClient.update(skillId, updateRequest);
-            return persistedSkillToPublicDefinition(skill);
-          },
-          async delete(skillId: string) {
-            return skillClient.delete(skillId);
-          },
-        };
-
+        const persistedProvider = createPersistedProvider(skillClient);
         const toolRegistry = await getToolRegistry({ request });
 
         return createSkillRegistry({

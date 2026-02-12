@@ -29,7 +29,7 @@ export interface SkillProvider {
 
 export interface SkillRegistry {
   has(skillId: string): Promise<boolean>;
-  get(skillId: string): Promise<SkillDefinition | PublicSkillDefinition | undefined>;
+  get(skillId: string): Promise<PublicSkillDefinition | undefined>;
   list(): Promise<PublicSkillDefinition[]>;
   listSkillDefinitions(): Promise<SkillDefinition[]>;
   create(params: PersistedSkillCreateRequest): Promise<PublicSkillDefinition>;
@@ -67,11 +67,11 @@ class SkillRegistryImpl implements SkillRegistry {
     return this.persistedProvider.has(skillId);
   }
 
-  async get(skillId: string): Promise<SkillDefinition | PublicSkillDefinition | undefined> {
-    // Built-in first, then persisted
+  async get(skillId: string): Promise<PublicSkillDefinition | undefined> {
+    // Built-in first (convert to public format), then persisted
     const builtinSkill = this.builtinSkillsMap.get(skillId);
     if (builtinSkill) {
-      return builtinSkill;
+      return builtinSkillToPublicDefinition(builtinSkill);
     }
     return this.persistedProvider.get(skillId);
   }
@@ -81,9 +81,7 @@ class SkillRegistryImpl implements SkillRegistry {
    */
   async list(): Promise<PublicSkillDefinition[]> {
     const builtinPublic = [...this.builtinSkillsMap.values()].map(builtinSkillToPublicDefinition);
-
     const persistedSkills = await this.persistedProvider.list();
-
     return [...builtinPublic, ...persistedSkills];
   }
 
