@@ -159,8 +159,6 @@ describe('ProfilesRepository.update', () => {
     await repository.update('default', 'profile-id', {
       rules: {
         fieldRules: [{ field: 'host.name', allowed: false, anonymized: false }],
-        regexRules: [],
-        nerRules: [],
       },
       updatedBy: 'updater',
     });
