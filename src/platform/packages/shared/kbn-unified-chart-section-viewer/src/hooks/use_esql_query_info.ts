@@ -17,6 +17,7 @@ export interface EsqlQueryInfo {
   indices: string[];
   dimensions: string[];
   filters: string[];
+  metadataFields: string[];
 }
 
 export const useEsqlQueryInfo = ({ query }: { query: string }): EsqlQueryInfo => {
@@ -25,6 +26,7 @@ export const useEsqlQueryInfo = ({ query }: { query: string }): EsqlQueryInfo =>
     const fieldsByCommand = new Map<string, string[]>();
     const indices = new Set<string>();
     const filters: string[] = extractFilters(query);
+    const metadataFields = new Set<string>();
 
     // Extract stats fields
     const statsNodes = Walker.matchAll(ast.root, { type: 'command', name: 'stats' });
@@ -45,6 +47,14 @@ export const useEsqlQueryInfo = ({ query }: { query: string }): EsqlQueryInfo =>
       },
     });
 
+    // Extract fields requested via FROM ... METADATA ...
+    const metadataOptions = Walker.matchAll(ast.root, { type: 'option', name: 'metadata' });
+    Walker.walk(metadataOptions, {
+      visitColumn: (ctx) => {
+        metadataFields.add(ctx.name);
+      },
+    });
+
     const metricFields = fieldsByCommand.get('metricField') ?? [];
     const dimensions = fieldsByCommand.get('dimensions') ?? [];
 
@@ -54,6 +64,7 @@ export const useEsqlQueryInfo = ({ query }: { query: string }): EsqlQueryInfo =>
       dimensions,
       indices: Array.from(indices),
       filters,
+      metadataFields: Array.from(metadataFields),
     };
   }, [query]);
 };

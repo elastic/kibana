@@ -9,6 +9,7 @@ import type { BaseFeature } from '@kbn/streams-schema';
 import { identifyFeatures } from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { get } from 'lodash';
+import { tags } from '@kbn/scout';
 import { evaluate } from '../src/evaluate';
 import type { StreamsEvaluationWorkerFixtures } from '../src/types';
 import type {
@@ -343,7 +344,7 @@ const CODE_EVALUATORS = [
   typeAssertionsEvaluator,
 ];
 
-evaluate.describe('Streams features identification', { tag: '@svlOblt' }, () => {
+evaluate.describe('Streams features identification', { tag: tags.serverless.observability.complete }, () => {
   async function runFeatureIdentificationExperiment(
     dataset: FeatureIdentificationEvaluationDataset,
     {
@@ -385,28 +386,28 @@ evaluate.describe('Streams features identification', { tag: '@svlOblt' }, () => 
               metadata,
             });
 
-            return result;
+            return { features };
           },
         },
         ...CODE_EVALUATORS,
       ]
     );
-  }
 
-  // Run evaluation for each dataset
-  FEATURE_IDENTIFICATION_DATASETS.forEach((dataset) => {
-    evaluate.describe(dataset.name, () => {
-      evaluate(
-        'feature identification',
-        async ({ evaluators, inferenceClient, logger, phoenixClient }) => {
-          await runFeatureIdentificationExperiment(dataset, {
-            inferenceClient,
-            logger,
-            phoenixClient,
-            evaluators,
-          });
-        }
-      );
+    // Run evaluation for each dataset
+    FEATURE_IDENTIFICATION_DATASETS.forEach((dataset) => {
+      evaluate.describe(dataset.name, () => {
+        evaluate(
+          'feature identification',
+          async ({ evaluators, inferenceClient, logger, phoenixClient }) => {
+            await runFeatureIdentificationExperiment(dataset, {
+              inferenceClient,
+              logger,
+              phoenixClient,
+              evaluators,
+            });
+          }
+        );
+      });
     });
-  });
-});
+  }
+);
