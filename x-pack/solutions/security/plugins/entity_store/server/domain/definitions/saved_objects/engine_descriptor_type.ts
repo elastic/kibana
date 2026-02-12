@@ -107,6 +107,7 @@ const engineDescriptorAttributesSchema = {
     timeout: schema.string(),
     frequency: schema.string(),
     paginationTimestamp: schema.maybe(schema.string()),
+    paginationId: schema.maybe(schema.string()),
     lastExecutionTimestamp: schema.maybe(schema.string()),
   }),
   error: schema.maybe(
@@ -140,6 +141,7 @@ const version2: SavedObjectsFullModelVersion = {
         logExtractionState: {
           properties: {
             additionalIndexPatterns: { type: 'keyword' as const }, // array of strings (ES keyword supports multi-value)
+            paginationId: { type: 'keyword' as const },
           },
         },
       },
