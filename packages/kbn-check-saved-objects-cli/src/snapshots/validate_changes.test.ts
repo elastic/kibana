@@ -189,7 +189,11 @@ describe('validateChangesNewType', () => {
     const to = loadSnapshot('mapping_fields_not_declared.json');
 
     expect(() =>
-      validateNewTypeWrapper({ to, name: 'new-type-with-undeclared-fields', schemaFields: ['declaredField'] })
+      validateNewTypeWrapper({
+        to,
+        name: 'new-type-with-undeclared-fields',
+        schemaFields: ['declaredField'],
+      })
     ).toThrowError(
       /The SO type 'new-type-with-undeclared-fields' has mapping fields not present in the latest model version schema: undeclaredField/
     );
@@ -199,7 +203,11 @@ describe('validateChangesNewType', () => {
     const to = loadSnapshot('name_title_wrong_type.json');
 
     expect(() =>
-      validateNewTypeWrapper({ to, name: 'type-with-wrong-name-title', schemaFields: ['name', 'title'] })
+      validateNewTypeWrapper({
+        to,
+        name: 'type-with-wrong-name-title',
+        schemaFields: ['name', 'title'],
+      })
     ).toThrowError(
       /The SO type 'type-with-wrong-name-title' has 'name' or 'title' fields with incorrect types.*name \(type: keyword, expected: text\).*title \(type: keyword, expected: text\)/
     );
