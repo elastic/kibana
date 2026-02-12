@@ -145,6 +145,7 @@ export interface TabState extends TabItem {
   attributes: {
     visContext: UnifiedHistogramVisContext | {} | undefined;
     controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
+    timeRestore: boolean;
   };
 
   // The following properties are used to manage the tab's state after it has been initialized.
