@@ -8,16 +8,26 @@
  */
 
 import { useCallback, useEffect, useRef, useState, type MutableRefObject } from 'react';
-import type { ESQLCallbacks, ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
+import type { HttpStart } from '@kbn/core/public';
+import type { ESQLControlVariable, ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
+import type { TimeRange } from '@kbn/es-query';
+import type { KibanaProject as SolutionId } from '@kbn/projects-solutions-groups';
+import type { ISearchGeneric } from '@kbn/search-types';
 import type { monaco } from '@kbn/monaco';
 import { BROWSER_POPOVER_WIDTH, DataSourceSelectionChange } from '@kbn/esql-resource-browser';
+import { getEditorExtensions, getEsqlColumns } from '@kbn/esql-utils';
 import { getLocatedSourceItemsFromQuery, getRangeFromOffsets } from './utils';
 import { BROWSER_POPOVER_VERTICAL_OFFSET } from './constants';
 
 interface UseFieldsBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
-  esqlCallbacks: ESQLCallbacks;
+  http: HttpStart;
+  search: ISearchGeneric;
+  getTimeRange: () => TimeRange;
+  signal?: AbortSignal;
+  variables?: ESQLControlVariable[];
+  activeSolutionId?: SolutionId;
 }
 
 interface BrowserPopoverPosition {
@@ -30,7 +40,12 @@ const DEFAULT_FIELDS_BROWSER_INDEX = '.kibana';
 export function useFieldsBrowser({
   editorRef,
   editorModel,
-  esqlCallbacks,
+  http,
+  search,
+  getTimeRange,
+  signal,
+  variables,
+  activeSolutionId,
 }: UseFieldsBrowserParams) {
   const [isFieldsBrowserOpen, setIsFieldsBrowserOpen] = useState(false);
   const [browserPopoverPosition, setBrowserPopoverPosition] = useState<BrowserPopoverPosition>({});
@@ -82,9 +97,6 @@ export function useFieldsBrowser({
 
   const fetchFields = useCallback(
     async (queryText: string) => {
-      const { getColumnsFor } = esqlCallbacks;
-      if (!getColumnsFor) return [];
-
       // We only need a source command to retrieve fields. When the current query doesn't have
       // any sources yet, fall back to a stable Kibana index so the browser can still function.
       const mainSources = getLocatedSourceItemsFromQuery(queryText)
@@ -98,17 +110,30 @@ export function useFieldsBrowser({
       // existing usage in `kbn-esql-language` (e.g. `fetchFields('FROM <index>')`).
       const minimalQuery = `FROM ${indexPattern}`;
 
-      return (await getColumnsFor({ query: minimalQuery })) ?? [];
+      return await getEsqlColumns({
+        esqlQuery: minimalQuery,
+        search,
+        timeRange: getTimeRange(),
+        signal,
+        variables,
+      });
     },
-    [esqlCallbacks]
+    [getTimeRange, search, signal, variables]
   );
 
   const fetchRecommendedFields = useCallback(
     async (queryText: string) => {
-      const extensions = await esqlCallbacks.getEditorExtensions?.(queryText);
-      return extensions?.recommendedFields ?? [];
+      if (!activeSolutionId) return [];
+      if (queryText.trim() === '') return [];
+
+      try {
+        const extensions = await getEditorExtensions(http, queryText, activeSolutionId);
+        return extensions?.recommendedFields ?? [];
+      } catch {
+        return [];
+      }
     },
-    [esqlCallbacks]
+    [activeSolutionId, http]
   );
 
   const openFieldsBrowser = useCallback(

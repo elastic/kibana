@@ -706,7 +706,12 @@ const ESQLEditorInternal = function ESQLEditor({
   } = useFieldsBrowser({
     editorRef,
     editorModel,
-    esqlCallbacks,
+    http: core.http,
+    search: data.search.search,
+    getTimeRange: () => data.query.timefilter.timefilter.getTime(),
+    signal: abortControllerRef.current.signal,
+    variables: esqlService?.variablesService?.esqlVariables,
+    activeSolutionId: activeSolutionId ?? undefined,
   });
 
   const queryRunButtonProperties = useMemo(() => {
