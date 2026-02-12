@@ -27,7 +27,7 @@ include::key.asciidoc[]
 
 [source,sh]
 -------------------------
-rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+sudo rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
 -------------------------
 
 [[rpm-repo]]
