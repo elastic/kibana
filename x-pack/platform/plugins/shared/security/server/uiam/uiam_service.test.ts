@@ -209,14 +209,6 @@ describe('UiamService', () => {
     });
   });
 
-  describe('#getEsClientAuthenticationHeader', () => {
-    it('returns the ES client authentication header with shared secret', () => {
-      expect(uiamService.getEsClientAuthenticationHeader()).toEqual({
-        [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
-      });
-    });
-  });
-
   describe('#refreshSessionTokens', () => {
     it('properly calls UIAM service to refresh the tokens', async () => {
       fetchSpy.mockResolvedValue({

@@ -42,9 +42,6 @@ describe('UiamAPIKeys', () => {
     mockUiam = {
       getAuthenticationHeaders: jest.fn(),
       getClientAuthentication: jest.fn(),
-      getEsClientAuthenticationHeader: jest.fn().mockReturnValue({
-        'x-client-authentication': 'shared-secret',
-      }),
       refreshSessionTokens: jest.fn(),
       invalidateSessionTokens: jest.fn(),
       grantApiKey: jest.fn(),

@@ -71,12 +71,6 @@ export interface UiamServicePublic {
   getClientAuthentication(): ClientAuthentication;
 
   /**
-   * Returns the Elasticsearch client authentication header (`x-client-authentication`) with the shared secret value.
-   * This header is used to authenticate requests from Kibana to Elasticsearch when using UIAM credentials.
-   */
-  getEsClientAuthenticationHeader(): Record<string, string>;
-
-  /**
    * Refreshes the UIAM user session and returns new access and refresh session tokens.
    * @param refreshToken UIAM session refresh token.
    */
@@ -154,13 +148,6 @@ export class UiamService implements UiamServicePublic {
    */
   getClientAuthentication(): ClientAuthentication {
     return { scheme: 'SharedSecret', value: this.#config.sharedSecret };
-  }
-
-  /**
-   * See {@link UiamServicePublic.getEsClientAuthenticationHeader}.
-   */
-  getEsClientAuthenticationHeader(): Record<string, string> {
-    return { [ES_CLIENT_AUTHENTICATION_HEADER]: this.getClientAuthentication().value };
   }
 
   /**
