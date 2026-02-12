@@ -98,7 +98,6 @@ export const selectHasUnsavedChanges = (
 
     const normalizedTab = fromTabStateToSavedObjectTab({
       tab: tabState,
-      overridenTimeRestore: Boolean(persistedTab.timeRestore),
       dataView: currentDataView,
       services,
     });
