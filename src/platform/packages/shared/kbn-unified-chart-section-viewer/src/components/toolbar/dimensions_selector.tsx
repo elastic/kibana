@@ -102,14 +102,15 @@ export const DimensionsSelector = ({
         isIntersecting,
         isAtMaxLimit,
       });
-      
-      const tooltipContent = isAtMaxLimit && isDisabled ? (
-        <FormattedMessage
-          id="metricsExperience.dimensionsSelector.maxDimensionsWarning"
-          defaultMessage="Maximum of {maxDimensions} dimensions selected"
-          values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
-        />
-      ) : undefined;
+
+      const tooltipContent =
+        isAtMaxLimit && isDisabled ? (
+          <FormattedMessage
+            id="metricsExperience.dimensionsSelector.maxDimensionsWarning"
+            defaultMessage="Maximum of {maxDimensions} dimensions selected"
+            values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
+          />
+        ) : undefined;
 
       const option: SelectableEntry = {
         value: dimension.name,
