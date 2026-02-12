@@ -6,7 +6,6 @@
  */
 
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
-import type { z, ZodObject } from '@kbn/zod/v4';
 import type { ToolHandlerFn } from '@kbn/agent-builder-server';
 import { interpolateEsqlQuery } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type { EsqlToolParamValue } from '@kbn/agent-builder-common';
@@ -44,7 +43,7 @@ export const resolveToolParameters = (
 
 export const createHandler = (
   configuration: EsqlToolConfig
-): ToolHandlerFn<z.infer<ZodObject<any>>> => {
+): ToolHandlerFn<Record<string, EsqlToolParamValue>> => {
   return async (params, { esClient }) => {
     const client = esClient.asCurrentUser;
 

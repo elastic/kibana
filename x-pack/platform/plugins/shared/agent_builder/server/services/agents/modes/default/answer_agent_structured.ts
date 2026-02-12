@@ -19,13 +19,19 @@ import { tags } from './constants';
 import type { StateType } from './state';
 import { processStructuredAnswerResponse } from './action_utils';
 
-export const structuredOutputSchema = z.object({
+const structuredOutputZodSchema = z.object({
   response: z.string().describe("The response to the user's query"),
   data: z
-    .record(z.unknown())
+    .record(z.string(), z.unknown())
     .optional()
     .describe('Optional structured data to include in the response'),
 });
+
+const { $schema: _$schema, ...structuredOutputSchema } = z.toJSONSchema(structuredOutputZodSchema, {
+  unrepresentable: 'any',
+}) as Record<string, unknown>;
+
+export { structuredOutputSchema };
 
 const wrappedSchemaProp = 'response';
 
