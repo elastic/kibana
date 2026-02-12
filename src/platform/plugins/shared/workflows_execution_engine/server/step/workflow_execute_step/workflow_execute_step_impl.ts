@@ -72,9 +72,12 @@ export class WorkflowExecuteStepImpl implements NodeImplementation {
     // Start step execution to ensure stepType and stepId are set
     // This is important for frontend rendering even if the step fails early
     stepExecutionRuntime.startStep();
-    await stepExecutionRuntime.flushEventLogs();
 
     const { workflowId, inputs } = this.getInput();
+
+    // Persist resolved inputs for observability in the execution UI
+    stepExecutionRuntime.setInput({ 'workflow-id': workflowId, inputs });
+    await stepExecutionRuntime.flushEventLogs();
 
     try {
       const rawDepth = stepExecutionRuntime.workflowExecution.context?.parentDepth;
