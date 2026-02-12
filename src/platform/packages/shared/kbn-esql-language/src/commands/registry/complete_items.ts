@@ -12,17 +12,14 @@ import { esqlCommandRegistry } from '.';
 import { buildDocumentation } from '../definitions/utils/documentation';
 import { TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
 import { withAutoSuggest } from '../definitions/utils/autocomplete/helpers';
-import { SuggestionCategory } from '../../shared/sorting/types';
+import { techPreviewLabel } from '../definitions/utils/shared';
+import { SuggestionCategory } from '../../language/autocomplete/utils/sorting/types';
 import {
   ESQL_STRING_TYPES,
   ESQL_COMMON_NUMERIC_TYPES,
   ESQL_NAMED_PARAMS_TYPE,
 } from '../definitions/types';
 import { getPromqlParamDefinitions } from './promql/utils';
-
-const techPreviewLabel = i18n.translate('kbn-esql-language.esql.autocomplete.techPreviewLabel', {
-  defaultMessage: `Technical Preview`,
-});
 
 function buildCharCompleteItem(
   label: string,
@@ -180,10 +177,11 @@ export function getPromqlParamKeySuggestions(): ISuggestionItem[] {
     withAutoSuggest({
       label: name,
       text: `${name} = `,
-      kind: 'Keyword',
+      kind: 'Value',
       detail: i18n.translate(`kbn-esql-language.esql.autocomplete.promql.${name}ParamDoc`, {
         defaultMessage: description,
       }),
+      category: SuggestionCategory.VALUE,
     })
   );
 }
@@ -195,6 +193,16 @@ export const commaCompleteItem = buildCharCompleteItem(
   }),
   { sortText: 'B', quoted: false, category: SuggestionCategory.COMMA }
 );
+
+export const promqlByCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: 'by',
+  text: 'by ($0) ',
+  asSnippet: true,
+  kind: 'Reference',
+  detail: i18n.translate('kbn-esql-language.esql.autocomplete.promql.byDoc', {
+    defaultMessage: 'Group by labels',
+  }),
+});
 
 export const byCompleteItem: ISuggestionItem = withAutoSuggest({
   label: 'BY',
@@ -566,3 +574,53 @@ export const getDateHistogramCompletionItem: (histogramBarTarget?: number) => IS
     sortText: '1',
     category: SuggestionCategory.CUSTOM_ACTION,
   });
+
+export function createResourceBrowserSuggestion(options: {
+  label: string;
+  description: string;
+  commandId: string;
+  rangeToReplace?: { start: number; end: number };
+  filterText?: string;
+  insertText?: string;
+  commandArgs?: Record<string, string>;
+}): ISuggestionItem {
+  return withAutoSuggest({
+    label: options.label,
+    text: options.insertText || '',
+    kind: 'Folder',
+    detail: options.description,
+    command: {
+      title: options.label,
+      id: options.commandId,
+      ...(options.commandArgs && { arguments: [options.commandArgs] }),
+    },
+    asSnippet: false,
+    filterText: options.filterText || '',
+    ...(options.rangeToReplace && { rangeToReplace: options.rangeToReplace }),
+    category: SuggestionCategory.CUSTOM_ACTION,
+  });
+}
+
+export function createIndicesBrowserSuggestion(
+  rangeToReplace?: { start: number; end: number },
+  filterText?: string,
+  insertText?: string,
+  commandArgs?: Record<string, string>
+): ISuggestionItem {
+  return createResourceBrowserSuggestion({
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.indicesBrowser.suggestionLabel', {
+      defaultMessage: 'Browse indices',
+    }),
+    description: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.indicesBrowser.suggestionDescription',
+      {
+        defaultMessage: 'Open data source browser',
+      }
+    ),
+    commandId: 'esql.indicesBrowser.open',
+    rangeToReplace,
+    filterText,
+    insertText,
+    commandArgs,
+  });
+}

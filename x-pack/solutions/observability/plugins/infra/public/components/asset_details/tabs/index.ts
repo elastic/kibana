@@ -13,3 +13,4 @@ export { Osquery } from './osquery/osquery';
 export { Logs } from './logs/logs';
 export { Overview } from './overview/overview';
 export { Metrics } from './metrics/metrics';
+export { Dashboards } from './dashboards/dashboards';

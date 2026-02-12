@@ -42,7 +42,7 @@ import { FieldStatusBadge } from './field_status';
 
 interface SchemaChangesReviewModalProps {
   onClose: () => void;
-  streamType?: 'wired' | 'classic' | 'unknown';
+  streamType?: 'wired' | 'classic' | 'query' | 'unknown';
   definition: Streams.ingest.all.GetResponse;
   fields: SchemaEditorField[];
   storedFields: SchemaEditorField[];

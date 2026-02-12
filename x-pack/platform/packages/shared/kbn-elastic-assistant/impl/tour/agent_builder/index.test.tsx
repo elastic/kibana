@@ -53,6 +53,23 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+const mockToursIsEnabled = jest.fn(() => true);
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const { notificationServiceMock } = jest.requireActual('@kbn/core/public/mocks');
+  return {
+    useKibana: () => ({
+      services: {
+        notifications: {
+          ...notificationServiceMock.createStartContract(),
+          tours: {
+            isEnabled: mockToursIsEnabled,
+          },
+        },
+      },
+    }),
+  };
+});
+
 const Wrapper = ({ children }: { children?: React.ReactNode }) => (
   <I18nProvider>{children}</I18nProvider>
 );
@@ -68,6 +85,7 @@ describe('AgentBuilderTourStep', () => {
     jest.clearAllMocks();
     jest.useFakeTimers();
     (useLocalStorage as jest.Mock).mockReturnValue([defaultTourState, mockSetTourState]);
+    mockToursIsEnabled.mockReturnValue(true);
   });
 
   afterAll(() => {
@@ -92,6 +110,31 @@ describe('AgentBuilderTourStep', () => {
     const { queryByTestId } = render(
       <AgentBuilderTourStep
         isDisabled={true}
+        storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
+      >
+        <div data-test-subj="target">{'Test'}</div>
+      </AgentBuilderTourStep>,
+      {
+        wrapper: Wrapper,
+      }
+    );
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    await waitFor(() => {
+      expect(queryByTestId('agentBuilderTourStepPanel')).not.toBeInTheDocument();
+    });
+  });
+
+  it('does not render tour when user does not allow tours', async () => {
+    (useLocalStorage as jest.Mock).mockReturnValue([defaultTourState, mockSetTourState]);
+    mockToursIsEnabled.mockReturnValue(false);
+
+    const { queryByTestId } = render(
+      <AgentBuilderTourStep
+        isDisabled={false}
         storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.AGENT_BUILDER_TOUR}
       >
         <div data-test-subj="target">{'Test'}</div>

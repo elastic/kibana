@@ -40,7 +40,9 @@
     "@kbn/calculate-width-from-char-count",
     "@kbn/kql",
     "@kbn/ebt-tools",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/search-types",
+    "@kbn/esql-resource-browser"
   ],
   "exclude": [
     "target/**/*",

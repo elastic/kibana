@@ -16,6 +16,7 @@ import type {
   DynamicGroupingProps,
   GroupChildComponentRenderer,
   GroupingSort,
+  GroupingBucket,
   ParsedGroupingAggregation,
 } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
@@ -322,12 +323,19 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   );
 
   const getTakeActionItems = useCallback(
-    (groupFilters: Filter[], groupNumber: number) => {
+    (
+      groupFilters: Filter[],
+      groupNumber: number,
+      groupBucket: GroupingBucket<AlertsGroupingAggregation>,
+      closePopover: () => void
+    ) => {
       const takeActionParams = {
         groupNumber,
         query: getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
         selectedGroup,
         tableId,
+        groupBucket,
+        closePopover,
       };
 
       return groupTakeActionItems?.(takeActionParams);

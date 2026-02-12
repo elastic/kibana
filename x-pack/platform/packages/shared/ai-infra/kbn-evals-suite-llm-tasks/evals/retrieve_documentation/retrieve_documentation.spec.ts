@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
-import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { containsAllTerms, evaluate, selectEvaluators } from '@kbn/evals';
+import {
+  containsAllTerms,
+  evaluate,
+  tags,
+  selectEvaluators,
+  type Example,
+  type TaskOutput,
+} from '@kbn/evals';
 import { SearchService } from '@kbn/product-doc-base-plugin/server/services/search/search_service';
 import { retrieveDocumentation } from '@kbn/llm-tasks-plugin/server/tasks/retrieve_documentation';
 import type { ProductName } from '@kbn/product-doc-common';
@@ -72,7 +77,7 @@ const createNoopLogger = (): Logger =>
 
 evaluate.describe(
   'llm_tasks.retrieveDocumentation (task-level retriever evals)',
-  { tag: '@svlOblt' },
+  { tag: tags.serverless.observability.complete },
   () => {
     let installedBySuite = false;
 

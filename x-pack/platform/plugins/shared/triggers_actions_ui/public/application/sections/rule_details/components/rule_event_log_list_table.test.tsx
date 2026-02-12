@@ -19,6 +19,7 @@ import {
 import { mockRule, mockLogResponse } from './test_helpers';
 import { getJsDomPerformanceFix } from '../../test_utils';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');
@@ -40,10 +41,21 @@ const { getIsExperimentalFeatureEnabled } = jest.requireMock(
 );
 const { useLoadRuleEventLogs } = jest.requireMock('../../../hooks/use_load_rule_event_logs');
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+    },
+  },
+});
+
 const RuleEventLogListWithProvider = (props: RuleEventLogListTableProps<'stackManagement'>) => {
   return (
     <IntlProvider locale="en">
-      <RuleEventLogListTable {...props} />
+      <QueryClientProvider client={queryClient}>
+        <RuleEventLogListTable {...props} />
+      </QueryClientProvider>
     </IntlProvider>
   );
 };

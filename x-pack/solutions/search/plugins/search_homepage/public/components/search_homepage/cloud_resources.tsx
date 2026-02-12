@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiSplitPanel,
   EuiText,
+  EuiTextColor,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
@@ -47,23 +48,20 @@ const ResourceCard = ({
   return (
     <EuiSplitPanel.Outer
       direction="row"
-      css={css({
-        maxWidth: euiTheme.base * 36,
-      })}
+      responsive={['xs', 's', 'm']}
       data-test-subj={dataTestSubj}
+      css={css({ height: '100%' })}
     >
-      <EuiSplitPanel.Inner
-        paddingSize="none"
-        css={css({
-          backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-        })}
-      >
-        <EuiFlexGroup justifyContent="center" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <div css={css({ margin: `${euiTheme.size.xxl} 0` })}>
-              <EuiImage size={euiTheme.base * 5} src={icon(assetBasePath)} alt="" />
-            </div>
-          </EuiFlexItem>
+      <EuiSplitPanel.Inner paddingSize="none" color="subdued">
+        <EuiFlexGroup
+          justifyContent="center"
+          alignItems="center"
+          css={css({
+            height: '100%',
+            padding: `${euiTheme.size.xxl} 0`,
+          })}
+        >
+          <EuiImage size={euiTheme.base * 5} src={icon(assetBasePath)} alt="" />
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner paddingSize="l">
@@ -72,7 +70,7 @@ const ResourceCard = ({
             <h4>{title}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiText size="xs" color="subdued">
+          <EuiText size="s" color="subdued">
             <p>{description}</p>
           </EuiText>
           <EuiSpacer size="xs" />
@@ -85,6 +83,7 @@ const ResourceCard = ({
               data-test-subj="searchHomepageSearchCloudResourceCardAction"
               href={actionHref}
               target="_blank"
+              flush="both"
             >
               {actionText}
             </EuiButtonEmpty>
@@ -179,11 +178,13 @@ export const CloudResources = () => {
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
-        <EuiTitle size="xs">
+        <EuiTitle size="xxs">
           <h6>
-            {i18n.translate('xpack.searchHomepage.cloudResources.h6.cloudResourcesLabel', {
-              defaultMessage: 'Cloud resources',
-            })}
+            <EuiTextColor color="subdued">
+              {i18n.translate('xpack.searchHomepage.cloudResources.h6.cloudResourcesLabel', {
+                defaultMessage: 'Cloud resources',
+              })}
+            </EuiTextColor>
           </h6>
         </EuiTitle>
       </EuiFlexItem>

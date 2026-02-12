@@ -29,7 +29,7 @@ describe('inapp editing of Lens embeddable', () => {
         query: { esql: 'from test' },
         filters: [{ query: { match_phrase: { src: 'test' } }, meta: { index: 'index-pattern-0' } }],
         datasourceStates: {
-          testDatasource: 'datasource',
+          formBased: { layers: {} },
         },
         visualization: {},
       },

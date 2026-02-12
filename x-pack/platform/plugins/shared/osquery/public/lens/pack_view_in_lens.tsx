@@ -27,11 +27,11 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ item }
     interval,
   });
 
-  const startDate = lastResultsData?.['@timestamp']
-    ? moment(lastResultsData?.['@timestamp'][0]).subtract(interval, 'seconds').toISOString()
+  const startDate = lastResultsData?.lastResultTime
+    ? moment(lastResultsData.lastResultTime[0]).subtract(interval, 'seconds').toISOString()
     : `now-${interval}s`;
-  const endDate = lastResultsData?.['@timestamp']
-    ? moment(lastResultsData?.['@timestamp'][0]).toISOString()
+  const endDate = lastResultsData?.lastResultTime
+    ? moment(lastResultsData.lastResultTime[0]).toISOString()
     : 'now';
 
   return (
@@ -40,7 +40,7 @@ const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({ item }
       buttonType={ViewResultsActionButtonType.icon}
       startDate={startDate}
       endDate={endDate}
-      mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
+      mode={lastResultsData?.lastResultTime ? 'absolute' : 'relative'}
     />
   );
 };

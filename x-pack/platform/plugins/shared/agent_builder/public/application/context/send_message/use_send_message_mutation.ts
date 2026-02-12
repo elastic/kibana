@@ -8,8 +8,17 @@
 import { useMutation } from '@kbn/react-query';
 import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
 import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_tool';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { firstValueFrom } from 'rxjs';
+import { isEqual } from 'lodash';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common/chat/conversation';
+import type {
+  Attachment,
+  ScreenContextAttachmentData,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
+import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { useKibana } from '../../hooks/use_kibana';
+import type { StartServices } from '../../hooks/use_kibana';
 import { useAgentId, useConversation } from '../../hooks/use_conversation';
 import { useConversationContext } from '../conversation/conversation_context';
 import { useConversationId } from '../conversation/use_conversation_id';
@@ -22,6 +31,72 @@ import { BrowserToolExecutor } from '../../services/browser_tool_executor';
 interface UseSendMessageMutationProps {
   connectorId?: string;
 }
+
+const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
+
+const buildScreenContextData = async ({
+  services,
+}: {
+  services: StartServices;
+}): Promise<ScreenContextAttachmentData | undefined> => {
+  const url = window.location.href;
+  const app = await firstValueFrom(services.application.currentAppId$);
+  const additionalData: Record<string, string> = {};
+
+  const timefilter = services.plugins.data?.query.timefilter.timefilter;
+  if (timefilter) {
+    const time = timefilter.getTime();
+    if (time?.from) {
+      additionalData.time_from = String(time.from);
+    }
+    if (time?.to) {
+      additionalData.time_to = String(time.to);
+    }
+  }
+
+  const data: ScreenContextAttachmentData = {
+    ...(url ? { url } : {}),
+    ...(app ? { app } : {}),
+    ...(Object.keys(additionalData).length > 0 ? { additional_data: additionalData } : {}),
+  };
+
+  if (!data.url && !data.app && !data.additional_data) {
+    return undefined;
+  }
+
+  return data;
+};
+
+const withScreenContextAttachment = async ({
+  services,
+  conversationAttachments,
+}: {
+  services: StartServices;
+  conversationAttachments?: VersionedAttachment[];
+}): Promise<Attachment[]> => {
+  const data = await buildScreenContextData({ services });
+  if (!data) {
+    return [];
+  }
+
+  const existing = conversationAttachments?.find((attachment) => {
+    return attachment.type === AttachmentType.screenContext;
+  });
+
+  const latest = existing ? getLatestVersion(existing) : undefined;
+  if (latest?.data && isEqual(latest.data, data)) {
+    return [];
+  }
+
+  return [
+    {
+      id: existing?.id ?? SCREEN_CONTEXT_ATTACHMENT_ID,
+      type: AttachmentType.screenContext,
+      data: data as Record<string, unknown>,
+      hidden: true,
+    },
+  ];
+};
 
 export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationProps = {}) => {
   const { chatService } = useAgentBuilderServices();
@@ -78,13 +153,18 @@ export const useSendMessageMutation = ({ connectorId }: UseSendMessageMutationPr
       return Promise.reject(new Error('Abort signal not present'));
     }
 
+    const contextAttachments = await withScreenContextAttachment({
+      services,
+      conversationAttachments: conversation?.attachments,
+    });
+
     const events$ = chatService.chat({
       signal,
       input: message,
       conversationId,
       agentId,
       connectorId,
-      attachments: attachments ?? [],
+      attachments: [...(attachments || []), ...contextAttachments],
       browserApiTools: browserApiToolsMetadata,
     });
 

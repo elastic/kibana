@@ -32,7 +32,7 @@ export const RulesTableToolbar = React.memo(() => {
   const { data: ruleManagementFilters } = useRuleManagementFilters();
   const { data: prebuiltRulesStatus } = usePrebuiltRulesStatus();
 
-  const canReadRules = useUserPrivileges().rulesPrivileges.read;
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
 
   const installedTotal =
     (ruleManagementFilters?.rules_summary.custom_count ?? 0) +

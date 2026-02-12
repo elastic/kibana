@@ -33,7 +33,6 @@ describe('Panels toggle component', () => {
     return mountWithIntl(
       <DiscoverTestProvider stateContainer={stateContainer}>
         <PanelsToggle
-          stateContainer={stateContainer}
           sidebarToggleState$={sidebarToggleState$}
           isChartAvailable={isChartAvailable}
           renderedFor={renderedFor}

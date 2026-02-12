@@ -127,6 +127,14 @@ export interface VisTypeDefinition<TVisParams extends VisParams> {
    */
   readonly getUsedIndexPattern?: (visParams: VisParams) => DataView[] | Promise<DataView[]>;
 
+  /**
+   * Vega may provide project routing overrides.
+   * This method should return an array of project routing values extracted from the vega spec.
+   */
+  readonly getProjectRoutingOverrides?: (
+    visParams: VisParams
+  ) => Promise<Array<{ name?: string; value: string }> | undefined>;
+
   readonly isAccessible?: boolean;
   /**
    * It is the visualization icon, displayed on the wizard.

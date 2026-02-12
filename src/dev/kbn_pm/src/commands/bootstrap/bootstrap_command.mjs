@@ -15,6 +15,7 @@ import {
   checkYarnIntegrity,
   removeYarnIntegrityFileIfExists,
   yarnInstallDeps,
+  runInstallScripts,
 } from './yarn.mjs';
 import { sortPackageJson } from './sort_package_json.mjs';
 import { regeneratePackageMap } from './regenerate_package_map.mjs';
@@ -107,6 +108,10 @@ export const command = {
         }
         await yarnInstallDeps(log, { offline, quiet });
       }
+    });
+
+    await time('run install scripts', async () => {
+      await runInstallScripts(log, { quiet });
     });
 
     await time('pre-build webpack bundles for packages', async () => {

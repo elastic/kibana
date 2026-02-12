@@ -106,7 +106,9 @@ function makeKibanaRequest(url, options, body) {
     req.on('error', reject);
 
     if (body) {
-      req.write(JSON.stringify(body));
+      const bodyStr = JSON.stringify(body);
+      req.setHeader('Content-Length', Buffer.byteLength(bodyStr));
+      req.write(bodyStr);
     }
 
     req.end();
@@ -188,7 +190,7 @@ async function exportWorkflows(options) {
       const filepath = path.join(dir, `${filename}.yaml`);
 
       // Add metadata as YAML comments at the top
-      const metadata = [
+      const metadataLines = [
         `# Workflow: ${workflow.name || 'Unnamed'}`,
         `# ID: ${workflow.id}`,
         `# Space: ${space}`,
@@ -198,12 +200,9 @@ async function exportWorkflows(options) {
         `# Enabled: ${workflow.enabled}`,
         workflow.tags && workflow.tags.length > 0 ? `# Tags: ${workflow.tags.join(', ')}` : null,
         `# Created by: ${workflow.createdBy || 'unknown'}`,
-        '',
-      ]
-        .filter(Boolean)
-        .join('\n');
+      ].filter(Boolean);
 
-      const content = metadata + workflow.yaml;
+      const content = metadataLines.join('\n') + '\n\n' + workflow.yaml;
 
       fs.writeFileSync(filepath, content, 'utf8');
       console.log(`✓ Exported: ${filename}.yaml (${workflow.name || 'Unnamed'})`);
@@ -300,13 +299,42 @@ async function importWorkflows(options) {
       const filepath = path.join(dir, file);
       const content = fs.readFileSync(filepath, 'utf8');
 
-      // Strip metadata comments to get clean YAML
+      // Strip the metadata comment block at the top of the file.
+      // Metadata format: consecutive '# Key: Value' lines followed by an empty line.
+      // Preserve all other content including inline YAML comments.
       const yamlLines = content.split('\n');
-      const cleanYaml = yamlLines.filter((line) => !line.trim().startsWith('#')).join('\n');
+      let firstContentLine = 0;
+      let inMetadataBlock = true;
+      for (let i = 0; i < yamlLines.length; i++) {
+        const trimmed = yamlLines[i].trim();
+        if (inMetadataBlock) {
+          if (trimmed.startsWith('# ') && trimmed.match(/^# \w+:/)) {
+            // Metadata comment line (e.g., "# Workflow: name")
+            continue;
+          } else if (trimmed === '') {
+            // Empty line after metadata - skip it and stop
+            firstContentLine = i + 1;
+            inMetadataBlock = false;
+            break;
+          } else {
+            // Non-metadata line - metadata block ended (no empty separator)
+            firstContentLine = i;
+            inMetadataBlock = false;
+            break;
+          }
+        }
+      }
+      const cleanYaml = yamlLines.slice(firstContentLine).join('\n').trim() + '\n';
 
-      // Extract workflow name from metadata
-      const nameMatch = content.match(/^# Workflow: (.+)$/m);
-      const workflowName = nameMatch ? nameMatch[1] : path.basename(file, path.extname(file));
+      // Extract workflow name from YAML content (source of truth), fallback to comment metadata
+      const yamlNameMatch = cleanYaml.match(/^name:\s*(.+)$/m);
+      const commentNameMatch = content.match(/^# Workflow: (.+)$/m);
+      let workflowName = path.basename(file, path.extname(file));
+      if (yamlNameMatch) {
+        workflowName = yamlNameMatch[1].trim().replace(/^['"]|['"]$/g, '');
+      } else if (commentNameMatch) {
+        workflowName = commentNameMatch[1];
+      }
 
       // Check if workflow already exists
       const existingId = existingByName.get(workflowName);
@@ -381,6 +409,82 @@ async function importWorkflows(options) {
 }
 
 /**
+ * Delete all workflows from Kibana
+ */
+async function deleteAllWorkflows(options) {
+  const { space, ssl } = options;
+  const { kibanaUrl, username, password } = getKibanaConfig(ssl);
+
+  try {
+    console.log(`Connecting to Kibana at ${kibanaUrl}...`);
+
+    const auth = Buffer.from(`${username}:${password}`).toString('base64');
+    const headers = {
+      Authorization: `Basic ${auth}`,
+    };
+
+    const spacePrefix = space === 'default' ? '' : `/s/${space}`;
+    const searchUrl = `${kibanaUrl}${spacePrefix}/api/workflows/search`;
+
+    console.log(`Fetching workflows from space: ${space}`);
+    const result = await makeKibanaRequest(
+      searchUrl,
+      {
+        method: 'POST',
+        headers,
+      },
+      {
+        page: 1,
+        limit: 10000,
+      }
+    );
+
+    const workflows = result.results || [];
+
+    if (workflows.length === 0) {
+      console.log('No workflows found to delete.');
+      return;
+    }
+
+    console.log(`Found ${workflows.length} workflow(s) to delete`);
+
+    const workflowIds = workflows.map((w) => w.id);
+
+    // Delete workflows in batches (max 1000 per request)
+    const batchSize = 100;
+    let totalDeleted = 0;
+
+    for (let i = 0; i < workflowIds.length; i += batchSize) {
+      const batch = workflowIds.slice(i, i + batchSize);
+      const deleteUrl = `${kibanaUrl}${spacePrefix}/api/workflows`;
+      const result = await makeKibanaRequest(
+        deleteUrl,
+        {
+          method: 'DELETE',
+          headers,
+        },
+        { ids: batch }
+      );
+      totalDeleted += result.deleted || 0;
+      if (result.failures && result.failures.length > 0) {
+        console.warn(`⚠️  ${result.failures.length} failure(s) in batch`);
+      }
+    }
+
+    console.log(`\n✅ Successfully deleted ${totalDeleted} workflow(s)`);
+  } catch (error) {
+    console.error('❌ Delete failed:', error.message);
+    if (error.body) {
+      console.error('Details:', JSON.stringify(error.body, null, 2));
+    }
+    if (error.statusCode) {
+      console.error('Status code:', error.statusCode);
+    }
+    process.exit(1);
+  }
+}
+
+/**
  * Show help message
  */
 function showHelp() {
@@ -393,6 +497,7 @@ Usage:
 Commands:
   export    Export workflows to YAML files
   import    Import workflows from YAML files
+  delete    Delete all workflows from a space
 
 Options:
   --dir         Directory for workflow files (default: ./workflows)
@@ -425,6 +530,12 @@ Examples:
 
   Import workflows to specific space:
     node scripts/workflows_import_export.js import --dir=./my-workflows --space=staging
+
+  Delete all workflows:
+    node scripts/workflows_import_export.js delete
+
+  Delete all workflows in a specific space:
+    node scripts/workflows_import_export.js delete --space=production
 `);
 }
 
@@ -472,6 +583,9 @@ async function main() {
     case 'import':
       await importWorkflows(options);
       break;
+    case 'delete':
+      await deleteAllWorkflows(options);
+      break;
     default:
       console.error(`❌ Unknown command: ${command}`);
       console.log('Run with --help for usage information');
@@ -487,4 +601,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { exportWorkflows, importWorkflows };
+module.exports = { exportWorkflows, importWorkflows, deleteAllWorkflows };

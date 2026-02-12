@@ -41,6 +41,7 @@ import {
   nonNullable,
   operationFromColumn,
 } from '../../utils';
+import { stripUndefined } from '../utils';
 import { getValueApiColumn } from '../../columns/esql_column';
 import { fromColorMappingLensStateToAPI, fromStaticColorLensStateToAPI } from '../../coloring';
 import {
@@ -149,7 +150,12 @@ function convertDataLayerToAPI(
     y: y || [],
     ...(breakdown_by
       ? {
-          breakdown_by,
+          breakdown_by: {
+            ...breakdown_by,
+            ...(visualization.colorMapping
+              ? { color: fromColorMappingLensStateToAPI(visualization.colorMapping) }
+              : {}),
+          },
         }
       : {}),
   };
@@ -234,15 +240,15 @@ function convertReferenceLinesDecorationsToAPIFormat(
   ReferenceLineDef,
   'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'fill' | 'axis' | 'text'
 > {
-  return {
-    ...(yConfig.color ? { color: fromStaticColorLensStateToAPI(yConfig.color) } : {}),
-    ...(yConfig.lineStyle ? { stroke_dash: yConfig.lineStyle } : {}),
-    ...(yConfig.lineWidth ? { stroke_width: yConfig.lineWidth } : {}),
-    ...(isReferenceLineValidIcon(yConfig.icon) ? { icon: yConfig.icon } : {}),
-    ...(yConfig.fill && yConfig.fill !== 'none' ? { fill: yConfig.fill } : {}),
-    ...(yConfig.axisMode && yConfig.axisMode !== 'auto' ? { axis: yConfig.axisMode } : {}),
-    ...(yConfig.textVisibility != null ? { text: yConfig.textVisibility ? 'label' : 'none' } : {}),
-  };
+  return stripUndefined({
+    color: yConfig.color ? fromStaticColorLensStateToAPI(yConfig.color) : undefined,
+    stroke_dash: yConfig.lineStyle,
+    stroke_width: yConfig.lineWidth,
+    icon: isReferenceLineValidIcon(yConfig.icon) ? yConfig.icon : undefined,
+    fill: yConfig.fill && yConfig.fill !== 'none' ? yConfig.fill : undefined,
+    axis: yConfig.axisMode && yConfig.axisMode !== 'auto' ? yConfig.axisMode : undefined,
+    text: yConfig.textVisibility != null ? (yConfig.textVisibility ? 'label' : 'none') : undefined,
+  });
 }
 
 function getLabelFromLayer(

@@ -131,5 +131,13 @@ export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeMode
 
 export type RuleTemplate = Pick<
   Rule,
-  'id' | 'name' | 'params' | 'tags' | 'alertDelay' | 'schedule' | 'flapping' | 'ruleTypeId'
+  | 'id'
+  | 'name'
+  | 'params'
+  | 'tags'
+  | 'alertDelay'
+  | 'schedule'
+  | 'flapping'
+  | 'ruleTypeId'
+  | 'artifacts'
 >;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiHasEditorConfig } from '@kbn/control-group-renderer/src/types';
+import { apiHasEditorConfig } from '@kbn/control-group-renderer';
 import type { DataControlState } from '@kbn/controls-schemas';
 import { i18n } from '@kbn/i18n';
 import {

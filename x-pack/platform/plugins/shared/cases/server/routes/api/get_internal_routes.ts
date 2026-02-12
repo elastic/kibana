@@ -30,8 +30,10 @@ import {
   findCasesContainingAllAlertsRoute,
   findCasesContainingAllDocumentsRoute,
 } from './internal/find_cases_containing_all_alerts';
+import type { ConfigType } from '../../config';
+import { getTemplateRoutes } from './templates';
 
-export const getInternalRoutes = (userProfileService: UserProfileService) =>
+export const getInternalRoutes = (userProfileService: UserProfileService, config: ConfigType) =>
   [
     bulkCreateAttachmentsRoute,
     suggestUserProfilesRoute(userProfileService),
@@ -54,4 +56,5 @@ export const getInternalRoutes = (userProfileService: UserProfileService) =>
     findUserActionsRoute,
     findCasesContainingAllDocumentsRoute,
     findCasesContainingAllAlertsRoute,
+    ...getTemplateRoutes(config),
   ] as CaseRoute[];

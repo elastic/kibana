@@ -27,6 +27,7 @@ import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { ChatService } from '../services/chat';
 import type { AttachmentServiceStart } from '../services/attachments';
+import { validateToolSelection } from '../services/agents/persisted/client/utils';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
@@ -141,6 +142,39 @@ export function registerChatRoutes({
         }
       )
     ),
+    configuration_overrides: schema.maybe(
+      schema.object(
+        {
+          instructions: schema.maybe(
+            schema.string({
+              meta: { description: 'Custom instructions for the agent.' },
+            })
+          ),
+          tools: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                tool_ids: schema.arrayOf(schema.string()),
+              }),
+              { meta: { description: 'Tool selection to enable for this execution.' } }
+            )
+          ),
+        },
+        {
+          meta: {
+            description:
+              'Runtime configuration overrides. These override the stored agent configuration for this execution only.',
+          },
+        }
+      )
+    ),
+    action: schema.maybe(
+      schema.oneOf([schema.literal('regenerate')], {
+        meta: {
+          description:
+            'The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.',
+        },
+      })
+    ),
   });
 
   const validateAttachments = async ({
@@ -160,6 +194,33 @@ export function registerChatRoutes({
       }
     }
     return results;
+  };
+
+  const validateAction = (payload: ChatRequestBodyPayload) => {
+    if (payload.action === 'regenerate' && !payload.conversation_id) {
+      throw createBadRequestError('conversation_id is required when action is regenerate');
+    }
+  };
+
+  const validateConfigurationOverrides = async ({
+    payload,
+    request,
+  }: {
+    payload: ChatRequestBodyPayload;
+    request: KibanaRequest;
+  }) => {
+    if (payload.configuration_overrides?.tools) {
+      const { tools: toolsService } = getInternalServices();
+      const toolRegistry = await toolsService.getRegistry({ request });
+      const errors = await validateToolSelection({
+        toolRegistry,
+        request,
+        toolSelection: payload.configuration_overrides.tools,
+      });
+      if (errors.length > 0) {
+        throw createBadRequestError(`Invalid tool override: ${errors.join(', ')}`);
+      }
+    }
   };
 
   const callConverse = ({
@@ -183,6 +244,8 @@ export function registerChatRoutes({
       prompts,
       capabilities,
       browser_api_tools: browserApiTools,
+      configuration_overrides: configurationOverrides,
+      action,
     } = payload;
 
     return chatService.converse({
@@ -191,6 +254,7 @@ export function registerChatRoutes({
       conversationId,
       capabilities,
       browserApiTools,
+      configurationOverrides,
       abortSignal,
       nextInput: {
         message: input,
@@ -198,6 +262,7 @@ export function registerChatRoutes({
         attachments,
       },
       request,
+      action,
     });
   };
 
@@ -210,7 +275,7 @@ export function registerChatRoutes({
       access: 'public',
       summary: 'Send chat message',
       description:
-        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response.',
+        'Send a message to an agent and receive a complete response. This synchronous endpoint waits for the agent to fully process your request before returning the final result. Use this for simple chat interactions where you need the complete response. To learn more, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
@@ -246,6 +311,10 @@ export function registerChatRoutes({
               attachmentsService,
             })
           : [];
+
+        await validateConfigurationOverrides({ payload, request });
+
+        validateAction(payload);
 
         const chatEvents$ = callConverse({
           payload,
@@ -324,6 +393,10 @@ export function registerChatRoutes({
               attachmentsService,
             })
           : [];
+
+        await validateConfigurationOverrides({ payload, request });
+
+        validateAction(payload);
 
         const chatEvents$ = callConverse({
           payload,

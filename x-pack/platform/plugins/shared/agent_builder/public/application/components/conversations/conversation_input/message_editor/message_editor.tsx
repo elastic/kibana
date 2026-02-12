@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, keys, useGeneratedHtmlId, useEuiFontSize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -49,6 +49,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   placeholder = '',
   'data-test-subj': dataTestSubj,
 }) => {
+  const [isComposing, setIsComposing] = useState(false);
   const { ref, onChange } = messageEditor._internal;
   const editorId = useGeneratedHtmlId({ prefix: 'messageEditor' });
   const { euiTheme } = useEuiTheme();
@@ -71,6 +72,11 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
     fontStyles,
   ];
 
+  const handleCompositionStart = () => setIsComposing(true);
+  const handleCompositionEnd = () => {
+    setIsComposing(false);
+  };
+
   return (
     <div
       ref={ref}
@@ -85,8 +91,10 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       data-test-subj={dataTestSubj}
       css={editorStyles}
       onInput={onChange}
+      onCompositionStart={handleCompositionStart}
+      onCompositionEnd={handleCompositionEnd}
       onKeyDown={(event) => {
-        if (!event.shiftKey && event.key === keys.ENTER) {
+        if (!event.shiftKey && event.key === keys.ENTER && !isComposing) {
           event.preventDefault();
           onSubmit();
         }

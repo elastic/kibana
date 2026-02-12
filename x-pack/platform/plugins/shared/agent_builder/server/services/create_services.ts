@@ -18,11 +18,14 @@ import { RunnerFactoryImpl } from './runner';
 import { ConversationServiceImpl } from './conversation';
 import { createChatService } from './chat';
 import { type AttachmentService, createAttachmentService } from './attachments';
+import { type SkillService, createSkillService } from './skills';
+import { AuditLogService } from '../audit';
 
 interface ServiceInstances {
   tools: ToolsService;
   agents: AgentsService;
   attachments: AttachmentService;
+  skills: SkillService;
 }
 
 export class ServiceManager {
@@ -35,12 +38,14 @@ export class ServiceManager {
       tools: new ToolsService(),
       agents: new AgentsService(),
       attachments: createAttachmentService(),
+      skills: createSkillService(),
     };
 
     this.internalSetup = {
       tools: this.services.tools.setup({ logger, workflowsManagement }),
       agents: this.services.agents.setup({ logger }),
       attachments: this.services.attachments.setup(),
+      skills: this.services.skills.setup(),
     };
 
     return this.internalSetup;
@@ -72,6 +77,7 @@ export class ServiceManager {
     };
 
     const attachments = this.services.attachments.start();
+    const skillsServiceStart = this.services.skills.start();
 
     const tools = this.services.tools.start({
       getRunner,
@@ -96,12 +102,15 @@ export class ServiceManager {
       logger: logger.get('runnerFactory'),
       security,
       elasticsearch,
+      uiSettings,
+      savedObjects,
       inference,
       spaces,
       actions,
       toolsService: tools,
       agentsService: agents,
       attachmentsService: attachments,
+      skillServiceStart: skillsServiceStart,
       trackingService,
     });
     runner = runnerFactory.getRunner();
@@ -111,6 +120,11 @@ export class ServiceManager {
       security,
       elasticsearch,
       spaces,
+    });
+
+    const auditLogService = new AuditLogService({
+      security,
+      logger: logger.get('audit'),
     });
 
     const chat = createChatService({
@@ -128,8 +142,10 @@ export class ServiceManager {
       tools,
       agents,
       attachments,
+      skills: skillsServiceStart,
       conversations,
       runnerFactory,
+      auditLogService,
       chat,
     };
 

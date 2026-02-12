@@ -3,7 +3,7 @@ steps:
     label: 'FTR Bench'
     agents:
       machineType: c2d-standard-16
-      zones: us-central1-a,us-central1-b,us-central1-c
+      zones: northamerica-northeast2-b,us-central1-c,us-central1-a
       diskSizeGb: 200
     key: ftr_bench
     timeout_in_minutes: 120

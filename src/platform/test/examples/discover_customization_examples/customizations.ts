@@ -52,12 +52,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    it('Top nav', async () => {
-      await testSubjects.existOrFail('shareTopNavButton');
-      await testSubjects.missingOrFail('discoverNewButton');
-      await testSubjects.missingOrFail('discoverOpenButton');
-    });
-
     it('Search bar', async () => {
       await testSubjects.click('logsViewSelectorButton');
       await testSubjects.click('logsViewSelectorOption-ASavedSearch');

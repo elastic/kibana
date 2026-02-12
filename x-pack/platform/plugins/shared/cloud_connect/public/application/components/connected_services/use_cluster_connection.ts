@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useCloudConnectedAppContext } from '../../app_context';
 import type { ClusterDetails, ServiceType } from '../../../types';
 
@@ -52,7 +53,14 @@ export const updateServiceEnabled = (
  * for API refetches, providing a smoother user experience.
  */
 export const useClusterConnection = () => {
-  const { apiService } = useCloudConnectedAppContext();
+  const {
+    apiService,
+    justConnected,
+    setJustConnected,
+    setAutoEnablingEis,
+    hasConfigurePermission,
+    notifications,
+  } = useCloudConnectedAppContext();
   const {
     data: initialClusterDetails,
     isLoading,
@@ -70,6 +78,49 @@ export const useClusterConnection = () => {
       setClusterDetails(initialClusterDetails);
     }
   }, [initialClusterDetails]);
+
+  // Auto-enable EIS after fresh connection
+  useEffect(() => {
+    if (!justConnected || !initialClusterDetails) return;
+
+    // Clear the flag immediately so it doesn't trigger again
+    setJustConnected(false);
+
+    const eisService = initialClusterDetails.services?.eis;
+    const subscription = initialClusterDetails.metadata?.subscription;
+    const hasActiveSubscription = subscription === 'active' || subscription === 'trial';
+
+    // Check all conditions before auto-enabling
+    const canAutoEnable =
+      eisService?.support?.supported &&
+      !eisService?.enabled &&
+      hasConfigurePermission &&
+      (!eisService?.subscription?.required || hasActiveSubscription);
+
+    if (canAutoEnable) {
+      setAutoEnablingEis(true);
+      apiService.updateServices({ eis: { enabled: true } }).then(({ error: updateError }) => {
+        setAutoEnablingEis(false);
+        if (updateError) {
+          notifications.toasts.addError(updateError as Error, {
+            title: i18n.translate('xpack.cloudConnect.autoEnableEis.errorTitle', {
+              defaultMessage: 'Failed to auto-enable Elastic Inference Service',
+            }),
+          });
+        } else {
+          setClusterDetails((prev) => updateServiceEnabled(prev, 'eis', true));
+        }
+      });
+    }
+  }, [
+    justConnected,
+    initialClusterDetails,
+    setJustConnected,
+    setAutoEnablingEis,
+    hasConfigurePermission,
+    apiService,
+    notifications.toasts,
+  ]);
 
   /**
    * Optimistically updates a service's enabled state.

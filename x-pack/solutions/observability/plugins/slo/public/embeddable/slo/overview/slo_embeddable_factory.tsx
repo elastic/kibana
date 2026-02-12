@@ -67,7 +67,7 @@ export const getOverviewEmbeddableFactory = ({
     const deps = { ...coreStart, ...pluginsStart };
     const state = initialState;
 
-    const dynamicActionsManager = deps.embeddableEnhanced?.initializeEmbeddableDynamicActions(
+    const dynamicActionsManager = await deps.embeddableEnhanced?.initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
       initialState
@@ -106,7 +106,7 @@ export const getOverviewEmbeddableFactory = ({
         remoteName: 'referenceEquality',
         overviewMode: 'referenceEquality',
         ...titleComparators,
-        ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+        ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
       }),
       onReset: (lastSaved) => {
         dynamicActionsManager?.reinitializeState(lastSaved ?? {});
@@ -121,8 +121,8 @@ export const getOverviewEmbeddableFactory = ({
       ...(dynamicActionsManager?.api ?? {}),
       ...sloStateManager.api,
       defaultTitle$,
-      hideTitle$: titleManager.api.hidePanelTitles$,
-      setHideTitle: titleManager.api.setHidePanelTitles,
+      hideTitle$: titleManager.api.hideTitle$,
+      setHideTitle: titleManager.api.setHideTitle,
       supportedTriggers: () => [],
       getTypeDisplayName: () =>
         i18n.translate('xpack.slo.editSloOverviewEmbeddableTitle.typeDisplayName', {

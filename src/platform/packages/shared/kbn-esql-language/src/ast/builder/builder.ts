@@ -375,6 +375,21 @@ export namespace Builder {
           name: '',
         };
       };
+
+      export const bare = (
+        template: Omit<AstNodeTemplate<ESQLList>, 'name' | 'values'> &
+          Partial<Pick<ESQLList, 'values'>> = {},
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLList => {
+        return {
+          values: [],
+          ...template,
+          ...Builder.parserFields(fromParser),
+          type: 'list',
+          subtype: 'bare',
+          name: '',
+        };
+      };
     }
 
     export namespace literal {

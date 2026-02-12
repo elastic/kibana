@@ -24,7 +24,6 @@ dependsOn:
   - '@kbn/core-application-browser'
   - '@kbn/core-application-browser-internal'
   - '@kbn/core-saved-objects-common'
-  - '@kbn/core-apps-browser-internal'
   - '@kbn/core-root-browser-internal'
   - '@kbn/core-theme-browser-mocks'
   - '@kbn/core-base-browser-mocks'

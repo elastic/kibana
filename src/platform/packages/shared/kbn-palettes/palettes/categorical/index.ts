@@ -9,3 +9,4 @@
 
 export * from './neutral';
 export * from './elastic';
+export * from './severity';

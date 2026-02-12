@@ -8,6 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { i18n } from '@kbn/i18n';
 import { EuiInMemoryTable, EuiEmptyPrompt } from '@elastic/eui';
 
 export const FieldList = ({
@@ -69,6 +70,9 @@ export const FieldList = ({
       sorting={true}
       noItemsMessage={message}
       data-test-subj={dataTestSubj}
+      tableCaption={i18n.translate('xpack.rollupJobs.fieldList.tableCaption', {
+        defaultMessage: 'Available fields',
+      })}
     />
   );
 };

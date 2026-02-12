@@ -7,7 +7,7 @@
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 
 import type { RollbackPackageResponse } from '../../../common/types';
 
@@ -82,7 +82,12 @@ export async function _runBulkRollbackTask({
 
 export async function scheduleBulkRollback(
   taskManagerStart: TaskManagerStartContract,
-  taskParams: Omit<BulkRollbackTaskParams, 'type'>
+  taskParams: Omit<BulkRollbackTaskParams, 'type'>,
+  request: KibanaRequest
 ) {
-  return scheduleBulkOperationTask(taskManagerStart, { ...taskParams, type: 'bulk_rollback' });
+  return scheduleBulkOperationTask(
+    taskManagerStart,
+    { ...taskParams, type: 'bulk_rollback' },
+    request
+  );
 }

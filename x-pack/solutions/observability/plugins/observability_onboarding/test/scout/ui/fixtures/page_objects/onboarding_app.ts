@@ -12,7 +12,7 @@ export class OnboardingApp {
 
   async goto() {
     await this.page.gotoApp('observabilityOnboarding');
-    await this.useCaseGridByTestId.waitFor({ state: 'visible' });
+    await this.useCaseGridByTestId.waitFor({ state: 'visible', timeout: 20_000 });
   }
 
   public get hostUseCaseTile() {
@@ -73,6 +73,10 @@ export class OnboardingApp {
 
   public get firehoseQuickstartCard() {
     return this.page.getByTestId('integration-card:firehose-quick-start');
+  }
+
+  public get cloudforwarderQuickstartCard() {
+    return this.page.getByTestId('integration-card:cloudforwarder-quick-start');
   }
 
   public get useCaseGrid() {
@@ -140,7 +144,8 @@ export class OnboardingApp {
       /(aws-logs-virtual|azure-logs-virtual|gcp-logs-virtual|firehose-quick-start)/;
     if (!nonRouting.test(cardSelector)) {
       await this.page.waitForURL(
-        /.*\/(auto-detect|kubernetes|otel-logs|otel-kubernetes|apm-virtual|otel-virtual|synthetics-virtual)/
+        /.*\/(auto-detect|kubernetes|otel-logs|otel-kubernetes|apm-virtual|otel-virtual|synthetics-virtual)/,
+        { timeout: 30_000 }
       );
     }
   }

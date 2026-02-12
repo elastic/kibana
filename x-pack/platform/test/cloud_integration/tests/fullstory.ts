@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import fetch from 'node-fetch';
 import { sha256 } from 'js-sha256';
 import { CLOUD_USER_ID } from '@kbn/cloud-integration-saml-provider-plugin/constants';
 import type { FtrProviderContext } from '../ftr_provider_context';

@@ -53,3 +53,5 @@ export type {
   EuiSideNavItemTypeEnhanced,
   RenderAs,
 } from './project_navigation';
+
+export type { SidebarApp, SidebarAppDefinition, SidebarSetup, SidebarStart } from './sidebar';

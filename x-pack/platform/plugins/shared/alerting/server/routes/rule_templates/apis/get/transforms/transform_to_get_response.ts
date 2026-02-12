@@ -18,4 +18,6 @@ export const transformGetResponse = (ruleTemplate: RuleTemplate): RuleTemplateRe
   tags: ruleTemplate.tags,
   ...(ruleTemplate.alertDelay ? { alert_delay: ruleTemplate.alertDelay } : {}),
   ...(ruleTemplate.flapping ? { flapping: transformFlappingV1(ruleTemplate.flapping) } : {}),
+  ...(ruleTemplate.artifacts ? { artifacts: ruleTemplate.artifacts } : {}),
+  ...(ruleTemplate.description ? { description: ruleTemplate.description } : {}),
 });

@@ -7,7 +7,6 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import { omit } from 'lodash';
-import fetch from 'node-fetch';
 import type { Url } from 'url';
 import { format, parse } from 'url';
 
@@ -46,16 +45,20 @@ async function getKibanaUrl({ kibana, log }: { kibana: string; log: ToolingLog }
 
     log.debug(`Checking Kibana URL ${kibanaUrlWithoutAuth} for a redirect`);
 
-    const unredirectedResponse = await fetch(kibanaUrlWithoutAuth, {
-      headers: {
-        ...(parsedKibanaUrl.auth
-          ? { Authorization: `Basic ${Buffer.from(parsedKibanaUrl.auth).toString('base64')}` }
-          : {}),
-      },
-      method: 'HEAD',
-      follow: 1,
-      redirect: 'manual',
-    });
+    let unredirectedResponse;
+    try {
+      unredirectedResponse = await fetch(kibanaUrlWithoutAuth, {
+        headers: {
+          ...(parsedKibanaUrl.auth
+            ? { Authorization: `Basic ${Buffer.from(parsedKibanaUrl.auth).toString('base64')}` }
+            : {}),
+        },
+        method: 'HEAD',
+        redirect: 'manual',
+      });
+    } catch (fetchError: any) {
+      throw fetchError;
+    }
 
     log.debug('Unredirected response', unredirectedResponse.headers.get('location'));
 
@@ -76,20 +79,31 @@ async function getKibanaUrl({ kibana, log }: { kibana: string; log: ToolingLog }
       auth: parsedTarget.auth,
     });
 
-    const redirectedResponse = await fetch(discoveredKibanaUrlWithAuth, {
-      method: 'HEAD',
-    });
-
-    if (redirectedResponse.status !== 200) {
-      throw new Error(
-        `Expected HTTP 200 from ${discoveredKibanaUrlWithAuth}, got ${redirectedResponse.status}`
-      );
-    }
-
+    // Strip credentials from URL for fetch (Node.js fetch doesn't support credentials in URLs)
     const discoveredKibanaUrlWithoutAuth = format({
       ...parsedDiscoveredUrl,
       auth: undefined,
     });
+
+    let redirectedResponse;
+    try {
+      redirectedResponse = await fetch(discoveredKibanaUrlWithoutAuth, {
+        method: 'HEAD',
+        headers: {
+          ...(parsedTarget.auth
+            ? { Authorization: `Basic ${Buffer.from(parsedTarget.auth).toString('base64')}` }
+            : {}),
+        },
+      });
+    } catch (fetchError: any) {
+      throw fetchError;
+    }
+
+    if (redirectedResponse.status !== 200) {
+      throw new Error(
+        `Expected HTTP 200 from ${discoveredKibanaUrlWithoutAuth}, got ${redirectedResponse.status}`
+      );
+    }
 
     log.info(
       `Discovered kibana running at: ${
@@ -98,8 +112,26 @@ async function getKibanaUrl({ kibana, log }: { kibana: string; log: ToolingLog }
     );
 
     return discoveredKibanaUrlWithAuth.replace(/\/$/, '');
-  } catch (error) {
-    throw new Error(`Could not connect to Kibana: ` + error.message);
+  } catch (error: any) {
+    const parsedKibanaUrl = parse(kibana);
+    const kibanaUrlWithoutAuth = format(omit(parsedKibanaUrl, 'auth'));
+    const errorCode = error?.code || error?.cause?.code;
+    const isConnectionError =
+      errorCode === 'ECONNREFUSED' ||
+      errorCode === 'ENOTFOUND' ||
+      errorCode === 'ETIMEDOUT' ||
+      error?.message?.includes('fetch failed') ||
+      error?.message?.includes('ECONNREFUSED');
+
+    if (isConnectionError) {
+      throw new Error(
+        `Could not connect to Kibana at ${kibanaUrlWithoutAuth}. ` +
+          `Please ensure Kibana is running and accessible at this URL. ` +
+          `Error: ${error.message || errorCode || 'Unknown connection error'}`
+      );
+    }
+
+    throw new Error(`Could not connect to Kibana at ${kibanaUrlWithoutAuth}: ${error.message}`);
   }
 }
 

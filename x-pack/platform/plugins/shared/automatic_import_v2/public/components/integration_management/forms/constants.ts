@@ -7,3 +7,19 @@
 export const MAX_NAME_LENGTH = 100;
 export const MAX_DESCRIPTION_LENGTH = 200;
 export const MAX_LOGO_SIZE_BYTES = 1024 * 1024;
+
+export const DEFAULT_DATA_STREAM_VALUES = {
+  dataStreamTitle: '',
+  dataStreamDescription: '',
+  dataCollectionMethod: [] as string[],
+  logsSourceOption: 'upload' as const,
+  logSample: undefined,
+  selectedIndex: '',
+};
+
+export const DEFAULT_INTEGRATION_VALUES = {
+  title: '',
+  description: '',
+  logo: undefined,
+  connectorId: '',
+};

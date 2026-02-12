@@ -46,12 +46,12 @@ const buildAccessDeniedMessage = (
 };
 
 interface AccessControlServiceParams {
-  typeRegistry?: ISavedObjectTypeRegistry;
+  typeRegistry: ISavedObjectTypeRegistry;
 }
 
 export class AccessControlService {
   private userForOperation: AuthenticatedUser | null = null;
-  private typeRegistry: ISavedObjectTypeRegistry | undefined;
+  private typeRegistry: ISavedObjectTypeRegistry;
 
   constructor({ typeRegistry }: AccessControlServiceParams) {
     this.typeRegistry = typeRegistry;
@@ -68,7 +68,7 @@ export class AccessControlService {
   }) {
     const { object, currentUser, actions } = params;
 
-    if (!this.typeRegistry?.supportsAccessControl(object.type)) {
+    if (!this.typeRegistry.supportsAccessControl(object.type)) {
       return false;
     }
 
@@ -104,9 +104,6 @@ export class AccessControlService {
     objects: AuthorizeObject[];
     actions: Set<SecurityAction>;
   }): GetObjectsRequiringPrivilegeCheckResult {
-    if (!this.typeRegistry) {
-      return { types: new Set<string>(), objects: [] };
-    }
     const currentUser = this.userForOperation;
     const typesRequiringAccessControl = new Set<string>();
 

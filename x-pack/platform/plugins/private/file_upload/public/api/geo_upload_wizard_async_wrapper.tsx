@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
-import type { FileUploadComponentProps } from '../lazy_load_bundle';
+import type { GeoUploadWizardProps } from '../lazy_load_bundle';
 import { lazyLoadModules } from '../lazy_load_bundle';
 
 interface State {
-  GeoUploadWizard: React.ComponentType<FileUploadComponentProps> | null;
+  GeoUploadWizard: React.ComponentType<GeoUploadWizardProps> | null;
 }
 
-export class GeoUploadWizardAsyncWrapper extends React.Component<FileUploadComponentProps, State> {
+export class GeoUploadWizardAsyncWrapper extends React.Component<GeoUploadWizardProps, State> {
   state: State = {
     GeoUploadWizard: null,
   };

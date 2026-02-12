@@ -39,6 +39,7 @@
     "@kbn/file-upload-plugin",
     "@kbn/discover-utils",
     "@kbn/kql",
+    "@kbn/inspector-plugin",
   ],
   "exclude": [
     "target/**/*",

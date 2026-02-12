@@ -27,7 +27,8 @@ export const elasticsearchRoleSchema = schema.object({
           description:
             'Cluster privileges that define the cluster level actions that users can perform.',
         },
-      })
+      }),
+      { maxSize: 100 }
     )
   ),
   /**
@@ -44,7 +45,7 @@ export const elasticsearchRoleSchema = schema.object({
                 'The cluster level privileges for the remote cluster. The allowed values are a subset of the cluster privileges.',
             },
           }),
-          { minSize: 1 }
+          { minSize: 1, maxSize: 100 }
         ),
         clusters: schema.arrayOf(
           schema.string({
@@ -53,9 +54,10 @@ export const elasticsearchRoleSchema = schema.object({
                 'A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.',
             },
           }),
-          { minSize: 1 }
+          { minSize: 1, maxSize: 100 }
         ),
-      })
+      }),
+      { maxSize: 100 }
     )
   ),
 
@@ -76,7 +78,7 @@ export const elasticsearchRoleSchema = schema.object({
                 'The data streams, indices, and aliases to which the permissions in this entry apply. It supports wildcards (*).',
             },
           }),
-          { minSize: 1 }
+          { minSize: 1, maxSize: 100 }
         ),
 
         /**
@@ -90,7 +92,8 @@ export const elasticsearchRoleSchema = schema.object({
                 meta: {
                   description: 'The document fields that the role members have read access to.',
                 },
-              })
+              }),
+              { maxSize: 1000 }
             )
           )
         ),
@@ -106,7 +109,7 @@ export const elasticsearchRoleSchema = schema.object({
                 'The index level privileges that the role members have for the data streams and indices.',
             },
           }),
-          { minSize: 1 }
+          { minSize: 1, maxSize: 100 }
         ),
 
         /**
@@ -135,7 +138,8 @@ export const elasticsearchRoleSchema = schema.object({
             },
           })
         ),
-      })
+      }),
+      { maxSize: 1000 }
     )
   ),
 
@@ -155,7 +159,7 @@ export const elasticsearchRoleSchema = schema.object({
                 'A list of remote cluster aliases. It supports literal strings as well as wildcards and regular expressions.',
             },
           }),
-          { minSize: 1 }
+          { minSize: 1, maxSize: 100 }
         ),
 
         /**
@@ -169,7 +173,7 @@ export const elasticsearchRoleSchema = schema.object({
                 'A list of remote aliases, data streams, or indices to which the permissions apply. It supports wildcards (*).',
             },
           }),
-          { minSize: 1 }
+          { minSize: 1, maxSize: 100 }
         ),
 
         /**
@@ -183,7 +187,8 @@ export const elasticsearchRoleSchema = schema.object({
                 meta: {
                   description: 'The document fields that the role members have read access to.',
                 },
-              })
+              }),
+              { maxSize: 1000 }
             )
           )
         ),
@@ -199,7 +204,7 @@ export const elasticsearchRoleSchema = schema.object({
                 'The index level privileges that role members have for the specified indices.',
             },
           }),
-          { minSize: 1 }
+          { minSize: 1, maxSize: 100 }
         ),
 
         /**
@@ -228,7 +233,8 @@ export const elasticsearchRoleSchema = schema.object({
             },
           })
         ),
-      })
+      }),
+      { maxSize: 1000 }
     )
   ),
 
@@ -239,7 +245,8 @@ export const elasticsearchRoleSchema = schema.object({
     schema.arrayOf(
       schema.string({
         meta: { description: 'A user name that the role member can impersonate.' },
-      })
+      }),
+      { maxSize: 100 }
     )
   ),
 });
@@ -263,7 +270,8 @@ const spacesSchema = schema.oneOf(
             return `must be lower case, a-z, 0-9, '_', and '-' are allowed`;
           }
         },
-      })
+      }),
+      { maxSize: 1000 }
     ),
   ],
   { defaultValue: [GLOBAL_RESOURCE] }
@@ -306,7 +314,8 @@ export const getKibanaRoleSchema = (
                     return `unknown global privilege "${value}", must be one of [${globalPrivileges}]`;
                   }
                 },
-              })
+              }),
+              { maxSize: 50 }
             ),
             schema.arrayOf(
               schema.string({
@@ -317,7 +326,8 @@ export const getKibanaRoleSchema = (
                     return `unknown space privilege "${value}", must be one of [${spacePrivileges}]`;
                   }
                 },
-              })
+              }),
+              { maxSize: 50 }
             )
           )
         ),
@@ -346,7 +356,8 @@ export const getKibanaRoleSchema = (
                     return `only a-z, A-Z, 0-9, '_', and '-' are allowed`;
                   }
                 },
-              })
+              }),
+              { maxSize: 100 }
             )
           )
         ),

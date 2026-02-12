@@ -60,7 +60,7 @@ function transformPanelIn(panel: DashboardPanel): {
   const idx = uid ?? uuidv4();
 
   const transforms = embeddableService?.getTransforms(panel.type);
-  const panelSchema = transforms?.getSchema?.();
+  const panelSchema = transforms?.schema;
 
   if (panelSchema) {
     try {

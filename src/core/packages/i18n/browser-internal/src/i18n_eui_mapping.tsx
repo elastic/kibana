@@ -1367,6 +1367,17 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Next {displayInterval}',
         values: { displayInterval },
       }),
+    'euiTimeWindowButtons.invalidZoomInLabel': i18n.translate(
+      'core.euiTimeWindowButtons.invalidZoomInLabel',
+      { defaultMessage: 'Cannot zoom in invalid time window' }
+    ),
+    'euiTimeWindowButtons.cannotZoomInLabel': i18n.translate(
+      'core.euiTimeWindowButtons.cannotZoomInLabel',
+      { defaultMessage: 'Cannot zoom in any further' }
+    ),
+    'euiTimeWindowButtons.zoomInLabel': i18n.translate('core.euiTimeWindowButtons.zoomInLabel', {
+      defaultMessage: 'Zoom in',
+    }),
     'euiQuickSelect.fullDescription': ({ timeTense, timeValue, timeUnit }: EuiValues) =>
       i18n.translate('core.euiQuickSelect.fullDescription', {
         defaultMessage: 'Currently set to {timeTense} {timeValue} {timeUnit}.',

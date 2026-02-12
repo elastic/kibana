@@ -40,7 +40,7 @@ export const useAllExceptionLists = ({
   const [exceptionsListsInfo, setExceptionsListInfo] = useState<Record<string, ExceptionListInfo>>(
     {}
   );
-  const { read: canReadRules } = useUserPrivileges().rulesPrivileges;
+  const { read: canReadRules } = useUserPrivileges().rulesPrivileges.rules;
 
   const handleExceptionsInfo = useCallback(
     (rules: Rule[]): Record<string, ExceptionListInfo> => {

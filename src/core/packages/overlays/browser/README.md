@@ -149,6 +149,43 @@ const flyoutRef = openMySystemFlyout(overlays);
 flyoutRef.close();
 ```
 
+#### Title Configuration
+
+The `title` option is used by the EUI Flyout Manager for history navigation and creates the flyout menu header. You can provide the title in two ways:
+
+1. **Top-level `title` option**:
+```typescript
+overlays.openSystemFlyout(<MyContent />, {
+  title: 'My Flyout Title',
+  // ... other options
+});
+```
+
+2. **Within `flyoutMenuProps.title`**:
+```typescript
+overlays.openSystemFlyout(<MyContent />, {
+  flyoutMenuProps: {
+    title: 'My Flyout Title',
+    hideTitle: false,
+    'data-test-subj': 'myFlyout',
+    // ... other flyout menu props
+  },
+  // ... other options
+});
+```
+
+**Precedence behavior:** If you provide `title` in both places, `flyoutMenuProps.title` takes precedence over the top-level `title`.
+
+```typescript
+// Example: flyoutMenuProps.title takes precedence
+overlays.openSystemFlyout(<MyContent />, {
+  title: 'Default Title',  // This will be ignored
+  flyoutMenuProps: {
+    title: 'Override Title',  // This will be used
+  },
+});
+```
+
 ### Key Differences
 
 - **`openFlyout`**: Traditional method that requires `toMountPoint`. Opens flyouts with `session="never"`. Content should include `EuiFlyoutHeader` and `EuiFlyoutBody`. Optionally include `EuiFlyoutFooter`.

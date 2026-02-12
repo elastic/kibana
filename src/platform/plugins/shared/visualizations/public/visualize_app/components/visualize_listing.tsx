@@ -9,7 +9,7 @@
 
 import type { MouseEvent, MutableRefObject } from 'react';
 import React, { useCallback, useRef, useMemo, useEffect } from 'react';
-import { EuiCallOut, EuiLink, EuiSpacer, type UseEuiTheme, logicalSizeCSS } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useUnmount from 'react-use/lib/useUnmount';
@@ -26,7 +26,6 @@ import {
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import type { TableListViewProps } from '@kbn/content-management-table-list-view';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
-import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -35,6 +34,12 @@ import {
   SAVED_OBJECTS_PER_PAGE_SETTING,
   VisualizeConstants,
 } from '@kbn/visualizations-common';
+import {
+  getNoItemsMessage,
+  getCustomColumn,
+  getCustomSortingOptions,
+  getVisualizationListingTableStyles,
+} from '@kbn/visualization-listing-components';
 import { findListItems } from '../../utils/saved_visualize_utils';
 import {
   deleteListItems,
@@ -43,73 +48,20 @@ import {
 import { checkForDuplicateTitle } from '../../utils/saved_objects_utils/check_for_duplicate_title';
 import { showNewVisModal } from '../../wizard';
 import { getTypes } from '../../services';
-import type { VisualizationListItem } from '../..';
 import type { VisualizeServices } from '../types';
-import { getNoItemsMessage, getCustomColumn, getCustomSortingOptions } from '../utils';
 import { getVisualizeListItemLinkFn } from '../utils/get_visualize_list_item_link';
-import type { VisualizationStage } from '../../vis_types/vis_type_alias_registry';
+import {
+  toTableListViewSavedObject,
+  type VisualizeUserContent,
+} from '../../utils/to_table_list_view_saved_object';
 
 const visualizeListingStyles = {
-  table: ({ euiTheme }: UseEuiTheme) => css`
-    .visListingTable__typeImage,
-    .visListingTable__typeIcon {
-      margin-right: ${euiTheme.size.s};
-      position: relative;
-      top: -1px;
-    }
-
-    .visListingTable__typeImage {
-      ${logicalSizeCSS(euiTheme.size.base, euiTheme.size.base)};
-    }
-
-    .visListingTable__experimentalIcon {
-      width: ${euiTheme.size.l};
-      vertical-align: middle;
-      padding: 0 ${euiTheme.size.s};
-      margin-left: ${euiTheme.size.s};
-    }
-  `,
-
+  table: getVisualizationListingTableStyles,
   calloutLink: css`
     text-decoration: underline;
   `,
 };
 
-export type VisualizeUserContent = VisualizationListItem &
-  UserContentCommonSchema & {
-    type: string;
-    attributes: {
-      id: string;
-      title: string;
-      description?: string;
-      readOnly: boolean;
-      error?: string;
-    };
-  };
-
-const toTableListViewSavedObject = (savedObject: Record<string, unknown>): VisualizeUserContent => {
-  return {
-    id: savedObject.id as string,
-    updatedAt: savedObject.updatedAt as string,
-    managed: savedObject.managed as boolean,
-    references: savedObject.references as Array<{ id: string; type: string; name: string }>,
-    type: savedObject.savedObjectType as string,
-    icon: savedObject.icon as string,
-    stage: savedObject.stage as VisualizationStage,
-    savedObjectType: savedObject.savedObjectType as string,
-    typeTitle: savedObject.typeTitle as string,
-    title: (savedObject.title as string) ?? '',
-    error: (savedObject.error as string) ?? '',
-    editor: savedObject.editor as any,
-    attributes: {
-      id: savedObject.id as string,
-      title: (savedObject.title as string) ?? '',
-      description: savedObject.description as string,
-      readOnly: savedObject.readOnly as boolean,
-      error: savedObject.error as string,
-    },
-  };
-};
 type CustomTableViewProps = Pick<
   TableListViewProps<VisualizeUserContent>,
   | 'createItem'

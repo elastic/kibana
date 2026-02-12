@@ -238,6 +238,12 @@ function EventDetailFields({ event, id }: { event: SafeResolverEvent; id: string
       search={search}
       pagination={true}
       sorting
+      tableCaption={i18n.translate(
+        'xpack.securitySolution.endpoint.resolver.panel.eventDetail.eventFieldsCaption',
+        {
+          defaultMessage: 'Event fields',
+        }
+      )}
     />
   );
 }

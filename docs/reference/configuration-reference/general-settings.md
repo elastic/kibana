@@ -527,6 +527,12 @@ $$$settings-telemetry-optIn$$$ `telemetry.optIn`
     To reload the logging settings, send a SIGHUP signal to {{kib}}. For more logging configuration options, see the [Configure Logging in {{kib}}](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging.md) guide.
     ::::
 
+`uiSettings.globalOverrides.hideAnnouncements` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.4`
+:   Set to `true` to stop showing messages and tours that highlight new features. **Default: `false`**
+
+`uiSettings.globalOverrides.hideFeedback` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}") {applies_to}`stack: ga 9.4`
+:   Set to `true` to stop showing elements requesting user feedback. **Default: `false`**
+
 `vis_type_table.legacyVisEnabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
 :   Starting from version 7.11, a new datatable visualization is used. Set to `true` to enable the legacy version. In version 8.0 and later, the old implementation is removed and this setting is no longer supported.
 

@@ -345,14 +345,14 @@ export const getQueryByScopedQueries = ({
 
   const searches: MsearchRequestItem[] = [];
 
-  maintenanceWindows.forEach(({ id, scopedQuery }) => {
-    if (!scopedQuery) {
+  maintenanceWindows.forEach(({ id, scope }) => {
+    if (!scope?.alerting) {
       return;
     }
 
     const scopedQueryFilter = generateAlertsFilterDSL(
       {
-        query: scopedQuery as AlertsFilter['query'],
+        query: scope.alerting as AlertsFilter['query'],
       },
       {
         analyzeWildcard: true,

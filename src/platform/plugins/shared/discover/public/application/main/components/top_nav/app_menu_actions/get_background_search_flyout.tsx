@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
+import type { DiscoverAppMenuItemType, DiscoverAppMenuRunAction } from '@kbn/discover-utils';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 
 export const getBackgroundSearchFlyout = ({
   onClick,
 }: {
-  onClick: () => void;
-}): AppMenuItemType => {
+  onClick: DiscoverAppMenuRunAction;
+}): DiscoverAppMenuItemType => {
   return {
     id: AppMenuActionId.backgroundsearch,
     order: 6,
