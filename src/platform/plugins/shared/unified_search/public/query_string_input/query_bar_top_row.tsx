@@ -240,6 +240,10 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    */
   onOpenQueryInNewTab?: ESQLEditorProps['onOpenQueryInNewTab'];
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
+  /**
+   * Optional ES|QL prop - Enable data source browser in ESQL editor
+   */
+  enableResourceBrowser?: ESQLEditorProps['enableResourceBrowser'];
   useBackgroundSearchButton?: boolean;
 }
 
@@ -996,6 +1000,7 @@ export const QueryBarTopRow = React.memo(
             esqlVariables={props.esqlVariablesConfig?.esqlVariables ?? []}
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
             queryStats={props.esqlQueryStats}
+            enableResourceBrowser={props.enableResourceBrowser}
             openVisorOnSourceCommands
           />
         )

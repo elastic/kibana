@@ -78,6 +78,8 @@ export interface ESQLEditorProps {
   /** Optional form field label to show above the query editor */
   /** Whether to merge external messages into the editor's message list */
   mergeExternalMessages?: boolean;
+  /** Enable data source browser suggestion & command integration */
+  enableResourceBrowser?: boolean;
   /** Stats about the last request made */
   queryStats?: ESQLQueryStats;
   /** If true, automatically opens the quick search visor when the editor initially loads with a query that has only source commands */
