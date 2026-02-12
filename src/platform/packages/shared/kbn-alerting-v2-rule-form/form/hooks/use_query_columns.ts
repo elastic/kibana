@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useState, useEffect, useRef } from 'react';
 import type { ISearchGeneric } from '@kbn/search-types';
+import { useQuery } from '@kbn/react-query';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 
 export interface QueryColumn {
@@ -22,62 +22,25 @@ interface UseQueryColumnsProps {
 }
 
 export const useQueryColumns = ({ query, search }: UseQueryColumnsProps) => {
-  const [columns, setColumns] = useState<QueryColumn[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
+  const columnsQuery = useQuery({
+    queryKey: ['queryColumns', query],
+    queryFn: async ({ signal }) => {
+      const rawColumns = await getESQLQueryColumnsRaw({
+        esqlQuery: query,
+        search,
+        signal,
+        dropNullColumns: true,
+      });
 
-  useEffect(() => {
-    const fetchColumns = async () => {
-      if (!query) {
-        setColumns([]);
-        return;
-      }
+      return rawColumns.map(({ name, type }) => ({ name, type }));
+    },
+    enabled: Boolean(query),
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
 
-      // Cancel any in-flight request
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-
-      abortControllerRef.current = new AbortController();
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const rawColumns = await getESQLQueryColumnsRaw({
-          esqlQuery: query,
-          search,
-          signal: abortControllerRef.current.signal,
-          dropNullColumns: true,
-        });
-
-        setColumns(
-          rawColumns.map(({ name, type }) => ({
-            name,
-            type,
-          }))
-        );
-      } catch (e: unknown) {
-        // Ignore abort errors
-        if (e instanceof Error && e.name === 'AbortError') {
-          return;
-        }
-        setError(e instanceof Error ? e : new Error('Unknown error'));
-        setColumns([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchColumns();
-
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, [query, search]);
-
-  return { columns, isLoading, error };
+  return {
+    ...columnsQuery,
+    data: columnsQuery.data ?? [],
+  };
 };

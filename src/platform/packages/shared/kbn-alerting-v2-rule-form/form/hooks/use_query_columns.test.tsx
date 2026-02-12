@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import { useQueryColumns } from './use_query_columns';
 
@@ -17,6 +19,22 @@ const mockGetESQLQueryColumnsRaw = jest.mocked(getESQLQueryColumnsRaw);
 
 const createMockSearch = () => jest.fn() as any;
 
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+    logger: {
+      log: () => {},
+      warn: () => {},
+      error: () => {},
+    },
+  });
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+};
+
 describe('useQueryColumns', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -24,15 +42,17 @@ describe('useQueryColumns', () => {
 
   it('returns empty columns when query is empty', async () => {
     const search = createMockSearch();
-    const { result } = renderHook(() =>
-      useQueryColumns({
-        query: '',
-        search,
-      })
+    const { result } = renderHook(
+      () =>
+        useQueryColumns({
+          query: '',
+          search,
+        }),
+      { wrapper: createWrapper() }
     );
 
-    expect(result.current.columns).toEqual([]);
-    expect(result.current.isLoading).toBe(false);
+    expect(result.current.data).toEqual([]);
+    expect(result.current.isLoading).toBe(true);
     expect(result.current.error).toBeNull();
     expect(mockGetESQLQueryColumnsRaw).not.toHaveBeenCalled();
   });
@@ -46,11 +66,13 @@ describe('useQueryColumns', () => {
     mockGetESQLQueryColumnsRaw.mockResolvedValue(mockColumns);
     const search = createMockSearch();
 
-    const { result } = renderHook(() =>
-      useQueryColumns({
-        query: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
-        search,
-      })
+    const { result } = renderHook(
+      () =>
+        useQueryColumns({
+          query: 'FROM logs-* | STATS count = COUNT(*) BY host.name',
+          search,
+        }),
+      { wrapper: createWrapper() }
     );
 
     expect(result.current.isLoading).toBe(true);
@@ -59,7 +81,7 @@ describe('useQueryColumns', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.columns).toEqual([
+    expect(result.current.data).toEqual([
       { name: 'host.name', type: 'keyword' },
       { name: 'count', type: 'long' },
     ]);
@@ -77,46 +99,28 @@ describe('useQueryColumns', () => {
     mockGetESQLQueryColumnsRaw.mockRejectedValue(testError);
     const search = createMockSearch();
 
-    const { result } = renderHook(() =>
-      useQueryColumns({
-        query: 'INVALID QUERY',
-        search,
-      })
+    const { result } = renderHook(
+      () =>
+        useQueryColumns({
+          query: 'INVALID QUERY',
+          search,
+        }),
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.columns).toEqual([]);
+    expect(result.current.data).toEqual([]);
     expect(result.current.error).toEqual(testError);
   });
 
-  it('ignores abort errors', async () => {
-    const abortError = new Error('Aborted');
-    abortError.name = 'AbortError';
-    mockGetESQLQueryColumnsRaw.mockRejectedValue(abortError);
-    const search = createMockSearch();
-
-    const { result } = renderHook(() =>
-      useQueryColumns({
-        query: 'FROM logs-* | LIMIT 10',
-        search,
-      })
-    );
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    // Should not set error for abort errors
-    expect(result.current.error).toBeNull();
-  });
-
-  it('aborts previous request when query changes', async () => {
+  it('refetches when query changes', async () => {
     const mockColumns = [{ name: 'test', type: 'keyword' }];
     mockGetESQLQueryColumnsRaw.mockResolvedValue(mockColumns);
     const search = createMockSearch();
+    const wrapper = createWrapper();
 
     const { rerender } = renderHook(
       ({ query }) =>
@@ -124,10 +128,10 @@ describe('useQueryColumns', () => {
           query,
           search,
         }),
-      { initialProps: { query: 'FROM logs-* | LIMIT 10' } }
+      { initialProps: { query: 'FROM logs-* | LIMIT 10' }, wrapper }
     );
 
-    // Change query immediately to trigger abort
+    // Change query to trigger refetch
     rerender({ query: 'FROM metrics-* | LIMIT 10' });
 
     await waitFor(() => {
@@ -144,11 +148,13 @@ describe('useQueryColumns', () => {
     mockGetESQLQueryColumnsRaw.mockResolvedValue(mockRawColumns as any);
     const search = createMockSearch();
 
-    const { result } = renderHook(() =>
-      useQueryColumns({
-        query: 'FROM logs-* | LIMIT 10',
-        search,
-      })
+    const { result } = renderHook(
+      () =>
+        useQueryColumns({
+          query: 'FROM logs-* | LIMIT 10',
+          search,
+        }),
+      { wrapper: createWrapper() }
     );
 
     await waitFor(() => {
@@ -156,27 +162,9 @@ describe('useQueryColumns', () => {
     });
 
     // Should only include name and type
-    expect(result.current.columns).toEqual([
+    expect(result.current.data).toEqual([
       { name: 'field1', type: 'keyword' },
       { name: 'field2', type: 'long' },
     ]);
-  });
-
-  it('handles non-Error objects in catch block', async () => {
-    mockGetESQLQueryColumnsRaw.mockRejectedValue('string error');
-    const search = createMockSearch();
-
-    const { result } = renderHook(() =>
-      useQueryColumns({
-        query: 'FROM logs-* | LIMIT 10',
-        search,
-      })
-    );
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    expect(result.current.error).toEqual(new Error('Unknown error'));
   });
 });
