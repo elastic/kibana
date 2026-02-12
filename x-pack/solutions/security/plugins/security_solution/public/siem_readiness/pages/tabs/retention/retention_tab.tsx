@@ -33,6 +33,11 @@ import { ViewCasesButton } from '../../components/view_cases_button';
 
 const RETENTION_CASE_TAGS = ['siem-readiness', 'retention', 'data-lifecycle'];
 
+const getIlmPoliciesUrl = (basePath: string, policyName?: string): string => {
+  const baseUrl = `${basePath}/app/management/data/index_lifecycle_management/policies`;
+  return policyName ? `${baseUrl}?policy=${policyName}` : baseUrl;
+};
+
 // Extended RetentionInfo for table compatibility
 interface RetentionInfoWithStatus extends RetentionInfo, Record<string, unknown> {}
 
@@ -55,7 +60,6 @@ export const RetentionTab: React.FC = () => {
   const error = categoriesError || retentionError;
 
   // Match data streams to categories by checking if backing index contains data stream name
-  // Backing index format: .ds-{data-stream-name}-{date}-{generation}
   const categories: Array<CategoryData<RetentionInfoWithStatus>> = useMemo(() => {
     if (!categoriesData?.mainCategoriesMap || !retentionData?.items) return [];
 
@@ -278,13 +282,14 @@ export const RetentionTab: React.FC = () => {
           defaultMessage: 'Action',
         }),
         width: '10%',
-        render: () => {
-          const ilmPoliciesUrl = `${basePath}/app/management/data/index_lifecycle_management/policies`;
+        field: 'policyName',
+        render: (policyName: string) => {
+          if (!policyName) return null;
           return (
             <div style={{ textAlign: 'right' }}>
               <EuiButtonEmpty
                 size="xs"
-                href={ilmPoliciesUrl}
+                href={getIlmPoliciesUrl(basePath, policyName)}
                 target="_blank"
                 iconType="popout"
                 iconSide="right"
