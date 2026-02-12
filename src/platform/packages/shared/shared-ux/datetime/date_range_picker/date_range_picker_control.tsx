@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { useDateRangePickerContext, type InitialFocus } from './date_range_picker_context';
+import { TimeWindowButtons } from './date_range_picker_time_window_buttons';
 
 // TODO move to constants.ts
 const FOCUSABLE_SELECTOR =
@@ -47,6 +48,7 @@ export function DateRangePickerControl() {
     panelRef,
     panelId,
     initialFocus,
+    timeWindowButtonsConfig,
   } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
 
@@ -170,6 +172,9 @@ export function DateRangePickerControl() {
           </EuiToolTip>
         )}
       </EuiFormControlLayout>
+      {!isEditing && timeWindowButtonsConfig && (
+        <TimeWindowButtons config={timeWindowButtonsConfig} />
+      )}
     </div>
   );
 }

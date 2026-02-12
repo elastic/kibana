@@ -30,6 +30,7 @@ import {
   timeRangeToFullFormattedText,
 } from './format';
 import type { DateRangePickerProps, DateRangePickerOnChangeProps } from './date_range_picker';
+import type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
 
 /** Public context value exposed to consumers via `useDateRangePickerContext`. */
 export interface DateRangePickerContextValue {
@@ -72,6 +73,8 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   /** Optional initial focus target for the dialog panel. */
   initialFocus?: InitialFocus;
   timeRange: TimeRange;
+  /** Resolved time window buttons config, or `false` when disabled. */
+  timeWindowButtonsConfig: TimeWindowButtonsConfig | false;
 }
 
 const DateRangePickerContext = createContext<DateRangePickerInternalContextValue | null>(null);
@@ -98,6 +101,7 @@ export function DateRangePickerProvider({
   dateFormat,
   isInvalid: isInvalidProp,
   compressed = true,
+  showTimeWindowButtons = false,
 }: PropsWithChildren<DateRangePickerProps>) {
   const { euiTheme } = useEuiTheme();
   const maxWidth = euiTheme.components.forms.maxWidth;
@@ -129,6 +133,16 @@ export function DateRangePickerProvider({
   // TODO separate a "live" validity prop that should be available in context
   // from the `isInvalid` top-level prop that will be passed down to control
   const isInvalid = isInvalidProp || timeRange.isInvalid;
+
+  const timeWindowButtonsConfig: TimeWindowButtonsConfig | false = useMemo(
+    () =>
+      showTimeWindowButtons === false
+        ? false
+        : showTimeWindowButtons === true
+        ? {}
+        : showTimeWindowButtons,
+    [showTimeWindowButtons]
+  );
 
   useEffect(() => {
     if (!isEditing && text.trim() === '' && lastValidText.current) {
@@ -193,6 +207,7 @@ export function DateRangePickerProvider({
       panelRef,
       panelId,
       timeRange,
+      timeWindowButtonsConfig,
     }),
     [
       text,
@@ -207,6 +222,7 @@ export function DateRangePickerProvider({
       displayDuration,
       panelId,
       timeRange,
+      timeWindowButtonsConfig,
     ]
   );
 

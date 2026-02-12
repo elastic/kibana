@@ -6,7 +6,7 @@ This file provides guidance to agents when working with code in this folder.
 
 This is a UI component. It's a date range picker with a "smart input".
 
-- **Only dependencies**: `@elastic/eui`, `@elastic/datemath` and `moment`
+- **Only dependencies**: `@elastic/eui`, `@elastic/datemath`, `@kbn/i18n` and `moment`
 
 ## Commands
 

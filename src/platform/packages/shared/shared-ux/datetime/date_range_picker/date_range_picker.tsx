@@ -10,8 +10,11 @@
 import React from 'react';
 
 import type { TimeRangeBounds } from './types';
+import type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
 import { DateRangePickerProvider } from './date_range_picker_context';
 import { DateRangePickerDialog } from './date_range_picker_dialog';
+
+export type { TimeWindowButtonsConfig } from './date_range_picker_time_window_buttons';
 
 export interface DateRangePickerProps {
   /** Text representation of the time range */
@@ -31,6 +34,13 @@ export interface DateRangePickerProps {
    * @default true
    */
   compressed?: boolean;
+
+  /**
+   * Show time window buttons (previous, zoom out, zoom in, next) beside the control.
+   * Pass `true` for defaults, or a config object for fine-grained control.
+   * @default false
+   */
+  showTimeWindowButtons?: boolean | TimeWindowButtonsConfig;
 }
 
 export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
