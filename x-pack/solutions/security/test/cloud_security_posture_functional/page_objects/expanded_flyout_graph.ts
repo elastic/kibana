@@ -22,7 +22,6 @@ const {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
-  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_TEST_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID,
@@ -38,7 +37,6 @@ const {
   GRAPH_CALLOUT_TEST_ID,
   GRAPH_NODE_ENTITY_DETAILS_ID,
   GRAPH_NODE_ENTITY_TAG_TEXT_ID,
-  GRAPH_NODE_ENTITY_TAG_COUNT_ID,
   GROUPED_ITEM_TITLE_TEST_ID_TEXT,
   GROUPED_ITEM_TITLE_TEST_ID_LINK,
   GROUPED_ITEM_TEST_ID,
@@ -104,24 +102,14 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     return nodes[0];
   }
 
-  async getNodesByIdCount(nodeId: string): Promise<number> {
+  async assertNodeExists(nodeId: string): Promise<void> {
     await this.waitGraphIsLoaded();
     const graph = await this.testSubjects.find(GRAPH_INVESTIGATION_TEST_ID);
     await graph.scrollIntoView();
     const nodes = await graph.findAllByCssSelector(
       `.react-flow__nodes .react-flow__node[data-id="${nodeId}"]`
     );
-    return nodes.length;
-  }
-
-  async assertNodeExists(nodeId: string): Promise<void> {
-    const count = await this.getNodesByIdCount(nodeId);
-    expect(count).to.be(1);
-  }
-
-  async assertNodeDoesNotExist(nodeId: string): Promise<void> {
-    const count = await this.getNodesByIdCount(nodeId);
-    expect(count).to.be(0);
+    expect(nodes.length).to.be(1);
   }
 
   async clickOnNodeExpandButton(
@@ -149,11 +137,6 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
   async showEntityDetails(nodeId: string): Promise<void> {
     await this.clickOnNodeExpandButton(nodeId);
     await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID);
-    await this.pageObjects.header.waitUntilLoadingHasFinished();
-  }
-  async showEntityRelationships(nodeId: string): Promise<void> {
-    await this.clickOnNodeExpandButton(nodeId);
-    await this.testSubjects.click(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID);
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
@@ -296,13 +279,6 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     const tagWrapper = await node.findByTestSubject(GRAPH_NODE_ENTITY_TAG_TEXT_ID);
     const tagText = await tagWrapper.getVisibleText();
     expect(tagText.toLowerCase()).to.contain(expectedTagValue.toLowerCase());
-  }
-
-  async assertNodeEntityTagCount(nodeId: string, expectedCount: number): Promise<void> {
-    const node = await this.selectNode(nodeId);
-    const countWrapper = await node.findByTestSubject(GRAPH_NODE_ENTITY_TAG_COUNT_ID);
-    const countText = await countWrapper.getVisibleText();
-    expect(parseInt(countText, 10)).to.be(expectedCount);
   }
 
   async assertNodeEntityDetails(nodeId: string, expectedDetails: string): Promise<void> {

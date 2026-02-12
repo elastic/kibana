@@ -19,8 +19,6 @@ import {
   GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_TOOLTIP_ID,
-  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
-  GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
 } from '../../test_ids';
 import type {
   ItemExpandPopoverListItemProps,
@@ -83,9 +81,7 @@ export const useEntityNodeExpandPopover = (
   setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>,
   dataViewId: string,
   searchFilters: Filter[],
-  onShowEntityDetailsClick?: (node: NodeProps) => void,
-  expandedEntityIds?: Set<string>,
-  onToggleEntityRelationships?: (node: NodeProps, action: NodeToggleAction) => void
+  onShowEntityDetailsClick?: (node: NodeProps) => void
 ) => {
   const onToggleExploreRelatedEntitiesClick = useCallback(
     (node: NodeProps, action: NodeToggleAction) => {
@@ -145,15 +141,6 @@ export const useEntityNodeExpandPopover = (
         ? 'hide'
         : 'show';
 
-      // Determine if entity relationships are currently shown
-      const entityRelationshipsAction: NodeToggleAction = expandedEntityIds?.has(node.id)
-        ? 'hide'
-        : 'show';
-
-      // Entity relationships feature requires enriched entity and the toggle callback
-      const shouldDisableEntityRelationships =
-        !onToggleEntityRelationships || !isEntityNodeEnriched(node.data);
-
       const shouldDisableEntityDetailsListItem =
         !onShowEntityDetailsClick ||
         !['single-entity', 'grouped-entities'].includes(docMode) ||
@@ -199,44 +186,6 @@ export const useEntityNodeExpandPopover = (
       // For 'single-entity', show filter actions + entity details
       if (docMode === 'single-entity') {
         return [
-          {
-            type: 'item',
-            iconType: 'cluster',
-            testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
-            label:
-              entityRelationshipsAction === 'show'
-                ? i18n.translate(
-                    'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityRelationships',
-                    {
-                      defaultMessage: 'Show entity relationships',
-                    }
-                  )
-                : i18n.translate(
-                    'securitySolutionPackages.csp.graph.graphNodeExpandPopover.hideEntityRelationships',
-                    {
-                      defaultMessage: 'Hide entity relationships',
-                    }
-                  ),
-            disabled: shouldDisableEntityRelationships,
-            onClick: () => {
-              onToggleEntityRelationships?.(node, entityRelationshipsAction);
-            },
-            showToolTip: shouldDisableEntityRelationships,
-            toolTipText: shouldDisableEntityRelationships
-              ? i18n.translate(
-                  'securitySolutionPackages.csp.graph.graphNodeExpandPopover.entityRelationshipsNotAvailable',
-                  {
-                    defaultMessage: 'Entity relationships not available',
-                  }
-                )
-              : undefined,
-            toolTipProps: shouldDisableEntityRelationships
-              ? {
-                  position: 'bottom',
-                  'data-test-subj': GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
-                }
-              : undefined,
-          },
           {
             type: 'item',
             iconType: 'sortRight',
@@ -318,8 +267,6 @@ export const useEntityNodeExpandPopover = (
       onToggleActionsOnEntityClick,
       onToggleExploreRelatedEntitiesClick,
       onShowEntityDetailsClick,
-      onToggleEntityRelationships,
-      expandedEntityIds,
       searchFilters,
     ]
   );

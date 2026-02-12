@@ -34,7 +34,7 @@ import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_fi
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
 import type { NodeViewModel } from '../types';
-import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
+import { isLabelNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
 
 const useGraphPopovers = ({
@@ -43,16 +43,12 @@ const useGraphPopovers = ({
   setSearchFilters,
   nodeDetailsClickHandler,
   onOpenNetworkPreview,
-  expandedEntityIds,
-  onToggleEntityRelationships,
 }: {
   dataViewId: string;
   searchFilters: Filter[];
   setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
   nodeDetailsClickHandler?: (node: NodeProps) => void;
   onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
-  expandedEntityIds: Set<string>;
-  onToggleEntityRelationships: (node: NodeProps, action: 'show' | 'hide') => void;
 }) => {
   const [currentIps, setCurrentIps] = useState<string[]>([]);
   const [currentCountryCodes, setCurrentCountryCodes] = useState<string[]>([]);
@@ -64,9 +60,7 @@ const useGraphPopovers = ({
     setSearchFilters,
     dataViewId,
     searchFilters,
-    nodeDetailsClickHandler,
-    expandedEntityIds,
-    onToggleEntityRelationships
+    nodeDetailsClickHandler
   );
   const labelExpandPopover = useLabelNodeExpandPopover(
     setSearchFilters,
@@ -169,9 +163,8 @@ export interface GraphInvestigationProps {
 
     /**
      * The origin events for the graph investigation view.
-     * Optional - may be empty when opening from entity flyout.
      */
-    originEventIds?: Array<{
+    originEventIds: Array<{
       /**
        * The ID of the origin event.
        */
@@ -181,22 +174,6 @@ export interface GraphInvestigationProps {
        * A flag indicating whether the origin event is an alert or not.
        */
       isAlert: boolean;
-    }>;
-
-    /**
-     * Entity IDs for fetching relationships from entity store.
-     * isOrigin indicates whether this entity is the center/origin of the graph.
-     */
-    entityIds?: Array<{
-      /**
-       * The ID of the entity.
-       */
-      id: string;
-
-      /**
-       * Whether this entity is the origin of the graph (for centering).
-       */
-      isOrigin: boolean;
     }>;
 
     /**
@@ -244,13 +221,7 @@ type EsQuery = UseFetchGraphDataParams['req']['query']['esQuery'];
  */
 export const GraphInvestigation = memo<GraphInvestigationProps>(
   ({
-    initialState: {
-      indexPatterns,
-      dataView,
-      originEventIds,
-      entityIds,
-      timeRange: initialTimeRange,
-    },
+    initialState: { indexPatterns, dataView, originEventIds, timeRange: initialTimeRange },
     showInvestigateInTimeline = false,
     showToggleSearch = false,
     onInvestigateInTimeline,
@@ -266,32 +237,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
 
-    // Track which entities have their relationships expanded
-    const [expandedEntityIds, setExpandedEntityIds] = useState<Set<string>>(() => new Set());
-
-    // Convert expandedEntityIds Set to API format
-    const entityIdsForApi = useMemo(() => {
-      if (expandedEntityIds.size === 0) return undefined;
-
-      return Array.from(expandedEntityIds).map((id) => ({
-        id,
-        isOrigin: false, // User-expanded entities are not the graph origin
-      }));
-    }, [expandedEntityIds]);
-
-    // Toggle handler for entity relationships
-    const onToggleEntityRelationships = useCallback((node: NodeProps, action: 'show' | 'hide') => {
-      setExpandedEntityIds((prev) => {
-        const next = new Set(prev);
-        if (action === 'show') {
-          next.add(node.id);
-        } else {
-          next.delete(node.id);
-        }
-        return next;
-      });
-    }, []);
-
     const onInvestigateInTimelineCallback = useCallback(() => {
       const query = { ...kquery };
 
@@ -299,7 +244,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
 
       const hasKqlQuery = query.query.trim() !== '';
 
-      if (originEventIds && originEventIds.length > 0) {
+      if (originEventIds.length > 0) {
         if (!hasKqlQuery || searchFilters.length > 0) {
           filters = originEventIds.reduce<Filter[]>((acc, { id }) => {
             return addFilter(dataView?.id ?? '', acc, EVENT_ID, id);
@@ -347,7 +292,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           esQuery,
           start: timeRange.from,
           end: timeRange.to,
-          entityIds: entityIdsForApi,
         },
         nodesLimit: GRAPH_NODES_LIMIT,
       },
@@ -387,8 +331,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       setSearchFilters,
       nodeDetailsClickHandler: onOpenEventPreview ? nodeDetailsClickHandler : undefined,
       onOpenNetworkPreview,
-      expandedEntityIds,
-      onToggleEntityRelationships,
     });
 
     const nodeExpandButtonClickHandler = (...args: unknown[]) =>
@@ -403,13 +345,11 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       eventPopover,
     ].some(({ state: { isOpen } }) => isOpen);
 
-    const { originEventIdsSet, originAlertIdsSet, originEntityIdsSet } = useMemo(() => {
+    const { originEventIdsSet, originAlertIdsSet } = useMemo(() => {
       const eventIds = new Set<string>();
       const alertIds = new Set<string>();
-      const entityIdsWithOrigin = new Set<string>();
 
-      // Add origin event IDs (for centering when opening from events flyout)
-      originEventIds?.forEach(({ id, isAlert }) => {
+      originEventIds.forEach(({ id, isAlert }) => {
         if (isAlert) {
           alertIds.add(id);
         } else {
@@ -417,34 +357,11 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
         }
       });
 
-      // Add entity IDs that are marked as origin (for centering when opening from entity flyout)
-      entityIds?.forEach(({ id, isOrigin }) => {
-        if (isOrigin) {
-          entityIdsWithOrigin.add(id);
-        }
-      });
-
       return {
         originEventIdsSet: eventIds,
         originAlertIdsSet: alertIds,
-        originEntityIdsSet: entityIdsWithOrigin,
       };
-    }, [originEventIds, entityIds]);
-
-    // Build a map of relationship node IDs to their source entities (from edges)
-    // This allows us to determine if a relationship node is connected to an origin entity
-    const relationshipNodeSources = useMemo(() => {
-      const sourcesMap = new Map<string, string[]>();
-      data?.edges?.forEach((edge) => {
-        // Check if target is a relationship node by checking if it starts with 'rel('
-        if (edge.target.startsWith('rel(')) {
-          const sources = sourcesMap.get(edge.target) || [];
-          sources.push(edge.source);
-          sourcesMap.set(edge.target, sources);
-        }
-      });
-      return sourcesMap;
-    }, [data?.edges]);
+    }, [originEventIds]);
 
     const nodes = useMemo(() => {
       return (
@@ -481,27 +398,13 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               countryClickHandler: createCountryClickHandler(nodeCountryCodes),
               eventClickHandler: createEventClickHandler(analysis, text),
             };
-          } else if (isRelationshipNode(node)) {
-            // Check if any source entity connected to this relationship node is an origin
-            const sources = relationshipNodeSources.get(node.id) || [];
-            const isOrigin = sources.some((sourceId) => originEntityIdsSet.has(sourceId));
-            return {
-              ...node,
-              ...(isOrigin && { isOrigin }),
-            };
           }
 
           return { ...node };
         }) ?? []
       );
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [
-      data?.nodes,
-      originEventIdsSet,
-      originAlertIdsSet,
-      originEntityIdsSet,
-      relationshipNodeSources,
-    ]);
+    }, [data?.nodes, originEventIdsSet, originAlertIdsSet]);
 
     // Get callout state based on current graph state
     const calloutState = useGraphCallout(nodes);
