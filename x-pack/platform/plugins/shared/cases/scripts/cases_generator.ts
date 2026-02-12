@@ -40,24 +40,19 @@ function updateURL({
   return urlObject.href;
 }
 
-const makeRequest = async ({
+const createKbnClient = ({
   url,
-  newCase,
-  path,
-  apiKey,
   username,
   password,
   ssl,
+  apiKey,
 }: {
   url: string;
-  newCase: CasePostRequest;
-  path: string;
-  apiKey?: string;
   username: string;
   password: string;
   ssl: boolean;
-}) => {
-  let ca: Buffer;
+  apiKey?: string;
+}): { kbnClient: KbnClient; headers: Record<string, string> } => {
   const toolingLogOptions = { log: toolingLogger };
 
   let updatedUrl = updateURL({
@@ -71,7 +66,7 @@ const makeRequest = async ({
   };
 
   if (ssl) {
-    ca = fs.readFileSync(CA_CERT_PATH);
+    const ca = fs.readFileSync(CA_CERT_PATH);
     updatedUrl = updateURL({
       url: updatedUrl,
       user: { username, password },
@@ -83,29 +78,14 @@ const makeRequest = async ({
       url: updatedUrl,
     };
   }
-  const kbnClient = new KbnClient({
-    ...kbnClientOptions,
-  });
 
-  let headers: Record<string, string> = {};
+  const kbnClient = new KbnClient(kbnClientOptions);
+  const headers: Record<string, string> = {};
   if (apiKey) {
-    headers = {
-      Authorization: `ApiKey ${apiKey}`,
-    };
+    headers.Authorization = `ApiKey ${apiKey}`;
   }
 
-  return kbnClient
-    .request({
-      method: 'POST',
-      path,
-      headers,
-      body: newCase,
-    })
-    .then(({ data }) => data)
-    .catch((error) => {
-      toolingLogger.error(`Error creating case: ${newCase.title}`);
-      toolingLogger.error(error);
-    });
+  return { kbnClient, headers };
 };
 
 const createCase = (counter: number, owner: string, reqId: string): CasePostRequest => ({
@@ -129,6 +109,23 @@ const createCase = (counter: number, owner: string, reqId: string): CasePostRequ
   customFields: [],
 });
 
+const createUserComment = (owner: string, index: number) => ({
+  type: 'user' as const,
+  comment: `Auto generated comment ${index + 1}`,
+  owner,
+});
+
+const createAlertAttachment = (owner: string, index: number) => ({
+  type: 'alert' as const,
+  alertId: `sample-alert-${getRandomString(8)}-${index}`,
+  index: '.internal.alerts-security.alerts-default-000001',
+  rule: {
+    id: `sample-rule-${getRandomString(6)}`,
+    name: `Sample Rule ${index + 1}`,
+  },
+  owner,
+});
+
 const getRandomString = (length: number) =>
   Math.random()
     .toString(36)
@@ -137,36 +134,85 @@ const getRandomString = (length: number) =>
 const generateCases = async ({
   cases,
   space,
-  username,
-  password,
-  apiKey,
-  kibana,
-  ssl,
+  kbnClient,
+  headers,
+  commentsPerCase,
+  alertsPerCase,
 }: {
   cases: CasePostRequest[];
   space: string;
-  apiKey: string;
-  username: string;
-  password: string;
-  kibana: string;
-  ssl: boolean;
+  kbnClient: KbnClient;
+  headers: Record<string, string>;
+  commentsPerCase: number;
+  alertsPerCase: number;
 }) => {
   try {
+    const basePath = space ? `/s/${space}` : '';
+    const casesPath = `${basePath}/api/cases`;
+    const totalAttachments = commentsPerCase + alertsPerCase;
+
     toolingLogger.info(
-      `Creating ${cases.length} cases in ${space ? `space: ${space}` : 'default space'}`
+      `Creating ${cases.length} cases in ${space ? `space: ${space}` : 'default space'}` +
+        (totalAttachments > 0
+          ? ` with ${commentsPerCase} comments and ${alertsPerCase} alerts each`
+          : '')
     );
-    const path = `${space ? `/s/${space}` : ''}/api/cases`;
-    const concurrency = 100;
+
+    const concurrency = totalAttachments > 0 ? 10 : 100;
+
     await pMap(
       cases,
-      (newCase, index) => {
+      async (newCase, index) => {
         if (index % concurrency === 0) {
           const caseCount = cases.length;
           console.info(
             `CREATING CASES ${index + 1} to ${Math.min(index + concurrency, caseCount)}`
           );
         }
-        return makeRequest({ url: kibana, path, newCase, username, password, apiKey, ssl });
+
+        try {
+          const { data: createdCase } = await kbnClient.request<{ id: string }>({
+            method: 'POST',
+            path: casesPath,
+            headers,
+            body: newCase,
+          });
+
+          const caseId = createdCase.id;
+
+          if (totalAttachments > 0) {
+            const attachments = [
+              ...Array.from({ length: commentsPerCase }, (_, i) =>
+                createUserComment(newCase.owner, i)
+              ),
+              ...Array.from({ length: alertsPerCase }, (_, i) =>
+                createAlertAttachment(newCase.owner, i)
+              ),
+            ];
+
+            const commentPath = `${basePath}/api/cases/${caseId}/comments`;
+
+            // Attachments must be added sequentially because they are embedded
+            // on the case SO — parallel writes cause version conflicts.
+            for (const attachment of attachments) {
+              try {
+                await kbnClient.request({
+                  method: 'POST',
+                  path: commentPath,
+                  headers,
+                  body: attachment,
+                });
+              } catch (err) {
+                toolingLogger.error(
+                  `Error adding ${attachment.type} to case ${caseId}: ${(err as Error).message}`
+                );
+              }
+            }
+          }
+        } catch (error) {
+          toolingLogger.error(`Error creating case: ${newCase.title}`);
+          toolingLogger.error(error);
+        }
       },
       { concurrency }
     );
@@ -202,6 +248,18 @@ const main = async () => {
         type: 'number',
         default: 10,
       },
+      comments: {
+        alias: 'm',
+        describe: 'Number of user comments per case',
+        type: 'number',
+        default: 0,
+      },
+      alerts: {
+        alias: 'a',
+        describe: 'Number of sample alert attachments per case',
+        type: 'number',
+        default: 0,
+      },
       apiKey: {
         alias: 'apiKey',
         describe: 'API key to pass as an authorization header. Necessary for serverless',
@@ -229,8 +287,11 @@ const main = async () => {
       },
     }).argv;
 
-    const { apiKey, username, password, kibana, count, owners, space, ssl } = argv;
+    const { apiKey, username, password, kibana, count, owners, space, ssl, comments, alerts } =
+      argv;
     const numCasesToCreate = Number(count);
+    const commentsPerCase = Number(comments);
+    const alertsPerCase = Number(alerts);
     const potentialOwners = new Set(['securitySolution', 'observability', 'cases']);
     const invalidOwnerProvided = owners.some((owner) => !potentialOwners.has(owner));
 
@@ -249,7 +310,29 @@ const main = async () => {
         return createCase(index + 1, owner, idForThisRequest);
       });
 
-    await generateCases({ cases, space, username, password, kibana, apiKey, ssl });
+    const { kbnClient, headers } = createKbnClient({
+      url: kibana,
+      username,
+      password,
+      ssl,
+      apiKey,
+    });
+
+    await generateCases({
+      cases,
+      space,
+      kbnClient,
+      headers,
+      commentsPerCase,
+      alertsPerCase,
+    });
+
+    toolingLogger.info('Done!');
+    if (commentsPerCase > 0 || alertsPerCase > 0) {
+      toolingLogger.info(
+        `Created ${numCasesToCreate} cases, each with ${commentsPerCase} comments and ${alertsPerCase} alerts (embedded on case SO)`
+      );
+    }
   } catch (error) {
     console.log(error);
   }
