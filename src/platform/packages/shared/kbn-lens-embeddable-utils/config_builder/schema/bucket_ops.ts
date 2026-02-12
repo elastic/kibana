@@ -73,7 +73,7 @@ export const bucketDateHistogramOperationSchema = schema.object(
       })
     ),
   },
-  { meta: { id: 'dateHistogramOperationSchema' } }
+  { meta: { id: 'dateHistogramOperation' } }
 );
 
 export const bucketTermsOperationSchema = schema.object(
@@ -241,7 +241,7 @@ export const bucketTermsOperationSchema = schema.object(
       ])
     ),
   },
-  { meta: { id: 'termsOperationSchema' } }
+  { meta: { id: 'termsOperation' } }
 );
 
 export const bucketFiltersOperationSchema = schema.object(
@@ -253,7 +253,7 @@ export const bucketFiltersOperationSchema = schema.object(
      */
     filters: schema.arrayOf(filterWithLabelSchema, { maxSize: 100 }),
   },
-  { meta: { id: 'filtersOperationSchema' } }
+  { meta: { id: 'filtersOperation' } }
 );
 
 export const bucketHistogramOperationSchema = schema.object(
@@ -307,7 +307,7 @@ export const bucketHistogramOperationSchema = schema.object(
       defaultValue: LENS_HISTOGRAM_EMPTY_ROWS_DEFAULT,
     }),
   },
-  { meta: { id: 'histogramOperationSchema' } }
+  { meta: { id: 'histogramOperation' } }
 );
 
 export const bucketRangesOperationSchema = schema.object({
@@ -368,7 +368,7 @@ export const bucketRangesOperationSchema = schema.object({
         })
       ),
     }),
-    { maxSize: 100, meta: { id: 'rangesOperationSchema' } }
+    { maxSize: 100, meta: { id: 'rangesOperation' } }
   ),
 });
 

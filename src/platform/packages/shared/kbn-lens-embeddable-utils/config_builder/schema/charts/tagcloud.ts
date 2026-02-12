@@ -109,7 +109,7 @@ export const tagcloudStateSchemaESQL = schema.object(
 export const tagcloudStateSchema = schema.oneOf(
   [tagcloudStateSchemaNoESQL, tagcloudStateSchemaESQL],
   {
-    meta: { id: 'tagcloudChartSchema' },
+    meta: { id: 'tagcloudChart' },
   }
 );
 

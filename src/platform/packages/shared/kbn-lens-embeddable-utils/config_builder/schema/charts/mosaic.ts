@@ -204,7 +204,7 @@ const mosaicStateSchemaESQL = schema.object(
 
 export const mosaicStateSchema = schema.oneOf([mosaicStateSchemaNoESQL, mosaicStateSchemaESQL], {
   meta: {
-    id: 'mosaicChartSchema',
+    id: 'mosaicChart',
     description:
       'Mosaic chart configuration schema supporting both data source queries (non-ES|QL) and ES|QL query modes',
   },

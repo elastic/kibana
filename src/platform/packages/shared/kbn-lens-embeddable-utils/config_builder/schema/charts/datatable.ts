@@ -462,7 +462,7 @@ export const datatableStateSchema = schema.oneOf(
   {
     meta: {
       description: 'Datatable chart configuration: DSL or ES|QL query based',
-      id: 'datatableChartSchema',
+      id: 'datatableChart',
     },
   }
 );

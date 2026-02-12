@@ -151,7 +151,7 @@ export const gaugeStateSchemaESQL = schema.object(
 );
 
 export const gaugeStateSchema = schema.oneOf([gaugeStateSchemaNoESQL, gaugeStateSchemaESQL], {
-  meta: { id: 'gaugeChartSchema' },
+  meta: { id: 'gaugeChart' },
 });
 
 export type GaugeState = TypeOf<typeof gaugeStateSchema>;
