@@ -2341,7 +2341,7 @@ export class CstToAstConverter {
     const value = this.fromPrimaryExpressionStrict(ctx.primaryExpression());
 
     return Builder.expression.inlineCast(
-      { castType: ctx.dataType().getText().toLowerCase() as ast.InlineCastingType, value },
+      { castType: ctx.dataType().getText().toLowerCase(), value },
       this.getParserFields(ctx)
     );
   }
@@ -2596,7 +2596,7 @@ export class CstToAstConverter {
     if (dataTypeCtx) {
       expression = Builder.expression.inlineCast(
         {
-          castType: dataTypeCtx.getText().toLowerCase() as ast.InlineCastingType,
+          castType: dataTypeCtx.getText().toLowerCase(),
           value: expression,
         },
         {

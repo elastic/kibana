@@ -48,7 +48,7 @@ const triggerControl = async (
   onSaveControl?: ESQLControlsContext['onSaveControl'],
   onCancelControl?: ESQLControlsContext['onCancelControl']
 ) => {
-  await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+  await uiActions.executeTriggerActions('ESQL_CONTROL_TRIGGER', {
     queryString,
     variableType,
     cursorPosition: position,
