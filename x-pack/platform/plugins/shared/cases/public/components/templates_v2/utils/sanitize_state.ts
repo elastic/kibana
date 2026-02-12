@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import type { TemplatesFindRequest } from '../../../../common/types/api/template/v1';
 import { PAGE_SIZE_OPTIONS, SORT_ORDER_VALUES, DEFAULT_QUERY_PARAMS } from '../constants';
-import type { QueryParams } from '../types';
 
-export const sanitizeState = (state: Partial<QueryParams> = {}): Partial<QueryParams> => {
+export const sanitizeState = (
+  state: Partial<TemplatesFindRequest> = {}
+): Partial<TemplatesFindRequest> => {
   const { perPage, sortOrder, tags, author, ...rest } = state;
 
-  const sanitized: Partial<QueryParams> = { ...rest };
+  const sanitized: Partial<TemplatesFindRequest> = { ...rest };
 
   if (perPage !== undefined) {
     sanitized.perPage = Math.min(perPage, PAGE_SIZE_OPTIONS[PAGE_SIZE_OPTIONS.length - 1]);

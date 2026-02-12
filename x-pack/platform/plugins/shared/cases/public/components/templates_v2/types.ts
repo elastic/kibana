@@ -6,17 +6,12 @@
  */
 
 import type {
-  Template,
   CreateTemplateInput,
   PatchTemplateInput,
 } from '../../../common/types/domain/template/v1';
+import type { TemplatesFindRequest } from '../../../common/types/api/template/v1';
 
-export interface TemplatesFindResponse {
-  templates: Template[];
-  page: number;
-  perPage: number;
-  total: number;
-}
+export type TemplatesURLQueryParams = Partial<TemplatesFindRequest>;
 
 export type TemplateRequest = CreateTemplateInput;
 
@@ -41,18 +36,3 @@ export interface BulkExportTemplatesResponse {
   filename: string;
   content: string;
 }
-
-export type SortField = keyof Template;
-export type SortOrder = 'asc' | 'desc';
-
-export interface QueryParams {
-  page: number;
-  perPage: number;
-  sortField: SortField;
-  sortOrder: SortOrder;
-  search: string;
-  tags: string[];
-  author: string[];
-}
-
-export type TemplatesURLQueryParams = Partial<QueryParams>;

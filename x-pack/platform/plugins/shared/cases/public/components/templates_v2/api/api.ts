@@ -21,7 +21,10 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import { MOCK_TEMPLATES } from './sample_data';
 import { templatesToYaml } from '../utils/templates_to_yaml';
 import type {
+  TemplatesFindRequest,
   TemplatesFindResponse,
+} from '../../../../common/types/api/template/v1';
+import type {
   TemplateUpdateRequest,
   BulkDeleteTemplatesResponse,
   BulkExportTemplatesResponse,
@@ -47,13 +50,7 @@ export const getTemplates = async ({
   queryParams,
 }: {
   signal?: AbortSignal;
-  queryParams: {
-    page: number;
-    perPage: number;
-    search: string;
-    sortField: string;
-    sortOrder: 'asc' | 'desc';
-  };
+  queryParams: TemplatesFindRequest;
 }): Promise<TemplatesFindResponse> => {
   const { page, perPage, search, sortField, sortOrder } = queryParams;
 
@@ -76,8 +73,8 @@ export const getTemplates = async ({
 
   // Sort templates
   const sortedTemplates = [...filteredTemplates].sort((a, b) => {
-    const aValue = a[sortField as keyof Template];
-    const bValue = b[sortField as keyof Template];
+    const aValue = a[sortField];
+    const bValue = b[sortField];
 
     if (aValue == null || bValue == null) {
       return 0;
