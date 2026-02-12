@@ -257,6 +257,8 @@ export const RulesListTable = (props: RulesListTableProps) => {
   // Detect current app to determine the correct path format
 
   const ruleRowCss = css`
+    min-width: ${euiTheme.breakpoint.xl}px;
+
     .actRulesList__tableRowDisabled {
       background-color: ${euiTheme.colors.lightestShade};
 
@@ -1033,10 +1035,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           sorting={{ sort }}
           rowHeader="name"
           rowProps={rowProps}
-          css={css`
-            min-width: ${euiTheme.breakpoint.xl}px;
-            ${ruleRowCss};
-          `}
+          css={ruleRowCss}
           cellProps={(rule: RuleTableItem) => ({
             'data-test-subj': 'cell',
             className: !ruleTypesState.data.get(rule.ruleTypeId)?.enabledInLicense
