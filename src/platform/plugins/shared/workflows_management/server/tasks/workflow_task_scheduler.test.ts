@@ -29,14 +29,124 @@ const mockTaskManager: TaskManagerStartContract = {
   schedule: jest.fn().mockResolvedValue({ id: 'test-task-id' }),
   fetch: jest.fn().mockResolvedValue({ docs: [] }),
   bulkRemove: jest.fn().mockResolvedValue(undefined),
+  bulkUpdateSchedules: jest.fn().mockResolvedValue({ tasks: [], errors: [] }),
 } as any;
 
-describe('WorkflowTaskScheduler RRule Validation', () => {
+describe('WorkflowTaskScheduler', () => {
   let scheduler: WorkflowTaskScheduler;
 
   beforeEach(() => {
     scheduler = new WorkflowTaskScheduler(mockLogger, mockTaskManager);
     jest.clearAllMocks();
+  });
+
+  describe('Idempotent scheduling', () => {
+    it('should handle 409 conflict by updating schedule in place', async () => {
+      const conflictError = new Error('Conflict') as Error & { statusCode: number };
+      conflictError.statusCode = 409;
+      (mockTaskManager.schedule as jest.Mock).mockRejectedValueOnce(conflictError);
+      (mockTaskManager.bulkUpdateSchedules as jest.Mock).mockResolvedValueOnce({
+        tasks: [{ id: 'workflow:test-workflow:scheduled' }],
+        errors: [],
+      });
+
+      const workflow: EsWorkflow = {
+        id: 'test-workflow',
+        name: 'Test Workflow',
+        enabled: true,
+        tags: [],
+        definition: {
+          triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+          steps: [],
+          name: 'Test Workflow',
+          enabled: false,
+          version: '1',
+        },
+        yaml: '',
+        createdBy: 'test-user',
+        lastUpdatedBy: 'test-user',
+        valid: true,
+        deleted_at: null,
+        createdAt: new Date(),
+        lastUpdatedAt: new Date(),
+      };
+
+      const result = await scheduler.scheduleWorkflowTasks(workflow, 'default');
+
+      expect(result).toEqual(['workflow:test-workflow:scheduled']);
+      expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.bulkUpdateSchedules).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
+        ['workflow:test-workflow:scheduled'],
+        expect.objectContaining({ interval: '30s' })
+      );
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Updated existing scheduled task')
+      );
+    });
+
+    it('should propagate non-409 errors from schedule', async () => {
+      const serverError = new Error('Server error') as Error & { statusCode: number };
+      serverError.statusCode = 500;
+      (mockTaskManager.schedule as jest.Mock).mockRejectedValueOnce(serverError);
+
+      const workflow: EsWorkflow = {
+        id: 'test-workflow',
+        name: 'Test Workflow',
+        enabled: true,
+        tags: [],
+        definition: {
+          triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+          steps: [],
+          name: 'Test Workflow',
+          enabled: false,
+          version: '1',
+        },
+        yaml: '',
+        createdBy: 'test-user',
+        lastUpdatedBy: 'test-user',
+        valid: true,
+        deleted_at: null,
+        createdAt: new Date(),
+        lastUpdatedAt: new Date(),
+      };
+
+      await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).rejects.toThrow(
+        'Server error'
+      );
+      expect(mockTaskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
+    });
+
+    it('should not delete tasks on updateWorkflowTasks (idempotent update)', async () => {
+      const workflow: EsWorkflow = {
+        id: 'test-workflow',
+        name: 'Test Workflow',
+        enabled: true,
+        tags: [],
+        definition: {
+          triggers: [{ type: 'scheduled', with: { every: '30s' } }],
+          steps: [],
+          name: 'Test Workflow',
+          enabled: false,
+          version: '1',
+        },
+        yaml: '',
+        createdBy: 'test-user',
+        lastUpdatedBy: 'test-user',
+        valid: true,
+        deleted_at: null,
+        createdAt: new Date(),
+        lastUpdatedAt: new Date(),
+      };
+
+      await scheduler.updateWorkflowTasks(workflow, 'default');
+
+      // Should NOT call fetch/bulkRemove (no delete step)
+      expect(mockTaskManager.fetch).not.toHaveBeenCalled();
+      expect(mockTaskManager.bulkRemove).not.toHaveBeenCalled();
+      // Should call schedule
+      expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('RRule Validation', () => {
