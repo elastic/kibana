@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { PLATFORM_INDEX_MGMT_V2 } from '../../../common/constants';
 import { useAppContext } from '../app_context';
 
 export const DiscoverLink = ({
@@ -18,7 +19,8 @@ export const DiscoverLink = ({
   indexName: string;
   asButton?: boolean;
 }) => {
-  const { url } = useAppContext();
+  const { url, settings } = useAppContext();
+  const isNewDesignEnabled = settings?.client.get<boolean>(PLATFORM_INDEX_MGMT_V2, false);
   const discoverLocator = url?.locators.get('DISCOVER_APP_LOCATOR');
   if (!discoverLocator) {
     return null;
@@ -39,7 +41,14 @@ export const DiscoverLink = ({
     />
   );
   if (asButton) {
-    link = (
+    link = isNewDesignEnabled ? (
+      <EuiButtonEmpty onClick={onClick} iconType="discoverApp" data-test-subj="discoverButtonLink">
+        <FormattedMessage
+          id="xpack.idxMgmt.goToDiscover.discoverIndexButtonLabel"
+          defaultMessage="Discover index"
+        />
+      </EuiButtonEmpty>
+    ) : (
       <EuiButton fill onClick={onClick} iconType="discoverApp" data-test-subj="discoverButtonLink">
         <FormattedMessage
           id="xpack.idxMgmt.goToDiscover.discoverIndexButtonLabel"
