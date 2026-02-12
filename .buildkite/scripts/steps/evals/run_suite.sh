@@ -164,7 +164,7 @@ EOF
 fi
 
 # Start Scout server in background (run Kibana from the distributable)
-node scripts/scout start-server --stateful --kibana-install-dir "${KIBANA_BUILD_LOCATION:?}" &
+node scripts/scout start-server --location local --arch stateful --domain classic --kibanaInstallDir "${KIBANA_BUILD_LOCATION:?}" &
 SCOUT_PID=$!
 
 # Wait for Scout to write servers config (and fail fast if the Scout server process exits)
