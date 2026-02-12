@@ -115,7 +115,7 @@ export function registerRefreshTokenRoute({
           body: parseResult.data,
         });
       } catch (error) {
-        const errorMsg = `EARS exchange code error: ${error}`;
+        const errorMsg = `EARS refresh error: ${error}`;
         logger.error(errorMsg);
         return response.customError({
           statusCode: 500,

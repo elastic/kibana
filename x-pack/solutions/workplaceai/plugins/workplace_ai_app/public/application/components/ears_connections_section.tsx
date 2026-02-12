@@ -21,6 +21,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { GoogleUserInfo } from '../../../common';
 import { EarsOAuthProvider } from '../../../common';
+import type { WorkplaceAIClientConfig } from '../../types';
 import { useWorkplaceAIConfig } from '../hooks/use_kibana';
 import { useExchangeCode, useRefreshToken, useRevokeToken } from '../hooks/use_ears_oauth';
 
@@ -36,8 +37,7 @@ const GOOGLE_SCOPES = [
   'https://www.googleapis.com/auth/drive.metadata.readonly',
 ];
 
-function getEARSAuthUrl(): string | undefined {
-  const config = useWorkplaceAIConfig();
+function getEARSAuthUrl(config: WorkplaceAIClientConfig): string | undefined {
   const earsUrl = config.ears.url;
 
   const params = new URLSearchParams();
@@ -52,7 +52,8 @@ function getEARSAuthUrl(): string | undefined {
 }
 
 export const EarsConnectionsSection: React.FC = () => {
-  const earsAuthUrl = getEARSAuthUrl();
+  const config = useWorkplaceAIConfig();
+  const earsAuthUrl = getEARSAuthUrl(config);
 
   const urlParams = new URLSearchParams(window.location.search);
 
@@ -75,7 +76,7 @@ export const EarsConnectionsSection: React.FC = () => {
       { provider: EarsOAuthProvider.Google, code },
       {
         onSuccess: (data) => {
-          if (!data.access_token || data.access_token.length == 0) {
+          if (!data.access_token || data.access_token.length === 0) {
             setEarsError(
               'Got empty token. Likely your access code is invalid - delete it from the query parameters and try the flow again'
             );
@@ -121,13 +122,13 @@ export const EarsConnectionsSection: React.FC = () => {
     }
   };
 
-  const useRefreshTokenMutation = useRefreshToken();
+  const refreshTokenMutation = useRefreshToken();
 
   const handleRefreshToken = async () => {
     if (!refreshToken) return;
     setEarsLoading(true);
 
-    useRefreshTokenMutation.mutate(
+    refreshTokenMutation.mutate(
       { provider: EarsOAuthProvider.Google, refresh_token: refreshToken },
       {
         onSuccess: (data) => {
@@ -144,17 +145,16 @@ export const EarsConnectionsSection: React.FC = () => {
     );
   };
 
-  const useRevokeTokensMutation = useRevokeToken();
+  const revokeTokensMutation = useRevokeToken();
 
   const handleRevokeToken = async () => {
     if (!accessToken) return;
     setEarsLoading(true);
 
-    useRevokeTokensMutation.mutate(
+    revokeTokensMutation.mutate(
       { provider: EarsOAuthProvider.Google, token: accessToken },
       {
         onSuccess: (data) => {
-          console.log('Token successfully revoked');
           setEarsError(null);
         },
         onError: (error) => {
@@ -249,7 +249,7 @@ export const EarsConnectionsSection: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s">
-                {code && !accessToken && (
+                {!accessToken && (
                   <EuiFlexItem>
                     <EuiButton color="success" onClick={handleExchangeCode} isLoading={earsLoading}>
                       <FormattedMessage

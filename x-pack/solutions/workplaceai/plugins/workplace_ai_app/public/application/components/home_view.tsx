@@ -35,7 +35,7 @@ export const WorkplaceAIHomeView: React.FC<{}> = () => {
 
         <ExploreWorkplaceAI />
 
-        {true && (
+        {isEarsUiEnabled && (
           <>
             <div css={sectionGapStyles} />
             <EarsConnectionsSection />

@@ -99,7 +99,7 @@ export function registerRevokeTokenRoute({
 
         return response.ok();
       } catch (error) {
-        const errorMsg = `EARS exchange code error: ${error}`;
+        const errorMsg = `EARS revoke token error: ${error}`;
         logger.error(errorMsg);
         return response.customError({
           statusCode: 500,

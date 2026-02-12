@@ -49,10 +49,7 @@ export function registerExchangeCodeRoute({
           ]),
         }),
         body: schema.object({
-          code: schema.maybe(schema.string()),
-          state: schema.maybe(schema.string()),
-          error: schema.maybe(schema.string()),
-          error_description: schema.maybe(schema.string()),
+          code: schema.string(),
         }),
       },
     },
@@ -71,16 +68,7 @@ export function registerExchangeCodeRoute({
 
       const { provider } = request.params;
 
-      const { code, state, error, error_description } = request.body;
-
-      if (!code) {
-        return response.customError({
-          statusCode: 500,
-          body: {
-            message: 'No code provided',
-          },
-        });
-      }
+      const { code } = request.body;
 
       try {
         const fetchOptions: RequestInit & { dispatcher?: Agent } = {
