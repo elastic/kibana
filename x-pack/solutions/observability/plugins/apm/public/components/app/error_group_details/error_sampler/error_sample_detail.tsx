@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
-import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import { getContextMenuItemsFromActions } from '@kbn/observability-shared-plugin/public';
 import { first } from 'lodash';
 import React, { useEffect, useState } from 'react';
@@ -30,6 +29,7 @@ import { useHistory } from 'react-router-dom';
 import useAsync from 'react-use/lib/useAsync';
 import { ExceptionStacktrace, PlaintextStacktrace, Stacktrace } from '@kbn/event-stacktrace';
 import { Timestamp } from '@kbn/apm-ui-shared';
+import { O11Y_APM_ERROR_CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { AT_TIMESTAMP } from '../../../../../common/es_fields/apm';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -130,7 +130,7 @@ export function ErrorSampleDetails({
   const externalContextMenuItems = useAsync(() => {
     return getContextMenuItemsFromActions({
       uiActions,
-      triggerId: ObservabilityTriggerId.ApmErrorContextMenu,
+      triggerId: O11Y_APM_ERROR_CONTEXT_MENU_TRIGGER,
       context: {
         error,
         transaction,

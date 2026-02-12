@@ -688,7 +688,8 @@
       "groupName": "monaco",
       "matchDepNames": [
         "monaco-yaml",
-        "monaco-editor"
+        "monaco-editor",
+        "monaco-promql"
       ],
       "reviewers": [
         "team:appex-sharedux"
