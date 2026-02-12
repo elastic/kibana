@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { GoogleUserInfo } from '../../../common';
 import { EarsOAuthProvider } from '../../../common';
 import type { WorkplaceAIClientConfig } from '../../types';
-import { useWorkplaceAIConfig } from '../hooks/use_kibana';
+import { useWorkplaceAIConfig, useKibana } from '../hooks/use_kibana';
 import { useExchangeCode, useRefreshToken, useRevokeToken } from '../hooks/use_ears_oauth';
 
 /*
@@ -37,12 +37,19 @@ const GOOGLE_SCOPES = [
   'https://www.googleapis.com/auth/drive.metadata.readonly',
 ];
 
-function getEARSAuthUrl(config: WorkplaceAIClientConfig): string | undefined {
+function getEARSAuthUrl(
+  config: WorkplaceAIClientConfig,
+  kibanaBasePath: string | undefined
+): string | undefined {
+  if (!kibanaBasePath) {
+    return undefined;
+  }
+
   const earsUrl = config.ears.url;
 
   const params = new URLSearchParams();
   GOOGLE_SCOPES.forEach((s) => params.append('scope', s));
-  params.set('callback_uri', 'http://localhost:5601/app/workplace_ai');
+  params.set('callback_uri', `${kibanaBasePath}/app/workplace_ai`);
 
   const authUrl = earsUrl
     ? `${earsUrl}/${EarsOAuthProvider.Google}/oauth/authorize?${params.toString()}`
@@ -53,7 +60,10 @@ function getEARSAuthUrl(config: WorkplaceAIClientConfig): string | undefined {
 
 export const EarsConnectionsSection: React.FC = () => {
   const config = useWorkplaceAIConfig();
-  const earsAuthUrl = getEARSAuthUrl(config);
+  const { http } = useKibana().services;
+  const basePath = http.basePath.publicBaseUrl;
+
+  const earsAuthUrl = getEARSAuthUrl(config, basePath);
 
   const urlParams = new URLSearchParams(window.location.search);
 
@@ -154,7 +164,7 @@ export const EarsConnectionsSection: React.FC = () => {
     revokeTokensMutation.mutate(
       { provider: EarsOAuthProvider.Google, token: accessToken },
       {
-        onSuccess: (data) => {
+        onSuccess: () => {
           setEarsError(null);
         },
         onError: (error) => {
@@ -193,34 +203,56 @@ export const EarsConnectionsSection: React.FC = () => {
             <EuiFlexItem grow={false}>
               <EuiAvatar name="Google" iconType="logoGoogleG" size="l" color="plain" />
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiTitle size="xs">
-                <h3>
-                  <FormattedMessage
-                    id="xpack.workplaceai.gettingStarted.earsSection.googleTitle"
-                    defaultMessage="Google"
-                  />
-                </h3>
-              </EuiTitle>
-              <EuiText size="s" color="subdued">
-                <FormattedMessage
-                  id="xpack.workplaceai.gettingStarted.earsSection.googleDescription"
-                  defaultMessage="Connect your Google account."
-                />
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s">
+            {earsAuthUrl && (
+              <>
                 <EuiFlexItem>
-                  <EuiButton href={earsAuthUrl} isDisabled={!earsAuthUrl}>
+                  <EuiTitle size="xs">
+                    <h3>
+                      <FormattedMessage
+                        id="xpack.workplaceai.gettingStarted.earsSection.googleTitle"
+                        defaultMessage="Google"
+                      />
+                    </h3>
+                  </EuiTitle>
+                  <EuiText size="s" color="subdued">
                     <FormattedMessage
-                      id="xpack.workplaceai.gettingStarted.earsSection.connectGoogleButton"
-                      defaultMessage="Connect to Google"
+                      id="xpack.workplaceai.gettingStarted.earsSection.googleDescription"
+                      defaultMessage="Connect your Google account."
                     />
-                  </EuiButton>
+                  </EuiText>
                 </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem>
+                      <EuiButton href={earsAuthUrl} isDisabled={!earsAuthUrl}>
+                        <FormattedMessage
+                          id="xpack.workplaceai.gettingStarted.earsSection.connectGoogleButton"
+                          defaultMessage="Connect to Google"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </>
+            )}
+            {!earsAuthUrl && (
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.workplaceai.gettingStarted.earsSection.notWorking"
+                      defaultMessage="Not possible to use EARS"
+                    />
+                  </h3>
+                </EuiTitle>
+                <EuiText size="s" color="subdued">
+                  <FormattedMessage
+                    id="xpack.workplaceai.gettingStarted.earsSection.noPublicKibanaUrl"
+                    defaultMessage="server.publicBaseUrl setting is not found. Not possible to form callback_uri"
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiPanel>
       )}
@@ -303,7 +335,7 @@ export const EarsConnectionsSection: React.FC = () => {
                   announceOnMount
                   title={
                     <FormattedMessage
-                      id="xpack.workplaceai.gettingStarted.earsSection.userInfoErrorTitle"
+                      id="xpack.workplaceai.gettingStarted.earsSection.earsInfoErrorTitle"
                       defaultMessage="Failed to execute EARS call"
                     />
                   }
