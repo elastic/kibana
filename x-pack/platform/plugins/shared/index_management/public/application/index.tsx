@@ -11,6 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import type SemVer from 'semver/classes/semver';
 
 import type { CoreStart, CoreSetup, ApplicationStart } from '@kbn/core/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { API_BASE_PATH } from '../../common';
@@ -53,6 +54,7 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
   } = core;
   const startServices = { analytics, i18n, overlays, theme, userProfile };
   const { services, setBreadcrumbs, uiSettings, settings, kibanaVersion } = dependencies;
+  const { cloud } = dependencies.plugins;
 
   // theme is required by the CodeEditor component used to edit runtime field Painless scripts.
   const { Provider: KibanaReactContextProvider } =
@@ -65,6 +67,7 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
       },
       theme,
       userProfile,
+      cloud,
     });
 
   const componentTemplateProviderValues = {
@@ -129,6 +132,7 @@ interface KibanaReactContextServices {
   };
   theme: CoreStart['theme'];
   userProfile: CoreStart['userProfile'];
+  cloud?: CloudSetup;
 }
 
 // We override useKibana() from the react plugin to return a typed version for this app

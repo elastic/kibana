@@ -8,11 +8,20 @@
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiButton, EuiPageHeader, EuiPageSection, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageHeader,
+  EuiPageSection,
+  EuiSpacer,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { RouteComponentProps } from 'react-router-dom';
+import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
+import { ConnectionDetails } from '@kbn/search-api-panels';
 
 import { useIndexErrors } from '../../../../hooks/use_index_errors';
 import { resetIndexUrlParams } from './reset_index_url_params';
@@ -141,35 +150,65 @@ export const DetailsPageContentV2: FunctionComponent<Props> = ({
   return (
     <>
       <EuiPageSection paddingSize="none">
-        <EuiButton
-          data-test-subj="indexDetailsBackToIndicesButton"
-          color="text"
-          iconType="arrowLeft"
-          onClick={navigateToIndicesList}
-        >
-          <FormattedMessage
-            id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
-            defaultMessage="Back to indices"
-          />
-        </EuiButton>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={true}>
+            <div>
+              <EuiButton
+                data-test-subj="indexDetailsBackToIndicesButton"
+                color="text"
+                iconType="arrowLeft"
+                onClick={navigateToIndicesList}
+              >
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
+                  defaultMessage="Back to indices"
+                />
+              </EuiButton>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup>
+              <DiscoverLink indexName={index.name} asButton={true} />
+              <ManageIndexButton
+                index={index}
+                reloadIndexDetails={fetchIndexDetails}
+                navigateToIndicesList={navigateToIndicesList}
+              />
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="l" />
+        <EuiFlexGroup css={{ overflow: 'auto' }} wrap justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <ConnectionDetails />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <div>
+              <EuiButton
+                data-test-subj="indexDetailsApiKeysButton"
+                color="text"
+                iconType="plusInCircle"
+                size="s"
+                onClick={() =>
+                  openWiredConnectionDetails({
+                    props: { options: { defaultTabId: 'apiKeys' } },
+                  })
+                }
+              >
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexDetails.apiKeysButtonLabel"
+                  defaultMessage="API keys"
+                />
+              </EuiButton>
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPageSection>
       <EuiSpacer size="l" />
       <EuiPageHeader
         data-test-subj="indexDetailsHeader"
         pageTitle={pageTitle}
         bottomBorder
-        rightSideItems={[
-          <DiscoverLink indexName={index.name} asButton={true} />,
-          <ManageIndexButton
-            index={index}
-            reloadIndexDetails={fetchIndexDetails}
-            navigateToIndicesList={navigateToIndicesList}
-          />,
-        ]}
-        rightSideGroupProps={{
-          wrap: false,
-        }}
-        responsive="reverse"
         tabs={headerTabs}
       >
         {indexErrors.length > 0 ? <IndexErrorCallout errors={indexErrors} /> : null}
