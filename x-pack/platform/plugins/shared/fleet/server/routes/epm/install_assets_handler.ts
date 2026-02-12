@@ -27,8 +27,8 @@ import type {
 import { createArchiveIteratorFromMap } from '../../services/epm/archive/archive_iterator';
 import {
   createInactivityMonitoringTemplate,
-  stepCreateAlertingRules,
-} from '../../services/epm/packages/install_state_machine/steps/step_create_alerting_rules';
+  stepCreateAlertingAssets,
+} from '../../services/epm/packages/install_state_machine/steps/step_create_alerting_assets';
 
 export async function checkIntegrationsAllPrivilegesForSpaces(
   request: KibanaRequest,
@@ -168,7 +168,7 @@ export const installRuleAssetsHandler: FleetRequestHandler<
 
   const { packageInfo } = installedPkgWithAssets;
 
-  await stepCreateAlertingRules({
+  await stepCreateAlertingAssets({
     logger,
     savedObjectsClient,
     packageInstallContext: {

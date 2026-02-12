@@ -236,7 +236,7 @@ export async function createInactivityMonitoringTemplate(
   });
 }
 
-export async function stepCreateAlertingRules(
+export async function stepCreateAlertingAssets(
   context: Pick<
     InstallContext,
     'logger' | 'savedObjectsClient' | 'packageInstallContext' | 'spaceId' | 'request'

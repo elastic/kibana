@@ -22,8 +22,8 @@ import { createSavedObjectClientMock } from '../../../../../mocks';
 import {
   createAlertingRuleFromTemplate,
   createInactivityMonitoringTemplate,
-  stepCreateAlertingRules,
-} from './step_create_alerting_rules';
+  stepCreateAlertingAssets,
+} from './step_create_alerting_assets';
 
 jest.mock('../../install');
 
@@ -432,7 +432,7 @@ describe('createInactivityMonitoringTemplate', () => {
   });
 });
 
-describe('stepCreateAlertingRules', () => {
+describe('stepCreateAlertingAssets', () => {
   beforeEach(() => {
     jest.mocked(saveKibanaAssetsRefs).mockReset();
   });
@@ -449,7 +449,7 @@ describe('stepCreateAlertingRules', () => {
       request: httpServerMock.createKibanaRequest(),
     };
 
-    await stepCreateAlertingRules(context as any);
+    await stepCreateAlertingAssets(context as any);
 
     expect(saveKibanaAssetsRefs).not.toHaveBeenCalled();
   });
@@ -497,7 +497,7 @@ describe('stepCreateAlertingRules', () => {
       request: httpServerMock.createKibanaRequest(),
     };
 
-    await stepCreateAlertingRules(context as any);
+    await stepCreateAlertingAssets(context as any);
     expect(saveKibanaAssetsRefs).toHaveBeenCalledWith(
       expect.anything(),
       'elastic_agent',
