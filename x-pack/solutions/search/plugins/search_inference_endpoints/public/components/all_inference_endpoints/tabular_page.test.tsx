@@ -337,8 +337,7 @@ describe('When the tabular page is loaded', () => {
         const columnHeaders = within(table).getAllByRole('columnheader');
         const headerLabels = columnHeaders.map((header) => header.textContent?.trim() ?? '');
 
-        expect(headerLabels).toEqual(['Endpoint', 'Service', 'Type', '']);
-        expect(headerLabels).not.toContain('Model');
+        expect(headerLabels).toEqual(['Endpoint', 'Model', 'Service', '']);
       });
     });
 
