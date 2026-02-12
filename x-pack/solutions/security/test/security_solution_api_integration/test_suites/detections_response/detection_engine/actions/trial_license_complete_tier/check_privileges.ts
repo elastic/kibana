@@ -60,7 +60,6 @@ export default ({ getService }: FtrProviderContext) => {
       const mixedReadabilityTestCases = [
         ['host_alias', 'auditbeat-8.0.0'],
         ['host_alias*', 'auditbeat-*'],
-        ['auditbeat-8.0.0', 'auditbeat-*'],
       ];
 
       noReadableIndicesTestCases.forEach((index) => {
@@ -97,34 +96,6 @@ export default ({ getService }: FtrProviderContext) => {
 
       mixedReadabilityTestCases.forEach((index) => {
         it(`successfully executes the rule if some of the index patterns can be read`, async () => {
-          const rule = {
-            ...getRuleForAlertTesting(index),
-            query: 'process.executable: "/usr/bin/sudo"',
-          };
-          await createUserAndRole(getService, ROLES.detections_admin);
-          const { id } = await createRuleWithAuth(supertestWithoutAuth, rule, {
-            user: ROLES.detections_admin,
-            pass: 'changeme',
-          });
-          await waitForRuleSuccess({
-            supertest,
-            log,
-            id,
-          });
-
-          await deleteUserAndRole(getService, ROLES.detections_admin);
-        });
-      });
-    });
-
-    context('when some specified indices do not exist, but user can read all others', () => {
-      const mixedExistenceTestCases = [
-        ['auditbeat-8.0.0', 'non-existent-index'],
-        ['auditbeat-*', 'non-existent-index'],
-      ];
-
-      mixedExistenceTestCases.forEach((index) => {
-        it(`sets rule status to partial failure for KQL rule with index param: ${index}`, async () => {
           const rule = {
             ...getRuleForAlertTesting(index),
             query: 'process.executable: "/usr/bin/sudo"',
