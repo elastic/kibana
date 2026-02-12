@@ -10,6 +10,7 @@ plugins:
     - discover_enhanced
     - entity_store
     - fleet
+    - gen_ai_settings
     - global_search
     - index_management
     - infra
