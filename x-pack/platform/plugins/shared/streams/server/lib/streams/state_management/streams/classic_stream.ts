@@ -15,7 +15,12 @@ import type {
   IngestStreamLifecycle,
   IngestStreamSettings,
 } from '@kbn/streams-schema';
-import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
+import {
+  isIlmLifecycle,
+  isInheritLifecycle,
+  Streams,
+  validateStreamName,
+} from '@kbn/streams-schema';
 import { validateStreamlang } from '@kbn/streamlang';
 import { isMappingProperties } from '@kbn/streams-schema/src/fields';
 import {
@@ -23,7 +28,6 @@ import {
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import _, { cloneDeep } from 'lodash';
-import { validateStreamName } from '../../../../../common/constants';
 import type { DataStreamMappingsUpdateResponse } from '../../data_streams/manage_data_streams';
 import { StatusError } from '../../errors/status_error';
 import { validateClassicFields, validateSimulation } from '../../helpers/validate_fields';

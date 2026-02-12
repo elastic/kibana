@@ -7,6 +7,13 @@
 
 import type { PricingProductFeature } from '@kbn/core-pricing-common';
 
+// Re-export from kbn-streams-schema for backwards compatibility
+export {
+  validateStreamName,
+  MAX_STREAM_NAME_LENGTH,
+  INVALID_STREAM_NAME_CHARACTERS,
+} from '@kbn/streams-schema';
+
 export const ASSET_VERSION = 1;
 
 export const ATTACHMENT_SUGGESTIONS_LIMIT = 50;
@@ -55,44 +62,3 @@ export const STREAMS_TIERED_FEATURES = [
 ];
 
 export const FAILURE_STORE_SELECTOR = '::failures';
-
-export const MAX_STREAM_NAME_LENGTH = 200;
-
-/**
- * Characters that are not allowed in stream names.
- * These are the characters that Elasticsearch does not allow in index template/data stream names.
- * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html#indices-create-api-path-params
- */
-export const INVALID_STREAM_NAME_CHARACTERS = [' ', '"', '\\', '*', ',', '/', '<', '>', '?', '|'];
-
-/**
- * Validates a stream name against Elasticsearch naming requirements.
- * Returns an error message if invalid, or undefined if valid.
- */
-export const validateStreamName = (
-  name: string
-): { valid: true } | { valid: false; message: string } => {
-  if (!name || name.length === 0) {
-    return { valid: false, message: 'Stream name must not be empty.' };
-  }
-
-  if (name.length > MAX_STREAM_NAME_LENGTH) {
-    return {
-      valid: false,
-      message: `Stream name cannot be longer than ${MAX_STREAM_NAME_LENGTH} characters.`,
-    };
-  }
-
-  if (name !== name.toLowerCase()) {
-    return { valid: false, message: 'Stream name cannot contain uppercase characters.' };
-  }
-
-  for (const char of INVALID_STREAM_NAME_CHARACTERS) {
-    if (name.includes(char)) {
-      const charDisplay = char === ' ' ? 'spaces' : `"${char}"`;
-      return { valid: false, message: `Stream name cannot contain ${charDisplay}.` };
-    }
-  }
-
-  return { valid: true };
-};
