@@ -7,24 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { useCreateRule } from './use_create_rule';
 import type { FormValues } from '../types';
-
-const createWrapper = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  );
-};
 
 const createMockHttp = (response: unknown = { id: 'rule-123', name: 'Test Rule' }) => ({
   post: jest.fn().mockResolvedValue(response),
@@ -37,8 +25,25 @@ const createMockNotifications = () => ({
   },
 });
 
+const createWrapper = () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+    logger: {
+      log: () => {},
+      warn: () => {},
+      error: () => {},
+    },
+  });
+  return ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+};
+
 describe('useCreateRule', () => {
   const validFormData: FormValues = {
+    kind: 'signal',
     name: 'Test Rule',
     description: 'Test Rule Description',
     tags: ['tag1', 'tag2'],
@@ -187,6 +192,7 @@ describe('useCreateRule', () => {
     );
 
     const formData: FormValues = {
+      kind: 'signal',
       name: 'Complex Rule',
       description: 'Complex Rule Description',
       tags: ['production', 'critical'],

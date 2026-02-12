@@ -24,11 +24,17 @@ const TestWrapper: React.FC<{
     defaultValues: { name: '', query: '' },
   });
 
-  // Override formState with test values
-  Object.defineProperty(methods.formState, 'errors', { value: errors, writable: true });
-  Object.defineProperty(methods.formState, 'isSubmitted', { value: isSubmitted, writable: true });
+  // Override formState with test values by spreading
+  const methodsWithOverrides = {
+    ...methods,
+    formState: {
+      ...methods.formState,
+      errors,
+      isSubmitted,
+    },
+  };
 
-  return <FormProvider {...methods}>{children}</FormProvider>;
+  return <FormProvider {...methodsWithOverrides}>{children}</FormProvider>;
 };
 
 describe('ErrorCallOut', () => {
@@ -112,9 +118,8 @@ describe('ErrorCallOut', () => {
       );
 
       expect(screen.getByText('Name is required')).toBeInTheDocument();
-      expect(screen.queryByText('')).not.toBeInTheDocument();
 
-      // Should only have one list item
+      // Should only have one list item (empty messages are filtered out)
       const listItems = screen.getAllByRole('listitem');
       expect(listItems).toHaveLength(1);
     });
@@ -124,13 +129,13 @@ describe('ErrorCallOut', () => {
         name: { message: 'Name is required' },
       });
 
-      render(
+      const { container } = render(
         <TestWrapper errors={errors} isSubmitted={true}>
           <ErrorCallOut />
         </TestWrapper>
       );
 
-      const callout = screen.getByRole('complementary');
+      const callout = container.querySelector('.euiCallOut');
       expect(callout).toHaveClass('euiCallOut--danger');
     });
   });

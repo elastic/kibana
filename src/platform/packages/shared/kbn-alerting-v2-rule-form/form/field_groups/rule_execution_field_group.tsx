@@ -44,7 +44,7 @@ export const RuleExecutionFieldGroup: React.FC<RuleExecutionFieldGroupProps> = (
   } = useFormContext<FormValues>();
 
   // Columns come from the ES|QL query result (used for grouping)
-  const { columns } = useQueryColumns({ query, search: services.data.search.search });
+  const { data: columns } = useQueryColumns({ query, search: services.data.search.search });
 
   return (
     <FieldGroup
