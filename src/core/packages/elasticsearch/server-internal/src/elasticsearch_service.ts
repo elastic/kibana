@@ -261,8 +261,7 @@ export class ElasticsearchService
   private getOnRequestHandler(): OnRequestHandler | undefined {
     if (!this.isServerless || !this.cpsEnabled) return undefined;
 
-    return ({ scoped }, params, options) => {
-      if (!scoped) return;
+    return (ctx, params, options) => {
       const body = params.body;
       if (
         isPlainObject(body) &&

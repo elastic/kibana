@@ -70,6 +70,7 @@ export function createTestServerlessInstances({
   if (enableCPS) {
     if (!kibana.settings) kibana.settings = {};
     set(kibana.settings, 'cps.cpsEnabled', true);
+    set(kibana.settings, 'xpack.security.uiam.enabled', true);
     set(kibana.settings, 'elasticsearch', {
       hosts: [`https://localhost:${esTestConfig.getPort()}`],
       serviceAccountToken: kibanaDevServiceAccount.token,
