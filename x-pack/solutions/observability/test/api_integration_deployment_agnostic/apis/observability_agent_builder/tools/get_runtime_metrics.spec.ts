@@ -5,9 +5,17 @@
  * 2.0.
  */
 
+import datemath from '@kbn/datemath';
 import expect from '@kbn/expect';
-import { apm, timerange } from '@kbn/synthtrace-client';
-import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import { timerange } from '@kbn/synthtrace-client';
+import {
+  type ApmSynthtraceEsClient,
+  generateElasticApmJvmMetrics,
+  indexOtelJvmMetrics,
+  cleanupOtelJvmMetrics,
+  type ElasticApmJvmServiceConfig,
+  type OtelJvmServiceConfig,
+} from '@kbn/synthtrace';
 import {
   OBSERVABILITY_GET_RUNTIME_METRICS_TOOL_ID,
   type GetRuntimeMetricsToolResult,
@@ -25,6 +33,53 @@ const OTEL_APM_SERVER_INSTANCE_NAME = 'otel-apm-server-instance-a';
 const START = 'now-15m';
 const END = 'now';
 
+// Elastic APM service config for tests
+const ELASTIC_APM_SERVICE: ElasticApmJvmServiceConfig = {
+  name: SERVICE_NAME,
+  environment: ENVIRONMENT,
+  instanceName: INSTANCE_NAME,
+  hostName: 'test-host-1',
+  cpuPercent: 0.75,
+  heapMemoryUsed: 500_000_000, // 500MB
+  heapMemoryMax: 1_073_741_824, // 1GB
+  nonHeapMemoryUsed: 50_000_000, // 50MB
+  nonHeapMemoryMax: 268_435_456, // 256MB
+  threadCount: 42,
+  gcTime: 150, // ms
+};
+
+// OTel native ingest service config
+const OTEL_NATIVE_SERVICE: OtelJvmServiceConfig = {
+  name: OTEL_SERVICE_NAME,
+  environment: ENVIRONMENT,
+  instanceName: OTEL_INSTANCE_NAME,
+  hostName: 'otel-host-1',
+  ingestPath: 'native',
+  cpuUtilization: 0.65,
+  heapMemoryUsed: 400_000_000, // 400MB
+  heapMemoryLimit: 800_000_000, // 800MB
+  nonHeapMemoryUsed: 40_000_000, // 40MB
+  nonHeapMemoryLimit: 80_000_000, // 80MB
+  threadCount: 35,
+  gcDurationSeconds: 0.15, // 150ms in seconds
+};
+
+// OTel APM Server ingest service config
+const OTEL_APM_SERVER_SERVICE: OtelJvmServiceConfig = {
+  name: OTEL_APM_SERVER_SERVICE_NAME,
+  environment: ENVIRONMENT,
+  instanceName: OTEL_APM_SERVER_INSTANCE_NAME,
+  hostName: 'otel-apm-host-1',
+  ingestPath: 'apm_server',
+  cpuUtilization: 0.55,
+  heapMemoryUsed: 300_000_000, // 300MB
+  heapMemoryLimit: 600_000_000, // 600MB
+  nonHeapMemoryUsed: 30_000_000, // 30MB
+  nonHeapMemoryLimit: 60_000_000, // 60MB
+  threadCount: 28,
+  gcDurationSeconds: 0.1, // 100ms in seconds
+};
+
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const synthtrace = getService('synthtrace');
@@ -41,29 +96,34 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
       await apmSynthtraceEsClient.clean();
 
-      const instance = apm
-        .service({ name: SERVICE_NAME, environment: ENVIRONMENT, agentName: 'java' })
-        .instance(INSTANCE_NAME);
+      const range = timerange(START, END);
 
-      await apmSynthtraceEsClient.index(
-        timerange(START, END)
-          .interval('1m')
-          .rate(1)
-          .generator((timestamp) =>
-            instance
-              .appMetrics({
-                'system.process.cpu.total.norm.pct': 0.75,
-                'jvm.memory.heap.used': 500000000, // 500MB
-                'jvm.memory.non_heap.used': 50000000, // 50MB
-                'jvm.thread.count': 42,
-              })
-              .timestamp(timestamp)
-          )
-      );
+      // Index Elastic APM JVM metrics using synthtrace
+      const { client, generator } = generateElasticApmJvmMetrics({
+        range,
+        apmEsClient: apmSynthtraceEsClient,
+        services: [ELASTIC_APM_SERVICE],
+      });
+      await client.index(generator);
+
+      // Index OTel JVM metrics using direct ES indexing
+      const startMs = datemath.parse(START)!.valueOf();
+      const endMs = datemath.parse(END)!.valueOf();
+
+      await indexOtelJvmMetrics({
+        esClient: es,
+        startMs,
+        endMs,
+        services: [OTEL_NATIVE_SERVICE, OTEL_APM_SERVER_SERVICE],
+      });
     });
 
     after(async () => {
       await apmSynthtraceEsClient.clean();
+      await cleanupOtelJvmMetrics({
+        esClient: es,
+        services: [OTEL_NATIVE_SERVICE, OTEL_APM_SERVER_SERVICE],
+      });
     });
 
     describe('when fetching runtime metrics for a Java service', () => {
@@ -108,37 +168,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns heap memory metrics', () => {
-        expect(resultData.nodes[0].heapMemoryBytes).to.be(500000000);
+        expect(resultData.nodes[0].heapMemoryBytes).to.be(ELASTIC_APM_SERVICE.heapMemoryUsed);
       });
 
       it('returns non-heap memory metrics', () => {
-        expect(resultData.nodes[0].nonHeapMemoryBytes).to.be(50000000);
+        expect(resultData.nodes[0].nonHeapMemoryBytes).to.be(ELASTIC_APM_SERVICE.nonHeapMemoryUsed);
       });
 
       it('returns thread count metrics', () => {
-        expect(resultData.nodes[0].threadCount).to.be(42);
+        expect(resultData.nodes[0].threadCount).to.be(ELASTIC_APM_SERVICE.threadCount);
       });
     });
 
     describe('when fetching metrics for a non-Java service', () => {
       before(async () => {
-        // Index a Node.js service (no JVM metrics)
-        const nodeInstance = apm
-          .service({ name: 'nodejs-service', environment: ENVIRONMENT, agentName: 'nodejs' })
-          .instance('node-instance-1');
-
-        await apmSynthtraceEsClient.index(
-          timerange(START, END)
-            .interval('1m')
-            .rate(1)
-            .generator((timestamp) =>
-              nodeInstance
-                .transaction({ transactionName: 'GET /api/users' })
-                .timestamp(timestamp)
-                .duration(100)
-                .success()
-            )
-        );
+        // Index a Node.js service (no JVM metrics) using synthtrace
+        const { client, generator } = generateElasticApmJvmMetrics({
+          range: timerange(START, END),
+          apmEsClient: apmSynthtraceEsClient,
+          services: [], // Empty services - no JVM metrics
+        });
+        await client.index(generator);
       });
 
       it('returns empty results for non-JVM services', async () => {
@@ -260,60 +310,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('when fetching runtime metrics for an OTel JVM service', () => {
+    describe('when fetching runtime metrics for an OTel JVM service (native ingest)', () => {
       let resultData: GetRuntimeMetricsToolResult['data'];
 
       before(async () => {
-        // Index OTel JVM metrics using ES client directly
-        // OTel uses different field names than Elastic APM
-        const now = Date.now();
-        const docs = [];
-
-        // Generate 15 documents (one per minute for 15 minutes)
-        for (let i = 0; i < 15; i++) {
-          const timestamp = new Date(now - (15 - i) * 60 * 1000).toISOString();
-
-          docs.push({
-            '@timestamp': timestamp,
-            'processor.event': 'metric',
-            'metricset.name': 'app',
-            'service.name': OTEL_SERVICE_NAME,
-            'service.environment': ENVIRONMENT,
-            'service.node.name': OTEL_INSTANCE_NAME,
-            'host.name': 'otel-host-1',
-            'metrics.jvm.cpu.recent_utilization': 0.65,
-            'metrics.jvm.memory.used': 400000000, // 400MB heap
-            'metrics.jvm.memory.limit': 800000000, // 800MB max
-            'attributes.jvm.memory.type': 'heap',
-            'metrics.jvm.thread.count': 35,
-            'metrics.jvm.gc.duration': 0.15, // 150ms in seconds
-          });
-
-          // Non-heap memory doc
-          docs.push({
-            '@timestamp': timestamp,
-            'processor.event': 'metric',
-            'metricset.name': 'app',
-            'service.name': OTEL_SERVICE_NAME,
-            'service.environment': ENVIRONMENT,
-            'service.node.name': OTEL_INSTANCE_NAME,
-            'host.name': 'otel-host-1',
-            'metrics.jvm.memory.used': 40000000, // 40MB non-heap
-            'metrics.jvm.memory.limit': 80000000, // 80MB max
-            'attributes.jvm.memory.type': 'non_heap',
-          });
-        }
-
-        // Bulk index OTel metrics to APM app metrics data stream
-        // Uses OTel field names - handler detects OTel by field names, not index
-        const body = docs.flatMap((doc) => [
-          { create: { _index: `metrics-apm.app.${OTEL_SERVICE_NAME}-default` } },
-          doc,
-        ]);
-
-        await es.bulk({ body, refresh: true });
-
-        // Execute the tool
         const results = await agentBuilderApiClient.executeTool<GetRuntimeMetricsToolResult>({
           id: OBSERVABILITY_GET_RUNTIME_METRICS_TOOL_ID,
           params: {
@@ -326,16 +326,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(results).to.have.length(1);
         resultData = results[0].data;
-      });
-
-      after(async () => {
-        // Clean up OTel test data
-        await es.deleteByQuery({
-          index: `metrics-apm.app.${OTEL_SERVICE_NAME}-default`,
-          query: { match_all: {} },
-          refresh: true,
-          ignore_unavailable: true,
-        });
       });
 
       it('returns runtime metrics for the OTel service', () => {
@@ -356,13 +346,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns heap memory metrics from OTel fields', () => {
-        expect(resultData.nodes[0].heapMemoryBytes).to.be(400000000);
-        expect(resultData.nodes[0].heapMemoryMaxBytes).to.be(800000000);
+        expect(resultData.nodes[0].heapMemoryBytes).to.be(OTEL_NATIVE_SERVICE.heapMemoryUsed);
+        expect(resultData.nodes[0].heapMemoryMaxBytes).to.be(OTEL_NATIVE_SERVICE.heapMemoryLimit);
       });
 
       it('returns non-heap memory metrics from OTel fields', () => {
-        expect(resultData.nodes[0].nonHeapMemoryBytes).to.be(40000000);
-        expect(resultData.nodes[0].nonHeapMemoryMaxBytes).to.be(80000000);
+        expect(resultData.nodes[0].nonHeapMemoryBytes).to.be(OTEL_NATIVE_SERVICE.nonHeapMemoryUsed);
+        expect(resultData.nodes[0].nonHeapMemoryMaxBytes).to.be(
+          OTEL_NATIVE_SERVICE.nonHeapMemoryLimit
+        );
       });
 
       it('returns memory utilization', () => {
@@ -371,13 +363,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns thread count from OTel fields', () => {
-        expect(resultData.nodes[0].threadCount).to.be(35);
+        expect(resultData.nodes[0].threadCount).to.be(OTEL_NATIVE_SERVICE.threadCount);
       });
 
       it('returns GC duration from OTel fields (converted to ms)', () => {
         // OTel stores GC duration in seconds, we convert to ms
-        // Sum of 0.15s * ~14 docs (timing can vary) = ~2100ms
-        expect(resultData.nodes[0].gcDurationMs).to.be.within(2000, 2400);
+        // Sum of 0.15s * ~14-16 docs (timing can vary) = ~2100-2400ms
+        expect(resultData.nodes[0].gcDurationMs).to.be.within(2000, 2600);
       });
     });
 
@@ -387,51 +379,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       let resultData: GetRuntimeMetricsToolResult['data'];
 
       before(async () => {
-        const now = Date.now();
-        const docs = [];
-
-        for (let i = 0; i < 15; i++) {
-          const timestamp = new Date(now - (15 - i) * 60 * 1000).toISOString();
-
-          // Heap memory doc - uses labels.jvm_memory_type (APM Server ingest path)
-          docs.push({
-            '@timestamp': timestamp,
-            'processor.event': 'metric',
-            'metricset.name': 'app',
-            'service.name': OTEL_APM_SERVER_SERVICE_NAME,
-            'service.environment': ENVIRONMENT,
-            'service.node.name': OTEL_APM_SERVER_INSTANCE_NAME,
-            'host.name': 'otel-apm-host-1',
-            'metrics.jvm.cpu.recent_utilization': 0.55,
-            'metrics.jvm.memory.used': 300000000, // 300MB heap
-            'metrics.jvm.memory.limit': 600000000, // 600MB max
-            'labels.jvm_memory_type': 'heap', // APM Server transforms jvm.memory.type → labels.jvm_memory_type
-            'metrics.jvm.thread.count': 28,
-            'metrics.jvm.gc.duration': 0.1, // 100ms in seconds
-          });
-
-          // Non-heap memory doc
-          docs.push({
-            '@timestamp': timestamp,
-            'processor.event': 'metric',
-            'metricset.name': 'app',
-            'service.name': OTEL_APM_SERVER_SERVICE_NAME,
-            'service.environment': ENVIRONMENT,
-            'service.node.name': OTEL_APM_SERVER_INSTANCE_NAME,
-            'host.name': 'otel-apm-host-1',
-            'metrics.jvm.memory.used': 30000000, // 30MB non-heap
-            'metrics.jvm.memory.limit': 60000000, // 60MB max
-            'labels.jvm_memory_type': 'non_heap',
-          });
-        }
-
-        const body = docs.flatMap((doc) => [
-          { create: { _index: `metrics-apm.app.${OTEL_APM_SERVER_SERVICE_NAME}-default` } },
-          doc,
-        ]);
-
-        await es.bulk({ body, refresh: true });
-
         const results = await agentBuilderApiClient.executeTool<GetRuntimeMetricsToolResult>({
           id: OBSERVABILITY_GET_RUNTIME_METRICS_TOOL_ID,
           params: {
@@ -446,15 +393,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         resultData = results[0].data;
       });
 
-      after(async () => {
-        await es.deleteByQuery({
-          index: `metrics-apm.app.${OTEL_APM_SERVER_SERVICE_NAME}-default`,
-          query: { match_all: {} },
-          refresh: true,
-          ignore_unavailable: true,
-        });
-      });
-
       it('returns runtime metrics for OTel service ingested via APM Server', () => {
         expect(resultData.total).to.be(1);
         expect(resultData.nodes.length).to.be(1);
@@ -465,20 +403,26 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('returns heap memory using labels.jvm_memory_type', () => {
-        expect(resultData.nodes[0].heapMemoryBytes).to.be(300000000);
-        expect(resultData.nodes[0].heapMemoryMaxBytes).to.be(600000000);
+        expect(resultData.nodes[0].heapMemoryBytes).to.be(OTEL_APM_SERVER_SERVICE.heapMemoryUsed);
+        expect(resultData.nodes[0].heapMemoryMaxBytes).to.be(
+          OTEL_APM_SERVER_SERVICE.heapMemoryLimit
+        );
         expect(resultData.nodes[0].heapMemoryUtilization).to.be(0.5);
       });
 
       it('returns non-heap memory using labels.jvm_memory_type', () => {
-        expect(resultData.nodes[0].nonHeapMemoryBytes).to.be(30000000);
-        expect(resultData.nodes[0].nonHeapMemoryMaxBytes).to.be(60000000);
+        expect(resultData.nodes[0].nonHeapMemoryBytes).to.be(
+          OTEL_APM_SERVER_SERVICE.nonHeapMemoryUsed
+        );
+        expect(resultData.nodes[0].nonHeapMemoryMaxBytes).to.be(
+          OTEL_APM_SERVER_SERVICE.nonHeapMemoryLimit
+        );
         expect(resultData.nodes[0].nonHeapMemoryUtilization).to.be(0.5);
       });
 
       it('returns CPU and thread count', () => {
         expect(resultData.nodes[0].cpuUtilization).to.be.within(0.5, 0.6);
-        expect(resultData.nodes[0].threadCount).to.be(28);
+        expect(resultData.nodes[0].threadCount).to.be(OTEL_APM_SERVER_SERVICE.threadCount);
       });
     });
   });
