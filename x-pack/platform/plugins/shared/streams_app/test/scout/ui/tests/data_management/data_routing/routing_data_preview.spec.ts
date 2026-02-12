@@ -211,58 +211,6 @@ test.describe('Stream data routing - previewing data', { tag: ['@ess', '@svlOblt
     await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toContainText('%');
   });
 
-  // This test is failing in Cloud run even with improved cleanup b/w test spec files
-  // See https://github.com/elastic/kibana/issues/242931
-  test.skip('should switch between matched and unmatched documents', async ({
-    page,
-    pageObjects,
-  }) => {
-    await pageObjects.streams.clickCreateRoutingRule();
-    await pageObjects.streams.fillRoutingRuleName('filter-switch-test');
-
-    await pageObjects.streams.fillConditionEditor({
-      field: 'severity_text',
-      operator: 'equals',
-      value: 'info',
-    });
-
-    await pageObjects.streams.expectPreviewPanelVisible();
-    const initialRows = await pageObjects.streams.getPreviewTableRows();
-
-    // Verify all initial rows match the condition
-    for (let rowIndex = 0; rowIndex < initialRows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValueContains({
-        columnName: 'severity_text',
-        rowIndex,
-        value: 'info',
-      });
-    }
-
-    await expect(page.getByTestId('routingPreviewMatchedFilterButton')).toContainText('50%');
-    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toContainText('50%');
-
-    await page.getByTestId('routingPreviewUnmatchedFilterButton').click();
-
-    await pageObjects.streams.expectPreviewPanelVisible();
-
-    // Verify unmatched filter is now selected
-    await expect(page.getByTestId('routingPreviewUnmatchedFilterButton')).toHaveAttribute(
-      'aria-pressed',
-      'true'
-    );
-
-    // Verify unmatched documents are shown (should not contain 'info')
-    const unmatchedRows = await pageObjects.streams.getPreviewTableRows();
-    for (let rowIndex = 0; rowIndex < unmatchedRows.length; rowIndex++) {
-      await pageObjects.streams.expectCellValueContains({
-        columnName: 'severity_text',
-        rowIndex,
-        value: 'info',
-        invertCondition: true,
-      });
-    }
-  });
-
   test('should maintain filter state when condition changes', async ({ page, pageObjects }) => {
     await pageObjects.streams.clickCreateRoutingRule();
     await pageObjects.streams.fillRoutingRuleName('filter-state-test');
