@@ -35,6 +35,6 @@ fileGroups:
     - common/**/*.ts
     - public/**/*.ts
     - public/**/*.tsx
-    - test/scout/**/*
+    - test/scout_examples/**/*
     - '!target/**/*'
 tasks: {}
