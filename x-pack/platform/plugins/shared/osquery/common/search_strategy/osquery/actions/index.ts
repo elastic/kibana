@@ -29,11 +29,23 @@ export interface ActionDetails {
   agent_policy_ids: string[];
   agents: string[];
   user_id?: string;
+  user_profile_uid?: string | null;
   pack_id?: string;
   pack_name?: string;
   space_id?: string;
   pack_prebuilt?: boolean;
   status?: string;
+  case_ids?: string[];
+  alert_ids?: string[];
+  event_ids?: string[];
+  result_counts?: {
+    total_rows: number;
+    responded_agents?: number;
+    successful_agents?: number;
+    error_agents?: number;
+    queries_with_results?: number;
+    queries_total?: number;
+  };
   queries?: Array<{
     action_id: string;
     id: string;
