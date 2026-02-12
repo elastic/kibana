@@ -132,21 +132,29 @@ To regenerate, run: node scripts/generate user-activity-actions-docs
       : groups
           .map((g) => {
             const lines = g.rows.map((row) => {
-              const description = normalizeDescription(row.definition.description);
+              const description = normalizeDescription(row.definition.description).replace(
+                /\|/g,
+                '\\|'
+              );
               const { versionAddedAt } = row.definition;
 
-              if (row.isRemoved) {
-                const versionRemovedAt = row.definition.versionRemovedAt;
-                return `- **${row.id}**: ${description} ${formatAppliesTo({
-                  versionAddedAt,
-                  versionRemovedAt,
-                })}`;
-              }
+              const actionCell = row.isRemoved
+                ? `\`${row.id}\` ${formatAppliesTo({
+                    versionAddedAt,
+                    versionRemovedAt: row.definition.versionRemovedAt,
+                  })}`
+                : `\`${row.id}\` ${formatAppliesTo({ versionAddedAt })}`;
 
-              return `- **${row.id}**: ${description} ${formatAppliesTo({ versionAddedAt })}`;
+              return `| ${actionCell} | ${description} |`;
             });
 
-            return [`### ${g.groupName}`, '', ...lines].join('\n');
+            return [
+              `### ${g.groupName}`,
+              '',
+              '| Action | Description |',
+              '| --- | --- |',
+              ...lines,
+            ].join('\n');
           })
           .join('\n\n') + '\n';
 
