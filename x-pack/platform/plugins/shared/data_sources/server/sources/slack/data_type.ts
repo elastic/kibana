@@ -20,12 +20,14 @@ export const slackDataSource: DataSource = {
   iconType: '.slack2',
 
   // Slack data source uses a Stack Connector for execution.
-  // We expect users to create/configure the stack connector (including OAuth authorization) via the connector flyout,
+  // We expect users to create/configure the stack connector via the connector flyout,
   // then the data source will reference that connector id.
-  stackConnector: {
-    type: '.slack2',
-    config: {},
-  },
+  stackConnectors: [
+    {
+      type: '.slack2',
+      config: {},
+    },
+  ],
 
   workflows: {
     directory: __dirname + '/workflows',
