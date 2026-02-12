@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { spaceTest } from '@kbn/scout-security';
+import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
 // Failing: See https://github.com/elastic/kibana/issues/247203
 spaceTest.describe.skip(
   'Entity analytics dashboard page',
-  { tag: ['@ess', '@svlSecurity'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth, apiServices }) => {
       await apiServices.entityAnalytics.deleteEntityStoreEngines();
