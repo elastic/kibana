@@ -107,6 +107,12 @@ export interface ActionsToSchedule {
   actionToLog: ActionOpts;
 }
 
+/** Entry describing an alert instance that should be automatically unmuted. */
+export interface AlertToAutoUnmute {
+  alertInstanceId: string;
+  reason: string;
+}
+
 export interface IActionScheduler<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
@@ -114,6 +120,8 @@ export interface IActionScheduler<
   RecoveryActionGroupId extends string
 > {
   get priority(): number;
+  /** Alerts whose mute conditions have been met and should be auto-unmuted. */
+  alertsToAutoUnmute?: AlertToAutoUnmute[];
   getActionsToSchedule(
     opts: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>
   ): Promise<ActionsToSchedule[]>;

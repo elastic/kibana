@@ -150,6 +150,26 @@ export const alertDelaySchema = schema.object({
   active: schema.number(),
 });
 
+const muteConditionSchema = schema.object({
+  type: schema.oneOf([
+    schema.literal('severity_change'),
+    schema.literal('severity_equals'),
+    schema.literal('field_change'),
+  ]),
+  field: schema.string(),
+  value: schema.maybe(schema.string()),
+  snapshotValue: schema.maybe(schema.string()),
+});
+
+const mutedAlertInstanceSchema = schema.object({
+  alertInstanceId: schema.string(),
+  mutedAt: schema.string(),
+  mutedBy: schema.maybe(schema.string()),
+  expiresAt: schema.maybe(schema.string()),
+  conditions: schema.maybe(schema.arrayOf(muteConditionSchema)),
+  conditionOperator: schema.oneOf([schema.literal('any'), schema.literal('all')]),
+});
+
 /**
  * Unsanitized (domain) rule schema, used by internal rules clients
  */
@@ -177,6 +197,7 @@ export const ruleDomainSchema = schema.object({
   muteAll: schema.boolean(),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
   mutedInstanceIds: schema.arrayOf(schema.string()),
+  mutedAlerts: schema.maybe(schema.arrayOf(mutedAlertInstanceSchema)),
   executionStatus: ruleExecutionStatusSchema,
   monitoring: schema.maybe(monitoringSchema),
   snoozeSchedule: schema.maybe(schema.arrayOf(snoozeScheduleSchema)),
@@ -219,6 +240,7 @@ export const ruleSchema = schema.object({
   muteAll: schema.boolean(),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),
   mutedInstanceIds: schema.arrayOf(schema.string()),
+  mutedAlerts: schema.maybe(schema.arrayOf(mutedAlertInstanceSchema)),
   executionStatus: ruleExecutionStatusSchema,
   monitoring: schema.maybe(monitoringSchema),
   snoozeSchedule: schema.maybe(schema.arrayOf(snoozeScheduleSchema)),

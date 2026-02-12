@@ -15,6 +15,7 @@ import {
   rawRuleSchemaV6,
   rawRuleSchemaV7,
   rawRuleSchemaV8,
+  rawRuleSchemaV9,
 } from '../schemas/raw_rule';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
@@ -102,6 +103,38 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawRuleSchemaV8.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV8,
+    },
+  },
+  '9': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          mutedAlerts: {
+            type: 'nested',
+            properties: {
+              alertInstanceId: { type: 'keyword' },
+              mutedAt: { type: 'date' },
+              mutedBy: { type: 'keyword' },
+              expiresAt: { type: 'date' },
+              conditionOperator: { type: 'keyword' },
+              conditions: {
+                type: 'nested',
+                properties: {
+                  type: { type: 'keyword' },
+                  field: { type: 'keyword' },
+                  value: { type: 'keyword' },
+                  snapshotValue: { type: 'keyword' },
+                },
+              },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV9.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV9,
     },
   },
 };

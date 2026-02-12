@@ -15,6 +15,7 @@ import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
 import {
   buildRuleUrl,
   formatActionToEnqueue,
+  getAllMutedAlertInstanceIds,
   getSummarizedAlerts,
   getSummaryActionTimeBounds,
   isActionOnInterval,
@@ -104,7 +105,7 @@ export class SummaryActionScheduler<
         const optionsBase = {
           spaceId: this.context.taskInstance.params.spaceId,
           ruleId: this.context.rule.id,
-          excludedAlertInstanceIds: this.context.rule.mutedInstanceIds,
+          excludedAlertInstanceIds: getAllMutedAlertInstanceIds(this.context.rule),
           alertsFilter: action.alertsFilter,
         };
 

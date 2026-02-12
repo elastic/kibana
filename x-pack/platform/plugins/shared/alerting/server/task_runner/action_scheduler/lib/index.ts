@@ -18,3 +18,4 @@ export {
   logNumberOfFilteredAlerts,
 } from './rule_action_helper';
 export { shouldScheduleAction } from './should_schedule_action';
+export { getAllMutedAlertInstanceIds } from './get_all_muted_alert_instance_ids';
