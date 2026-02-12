@@ -117,6 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
       ],
       fleet: ['all', 'read', 'minimal_all', 'minimal_read'],
       actions: ['all', 'read', 'minimal_all', 'minimal_read', 'endpoint_security_execute'],
+      anonymization: ['all', 'read', 'minimal_all', 'minimal_read'],
       stackAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
       ml: ['all', 'read', 'minimal_all', 'minimal_read'],
       siem: [
