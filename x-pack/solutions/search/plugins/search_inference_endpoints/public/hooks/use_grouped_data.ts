@@ -9,11 +9,7 @@ import { useMemo } from 'react';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { i18n } from '@kbn/i18n';
 
-import {
-  type FilterOptions,
-  type GroupedInferenceEndpointsData,
-  GroupByOptions,
-} from '../types';
+import { type FilterOptions, type GroupedInferenceEndpointsData, GroupByOptions } from '../types';
 import { getModelId } from '../utils/get_model_id';
 import { useFilteredInferenceEndpoints } from './use_filtered_endpoints';
 import { KNOWN_MODEL_GROUPS } from '../utils/known_models';
