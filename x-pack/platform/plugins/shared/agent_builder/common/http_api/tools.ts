@@ -23,6 +23,7 @@ export type GetToolResponse = ToolDefinitionWithSchema;
 
 export interface DeleteToolResponse {
   success: boolean;
+  agentsUpdated?: number;
 }
 
 export type CreateToolPayload = Omit<ToolDefinition, 'description' | 'tags' | 'readonly'> &

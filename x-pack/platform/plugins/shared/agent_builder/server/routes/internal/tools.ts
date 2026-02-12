@@ -11,7 +11,6 @@ import { CONNECTOR_ID as MCP_CONNECTOR_ID } from '@kbn/connector-schemas/mcp/con
 import type { ListToolsResponse } from '@kbn/mcp-client';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { isMcpTool, type McpToolDefinition } from '@kbn/agent-builder-common/tools';
-import type { ToolSelection } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -37,19 +36,7 @@ import { apiPrivileges } from '../../../common/features';
 import { internalApiPath } from '../../../common/constants';
 import { getToolTypeInfo, bulkCreateMcpTools } from '../../services/tools/utils';
 import { toConnectorItem } from '../utils';
-
-function removeToolIdsFromToolSelection(
-  tools: ToolSelection[],
-  toolIdsToRemove: string[]
-): ToolSelection[] {
-  const removeSet = new Set(toolIdsToRemove);
-  return (tools ?? [])
-    .map((selection) => ({
-      ...selection,
-      tool_ids: (selection.tool_ids ?? []).filter((id) => !removeSet.has(id)),
-    }))
-    .filter((selection) => selection.tool_ids.length > 0);
-}
+import { removeToolIdsFromToolSelection } from '../../services/agents/persisted/client/utils';
 
 export function registerInternalToolsRoutes({
   router,
@@ -85,7 +72,7 @@ export function registerInternalToolsRoutes({
           (tool.tool_ids ?? []).some((toolId) => idsSet.has(toolId))
         )
       );
-     let agentsUpdated = 0;
+      let agentsUpdated = 0;
       for (const agent of agentsWithMatchingTools) {
         const currentTools = agent.configuration?.tools ?? [];
         const newTools = removeToolIdsFromToolSelection(currentTools, ids);
