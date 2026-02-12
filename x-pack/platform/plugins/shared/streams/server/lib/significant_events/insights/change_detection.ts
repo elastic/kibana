@@ -229,27 +229,6 @@ export function groupByStream(changedQueries: ChangedQuery[]): Map<string, Chang
 }
 
 /**
- * Parameters for the change-filtered insights pipeline.
- * These extend the basic InsightsDiscoveryTaskParams.
- */
-export interface ChangeFilteredPipelineParams {
-  /** Stream names to analyze. If empty/undefined, analyzes all streams */
-  streamNames?: string[];
-  /** Start of time range (epoch ms) */
-  from: number;
-  /** End of time range (epoch ms) */
-  to: number;
-  /** Bucket size for histogram (e.g., '1h', '15m') */
-  bucketSize?: string;
-  /** Minimum absolute percentage change to include (default: 20) */
-  changeThreshold?: number;
-  /** Maximum number of queries to process (default: 50) */
-  maxQueries?: number;
-  /** Optional text filter for query search */
-  queryFilter?: string;
-}
-
-/**
  * Derives reasonable bucket size from time range if not specified.
  * Aims for approximately 24-48 buckets.
  */

@@ -14,24 +14,12 @@ import { cancellableTask } from '../cancellable_task';
 import type { TaskParams } from '../types';
 import { generateInsights } from '../../significant_events/insights/generate_insights';
 import { formatInferenceProviderError } from '../../../routes/utils/create_connector_sse_error';
-import type { ChangeFilteredPipelineParams } from '../../significant_events/insights/change_detection';
 
 export interface InsightsDiscoveryTaskParams {
   connectorId: string;
-  /** Stream names to analyze. If undefined, analyzes all streams */
   streamNames?: string[];
-  /** Start of time range (epoch ms). Defaults to now-1h */
   from?: number;
-  /** End of time range (epoch ms). Defaults to now */
   to?: number;
-  /** Bucket size for histogram (e.g., '1h', '15m'). Auto-derived if not provided */
-  bucketSize?: string;
-  /** Minimum absolute percentage change to include (default: 20 for 20%) */
-  changeThreshold?: number;
-  /** Maximum number of queries to process (default: 50) */
-  maxQueries?: number;
-  /** Optional text filter for query search */
-  queryFilter?: string;
 }
 
 export const STREAMS_INSIGHTS_DISCOVERY_TASK_TYPE = 'streams_insights_discovery';
@@ -47,17 +35,8 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                 throw new Error('Request is required to run this task');
               }
 
-              const {
-                connectorId,
-                streamNames,
-                from,
-                to,
-                bucketSize,
-                changeThreshold,
-                maxQueries,
-                queryFilter,
-                _task,
-              } = runContext.taskInstance.params as TaskParams<InsightsDiscoveryTaskParams>;
+              const { connectorId, streamNames, from, to, _task } = runContext.taskInstance
+                .params as TaskParams<InsightsDiscoveryTaskParams>;
 
               const {
                 taskClient,
@@ -72,20 +51,6 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
               const boundInferenceClient = inferenceClient.bindTo({ connectorId });
               const logger = taskContext.logger.get('insights_discovery');
 
-              // Build pipeline params if any change-filter params are provided
-              const hasPipelineParams = streamNames || from || to || changeThreshold || maxQueries;
-              const pipelineParams: ChangeFilteredPipelineParams | undefined = hasPipelineParams
-                ? {
-                    streamNames,
-                    from: from ?? Date.now() - 60 * 60 * 1000, // Default: 1 hour ago
-                    to: to ?? Date.now(),
-                    bucketSize,
-                    changeThreshold,
-                    maxQueries,
-                    queryFilter,
-                  }
-                : undefined;
-
               try {
                 const result = await generateInsights({
                   streamsClient,
@@ -95,7 +60,9 @@ export function createStreamsInsightsDiscoveryTask(taskContext: TaskContext) {
                   inferenceClient: boundInferenceClient,
                   signal: runContext.abortController.signal,
                   logger,
-                  pipelineParams,
+                  streamNames,
+                  from,
+                  to,
                 });
 
                 taskContext.telemetry.trackInsightsGenerated({

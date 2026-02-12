@@ -8,7 +8,7 @@
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
 import { sumTokens } from '@kbn/streams-ai';
 import type { ElasticsearchClient, IScopedClusterClient, Logger } from '@kbn/core/server';
-import type { Streams, SignificantEventsResponse } from '@kbn/streams-schema';
+import type { SignificantEventsResponse } from '@kbn/streams-schema';
 import type { InsightsResult } from '@kbn/streams-schema';
 import type { QueryClient } from '../../streams/assets/query/query_client';
 import type { StreamsClient } from '../../streams/client';
@@ -16,19 +16,13 @@ import { getRuleIdFromQueryLink } from '../../streams/assets/query/helpers/query
 import { readSignificantEventsFromAlertsIndices } from '../read_significant_events_from_alerts_indices';
 import { SummarizeQueriesPrompt } from './prompts/summarize_queries/prompt';
 import { SummarizeStreamsPrompt } from './prompts/summarize_streams/prompt';
-import {
-  extractInsightsFromResponse,
-  collectQueryData,
-  type QueryData,
-  type EnrichedQueryData,
-} from './utils';
+import { extractInsightsFromResponse, type QueryData, type EnrichedQueryData } from './utils';
 import { fetchAlertSampleDocuments } from './sample_documents';
 import {
   filterChangedQueries,
   groupByStream,
   deriveBucketSize,
   type ChangedQuery,
-  type ChangeFilteredPipelineParams,
 } from './change_detection';
 
 /** Default time range: 1 hour */
@@ -42,63 +36,38 @@ export interface GenerateInsightsParams {
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
-  /** Change-filtered pipeline params (optional - uses legacy behavior if not provided) */
-  pipelineParams?: ChangeFilteredPipelineParams;
+  /** Stream names to analyze. If empty/undefined, analyzes all streams */
+  streamNames?: string[];
+  /** Start of time range (epoch ms). Default: 1 hour before to */
+  from?: number;
+  /** End of time range (epoch ms). Default: now */
+  to?: number;
 }
 
 /**
- * Main insights generation function.
+ * Insights generation: change-filtered pipeline.
  *
- * If pipelineParams are provided, uses the new change-filtered pipeline:
- * 1. Calls readSignificantEventsFromAlertsIndices for histogram + change_points
- * 2. Filters to changedQueries by threshold
- * 3. Generates insights only for changed queries
- *
- * If pipelineParams are not provided, uses legacy behavior (all streams, all queries).
+ * 1. Reads significant events from alerts (histogram + change_points).
+ * 2. Filters to changed queries by threshold.
+ * 3. Generates insights only for changed queries, then optionally summarizes across streams.
  */
 export async function generateInsights(params: GenerateInsightsParams): Promise<InsightsResult> {
-  const { pipelineParams } = params;
-
-  // Use change-filtered pipeline if params provided
-  if (pipelineParams) {
-    return generateInsightsWithChangeFilter(params);
-  }
-
-  // Legacy behavior: process all streams
-  return generateInsightsLegacy(params);
-}
-
-/**
- * New change-filtered pipeline for insights generation.
- */
-async function generateInsightsWithChangeFilter({
-  queryClient,
-  esClient,
-  scopedClusterClient,
-  inferenceClient,
-  signal,
-  logger,
-  pipelineParams,
-}: GenerateInsightsParams): Promise<InsightsResult> {
-  if (!pipelineParams) {
-    throw new Error('pipelineParams required for change-filtered pipeline');
-  }
-
   const {
+    queryClient,
+    esClient,
+    scopedClusterClient,
+    inferenceClient,
+    signal,
+    logger,
     streamNames = [],
     from: fromParam,
     to: toParam,
-    bucketSize: bucketSizeParam,
-    changeThreshold,
-    maxQueries,
-    queryFilter,
-  } = pipelineParams;
+  } = params;
 
-  // Determine time range
   const now = Date.now();
   const to = toParam ?? now;
   const from = fromParam ?? to - DEFAULT_FROM_OFFSET_MS;
-  const bucketSize = deriveBucketSize(from, to, bucketSizeParam);
+  const bucketSize = deriveBucketSize(from, to);
 
   logger.debug(
     `[insights] Starting change-filtered pipeline: streams=${streamNames.length || 'all'}, ` +
@@ -112,7 +81,6 @@ async function generateInsightsWithChangeFilter({
       from: new Date(from),
       to: new Date(to),
       bucketSize,
-      query: queryFilter,
     },
     { queryClient, scopedClusterClient }
   );
@@ -127,11 +95,7 @@ async function generateInsightsWithChangeFilter({
   }
 
   // Step 2: Filter to changed queries by threshold
-  const changedQueries = filterChangedQueries(significantEvents, {
-    changeThreshold,
-    maxQueries,
-    logger,
-  });
+  const changedQueries = filterChangedQueries(significantEvents, { logger });
 
   logger.debug(`[insights] Filtered to ${changedQueries.length} changed queries`);
 
@@ -393,149 +357,3 @@ async function collectQueryDataFromEvent({
   };
 }
 
-/**
- * Legacy insights generation (original behavior).
- * Processes all streams and all queries without change filtering.
- */
-async function generateInsightsLegacy({
-  streamsClient,
-  queryClient,
-  esClient,
-  inferenceClient,
-  signal,
-  logger,
-}: GenerateInsightsParams): Promise<InsightsResult> {
-  const streams = await streamsClient.listStreams();
-  const streamInsightsResults = await Promise.all(
-    streams.map(async (stream) => {
-      const streamInsightResult = await generateStreamInsights({
-        stream,
-        queryClient,
-        esClient,
-        inferenceClient,
-        signal,
-        logger,
-      });
-      return {
-        streamName: stream.name,
-        ...streamInsightResult,
-      };
-    })
-  );
-
-  // Filter out streams with no insights
-  const streamInsightsWithData = streamInsightsResults.filter(
-    (result) => result.insights.length > 0
-  );
-
-  const tokensUsed = streamInsightsResults.reduce<ChatCompletionTokenCount>(
-    (acc, result) => sumTokens(acc, result.tokensUsed),
-    { prompt: 0, completion: 0, total: 0 }
-  );
-
-  // If no stream insights, return empty
-  if (streamInsightsWithData.length === 0) {
-    return {
-      insights: [],
-      tokensUsed,
-    };
-  }
-
-  try {
-    const response = await inferenceClient.prompt({
-      prompt: SummarizeStreamsPrompt,
-      input: {
-        streamInsights: JSON.stringify(streamInsightsWithData),
-      },
-      abortSignal: signal,
-    });
-
-    const insights = extractInsightsFromResponse(response, logger);
-
-    return {
-      insights,
-      tokensUsed: sumTokens(tokensUsed, response.tokens),
-    };
-  } catch (error) {
-    if (error.message.includes(`The request exceeded the model's maximum context length`)) {
-      logger.debug(
-        `Context too big when generating system insights, number of streams: ${streamInsightsWithData.length}`,
-        { error }
-      );
-      return {
-        insights: [],
-        tokensUsed,
-      };
-    }
-
-    throw error;
-  }
-}
-
-async function generateStreamInsights({
-  stream,
-  queryClient,
-  esClient,
-  inferenceClient,
-  signal,
-  logger,
-}: {
-  stream: Streams.all.Definition;
-  queryClient: QueryClient;
-  esClient: ElasticsearchClient;
-  inferenceClient: BoundInferenceClient;
-  signal: AbortSignal;
-  logger: Logger;
-}): Promise<InsightsResult> {
-  const queries = await queryClient.getAssets(stream.name);
-
-  const queryDataResults = await Promise.all(
-    queries.map((query) =>
-      collectQueryData({
-        query,
-        esClient,
-      })
-    )
-  );
-
-  // Filter out queries with no events
-  const queryDataList = queryDataResults.filter((data): data is QueryData => data !== undefined);
-
-  if (queryDataList.length === 0) {
-    return {
-      insights: [],
-      tokensUsed: { prompt: 0, completion: 0, total: 0 },
-    };
-  }
-
-  try {
-    const response = await inferenceClient.prompt({
-      prompt: SummarizeQueriesPrompt,
-      input: {
-        streamName: stream.name,
-        queries: JSON.stringify(queryDataList),
-      },
-      abortSignal: signal,
-    });
-
-    const insights = extractInsightsFromResponse(response, logger);
-
-    return {
-      insights,
-      tokensUsed: response.tokens ?? { prompt: 0, completion: 0, total: 0 },
-    };
-  } catch (error) {
-    if (error.message.includes(`The request exceeded the model's maximum context length`)) {
-      logger.debug(
-        `Context too big when generating insights for stream ${stream.name}, number of queries: ${queryDataList.length}`,
-        { error }
-      );
-      return {
-        insights: [],
-        tokensUsed: { prompt: 0, completion: 0, total: 0 },
-      };
-    }
-
-    throw error;
-  }
-}
