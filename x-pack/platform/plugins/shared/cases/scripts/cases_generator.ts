@@ -18,7 +18,20 @@ import pMap from 'p-map';
 import yargs from 'yargs';
 import { CaseSeverity, type CasePostRequest } from '../common';
 
-const ALERTS_INDEX = 'cases-generator-alerts';
+/**
+ * Returns the real alerts index for a given owner and space.
+ * - securitySolution → .internal.alerts-security.alerts-{space}
+ * - observability    → .internal.alerts-observability.alerts-{space}
+ * - cases            → .internal.alerts-security.alerts-{space} (fallback)
+ */
+const getAlertsIndex = (owner: string, space: string): string => {
+  const spaceId = space || 'default';
+  if (owner === 'observability') {
+    return `.internal.alerts-observability.alerts-${spaceId}`;
+  }
+  // securitySolution and cases both use the security alerts index
+  return `.internal.alerts-security.alerts-${spaceId}`;
+};
 
 const toolingLogger = new ToolingLog({
   level: 'info',
@@ -136,10 +149,17 @@ const createUserComment = (owner: string, index: number) => ({
   owner,
 });
 
+interface AlertInfo {
+  alertId: string;
+  index: string;
+  ruleId: string;
+  ruleName: string;
+}
+
 /**
  * Generates a realistic alert document for indexing into Elasticsearch.
  */
-const generateAlertDocument = (alertIndex: number) => {
+const generateAlertDocument = (alertNum: number) => {
   const now = new Date();
   const alertId = uuidv4();
   const ruleId = uuidv4();
@@ -164,6 +184,8 @@ const generateAlertDocument = (alertIndex: number) => {
 
   return {
     _id: alertId,
+    ruleId,
+    ruleName: `Generated Rule ${alertNum + 1}`,
     _source: {
       '@timestamp': now.toISOString(),
       event: {
@@ -196,13 +218,13 @@ const generateAlertDocument = (alertIndex: number) => {
       },
       rule: {
         id: ruleId,
-        name: `Generated Rule ${alertIndex + 1}`,
-        description: `Auto-generated detection rule #${alertIndex + 1}`,
+        name: `Generated Rule ${alertNum + 1}`,
+        description: `Auto-generated detection rule #${alertNum + 1}`,
       },
       'kibana.alert.uuid': alertId,
       'kibana.alert.rule.rule_id': ruleId,
-      'kibana.alert.rule.name': `Generated Rule ${alertIndex + 1}`,
-      'kibana.alert.rule.description': `Auto-generated detection rule #${alertIndex + 1}`,
+      'kibana.alert.rule.name': `Generated Rule ${alertNum + 1}`,
+      'kibana.alert.rule.description': `Auto-generated detection rule #${alertNum + 1}`,
       'kibana.alert.rule.category': 'Custom Query Rule',
       'kibana.alert.rule.consumer': 'siem',
       'kibana.alert.rule.rule_type_id': 'siem.queryRule',
@@ -219,46 +241,16 @@ const generateAlertDocument = (alertIndex: number) => {
 };
 
 /**
- * Ensures the alert index exists and bulk-indexes alert documents into ES.
- * Returns an array of { alertId, index, ruleId, ruleName } for each indexed alert.
+ * Bulk-indexes alert documents into the given ES index.
+ * The index must already exist (created by Kibana's alerting framework).
+ * Returns AlertInfo[] for each indexed alert.
  */
-const indexAlerts = async (
+const bulkIndexAlerts = async (
   esClient: Client,
-  totalAlerts: number,
-  alertIndex: string
-): Promise<Array<{ alertId: string; index: string; ruleId: string; ruleName: string }>> => {
-  // Create the index if it doesn't exist
-  const exists = await esClient.indices.exists({ index: alertIndex });
-  if (!exists) {
-    await esClient.indices.create({
-      index: alertIndex,
-      settings: { number_of_shards: 1, number_of_replicas: 0 },
-      mappings: {
-        dynamic: 'false' as const,
-        properties: {
-          '@timestamp': { type: 'date' },
-          'event.kind': { type: 'keyword' },
-          'event.category': { type: 'keyword' },
-          'event.action': { type: 'keyword' },
-          'host.name': { type: 'keyword' },
-          'user.name': { type: 'keyword' },
-          'process.name': { type: 'keyword' },
-          'process.pid': { type: 'long' },
-          'rule.id': { type: 'keyword' },
-          'rule.name': { type: 'keyword' },
-          'kibana.alert.uuid': { type: 'keyword' },
-          'kibana.alert.severity': { type: 'keyword' },
-          'kibana.alert.risk_score': { type: 'float' },
-          'kibana.alert.workflow_status': { type: 'keyword' },
-          'kibana.alert.rule.rule_id': { type: 'keyword' },
-          'kibana.alert.rule.name': { type: 'keyword' },
-        },
-      },
-    });
-    toolingLogger.info(`Created index: ${alertIndex}`);
-  }
-
-  const alerts = Array.from({ length: totalAlerts }, (_, i) => generateAlertDocument(i));
+  alertIndex: string,
+  count: number
+): Promise<AlertInfo[]> => {
+  const alerts = Array.from({ length: count }, (_, i) => generateAlertDocument(i));
 
   // Bulk index in chunks to avoid connection issues with large payloads
   const CHUNK_SIZE = 500;
@@ -280,16 +272,45 @@ const indexAlerts = async (
     }
 
     toolingLogger.info(
-      `Indexed ${Math.min(start + CHUNK_SIZE, alerts.length)}/${alerts.length} alerts`
+      `  [${alertIndex}] ${Math.min(start + CHUNK_SIZE, alerts.length)}/${alerts.length}`
     );
   }
 
   return alerts.map((alert) => ({
     alertId: alert._id,
     index: alertIndex,
-    ruleId: (alert._source.rule as { id: string }).id,
-    ruleName: (alert._source.rule as { name: string }).name,
+    ruleId: alert.ruleId,
+    ruleName: alert.ruleName,
   }));
+};
+
+/**
+ * Indexes alerts into the correct owner-specific index for each owner that needs them.
+ * Returns a map of owner → AlertInfo[] so each case can pull from the right pool.
+ */
+const indexAlertsForOwners = async (
+  esClient: Client,
+  cases: CasePostRequest[],
+  alertsPerCase: number,
+  space: string
+): Promise<Map<string, AlertInfo[]>> => {
+  // Count how many alerts each owner needs
+  const alertsNeededByOwner = new Map<string, number>();
+  for (const c of cases) {
+    const current = alertsNeededByOwner.get(c.owner) ?? 0;
+    alertsNeededByOwner.set(c.owner, current + alertsPerCase);
+  }
+
+  const alertsByOwner = new Map<string, AlertInfo[]>();
+
+  for (const [owner, count] of alertsNeededByOwner.entries()) {
+    const alertIndex = getAlertsIndex(owner, space);
+    toolingLogger.info(`Indexing ${count} alerts into ${alertIndex} for owner "${owner}"...`);
+    const alerts = await bulkIndexAlerts(esClient, alertIndex, count);
+    alertsByOwner.set(owner, alerts);
+  }
+
+  return alertsByOwner;
 };
 
 const generateCases = async ({
@@ -299,7 +320,7 @@ const generateCases = async ({
   headers,
   commentsPerCase,
   alertsPerCase,
-  indexedAlerts,
+  alertsByOwner,
 }: {
   cases: CasePostRequest[];
   space: string;
@@ -307,22 +328,23 @@ const generateCases = async ({
   headers: Record<string, string>;
   commentsPerCase: number;
   alertsPerCase: number;
-  indexedAlerts: Array<{ alertId: string; index: string; ruleId: string; ruleName: string }>;
+  alertsByOwner: Map<string, AlertInfo[]>;
 }) => {
   try {
     const basePath = space ? `/s/${space}` : '';
     const casesPath = `${basePath}/api/cases`;
     const totalAttachments = commentsPerCase + alertsPerCase;
 
-    toolingLogger.info(
-      `Creating ${cases.length} cases in ${space ? `space: ${space}` : 'default space'}` +
-        (totalAttachments > 0
-          ? ` with ${commentsPerCase} comments and ${alertsPerCase} alerts each`
-          : '')
-    );
+    const spaceLabel = space ? `space: ${space}` : 'default space';
+    const attachmentLabel =
+      totalAttachments > 0
+        ? ` with ${commentsPerCase} comments and ${alertsPerCase} alerts each`
+        : '';
+    toolingLogger.info(`Creating ${cases.length} cases in ${spaceLabel}${attachmentLabel}`);
 
     const concurrency = totalAttachments > 0 ? 10 : 100;
-    let alertCursor = 0;
+    // Track a cursor per owner so each case gets unique alerts
+    const ownerCursors = new Map<string, number>();
 
     await pMap(
       cases,
@@ -366,10 +388,12 @@ const generateCases = async ({
               }
             }
 
-            // Add real alert attachments
+            // Add real alert attachments from the owner's pool
+            const ownerAlerts = alertsByOwner.get(newCase.owner) ?? [];
+            const cursor = ownerCursors.get(newCase.owner) ?? 0;
+
             for (let i = 0; i < alertsPerCase; i++) {
-              const alert = indexedAlerts[alertCursor % indexedAlerts.length];
-              alertCursor++;
+              const alert = ownerAlerts[(cursor + i) % ownerAlerts.length];
 
               try {
                 await kbnClient.request({
@@ -390,6 +414,8 @@ const generateCases = async ({
                 );
               }
             }
+
+            ownerCursors.set(newCase.owner, cursor + alertsPerCase);
           }
         } catch (error) {
           toolingLogger.error(`Error creating case: ${newCase.title}`);
@@ -448,11 +474,6 @@ const main = async () => {
         type: 'number',
         default: 0,
       },
-      alertIndex: {
-        describe: 'Elasticsearch index to store generated alert documents',
-        type: 'string',
-        default: ALERTS_INDEX,
-      },
       apiKey: {
         alias: 'apiKey',
         describe: 'API key to pass as an authorization header. Necessary for serverless',
@@ -492,7 +513,6 @@ const main = async () => {
       ssl,
       comments,
       alerts,
-      alertIndex,
     } = argv;
     const numCasesToCreate = Number(count);
     const commentsPerCase = Number(comments);
@@ -524,18 +544,11 @@ const main = async () => {
     });
 
     // If alerts are requested, index real alert documents into ES first
-    let indexedAlerts: Array<{
-      alertId: string;
-      index: string;
-      ruleId: string;
-      ruleName: string;
-    }> = [];
+    let alertsByOwner = new Map<string, AlertInfo[]>();
 
     if (alertsPerCase > 0) {
       const esClient = createEsClient({ node, ssl });
-      const totalAlertsNeeded = numCasesToCreate * alertsPerCase;
-      toolingLogger.info(`Indexing ${totalAlertsNeeded} alert documents into ${alertIndex}...`);
-      indexedAlerts = await indexAlerts(esClient, totalAlertsNeeded, alertIndex);
+      alertsByOwner = await indexAlertsForOwners(esClient, cases, alertsPerCase, space);
     }
 
     await generateCases({
@@ -545,7 +558,7 @@ const main = async () => {
       headers,
       commentsPerCase,
       alertsPerCase,
-      indexedAlerts,
+      alertsByOwner,
     });
 
     toolingLogger.info('Done!');
