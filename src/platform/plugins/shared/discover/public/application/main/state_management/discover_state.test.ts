@@ -650,7 +650,9 @@ describe('Discover state', () => {
         })
       );
       await new Promise(process.nextTick);
-      expect(state.internalState.getState().persistedDiscoverSession?.id).toBe('the-saved-search-id');
+      expect(state.internalState.getState().persistedDiscoverSession?.id).toBe(
+        'the-saved-search-id'
+      );
       expect(getCurrentUrl()).toMatchInlineSnapshot(
         `"/#?_tab=(tabId:the-saved-search-id)&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),grid:(),hideChart:!f,interval:auto,sort:!())"`
       );
