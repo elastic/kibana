@@ -426,7 +426,6 @@ describe('Discover state', () => {
                   serializedSearchSource: { index: dataViewMock.id },
                 },
               }),
-              timeRestore: false,
               services,
             }),
           ],
@@ -454,7 +453,6 @@ describe('Discover state', () => {
                   serializedSearchSource: { index: dataViewAdHoc.toSpec() },
                 },
               }),
-              timeRestore: false,
               services,
             }),
           ],
@@ -557,23 +555,23 @@ describe('Discover state', () => {
       expect(hasUnsavedChanges).toBe(false);
       const { searchSource, ...savedSearch } = state.savedSearchState.getState();
       expect(savedSearch).toMatchInlineSnapshot(`
-              Object {
-                "chartInterval": "auto",
-                "columns": Array [
-                  "default_column",
-                ],
-                "density": undefined,
-                "headerRowHeight": undefined,
-                "hideAggregatedPreview": undefined,
-                "hideChart": undefined,
-                "refreshInterval": undefined,
-                "rowHeight": undefined,
-                "rowsPerPage": undefined,
-                "sampleSize": undefined,
-                "sort": Array [],
-                "timeRange": undefined,
-              }
-          `);
+        Object {
+          "chartInterval": "auto",
+          "columns": Array [
+            "default_column",
+          ],
+          "density": undefined,
+          "headerRowHeight": undefined,
+          "hideAggregatedPreview": undefined,
+          "hideChart": undefined,
+          "refreshInterval": undefined,
+          "rowHeight": undefined,
+          "rowsPerPage": undefined,
+          "sampleSize": undefined,
+          "sort": Array [],
+          "timeRange": undefined,
+        }
+      `);
       const { currentDataView$ } = selectTabRuntimeState(
         state.runtimeStateManager,
         state.getCurrentTab().id
