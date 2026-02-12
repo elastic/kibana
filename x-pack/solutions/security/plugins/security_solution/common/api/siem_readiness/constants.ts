@@ -6,3 +6,4 @@
  */
 
 export const GET_SIEM_READINESS_CATEGORIES_API_PATH = '/api/siem_readiness/get_categories';
+export const GET_SIEM_READINESS_PIPELINES_API_PATH = '/api/siem_readiness/get_pipelines';
