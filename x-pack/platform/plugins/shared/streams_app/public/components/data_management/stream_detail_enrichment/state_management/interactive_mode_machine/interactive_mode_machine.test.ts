@@ -95,7 +95,9 @@ describe('interactiveModeMachine condition focus behavior', () => {
     const processorId = actor
       .getSnapshot()
       .context.stepRefs.map((ref) => ref.getSnapshot().context.step)
-      .find((step) => (step as any).action === 'set' && step.parentId === conditionId)?.customIdentifier;
+      .find(
+        (step) => (step as any).action === 'set' && step.parentId === conditionId
+      )?.customIdentifier;
 
     expect(processorId).toBeDefined();
     actor.send({ type: 'step.save', id: processorId! });
@@ -127,4 +129,3 @@ describe('interactiveModeMachine condition focus behavior', () => {
     actor.stop();
   });
 });
-

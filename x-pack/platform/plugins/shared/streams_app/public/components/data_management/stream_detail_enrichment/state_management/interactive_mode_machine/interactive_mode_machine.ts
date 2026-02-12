@@ -672,10 +672,7 @@ export const interactiveModeMachine = setup({
             },
             'step.save': {
               target: 'idle',
-              actions: [
-                { type: 'reassignSteps' },
-                { type: 'syncToDSL' },
-              ],
+              actions: [{ type: 'reassignSteps' }, { type: 'syncToDSL' }],
             },
           },
         },
@@ -698,10 +695,7 @@ export const interactiveModeMachine = setup({
             },
             'step.save': {
               target: 'idle',
-              actions: [
-                { type: 'reassignSteps' },
-                { type: 'syncToDSL' },
-              ],
+              actions: [{ type: 'reassignSteps' }, { type: 'syncToDSL' }],
             },
           },
         },
