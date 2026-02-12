@@ -78,7 +78,7 @@ const allParamsAreMissing = (parsedVars: ParsedVars, params: Record<string, stri
   return varKeys.every((v) => !params[v]);
 };
 
-export const secondsToCronFormatter: FormatterFn<number> = (fields, key) => {
+export const secondsToCronFormatter: FormatterFn<string> = (fields, key) => {
   const value = (fields[key] as string) ?? '';
 
   return value !== undefined && value !== null ? `${value}s` : null;
