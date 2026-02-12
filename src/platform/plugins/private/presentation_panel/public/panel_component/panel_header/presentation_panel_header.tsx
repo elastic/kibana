@@ -69,10 +69,10 @@ export const PresentationPanelHeader = <
         }
       `,
       headerStyles: css`
-        height: ${euiTheme.size.l};
+        height: ${euiTheme.size.xxl};
         overflow: hidden;
-        line-height: ${euiTheme.size.l};
-        padding: 0px ${euiTheme.size.s};
+        line-height: ${euiTheme.size.xxl};
+        padding: 0px ${euiTheme.size.s} 0px ${euiTheme.size.base};
 
         display: flex;
         flex-wrap: nowrap;
