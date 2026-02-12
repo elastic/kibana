@@ -28,7 +28,6 @@ import {
 import type { DiscoverServices } from '../../../../../build_services';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { getSerializedSearchSourceDataViewDetails } from '../utils';
-import { createSearchSource } from '../../utils/create_search_source';
 
 export interface HasUnsavedChangesResult {
   hasUnsavedChanges: boolean;
@@ -96,28 +95,16 @@ export const selectHasUnsavedChanges = (
     const tabState = selectTab(state, tabId);
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
     const tabStateContainer = tabRuntimeState?.stateContainer$.getValue();
-    const normalizedTab = (() => {
-      const baseTab = fromTabStateToSavedObjectTab({
-        tab: tabState,
-        overridenTimeRestore: Boolean(persistedTab.timeRestore),
-        services,
-      });
+    const currentDataView = tabStateContainer
+      ? tabRuntimeState?.currentDataView$.getValue()
+      : undefined;
 
-      if (tabStateContainer) {
-        const currentDataView = tabRuntimeState?.currentDataView$.getValue();
-        return {
-          ...baseTab,
-          serializedSearchSource: createSearchSource({
-            dataView: currentDataView,
-            appState: tabState.appState,
-            globalState: tabState.globalState,
-            services,
-          }).getSerializedFields(),
-        };
-      }
-
-      return baseTab;
-    })();
+    const normalizedTab = fromTabStateToSavedObjectTab({
+      tab: tabState,
+      overridenTimeRestore: Boolean(persistedTab.timeRestore),
+      dataView: currentDataView,
+      services,
+    });
 
     for (const stringKey of Object.keys(TAB_COMPARATORS)) {
       const key = stringKey as keyof DiscoverSessionTab;
