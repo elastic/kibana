@@ -6,7 +6,7 @@
  */
 import { isEnabledFailureStore, Streams } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
+import type { AnyStateMachine, MachineImplementationsFrom } from 'xstate5';
 import { assign, cancel, forwardTo, raise, sendTo, setup, stopChild } from 'xstate5';
 
 import {
@@ -58,10 +58,10 @@ import {
   spawnDataSource,
 } from './utils';
 
-export type StreamEnrichmentActorRef = ActorRefFrom<typeof streamEnrichmentMachine>;
-export type StreamEnrichmentActorSnapshot = SnapshotFrom<typeof streamEnrichmentMachine>;
-
-export const streamEnrichmentMachine = setup({
+// Using AnyStateMachine type assertion to prevent TS7056 error:
+// "The inferred type of this node exceeds the maximum length the compiler will serialize"
+// This happens because the machine spawns other machines with complex types.
+export const streamEnrichmentMachine: AnyStateMachine = setup({
   types: {
     input: {} as StreamEnrichmentInput,
     context: {} as StreamEnrichmentContextType,

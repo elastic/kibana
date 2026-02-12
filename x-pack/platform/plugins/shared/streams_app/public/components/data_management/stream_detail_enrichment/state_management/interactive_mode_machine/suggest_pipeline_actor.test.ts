@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import { createActor, fromPromise } from 'xstate5';
+import { createActor, fromPromise, type AnyActorRef } from 'xstate5';
 import { TaskStatus } from '@kbn/streams-schema';
 import type { GrokCollection } from '@kbn/grok-ui';
 import type { StreamlangDSL } from '@kbn/streamlang/types/streamlang';
 import type { InteractiveModeParentRef } from './types';
 import { interactiveModeMachine } from './interactive_mode_machine';
+import type {
+  LoadExistingSuggestionResult,
+  LoadExistingSuggestionInputMinimal,
+  SchedulePipelineSuggestionTaskInputMinimal,
+  GetPipelineSuggestionStatusInputMinimal,
+  PipelineSuggestionTaskStatusResult,
+} from './suggest_pipeline_actor';
 
 const flushMicrotasks = async () => {
   await Promise.resolve();
@@ -25,12 +32,11 @@ const settleActor = async () => {
   await flushMicrotasks();
 };
 
-const waitForMatch = async (
-  actor: { getSnapshot: () => { matches: (s: string) => boolean; value: unknown } },
-  match: string
-) => {
+const waitForMatch = async (actor: AnyActorRef, match: string) => {
   for (let i = 0; i < 25; i++) {
-    if (actor.getSnapshot().matches(match)) return;
+    const snapshot = actor.getSnapshot();
+    if ('matches' in snapshot && typeof snapshot.matches === 'function' && snapshot.matches(match))
+      return;
     await settleActor();
   }
   throw new Error(
@@ -66,14 +72,25 @@ describe('interactive mode pipeline suggestion polling', () => {
     const getPipelineSuggestionStatusMock = jest.fn(async () => {
       statusCallCount += 1;
       if (statusCallCount <= 2) {
-        return { status: TaskStatus.InProgress } as any;
+        return { status: TaskStatus.InProgress } as PipelineSuggestionTaskStatusResult;
       }
-      return { status: TaskStatus.Completed, pipeline: { steps: [] } } as any;
+      return {
+        status: TaskStatus.Completed,
+        pipeline: { steps: [] },
+      } as PipelineSuggestionTaskStatusResult;
     });
 
-    const loadExistingSuggestionActor = fromPromise(async () => ({ type: 'none' as const }));
-    const scheduleTaskActor = fromPromise(async () => undefined);
-    const getStatusActor = fromPromise(async () => getPipelineSuggestionStatusMock());
+    const loadExistingSuggestionActor = fromPromise<
+      LoadExistingSuggestionResult,
+      LoadExistingSuggestionInputMinimal
+    >(async () => ({ type: 'none' as const }));
+    const scheduleTaskActor = fromPromise<void, SchedulePipelineSuggestionTaskInputMinimal>(
+      async () => {}
+    );
+    const getStatusActor = fromPromise<
+      PipelineSuggestionTaskStatusResult,
+      GetPipelineSuggestionStatusInputMinimal
+    >(async () => getPipelineSuggestionStatusMock());
 
     const testMachine = interactiveModeMachine.provide({
       actors: {
@@ -120,14 +137,23 @@ describe('interactive mode pipeline suggestion polling', () => {
     jest.useFakeTimers();
 
     const getPipelineSuggestionStatusMock = jest.fn(
-      async () => ({ status: TaskStatus.InProgress } as any)
+      async () => ({ status: TaskStatus.InProgress } as PipelineSuggestionTaskStatusResult)
     );
 
     const testMachine = interactiveModeMachine.provide({
       actors: {
-        loadExistingSuggestion: fromPromise(async () => ({ type: 'none' as const })),
-        schedulePipelineSuggestionTask: fromPromise(async () => undefined),
-        getPipelineSuggestionStatus: fromPromise(async () => getPipelineSuggestionStatusMock()),
+        loadExistingSuggestion: fromPromise<
+          LoadExistingSuggestionResult,
+          LoadExistingSuggestionInputMinimal
+        >(async () => ({ type: 'none' as const })),
+        schedulePipelineSuggestionTask: fromPromise<
+          void,
+          SchedulePipelineSuggestionTaskInputMinimal
+        >(async () => {}),
+        getPipelineSuggestionStatus: fromPromise<
+          PipelineSuggestionTaskStatusResult,
+          GetPipelineSuggestionStatusInputMinimal
+        >(async () => getPipelineSuggestionStatusMock()),
       },
     });
 
