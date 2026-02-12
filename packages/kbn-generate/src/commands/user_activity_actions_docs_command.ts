@@ -137,7 +137,10 @@ To regenerate, run: node scripts/generate user-activity-actions-docs
 
               if (row.isRemoved) {
                 const versionRemovedAt = row.definition.versionRemovedAt;
-                return `- **${row.id}**: ${description} ${formatAppliesTo({ versionAddedAt, versionRemovedAt })}`;
+                return `- **${row.id}**: ${description} ${formatAppliesTo({
+                  versionAddedAt,
+                  versionRemovedAt,
+                })}`;
               }
 
               return `- **${row.id}**: ${description} ${formatAppliesTo({ versionAddedAt })}`;
