@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { ComponentOpts } from './rule_status_dropdown';
 import { RuleStatusDropdown } from './rule_status_dropdown';
@@ -81,18 +80,18 @@ describe('RuleStatusDropdown', () => {
     jest.spyOn(global.Date, 'now').mockImplementation(() => new Date(NOW_STRING).valueOf());
   });
 
-  test('renders status control', () => {
+  test('renders status control as enabled switch', () => {
     const wrapper = mountWithIntl(<RuleStatusDropdown {...props} />);
-    expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe('Enabled');
+    const switchComponent = wrapper.find('[data-test-subj="ruleStatusDropdownSwitch"]').first();
+    expect(switchComponent.props().checked).toBe(true);
   });
 
   test('renders status control as disabled when rule is disabled', () => {
     const wrapper = mountWithIntl(
       <RuleStatusDropdown {...{ ...props, rule: { ...props.rule, enabled: false } }} />
     );
-    expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe(
-      'Disabled'
-    );
+    const switchComponent = wrapper.find('[data-test-subj="ruleStatusDropdownSwitch"]').first();
+    expect(switchComponent.props().checked).toBe(false);
   });
 
   test('renders status control as snoozed when rule is snoozed', () => {
@@ -103,7 +102,8 @@ describe('RuleStatusDropdown', () => {
         {...{ ...props, rule: { ...props.rule, isSnoozedUntil: SNOOZE_UNTIL } }}
       />
     );
-    expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe('Snoozed');
+    const switchComponent = wrapper.find('[data-test-subj="ruleStatusDropdownSwitch"]').first();
+    expect(switchComponent.props().checked).toBe(true);
     expect(wrapper.find('[data-test-subj="remainingSnoozeTime"]').first().text()).toBe('3 days');
   });
 
@@ -113,7 +113,8 @@ describe('RuleStatusDropdown', () => {
     const wrapper = mountWithIntl(
       <RuleStatusDropdown {...{ ...props, rule: { ...props.rule, muteAll: true } }} />
     );
-    expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe('Snoozed');
+    const switchComponent = wrapper.find('[data-test-subj="ruleStatusDropdownSwitch"]').first();
+    expect(switchComponent.props().checked).toBe(true);
     expect(wrapper.find('[data-test-subj="remainingSnoozeTime"]').first().text()).toBe(
       'Indefinitely'
     );
@@ -125,9 +126,8 @@ describe('RuleStatusDropdown', () => {
         {...{ ...props, rule: { ...props.rule, enabled: false, isSnoozedUntil: SNOOZE_UNTIL } }}
       />
     );
-    expect(wrapper.find('[data-test-subj="statusDropdown"]').first().props().title).toBe(
-      'Disabled'
-    );
+    const switchComponent = wrapper.find('[data-test-subj="ruleStatusDropdownSwitch"]').first();
+    expect(switchComponent.props().checked).toBe(false);
   });
 
   test('renders read-only status control when isEditable is false', () => {
@@ -140,21 +140,16 @@ describe('RuleStatusDropdown', () => {
         isEditable={false}
       />
     );
-    expect(wrapper.find('[data-test-subj="statusDropdownReadonly"]').first().props().children).toBe(
-      'Enabled'
-    );
+    const readOnlySwitch = wrapper.find('[data-test-subj="statusDropdownReadonly"]').first();
+    expect(readOnlySwitch.props().checked).toBe(true);
+    expect(readOnlySwitch.props().disabled).toBe(true);
   });
 
   describe('autoRecoverAlerts', () => {
     it('shows untrack active alerts modal if `autoRecoverAlerts` is `true`', async () => {
       render(<RuleStatusDropdown {...{ ...props, autoRecoverAlerts: true }} />);
 
-      await userEvent.click(await screen.findByTestId('ruleStatusDropdownBadge'));
-      await waitForEuiPopoverOpen();
-      expect(await screen.findByTestId('statusDropdown')).toBeInTheDocument();
-
-      expect(await screen.findByTestId('statusDropdownDisabledItem')).toBeInTheDocument();
-      await userEvent.click(screen.getByTestId('statusDropdownDisabledItem'));
+      await userEvent.click(await screen.findByTestId('ruleStatusDropdownSwitch'));
 
       expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
     });
@@ -162,12 +157,7 @@ describe('RuleStatusDropdown', () => {
     it('shows untrack active alerts modal if `autoRecoverAlerts` is `undefined`', async () => {
       render(<RuleStatusDropdown {...{ ...props, autoRecoverAlerts: undefined }} />);
 
-      await userEvent.click(await screen.findByTestId('ruleStatusDropdownBadge'));
-      await waitForEuiPopoverOpen();
-      expect(await screen.findByTestId('statusDropdown')).toBeInTheDocument();
-
-      expect(await screen.findByTestId('statusDropdownDisabledItem')).toBeInTheDocument();
-      await userEvent.click(screen.getByTestId('statusDropdownDisabledItem'));
+      await userEvent.click(await screen.findByTestId('ruleStatusDropdownSwitch'));
 
       expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
     });
@@ -175,12 +165,7 @@ describe('RuleStatusDropdown', () => {
     it('does not show untrack active alerts modal if `autoRecoverAlerts` is `false`', async () => {
       render(<RuleStatusDropdown {...{ ...props, autoRecoverAlerts: false }} />);
 
-      await userEvent.click(await screen.findByTestId('ruleStatusDropdownBadge'));
-      await waitForEuiPopoverOpen();
-      expect(await screen.findByTestId('statusDropdown')).toBeInTheDocument();
-
-      expect(await screen.findByTestId('statusDropdownDisabledItem')).toBeInTheDocument();
-      await userEvent.click(screen.getByTestId('statusDropdownDisabledItem'));
+      await userEvent.click(await screen.findByTestId('ruleStatusDropdownSwitch'));
 
       expect(await screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
 
