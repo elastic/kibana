@@ -39,9 +39,12 @@ export async function dismissAllToasts(page: ScoutPage): Promise<void> {
     await button.click().catch(() => {});
   }
 
-  // Brief pause to let the toast animation complete
+  // Wait for toasts to fully dismiss
   if (allButtons.length > 0) {
-    await page.waitForTimeout(500);
+    await toastList
+      .locator('[data-test-subj="toastCloseButton"]')
+      .waitFor({ state: 'hidden', timeout: 5_000 })
+      .catch(() => {});
   }
 }
 

@@ -10,12 +10,14 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiCallOut,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiPanel,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -23,6 +25,9 @@ import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
 import React, { useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { orderBy } from 'lodash';
 import {
   useFetchSignificantEvents,
   type SignificantEventItem,
@@ -37,39 +42,64 @@ import { LoadingPanel } from '../../../loading_panel';
 import { SparkPlot } from '../../../spark_plot';
 import { StreamsAppSearchBar } from '../../../streams_app_search_bar';
 import { SeverityBadge } from '../severity_badge/severity_badge';
+import { useFetchStreams } from '../../hooks/use_fetch_streams';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { buildDiscoverParams } from '../../utils/discover_helpers';
 import {
+  ACTIONS_COLUMN_TITLE,
+  BACKED_STATUS_COLUMN,
   CHART_SERIES_NAME,
   CHART_TITLE,
   IMPACT_COLUMN,
   LAST_OCCURRED_COLUMN,
   NO_ITEMS_MESSAGE,
+  NOT_PROMOTED_BADGE_LABEL,
+  NOT_PROMOTED_TOOLTIP_CONTENT,
   OCCURRENCES_COLUMN,
   OCCURRENCES_TOOLTIP_NAME,
+  OPEN_IN_DISCOVER_ACTION_DESCRIPTION,
+  OPEN_IN_DISCOVER_ACTION_TITLE,
+  PROMOTED_BADGE_LABEL,
+  PROMOTED_TOOLTIP_CONTENT,
   PROMOTE_ALL_BUTTON,
   PROMOTE_ALL_CALLOUT_DESCRIPTION,
   PROMOTE_ALL_ERROR_TOAST_TITLE,
+  PROMOTE_QUERY_ACTION_DESCRIPTION,
+  PROMOTE_QUERY_ACTION_TITLE,
   SEARCH_PLACEHOLDER,
   STREAM_COLUMN,
-  SYSTEMS_COLUMN,
   TABLE_CAPTION,
   TITLE_COLUMN,
+  UNABLE_TO_LOAD_QUERIES_BODY,
+  UNABLE_TO_LOAD_QUERIES_TITLE,
   getEventsCount,
   getPromoteAllCalloutTitle,
   getPromoteAllSuccessToast,
 } from './translations';
+import { PromoteAction } from './promote_action';
 
 export function QueriesTable() {
   const { euiTheme } = useEuiTheme();
   const {
     dependencies: {
-      start: { unifiedSearch },
+      start: { unifiedSearch, share },
     },
     core: {
       notifications: { toasts },
     },
   } = useKibana();
+  const { timeState } = useTimefilter();
   const [searchQuery, setSearchQuery] = useState('');
-  const { data, isLoading: queriesLoading } = useFetchSignificantEvents({ query: searchQuery });
+  const {
+    data: queriesData,
+    isLoading: queriesLoading,
+    isError: hasQueriesError,
+  } = useFetchSignificantEvents({ query: searchQuery });
+  const {
+    data: streamsData,
+    isLoading: streamsLoading,
+    isError: hasStreamsError,
+  } = useFetchStreams();
   const { count: unbackedCount } = useUnbackedQueriesCount();
   const queryClient = useQueryClient();
   const { promoteAll } = useQueriesApi();
@@ -89,9 +119,28 @@ export function QueriesTable() {
     }
   }, [promoteAll, queryClient, toasts]);
 
-  if (queriesLoading && !data) {
+  if (queriesLoading || streamsLoading) {
     return <LoadingPanel size="l" />;
   }
+
+  if (hasQueriesError || hasStreamsError) {
+    return (
+      <EuiEmptyPrompt
+        iconType="error"
+        color="danger"
+        title={<h2>{UNABLE_TO_LOAD_QUERIES_TITLE}</h2>}
+        body={<p>{UNABLE_TO_LOAD_QUERIES_BODY}</p>}
+      />
+    );
+  }
+
+  const sortedQueries = orderBy(
+    queriesData?.significant_events ?? [],
+    ['rule_backed', (event) => event.query.severity_score, (event) => event.query.title],
+    ['desc', 'desc', 'asc']
+  );
+  const streamDefinitions = streamsData?.streams ?? [];
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
   const columns: Array<EuiBasicTableColumn<SignificantEventItem>> = [
     {
@@ -100,21 +149,6 @@ export function QueriesTable() {
       render: (_: unknown, item: SignificantEventItem) => (
         <EuiLink onClick={() => {}}>{item.query.title}</EuiLink>
       ),
-    },
-    {
-      field: 'stream_name',
-      name: STREAM_COLUMN,
-      render: (_: unknown, item: SignificantEventItem) => (
-        <EuiBadge color="hollow">{item.stream_name || '--'}</EuiBadge>
-      ),
-    },
-    {
-      field: 'query.feature',
-      name: SYSTEMS_COLUMN,
-      render: (_: unknown, item: SignificantEventItem) => {
-        const systemName = item.query.feature?.name;
-        return systemName ? <EuiBadge color="hollow">{systemName}</EuiBadge> : '--';
-      },
     },
     {
       field: 'query.severity_score',
@@ -150,6 +184,7 @@ export function QueriesTable() {
       field: 'occurrences',
       name: OCCURRENCES_COLUMN,
       width: '160px',
+      align: 'center',
       render: (_: unknown, item: SignificantEventItem) => {
         return (
           <SparkPlot
@@ -164,6 +199,65 @@ export function QueriesTable() {
           />
         );
       },
+    },
+    {
+      field: 'stream_name',
+      name: STREAM_COLUMN,
+      render: (_: unknown, item: SignificantEventItem) => (
+        <EuiBadge color="hollow">{item.stream_name}</EuiBadge>
+      ),
+    },
+    {
+      field: 'rule_backed',
+      name: BACKED_STATUS_COLUMN,
+      render: (_: unknown, item: SignificantEventItem) => {
+        return (
+          <EuiToolTip
+            content={item.rule_backed ? PROMOTED_TOOLTIP_CONTENT : NOT_PROMOTED_TOOLTIP_CONTENT}
+          >
+            <span tabIndex={0}>
+              {item.rule_backed && <EuiBadge color="hollow">{PROMOTED_BADGE_LABEL}</EuiBadge>}
+              {!item.rule_backed && <EuiBadge color="warning">{NOT_PROMOTED_BADGE_LABEL}</EuiBadge>}
+            </span>
+          </EuiToolTip>
+        );
+      },
+    },
+    {
+      name: ACTIONS_COLUMN_TITLE,
+      actions: [
+        {
+          name: OPEN_IN_DISCOVER_ACTION_TITLE,
+          type: 'icon',
+          icon: 'discoverApp',
+          description: OPEN_IN_DISCOVER_ACTION_DESCRIPTION,
+          enabled: () => discoverLocator !== undefined,
+          onClick: (item) => {
+            const definition = streamDefinitions.find(
+              (streamItem) => streamItem.stream.name === item.stream_name
+            );
+
+            if (!definition) {
+              return;
+            }
+
+            discoverLocator?.navigate(
+              buildDiscoverParams(item.query, definition.stream, timeState)
+            );
+          },
+          isPrimary: true,
+          'data-test-subj': 'significant_events_table_open_in_discover_action',
+        },
+        {
+          type: 'button',
+          color: 'primary',
+          name: PROMOTE_QUERY_ACTION_TITLE,
+          description: PROMOTE_QUERY_ACTION_DESCRIPTION,
+          render: (item: SignificantEventItem) => {
+            return <PromoteAction item={item} />;
+          },
+        },
+      ],
     },
   ];
 
@@ -230,7 +324,7 @@ export function QueriesTable() {
                 id="aggregated-occurrences"
                 name={CHART_SERIES_NAME}
                 type="bar"
-                timeseries={data?.aggregated_occurrences ?? []}
+                timeseries={queriesData?.aggregated_occurrences ?? []}
                 annotations={[]}
                 height={180}
               />
@@ -239,7 +333,7 @@ export function QueriesTable() {
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="s">{getEventsCount(data?.significant_events.length ?? 0)}</EuiText>
+        <EuiText size="s">{getEventsCount(queriesData?.significant_events.length ?? 0)}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiBasicTable
@@ -251,9 +345,9 @@ export function QueriesTable() {
           tableCaption={TABLE_CAPTION}
           columns={columns}
           itemId={(item) => item.query.id}
-          items={data?.significant_events ?? []}
-          loading={queriesLoading}
-          noItemsMessage={!queriesLoading ? NO_ITEMS_MESSAGE : ''}
+          items={sortedQueries}
+          loading={queriesLoading || streamsLoading}
+          noItemsMessage={!queriesLoading && !streamsLoading ? NO_ITEMS_MESSAGE : ''}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

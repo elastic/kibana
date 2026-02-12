@@ -6,13 +6,14 @@
  */
 /* eslint-disable playwright/no-nth-methods */
 
-import { expect } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { socManagerRole } from '../common/roles';
 import { loadSavedQuery, cleanupSavedQuery } from '../common/api_helpers';
 import { waitForPageReady } from '../common/constants';
 
-test.describe('ALL - Inventory', { tag: ['@ess'] }, () => {
+test.describe('ALL - Inventory', { tag: [...tags.stateful.classic] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
 
@@ -38,13 +39,13 @@ test.describe('ALL - Inventory', { tag: ['@ess'] }, () => {
     await expect(page.testSubj.locator('waffleMap')).toBeVisible({ timeout: 60_000 });
 
     // Wait for page loading to settle
-    await page.waitForTimeout(3000);
+    await waitForPageReady(page);
 
     // Dismiss "Want a different view?" dialog if it appears (may cover the waffle map)
     const dismissButton = page.getByText('Dismiss').first();
     if (await dismissButton.isVisible({ timeout: 3_000 }).catch(() => false)) {
       await dismissButton.click();
-      await page.waitForTimeout(1000);
+      await waitForPageReady(page);
     }
 
     // Host nodes are rendered as buttons with names like "scout-osquery-agent-X..." inside the waffle map
@@ -85,13 +86,13 @@ test.describe('ALL - Inventory', { tag: ['@ess'] }, () => {
     await expect(page.testSubj.locator('waffleMap')).toBeVisible({ timeout: 60_000 });
 
     // Wait for page loading to settle
-    await page.waitForTimeout(3000);
+    await waitForPageReady(page);
 
     // Dismiss "Want a different view?" dialog if it appears
     const dismissButton = page.getByText('Dismiss').first();
     if (await dismissButton.isVisible({ timeout: 3_000 }).catch(() => false)) {
       await dismissButton.click();
-      await page.waitForTimeout(1000);
+      await waitForPageReady(page);
     }
 
     // Host nodes are rendered as buttons with names like "scout-osquery-agent-X..." inside the waffle map
@@ -120,6 +121,7 @@ test.describe('ALL - Inventory', { tag: ['@ess'] }, () => {
     // Select saved query
     const comboBox = page.testSubj.locator('comboBoxInput').first();
     await comboBox.click();
+    // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for combobox dropdown to render before typing
     await page.waitForTimeout(500);
     await comboBox.pressSequentially(savedQueryName);
     const option = page.getByRole('option', { name: new RegExp(savedQueryName, 'i') }).first();

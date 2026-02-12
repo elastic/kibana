@@ -6,7 +6,8 @@
  */
 
 import execa from 'execa';
-import { globalSetupHook } from '@kbn/scout';
+import { globalSetupHook, tags } from '@kbn/scout';
+import type { KbnClient } from '@kbn/test';
 import { maybeCreateDockerNetwork, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
 import {
@@ -59,7 +60,7 @@ async function isContainerRunning(name: string): Promise<boolean> {
   }
 }
 
-async function getOnlineAgentCount(kbnClient: any): Promise<number> {
+async function getOnlineAgentCount(kbnClient: KbnClient): Promise<number> {
   try {
     const { data } = await kbnClient.request({
       method: 'GET',
@@ -78,7 +79,7 @@ async function getOnlineAgentCount(kbnClient: any): Promise<number> {
   }
 }
 
-async function getAgentVersion(kbnClient: any): Promise<string> {
+async function getAgentVersion(kbnClient: KbnClient): Promise<string> {
   try {
     const status = await kbnClient.status.get();
 
@@ -88,7 +89,12 @@ async function getAgentVersion(kbnClient: any): Promise<string> {
   }
 }
 
-async function waitForAgents(kbnClient: any, log: any, expectedCount: number, timeoutMs = 240_000) {
+async function waitForAgents(
+  kbnClient: KbnClient,
+  log: any,
+  expectedCount: number,
+  timeoutMs = 240_000
+) {
   const start = Date.now();
   let lastCount = 0;
 
@@ -116,7 +122,7 @@ async function waitForAgents(kbnClient: any, log: any, expectedCount: number, ti
   );
 }
 
-async function waitForOsqueryReady(kbnClient: any, log: any, timeoutMs = 300_000) {
+async function waitForOsqueryReady(kbnClient: KbnClient, log: any, timeoutMs = 300_000) {
   const start = Date.now();
 
   while (Date.now() - start < timeoutMs) {
@@ -285,7 +291,7 @@ globalSetupHook.setTimeout(10 * 60 * 1000);
 
 globalSetupHook(
   'Set up Fleet Server and Elastic Agents for Osquery tests',
-  { tag: ['@ess', '@svlSecurity'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   async ({ kbnClient, log, config }) => {
     const isServerless = config.serverless;
 

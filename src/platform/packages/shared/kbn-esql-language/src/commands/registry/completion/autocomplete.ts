@@ -43,7 +43,7 @@ import {
   type ICommandCallbacks,
 } from '../types';
 import { getFunctionDefinition } from '../../definitions/utils/functions';
-import { SuggestionCategory } from '../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',

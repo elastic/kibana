@@ -6,7 +6,7 @@
  */
 
 /* eslint-disable playwright/no-nth-methods */
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { ScoutPage, KibanaUrl } from '@kbn/scout';
 import { waitForPageReady } from './constants';
 
@@ -44,29 +44,27 @@ export async function checkOsqueryResponseActionsPermissions(
     .locator('globalLoadingIndicator')
     .waitFor({ state: 'hidden', timeout: 120_000 })
     .catch(() => {});
-  await page.waitForTimeout(2000);
 
-  // Close the date tab if visible (can overlap the Actions tab)
-  const dateTab = page.getByText('Schedule').first();
-  if (await dateTab.isVisible({ timeout: 3_000 }).catch(() => false)) {
-    // Just ensure the Actions tab is clickable
-  }
+  // Wait for the Actions tab to be available (rule form fully rendered)
+  const actionsTab = page.testSubj.locator('edit-rule-actions-tab');
+  await actionsTab.waitFor({ state: 'visible', timeout: 30_000 });
+  await actionsTab.click();
 
-  // Click the Actions tab
-  await page.testSubj.locator('edit-rule-actions-tab').click();
-  await page.waitForTimeout(1000);
-
-  // Click the Osquery response action add button.
-  // In rare cases the button is not clickable due to the page not being fully loaded,
-  // so we retry a few times.
-  let actionAccordionVisible = false;
-  for (let attempt = 0; attempt < 5 && !actionAccordionVisible; attempt++) {
-    await page.testSubj.locator(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
-    await page.waitForTimeout(2000);
-    actionAccordionVisible = await page.testSubj
-      .locator('alertActionAccordion')
-      .isVisible({ timeout: 3_000 })
-      .catch(() => false);
+  // Wait for the response action button to be ready, then click it.
+  // Retry if the accordion doesn't appear (page may not be fully loaded).
+  const osqueryButton = page.testSubj.locator(OSQUERY_RESPONSE_ACTION_ADD_BUTTON);
+  const actionAccordion = page.testSubj.locator('alertActionAccordion');
+  for (let attempt = 0; attempt < 5; attempt++) {
+    await osqueryButton.waitFor({ state: 'visible', timeout: 10_000 });
+    await osqueryButton.click();
+    if (
+      await actionAccordion
+        .waitFor({ state: 'visible', timeout: 5_000 })
+        .then(() => true)
+        .catch(() => false)
+    ) {
+      break;
+    }
   }
 
   if (enabled) {

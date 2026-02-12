@@ -28,6 +28,8 @@ plugins:
     - transform
     - dashboard
     - workflows_extensions
+    - global_search
+    - banners
   disabled:
 
 packages:

@@ -6,13 +6,14 @@
  */
 
 /* eslint-disable playwright/no-nth-methods */
-import { expect } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { socManagerRole } from '../common/roles';
 import { waitForPageReady } from '../common/constants';
 
 // FLAKY: https://github.com/elastic/kibana/issues/229432
-test.describe.skip('ALL - Timelines', { tag: ['@ess'] }, () => {
+test.describe.skip('ALL - Timelines', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole(socManagerRole);
   });

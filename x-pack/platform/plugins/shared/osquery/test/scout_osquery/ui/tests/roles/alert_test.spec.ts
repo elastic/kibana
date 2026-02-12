@@ -6,13 +6,14 @@
  */
 /* eslint-disable playwright/no-nth-methods */
 
-import { expect } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
 import { t1AnalystRole } from '../../common/roles';
 import { loadRule, cleanupRule } from '../../common/api_helpers';
 import { waitForPageReady } from '../../common/constants';
 
-test.describe('Alert Test', { tag: ['@ess'] }, () => {
+test.describe('Alert Test', { tag: [...tags.stateful.classic] }, () => {
   let ruleName: string;
   let ruleId: string;
 
@@ -29,7 +30,7 @@ test.describe('Alert Test', { tag: ['@ess'] }, () => {
 
     // Click on the rule name
     await page.getByText(ruleName).first().click();
-    await page.waitForTimeout(5_000); // Wait for alerts to populate
+    await page.testSubj.locator('expand-event').first().waitFor({ state: 'visible' });
 
     // Expand first event
     await page.testSubj.locator('expand-event').first().click();

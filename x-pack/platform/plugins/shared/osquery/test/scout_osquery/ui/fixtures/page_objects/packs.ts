@@ -101,15 +101,14 @@ export class PacksPage {
     const paginationButton = this.page.testSubj.locator('tablePaginationPopoverButton');
     if (await paginationButton.isVisible({ timeout: 3_000 }).catch(() => false)) {
       await paginationButton.click();
-      await this.page.waitForTimeout(500);
       const fiftyRowsOption = this.page.testSubj.locator('tablePagination-50-rows');
-      if (await fiftyRowsOption.isVisible({ timeout: 3_000 }).catch(() => false)) {
+      await fiftyRowsOption.waitFor({ state: 'visible', timeout: 5_000 }).catch(() => {});
+      if (await fiftyRowsOption.isVisible()) {
         await fiftyRowsOption.click({ force: true });
       }
 
       // Close the popover if it's still open (press Escape)
       await this.page.keyboard.press('Escape');
-      await this.page.waitForTimeout(1000);
     }
   }
 

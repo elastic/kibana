@@ -6,7 +6,8 @@
  */
 /* eslint-disable playwright/no-nth-methods */
 
-import { expect } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import { socManagerRole } from '../common/roles';
 import {
@@ -21,7 +22,7 @@ import { waitForPageReady, dismissAllToasts } from '../common/constants';
 
 test.describe(
   'Alert Event Details - Response Actions Form',
-  { tag: ['@ess', '@svlSecurity'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     let multiQueryPackId: string;
     let multiQueryPackName: string;
@@ -137,6 +138,7 @@ test.describe(
       const ecsFieldInput = responseAction2.locator('[data-test-subj="ECS-field-input"]');
       const ecsComboBox = ecsFieldInput.locator('[data-test-subj="comboBoxInput"]');
       await ecsComboBox.click();
+      // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for combobox dropdown to render before typing
       await page.waitForTimeout(500);
       await ecsComboBox.pressSequentially('labels', { delay: 100 });
       // The option accessible name is "Custom key/value pairs." so match by text content
@@ -149,6 +151,7 @@ test.describe(
       );
       const columnComboBox = osqueryColumnSelect.locator('[data-test-subj="comboBoxInput"]');
       await columnComboBox.click();
+      // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for combobox dropdown to render before typing
       await page.waitForTimeout(1000);
       await columnComboBox.pressSequentially('days', { delay: 100 });
       // Wait for the option to appear and click it - use filter by text content since option name may differ
@@ -192,8 +195,10 @@ test.describe(
       await newResponseAction0.locator('[data-test-subj="comboBoxSearchInput"]').click();
       await expect(page.getByText('Search for a pack to run').first()).toBeVisible();
       await page.keyboard.press('Escape');
+      // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for dropdown to close before refocus
       await page.waitForTimeout(500);
       await newResponseAction0.locator('[data-test-subj="comboBoxInput"]').click();
+      // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for focus before typing
       await page.waitForTimeout(300);
       await newResponseAction0
         .locator('[data-test-subj="comboBoxInput"]')
@@ -251,9 +256,11 @@ test.describe(
       // Clear the current pack selection before typing the new one
       const finalPackComboBox = finalResponseAction0.locator('[data-test-subj="comboBoxInput"]');
       await finalPackComboBox.click();
+      // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for focus before keyboard input
       await page.waitForTimeout(300);
       await page.keyboard.press('ControlOrMeta+a');
       await page.keyboard.press('Backspace');
+      // eslint-disable-next-line playwright/no-wait-for-timeout -- wait for field to clear before typing
       await page.waitForTimeout(300);
       await finalPackComboBox.pressSequentially(multiQueryPackName);
       const multiPackOption = page.getByRole('option', { name: multiQueryPackName });

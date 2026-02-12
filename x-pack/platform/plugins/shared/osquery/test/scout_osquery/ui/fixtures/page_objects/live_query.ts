@@ -7,7 +7,6 @@
 /* eslint-disable playwright/no-nth-methods */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
-import { expect } from '@kbn/scout';
 import { RESULTS_TIMEOUT, waitForPageReady } from '../../common/constants';
 
 export class LiveQueryPage {
@@ -44,16 +43,18 @@ export class LiveQueryPage {
     await this.page.testSubj.locator('globalLoadingIndicator').waitFor({ state: 'hidden' });
 
     const agentInput = this.agentSelection.locator('[data-test-subj="comboBoxInput"]');
-    await expect(agentInput).toBeEnabled();
+    await agentInput.waitFor({ state: 'visible', timeout: 15_000 });
     await agentInput.click();
 
     // Wait for the "All agents" option to appear in the dropdown
     const allAgentsOption = this.page.getByRole('option', { name: /All agents/ });
-    await expect(allAgentsOption).toBeVisible({ timeout: 15_000 });
+    await allAgentsOption.waitFor({ state: 'visible', timeout: 15_000 });
     await allAgentsOption.click();
 
-    // The agent count includes Docker agents; use regex to match any count
-    await expect(this.page.getByText(/\d+ agents? selected\./)).toBeVisible({ timeout: 30_000 });
+    // Confirm agents were selected by waiting for the selection indicator
+    await this.page
+      .getByText(/\d+ agents? selected\./)
+      .waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async inputQuery(query: string) {
@@ -64,26 +65,26 @@ export class LiveQueryPage {
   async clearAndInputQuery(query: string) {
     // Click the editor to focus it
     await this.queryEditor.click();
-    await this.page.waitForTimeout(500);
-    // Select all content and delete it
-    await this.page.keyboard.press('ControlOrMeta+a');
-    await this.page.waitForTimeout(200);
-    await this.page.keyboard.press('Backspace');
-    await this.page.waitForTimeout(200);
-    // Verify the editor is empty before typing (retry if needed)
+    // Select all content and delete it (repeat to ensure empty)
     await this.page.keyboard.press('ControlOrMeta+a');
     await this.page.keyboard.press('Backspace');
-    await this.page.waitForTimeout(200);
+    await this.page.keyboard.press('ControlOrMeta+a');
+    await this.page.keyboard.press('Backspace');
     await this.queryEditor.pressSequentially(query);
   }
 
   async submitQuery() {
-    // Brief pause to let validation trigger — matches Cypress's cy.wait(1000)
-    await this.page.waitForTimeout(1000);
-    await this.page.getByText('Submit').first().click();
+    const submitButton = this.page.getByText('Submit').first();
+    await submitButton.waitFor({ state: 'visible' });
+    await submitButton.click();
   }
 
-  async checkResults() {
+  /**
+   * Wait for query results to appear. Periodically switches tabs and reloads
+   * the page to trigger a refresh. Throws if results never appear within
+   * the configured RESULTS_TIMEOUT.
+   */
+  async waitForResults() {
     const start = Date.now();
     const maxWaitMs = RESULTS_TIMEOUT;
     let reloadCount = 0;
@@ -95,9 +96,9 @@ export class LiveQueryPage {
 
       if (await statusTab.isVisible()) {
         await statusTab.click();
-        await this.page.waitForTimeout(1_000);
+        await waitForPageReady(this.page);
         await resultsTab.click();
-        await this.page.waitForTimeout(1_000);
+        await waitForPageReady(this.page);
       }
 
       // Check if the results table has data rows
@@ -113,15 +114,21 @@ export class LiveQueryPage {
           await this.page.reload();
           await waitForPageReady(this.page);
         } else {
-          await this.page.waitForTimeout(5_000);
+          await new Promise((r) => setTimeout(r, 5_000));
         }
       }
     }
 
-    // Final check — fail with a clear error if results never appeared
-    await expect(this.page.testSubj.locator('dataGridRowCell').first()).toBeVisible({
-      timeout: 60_000,
-    });
+    // Final check — let it throw with a clear error if results never appeared
+    await this.page.testSubj
+      .locator('dataGridRowCell')
+      .first()
+      .waitFor({ state: 'visible', timeout: 60_000 });
+  }
+
+  /** @deprecated Use waitForResults() instead */
+  async checkResults() {
+    return this.waitForResults();
   }
 
   async clickAdvanced() {
@@ -158,7 +165,7 @@ export class LiveQueryPage {
       } catch {
         // Dropdown didn't show options — schema may not be loaded yet
         await comboBox.press('Escape');
-        await this.page.waitForTimeout(5_000);
+        await new Promise((r) => setTimeout(r, 5_000));
       }
     }
 

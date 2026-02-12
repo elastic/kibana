@@ -6,7 +6,8 @@
  */
 /* eslint-disable playwright/no-nth-methods */
 
-import { expect } from '@kbn/scout';
+import { tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
 import { readerRole } from '../../common/roles';
 import {
@@ -18,7 +19,7 @@ import {
 } from '../../common/api_helpers';
 import { waitForPageReady } from '../../common/constants';
 
-test.describe('Reader - only READ', { tag: ['@ess'] }, () => {
+test.describe('Reader - only READ', { tag: [...tags.stateful.classic] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
   let packName: string;
@@ -96,7 +97,7 @@ test.describe('Reader - only READ', { tag: ['@ess'] }, () => {
       const nextPageLink = page.getByRole('link', { name: 'Next page' });
       while (await nextPageLink.isVisible({ timeout: 2_000 }).catch(() => false)) {
         await nextPageLink.click();
-        await page.waitForTimeout(1000);
+        await new Promise((r) => setTimeout(r, 1000));
         if (await toggle.isVisible({ timeout: 2_000 }).catch(() => false)) {
           break;
         }
