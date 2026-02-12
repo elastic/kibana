@@ -135,7 +135,19 @@ export class WorkflowExecuteSyncStrategy {
           `Sub-workflow ${state.executionId} completed with status: ${execution.status}`
         );
 
-        // Extract output - prioritize workflow.output step results from context
+        // Only treat COMPLETED as success — all other terminal statuses
+        // (FAILED, CANCELLED, TIMED_OUT, SKIPPED) should propagate as failures
+        if (execution.status !== ExecutionStatus.COMPLETED) {
+          const error = execution.error
+            ? new ExecutionError(execution.error)
+            : new ExecutionError({
+                type: 'Error',
+                message: `Sub-workflow execution ${execution.status}`,
+              });
+          return { status: 'failed', error };
+        }
+
+        // Extract output only for successful completions
         let output: JsonValue;
         if (execution.context?.output) {
           // If the child workflow used workflow.output step, use that output
@@ -157,17 +169,6 @@ export class WorkflowExecuteSyncStrategy {
           );
         }
 
-        // Check if sub-workflow failed before finishing the step
-        if (execution.status === ExecutionStatus.FAILED) {
-          const error = execution.error
-            ? new ExecutionError(execution.error)
-            : new ExecutionError({
-                type: 'Error',
-                message: 'Sub-workflow execution failed',
-              });
-          return { status: 'failed', error };
-        }
-
         // Pass the output directly as the step output (not wrapped in an object)
         const stepOutput: Record<string, unknown> | undefined =
           output === null ? undefined : (output as Record<string, unknown>);
@@ -185,9 +186,7 @@ export class WorkflowExecuteSyncStrategy {
         `Sub-workflow ${state.executionId} still ${execution.status}, polling again after ${nextInterval}`
       );
 
-      if (this.stepExecutionRuntime.tryEnterDelay(nextInterval)) {
-        // Exit without navigating - workflow will be resumed by the handle_execution_delay logic (either in-process or task manager)
-      }
+      this.stepExecutionRuntime.tryEnterDelay(nextInterval);
       return { status: 'waiting' };
     } catch (error) {
       return { status: 'failed', error: error as Error };
