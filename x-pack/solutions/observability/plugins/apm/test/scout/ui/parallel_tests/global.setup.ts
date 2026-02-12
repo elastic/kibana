@@ -13,35 +13,38 @@ import { generateSpanLinksData } from '../fixtures/synthtrace/generate_span_link
 import { generateSpanStacktraceData } from '../fixtures/synthtrace/generate_span_stacktrace_data';
 import { testData } from '../fixtures';
 
-globalSetupHook('Ingest data to Elasticsearch', async ({ apmSynthtraceEsClient }) => {
-  const opbeansDataGenerator: SynthtraceGenerator<ApmFields> = opbeans({
-    from: new Date(testData.OPBEANS_START_DATE).getTime(),
-    to: new Date(testData.OPBEANS_END_DATE).getTime(),
-  });
+globalSetupHook(
+  'Ingest data to Elasticsearch',
+  async ({ apmSynthtraceEsClient, esClient, log }) => {
+    const opbeansDataGenerator: SynthtraceGenerator<ApmFields> = opbeans({
+      from: new Date(testData.OPBEANS_START_DATE).getTime(),
+      to: new Date(testData.OPBEANS_END_DATE).getTime(),
+    });
 
-  await apmSynthtraceEsClient.index(opbeansDataGenerator);
-  await apmSynthtraceEsClient.index(servicesDataFromTheLast24Hours());
+    await apmSynthtraceEsClient.index(opbeansDataGenerator);
+    await apmSynthtraceEsClient.index(servicesDataFromTheLast24Hours());
 
-  // Generate span links data for span links tests
-  const spanLinksData = generateSpanLinksData();
-  await apmSynthtraceEsClient.index(spanLinksData);
+    // Generate span links data for span links tests
+    const spanLinksData = generateSpanLinksData();
+    await apmSynthtraceEsClient.index(spanLinksData);
 
-  // Generate span stacktrace data for stacktrace tests
-  const spanStacktraceData = generateSpanStacktraceData();
-  await apmSynthtraceEsClient.index(spanStacktraceData);
+    // Generate span stacktrace data for stacktrace tests
+    const spanStacktraceData = generateSpanStacktraceData();
+    await apmSynthtraceEsClient.index(spanStacktraceData);
 
-  log.info('Cleaning up APM ML indices before running the APM tests');
-  const jobs = await esClient.ml.getJobs();
-  const apmJobs = jobs.jobs.filter((job) => job.job_id.startsWith('apm-'));
-  for (const job of apmJobs) {
-    try {
-      await esClient.ml.stopDatafeed({ datafeed_id: `datafeed-${job.job_id}`, force: true });
-      await esClient.ml.deleteDatafeed({ datafeed_id: `datafeed-${job.job_id}`, force: true });
-    } catch (error) {
-      // Datafeed might not exist
-      log.warning(`Datafeed not found for job: ${job.job_id}`, error);
+    log.info('Cleaning up APM ML indices before running the APM tests');
+    const jobs = await esClient.ml.getJobs();
+    const apmJobs = jobs.jobs.filter((job) => job.job_id.startsWith('apm-'));
+    for (const job of apmJobs) {
+      try {
+        await esClient.ml.stopDatafeed({ datafeed_id: `datafeed-${job.job_id}`, force: true });
+        await esClient.ml.deleteDatafeed({ datafeed_id: `datafeed-${job.job_id}`, force: true });
+      } catch (error) {
+        // Datafeed might not exist
+        log.warning(`Datafeed not found for job: ${job.job_id}`, error);
+      }
+      await esClient.ml.deleteJob({ job_id: job.job_id, force: true });
+      log.info(`Deleted job: ${job.job_id}`);
     }
-    await esClient.ml.deleteJob({ job_id: job.job_id, force: true });
-    log.info(`Deleted job: ${job.job_id}`);
   }
-});
+);
