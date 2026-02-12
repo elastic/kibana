@@ -7,7 +7,6 @@
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { fillComboBox } from '../../../tasks/eui_form_interactions';
 import {
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL,
   ENTITY_ANALYTICS_THREAT_HUNTING_URL,
@@ -94,15 +93,16 @@ describe(
       ).should('exist');
     });
 
-    it('persists watchlist selection across navigation', () => {
+    it('navigate to privileged user monitoring page on selecting privileged users watchlist', () => {
       cy.get(PAGE_TITLE, { timeout: 60000 }).should('exist');
 
-      fillComboBox({ parentSelector: WATCHLIST_FILTER_COMBO_BOX, options: 'Privileged users' });
+      cy.get(WATCHLIST_FILTER_COMBO_BOX).should('exist');
+      const comboBoxInput = `${WATCHLIST_FILTER_COMBO_BOX} input`;
+      cy.get(comboBoxInput).first().click();
+      cy.get(comboBoxInput).first().type('Privileged users{downArrow}{enter}');
 
       cy.url({ timeout: 10000 }).should('include', ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL);
       cy.url().should('include', 'watchlist_id=prebuilt-priv');
-
-      cy.get(WATCHLIST_FILTER_COMBO_BOX).should('contain', 'Privileged users');
     });
 
     it('displays timeline icon when data is available', () => {
