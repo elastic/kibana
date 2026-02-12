@@ -21,6 +21,7 @@ import {
 
 import { useDateRangePickerContext, type InitialFocus } from './date_range_picker_context';
 import { TimeWindowButtons } from './date_range_picker_time_window_buttons';
+import { useSelectTextPartsWithArrowKeys } from './hooks/use_select_text_parts_with_arrow_keys';
 
 // TODO move to constants.ts
 const FOCUSABLE_SELECTOR =
@@ -62,6 +63,22 @@ export function DateRangePickerControl() {
     }
     wasEditingRef.current = isEditing;
   }, [isEditing, buttonRef]);
+
+  useSelectTextPartsWithArrowKeys({
+    inputRef,
+    isActive: isEditing,
+    // TODO this is simply increasing/decreasing integers,
+    // ideally we could make this "smart" so it knows what's being modified e.g. day of the month
+    onModifyPart: ({ text: currentText, part, action }) => {
+      const value = parseInt(part.text, 10);
+      if (isNaN(value)) return undefined;
+      const nextValue = action === 'increase' ? value + 1 : value - 1;
+      const newText =
+        currentText.substring(0, part.start) + String(nextValue) + currentText.substring(part.end);
+      setText(newText);
+      return newText;
+    },
+  });
 
   const onButtonClick = () => {
     setIsEditing(true);
