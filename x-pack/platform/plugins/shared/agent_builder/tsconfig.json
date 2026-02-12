@@ -83,7 +83,6 @@
     "@kbn/licensing-plugin",
     "@kbn/lens-embeddable-utils",
     "@kbn/elastic-assistant",
-    "@kbn/react-kibana-mount",
     "@kbn/react-query",
     "@kbn/shared-ux-utility",
     "@kbn/usage-collection-plugin",
