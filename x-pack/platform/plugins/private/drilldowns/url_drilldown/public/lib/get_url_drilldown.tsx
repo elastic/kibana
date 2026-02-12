@@ -28,6 +28,13 @@ import { getInheritedViewMode } from '@kbn/presentation-publishing';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
+  CONTEXT_MENU_TRIGGER,
+  IMAGE_CLICK_TRIGGER,
+  ROW_CLICK_TRIGGER,
+  SELECT_RANGE_TRIGGER,
+  VALUE_CLICK_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import {
   DEFAULT_ENCODE_URL,
   DEFAULT_OPEN_IN_NEW_TAB,
   URL_DRILLDOWN_SUPPORTED_TRIGGERS,
@@ -36,7 +43,6 @@ import type { UrlDrilldownState } from '../../server';
 import { getEventScopeValues, getEventVariableList } from './variables/event_variables';
 import { getContextScopeValues, getContextVariableList } from './variables/context_variables';
 import { getGlobalVariableList } from './variables/global_variables';
-import { CONTEXT_MENU_TRIGGER, IMAGE_CLICK_TRIGGER, ROW_CLICK_TRIGGER, SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 type ExecutionContext = ChartActionContext & EmbeddableApiContext;
 type SetupContext = EmbeddableApiContext;

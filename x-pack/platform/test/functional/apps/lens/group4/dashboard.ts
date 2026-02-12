@@ -355,7 +355,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // check that the drilldown is working now
       await clickInChart(5, 5); // hardcoded position of the slice, depends heavy on data and charts implementation
       expect(
-        await find.existsByCssSelector('[data-test-subj^="embeddablePanelAction-discover_drilldown"]')
+        await find.existsByCssSelector(
+          '[data-test-subj^="embeddablePanelAction-discover_drilldown"]'
+        )
       ).to.be(true);
 
       // save the dashboard
@@ -367,7 +369,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await clickInChart(5, 5); // hardcoded position of the slice, depends heavy on data and charts implementation
       expect(
-        await find.existsByCssSelector('[data-test-subj^="embeddablePanelAction-discover_drilldown"]')
+        await find.existsByCssSelector(
+          '[data-test-subj^="embeddablePanelAction-discover_drilldown"]'
+        )
       ).to.be(true);
     });
   });
