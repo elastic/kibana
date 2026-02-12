@@ -8,10 +8,10 @@
 import React, { useEffect } from 'react';
 import { render, screen } from '@testing-library/react';
 import { useForm, FormProvider } from 'react-hook-form';
-import { CreateTemplatePreview } from './preview';
-import { TemplateFieldRenderer } from '../../field_types/field_renderer';
+import { TemplatePreview } from './template_preview';
+import { TemplateFieldRenderer } from '../field_types/field_renderer';
 
-jest.mock('../../field_types/field_renderer', () => ({
+jest.mock('../field_types/field_renderer', () => ({
   TemplateFieldRenderer: jest.fn(() => <div data-test-subj="template-field-renderer" />),
 }));
 
@@ -30,7 +30,7 @@ describe('CreateTemplatePreview', () => {
 
       return (
         <FormProvider {...form}>
-          <CreateTemplatePreview />
+          <TemplatePreview />
         </FormProvider>
       );
     };
