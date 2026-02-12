@@ -60,6 +60,8 @@ export const ensureAlertsDataViewProfile = async ({
       targetId: ALERTS_DATA_VIEW_TARGET_ID,
       rules: {
         fieldRules: getDefaultAlertFieldRules(),
+        regexRules: [],
+        nerRules: [],
       },
       saltId,
       namespace,

@@ -144,7 +144,9 @@ export class AnonymizationPlugin
       migrateLegacySettings: () => runLegacySettingsMigration('default'),
       logger: this.logger,
     }).catch((err: Error) => {
-      this.logger.error(`Failed to initialize default alerts anonymization profile: ${err.message}`);
+      this.logger.error(
+        `Failed to initialize default alerts anonymization profile: ${err.message}`
+      );
     });
 
     this.policyService = {

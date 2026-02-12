@@ -28,6 +28,8 @@ const profileCreateParams = {
   targetId: 'security-solution-default',
   rules: {
     fieldRules: [{ field: 'host.name', allowed: true, anonymized: false }],
+    regexRules: [],
+    nerRules: [],
   },
   saltId: 'salt-default',
   namespace: 'default',
@@ -157,6 +159,8 @@ describe('ProfilesRepository.update', () => {
     await repository.update('default', 'profile-id', {
       rules: {
         fieldRules: [{ field: 'host.name', allowed: false, anonymized: false }],
+        regexRules: [],
+        nerRules: [],
       },
       updatedBy: 'updater',
     });
