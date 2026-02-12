@@ -344,9 +344,6 @@ export async function pickTestGroupRunOrder() {
             timeout_in_minutes: 120,
             key: 'jest',
             agents: expandAgentQueue('n2-4-spot', 110),
-            env: {
-              SCOUT_TARGET_TYPE: 'local',
-            },
             depends_on: JEST_CONFIGS_DEPS,
             retry: {
               automatic: [
@@ -366,9 +363,6 @@ export async function pickTestGroupRunOrder() {
             timeout_in_minutes: 120,
             key: 'jest-integration',
             agents: expandAgentQueue('n2-4-spot', 105),
-            env: {
-              SCOUT_TARGET_TYPE: 'local',
-            },
             depends_on: JEST_CONFIGS_DEPS,
             retry: {
               automatic: [
@@ -405,7 +399,6 @@ export async function pickTestGroupRunOrder() {
                   timeout_in_minutes: 120,
                   agents: expandAgentQueue(queue, 105),
                   env: {
-                    SCOUT_TARGET_TYPE: 'local',
                     FTR_CONFIG_GROUP_KEY: key,
                     ...ftrExtraArgs,
                     ...envFromlabels,

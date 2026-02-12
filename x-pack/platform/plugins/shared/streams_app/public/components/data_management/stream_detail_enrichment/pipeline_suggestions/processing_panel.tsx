@@ -22,9 +22,14 @@ import { AssetImage } from '../../../asset_image';
 interface ProcessingPanelProps {
   message: string;
   children?: React.ReactNode;
+  showTechPreviewBadge?: boolean;
 }
 
-export function ProcessingPanel({ message, children }: ProcessingPanelProps) {
+export function ProcessingPanel({
+  message,
+  children,
+  showTechPreviewBadge = false,
+}: ProcessingPanelProps) {
   return (
     <EuiPanel
       hasBorder
@@ -45,23 +50,25 @@ export function ProcessingPanel({ message, children }: ProcessingPanelProps) {
                     defaultMessage: 'Extract fields from your data',
                   })}
                 </EuiFlexItem>
-                <EuiBetaBadge
-                  label={i18n.translate(
-                    'xpack.streams.stepsEditor.pipelineSuggestion.betaBadgeLabel',
-                    {
-                      defaultMessage: 'Technical Preview',
-                    }
-                  )}
-                  tooltipContent={i18n.translate(
-                    'xpack.streams.stepsEditor.pipelineSuggestion.betaBadgeLabel.betaBadgeDescription',
-                    {
-                      defaultMessage:
-                        'This functionality is experimental and not supported. It may change or be removed at any time.',
-                    }
-                  )}
-                  alignment="middle"
-                  size="s"
-                />
+                {showTechPreviewBadge && (
+                  <EuiBetaBadge
+                    label={i18n.translate(
+                      'xpack.streams.stepsEditor.pipelineSuggestion.betaBadgeLabel',
+                      {
+                        defaultMessage: 'Technical Preview',
+                      }
+                    )}
+                    tooltipContent={i18n.translate(
+                      'xpack.streams.stepsEditor.pipelineSuggestion.betaBadgeLabel.betaBadgeDescription',
+                      {
+                        defaultMessage:
+                          'This functionality is experimental and not supported. It may change or be removed at any time.',
+                      }
+                    )}
+                    alignment="middle"
+                    size="s"
+                  />
+                )}
               </EuiFlexGroup>
             </h4>
           </EuiTitle>

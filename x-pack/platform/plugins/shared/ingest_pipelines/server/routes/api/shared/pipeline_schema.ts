@@ -8,9 +8,11 @@
 import { schema } from '@kbn/config-schema';
 
 export const pipelineSchema = {
-  description: schema.maybe(schema.string()),
-  processors: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
+  description: schema.maybe(schema.string({ maxLength: 1000 })),
+  processors: schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 1000 }),
   version: schema.maybe(schema.number()),
-  on_failure: schema.maybe(schema.arrayOf(schema.recordOf(schema.string(), schema.any()))),
+  on_failure: schema.maybe(
+    schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 1000 })
+  ),
   _meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 };
