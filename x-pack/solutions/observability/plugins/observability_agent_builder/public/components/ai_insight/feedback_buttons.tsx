@@ -43,7 +43,7 @@ export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
       <EuiFlexItem grow={false}>
         <EuiText color="subdued" size="s">
           <em>
-            {i18n.translate('xpack.observabilityAgentBuilder.insight.feedbackButtons.title', {
+            {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.feedbackButtons.title', {
               defaultMessage: 'Was this helpful?',
             })}
           </em>
@@ -54,14 +54,14 @@ export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
         <EuiFlexGroup responsive={false} direction="row" alignItems="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="observabilityAgentBuilderFeedbackButtonsPositiveButton"
+              data-test-subj="observabilityAgentBuilderFeedbackPositiveButton"
               color="success"
               disabled={hasBeenClicked}
               iconType="faceHappy"
               size="s"
               onClick={handleClickPositive}
             >
-              {i18n.translate('xpack.observabilityAgentBuilder.insight.feedbackButtons.positive', {
+              {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.feedbackButtons.yesLabel', {
                 defaultMessage: 'Yes',
               })}
             </EuiButtonEmpty>
@@ -69,14 +69,14 @@ export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="observabilityAgentBuilderFeedbackButtonsNegativeButton"
+              data-test-subj="observabilityAgentBuilderFeedbackNegativeButton"
               color="danger"
               disabled={hasBeenClicked}
               iconType="faceSad"
               size="s"
               onClick={handleClickNegative}
             >
-              {i18n.translate('xpack.observabilityAgentBuilder.insight.feedbackButtons.negative', {
+              {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.feedbackButtons.noLabel', {
                 defaultMessage: 'No',
               })}
             </EuiButtonEmpty>

@@ -97,7 +97,7 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
         connector: {
           connectorId: selectedConnector.connectorId,
           name: selectedConnector.name,
-          type: selectedConnector.type,
+          actionType: selectedConnector.type,
         },
       });
     },

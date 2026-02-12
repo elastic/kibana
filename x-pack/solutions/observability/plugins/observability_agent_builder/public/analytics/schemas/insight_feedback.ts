@@ -19,7 +19,7 @@ export interface ConnectorInfo {
 
 export interface InsightFeedback {
   feedback: Feedback;
-  insight_type: InsightType;
+  insightType: InsightType;
   connector: ConnectorInfo;
 }
 
@@ -32,7 +32,7 @@ export const insightFeedbackEventSchema: EventTypeOpts<InsightFeedback> = {
         description: 'Whether the user found the insight helpful: positive or negative',
       },
     },
-    insight_type: {
+    insightType: {
       type: 'keyword',
       _meta: {
         description: 'Type of AI insight: log, alert, or error',
@@ -49,13 +49,13 @@ export const insightFeedbackEventSchema: EventTypeOpts<InsightFeedback> = {
         name: {
           type: 'keyword',
           _meta: {
-            description: 'The name of the connector',
+            description: 'The name of the connector used',
           },
         },
         type: {
           type: 'keyword',
           _meta: {
-            description: 'The type of the connector',
+            description: 'The action type of the connector used',
           },
         },
       },
