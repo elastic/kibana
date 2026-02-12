@@ -10,6 +10,7 @@ import { createEsqlEquivalenceEvaluator } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { platformCoreTools } from '@kbn/agent-builder-common';
+import { tags } from '@kbn/scout';
 import type { AgentBuilderEvaluationChatClient } from '../../src/chat_client';
 import { evaluate as base } from '../../src/evaluate';
 
@@ -105,7 +106,7 @@ const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   ],
 });
 
-evaluate.describe('ES|QL tool evaluation', { tag: '@svlSearch' }, () => {
+evaluate.describe('ES|QL tool evaluation', { tag: tags.serverless.search }, () => {
   evaluate('analytical queries', async ({ evaluateDataset }) => {
     await evaluateDataset({
       dataset: {
