@@ -46,6 +46,7 @@ function createServerCallback() {
       }),
       getOrElse(constant({ username: '', password: '' }))
     );
+
     // return the payloads that were posted to be remembered (e.g. from header_as_payload)
     if (request.method === 'GET') {
       response.statusCode = 200;
