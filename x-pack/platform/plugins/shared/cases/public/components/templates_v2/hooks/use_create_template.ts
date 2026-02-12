@@ -6,16 +6,15 @@
  */
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { Template } from '../../../../common/types/domain/template/v1';
+import type { CreateTemplateInput, Template } from '../../../../common/types/domain/template/v1';
 import { postTemplate } from '../api/api';
 import { casesQueriesKeys, casesMutationsKeys } from '../../../containers/constants';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 import type { ServerError } from '../../../types';
 import { useCasesToast } from '../../../common/use_cases_toast';
-import type { TemplateRequest } from '../types';
 
 interface MutationArgs {
-  template: TemplateRequest;
+  template: CreateTemplateInput;
 }
 
 interface UseCreateTemplateProps {

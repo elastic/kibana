@@ -40,7 +40,7 @@ const getPanelDrilldownCounts = (
   return { panelsWithDrilldowns, drilldownCount };
 };
 
-spaceTest.describe('TSVB migration smoke (7.12.1)', { tag: tags.ESS_ONLY }, () => {
+spaceTest.describe('TSVB migration smoke (7.12.1)', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     const imported = await scoutSpace.savedObjects.load(EXPORT_PATH);

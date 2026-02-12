@@ -118,7 +118,7 @@ export function TestStepModal({
       aria-labelledby={modalTitleId}
       maxWidth={false}
       onClose={onClose}
-      data-test-subj="testStepModal"
+      data-test-subj="workflowTestStepModal"
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
@@ -182,7 +182,7 @@ export function TestStepModal({
           color="success"
           iconType="play"
           size="s"
-          data-test-subj="submit-step-run"
+          data-test-subj="workflowSubmitStepRun"
         >
           <FormattedMessage id="workflows.testStepModal.submitRunBtn" defaultMessage="Run" />
         </EuiButton>

@@ -5201,6 +5201,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-list-assembly@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-assembly":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-list-mock-data@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-mock-data":
   version "0.0.0"
   uid ""
@@ -5210,6 +5214,14 @@
   uid ""
 
 "@kbn/content-list-provider@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-list-table@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-table":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-list-toolbar@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar":
   version "0.0.0"
   uid ""
 

@@ -284,8 +284,8 @@ export const multiTermsComposite = async (
         }
 
         retryBatchSize = retryBatchSize / 2;
-        ruleExecutionLogger.warn(
-          `New terms query for multiple fields failed due to too many clauses in query: ${e.message}. Retrying #${retryCount} with ${retryBatchSize} for composite aggregation`
+        ruleExecutionLogger.debug(
+          `New terms query failed due to too many clauses\nError: ${e.message}. Retrying #${retryCount} with ${retryBatchSize} for composite aggregation.`
         );
         throw e;
       }

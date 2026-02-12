@@ -5,28 +5,33 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 
-test.describe('Infrastructure Inventory - Onboarding', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
-    await browserAuth.loginAsViewer();
-    // Skip load wait as there is no data to load in empty data test cases
-    await inventoryPage.goToPage({ skipLoadWait: true });
-  });
-
-  test('Renders no data page and redirects to onboarding page when no data is present', async ({
-    page,
-    pageObjects: { inventoryPage },
-  }) => {
-    await test.step('display empty state', async () => {
-      await expect(inventoryPage.noDataPage).toBeVisible();
-      await expect(inventoryPage.noDataPageActionButton).toBeVisible();
+test.describe(
+  'Infrastructure Inventory - Onboarding',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeEach(async ({ browserAuth, pageObjects: { inventoryPage } }) => {
+      await browserAuth.loginAsViewer();
+      // Skip load wait as there is no data to load in empty data test cases
+      await inventoryPage.goToPage({ skipLoadWait: true });
     });
 
-    await test.step('redirect to onboarding page when clicking on the add data button', async () => {
-      await inventoryPage.clickNoDataPageAddDataButton();
-      await expect(page.getByTestId('obltOnboardingHomeTitle')).toBeVisible();
+    test('Renders no data page and redirects to onboarding page when no data is present', async ({
+      page,
+      pageObjects: { inventoryPage },
+    }) => {
+      await test.step('display empty state', async () => {
+        await expect(inventoryPage.noDataPage).toBeVisible();
+        await expect(inventoryPage.noDataPageActionButton).toBeVisible();
+      });
+
+      await test.step('redirect to onboarding page when clicking on the add data button', async () => {
+        await inventoryPage.clickNoDataPageAddDataButton();
+        await expect(page.getByTestId('obltOnboardingHomeTitle')).toBeVisible();
+      });
     });
-  });
-});
+  }
+);

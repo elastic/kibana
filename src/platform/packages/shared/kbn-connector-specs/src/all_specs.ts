@@ -9,6 +9,7 @@
 
 export * from './specs/abuseipdb/abuseipdb';
 export * from './specs/alienvault_otx/alienvault_otx';
+export * from './specs/atlassian/jira-cloud/jira';
 export * from './specs/brave_search/brave_search';
 export * from './specs/github/github';
 export * from './specs/google_drive/google_drive';
