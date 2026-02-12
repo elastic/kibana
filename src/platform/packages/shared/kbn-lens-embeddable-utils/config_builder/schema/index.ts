@@ -30,11 +30,14 @@ import type {
   LensApiStaticValueOperation,
 } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
-import { partitionStateSchema } from './charts/partition';
 import type { MosaicState } from './charts/mosaic';
+import { mosaicStateSchema } from './charts/mosaic';
 import type { TreemapState } from './charts/treemap';
+import { treemapStateSchema } from './charts/treemap';
 import type { WaffleState } from './charts/waffle';
+import { waffleStateSchema } from './charts/waffle';
 import type { PieState } from './charts/pie';
+import { pieStateSchema } from './charts/pie';
 
 /**
  * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
@@ -51,9 +54,12 @@ export const _lensApiStateSchema: any = schema.oneOf([
   gaugeStateSchema,
   heatmapStateSchema,
   tagcloudStateSchema,
-  partitionStateSchema,
   regionMapStateSchema,
   datatableStateSchema,
+  pieStateSchema,
+  mosaicStateSchema,
+  treemapStateSchema,
+  waffleStateSchema,
 ]);
 
 export type LensApiState =

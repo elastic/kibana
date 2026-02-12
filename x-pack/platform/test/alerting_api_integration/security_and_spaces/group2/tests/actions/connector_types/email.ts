@@ -93,6 +93,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           oauthTokenUrl: null,
           tenantId: null,
         },
+        auth_mode: 'shared',
       });
     });
 
@@ -153,6 +154,41 @@ export default function emailTest({ getService }: FtrProviderContext) {
 
           const executeEvent = events[1];
           expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(350);
+        });
+    });
+
+    it('should execute email action correctly when replyTo is set', async () => {
+      await supertest
+        .post(`/api/actions/connector/${createdActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            to: ['kibana-action-test@elastic.co'],
+            replyTo: ['reply@example.com'], // <-- test input
+            subject: 'Test with replyTo',
+            message: 'message',
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          const { message, envelope } = resp.body.data;
+
+          expect(envelope.from).to.be('bob@example.com');
+          expect(envelope.to).to.eql(['kibana-action-test@elastic.co']);
+
+          expect(message.replyTo).to.eql([
+            {
+              address: 'reply@example.com',
+              name: '',
+            },
+          ]);
+          expect(message.subject).to.be('Test with replyTo');
+          expect(message.text).to.be(
+            'message\n\n---\n\nThis message was sent by Elastic. [Go to Elastic](https://localhost:5601).'
+          );
+          expect(message.html).to.be(
+            `<p>message</p>\n<hr>\n<p>This message was sent by Elastic. <a href=\"https://localhost:5601\">Go to Elastic</a>.</p>\n`
+          );
         });
     });
 
@@ -445,6 +481,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           oauthTokenUrl: null,
           tenantId: null,
         },
+        auth_mode: 'shared',
       });
     });
 
@@ -515,6 +552,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           oauthTokenUrl: null,
           tenantId: null,
         },
+        auth_mode: 'shared',
       });
     });
 
@@ -594,6 +632,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           clientId: '12345',
           tenantId: '1234567',
         },
+        auth_mode: 'shared',
       });
     });
 

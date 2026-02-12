@@ -6,7 +6,7 @@
  */
 
 import type { IToasts, NotificationsStart } from '@kbn/core/public';
-import type { DraftGrokExpression } from '@kbn/grok-ui';
+import type { GrokCollection } from '@kbn/grok-ui';
 import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
@@ -64,6 +64,8 @@ export interface InteractiveModeContext {
   suggestedPipeline?: StreamlangDSL;
   // Currently selected condition for filtering steps
   selectedConditionId?: string;
+  // Shared grok collection for pattern definitions
+  grokCollection: GrokCollection;
 }
 
 export interface InteractiveModeInput {
@@ -79,6 +81,8 @@ export interface InteractiveModeInput {
   simulationMode: DataSourceSimulationMode;
   // Stream name for pipeline suggestion
   streamName: string;
+  // Shared grok collection for pattern definitions
+  grokCollection: GrokCollection;
 }
 
 export type InteractiveModeEvent =
@@ -89,7 +93,6 @@ export type InteractiveModeEvent =
       type: 'step.changeProcessor';
       id: string;
       step: StreamlangProcessorDefinition;
-      resources?: { grokExpressions?: DraftGrokExpression[] };
     }
   | {
       type: 'step.changeCondition';
