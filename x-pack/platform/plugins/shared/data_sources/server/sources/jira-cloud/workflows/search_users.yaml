@@ -27,7 +27,7 @@ inputs:
 steps:
   - name: search-users
     type: jira-cloud.searchUsers
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= jira-cloud-stack-connector-id %>
     with:
       query: "${{inputs.query}}"
       username: "${{inputs.username}}"

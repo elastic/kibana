@@ -20,12 +20,12 @@ steps:
     steps:
       - name: get-issue
         type: jira-cloud.getIssue
-        connector-id: <%= stackConnectorId %>
+        connector-id: <%= jira-cloud-stack-connector-id %>
         with:
           issueId: "${{ inputs.id }}"
     else:
       - name: get-project
         type: jira-cloud.getProject
-        connector-id: <%= stackConnectorId %>
+        connector-id: <%= jira-cloud-stack-connector-id %>
         with:
           projectId: "${{ inputs.id }}"

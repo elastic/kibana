@@ -17,10 +17,12 @@ export const jiraDataSource: DataSource = {
 
   iconType: '.jira-cloud',
 
-  stackConnector: {
-    type: '.jira-cloud',
-    config: {},
-  },
+  stackConnectors: [
+    {
+      type: '.jira-cloud',
+      config: {},
+    },
+  ],
 
   workflows: {
     directory: __dirname + '/workflows',

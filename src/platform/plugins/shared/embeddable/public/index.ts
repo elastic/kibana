@@ -14,20 +14,11 @@ export { useAddFromLibraryTypes } from './add_from_library/registry';
 export { PanelNotFoundError, PanelIncompatibleError } from './react_embeddable_system';
 export { EmbeddableStateTransfer } from './state_transfer';
 export {
-  cellValueTrigger,
-  CELL_VALUE_TRIGGER,
-  contextMenuTrigger,
   isMultiValueClickTriggerContext,
   isRangeSelectTriggerContext,
   isRowClickTriggerContext,
   isValueClickTriggerContext,
-  MULTI_VALUE_CLICK_TRIGGER,
-  panelBadgeTrigger,
-  panelNotificationTrigger,
-  PANEL_BADGE_TRIGGER,
-  PANEL_NOTIFICATION_TRIGGER,
 } from './ui_actions/triggers';
-export { CONTEXT_MENU_TRIGGER, SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '../common';
 export type {
   CellValueContext,
   ChartActionContext,

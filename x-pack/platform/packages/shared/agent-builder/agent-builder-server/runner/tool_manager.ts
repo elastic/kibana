@@ -29,7 +29,6 @@ export interface ExecutableToolInput {
   type: ToolManagerToolType.executable;
   tools: ExecutableTool | ExecutableTool[];
   logger: Logger;
-  eventEmitter?: AgentEventEmitterFn;
 }
 
 export interface BrowserToolInput {
@@ -44,6 +43,12 @@ export type AddToolInput = ExecutableToolInput | BrowserToolInput;
  * Handles both static and dynamic tools with LRU eviction for dynamic tools.
  */
 export interface ToolManager {
+  /**
+   * Sets the event emitter to use for all tools added to this manager.
+   * Should be called once per run before adding tools.
+   */
+  setEventEmitter(eventEmitter: AgentEventEmitterFn): void;
+
   /**
    * Adds tools to the tool manager.
    * Supports both executable tools and browser API tools.
