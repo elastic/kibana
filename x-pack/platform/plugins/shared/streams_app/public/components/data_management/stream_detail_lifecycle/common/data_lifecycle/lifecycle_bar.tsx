@@ -24,13 +24,12 @@ interface LifecycleBarProps {
 
 const renderLifecyclePhase = (
   index: number,
-  onPhaseClick?: (phase: LifecyclePhase, index: number) => void,
-  testSubjPrefix?: string
   phase: LifecyclePhase,
   onPhaseClick?: (phase: LifecyclePhase, index: number) => void,
   isIlm?: boolean,
   onRemovePhase?: (phaseName: string) => void,
-  canManageLifecycle?: boolean
+  canManageLifecycle?: boolean,
+  testSubjPrefix?: string
 ) => {
   const commonProps = {
     description: phase.description,
@@ -43,7 +42,6 @@ const renderLifecyclePhase = (
     },
     isIlm,
     minAge: phase.min_age,
-    isReadOnly: phase.isReadOnly,
     testSubjPrefix,
     onRemovePhase,
     canManageLifecycle: canManageLifecycle ?? false,
