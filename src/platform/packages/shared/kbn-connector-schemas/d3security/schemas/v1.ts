@@ -8,7 +8,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { D3SecuritySeverity } from '../constants';
 
 // Connector schema
 export const D3SecurityConfigSchema = z
