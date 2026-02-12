@@ -19,13 +19,18 @@ import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_ca
 import { getESQLQuery } from '../../../shared/links/discover_links/get_esql_query';
 import type { TableActions } from '../../../shared/managed_table';
 
-interface UseServiceActionsParams {
-  openAlertFlyout: (ruleType: ApmRuleType, serviceName: string) => void;
-  openSloFlyout: (indicatorType: ApmIndicatorType, serviceName: string) => void;
+export interface DiscoverActionParams {
+  kuery: string;
   rangeFrom: string;
   rangeTo: string;
   environment: string;
   indexSettings: ApmIndexSettingsResponse['apmIndexSettings'];
+}
+
+interface UseServiceActionsParams {
+  openAlertFlyout: (ruleType: ApmRuleType, serviceName: string) => void;
+  openSloFlyout: (indicatorType: ApmIndicatorType, serviceName: string) => void;
+  discoverActionParams: DiscoverActionParams;
 }
 
 interface UseServiceActionsReturn {
@@ -36,10 +41,7 @@ interface UseServiceActionsReturn {
 export function useServiceActions({
   openAlertFlyout,
   openSloFlyout,
-  rangeFrom,
-  rangeTo,
-  environment,
-  indexSettings,
+  discoverActionParams,
 }: UseServiceActionsParams): UseServiceActionsReturn {
   const { core, plugins, share } = useApmPluginContext();
   const { capabilities } = core.application;
@@ -66,17 +68,18 @@ export function useServiceActions({
             const esqlQuery = getESQLQuery({
               indexType: 'traces',
               params: {
+                kuery: discoverActionParams.kuery,
                 serviceName: item.serviceName,
                 transactionType: item.transactionType,
-                environment,
+                environment: discoverActionParams.environment,
               },
-              indexSettings,
+              indexSettings: discoverActionParams.indexSettings,
             });
 
             if (!esqlQuery) return undefined;
 
             return discoverLocator?.getRedirectUrl({
-              timeRange: { from: rangeFrom, to: rangeTo },
+              timeRange: { from: discoverActionParams.rangeFrom, to: discoverActionParams.rangeTo },
               query: { esql: esqlQuery },
             });
           },
@@ -90,17 +93,18 @@ export function useServiceActions({
             const esqlQuery = getESQLQuery({
               indexType: 'error',
               params: {
+                kuery: discoverActionParams.kuery,
                 serviceName: item.serviceName,
                 transactionType: item.transactionType,
-                environment,
+                environment: discoverActionParams.environment,
               },
-              indexSettings,
+              indexSettings: discoverActionParams.indexSettings,
             });
 
             if (!esqlQuery) return undefined;
 
             return discoverLocator?.getRedirectUrl({
-              timeRange: { from: rangeFrom, to: rangeTo },
+              timeRange: { from: discoverActionParams.rangeFrom, to: discoverActionParams.rangeTo },
               query: { esql: esqlQuery },
             });
           },
@@ -246,10 +250,7 @@ export function useServiceActions({
     canWriteSlos,
     sloListLocator,
     discoverLocator,
-    rangeFrom,
-    rangeTo,
-    environment,
-    indexSettings,
+    discoverActionParams,
   ]);
 
   return { actions, showActionsColumn };

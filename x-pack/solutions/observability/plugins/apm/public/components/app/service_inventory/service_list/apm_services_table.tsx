@@ -526,13 +526,21 @@ export function ApmServicesTable({
     };
   }, [isTableSearchBarEnabled, maxCountExceeded, onChangeSearchQuery]);
 
+  const discoverActionParams = useMemo(
+    () => ({
+      kuery,
+      rangeFrom: query.rangeFrom,
+      rangeTo: query.rangeTo,
+      environment,
+      indexSettings: indexSettingsData.apmIndexSettings,
+    }),
+    [kuery, query.rangeFrom, query.rangeTo, environment, indexSettingsData.apmIndexSettings]
+  );
+
   const { actions: serviceActions, showActionsColumn } = useServiceActions({
     openAlertFlyout,
     openSloFlyout,
-    rangeFrom: query.rangeFrom,
-    rangeTo: query.rangeTo,
-    environment,
-    indexSettings: indexSettingsData.apmIndexSettings,
+    discoverActionParams,
   });
 
   return (
