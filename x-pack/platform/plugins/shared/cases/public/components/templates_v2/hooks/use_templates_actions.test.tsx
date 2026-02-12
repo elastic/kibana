@@ -128,7 +128,7 @@ describe('useTemplatesActions', () => {
     });
   });
 
-  it('handleClone calls cloneTemplate mutation with prefixed name', () => {
+  it('handleClone calls cloneTemplate mutation with template details', () => {
     const { result } = renderHook(() => useTemplatesActions(), { wrapper });
 
     expect(typeof result.current.handleClone).toBe('function');
@@ -140,7 +140,6 @@ describe('useTemplatesActions', () => {
     expect(cloneTemplateMock).toHaveBeenCalledWith(
       {
         template: {
-          name: expect.stringContaining(mockTemplate.name),
           owner: mockTemplate.owner,
           definition: mockTemplate.definition,
           description: mockTemplate.description,

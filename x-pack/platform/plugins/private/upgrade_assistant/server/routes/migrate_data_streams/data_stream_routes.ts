@@ -236,7 +236,7 @@ export function registerMigrateDataStreamRoutes({
       },
       validate: {
         body: schema.object({
-          indices: schema.arrayOf(schema.string()),
+          indices: schema.arrayOf(schema.string(), { maxSize: 1000 }),
         }),
         params: schema.object({
           dataStreamName: schema.string(),

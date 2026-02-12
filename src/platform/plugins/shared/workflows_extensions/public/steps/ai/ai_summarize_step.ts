@@ -84,4 +84,15 @@ Supports objects and arrays as input.`,
 \`\`\``,
     ],
   },
+
+  editorHandlers: {
+    config: {
+      'connector-id': {
+        connectorIdSelection: {
+          connectorTypes: ['inference.unified_completion', 'bedrock', 'gen-ai', 'gemini'],
+          enableCreation: false,
+        },
+      },
+    },
+  },
 };

@@ -16,16 +16,17 @@ import type {
   CreateAlertActionBody,
 } from '../../routes/schemas/alert_action_schema';
 import { queryResponseToRecords } from '../services/query_service/query_response_to_records';
-import { QueryService, type QueryServiceContract } from '../services/query_service/query_service';
+import { type QueryServiceContract } from '../services/query_service/query_service';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
+import { QueryServiceInternalToken } from '../services/query_service/tokens';
 
 @injectable()
 export class AlertActionsClient {
   constructor(
-    @inject(QueryService) private readonly queryService: QueryServiceContract,
+    @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(StorageServiceScopedToken) private readonly storageService: StorageServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract
   ) {}
@@ -98,7 +99,7 @@ export class AlertActionsClient {
     let whereClause = esql.exp`TRUE`;
     for (const action of actions) {
       whereClause = esql.exp`${whereClause} OR (group_hash == ${action.group_hash} AND ${
-        'episode_id' in action ? esql.exp`episode_id == ${action.episode_id}` : esql.exp`true`
+        'episode_id' in action ? esql.exp`episode.id == ${action.episode_id}` : esql.exp`true`
       })`;
     }
 
@@ -107,7 +108,7 @@ export class AlertActionsClient {
       | WHERE type == "alert" AND (${whereClause})
       | STATS
         last_event_timestamp = MAX(@timestamp),
-        last_episode_id = LAST(episode_id, @timestamp),
+        last_episode_id = LAST(episode.id, @timestamp),
         rule_id = VALUES(rule.id)
         BY group_hash
       | KEEP last_event_timestamp, rule_id, group_hash, last_episode_id
@@ -151,10 +152,10 @@ export class AlertActionsClient {
     const query = esql`
       FROM ${ALERT_EVENTS_DATA_STREAM}
       | WHERE type == "alert" AND group_hash == ${groupHash} AND ${
-      episodeId ? esql.exp`episode_id == ${episodeId}` : esql.exp`true`
+      episodeId ? esql.exp`episode.id == ${episodeId}` : esql.exp`true`
     }
       | SORT @timestamp DESC
-      | RENAME rule.id AS rule_id
+      | RENAME rule.id AS rule_id, episode.id AS episode_id
       | KEEP @timestamp, group_hash, episode_id, rule_id
       | LIMIT 1`.toRequest();
 

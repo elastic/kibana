@@ -13,6 +13,7 @@ import type {
   ChatAgentEvent,
   AgentCapabilities,
   AgentConfigurationOverrides,
+  ConversationAction,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -31,6 +32,7 @@ import type {
 } from '../runner';
 import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
+import type { AgentBuilderHooks } from '../hooks/types';
 import type { ToolRegistry } from '../tools';
 
 export type AgentHandlerFn = (
@@ -136,6 +138,10 @@ export interface AgentHandlerContext {
    */
   logger: Logger;
   /**
+   * Hooks service for agent lifecycle interception.
+   */
+  hooks: AgentBuilderHooks;
+  /**
    * File store to access data from the agent's virtual filesystem
    */
   filestore: IFileStore;
@@ -185,6 +191,10 @@ export interface AgentParams {
    * These override the stored agent configuration for this execution only.
    */
   configurationOverrides?: AgentConfigurationOverrides;
+  /**
+   * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
+   */
+  action?: ConversationAction;
 }
 
 export interface AgentResponse {
