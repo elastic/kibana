@@ -37,5 +37,6 @@
     "@kbn/presentation-containers",
     "@kbn/utility-types",
     "@kbn/presentation-publishing",
+    "@kbn/controls-schemas",
   ]
 }
