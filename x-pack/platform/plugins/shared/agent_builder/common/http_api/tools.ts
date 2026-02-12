@@ -53,6 +53,7 @@ export type BulkDeleteToolResult = BulkDeleteToolSuccessResult | BulkDeleteToolF
 
 export interface BulkDeleteToolResponse {
   results: BulkDeleteToolResult[];
+  agentsUpdated?: number;
 }
 
 export interface ExecuteToolResponse {
