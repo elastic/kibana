@@ -25,6 +25,8 @@ import { getOutputIdForAgentPolicy } from '../../../common/services/output_helpe
 import { pkgToPkgKey } from '../epm/registry';
 import { hasDynamicSignalTypes } from '../epm/packages/input_type_packages';
 
+const AGGREGATED_OTEL_METRICS_PIPELINE = 'metrics/aggregated-otel-metrics';
+
 // Generate OTel Collector policy
 export function generateOtelcolConfig(
   inputs: FullAgentPolicyInput[] | TemplateAgentPolicyInput[],
@@ -98,7 +100,7 @@ export function generateOtelcolConfig(
           otelConfig.connectors.elasticapm = {};
           otelConfig.processors.elasticapm = {};
 
-          otelConfig.service!.pipelines!['metrics/aggregated-otel-metrics'] = {
+          otelConfig.service!.pipelines![AGGREGATED_OTEL_METRICS_PIPELINE] = {
             receivers: ['elasticapm'],
           };
         }
