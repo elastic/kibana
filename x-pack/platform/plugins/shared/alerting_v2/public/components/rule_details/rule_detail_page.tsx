@@ -5,16 +5,181 @@
  * 2.0.
  */
 
-import { EuiPageHeader } from '@elastic/eui';
-import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
+import {
+  EuiBadge,
+  EuiCodeBlock,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageHeader,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { formatDuration } from '@kbn/alerting-plugin/common';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useMemo } from 'react';
+import type { RuleDetails } from '../../services/rules_api';
 
 export interface RuleDetailPageProps {
-  rule: CreateRuleData;
+  rule: RuleDetails;
 }
 
+const EMPTY_VALUE = '-';
+
+const formatEvery = (duration: string | undefined) => {
+  if (!duration) {
+    return EMPTY_VALUE;
+  }
+
+  return i18n.translate('xpack.alertingV2.ruleDetails.every', {
+    defaultMessage: '{duration}',
+    values: { duration: formatDuration(duration) },
+  });
+};
+
+const formatMaybeDuration = (duration: string | undefined) => {
+  if (!duration) {
+    return EMPTY_VALUE;
+  }
+
+  return formatDuration(duration);
+};
+
+const formatMaybeString = (value: string | undefined | null) => {
+  if (!value) {
+    return EMPTY_VALUE;
+  }
+
+  return value;
+};
+
+const formatMaybeList = (value: string[] | undefined) => {
+  if (!value || value.length === 0) {
+    return EMPTY_VALUE;
+  }
+
+  return value.join(', ');
+};
+
+const formatMaybeIsoDateTime = (value: string | undefined) => {
+  if (!value) {
+    return EMPTY_VALUE;
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return EMPTY_VALUE;
+  }
+
+  const datePart = new Intl.DateTimeFormat(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  }).format(date);
+  const timePart = new Intl.DateTimeFormat(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(date);
+
+  return i18n.translate('xpack.alertingV2.ruleDetails.dateTime', {
+    defaultMessage: '{date} at {time}',
+    values: { date: datePart, time: timePart },
+  });
+};
+
 export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ rule }) => {
+  const configurationListItems = useMemo(
+    () => [
+      {
+        title: i18n.translate('xpack.alertingV2.ruleDetails.runsEvery', {
+          defaultMessage: 'Runs every',
+        }),
+        description: (
+          <ItemValueRuleSummary
+            data-test-subj="alertingV2RuleDetailsSchedule"
+            itemValue={formatEvery(rule.schedule?.custom)}
+          />
+        ),
+      },
+      {
+        title: i18n.translate('xpack.alertingV2.ruleDetails.lookback', {
+          defaultMessage: 'Lookback',
+        }),
+        description: (
+          <ItemValueRuleSummary
+            data-test-subj="alertingV2RuleDetailsLookback"
+            itemValue={formatMaybeDuration(rule.lookbackWindow)}
+          />
+        ),
+      },
+      {
+        title: i18n.translate('xpack.alertingV2.ruleDetails.timeField', {
+          defaultMessage: 'Time field',
+        }),
+        description: (
+          <ItemValueRuleSummary
+            data-test-subj="alertingV2RuleDetailsTimeField"
+            itemValue={formatMaybeString(rule.timeField)}
+          />
+        ),
+      },
+      {
+        title: i18n.translate('xpack.alertingV2.ruleDetails.groupBy', {
+          defaultMessage: 'Group by',
+        }),
+        description: (
+          <ItemValueRuleSummary
+            data-test-subj="alertingV2RuleDetailsGroupBy"
+            itemValue={formatMaybeList(rule.groupingKey)}
+          />
+        ),
+      },
+    ],
+    [rule.schedule, rule.lookbackWindow, rule.timeField, rule.groupingKey]
+  );
+
+  const metadataListItems = useMemo(
+    () => [
+      {
+        title: i18n.translate('xpack.alertingV2.ruleDetails.created', {
+          defaultMessage: 'Created',
+        }),
+        description: (
+          <ItemValueRuleSummary
+            data-test-subj="alertingV2RuleDetailsCreatedAt"
+            itemValue={formatMaybeIsoDateTime(rule.createdAt)}
+          />
+        ),
+      },
+      {
+        title: i18n.translate('xpack.alertingV2.ruleDetails.lastModified', {
+          defaultMessage: 'Last modified',
+        }),
+        description: (
+          <ItemValueRuleSummary
+            data-test-subj="alertingV2RuleDetailsUpdatedAt"
+            itemValue={formatMaybeIsoDateTime(rule.updatedAt)}
+          />
+        ),
+      },
+      {
+        title: i18n.translate('xpack.alertingV2.ruleDetails.createdBy', {
+          defaultMessage: 'Created by',
+        }),
+        description: (
+          <ItemValueRuleSummary
+            data-test-subj="alertingV2RuleDetailsCreatedBy"
+            itemValue={formatMaybeString(rule.createdBy)}
+          />
+        ),
+      },
+    ],
+    [rule.createdAt, rule.updatedAt, rule.createdBy]
+  );
+
   return (
     <>
       <EuiPageHeader
@@ -29,7 +194,215 @@ export const RuleDetailPage: React.FunctionComponent<RuleDetailPageProps> = ({ r
             />
           </span>
         }
+        description={
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="flexStart"
+            gutterSize="m"
+            wrap={false}
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} alignItems="center">
+                <EuiFlexItem grow={false}>
+                  {rule.enabled ? (
+                    <EuiBadge color="success" data-test-subj="enabledBadge">
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.ruleDetails.enabled"
+                        defaultMessage="Enabled"
+                      />
+                    </EuiBadge>
+                  ) : (
+                    <EuiBadge color="subdued" data-test-subj="disabledBadge">
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.ruleDetails.disabled"
+                        defaultMessage="Disabled"
+                      />
+                    </EuiBadge>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued" data-test-subj="ruleType">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.ruleDetails.kindLabel"
+                      defaultMessage="Kind"
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow" data-test-subj="kindBadge">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.ruleDetails.kindValue"
+                      defaultMessage="{ruleType}"
+                      values={{ ruleType: rule.kind }}
+                    />
+                  </EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued" data-test-subj="ruleType">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.ruleDetails.createdLabel"
+                      defaultMessage="Created"
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow" data-test-subj="createdBadge">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.ruleDetails.createdValue"
+                      defaultMessage="{created}"
+                      values={{
+                        created: formatMaybeIsoDateTime(rule.createdAt),
+                      }}
+                    />
+                  </EuiBadge>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {rule.createdBy && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued" data-test-subj="ruleType">
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.ruleDetails.createdByLabel"
+                        defaultMessage="Created By"
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow" data-test-subj="createdByBadge">
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.ruleDetails.createdByValue"
+                        defaultMessage="{createdBy}"
+                        values={{
+                          createdBy: rule.createdBy,
+                        }}
+                      />
+                    </EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+            {rule.updatedAt && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued" data-test-subj="ruleType">
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.ruleDetails.lastModifiedLabel"
+                        defaultMessage="Last Modified"
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow" data-test-subj="lastModifiedBadge">
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.ruleDetails.lastModifiedValue"
+                        defaultMessage="{lastModified}"
+                        values={{
+                          lastModified: formatMaybeIsoDateTime(rule.updatedAt),
+                        }}
+                      />
+                    </EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued" data-test-subj="ruleTags">
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.ruleDetails.tagsLabel"
+                      defaultMessage="Tags"
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {rule.tags && (
+                    <EuiFlexGroup gutterSize="xs" wrap responsive={false} data-test-subj="ruleTags">
+                      {rule.tags.map((tag) => (
+                        <EuiFlexItem key={tag} grow={false}>
+                          <EuiBadge color="hollow">{tag}</EuiBadge>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
       />
+
+      <EuiSpacer size="m" />
+      <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
+        <EuiTitle size="s">
+          <EuiFlexItem grow={false}>
+            {i18n.translate('xpack.triggersActionsUI.ruleDetails.definition', {
+              defaultMessage: 'Configuration',
+            })}
+          </EuiFlexItem>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiDescriptionList
+          compressed={true}
+          type="column"
+          listItems={configurationListItems}
+          css={{ alignItems: 'start' }}
+        />
+      </EuiPanel>
+      <EuiSpacer size="s" />
+
+      <EuiPanel color="subdued" hasBorder={false} paddingSize="m">
+        <EuiSpacer size="m" />
+        <EuiTitle size="s">
+          <h3>
+            {i18n.translate('xpack.alertingV2.ruleDetails.query', {
+              defaultMessage: 'ES|QL query',
+            })}
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiPanel hasBorder paddingSize="none" css={{ width: '100%' }}>
+          <EuiCodeBlock
+            language="text"
+            isCopyable
+            overflowHeight={360}
+            paddingSize="m"
+            data-test-subj="alertingV2RuleDetailsQuery"
+            css={{ width: '100%' }}
+          >
+            {rule.query || EMPTY_VALUE}
+          </EuiCodeBlock>
+        </EuiPanel>
+      </EuiPanel>
     </>
   );
 };
+
+export interface ItemValueRuleSummaryProps {
+  itemValue: string;
+  extraSpace?: boolean;
+}
+
+function ItemValueRuleSummary({
+  itemValue,
+  extraSpace = true,
+  ...otherProps
+}: ItemValueRuleSummaryProps) {
+  return (
+    <EuiFlexItem grow={extraSpace ? 3 : 1} {...otherProps}>
+      <EuiText size="s">{itemValue}</EuiText>
+    </EuiFlexItem>
+  );
+}
