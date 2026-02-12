@@ -40,8 +40,16 @@ export const RetentionTab: React.FC = () => {
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
   const { getReadinessCategories, getReadinessRetention } = useSiemReadinessApi();
-  const { data: categoriesData, isLoading: categoriesLoading, error: categoriesError } = getReadinessCategories;
-  const { data: retentionData, isLoading: retentionLoading, error: retentionError } = getReadinessRetention;
+  const {
+    data: categoriesData,
+    isLoading: categoriesLoading,
+    error: categoriesError,
+  } = getReadinessCategories;
+  const {
+    data: retentionData,
+    isLoading: retentionLoading,
+    error: retentionError,
+  } = getReadinessRetention;
 
   const isLoading = categoriesLoading || retentionLoading;
   const error = categoriesError || retentionError;
@@ -69,16 +77,17 @@ export const RetentionTab: React.FC = () => {
   // Calculate non-compliant statistics
   const nonCompliantStats = useMemo(() => {
     let totalNonCompliant = 0;
-    let totalUnknown = 0;
 
     categories.forEach((category) => {
       category.items.forEach((item) => {
         if (item.status === 'non-compliant') totalNonCompliant++;
-        if (item.status === 'unknown') totalUnknown++;
       });
     });
 
-    return { totalNonCompliant, totalUnknown, hasIssues: totalNonCompliant > 0 || totalUnknown > 0 };
+    return {
+      totalNonCompliant,
+      hasIssues: totalNonCompliant > 0,
+    };
   }, [categories]);
 
   // Case description
@@ -97,10 +106,11 @@ export const RetentionTab: React.FC = () => {
 
   // Render function for accordion extra action (right side badges/stats)
   const renderExtraAction = (category: CategoryData<RetentionInfoWithStatus>) => {
-    const nonCompliantCount = category.items.filter((item) => item.status === 'non-compliant').length;
-    const unknownCount = category.items.filter((item) => item.status === 'unknown').length;
+    const nonCompliantCount = category.items.filter(
+      (item) => item.status === 'non-compliant'
+    ).length;
 
-    const hasIssues = nonCompliantCount > 0 || unknownCount > 0;
+    const hasIssues = nonCompliantCount > 0;
 
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -163,12 +173,6 @@ export const RetentionTab: React.FC = () => {
         defaultMessage: 'Healthy',
       }),
     },
-    {
-      value: 'unknown',
-      label: i18n.translate('xpack.securitySolution.siemReadiness.retention.filter.unknown', {
-        defaultMessage: 'Unknown',
-      }),
-    },
   ];
 
   // Define columns for the data stream table
@@ -228,28 +232,22 @@ export const RetentionTab: React.FC = () => {
         ),
         width: '20%',
         render: () => {
-          return i18n.translate(
-            'xpack.securitySolution.siemReadiness.retention.baseline.value',
-            {
-              defaultMessage: '12 months',
-            }
-          );
+          return i18n.translate('xpack.securitySolution.siemReadiness.retention.baseline.value', {
+            defaultMessage: '12 months',
+          });
         },
       },
       {
-        name: i18n.translate(
-          'xpack.securitySolution.siemReadiness.retention.table.column.status',
-          {
-            defaultMessage: 'Status',
-          }
-        ),
+        name: i18n.translate('xpack.securitySolution.siemReadiness.retention.table.column.status', {
+          defaultMessage: 'Status',
+        }),
         field: 'status',
         sortable: true,
         width: '15%',
         render: (status: RetentionStatus) => {
           const statusConfig: Record<
             RetentionStatus,
-            { color: 'success' | 'danger' | 'default'; label: string }
+            { color: 'success' | 'danger'; label: string }
           > = {
             healthy: {
               color: 'success',
@@ -269,15 +267,6 @@ export const RetentionTab: React.FC = () => {
                 }
               ),
             },
-            unknown: {
-              color: 'default',
-              label: i18n.translate(
-                'xpack.securitySolution.siemReadiness.retention.status.unknown',
-                {
-                  defaultMessage: 'Unknown',
-                }
-              ),
-            },
           };
 
           const config = statusConfig[status];
@@ -285,12 +274,9 @@ export const RetentionTab: React.FC = () => {
         },
       },
       {
-        name: i18n.translate(
-          'xpack.securitySolution.siemReadiness.retention.table.column.action',
-          {
-            defaultMessage: 'Action',
-          }
-        ),
+        name: i18n.translate('xpack.securitySolution.siemReadiness.retention.table.column.action', {
+          defaultMessage: 'Action',
+        }),
         width: '10%',
         render: () => {
           const ilmPoliciesUrl = `${basePath}/app/management/data/index_lifecycle_management/policies`;
@@ -359,12 +345,9 @@ export const RetentionTab: React.FC = () => {
           announceOnMount
         >
           <p>
-            {i18n.translate(
-              'xpack.securitySolution.siemReadiness.retention.noData.description',
-              {
-                defaultMessage: 'No data streams with security-relevant data were found.',
-              }
-            )}
+            {i18n.translate('xpack.securitySolution.siemReadiness.retention.noData.description', {
+              defaultMessage: 'No data streams with security-relevant data were found.',
+            })}
           </p>
         </EuiCallOut>
       </>

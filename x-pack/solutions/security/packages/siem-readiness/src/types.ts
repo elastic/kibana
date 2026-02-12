@@ -96,7 +96,7 @@ export interface CasesSearchResponse {
 
 // Retention types
 export type RetentionType = 'ilm' | 'dsl' | null;
-export type RetentionStatus = 'healthy' | 'non-compliant' | 'unknown';
+export type RetentionStatus = 'healthy' | 'non-compliant';
 
 export interface RetentionInfo {
   indexName: string;

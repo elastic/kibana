@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import type { IndicesGetDataStreamResponse, IlmGetLifecycleResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesGetDataStreamResponse,
+  IlmGetLifecycleResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { RetentionInfo, RetentionType, RetentionStatus, RetentionResponse } from '@kbn/siem-readiness';
+import type {
+  RetentionInfo,
+  RetentionType,
+  RetentionStatus,
+  RetentionResponse,
+} from '@kbn/siem-readiness';
 import { GET_SIEM_READINESS_RETENTION_API_PATH } from '../../../../common/api/siem_readiness/constants';
 import { API_VERSIONS } from '../../../../common/constants';
 import type { SiemReadinessRoutesDeps } from '../types';
@@ -46,7 +54,7 @@ const parseRetentionToDays = (retention: string | null | undefined): number | nu
  * Get retention status based on retention days
  */
 const getRetentionStatus = (retentionDays: number | null): RetentionStatus => {
-  if (retentionDays === null) return 'unknown';
+  if (retentionDays === null) return 'non-compliant';
   return retentionDays >= RETENTION_THRESHOLD_DAYS ? 'healthy' : 'non-compliant';
 };
 
@@ -134,23 +142,25 @@ export const getReadinessRetentionRoute = (
           // 2. Get all ILM policies
           const ilmPoliciesResponse: IlmGetLifecycleResponse = await esClient.ilm.getLifecycle();
 
-          // 3. Process each data stream and extract retention info
-          const items: RetentionInfo[] = dataStreamsResponse.data_streams.map((dataStream) => {
-            const { retentionType, retentionPeriod, policyName } = extractRetentionInfo(
-              dataStream,
-              ilmPoliciesResponse
-            );
-            const retentionDays = parseRetentionToDays(retentionPeriod);
+          // 3. Process each data stream and extract retention info (exclude those without retention)
+          const items: RetentionInfo[] = dataStreamsResponse.data_streams
+            .map((dataStream) => {
+              const { retentionType, retentionPeriod, policyName } = extractRetentionInfo(
+                dataStream,
+                ilmPoliciesResponse
+              );
+              const retentionDays = parseRetentionToDays(retentionPeriod);
 
-            return {
-              indexName: dataStream.name,
-              retentionType,
-              retentionPeriod,
-              retentionDays,
-              policyName,
-              status: getRetentionStatus(retentionDays),
-            };
-          });
+              return {
+                indexName: dataStream.name,
+                retentionType,
+                retentionPeriod,
+                retentionDays,
+                policyName,
+                status: getRetentionStatus(retentionDays),
+              };
+            })
+            .filter((item) => item.retentionPeriod !== null);
 
           const responseBody: RetentionResponse = { items };
 
