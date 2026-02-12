@@ -14,10 +14,8 @@ import {
   type UiActionsActionDefinition,
 } from '@kbn/ui-actions-plugin/public';
 import type { SLOPublicPluginsStart } from '..';
-import {
-  ADD_SLO_OVERVIEW_ACTION_ID,
-  SLO_OVERVIEW_EMBEDDABLE_ID,
-} from '../embeddable/slo/overview/constants';
+import { ADD_SLO_OVERVIEW_ACTION_ID } from '../embeddable/slo/overview/constants';
+import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../common/embeddables/overview/constants';
 import type { SLORepositoryClient } from '../types';
 import { openSloConfiguration } from '../embeddable/slo/overview/slo_overview_open_configuration';
 

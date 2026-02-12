@@ -27,7 +27,7 @@ import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
-import { SLO_OVERVIEW_EMBEDDABLE_ID } from './constants';
+import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../../../common/embeddables/overview/constants';
 import { GroupSloView } from './group_view/group_view';
 import { SloOverview } from './slo_overview';
 import { SloCardChartList } from './slo_overview_grid';

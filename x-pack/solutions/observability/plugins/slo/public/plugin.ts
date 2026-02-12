@@ -25,7 +25,7 @@ import type { SLORouteRepository } from '../server/routes/get_slo_server_route_r
 import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
 import { SLO_BURN_RATE_EMBEDDABLE_ID } from './embeddable/slo/burn_rate/constants';
 import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
-import { SLO_OVERVIEW_EMBEDDABLE_ID } from './embeddable/slo/overview/constants';
+import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../common/embeddables/overview/constants';
 import type { SloOverviewEmbeddableState } from './embeddable/slo/overview/types';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { SloDetailsHistoryLocatorDefinition } from './locators/slo_details_history';
