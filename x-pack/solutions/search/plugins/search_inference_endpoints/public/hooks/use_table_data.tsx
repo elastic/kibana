@@ -6,10 +6,8 @@
  */
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { useMemo } from 'react';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { type FilterOptions } from '../types';
-import { getModelId } from '../utils/get_model_id';
 import { useFilteredInferenceEndpoints } from './use_filtered_endpoints';
 
 /**
