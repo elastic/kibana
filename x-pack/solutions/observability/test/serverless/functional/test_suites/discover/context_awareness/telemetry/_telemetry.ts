@@ -31,7 +31,8 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
   const browser = getService('browser');
 
   describe('telemetry', () => {
-    describe('context', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/252235
+    describe.skip('context', () => {
       before(async () => {
         await svlCommonPage.loginAsAdmin();
         await esArchiver.loadIfNeeded(
