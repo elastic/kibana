@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { generateLongIdWithSeed } from '@kbn/apm-synthtrace-client/src/lib/utils/generate_id';
 import type { KibanaRole } from '@kbn/scout-oblt';
 
 export const OPBEANS_START_DATE = '2021-10-10T00:00:00.000Z';
