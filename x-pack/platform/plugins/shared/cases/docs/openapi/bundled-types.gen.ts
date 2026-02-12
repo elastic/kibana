@@ -299,7 +299,7 @@ export const Settings = z.object({
  * The severity of the case.
  */
 export type CaseSeverity = z.infer<typeof CaseSeverity>;
-export const CaseSeverity = z.enum(['critical', 'high', 'low', 'medium']).default('low');
+export const CaseSeverity = z.enum(['critical', 'high', 'low', 'medium']);
 export type CaseSeverityEnum = typeof CaseSeverity.enum;
 export const CaseSeverityEnum = CaseSeverity.enum;
 

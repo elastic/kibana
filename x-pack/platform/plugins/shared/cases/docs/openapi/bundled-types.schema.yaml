@@ -1748,7 +1748,6 @@ components:
         - high
         - low
         - medium
-      default: low
     case_tags:
       description: |
         The words and phrases that help categorize cases. It can be an empty array.
