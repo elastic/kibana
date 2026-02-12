@@ -208,6 +208,30 @@ Failure partway through leaves data in an inconsistent state. With a separate `c
 
 The saved objects import/export API serializes entire documents. A case with hundreds of embedded attachments produces a single large NDJSON line, which can cause memory pressure during import. The separate approach distributes this across many small lines.
 
+### 8. RBAC Considerations
+
+The Cases RBAC model is owner-based: the `owner` field on a case maps to a Kibana solution/feature (e.g., `securitySolution`, `observability`) and determines which users can access the case based on their role privileges. Authorization is enforced at the client layer (`server/client/`) before any service call, using the `Authorization` class which checks privileges via Kibana's Security plugin.
+
+**Key constraint: cases created within a solution will only ever have attachments from that same solution.** This means the attachment's owner is always identical to the case's owner, and per-attachment owner authorization is redundant.
+
+**How RBAC works with the embedded approach:**
+
+The embedded approach simplifies RBAC by eliminating the per-attachment owner concept entirely. Authorization happens once at the case level — if you can access the case, you can access all its attachments. This removes:
+
+- The redundant `owner` field on each attachment (the case's `owner` is the single source of truth)
+- Per-attachment authorization checks in the client layer
+- The need for `getAndEnsureAuthorizedEntities()` to partition attachments by owner
+
+For cross-case queries (e.g., "find all cases with alert attachments"), the existing `getAuthorizationFilter()` applies the owner KQL filter to the *cases* type. Since attachments are embedded, any authorized case comes with its attachments included. This is conceptually cleaner than the legacy approach where the authorization filter had to be applied separately to `case-comments`.
+
+**How RBAC works with the separate SO approach:**
+
+With separate `case-attachments` saved objects, each attachment document still needs its own `owner` field to support direct attachment queries. The `Authorization` class generates KQL filters like `case-attachments.attributes.owner: ("securitySolution")` that are applied at the ES level when querying attachments directly (e.g., find all alert attachments across cases, bulk-get attachments by ID).
+
+This is more fields and more authorization checks, but it follows the established Kibana saved objects RBAC pattern and supports direct attachment queries without first loading the parent case. It also provides finer-grained audit logging — each attachment access is a distinct operation that the audit logger records independently, whereas with the embedded approach, all attachments are implicitly accessed whenever the case is read.
+
+**Summary:** The embedded approach has a simpler RBAC model (case-level authorization only, no per-attachment owner). The separate SO approach has a more verbose but more standard RBAC model that supports direct attachment queries and finer-grained audit trails. Neither approach is clearly better here — the trade-off is simplicity vs. granularity.
+
 ---
 
 ## Comparison Matrix
@@ -226,6 +250,8 @@ The saved objects import/export API serializes entire documents. A case with hun
 | Migration from legacy | Complex (reshape) | Simpler (rename/remap) |
 | Max attachments per case | ~thousands (doc size) | ~millions (index size) |
 | Import/export | One large NDJSON line | Many small NDJSON lines |
+| RBAC model | Simpler — case-level authorization only, no per-attachment owner needed | Standard — per-attachment owner field, ES-level authorization filter |
+| Audit granularity | Case-level; all attachments accessed implicitly on case read | Per-attachment; each access independently auditable |
 
 ---
 
@@ -272,7 +298,7 @@ If the total number of attachments per case is **guaranteed to stay small** (say
 
 ## Summary
 
-Embedding gives you transactional consistency and simpler reads at the cost of document bloat, write contention, loss of Elasticsearch-level queryability, and limited ES|QL utility.
+Embedding gives you transactional consistency and simpler reads at the cost of document bloat, write contention, loss of Elasticsearch-level queryability, limited ES|QL utility, and degraded RBAC enforcement.
 
 **For a system where cases can accumulate 1,000+ attachments and multiple users and automations write concurrently, separate saved objects with denormalized counters is the more scalable and operationally safer architecture.**
 
