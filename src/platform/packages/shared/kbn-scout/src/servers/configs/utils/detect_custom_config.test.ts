@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CliSupportedServerModes } from '../../../types';
 import { detectCustomConfigDir, getConfigRootDir } from './detect_custom_config';
+import { ScoutTestTarget } from '@kbn/scout-info';
 
 describe('detectCustomConfigDir', () => {
   it('should detect custom config directory from playwright config path', () => {
@@ -47,8 +47,8 @@ describe('detectCustomConfigDir', () => {
 describe('getConfigRootDir', () => {
   it('should return default serverless root when playwright path does not contain custom config', () => {
     const defaultPlaywrightPath = 'default/scout/ui/playwright.config.ts';
-    const mode = 'serverless=es' as CliSupportedServerModes;
-    const result = getConfigRootDir(defaultPlaywrightPath, mode);
+    const testTarget = new ScoutTestTarget('local', 'serverless', 'search');
+    const result = getConfigRootDir(defaultPlaywrightPath, testTarget);
 
     expect(result).toContain('default');
     expect(result).toContain('serverless');
@@ -57,8 +57,8 @@ describe('getConfigRootDir', () => {
 
   it('should return default stateful root when playwright path does not contain custom config', () => {
     const defaultPlaywrightPath = 'default/scout/ui/playwright.config.ts';
-    const mode = 'stateful' as CliSupportedServerModes;
-    const result = getConfigRootDir(defaultPlaywrightPath, mode);
+    const testTarget = new ScoutTestTarget('local', 'stateful', 'classic');
+    const result = getConfigRootDir(defaultPlaywrightPath, testTarget);
 
     expect(result).toContain('default');
     expect(result).toContain('stateful');
@@ -67,8 +67,8 @@ describe('getConfigRootDir', () => {
 
   it('should return default root when playwright path does not contain custom config', () => {
     const playwrightPath = 'x-pack/solutions/security/test/scout/ui/playwright.config.ts';
-    const mode = 'serverless=es' as CliSupportedServerModes;
-    const result = getConfigRootDir(playwrightPath, mode);
+    const testTarget = new ScoutTestTarget('local', 'serverless', 'search');
+    const result = getConfigRootDir(playwrightPath, testTarget);
 
     expect(result).toContain('default');
     expect(result).toContain('serverless');
@@ -78,10 +78,9 @@ describe('getConfigRootDir', () => {
   it('should return custom root when playwright path contains custom config for serverless', () => {
     const playwrightPath =
       'x-pack/solutions/security/test/scout_uiam_local/ui/playwright.config.ts';
-    const mode = 'serverless=es' as CliSupportedServerModes;
-    const result = getConfigRootDir(playwrightPath, mode);
+    const testTarget = new ScoutTestTarget('local', 'serverless', 'search');
+    const result = getConfigRootDir(playwrightPath, testTarget);
 
-    expect(result).toContain('custom');
     expect(result).toContain('uiam_local');
     expect(result).toContain('serverless');
     expect(result).not.toContain('default');
@@ -90,10 +89,9 @@ describe('getConfigRootDir', () => {
   it('should return custom root when playwright path contains custom config for stateful', () => {
     const playwrightPath =
       'x-pack/solutions/security/test/scout_uiam_local/ui/playwright.config.ts';
-    const mode = 'stateful' as CliSupportedServerModes;
-    const result = getConfigRootDir(playwrightPath, mode);
+    const testTarget = new ScoutTestTarget('local', 'stateful', 'classic');
+    const result = getConfigRootDir(playwrightPath, testTarget);
 
-    expect(result).toContain('custom');
     expect(result).toContain('uiam_local');
     expect(result).toContain('stateful');
     expect(result).not.toContain('default');
@@ -101,10 +99,9 @@ describe('getConfigRootDir', () => {
 
   it('should return custom root when configDir is explicitly provided for serverless', () => {
     const defaultPlaywrightPath = 'default/scout/ui/playwright.config.ts';
-    const mode = 'serverless=es' as CliSupportedServerModes;
-    const result = getConfigRootDir(defaultPlaywrightPath, mode, 'uiam_local');
+    const testTarget = new ScoutTestTarget('local', 'serverless', 'search');
+    const result = getConfigRootDir(defaultPlaywrightPath, testTarget, 'uiam_local');
 
-    expect(result).toContain('custom');
     expect(result).toContain('uiam_local');
     expect(result).toContain('serverless');
     expect(result).not.toContain('default');
@@ -112,10 +109,9 @@ describe('getConfigRootDir', () => {
 
   it('should return custom root when configDir is explicitly provided for stateful', () => {
     const defaultPlaywrightPath = 'default/scout/ui/playwright.config.ts';
-    const mode = 'stateful' as CliSupportedServerModes;
-    const result = getConfigRootDir(defaultPlaywrightPath, mode, 'uiam_local');
+    const testTarget = new ScoutTestTarget('local', 'stateful', 'classic');
+    const result = getConfigRootDir(defaultPlaywrightPath, testTarget, 'uiam_local');
 
-    expect(result).toContain('custom');
     expect(result).toContain('uiam_local');
     expect(result).toContain('stateful');
     expect(result).not.toContain('default');
@@ -123,10 +119,9 @@ describe('getConfigRootDir', () => {
 
   it('should prioritize configDir over playwright path detection', () => {
     const playwrightPath = 'x-pack/solutions/security/test/scout_other/ui/playwright.config.ts';
-    const mode = 'serverless=es' as CliSupportedServerModes;
-    const result = getConfigRootDir(playwrightPath, mode, 'uiam_local');
+    const testTarget = new ScoutTestTarget('local', 'serverless', 'search');
+    const result = getConfigRootDir(playwrightPath, testTarget, 'uiam_local');
 
-    expect(result).toContain('custom');
     expect(result).toContain('uiam_local');
     expect(result).not.toContain('other');
     expect(result).toContain('serverless');

@@ -113,8 +113,12 @@ export const SettingsSchemaV7 = SettingsSchemaV6.extends({
   integration_knowledge_enabled: schema.maybe(schema.boolean()),
 });
 
+export const SettingsSchemaV8 = SettingsSchemaV7.extends({
+  download_source_auth_secret_storage_requirements_met: schema.maybe(schema.boolean()),
+});
+
 export const SettingsResponseSchema = schema.object({
-  item: SettingsSchemaV7,
+  item: SettingsSchemaV8,
 });
 
 export const PutSpaceSettingsRequestSchema = {

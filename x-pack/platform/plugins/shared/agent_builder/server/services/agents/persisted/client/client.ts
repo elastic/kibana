@@ -57,8 +57,13 @@ export const createClient = async ({
   toolsService: ToolsServiceStart;
   logger: Logger;
 }): Promise<AgentClient> => {
-  const user = getUserFromRequest(request, security);
-  const esClient = elasticsearch.client.asScoped(request).asInternalUser;
+  const scopedClient = elasticsearch.client.asScoped(request);
+  const user = await getUserFromRequest({
+    request,
+    security,
+    esClient: scopedClient.asCurrentUser,
+  });
+  const esClient = scopedClient.asInternalUser;
   const storage = createStorage({ logger, esClient });
 
   return new AgentClientImpl({ storage, user, request, space, toolsService });

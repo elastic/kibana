@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { SortableScriptLibraryFields } from '../../types';
 
 /**
  * List of Tags that can be used with scripts
@@ -48,3 +49,12 @@ export const SCRIPT_TAGS = Object.freeze({
     defaultMessage: 'Troubleshooting',
   }),
 });
+
+export type ScriptTagKey = keyof typeof SCRIPT_TAGS;
+export const SORTED_SCRIPT_TAGS_KEYS = Object.freeze(
+  Object.keys(SCRIPT_TAGS).sort() as ScriptTagKey[]
+);
+
+export const SCRIPT_LIBRARY_SORTABLE_FIELDS: readonly SortableScriptLibraryFields[] = Object.freeze(
+  ['name', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy', 'fileSize']
+);
