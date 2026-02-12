@@ -44,7 +44,7 @@ const removeCustomTimeRange = async (pageObjects: PageObjects) => {
   await pageObjects.dashboard.saveCustomizePanel();
 };
 
-spaceTest.describe('Panel time range (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Panel time range (dashboard)', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     await scoutSpace.savedObjects.load(LENS_BASIC_KIBANA_ARCHIVE);
