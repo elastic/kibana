@@ -22,7 +22,7 @@ import snapshot from '../fixtures/schema_snapshot.json';
  *
  * See README.md for usage instructions.
  */
-apiTest.describe('dashboard REST schema', { tag: tags.ESS_ONLY }, () => {
+apiTest.describe('dashboard REST schema', { tag: tags.stateful.all }, () => {
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
