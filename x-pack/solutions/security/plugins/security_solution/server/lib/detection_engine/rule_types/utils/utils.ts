@@ -434,9 +434,9 @@ export const getRuleRangeTuples = async ({
   const intervalDuration = parseInterval(interval);
   if (intervalDuration == null) {
     ruleExecutionLogger.error(
-      `Error computing gap between rule runs\nError: could not parse rule interval "${JSON.stringify(
+      `Failed to compute gap between rule runs: could not parse rule interval "${JSON.stringify(
         interval
-      )}".`
+      )}"`
     );
     return {
       tuples,

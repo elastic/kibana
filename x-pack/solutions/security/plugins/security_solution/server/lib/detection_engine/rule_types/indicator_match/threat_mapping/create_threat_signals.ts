@@ -77,7 +77,7 @@ export const createThreatSignals = async ({
   });
 
   const params = completeRule.ruleParams;
-  ruleExecutionLogger.trace('Indicator matching rule starting');
+  ruleExecutionLogger.debug('Indicator matching rule starting');
   const perPage = concurrentSearches * itemsPerSearch;
   const verifyExecutionCanProceed = buildExecutionIntervalValidator(
     completeRule.ruleConfig.schedule.interval
@@ -185,7 +185,7 @@ export const createThreatSignals = async ({
     while (list.hits.hits.length !== 0) {
       verifyExecutionCanProceed();
       const chunks = chunk(chunkPage, list.hits.hits);
-      ruleExecutionLogger.trace(`${chunks.length} concurrent indicator searches are starting.`);
+      ruleExecutionLogger.debug(`${chunks.length} concurrent indicator searches are starting.`);
       const concurrentSearchesPerformed =
         chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(createSignal);
       const searchesPerformed = await Promise.all(concurrentSearchesPerformed);
@@ -205,8 +205,8 @@ export const createThreatSignals = async ({
         // allowed by elasticsearch. The sliced chunk is used in createSignal to generate
         // threat filters.
         chunkPage = maxClauseCountValue;
-        ruleExecutionLogger.debug(
-          `Max clause count error received from Elasticsearch. Setting rule page size to ${maxClauseCountValue}.`
+        ruleExecutionLogger.warn(
+          `maxClauseCount error received from elasticsearch, setting IM rule page size to ${maxClauseCountValue}`
         );
 
         // only store results + errors that are not related to maxClauseCount
@@ -232,7 +232,10 @@ export const createThreatSignals = async ({
       }
       documentCount -= list.hits.hits.length;
       ruleExecutionLogger.debug(
-        `Alert candidates found: ${results.createdSignalsCount}.\nConcurrent indicator match searches completed. Search took: ${results.searchAfterTimes}ms. Bulk create times (ms): ${results.bulkCreateTimes}. Are all operations successful: ${results.success}.`
+        `Concurrent indicator match searches completed with ${results.createdSignalsCount} signals found`,
+        `search times of ${results.searchAfterTimes}ms,`,
+        `bulk create times ${results.bulkCreateTimes}ms,`,
+        `all successes are ${results.success}`
       );
 
       // if alerts suppressed it means suppression enabled, so suppression alert limit should be applied (5 * max_signals)
@@ -243,7 +246,7 @@ export const createThreatSignals = async ({
           results.warningMessages.push(getMaxSignalsWarning());
         }
         ruleExecutionLogger.debug(
-          `Max alerts per run reached\n${params.maxSignals}. Additional ${documentCount} documents are not checked.`
+          `Indicator match has reached its max signals count ${params.maxSignals}. Additional documents not checked are ${documentCount}`
         );
         break;
       } else if (
@@ -254,15 +257,15 @@ export const createThreatSignals = async ({
       ) {
         // warning should be already set
         ruleExecutionLogger.debug(
-          `Max alerts per run reached\nIndicator match has reached its max signals count ${
+          `Indicator match has reached its max signals count ${
             MAX_SIGNALS_SUPPRESSION_MULTIPLIER * params.maxSignals
-          }. Additional ${documentCount} documents are not checked.`
+          }. Additional documents not checked are ${documentCount}`
         );
         break;
       }
-      ruleExecutionLogger.trace(`Documents items left to check: ${documentCount}`);
+      ruleExecutionLogger.debug(`Documents items left to check are ${documentCount}`);
       if (maxClauseCountValue > Number.NEGATIVE_INFINITY) {
-        ruleExecutionLogger.trace(`Re-running search due to max clause count error`);
+        ruleExecutionLogger.debug(`Re-running search since we hit max clause count error`);
 
         // re-run search with smaller max clause count;
         list = await getDocumentList({ searchAfter: undefined });
@@ -277,8 +280,8 @@ export const createThreatSignals = async ({
         const hasNegativeDateSort = sortIds?.some((val) => Number(val) < 0);
 
         if (hasNegativeDateSort) {
-          ruleExecutionLogger.trace(
-            `Negative date sort ID encountered\nValue: ${sortIds}. Threat search stopped.`
+          ruleExecutionLogger.debug(
+            `Negative date sort id value encountered: ${sortIds}. Threat search stopped.`
           );
 
           break;
@@ -379,8 +382,8 @@ export const createThreatSignals = async ({
     await services.scopedClusterClient.asCurrentUser.closePointInTime({ id: threatPitId });
   } catch (error) {
     // Don't fail due to a bad point in time closure. We have seen failures in e2e tests during nominal operations.
-    ruleExecutionLogger.debug(
-      `Error trying to close point in time\nPIT ID: "${threatPitId}". It will expire within "${THREAT_PIT_KEEP_ALIVE}". Error: "${error}".`
+    ruleExecutionLogger.warn(
+      `Error trying to close point in time: "${threatPitId}", it will expire within "${THREAT_PIT_KEEP_ALIVE}". Error is: "${error}"`
     );
   }
   scheduleNotificationResponseActionsService({
@@ -388,6 +391,6 @@ export const createThreatSignals = async ({
     signalsCount: results.createdSignalsCount,
     responseActions: completeRule.ruleParams.responseActions,
   });
-  ruleExecutionLogger.trace('Indicator matching rule has completed');
+  ruleExecutionLogger.debug('Indicator matching rule has completed');
   return results;
 };

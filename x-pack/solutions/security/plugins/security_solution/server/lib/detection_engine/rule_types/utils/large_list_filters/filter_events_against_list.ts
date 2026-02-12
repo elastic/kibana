@@ -47,9 +47,7 @@ export const filterEventsAgainstList = async <T>({
     );
 
     if (!atLeastOneLargeValueList) {
-      ruleExecutionLogger.debug(
-        'No exception items of type list found\nReturning unfiltered events.'
-      );
+      ruleExecutionLogger.debug('No exception items of type list found - return unfiltered events');
       return [events, []];
     }
 
@@ -76,7 +74,7 @@ export const filterEventsAgainstList = async <T>({
           fieldAndSetTuples,
         });
         ruleExecutionLogger.debug(
-          `Events filtered by exception: ${nextExcludedEvents.length}\nException ID: "${exceptionItem.id}".`
+          `Exception with id ${exceptionItem.id} filtered out ${nextExcludedEvents.length} events`
         );
         return [nextIncludedEvents, [...excludedEvents, ...nextExcludedEvents]];
       },
