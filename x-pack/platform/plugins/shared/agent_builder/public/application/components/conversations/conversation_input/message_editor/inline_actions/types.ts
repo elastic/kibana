@@ -49,3 +49,12 @@ export interface TriggerMatchResult {
   /** The active trigger details, or null */
   readonly activeTrigger: ActiveTrigger | null;
 }
+
+/**
+ * Absolute position (relative to a containing element) for anchoring the
+ * inline action popover.
+ */
+export interface AnchorPosition {
+  readonly left: number;
+  readonly top: number;
+}

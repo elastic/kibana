@@ -10,9 +10,11 @@ export type { InlineActionTriggerState } from './use_inline_action_trigger';
 export type {
   TriggerDefinition,
   ActiveTrigger,
+  AnchorPosition,
   InlineActionKind,
   TriggerMatchResult,
 } from './types';
 export { getRectAtOffset } from './cursor_rect';
 export { InlineActionPopover } from './inline_action_popover';
-export type { AnchorPosition } from './inline_action_popover';
+export { InlineActionsContainer } from './inline_actions_container';
+export { useInlineActionsMenuAnchor } from './use_inline_actions_menu_anchor';

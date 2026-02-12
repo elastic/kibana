@@ -9,12 +9,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiPopover, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { TriggerMatchResult } from './types';
-
-export interface AnchorPosition {
-  readonly left: number;
-  readonly top: number;
-}
+import type { TriggerMatchResult, AnchorPosition } from './types';
 
 interface InlineActionPopoverProps {
   triggerMatch: TriggerMatchResult;
@@ -28,6 +23,13 @@ const placeholderLabel = i18n.translate(
   { defaultMessage: 'Inline actions' }
 );
 
+const wrapperStyles = css`
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+`;
+
 const anchorStyles = css`
   display: block;
   width: 0;
@@ -40,22 +42,17 @@ export const InlineActionPopover: React.FC<InlineActionPopoverProps> = ({
   anchorPosition,
   'data-test-subj': dataTestSubj = 'inlineActionPopover',
 }) => {
-  const { isActive, activeTrigger } = triggerMatch;
-
-  const wrapperStyles = css`
-    position: absolute;
-    left: ${anchorPosition?.left ?? 0}px;
-    top: ${anchorPosition?.top ?? 0}px;
-    width: 0;
-    height: 0;
-    pointer-events: none;
-  `;
+  const { activeTrigger } = triggerMatch;
 
   return (
-    <div css={wrapperStyles} data-test-subj={`${dataTestSubj}-anchor`}>
+    <div
+      css={wrapperStyles}
+      style={{ left: anchorPosition?.left ?? 0, top: anchorPosition?.top ?? 0 }}
+      data-test-subj={`${dataTestSubj}-anchor`}
+    >
       <EuiPopover
         button={<span css={anchorStyles} />}
-        isOpen={isActive && anchorPosition !== null}
+        isOpen={activeTrigger !== null && anchorPosition !== null}
         closePopover={onClose}
         anchorPosition="upLeft"
         panelPaddingSize="s"
