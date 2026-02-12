@@ -9,6 +9,7 @@ import moment from 'moment/moment';
 import { log, timerange } from '@kbn/synthtrace-client';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { MORE_THAN_1024_CHARS, STACKTRACE_MESSAGE } from '../const';
+import { clickWithRetry } from '../../../utils/click_with_retry';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'discover', 'svlCommonPage']);
@@ -18,6 +19,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const synthtrace = getService('svlLogsSynthtraceClient');
   const queryBar = getService('queryBar');
+
+  const click = (action: () => Promise<void>, timeoutMs?: number) =>
+    clickWithRetry(retry, action, timeoutMs);
 
   const start = moment().subtract(30, 'minutes').valueOf();
   const end = moment().add(30, 'minutes').valueOf();
@@ -247,11 +251,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('when flyout is already open on a different tab', () => {
-        const clickWithRetry = async (action: () => Promise<void>) => {
-          await retry.tryForTime(10 * 1000, async () => {
-            await action();
-          });
-        };
         it('should switch tab to logs overview and open quality issues accordion, when user clicks on quality issue control of same row', async () => {
           await dataGrid.clickRowToggle({ rowIndex: 0 });
 
@@ -260,7 +259,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await jsonTabButton.click();
 
           // Click to open Quality Issue control on the same row
-          await clickWithRetry(() => dataGrid.clickQualityIssueLeadingControl(0));
+          await click(() => dataGrid.clickQualityIssueLeadingControl(0));
 
           await testSubjects.waitForAccordionState(
             'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
@@ -281,7 +280,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await jsonTabButton.click();
 
           // Click to open Quality Issue control on the same row
-          await clickWithRetry(() => dataGrid.clickQualityIssueLeadingControl(1));
+          await click(() => dataGrid.clickQualityIssueLeadingControl(1));
 
           await testSubjects.waitForAccordionState(
             'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
@@ -302,7 +301,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await jsonTabButton.click();
 
           // Click to open Stacktrace control on the same row
-          await clickWithRetry(() => dataGrid.clickStacktraceLeadingControl(0));
+          await click(() => dataGrid.clickStacktraceLeadingControl(0));
 
           await testSubjects.waitForAccordionState(
             'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
@@ -323,7 +322,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await jsonTabButton.click();
 
           // Click to open Stacktrace control on a different row
-          await clickWithRetry(() => dataGrid.clickStacktraceLeadingControl(1));
+          await click(() => dataGrid.clickStacktraceLeadingControl(1));
 
           await testSubjects.waitForAccordionState(
             'unifiedDocViewLogsOverviewDegradedFieldsAccordion',
