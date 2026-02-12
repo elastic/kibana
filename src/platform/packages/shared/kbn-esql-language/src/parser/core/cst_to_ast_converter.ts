@@ -2162,7 +2162,7 @@ export class CstToAstConverter {
     }
 
     const diversifyField = this.toColumn(diversifyFieldCtx);
-    const onOption = this.toOption(onToken.getText().toLocaleLowerCase(), diversifyFieldCtx);
+    const onOption = this.toOption(onToken.getText().toLowerCase(), diversifyFieldCtx);
 
     onOption.args.push(diversifyField);
     onOption.location.min = onToken.symbol.start;
@@ -2212,7 +2212,7 @@ export class CstToAstConverter {
       command.incomplete = incomplete;
 
       if (!withOption.incomplete) {
-        command.lambda = withOption.args[0];
+        command.namedParameters = withOption.args[0];
         command.args.push(withOption);
       }
     }

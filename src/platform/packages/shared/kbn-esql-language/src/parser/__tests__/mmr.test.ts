@@ -39,7 +39,7 @@ describe('MMR command', () => {
         value: 10,
       });
 
-      expect(mmrCmd.lambda).toMatchObject({
+      expect(mmrCmd.namedParameters).toMatchObject({
         type: 'map',
         entries: [
           {
@@ -116,7 +116,7 @@ describe('MMR command', () => {
 
       expect(mmrCmd.diversifyField).toMatchObject({ type: 'identifier', name: 'genre' });
       expect(mmrCmd.limit).toMatchObject({ type: 'literal', literalType: 'integer', value: 3 });
-      expect(mmrCmd.lambda).toBeUndefined();
+      expect(mmrCmd.namedParameters).toBeUndefined();
       expect(mmrCmd.args).toHaveLength(2);
     });
   });

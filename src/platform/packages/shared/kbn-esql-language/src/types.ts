@@ -157,7 +157,7 @@ export interface ESQLAstMmrCommand extends ESQLCommand<'mmr'> {
   queryVector?: ESQLAstItem;
   diversifyField: ESQLAstItem;
   limit: ESQLAstItem;
-  lambda: ESQLAstItem;
+  namedParameters: ESQLAstItem;
 }
 
 /**
