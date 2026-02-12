@@ -684,7 +684,6 @@ export const interactiveModeMachine = setup({
             'step.save': {
               target: 'idle',
               actions: [
-                { type: 'maybeClearAutoConditionFilter', params: ({ event }) => event },
                 { type: 'reassignSteps' },
                 { type: 'syncToDSL' },
               ],
@@ -712,7 +711,6 @@ export const interactiveModeMachine = setup({
             'step.save': {
               target: 'idle',
               actions: [
-                { type: 'maybeClearAutoConditionFilter', params: ({ event }) => event },
                 { type: 'reassignSteps' },
                 { type: 'syncToDSL' },
               ],
