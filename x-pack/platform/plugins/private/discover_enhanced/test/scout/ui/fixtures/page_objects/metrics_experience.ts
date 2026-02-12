@@ -29,6 +29,7 @@ export class MetricsExperiencePage {
   }
 
   async runEsqlQuery(query: string) {
+    await this.discover.selectTextBaseLang();
     await this.setEsqlQuery(query);
     await this.submitQuery();
     await this.discover.waitUntilSearchingHasFinished();
