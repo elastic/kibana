@@ -264,9 +264,16 @@ export class ElasticsearchService
       if (!this.cpsEnabled) return;
 
       const acceptedParams = params.meta?.acceptedParams;
-      if (!acceptedParams?.includes('project_routing')) return;
-
+      const apiSupportsProjectRouting = acceptedParams?.includes('project_routing') ?? false;
       const querystring = options.querystring as Record<string, unknown> | undefined;
+      if (!apiSupportsProjectRouting) {
+        if (querystring?.project_routing != null) {
+          const { project_routing: _, ...rest } = querystring;
+          options.querystring = Object.keys(rest).length > 0 ? rest : undefined;
+        }
+        return;
+      }
+
       if (querystring?.project_routing != null) return;
 
       const body = params.body as Record<string, unknown> | undefined;

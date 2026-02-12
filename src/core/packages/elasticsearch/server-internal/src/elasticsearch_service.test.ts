@@ -675,6 +675,106 @@ describe('CPS onRequest handler', () => {
         });
       });
 
+      describe('defensive stripping of project_routing', () => {
+        it('strips project_routing when API does not support it', () => {
+          const options: any = { querystring: { project_routing: 'explicit-value' } };
+          const params = {
+            method: 'GET',
+            path: '/_cluster/health',
+            meta: { acceptedParams: ['level', 'timeout'] },
+          };
+
+          setCpsEnabled(true);
+
+          onRequestHandler({ scoped: true }, params, options);
+
+          expect(options.querystring).toBeUndefined();
+        });
+
+        it('strips project_routing but preserves other querystring params when API does not support it', () => {
+          const options: any = {
+            querystring: {
+              project_routing: 'explicit-value',
+              pretty: true,
+              timeout: '30s',
+            },
+          };
+          const params = {
+            method: 'GET',
+            path: '/_cluster/health',
+            meta: { acceptedParams: ['level', 'timeout'] },
+          };
+
+          setCpsEnabled(true);
+
+          onRequestHandler({ scoped: true }, params, options);
+
+          expect(options.querystring).toEqual({
+            pretty: true,
+            timeout: '30s',
+          });
+        });
+
+        it('strips project_routing when acceptedParams is undefined', () => {
+          const options: any = { querystring: { project_routing: 'explicit-value' } };
+          const params = {
+            method: 'GET',
+            path: '/_cluster/health',
+            meta: {},
+          };
+
+          setCpsEnabled(true);
+
+          onRequestHandler({ scoped: true }, params, options);
+
+          expect(options.querystring).toBeUndefined();
+        });
+
+        it('strips project_routing when meta is undefined', () => {
+          const options: any = { querystring: { project_routing: 'explicit-value' } };
+          const params = {
+            method: 'GET',
+            path: '/_cluster/health',
+          };
+
+          setCpsEnabled(true);
+
+          onRequestHandler({ scoped: true }, params, options);
+
+          expect(options.querystring).toBeUndefined();
+        });
+
+        it('does not strip project_routing when CPS is disabled', () => {
+          const options: any = { querystring: { project_routing: 'explicit-value' } };
+          const params = {
+            method: 'GET',
+            path: '/_cluster/health',
+            meta: { acceptedParams: [] },
+          };
+
+          setCpsEnabled(false);
+
+          onRequestHandler({ scoped: true }, params, options);
+
+          expect(options.querystring.project_routing).toBe('explicit-value');
+        });
+
+        it('does not strip project_routing for unscoped requests', () => {
+          const options: any = { querystring: { project_routing: 'explicit-value' } };
+          const params = {
+            method: 'GET',
+            path: '/_cluster/health',
+            meta: { acceptedParams: [] },
+          };
+
+          setCpsEnabled(true);
+
+          onRequestHandler({ scoped: false }, params, options);
+
+          expect(options.querystring.project_routing).toBe('explicit-value');
+        });
+      });
+
     });
   });
 });

@@ -269,6 +269,95 @@ describe('CPS project_routing on serverless ES', () => {
     });
   });
 
+  describe('APIs that do NOT support project_routing', () => {
+    it('cluster.health does not accept project_routing (baseline)', async () => {
+      const response = await client.cluster.health();
+      expect(response.cluster_name).toBeDefined();
+      expect(response.status).toBeDefined();
+    });
+
+    it('indices.create does not accept project_routing (baseline)', async () => {
+      const tempIndex = 'cps-test-temp-index';
+      try {
+        const response = await client.indices.create({ index: tempIndex });
+        expect(response.acknowledged).toBe(true);
+      } finally {
+        await client.indices.delete({ index: tempIndex }).catch(() => {});
+      }
+    });
+
+    it('indices.getMapping does not accept project_routing (baseline)', async () => {
+      const response = await client.indices.getMapping({ index: TEST_INDEX });
+      expect(response[TEST_INDEX]).toBeDefined();
+      expect(response[TEST_INDEX].mappings).toBeDefined();
+    });
+
+    it('cat.indices does not accept project_routing (baseline)', async () => {
+      const response = await client.cat.indices({ format: 'json' });
+      expect(Array.isArray(response)).toBe(true);
+    });
+
+    it('cat.shards does not accept project_routing (baseline)', async () => {
+      const response = await client.cat.shards({ format: 'json' });
+      expect(Array.isArray(response)).toBe(true);
+    });
+
+    it('index (PUT document) does not accept project_routing (baseline)', async () => {
+      const response = await client.index({
+        index: TEST_INDEX,
+        document: { title: 'No routing test', category: 'test', timestamp: '2024-01-15', count: 999 },
+      });
+      expect(response._id).toBeDefined();
+
+      await client.delete({ index: TEST_INDEX, id: response._id }).catch(() => {});
+    });
+
+    it('bulk operations do not accept project_routing (baseline)', async () => {
+      const response = await client.bulk({
+        operations: [
+          { index: { _index: TEST_INDEX } },
+          { title: 'Bulk no routing', category: 'test', timestamp: '2024-01-16', count: 888 },
+        ],
+      });
+      expect(response.errors).toBe(false);
+
+      for (const item of response.items) {
+        if (item.index?._id) {
+          await client.delete({ index: TEST_INDEX, id: item.index._id }).catch(() => {});
+        }
+      }
+    });
+
+    it('delete does not accept project_routing (baseline)', async () => {
+      const indexResponse = await client.index({
+        index: TEST_INDEX,
+        document: { title: 'To delete', category: 'temp', timestamp: '2024-01-17', count: 1 },
+      });
+
+      const deleteResponse = await client.delete({
+        index: TEST_INDEX,
+        id: indexResponse._id,
+      });
+      expect(deleteResponse.result).toBe('deleted');
+    });
+
+    it('update does not accept project_routing (baseline)', async () => {
+      const indexResponse = await client.index({
+        index: TEST_INDEX,
+        document: { title: 'To update', category: 'temp', timestamp: '2024-01-18', count: 1 },
+      });
+
+      const updateResponse = await client.update({
+        index: TEST_INDEX,
+        id: indexResponse._id,
+        doc: { count: 2 },
+      });
+      expect(updateResponse.result).toBe('updated');
+
+      await client.delete({ index: TEST_INDEX, id: indexResponse._id }).catch(() => {});
+    });
+  });
+
   describe('search API with project_routing', () => {
     itIfCpsSupported('accepts project_routing parameter without error', async () => {
       const response = await client.search(
