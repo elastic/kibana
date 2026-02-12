@@ -93,10 +93,7 @@ export function buildUpdateRuleAttributes(
       : existingAttrs.evaluation,
     // Optional top-level fields: `null` → `undefined` (clear), `undefined` → keep existing.
     recovery_policy: nullToUndefined(updateData.recovery_policy, existingAttrs.recovery_policy),
-    state_transition: nullToUndefined(
-      updateData.state_transition,
-      existingAttrs.state_transition
-    ),
+    state_transition: nullToUndefined(updateData.state_transition, existingAttrs.state_transition),
     grouping: nullToUndefined(updateData.grouping, existingAttrs.grouping),
     no_data: nullToUndefined(updateData.no_data, existingAttrs.no_data),
     notification_policies: nullToUndefined(
