@@ -5,50 +5,6 @@
  * 2.0.
  */
 
-export function generateGetConversationHistoryWorkflow(stackConnectorId: string): string {
-  return `version: '1'
-name: 'sources.slack.get_conversation_history'
-description: 'Fetch message history for a specific Slack conversation'
-enabled: true
-triggers:
-  - type: 'manual'
-inputs:
-  - name: channel
-    type: string
-    description: 'Conversation ID (e.g. C123..., G123..., D123...)'
-  - name: oldest
-    type: string
-    required: false
-    description: 'Start of time range (Unix timestamp as string)'
-  - name: latest
-    type: string
-    required: false
-    description: 'End of time range (Unix timestamp as string)'
-  - name: inclusive
-    type: boolean
-    required: false
-    default: false
-  - name: limit
-    type: number
-    required: false
-    default: 100
-  - name: cursor
-    type: string
-    required: false
-steps:
-  - name: get-conversation-history
-    type: slack2.getConversationHistory
-    connector-id: ${stackConnectorId}
-    with:
-      channel: "\${{inputs.channel}}"
-      oldest: "\${{inputs.oldest}}"
-      latest: "\${{inputs.latest}}"
-      inclusive: \${{inputs.inclusive}}
-      limit: \${{inputs.limit}}
-      cursor: "\${{inputs.cursor}}"
-`;
-}
-
 export function generateSendMessageWorkflow(stackConnectorId: string): string {
   return `version: '1'
 name: 'sources.slack.send_message'

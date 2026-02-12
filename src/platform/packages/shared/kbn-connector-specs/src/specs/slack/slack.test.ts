@@ -199,55 +199,6 @@ describe('Slack', () => {
     });
   });
 
-  describe('getConversationHistory action', () => {
-    it('should get conversation history with required channel', async () => {
-      const mockResponse = {
-        data: {
-          ok: true,
-          messages: [],
-          has_more: false,
-        },
-      };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      const result = await Slack.actions.getConversationHistory.handler(mockContext, {
-        channel: 'C123',
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://slack.com/api/conversations.history?channel=C123'
-      );
-      expect(result).toEqual(mockResponse.data);
-    });
-
-    it('should include optional parameters', async () => {
-      const mockResponse = { data: { ok: true, messages: [] } };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      await Slack.actions.getConversationHistory.handler(mockContext, {
-        channel: 'C123',
-        oldest: '1700000000.000000',
-        latest: '1700000100.000000',
-        inclusive: true,
-        limit: 100,
-        cursor: 'cursor123',
-      });
-
-      expect(mockClient.get).toHaveBeenCalledWith(
-        'https://slack.com/api/conversations.history?channel=C123&oldest=1700000000.000000&latest=1700000100.000000&inclusive=true&limit=100&cursor=cursor123'
-      );
-    });
-
-    it('should throw error when Slack API returns error', async () => {
-      const mockResponse = { data: { ok: false, error: 'invalid_auth' } };
-      mockClient.get.mockResolvedValue(mockResponse);
-
-      await expect(
-        Slack.actions.getConversationHistory.handler(mockContext, { channel: 'C123' })
-      ).rejects.toThrow('Slack getConversationHistory error: invalid_auth');
-    });
-  });
-
   describe('sendMessage action', () => {
     it('should send message with required parameters', async () => {
       const mockResponse = {
