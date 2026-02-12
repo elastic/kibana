@@ -30,10 +30,10 @@ import {
   excapeHtmlCharacters,
   generateTestRunId,
   getKibanaModuleData,
+  getRunCommand,
   getRunTarget,
   parseStdout,
   stripFilePath,
-  stripRunCommand,
 } from '../../../helpers';
 import type { TestFailure } from '../../report';
 import { ScoutFailureReport } from '../../report';
@@ -63,7 +63,7 @@ export class ScoutFailedTestReporter implements Reporter {
     this.report = new ScoutFailureReport(this.log);
     this.codeOwnersEntries = getCodeOwnersEntries();
     this.runId = this.reporterOptions.runId || generateTestRunId();
-    this.command = stripRunCommand(process.argv);
+    this.command = getRunCommand();
   }
 
   private getFileOwners(filePath: string): string[] {
@@ -111,7 +111,13 @@ export class ScoutFailedTestReporter implements Reporter {
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
-    if (result.status !== 'failed') {
+    // Playwright marks timeouts and interruptions as separate statuses, but we still
+    // want to generate a Scout failure report artifact for them (e.g. global.setup.ts timeouts).
+    if (
+      result.status !== 'failed' &&
+      result.status !== 'timedOut' &&
+      result.status !== 'interrupted'
+    ) {
       return;
     }
 
