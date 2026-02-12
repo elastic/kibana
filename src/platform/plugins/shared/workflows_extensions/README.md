@@ -10,6 +10,25 @@ The `workflows_extensions` plugin serves as the home for workflow extension poin
 
 Future extension points (such as triggers) will also be registered through this plugin.
 
+## Important: Internal vs External Steps
+
+**⚠️ IMPORTANT CONVENTION**: The `workflows_extensions` plugin contains **internal, workflows-team owned** step implementations only. These are located in:
+- `server/steps/` - Internal server-side step handlers
+- `public/steps/` - Internal public-side step definitions
+
+**External teams should NOT implement custom steps inside the `workflows_extensions` plugin.** Instead, external teams must:
+
+1. **Create steps in their own plugin** - Steps should be implemented in a plugin owned and maintained by the team that will maintain the step
+2. **Register via plugin contract** - Use the `workflows_extensions` plugin contract to register steps from your external plugin, just like the example in `examples/workflows_extensions_example/README.md`
+
+This separation ensures:
+- Clear ownership boundaries
+- Proper maintenance responsibilities
+- Better code organization
+- Reduced coupling between teams
+
+See the [Contributing Custom Step Types](#contributing-custom-step-types) section below for the correct way to implement external steps.
+
 ### Step Type Registry Architecture
 
 The step type registry provides a clean separation between:

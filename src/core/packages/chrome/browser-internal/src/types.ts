@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode } from 'react';
+import type { JSX, ReactNode } from 'react';
 import type {
   ChromeSetup,
   ChromeStart,
@@ -90,6 +90,12 @@ export interface InternalChromeStart extends ChromeStart {
    * @deprecated - clean up https://github.com/elastic/kibana/issues/225264
    */
   getProjectAppMenuComponent(): JSX.Element;
+
+  /**
+   * Used only by the rendering service to render the sidebar UI
+   * @internal
+   */
+  getSidebarComponent(): JSX.Element;
 
   /**
    * Used only by the rendering service to retrieve the set of classNames

@@ -9,12 +9,23 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { KPIsSection, KPIS_SECTION } from './kpis_section';
+import type { KPIsSectionProps } from './kpis_section';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+
+jest.mock('./summary_view_content', () => ({
+  SummaryViewContent: () => <div data-test-subj="mock-summary-view-content" />,
+}));
 
 jest.mock('../../../../common/containers/query_toggle');
 
 const mockSetToggleStatus = jest.fn();
 const mockUseQueryToggle = useQueryToggle as jest.Mock;
+
+const defaultProps: KPIsSectionProps = {
+  pageFilters: [],
+  assignees: [],
+  selectedConnectorNames: [],
+};
 
 describe('<KPIsSection />', () => {
   beforeEach(() => {
@@ -28,7 +39,7 @@ describe('<KPIsSection />', () => {
   it('renders the section', () => {
     render(
       <TestProviders>
-        <KPIsSection />
+        <KPIsSection {...defaultProps} />
       </TestProviders>
     );
 
@@ -43,11 +54,26 @@ describe('<KPIsSection />', () => {
 
     render(
       <TestProviders>
-        <KPIsSection />
+        <KPIsSection {...defaultProps} />
       </TestProviders>
     );
 
     expect(screen.getByTestId('kpi-view-select-tabs')).toBeInTheDocument();
+  });
+
+  it('renders SummaryViewContent when view is summary', () => {
+    mockUseQueryToggle.mockReturnValue({
+      toggleStatus: true,
+      setToggleStatus: mockSetToggleStatus,
+    });
+
+    render(
+      <TestProviders>
+        <KPIsSection {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('mock-summary-view-content')).toBeInTheDocument();
   });
 
   it('shows collapsed label when collapsed', () => {
@@ -58,7 +84,7 @@ describe('<KPIsSection />', () => {
 
     render(
       <TestProviders>
-        <KPIsSection />
+        <KPIsSection {...defaultProps} />
       </TestProviders>
     );
 
@@ -68,7 +94,7 @@ describe('<KPIsSection />', () => {
   it('toggle button calls setToggleStatus when clicked', () => {
     render(
       <TestProviders>
-        <KPIsSection />
+        <KPIsSection {...defaultProps} />
       </TestProviders>
     );
 

@@ -308,6 +308,16 @@ export interface ApiStats {
   adoptionTrackedAPIsUnreferencedCount: number;
 }
 
+/**
+ * Collections of issues and metadata indexed by plugin ID.
+ * Used by `collectApiStatsForPlugin` to gather stats for a specific plugin.
+ */
+export interface IssuesByPlugin {
+  missingApiItems: MissingApiItemMap;
+  referencedDeprecations: ReferencedDeprecationsByPlugin;
+  adoptionTrackedAPIs: AdoptionTrackedAPIsByPlugin;
+}
+
 export type PluginMetaInfo = ApiStats & {
   owner: { name: string; githubTeam?: string };
   description?: string;

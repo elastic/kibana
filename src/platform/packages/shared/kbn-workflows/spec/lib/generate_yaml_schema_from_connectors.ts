@@ -11,7 +11,6 @@ import { z } from '@kbn/zod/v4';
 import { convertLegacyInputsToJsonSchema } from './input_conversion';
 import { type ConnectorContractUnion } from '../..';
 import { KIBANA_TYPE_ALIASES } from '../kibana/aliases';
-import type { JsonModelSchema } from '../schema';
 import {
   BaseConnectorStepSchema,
   DataSetStepSchema,
@@ -27,6 +26,7 @@ import {
   WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
 } from '../schema';
+import type { JsonModelSchema } from '../schema/common/json_model_schema';
 
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior

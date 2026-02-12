@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { omit } from 'lodash';
 import { test } from '../../../fixtures';
 import {

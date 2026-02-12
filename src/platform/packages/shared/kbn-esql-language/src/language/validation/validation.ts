@@ -135,7 +135,7 @@ async function validateAst(
     const currentCommand = subquery.commands[subquery.commands.length - 1];
 
     const subqueryForColumns =
-      currentCommand.name === 'join'
+      currentCommand.name === 'join' || currentCommand.name === 'promql'
         ? subquery
         : { ...subquery, commands: subquery.commands.slice(0, -1) };
 

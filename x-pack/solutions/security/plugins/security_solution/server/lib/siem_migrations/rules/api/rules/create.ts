@@ -59,6 +59,7 @@ export const registerSiemRuleMigrationsCreateRulesRoute = (
               }
               const ctx = await context.resolve(['securitySolution']);
               const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
+              const { experimentalFeatures } = ctx.securitySolution.getConfig();
               await siemMigrationAuditLogger.logAddRules({
                 migrationId,
                 count: rulesCount,
@@ -75,7 +76,10 @@ export const registerSiemRuleMigrationsCreateRulesRoute = (
 
               // Create identified resource documents without content to keep track of them
               const resourceIdentifier = new RuleResourceIdentifier(
-                firstOriginalRule.vendor as ResourceSupportedVendor
+                firstOriginalRule.vendor as ResourceSupportedVendor,
+                {
+                  experimentalFeatures,
+                }
               );
               const extractedResources = await resourceIdentifier.fromOriginals(originalRules);
 

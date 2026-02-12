@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { MathProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
 import { streamlangApiTest as apiTest } from '../..';
@@ -34,7 +34,7 @@ apiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]total', 50);
+      expect(ingestedDocs[0]?.total).toBe(50);
     });
 
     apiTest('should compute addition of fields', async ({ testBed }) => {
@@ -56,7 +56,7 @@ apiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]sum', 40);
+      expect(ingestedDocs[0]?.sum).toBe(40);
     });
 
     apiTest('should compute subtraction of fields', async ({ testBed }) => {
@@ -78,7 +78,7 @@ apiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]difference', 70);
+      expect(ingestedDocs[0]?.difference).toBe(70);
     });
 
     apiTest('should compute division of fields', async ({ testBed }) => {
@@ -100,7 +100,7 @@ apiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]average', 25);
+      expect(ingestedDocs[0]?.average).toBe(25);
     });
 
     // === Nested Field Paths ===
@@ -175,8 +175,8 @@ apiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocsOrdered(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]not_equal', true);
-      expect(ingestedDocs).toHaveProperty('[1]not_equal', false);
+      expect(ingestedDocs[0]?.not_equal).toBe(true);
+      expect(ingestedDocs[1]?.not_equal).toBe(false);
     });
 
     apiTest('should compute gt (greater than) comparison', async ({ testBed }) => {
@@ -201,8 +201,8 @@ apiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocsOrdered(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]a_greater', true);
-      expect(ingestedDocs).toHaveProperty('[1]a_greater', false);
+      expect(ingestedDocs[0]?.a_greater).toBe(true);
+      expect(ingestedDocs[1]?.a_greater).toBe(false);
     });
 
     apiTest('should compute lt (less than) comparison', async ({ testBed }) => {
@@ -227,8 +227,8 @@ apiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocsOrdered(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]a_less', true);
-      expect(ingestedDocs).toHaveProperty('[1]a_less', false);
+      expect(ingestedDocs[0]?.a_less).toBe(true);
+      expect(ingestedDocs[1]?.a_less).toBe(false);
     });
 
     apiTest('should compute eq (equality) comparison', async ({ testBed }) => {
@@ -253,8 +253,8 @@ apiTest.describe(
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocsOrdered(indexName);
-      expect(ingestedDocs).toHaveProperty('[0]equal', true);
-      expect(ingestedDocs).toHaveProperty('[1]equal', false);
+      expect(ingestedDocs[0]?.equal).toBe(true);
+      expect(ingestedDocs[1]?.equal).toBe(false);
     });
 
     // === Where Condition ===
@@ -285,9 +285,9 @@ apiTest.describe(
 
       const ingestedDocs = await testBed.getDocsOrdered(indexName);
       // Active doc should have total calculated
-      expect(ingestedDocs).toHaveProperty('[0]total', 50);
+      expect(ingestedDocs[0]?.total).toBe(50);
       // Inactive doc should not have total field
-      expect((ingestedDocs as Array<Record<string, unknown>>)[1]).not.toHaveProperty('total');
+      expect(ingestedDocs[1]?.total).toBeUndefined();
     });
 
     // === Ignore Missing ===
@@ -317,9 +317,9 @@ apiTest.describe(
 
         const ingestedDocs = await testBed.getDocsOrdered(indexName);
         // First doc should have total calculated
-        expect(ingestedDocs).toHaveProperty('[0]total', 50);
+        expect(ingestedDocs[0]?.total).toBe(50);
         // Second doc should not have total field (skipped)
-        expect((ingestedDocs as Array<Record<string, unknown>>)[1]).not.toHaveProperty('total');
+        expect(ingestedDocs[1]?.total).toBeUndefined();
       }
     );
 

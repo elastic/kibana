@@ -41,7 +41,7 @@ describe('UiamAPIKeys', () => {
 
     mockUiam = {
       getAuthenticationHeaders: jest.fn(),
-      getUserProfileGrant: jest.fn(),
+      getClientAuthentication: jest.fn(),
       getEsClientAuthenticationHeader: jest.fn().mockReturnValue({
         'x-client-authentication': 'shared-secret',
       }),
@@ -324,32 +324,6 @@ describe('UiamAPIKeys', () => {
         },
       });
       expect(mockUiam.getEsClientAuthenticationHeader).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('isUiamCredential()', () => {
-    it('returns true when credentials start with UIAM prefix', () => {
-      const authorization = new HTTPAuthorizationHeader('ApiKey', 'essu_credential_123');
-
-      const result = UiamAPIKeys.isUiamCredential(authorization);
-
-      expect(result).toBe(true);
-    });
-
-    it('returns false when credentials do not start with UIAM prefix', () => {
-      const authorization = new HTTPAuthorizationHeader('ApiKey', 'regular_credential_123');
-
-      const result = UiamAPIKeys.isUiamCredential(authorization);
-
-      expect(result).toBe(false);
-    });
-
-    it('returns false when credentials are empty', () => {
-      const authorization = new HTTPAuthorizationHeader('ApiKey', '');
-
-      const result = UiamAPIKeys.isUiamCredential(authorization);
-
-      expect(result).toBe(false);
     });
   });
 

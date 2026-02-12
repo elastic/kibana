@@ -327,3 +327,75 @@ describe('ToolTestFlyout array combo box', () => {
     expect(callArgs.toolParams.tags).toEqual([123, 'alpha']);
   });
 });
+
+describe('ToolTestFlyout numeric field', () => {
+  const mockTool: ToolDefinitionWithSchema = {
+    ...mockToolDefinition,
+    schema: {
+      ...mockToolDefinition.schema,
+      properties: {
+        count: {
+          title: 'Count',
+          type: 'number',
+        },
+      },
+    },
+  };
+
+  const mockOnClose = jest.fn();
+  const mockExecuteTool = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseAgentBuilderServices.mockReturnValue({
+      docLinksService: {
+        tools: 'https://example.com/docs',
+      },
+    });
+    mockUseTool.mockReturnValue({
+      tool: mockTool,
+      isLoading: false,
+    });
+    mockUseExecuteTool.mockReturnValue({
+      executeTool: mockExecuteTool,
+      isLoading: false,
+    });
+  });
+
+  const renderComponent = () => {
+    return render(
+      <IntlProvider locale="en">
+        <ToolTestFlyout toolId="test-tool" onClose={mockOnClose} />
+      </IntlProvider>
+    );
+  };
+
+  it('submits 0 as a number, not a string (valueAsNumber must be used, not fallback to value)', async () => {
+    const { container } = renderComponent();
+    const numericInput = await waitFor(() =>
+      container.querySelector('[data-test-subj="agentBuilderToolTestInput-count"]')
+    );
+
+    expect(numericInput).toBeInTheDocument();
+
+    act(() => {
+      fireEvent.change(numericInput as Element, {
+        target: { value: '0', valueAsNumber: 0 },
+      });
+    });
+
+    await act(async () => {
+      fireEvent.click(
+        container.querySelector('[data-test-subj="agentBuilderToolTestSubmitButton"]') as Element
+      );
+    });
+
+    await waitFor(() => {
+      expect(mockExecuteTool).toHaveBeenCalled();
+    });
+
+    const callArgs = mockExecuteTool.mock.calls[0][0];
+    expect(callArgs.toolParams.count).toBe(0);
+    expect(typeof callArgs.toolParams.count).toBe('number');
+  });
+});

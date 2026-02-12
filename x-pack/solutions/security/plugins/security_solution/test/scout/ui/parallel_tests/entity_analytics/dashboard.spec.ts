@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, spaceTest } from '@kbn/scout-security';
+import { spaceTest } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/ui';
 
 // Failing: See https://github.com/elastic/kibana/issues/247203
 spaceTest.describe.skip(

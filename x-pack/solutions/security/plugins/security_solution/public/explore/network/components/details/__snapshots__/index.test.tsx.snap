@@ -402,7 +402,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
             >
               iana.org
               <span
-                class="css-1j75qc1"
+                class="emotion-EuiExternalLinkIcon"
                 data-euiicon-type="popout"
                 role="presentation"
               />
@@ -815,7 +815,7 @@ exports[`IP Overview Component rendering it renders the side panel IP overview 1
             >
               iana.org
               <span
-                class="css-1j75qc1"
+                class="emotion-EuiExternalLinkIcon"
                 data-euiicon-type="popout"
                 role="presentation"
               />

@@ -1705,7 +1705,6 @@ export class CstToAstConverter {
     if (query) {
       command.query = query;
       args.push(query);
-      command.incomplete ||= query.incomplete;
     } else {
       command.incomplete = true;
     }
@@ -2025,8 +2024,7 @@ export class CstToAstConverter {
   }
 
   /**
-   * Converts promql query parts to an "unknown" node.
-   * The detailed parsing of PromQL query will be done later.
+   * Parses promql query parts into a PromQL AST node.
    */
   private fromPromqlQueryParts(
     queryPartCtxs: cst.PromqlQueryPartContext[]

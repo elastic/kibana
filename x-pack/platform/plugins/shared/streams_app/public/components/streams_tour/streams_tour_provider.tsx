@@ -153,8 +153,10 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
     dependencies: {
       start: { share },
     },
+    core: { notifications },
   } = useKibana();
   const { features } = useStreamsPrivileges();
+  const isTourEnabled = notifications?.tours?.isEnabled() ?? true;
 
   const streamsLocator = useMemo(
     () =>
@@ -219,15 +221,25 @@ export function StreamsTourProvider({ children }: StreamsTourProviderProps) {
 
   const tourStepProps = useMemo(
     () =>
-      createEnhancedTourStepProps(
-        baseTourStepProps,
-        stepsConfig,
-        actions,
-        tourState,
-        completeTour,
-        navigateToList
-      ),
-    [baseTourStepProps, stepsConfig, actions, tourState, completeTour, navigateToList]
+      isTourEnabled
+        ? createEnhancedTourStepProps(
+            baseTourStepProps,
+            stepsConfig,
+            actions,
+            tourState,
+            completeTour,
+            navigateToList
+          )
+        : [],
+    [
+      baseTourStepProps,
+      stepsConfig,
+      actions,
+      tourState,
+      completeTour,
+      navigateToList,
+      isTourEnabled,
+    ]
   );
 
   const getStepPropsByStepId = useCallback(

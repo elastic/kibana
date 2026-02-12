@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { ReplaceProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -34,7 +34,7 @@ apiTest.describe('Streamlang to ES|QL - Replace Processor', { tag: ['@ess', '@sv
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]).toHaveProperty('message', 'An warning occurred');
+      expect(esqlResult.documents[0]?.message).toBe('An warning occurred');
     }
   );
 
@@ -62,8 +62,8 @@ apiTest.describe('Streamlang to ES|QL - Replace Processor', { tag: ['@ess', '@sv
       const esqlResult = await esql.queryOnIndex(indexName, query);
 
       expect(esqlResult.documents).toHaveLength(1);
-      expect(esqlResult.documents[0]).toHaveProperty('message', 'An error occurred'); // Original preserved
-      expect(esqlResult.documents[0]).toHaveProperty('clean_message', 'An warning occurred'); // New field created
+      expect(esqlResult.documents[0]?.message).toBe('An error occurred'); // Original preserved
+      expect(esqlResult.documents[0]?.clean_message).toBe('An warning occurred'); // New field created
     }
   );
 
@@ -88,7 +88,7 @@ apiTest.describe('Streamlang to ES|QL - Replace Processor', { tag: ['@ess', '@sv
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(1);
-    expect(esqlResult.documents[0]).toHaveProperty('message', 'Error code [NUM] found');
+    expect(esqlResult.documents[0]?.message).toBe('Error code [NUM] found');
   });
 
   apiTest('should replace literal dot with escaped dot pattern', async ({ testBed, esql }) => {
@@ -112,7 +112,7 @@ apiTest.describe('Streamlang to ES|QL - Replace Processor', { tag: ['@ess', '@sv
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(1);
-    expect(esqlResult.documents[0]).toHaveProperty('message', 'Android-log');
+    expect(esqlResult.documents[0]?.message).toBe('Android-log');
   });
 
   apiTest('should replace using regex with capture groups', async ({ testBed, esql }) => {
@@ -136,7 +136,7 @@ apiTest.describe('Streamlang to ES|QL - Replace Processor', { tag: ['@ess', '@sv
     const esqlResult = await esql.queryOnIndex(indexName, query);
 
     expect(esqlResult.documents).toHaveLength(1);
-    expect(esqlResult.documents[0]).toHaveProperty('message', 'Messages: 3 for user alice');
+    expect(esqlResult.documents[0]?.message).toBe('Messages: 3 for user alice');
   });
 
   apiTest(
@@ -166,7 +166,7 @@ apiTest.describe('Streamlang to ES|QL - Replace Processor', { tag: ['@ess', '@sv
       // ES|QL filters out documents with missing field when ignore_missing: false
       expect(esqlResult.documents).toHaveLength(1);
       expect(esqlResult.documents[0]).toStrictEqual(expect.objectContaining({ status: 'doc1' }));
-      expect(esqlResult.documents[0]).toHaveProperty('message', 'An warning occurred');
+      expect(esqlResult.documents[0]?.message).toBe('An warning occurred');
     }
   );
 
@@ -197,8 +197,8 @@ apiTest.describe('Streamlang to ES|QL - Replace Processor', { tag: ['@ess', '@sv
     expect(esqlResult.documents).toHaveLength(2);
     const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
     const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
-    expect(doc1).toHaveProperty('message', 'An warning occurred');
-    expect(doc2).toHaveProperty('message', null);
+    expect(doc1?.message).toBe('An warning occurred');
+    expect(doc2?.message).toBeNull();
   });
 
   apiTest('should replace field conditionally with EVAL CASE', async ({ testBed, esql }) => {
@@ -232,12 +232,12 @@ apiTest.describe('Streamlang to ES|QL - Replace Processor', { tag: ['@ess', '@sv
 
     // First doc should have message replaced (where condition matched)
     const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
-    expect(doc1).toHaveProperty('message', 'An warning occurred');
+    expect(doc1?.message).toBe('An warning occurred');
     expect(doc1?.['event.kind']).toBe('test');
 
     // Second doc should keep original message (where condition not matched)
     const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
-    expect(doc2).toHaveProperty('message', 'An error occurred');
+    expect(doc2?.message).toBe('An error occurred');
     expect(doc2?.['event.kind']).toBe('production');
   });
 
@@ -285,14 +285,14 @@ apiTest.describe('Streamlang to ES|QL - Replace Processor', { tag: ['@ess', '@sv
 
       // First doc should have clean_message created (where condition matched)
       const doc1 = esqlResult.documents.find((d: any) => d.status === 'doc1');
-      expect(doc1).toHaveProperty('message', 'An error occurred'); // Original preserved
-      expect(doc1).toHaveProperty('clean_message', 'An warning occurred'); // New field created
+      expect(doc1?.message).toBe('An error occurred'); // Original preserved
+      expect(doc1?.clean_message).toBe('An warning occurred'); // New field created
       expect(doc1?.['event.kind']).toBe('test');
 
       // Second doc should have clean_message as empty string (where condition not matched)
       const doc2 = esqlResult.documents.find((d: any) => d.status === 'doc2');
-      expect(doc2).toHaveProperty('message', 'An error occurred');
-      expect(doc2).toHaveProperty('clean_message', '');
+      expect(doc2?.message).toBe('An error occurred');
+      expect(doc2?.clean_message).toBe('');
       expect(doc2?.['event.kind']).toBe('production');
     }
   );

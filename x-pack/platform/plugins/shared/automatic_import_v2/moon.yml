@@ -52,6 +52,10 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/shared-ux-router'
   - '@kbn/react-query'
+  - '@kbn/elastic-assistant'
+  - '@kbn/kibana-utils-plugin'
+  - '@kbn/ingest-pipelines-plugin'
+  - '@kbn/utility-types'
 tags:
   - plugin
   - prod

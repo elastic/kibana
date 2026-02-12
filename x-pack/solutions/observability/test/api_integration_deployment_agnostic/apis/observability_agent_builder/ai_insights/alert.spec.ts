@@ -154,9 +154,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(status).to.be(200);
         expect(body.context).to.be.a('string');
 
-        // Context should contain APM service summary and errors from the synthetic data
+        // Context should contain APM service summary and log groups from the synthetic data
         expect(body.context).to.contain('<apmServiceSummary>');
-        expect(body.context).to.contain('<apmErrors>');
+        expect(body.context).to.contain('<logGroups>');
       });
 
       it('returns no related signals when alert has no service.name', async () => {

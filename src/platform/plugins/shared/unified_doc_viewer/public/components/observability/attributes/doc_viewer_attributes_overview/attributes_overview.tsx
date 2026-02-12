@@ -16,7 +16,7 @@ import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   LOCAL_STORAGE_KEY_SEARCH_TERM,
-  useTableFilters,
+  useTableFiltersState,
 } from '../../../doc_viewer_table/table_filters';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import {
@@ -49,7 +49,7 @@ export function AttributesOverview({
   const { storage, uiSettings } = getUnifiedDocViewerServices();
   const isEsqlMode = Array.isArray(textBasedHits);
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
-  const { searchTerm, onChangeSearchTerm } = useTableFilters({
+  const { searchTerm, onChangeSearchTerm } = useTableFiltersState({
     storage,
     storageKey: LOCAL_STORAGE_KEY_SEARCH_TERM,
   });

@@ -75,6 +75,7 @@ export const setTabs: InternalStateThunkActionCreator<
       newRecentlyClosedTab.initialInternalState =
         selectTabRuntimeInternalState(runtimeStateManager, tab.id) ??
         cloneDeep(tab.initialInternalState);
+      newRecentlyClosedTab.attributes = cloneDeep(tab.attributes);
       newRecentlyClosedTab.appState = cloneDeep(tab.appState);
       newRecentlyClosedTab.globalState = cloneDeep(tab.globalState);
       justRemovedTabs.push(newRecentlyClosedTab);
@@ -159,6 +160,7 @@ export const updateTabs: InternalStateThunkActionCreator<
 
       // TODO: these lines can likely be removed since `item` is already spread to `tab` above
       // the following assignments for appState, globalState, and dataRequestParams are for supporting `openInNewTab` action
+      tab.attributes = 'attributes' in item ? cloneDeep(item.attributes) : tab.attributes;
       tab.appState = 'appState' in item ? cloneDeep(item.appState) : tab.appState;
       tab.globalState = 'globalState' in item ? cloneDeep(item.globalState) : tab.globalState;
       tab.dataRequestParams =
@@ -175,6 +177,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         tab.initialInternalState =
           selectTabRuntimeInternalState(runtimeStateManager, item.duplicatedFromId) ??
           cloneDeep(existingTabToDuplicateFrom.initialInternalState);
+        tab.attributes = cloneDeep(existingTabToDuplicateFrom.attributes);
         tab.appState = cloneDeep(existingTabToDuplicateFrom.appState);
         tab.globalState = cloneDeep(existingTabToDuplicateFrom.globalState);
         tab.uiState = cloneDeep(existingTabToDuplicateFrom.uiState);
@@ -189,6 +192,7 @@ export const updateTabs: InternalStateThunkActionCreator<
         }
 
         tab.initialInternalState = cloneDeep(recentlyClosedTabToRestore.initialInternalState);
+        tab.attributes = cloneDeep(recentlyClosedTabToRestore.attributes);
         tab.appState = cloneDeep(recentlyClosedTabToRestore.appState);
         tab.globalState = cloneDeep(recentlyClosedTabToRestore.globalState);
       } else if (!('appState' in item)) {

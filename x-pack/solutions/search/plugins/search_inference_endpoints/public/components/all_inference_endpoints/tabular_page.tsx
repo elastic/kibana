@@ -57,9 +57,11 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
 
   const copyContent = useCallback(
     (inferenceId: string) => {
+      const message = i18n.ENDPOINT_COPY_SUCCESS(inferenceId);
       navigator.clipboard.writeText(inferenceId).then(() => {
         toasts?.addSuccess({
-          title: i18n.ENDPOINT_COPY_SUCCESS(inferenceId),
+          title: message,
+          'aria-label': message,
         });
       });
     },
@@ -94,8 +96,8 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   );
 
   const displayInferenceFlyout = useCallback((selectedEndpoint: InferenceInferenceEndpointInfo) => {
-    setShowInferenceFlyout(true);
     setSelectedInferenceEndpoint(selectedEndpoint);
+    setShowInferenceFlyout(true);
   }, []);
 
   const onCloseInferenceFlyout = useCallback(() => {
@@ -129,13 +131,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           endpointInfo: InferenceInferenceEndpointInfo
         ) => {
           if (inferenceId) {
-            return (
-              <EndpointInfo
-                inferenceId={inferenceId}
-                endpointInfo={endpointInfo}
-                isCloudEnabled={cloud?.isCloudEnabled ?? false}
-              />
-            );
+            return <EndpointInfo inferenceId={inferenceId} endpointInfo={endpointInfo} />;
           }
 
           return null;
@@ -213,7 +209,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         width: '165px',
       },
     ],
-    [copyContent, displayDeleteActionitem, displayInferenceFlyout, cloud?.isCloudEnabled]
+    [copyContent, displayDeleteActionitem, displayInferenceFlyout]
   );
 
   const handleTableChange = useCallback(
@@ -275,7 +271,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         <EuiFlexItem>
           <EuiBasicTable
             columns={tableColumns}
-            itemId="id"
+            itemId="inference_id"
             items={paginatedSortedTableData}
             onChange={handleTableChange}
             pagination={pagination}

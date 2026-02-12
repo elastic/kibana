@@ -1,0 +1,47 @@
+version: '1'
+name: 'sources.sharepoint.search'
+description: 'Search SharePoint content with Microsoft Graph search. Actions and inputs: search (query, optional entity_types, optional region, optional from, optional size). The query input accepts Keyword Query Language (KQL).'
+tags: ['agent-builder-tool']
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: query
+    type: string
+    required: true
+  - name: entity_types
+    type: array
+    default:
+      - "site"
+      - "list"
+      - "listItem"
+      - "drive"
+      - "driveItem"
+    description: "Entity types to search. Valid values: site, list, listItem, drive, driveItem"
+  - name: region
+    type: choice
+    default: "NAM"
+    options:
+      - "NAM"
+      - "EUR"
+      - "APC"
+      - "LAM"
+      - "MEA"
+    description: "Search region (NAM=North America, EUR=Europe, APC=Asia Pacific, LAM=Latin America, MEA=Middle East/Africa)"
+    required: false
+  - name: from
+    type: number
+    required: false
+  - name: size
+    type: number
+    required: false
+steps:
+  - name: search-sharepoint
+    type: sharepoint-online.search
+    connector-id: <%= stackConnectorId %>
+    with:
+      query: "${{ inputs.query }}"
+      entityTypes: ${{ inputs.entity_types }}
+      region: "${{ inputs.region }}"
+      from: ${{ inputs.from }}
+      size: ${{ inputs.size }}

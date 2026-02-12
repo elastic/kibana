@@ -1,0 +1,284 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { DataStreamsTable } from './data_steams_table';
+import type { DataStreamResponse } from '../../../../../../common';
+
+// Components are further tested in their own files. We just want to test if it renders.
+jest.mock('./input_types_badges', () => ({
+  InputTypesBadges: jest.fn(({ inputTypes }) => (
+    <div data-test-subj="mock-input-types-badges">
+      {inputTypes?.map((t: { name: string }) => t.name).join(', ')}
+    </div>
+  )),
+}));
+
+jest.mock('./status', () => ({
+  Status: jest.fn(({ status, isDeleting }) => (
+    <div data-test-subj="mock-status">{isDeleting ? 'Deleting...' : status}</div>
+  )),
+}));
+
+// Mock useDeleteDataStream hook
+const mockMutate = jest.fn();
+const mockDeleteDataStreamMutation = {
+  mutate: mockMutate,
+  isLoading: false,
+  variables: undefined as { dataStreamId: string } | undefined,
+};
+
+jest.mock('../../../../../common', () => ({
+  useDeleteDataStream: () => ({
+    deleteDataStreamMutation: mockDeleteDataStreamMutation,
+  }),
+}));
+
+// Mock EUI theme provider
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    useEuiTheme: () => ({
+      euiTheme: {
+        colors: {
+          backgroundBaseSubdued: '#f5f7fa',
+          text: '#343741',
+        },
+      },
+    }),
+  };
+});
+
+const createMockDataStream = (overrides: Partial<DataStreamResponse> = {}): DataStreamResponse => ({
+  dataStreamId: 'ds-1',
+  title: 'Test Data Stream',
+  description: 'Test description',
+  status: 'completed',
+  inputTypes: [{ name: 'filestream' }],
+  ...overrides,
+});
+
+describe('DataStreamsTable', () => {
+  const defaultProps = {
+    integrationId: 'integration-123',
+    items: [createMockDataStream()],
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockDeleteDataStreamMutation.isLoading = false;
+    mockDeleteDataStreamMutation.variables = undefined;
+  });
+
+  describe('rendering', () => {
+    it('should render the table with a data stream title', () => {
+      render(<DataStreamsTable {...defaultProps} />);
+
+      expect(screen.getByText('Test Data Stream')).toBeInTheDocument();
+    });
+
+    it('should render multiple data streams', () => {
+      const items = [
+        createMockDataStream({ dataStreamId: 'ds-1', title: 'First Stream' }),
+        createMockDataStream({ dataStreamId: 'ds-2', title: 'Second Stream' }),
+      ];
+
+      render(<DataStreamsTable {...defaultProps} items={items} />);
+
+      expect(screen.getByText('First Stream')).toBeInTheDocument();
+      expect(screen.getByText('Second Stream')).toBeInTheDocument();
+    });
+
+    it('should render InputTypesBadges component for each row', () => {
+      render(<DataStreamsTable {...defaultProps} />);
+
+      expect(screen.getByTestId('mock-input-types-badges')).toBeInTheDocument();
+    });
+
+    it('should render Status component for each row', () => {
+      render(<DataStreamsTable {...defaultProps} />);
+
+      expect(screen.getByTestId('mock-status')).toBeInTheDocument();
+    });
+
+    it('should render empty table when no items', () => {
+      render(<DataStreamsTable {...defaultProps} items={[]} />);
+
+      expect(screen.queryByText('Test Data Stream')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('sorting', () => {
+    it('should sort items by title ascending by default', () => {
+      const items = [
+        createMockDataStream({ dataStreamId: 'ds-2', title: 'Zebra Stream' }),
+        createMockDataStream({ dataStreamId: 'ds-1', title: 'Alpha Stream' }),
+      ];
+
+      render(<DataStreamsTable {...defaultProps} items={items} />);
+
+      const rows = screen.getAllByRole('row');
+      // Second row should be Alpha (sorted ascending)
+      expect(within(rows[1]).getByText('Alpha Stream')).toBeInTheDocument();
+    });
+
+    it('should allow sorting by clicking column header', async () => {
+      const items = [
+        createMockDataStream({ dataStreamId: 'ds-1', title: 'Alpha Stream' }),
+        createMockDataStream({ dataStreamId: 'ds-2', title: 'Zebra Stream' }),
+      ];
+
+      render(<DataStreamsTable {...defaultProps} items={items} />);
+
+      // Click title column header to toggle sort
+      const titleHeader = screen.getByRole('button', { name: /title/i });
+      await userEvent.click(titleHeader);
+
+      // After clicking, should be descending (Zebra first)
+      const rows = screen.getAllByRole('row');
+      expect(within(rows[1]).getByText('Zebra Stream')).toBeInTheDocument();
+    });
+  });
+
+  describe('delete functionality', () => {
+    it('should show delete confirmation modal when delete action clicked', async () => {
+      render(<DataStreamsTable {...defaultProps} />);
+
+      const deleteButton = screen.getByTestId('deleteDataStreamButton');
+      await userEvent.click(deleteButton);
+
+      expect(
+        screen.getByText(/Are you sure you want to delete "Test Data Stream"/i)
+      ).toBeInTheDocument();
+    });
+
+    it('should close modal when cancel is clicked', async () => {
+      render(<DataStreamsTable {...defaultProps} />);
+
+      const deleteButton = screen.getByTestId('deleteDataStreamButton');
+      await userEvent.click(deleteButton);
+
+      const cancelButton = screen.getByText('Cancel');
+      await userEvent.click(cancelButton);
+
+      expect(screen.queryByText(/Are you sure you want to delete/i)).not.toBeInTheDocument();
+    });
+
+    it('should call delete mutation when confirm is clicked', async () => {
+      render(<DataStreamsTable {...defaultProps} />);
+
+      const deleteButton = screen.getByTestId('deleteDataStreamButton');
+      await userEvent.click(deleteButton);
+
+      // Click confirm button in the modal
+      const confirmButton = screen.getByRole('button', { name: /delete/i });
+      await userEvent.click(confirmButton);
+
+      expect(mockMutate).toHaveBeenCalledWith({
+        integrationId: 'integration-123',
+        dataStreamId: 'ds-1',
+      });
+    });
+
+    it('should pass isDeleting to Status when deletion in progress', () => {
+      mockDeleteDataStreamMutation.isLoading = true;
+      mockDeleteDataStreamMutation.variables = { dataStreamId: 'ds-1' };
+
+      render(<DataStreamsTable {...defaultProps} />);
+
+      expect(screen.getByText('Deleting...')).toBeInTheDocument();
+    });
+
+    it('should disable delete button while deleting that item', () => {
+      mockDeleteDataStreamMutation.isLoading = true;
+      mockDeleteDataStreamMutation.variables = { dataStreamId: 'ds-1' };
+
+      render(<DataStreamsTable {...defaultProps} />);
+
+      const deleteButton = screen.getByTestId('deleteDataStreamButton');
+      expect(deleteButton).toBeDisabled();
+    });
+  });
+
+  describe('action buttons', () => {
+    it('should disable expand button for non-completed data streams', () => {
+      const items = [createMockDataStream({ status: 'pending' })];
+
+      render(<DataStreamsTable {...defaultProps} items={items} />);
+
+      const expandButton = screen.getByTestId('expandDataStreamButton');
+      expect(expandButton).toBeDisabled();
+    });
+
+    it('should enable expand button for completed data streams', () => {
+      const items = [createMockDataStream({ status: 'completed' })];
+
+      render(<DataStreamsTable {...defaultProps} items={items} />);
+
+      const expandButton = screen.getByTestId('expandDataStreamButton');
+      expect(expandButton).not.toBeDisabled();
+    });
+
+    it('should disable refresh button for pending data streams', () => {
+      const items = [createMockDataStream({ status: 'pending' })];
+
+      render(<DataStreamsTable {...defaultProps} items={items} />);
+
+      const refreshButton = screen.getByTestId('refreshDataStreamButton');
+      expect(refreshButton).toBeDisabled();
+    });
+
+    it('should enable refresh button for completed data streams', () => {
+      const items = [createMockDataStream({ status: 'completed' })];
+
+      render(<DataStreamsTable {...defaultProps} items={items} />);
+
+      const refreshButton = screen.getByTestId('refreshDataStreamButton');
+      expect(refreshButton).not.toBeDisabled();
+    });
+
+    it('should enable refresh button for failed data streams', () => {
+      const items = [createMockDataStream({ status: 'failed' })];
+
+      render(<DataStreamsTable {...defaultProps} items={items} />);
+
+      const refreshButton = screen.getByTestId('refreshDataStreamButton');
+      expect(refreshButton).not.toBeDisabled();
+    });
+  });
+
+  describe('column rendering', () => {
+    it('should render title column with tooltip', () => {
+      render(<DataStreamsTable {...defaultProps} />);
+
+      const titleCell = screen.getByText('Test Data Stream');
+      expect(titleCell).toBeInTheDocument();
+      expect(titleCell.closest('span')).toHaveAttribute('tabIndex', '0');
+    });
+
+    it('should render Data Collection Methods column', () => {
+      render(<DataStreamsTable {...defaultProps} />);
+
+      expect(screen.getByText('Data Collection Methods')).toBeInTheDocument();
+    });
+
+    it('should render Status column', () => {
+      render(<DataStreamsTable {...defaultProps} />);
+
+      expect(screen.getByText('Status')).toBeInTheDocument();
+    });
+
+    it('should render Actions column', () => {
+      render(<DataStreamsTable {...defaultProps} />);
+
+      expect(screen.getByText('Actions')).toBeInTheDocument();
+    });
+  });
+});

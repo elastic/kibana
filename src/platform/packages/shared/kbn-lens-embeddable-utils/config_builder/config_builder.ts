@@ -46,6 +46,10 @@ import {
   fromLensStateToAPI as fromRegionMapLensStateToAPI,
 } from './transforms/charts/region_map';
 import {
+  fromAPItoLensState as fromPartitionAPItoLensState,
+  fromLensStateToAPI as fromPartitionLensStateToAPI,
+} from './transforms/charts/partition';
+import {
   fromAPItoLensState as fromDatatableAPItoLensState,
   fromLensStateToAPI as fromDatatableLensStateToAPI,
 } from './transforms/charts/datatable';
@@ -61,6 +65,7 @@ const compatibilityMap: Record<string, string> = {
   lnsHeatmap: 'heatmap',
   lnsTagcloud: 'tagcloud',
   lnsChoropleth: 'region_map',
+  lnsPie: 'pie',
   lnsDatatable: 'datatable',
 };
 
@@ -73,6 +78,28 @@ type ChartTypeLike =
   | Pick<LensApiState, 'type'>
   | { visualizationType: null | undefined }
   | undefined;
+
+const partitionSubTypes = ['pie', 'donut', 'treemap', 'mosaic', 'waffle'] as const;
+
+function addPartitionChartConverters() {
+  return Object.fromEntries(
+    partitionSubTypes.map((chartType) => {
+      return [
+        chartType,
+        {
+          fromAPItoLensState: fromPartitionAPItoLensState,
+          fromLensStateToAPI: fromPartitionLensStateToAPI,
+        },
+      ];
+    })
+  ) as Record<
+    (typeof partitionSubTypes)[number],
+    {
+      fromAPItoLensState: typeof fromPartitionAPItoLensState;
+      fromLensStateToAPI: typeof fromPartitionLensStateToAPI;
+    }
+  >;
+}
 
 const apiConvertersByChart = {
   metric: { fromAPItoLensState, fromLensStateToAPI },
@@ -100,6 +127,7 @@ const apiConvertersByChart = {
     fromAPItoLensState: fromRegionMapAPItoLensState,
     fromLensStateToAPI: fromRegionMapLensStateToAPI,
   },
+  ...addPartitionChartConverters(),
   datatable: {
     fromAPItoLensState: fromDatatableAPItoLensState,
     fromLensStateToAPI: fromDatatableLensStateToAPI,

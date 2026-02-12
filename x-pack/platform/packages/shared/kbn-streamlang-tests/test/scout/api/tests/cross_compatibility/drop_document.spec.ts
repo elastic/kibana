@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { DropDocumentProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql, transpileIngestPipeline } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -58,13 +58,11 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex('esql-e2e-test-drop-basic', query);
 
         expect(ingestResult).toHaveLength(2);
-        ingestResult.forEach((remainingDoc) =>
-          expect(remainingDoc).not.toHaveProperty('logType', 'info')
-        );
+        ingestResult.forEach((remainingDoc) => expect(remainingDoc?.logType).not.toBe('info'));
 
         expect(esqlResult.documents).toHaveLength(2);
         esqlResult.documents.forEach((remainingDoc) =>
-          expect(remainingDoc).not.toHaveProperty('logType', 'info')
+          expect(remainingDoc?.logType).not.toBe('info')
         );
       }
     );

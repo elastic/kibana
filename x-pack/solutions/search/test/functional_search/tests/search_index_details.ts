@@ -71,7 +71,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await searchSpace.navigateTo(spaceCreated.id);
           await pageObjects.searchNavigation.navigateToIndexDetailPage(indexWithoutDataName);
           await pageObjects.searchIndexDetailsPage.expectIndexDetailsPageIsLoaded();
-          await pageObjects.searchIndexDetailsPage.dismissIngestTourIfShown();
         });
         it('can load index detail page', async () => {
           await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();

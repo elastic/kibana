@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { StreamlangDSL, JoinProcessor } from '@kbn/streamlang';
 import { transpileEsql, transpileIngestPipeline } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -41,7 +41,7 @@ apiTest.describe('Cross-compatibility - Join Processor', { tag: ['@ess', '@svlOb
     const esqlResult = await esql.queryOnIndex('esql-e2e-test-join-basic', query);
 
     expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywordsOrdered[0]);
-    expect(ingestResult[0]).toHaveProperty('my_joined_field', 'first, second, third');
+    expect(ingestResult[0]?.my_joined_field).toBe('first, second, third');
   });
 
   apiTest(
@@ -87,11 +87,11 @@ apiTest.describe('Cross-compatibility - Join Processor', { tag: ['@ess', '@svlOb
       expect(ingestResult).toHaveLength(2);
       expect(esqlResult.documents).toHaveLength(2);
 
-      expect(esqlResult.documentsOrdered[0]).toHaveProperty('my_joined_field', null);
-      expect(ingestResult[0]).not.toHaveProperty('my_joined_field');
+      expect(esqlResult.documentsOrdered[0]?.my_joined_field).toBeNull();
+      expect(ingestResult[0]?.my_joined_field).toBeUndefined();
 
       expect(ingestResult[1]).toStrictEqual(esqlResult.documentsWithoutKeywordsOrdered[1]);
-      expect(ingestResult[1]).toHaveProperty('my_joined_field', 'first, second, third');
+      expect(ingestResult[1]?.my_joined_field).toBe('first, second, third');
     }
   );
 
@@ -134,10 +134,10 @@ apiTest.describe('Cross-compatibility - Join Processor', { tag: ['@ess', '@svlOb
       expect(esqlResult.documents).toHaveLength(2);
 
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywordsOrdered[0]);
-      expect(ingestResult[0]).toHaveProperty('my_joined_field', 'first, second, third');
+      expect(ingestResult[0]?.my_joined_field).toBe('first, second, third');
 
-      expect(ingestResult[1]).not.toHaveProperty('my_joined_field');
-      expect(esqlResult.documentsOrdered[1]).toHaveProperty('my_joined_field', null);
+      expect(ingestResult[1]?.my_joined_field).toBeUndefined();
+      expect(esqlResult.documentsOrdered[1]?.my_joined_field).toBeNull();
     }
   );
 
@@ -181,10 +181,10 @@ apiTest.describe('Cross-compatibility - Join Processor', { tag: ['@ess', '@svlOb
       expect(esqlResult.documents).toHaveLength(2);
 
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywordsOrdered[0]);
-      expect(ingestResult[0]).toHaveProperty('my_joined_field', 'first, second, third');
+      expect(ingestResult[0]?.my_joined_field).toBe('first, second, third');
 
-      expect(ingestResult[1]).toHaveProperty('my_joined_field', 'first, third');
-      expect(esqlResult.documentsOrdered[1]).toHaveProperty('my_joined_field', 'first, third');
+      expect(ingestResult[1]?.my_joined_field).toBe('first, third');
+      expect(esqlResult.documentsOrdered[1]?.my_joined_field).toBe('first, third');
     }
   );
 });

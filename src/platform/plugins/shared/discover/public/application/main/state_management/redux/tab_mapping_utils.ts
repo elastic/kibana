@@ -16,6 +16,7 @@ import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { DEFAULT_TAB_STATE } from './constants';
+import { parseControlGroupJson } from './utils';
 
 export const fromSavedObjectTabToTabState = ({
   tab,
@@ -55,8 +56,6 @@ export const fromSavedObjectTabToTabState = ({
     label: tab.label,
     initialInternalState: {
       serializedSearchSource: tab.serializedSearchSource,
-      visContext: tab.visContext,
-      controlGroupJson: tab.controlGroupJson,
     },
     appState,
     previousAppState: existingTab?.appState ?? appState,
@@ -65,6 +64,13 @@ export const fromSavedObjectTabToTabState = ({
       refreshInterval: tab.timeRange
         ? tab.refreshInterval
         : existingTab?.globalState.refreshInterval,
+    },
+    attributes: {
+      ...DEFAULT_TAB_STATE.attributes,
+      visContext: tab.visContext,
+      controlGroupState: tab.controlGroupJson
+        ? parseControlGroupJson(tab.controlGroupJson)
+        : undefined,
     },
   };
 };
@@ -104,8 +110,8 @@ export const fromSavedObjectTabToSavedSearch = async ({
   breakdownField: tab.breakdownField,
   chartInterval: tab.chartInterval,
   density: tab.density,
-  visContext: tab.visContext,
-  controlGroupJson: tab.controlGroupJson,
+  visContext: tab.visContext, // managed via Redux state now
+  controlGroupJson: tab.controlGroupJson, // managed via Redux state now
 });
 
 export const fromTabStateToSavedObjectTab = ({
@@ -144,8 +150,10 @@ export const fromTabStateToSavedObjectTab = ({
     breakdownField: tab.appState.breakdownField,
     chartInterval: tab.appState.interval,
     density: tab.appState.density,
-    visContext: tab.initialInternalState?.visContext,
-    controlGroupJson: tab.initialInternalState?.controlGroupJson,
+    visContext: tab.attributes.visContext,
+    controlGroupJson: tab.attributes.controlGroupState
+      ? JSON.stringify(tab.attributes.controlGroupState)
+      : undefined,
   };
 };
 
@@ -154,7 +162,9 @@ export const fromSavedSearchToSavedObjectTab = ({
   savedSearch,
   services,
 }: {
-  tab: Pick<TabState, 'id' | 'label'>;
+  tab: Pick<TabState, 'id' | 'label'> & {
+    attributes?: TabState['attributes'];
+  };
   savedSearch: SavedSearch;
   services: DiscoverServices;
 }): DiscoverSessionTab => {
@@ -185,7 +195,11 @@ export const fromSavedSearchToSavedObjectTab = ({
     breakdownField: savedSearch.breakdownField,
     chartInterval: savedSearch.chartInterval,
     density: savedSearch.density,
-    visContext: savedSearch.visContext,
-    controlGroupJson: savedSearch.controlGroupJson,
+    visContext: tab.attributes ? tab.attributes?.visContext : savedSearch.visContext,
+    controlGroupJson: tab.attributes
+      ? tab.attributes?.controlGroupState
+        ? JSON.stringify(tab.attributes.controlGroupState)
+        : undefined
+      : savedSearch.controlGroupJson,
   };
 };

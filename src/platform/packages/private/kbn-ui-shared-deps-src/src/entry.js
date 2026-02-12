@@ -118,3 +118,4 @@ export const KbnReactKibanaContextEnv = require('@kbn/react-kibana-context-env')
 export const KbnSharedUxRouter = require('@kbn/shared-ux-router');
 export const KbnReactKibanaMount = require('@kbn/react-kibana-mount');
 export const KbnVisualizationsCommon = require('@kbn/visualizations-common');
+export const KbnCoreSidebarContext = require('@kbn/core-chrome-sidebar-context');

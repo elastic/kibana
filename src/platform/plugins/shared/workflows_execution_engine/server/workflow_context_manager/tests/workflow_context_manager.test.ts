@@ -842,6 +842,8 @@ describe('WorkflowContextManager', () => {
               isTestRun: false,
               startedAt: new Date('2023-01-01T00:00:00.000Z'),
               url: 'http://localhost:5601/s/space-789/app/workflows/workflow-456?executionId=exec-123&tab=executions',
+              executedBy: 'unknown',
+              triggeredBy: undefined,
             },
             workflow: {
               id: 'workflow-456',

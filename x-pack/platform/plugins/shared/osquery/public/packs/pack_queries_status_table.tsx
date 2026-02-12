@@ -752,6 +752,13 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
   return (
     <EuiBasicTable<PackQueryFormData>
+      tableCaption={i18n.translate(
+        'xpack.osquery.pack.queriesTable.packQueriesStatusTableCaption',
+        {
+          defaultMessage: 'Status of pack {packName} queries',
+          values: { packName },
+        }
+      )}
       // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
       items={data ?? []}
       itemId={getItemId}

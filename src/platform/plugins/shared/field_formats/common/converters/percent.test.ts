@@ -9,6 +9,7 @@
 
 import { PercentFormat } from './percent';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
+import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
 
 describe('PercentFormat', () => {
   const config: { [key: string]: string } = {
@@ -27,5 +28,18 @@ describe('PercentFormat', () => {
     const formatter = new PercentFormat({ pattern: '0,0%' }, getConfig);
 
     expect(formatter.convert('0.99999')).toBe('100%');
+  });
+
+  test('missing value', () => {
+    const formatter = new PercentFormat({ pattern: '0,0%' }, getConfig);
+
+    expect(formatter.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(formatter.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
+    expect(formatter.convert(null, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
+    expect(formatter.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
+      '<span class="ffString__emptyValue">(null)</span>'
+    );
   });
 });

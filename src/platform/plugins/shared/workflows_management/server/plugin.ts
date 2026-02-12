@@ -17,7 +17,7 @@ import type {
 } from '@kbn/core/server';
 
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import type { TriggerType } from '@kbn/workflows';
+import type { TriggerType } from '@kbn/workflows/spec/schema/triggers/trigger_schema';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
 
 import {

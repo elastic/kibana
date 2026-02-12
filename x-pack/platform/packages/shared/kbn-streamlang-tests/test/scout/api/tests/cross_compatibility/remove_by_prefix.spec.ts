@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { RemoveByPrefixProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -46,10 +46,10 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex('esql-remove-by-prefix-nested', query);
 
         // Both remove the parent field and all nested fields
-        expect(ingestResult[0]).not.toHaveProperty('host');
-        expect(ingestResult[0]).not.toHaveProperty('host.name');
-        expect(ingestResult[0]).not.toHaveProperty('host.ip');
-        expect(ingestResult[0]).toHaveProperty('message', 'keep-this');
+        expect(ingestResult[0]?.host).toBeUndefined();
+        expect(ingestResult[0]?.['host.name']).toBeUndefined();
+        expect(ingestResult[0]?.['host.ip']).toBeUndefined();
+        expect(ingestResult[0]?.message).toBe('keep-this');
 
         // ES|QL also removes the parent field when all nested fields are removed
         expect(esqlResult.documents[0]).toStrictEqual(
@@ -91,13 +91,13 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex('esql-remove-by-prefix-flattened', query);
 
         // Both should remove the nested fields
-        expect(ingestResult[0]).not.toHaveProperty('labels.env');
-        expect(ingestResult[0]).not.toHaveProperty('labels.team');
+        expect(ingestResult[0]?.['labels.env']).toBeUndefined();
+        expect(ingestResult[0]?.['labels.team']).toBeUndefined();
         expect(esqlResult.columnNames).not.toContain('labels.env');
         expect(esqlResult.columnNames).not.toContain('labels.team');
 
         // Both should keep the message
-        expect(ingestResult[0]).toHaveProperty('message', 'keep-this');
+        expect(ingestResult[0]?.message).toBe('keep-this');
         expect(esqlResult.documents[0]).toStrictEqual(
           expect.objectContaining({ message: 'keep-this' })
         );
@@ -170,9 +170,9 @@ apiTest.describe(
         const esqlResult = await esql.queryOnIndex('esql-remove-by-prefix-parent', query);
 
         // Both behave the same: remove the parent field and all nested fields
-        expect(ingestResult[0]).not.toHaveProperty('metadata');
-        expect(ingestResult[0]).not.toHaveProperty('metadata.timestamp');
-        expect(ingestResult[0]).not.toHaveProperty('metadata.host');
+        expect(ingestResult[0]?.metadata).toBeUndefined();
+        expect(ingestResult[0]?.['metadata.timestamp']).toBeUndefined();
+        expect(ingestResult[0]?.['metadata.host']).toBeUndefined();
 
         expect(esqlResult.columnNames).not.toContain('metadata');
         expect(esqlResult.columnNames).not.toContain('metadata.timestamp');

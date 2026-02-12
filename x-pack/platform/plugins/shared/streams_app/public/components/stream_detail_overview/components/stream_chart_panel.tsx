@@ -15,6 +15,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { Streams, getDiscoverEsqlQuery, getIndexPatternsForStream } from '@kbn/streams-schema';
 import { computeInterval } from '@kbn/visualization-utils';
 import type { DurationInputArg1, DurationInputArg2 } from 'moment';
@@ -35,6 +36,7 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
     dependencies: {
       start: { data, dataViews, share, streams },
     },
+    core: { uiSettings },
   } = useKibana();
   const { streamsRepositoryClient } = streams;
 
@@ -96,15 +98,18 @@ export function StreamChartPanel({ definition }: StreamChartPanelProps) {
         return undefined;
       }
 
+      const timezone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
+
       return executeEsqlQuery({
         query: queries.histogramQuery,
         search: data.search.search,
+        timezone,
         signal,
         start,
         end,
       });
     },
-    [indexPatterns, dataViews, data.search.search, queries?.histogramQuery],
+    [queries?.histogramQuery, indexPatterns, dataViews, uiSettings, data.search.search],
     {
       withTimeRange: true,
     }

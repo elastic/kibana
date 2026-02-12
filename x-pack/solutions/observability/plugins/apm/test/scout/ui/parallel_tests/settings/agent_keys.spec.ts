@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 
 test.describe('Agent Keys', { tag: ['@ess', '@svlOblt'] }, () => {

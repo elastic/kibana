@@ -261,7 +261,6 @@ export const createNavigationTree = (
             { link: 'management:search_sessions' },
             { link: 'management:spaces' },
             { link: 'maps' },
-            { link: 'visualize' },
             { link: 'graph' },
             { link: 'canvas' },
             { link: 'management:settings' },

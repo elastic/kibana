@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { ReplaceProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
 import { streamlangApiTest as apiTest } from '../..';
@@ -37,7 +37,7 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
       const esqlResult = await esql.queryOnIndex('esql-replace', query);
 
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-      expect(ingestResult[0]).toHaveProperty('message', 'An warning occurred');
+      expect(ingestResult[0]?.message).toBe('An warning occurred');
     }
   );
 
@@ -67,8 +67,8 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
       const esqlResult = await esql.queryOnIndex('esql-replace-target', query);
 
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-      expect(ingestResult[0]).toHaveProperty('message', 'An error occurred'); // Original preserved
-      expect(ingestResult[0]).toHaveProperty('clean_message', 'An warning occurred'); // New field created
+      expect(ingestResult[0]?.message).toBe('An error occurred'); // Original preserved
+      expect(ingestResult[0]?.clean_message).toBe('An warning occurred'); // New field created
     }
   );
 
@@ -97,7 +97,7 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
       const esqlResult = await esql.queryOnIndex('esql-replace-regex', query);
 
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-      expect(ingestResult[0]).toHaveProperty('message', 'Error code [NUM] found');
+      expect(ingestResult[0]?.message).toBe('Error code [NUM] found');
     }
   );
 
@@ -126,7 +126,7 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
       const esqlResult = await esql.queryOnIndex('esql-replace-capture', query);
 
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-      expect(ingestResult[0]).toHaveProperty('message', 'Messages: 3 for user alice');
+      expect(ingestResult[0]?.message).toBe('Messages: 3 for user alice');
     }
   );
 
@@ -176,8 +176,8 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
 
       expect(ingestDoc1).toStrictEqual(esqlDoc1);
       expect(ingestDoc2).toStrictEqual(esqlDoc2);
-      expect(ingestDoc1).toHaveProperty('message', 'An warning occurred');
-      expect(ingestDoc2).toHaveProperty('message', 'An error occurred');
+      expect(ingestDoc1?.message).toBe('An warning occurred');
+      expect(ingestDoc2?.message).toBe('An error occurred');
     }
   );
 
@@ -247,8 +247,8 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
 
       // Both should overwrite the numeric target field with the string result
       expect(ingestResult[0]).toStrictEqual(esqlResult.documentsWithoutKeywords[0]);
-      expect(ingestResult[0]).toHaveProperty('message', 'An error occurred'); // Source preserved
-      expect(ingestResult[0]).toHaveProperty('status_code', 'An warning occurred'); // Target overwritten with string
+      expect(ingestResult[0]?.message).toBe('An error occurred'); // Source preserved
+      expect(ingestResult[0]?.status_code).toBe('An warning occurred'); // Target overwritten with string
     }
   );
 
@@ -328,13 +328,13 @@ apiTest.describe('Cross-compatibility - Replace Processor', { tag: ['@ess', '@sv
       const esqlResult = await esql.queryOnIndex('esql-replace-single', query);
 
       // Ingest Pipeline processes all array elements
-      expect(ingestResult[0]).toHaveProperty('message', [
+      expect(ingestResult[0]?.message).toStrictEqual([
         'An warning occurred 01',
         'An warning occurred 02',
       ]);
 
       // ES|QL sets the field to null since it cannot handle multi-value arrays for replace()
-      expect(esqlResult.documentsWithoutKeywords[0]).toHaveProperty('message', null);
+      expect(esqlResult.documentsWithoutKeywords[0]?.message).toBeNull();
     }
   );
 });

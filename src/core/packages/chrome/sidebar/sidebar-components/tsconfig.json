@@ -1,0 +1,22 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../../../../../../typings/emotion.d.ts"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/use-observable",
+    "@kbn/core-chrome-layout-utils",
+    "@kbn/core-chrome-layout-components",
+    "@kbn/core-chrome-sidebar",
+    "@kbn/core-chrome-sidebar-context",
+  ]
+}

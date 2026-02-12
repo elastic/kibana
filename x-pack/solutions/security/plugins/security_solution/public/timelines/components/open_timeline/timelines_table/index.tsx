@@ -7,6 +7,7 @@
 
 import { EuiBasicTable } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { i18n as kibanaI18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 
@@ -231,7 +232,9 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
       <>
         {pendingDeleteIds.length > 0 && <DeleteConfirmModal />}
         <EuiBasicTable
-          tableCaption={i18n.TIMELINE_TABLE_CAPTION}
+          tableCaption={kibanaI18n.translate('xpack.securitySolution.timeline.timelinesCaption', {
+            defaultMessage: 'Timelines',
+          })}
           columns={columns}
           data-test-subj="timelines-table"
           itemId="savedObjectId"

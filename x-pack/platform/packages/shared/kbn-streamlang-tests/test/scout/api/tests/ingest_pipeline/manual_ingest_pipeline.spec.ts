@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type { StreamlangDSL } from '@kbn/streamlang';
 import type { ManualIngestPipelineProcessor } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
@@ -49,9 +49,9 @@ apiTest.describe(
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
-        expect(source).toHaveProperty('status', 'processed');
-        expect(source).toHaveProperty('message', 'test message');
-        expect(source).toHaveProperty('existing_field', 'existing_value');
+        expect(source?.status).toBe('processed');
+        expect(source?.message).toBe('test message');
+        expect(source?.existing_field).toBe('existing_value');
       }
     );
 
@@ -95,10 +95,10 @@ apiTest.describe(
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
-        expect(source).toHaveProperty('processor_type', 'manual');
-        expect(source).toHaveProperty('renamed_field', 'test_value');
-        expect(source).not.toHaveProperty('original_name'); // Should be renamed
-        expect(source).toHaveProperty('message', 'test message');
+        expect(source?.processor_type).toBe('manual');
+        expect(source?.renamed_field).toBe('test_value');
+        expect(source?.original_name).toBeUndefined(); // Should be renamed
+        expect(source?.message).toBe('test message');
       }
     );
 
@@ -144,8 +144,8 @@ apiTest.describe(
         const processedDoc = ingestedDocs.find((doc) => doc.message === 'should be processed');
         const skippedDoc = ingestedDocs.find((doc) => doc.message === 'should NOT be processed');
 
-        expect(processedDoc).toHaveProperty('status', 'processed_with_condition');
-        expect(skippedDoc).not.toHaveProperty('status'); // Should not be processed
+        expect(processedDoc?.status).toBe('processed_with_condition');
+        expect(skippedDoc?.status).toBeUndefined(); // Should not be processed
       }
     );
 
@@ -181,8 +181,8 @@ apiTest.describe(
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
       const source = ingestedDocs[0];
-      expect(source).toHaveProperty('tagged_field', 'tagged_value');
-      expect(source).toHaveProperty('message', 'test message with tag');
+      expect(source?.tagged_field).toBe('tagged_value');
+      expect(source?.message).toBe('test message with tag');
     });
 
     apiTest(
@@ -224,11 +224,11 @@ apiTest.describe(
         const ingestedDocs = await testBed.getDocs(indexName);
         expect(ingestedDocs).toHaveLength(1);
         const source = ingestedDocs[0];
-        expect(source).toHaveProperty('client_ip', '192.168.1.1');
-        expect(source).toHaveProperty('method', 'GET');
-        expect(source).toHaveProperty('path', '/api/users');
-        expect(source).toHaveProperty('parsed_by', 'manual_grok');
-        expect(source).toHaveProperty('message', '192.168.1.1 GET /api/users');
+        expect(source?.client_ip).toBe('192.168.1.1');
+        expect(source?.method).toBe('GET');
+        expect(source?.path).toBe('/api/users');
+        expect(source?.parsed_by).toBe('manual_grok');
+        expect(source?.message).toBe('192.168.1.1 GET /api/users');
       }
     );
   }

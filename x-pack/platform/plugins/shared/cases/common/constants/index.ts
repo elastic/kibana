@@ -30,6 +30,7 @@ export const CASE_SAVED_OBJECT = 'cases' as const;
 export const CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT = 'cases-connector-mappings' as const;
 export const CASE_USER_ACTION_SAVED_OBJECT = 'cases-user-actions' as const;
 export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments' as const;
+export const CASE_ATTACHMENT_SAVED_OBJECT = 'cases-attachments' as const;
 export const CASE_CONFIGURE_SAVED_OBJECT = 'cases-configure' as const;
 export const CASE_RULES_SAVED_OBJECT = 'cases-rules' as const;
 export const CASE_ID_INCREMENTER_SAVED_OBJECT = 'cases-incrementing-id' as const;
@@ -109,6 +110,11 @@ export const INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL =
 export const INTERNAL_CASE_GET_CASES_BY_ALERTS_URL =
   `${CASES_INTERNAL_URL}/case/alerts/_find_containing_all` as const;
 export const INTERNAL_BULK_CREATE_CASE_OBSERVABLES_URL = `${CASES_INTERNAL_URL}/{case_id}/observables/_bulk_create`;
+
+export const INTERNAL_TEMPLATES_URL = `${CASES_INTERNAL_URL}/templates` as const;
+export const INTERNAL_TEMPLATE_DETAILS_URL = `${INTERNAL_TEMPLATES_URL}/{template_id}` as const;
+export const INTERNAL_BULK_DELETE_TEMPLATES_URL = `${INTERNAL_TEMPLATES_URL}/_bulk_delete` as const;
+export const INTERNAL_BULK_EXPORT_TEMPLATES_URL = `${INTERNAL_TEMPLATES_URL}/_bulk_export` as const;
 
 /**
  * Action routes
