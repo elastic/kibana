@@ -181,7 +181,7 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
 };
 
 export const ESQLRuleFormFlyout: React.FC<ESQLRuleFormFlyoutProps> = (props) => {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useMemo(() => new QueryClient(), []);
   return (
     <QueryClientProvider client={queryClient}>
       <ESQLRuleFormFlyoutComponent {...props} />
