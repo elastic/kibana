@@ -558,7 +558,7 @@ export const useBulkActions = ({
               key: i18n.BULK_ACTION_ALERT_SUPPRESSION,
               name: i18n.BULK_ACTION_ALERT_SUPPRESSION,
               'data-test-subj': 'alertSuppressionBulkEditRule',
-              disabled: isAlertSuppressionDisabled,
+              disabled: !canEditRules || isAlertSuppressionDisabled,
               toolTipContent: isAlertSuppressionLicenseValid
                 ? undefined
                 : alertSuppressionUpsellingMessage,
