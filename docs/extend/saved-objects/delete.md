@@ -79,3 +79,10 @@ Before removing a type:
 * **No references** — Ensure no other Saved Object types reference the type you are removing.
 * **Data migration** — If users have documents of this type, ensure they have been migrated or are no longer needed.
 * **Stakeholders** — Confirm with your team and any dependent teams that the removal is expected.
+
+>[!WARNING]
+> When deleting a field from an existing Saved Object type, use a 2-step rollout across separate releases:
+> 1. **Release N**: stop using the field in business logic, but keep the field data in documents.
+> 2. **Release N+1**: introduce a new model version that removes the field data (for example with `data_removal`).
+>
+> This split preserves rollback integrity, because an emergency rollback to the previous release can still operate on documents that retain the field.
