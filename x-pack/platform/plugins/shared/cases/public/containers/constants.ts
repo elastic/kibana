@@ -19,6 +19,7 @@ export const casesQueriesKeys = {
   alerts: ['alerts'] as const,
   userActions: ['user-actions'] as const,
   templates: ['templates'] as const,
+  template: (templateId: string) => [...casesQueriesKeys.templates, 'detail', templateId] as const,
   templatesList: () => [...casesQueriesKeys.templates, 'list'] as const,
   templatesAll: (params: unknown) => [...casesQueriesKeys.templatesList(), params] as const,
   templatesTags: () => [...casesQueriesKeys.templates, 'tags'] as const,
