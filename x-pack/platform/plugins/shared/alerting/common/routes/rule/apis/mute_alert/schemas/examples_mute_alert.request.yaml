@@ -1,0 +1,9 @@
+summary: Mute an alert with time-based and condition-based snooze
+description: Mute an alert for one hour or until the alert severity changes.
+value:
+  expires_at: "2025-12-01T12:00:00.000Z"
+  condition_operator: any
+  conditions:
+    - type: severity_change
+      field: kibana.alert.severity
+      snapshot_value: medium

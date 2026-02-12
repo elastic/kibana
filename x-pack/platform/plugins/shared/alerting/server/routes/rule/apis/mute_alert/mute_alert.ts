@@ -24,6 +24,7 @@ import {
   muteAlertParamsSchemaV1,
   muteAlertQuerySchemaV1,
   muteAlertBodySchemaV1,
+  muteAlertExamplesV1,
 } from '../../../../../common/routes/rule/apis/mute_alert';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
@@ -39,6 +40,7 @@ export const muteAlertRoute = (
         access: 'public',
         summary: `Mute an alert`,
         tags: ['oas-tag:alerting'],
+        oasOperationObject: muteAlertExamplesV1,
       },
       validate: {
         request: {
