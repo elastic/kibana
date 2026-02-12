@@ -10,6 +10,7 @@ import { githubDataSource } from './github';
 import { googleDriveDataSource } from './google_drive';
 import { sharepointOnlineDataSource } from './sharepoint_online';
 import { jiraDataSource } from './jira-cloud';
+import { firecrawlDataSource } from './firecrawl';
 
 export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(notionDataSource);
@@ -17,4 +18,5 @@ export function registerDataSources(dataCatalog: DataCatalogPluginSetup) {
   dataCatalog.register(googleDriveDataSource);
   dataCatalog.register(sharepointOnlineDataSource);
   dataCatalog.register(jiraDataSource);
+  dataCatalog.register(firecrawlDataSource);
 }
