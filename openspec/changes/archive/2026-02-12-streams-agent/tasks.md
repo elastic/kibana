@@ -10,11 +10,11 @@
 ## 2. Read Tools (stream-querying)
 
 - [x] 2.1 Create helper to obtain a scoped `StreamsClient` from the Agent Builder tool handler context using `StreamsService.createClient(request)`
-- [x] 2.2 Implement `streams.list_streams` tool — returns all streams with name, type, quality status, and storage size
-- [x] 2.3 Implement `streams.get_stream` tool — returns full stream configuration (retention, storage, ingestion, processors, partitions, schema, data quality, features/systems)
+- [x] 2.2 Implement `streams.list_streams` tool — returns all streams with name and description
+- [x] 2.3 Implement `streams.get_stream` tool — returns stream definition (type, retention, processors, partitions, field mappings, description)
 - [x] 2.4 Implement `streams.get_data_quality` tool — returns degraded/failed doc counts, quality score, failure store status
 - [x] 2.5 Implement `streams.get_schema` tool — returns mapped fields with types, unmapped fields, inherited fields
-- [x] 2.6 Implement `streams.get_lifecycle_stats` tool — returns retention policy, ILM phase breakdown, data tier distribution
+- [x] 2.6 Implement `streams.get_lifecycle_stats` tool — returns retention policy, ILM phase breakdown with per-phase storage, and document count
 - [x] 2.7 Implement `streams.query_documents` tool — returns recent sample documents sorted by `@timestamp` desc, with optional count (default 20) and optional time range (no time filter by default)
 - [x] 2.8 Add all read tool IDs to Agent Builder's `allow_lists.ts` (`AGENT_BUILDER_BUILTIN_TOOLS`)
 - [x] 2.9 Add read tool IDs to the agent's `configuration.tools` list
@@ -27,15 +27,19 @@
 - [x] 3.4 Implement `streams.update_processors` tool — adds/edits/removes processors, with confirmation
 - [x] 3.5 Implement `streams.map_fields` tool — updates field mappings, with confirmation
 - [x] 3.6 Implement `streams.enable_failure_store` tool — enables/disables failure store, with confirmation
-- [x] 3.7 Implement `streams.update_settings` tool — updates description and routing configuration, with confirmation
+- [x] 3.7 Implement `streams.update_settings` tool — updates stream description, with confirmation
 - [x] 3.8 Add all write tool IDs to Agent Builder's allow lists and agent tool configuration
 
 ## 4. AI Orchestration Tools
 
 - [x] 4.1 Implement `streams.suggest_partitions` tool — calls `partitionStream` from `@kbn/streams-ai`, returns suggested partitions with names and conditions
-- [ ] 4.2 Implement `streams.suggest_processing_pipeline` tool — requires simulation infrastructure; deferred to follow-up
-- [ ] 4.3 Implement `streams.suggest_grok_patterns` tool — requires client-side heuristic input; deferred to follow-up
-- [ ] 4.4 Implement `streams.suggest_dissect_patterns` tool — requires client-side heuristic input; deferred to follow-up
+
+_The following tools are deferred to a follow-up change (not in scope for this implementation):_
+
+- [ ] 4.2 Implement `streams.suggest_processing_pipeline` tool — requires simulation infrastructure
+- [ ] 4.3 Implement `streams.suggest_grok_patterns` tool — requires client-side heuristic input
+- [ ] 4.4 Implement `streams.suggest_dissect_patterns` tool — requires client-side heuristic input
+
 - [x] 4.5 Implement `streams.identify_features` tool — calls `identifyFeatures` from `@kbn/streams-ai`, returns detected features
 - [x] 4.6 Implement `streams.identify_systems` tool — calls `identifySystems` from `@kbn/streams-ai`, returns detected systems
 - [x] 4.7 Implement `streams.generate_description` tool — calls `generateStreamDescription` from `@kbn/streams-ai`, returns generated description
@@ -44,6 +48,8 @@
 - [x] 4.10 Use `context.modelProvider.getDefaultModel()` for connector resolution instead of `connectorId` parameter
 
 ## 5. Integration & Testing
+
+_The following tasks are deferred to a later stage (not in scope for this proof of concept):_
 
 - [ ] 5.1 Verify the agent appears in Agent Builder's agent selector UI
 - [ ] 5.2 Test read tool workflows end-to-end (list streams, get detail, follow-up questions)

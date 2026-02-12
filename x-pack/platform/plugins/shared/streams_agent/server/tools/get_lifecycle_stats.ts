@@ -31,7 +31,7 @@ export function createGetLifecycleStatsTool({
     id: STREAMS_GET_LIFECYCLE_STATS_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Gets lifecycle and retention information for a stream, including the current retention policy (type, value, and source), storage size, and data tier distribution.',
+      'Gets lifecycle and retention information for a stream, including the current retention policy (type, value, and source), storage size, document count, and ILM phase breakdown (when managed by ILM).',
     tags: ['streams'],
     schema: getLifecycleStatsSchema,
     handler: async (toolParams, context) => {
@@ -47,11 +47,23 @@ export function createGetLifecycleStatsTool({
 
         // Extract lifecycle from stream definition
         let lifecycle;
-        if (Streams.WiredStream.Definition.is(streamDefinition) || Streams.ClassicStream.Definition.is(streamDefinition)) {
+        let lifecycleType: 'ilm' | 'dsl' | 'inherit' | 'unknown' = 'unknown';
+
+        if (
+          Streams.WiredStream.Definition.is(streamDefinition) ||
+          Streams.ClassicStream.Definition.is(streamDefinition)
+        ) {
           lifecycle = streamDefinition.ingest.lifecycle;
+          if (lifecycle && 'ilm' in lifecycle) {
+            lifecycleType = 'ilm';
+          } else if (lifecycle && 'inherit' in lifecycle) {
+            lifecycleType = 'inherit';
+          } else if (lifecycle) {
+            lifecycleType = 'dsl';
+          }
         }
 
-        // Get data stream stats for storage info
+        // Get data stream stats for total storage info
         let storageSizeBytes: number | undefined;
         let docCount: number | undefined;
         try {
@@ -63,15 +75,80 @@ export function createGetLifecycleStatsTool({
           // Stats may not be available
         }
 
+        // If ILM-managed, get phase breakdown (same approach as the streams plugin's
+        // lifecycle/_stats route: ilm.getLifecycle → ilm.explainLifecycle → indices.stats)
+        let ilmPhases:
+          | Record<string, { name: string; sizeInBytes: number; minAge?: string }>
+          | undefined;
+        if (lifecycleType === 'ilm' && lifecycle && 'ilm' in lifecycle) {
+          try {
+            const policyName = lifecycle.ilm.policy;
+
+            // Destructure { policy } from the ILM response, matching the pattern in
+            // the streams plugin's lifecycle/_stats route handler
+            const { policy } = await esClient.ilm
+              .getLifecycle({ name: policyName })
+              .then((policies) => policies[policyName]);
+
+            const [explainResponse, indicesStatsResponse] = await Promise.all([
+              esClient.ilm.explainLifecycle({ index: name }),
+              esClient.indices.stats({ index: name, level: 'indices' }),
+            ]);
+
+            const indicesIlmDetails = explainResponse.indices;
+            const indicesStats = indicesStatsResponse.indices ?? {};
+
+            if (policy?.phases) {
+              const phases: Record<string, { name: string; sizeInBytes: number; minAge?: string }> =
+                {};
+              const phaseNames = ['hot', 'warm', 'cold', 'frozen', 'delete'] as const;
+
+              for (const phaseName of phaseNames) {
+                const phase = policy.phases[phaseName];
+                if (!phase) continue;
+
+                if (phaseName === 'delete') {
+                  phases[phaseName] = {
+                    name: phaseName,
+                    sizeInBytes: 0,
+                    minAge: phase.min_age?.toString(),
+                  };
+                  continue;
+                }
+
+                // Aggregate storage for indices in this phase
+                const sizeInBytes = Object.values(indicesIlmDetails)
+                  .filter((detail) => detail.managed && detail.phase === phaseName)
+                  .reduce((size, detail) => {
+                    const indexStats = indicesStats[detail.index!];
+                    return size + (indexStats?.total?.store?.total_data_set_size_in_bytes ?? 0);
+                  }, 0);
+
+                phases[phaseName] = {
+                  name: phaseName,
+                  sizeInBytes,
+                  minAge: phase.min_age?.toString(),
+                };
+              }
+
+              ilmPhases = phases;
+            }
+          } catch (e) {
+            logger.debug(`Could not fetch ILM phase breakdown for ${name}: ${e.message}`);
+          }
+        }
+
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
                 stream: name,
+                lifecycleType,
                 lifecycle,
                 storageSizeBytes,
                 documentCount: docCount,
+                ...(ilmPhases ? { ilmPhases } : {}),
               },
             },
           ],

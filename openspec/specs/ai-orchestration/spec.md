@@ -1,10 +1,7 @@
-## ADDED Requirements
-
-### Requirement: AI tool time ranges default to last 24 hours
-All AI orchestration tools that accept time range parameters (`startMs`, `endMs`) SHALL make those parameters optional. When omitted, the tool SHALL default to the last 24 hours using `Date.now()` server-side. This prevents the agent from hallucinating incorrect Unix timestamps.
+## Requirements
 
 ### Requirement: AI tool time ranges must be accurate when available
-When the agent has already queried documents from a stream (via `streams.query_documents`) and knows the actual time range of the data, it MUST pass those timestamps as `startMs`/`endMs` to subsequent AI tool calls. The 24-hour server-side default is a safety net for cases where the agent has no prior knowledge, not a substitute for accurate values. If the agent has not yet queried documents and is about to call an AI tool, it MUST call `query_documents` first to discover the actual time range.
+When the agent has already queried documents from a stream (via `streams.query_documents`) and knows the actual time range of the data, it MUST pass those timestamps as `startMs`/`endMs` to subsequent AI tool calls. The 24-hour server-side default (see design decision 9) is a safety net for cases where the agent has no prior knowledge, not a substitute for accurate values. If the agent has not yet queried documents and is about to call an AI tool, it MUST call `query_documents` first to discover the actual time range.
 
 #### Scenario: Agent uses known time range for AI tool
 - **WHEN** the agent has previously called `query_documents` and observed data spanning a specific time range
@@ -14,9 +11,6 @@ When the agent has already queried documents from a stream (via `streams.query_d
 #### Scenario: Agent discovers time range before AI tool
 - **WHEN** the user asks for an AI operation and no documents have been queried yet
 - **THEN** the agent calls `query_documents` first, extracts the time range from the results, and passes it to the AI tool
-
-### Requirement: AI tool connector from execution context
-All AI orchestration tools SHALL obtain the LLM connector from the Agent Builder tool context (`context.modelProvider.getDefaultModel()`) rather than accepting a `connectorId` parameter. This ensures the tools always use the same connector the agent is running on, without requiring the LLM to know or pass connector IDs.
 
 ### Requirement: Suggest partitions
 The agent SHALL provide a tool `streams.suggest_partitions` that accepts a stream name and an optional user hint, invokes the existing partition suggestion AI endpoint, and returns the suggested partitions with their names and routing conditions. Time range parameters are optional (default: last 24 hours).
@@ -36,6 +30,8 @@ The agent SHALL provide a tool `streams.suggest_partitions` that accepts a strea
 ### Requirement: Suggest processing pipeline
 The agent SHALL provide a tool `streams.suggest_processing_pipeline` that accepts a stream name and invokes the existing processing pipeline suggestion AI endpoint, returning the suggested processors.
 
+> **Note:** This tool is deferred to a follow-up change. It requires simulation infrastructure that is not yet available for agent tool use. The requirement is retained here to capture the intended behavior.
+
 #### Scenario: User asks for help extracting fields
 - **WHEN** the user asks "help me extract fields from logs.nginx" or "suggest a processing pipeline for logs.nginx"
 - **THEN** the agent calls `streams.suggest_processing_pipeline`, presents the suggested processors (type, source field, patterns/config, expected success rate), and asks the user which to accept
@@ -47,12 +43,16 @@ The agent SHALL provide a tool `streams.suggest_processing_pipeline` that accept
 ### Requirement: Suggest grok patterns
 The agent SHALL provide a tool `streams.suggest_grok_patterns` that accepts a stream name and a source field, invokes the existing grok suggestion AI endpoint, and returns suggested grok patterns.
 
+> **Note:** This tool is deferred to a follow-up change. It requires client-side heuristic input that is not yet available for agent tool use.
+
 #### Scenario: User asks for grok pattern help
 - **WHEN** the user asks "generate a grok pattern for the message field in logs.apache"
 - **THEN** the agent calls `streams.suggest_grok_patterns` and presents the suggested patterns with example matches
 
 ### Requirement: Suggest dissect patterns
 The agent SHALL provide a tool `streams.suggest_dissect_patterns` that accepts a stream name and a source field, invokes the existing dissect suggestion AI endpoint, and returns suggested dissect patterns.
+
+> **Note:** This tool is deferred to a follow-up change. It requires client-side heuristic input that is not yet available for agent tool use.
 
 #### Scenario: User asks for dissect pattern help
 - **WHEN** the user asks "generate a dissect pattern for logs.syslog"

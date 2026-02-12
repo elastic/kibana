@@ -48,10 +48,7 @@ const queryDocumentsSchema = z.object({
  * e.g. { body: { text: "hello" }, resource: { attributes: { "host.name": "h1" } } }
  * becomes { "body.text": "hello", "resource.attributes.host.name": "h1" }
  */
-function flattenDocument(
-  doc: Record<string, unknown>,
-  prefix = ''
-): Record<string, unknown> {
+function flattenDocument(doc: Record<string, unknown>, prefix = ''): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(doc)) {
     const flatKey = prefix ? `${prefix}.${key}` : key;
@@ -124,7 +121,8 @@ export function createQueryDocumentsTool({
             : response.hits.total?.value ?? 0;
 
         // Extract the time range of returned documents as epoch millis
-        // so the agent can pass them directly to AI tools as startMs/endMs
+        // so the agent can pass them directly to AI tools as startMs/endMs.
+        // Handle both string timestamps (ISO 8601) and numeric timestamps (epoch ms).
         let oldestReturnedTimestampMs: number | undefined;
         let newestReturnedTimestampMs: number | undefined;
         if (documents.length > 0) {
@@ -132,9 +130,13 @@ export function createQueryDocumentsTool({
           const oldestTs = documents[documents.length - 1]['@timestamp'];
           if (typeof newestTs === 'string') {
             newestReturnedTimestampMs = new Date(newestTs).getTime();
+          } else if (typeof newestTs === 'number') {
+            newestReturnedTimestampMs = newestTs;
           }
           if (typeof oldestTs === 'string') {
             oldestReturnedTimestampMs = new Date(oldestTs).getTime();
+          } else if (typeof oldestTs === 'number') {
+            oldestReturnedTimestampMs = oldestTs;
           }
         }
 

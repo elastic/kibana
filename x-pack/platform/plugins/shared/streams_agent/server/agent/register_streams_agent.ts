@@ -8,10 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import dedent from 'dedent';
 import { STREAMS_AGENT_ID } from '../../common/constants';
-import type {
-  StreamsAgentCoreSetup,
-  StreamsAgentPluginSetupDependencies,
-} from '../types';
+import type { StreamsAgentCoreSetup, StreamsAgentPluginSetupDependencies } from '../types';
 import { STREAMS_AGENT_TOOL_IDS } from '../tools/register_tools';
 
 export async function registerStreamsAgent({
@@ -26,8 +23,9 @@ export async function registerStreamsAgent({
   plugins.agentBuilder.agents.register({
     id: STREAMS_AGENT_ID,
     name: 'Streams Agent',
-    description: 'Agent specialized in managing Elastic Streams — querying, partitioning, processing, retention, and data quality',
-    avatar_icon: 'logstashOutput',
+    description:
+      'Agent specialized in managing Elastic Streams — querying, partitioning, processing, retention, and data quality',
+    avatar_icon: 'productStreamsWired',
     configuration: {
       instructions: getStreamsAgentInstructions(),
       tools: [{ tool_ids: STREAMS_AGENT_TOOL_IDS }],

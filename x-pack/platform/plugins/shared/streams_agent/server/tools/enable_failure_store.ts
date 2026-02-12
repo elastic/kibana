@@ -20,9 +20,7 @@ export const STREAMS_ENABLE_FAILURE_STORE_TOOL_ID = 'streams.enable_failure_stor
 
 const enableFailureStoreSchema = z.object({
   name: z.string().min(1).describe('The name of the stream'),
-  enabled: z
-    .boolean()
-    .describe('Whether to enable (true) or disable (false) the failure store'),
+  enabled: z.boolean().describe('Whether to enable (true) or disable (false) the failure store'),
 });
 
 export function createEnableFailureStoreTool({
@@ -46,17 +44,25 @@ export function createEnableFailureStoreTool({
         const { streamsClient } = await getScopedStreamsClients({ core, request });
 
         const stream = await streamsClient.getStream(name);
-        if (!Streams.WiredStream.Definition.is(stream) && !Streams.ClassicStream.Definition.is(stream)) {
+        if (
+          !Streams.WiredStream.Definition.is(stream) &&
+          !Streams.ClassicStream.Definition.is(stream)
+        ) {
           return {
             results: [
               {
                 type: ToolResultType.error,
-                data: { message: 'Failure store can only be configured on ingest streams (wired or classic).' },
+                data: {
+                  message:
+                    'Failure store can only be configured on ingest streams (wired or classic).',
+                },
               },
             ],
           };
         }
 
+        // FailureStoreEnabledWithoutLifecycle = failure store ON, lifecycle management OFF
+        // FailureStoreDisabled = failure store OFF entirely
         const failureStore: FailureStore = enabled
           ? { lifecycle: { disabled: {} } }
           : { disabled: {} };

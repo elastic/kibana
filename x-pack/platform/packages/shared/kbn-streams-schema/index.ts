@@ -129,6 +129,7 @@ export {
   type WiredIngestStreamEffectiveFailureStore,
   type FailureStoreStatsResponse,
   isEnabledFailureStore,
+  isDisabledFailureStore,
   isInheritFailureStore,
   isDisabledLifecycleFailureStore,
   isEnabledLifecycleFailureStore,

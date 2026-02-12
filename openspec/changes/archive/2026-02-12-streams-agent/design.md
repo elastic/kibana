@@ -144,9 +144,9 @@ A new `streams` namespace is added to Agent Builder's namespace list, and the ag
 
 ### 12. AI tool time ranges: Agent must pass accurate values
 
-**Decision:** The agent's system instructions require it to always pass accurate `startMs`/`endMs` values to AI tools based on data it has already observed (from prior `query_documents` calls). If no documents have been queried yet, the agent must call `query_documents` first to discover the actual time range before invoking an AI tool.
+**Decision:** The agent's system instructions require it to always pass accurate `startMs`/`endMs` values to AI tools based on data it has already observed (from prior `query_documents` calls). This behavioral requirement is specified in the ai-orchestration spec ("AI tool time ranges must be accurate when available").
 
-**Rationale:** During testing, the agent queried documents from a stream and observed data from Feb 5th, but when subsequently calling `suggest_partitions` it passed no time range. The tool defaulted to the last 24 hours, found zero documents, and returned no suggestions. The server-side 24h default (Decision 9) is a safety net, not a substitute for accurate time ranges — data can easily be older than 24 hours. The agent instructions now make this a hard requirement rather than a soft suggestion.
+**Rationale:** During testing, the agent queried documents from a stream and observed data from Feb 5th, but when subsequently calling `suggest_partitions` it passed no time range. The tool defaulted to the last 24 hours, found zero documents, and returned no suggestions. The server-side 24h default (Decision 9) is a safety net, not a substitute for accurate time ranges — data can easily be older than 24 hours.
 
 ### 13. Mutation safety: Prerequisite checklist, few-shot examples, and severity tiers
 
@@ -163,34 +163,13 @@ A new `streams` namespace is added to Agent Builder's namespace list, and the ag
 - Progressive disclosure (normal mutations get standard protocol, destructive operations get extra requirements)
 - Negative examples (explicitly show what WRONG behavior looks like)
 
-### 14. Agent instructions: Holistic prompt engineering review
+### 14. Agent instructions: Structured prompt with behavioral sections
 
-**Decision:** The agent system instructions are restructured and expanded based on a comprehensive prompt engineering review. The changes address eight identified issues:
+**Decision:** The agent system instructions are organized into discrete XML-tagged sections (`<role>`, `<mutation_protocol>`, `<tool_selection>`, `<querying_data>`, `<response_formatting>`, `<ai_tools>`, `<workflows>`, `<context_tracking>`, `<error_handling>`, `<next_steps>`, `<boundaries>`), each addressing a specific behavioral concern. Safety-critical sections (mutation protocol) are placed immediately after the role definition to leverage LLM primacy effects, and concrete few-shot examples are used throughout instead of abstract descriptions.
 
-1. **Instruction ordering** — The `<mutation_protocol>` section is moved to immediately after `<role>`, leveraging primacy effect. LLMs pay most attention to the beginning and end of instructions; safety-critical rules were previously buried in the middle.
+**Rationale:** Testing revealed that abstract protocol descriptions were bypassed by the LLM (e.g., the agent skipped preview-confirm entirely for destructive operations). Restructuring the instructions with concrete examples, self-verification checklists, and explicit formatting guidance for each tool output type resolved these issues. The "Show, Don't Tell" principle — examples and heuristics outperform abstract rules — is applied consistently.
 
-2. **Response formatting guidance** — A new `<response_formatting>` section provides explicit formatting patterns for each tool output type (schema as field lists, data quality as concise metrics, lifecycle as summary lines, partitions as numbered lists). Without this, the LLM defaults to prose for everything, producing inconsistent and verbose responses.
-
-3. **Error handling guidance** — A new `<error_handling>` section tells the agent to report errors clearly with the stream name and attempted operation, explain likely causes if known, and suggest next steps. Without this, the agent may silently retry, give generic errors, or guess at causes.
-
-4. **Multi-step workflow examples** — A new `<workflows>` section provides a concrete few-shot example of a complete orchestration flow (query data → suggest partitions → create partitions with sequential execution). This gives the LLM a template for complex multi-tool interactions.
-
-5. **Tool selection heuristics** — A new `<tool_selection>` section guides the agent on when to use `get_stream` (general overview) vs focused tools (`get_schema`, `get_data_quality`, `get_lifecycle_stats`), and when to use `query_documents` vs `list_streams`. Without this, the agent may over-call or under-call tools.
-
-6. **Tone and conciseness** — The `<role>` section now includes a communication style directive: be direct, lead with data not filler, prefer structured formatting over prose. Operations teams value brevity.
-
-7. **`list_streams` tool description fix** — The tool description claimed to return type, data quality status, and storage, but the handler only returns name and description. The description is corrected to match reality.
-
-8. **Ambiguous stream name resolution** — The `<context_tracking>` section now includes guidance for handling partial stream names (e.g., "nginx" → try "logs.nginx", fall back to `list_streams` to find matches).
-
-**Rationale:** Each issue was identified through testing or prompt engineering best practice analysis:
-- Issues 1, 6 are structural improvements grounded in LLM attention patterns and user experience research.
-- Issues 2, 4, 5 apply the "Show, Don't Tell" principle — examples and concrete heuristics outperform abstract instructions.
-- Issue 3 fills a gap that causes poor error experiences.
-- Issue 7 prevents the LLM from referencing data that doesn't exist in tool responses.
-- Issue 8 improves the natural language experience by reducing unnecessary clarification prompts.
-
-**Trade-off:** The expanded instructions add ~400–500 tokens to the system prompt. This is justified because the instructions are read once per conversation and the improvements affect every interaction. The token cost is amortized across all tool calls in the conversation.
+**Trade-off:** The expanded instructions add ~400–500 tokens to the system prompt. This is justified because the instructions are read once per conversation and the improvements affect every interaction.
 
 ## Risks / Trade-offs
 

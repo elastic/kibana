@@ -6,17 +6,18 @@ Streams provides powerful capabilities for managing data streams — partitionin
 
 - Register a new "Streams Agent" in Agent Builder with Streams-specific instructions and tools. The agent is accessible through the Agent Builder chat UI — no custom chat component is needed.
 - Define Streams-specific tools that the agent can call to query and modify streams. These tools call existing Streams APIs (both public and internal) under the hood.
-- The agent supports natural language querying of stream state: listing streams, inspecting hierarchy, checking retention, storage, data quality, schema, processors, and partitions.
-- The agent supports stream mutations through a preview-confirm-apply cycle: setting retention, creating partitions, adding processors, mapping fields, enabling failure stores, and deleting streams. Every mutation is simulated/previewed before the user confirms.
+- The agent supports natural language querying of stream state: listing streams, inspecting hierarchy, checking retention, storage, schema, data quality, processors, and partitions.
+- The agent supports stream mutations through a preview-confirm-apply cycle: setting retention, creating partitions, adding processors, mapping fields, enabling failure stores, updating descriptions, and deleting streams. Every mutation is previewed before the user confirms.
 - The agent wraps existing Streams AI features (partition suggestions, processing pipeline suggestions, grok/dissect pattern generation, feature/system identification) into conversational workflows with multi-step reasoning, rather than reimplementing them.
 - The agent maintains conversational context — when a user discusses a specific stream, follow-up questions implicitly refer to it without requiring the user to repeat the stream name. This is a behavioral requirement enforced through agent instructions; Agent Builder's built-in conversation history provides the underlying mechanism.
 
 ## Capabilities
 
 ### New Capabilities
-- `stream-querying`: Natural language read operations — listing streams, inspecting stream details (retention, storage, ingestion, processors, schema, partitions, data quality, features/systems), querying sample documents from a stream, and cross-stream analysis (e.g. "which streams have data quality issues?"). Implemented as Agent Builder tools that call existing Streams APIs.
-- `stream-management`: Natural language write operations with a preview-confirm-apply cycle — setting retention, creating/deleting partitions, adding/editing processors, mapping fields, enabling failure stores, and adjusting advanced settings. Implemented as Agent Builder tools with confirmation steps before applying mutations.
+- `stream-querying`: Natural language read operations — listing streams, inspecting stream details (retention, storage, processors, schema, partitions, data quality), querying sample documents from a stream, and cross-stream analysis (e.g. "which streams have data quality issues?"). Implemented as Agent Builder tools that call existing Streams APIs.
+- `stream-management`: Natural language write operations with a preview-confirm-apply cycle — setting retention, creating/deleting partitions, adding/editing processors, mapping fields, enabling failure stores, and updating stream descriptions. Implemented as Agent Builder tools with confirmation steps before applying mutations.
 - `ai-orchestration`: Conversational orchestration of existing Streams AI endpoints — partition suggestions, processing pipeline suggestions, grok/dissect pattern generation, feature/system identification, and description generation — exposed as Agent Builder tools that the agent can chain into multi-step workflows (e.g. "onboard this new application" triggers partitioning, then processing, then retention setup).
+- `agent-behavior`: Cross-cutting behavioral requirements for the agent — response formatting, tool selection heuristics, conversational context tracking, ambiguous stream name resolution, error handling, and next-step suggestions. These apply across all capabilities and are enforced through the agent's system instructions.
 
 ### Modified Capabilities
 

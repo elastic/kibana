@@ -33,7 +33,7 @@ export function createUpdateSettingsTool({
     id: STREAMS_UPDATE_SETTINGS_TOOL_ID,
     type: ToolType.builtin,
     description:
-      'Updates general settings for a stream like description and routing configuration. IMPORTANT: Always preview and get user confirmation before calling.',
+      'Updates the description for a stream. IMPORTANT: Always preview and get user confirmation before calling.',
     tags: ['streams'],
     schema: updateSettingsSchema,
     handler: async (toolParams, context) => {
@@ -43,12 +43,17 @@ export function createUpdateSettingsTool({
         const { streamsClient } = await getScopedStreamsClients({ core, request });
 
         const stream = await streamsClient.getStream(name);
-        if (!Streams.WiredStream.Definition.is(stream) && !Streams.ClassicStream.Definition.is(stream)) {
+        if (
+          !Streams.WiredStream.Definition.is(stream) &&
+          !Streams.ClassicStream.Definition.is(stream)
+        ) {
           return {
             results: [
               {
                 type: ToolResultType.error,
-                data: { message: 'Settings can only be updated on ingest streams (wired or classic).' },
+                data: {
+                  message: 'Settings can only be updated on ingest streams (wired or classic).',
+                },
               },
             ],
           };
@@ -67,7 +72,9 @@ export function createUpdateSettingsTool({
             {
               type: ToolResultType.other,
               data: {
-                message: `Successfully updated settings for stream "${name}": ${changedSettings.join(', ')}`,
+                message: `Successfully updated settings for stream "${name}": ${changedSettings.join(
+                  ', '
+                )}`,
                 stream: name,
                 updatedSettings: changedSettings,
               },

@@ -1,4 +1,4 @@
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Preview-confirm-apply cycle for all mutations
 Every write tool SHALL follow a preview-confirm-apply cycle. The agent MUST NOT call any write tool (`set_retention`, `fork_stream`, `delete_stream`, `update_processors`, `map_fields`, `enable_failure_store`, `update_settings`) unless ALL of the following preconditions are met:
@@ -101,35 +101,19 @@ The agent SHALL provide a tool `streams.map_fields` that accepts a stream name a
 - **THEN** the agent previews the mapping change (field name, proposed type) and after confirmation, applies the mapping
 
 ### Requirement: Enable failure store
-The agent SHALL provide a tool `streams.enable_failure_store` that accepts a stream name and an optional retention period and enables the failure store on the stream.
+The agent SHALL provide a tool `streams.enable_failure_store` that accepts a stream name and an enabled flag, and enables or disables the failure store on the stream.
 
-#### Scenario: Enable failure store with default retention
+#### Scenario: Enable failure store
 - **WHEN** the user asks "enable the failure store on logs.orders"
 - **THEN** the agent previews enabling the failure store and after confirmation, enables it
 
-### Requirement: Update advanced settings
-The agent SHALL provide a tool `streams.update_settings` that accepts a stream name and settings (shards, replicas, refresh interval) and updates the stream's advanced configuration.
+#### Scenario: Disable failure store
+- **WHEN** the user asks "disable the failure store on logs.orders"
+- **THEN** the agent previews disabling the failure store and after confirmation, disables it
 
-#### Scenario: Change replica count
-- **WHEN** the user asks "set replicas to 2 on logs.critical"
-- **THEN** the agent previews the settings change and after confirmation, applies it
+### Requirement: Update stream description
+The agent SHALL provide a tool `streams.update_settings` that accepts a stream name and an optional description, and updates the stream's general metadata.
 
-### Requirement: Error handling for failed operations
-When a tool call fails, the agent SHALL handle the error gracefully:
-1. Report the error clearly to the user — include the stream name and what the agent was trying to do
-2. If the likely cause is known, explain it briefly (e.g. "the stream may not exist", "a lock conflict occurred — another operation may be in progress", "insufficient permissions")
-3. Suggest a next step: retry, try a different approach, or ask the user for guidance
-
-The agent SHALL NOT silently retry failed operations. The agent SHALL NOT give generic "something went wrong" errors when the tool returns a specific error message.
-
-#### Scenario: Write tool fails with lock conflict
-- **WHEN** a write tool fails with a lock conflict error
-- **THEN** the agent explains that another operation may be modifying the stream concurrently, and offers to retry after a moment
-
-#### Scenario: Tool fails because stream does not exist
-- **WHEN** a tool fails because the specified stream name does not exist
-- **THEN** the agent tells the user the stream was not found, suggests checking the name, and offers to call `list_streams` to find available streams
-
-#### Scenario: Tool fails with permission error
-- **WHEN** a tool fails because the user lacks the required permissions
-- **THEN** the agent explains that the operation requires additional permissions and suggests the user contact their administrator
+#### Scenario: Update a stream's description
+- **WHEN** the user asks "set the description of logs.nginx to 'Nginx access and error logs'"
+- **THEN** the agent previews the description change and after confirmation, applies it
