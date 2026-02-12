@@ -198,3 +198,135 @@ export const esqlChartWithBreakdownColorMapping: LensAttributes = {
     },
   },
 };
+
+export const esqlXYWithCollapseByBreakdown: LensAttributes = {
+  title: 'ESQL XY with collapse by breakdown',
+  references: [],
+  state: {
+    datasourceStates: {
+      textBased: {
+        layers: {
+          'eec88dc5-7f20-46ff-bc9b-1cc9551bcc4e': {
+            index: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
+            query: {
+              esql: 'FROM kibana_sample_data_logs | LIMIT 1000\n',
+            },
+            columns: [
+              {
+                columnId: '@timestamp',
+                fieldName: '@timestamp',
+                label: '@timestamp',
+                customLabel: false,
+                meta: {
+                  type: 'date',
+                  esType: 'date',
+                },
+                inMetricDimension: true,
+              },
+              {
+                columnId: 'agent',
+                fieldName: 'agent',
+                label: 'agent',
+                customLabel: false,
+                meta: {
+                  type: 'string',
+                  esType: 'text',
+                  sourceParams: {
+                    indexPattern: 'kibana_sample_data_logs',
+                    sourceField: 'agent',
+                  },
+                  params: {
+                    id: 'string',
+                  },
+                },
+                inMetricDimension: true,
+              },
+              {
+                columnId: 'bytes',
+                fieldName: 'bytes',
+                label: 'bytes',
+                customLabel: false,
+                meta: {
+                  type: 'number',
+                  esType: 'long',
+                },
+                inMetricDimension: true,
+              },
+            ],
+            timeField: '@timestamp',
+          },
+        },
+        // @ts-expect-error
+        indexPatternRefs: [
+          {
+            id: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
+            title: 'kibana_sample_data_logs',
+            timeField: '@timestamp',
+          },
+        ],
+      },
+    },
+    filters: [],
+    query: {
+      esql: 'FROM kibana_sample_data_logs | LIMIT 1000\n',
+    },
+    visualization: {
+      legend: {
+        isVisible: true,
+        position: 'right',
+      },
+      valueLabels: 'hide',
+      fittingFunction: 'Linear',
+      axisTitlesVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: true,
+      },
+      tickLabelsVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: true,
+      },
+      labelsOrientation: {
+        x: 0,
+        yLeft: 0,
+        yRight: 0,
+      },
+      gridlinesVisibilitySettings: {
+        x: true,
+        yLeft: true,
+        yRight: true,
+      },
+      preferredSeriesType: 'line',
+      layers: [
+        {
+          layerId: 'eec88dc5-7f20-46ff-bc9b-1cc9551bcc4e',
+          seriesType: 'line',
+          xAccessor: '@timestamp',
+          splitAccessors: ['agent'],
+          accessors: ['bytes'],
+          layerType: 'data',
+          collapseFn: 'max',
+        },
+      ],
+    },
+    adHocDataViews: {
+      e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a: {
+        id: 'e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a',
+        title: 'kibana_sample_data_logs',
+        timeFieldName: '@timestamp',
+        sourceFilters: [],
+        type: 'esql',
+        fieldFormats: {},
+        runtimeFieldMap: {},
+        allowNoIndex: false,
+        name: 'kibana_sample_data_logs',
+        allowHidden: false,
+        managed: false,
+      },
+    },
+    needsRefresh: false,
+  },
+  visualizationType: 'lnsXY',
+  version: 2,
+};

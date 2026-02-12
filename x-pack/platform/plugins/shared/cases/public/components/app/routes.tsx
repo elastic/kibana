@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
 import React, { lazy, Suspense, useCallback } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -32,13 +33,24 @@ import * as i18n from './translations';
 import { useReadonlyHeader } from './use_readonly_header';
 import type { CaseViewProps } from '../case_view/types';
 import type { CreateCaseFormProps } from '../create/form';
-import { TemplateFormPage } from '../templates_v2/pages/template_form_page';
+import type { CreateTemplatePageProps } from '../templates_v2/pages/create_template/page';
+import type { EditTemplatePageProps } from '../templates_v2/pages/edit_template/page';
 import { KibanaServices } from '../../common/lib/kibana/services';
 
-const CaseViewLazy: React.FC<CaseViewProps> = lazy(() => import('../case_view'));
+const CaseViewLazy: FC<CaseViewProps> = lazy(() => import('../case_view'));
+
+const CreateTemplateLazy: FC<CreateTemplatePageProps> = lazy(
+  () => import('../templates_v2/pages/create_template/page')
+);
+
+const EditTemplateLazy: FC<EditTemplatePageProps> = lazy(
+  () => import('../templates_v2/pages/edit_template/page')
+);
+
 const AllCasesTemplatesLazy: React.FC = lazy(
   () => import('../templates_v2/pages/all_templates_page')
 );
+
 const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   actionsNavigation,
   ruleDetailsNavigation,
@@ -98,16 +110,23 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
             </Suspense>
           </Route>
         )}
+
         {isTemplatesEnabled && (
           <Route exact path={getCasesCreateTemplatePath(basePath)}>
-            <TemplateFormPage />
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <CreateTemplateLazy />
+            </Suspense>
           </Route>
         )}
+
         {isTemplatesEnabled && (
           <Route exact path={getCasesEditTemplatePath(basePath)}>
-            <TemplateFormPage />
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <EditTemplateLazy />
+            </Suspense>
           </Route>
         )}
+
         {/* NOTE: current case view implementation retains some local state between renders, eg. when going from one case directly to another one. as a short term fix, we are forcing the component remount. */}
         <Route exact path={[getCaseViewWithCommentPath(basePath), getCaseViewPath(basePath)]}>
           <Suspense fallback={<EuiLoadingSpinner />}>
