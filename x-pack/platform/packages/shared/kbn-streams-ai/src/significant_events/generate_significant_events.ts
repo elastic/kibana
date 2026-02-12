@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Feature, FeatureStatus, Streams, System } from '@kbn/streams-schema';
+import type { Feature, Streams, System } from '@kbn/streams-schema';
 import type { Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
@@ -55,7 +55,7 @@ export async function generateSignificantEvents({
 }: {
   stream: Streams.all.Definition;
   system?: System;
-  getFeatures(params?: { type?: string[]; status?: FeatureStatus[] }): Promise<Feature[]>;
+  getFeatures(params?: { type?: string[] }): Promise<Feature[]>;
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
@@ -91,7 +91,7 @@ export async function generateSignificantEvents({
           const startTime = Date.now();
           try {
             const features = await withSpan('get_stream_features_for_significant_events', () =>
-              getFeatures({ status: ['active'] })
+              getFeatures()
             );
             const llmFeatures = features.map(toLlmFeature);
             toolUsage.get_stream_features.latency_ms += Date.now() - startTime;
