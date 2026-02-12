@@ -37,7 +37,7 @@ const DATA_STREAM_USE_APM_VAR: RegistryVarsEntry = {
   name: USE_APM_VAR_NAME,
   type: 'bool',
   title: 'Use APM Server',
-  description: 'If enabled, the OTel Collector it will enable apm collector and processor.',
+  description: 'enables the apm collector and processor.',
   multi: false,
   required: false,
   show_user: true,
