@@ -13,11 +13,12 @@ import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { DataViewListItem, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { getNextTabNumber, type TabItem } from '@kbn/unified-tabs';
 import { createAsyncThunk, miniSerializeError } from '@reduxjs/toolkit';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type {
   InternalStateDependencies,
   InternalStateDispatch,
@@ -118,7 +119,7 @@ export const getSerializedSearchSourceDataViewDetails = (
 
 export const parseControlGroupJson = (
   jsonString?: string | null
-): ControlPanelsState<ESQLControlState> => {
+): ControlPanelsState<OptionsListESQLControlState> => {
   try {
     return jsonString ? JSON.parse(jsonString) : {};
   } catch (e) {
@@ -135,7 +136,7 @@ export const parseControlGroupJson = (
  * @returns An array of ESQLControlVariable objects.
  */
 export const extractEsqlVariables = (
-  panels: ControlPanelsState<ESQLControlState> | null
+  panels: ControlPanelsState<OptionsListESQLControlState> | null
 ): ESQLControlVariable[] => {
   if (!panels || Object.keys(panels).length === 0) {
     return [];
@@ -158,7 +159,7 @@ export const extractEsqlVariables = (
 
       acc.push({
         key: panel.variableName,
-        type: panel.variableType,
+        type: panel.variableType as ESQLVariableType,
         value,
       });
     }

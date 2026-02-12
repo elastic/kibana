@@ -9489,19 +9489,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ui-actions-enhanced-examples-plugin@link:x-pack/examples/ui_actions_enhanced_examples":
-  version "0.0.0"
-  uid ""
-
 "@kbn/ui-actions-enhanced-plugin@link:src/platform/plugins/shared/ui_actions_enhanced":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ui-actions-examples-plugin@link:examples/ui_action_examples":
-  version "0.0.0"
-  uid ""
-
-"@kbn/ui-actions-explorer-plugin@link:examples/ui_actions_explorer":
   version "0.0.0"
   uid ""
 

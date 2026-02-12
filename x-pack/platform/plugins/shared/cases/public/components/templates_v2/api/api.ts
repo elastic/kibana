@@ -15,6 +15,7 @@ import {
   INTERNAL_BULK_EXPORT_TEMPLATES_URL,
   INTERNAL_TEMPLATE_CREATORS_URL,
   INTERNAL_TEMPLATE_TAGS_URL,
+  INTERNAL_TEMPLATE_DETAILS_URL,
   INTERNAL_TEMPLATES_URL,
 } from '../../../../common/constants';
 import { KibanaServices } from '../../../common/lib/kibana';
@@ -106,6 +107,23 @@ export const getTemplates = async ({
   };
 };
 
+export const getTemplate = async ({
+  templateId,
+  signal,
+}: {
+  templateId: string;
+  signal?: AbortSignal;
+}): Promise<ParsedTemplate> => {
+  const response = await KibanaServices.get().http.fetch<ParsedTemplate>(
+    INTERNAL_TEMPLATE_DETAILS_URL.replace('{template_id}', templateId),
+    {
+      method: 'GET',
+      signal,
+    }
+  );
+  return response;
+};
+
 export const patchTemplate = async ({
   templateId,
   template,
@@ -114,28 +132,14 @@ export const patchTemplate = async ({
   template: TemplateUpdateRequest;
   signal?: AbortSignal;
 }): Promise<Template> => {
-  // TODO: Replace with actual API call when available
-  // const response = await KibanaServices.get().http.fetch<Template>(`${TEMPLATES_URL}/${templateId}`, {
-  //   method: 'PATCH',
-  //   body: JSON.stringify(template),
-  //   signal,
-  // });
-  // return response;
-
-  // Return mock data
-  const existingTemplate = MOCK_TEMPLATES.find((t) => t.templateId === templateId);
-
-  if (!existingTemplate) {
-    throw new Error(`Template with id ${templateId} not found`);
-  }
-
-  const updatedTemplate: Template = {
-    ...existingTemplate,
-    ...template,
-    templateVersion: existingTemplate.templateVersion + 1,
-  };
-
-  return updatedTemplate;
+  const response = await KibanaServices.get().http.fetch<Template>(
+    INTERNAL_TEMPLATE_DETAILS_URL.replace('{template_id}', templateId),
+    {
+      method: 'PATCH',
+      body: JSON.stringify(template),
+    }
+  );
+  return response;
 };
 
 export const bulkDeleteTemplates = async ({
