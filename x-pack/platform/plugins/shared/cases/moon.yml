@@ -118,6 +118,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - scripts/**/*
+    - docs/openapi/**/*.gen.ts
     - '!target/**/*'
 tasks:
   jest:
