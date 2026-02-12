@@ -260,10 +260,45 @@ paths:
                   }
       responses:
         '200':
-          description: A successful response.
-          # content:
-          #   application/json:
-          #     examples:
+          description: >
+            A successful response.
+            The response may include a `warnings` array when the monitor configuration has non-critical issues.
+            For example, if a browser monitor specifies a timeout but has no private locations configured, a warning is returned indicating the timeout will have no effect.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  warnings:
+                    type: array
+                    description: >
+                      An optional array of warnings about the monitor configuration.
+                    items:
+                      $ref: "#/components/schemas/monitorWarning"
+        '400':
+          description: >
+            Bad request.
+            For browser monitors, a 400 error is returned if the timeout is less than 30 seconds.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    example: 400
+                  error:
+                    type: string
+                    example: Bad Request
+                  message:
+                    type: string
+                    example: Browser Monitor timeout is invalid
+                  attributes:
+                    type: object
+                    properties:
+                      details:
+                        type: string
+                        example: Invalid timeout 20 seconds supplied. Minimum timeout for browser monitors is 30 seconds.
   /api/synthetics/monitors/{id}:
     delete:
       summary: Delete a monitor
@@ -446,8 +481,25 @@ paths:
                     "locations": ["united_kingdom"]
                   }
       responses:
-       "200":
-          description: OK
+        '200':
+          description: >
+            A successful response.
+            The response may include a `warnings` array when the monitor configuration has non-critical issues.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  warnings:
+                    type: array
+                    description: >
+                      An optional array of warnings about the monitor configuration.
+                    items:
+                      $ref: "#/components/schemas/monitorWarning"
+        '400':
+          description: >
+            Bad request.
+            For browser monitors, a 400 error is returned if the timeout is less than 30 seconds.
   /api/synthetics/monitors/_bulk_delete:
     post:
       summary: Delete monitors
@@ -1278,6 +1330,21 @@ components:
           description: >
             The monitor timeout in seconds.
             The monitor will fail if it doesn't complete within this time.
+
+
+            For browser monitors, the minimum timeout is 30 seconds.
+            Browser monitor timeouts are only applied when the monitor runs on private locations.
+            If a browser monitor specifies a timeout but has no private locations configured, the timeout will have no effect and a warning will be returned in the response.
+    monitorWarning:
+      title: Monitor warning
+      type: object
+      properties:
+        id:
+          type: string
+          description: The monitor ID associated with the warning.
+        message:
+          type: string
+          description: A human-readable warning message.
     browserMonitorFields:
       title: Browser monitor fields
       allOf: # Combines the common fields schema with the browser monitor-specific details
