@@ -50,6 +50,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     pipeline.push(getAgentImageConfig({ returnYaml: true }));
+    // Pushing steps allows flexibility on which getPipeline is first, without conditionals on the removeSteps parameter
     pipeline.push('steps:');
 
     const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
@@ -61,6 +62,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     }
 
     await runPreBuild();
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml'));
 
     /**
      * Start FTR bench early to avoid blocking the build.
@@ -99,8 +101,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/jest_bench.yml'));
     }
-
-    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml'));
 
     if (prHasFIPSLabel()) {
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml'));
