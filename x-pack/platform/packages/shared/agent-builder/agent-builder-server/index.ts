@@ -55,6 +55,10 @@ export type {
   InternalToolAvailabilityHandler,
   InternalToolDefinition,
   ToolReturnSummarizerFn,
+  ToolRegistry,
+  ToolListParams,
+  ToolCreateParams,
+  ToolUpdateParams,
 } from './tools';
 export { getToolResultId, createErrorResult, createOtherResult, isToolResultId } from './tools';
 export type {
@@ -70,5 +74,6 @@ export type {
   AgentEventEmitter,
   AgentEventEmitterFn,
   RunAgentOnEventFn,
+  ExperimentalFeatures,
 } from './agents';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';

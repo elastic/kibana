@@ -45,6 +45,7 @@ export async function registerObservabilityAgent({
 
         ${getInvestigationInstructions()}
         ${getReasoningInstructions()}
+        ${getTraceMetricFormatInstructions()}
         ${getFieldDiscoveryInstructions()}
         ${getKqlInstructions()}
         ${getEntityLinkingInstructions({ urlPrefix })}
@@ -59,8 +60,8 @@ export async function registerObservabilityAgent({
 
 function getInvestigationInstructions() {
   return dedent(`
-    ### INVESTIGATION APPROACH
-
+    <investigation_approach>
+    ### Investigation Approach
     Follow a progressive workflow - start broad, then narrow down:
     1. **Triage**: What's the severity? How many users/services affected?
     2. **Scope**: Which components are affected? What's the blast radius?
@@ -68,30 +69,35 @@ function getInvestigationInstructions() {
     4. **Correlation**: What error patterns exist? What's the sequence of events?
     5. **Root Cause**: Distinguish the SOURCE (where the problem started) from AFFECTED services (impacted downstream)
     6. **Verification**: Does your hypothesis explain ALL the symptoms? If not, dig deeper.
+    </investigation_approach>
   `);
 }
 
 function getReasoningInstructions() {
   return dedent(`
-    ### REASONING PRINCIPLES
-
+    <reasoning_principles>
+    ### Reasoning Principles
     - **Be quantitative**: Quote specific metrics (error rate %, latency ms, throughput rpm). Avoid vague terms like "high" without numbers.
     - **Correlation ≠ causation**: Look for temporal sequence (what happened FIRST) and causal mechanism.
     - **Consider all layers**: Infrastructure (CPU, memory, disk) → Application (latency, throughput, failure rate) → Dependencies (databases, caches, external APIs).
     - **Follow evidence**: Support hypotheses with data. Acknowledge uncertainty when evidence is inconclusive.
+    </reasoning_principles>
   `);
 }
 
 function getFieldDiscoveryInstructions() {
   return dedent(`
-    ### FIELD DISCOVERY
+    <field_discovery>
+    ### Field Discovery
     Before using field names in \`groupBy\`, \`kqlFilter\`, or \`aggregation.field\` parameters, call \`${OBSERVABILITY_GET_INDEX_INFO_TOOL_ID}\` first.
     Clusters use different naming conventions (ECS vs OpenTelemetry) - discovering fields first prevents errors.
+    </field_discovery>
   `);
 }
 
 function getKqlInstructions() {
   return dedent(`
+    <kql_syntax>
     ### KQL (Kibana Query Language)
     Use KQL syntax for \`kqlFilter\` parameters:
     - Match: \`field: value\`, \`field: (a OR b OR c)\`
@@ -100,6 +106,17 @@ function getKqlInstructions() {
     - Negation: \`NOT field: value\`
     - Logical operators: Combine with \`AND\`/\`OR\`, \`(field: value OR field: value) AND field: value\`, use parentheses for precedence
     - Use quotes for exact phrases in text fields: \`message: "connection refused"\`
+    </kql_syntax>
+  `);
+}
+
+function getTraceMetricFormatInstructions() {
+  return dedent(`
+    ### TRACE METRIC FORMATS
+    All observability tools use these standardized units for trace metrics:
+    - **Latency**: milliseconds (ms)
+    - **Throughput**: transactions per minute (tpm)
+    - **Failure rate**: 0-1 scale (e.g., 0.05 = 5% failure rate)
   `);
 }
 
@@ -109,9 +126,10 @@ function getKqlInstructions() {
  */
 export function getEntityLinkingInstructions({ urlPrefix }: { urlPrefix: string }): string {
   return dedent(`
+  <entity_linking>
   ### Entity Linking Guidelines
   Use markdown for readability. When referencing entities, create clickable links.
-  IMPORTANT: Do NOT wrap links in backticks - backticks prevent links from being clickable.
+  **IMPORTANT**: Do NOT wrap links in backticks - backticks prevent links from being clickable.
 
   | Entity | Link Format | Example |
   |--------|-------------|---------|
@@ -127,6 +145,6 @@ export function getEntityLinkingInstructions({ urlPrefix }: { urlPrefix: string 
   | Alert | [<alertId>](${urlPrefix}/app/observability/alerts/<alertId>) | "Alert [alert-uuid-123](${urlPrefix}/app/observability/alerts/alert-uuid-123) was triggered." |
   | Alert Rules | [<alertRuleId>](${urlPrefix}/app/observability/alerts/rules/<alertRuleId>) | "Alert Rule [alert-uuid-123](${urlPrefix}/app/observability/alerts/rules/alert-uuid-123)." |
   | Logs Explorer | [Logs](${urlPrefix}/app/logs) | "View [Logs](${urlPrefix}/app/logs) to investigate the issue further." |
-
+  </entity_linking>
 `);
 }

@@ -6,17 +6,21 @@
  */
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { Model } from '@kbn/inference-common';
-import type { Client as EsClient } from '@elastic/elasticsearch';
 import chalk from 'chalk';
 import { hostname } from 'os';
-import {
+import type { Model } from '@kbn/inference-common';
+import type {
   EvaluationScoreRepository,
-  type EvaluationScoreDocument,
-  parseScoreDocuments,
+  EvaluatorStats as RepositoryEvaluatorStats,
 } from './score_repository';
-import { buildEvaluationResults, calculateEvaluatorStats } from './evaluation_stats';
-import type { EvaluationReport, RanExperiment, TraceLinkInfo } from '../types';
+import { type EvaluationScoreDocument } from './score_repository';
+import { getGitMetadata } from './git_metadata';
+import {
+  buildEvaluationResults,
+  calculateEvaluatorStats,
+  type DatasetScoreWithStats,
+} from './evaluation_stats';
+import type { EvaluationReport, RanExperiment, TraceLinkInfo, EvaluationRun, TaskRun } from '../types';
 import { validateTraceId } from './improvement_suggestions/trace_preprocessor';
 
 /**
@@ -183,9 +187,95 @@ export function generateTraceUrl(
   return `${baseUrl}/traces/${traceId}`;
 }
 
+function getTaskRun(evalRun: EvaluationRun, runs: RanExperiment['runs']): TaskRun {
+  return runs[evalRun.experimentRunId];
+}
+
+/**
+ * Maps ran experiments to evaluation score documents for Elasticsearch export.
+ */
+export async function mapToEvaluationScoreDocuments({
+  experiments,
+  taskModel,
+  evaluatorModel,
+  runId,
+  totalRepetitions,
+}: {
+  experiments: RanExperiment[];
+  taskModel: Model;
+  evaluatorModel: Model;
+  runId: string;
+  totalRepetitions: number;
+  /** Optional base URL for trace viewing (e.g., Phoenix UI URL) - use buildEvaluationReport for trace link info */
+  traceBaseUrl?: string;
+  /** Optional project ID for trace viewing (used by Phoenix/Langfuse) - use buildEvaluationReport for trace link info */
+  projectId?: string;
+}): Promise<EvaluationScoreDocument[]> {
+  const documents: EvaluationScoreDocument[] = [];
+  const timestamp = new Date().toISOString();
+  const gitMetadata = getGitMetadata();
+  const hostName = hostname();
+
+  for (const experiment of experiments) {
+    const { datasetId, evaluationRuns, runs = {} } = experiment;
+    if (!evaluationRuns) {
+      continue;
+    }
+
+    const datasetName = experiment.datasetName ?? datasetId;
+
+    for (const evalRun of evaluationRuns) {
+      const taskRun = getTaskRun(evalRun, runs);
+      const exampleId = evalRun.exampleId ?? String(taskRun.exampleIndex);
+
+      documents.push({
+        '@timestamp': timestamp,
+        run_id: runId,
+        experiment_id: experiment.id ?? '',
+        example: {
+          id: exampleId,
+          index: taskRun.exampleIndex,
+          dataset: {
+            id: datasetId,
+            name: datasetName,
+          },
+        },
+        task: {
+          trace_id: taskRun.traceId ?? null,
+          repetition_index: taskRun.repetition,
+          model: taskModel,
+        },
+        evaluator: {
+          name: evalRun.name,
+          score: evalRun.result?.score ?? null,
+          label: evalRun.result?.label ?? null,
+          explanation: evalRun.result?.explanation ?? null,
+          metadata: evalRun.result?.metadata ?? null,
+          trace_id: evalRun.traceId ?? null,
+          model: evaluatorModel,
+        },
+        run_metadata: {
+          git_branch: gitMetadata.branch,
+          git_commit_sha: gitMetadata.commitSha,
+          total_repetitions: totalRepetitions,
+        },
+        environment: {
+          hostname: hostName,
+        },
+      });
+    }
+  }
+
+  return documents;
+}
+
+/**
+ * Builds an evaluation report from experiments with dataset scores, stats, and trace link info.
+ * Used when reporting from in-memory experiments (without ES export).
+ */
 export async function buildEvaluationReport({
   experiments,
-  model,
+  taskModel,
   evaluatorModel,
   repetitions,
   runId,
@@ -193,95 +283,76 @@ export async function buildEvaluationReport({
   projectId,
 }: {
   experiments: RanExperiment[];
-  model: Model;
+  taskModel: Model;
   evaluatorModel: Model;
   repetitions: number;
   runId?: string;
-  /** Optional base URL for trace viewing (e.g., Phoenix UI URL) */
   traceBaseUrl?: string;
-  /** Optional project ID for trace viewing (used by Phoenix/Langfuse) */
   projectId?: string;
 }): Promise<EvaluationReport> {
   const { datasetScores } = await buildEvaluationResults(experiments);
 
-  const datasetScoresWithStats = datasetScores.map((dataset) => ({
-    ...dataset,
+  const datasetScoresWithStats: DatasetScoreWithStats[] = datasetScores.map((ds) => ({
+    ...ds,
     evaluatorStats: new Map(
-      Array.from(dataset.evaluatorScores.entries()).map(([evaluatorName, scores]) => {
-        const stats = calculateEvaluatorStats(scores, dataset.numExamples);
-        return [evaluatorName, stats];
-      })
+      [...ds.evaluatorScores.entries()].map(([name, scores]) => [
+        name,
+        calculateEvaluatorStats(scores, ds.numExamples),
+      ])
     ),
   }));
 
-  const currentRunId = runId || process.env.TEST_RUN_ID;
-
-  if (!currentRunId) {
-    throw new Error(
-      'runId must be provided either as a parameter or via TEST_RUN_ID environment variable'
-    );
+  const stats: RepositoryEvaluatorStats[] = [];
+  for (const ds of datasetScoresWithStats) {
+    for (const [evaluatorName, evaluatorStats] of ds.evaluatorStats.entries()) {
+      stats.push({
+        datasetId: ds.id,
+        datasetName: ds.name,
+        evaluatorName,
+        stats: {
+          mean: evaluatorStats.mean,
+          median: evaluatorStats.median,
+          stdDev: evaluatorStats.stdDev,
+          min: evaluatorStats.min,
+          max: evaluatorStats.max,
+          count: evaluatorStats.count,
+        },
+      });
+    }
   }
 
-  // Collect trace link information
   const traceLinkInfo = collectTraceLinkInfo(experiments, traceBaseUrl, projectId);
 
   return {
-    datasetScoresWithStats,
-    model,
+    stats,
+    model: taskModel,
     evaluatorModel,
     repetitions,
-    runId: currentRunId,
+    runId: runId ?? '',
     traceLinkInfo: traceLinkInfo.totalTraceCount > 0 ? traceLinkInfo : undefined,
   };
 }
 
 export async function exportEvaluations(
-  report: EvaluationReport,
-  esClient: EsClient,
+  documents: EvaluationScoreDocument[],
+  scoreRepository: EvaluationScoreRepository,
   log: SomeDevLog
 ): Promise<void> {
-  if (report.datasetScoresWithStats.length === 0) {
-    log.warning('No dataset scores available to export to Elasticsearch');
+  if (documents.length === 0) {
+    log.warning('No evaluation scores to export');
     return;
   }
 
   log.info(chalk.blue('\n═══ EXPORTING TO ELASTICSEARCH ═══'));
 
-  const exporter = new EvaluationScoreRepository(esClient, log);
+  await scoreRepository.exportScores(documents);
 
-  await exporter.exportScores({
-    datasetScoresWithStats: report.datasetScoresWithStats,
-    model: report.model,
-    evaluatorModel: report.evaluatorModel,
-    runId: report.runId,
-    repetitions: report.repetitions,
-  });
+  const { run_id: docRunId, task, environment } = documents[0];
 
-  const modelId = report.model.id || 'unknown';
-
-  log.info(chalk.green('✅ Model scores exported to Elasticsearch successfully!'));
+  log.info(chalk.green('✅ Evaluation scores exported successfully!'));
   log.info(
     chalk.gray(
-      `You can query the data using: environment.hostname:"${hostname()}" AND model.id:"${modelId}" AND run_id:"${report.runId
-      }"`
+      `You can query the data using: environment.hostname:"${environment.hostname}" AND task.model.id:"${task.model.id}" AND run_id:"${docRunId}"`
     )
   );
-}
-
-export function formatReportData(scores: EvaluationScoreDocument[]): EvaluationReport {
-  if (scores.length === 0) {
-    throw new Error('No documents to format');
-  }
-
-  const scoresWithStats = parseScoreDocuments(scores);
-
-  const repetitions = scores[0].repetitions ?? 1;
-
-  return {
-    datasetScoresWithStats: scoresWithStats,
-    model: scores[0].model as Model,
-    evaluatorModel: scores[0].evaluator_model as Model,
-    repetitions,
-    runId: scores[0].run_id,
-  };
 }

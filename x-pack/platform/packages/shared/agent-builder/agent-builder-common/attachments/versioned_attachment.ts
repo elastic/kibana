@@ -11,11 +11,13 @@ import type { AttachmentType, AttachmentDataOf } from './attachment_types';
 /**
  * Represents a single version of an attachment's content.
  */
-export interface AttachmentVersion<DataType = unknown> {
+export interface AttachmentVersion<DataType = unknown, RawDataType = unknown> {
   /** Version number (starts at 1) */
   version: number;
   /** The attachment data for this version */
   data: DataType;
+  /** The attachment raw data for by reference attachments */
+  raw_data?: RawDataType;
   /** When this version was created */
   created_at: string;
   /** Hash of the content for deduplication */
@@ -154,6 +156,7 @@ export const attachmentVersionRefSchema = z.object({
 export const attachmentVersionSchema = z.object({
   version: z.number().int().positive(),
   data: z.unknown(),
+  raw_data: z.unknown().optional(),
   created_at: z.string(),
   content_hash: z.string(),
   estimated_tokens: z.number().int().optional(),

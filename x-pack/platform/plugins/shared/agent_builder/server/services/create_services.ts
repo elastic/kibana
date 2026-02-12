@@ -19,12 +19,15 @@ import { RunnerFactoryImpl } from './runner';
 import { ConversationServiceImpl } from './conversation';
 import { createChatService } from './chat';
 import { type AttachmentService, createAttachmentService } from './attachments';
+import { type SkillService, createSkillService } from './skills';
+import { AuditLogService } from '../audit';
 
 interface ServiceInstances {
   tools: ToolsService;
   agents: AgentsService;
   attachments: AttachmentService;
   skills: SkillsService;
+  skill: SkillService;
 }
 
 export class ServiceManager {
@@ -38,6 +41,7 @@ export class ServiceManager {
       agents: new AgentsService(),
       attachments: createAttachmentService(),
       skills: new SkillsService(),
+      skill: createSkillService(),
     };
 
     this.internalSetup = {
@@ -45,6 +49,7 @@ export class ServiceManager {
       agents: this.services.agents.setup({ logger }),
       attachments: this.services.attachments.setup(),
       skills: this.services.skills.setup({ logger }),
+      skill: this.services.skill.setup(),
     };
 
     return this.internalSetup;
@@ -76,6 +81,8 @@ export class ServiceManager {
     };
 
     const attachments = this.services.attachments.start();
+    const skills = this.services.skills.start();
+    const skillServiceStart = this.services.skill.start();
 
     const tools = this.services.tools.start({
       getRunner,
@@ -96,12 +103,12 @@ export class ServiceManager {
       toolsService: tools,
     });
 
-    const skills = this.services.skills.start();
-
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
       security,
       elasticsearch,
+      uiSettings,
+      savedObjects,
       inference,
       spaces,
       actions,
@@ -109,6 +116,7 @@ export class ServiceManager {
       agentsService: agents,
       attachmentsService: attachments,
       skillsService: skills,
+      skillServiceStart,
       trackingService,
     });
     runner = runnerFactory.getRunner();
@@ -118,6 +126,11 @@ export class ServiceManager {
       security,
       elasticsearch,
       spaces,
+    });
+
+    const auditLogService = new AuditLogService({
+      security,
+      logger: logger.get('audit'),
     });
 
     const chat = createChatService({
@@ -136,8 +149,10 @@ export class ServiceManager {
       agents,
       attachments,
       skills,
+      skill: skillServiceStart,
       conversations,
       runnerFactory,
+      auditLogService,
       chat,
     };
 

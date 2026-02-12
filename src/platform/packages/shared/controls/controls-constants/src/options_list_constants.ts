@@ -12,4 +12,4 @@ export const OPTIONS_LIST_DEFAULT_SORT = {
   direction: 'desc',
 } as const;
 
-export const DEFAULT_SEARCH_TECHNIQUE = 'prefix';
+export const DEFAULT_SEARCH_TECHNIQUE = 'wildcard';

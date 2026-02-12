@@ -10,7 +10,6 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { EsClient, ScoutWorkerFixtures } from '@kbn/scout';
 import type { EvaluationCriterion } from './evaluators/criteria';
-import type { EvaluationAnalysisService } from './utils/analysis';
 import { type EvaluationReporter } from './utils/reporting/evaluation_reporter';
 import type {
   EvaluatorDisplayOptions,
@@ -18,6 +17,7 @@ import type {
 } from './utils/reporting/report_table';
 import type { DatasetScoreWithStats } from './utils/evaluation_stats';
 import type { PreprocessedTrace } from './utils/improvement_suggestions/trace_preprocessor';
+import type { EvaluatorStats } from './utils/score_repository';
 
 export interface EvaluationDataset<TExample extends Example = Example> {
   name: string;
@@ -70,7 +70,7 @@ export interface EvaluatorParams<TExample extends Example, TTaskOutput extends T
 export interface EvaluationResult {
   score?: number | null;
   label?: string | null;
-  explanation?: string;
+  explanation?: string | null;
   reasoning?: string;
   details?: unknown;
   metadata?: Record<string, unknown> | undefined;
@@ -139,40 +139,43 @@ export interface ExampleWithId extends Example {
   id: string;
 }
 
+export interface TaskRun {
+  exampleIndex: number;
+  repetition: number;
+  input: Example['input'];
+  expected: Example['output'];
+  metadata: Example['metadata'];
+  output: TaskOutput;
+  traceId?: string | null;
+}
+
+export interface EvaluationRun {
+  name: string;
+  result?: EvaluationResult;
+  experimentRunId: string;
+  traceId?: string | null;
+  exampleId?: string;
+}
+
 export interface RanExperiment {
   id: string;
   datasetId: string;
   datasetName: string;
   datasetDescription?: string;
-  runs: Record<
-    string,
-    {
-      exampleIndex: number;
-      repetition: number;
-      input: Example['input'];
-      expected: Example['output'];
-      metadata: Example['metadata'];
-      output: TaskOutput;
+  runs: Record<string, TaskRun & { evalThreadId?: string }>;
+  evaluationRuns: Array<
+    EvaluationRun & {
       /**
-       * Optional thread ID from the evaluation run.
-       * Useful for correlating runs with external conversation/thread systems.
+       * Optional linkage back to the originating run.
+       *
+       * - Always populated by the in-Kibana executor.
+       * - May be missing when using the Phoenix-backed executor (depends on Phoenix payload shape).
        */
-      evalThreadId?: string;
+      runKey?: string;
+      exampleIndex?: number;
+      repetition?: number;
     }
   >;
-  evaluationRuns: Array<{
-    name: string;
-    result?: EvaluationResult;
-    /**
-     * Optional linkage back to the originating run.
-     *
-     * - Always populated by the in-Kibana executor.
-     * - May be missing when using the Phoenix-backed executor (depends on Phoenix payload shape).
-     */
-    runKey?: string;
-    exampleIndex?: number;
-    repetition?: number;
-  }>;
   experimentMetadata?: Record<string, unknown>;
 }
 
@@ -232,7 +235,7 @@ export interface TraceLinkInfo {
 }
 
 export interface EvaluationReport {
-  datasetScoresWithStats: DatasetScoreWithStats[];
+  stats: EvaluatorStats[];
   model: Model;
   evaluatorModel: Model;
   repetitions: number;
@@ -258,7 +261,6 @@ export interface EvaluationSpecificWorkerFixtures {
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
   repetitions: number;
-  evaluationAnalysisService: EvaluationAnalysisService;
   reportDisplayOptions: ReportDisplayOptions;
   reportModelScore: EvaluationReporter;
   traceEsClient: EsClient;
@@ -279,7 +281,6 @@ export interface EvaluationWorkerFixtures extends ScoutWorkerFixtures {
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
   repetitions: number;
-  evaluationAnalysisService: EvaluationAnalysisService;
 }
 
 /**

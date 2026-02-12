@@ -24,6 +24,7 @@ export {
   createAttackDiscoveryIntegrationService,
   createNoOpAttackDiscoveryIntegrationService,
 } from './attack_discovery_integration';
+export { TemplatesService } from './templates';
 
 export interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;

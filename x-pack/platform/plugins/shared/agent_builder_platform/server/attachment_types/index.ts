@@ -13,6 +13,7 @@ import { createScreenContextAttachmentType } from './screen_context';
 import { createWorkflowDraftAttachmentType } from './workflow_draft';
 import { createWorkflowAttachmentType } from './workflow';
 import { createSavedObjectAttachmentType } from './saved_object';
+import { createVisualizationRefAttachmentType } from './visualization_ref';
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
@@ -35,6 +36,7 @@ export const registerAttachmentTypes = ({
     createWorkflowDraftAttachmentType(),
     createWorkflowAttachmentType(),
     createSavedObjectAttachmentType(),
+    createVisualizationRefAttachmentType(),
   ];
 
   attachmentTypes.forEach((attachmentType) => {

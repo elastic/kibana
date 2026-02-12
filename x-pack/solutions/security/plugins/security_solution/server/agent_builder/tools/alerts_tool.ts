@@ -12,7 +12,6 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { DEFAULT_ALERTS_INDEX, ESSENTIAL_ALERT_FIELDS } from '../../../common/constants';
-import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
@@ -251,16 +250,20 @@ export const alertsTool = (
     },
     handler: async (
       params,
-      { request, esClient, modelProvider, events }
+      { request, esClient, modelProvider, spaceId, events }
     ) => {
-      const asAny = params as any;
+      const asAny = params as Record<string, unknown>;
 
       // Determine the index to use: either explicitly provided or based on the current space
       const searchIndex =
-        asAny?.index ?? `${DEFAULT_ALERTS_INDEX}-${getSpaceIdFromRequest(request)}`;
+        (asAny?.index as string | undefined) ??
+        `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
       // WRITE: set workflow status / acknowledge
-      if (asAny?.operation === 'set_workflow_status' || asAny?.operation === 'acknowledge') {
+      if (
+        asAny?.operation === 'set_workflow_status' ||
+        asAny?.operation === 'acknowledge'
+      ) {
         const confirm = asAny?.confirm;
         if (confirm !== true) {
           return {
@@ -279,9 +282,11 @@ export const alertsTool = (
           };
         }
 
-        const status = asAny?.operation === 'acknowledge' ? 'acknowledged' : asAny?.status;
-        const alertIds: string[] = Array.isArray(asAny?.alertIds) ? asAny.alertIds : [];
-        const reason: string | undefined = status === 'closed' ? asAny?.reason : undefined;
+        const status =
+          asAny?.operation === 'acknowledge' ? 'acknowledged' : (asAny?.status as string);
+        const alertIds: string[] = Array.isArray(asAny?.alertIds) ? (asAny.alertIds as string[]) : [];
+        const reason: string | undefined =
+          status === 'closed' ? (asAny?.reason as string | undefined) : undefined;
 
         const updatedAt = new Date().toISOString();
         const scriptReason = status === 'closed' ? reason ?? null : null;
@@ -322,7 +327,7 @@ export const alertsTool = (
               ],
               minimum_should_match: 1,
             },
-          } as any,
+          },
         });
 
         return {
@@ -341,8 +346,8 @@ export const alertsTool = (
       }
 
       // READ: search
-      const nlQuery = asAny?.query;
-      const isCount = asAny?.isCount;
+      const nlQuery = asAny?.query as string;
+      const isCount = asAny?.isCount as boolean | undefined;
 
       // If the query looks like a "get alert by id" request, do a deterministic lookup first.
       // This avoids treating the id as a file hash and building the wrong structured query.
@@ -362,8 +367,8 @@ export const alertsTool = (
               ],
               minimum_should_match: 1,
             },
-          } as any,
-          _source: ESSENTIAL_ALERT_FIELDS as any,
+          },
+          _source: ESSENTIAL_ALERT_FIELDS,
         });
 
         return {
@@ -387,11 +392,11 @@ export const alertsTool = (
         const size = isCount ? 0 : 50;
         const raw = await esClient.asCurrentUser.search({
           index: searchIndex,
-          query: dslQuery as any,
+          query: dslQuery,
           track_total_hits: true,
           size,
           ...(size > 0 ? { sort: [{ '@timestamp': 'desc' }] } : {}),
-          _source: ESSENTIAL_ALERT_FIELDS as any,
+          _source: ESSENTIAL_ALERT_FIELDS,
         });
 
         return {
@@ -406,12 +411,11 @@ export const alertsTool = (
         };
       }
 
-      // Enhance the query with KEEP clause instructions if searching alerts index
+      // Fall back to runSearchTool for general natural language queries
       const enhancedQuery = enhanceQueryForAlerts(nlQuery, searchIndex, isCount);
 
       logger.debug(
-        `alerts tool called with query: ${nlQuery}, index: ${searchIndex}, isCount: ${isCount ?? false
-        }`
+        `alerts tool called with query: ${nlQuery}, index: ${searchIndex}, isCount: ${isCount ?? false}`
       );
       const results = await runSearchTool({
         nlQuery: enhancedQuery,

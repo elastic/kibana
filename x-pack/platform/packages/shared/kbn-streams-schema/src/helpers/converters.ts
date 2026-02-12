@@ -7,6 +7,7 @@
 
 import { omit } from 'lodash';
 import { Streams } from '../models/streams';
+import { QueryStream } from '../models/query';
 
 /**
  * Parses a stream upsert request and converts it into the corresponding stream definition.
@@ -50,6 +51,14 @@ export const convertUpsertRequestIntoDefinition = (
           updated_at: now,
         },
       },
+    };
+  }
+
+  if (QueryStream.UpsertRequest.is(request)) {
+    return {
+      ...request.stream,
+      name,
+      updated_at: now,
     };
   }
 
@@ -98,6 +107,15 @@ export const convertGetResponseIntoUpsertRequest = (
           processing: omit(getResponse.stream.ingest.processing, ['updated_at']),
         },
       },
+    };
+  }
+
+  if (QueryStream.GetResponse.is(getResponse)) {
+    return {
+      dashboards: getResponse.dashboards,
+      queries: getResponse.queries,
+      rules: getResponse.rules,
+      stream: omit(getResponse.stream, ['name', 'updated_at']),
     };
   }
 

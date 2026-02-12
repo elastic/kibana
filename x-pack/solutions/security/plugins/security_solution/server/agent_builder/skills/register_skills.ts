@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OnechatPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { SECURITY_ALERT_SUPPRESSION_READONLY_SKILL } from './security_alert_suppression_readonly_skill';
 import { SECURITY_ATTACK_DISCOVERY_SKILL } from './security_attack_discovery_skill';
 import { SECURITY_CASES_SKILL } from './security_cases_skill';
@@ -18,16 +18,28 @@ import { SECURITY_RULE_EXCEPTIONS_PREVIEW_SKILL } from './security_rule_exceptio
 import { SECURITY_THREAT_INTEL_SKILL } from './security_threat_intel_skill';
 import { SECURITY_TIMELINES_SKILL } from './security_timelines_skill';
 
-export const registerAgentBuilderSkills = (onechat: OnechatPluginSetup) => {
-  onechat.skills.register(SECURITY_CASES_SKILL);
-  onechat.skills.register(SECURITY_DETECTION_RULES_SKILL);
-  onechat.skills.register(SECURITY_TIMELINES_SKILL);
-  onechat.skills.register(SECURITY_EXCEPTION_LISTS_SKILL);
-  onechat.skills.register(SECURITY_ATTACK_DISCOVERY_SKILL);
-  onechat.skills.register(SECURITY_ENDPOINT_READONLY_SKILL);
-  onechat.skills.register(SECURITY_NETWORK_SKILL);
-  onechat.skills.register(SECURITY_THREAT_INTEL_SKILL);
-  onechat.skills.register(SECURITY_ALERT_SUPPRESSION_READONLY_SKILL);
-  onechat.skills.register(SECURITY_RULE_EXCEPTIONS_PREVIEW_SKILL);
-  onechat.skills.register(SECURITY_ENDPOINT_RESPONSE_ACTIONS_READONLY_SKILL);
+/**
+ * Registers all security agent builder skills with the agentBuilder plugin
+ */
+export const registerSkills = async (
+  agentBuilder: AgentBuilderPluginSetup
+): Promise<void> => {
+  agentBuilder.skills.register(SECURITY_CASES_SKILL);
+  agentBuilder.skills.register(SECURITY_DETECTION_RULES_SKILL);
+  agentBuilder.skills.register(SECURITY_TIMELINES_SKILL);
+  agentBuilder.skills.register(SECURITY_EXCEPTION_LISTS_SKILL);
+  agentBuilder.skills.register(SECURITY_ATTACK_DISCOVERY_SKILL);
+  agentBuilder.skills.register(SECURITY_ENDPOINT_READONLY_SKILL);
+  agentBuilder.skills.register(SECURITY_NETWORK_SKILL);
+  agentBuilder.skills.register(SECURITY_THREAT_INTEL_SKILL);
+  agentBuilder.skills.register(SECURITY_ALERT_SUPPRESSION_READONLY_SKILL);
+  agentBuilder.skills.register(SECURITY_RULE_EXCEPTIONS_PREVIEW_SKILL);
+  agentBuilder.skills.register(SECURITY_ENDPOINT_RESPONSE_ACTIONS_READONLY_SKILL);
+};
+
+/**
+ * @deprecated Use registerSkills instead. Kept for backward compatibility.
+ */
+export const registerAgentBuilderSkills = (agentBuilder: AgentBuilderPluginSetup): void => {
+  void registerSkills(agentBuilder);
 };

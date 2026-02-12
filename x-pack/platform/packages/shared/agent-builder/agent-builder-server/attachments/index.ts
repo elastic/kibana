@@ -16,6 +16,7 @@ export type {
   AttachmentComponentProps,
   EntityRecognitionConfig,
   EntityRecognitionResolverContext,
+  AttachmentResolveContext,
 } from './type_definition';
 export type {
   AttachmentBoundedTool,

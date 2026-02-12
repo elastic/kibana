@@ -44,7 +44,7 @@ export type {
   ImprovementSuggestionAnalysisResult,
   EvalTraceCorrelation,
 } from './src/types';
-export { withEvaluatorSpan } from './src/utils/tracing';
+export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
 export {
   containsAllTerms,
   extractAllStrings,
@@ -77,6 +77,8 @@ export {
   EvaluationScoreRepository,
   type EvaluationScoreDocument,
   type EvaluationExplanation,
+  type EvaluatorStats,
+  type RunStats,
   parseScoreDocuments,
 } from './src/utils/score_repository';
 
@@ -98,9 +100,9 @@ export type {
   DatasetScoreWithStats,
   EvaluatorStats,
 } from './src/utils/evaluation_stats';
-
 export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
 export { createSpanLatencyEvaluator } from './src/evaluators/trace_based';
+export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';
 
 export {
   createPrecisionAtKEvaluator,
@@ -556,3 +558,6 @@ export {
   type EvalsCliArgs,
   type OutputFormat,
 } from './src/cli';
+
+// Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
+export { tags } from '@kbn/scout';

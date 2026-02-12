@@ -6,6 +6,7 @@
  */
 
 import type { Skill } from '@kbn/agent-builder-common/skills';
+import type { SkillDefinition } from '@kbn/agent-builder-server/skills';
 
 export interface SkillsServiceSetup {
   register(skill: Skill): void;
@@ -18,3 +19,14 @@ export interface SkillsServiceStart {
   getAllSkills(): Skill[];
 }
 
+export interface SkillServiceSetup {
+  /**
+   * @deprecated This API is still in development and not ready to be used yet.
+   */
+  registerSkill(skill: SkillDefinition): Promise<void>;
+}
+
+export interface SkillServiceStart {
+  getSkillDefinition(skillId: string): SkillDefinition | undefined;
+  listSkills(): SkillDefinition[];
+}

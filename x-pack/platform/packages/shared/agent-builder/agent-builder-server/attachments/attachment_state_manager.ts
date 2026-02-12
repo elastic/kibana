@@ -6,16 +6,19 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type {
+  VersionedAttachment,
+  AttachmentVersion,
+  AttachmentVersionRef,
+  AttachmentDiff,
+  VersionedAttachmentInput,
+  AttachmentType,
+  AttachmentRefActor,
+  AttachmentRefOperation,
+} from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_REF_OPERATION,
   ATTACHMENT_REF_ACTOR,
-  type VersionedAttachment,
-  type AttachmentVersion,
-  type AttachmentVersionRef,
-  type AttachmentRefOperation,
-  type AttachmentRefActor,
-  type AttachmentDiff,
-  type VersionedAttachmentInput,
 } from '@kbn/agent-builder-common/attachments';
 import {
   hashContent,
@@ -24,7 +27,7 @@ import {
   getVersion,
   isAttachmentActive,
 } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentTypeDefinition } from './type_definition';
+import type { AttachmentResolveContext, AttachmentTypeDefinition } from './type_definition';
 
 /**
  * Input for updating an existing attachment.
@@ -59,20 +62,25 @@ export interface ResolvedAttachmentRef {
  * Provides CRUD operations with version tracking.
  */
 export interface AttachmentStateManager {
-  /** Get an attachment by ID */
-  get(id: string): VersionedAttachment | undefined;
-  /** Get the latest version of an attachment */
-  getLatest(id: string): AttachmentVersion | undefined;
-  /** Get a specific version of an attachment */
-  getVersion(id: string, version: number): AttachmentVersion | undefined;
-  /** Read (track access to) the latest version of an attachment */
-  readLatest(id: string, actor?: AttachmentRefActor): AttachmentVersion | undefined;
-  /** Read (track access to) a specific version of an attachment */
-  readVersion(
+  /** Get an attachment by ID. Optionally resolve by-reference data when context is provided. */
+  get(
     id: string,
-    version: number,
-    actor?: AttachmentRefActor
-  ): AttachmentVersion | undefined;
+    options: {
+      context: AttachmentResolveContext;
+      actor?: AttachmentRefActor;
+      version?: number;
+    }
+  ): Promise<
+    | {
+        id: string;
+        version: number;
+        type: AttachmentType;
+        data: AttachmentVersion;
+      }
+    | undefined
+  >;
+  /** Get the raw stored attachment record (all versions, metadata). */
+  getAttachmentRecord(id: string): VersionedAttachment | undefined;
   /** Get all active (non-deleted) attachments */
   getActive(): VersionedAttachment[];
   /** Get all attachments (including deleted) */
@@ -107,6 +115,14 @@ export interface AttachmentStateManager {
 
   /** Resolve attachment references to their actual data */
   resolveRefs(refs: AttachmentVersionRef[]): ResolvedAttachmentRef[];
+  /** Resolve a single attachment's referenced data if the type supports it */
+  resolveAttachment(
+    attachment: VersionedAttachment,
+    options: {
+      context: AttachmentResolveContext;
+      version: number;
+    }
+  ): Promise<unknown | undefined>;
   /** Get total estimated tokens for all active attachments */
   getTotalTokenEstimate(): number;
   /** Check if any changes have been made */
@@ -170,44 +186,53 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
   }
 
-  get(id: string): VersionedAttachment | undefined {
-    return this.attachments.get(id);
-  }
-
-  getLatest(id: string): AttachmentVersion | undefined {
-    const attachment = this.attachments.get(id);
-    if (!attachment) {
-      return undefined;
-    }
-    return getLatestVersion(attachment);
-  }
-
-  getVersion(id: string, version: number): AttachmentVersion | undefined {
-    const attachment = this.attachments.get(id);
-    if (!attachment) {
-      return undefined;
-    }
-    return getVersion(attachment, version);
-  }
-
-  readLatest(id: string, actor?: AttachmentRefActor): AttachmentVersion | undefined {
-    const latest = this.getLatest(id);
-    if (latest) {
-      this.recordAccess(id, latest.version, ATTACHMENT_REF_OPERATION.read, actor);
-    }
-    return latest;
-  }
-
-  readVersion(
+  async get(
     id: string,
-    version: number,
-    actor?: AttachmentRefActor
-  ): AttachmentVersion | undefined {
-    const versionData = this.getVersion(id, version);
-    if (versionData) {
-      this.recordAccess(id, versionData.version, ATTACHMENT_REF_OPERATION.read, actor);
+    options: {
+      version?: number;
+      actor?: AttachmentRefActor;
+      context: AttachmentResolveContext;
     }
-    return versionData;
+  ) {
+    const attachment = this.attachments.get(id);
+    if (!attachment) {
+      return undefined;
+    }
+
+    const version = options?.version ?? attachment.current_version;
+    const attachmentVersion = getVersion(attachment, version);
+    if (!attachmentVersion) {
+      return undefined;
+    }
+
+    const resolvedContent = await this.resolveAttachment(attachment, {
+      context: options.context,
+      version,
+    });
+
+    if (options.actor) {
+      this.recordAccess(id, version, ATTACHMENT_REF_OPERATION.read, options.actor);
+    }
+
+    const responseVersion: AttachmentVersion =
+      resolvedContent !== undefined
+        ? {
+            ...attachmentVersion,
+            data: resolvedContent,
+            raw_data: attachmentVersion.raw_data ?? attachmentVersion.data,
+          }
+        : attachmentVersion;
+
+    return {
+      id,
+      version,
+      type: attachment.type as AttachmentType,
+      data: responseVersion,
+    };
+  }
+
+  getAttachmentRecord(id: string): VersionedAttachment | undefined {
+    return this.attachments.get(id);
   }
 
   getActive(): VersionedAttachment[] {
@@ -312,6 +337,10 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       return undefined;
     }
 
+    if (attachment.active === false) {
+      throw new Error(`Cannot update deleted attachment "${id}"`);
+    }
+
     if (input.description !== undefined) {
       attachment.description = input.description;
       this.dirty = true;
@@ -360,6 +389,10 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
       return false;
     }
 
+    if (attachment.type === 'screen_context') {
+      throw new Error(`Cannot delete screen_context attachment "${id}"`);
+    }
+
     if (attachment.active === false) {
       return false;
     }
@@ -389,6 +422,11 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
   permanentDelete(id: string): boolean {
     if (!this.attachments.has(id)) {
       return false;
+    }
+
+    const attachment = this.attachments.get(id)!;
+    if (attachment.type === 'screen_context') {
+      throw new Error(`Cannot delete screen_context attachment "${id}"`);
     }
 
     this.attachments.delete(id);
@@ -439,6 +477,79 @@ class AttachmentStateManagerImpl implements AttachmentStateManager {
     }
 
     return results;
+  }
+
+  async resolveAttachment(
+    attachment: VersionedAttachment,
+    options: {
+      version: number;
+      context: AttachmentResolveContext;
+    }
+  ): Promise<unknown | undefined> {
+    const { version, context } = options;
+    const { id, type } = attachment;
+    const attachmentVersion = getVersion(attachment, version);
+    const definition = this.options.getTypeDefinition(type);
+    if (!definition?.resolve) {
+      return undefined;
+    }
+
+    if (!attachmentVersion) {
+      return undefined;
+    }
+
+    const referenceData = attachmentVersion.raw_data ?? attachmentVersion.data;
+    const resolved = await definition.resolve(
+      {
+        id,
+        type,
+        data: referenceData,
+      },
+      context
+    );
+
+    if (resolved === undefined) {
+      return undefined;
+    }
+
+    const currentResolved =
+      attachmentVersion.raw_data !== undefined ? attachmentVersion.data : undefined;
+    const isSameResolved =
+      currentResolved !== undefined && JSON.stringify(currentResolved) === JSON.stringify(resolved);
+
+    if (isSameResolved) {
+      return resolved;
+    }
+
+    const newContentHash = hashContent(resolved);
+    const newTokens = estimateTokens(resolved);
+
+    if (attachmentVersion.raw_data === undefined) {
+      // First resolve: cache resolved data on the existing version without bumping version.
+      attachmentVersion.raw_data = attachmentVersion.data;
+      attachmentVersion.data = resolved;
+      attachmentVersion.content_hash = newContentHash;
+      attachmentVersion.estimated_tokens = newTokens;
+      this.dirty = true;
+      return resolved;
+    }
+
+    const newVersionNumber = attachment.current_version + 1;
+    const newVersion: AttachmentVersion = {
+      ...attachmentVersion,
+      version: newVersionNumber,
+      data: resolved,
+      raw_data: attachmentVersion.raw_data,
+      created_at: new Date().toISOString(),
+      content_hash: newContentHash,
+      estimated_tokens: newTokens,
+    };
+
+    attachment.versions.push(newVersion);
+    attachment.current_version = newVersionNumber;
+    this.dirty = true;
+
+    return resolved;
   }
 
   getTotalTokenEstimate(): number {

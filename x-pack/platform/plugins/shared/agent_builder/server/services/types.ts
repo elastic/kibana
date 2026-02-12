@@ -21,14 +21,17 @@ import type { SkillsServiceSetup, SkillsServiceStart } from './skills';
 import type { ConversationService } from './conversation';
 import type { ChatService } from './chat';
 import type { AttachmentServiceSetup, AttachmentServiceStart } from './attachments';
+import type { SkillServiceSetup, SkillServiceStart } from './skills';
 import type { TrackingService } from '../telemetry/tracking_service';
 import type { AnalyticsService } from '../telemetry';
+import type { AuditLogService } from '../audit';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
   agents: AgentsServiceSetup;
   attachments: AttachmentServiceSetup;
   skills: SkillsServiceSetup;
+  skill: SkillServiceSetup;
 }
 
 export interface InternalStartServices {
@@ -36,9 +39,11 @@ export interface InternalStartServices {
   agents: AgentsServiceStart;
   attachments: AttachmentServiceStart;
   skills: SkillsServiceStart;
+  skill: SkillServiceStart;
   conversations: ConversationService;
   chat: ChatService;
   runnerFactory: RunnerFactory;
+  auditLogService: AuditLogService;
 }
 
 export interface ServiceSetupDeps {
