@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflow } from '@kbn/workflows';
 import { WorkflowTaskScheduler } from './workflow_task_scheduler';
@@ -31,6 +31,8 @@ const mockTaskManager: TaskManagerStartContract = {
   bulkRemove: jest.fn().mockResolvedValue(undefined),
   bulkUpdateSchedules: jest.fn().mockResolvedValue({ tasks: [], errors: [] }),
 } as any;
+
+const mockRequest = {} as KibanaRequest;
 
 describe('WorkflowTaskScheduler', () => {
   let scheduler: WorkflowTaskScheduler;
@@ -71,7 +73,7 @@ describe('WorkflowTaskScheduler', () => {
         lastUpdatedAt: new Date(),
       };
 
-      const result = await scheduler.scheduleWorkflowTasks(workflow, 'default');
+      const result = await scheduler.scheduleWorkflowTasks(workflow, 'default', mockRequest);
 
       expect(result).toEqual(['workflow:test-workflow:scheduled']);
       expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
@@ -111,9 +113,9 @@ describe('WorkflowTaskScheduler', () => {
         lastUpdatedAt: new Date(),
       };
 
-      await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).rejects.toThrow(
-        'Server error'
-      );
+      await expect(
+        scheduler.scheduleWorkflowTasks(workflow, 'default', mockRequest)
+      ).rejects.toThrow('Server error');
       expect(mockTaskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
     });
 
@@ -139,7 +141,7 @@ describe('WorkflowTaskScheduler', () => {
         lastUpdatedAt: new Date(),
       };
 
-      await scheduler.updateWorkflowTasks(workflow, 'default');
+      await scheduler.updateWorkflowTasks(workflow, 'default', mockRequest);
 
       // Should NOT call fetch/bulkRemove (no delete step)
       expect(mockTaskManager.fetch).not.toHaveBeenCalled();
@@ -185,12 +187,12 @@ describe('WorkflowTaskScheduler', () => {
         lastUpdatedAt: new Date(),
       };
 
-      await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).resolves.toEqual([
-        'test-task-id',
-      ]);
+      await expect(
+        scheduler.scheduleWorkflowTasks(workflow, 'default', mockRequest)
+      ).resolves.toEqual(['test-task-id']);
       expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
 
-      // Verify the task instance structure includes workflowid
+      // Verify the task instance structure includes workflowid and request
       expect(mockTaskManager.schedule).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'workflow:test-workflow:scheduled',
@@ -200,7 +202,8 @@ describe('WorkflowTaskScheduler', () => {
             spaceId: 'default',
             triggerType: 'scheduled',
           }),
-        })
+        }),
+        { request: mockRequest }
       );
     });
 
@@ -237,9 +240,9 @@ describe('WorkflowTaskScheduler', () => {
         lastUpdatedAt: new Date(),
       };
 
-      await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).rejects.toThrow(
-        'Invalid RRule frequency: "INVALID"'
-      );
+      await expect(
+        scheduler.scheduleWorkflowTasks(workflow, 'default', mockRequest)
+      ).rejects.toThrow('Invalid RRule frequency: "INVALID"');
     });
 
     it('should reject WEEKLY frequency without byweekday', async () => {
@@ -275,9 +278,9 @@ describe('WorkflowTaskScheduler', () => {
         lastUpdatedAt: new Date(),
       };
 
-      await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).rejects.toThrow(
-        'WEEKLY frequency requires at least one byweekday value'
-      );
+      await expect(
+        scheduler.scheduleWorkflowTasks(workflow, 'default', mockRequest)
+      ).rejects.toThrow('WEEKLY frequency requires at least one byweekday value');
     });
 
     it('should reject MONTHLY frequency without bymonthday or byweekday', async () => {
@@ -313,9 +316,9 @@ describe('WorkflowTaskScheduler', () => {
         lastUpdatedAt: new Date(),
       };
 
-      await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).rejects.toThrow(
-        'MONTHLY frequency requires either bymonthday or byweekday values'
-      );
+      await expect(
+        scheduler.scheduleWorkflowTasks(workflow, 'default', mockRequest)
+      ).rejects.toThrow('MONTHLY frequency requires either bymonthday or byweekday values');
     });
 
     it('should reject invalid byhour values', async () => {
@@ -352,9 +355,9 @@ describe('WorkflowTaskScheduler', () => {
         lastUpdatedAt: new Date(),
       };
 
-      await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).rejects.toThrow(
-        'Invalid RRule byhour: "25"'
-      );
+      await expect(
+        scheduler.scheduleWorkflowTasks(workflow, 'default', mockRequest)
+      ).rejects.toThrow('Invalid RRule byhour: "25"');
     });
 
     it('should reject invalid byminute values', async () => {
@@ -391,9 +394,9 @@ describe('WorkflowTaskScheduler', () => {
         lastUpdatedAt: new Date(),
       };
 
-      await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).rejects.toThrow(
-        'Invalid RRule byminute: "60"'
-      );
+      await expect(
+        scheduler.scheduleWorkflowTasks(workflow, 'default', mockRequest)
+      ).rejects.toThrow('Invalid RRule byminute: "60"');
     });
 
     it('should reject invalid bymonthday values', async () => {
@@ -430,9 +433,9 @@ describe('WorkflowTaskScheduler', () => {
         lastUpdatedAt: new Date(),
       };
 
-      await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).rejects.toThrow(
-        'Invalid RRule bymonthday: "32"'
-      );
+      await expect(
+        scheduler.scheduleWorkflowTasks(workflow, 'default', mockRequest)
+      ).rejects.toThrow('Invalid RRule bymonthday: "32"');
     });
 
     it('should reject invalid byweekday values', async () => {
@@ -469,9 +472,9 @@ describe('WorkflowTaskScheduler', () => {
         lastUpdatedAt: new Date(),
       };
 
-      await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).rejects.toThrow(
-        'Invalid RRule byweekday: "INVALID"'
-      );
+      await expect(
+        scheduler.scheduleWorkflowTasks(workflow, 'default', mockRequest)
+      ).rejects.toThrow('Invalid RRule byweekday: "INVALID"');
     });
 
     it('should reject invalid dtstart values', async () => {
@@ -508,9 +511,9 @@ describe('WorkflowTaskScheduler', () => {
         lastUpdatedAt: new Date(),
       };
 
-      await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).rejects.toThrow(
-        'Invalid RRule dtstart: "invalid-date"'
-      );
+      await expect(
+        scheduler.scheduleWorkflowTasks(workflow, 'default', mockRequest)
+      ).rejects.toThrow('Invalid RRule dtstart: "invalid-date"');
     });
 
     it('should accept valid complex RRule configuration', async () => {
@@ -550,9 +553,9 @@ describe('WorkflowTaskScheduler', () => {
         lastUpdatedAt: new Date(),
       };
 
-      await expect(scheduler.scheduleWorkflowTasks(workflow, 'default')).resolves.toEqual([
-        'test-task-id',
-      ]);
+      await expect(
+        scheduler.scheduleWorkflowTasks(workflow, 'default', mockRequest)
+      ).resolves.toEqual(['test-task-id']);
       expect(mockTaskManager.schedule).toHaveBeenCalledTimes(1);
     });
   });
@@ -593,7 +596,7 @@ describe('WorkflowTaskScheduler', () => {
         lastUpdatedAt: new Date(),
       };
 
-      await scheduler.scheduleWorkflowTasks(workflow, 'default');
+      await scheduler.scheduleWorkflowTasks(workflow, 'default', mockRequest);
 
       expect(mockLogger.debug).toHaveBeenCalledWith(
         expect.stringContaining('RRule schedule created')

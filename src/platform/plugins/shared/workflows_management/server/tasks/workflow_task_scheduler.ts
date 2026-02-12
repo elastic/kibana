@@ -36,7 +36,7 @@ export class WorkflowTaskScheduler {
   async scheduleWorkflowTasks(
     workflow: EsWorkflow,
     spaceId: string,
-    request?: KibanaRequest
+    request: KibanaRequest
   ): Promise<string[]> {
     const scheduledTriggers = getScheduledTriggers(workflow.definition?.triggers ?? []);
     const scheduledTaskIds: string[] = [];
@@ -68,7 +68,7 @@ export class WorkflowTaskScheduler {
     workflowId: string,
     spaceId: string,
     trigger: WorkflowTrigger,
-    request?: KibanaRequest
+    request: KibanaRequest
   ): Promise<string> {
     const schedule = convertWorkflowScheduleToTaskSchedule(trigger);
     const taskId = `workflow:${workflowId}:${trigger.type}`;
@@ -102,11 +102,9 @@ export class WorkflowTaskScheduler {
     };
 
     try {
-      // Use Task Manager's first-class API key support by passing the request
-      // Task Manager will automatically create and manage the API key for user context
-      const scheduledTask = request
-        ? await this.taskManager.schedule(taskInstance, { request })
-        : await this.taskManager.schedule(taskInstance);
+      // Use Task Manager's first-class API key support by passing the request.
+      // Task Manager will automatically create and manage the API key for user context.
+      const scheduledTask = await this.taskManager.schedule(taskInstance, { request });
 
       return scheduledTask.id;
     } catch (err) {
@@ -173,7 +171,7 @@ export class WorkflowTaskScheduler {
   async updateWorkflowTasks(
     workflow: EsWorkflow,
     spaceId: string,
-    request?: KibanaRequest
+    request: KibanaRequest
   ): Promise<void> {
     // Schedule tasks idempotently — creates new tasks or updates existing ones in place.
     // No need to unschedule first since scheduleWorkflowTask handles 409 conflicts gracefully.
