@@ -82,7 +82,7 @@ describe('percentile', () => {
           sourceField: 'category',
         } as TermsIndexPatternColumn,
         col2: {
-          label: '23rd percentile of a',
+          label: '',
           dataType: 'number',
           isBucketed: false,
           sourceField: 'a',
@@ -171,7 +171,7 @@ describe('percentile', () => {
       const oldColumn: PercentileIndexPatternColumn = {
         operationType: 'percentile',
         sourceField: 'bytes',
-        label: '23rd percentile of bytes',
+        label: '',
         isBucketed: true,
         dataType: 'number',
         params: {
@@ -179,6 +179,12 @@ describe('percentile', () => {
         },
       };
       const indexPattern = createMockedIndexPattern();
+
+      expect(percentileOperation.getDefaultLabel(oldColumn, layer.columns, indexPattern)).toBe(
+        '23rd percentile of bytes'
+      );
+      expect(oldColumn.label).toEqual('');
+
       const newNumberField = indexPattern.getFieldByName('memory')!;
       const column = percentileOperation.onFieldChange(oldColumn, newNumberField);
 
@@ -191,7 +197,10 @@ describe('percentile', () => {
           }),
         })
       );
-      expect(column.label).toContain('memory');
+      expect(percentileOperation.getDefaultLabel(column, layer.columns, indexPattern)).toBe(
+        '23rd percentile of memory'
+      );
+      expect(column.label).toEqual('');
     });
   });
 
@@ -514,7 +523,6 @@ describe('percentile', () => {
       });
       expect(percentileColumn.dataType).toEqual('number');
       expect(percentileColumn.params.percentile).toEqual(95);
-      expect(percentileColumn.label).toEqual('95th percentile of test');
     });
 
     it('should create a percentile from formula', () => {
@@ -531,7 +539,6 @@ describe('percentile', () => {
       );
       expect(percentileColumn.dataType).toEqual('number');
       expect(percentileColumn.params.percentile).toEqual(75);
-      expect(percentileColumn.label).toEqual('75th percentile of test');
     });
 
     it('should create a percentile from formula with filter', () => {
@@ -549,7 +556,7 @@ describe('percentile', () => {
       expect(percentileColumn.dataType).toEqual('number');
       expect(percentileColumn.params.percentile).toEqual(75);
       expect(percentileColumn.filter).toEqual({ language: 'kuery', query: 'bytes > 100' });
-      expect(percentileColumn.label).toEqual('75th percentile of test');
+      expect(percentileColumn.label).toEqual('');
     });
 
     it('should not keep a filter if coming from last value', () => {

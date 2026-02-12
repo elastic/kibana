@@ -58,7 +58,7 @@ describe('static_value', () => {
       columnOrder: ['col1', 'col2'],
       columns: {
         col1: {
-          label: 'Top value of category',
+          label: '',
           dataType: 'string',
           isBucketed: true,
           operationType: 'terms',
@@ -70,7 +70,8 @@ describe('static_value', () => {
           sourceField: 'category',
         } as TermsIndexPatternColumn,
         col2: {
-          label: 'Static value: 23',
+          label: 'Number of bytes',
+          customLabel: true,
           dataType: 'number',
           isBucketed: false,
           operationType: 'static_value',
@@ -246,7 +247,7 @@ describe('static_value', () => {
           layer: { columns: {}, columnOrder: [], indexPatternId: '' },
         })
       ).toEqual({
-        label: 'Static value',
+        label: '',
         dataType: 'number',
         operationType: 'static_value',
         isBucketed: false,
@@ -270,7 +271,7 @@ describe('static_value', () => {
           } as StaticValueIndexPatternColumn,
         })
       ).toEqual({
-        label: 'Static value: 23',
+        label: '',
         dataType: 'number',
         operationType: 'static_value',
         isBucketed: false,
@@ -289,7 +290,7 @@ describe('static_value', () => {
           { value: '23' }
         )
       ).toEqual({
-        label: 'Static value: 23',
+        label: '',
         dataType: 'number',
         operationType: 'static_value',
         isBucketed: false,
@@ -316,7 +317,7 @@ describe('static_value', () => {
           { value: '53' }
         )
       ).toEqual({
-        label: 'Static value: 53',
+        label: '',
         dataType: 'number',
         operationType: 'static_value',
         isBucketed: false,
@@ -396,7 +397,7 @@ describe('static_value', () => {
             params: {
               value: '27',
             },
-            label: 'Static value: 27',
+            label: 'Number of bytes',
           },
         },
       });

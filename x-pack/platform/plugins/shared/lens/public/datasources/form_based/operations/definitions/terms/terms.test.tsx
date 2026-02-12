@@ -436,7 +436,7 @@ describe('terms', () => {
       const oldColumn: TermsIndexPatternColumn = {
         operationType: 'terms',
         sourceField: 'source',
-        label: 'Top 5 values of source',
+        label: '',
         isBucketed: true,
         dataType: 'string',
         params: {
@@ -448,6 +448,9 @@ describe('terms', () => {
         },
       };
       const indexPattern = createMockedIndexPattern();
+      expect(
+        termsOperation.getDefaultLabel(oldColumn, layer.columns, createMockedIndexPattern())
+      ).toBe('Top 5 values of source');
       const newNumberField = indexPattern.getFieldByName('bytes')!;
 
       const column = termsOperation.onFieldChange(oldColumn, newNumberField);
@@ -456,7 +459,9 @@ describe('terms', () => {
       expect(column).toHaveProperty('params.size', 5);
       expect(column).toHaveProperty('params.orderBy.type', 'alphabetical');
       expect(column).toHaveProperty('params.orderDirection', 'asc');
-      expect(column.label).toContain('bytes');
+      expect(
+        termsOperation.getDefaultLabel(column, layer.columns, createMockedIndexPattern())
+      ).toBe('Top 5 values of bytes');
     });
 
     it('should remove numeric parameters when changing away from number', () => {
@@ -2519,7 +2524,7 @@ describe('terms', () => {
               orderAgg: expect.objectContaining({
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Average of bytes',
+                label: '',
                 operationType: 'average',
                 sourceField: 'bytes',
               }),
@@ -2585,7 +2590,7 @@ describe('terms', () => {
               orderAgg: expect.objectContaining({
                 dataType: 'number',
                 isBucketed: false,
-                label: 'Median of memory',
+                label: '',
                 operationType: 'median',
                 sourceField: 'memory',
               }),
@@ -2690,7 +2695,7 @@ describe('terms', () => {
           ...layer.columns,
           col1: {
             ...layer.columns.col1,
-            label: 'Top 7 values of source',
+            label: 'Top 3 values of source',
             params: {
               ...(layer.columns.col1 as TermsIndexPatternColumn).params,
               size: 7,

@@ -133,7 +133,6 @@ const layer: FormBasedLayer = {
     } as AvgIndexPatternColumn,
     ref: {
       label: '',
-      customLabel: true,
       dataType: 'number',
       isBucketed: false,
       operationType: 'differences',
@@ -149,78 +148,86 @@ describe('labels', () => {
     layer,
     previousColumn: layer.columns.metric,
   };
-  it('should use label of referenced operation to create label for derivative and moving average', () => {
-    expect(derivativeOperation.buildColumn(calcColumnArgs)).toEqual(
-      expect.objectContaining({
-        label: 'Differences of metricLabel',
-      })
+  it('should use custom label of referenced operation to create label for derivative and moving average', () => {
+    const derivativeColumn = derivativeOperation.buildColumn(calcColumnArgs);
+    expect(derivativeColumn.label).toBe('Differences of metricLabel');
+    expect(derivativeOperation.getDefaultLabel(derivativeColumn, layer.columns, indexPattern)).toBe(
+      'Differences of metricLabel'
     );
-    expect(movingAverageOperation.buildColumn(calcColumnArgs)).toEqual(
-      expect.objectContaining({
-        label: 'Moving average of metricLabel',
-      })
-    );
+
+    const movingAverageColumn = movingAverageOperation.buildColumn(calcColumnArgs);
+    expect(movingAverageColumn.label).toBe('Moving average of metricLabel');
+    expect(
+      movingAverageOperation.getDefaultLabel(movingAverageColumn, layer.columns, indexPattern)
+    ).toBe('Moving average of metricLabel');
   });
 
   it('should use displayName of a field for a label for counter rate and cumulative sum', () => {
-    expect(counterRateOperation.buildColumn(calcColumnArgs)).toEqual(
-      expect.objectContaining({
-        label: 'Counter rate of bytesLabel per second',
-      })
-    );
-    expect(cumulativeSumOperation.buildColumn(calcColumnArgs)).toEqual(
-      expect.objectContaining({
-        label: 'Cumulative sum of bytesLabel',
-      })
-    );
+    const counterRateColumn = counterRateOperation.buildColumn(calcColumnArgs);
+    expect(
+      counterRateOperation.getDefaultLabel(counterRateColumn, layer.columns, indexPattern)
+    ).toBe('Counter rate of bytesLabel per second');
+
+    const cumulativeSumColumn = cumulativeSumOperation.buildColumn(calcColumnArgs);
+    expect(
+      cumulativeSumOperation.getDefaultLabel(cumulativeSumColumn, layer.columns, indexPattern)
+    ).toBe('Cumulative sum of bytesLabel');
   });
 });
 
 describe('time scale transition', () => {
   it('should carry over time scale and adjust label on operation from count to sum', () => {
-    expect(
-      sumOperation.buildColumn({
-        ...baseColumnArgs,
-      })
-    ).toEqual(
-      expect.objectContaining({
-        timeScale: 'h',
-        label: 'Sum of bytesLabel per hour',
-      })
+    const column = sumOperation.buildColumn({
+      ...baseColumnArgs,
+    });
+    expect(column.timeScale).toBe('h');
+    expect(sumOperation.getDefaultLabel(column, {}, indexPattern)).toBe(
+      'Sum of bytesLabel per hour'
     );
   });
 
   it('should carry over time scale and adjust label on operation from count to calculation', () => {
-    [counterRateOperation, movingAverageOperation, derivativeOperation].forEach(
-      (calculationOperation) => {
-        const result = calculationOperation.buildColumn({
-          ...baseColumnArgs,
-          referenceIds: [],
-        });
-        expect(result.timeScale).toEqual('h');
-        expect(result.label).toContain('per hour');
-      }
+    const counterRateResult = counterRateOperation.buildColumn({
+      ...baseColumnArgs,
+      referenceIds: [],
+    });
+    expect(counterRateResult.timeScale).toEqual('h');
+    expect(counterRateOperation.getDefaultLabel(counterRateResult, {}, indexPattern)).toContain(
+      'per hour'
+    );
+
+    const movingAverageResult = movingAverageOperation.buildColumn({
+      ...baseColumnArgs,
+      referenceIds: [],
+    });
+    expect(movingAverageResult.timeScale).toEqual('h');
+    expect(movingAverageOperation.getDefaultLabel(movingAverageResult, {}, indexPattern)).toContain(
+      'per hour'
+    );
+
+    const derivativeResult = derivativeOperation.buildColumn({
+      ...baseColumnArgs,
+      referenceIds: [],
+    });
+    expect(derivativeResult.timeScale).toEqual('h');
+    expect(derivativeOperation.getDefaultLabel(derivativeResult, {}, indexPattern)).toContain(
+      'per hour'
     );
   });
 
   it('should not set time scale if it was not set previously', () => {
-    expect(
-      countOperation.buildColumn({
-        ...baseColumnArgs,
-        previousColumn: {
-          label: 'Sum of bytes',
-          dataType: 'number',
-          isBucketed: false,
-          operationType: 'sum',
-          sourceField: 'bytes',
-        },
-      })
-    ).toEqual(
-      expect.objectContaining({
-        timeScale: undefined,
-        label: 'Count of bytesLabel',
-      })
-    );
+    const column = countOperation.buildColumn({
+      ...baseColumnArgs,
+      previousColumn: {
+        label: 'Sum of bytes',
+        dataType: 'number',
+        isBucketed: false,
+        operationType: 'sum',
+        sourceField: 'bytes',
+      },
+    });
+    expect(column.timeScale).toBeUndefined();
+    expect(countOperation.getDefaultLabel(column, {}, indexPattern)).toBe('Count of bytesLabel');
   });
 
   it('should set time scale to default for counter rate', () => {
@@ -242,25 +249,22 @@ describe('time scale transition', () => {
   });
 
   it('should adjust label on field change', () => {
-    expect(
-      sumOperation.onFieldChange(
-        {
-          label: 'Sum of bytesLabel per hour',
-          timeScale: 'h',
-          dataType: 'number',
-          isBucketed: false,
-
-          // Private
-          operationType: 'sum',
-          sourceField: 'bytes',
-        },
-        indexPattern.fields[3]
-      )
-    ).toEqual(
-      expect.objectContaining({
+    const resultColumn = sumOperation.onFieldChange(
+      {
+        label: 'Sum of bytesLabel per hour',
         timeScale: 'h',
-        label: 'Sum of memory per hour',
-      })
+        dataType: 'number',
+        isBucketed: false,
+
+        // Private
+        operationType: 'sum',
+        sourceField: 'bytes',
+      },
+      indexPattern.fields[3]
+    );
+    expect(resultColumn.timeScale).toBe('h');
+    expect(sumOperation.getDefaultLabel(resultColumn, {}, indexPattern)).toBe(
+      'Sum of memory per hour'
     );
   });
 

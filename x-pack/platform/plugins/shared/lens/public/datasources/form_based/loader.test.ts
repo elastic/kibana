@@ -309,7 +309,7 @@ describe('loader', () => {
             "col1": Object {
               "dataType": "number",
               "isBucketed": false,
-              "label": "sum(bytes) + 100",
+              "label": "Formula 1",
               "operationType": "formula",
               "params": Object {
                 "formula": "sum(bytes) + 100",
@@ -320,11 +320,10 @@ describe('loader', () => {
               ],
             },
             "col1X0": Object {
-              "customLabel": true,
               "dataType": "number",
               "filter": undefined,
               "isBucketed": false,
-              "label": "Part of sum(bytes) + 100",
+              "label": "Part of Formula 1",
               "operationType": "sum",
               "params": Object {
                 "emptyAsNull": false,
@@ -335,10 +334,9 @@ describe('loader', () => {
               "timeShift": undefined,
             },
             "col1X1": Object {
-              "customLabel": true,
               "dataType": "number",
               "isBucketed": false,
-              "label": "Part of sum(bytes) + 100",
+              "label": "Part of Formula 1",
               "operationType": "math",
               "params": Object {
                 "tinymathAst": Object {
@@ -362,7 +360,7 @@ describe('loader', () => {
             "col2": Object {
               "dataType": "number",
               "isBucketed": false,
-              "label": "average(bytes) + 100",
+              "label": "Formula 2",
               "operationType": "formula",
               "params": Object {
                 "formula": "average(bytes) + 100",
@@ -373,11 +371,10 @@ describe('loader', () => {
               ],
             },
             "col2X0": Object {
-              "customLabel": true,
               "dataType": "number",
               "filter": undefined,
               "isBucketed": false,
-              "label": "Part of average(bytes) + 100",
+              "label": "Part of Formula 2",
               "operationType": "average",
               "params": Object {
                 "emptyAsNull": false,
@@ -388,10 +385,9 @@ describe('loader', () => {
               "timeShift": undefined,
             },
             "col2X1": Object {
-              "customLabel": true,
               "dataType": "number",
               "isBucketed": false,
-              "label": "Part of average(bytes) + 100",
+              "label": "Part of Formula 2",
               "operationType": "math",
               "params": Object {
                 "tinymathAst": Object {
