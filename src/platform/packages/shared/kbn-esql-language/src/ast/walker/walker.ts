@@ -7,14 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as types from '../../types';
 import { resolveItem } from '../visitor/utils';
+import { isPromqlNode, replaceProperties, templateToPredicate } from './helpers';
+import { PromqlWalker, type PromqlWalkerOptions } from '../../embedded_languages/promql/ast/walker';
+import type * as types from '../../types';
+import type * as promql from '../../embedded_languages/promql/types';
 import type { NodeMatchTemplate } from './helpers';
-import { replaceProperties, templateToPredicate } from './helpers';
 
 type Node = types.ESQLAstNode | types.ESQLAstNode[];
 
 export interface WalkerOptions {
+  // ----------------------------------------------------------- PromQL options
+
+  promql?: PromqlWalkerOptions;
+
+  // ----------------------------------------------------------- ES|QL visitors
+
   visitCommand?: (
     node: types.ESQLCommand,
     parent: types.ESQLAstQueryExpression | undefined,
@@ -95,6 +103,8 @@ export interface WalkerOptions {
     parent: types.ESQLProperNode | undefined,
     walker: WalkerVisitorApi
   ) => void;
+
+  // ------------------------------------------------------------ Other options
 
   /**
    * Called on every expression node.
@@ -731,13 +741,46 @@ export class Walker {
     this.walkList(node.commands, node);
   }
 
+  /**
+   * Walk a PromQL AST node and dispatch to the appropriate walk method.
+   */
+  public walkPromqlNode(
+    node: promql.PromQLAstNode,
+    parent: types.ESQLProperNode | undefined
+  ): void {
+    if (this.aborted) return;
+    if (!node) return;
+
+    const walker = PromqlWalker.walk(
+      node,
+      {
+        order: this.options.order,
+        ...this.options.promql,
+      },
+      parent
+    );
+
+    if (walker.aborted) {
+      this.abort();
+    }
+  }
+
   public walkSingleAstItem(
     node: types.ESQLAstExpression,
     parent: types.ESQLProperNode | undefined
   ): void {
     if (this.aborted) return;
     if (!node) return;
+
+    // Check if this is a PromQL node and delegate to PromQL walker
+    if (isPromqlNode(node)) {
+      this.walkPromqlNode(node, parent);
+      return;
+    }
+
+    // Skip other non-ES|QL dialect nodes
     if ('dialect' in node) return;
+
     const { options } = this;
     options.visitSingleAstItem?.(node, parent, this);
     switch (node.type) {
