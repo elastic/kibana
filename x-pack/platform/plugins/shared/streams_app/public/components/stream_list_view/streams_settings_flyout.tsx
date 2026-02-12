@@ -108,9 +108,6 @@ export function StreamsSettingsFlyout({
             defaultMessage: 'Wired streams have been enabled successfully',
           }),
         });
-
-        // Close the flyout
-        onClose();
       } catch (error) {
         core.notifications.toasts.addError(getFormattedError(error), {
           title: i18n.translate('xpack.streams.streamsListView.enableWiredStreamsErrorToastTitle', {
