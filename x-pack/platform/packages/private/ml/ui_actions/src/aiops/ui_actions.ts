@@ -13,6 +13,7 @@ import type { Trigger } from '@kbn/ui-actions-plugin/public';
 export interface CategorizeFieldContext {
   field: DataViewField;
   dataView: DataView;
+  fieldValue: string;
   originatingApp: string;
   additionalFilter?: {
     from: number;
@@ -20,6 +21,7 @@ export interface CategorizeFieldContext {
     field?: { name: string; value: string };
   };
   focusTrapProps?: EuiFlyoutProps['focusTrapProps'];
+  onFilter?: (field: DataViewField, value: string, mode: '+' | '-') => void;
 }
 
 export const ACTION_CATEGORIZE_FIELD = 'ACTION_CATEGORIZE_FIELD';
@@ -32,5 +34,18 @@ export const categorizeFieldTrigger: Trigger = {
   }),
   description: i18n.translate('xpack.ml.actions.runPatternAnalysis.description', {
     defaultMessage: 'Triggered when user wants to run pattern analysis on a field.',
+  }),
+};
+
+export const ACTION_REVERSE_CATEGORIZE_FIELD = 'ACTION_REVERSE_CATEGORIZE_FIELD';
+
+export const REVERSE_CATEGORIZE_FIELD_TRIGGER = 'REVERSE_CATEGORIZE_FIELD_TRIGGER';
+export const reverseCategorizeFieldTrigger: Trigger = {
+  id: REVERSE_CATEGORIZE_FIELD_TRIGGER,
+  title: i18n.translate('xpack.ml.actions.runReverseCategorization.title', {
+    defaultMessage: 'Run reverse categorization',
+  }),
+  description: i18n.translate('xpack.ml.actions.runReverseCategorization.description', {
+    defaultMessage: 'Triggered when user wants to run reverse categorization on a field.',
   }),
 };

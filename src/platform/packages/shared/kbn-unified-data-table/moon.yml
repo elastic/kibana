@@ -52,6 +52,7 @@ dependsOn:
   - '@kbn/restorable-state'
   - '@kbn/react-hooks'
   - '@kbn/css-utils'
+  - '@kbn/ml-ui-actions'
 tags:
   - shared-browser
   - package
