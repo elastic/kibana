@@ -22,6 +22,7 @@ import {
 import { useDateRangePickerContext, type InitialFocus } from './date_range_picker_context';
 import { TimeWindowButtons } from './date_range_picker_time_window_buttons';
 import { useSelectTextPartsWithArrowKeys } from './hooks/use_select_text_parts_with_arrow_keys';
+import { useInputHintText } from './hooks/use_input_hint_text';
 
 // TODO move to constants.ts
 const FOCUSABLE_SELECTOR =
@@ -52,6 +53,7 @@ export function DateRangePickerControl() {
     timeWindowButtonsConfig,
   } = useDateRangePickerContext();
   const { euiTheme } = useEuiTheme();
+  const hintText = useInputHintText(text);
 
   const controlRef = useRef<HTMLDivElement>(null);
   const wasEditingRef = useRef(false);
@@ -168,6 +170,7 @@ export function DateRangePickerControl() {
             onChange={onInputChange}
             onKeyDown={onInputKeyDown}
             compressed={compressed}
+            placeholder={hintText}
           />
         ) : (
           <EuiToolTip
