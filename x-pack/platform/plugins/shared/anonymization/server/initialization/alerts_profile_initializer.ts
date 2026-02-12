@@ -26,11 +26,13 @@ export const ensureAlertsDataViewProfile = async ({
   namespace,
   profilesRepo,
   saltService,
+  migrateLegacySettings,
   logger,
 }: {
   namespace: string;
   profilesRepo: ProfilesRepository;
   saltService: SaltService;
+  migrateLegacySettings?: () => Promise<void>;
   logger: Logger;
 }): Promise<void> => {
   try {
@@ -63,6 +65,11 @@ export const ensureAlertsDataViewProfile = async ({
       namespace,
       createdBy: 'system',
     });
+
+    // Only run advanced settings migration during automatic profile creation.
+    if (migrateLegacySettings) {
+      await migrateLegacySettings();
+    }
 
     logger.info(`Created alerts data view anonymization profile in space: ${namespace}`);
   } catch (err) {
