@@ -87,6 +87,13 @@ export interface SiemReadinessPackageInfo {
   status: string;
   categories?: string[];
 }
+
+export interface PipelineStats {
+  name: string;
+  indices: string[];
+  docsCount: number;
+  failedDocsCount: number;
+}
 export interface CasesSearchResponse {
   total: number;
   countOpenCases: number;
