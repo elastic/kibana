@@ -27,6 +27,11 @@ import {
 
 import { patchRuleRoute } from './route';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../../routes/__mocks__/request_context';
+import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
 
 describe('Patch rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -40,6 +45,10 @@ describe('Patch rule route', () => {
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
     clients.detectionRulesClient.patchRule.mockResolvedValue(getRulesSchemaMock());
+
+    context.securitySolution.getEndpointService.mockReturnValue(
+      createMockEndpointAppContextService()
+    );
 
     patchRuleRoute(server.router);
   });

@@ -40,15 +40,13 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
 
 export type ResponseActionsApiCommandNames = (typeof RESPONSE_ACTION_API_COMMANDS_NAMES)[number];
 
-export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiCommandNames[] = [
-  'isolate',
-  // TODO: TC- Uncomment these when we go GA with automated process actions
-  // 'kill-process',
-  // 'suspend-process'
-];
+export type EnabledAutomatedResponseActionsCommands = Extract<
+  ResponseActionsApiCommandNames,
+  'isolate'
+>;
 
-export type EnabledAutomatedResponseActionsCommands =
-  (typeof ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS)[number];
+export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: EnabledAutomatedResponseActionsCommands[] =
+  ['isolate'];
 
 /**
  * The list of possible capabilities, reported by the endpoint in the metadata document

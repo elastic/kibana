@@ -26,6 +26,11 @@ import {
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { ResponseActionTypesEnum } from '../../../../../../../common/api/detection_engine';
 import { HttpAuthzError } from '../../../../../machine_learning/validation';
+import type {
+  MockClients,
+  SecuritySolutionRequestHandlerContextMock,
+} from '../../../../routes/__mocks__/request_context';
+import { createMockEndpointAppContextService } from '../../../../../../endpoint/mocks';
 
 describe('Update rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -40,6 +45,10 @@ describe('Update rule route', () => {
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
     clients.detectionRulesClient.updateRule.mockResolvedValue(getRulesSchemaMock());
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
+
+    context.securitySolution.getEndpointService.mockReturnValue(
+      createMockEndpointAppContextService()
+    );
 
     updateRuleRoute(server.router);
   });
@@ -233,7 +242,7 @@ describe('Update rule route', () => {
       const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(403);
       expect(response.body.message).toEqual(
-        'User is not authorized to change isolate response actions'
+        'User is not authorized to create/update isolate response action'
       );
     });
     test('fails when isolate rbac and response action is being removed to finish as empty array', async () => {
@@ -273,7 +282,7 @@ describe('Update rule route', () => {
       const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(403);
       expect(response.body.message).toEqual(
-        'User is not authorized to change isolate response actions'
+        'User is not authorized to create/update isolate response action'
       );
     });
     test('fails when provided with an unsupported command', async () => {
