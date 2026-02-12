@@ -17,7 +17,7 @@ import {
 import { SUB_ACTION } from '@kbn/connector-schemas/mcp';
 import type { ServiceParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { AxiosError } from 'axios';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import {
   McpClient,
   type McpClientOptions,
