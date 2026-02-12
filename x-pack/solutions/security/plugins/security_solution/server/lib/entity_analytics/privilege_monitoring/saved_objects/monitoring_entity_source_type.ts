@@ -7,10 +7,12 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type {
   Matcher,
+  MonitoringEntitySourceAttributes,
   MonitoringEntitySourceType,
 } from '../../../../../common/api/entity_analytics';
 import { areMatchersEqual, getDefaultMatchersForSource } from '../data_sources/matchers';
@@ -106,6 +108,25 @@ const integrationsSchema = schema.object(
   { unknowns: 'ignore' }
 );
 
+type BaseMonitoringEntitySourceSchemaAttributes = Pick<
+  MonitoringEntitySourceAttributes,
+  'type' | 'name' | 'managed' | 'enabled' | 'integrationName' | 'matchers' | 'filter'
+> & { error?: string };
+
+type BaseMonitoringEntitySourceSchemaProps = {
+  [Key in keyof BaseMonitoringEntitySourceSchemaAttributes]: Type<unknown>;
+};
+
+type BaseMonitoringEntitySourceSchemaV2Attributes = BaseMonitoringEntitySourceSchemaAttributes &
+  Pick<
+    MonitoringEntitySourceAttributes,
+    'matchersModifiedByUser' | 'managedVersion' | 'integrations'
+  >;
+
+type BaseMonitoringEntitySourceSchemaV2Props = {
+  [Key in keyof BaseMonitoringEntitySourceSchemaV2Attributes]: Type<unknown>;
+};
+
 const baseEntitySourceSchema = {
   type: schema.maybe(schema.string()),
   name: schema.maybe(schema.string()),
@@ -115,14 +136,14 @@ const baseEntitySourceSchema = {
   integrationName: schema.maybe(schema.string()),
   matchers: schema.maybe(matchersSchema),
   filter: schema.maybe(schema.any()),
-};
+} satisfies BaseMonitoringEntitySourceSchemaProps;
 
 const baseEntitySourceSchemaV2 = {
   ...baseEntitySourceSchema,
   matchersModifiedByUser: schema.boolean({ defaultValue: false }),
   managedVersion: schema.maybe(schema.number()),
   integrations: schema.maybe(integrationsSchema),
-};
+} satisfies BaseMonitoringEntitySourceSchemaV2Props;
 
 const monitoringEntitySourceModelVersion1: SavedObjectsModelVersion = {
   changes: [],
@@ -171,9 +192,9 @@ const monitoringEntitySourceModelVersion2: SavedObjectsModelVersion = {
         const defaultMatchers =
           attrs.managed === true
             ? getDefaultMatchersForSource(
-                attrs.type as MonitoringEntitySourceType,
-                attrs.integrationName
-              )
+              attrs.type as MonitoringEntitySourceType,
+              attrs.integrationName
+            )
             : undefined;
 
         const inferredModifiedByUser =
