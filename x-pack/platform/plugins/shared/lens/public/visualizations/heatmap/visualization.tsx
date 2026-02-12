@@ -566,4 +566,10 @@ export const getHeatmapVisualization = ({
       ],
     };
   },
+
+  getDisplayOptions() {
+    return {
+      noPadding: true,
+    };
+  },
 });
