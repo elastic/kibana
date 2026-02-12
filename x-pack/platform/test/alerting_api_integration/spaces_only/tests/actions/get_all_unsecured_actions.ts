@@ -24,6 +24,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isSystemAction: false,
       referencedByCount: 0,
       isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
     {
       id: 'notification-email',
@@ -34,6 +35,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isSystemAction: false,
       referencedByCount: 0,
       isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
     {
       id: 'preconfigured-es-index-action',
@@ -44,6 +46,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isSystemAction: false,
       referencedByCount: 0,
       isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
     {
       id: 'my-deprecated-servicenow',
@@ -54,6 +57,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isSystemAction: false,
       referencedByCount: 0,
       isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
     {
       id: 'my-deprecated-servicenow-default',
@@ -64,6 +68,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isSystemAction: false,
       referencedByCount: 0,
       isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
     {
       id: 'my-slack1',
@@ -74,6 +79,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isSystemAction: false,
       referencedByCount: 0,
       isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
     {
       id: 'custom-system-abc-connector',
@@ -84,6 +90,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isSystemAction: false,
       referencedByCount: 0,
       isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
     {
       id: 'preconfigured.test.index-record',
@@ -94,6 +101,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isSystemAction: false,
       referencedByCount: 0,
       isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
     {
       id: 'my-test-email',
@@ -104,6 +112,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       isSystemAction: false,
       referencedByCount: 0,
       isConnectorTypeDeprecated: false,
+      authMode: 'shared',
     },
   ];
 
@@ -180,6 +189,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
             unencrypted: `This value shouldn't get encrypted`,
           },
           referencedByCount: 0,
+          authMode: 'shared',
         },
       ]);
 
@@ -212,6 +222,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
             unencrypted: `This value shouldn't get encrypted`,
           },
           referencedByCount: 0,
+          authMode: 'shared',
         },
       ]);
     });
