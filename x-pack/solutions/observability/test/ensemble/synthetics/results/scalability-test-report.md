@@ -361,29 +361,28 @@ With 5 browser monitors on a 3-minute schedule, the agent runs up to **2 monitor
 
 ---
 
-### 4.8 Edge Case: Journey Timeout Limit
+### 4.8 Edge Case: Very Heavy Journey Rerun (`timeout: null`, `domcontentloaded`)
 
-**Status**: FAIL - Journeys exceeding default timeout
+**Status**: PASS
 
 **Journey**: 8-step navigation with 10s waits (~120s total)
 
-#### Error
-```
-CMD_TIMEOUT: journey did not finish executing, 3 steps ran
-command did not exit before extended timeout: 46s
-```
+#### Execution Result (Rerun)
+| Monitors | Up | Down | Pending | Avg Duration | Result |
+|----------|----|------|---------|--------------|--------|
+| 1 | 1 | 0 | 0 | ~97.0s | **PASS** |
 
-#### Finding
+#### Finding (Rerun)
 
-The default monitor timeout is **16 seconds** with an extended timeout of **~46 seconds**. Any journey exceeding this will fail with `CMD_TIMEOUT`, regardless of agent capacity.
+With browser monitors created using `timeout: null` and journey steps using
+`waitForLoadState('domcontentloaded')`, this very-heavy scenario completed successfully.
 
-| Journey Duration | Timeout (default) | Result |
-|------------------|-------------------|--------|
-| < 46s | 46s | OK |
-| > 46s | 46s | **CMD_TIMEOUT** |
+| Scenario | Monitor Timeout | Wait Strategy | Observed Outcome |
+|----------|-----------------|---------------|------------------|
+| Very heavy journey (~120s total) | `null` | `domcontentloaded` | **Success (up)** |
 
 > [!IMPORTANT]
-> Any capacity planning must account for this timeout limit. For journeys > 46s, you must increase the monitor timeout setting before the agent can execute them.
+> This confirms the prior failure mode was step wait behavior (`networkidle` path), not a global browser monitor timeout limit.
 
 ---
 
@@ -466,7 +465,7 @@ capacity_constant = (600s × 2 CPUs) / 1.4 = 857
 
 ---
 
-### 4.10 Results: Heavy Journey Test (18 monitors, ~40s duration, 10-min schedule)
+### 4.10 Results: Heavy Journey Test Rerun (18 monitors, 10-min schedule, `timeout: null`, `domcontentloaded`)
 
 **Schedule**: Every 10 minutes  
 **Purpose**: Test capacity with heavy journey using overhead factor 1.8
@@ -478,76 +477,39 @@ capacity_constant = (600s × 2 CPUs) / 1.8 = 667
 max_monitors = 667 / 37s = 18 monitors
 ```
 
-#### Test Results
+#### Test Results (Rerun)
 
 | Monitors | Up | Down | Pending | Avg Duration | Result |
 |----------|-----|------|---------|--------------|--------|
-| 18 | 12-13 | 5-6 | 0 | ~40s | **PARTIAL FAIL** |
+| 18 | 18 | 0 | 0 | ~18.35s | **PASS** |
 
-#### Error Analysis
+#### Error Analysis (Rerun)
 
-All failures were **CMD_TIMEOUT** errors, not capacity issues:
+No `CMD_TIMEOUT` and no Playwright `50000ms` timeout errors were observed in this rerun window.
 
-```
-"error": "journey did not finish executing, 3 steps ran: 
-command did not exit before extended timeout: 46s"
-```
+#### Rerun Metrics Snapshot
 
-#### Execution History
+| Metric | Value |
+|--------|-------|
+| Summary docs in window | 44 |
+| Status mix | 44 up / 0 down |
+| Avg duration | ~18.35s |
+| p95 duration | ~27.39s |
 
-| Monitor | Duration | Status |
-|---------|----------|--------|
-| Monitor 1 | 38.1s | up |
-| Monitor 5 | 40.3s | up |
-| Monitor 6 | 39.3s | up |
-| Monitor 8 | 38.7s | up |
-| Monitor 9 | 39.9s | up |
-| Monitor 10 | 42.5s | up |
-| Monitor 11 | 38.7s | up |
-| Monitor 12 | 39.4s | up |
-| Monitor 13 | 40.1s | up |
-| Monitor 14 | 40.1s | up |
-| Monitor 16 | 42.0s | up |
-| Monitor 17 | 43.3s | up |
-| Monitor 2 | 0s (timeout) | down |
-| Monitor 3 | 43.3s (timeout) | down |
-| Monitor 4 | 0s (timeout) | down |
-| Monitor 7 | 0s (timeout) | down |
-| Monitor 15 | 0s (timeout) | down |
-| Monitor 18 | 0s (timeout) | down |
-
-#### Reverse Engineering the Overhead
-
-If 12 monitors succeeded out of 18 with ~40s journey:
-
-```
-max_monitors = (schedule_interval × concurrency) / (overhead × avg_duration)
-12 = (600 × 2) / (overhead × 40)
-12 = 1200 / (overhead × 40)
-overhead = 1200 / (12 × 40) = 2.5
-```
-
-#### Implied Overhead by Result
-
-| Monitors Succeeded | Avg Duration | Implied Overhead |
-|-------------------|--------------|------------------|
-| 12 | 40s | **2.5** |
-| 13 | 40s | **2.3** |
-
-> [!WARNING]
-> **Key Finding**: For journeys > 35s, the **46s timeout becomes the limiting factor**, not agent capacity. The failures were timeout errors, not pending monitors. This effectively increases the required overhead to **2.3-2.5** for heavy journeys near the timeout limit.
+> [!TIP]
+> **Key Finding (updated)**: Using `domcontentloaded` removed timeout-driven flakiness for this scenario under the same agent limits.
 
 > [!IMPORTANT]
-> **Recommendation for Heavy Journeys (35-45s)**:
-> - Use **overhead factor 2.5** to account for timeout variability
-> - Or increase the monitor timeout setting if journey consistently exceeds 46s
+> **Recommendation for Heavy Journeys**:
+> - Keep capacity planning (overhead/concurrency), and standardize waits in test scripts.
+> - For scalability testing, prefer deterministic waits like `domcontentloaded` over `networkidle` when possible.
 
 ---
 
 ### 4.11 Results: Heavy Journey with Extended Timeout (7 monitors, ~54s, 3-min schedule)
 
 **Schedule**: Every 3 minutes  
-**Purpose**: Validate 1.4 overhead formula for heavy journeys by removing the timeout constraint  
+**Purpose**: Historical baseline validation using explicit monitor timeout increase  
 **Timeout**: 120 seconds (increased from default 46s)
 
 #### Configuration Changes
@@ -589,7 +551,6 @@ max_monitors = 257 / 37s = ~7 monitors (for expected 37s duration)
 
 1. **No CMD_TIMEOUT errors**: With 120s timeout, all 5 steps complete successfully
 2. **No pending monitors**: Capacity formula is validated - 7 monitors fit within schedule
-3. **All failures were network issues**: `page.waitForLoadState: Timeout 50000ms exceeded` (elastic.co website, not capacity)
 
 #### Observed Overhead Calculation
 
@@ -602,7 +563,7 @@ Observed Overhead: 163 / 189 = 0.86 (actually faster than theoretical!)
 ```
 
 > [!TIP]
-> **Critical Finding**: The previous heavy journey failures (Test 4.7, 4.10) were caused by the **46s timeout constraint**, NOT capacity issues. When timeout is increased to 120s:
+> **Historical finding**: In the earlier baseline set, increasing timeout removed monitor-level timeout pressure for this scenario:
 > - Heavy journeys complete all 5 steps
 > - The 1.4 overhead formula is validated
 > - Observed overhead for long journeys is actually **~1.0-1.1** (lower than 1.4)
@@ -616,7 +577,8 @@ Observed Overhead: 163 / 189 = 0.86 (actually faster than theoretical!)
 | ~54s (heavy) | 0.86-1.1 | Startup cost is minimal relative to execution |
 
 > [!IMPORTANT]
-> **Conclusion**: The 1.4 overhead factor is **conservative** for heavy journeys. The formula works when timeout constraints are properly configured. For journeys > 46s, increase the monitor timeout setting.
+> **Conclusion**: The 1.4 overhead factor is **conservative** for long journeys in this baseline test set.  
+> This section is baseline-only; final reruns in 4.8/4.10/4.12.x show wait strategy (`domcontentloaded`) also materially affects outcomes.
 
 ---
 
@@ -644,30 +606,34 @@ capacity_constant = (schedule_interval × concurrency) / 2.5
 max_monitors = capacity_constant / avg_duration_seconds
 ```
 
+> [!NOTE]
+> **Naming update (Option A):** In this section, rows are mapped by **script profile**, not fixed "heavy/medium/complex" duration tiers.  
+> The same script profile can shift in observed runtime when wait strategy changes (for example `networkidle` -> `domcontentloaded`).
+
 **3-Minute Schedule (2 CPU)**:
 ```
 capacity_constant = (180 × 2) / 2.5 = 144
 ```
 
-| Journey Type | Duration | Predicted Max |
+| Script Profile | Duration | Predicted Max |
 |--------------|----------|---------------|
-| Simple | ~4.5s | 144 / 4.5 = **32 monitors** |
-| Complex | ~24s | 144 / 24 = **6 monitors** |
-| Heavy | ~37s | 144 / 37 = **4 monitors** |
+| Profile A (simple 1-step nav) | ~4.5s | 144 / 4.5 = **32 monitors** |
+| Profile B (5-step nav) | ~24s | 144 / 24 = **6 monitors** |
+| Profile C (5-step nav + waits, prior baseline) | ~37s | 144 / 37 = **4 monitors** |
 
 **10-Minute Schedule (2 CPU)**:
 ```
 capacity_constant = (600 × 2) / 2.5 = 480
 ```
 
-| Journey Type | Duration | Predicted Max |
+| Script Profile | Duration | Predicted Max |
 |--------------|----------|---------------|
-| Medium | ~21s | 480 / 21 = **23 monitors** |
-| Heavy | ~40s | 480 / 40 = **12 monitors** |
+| Profile D (3-step nav + waits) | ~21s | 480 / 21 = **23 monitors** |
+| Profile C (5-step nav + waits, prior baseline) | ~40s | 480 / 40 = **12 monitors** |
 
 ---
 
-#### 4.12.1 Simple Journey (32 monitors, ~4.5s, 3-min schedule)
+#### 4.12.1 Profile A: Simple Journey (32 monitors, ~4.5s, 3-min schedule)
 
 **Schedule**: Every 3 minutes  
 **Journey**: Simple (1 step)  
@@ -696,7 +662,7 @@ Observed overhead = 103 / 72 = 1.43
 
 ---
 
-#### 4.12.2 Complex Journey (6 monitors, ~24s, 3-min schedule)
+#### 4.12.2 Profile B: 5-Step Journey (6 monitors, ~24s, 3-min schedule)
 
 **Schedule**: Every 3 minutes  
 **Journey**: Complex (5 steps)  
@@ -723,32 +689,32 @@ Observed overhead = 103 / 72 = 1.43
 
 ---
 
-#### 4.12.3 Heavy Journey (4 monitors, ~37s, 3-min schedule)
+#### 4.12.3 Profile C Rerun (4 monitors, 3-min schedule, `timeout: null`, `domcontentloaded`)
 
 **Schedule**: Every 3 minutes  
 **Journey**: Heavy (5 steps + waits)  
 **Monitors**: 4  
-**Result**: **FAIL** (Timeout Constrained)
+**Result**: **PASS**
 
 | Monitors | Up | Down | Pending | Actual Duration | Status |
 |----------|-----|------|---------|-----------------|--------|
-| 4 | 0 | 4 | 0 | 43-44s | **TIMEOUT FAIL** |
+| 4 | 4 | 0 | 0 | ~25.12s avg | **PASS** |
 
 **Error Analysis**:
 
-| Monitor | Duration | Steps Completed | Error |
-|---------|----------|-----------------|-------|
-| Monitor 1 | 43.97s | 3/5 | journey did not finish executing |
-| Monitor 2 | 44.21s | 0/5 | journey did not finish executing |
-| Monitor 3 | 44.22s | 0/5 | journey did not finish executing |
-| Monitor 4 | 43.98s | 3/5 | journey did not finish executing |
+| Metric | Value |
+|--------|-------|
+| Summary docs in window | 12 |
+| Status mix | 12 up / 0 down |
+| Avg duration | ~25.12s |
+| p95 duration | ~26.27s |
 
-> [!WARNING]
-> **Timeout Constraint**: The heavy journey takes ~44s, hitting the 46s timeout. This test fails due to **timeout limits**, not capacity.
+> [!TIP]
+> This rerun was stable with no timeout failures.
 
 ---
 
-#### 4.12.4 Medium Journey (23 monitors, ~21s, 10-min schedule)
+#### 4.12.4 Profile D: 3-Step + Waits Journey (23 monitors, ~21s, 10-min schedule)
 
 **Schedule**: Every 10 minutes  
 **Journey**: Medium (3 steps + waits)  
@@ -775,36 +741,40 @@ Observed overhead: 550 / 483 = 1.14
 
 ---
 
-#### 4.12.5 Heavy Journey (12 monitors, ~40s, 10-min schedule)
+#### 4.12.5 Profile C Rerun (12 monitors, 10-min schedule, `timeout: null`, `domcontentloaded`)
 
 **Schedule**: Every 10 minutes  
 **Journey**: Heavy (5 steps + waits)  
 **Monitors**: 12  
-**Result**: **FAIL** (Timeout Constrained)
+**Result**: **PASS**
 
 | Monitors | Up | Down | Pending | Actual Duration | Status |
 |----------|-----|------|---------|-----------------|--------|
-| 12 | 0 | 12 | 0 | 42-45s | **TIMEOUT FAIL** |
+| 12 | 12 | 0 | 0 | ~19.79s avg | **PASS** |
 
-All monitors fail with "journey did not finish executing, 3 steps ran" - the 5-step journey cannot complete before the 46s timeout.
+Rerun metrics:
+- Summary docs in window: 30
+- Status mix: 30 up / 0 down
+- p95 duration: ~27.41s
 
-> [!WARNING]
-> **Timeout Override**: Heavy journeys (5 steps + 3s waits each) consistently take 42-45s, which approaches or exceeds the 46s timeout. This test fails due to **timeout constraints**, not capacity.
+> [!TIP]
+> No timeout errors were observed in this rerun.
 
 ---
 
 #### 4.12 Summary: 2.5 Overhead Results
 
-| Test | Journey | Schedule | Monitors | Result | Notes |
+| Test | Script Profile | Schedule | Monitors | Result | Notes |
 |------|---------|----------|----------|--------|-------|
-| 4.12.1 | Simple (~4.5s) | 3-min | 32 | **PASS** | 100% success, 43% headroom |
-| 4.12.2 | Complex (~24s) | 3-min | 6 | **PARTIAL** | 67% success, network variability |
-| 4.12.3 | Heavy (~37s) | 3-min | 4 | **FAIL** | Timeout constraint |
-| 4.12.4 | Medium (~21s) | 10-min | 23 | **PASS** | 100% success on 2nd cycle |
-| 4.12.5 | Heavy (~40s) | 10-min | 12 | **FAIL** | Timeout constraint |
+| 4.12.1 | Profile A (simple 1-step nav, ~4.5s) | 3-min | 32 | **PASS** | 100% success, 43% headroom |
+| 4.12.2 | Profile B (5-step nav, ~24s) | 3-min | 6 | **PARTIAL** | 67% success, network variability |
+| 4.12.3 | Profile C rerun (`timeout: null`, `domcontentloaded`) | 3-min | 4 | **PASS** | 12 up / 0 down in summary window |
+| 4.12.4 | Profile D (3-step nav + waits, ~21s) | 10-min | 23 | **PASS** | 100% success on 2nd cycle |
+| 4.12.5 | Profile C rerun (`timeout: null`, `domcontentloaded`) | 10-min | 12 | **PASS** | 30 up / 0 down in summary window |
 
 > [!IMPORTANT]
-> **The 2.5 overhead factor works for journeys under ~35s**, providing adequate headroom and stable CPU utilization. However, **heavy journeys (40s+) are timeout-constrained** regardless of the overhead factor.
+> **The 2.5 overhead factor still provides useful capacity guidance.**
+> Reruns show wait strategy matters: switching to `domcontentloaded` removed timeout-driven failures for these heavy scenarios.
 
 ---
 
@@ -848,7 +818,7 @@ All monitors fail with "journey did not finish executing, 3 steps ran" - the 5-s
 
 ### Summary Table
 
-#### 1.4 Overhead Tests (Maximum Capacity)
+#### 1.4 Overhead Tests (Historical Baseline Dataset)
 
 | Monitors | Journey | Timeout | Pending | Agent CPU% | Agent Memory | Status |
 |----------|---------|---------|---------|------------|--------------|--------|
@@ -861,13 +831,13 @@ All monitors fail with "journey did not finish executing, 3 steps ran" - the 5-s
 
 #### 2.5 Overhead Tests (Production Recommended)
 
-| Monitors | Journey | Schedule | Headroom | Status | Notes |
+| Monitors | Script Profile | Schedule | Headroom | Status | Notes |
 |----------|---------|----------|----------|--------|-------|
-| 32 | Simple (~4.5s) | 3-min | 43% | **PASS** | 100% success |
-| 6 | Complex (~24s) | 3-min | - | **PARTIAL** | 67% success, network variability |
-| 4 | Heavy (~37s) | 3-min | - | **FAIL** | Timeout constraint |
-| 23 | Medium (~21s) | 10-min | - | **PASS** | 100% on 2nd cycle |
-| 12 | Heavy (~40s) | 10-min | - | **FAIL** | Timeout constraint |
+| 32 | Profile A (simple 1-step nav, ~4.5s) | 3-min | 43% | **PASS** | 100% success |
+| 6 | Profile B (5-step nav, ~24s) | 3-min | - | **PARTIAL** | 67% success, network variability |
+| 4 | Profile C rerun (`timeout: null`, `domcontentloaded`) | 3-min | - | **PASS** | 12 up / 0 down |
+| 23 | Profile D (3-step nav + waits, ~21s) | 10-min | - | **PASS** | 100% on 2nd cycle |
+| 12 | Profile C rerun (`timeout: null`, `domcontentloaded`) | 10-min | - | **PASS** | 30 up / 0 down |
 
 #### SYNTHETICS_LIMIT_BROWSER Tests
 
@@ -1014,7 +984,7 @@ Observed Overhead = Actual Cycle Spread / Theoretical
 3. **Divide by avg_duration** = Number of monitors that fit in the available time
    - Example: 257 / 4.5s = 57 monitors
 
-### Formula Validation: Test Results vs Predictions
+### Formula Validation: Test Results vs Predictions (Historical Baseline)
 
 | Test | Schedule | Duration | Timeout | Monitors | Formula Predicts | Actual Result | Match |
 |------|----------|----------|---------|----------|------------------|---------------|-------|
@@ -1028,7 +998,8 @@ Observed Overhead = Actual Cycle Spread / Theoretical
 *Heavy journey at 46s timeout was limited by timeout, not capacity
 
 > [!TIP]
-> The formula accurately predicted capacity across **all schedules and journey types** when timeout is properly configured. The 1.4 overhead factor is validated as **universal and conservative**.
+> In the historical baseline dataset, the formula predicted capacity well across tested schedules/journeys.  
+> Final reruns should still be interpreted with script/wait strategy context.
 
 ### Capacity Constant by Agent Size
 
@@ -1052,12 +1023,12 @@ Observed Overhead = Actual Cycle Spread / Theoretical
 
 ### Capacity by Journey Complexity
 
-| Journey Type | Steps | Avg Duration | Max Monitors | Notes |
+| Script Profile | Steps | Avg Duration | Max Monitors | Notes |
 |--------------|-------|--------------|--------------|-------|
-| Simple | 1 | ~4.5s | ~57 | Single page load |
-| Complex | 5 | ~24s | ~10 | Multi-page navigation |
-| Heavy | 5 + waits | ~37s | ~7 | Near max duration before default timeout |
-| Very Heavy | 8 + waits | >46s | N/A | **Requires increased timeout setting** |
+| Profile A (simple 1-step nav) | 1 | ~4.5s | ~57 | Single page load |
+| Profile B (5-step nav) | 5 | ~24s | ~10 | Multi-page navigation |
+| Profile C (5-step nav + waits, baseline) | 5 + waits | ~37s | ~7 | Baseline profile |
+| Profile E (8-step nav + waits, baseline) | 8 + waits | ~120s | N/A | Sensitive to wait strategy / timeout config |
 
 ### Capacity by Schedule Interval (2 CPU Agent)
 
@@ -1077,19 +1048,20 @@ Observed Overhead = Actual Cycle Spread / Theoretical
 
 Before calculating capacity, follow these two steps:
 
-#### Step 1: Check the Timeout Constraint
+#### Step 1: Check Timeout Configuration and Step-Level Waits
 
-The default monitor timeout is **~46 seconds**. This is an independent constraint that applies regardless of agent capacity.
+Do not assume a universal browser default timeout of `46s`.
+In these tests, timeout behavior differed by monitor configuration and by operation-level browser waits.
 
-| Journey Duration | Timeout Risk | Action Required |
+| Journey Duration / Behavior | Timeout Risk | Action Required |
 |------------------|--------------|-----------------|
-| < 30s | None | Proceed to Step 2 |
-| 30-40s | Low | Monitor for occasional timeouts |
-| 40-46s | Medium | Consider increasing timeout |
-| > 46s | **High** | **Must increase monitor timeout setting** |
+| < 30s and stable loads | Low | Proceed to Step 2 |
+| 30-60s with `networkidle` waits | Medium | Watch for Playwright `50000ms` step timeout |
+| Frequent `waitForLoadState` timeouts | High | Adjust wait strategy / target page / load |
+| Monitor-level `CMD_TIMEOUT` observed | High | Revisit monitor timeout configuration |
 
 > [!WARNING]
-> Journeys exceeding 46 seconds will fail with `CMD_TIMEOUT` errors even if the agent has spare capacity. Increase the monitor's timeout setting before deploying.
+> Two different timeout classes can fail a run: monitor-level timeout (`CMD_TIMEOUT`) and browser operation timeout (`Timeout 50000ms exceeded`).
 
 #### Step 2: Calculate Capacity
 
@@ -1108,13 +1080,13 @@ max_monitors = capacity_constant / avg_journey_duration
 | ~10s | None | 25 monitors | 85 monitors | Safe zone |
 | ~20s | None | 12 monitors | 42 monitors | Safe zone |
 | ~30s | Low | 8 monitors | 28 monitors | Monitor memory usage |
-| ~40s | Medium | 6 monitors | 21 monitors | Near timeout - test thoroughly |
-| ~45s | High | 5 monitors | 19 monitors | At timeout edge - increase timeout if needed |
-| >46s | **Critical** | N/A | N/A | **Must increase timeout setting first** |
+| ~40s | Medium | 6 monitors | 21 monitors | Test with chosen wait strategy under load |
+| ~45s | Medium-High | 5 monitors | 19 monitors | Validate step waits and timeout config |
+| >46s | Context-dependent | N/A | N/A | Requires explicit timeout/wait strategy validation |
 
 > [!IMPORTANT]
 > **Two constraints govern capacity:**
-> 1. **Timeout constraint**: Journey must complete within 46s (or configured timeout)
+> 1. **Timeout constraint**: Monitor-level timeout must be configured appropriately for the journey.
 > 2. **Capacity constraint**: Total cycle spread must fit within schedule interval
 >
 > Check timeout first, then calculate capacity.
@@ -1130,7 +1102,8 @@ max_monitors = capacity_constant / avg_journey_duration
 4. **Breaking point is predictable**: When `cycle_spread > schedule_interval`, monitors go pending
 
 > [!WARNING]
-> **Default timeout limit**: Journeys > 46 seconds will fail with CMD_TIMEOUT regardless of capacity
+> **Timeout note**: Initial reruns with `networkidle` showed Playwright `50000ms` operation timeouts.  
+> Final reruns with `domcontentloaded` were stable for the targeted scenarios.
 
 ---
 
@@ -1163,15 +1136,18 @@ The reports tested two factors. Choose based on your risk tolerance:
     *   **Result**: Validated as the "breaking point" in tests.
     *   **Example**: On the same setup, you can squeeze in **50-57 simple monitors**, but any hiccup will cause gaps.
 
-### 2. The "Hidden" Hard Limit: 46 Seconds
+### 2. Timeout Behavior to Plan For
 
-There is a hard constraint independent of capacity: **The Default Timeout**.
+There are two independent timeout behaviors to consider:
 
-*   **The Findings**: Any journey taking longer than **~46 seconds** will fail with `CMD_TIMEOUT`, even if your agent is sitting idle.
-*   **The Fix**: If your journey takes >35s, you are in the danger zone. You have two options:
-    1. **Increase the monitor timeout** setting in your configuration
-    2. **Divide the journey into shorter steps** - split a heavy 5-step journey into separate monitors with fewer steps each
-*   **Evidence**: In Test 4.12.3, running just 4 monitors failed because the journey took ~44s, hitting the timeout wall despite having plenty of CPU capacity.
+*   **Monitor-level timeout (`CMD_TIMEOUT`)**: depends on monitor configuration.
+*   **Browser operation timeout (`50000ms`)**: can fail an individual Playwright operation such as `page.waitForLoadState()`.
+
+*   **Rerun finding**: with browser monitor `timeout: null`, initial `networkidle` reruns showed `Timeout 50000ms exceeded` failures, while follow-up `domcontentloaded` reruns for the same scenarios were stable.
+*   **Practical fix options**:
+    1. Keep monitor timeout configuration explicit and environment-appropriate.
+    2. Reduce brittle waits (`networkidle`), simplify waits, or use a more stable target for scalability testing.
+    3. Reduce concurrency pressure on constrained CPU when testing heavy journeys.
 
 > [!WARNING]
 > **Nested Timeout**: Even after increasing the monitor timeout, you may hit a **Playwright/Chromium-level timeout of 50000ms (50s)** for operations like `page.waitForLoadState()`. This is a separate timeout within the browser automation layer. If your individual step operations exceed 50s, you'll see errors like `page.waitForLoadState: Timeout 50000ms exceeded`.
@@ -1181,9 +1157,10 @@ There is a hard constraint independent of capacity: **The Default Timeout**.
 The data is highly reliable because it was cross-validated:
 1.  **Consistency**: The formula accurately predicted the breaking point across different schedules (3-min vs 10-min) and journey types (Simple vs Complex).
 2.  **Concurrency**: Confirmed that the agent runs exactly **N** browsers concurrently, where N = CPU cores.
-3.  **Failure Mode**: The failure mechanism is clear.
+3.  **Failure Mode**: The failure mechanisms are distinguishable.
     *   **Capacity Failure**: Monitors go "Pending" (queue builds up).
-    *   **Timeout Failure**: Monitors go "Down" with `CMD_TIMEOUT` (individual runs take too long).
+    *   **Monitor Timeout Failure**: Monitors go "Down" with `CMD_TIMEOUT`.
+    *   **Browser Step Timeout Failure**: Monitors go "Down" with `page.waitForLoadState: Timeout 50000ms exceeded`.
 
 ---
 
@@ -1248,6 +1225,10 @@ curl -s -u "elastic:changeme" "http://localhost:9200/synthetics-*/_search" \
 ---
 
 ## Journey Scripts Tested
+
+> [!NOTE]
+> The scripts below are historical baseline scripts (`networkidle`) used for original sections.
+> Rerun sections used `domcontentloaded` for targeted heavy-profile validation.
 
 ### Simple Journey (~4.5s)
 ```javascript
