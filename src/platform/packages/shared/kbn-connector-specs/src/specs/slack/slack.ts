@@ -13,7 +13,7 @@ import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
 
 const SLACK_API_BASE = 'https://slack.com/api';
-const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Temporary: remove once OAuth UX is fully unblocked.
+const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Temporary: remove once OAuth support is unblocked.
 const SLACK_CONVERSATION_TYPES = ['public_channel', 'private_channel', 'im', 'mpim'] as const;
 
 const SlackSearchMessagesInputSchema = z.object({
@@ -462,7 +462,7 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
 }
 
 /**
- * Slack connector using OAuth2 Authorization Code flow.
+ * Slack connector using a user-provided bearer token (temporary MVP path).
  *
  * Required Slack App scopes:
  * MVP:
@@ -491,57 +491,37 @@ export const Slack: ConnectorSpec = {
   },
 
   auth: {
-    types: [
-      {
-        type: 'oauth_authorization_code',
-        defaults: {
-          authorizationUrl: 'https://slack.com/oauth/v2/authorize',
-          tokenUrl: 'https://slack.com/api/oauth.v2.access',
-          scope:
-            'channels:read,channels:history,groups:read,im:read,mpim:read,chat:write,search:read',
-          scopeQueryParam: 'user_scope', // Slack OAuth v2 uses user_scope for user token scopes
-          tokenExtractor: 'slackUserToken', // extract authed_user.access_token for user-token-only scopes (e.g. search:read)
-          useBasicAuth: false, // Slack uses POST body for client credentials
-        },
-        overrides: {
-          meta: {
-            scope: { hidden: true },
-            authorizationUrl: { hidden: true },
-            tokenUrl: { hidden: true },
-          },
-        },
-      },
-      ...(ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH
-        ? ([
-            {
-              type: 'bearer',
-              defaults: {
-                token: '',
-              },
-              overrides: {
-                meta: {
-                  token: {
-                    sensitive: true,
-                    label: i18n.translate(
-                      'core.kibanaConnectorSpecs.slack.auth.temporaryManualToken.label',
-                      {
-                        defaultMessage: 'Temporary Slack user token',
-                      }
-                    ),
-                    helpText: i18n.translate(
-                      'core.kibanaConnectorSpecs.slack.auth.temporaryManualToken.helpText',
-                      {
-                        defaultMessage:
-                          'Temporary option for testing only. Paste a Slack user token (e.g. xoxp-...) here. Prefer the OAuth authorization flow when available.',
-                      }
-                    ),
-                  },
+    // MVP: bearer token only (OAuth auth-code flow not required for merge into main)
+    types: ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH
+      ? ([
+          {
+            type: 'bearer',
+            defaults: {
+              token: '',
+            },
+            overrides: {
+              meta: {
+                token: {
+                  sensitive: true,
+                  label: i18n.translate(
+                    'core.kibanaConnectorSpecs.slack.auth.temporaryManualToken.label',
+                    {
+                      defaultMessage: 'Temporary Slack user token',
+                    }
+                  ),
+                  helpText: i18n.translate(
+                    'core.kibanaConnectorSpecs.slack.auth.temporaryManualToken.helpText',
+                    {
+                      defaultMessage:
+                        'Temporary option for testing only. Paste a Slack user token (e.g. xoxp-...) here.',
+                    }
+                  ),
                 },
               },
             },
-          ] as const)
-        : []),
-    ],
+          },
+        ] as const)
+      : [],
   },
 
   // No additional configuration needed beyond OAuth credentials

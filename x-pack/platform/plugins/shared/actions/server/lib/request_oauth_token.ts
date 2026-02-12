@@ -9,22 +9,14 @@ import qs from 'query-string';
 import axios from 'axios';
 import { stableStringify } from '@kbn/std';
 import type { Logger } from '@kbn/core/server';
-import type { RefreshTokenOAuthRequestParams } from './request_oauth_refresh_token';
-import type { JWTOAuthRequestParams } from './request_oauth_jwt_token';
-import type { ClientCredentialsOAuthRequestParams } from './request_oauth_client_credentials_token';
 import { request } from './axios_utils';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { AsApiContract } from '../../common';
-import { getBasicAuthHeader } from './get_basic_auth_header';
-import type { AuthorizationCodeOAuthRequestParams } from './request_oauth_authorization_code_token';
-import { extractOAuthAccessToken } from './extract_oauth_token';
 
 export interface OAuthTokenResponse {
   tokenType: string;
   accessToken: string;
-  expiresIn?: number;
-  refreshToken?: string;
-  refreshTokenExpiresIn?: number;
+  expiresIn: number;
 }
 
 export async function requestOAuthToken<T>(
@@ -32,58 +24,31 @@ export async function requestOAuthToken<T>(
   grantType: string,
   configurationUtilities: ActionsConfigurationUtilities,
   logger: Logger,
-  bodyRequest: AsApiContract<T>,
-  useBasicAuth: boolean = false,
-  tokenExtractor?: string
+  bodyRequest: AsApiContract<T>
 ): Promise<OAuthTokenResponse> {
   const axiosInstance = axios.create();
-
-  type OAuthBodyRequest =
-    | AuthorizationCodeOAuthRequestParams
-    | ClientCredentialsOAuthRequestParams
-    | JWTOAuthRequestParams
-    | RefreshTokenOAuthRequestParams;
-  // Extract client credentials for Basic Auth if needed
-  const {
-    client_id: clientId,
-    client_secret: clientSecret,
-    ...restBody
-  } = bodyRequest as AsApiContract<OAuthBodyRequest>;
-
-  const requestData = {
-    ...(useBasicAuth ? restBody : bodyRequest),
-    grant_type: grantType,
-  };
-
-  const requestHeaders = {
-    ...(useBasicAuth && clientId && clientSecret
-      ? getBasicAuthHeader({ username: clientId, password: clientSecret })
-      : {}),
-    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-  };
 
   const res = await request({
     axios: axiosInstance,
     url: tokenUrl,
     method: 'post',
     logger,
-    data: qs.stringify(requestData),
-    headers: requestHeaders,
+    data: qs.stringify({
+      ...bodyRequest,
+      grant_type: grantType,
+    }),
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    },
     configurationUtilities,
     validateStatus: () => true,
   });
 
   if (res.status === 200) {
-    const extractedAccessToken = extractOAuthAccessToken(res.data, tokenExtractor);
-    if (!extractedAccessToken) {
-      throw new Error('Unable to extract access token from OAuth response');
-    }
     return {
       tokenType: res.data.token_type,
-      accessToken: extractedAccessToken,
+      accessToken: res.data.access_token,
       expiresIn: res.data.expires_in,
-      refreshToken: res.data.refresh_token,
-      refreshTokenExpiresIn: res.data.refresh_token_expires_in,
     };
   } else {
     const errString = stableStringify(res.data);

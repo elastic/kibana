@@ -16,7 +16,6 @@ export enum WidgetType {
   FormFieldset = 'formFieldset',
   Hidden = 'hidden',
   Object = 'object',
-  OAuthAuthorizeButton = 'oauthAuthorizeButton',
 }
 
 export interface BaseWidgetProps<

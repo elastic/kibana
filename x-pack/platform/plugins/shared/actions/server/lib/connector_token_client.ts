@@ -25,14 +25,14 @@ interface ConstructorOptions {
 interface CreateOptions {
   connectorId: string;
   token: string;
-  expiresAtMillis?: string;
+  expiresAtMillis: string;
   tokenType?: string;
 }
 
 export interface UpdateOptions {
   id: string;
   token: string;
-  expiresAtMillis?: string;
+  expiresAtMillis: string;
   tokenType?: string;
 }
 
@@ -40,12 +40,10 @@ interface UpdateOrReplaceOptions {
   connectorId: string;
   token: ConnectorToken | null;
   newToken: string;
-  expiresInSec?: number;
+  expiresInSec: number;
   tokenRequestDate: number;
   deleteExisting: boolean;
-  tokenType?: string;
 }
-
 export class ConnectorTokenClient {
   private readonly logger: Logger;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -115,12 +113,10 @@ export class ConnectorTokenClient {
 
     try {
       const updateOperation = () => {
-        // Exclude id from attributes since it's saved object metadata, not document data
-        const { id: _id, ...attributesWithoutId } = attributes;
         return this.unsecuredSavedObjectsClient.create<ConnectorToken>(
           CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
           {
-            ...attributesWithoutId,
+            ...attributes,
             token,
             expiresAt: expiresAtMillis,
             tokenType: tokenType ?? 'access_token',
@@ -218,10 +214,7 @@ export class ConnectorTokenClient {
       return { hasErrors: true, connectorToken: null };
     }
 
-    if (
-      connectorTokensResult[0].attributes.expiresAt &&
-      isNaN(Date.parse(connectorTokensResult[0].attributes.expiresAt))
-    ) {
+    if (isNaN(Date.parse(connectorTokensResult[0].attributes.expiresAt))) {
       this.logger.error(
         `Failed to get connector_token for connectorId "${connectorId}" and tokenType: "${
           tokenType ?? 'access_token'
@@ -279,7 +272,6 @@ export class ConnectorTokenClient {
     expiresInSec,
     tokenRequestDate,
     deleteExisting,
-    tokenType = 'access_token',
   }: UpdateOrReplaceOptions) {
     expiresInSec = expiresInSec ?? 3600;
     tokenRequestDate = tokenRequestDate ?? Date.now();
@@ -287,7 +279,7 @@ export class ConnectorTokenClient {
       if (deleteExisting) {
         await this.deleteConnectorTokens({
           connectorId,
-          tokenType,
+          tokenType: 'access_token',
         });
       }
 
@@ -295,144 +287,15 @@ export class ConnectorTokenClient {
         connectorId,
         token: newToken,
         expiresAtMillis: new Date(tokenRequestDate + expiresInSec * 1000).toISOString(),
-        tokenType,
+        tokenType: 'access_token',
       });
     } else {
       await this.update({
-        id: token.id!,
+        id: token.id!.toString(),
         token: newToken,
         expiresAtMillis: new Date(tokenRequestDate + expiresInSec * 1000).toISOString(),
-        tokenType,
+        tokenType: 'access_token',
       });
-    }
-  }
-
-  /**
-   * Create new token with refresh token support
-   */
-  public async createWithRefreshToken({
-    connectorId,
-    accessToken,
-    refreshToken,
-    expiresIn,
-    refreshTokenExpiresIn,
-    tokenType,
-  }: {
-    connectorId: string;
-    accessToken: string;
-    refreshToken?: string;
-    expiresIn?: number;
-    refreshTokenExpiresIn?: number;
-    tokenType?: string;
-  }): Promise<ConnectorToken> {
-    const id = SavedObjectsUtils.generateId();
-    const now = Date.now();
-    const expiresInMillis = expiresIn ? new Date(now + expiresIn * 1000).toISOString() : undefined;
-    const refreshTokenExpiresInMillis = refreshTokenExpiresIn
-      ? new Date(now + refreshTokenExpiresIn * 1000).toISOString()
-      : undefined;
-
-    try {
-      const result = await this.unsecuredSavedObjectsClient.create(
-        CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-        omitBy(
-          {
-            connectorId,
-            token: accessToken,
-            refreshToken,
-            expiresAt: expiresInMillis,
-            refreshTokenExpiresAt: refreshTokenExpiresInMillis,
-            tokenType: tokenType ?? 'access_token',
-            createdAt: new Date(now).toISOString(),
-            updatedAt: new Date(now).toISOString(),
-          },
-          isUndefined
-        ),
-        { id }
-      );
-
-      return result.attributes as ConnectorToken;
-    } catch (err) {
-      this.logger.error(
-        `Failed to create connector_token with refresh token for connectorId "${connectorId}". Error: ${err.message}`
-      );
-      throw err;
-    }
-  }
-
-  /**
-   * Update token with refresh token
-   */
-  public async updateWithRefreshToken({
-    id,
-    token,
-    refreshToken,
-    expiresIn,
-    refreshTokenExpiresIn,
-    tokenType,
-  }: {
-    id: string;
-    token: string;
-    refreshToken?: string;
-    expiresIn?: number;
-    refreshTokenExpiresIn?: number;
-    tokenType?: string;
-  }): Promise<ConnectorToken | null> {
-    const { attributes, references, version } =
-      await this.unsecuredSavedObjectsClient.get<ConnectorToken>(
-        CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-        id
-      );
-    const now = Date.now();
-    const expiresInMillis = expiresIn ? new Date(now + expiresIn * 1000).toISOString() : undefined;
-    const refreshTokenExpiresInMillis = refreshTokenExpiresIn
-      ? new Date(now + refreshTokenExpiresIn * 1000).toISOString()
-      : undefined;
-
-    try {
-      const updateOperation = () => {
-        // Exclude id from attributes since it's saved object metadata, not document data
-        const { id: _id, ...attributesWithoutId } = attributes;
-        return this.unsecuredSavedObjectsClient.create<ConnectorToken>(
-          CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-          omitBy(
-            {
-              ...attributesWithoutId,
-              token,
-              refreshToken: refreshToken ?? attributes.refreshToken,
-              expiresAt: expiresInMillis,
-              refreshTokenExpiresAt:
-                refreshTokenExpiresInMillis ?? attributes.refreshTokenExpiresAt,
-              tokenType: tokenType ?? 'access_token',
-              updatedAt: new Date(now).toISOString(),
-            },
-            isUndefined
-          ) as ConnectorToken,
-          omitBy(
-            {
-              id,
-              overwrite: true,
-              references,
-              version,
-            },
-            isUndefined
-          )
-        );
-      };
-
-      const result = await retryIfConflicts(
-        this.logger,
-        `accessToken.updateWithRefreshToken('${id}')`,
-        updateOperation,
-        MAX_RETRY_ATTEMPTS
-      );
-
-      return result.attributes as ConnectorToken;
-    } catch (err) {
-      this.logger.error(
-        `Failed to update connector_token with refresh token for id "${id}". Error: ${err.message}`
-      );
-      throw err;
     }
   }
 }

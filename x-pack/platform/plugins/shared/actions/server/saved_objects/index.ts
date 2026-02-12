@@ -13,12 +13,7 @@ import type {
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getOldestIdleActionTask } from '@kbn/task-manager-plugin/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import {
-  actionMappings,
-  actionTaskParamsMappings,
-  connectorTokenMappings,
-  oauthStateMappings,
-} from './mappings';
+import { actionMappings, actionTaskParamsMappings, connectorTokenMappings } from './mappings';
 import { getActionsMigrations } from './actions_migrations';
 import { getActionTaskParamsMigrations } from './action_task_params_migrations';
 import type { InMemoryConnector, RawAction } from '../types';
@@ -29,13 +24,11 @@ import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-  OAUTH_STATE_SAVED_OBJECT_TYPE,
 } from '../constants/saved_objects';
 import {
   actionTaskParamsModelVersions,
   connectorModelVersions,
   connectorTokenModelVersions,
-  oauthStateModelVersions,
 } from './model_versions';
 
 export function setupSavedObjects(
@@ -136,52 +129,13 @@ export function setupSavedObjects(
 
   encryptedSavedObjects.registerType({
     type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['token', 'refreshToken']),
+    attributesToEncrypt: new Set(['token']),
     attributesToIncludeInAAD: new Set([
       'connectorId',
       'tokenType',
       'expiresAt',
       'createdAt',
       'updatedAt',
-      'refreshTokenExpiresAt',
-    ]),
-  });
-
-  savedObjects.registerType({
-    name: OAUTH_STATE_SAVED_OBJECT_TYPE,
-    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
-    hidden: true,
-    namespaceType: 'agnostic',
-    mappings: oauthStateMappings,
-    management: {
-      importableAndExportable: false,
-    },
-    modelVersions: oauthStateModelVersions,
-    excludeOnUpgrade: async () => {
-      // Clean up expired states older than 1 hour
-      const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
-      return {
-        bool: {
-          must: [{ term: { type: 'oauth_state' } }, { range: { expiresAt: { lt: oneHourAgo } } }],
-        },
-      };
-    },
-  });
-
-  encryptedSavedObjects.registerType({
-    type: OAUTH_STATE_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['codeVerifier']),
-    attributesToIncludeInAAD: new Set([
-      'state',
-      'connectorId',
-      'kibanaReturnUrl',
-      'redirectUri',
-      'authorizationUrl',
-      'scope',
-      'spaceId',
-      'createdAt',
-      'expiresAt',
-      'createdBy',
     ]),
   });
 }

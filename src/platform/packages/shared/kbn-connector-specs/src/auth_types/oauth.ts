@@ -43,7 +43,6 @@ export const OAuth: AuthTypeSpec<AuthSchemaType> = {
     let token;
     try {
       token = await ctx.getToken({
-        grantType: 'client_credentials',
         tokenUrl: secret.tokenUrl,
         scope: secret.scope,
         clientId: secret.clientId,

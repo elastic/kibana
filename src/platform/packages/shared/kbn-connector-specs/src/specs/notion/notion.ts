@@ -22,17 +22,7 @@ export const NotionConnector: ConnectorSpec = {
   },
 
   auth: {
-    types: [
-      'bearer',
-      {
-        type: 'oauth_authorization_code',
-        defaults: {
-          authorizationUrl: 'https://api.notion.com/v1/oauth/authorize',
-          tokenUrl: 'https://api.notion.com/v1/oauth/token',
-          useBasicAuth: true, // Notion requires HTTP Basic Auth for client credentials
-        },
-      },
-    ],
+    types: ['bearer'],
     headers: {
       'Notion-Version': '2025-09-03',
     },

@@ -14,7 +14,7 @@ import type { RewriteResponseCase } from '../../common';
 // for OAuth 2.0 Client Authentication and Authorization Grants https://datatracker.ietf.org/doc/html/rfc7523#section-8.1
 export const OAUTH_JWT_BEARER_GRANT_TYPE = 'urn:ietf:params:oauth:grant-type:jwt-bearer';
 
-export interface JWTOAuthRequestParams {
+interface JWTOAuthRequestParams {
   assertion: string;
   clientId?: string;
   clientSecret?: string;

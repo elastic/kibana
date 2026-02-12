@@ -48,8 +48,8 @@ const connectorTypeSchema = schema.object({
   maxAttempts: schema.maybe(schema.number({ min: MIN_MAX_ATTEMPTS, max: MAX_MAX_ATTEMPTS })),
 });
 
-// We leverage the enabledActionTypes list by allowing the other plugins to overwrite it by using "setEnabledConnectorTypes" in the plugin setup.
-// The list can be overwritten only if it has not already been set in the config.
+// We leverage enabledActionTypes list by allowing the other plugins to overwrite it by using "setEnabledConnectorTypes" in the plugin setup.
+// The list can be overwritten only if it's not already been set in the config.
 const enabledConnectorTypesSchema = schema.arrayOf(
   schema.oneOf([schema.string(), schema.literal(EnabledActionTypes.Any)]),
   {
@@ -72,17 +72,6 @@ const rateLimiterSchema = schema.recordOf(
     limit: schema.number({ defaultValue: 500, min: 1, max: 5000 }),
   })
 );
-
-const oAuthRateLimitSchema = schema.object({
-  authorize: schema.object({
-    lookbackWindow: schema.string({ defaultValue: '1h', validate: validateDuration }),
-    limit: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
-  }),
-  callback: schema.object({
-    lookbackWindow: schema.string({ defaultValue: '1h', validate: validateDuration }),
-    limit: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
-  }),
-});
 
 export const configSchema = schema.object({
   allowedHosts: schema.arrayOf(
@@ -212,13 +201,11 @@ export const configSchema = schema.object({
     })
   ),
   rateLimiter: schema.maybe(rateLimiterSchema),
-  oAuthRateLimit: oAuthRateLimitSchema,
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
 export type EnabledConnectorTypes = TypeOf<typeof enabledConnectorTypesSchema>;
 export type ConnectorRateLimiterConfig = TypeOf<typeof rateLimiterSchema>;
-export type OAuthRateLimiterConfig = TypeOf<typeof oAuthRateLimitSchema>;
 
 // It would be nicer to add the proxyBypassHosts / proxyOnlyHosts restriction on
 // simultaneous usage in the config validator directly, but there's no good way to express

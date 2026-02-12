@@ -61,10 +61,7 @@ export const getOAuthClientCredentialsAccessToken = async ({
     hasErrors = errors;
   }
 
-  if (
-    connectorToken === null ||
-    (connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) <= Date.now() : false)
-  ) {
+  if (connectorToken === null || Date.parse(connectorToken.expiresAt) <= Date.now()) {
     // Save the time before requesting token so we can use it to calculate expiration
     const requestTokenStart = Date.now();
 

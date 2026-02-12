@@ -92,48 +92,5 @@ export const connectorTokenMappings: SavedObjectsTypeMappingDefinition = {
     // updatedAt: {
     //   type: 'date',
     // },
-    // refreshToken: {
-    //   type: 'binary',
-    // },
-    // refreshTokenExpiresAt: {
-    //   type: 'date',
-    // },
-  },
-};
-
-export const oauthStateMappings: SavedObjectsTypeMappingDefinition = {
-  dynamic: false,
-  properties: {
-    state: {
-      type: 'keyword',
-    },
-    connectorId: {
-      type: 'keyword',
-    },
-    expiresAt: {
-      type: 'date',
-    },
-    // NO NEED TO BE INDEXED
-    // codeVerifier: {
-    //   type: 'binary',
-    // },
-    // redirectUri: {
-    //   type: 'keyword',
-    // },
-    // authorizationUrl: {
-    //   type: 'keyword',
-    // },
-    // scope: {
-    //   type: 'keyword',
-    // },
-    // createdAt: {
-    //   type: 'date',
-    // },
-    // createdBy: {
-    //   type: 'keyword',
-    // },
-    // kibanaReturnUrl: {
-    //   type: 'keyword',
-    // },
   },
 };

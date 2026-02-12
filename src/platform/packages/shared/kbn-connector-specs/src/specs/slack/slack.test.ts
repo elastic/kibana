@@ -36,13 +36,12 @@ describe('Slack', () => {
     expect(Slack.metadata.supportedFeatureIds).toContain('workflows');
   });
 
-  it('should use oauth_authorization_code auth type', () => {
+  it('should use bearer auth type', () => {
     expect(Slack.auth).toBeDefined();
     expect(Slack.auth?.types.length).toBeGreaterThanOrEqual(1);
     const types = (Slack.auth?.types as Array<string | { type: string }>).map((t) =>
       typeof t === 'string' ? t : t.type
     );
-    expect(types).toContain('oauth_authorization_code');
     expect(types).toContain('bearer');
   });
 
@@ -141,7 +140,9 @@ describe('Slack', () => {
       };
       mockClient.get.mockResolvedValue(mockResponse);
 
-      const result = await Slack.actions.resolveChannelId.handler(mockContext, { name: '#general' });
+      const result = await Slack.actions.resolveChannelId.handler(mockContext, {
+        name: '#general',
+      });
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://slack.com/api/conversations.list?types=public_channel&exclude_archived=true&limit=1000'
@@ -160,10 +161,18 @@ describe('Slack', () => {
     it('should paginate until found (contains match)', async () => {
       mockClient.get
         .mockResolvedValueOnce({
-          data: { ok: true, channels: [{ id: 'C9', name: 'zzz' }], response_metadata: { next_cursor: 'c2' } },
+          data: {
+            ok: true,
+            channels: [{ id: 'C9', name: 'zzz' }],
+            response_metadata: { next_cursor: 'c2' },
+          },
         })
         .mockResolvedValueOnce({
-          data: { ok: true, channels: [{ id: 'C7', name: 'alerts-prod' }], response_metadata: { next_cursor: '' } },
+          data: {
+            ok: true,
+            channels: [{ id: 'C7', name: 'alerts-prod' }],
+            response_metadata: { next_cursor: '' },
+          },
         });
 
       const result = await Slack.actions.resolveChannelId.handler(mockContext, {
