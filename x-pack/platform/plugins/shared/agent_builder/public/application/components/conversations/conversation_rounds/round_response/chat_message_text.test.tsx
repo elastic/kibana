@@ -127,6 +127,7 @@ describe('chat_message_text', () => {
         setTimeToFirstToken: jest.fn(),
         setPendingPrompt: jest.fn(),
         clearPendingPrompt: jest.fn(),
+        clearLastRoundResponse: jest.fn(),
       },
     });
   });
