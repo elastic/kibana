@@ -245,6 +245,5 @@ export default function ({ getService }: FtrProviderContext) {
         expect(status).to.be(403);
       });
     });
-
   });
 }
