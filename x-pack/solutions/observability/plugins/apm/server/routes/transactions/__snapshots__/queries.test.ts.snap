@@ -10,40 +10,46 @@ Object {
       },
     ],
   },
-  "fields": Array [
-    Object {
-      "field": "*",
-      "include_unmapped": true,
-    },
-  ],
-  "query": Object {
-    "bool": Object {
-      "filter": Array [
-        Object {
-          "term": Object {
-            "transaction.id": "foo",
-          },
-        },
-        Object {
-          "term": Object {
-            "trace.id": "bar",
-          },
-        },
-        Object {
-          "range": Object {
-            "@timestamp": Object {
-              "format": "epoch_millis",
-              "gte": 0,
-              "lte": 50000,
+  "body": Object {
+    "_source": Array [
+      "span.links",
+      "transaction.marks.agent",
+    ],
+    "fields": Array [
+      Object {
+        "field": "*",
+        "include_unmapped": true,
+      },
+    ],
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "term": Object {
+              "transaction.id": "foo",
             },
           },
-        },
-      ],
+          Object {
+            "term": Object {
+              "trace.id": "bar",
+            },
+          },
+          Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "epoch_millis",
+                "gte": 0,
+                "lte": 50000,
+              },
+            },
+          },
+        ],
+      },
     },
+    "size": 1,
+    "terminate_after": 1,
+    "track_total_hits": false,
   },
-  "size": 1,
-  "terminate_after": 1,
-  "track_total_hits": false,
 }
 `;
 
