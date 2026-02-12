@@ -7,6 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
+import type {
+  FieldRule,
+  CreateAnonymizationProfileRequestBody,
+  UpdateAnonymizationProfileRequestBody,
+  FindAnonymizationProfilesRequestQuery,
+} from '@kbn/anonymization-common';
 import {
   ANONYMIZATION_API_VERSION,
   ANONYMIZATION_PROFILES_API_BASE,
@@ -47,9 +53,7 @@ const rulesSchema = schema.object({
 /**
  * Validates that every field rule with anonymized=true has an entityClass.
  */
-const validateFieldRules = (
-  fieldRules: Array<{ allowed: boolean; anonymized: boolean; entityClass?: string }>
-): string | undefined => {
+const validateFieldRules = (fieldRules: FieldRule[]): string | undefined => {
   for (const rule of fieldRules) {
     if (rule.anonymized && !rule.entityClass) {
       return 'entityClass is required when anonymized is true';
@@ -90,7 +94,8 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
       },
       async (context, request, response) => {
         try {
-          const validationError = validateFieldRules(request.body.rules.fieldRules);
+          const body = request.body as CreateAnonymizationProfileRequestBody;
+          const validationError = validateFieldRules(body.rules.fieldRules);
           if (validationError) {
             return response.badRequest({ body: { message: validationError } });
           }
@@ -106,7 +111,7 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           const saltId = `salt-${namespace}`;
 
           const profile = await repo.create({
-            ...request.body,
+            ...body,
             saltId,
             namespace,
             createdBy: coreContext.security.authc.getCurrentUser()?.username ?? 'unknown',
@@ -164,6 +169,7 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
       },
       async (context, request, response) => {
         try {
+          const query = request.query as FindAnonymizationProfilesRequestQuery;
           const coreContext = await context.core;
           const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
           const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -173,13 +179,13 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
           const repo = new ProfilesRepository(esClient);
           const result = await repo.find({
             namespace,
-            filter: request.query.filter,
-            targetType: request.query.target_type,
-            targetId: request.query.target_id,
-            sortField: request.query.sort_field as 'created_at' | 'name' | 'updated_at' | undefined,
-            sortOrder: request.query.sort_order as 'asc' | 'desc' | undefined,
-            page: request.query.page,
-            perPage: request.query.per_page,
+            filter: query.filter,
+            targetType: query.target_type,
+            targetId: query.target_id,
+            sortField: query.sort_field,
+            sortOrder: query.sort_order,
+            page: query.page,
+            perPage: query.per_page,
           });
 
           return response.ok({ body: result });
@@ -264,8 +270,10 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
       },
       async (context, request, response) => {
         try {
-          if (request.body.rules?.fieldRules) {
-            const validationError = validateFieldRules(request.body.rules.fieldRules);
+          const body = request.body as UpdateAnonymizationProfileRequestBody;
+
+          if (body.rules?.fieldRules) {
+            const validationError = validateFieldRules(body.rules.fieldRules);
             if (validationError) {
               return response.badRequest({ body: { message: validationError } });
             }
@@ -277,7 +285,7 @@ export const registerProfileRoutes = (router: IRouter, logger: Logger): void => 
 
           const repo = new ProfilesRepository(esClient);
           const profile = await repo.update(namespace, request.params.id, {
-            ...request.body,
+            ...body,
             updatedBy: coreContext.security.authc.getCurrentUser()?.username ?? 'unknown',
           });
 

@@ -1,0 +1,678 @@
+openapi: 3.0.3
+info:
+  description: Manage anonymization profiles and replacements.
+  title: Anonymization API (Elastic Cloud Serverless)
+  version: '2026-02-10'
+servers:
+  - url: http://{kibana_host}:{port}
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/anonymization/profiles:
+    post:
+      operationId: CreateAnonymizationProfile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAnonymizationProfileRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnonymizationProfile'
+          description: Successfully created profile.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid request.
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: A profile for this target already exists.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Server error.
+      summary: Create anonymization profile
+      tags:
+        - Anonymization API
+        - Anonymization API
+  /api/anonymization/profiles/_find:
+    get:
+      operationId: FindAnonymizationProfiles
+      parameters:
+        - in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: target_type
+          required: false
+          schema:
+            $ref: '#/components/schemas/AnonymizationTargetType'
+        - in: query
+          name: target_id
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: sort_field
+          required: false
+          schema:
+            $ref: '#/components/schemas/ProfileSortField'
+        - in: query
+          name: sort_order
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortOrder'
+        - in: query
+          name: page
+          required: false
+          schema:
+            minimum: 1
+            type: integer
+        - in: query
+          name: per_page
+          required: false
+          schema:
+            maximum: 1000
+            minimum: 1
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FindProfilesResponse'
+          description: Successfully found profiles.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Server error.
+      summary: Find anonymization profiles
+      tags:
+        - Anonymization API
+        - Anonymization API
+  /api/anonymization/profiles/{id}:
+    delete:
+      operationId: DeleteAnonymizationProfile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    example: true
+                    type: boolean
+                required:
+                  - deleted
+          description: Successfully deleted profile.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Profile was not found.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Server error.
+      summary: Delete anonymization profile
+      tags:
+        - Anonymization API
+        - Anonymization API
+    get:
+      operationId: GetAnonymizationProfile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnonymizationProfile'
+          description: Successfully retrieved profile.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Profile was not found.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Server error.
+      summary: Get anonymization profile by id
+      tags:
+        - Anonymization API
+        - Anonymization API
+    put:
+      operationId: UpdateAnonymizationProfile
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAnonymizationProfileRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnonymizationProfile'
+          description: Successfully updated profile.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Invalid request.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Profile was not found.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Server error.
+      summary: Update anonymization profile
+      tags:
+        - Anonymization API
+        - Anonymization API
+  /api/inference/anonymization/replacements/_by_scope:
+    get:
+      operationId: GetAnonymizationReplacementsByScope
+      parameters:
+        - in: query
+          name: type
+          required: true
+          schema:
+            $ref: '#/components/schemas/ReplacementsScopeType'
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: profile_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReplacementsSetResponse'
+          description: Successfully retrieved replacements set.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Replacements set was not found.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Server error.
+      summary: Resolve replacements by scope
+      tags:
+        - Anonymization API
+        - Anonymization API
+  /api/inference/anonymization/replacements/_deanonymize:
+    post:
+      operationId: DeanonymizeWithReplacements
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeanonymizeRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeanonymizeResponse'
+          description: Successfully deanonymized text.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Replacements set was not found.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Server error.
+      summary: Deanonymize text using replacements
+      tags:
+        - Anonymization API
+        - Anonymization API
+  /api/inference/anonymization/replacements/_import:
+    post:
+      operationId: ImportAnonymizationReplacements
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportReplacementsRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportReplacementsResponse'
+          description: Successfully imported replacements.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Source or destination replacements set not found.
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Import conflict.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Server error.
+      summary: Import and merge replacements
+      tags:
+        - Anonymization API
+        - Anonymization API
+  /api/inference/anonymization/replacements/{id}:
+    get:
+      operationId: GetAnonymizationReplacements
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReplacementsSetResponse'
+          description: Successfully retrieved replacements set.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Replacements set was not found.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Server error.
+      summary: Resolve replacements by id
+      tags:
+        - Anonymization API
+        - Anonymization API
+components:
+  schemas:
+    AnonymizationProfile:
+      type: object
+      properties:
+        createdAt:
+          format: date-time
+          type: string
+        createdBy:
+          example: elastic
+          type: string
+        description:
+          type: string
+        id:
+          example: profile-1
+          type: string
+        name:
+          type: string
+        namespace:
+          example: default
+          type: string
+        rules:
+          $ref: '#/components/schemas/AnonymizationProfileRules'
+        saltId:
+          example: salt-default
+          type: string
+        targetId:
+          type: string
+        targetType:
+          $ref: '#/components/schemas/AnonymizationTargetType'
+        updatedAt:
+          format: date-time
+          type: string
+        updatedBy:
+          example: elastic
+          type: string
+      required:
+        - id
+        - name
+        - targetType
+        - targetId
+        - rules
+        - saltId
+        - namespace
+        - createdAt
+        - updatedAt
+        - createdBy
+        - updatedBy
+    AnonymizationProfileRules:
+      type: object
+      properties:
+        fieldRules:
+          items:
+            $ref: '#/components/schemas/FieldRule'
+          type: array
+        nerRules:
+          default: []
+          items:
+            $ref: '#/components/schemas/NerRule'
+          type: array
+        regexRules:
+          default: []
+          items:
+            $ref: '#/components/schemas/RegexRule'
+          type: array
+      required:
+        - fieldRules
+    AnonymizationTargetType:
+      enum:
+        - data_view
+        - index_pattern
+        - index
+      example: data_view
+      type: string
+    CreateAnonymizationProfileRequest:
+      type: object
+      properties:
+        description:
+          example: Default allow/anonymize/deny rules for SOC workflows
+          type: string
+        name:
+          example: Security Default Anonymization Profile
+          type: string
+        rules:
+          $ref: '#/components/schemas/AnonymizationProfileRules'
+        targetId:
+          example: security-solution-default
+          type: string
+        targetType:
+          $ref: '#/components/schemas/AnonymizationTargetType'
+      required:
+        - name
+        - targetType
+        - targetId
+        - rules
+    DeanonymizeRequest:
+      type: object
+      properties:
+        replacementsId:
+          example: replacements-1
+          type: string
+        text:
+          example: Investigate HOST_NAME_abc123
+          type: string
+      required:
+        - text
+        - replacementsId
+    DeanonymizeResponse:
+      type: object
+      properties:
+        text:
+          example: Investigate server-1
+          type: string
+      required:
+        - text
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          description: Human-readable error message.
+          example: Profile not found
+          type: string
+      required:
+        - message
+    FieldRule:
+      type: object
+      properties:
+        allowed:
+          example: true
+          type: boolean
+        anonymized:
+          example: true
+          type: boolean
+        entityClass:
+          example: HOST_NAME
+          type: string
+        field:
+          example: host.name
+          type: string
+      required:
+        - field
+        - allowed
+        - anonymized
+    FindProfilesResponse:
+      type: object
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/AnonymizationProfile'
+          type: array
+        page:
+          example: 1
+          minimum: 1
+          type: integer
+        perPage:
+          example: 20
+          maximum: 1000
+          minimum: 1
+          type: integer
+        total:
+          example: 1
+          minimum: 0
+          type: integer
+      required:
+        - page
+        - perPage
+        - total
+        - data
+    ImportReplacementsRequest:
+      type: object
+      properties:
+        destinationId:
+          example: replacements-dest
+          type: string
+        sourceId:
+          example: replacements-src
+          type: string
+      required:
+        - sourceId
+        - destinationId
+    ImportReplacementsResponse:
+      type: object
+      properties:
+        id:
+          example: replacements-dest
+          type: string
+        merged:
+          example: true
+          type: boolean
+      required:
+        - id
+        - merged
+    NerRule:
+      type: object
+      properties:
+        allowedEntityClasses:
+          example:
+            - PER
+            - ORG
+          items:
+            type: string
+          type: array
+        enabled:
+          example: true
+          type: boolean
+        id:
+          example: ner-1
+          type: string
+        modelId:
+          example: ner-model-v1
+          type: string
+        type:
+          enum:
+            - ner
+          type: string
+      required:
+        - id
+        - type
+        - modelId
+        - allowedEntityClasses
+        - enabled
+    ProfileSortField:
+      enum:
+        - created_at
+        - name
+        - updated_at
+      example: created_at
+      type: string
+    RegexRule:
+      type: object
+      properties:
+        enabled:
+          example: true
+          type: boolean
+        entityClass:
+          example: EMAIL
+          type: string
+        id:
+          example: regex-1
+          type: string
+        pattern:
+          example: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}'
+          type: string
+        type:
+          enum:
+            - regex
+          type: string
+      required:
+        - id
+        - type
+        - entityClass
+        - pattern
+        - enabled
+    ReplacementsScopeType:
+      enum:
+        - thread
+        - execution
+      example: thread
+      type: string
+    ReplacementsSetResponse:
+      type: object
+      properties:
+        id:
+          example: replacements-1
+          type: string
+        profileId:
+          example: profile-1
+          type: string
+        scopeId:
+          example: thread-1
+          type: string
+        scopeType:
+          $ref: '#/components/schemas/ReplacementsScopeType'
+        tokenToOriginal:
+          additionalProperties:
+            type: string
+          example:
+            HOST_NAME_abc123: server-1
+          type: object
+      required:
+        - id
+        - tokenToOriginal
+        - scopeType
+        - scopeId
+        - profileId
+    SortOrder:
+      enum:
+        - asc
+        - desc
+      example: desc
+      type: string
+    UpdateAnonymizationProfileRequest:
+      type: object
+      properties:
+        description:
+          example: Updated description
+          type: string
+        name:
+          example: Updated Profile Name
+          type: string
+        rules:
+          $ref: '#/components/schemas/AnonymizationProfileRules'
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+security:
+  - BasicAuth: []
+tags:
+  - description: Manage anonymization profiles and replacements.
+    name: Anonymization API
+    x-displayName: Anonymization

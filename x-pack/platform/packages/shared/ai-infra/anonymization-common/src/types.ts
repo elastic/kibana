@@ -8,11 +8,15 @@
 import type { z } from '@kbn/zod';
 import type {
   anonymizationProfileSchema,
+  anonymizationProfileRulesSchema,
+  createAnonymizationProfileRequestSchema,
+  findAnonymizationProfilesQuerySchema,
   fieldRuleSchema,
   regexRuleSchema,
   nerRuleSchema,
   replacementsSetSchema,
   tokenSourceEntrySchema,
+  updateAnonymizationProfileRequestSchema,
 } from './schemas';
 
 /**
@@ -37,6 +41,14 @@ export type NerRule = z.infer<typeof nerRuleSchema>;
  * (data view, index pattern, or index) within a Kibana space.
  */
 export type AnonymizationProfile = z.infer<typeof anonymizationProfileSchema>;
+export type AnonymizationProfileRules = z.infer<typeof anonymizationProfileRulesSchema>;
+export type CreateAnonymizationProfileRequest = z.infer<
+  typeof createAnonymizationProfileRequestSchema
+>;
+export type UpdateAnonymizationProfileRequest = z.infer<
+  typeof updateAnonymizationProfileRequestSchema
+>;
+export type FindAnonymizationProfilesQuery = z.infer<typeof findAnonymizationProfilesQuerySchema>;
 
 /**
  * A replacements set: persisted token→original mappings scoped to a

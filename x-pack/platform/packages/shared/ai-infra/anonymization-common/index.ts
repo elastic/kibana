@@ -7,6 +7,10 @@
 
 export type {
   AnonymizationProfile,
+  AnonymizationProfileRules,
+  CreateAnonymizationProfileRequest,
+  UpdateAnonymizationProfileRequest,
+  FindAnonymizationProfilesQuery,
   FieldRule,
   RegexRule,
   NerRule,
@@ -18,6 +22,10 @@ export type {
 
 export {
   anonymizationProfileSchema,
+  anonymizationProfileRulesSchema,
+  createAnonymizationProfileRequestSchema,
+  updateAnonymizationProfileRequestSchema,
+  findAnonymizationProfilesQuerySchema,
   fieldRuleSchema,
   regexRuleSchema,
   nerRuleSchema,
@@ -28,3 +36,4 @@ export {
 export { generateToken } from './src/generate_token';
 export { replaceTokensWithOriginals } from './src/replace_tokens_with_originals';
 export { resolveEffectivePolicy } from './src/resolve_effective_policy';
+export * from './impl/schemas';

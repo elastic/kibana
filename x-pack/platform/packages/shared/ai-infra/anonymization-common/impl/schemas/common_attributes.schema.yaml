@@ -1,0 +1,321 @@
+openapi: 3.0.0
+info:
+  title: Anonymization Common Attributes
+  version: '2026-02-10'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Human-readable error message.
+          example: Profile not found
+
+    AnonymizationTargetType:
+      type: string
+      enum:
+        - data_view
+        - index_pattern
+        - index
+      example: data_view
+
+    SortOrder:
+      type: string
+      enum:
+        - asc
+        - desc
+      example: desc
+
+    ProfileSortField:
+      type: string
+      enum:
+        - created_at
+        - name
+        - updated_at
+      example: created_at
+
+    ReplacementsScopeType:
+      type: string
+      enum:
+        - thread
+        - execution
+      example: thread
+
+    FieldRule:
+      type: object
+      required:
+        - field
+        - allowed
+        - anonymized
+      properties:
+        field:
+          type: string
+          example: host.name
+        allowed:
+          type: boolean
+          example: true
+        anonymized:
+          type: boolean
+          example: true
+        entityClass:
+          type: string
+          example: HOST_NAME
+
+    RegexRule:
+      type: object
+      required:
+        - id
+        - type
+        - entityClass
+        - pattern
+        - enabled
+      properties:
+        id:
+          type: string
+          example: regex-1
+        type:
+          type: string
+          enum: [regex]
+        entityClass:
+          type: string
+          example: EMAIL
+        pattern:
+          type: string
+          example: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}'
+        enabled:
+          type: boolean
+          example: true
+
+    NerRule:
+      type: object
+      required:
+        - id
+        - type
+        - modelId
+        - allowedEntityClasses
+        - enabled
+      properties:
+        id:
+          type: string
+          example: ner-1
+        type:
+          type: string
+          enum: [ner]
+        modelId:
+          type: string
+          example: ner-model-v1
+        allowedEntityClasses:
+          type: array
+          items:
+            type: string
+          example: [PER, ORG]
+        enabled:
+          type: boolean
+          example: true
+
+    AnonymizationProfileRules:
+      type: object
+      required:
+        - fieldRules
+      properties:
+        fieldRules:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldRule'
+        regexRules:
+          type: array
+          items:
+            $ref: '#/components/schemas/RegexRule'
+          default: []
+        nerRules:
+          type: array
+          items:
+            $ref: '#/components/schemas/NerRule'
+          default: []
+
+    CreateAnonymizationProfileRequest:
+      type: object
+      required:
+        - name
+        - targetType
+        - targetId
+        - rules
+      properties:
+        name:
+          type: string
+          example: Security Default Anonymization Profile
+        description:
+          type: string
+          example: Default allow/anonymize/deny rules for SOC workflows
+        targetType:
+          $ref: '#/components/schemas/AnonymizationTargetType'
+        targetId:
+          type: string
+          example: security-solution-default
+        rules:
+          $ref: '#/components/schemas/AnonymizationProfileRules'
+
+    UpdateAnonymizationProfileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Updated Profile Name
+        description:
+          type: string
+          example: Updated description
+        rules:
+          $ref: '#/components/schemas/AnonymizationProfileRules'
+
+    AnonymizationProfile:
+      type: object
+      required:
+        - id
+        - name
+        - targetType
+        - targetId
+        - rules
+        - saltId
+        - namespace
+        - createdAt
+        - updatedAt
+        - createdBy
+        - updatedBy
+      properties:
+        id:
+          type: string
+          example: profile-1
+        name:
+          type: string
+        description:
+          type: string
+        targetType:
+          $ref: '#/components/schemas/AnonymizationTargetType'
+        targetId:
+          type: string
+        rules:
+          $ref: '#/components/schemas/AnonymizationProfileRules'
+        saltId:
+          type: string
+          example: salt-default
+        namespace:
+          type: string
+          example: default
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+          example: elastic
+        updatedBy:
+          type: string
+          example: elastic
+
+    FindProfilesResponse:
+      type: object
+      required:
+        - page
+        - perPage
+        - total
+        - data
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          example: 1
+        perPage:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          example: 20
+        total:
+          type: integer
+          minimum: 0
+          example: 1
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnonymizationProfile'
+
+    ReplacementsSetResponse:
+      type: object
+      required:
+        - id
+        - tokenToOriginal
+        - scopeType
+        - scopeId
+        - profileId
+      properties:
+        id:
+          type: string
+          example: replacements-1
+        tokenToOriginal:
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            HOST_NAME_abc123: server-1
+        scopeType:
+          $ref: '#/components/schemas/ReplacementsScopeType'
+        scopeId:
+          type: string
+          example: thread-1
+        profileId:
+          type: string
+          example: profile-1
+
+    DeanonymizeRequest:
+      type: object
+      required:
+        - text
+        - replacementsId
+      properties:
+        text:
+          type: string
+          example: Investigate HOST_NAME_abc123
+        replacementsId:
+          type: string
+          example: replacements-1
+
+    DeanonymizeResponse:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          example: Investigate server-1
+
+    ImportReplacementsRequest:
+      type: object
+      required:
+        - sourceId
+        - destinationId
+      properties:
+        sourceId:
+          type: string
+          example: replacements-src
+        destinationId:
+          type: string
+          example: replacements-dest
+
+    ImportReplacementsResponse:
+      type: object
+      required:
+        - id
+        - merged
+      properties:
+        id:
+          type: string
+          example: replacements-dest
+        merged:
+          type: boolean
+          example: true

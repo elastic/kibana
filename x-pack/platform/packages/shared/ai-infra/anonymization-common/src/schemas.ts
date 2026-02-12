@@ -47,6 +47,13 @@ export const nerRuleSchema = z.object({
   enabled: z.boolean(),
 });
 
+/** Reusable profile rules payload shared by APIs and persisted profiles. */
+export const anonymizationProfileRulesSchema = z.object({
+  fieldRules: z.array(fieldRuleSchema),
+  regexRules: z.array(regexRuleSchema).optional().default([]),
+  nerRules: z.array(nerRuleSchema).optional().default([]),
+});
+
 export const anonymizationProfileSchema = z.object({
   /** UUID for the profile. */
   id: z.string(),
@@ -59,11 +66,7 @@ export const anonymizationProfileSchema = z.object({
   /** Target identifier (data view SO id, index pattern string, or index name). */
   targetId: z.string(),
   /** Per-field and text-scanning rules. */
-  rules: z.object({
-    fieldRules: z.array(fieldRuleSchema),
-    regexRules: z.array(regexRuleSchema).optional().default([]),
-    nerRules: z.array(nerRuleSchema).optional().default([]),
-  }),
+  rules: anonymizationProfileRulesSchema,
   /** Reference to the per-space encrypted salt used for deterministic tokenization. */
   saltId: z.string(),
   /** Space identifier. */
@@ -76,6 +79,33 @@ export const anonymizationProfileSchema = z.object({
   createdBy: z.string(),
   /** Username of last updater. */
   updatedBy: z.string(),
+});
+
+/** Public API payload for profile creation. */
+export const createAnonymizationProfileRequestSchema = z.object({
+  name: z.string(),
+  description: z.string().optional(),
+  targetType: z.enum(['data_view', 'index_pattern', 'index']),
+  targetId: z.string(),
+  rules: anonymizationProfileRulesSchema,
+});
+
+/** Public API payload for profile updates. */
+export const updateAnonymizationProfileRequestSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  rules: anonymizationProfileRulesSchema.optional(),
+});
+
+/** Public API query payload for profile search. */
+export const findAnonymizationProfilesQuerySchema = z.object({
+  filter: z.string().optional(),
+  target_type: z.string().optional(),
+  target_id: z.string().optional(),
+  sort_field: z.enum(['created_at', 'name', 'updated_at']).optional(),
+  sort_order: z.enum(['asc', 'desc']).optional(),
+  page: z.number().int().positive().optional(),
+  per_page: z.number().int().min(1).max(1000).optional(),
 });
 
 export const tokenSourceEntrySchema = z.object({

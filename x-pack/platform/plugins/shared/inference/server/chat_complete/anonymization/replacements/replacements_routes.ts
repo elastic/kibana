@@ -7,7 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import { replaceTokensWithOriginals } from '@kbn/anonymization-common';
+import {
+  replaceTokensWithOriginals,
+  type GetAnonymizationReplacementsByScopeRequestQuery,
+  type DeanonymizeWithReplacementsRequestBody,
+  type ImportAnonymizationReplacementsRequestBody,
+} from '@kbn/anonymization-common';
 import { apiPrivileges } from '@kbn/anonymization-plugin/common';
 import { ReplacementsRepository } from './replacements_repository';
 import { ensureReplacementsIndex } from './replacements_index';
@@ -94,6 +99,7 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
       },
       async (context, request, response) => {
         try {
+          const query = request.query as GetAnonymizationReplacementsByScopeRequestQuery;
           const coreContext = await context.core;
           const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
           const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -101,9 +107,9 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
           const repo = new ReplacementsRepository(esClient);
           const replacements = await repo.findByScope(
             namespace,
-            request.query.type,
-            request.query.id,
-            request.query.profile_id
+            query.type,
+            query.id,
+            query.profile_id
           );
 
           if (!replacements) {
@@ -154,19 +160,20 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
       },
       async (context, request, response) => {
         try {
+          const body = request.body as DeanonymizeWithReplacementsRequestBody;
           const coreContext = await context.core;
           const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
           const esClient = coreContext.elasticsearch.client.asInternalUser;
 
           const repo = new ReplacementsRepository(esClient);
-          const replacements = await repo.get(namespace, request.body.replacementsId);
+          const replacements = await repo.get(namespace, body.replacementsId);
 
           if (!replacements) {
             return response.notFound({ body: { message: 'Replacements set not found' } });
           }
 
           const deanonymizedText = replaceTokensWithOriginals(
-            request.body.text,
+            body.text,
             replacements.tokenToOriginal
           );
 
@@ -206,6 +213,7 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
       },
       async (context, request, response) => {
         try {
+          const body = request.body as ImportAnonymizationReplacementsRequestBody;
           const coreContext = await context.core;
           const namespace = coreContext.savedObjects.client.getCurrentNamespace() ?? 'default';
           const esClient = coreContext.elasticsearch.client.asInternalUser;
@@ -215,8 +223,8 @@ export const registerReplacementsRoutes = (router: IRouter, logger: Logger): voi
           const repo = new ReplacementsRepository(esClient);
           const result = await repo.importReplacements(
             namespace,
-            request.body.sourceId,
-            request.body.destinationId
+            body.sourceId,
+            body.destinationId
           );
 
           return response.ok({ body: { id: result.id, merged: true } });

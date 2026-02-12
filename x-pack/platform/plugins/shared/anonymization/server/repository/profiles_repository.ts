@@ -7,7 +7,11 @@
 
 import { createHash } from 'crypto';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { AnonymizationProfile, FieldRule } from '@kbn/anonymization-common';
+import type {
+  AnonymizationProfile,
+  AnonymizationProfileRules,
+  FindAnonymizationProfilesQuery,
+} from '@kbn/anonymization-common';
 import { ANONYMIZATION_PROFILES_INDEX } from '../../common';
 
 /** Shape of an ES document in the profiles index. */
@@ -57,23 +61,7 @@ interface CreateProfileParams {
   description?: string;
   targetType: 'data_view' | 'index_pattern' | 'index';
   targetId: string;
-  rules: {
-    fieldRules: FieldRule[];
-    regexRules?: Array<{
-      id: string;
-      type: 'regex';
-      entityClass: string;
-      pattern: string;
-      enabled: boolean;
-    }>;
-    nerRules?: Array<{
-      id: string;
-      type: 'ner';
-      modelId: string;
-      allowedEntityClasses: string[];
-      enabled: boolean;
-    }>;
-  };
+  rules: AnonymizationProfileRules;
   saltId: string;
   namespace: string;
   createdBy: string;
@@ -88,13 +76,13 @@ interface UpdateProfileParams {
 
 interface FindProfilesParams {
   namespace: string;
-  filter?: string;
-  targetType?: string;
-  targetId?: string;
-  sortField?: 'created_at' | 'name' | 'updated_at';
-  sortOrder?: 'asc' | 'desc';
-  page?: number;
-  perPage?: number;
+  filter?: FindAnonymizationProfilesQuery['filter'];
+  targetType?: FindAnonymizationProfilesQuery['target_type'];
+  targetId?: FindAnonymizationProfilesQuery['target_id'];
+  sortField?: FindAnonymizationProfilesQuery['sort_field'];
+  sortOrder?: FindAnonymizationProfilesQuery['sort_order'];
+  page?: FindAnonymizationProfilesQuery['page'];
+  perPage?: FindAnonymizationProfilesQuery['per_page'];
 }
 
 interface FindProfilesResult {
