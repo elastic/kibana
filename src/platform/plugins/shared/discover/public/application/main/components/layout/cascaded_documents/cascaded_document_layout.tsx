@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, Fragment, useRef } from 'react';
+import React, { useMemo, useCallback, Fragment, useRef, useEffect } from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import { throttle } from 'lodash';
+import type { ExpandedState, RowSelectionState } from '@tanstack/react-table';
 import {
   DataCascade,
   DataCascadeRow,
@@ -31,6 +33,7 @@ import { cascadedDocumentsStyles } from './cascaded_documents.styles';
 import { useEsqlDataCascadeRowActionHelpers } from './blocks/use_row_header_components';
 import { useDataCascadeRowExpansionHandlers, useGroupedCascadeData } from './hooks';
 import { useCascadedDocumentsContext } from './cascaded_documents_provider';
+import type { DataCascadeLeafUiState } from '../../../state_management/redux';
 
 export interface ESQLDataCascadeProps
   extends Pick<
@@ -54,6 +57,8 @@ const ESQLDataCascade = React.memo(
     const {
       availableCascadeGroups,
       selectedCascadeGroups,
+      dataCascadeUiState,
+      setDataCascadeUiState,
       esqlVariables,
       viewModeToggle,
       cascadeGroupingChangeHandler,
@@ -84,6 +89,54 @@ const ESQLDataCascade = React.memo(
       togglePopover
     );
 
+    const initialTableState = useMemo(() => {
+      if (!dataCascadeUiState) {
+        return undefined;
+      }
+
+      return {
+        expanded: dataCascadeUiState.expanded,
+        rowSelection: dataCascadeUiState.rowSelection,
+      };
+    }, [dataCascadeUiState]);
+
+    const handleTableStateChange = useCallback(
+      (nextState: { expanded?: ExpandedState; rowSelection?: RowSelectionState }) => {
+        setDataCascadeUiState({
+          expanded: nextState.expanded,
+          rowSelection: nextState.rowSelection,
+        });
+      },
+      [setDataCascadeUiState]
+    );
+
+    const handleScrollChange = useMemo(
+      () =>
+        throttle((scrollOffset: number) => {
+          setDataCascadeUiState({ scrollOffset });
+        }, 150),
+      [setDataCascadeUiState]
+    );
+
+    useEffect(() => {
+      return () => handleScrollChange.cancel();
+    }, [handleScrollChange]);
+
+    const updateLeafUiState = useCallback(
+      (cellId: string, nextState: DataCascadeLeafUiState) => {
+        const existingLeafState = dataCascadeUiState?.leafUiState?.[cellId] ?? {};
+        setDataCascadeUiState({
+          leafUiState: {
+            [cellId]: {
+              ...existingLeafState,
+              ...nextState,
+            },
+          },
+        });
+      },
+      [dataCascadeUiState?.leafUiState, setDataCascadeUiState]
+    );
+
     const cascadeLeafRowRenderer = useCallback<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['children']
     >(
@@ -100,13 +153,15 @@ const ESQLDataCascade = React.memo(
           dataView={dataView}
           cellData={cellData!}
           cellId={cellId}
+          leafUiState={dataCascadeUiState?.leafUiState?.[cellId]}
+          onLeafUiStateChange={(nextState) => updateLeafUiState(cellId, nextState)}
           getScrollElement={getScrollElement}
           getScrollOffset={getScrollOffset}
           getScrollMargin={getScrollMargin}
           preventSizeChangePropagation={preventSizeChangePropagation}
         />
       ),
-      [dataView, props]
+      [dataCascadeUiState?.leafUiState, dataView, props, updateLeafUiState]
     );
 
     return (
@@ -116,7 +171,11 @@ const ESQLDataCascade = React.memo(
         data={cascadeGroupData}
         cascadeGroups={availableCascadeGroups}
         initialGroupColumn={selectedCascadeGroups}
+        initialTableState={initialTableState}
+        initialScrollOffset={dataCascadeUiState?.scrollOffset}
         customTableHeader={customTableHeading}
+        onScrollChange={handleScrollChange}
+        onTableStateChange={handleTableStateChange}
       >
         <DataCascadeRow<ESQLDataGroupNode, DataTableRecord>
           rowHeaderTitleSlot={rowHeaderTitle}

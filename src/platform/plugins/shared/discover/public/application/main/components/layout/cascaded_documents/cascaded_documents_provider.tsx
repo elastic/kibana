@@ -13,6 +13,7 @@ import type { ReactElement } from 'react';
 import { createContext, useContext } from 'react';
 import type {
   CascadedDocumentsState,
+  DataCascadeUiState,
   DiscoverAppState,
   internalStateActions,
 } from '../../../state_management/redux';
@@ -22,6 +23,8 @@ import type { CascadedDocumentsFetcher } from '../../../data_fetching/cascaded_d
 export interface CascadedDocumentsContext
   extends Pick<CascadedDocumentsState, 'availableCascadeGroups' | 'selectedCascadeGroups'> {
   cascadedDocumentsFetcher: CascadedDocumentsFetcher;
+  dataCascadeUiState: Partial<DataCascadeUiState> | undefined;
+  setDataCascadeUiState: (uiState: Partial<DataCascadeUiState>) => void;
   esqlQuery: AggregateQuery;
   esqlVariables: ESQLControlVariable[] | undefined;
   timeRange: TimeRange | undefined;

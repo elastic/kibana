@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Children, isValidElement, useRef, useMemo, useCallback } from 'react';
+import React, { Children, isValidElement, useRef, useMemo, useCallback, useEffect } from 'react';
 import {
   EuiAutoSizer,
   EuiFlexGroup,
@@ -15,6 +15,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { throttle } from 'lodash';
 import { CascadeHeaderPrimitive } from './data_cascade_header';
 import { CascadeRowPrimitive } from './data_cascade_row';
 import { CascadeRowCellPrimitive } from './data_cascade_row_cell';
@@ -59,10 +60,13 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
   tableTitleSlot: TableTitleSlot,
   customTableHeader,
   overscan = 10,
+  initialScrollOffset,
   children,
   enableRowSelection = false,
   enableStickyGroupHeader = true,
   allowMultipleRowToggle = false,
+  onScrollChange,
+  onTableStateChange,
 }: DataCascadeImplProps<G, L>) {
   const rowElement = Children.only(children);
 
@@ -130,6 +134,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     allowMultipleRowToggle,
     header: cascadeHeaderElement,
     rowCell: cascadeRowCell,
+    onTableStateChange,
   });
 
   // persist the virtualizer instance to ref, so that invocations of getVirtualizer will always return the latest instance
@@ -200,6 +205,33 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
     virtualizedRowComputedTranslateValue,
   ]);
 
+  const handleScrollChange = useMemo(() => {
+    if (!onScrollChange) {
+      return undefined;
+    }
+
+    return throttle((event: React.UIEvent<HTMLDivElement>) => {
+      onScrollChange(event.currentTarget.scrollTop);
+    }, 150);
+  }, [onScrollChange]);
+
+  useEffect(() => {
+    return () => handleScrollChange?.cancel();
+  }, [handleScrollChange]);
+
+  useEffect(() => {
+    if (initialScrollOffset === undefined || !scrollElementRef.current) {
+      return;
+    }
+
+    const scrollElement = scrollElementRef.current;
+    const frame = requestAnimationFrame(() => {
+      scrollElement.scrollTop = initialScrollOffset;
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [initialScrollOffset]);
+
   return (
     <div ref={cascadeWrapperRef} data-test-subj="data-cascade" css={styles.container}>
       <EuiFlexGroup direction="column" gutterSize="none" css={styles.containerInner}>
@@ -215,6 +247,7 @@ export function DataCascadeImpl<G extends GroupNode, L extends LeafNode>({
                 style={{
                   ...scrollContainerSize,
                 }}
+                onScroll={handleScrollChange}
               >
                 {/* Always render the slot so the ref is available immediately.
                     Use hidden style when not visible to avoid layout impact. */}

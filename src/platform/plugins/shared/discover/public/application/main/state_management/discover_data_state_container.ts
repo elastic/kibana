@@ -339,6 +339,10 @@ export function getDataStateContainer({
             })
           );
 
+          internalState.dispatch(
+            injectCurrentTab(internalStateActions.resetDataCascadeUiState)({})
+          );
+
           await scopedProfilesManager.resolveDataSourceProfile(
             {
               dataSource: getCurrentTab().appState.dataSource,

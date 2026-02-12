@@ -18,6 +18,8 @@ export {
   type DiscoverAppState,
   type InternalStateDataRequestParams,
   type CascadedDocumentsState,
+  type DataCascadeUiState,
+  type DataCascadeLeafUiState,
   TabInitializationStatus,
 } from './types';
 

@@ -207,6 +207,8 @@ describe('data_fetching related hooks', () => {
         availableCascadeGroups: ['category'],
         selectedCascadeGroups: ['category'],
         cascadedDocumentsFetcher: createMockFetcher(),
+        dataCascadeUiState: undefined,
+        setDataCascadeUiState: jest.fn(),
         esqlQuery,
         esqlVariables: undefined,
         timeRange: undefined,

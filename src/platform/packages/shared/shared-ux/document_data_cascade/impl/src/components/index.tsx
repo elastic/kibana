@@ -22,10 +22,15 @@ export type {
 export function DataCascade<G extends GroupNode = GroupNode, L extends LeafNode = LeafNode>({
   cascadeGroups,
   initialGroupColumn,
+  initialTableState,
   ...props
 }: DataCascadeImplProps<G, L> & ComponentProps<typeof DataCascadeProvider>) {
   return (
-    <DataCascadeProvider cascadeGroups={cascadeGroups} initialGroupColumn={initialGroupColumn}>
+    <DataCascadeProvider
+      cascadeGroups={cascadeGroups}
+      initialGroupColumn={initialGroupColumn}
+      initialTableState={initialTableState}
+    >
       <DataCascadeImpl<G, L> {...props} />
     </DataCascadeProvider>
   );

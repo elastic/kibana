@@ -9,7 +9,13 @@
 
 import type React from 'react';
 import type { EuiThemeShape, EuiButtonIconProps, EuiButtonEmptyProps } from '@elastic/eui';
-import type { Table, CellContext, Row } from '@tanstack/react-table';
+import type {
+  ExpandedState,
+  RowSelectionState,
+  Table,
+  CellContext,
+  Row,
+} from '@tanstack/react-table';
 import type { VirtualItem } from '@tanstack/react-virtual';
 import type { GroupNode, LeafNode } from '../../store_provider';
 import type { CascadeVirtualizerProps, useCascadeVirtualizer } from '../../lib/core/virtualizer';
@@ -252,6 +258,21 @@ interface DataCascadeImplBaseProps<G extends GroupNode, L extends LeafNode>
    * Enabling this options causes the group header to stick to the top of the table when toggled and scrolling. Default is true.
    */
   enableStickyGroupHeader?: boolean;
+  /**
+   * Initial scroll offset for the main cascade list.
+   */
+  initialScrollOffset?: number;
+  /**
+   * Callback invoked when the main cascade list scrolls.
+   */
+  onScrollChange?: (scrollOffset: number) => void;
+  /**
+   * Callback invoked when expanded/selected state changes.
+   */
+  onTableStateChange?: (state: {
+    expanded?: ExpandedState;
+    rowSelection?: RowSelectionState;
+  }) => void;
   /**
    * Whether to allow multiple group rows to be expanded at the same time, default is false.
    */
