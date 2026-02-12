@@ -564,14 +564,15 @@ export const resetDefsCounter = () => {
  * Recursively rewrite every `$ref` value that starts with `#/$defs/`
  * to point to `#/components/schemas/<uniqueKey>` instead.
  */
-function rewriteDefsRefs(
-  obj: unknown,
-  replacements: Record<string, string>
-): unknown {
-  if (typeof obj !== 'object' || obj === null) return obj;
+function rewriteDefsRefs(obj: unknown, replacements: Record<string, string>): unknown {
+  if (typeof obj !== 'object' || obj === null) {
+    return obj;
+  }
+
   if (Array.isArray(obj)) return obj.map((item) => rewriteDefsRefs(item, replacements));
 
   const result: Record<string, unknown> = {};
+
   for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
     if (key === '$ref' && typeof value === 'string' && replacements[value]) {
       result[key] = replacements[value];
