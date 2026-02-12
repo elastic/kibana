@@ -305,7 +305,12 @@ describe('CPS project_routing on serverless ES', () => {
     it('index (PUT document) does not accept project_routing (baseline)', async () => {
       const response = await client.index({
         index: TEST_INDEX,
-        document: { title: 'No routing test', category: 'test', timestamp: '2024-01-15', count: 999 },
+        document: {
+          title: 'No routing test',
+          category: 'test',
+          timestamp: '2024-01-15',
+          count: 999,
+        },
       });
       expect(response._id).toBeDefined();
 

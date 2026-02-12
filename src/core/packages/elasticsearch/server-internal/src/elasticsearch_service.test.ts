@@ -774,7 +774,6 @@ describe('CPS onRequest handler', () => {
           expect(options.querystring.project_routing).toBe('explicit-value');
         });
       });
-
     });
   });
 });
