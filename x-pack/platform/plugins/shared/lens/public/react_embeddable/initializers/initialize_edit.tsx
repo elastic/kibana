@@ -225,10 +225,14 @@ export function initializeEditApi(
   };
 
   const getEditPanel = async (
-    { showOnly, closeFlyout }: { showOnly?: boolean; closeFlyout?: () => void } = {
+    { closeFlyout }: { closeFlyout?: () => void } = {
       closeFlyout: noop,
     }
   ) => {
+    if (canEdit()) {
+      // prevent serializing incomplete state during editing
+      internalApi.updateEditingState(true);
+    }
     // save the initial state in case it needs to revert later on
     const firstState = getState();
     const ConfigPanel = await getInlineEditor({
@@ -239,7 +243,7 @@ export function initializeEditApi(
       },
       // the getState() here contains the wrong filters references but the input attributes
       // are correct as getInlineEditor() handler is using the getModifiedState() function
-      onApply: showOnly
+      onApply: !canEdit()
         ? noop
         : (attributes: LensRuntimeState['attributes']) => {
             internalApi.updateEditingState(false);
@@ -291,8 +295,6 @@ export function initializeEditApi(
           return navigateFn();
         }
 
-        internalApi.updateEditingState(true);
-
         mountInlinePanel({
           core: startDependencies.coreStart,
           api: parentApi,
@@ -336,7 +338,6 @@ export function initializeEditApi(
           api: parentApi,
           loadContent: async ({ closeFlyout } = { closeFlyout: noop }) => {
             return getEditPanel({
-              showOnly: true,
               closeFlyout,
             });
           },
