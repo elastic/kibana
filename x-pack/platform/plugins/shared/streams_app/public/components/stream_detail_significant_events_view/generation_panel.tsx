@@ -197,7 +197,7 @@ function GenerationContext({
               'xpack.streams.significantEvents.significantEventsGenerationPanel.description',
               {
                 defaultMessage:
-                  'Select the subset of data you want to generate the significant events for. Generation uses the last 24 hours of data.',
+                  'Select the subset of data you want to generate significant events for. Generation uses stream description and extracted features as context.',
               }
             )}
           </EuiText>
@@ -278,7 +278,7 @@ function IdentifySystems({
               'xpack.streams.significantEvents.significantEventsGenerationPanel.identifySystemsDescription',
               {
                 defaultMessage:
-                  'Systems are logical subsets of the data and they provide the best context for the generation of significant events. Identify systems first. Generation uses the last 24 hours of data.',
+                  'Systems are logical subsets of data and provide better context for significant event generation. Identify systems first.',
               }
             )}
           </EuiText>

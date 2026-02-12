@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import type { Feature, Streams, System } from '@kbn/streams-schema';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
-import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
-import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
-import { conditionToQueryDsl } from '@kbn/streamlang';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { fromKueryExpression } from '@kbn/es-query';
 import { withSpan } from '@kbn/apm-utils';
@@ -20,6 +16,11 @@ import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
 import { sumTokens } from '../helpers/sum_tokens';
 import { getComputedFeatureInstructions } from '../features/computed';
+import {
+  getFeatureTypesFromToolArgs,
+  resolveFeatureTypeFilters,
+  toLlmFeature,
+} from './tools/features_tool';
 
 interface Query {
   kql: string;
@@ -27,6 +28,18 @@ interface Query {
   category: SignificantEventType;
   severity_score: number;
   evidence?: string[];
+}
+
+export interface SignificantEventsToolUsage {
+  get_stream_features: {
+    calls: number;
+    failures: number;
+    latency_ms: number;
+  };
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 /**
@@ -38,49 +51,28 @@ interface Query {
 export async function generateSignificantEvents({
   stream,
   system,
-  features,
-  start,
-  end,
-  esClient,
+  getFeatures,
   inferenceClient,
   signal,
-  sampleDocsSize,
   systemPrompt,
   logger,
 }: {
   stream: Streams.all.Definition;
   system?: System;
-  features: Feature[];
-  start: number;
-  end: number;
-  esClient: ElasticsearchClient;
+  getFeatures(params?: { type?: string[] }): Promise<Feature[]>;
   inferenceClient: BoundInferenceClient;
   signal: AbortSignal;
   logger: Logger;
-  sampleDocsSize?: number;
   systemPrompt: string;
 }): Promise<{
   queries: Query[];
   tokensUsed: ChatCompletionTokenCount;
+  toolUsage: SignificantEventsToolUsage;
 }> {
   logger.debug('Starting significant event generation');
-
-  let formattedAnalysis: FormattedDocumentAnalysis | undefined;
-
-  if (system?.filter) {
-    logger.trace('Describing dataset for significant event generation (with filter)');
-    const analysis = await withSpan('describe_dataset_for_significant_event_generation', () =>
-      describeDataset({
-        sampleDocsSize,
-        start,
-        end,
-        esClient,
-        index: stream.name,
-        filter: conditionToQueryDsl(system.filter),
-      })
-    );
-    formattedAnalysis = formatDocumentAnalysis(analysis, { dropEmpty: true });
-  }
+  const toolUsage: SignificantEventsToolUsage = {
+    get_stream_features: { calls: 0, failures: 0, latency_ms: 0 },
+  };
 
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
 
@@ -89,17 +81,48 @@ export async function generateSignificantEvents({
     executeAsReasoningAgent({
       input: {
         name: system?.name || stream.name,
-        dataset_analysis: formattedAnalysis ? JSON.stringify(formattedAnalysis) : '',
         description: system?.description || stream.description,
-        features: JSON.stringify(
-          features.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
-        ),
         computed_feature_instructions: getComputedFeatureInstructions(),
       },
       maxSteps: 4,
       prompt,
       inferenceClient,
       toolCallbacks: {
+        // Context is retrieved on-demand through tools to keep prompts compact
+        // and to make this pattern reusable for future context providers.
+        get_stream_features: async (toolCall) => {
+          toolUsage.get_stream_features.calls += 1;
+          const startTime = Date.now();
+          try {
+            // Keep this intentionally permissive: ignore unknown tool args instead of failing generation.
+            const featureTypes = getFeatureTypesFromToolArgs(toolCall.function.arguments);
+            const typeFilters = resolveFeatureTypeFilters(featureTypes);
+            const features = await withSpan('get_stream_features_for_significant_events', () =>
+              getFeatures(typeFilters ? { type: typeFilters } : undefined)
+            );
+            const llmFeatures = features.map(toLlmFeature);
+            toolUsage.get_stream_features.latency_ms += Date.now() - startTime;
+
+            return {
+              response: {
+                features: llmFeatures,
+                count: llmFeatures.length,
+              },
+            };
+          } catch (error) {
+            toolUsage.get_stream_features.failures += 1;
+            toolUsage.get_stream_features.latency_ms += Date.now() - startTime;
+            const errorMessage = getErrorMessage(error);
+            logger.warn(`Failed to fetch stream features: ${errorMessage}`);
+            return {
+              response: {
+                features: [],
+                count: 0,
+                error: errorMessage,
+              },
+            };
+          }
+        },
         add_queries: async (toolCall) => {
           const queries = toolCall.function.arguments.queries;
 
@@ -131,7 +154,19 @@ export async function generateSignificantEvents({
 
   const queries = response.input.flatMap((message) => {
     if (message.role === MessageRole.Tool) {
-      return message.response.queries.flatMap((query) => {
+      const responsePayload = message.response;
+      if (
+        !responsePayload ||
+        typeof responsePayload !== 'object' ||
+        !('queries' in responsePayload)
+      ) {
+        return [];
+      }
+      const queriesFromResponse = responsePayload.queries;
+      if (!Array.isArray(queriesFromResponse)) {
+        return [];
+      }
+      return queriesFromResponse.flatMap((query) => {
         if (query.valid) {
           return [query.query];
         }
@@ -154,5 +189,6 @@ export async function generateSignificantEvents({
       },
       response.tokens
     ),
+    toolUsage,
   };
 }

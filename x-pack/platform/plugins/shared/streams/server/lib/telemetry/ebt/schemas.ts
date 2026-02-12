@@ -167,6 +167,27 @@ const streamsSignificantEventsQueriesGeneratedSchema: RootSchema<StreamsSignific
         description: 'The name of the Stream',
       },
     },
+    tool_calls: {
+      type: 'long',
+      _meta: {
+        description: 'Total number of tool calls during significant events generation',
+        optional: true,
+      },
+    },
+    tool_failures: {
+      type: 'long',
+      _meta: {
+        description: 'Total number of failed tool calls during significant events generation',
+        optional: true,
+      },
+    },
+    tool_latency_ms: {
+      type: 'long',
+      _meta: {
+        description: 'Total tool callback latency in milliseconds during significant events generation',
+        optional: true,
+      },
+    },
   };
 
 const streamsInsightsGeneratedSchema: RootSchema<StreamsInsightsGeneratedProps> = {

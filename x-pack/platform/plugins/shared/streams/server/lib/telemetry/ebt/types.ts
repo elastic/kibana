@@ -43,6 +43,9 @@ interface StreamsSignificantEventsQueriesGeneratedProps {
   output_tokens_used: number;
   stream_name: string;
   stream_type: StreamType;
+  tool_calls?: number;
+  tool_failures?: number;
+  tool_latency_ms?: number;
 }
 
 interface StreamsInsightsGeneratedProps {

@@ -5,25 +5,23 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
-import type { Feature, GeneratedSignificantEventQuery, Streams, System } from '@kbn/streams-schema';
+import type { GeneratedSignificantEventQuery, Streams, System } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
+import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
+import type { FeatureClient } from '../streams/feature/feature_client';
 
 interface Params {
   definition: Streams.all.Definition;
   connectorId: string;
-  start: number;
-  end: number;
   system?: System;
-  sampleDocsSize?: number;
   systemPrompt: string;
-  features: Feature[];
+  featureClient: FeatureClient;
 }
 
 interface Dependencies {
   inferenceClient: InferenceClient;
-  esClient: ElasticsearchClient;
   logger: Logger;
   signal: AbortSignal;
 }
@@ -31,27 +29,30 @@ interface Dependencies {
 export async function generateSignificantEventDefinitions(
   params: Params,
   dependencies: Dependencies
-): Promise<{ queries: GeneratedSignificantEventQuery[]; tokensUsed: ChatCompletionTokenCount }> {
-  const { definition, connectorId, start, end, system, sampleDocsSize, systemPrompt, features } =
-    params;
-  const { inferenceClient, esClient, logger, signal } = dependencies;
+): Promise<{
+  queries: GeneratedSignificantEventQuery[];
+  tokensUsed: ChatCompletionTokenCount;
+  toolUsage: SignificantEventsToolUsage;
+}> {
+  const { definition, connectorId, system, systemPrompt, featureClient } = params;
+  const { inferenceClient, logger, signal } = dependencies;
 
   const boundInferenceClient = inferenceClient.bindTo({
     connectorId,
   });
 
-  const { queries, tokensUsed } = await generateSignificantEvents({
+  const { queries, tokensUsed, toolUsage } = await generateSignificantEvents({
     stream: definition,
-    start,
-    end,
-    esClient,
     inferenceClient: boundInferenceClient,
     logger,
     system,
     signal,
-    sampleDocsSize,
     systemPrompt,
-    features,
+    // Server owns data access; AI layer only requests context via this callback.
+    getFeatures: async (filters) => {
+      const response = await featureClient.getFeatures(definition.name, filters);
+      return response.hits;
+    },
   });
 
   return {
@@ -63,5 +64,6 @@ export async function generateSignificantEventDefinitions(
       evidence: query.evidence,
     })),
     tokensUsed,
+    toolUsage,
   };
 }

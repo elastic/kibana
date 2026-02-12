@@ -17,7 +17,6 @@ import {
 import { generateSignificantEvents } from '@kbn/streams-ai';
 import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
 
-import kbnDatemath from '@kbn/datemath';
 import { evaluate } from '../src/evaluate';
 import type { SignificantEventsEvaluationExample } from './significant_events_datasets';
 import { SIGNIFICANT_EVENTS_DATASETS } from './significant_events_datasets';
@@ -188,14 +187,11 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
                   const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
                   const { queries } = await generateSignificantEvents({
                     stream,
-                    start: kbnDatemath.parse('now-24h')!.valueOf(),
-                    end: kbnDatemath.parse('now')!.valueOf(),
-                    esClient,
                     inferenceClient,
                     logger,
                     signal: new AbortController().signal,
                     systemPrompt: significantEventsPrompt,
-                    features: [],
+                    getFeatures: async () => [],
                   });
 
                   // The task should return the array of generated queries
@@ -255,14 +251,11 @@ evaluate.describe('Significant events query generation', { tag: '@svlOblt' }, ()
             const { stream } = await apiServices.streams.getStreamDefinition(testIndex);
             const { queries } = await generateSignificantEvents({
               stream,
-              start: kbnDatemath.parse('now-24h')!.valueOf(),
-              end: kbnDatemath.parse('now')!.valueOf(),
-              esClient,
               inferenceClient,
               logger,
               signal: new AbortController().signal,
               systemPrompt: significantEventsPrompt,
-              features: [],
+              getFeatures: async () => [],
             });
 
             return queries;

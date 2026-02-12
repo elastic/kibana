@@ -6,6 +6,7 @@
  */
 import { conditionSchema } from '@kbn/streamlang';
 import {
+  getStreamTypeFromDefinition,
   systemSchema,
   type SignificantEventsGenerateResponse,
   type SignificantEventsGetResponse,
@@ -166,13 +167,17 @@ const generateSignificantEventsRoute = createServerRoute({
         .describe(
           'Optional connector ID. If not provided, the default AI connector from settings will be used.'
         ),
-      from: dateFromString,
-      to: dateFromString,
+      from: dateFromString.describe(
+        'Time range start. Kept for API compatibility; feature-based generation does not sample raw logs.'
+      ).optional(),
+      to: dateFromString.describe(
+        'Time range end. Kept for API compatibility; feature-based generation does not sample raw logs.'
+      ).optional(),
       sampleDocsSize: z
         .number()
         .optional()
         .describe(
-          'Number of sample documents to use for generation from the current data of stream'
+          'Deprecated and currently ignored. Significant events generation now uses extracted stream features.'
         ),
     }),
     body: z.object({
@@ -182,7 +187,7 @@ const generateSignificantEventsRoute = createServerRoute({
   options: {
     access: 'public',
     summary: 'Generate significant events',
-    description: 'Generate significant events queries based on the stream data',
+    description: 'Generate significant events queries based on stream context and extracted features',
     availability: {
       since: '9.2.0',
       stability: 'experimental',
@@ -199,10 +204,10 @@ const generateSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
+    telemetry,
   }): Promise<SignificantEventsGenerateResponse> => {
     const {
       streamsClient,
-      scopedClusterClient,
       licensing,
       inferenceClient,
       uiSettingsClient,
@@ -220,13 +225,11 @@ const generateSignificantEventsRoute = createServerRoute({
     });
 
     // Get connector info for error enrichment
-    const [connector, definition, { significantEventsPromptOverride }, { hits: features }] =
-      await Promise.all([
-        inferenceClient.getConnectorById(connectorId),
-        streamsClient.getStream(params.path.name),
-        new PromptsConfigService({ soClient, logger }).getPrompt(),
-        featureClient.getFeatures(params.path.name),
-      ]);
+    const [connector, definition, { significantEventsPromptOverride }] = await Promise.all([
+      inferenceClient.getConnectorById(connectorId),
+      streamsClient.getStream(params.path.name),
+      new PromptsConfigService({ soClient, logger }).getPrompt(),
+    ]);
 
     return fromRxjs(
       generateSignificantEventDefinitions(
@@ -234,25 +237,35 @@ const generateSignificantEventsRoute = createServerRoute({
           definition,
           system: params.body?.system,
           connectorId,
-          start: params.query.from.valueOf(),
-          end: params.query.to.valueOf(),
-          sampleDocsSize: params.query.sampleDocsSize,
           systemPrompt: significantEventsPromptOverride,
-          features,
+          featureClient,
         },
         {
           inferenceClient,
-          esClient: scopedClusterClient.asCurrentUser,
           logger: logger.get('significant_events'),
           signal: getRequestAbortSignal(request),
         }
       )
     ).pipe(
-      map(({ queries, tokensUsed }) => ({
-        type: 'generated_queries' as const,
-        queries,
-        tokensUsed,
-      })),
+      map(({ queries, tokensUsed, toolUsage }) => {
+        telemetry.trackSignificantEventsQueriesGenerated({
+          count: queries.length,
+          systems_count: params.body?.system ? 1 : 0,
+          stream_name: definition.name,
+          stream_type: getStreamTypeFromDefinition(definition),
+          input_tokens_used: tokensUsed.prompt,
+          output_tokens_used: tokensUsed.completion,
+          tool_calls: toolUsage.get_stream_features.calls,
+          tool_failures: toolUsage.get_stream_features.failures,
+          tool_latency_ms: toolUsage.get_stream_features.latency_ms,
+        });
+
+        return {
+          type: 'generated_queries' as const,
+          queries,
+          tokensUsed,
+        };
+      }),
       catchError((error: Error) => {
         throw createConnectorSSEError(error, connector);
       })

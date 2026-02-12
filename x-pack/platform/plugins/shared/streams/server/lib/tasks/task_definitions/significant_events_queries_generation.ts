@@ -54,7 +54,6 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
               const {
                 taskClient,
-                scopedClusterClient,
                 streamsClient,
                 inferenceClient,
                 soClient,
@@ -65,9 +64,6 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
               try {
                 const stream = await streamsClient.getStream(streamName);
-                const { hits: features } = await featureClient.getFeatures(streamName);
-
-                const esClient = scopedClusterClient.asCurrentUser;
 
                 const promptsConfigService = new PromptsConfigService({
                   soClient,
@@ -92,16 +88,12 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                         {
                           definition: stream,
                           connectorId,
-                          start,
-                          end,
                           system,
-                          sampleDocsSize,
-                          features,
                           systemPrompt: significantEventsPromptOverride,
+                          featureClient,
                         },
                         {
                           inferenceClient,
-                          esClient,
                           logger: taskContext.logger.get('significant_events_generation'),
                           signal: runContext.abortController.signal,
                         }
@@ -122,6 +114,16 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                     { queries: [], tokensUsed: { prompt: 0, completion: 0 } }
                   );
 
+                const toolUsage = resultsArray.reduce(
+                  (acc, result) => {
+                    acc.calls += result.toolUsage.get_stream_features.calls;
+                    acc.failures += result.toolUsage.get_stream_features.failures;
+                    acc.latency_ms += result.toolUsage.get_stream_features.latency_ms;
+                    return acc;
+                  },
+                  { calls: 0, failures: 0, latency_ms: 0 }
+                );
+
                 taskContext.telemetry.trackSignificantEventsQueriesGenerated({
                   count: combinedResults.queries.length,
                   systems_count: systems?.length ?? 0,
@@ -129,6 +131,9 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   stream_type: getStreamTypeFromDefinition(stream),
                   input_tokens_used: combinedResults.tokensUsed.prompt,
                   output_tokens_used: combinedResults.tokensUsed.completion,
+                  tool_calls: toolUsage.calls,
+                  tool_failures: toolUsage.failures,
+                  tool_latency_ms: toolUsage.latency_ms,
                 });
 
                 await taskClient.complete<
