@@ -22,6 +22,7 @@ import { useAlertsPrivileges } from '../../../containers/detection_engine/alerts
 import * as i18n from '../translations';
 
 const mockMutate = jest.fn();
+const mockUseMutation = jest.fn((_options?: unknown) => ({ mutate: mockMutate }));
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
@@ -29,10 +30,9 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     useKibana: jest.fn(),
   };
 });
-jest.mock('@kbn/workflows-management-plugin/public', () => ({
-  useWorkflowActions: jest.fn(() => ({
-    runWorkflow: { mutate: mockMutate },
-  })),
+jest.mock('@kbn/react-query', () => ({
+  ...jest.requireActual('@kbn/react-query'),
+  useMutation: (options: unknown) => mockUseMutation(options),
 }));
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('@kbn/workflows-ui', () => ({
@@ -133,6 +133,7 @@ const renderContextMenu = (
 
 describe('useRunAlertWorkflowPanel', () => {
   beforeEach(() => {
+    mockUseMutation.mockReturnValue({ mutate: mockMutate });
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
     useKibanaMock.mockReturnValue(createMockKibana());
   });
