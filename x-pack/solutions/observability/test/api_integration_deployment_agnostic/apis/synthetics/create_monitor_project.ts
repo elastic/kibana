@@ -366,7 +366,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ipv4: true,
             max_attempts: 2,
             labels: {},
-            maintenance_windows: [],
+            maintenance_windows: monitor.maintenanceWindows || [],
             spaces: ['default'],
             updated_at: decryptedCreatedMonitor.updated_at,
             created_at: decryptedCreatedMonitor.created_at,
@@ -486,7 +486,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             params: '',
             max_attempts: 2,
             labels: {},
-            maintenance_windows: [],
+            maintenance_windows: monitor.maintenanceWindows || [],
             spaces: ['default'],
             updated_at: decryptedCreatedMonitor.updated_at,
             created_at: decryptedCreatedMonitor.created_at,
@@ -595,7 +595,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             updated_at: decryptedCreatedMonitor.updated_at,
             created_at: decryptedCreatedMonitor.created_at,
             labels: {},
-            maintenance_windows: [],
+            maintenance_windows: monitor.maintenanceWindows || [],
             spaces: ['default'],
           });
         }
@@ -734,6 +734,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             monitors: [
               {
                 ...httpProjectMonitors.monitors[1],
+                maintenance_windows: [],
                 locations: ['does not exist'],
               },
             ],
@@ -787,6 +788,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   testLocal1: 'testLocalParamsValue',
                 },
                 proxy_url: '${testGlobalParam2}',
+                maintenance_windows: [],
                 max_attempts: 2,
               },
               reason: "Couldn't save or update monitor because of an invalid configuration.",

@@ -9,6 +9,13 @@ import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { RouteConfig } from '@kbn/core/server';
 
+import {
+  PostDeletePackagePoliciesResponse,
+  UpgradePackagePolicyDryRunResponse,
+  UpgradePackagePolicyDryRunResponseItem,
+  UpgradePackagePolicyResponse,
+} from '../../../common/types';
+
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { PACKAGE_POLICY_API_ROUTES } from '../../../common/constants';
@@ -21,10 +28,15 @@ import {
 import { createAppContextStartContractMock, xpackMocks } from '../../mocks';
 import type { PackagePolicyClient, FleetRequestHandlerContext } from '../..';
 import type { UpdatePackagePolicyRequestSchema } from '../../types/rest_spec';
-import type { AgentPolicy, FleetRequestHandler } from '../../types';
+import type { AgentPolicy, DryRunPackagePolicy, FleetRequestHandler } from '../../types';
 import type { PackagePolicy } from '../../types';
 
-import { getPackagePoliciesHandler } from './handlers';
+import {
+  deletePackagePolicyHandler,
+  dryRunUpgradePackagePolicyHandler,
+  getPackagePoliciesHandler,
+  upgradePackagePolicyHandler,
+} from './handlers';
 import { registerRoutes } from '.';
 
 const packagePolicyServiceMock = packagePolicyService as jest.Mocked<PackagePolicyClient>;
@@ -117,6 +129,7 @@ jest.mock(
             : Promise.resolve(packagePolicy)
         ),
         upgrade: jest.fn(),
+        bulkUpgrade: jest.fn(),
         getUpgradeDryRunDiff: jest.fn(),
         enrichPolicyWithDefaultsFromPackage: jest
           .fn()
@@ -143,6 +156,8 @@ jest.mock('../../services/epm/packages', () => {
   };
 });
 
+let testPackagePolicy: PackagePolicy;
+
 describe('When calling package policy', () => {
   let routerMock: jest.Mocked<FleetAuthzRouter>;
   let routeHandler: FleetRequestHandler<any, any, any>;
@@ -161,6 +176,61 @@ describe('When calling package policy', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     (await context.fleet).packagePolicyService.asCurrentUser as jest.Mocked<PackagePolicyClient>;
     response = httpServerMock.createResponseFactory();
+    testPackagePolicy = {
+      agents: 100,
+      created_at: '2022-12-19T20:43:45.879Z',
+      created_by: 'elastic',
+      description: '',
+      enabled: true,
+      id: '123',
+      inputs: [
+        {
+          streams: [
+            {
+              id: '1',
+              compiled_stream: {},
+              enabled: true,
+              keep_enabled: false,
+              release: 'beta',
+              vars: { var: { type: 'text', value: 'value', frozen: false } },
+              config: { config: { type: 'text', value: 'value', frozen: false } },
+              data_stream: { dataset: 'apache.access', type: 'logs', elasticsearch: {} },
+            },
+          ],
+          compiled_input: '',
+          id: '1',
+          enabled: true,
+          type: 'logs',
+          policy_template: '',
+          keep_enabled: false,
+          vars: { var: { type: 'text', value: 'value', frozen: false } },
+          config: { config: { type: 'text', value: 'value', frozen: false } },
+        },
+      ],
+      vars: { var: { type: 'text', value: 'value', frozen: false } },
+      name: 'Package Policy 123',
+      namespace: 'default',
+      package: {
+        name: 'a-package',
+        title: 'package A',
+        version: '1.0.0',
+        experimental_data_stream_features: [{ data_stream: 'logs', features: { tsdb: true } }],
+        requires_root: false,
+      },
+      policy_id: 'agent-policy-id-a',
+      policy_ids: ['agent-policy-id-a'],
+      revision: 1,
+      updated_at: '2022-12-19T20:43:45.879Z',
+      updated_by: 'elastic',
+      version: '1.0.0',
+      secret_references: [
+        {
+          id: 'ref1',
+        },
+      ],
+      spaceIds: ['space1'],
+      elasticsearch: {},
+    };
   });
 
   afterEach(() => {
@@ -538,6 +608,163 @@ describe('When calling package policy', () => {
             },
           ],
         },
+      });
+    });
+
+    describe('bulk delete api handler', () => {
+      const responseBody: PostDeletePackagePoliciesResponse = [
+        {
+          id: '1',
+          name: 'policy',
+          success: true,
+          policy_ids: ['1'],
+          output_id: '1',
+          package: {
+            name: 'package',
+            version: '1.0.0',
+            title: 'Package',
+          },
+          statusCode: 409,
+          body: {
+            message: 'conflict',
+          },
+        },
+      ];
+
+      it('should deduplicate ids', async () => {
+        packagePolicyServiceMock.delete.mockResolvedValue(responseBody);
+        const request = httpServerMock.createKibanaRequest({
+          body: {
+            packagePolicyIds: ['1', '1'],
+          },
+        });
+        await deletePackagePolicyHandler(context, request, response);
+        expect(response.ok).toHaveBeenCalledWith({
+          body: responseBody,
+        });
+      });
+    });
+
+    describe('upgrade api handler', () => {
+      const responseBody: UpgradePackagePolicyResponse = [
+        {
+          id: '1',
+          name: 'policy',
+          success: true,
+          statusCode: 200,
+          body: {
+            message: 'success',
+          },
+        },
+      ];
+
+      it('should deduplicate ids', async () => {
+        packagePolicyServiceMock.upgrade.mockResolvedValue(responseBody);
+        const request = httpServerMock.createKibanaRequest({
+          body: {
+            packagePolicyIds: ['1', '1'],
+          },
+        });
+        await upgradePackagePolicyHandler(context, request, response);
+        expect(response.ok).toHaveBeenCalledWith({
+          body: responseBody,
+        });
+      });
+    });
+
+    describe('dry run upgrade api handler', () => {
+      let responseBody: UpgradePackagePolicyDryRunResponse;
+      beforeEach(() => {
+        const dryRunPackagePolicy: DryRunPackagePolicy = {
+          description: '',
+          enabled: true,
+          id: '123',
+          inputs: [
+            {
+              streams: [
+                {
+                  id: '1',
+                  enabled: true,
+                  keep_enabled: false,
+                  release: 'beta',
+                  vars: { var: { type: 'text', value: 'value', frozen: false } },
+                  config: { config: { type: 'text', value: 'value', frozen: false } },
+                  data_stream: { dataset: 'apache.access', type: 'logs', elasticsearch: {} },
+                },
+              ],
+              id: '1',
+              enabled: true,
+              type: 'logs',
+              policy_template: '',
+              keep_enabled: false,
+              vars: { var: { type: 'text', value: 'value', frozen: false } },
+              config: { config: { type: 'text', value: 'value', frozen: false } },
+            },
+          ],
+          vars: { var: { type: 'text', value: 'value', frozen: false } },
+          name: 'Package Policy 123',
+          namespace: 'default',
+          package: {
+            name: 'a-package',
+            title: 'package A',
+            version: '1.0.0',
+            experimental_data_stream_features: [{ data_stream: 'logs', features: { tsdb: true } }],
+            requires_root: false,
+          },
+          policy_id: 'agent-policy-id-a',
+          policy_ids: ['agent-policy-id-a'],
+          errors: [{ key: 'error', message: 'error' }],
+          missingVars: ['var'],
+        };
+        const responseItem: UpgradePackagePolicyDryRunResponseItem = {
+          hasErrors: false,
+          name: 'policy',
+          statusCode: 200,
+          body: {
+            message: 'success',
+          },
+          diff: [testPackagePolicy, dryRunPackagePolicy],
+          agent_diff: [
+            [
+              {
+                id: '1',
+                name: 'input',
+                revision: 1,
+                type: 'logs',
+                data_stream: { namespace: 'default' },
+                use_output: 'default',
+                package_policy_id: '1',
+                streams: [
+                  {
+                    id: 'logfile-log.logs-d46700b2-47f8-4b1a-9153-14a717dc5edf',
+                    data_stream: {
+                      dataset: 'generic',
+                      type: 'logs',
+                    },
+                    paths: ['/var/tmp'],
+                    ignore_older: '72h',
+                  },
+                ],
+              },
+            ],
+          ],
+        };
+        responseBody = [responseItem, responseItem];
+
+        packagePolicyServiceMock.getUpgradeDryRunDiff.mockResolvedValueOnce(responseBody[0]);
+        packagePolicyServiceMock.getUpgradeDryRunDiff.mockResolvedValueOnce(responseBody[1]);
+      });
+
+      it('should deduplicate ids', async () => {
+        const request = httpServerMock.createKibanaRequest({
+          body: {
+            packagePolicyIds: ['1', '2', '1', '2'],
+          },
+        });
+        await dryRunUpgradePackagePolicyHandler(context, request, response);
+        expect(response.ok).toHaveBeenCalledWith({
+          body: responseBody,
+        });
       });
     });
   });

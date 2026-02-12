@@ -90,7 +90,6 @@ dependsOn:
   - '@kbn/monaco'
   - '@kbn/code-editor'
   - '@kbn/logging'
-  - '@kbn/core-elasticsearch-client-server-mocks'
   - '@kbn/core-test-helpers-model-versions'
   - '@kbn/elastic-assistant-common'
   - '@kbn/test'
@@ -98,6 +97,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
+  - '@kbn/core-elasticsearch-server-utils'
 tags:
   - plugin
   - prod

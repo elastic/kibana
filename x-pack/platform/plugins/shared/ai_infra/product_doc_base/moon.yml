@@ -23,7 +23,6 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/product-doc-common'
   - '@kbn/core-saved-objects-server'
-  - '@kbn/utils'
   - '@kbn/core-http-browser'
   - '@kbn/logging-mocks'
   - '@kbn/licensing-plugin'
@@ -32,6 +31,7 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/ml-is-populated-object'
   - '@kbn/i18n'
+  - '@kbn/fs'
 tags:
   - plugin
   - prod

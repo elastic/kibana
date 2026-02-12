@@ -4,6 +4,7 @@ disabled:
   - x-pack/solutions/observability/test/serverless/api_integration/configs/config.ts
   - x-pack/solutions/observability/test/serverless/api_integration/configs/configs.logs_essentials.ts
   - x-pack/solutions/observability/test/serverless/api_integration/test_suites/fleet/config.ts
+  - x-pack/solutions/observability/test/serverless/functional/configs/config.onboarding.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.feature_flags.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.log_essentials.ts
   - x-pack/solutions/observability/test/serverless/functional/configs/config.screenshots.ts

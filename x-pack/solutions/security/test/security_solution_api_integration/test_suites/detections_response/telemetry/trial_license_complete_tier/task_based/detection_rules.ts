@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';

@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/lock-manager'
   - '@kbn/core-pricing-common'
+  - '@kbn/core-elasticsearch-server-utils'
 tags:
   - plugin
   - prod

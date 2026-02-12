@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { testData, test } from '../fixtures';
 
 test.describe('Wired Streams', { tag: ['@ess', '@svlOblt'] }, () => {

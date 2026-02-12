@@ -47,7 +47,7 @@ export const createActionHandler = async (
   const { soClient, metadata, alertData, error } = options;
   const savedObjectsClient = soClient ?? coreStartServices.savedObjects.createInternalRepository();
   const elasticsearchClient = coreStartServices.elasticsearch.client.asInternalUser;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+
   const { agent_all, agent_ids, agent_platforms, agent_policy_ids } = params;
   const selectedAgents = await parseAgentSelection(
     internalSavedObjectsClient,

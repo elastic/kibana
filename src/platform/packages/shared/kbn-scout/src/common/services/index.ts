@@ -15,7 +15,7 @@ export { createSamlSessionManager } from './saml_auth';
 
 export type { KibanaUrl } from './kibana_url';
 export type { SamlSessionManager } from '@kbn/test';
-export type { ScoutLogger } from './logger';
+export { ScoutLogger } from './logger';
 export type { KbnClient } from '@kbn/test';
 export type { Client as EsClient } from '@elastic/elasticsearch';
 export {
@@ -24,3 +24,4 @@ export {
   isElasticsearchRole,
 } from './custom_role';
 export type { ElasticsearchRoleDescriptor, KibanaRole } from './custom_role';
+export { getPrivilegedRoleName } from './roles';

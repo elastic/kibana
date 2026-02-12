@@ -112,12 +112,13 @@ describe('useColumns', () => {
     it('should restore the columns to their default value', () => {
       let columns = [...defaultColumns];
       let visibleColumns = columns.map((col) => col.id);
-      const setColumns = jest.fn((newColumns) => {
-        columns = newColumns;
+      const setColumns = jest.fn((updater) => {
+        columns = typeof updater === 'function' ? updater(columns) : updater;
       });
       const setVisibleColumns = jest.fn((updater) => {
         visibleColumns = typeof updater === 'function' ? updater(visibleColumns) : updater;
       });
+
       const { result } = renderHook(
         () =>
           useColumns({
@@ -139,6 +140,7 @@ describe('useColumns', () => {
       act(() => {
         result.current.onToggleColumn(defaultColumns[0].id);
       });
+
       expect(visibleColumns).not.toContain('event.action');
       act(() => {
         result.current.onResetColumns();

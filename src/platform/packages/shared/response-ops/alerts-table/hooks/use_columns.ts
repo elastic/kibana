@@ -179,21 +179,25 @@ export const useColumns = ({
 
   const onToggleColumn = useCallback(
     (columnId: string) => {
-      updateColumns((oldColumns) =>
-        toggleColumn({
+      updateColumns((oldColumns) => {
+        const updatedColumns = toggleColumn({
           columnId,
           columns: oldColumns,
           defaultColumns,
-        })
-      );
-      // Toggle the column in the visible columns as well
-      updateVisibleColumns((oldVisibleColumns) =>
-        toggleVisibleColumn({
-          columnId,
-          visibleColumns: oldVisibleColumns,
-          defaultVisibleColumns,
-        })
-      );
+        });
+
+        // Toggle the column in the visible columns as well
+        updateVisibleColumns((oldVisibleColumns) =>
+          toggleVisibleColumn({
+            columnId,
+            visibleColumns: oldVisibleColumns,
+            defaultVisibleColumns,
+            columns: updatedColumns,
+          })
+        );
+
+        return updatedColumns;
+      });
     },
     [updateColumns, updateVisibleColumns, defaultColumns, defaultVisibleColumns]
   );

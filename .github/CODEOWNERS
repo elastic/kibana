@@ -186,6 +186,7 @@ src/core/packages/elasticsearch/client-server-mocks @elastic/kibana-core
 src/core/packages/elasticsearch/server @elastic/kibana-core
 src/core/packages/elasticsearch/server-internal @elastic/kibana-core
 src/core/packages/elasticsearch/server-mocks @elastic/kibana-core
+src/core/packages/elasticsearch/server-utils @elastic/kibana-core
 src/core/packages/environment/server-internal @elastic/kibana-core
 src/core/packages/environment/server-mocks @elastic/kibana-core
 src/core/packages/execution-context/browser @elastic/kibana-core
@@ -1105,9 +1106,12 @@ x-pack/platform/plugins/private/watcher @elastic/kibana-management
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 src/platform/packages/shared/kbn-xstate-utils @elastic/obs-onboarding-team
+packages/kbn-yarn-install-scripts @elastic/kibana-operations @elastic/kibana-security
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 src/platform/packages/shared/kbn-zod @elastic/kibana-core
 src/platform/packages/shared/kbn-zod-helpers @elastic/security-detection-rule-management
+x-pack/solutions/search/packages/kbn-scout-search @elastic/appex-qa @elastic/search-kibana
+
 ####
 ## Everything below this line overrides the default assignments for each package.
 ## Items lower in the file have higher precedence:
@@ -1551,7 +1555,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/fixtures/es_archives/dashboard/async_search @elastic/kibana-presentation
 ^/src/platform/test/functional/fixtures/kbn_archiver/dashboard @elastic/kibana-presentation
 ^/src/platform/test/functional/fixtures/kbn_archiver/canvas @elastic/kibana-presentation
-^/src/platform/test/api_integration/apis/dashboards @elastic/kibana-presentation
 ^/src/platform/test/interpreter_functional/snapshots @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/54342
 ^/src/platform/test/functional/services/inspector.ts @elastic/kibana-presentation
 /x-pack/platform/test/functional/services/canvas_element.ts @elastic/kibana-presentation
@@ -1622,9 +1625,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 ^/src/platform/test/examples/response_stream/*.ts @elastic/ml-ui
 /x-pack/platform/test/accessibility/apps/group2/transform.ts  @elastic/ml-ui
 /x-pack/platform/test/api_integration/apis/aiops/ @elastic/ml-ui
-/x-pack/platform/test/api_integration/apis/transform/ @elastic/ml-ui
 /x-pack/platform/test/api_integration_basic/apis/aiops @elastic/ml-ui
-/x-pack/platform/test/api_integration_basic/apis/transform/ @elastic/ml-ui @elastic/kibana-management
 /x-pack/platform/test/functional/services/transform @elastic/ml-ui @elastic/kibana-management
 /x-pack/platform/test/functional/services/aiops @elastic/ml-ui
 /x-pack/platform/test/functional/apps/aiops @elastic/ml-ui
@@ -2355,6 +2356,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 ## Security Solution sub teams - security-engineering-productivity
 ## NOTE: It's important to keep this above other teams' sections because test automation doesn't process
 ## the CODEOWNERS file correctly. See https://github.com/elastic/kibana/issues/173307#issuecomment-1855858929
+/x-pack/solutions/security/test/security_solution_cypress/.cursor/rules/flaky_test_doctor.mdc @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
