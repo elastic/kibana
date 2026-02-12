@@ -10,22 +10,39 @@
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { CoreStart } from '@kbn/core/server';
 
-export function getKibanaUrl(coreStart?: CoreStart, cloudSetup?: CloudSetup): string {
-  if (coreStart?.http?.basePath?.publicBaseUrl) {
-    return coreStart.http.basePath.publicBaseUrl;
+const LOCALHOST_FALLBACK = 'http://localhost:5601';
+
+export function getKibanaUrl(
+  coreStart?: CoreStart,
+  cloudSetup?: CloudSetup,
+  forceServerInfo: boolean = false,
+  forceLocalhost: boolean = false
+): string {
+  // Force flags take precedence (forceServerInfo wins over forceLocalhost)
+  if (forceServerInfo) {
+    return getServerInfoUrl(coreStart) ?? LOCALHOST_FALLBACK;
   }
 
-  if (cloudSetup?.kibanaUrl) {
-    return cloudSetup.kibanaUrl;
+  if (forceLocalhost) {
+    return LOCALHOST_FALLBACK;
   }
 
+  // Default resolution order: publicBaseUrl → cloud URL → server info → localhost
+  return (
+    coreStart?.http?.basePath?.publicBaseUrl ??
+    cloudSetup?.kibanaUrl ??
+    getServerInfoUrl(coreStart) ??
+    LOCALHOST_FALLBACK
+  );
+}
+
+function getServerInfoUrl(coreStart?: CoreStart): string | undefined {
   const http = coreStart?.http;
-  if (http) {
-    const { protocol, hostname, port } = http.getServerInfo();
-    return `${protocol}://${hostname}:${port}${http.basePath.prepend('/').slice(0, -1)}`;
+  if (!http) {
+    return undefined;
   }
-
-  return 'http://localhost:5601';
+  const { protocol, hostname, port } = http.getServerInfo();
+  return `${protocol}://${hostname}:${port}${http.basePath.prepend('/').slice(0, -1)}`;
 }
 
 export function buildWorkflowExecutionUrl(

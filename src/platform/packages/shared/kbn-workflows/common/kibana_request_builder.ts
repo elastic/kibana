@@ -11,6 +11,9 @@ import { getKibanaConnectors } from '../spec/kibana';
 import { KIBANA_TYPE_ALIASES } from '../spec/kibana/aliases';
 import type { RequestOptions } from '../types/latest';
 
+// Meta params that control step behavior but should never be forwarded as HTTP params
+const KIBANA_STEP_META_KEYS = new Set(['forceServerInfo', 'forceLocalhost', 'debug']);
+
 /**
  * Builds a Kibana HTTP request from connector definitions
  * This is shared between the execution engine and the YAML editor copy functionality
@@ -95,8 +98,8 @@ export function buildKibanaRequest(
     const headers: Record<string, string> = {};
 
     for (const [key, value] of Object.entries(params)) {
-      // Skip path parameters (they're used in the URL) and meta parameters
-      if (pathParams.has(key) || key === 'method') {
+      // Skip path parameters (they're used in the URL), meta parameters, and step-level options
+      if (pathParams.has(key) || key === 'method' || KIBANA_STEP_META_KEYS.has(key)) {
         // eslint-disable-next-line no-continue
         continue;
       }

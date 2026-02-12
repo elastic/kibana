@@ -21,6 +21,7 @@ import {
   getOnFailureStepSchema,
   getParallelStepSchema,
   getWorkflowSettingsSchema,
+  KibanaStepMetaSchema,
   WaitStepSchema,
   WorkflowSchemaBase,
   WorkflowSchemaForAutocompleteBase,
@@ -137,11 +138,18 @@ function generateStepSchemaForConnector(
       connector.hasConnectorId === 'required' ? z.string() : z.string().optional();
   }
 
+  // For kibana.* connectors, extend the params schema with routing/debug meta options
+  const isKibanaConnector = connector.type.startsWith('kibana.');
+  const withSchema =
+    isKibanaConnector && connector.paramsSchema instanceof z.ZodObject
+      ? connector.paramsSchema.extend(KibanaStepMetaSchema)
+      : connector.paramsSchema;
+
   return BaseConnectorStepSchema.extend({
     type: connector.description
       ? z.literal(connector.type).describe(connector.description)
       : z.literal(connector.type),
-    with: connector.paramsSchema,
+    with: withSchema,
     ...connectorIdSchema,
     'on-failure': getOnFailureStepSchema(stepSchema, loose).optional(),
     ...(connector.configSchema && connector.configSchema.shape),
