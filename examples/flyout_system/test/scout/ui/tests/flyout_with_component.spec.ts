@@ -10,7 +10,7 @@
 import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
-test.describe('Flyout System - EuiFlyout component', { tag: ['@ess'] }, () => {
+test.describe('Flyout System - EuiFlyout component', { tag: ['@local-stateful-classic'] }, () => {
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsViewer();
     await page.gotoApp('flyoutSystemExamples');
