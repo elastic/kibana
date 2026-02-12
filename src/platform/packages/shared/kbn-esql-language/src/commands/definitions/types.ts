@@ -11,6 +11,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLNumericLiteralType } from '../../types';
 import type { Location } from '../registry/types';
+import type { inlineCastsMapping } from './generated/inline_casts_mapping';
 
 /**
  * This is the list of all data types that are supported in ES|QL.
@@ -516,3 +517,5 @@ export function supportsArithmeticOperations(type: string): boolean {
 export const ESQL_STRING_TYPES = ['keyword', 'text'] as const;
 
 export const ESQL_NAMED_PARAMS_TYPE = 'function_named_parameters' as const;
+
+export type InlineCastingType = keyof typeof inlineCastsMapping;

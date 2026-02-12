@@ -8,7 +8,7 @@
  */
 import type { ESQLAstRerankCommand, ESQLAstAllCommands } from '../../../types';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../types';
-import { SuggestionCategory } from '../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 import { Location } from '../types';
 import { getPosition, CaretPosition } from './utils';
 import {

@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { isToolCallStep, platformCoreTools } from '@kbn/agent-builder-common';
 import type {
   ChatRequestBodyPayload,
@@ -15,10 +14,12 @@ import type {
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export const converseApiSuite = (
-  { id: connectorId }: AvailableConnectorWithId,
+  name: string,
+  connectorId: string | (() => string),
   { getService }: FtrProviderContext
 ) => {
   const supertest = getService('supertest');
+  const resolveConnectorId = () => (typeof connectorId === 'string' ? connectorId : connectorId());
 
   const converse = async <T = ChatResponse>(
     payload: ChatRequestBodyPayload,
@@ -32,48 +33,40 @@ export const converseApiSuite = (
     return res.body as T;
   };
 
-  describe('Converse API', () => {
-    describe('sync', () => {
-      it('returns an answer for a simple message', async () => {
-        const response = await converse({
-          input: 'Hello',
-          connector_id: connectorId,
-        });
-
-        expect(response.response.message!.length).to.be.greaterThan(0);
+  describe(`Connector: ${name}`, () => {
+    it('returns an answer for a simple message', async () => {
+      const response = await converse({
+        input: 'Hello',
+        connector_id: resolveConnectorId(),
       });
+      expect(response.response.message!.length).to.be.greaterThan(0);
+    });
 
-      it('can execute a tool', async () => {
-        const response = await converse({
-          input: `Using the "platform_core_list_indices" tool, please list my indices. Only call the tool once.`,
-          connector_id: connectorId,
-        });
-
-        expect(response.response.message!.length).to.be.greaterThan(0);
-
-        const toolCalls = response.steps.filter(isToolCallStep);
-        expect(toolCalls.length >= 1).to.be(true);
-
-        const toolCall = toolCalls[0];
-        expect(toolCall.tool_id).to.eql(platformCoreTools.listIndices);
+    it('can execute a tool', async () => {
+      const response = await converse({
+        input: `Using the "platform_core_list_indices" tool, please list my indices. Only call the tool once.`,
+        connector_id: resolveConnectorId(),
       });
+      expect(response.response.message!.length).to.be.greaterThan(0);
+      const toolCalls = response.steps.filter(isToolCallStep);
+      expect(toolCalls.length >= 1).to.be(true);
+      expect(toolCalls[0].tool_id).to.eql(platformCoreTools.listIndices);
+    });
 
-      it('can continue a text conversation', async () => {
-        const response1 = await converse({
-          input: 'Please say "hello"',
-          connector_id: connectorId,
-        });
-
-        expect(response1.response.message!.length).to.be.greaterThan(0);
-
-        const response2 = await converse({
-          conversation_id: response1.conversation_id,
-          input: 'Please say it again.',
-          connector_id: connectorId,
-        });
-
-        expect(response2.response.message!.length).to.be.greaterThan(0);
+    it('can continue a text conversation', async () => {
+      const id = resolveConnectorId();
+      const response1 = await converse({
+        input: 'Please say "hello"',
+        connector_id: id,
       });
+      expect(response1.response.message!.length).to.be.greaterThan(0);
+
+      const response2 = await converse({
+        conversation_id: response1.conversation_id,
+        input: 'Please say it again.',
+        connector_id: id,
+      });
+      expect(response2.response.message!.length).to.be.greaterThan(0);
     });
   });
 };
