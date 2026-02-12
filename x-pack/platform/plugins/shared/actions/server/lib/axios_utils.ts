@@ -6,7 +6,7 @@
  */
 
 import { isObjectLike, isEmpty } from 'lodash';
-import { Agent } from 'agent-base';
+import type { Agent } from 'agent-base';
 import type {
   AxiosInstance,
   Method,
