@@ -23,4 +23,7 @@ tags:
   - dev
   - group-platform
   - private
+fileGroups:
+  src:
+    - '**/*.{js,jsx,mjs,cjs}'
 tasks: {}

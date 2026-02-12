@@ -55,7 +55,12 @@ export function filterPackages(allPackages: Package[], filter: string[]): Packag
   });
 }
 
-export function writeYaml(filePath: string, obj: any, preamble: string | null = null) {
+export function writeYaml(
+  filePath: string,
+  obj: any,
+  preamble: string | null = null,
+  dryRun = false
+) {
   let fileContent = jsYaml.dump(obj, {
     lineWidth: 300,
     noRefs: true,
@@ -68,7 +73,9 @@ export function writeYaml(filePath: string, obj: any, preamble: string | null = 
   if (existsSync(filePath) && readFile(filePath) === fileContent) {
     return false;
   } else {
-    writeFileSync(filePath, fileContent);
+    if (!dryRun) {
+      writeFileSync(filePath, fileContent);
+    }
     return true;
   }
 }

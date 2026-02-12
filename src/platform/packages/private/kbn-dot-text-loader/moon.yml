@@ -24,6 +24,9 @@ tags:
   - group-platform
   - private
   - jest-unit-tests
+fileGroups:
+  src:
+    - '**/*.{js,jsx,mjs,cjs}'
 tasks:
   jest:
     args:

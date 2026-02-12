@@ -50,6 +50,8 @@
     "@kbn/dot-text",
     "@kbn/yarn-lock-validator",
     "@kbn/sort-package-json",
-    "@kbn/babel-register"
+    "@kbn/babel-register",
+    "@kbn/setup-node-env",
+    "@kbn/moon"
   ]
 }

@@ -13,7 +13,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { File } from '../file';
 
 /**
- * Get the files that are staged for commit (excluding deleted files)
+ * Get the files that are staged for commit
  * as `File` objects that are aware of their commit status.
  *
  * @param  {String} gitRef
@@ -32,18 +32,20 @@ export async function getFilesForCommit(gitRef) {
       // git diff --name-status outputs lines with two OR three parts
       // separated by a tab character
       .map((line) => line.trim().split('\t'))
-      .map(([status, ...paths]) => {
-        // ignore deleted files
-        if (status === 'D') {
-          return undefined;
-        }
+      .map(([statusSymbol, ...paths]) => {
+        const status = {
+          A: 'added',
+          M: 'modified',
+          R: 'renamed',
+          D: 'deleted',
+          '??': 'untracked',
+        }[statusSymbol];
 
         // the status is always in the first column
         // .. If the file is edited the line will only have two columns
         // .. If the file is renamed it will have three columns
         // .. In any case, the last column is the CURRENT path to the file
-        return new File(paths[paths.length - 1]);
+        return new File(paths[paths.length - 1], status);
       })
-      .filter(Boolean)
   );
 }

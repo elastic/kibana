@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { checkFileCasing } from './check_file_casing';
 export { getFilesForCommit } from './get_files_for_commit';
+export { FileCasingCheck } from './check_file_casing';
+export { YamlLintCheck } from './yaml_lint_check';
+export { LinterCheck } from './linter_check';
+export { MoonConfigGenerationCheck } from './moon_config_generation_check';
+export { SemverRangesCheck } from './semver_check';
