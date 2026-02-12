@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { validateSkillDefinition, type SkillDefinition } from './type_definition';
+import { defineSkillType, validateSkillDefinition, type SkillDefinition } from './type_definition';
 
 describe('validateSkillTypeDefinition', () => {
   const createMockSkill = (overrides: Partial<SkillDefinition> = {}): SkillDefinition => ({
@@ -95,5 +95,17 @@ describe('validateSkillTypeDefinition', () => {
     });
 
     await expect(validateSkillDefinition(skill)).rejects.toThrow();
+  });
+
+  it('accepts dashboard grouped base paths', async () => {
+    const skill = defineSkillType({
+      id: 'dashboard-test-skill',
+      name: 'dashboard-test-skill',
+      basePath: 'skills/platform/dashboard',
+      description: 'A test skill in the dashboard directory',
+      content: 'Skill body content',
+    });
+
+    await expect(validateSkillDefinition(skill)).resolves.toEqual(skill);
   });
 });

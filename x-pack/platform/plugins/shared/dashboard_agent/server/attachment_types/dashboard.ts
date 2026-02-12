@@ -39,6 +39,8 @@ export const createDashboardAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
+    getAgentDescription: () =>
+      `A dashboard attachment is rendered as an interactive card in the UI that the user can click to open. Do NOT use <visualization> tags or any custom rendering elements for dashboard results. Instead, summarize the dashboard content (title, description, panel list) in plain text.`,
     getTools: () => [],
   };
 };
