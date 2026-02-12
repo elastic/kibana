@@ -32,28 +32,18 @@ export const HealthTruncateText: React.FC<PropsWithChildren<HealthTruncateTextPr
   children,
   healthColor,
   dataTestSubj,
-}) => (
-  <OptionalToolTip tooltipContent={tooltipContent}>
+}) => {
+  const content = (
     <EuiHealth color={healthColor} data-test-subj={dataTestSubj}>
       <StatusTextWrapper tabIndex={0}>
         <span className="eui-textTruncate">{children}</span>
       </StatusTextWrapper>
     </EuiHealth>
-  </OptionalToolTip>
-);
+  );
+  if (!tooltipContent) {
+    return content;
+  }
+  return <EuiToolTip content={tooltipContent}>{content}</EuiToolTip>;
+};
 
 HealthTruncateText.displayName = 'HealthTruncateText';
-
-const OptionalToolTip = ({
-  tooltipContent,
-  children,
-}: {
-  tooltipContent?: React.ReactNode;
-  children: React.ReactElement;
-}) => {
-  if (!tooltipContent) {
-    return children;
-  }
-
-  return <EuiToolTip content={tooltipContent}>{children}</EuiToolTip>;
-};
