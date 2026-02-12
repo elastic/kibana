@@ -8,3 +8,6 @@
 export { useGetEndpointScript } from './use_get_script_by_id';
 export { useGetEndpointScriptsList } from './use_get_scripts_list';
 export { useDeleteEndpointScript } from './use_delete_script_by_id';
+export { usePatchEndpointScript } from './use_patch_script_by_id';
+export { usePostEndpointScript } from './use_upload_script';
+export type { ErrorType } from './types';
