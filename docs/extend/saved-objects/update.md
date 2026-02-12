@@ -242,7 +242,7 @@ let modelVersion3: SavedObjectsModelVersion = {
 
 The root `mappings` can still list the removed field ({{es}} does not support removing mapping fields without reindexing). You can flag it with a `mappings_deprecation` change so it can be cleaned up when supported.
 
->[!WARNING]
+> [!WARNING]
 > When introducing a new searchable/indexed field, use a 2-step rollout across separate releases:
 > 1. **Release N**: introduce a new model version with the mapping update (and `data_backfill` if needed). Do not depend on the field in business logic yet.
 > 2. **Release N+1**: update business logic to read/search/filter using that field.
