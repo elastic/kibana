@@ -101,6 +101,14 @@ import { useEsqlCallbacks } from './use_esql_callbacks';
 import { useDataSourceBrowser } from './resource_browser/use_data_source_browser';
 import { useSourcesBadge } from './resource_browser/use_resource_browser_badge';
 
+type EsqlLanguageDeps = ESQLCallbacks & Partial<{ telemetry: ESQLTelemetryCallbacks }>;
+const esqlDepsByModelUri = new Map<string, EsqlLanguageDeps>();
+
+// Single shared provider per language; resolves callbacks per Monaco model.
+const sharedEsqlSuggestionProvider = ESQLLang.getSuggestionProvider?.({
+  getModelDependencies: (model) => esqlDepsByModelUri.get(model.uri.toString()),
+});
+
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
 const DATEPICKER_WIDTH = 373;
@@ -141,6 +149,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
+  const editorModelUriRef = useRef<string | undefined>(undefined);
   const containerRef = useRef<HTMLElement>(null);
 
   const editorCommandDisposables = useRef(
@@ -902,10 +911,14 @@ const ESQLEditorInternal = function ESQLEditor({
     [serverErrors, serverWarning, code, codeWhenSubmitted, queryValidation]
   );
 
-  const suggestionProvider = useMemo(
-    () => ESQLLang.getSuggestionProvider?.({ ...esqlCallbacks, telemetry: telemetryCallbacks }),
-    [esqlCallbacks, telemetryCallbacks]
-  );
+  const suggestionProvider = sharedEsqlSuggestionProvider;
+
+  useEffect(() => {
+    const modelUri = editorModelUriRef.current;
+    if (modelUri) {
+      esqlDepsByModelUri.set(modelUri, { ...esqlCallbacks, telemetry: telemetryCallbacks });
+    }
+  }, [esqlCallbacks, telemetryCallbacks]);
 
   const hoverProvider = useMemo(
     () =>
@@ -952,6 +965,9 @@ const ESQLEditorInternal = function ESQLEditor({
   useEffect(() => {
     const disposablesMap = editorCommandDisposables.current;
     return () => {
+      if (editorModelUriRef.current) {
+        esqlDepsByModelUri.delete(editorModelUriRef.current);
+      }
       // Cleanup editor command disposables
       const currentEditor = editorRef.current;
       if (currentEditor) {
@@ -1149,6 +1165,11 @@ const ESQLEditorInternal = function ESQLEditor({
                   const model = editor.getModel();
                   if (model) {
                     editorModel.current = model;
+                    editorModelUriRef.current = model.uri.toString();
+                    esqlDepsByModelUri.set(editorModelUriRef.current, {
+                      ...esqlCallbacks,
+                      telemetry: telemetryCallbacks,
+                    });
                     await addLookupIndicesDecorator();
                     if (enableResourceBrowser) {
                       addSourcesDecorator();

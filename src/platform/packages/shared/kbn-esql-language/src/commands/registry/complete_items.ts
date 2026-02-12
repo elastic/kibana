@@ -635,7 +635,7 @@ export function createFieldsBrowserSuggestion(
     description: i18n.translate(
       'kbn-esql-language.esql.autocomplete.fieldsBrowser.suggestionDescription',
       {
-        defaultMessage: 'Open field browser',
+        defaultMessage: 'Open fields browser',
       }
     ),
     commandId: 'esql.fieldsBrowser.open',

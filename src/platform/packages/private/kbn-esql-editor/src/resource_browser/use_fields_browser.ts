@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useRef, useState, type MutableRefObject } from 'react';
+import { useCallback, useEffect, useRef, useState, type MutableRefObject } from 'react';
 import type { ESQLCallbacks, ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import { BROWSER_POPOVER_WIDTH, DataSourceSelectionChange } from '@kbn/esql-resource-browser';
 import { getLocatedSourceItemsFromQuery, getRangeFromOffsets } from './utils';
-import { BROWSER_POPOVER_VERTICAL_OFFSET } from './const';
+import { BROWSER_POPOVER_VERTICAL_OFFSET } from './constants';
 
 interface UseFieldsBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -38,6 +38,15 @@ export function useFieldsBrowser({
   const [allFields, setAllFields] = useState<ESQLFieldWithMetadata[]>([]);
   const [recommendedFields, setRecommendedFields] = useState<RecommendedField[]>([]);
   const [isLoadingFields, setIsLoadingFields] = useState(false);
+
+  // Avoid React state updates after unmount (async fetches resolve later).
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Offset where we start inserting the selected field.
   // We keep this stable for the lifetime of an open popover session.
@@ -134,13 +143,19 @@ export function useFieldsBrowser({
             ? fetchedFields.filter((f) => suggested.has(f.name))
             : fetchedFields;
 
-        setAllFields(filteredFields);
-        setRecommendedFields(fetchedRecommended);
+        if (isMountedRef.current) {
+          setAllFields(filteredFields);
+          setRecommendedFields(fetchedRecommended);
+        }
       } catch {
-        setAllFields([]);
-        setRecommendedFields([]);
+        if (isMountedRef.current) {
+          setAllFields([]);
+          setRecommendedFields([]);
+        }
       } finally {
-        setIsLoadingFields(false);
+        if (isMountedRef.current) {
+          setIsLoadingFields(false);
+        }
       }
 
       updatePopoverPosition();

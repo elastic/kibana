@@ -10,7 +10,7 @@
 import { Parser, isSource } from '@kbn/esql-language';
 import type { monaco } from '@kbn/monaco';
 import { IndicesBrowserOpenMode } from './open_mode';
-import { SUPPORTED_COMMANDS } from './const';
+import { SUPPORTED_COMMANDS } from './constants';
 
 export interface CommandRange {
   lineNumber: number; // 1-based, assumes the command is on a single line

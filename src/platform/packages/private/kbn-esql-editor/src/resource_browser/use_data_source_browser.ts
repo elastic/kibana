@@ -24,7 +24,7 @@ import {
   getRangeFromOffsets,
 } from './utils';
 import { IndicesBrowserOpenMode } from './open_mode';
-import { BROWSER_POPOVER_VERTICAL_OFFSET } from './const';
+import { BROWSER_POPOVER_VERTICAL_OFFSET } from './constants';
 
 interface UseDataSourceBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
