@@ -34,7 +34,6 @@ async function generateScoutConfigManifest(configPath: string, log?: ToolingLog)
 async function updateScoutConfigManifests(onlyOutdated: boolean, reload: boolean, log: ToolingLog) {
   const updatedConfigPaths: string[] = [];
 
-  // Update manifests for files that are outdated
   for (const config of testConfigs.all) {
     const configDirSHA1 = await getGitSHA1ForPath(path.dirname(config.path));
 
