@@ -73,8 +73,6 @@ export const ConnectorIconsMap: Map<
     '.urlvoid',
     lazy(() => import(/* webpackChunkName: "connectorIconUrlvoid" */ './specs/urlvoid/icon')),
   ],
-
-  ['.slack', lazy(() => import(/* webpackChunkName: "connectorIconslack" */ './specs/slack/icon'))],
   [
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconslack2" */ './specs/slack/icon')),
