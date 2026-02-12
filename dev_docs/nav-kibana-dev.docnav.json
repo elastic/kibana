@@ -314,6 +314,10 @@
         {
           "id": "kibDevDocsChromeSidebar",
           "label": "Chrome Sidebar"
+        },
+        {
+          "id": "kibDevDocsFeedbackPlugin",
+          "label": "Feedback Plugin (One Feedback)"
         }
       ]
     },

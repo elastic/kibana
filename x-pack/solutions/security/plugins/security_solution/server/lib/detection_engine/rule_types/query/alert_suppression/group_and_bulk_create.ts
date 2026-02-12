@@ -282,8 +282,8 @@ export const groupAndBulkCreate = async ({
           ruleType: 'query',
         });
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
-        sharedParams.ruleExecutionLogger.debug(
-          `created ${bulkCreateResult.createdItemsCount} signals`
+        sharedParams.ruleExecutionLogger.info(
+          `Alerts created: ${bulkCreateResult.createdItemsCount}`
         );
       } else {
         const bulkCreateResult = await bulkCreate({
@@ -298,8 +298,8 @@ export const groupAndBulkCreate = async ({
             suppressedItemsCount: getNumberOfSuppressedAlerts(bulkCreateResult.createdItems, []),
           },
         });
-        sharedParams.ruleExecutionLogger.debug(
-          `created ${bulkCreateResult.createdItemsCount} signals`
+        sharedParams.ruleExecutionLogger.info(
+          `Alerts created: ${bulkCreateResult.createdItemsCount}`
         );
       }
 
