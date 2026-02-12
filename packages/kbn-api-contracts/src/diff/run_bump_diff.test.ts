@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { existsSync } from 'node:fs';
 import { execFileSync } from 'child_process';
 import { runBumpDiff, BumpServiceError } from './run_bump_diff';
 
@@ -14,15 +15,54 @@ jest.mock('@kbn/repo-info', () => ({
   REPO_ROOT: '/mock/repo/root',
 }));
 
+jest.mock('node:fs', () => ({
+  existsSync: jest.fn(),
+}));
+
 jest.mock('child_process', () => ({
   execFileSync: jest.fn(),
 }));
 
+const mockExistsSync = existsSync as jest.MockedFunction<typeof existsSync>;
 const mockExecFileSync = execFileSync as jest.MockedFunction<typeof execFileSync>;
 
 describe('runBumpDiff', () => {
+  beforeEach(() => {
+    mockExistsSync.mockReturnValue(true);
+  });
+
   afterEach(() => {
     jest.resetAllMocks();
+  });
+
+  it('throws when basePath is not absolute', () => {
+    expect(() => runBumpDiff('relative/base.yaml', '/tmp/current.yaml')).toThrow(
+      'basePath must be an absolute path'
+    );
+    expect(mockExecFileSync).not.toHaveBeenCalled();
+  });
+
+  it('throws when currentPath is not absolute', () => {
+    expect(() => runBumpDiff('/tmp/base.yaml', 'relative/current.yaml')).toThrow(
+      'currentPath must be an absolute path'
+    );
+    expect(mockExecFileSync).not.toHaveBeenCalled();
+  });
+
+  it('throws when basePath does not exist', () => {
+    mockExistsSync.mockImplementation((p) => p !== '/tmp/base.yaml');
+    expect(() => runBumpDiff('/tmp/base.yaml', '/tmp/current.yaml')).toThrow(
+      'basePath does not exist'
+    );
+    expect(mockExecFileSync).not.toHaveBeenCalled();
+  });
+
+  it('throws when currentPath does not exist', () => {
+    mockExistsSync.mockImplementation((p) => p !== '/tmp/current.yaml');
+    expect(() => runBumpDiff('/tmp/base.yaml', '/tmp/current.yaml')).toThrow(
+      'currentPath does not exist'
+    );
+    expect(mockExecFileSync).not.toHaveBeenCalled();
   });
 
   it('returns parsed JSON when bump-cli outputs valid JSON', () => {

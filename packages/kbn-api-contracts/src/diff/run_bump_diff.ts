@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import path from 'node:path';
+import { existsSync } from 'node:fs';
 import { execFileSync } from 'child_process';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { BumpDiffEntry } from './parse_bump_diff';
@@ -37,7 +38,19 @@ const isBumpServiceError = (error: unknown): boolean => {
   return BUMP_SERVICE_ERROR_PATTERNS.some((pattern) => combined.includes(pattern));
 };
 
+const validateFilePath = (filePath: string, label: string): void => {
+  if (!path.isAbsolute(filePath)) {
+    throw new Error(`${label} must be an absolute path, got: ${filePath}`);
+  }
+  if (!existsSync(filePath)) {
+    throw new Error(`${label} does not exist: ${filePath}`);
+  }
+};
+
 export const runBumpDiff = (basePath: string, currentPath: string): BumpDiffEntry[] => {
+  validateFilePath(basePath, 'basePath');
+  validateFilePath(currentPath, 'currentPath');
+
   try {
     const output = execFileSync(
       'npm',
