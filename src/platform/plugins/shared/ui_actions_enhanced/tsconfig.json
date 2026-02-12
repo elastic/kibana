@@ -11,8 +11,6 @@
   ],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/data-plugin",
-    "@kbn/embeddable-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/ui-actions-plugin",
