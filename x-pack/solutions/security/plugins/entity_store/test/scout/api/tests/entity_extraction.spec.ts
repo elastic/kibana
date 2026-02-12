@@ -70,6 +70,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     );
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
+    expect(extractionResponse.body.pages).toBe(1);
     expect(extractionResponse.body.count).toBe(expectedResultCount);
 
     const entities = await esClient.search({
@@ -105,6 +106,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     );
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
+    expect(extractionResponse.body.pages).toBe(1);
     expect(extractionResponse.body.count).toBe(20);
 
     const entities = await esClient.search({
@@ -140,6 +142,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     );
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
+    expect(extractionResponse.body.pages).toBe(1);
     expect(extractionResponse.body.count).toBe(2);
 
     const entities = await esClient.search({
@@ -175,6 +178,7 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     );
     expect(extractionResponse.statusCode).toBe(200);
     expect(extractionResponse.body.success).toBe(true);
+    expect(extractionResponse.body.pages).toBe(1);
     expect(extractionResponse.body.count).toBe(1);
 
     const entities = await esClient.search({
