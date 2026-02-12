@@ -198,6 +198,19 @@ describe('MessageEditor', () => {
     expect(container).toContainElement(editor);
   });
 
+  it('has aria-haspopup="dialog" on the editor', () => {
+    const messageEditor = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    expect(screen.getByTestId('messageEditor')).toHaveAttribute('aria-haspopup', 'dialog');
+  });
+
   it('renders popover content when trigger is active', () => {
     const messageEditor = createMockMessageEditor();
 

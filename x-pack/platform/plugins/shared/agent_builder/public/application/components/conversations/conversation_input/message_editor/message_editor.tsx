@@ -93,6 +93,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
         aria-multiline="true"
         aria-label={editorAriaLabel}
         aria-disabled={disabled}
+        aria-haspopup="dialog"
         tabIndex={0}
         data-placeholder={placeholder}
         data-test-subj={dataTestSubj}

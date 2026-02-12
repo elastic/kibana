@@ -66,6 +66,32 @@ describe('InlineActionPopover', () => {
     expect(screen.getByTestId('testPopover-content')).toBeInTheDocument();
   });
 
+  it('renders screen reader announcement when trigger is active', () => {
+    render(
+      <InlineActionPopover
+        triggerMatch={activeMatch}
+        onClose={onClose}
+        anchorPosition={{ left: 10, top: 20 }}
+        data-test-subj="testPopover"
+      />
+    );
+
+    expect(screen.getByText(/mention suggestions opened/i)).toBeInTheDocument();
+  });
+
+  it('does not render screen reader announcement when trigger is inactive', () => {
+    render(
+      <InlineActionPopover
+        triggerMatch={inactiveMatch}
+        onClose={onClose}
+        anchorPosition={{ left: 10, top: 20 }}
+        data-test-subj="testPopover"
+      />
+    );
+
+    expect(screen.queryByText(/suggestions opened/i)).not.toBeInTheDocument();
+  });
+
   it('displays trigger kind and query', () => {
     render(
       <InlineActionPopover

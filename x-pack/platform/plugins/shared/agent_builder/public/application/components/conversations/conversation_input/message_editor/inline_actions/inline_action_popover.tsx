@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiPopover, EuiText } from '@elastic/eui';
+import { EuiPopover, EuiScreenReaderLive, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { TriggerMatchResult, AnchorPosition } from './types';
+import type { TriggerMatchResult, AnchorPosition, InlineActionKind } from './types';
 
 interface InlineActionPopoverProps {
   triggerMatch: TriggerMatchResult;
@@ -22,6 +22,28 @@ const placeholderLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.inlineActionPopover.placeholder',
   { defaultMessage: 'Inline actions' }
 );
+
+const announcementsByKind: Record<InlineActionKind, string> = {
+  mention: i18n.translate(
+    'xpack.agentBuilder.conversationInput.inlineActionPopover.mentionAnnouncement',
+    { defaultMessage: 'Mention suggestions opened. Press Escape to close.' }
+  ),
+  command: i18n.translate(
+    'xpack.agentBuilder.conversationInput.inlineActionPopover.commandAnnouncement',
+    { defaultMessage: 'Command suggestions opened. Press Escape to close.' }
+  ),
+};
+
+const panelLabelsByKind: Record<InlineActionKind, string> = {
+  mention: i18n.translate(
+    'xpack.agentBuilder.conversationInput.inlineActionPopover.mentionPanelLabel',
+    { defaultMessage: 'Mention suggestions' }
+  ),
+  command: i18n.translate(
+    'xpack.agentBuilder.conversationInput.inlineActionPopover.commandPanelLabel',
+    { defaultMessage: 'Command suggestions' }
+  ),
+};
 
 const wrapperStyles = css`
   position: absolute;
@@ -43,6 +65,10 @@ export const InlineActionPopover: React.FC<InlineActionPopoverProps> = ({
   'data-test-subj': dataTestSubj = 'inlineActionPopover',
 }) => {
   const { activeTrigger } = triggerMatch;
+  const isOpen = activeTrigger !== null && anchorPosition !== null;
+  const kind = activeTrigger?.trigger.kind;
+  const announcementText = kind ? announcementsByKind[kind] : '';
+  const panelAriaLabel = kind ? panelLabelsByKind[kind] : '';
 
   return (
     <div
@@ -50,12 +76,14 @@ export const InlineActionPopover: React.FC<InlineActionPopoverProps> = ({
       style={{ left: anchorPosition?.left ?? 0, top: anchorPosition?.top ?? 0 }}
       data-test-subj={`${dataTestSubj}-anchor`}
     >
+      <EuiScreenReaderLive isActive={isOpen}>{announcementText}</EuiScreenReaderLive>
       <EuiPopover
         button={<span css={anchorStyles} />}
-        isOpen={activeTrigger !== null && anchorPosition !== null}
+        isOpen={isOpen}
         closePopover={onClose}
         anchorPosition="upLeft"
         panelPaddingSize="s"
+        panelProps={{ 'aria-label': panelAriaLabel }}
         data-test-subj={dataTestSubj}
         ownFocus={false}
         display="block"
