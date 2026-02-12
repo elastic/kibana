@@ -167,7 +167,7 @@ export async function getFieldsSuggestions(
     addComma = false,
     promoteToTop = true,
     canBeMultiValue = false,
-    isFieldsBrowserEnabled = true,
+    isFieldsBrowserEnabled = false,
   } = options;
 
   const variableType = (() => {

@@ -53,6 +53,7 @@ export class SuggestionBuilder {
       promoteToTop,
       values,
       canBeMultiValue,
+      isFieldsBrowserEnabled: Boolean(this.context.context?.isFieldsBrowserEnabled),
     });
 
     this.suggestions.push(...fieldSuggestions);

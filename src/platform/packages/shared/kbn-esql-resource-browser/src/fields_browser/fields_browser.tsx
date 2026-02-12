@@ -191,7 +191,10 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
 
       const isSelected = changedOption.checked === 'on';
       setSelectedItems(isSelected ? [fieldName] : []);
-      onSelect(fieldName, isSelected ? DataSourceSelectionChange.Add : DataSourceSelectionChange.Remove);
+      onSelect(
+        fieldName,
+        isSelected ? DataSourceSelectionChange.Add : DataSourceSelectionChange.Remove
+      );
     },
     [onSelect]
   );

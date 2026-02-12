@@ -201,6 +201,7 @@ export interface ICommandContext {
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
   isCursorInSubquery?: boolean;
+  isFieldsBrowserEnabled?: boolean;
   unmappedFieldsStrategy?: UnmappedFieldsStrategy;
 }
 /**

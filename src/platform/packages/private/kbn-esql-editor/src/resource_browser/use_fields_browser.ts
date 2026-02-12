@@ -11,7 +11,7 @@ import { useCallback, useRef, useState, type MutableRefObject } from 'react';
 import type { ESQLCallbacks, ESQLFieldWithMetadata, RecommendedField } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import { BROWSER_POPOVER_WIDTH, DataSourceSelectionChange } from '@kbn/esql-resource-browser';
-import { getLocatedSourceItemsFromQuery } from './utils';
+import { getLocatedSourceItemsFromQuery, getRangeFromOffsets } from './utils';
 import { BROWSER_POPOVER_VERTICAL_OFFSET } from './const';
 
 interface UseFieldsBrowserParams {
@@ -27,21 +27,6 @@ interface BrowserPopoverPosition {
 
 const DEFAULT_FIELDS_BROWSER_INDEX = '.kibana';
 
-const getRangeFromOffsets = (
-  model: monaco.editor.ITextModel,
-  startOffset: number,
-  endOffset: number
-): monaco.IRange => {
-  const start = model.getPositionAt(startOffset);
-  const end = model.getPositionAt(endOffset);
-  return {
-    startLineNumber: start.lineNumber,
-    startColumn: start.column,
-    endLineNumber: end.lineNumber,
-    endColumn: end.column,
-  };
-};
-
 export function useFieldsBrowser({
   editorRef,
   editorModel,
@@ -54,7 +39,7 @@ export function useFieldsBrowser({
   const [recommendedFields, setRecommendedFields] = useState<RecommendedField[]>([]);
   const [isLoadingFields, setIsLoadingFields] = useState(false);
 
-  // Offset where we start inserting the comma-separated list of selected fields.
+  // Offset where we start inserting the selected field.
   // We keep this stable for the lifetime of an open popover session.
   const insertAnchorOffsetRef = useRef<number | undefined>(undefined);
   // Length of the currently inserted text at the anchor. Used so we can replace our own inserted
@@ -96,8 +81,13 @@ export function useFieldsBrowser({
       const mainSources = getLocatedSourceItemsFromQuery(queryText)
         .map((s) => s.name)
         .filter((name): name is string => Boolean(name));
-      const indexPattern = mainSources.length ? mainSources.join(',') : DEFAULT_FIELDS_BROWSER_INDEX;
-      const minimalQuery = `FROM ${indexPattern} | LIMIT 0`;
+      const indexPattern = mainSources.length
+        ? mainSources.join(',')
+        : DEFAULT_FIELDS_BROWSER_INDEX;
+      // `getColumnsFor` ultimately uses `getESQLQueryColumnsRaw()`, which appends `| limit 0`
+      // internally. So we pass a plain source query here (no extra LIMIT) to match the
+      // existing usage in `kbn-esql-language` (e.g. `fetchFields('FROM <index>')`).
+      const minimalQuery = `FROM ${indexPattern}`;
 
       return (await getColumnsFor({ query: minimalQuery })) ?? [];
     },
@@ -120,16 +110,16 @@ export function useFieldsBrowser({
 
       // Reset per-open-session state.
       insertedTextLengthRef.current = 0;
-      suggestedFieldNamesRef.current =
-        options?.preloadedFields?.length ? new Set(options.preloadedFields) : undefined;
+      suggestedFieldNamesRef.current = options?.preloadedFields?.length
+        ? new Set(options.preloadedFields)
+        : undefined;
 
       const fullText = model.getValue() || '';
       const cursorPosition = editor.getPosition();
       if (!cursorPosition) return;
 
-    const cursorOffset = model.getOffsetAt(cursorPosition);
-    insertAnchorOffsetRef.current = cursorOffset;
-    insertedTextLengthRef.current = 0;
+      const cursorOffset = model.getOffsetAt(cursorPosition);
+      insertAnchorOffsetRef.current = cursorOffset;
 
       setIsLoadingFields(true);
       try {
@@ -164,7 +154,7 @@ export function useFieldsBrowser({
       const editor = editorRef.current;
       const model = editorModel.current;
       const insertAtOffset = insertAnchorOffsetRef.current;
-      if (!editor || !model || typeof insertAtOffset !== 'number') {
+      if (!editor || !model || insertAtOffset == null) {
         return;
       }
 

@@ -21,6 +21,7 @@ import {
   computeRemovalRange,
   getLocatedSourceItemsFromQuery,
   getSourceCommandContextFromQuery,
+  getRangeFromOffsets,
 } from './utils';
 import { IndicesBrowserOpenMode } from './open_mode';
 import { BROWSER_POPOVER_VERTICAL_OFFSET } from './const';
@@ -45,21 +46,6 @@ const normalizeTimeseriesIndices = (result: IndicesAutocompleteResult): ESQLSour
       hidden: false,
     })) ?? []
   );
-};
-
-const getRangeFromOffsets = (
-  model: monaco.editor.ITextModel,
-  startOffset: number,
-  endOffset: number
-): monaco.IRange => {
-  const start = model.getPositionAt(startOffset);
-  const end = model.getPositionAt(endOffset);
-  return {
-    startLineNumber: start.lineNumber,
-    startColumn: start.column,
-    endLineNumber: end.lineNumber,
-    endColumn: end.column,
-  };
 };
 
 export function useDataSourceBrowser({

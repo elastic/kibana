@@ -260,11 +260,15 @@ async function getSuggestionsWithinCommandExpression(
     callbacks
   );
 
+  const isInsideSubquery = astContext.isCursorInSubquery; // We only show resource browser suggestions in the main query
+  const isResourceBrowserEnabled = (await callbacks?.isResourceBrowserEnabled?.()) ?? false;
+
   const context = {
     ...references,
     ...additionalCommandContext,
     activeProduct: callbacks?.getActiveProduct?.(),
     isCursorInSubquery: astContext.isCursorInSubquery,
+    isFieldsBrowserEnabled: isResourceBrowserEnabled && !isInsideSubquery,
     unmappedFieldsStrategy,
   };
 
@@ -291,18 +295,6 @@ async function getSuggestionsWithinCommandExpression(
 
   const commandName = astContext.command.name.toLowerCase();
   const isTSorFROMCommand = commandName === 'from' || commandName === 'ts';
-  const isInsideSubquery = astContext.isCursorInSubquery; // We only show resource browser suggestions in the main query
-  const isResourceBrowserEnabled = (await callbacks?.isResourceBrowserEnabled?.()) ?? false;
-
-  // Hide the fields browser suggestion when the editor doesn't support the resource browser
-  // (e.g. outside Discover), or when the cursor is inside a subquery.
-  if (!isResourceBrowserEnabled || isInsideSubquery) {
-    for (let i = suggestions.length - 1; i >= 0; i--) {
-      if (suggestions[i].command?.id === 'esql.fieldsBrowser.open') {
-        suggestions.splice(i, 1);
-      }
-    }
-  }
 
   if (isTSorFROMCommand && isResourceBrowserEnabled && !isInsideSubquery) {
     const { rangeToReplace, filterText } =

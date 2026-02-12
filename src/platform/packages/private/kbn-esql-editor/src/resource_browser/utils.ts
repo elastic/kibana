@@ -8,6 +8,7 @@
  */
 
 import { Parser, isSource } from '@kbn/esql-language';
+import type { monaco } from '@kbn/monaco';
 import { IndicesBrowserOpenMode } from './open_mode';
 import { SUPPORTED_COMMANDS } from './const';
 
@@ -16,6 +17,21 @@ export interface CommandRange {
   startColumn: number; // 1-based
   endColumn: number; // 1-based, inclusive
 }
+
+export const getRangeFromOffsets = (
+  model: monaco.editor.ITextModel,
+  startOffset: number,
+  endOffset: number
+): monaco.IRange => {
+  const start = model.getPositionAt(startOffset);
+  const end = model.getPositionAt(endOffset);
+  return {
+    startLineNumber: start.lineNumber,
+    startColumn: start.column,
+    endLineNumber: end.lineNumber,
+    endColumn: end.column,
+  };
+};
 
 /**
  * Returns the first command in the query that matches one of the `supportedCommands`.
