@@ -36,11 +36,12 @@ export function registerUpdateIndexRoute({
       },
       validate: {
         params: schema.object({
-          index: schema.string(),
+          index: schema.string({ maxLength: 1000 }),
         }),
         body: schema.object({
           operations: schema.arrayOf(
-            schema.oneOf([schema.literal('blockWrite'), schema.literal('unfreeze')])
+            schema.oneOf([schema.literal('blockWrite'), schema.literal('unfreeze')]),
+            { maxSize: 1000 }
           ),
         }),
       },
