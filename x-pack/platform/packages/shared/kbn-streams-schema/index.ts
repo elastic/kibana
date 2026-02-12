@@ -85,6 +85,8 @@ export {
   type SignificantEventsResponse,
   type SignificantEventsGetResponse,
   type SignificantEventsPreviewResponse,
+  type DiscoveryQueriesGetResponse,
+  type DiscoveryQueriesOccurrencesGetResponse,
   upsertStreamQueryRequestSchema,
   streamQueryKqlSchema,
   streamQuerySchema,

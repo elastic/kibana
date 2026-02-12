@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import {
   systemSchema,
   type SignificantEventsQueriesGenerationResult,
   type SignificantEventsQueriesGenerationTaskResult,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { readSignificantEventsFromAlertsIndices } from '../../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import {
   getSignificantEventsQueriesGenerationTaskId,
@@ -153,7 +155,61 @@ const significantEventsQueriesGenerationTaskRoute = createServerRoute({
   },
 });
 
+const readAllSignificantEventsRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_significant_events',
+  params: z.object({
+    query: z.object({
+      from: dateFromString.describe('Start of the time range'),
+      to: dateFromString.describe('End of the time range'),
+      bucketSize: z.string().describe('Size of time buckets for aggregation'),
+      query: z.string().optional().describe('Query string to filter significant events queries'),
+      streamNames: z
+        .preprocess(
+          (val) => (typeof val === 'string' ? [val] : val),
+          z.array(z.string()).optional()
+        )
+        .describe('Stream names to filter significant events'),
+    }),
+  }),
+  options: {
+    access: 'internal',
+    summary: 'Read all significant events',
+    description: 'Read all significant events',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<SignificantEventsGetResponse> => {
+    const { queryClient, scopedClusterClient, licensing, uiSettingsClient } =
+      await getScopedClients({
+        request,
+      });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+
+    const { from, to, bucketSize, query, streamNames } = params.query;
+
+    return readSignificantEventsFromAlertsIndices(
+      {
+        from,
+        to,
+        bucketSize,
+        query,
+        streamNames,
+      },
+      { queryClient, scopedClusterClient }
+    );
+  },
+});
+
 export const internalSignificantEventsRoutes = {
   ...significantEventsQueriesGenerationStatusRoute,
   ...significantEventsQueriesGenerationTaskRoute,
+  ...readAllSignificantEventsRoute,
 };

@@ -7,15 +7,11 @@
 
 import { calculateAuto } from '@kbn/calculate-auto';
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
+import type { DiscoveryQueriesOccurrencesGetResponse } from '@kbn/streams-schema';
 import moment from 'moment';
 import { useKibana } from './use_kibana';
 import { useTimefilter } from './use_timefilter';
 import { useFetchErrorToast } from './use_fetch_error_toast';
-
-interface DiscoveryQueriesOccurrencesGetResponse {
-  aggregated_occurrences: Array<{ x: string; y: number }>;
-  total_occurrences: number;
-}
 
 export interface DiscoveryQueriesOccurrencesFetchResult {
   aggregated_occurrences: Array<{ x: number; y: number }>;

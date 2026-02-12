@@ -5,24 +5,18 @@
  * 2.0.
  */
 
+import type { SignificantEventsResponse } from '@kbn/streams-schema';
+import { orderBy } from 'lodash';
+
 /**
- * Sort significant events for the Significant Events Discovery "Queries" table.
- *
- * Requirement: show non-backed queries first, while keeping the remaining order stable.
+ * Sort queries for the Discovery "Queries" table.
  */
-export function sortSignificantEventsForQueriesTable<T extends { rule_backed: boolean }>(
-  events: readonly T[]
-): T[] {
-  const unbacked: T[] = [];
-  const backed: T[] = [];
-
-  for (const event of events) {
-    if (event.rule_backed) {
-      backed.push(event);
-    } else {
-      unbacked.push(event);
-    }
-  }
-
-  return [...unbacked, ...backed];
+export function sortForQueriesTable(
+  queries: SignificantEventsResponse[]
+): SignificantEventsResponse[] {
+  return orderBy(
+    queries,
+    ['rule_backed', (query) => query.severity_score, (query) => query.title],
+    ['asc', 'desc', 'asc']
+  );
 }

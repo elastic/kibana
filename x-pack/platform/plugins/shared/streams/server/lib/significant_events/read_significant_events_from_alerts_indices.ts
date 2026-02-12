@@ -18,7 +18,6 @@ import { LEGACY_RULE_BACKED_FALLBACK, type QueryLink } from '../../../common/que
 import type { QueryClient } from '../streams/assets/query/query_client';
 import { getRuleIdFromQueryLink } from '../streams/assets/query/helpers/query';
 import { SecurityError } from '../streams/errors/security_error';
-import { sortSignificantEventsForQueriesTable } from './utils';
 
 export async function readSignificantEventsFromAlertsIndices(
   params: { streamNames?: string[]; from: Date; to: Date; bucketSize: string; query?: string },
@@ -136,19 +135,17 @@ export async function readSignificantEventsFromAlertsIndices(
 
   if (!response.aggregations || !isArray(response.aggregations.by_rule.buckets)) {
     return {
-      significant_events: sortSignificantEventsForQueriesTable(
-        queryLinks.map((queryLink) => ({
-          ...toStreamQueryKql(queryLink),
-          stream_name: queryLink.stream_name,
-          occurrences: [],
-          change_points: {
-            type: {
-              stationary: { p_value: 0, change_point: 0 },
-            },
+      significant_events: queryLinks.map((queryLink) => ({
+        ...toStreamQueryKql(queryLink),
+        stream_name: queryLink.stream_name,
+        occurrences: [],
+        change_points: {
+          type: {
+            stationary: { p_value: 0, change_point: 0 },
           },
-          rule_backed: queryLink.rule_backed ?? LEGACY_RULE_BACKED_FALLBACK,
-        }))
-      ),
+        },
+        rule_backed: queryLink.rule_backed ?? LEGACY_RULE_BACKED_FALLBACK,
+      })),
       aggregated_occurrences: [],
     };
   }
@@ -194,10 +191,7 @@ export async function readSignificantEventsFromAlertsIndices(
     }));
 
   return {
-    significant_events: sortSignificantEventsForQueriesTable([
-      ...significantEvents,
-      ...notFoundSignificantEvents,
-    ]),
+    significant_events: [...significantEvents, ...notFoundSignificantEvents],
     aggregated_occurrences: aggregatedOccurrences,
   };
 }

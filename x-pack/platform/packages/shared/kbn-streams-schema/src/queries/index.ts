@@ -123,3 +123,15 @@ export type SignificantEventsPreviewResponse = Pick<
   SignificantEventsResponse,
   'occurrences' | 'change_points' | 'kql'
 >;
+
+export interface DiscoveryQueriesGetResponse {
+  queries: SignificantEventsResponse[];
+  page: number;
+  perPage: number;
+  total: number;
+}
+
+export interface DiscoveryQueriesOccurrencesGetResponse {
+  aggregated_occurrences: Array<{ x: string; y: number }>;
+  total_occurrences: number;
+}
