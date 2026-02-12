@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
 import { spanFlyoutId } from './waterfall_flyout/span_flyout';
@@ -48,6 +48,40 @@ export const FullScreenWaterfall = ({
     'observability-full-trace-waterfall'
   )?.render;
   const { euiTheme } = useEuiTheme();
+
+  /*
+   * Temporary workaround: add a native <style> tag to fix the z-index of EuiDataGrid cell popovers
+   * rendered inside nested flyouts.
+   *
+   * EuiDataGrid popovers use EuiPortal, which inserts content at the document root. When nested
+   * flyouts unmount, Emotion's style cleanup can target portals that have already been removed
+   * from the DOM, resulting in a white screen crash.
+   *
+   * By injecting a plain <style> element into document.head, we bypass Emotion entirely,
+   * avoiding the cleanup race condition while still ensuring the popover renders
+   * above the flyout layers.
+   *
+   * TODO: Remove this workaround once EUI provides a proper fix for popover z-index handling
+   * inside nested flyouts (see: https://github.com/elastic/eui/issues/8801).
+   */
+
+  useEffect(() => {
+    const style = document.createElement('style');
+
+    style.id = 'flyout-datagrid-popover-z-index-fix';
+    style.textContent = `
+      .euiDataGridRowCell__popover {
+        z-index: ${euiTheme.levels.menu} !important;
+      }
+    `;
+
+    document.head.appendChild(style);
+
+    return () => {
+      style.remove();
+    };
+  }, [euiTheme.levels.menu]);
+
   const [docId, setDocId] = useState<string | null>(null);
   const [docIndex, setDocIndex] = useState<string | undefined>(undefined);
   const [activeFlyoutType, setActiveFlyoutType] = useState<DocumentType | null>(null);

@@ -19,11 +19,11 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { useSidebar, useSidebarApp } from '@kbn/core-chrome-sidebar-components';
+import { useSidebar } from '@kbn/core-chrome-sidebar-components';
 import React from 'react';
-import { counterAppId } from './counter_app';
-import { textInputAppId, type TextInputSidebarParams } from './text_input_app';
-import { tabSelectionAppId, type TabSelectionSidebarParams } from './tab_selection_app';
+import { useCounterSidebarApp } from './counter_app';
+import { useTextInputSidebarApp } from './text_input_app';
+import { useTabSelectionSidebarApp } from './tab_selection_app';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface Props {}
@@ -31,23 +31,23 @@ export interface Props {}
 export function App({}: Props) {
   const { close, setWidth } = useSidebar();
 
-  // Get app-bound APIs for each sidebar app
-  const textApp = useSidebarApp<TextInputSidebarParams>(textInputAppId);
-  const counterApp = useSidebarApp(counterAppId);
-  const tabsApp = useSidebarApp<TabSelectionSidebarParams>(tabSelectionAppId);
+  // Get app-bound APIs using typed hooks from each sidebar app
+  const textApp = useTextInputSidebarApp();
+  const counterApp = useCounterSidebarApp();
+  const tabsApp = useTabSelectionSidebarApp();
 
   // App handlers just for simple demo controls,
   // For real apps, these handlers would be exposed on plugins contracts or as hooks.
   // Text Input App handlers
   const handleOpenTextApp = () => textApp.open();
-  const handleResetTextInput = () => textApp.setParams({ userName: '' });
+  const handleResetTextInput = () => textApp.actions.clear();
 
-  // Counter App handlers (no params - uses internal state)
+  // Counter App handlers (no store - uses internal React state)
   const handleOpenCounterApp = () => counterApp.open();
 
   // Tab Selection App handlers
   const handleOpenTabsApp = () => tabsApp.open();
-  const handleResetTabs = () => tabsApp.setParams({ selectedTab: 'overview' });
+  const handleResetTabs = () => tabsApp.actions.selectTab('overview');
 
   const handleCloseSidebar = () => close();
 
@@ -75,7 +75,7 @@ export function App({}: Props) {
 
           <EuiSpacer size="m" />
 
-          {/* Counter App Controls (no params - uses internal state) */}
+          {/* Counter App Controls (no store - uses internal React state) */}
           <EuiPanel hasBorder>
             <EuiTitle size="s">
               <h3>Counter App</h3>

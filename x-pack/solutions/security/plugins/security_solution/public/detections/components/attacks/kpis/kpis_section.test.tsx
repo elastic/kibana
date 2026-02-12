@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { TestProviders } from '../../../../common/mock';
 import { KPIsSection, KPIS_SECTION } from './kpis_section';
 import type { KPIsSectionProps } from './kpis_section';
@@ -25,6 +26,7 @@ const defaultProps: KPIsSectionProps = {
   pageFilters: [],
   assignees: [],
   selectedConnectorNames: [],
+  dataView: {} as DataView,
 };
 
 describe('<KPIsSection />', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiNotificationBadge,
+  EuiPanel,
   EuiProgress,
   EuiSpacer,
   EuiTab,
@@ -67,37 +68,18 @@ export const SimulationPlayground = ({
 
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
 
+  const [isRefreshTooltipVisible, setIsRefreshTooltipVisible] = useState(false);
+
   return (
     <>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
           <EuiFlexItem>
             <EuiTabs bottomBorder={false}>
               <EuiTab
                 isSelected={isViewingDataPreview}
-                onClick={viewSimulationPreviewData}
                 append={
-                  <EuiFlexGroup alignItems="center" gutterSize="xs">
-                    <EuiFlexItem>
-                      <EuiToolTip
-                        content={i18n.translate(
-                          'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.refreshPreviewTooltip',
-                          {
-                            defaultMessage: 'Refetch samples and rerun simulation',
-                          }
-                        )}
-                      >
-                        <EuiButtonIcon
-                          iconType="refresh"
-                          onClick={refreshSimulation}
-                          isLoading={isDataSourceLoading}
-                          aria-label={i18n.translate(
-                            'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.refreshPreviewAriaLabel',
-                            { defaultMessage: 'Refresh data preview' }
-                          )}
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
+                  <>
                     {hasOutdatedDocuments && (
                       <EuiFlexItem data-test-subj="streamsAppProcessingOutdatedDocumentsTipAnchor">
                         <EuiIconTip
@@ -113,8 +95,9 @@ export const SimulationPlayground = ({
                         />
                       </EuiFlexItem>
                     )}
-                  </EuiFlexGroup>
+                  </>
                 }
+                onClick={viewSimulationPreviewData}
               >
                 {i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.dataPreview',
@@ -141,6 +124,36 @@ export const SimulationPlayground = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <DataSourcesControls />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiPanel paddingSize="xs" hasShadow={false} hasBorder>
+              <EuiToolTip
+                content={
+                  isRefreshTooltipVisible
+                    ? i18n.translate(
+                        'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.refreshPreviewTooltip',
+                        {
+                          defaultMessage: 'Refetch samples and rerun simulation',
+                        }
+                      )
+                    : undefined
+                }
+                onMouseOut={() => setIsRefreshTooltipVisible(false)}
+              >
+                <EuiButtonIcon
+                  iconType="refresh"
+                  size="xs"
+                  onClick={refreshSimulation}
+                  isLoading={isDataSourceLoading}
+                  onMouseEnter={() => setIsRefreshTooltipVisible(true)}
+                  onMouseLeave={() => setIsRefreshTooltipVisible(false)}
+                  aria-label={i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.refreshPreviewAriaLabel',
+                    { defaultMessage: 'Refresh data preview' }
+                  )}
+                />
+              </EuiToolTip>
+            </EuiPanel>
           </EuiFlexItem>
           <ProgressBar />
         </EuiFlexGroup>

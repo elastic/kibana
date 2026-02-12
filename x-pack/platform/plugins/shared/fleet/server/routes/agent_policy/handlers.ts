@@ -12,7 +12,13 @@ import { dump } from 'js-yaml';
 
 import { isEmpty, uniq } from 'lodash';
 
-import { ALL_SPACES_ID, FIPS_AGENT_KUERY, inputsFormat } from '../../../common/constants';
+import {
+  ALL_SPACES_ID,
+  AGENT_POLICY_VERSION_SEPARATOR,
+  FIPS_AGENT_KUERY,
+  inputsFormat,
+} from '../../../common/constants';
+import { removeVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import {
@@ -78,6 +84,14 @@ import { getLatestAgentAvailableDockerImageVersion } from '../../services/agents
 
 const deduplicateIds = (ids: string[]) => uniq(ids);
 
+/**
+ * Builds kuery that matches agents assigned to a policy or any of its version-specific policies.
+ * Wildcard must be outside quotes so KQL treats * as wildcard, not literal.
+ */
+function getPolicyOrVersionSpecificKuery(policyId: string): string {
+  return `(${AGENTS_PREFIX}.policy_id:"${policyId}" or ${AGENTS_PREFIX}.policy_id:${policyId}${AGENT_POLICY_VERSION_SEPARATOR}*)`;
+}
+
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
   agentPolicies: AgentPolicy[]
@@ -85,12 +99,13 @@ export async function populateAssignedAgentsCount(
   await pMap(
     agentPolicies,
     (agentPolicy: GetAgentPoliciesResponseItem) => {
+      const policyKuery = getPolicyOrVersionSpecificKuery(agentPolicy.id);
       const totalAgents = agentClient
         .listAgents({
           showInactive: true,
           perPage: 0,
           page: 1,
-          kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}"`,
+          kuery: policyKuery,
         })
         .then(({ total }) => (agentPolicy.agents = total));
       const unprivilegedAgents = agentClient
@@ -98,7 +113,7 @@ export async function populateAssignedAgentsCount(
           showInactive: true,
           perPage: 0,
           page: 1,
-          kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}" and ${UNPRIVILEGED_AGENT_KUERY}`,
+          kuery: `${policyKuery} and ${UNPRIVILEGED_AGENT_KUERY}`,
         })
         .then(({ total }) => (agentPolicy.unprivileged_agents = total));
       const fipsAgents = agentClient
@@ -106,7 +121,7 @@ export async function populateAssignedAgentsCount(
           showInactive: true,
           perPage: 0,
           page: 1,
-          kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicy.id}" and ${FIPS_AGENT_KUERY}`,
+          kuery: `${policyKuery} and ${FIPS_AGENT_KUERY}`,
         })
         .then(({ total }) => (agentPolicy.fips_agents = total));
       return Promise.all([totalAgents, unprivilegedAgents, fipsAgents]);
@@ -289,7 +304,9 @@ export const getOneAgentPolicyHandler: FleetRequestHandler<
   const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
   const soClient = coreContext.savedObjects.client;
 
-  const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
+  // Version-specific policy ids (e.g. policy1#9.3) are not saved objects; resolve to base policy
+  const resolvedPolicyId = removeVersionSuffixFromPolicyId(request.params.agentPolicyId);
+  const agentPolicy = await agentPolicyService.get(soClient, resolvedPolicyId);
   if (agentPolicy) {
     if (fleetContext.authz.fleet.readAgents) {
       await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, [agentPolicy]);
@@ -876,7 +893,8 @@ export const GetAgentPolicyOutputsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
-  const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
+  const resolvedPolicyId = removeVersionSuffixFromPolicyId(request.params.agentPolicyId);
+  const agentPolicy = await agentPolicyService.get(soClient, resolvedPolicyId);
 
   if (!agentPolicy) {
     return response.customError({

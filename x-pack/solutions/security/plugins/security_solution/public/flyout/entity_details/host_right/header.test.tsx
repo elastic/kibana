@@ -9,11 +9,16 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
 import { HostPanelHeader } from './header';
-import { mockObservedHostData } from '../mocks';
+
+const defaultLastSeen = {
+  date: '2023-02-23T20:03:17.489Z',
+  isLoading: false,
+};
 
 const mockProps = {
   hostName: 'test',
-  observedHost: mockObservedHostData,
+  scopeId: 'test-scope-id',
+  lastSeen: defaultLastSeen,
 };
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
@@ -33,18 +38,7 @@ describe('HostPanelHeader', () => {
     const futureDay = '2989-03-07T20:00:00.000Z';
     const { getByTestId } = render(
       <TestProviders>
-        <HostPanelHeader
-          {...{
-            ...mockProps,
-            observedHost: {
-              ...mockObservedHostData,
-              lastSeen: {
-                isLoading: false,
-                date: futureDay,
-              },
-            },
-          }}
-        />
+        <HostPanelHeader {...mockProps} lastSeen={{ date: futureDay, isLoading: false }} />
       </TestProviders>
     );
 
@@ -64,21 +58,22 @@ describe('HostPanelHeader', () => {
   it('does not render observed badge when lastSeen date is undefined', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <HostPanelHeader
-          {...{
-            ...mockProps,
-            observedHost: {
-              ...mockObservedHostData,
-              lastSeen: {
-                isLoading: false,
-                date: undefined,
-              },
-            },
-          }}
-        />
+        <HostPanelHeader {...mockProps} lastSeen={{ date: undefined, isLoading: false }} />
       </TestProviders>
     );
 
+    expect(queryByTestId('host-panel-header-observed-badge')).not.toBeInTheDocument();
+  });
+
+  it('renders skeleton when loading', () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <HostPanelHeader {...mockProps} lastSeen={{ date: undefined, isLoading: true }} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('host-panel-header-lastSeen-loading')).toBeInTheDocument();
+    expect(getByTestId('host-panel-header-observed-badge-loading')).toBeInTheDocument();
     expect(queryByTestId('host-panel-header-observed-badge')).not.toBeInTheDocument();
   });
 });

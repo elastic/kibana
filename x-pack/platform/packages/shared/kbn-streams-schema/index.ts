@@ -10,6 +10,12 @@ export { IngestBase, type IngestStreamIndexMode } from './src/models/ingest/base
 export { Ingest } from './src/models/ingest';
 export { WiredIngest } from './src/models/ingest/wired';
 export { ClassicIngest } from './src/models/ingest/classic';
+export { Query } from './src/models/query';
+export {
+  ESQL_VIEW_PREFIX,
+  getEsqlViewName,
+  getStreamNameFromViewName,
+} from './src/models/query/view_name';
 
 export {
   type RoutingDefinition,
@@ -105,6 +111,9 @@ export {
   type IngestStreamLifecycleInherit,
   type IngestStreamEffectiveLifecycle,
   type PhaseName,
+  type IlmPolicy,
+  type IlmPolicyWithUsage,
+  type IlmPolicyUsage,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
