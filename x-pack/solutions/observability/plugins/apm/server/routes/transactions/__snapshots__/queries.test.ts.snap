@@ -10,69 +10,40 @@ Object {
       },
     ],
   },
-  "body": Object {
-    "_source": Array [
-      "span.links",
-      "transaction.marks.agent",
-    ],
-    "fields": Array [
-      "trace.id",
-      "agent.name",
-      "processor.event",
-      "@timestamp",
-      "timestamp.us",
-      "service.name",
-      "transaction.id",
-      "transaction.duration.us",
-      "transaction.name",
-      "transaction.sampled",
-      "transaction.type",
-      "processor.name",
-      "service.language.name",
-      "service.environment",
-      "url.full",
-      "transaction.page.url",
-      "http.response.status_code",
-      "http.request.method",
-      "user_agent.name",
-      "url.path",
-      "url.scheme",
-      "server.address",
-      "server.port",
-      "user_agent.version",
-      "kubernetes.pod.uid",
-      "host.hostname",
-      "container.id",
-    ],
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "term": Object {
-              "transaction.id": "foo",
-            },
-          },
-          Object {
-            "term": Object {
-              "trace.id": "bar",
-            },
-          },
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 0,
-                "lte": 50000,
-              },
-            },
-          },
-        ],
-      },
+  "fields": Array [
+    Object {
+      "field": "*",
+      "include_unmapped": true,
     },
-    "size": 1,
-    "terminate_after": 1,
-    "track_total_hits": false,
+  ],
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "term": Object {
+            "transaction.id": "foo",
+          },
+        },
+        Object {
+          "term": Object {
+            "trace.id": "bar",
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "format": "epoch_millis",
+              "gte": 0,
+              "lte": 50000,
+            },
+          },
+        },
+      ],
+    },
   },
+  "size": 1,
+  "terminate_after": 1,
+  "track_total_hits": false,
 }
 `;
 
