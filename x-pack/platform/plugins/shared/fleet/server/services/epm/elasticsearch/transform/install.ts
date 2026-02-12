@@ -54,8 +54,6 @@ import {
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
 } from '../../../../constants';
 
-import { appContextService } from '../../../app_context';
-
 import { deleteTransforms } from './remove';
 import { getDestinationIndexAliases } from './transform_utils';
 import { loadMappingForTransform } from './mappings';

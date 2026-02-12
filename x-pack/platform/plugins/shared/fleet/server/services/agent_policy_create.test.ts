@@ -7,8 +7,6 @@
 
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import type { KibanaRequest } from '@kbn/core/server';
-
 import { createAppContextStartContractMock } from '../mocks';
 
 import type { AgentPolicy, PackagePolicy } from '../types';

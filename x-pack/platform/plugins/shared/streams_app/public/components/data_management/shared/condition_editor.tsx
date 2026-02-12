@@ -125,20 +125,8 @@ export function ConditionEditor(props: ConditionEditorProps) {
             id="xpack.streams.conditionEditor.arrayOperatorHelpText"
             defaultMessage="Use {includes} for array/multivalue fields. For partial matches, use {contains}."
             values={{
-              includes: (
-                <strong>
-                  {i18n.translate('xpack.streams.conditionEditor.strong.includesLabel', {
-                    defaultMessage: 'includes',
-                  })}
-                </strong>
-              ),
-              contains: (
-                <strong>
-                  {i18n.translate('xpack.streams.conditionEditor.strong.containsLabel', {
-                    defaultMessage: 'contains',
-                  })}
-                </strong>
-              ),
+              includes: <strong>includes</strong>,
+              contains: <strong>contains</strong>,
             }}
           />
         ) : undefined
