@@ -157,4 +157,3 @@ const extractEsql = (attributes: LensAttributes): string => {
     return '';
   }
 };
-
