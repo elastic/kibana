@@ -8,16 +8,16 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { defaultConfig } from '../../../default/stateful/base.config';
+import { defaultConfig } from '../../default/stateful/base.config';
 
 /**
- * Custom Scout stateful server configuration for the Flyout System example plugin.
+ * Scout stateful server configuration for example plugins.
  *
- * Since `flyoutSystemExamples` is an example plugin, the Kibana dev server must
- * be started with `--run-examples` to load example plugins from the `examples/` directory.
+ * The Kibana dev server is started with `--run-examples` to load
+ * all example plugins from the `examples/` directory.
  *
  * Usage:
- *   node scripts/scout.js start-server --stateful --config-dir flyout_system
+ *   node scripts/scout.js start-server --stateful --config-set examples
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
