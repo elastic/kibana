@@ -162,7 +162,7 @@ export class SharedConnectorTokenClient {
 
       return {
         ...result.attributes,
-        id: this.formatTokenId(actualId),
+        id,
       } as ConnectorToken;
     } catch (err) {
       this.logger.error(
@@ -457,7 +457,7 @@ export class SharedConnectorTokenClient {
 
       return {
         ...result.attributes,
-        id: this.formatTokenId(actualId),
+        id,
       } as ConnectorToken;
     } catch (err) {
       this.logger.error(

@@ -119,11 +119,11 @@ export class ConnectorTokenClient {
     const { scope, actualId } = this.parseTokenId(options.id);
     this.log({ method: 'update', scope, fields: { id: actualId } });
     if (scope === 'per-user') {
-      return this.userClient.update({ ...options, id: actualId });
+      return this.userClient.update(options);
     }
     if (options.token) {
       return this.sharedClient.update({
-        id: actualId,
+        id: options.id,
         token: options.token,
         expiresAtMillis: options.expiresAtMillis,
         tokenType: options.tokenType,
@@ -254,8 +254,8 @@ export class ConnectorTokenClient {
     const { scope, actualId } = this.parseTokenId(options.id);
     this.log({ method: 'updateWithRefreshToken', scope, fields: { id: actualId } });
     if (scope === 'per-user') {
-      return this.userClient.updateWithRefreshToken({ ...options, id: actualId });
+      return this.userClient.updateWithRefreshToken(options);
     }
-    return this.sharedClient.updateWithRefreshToken({ ...options, id: actualId });
+    return this.sharedClient.updateWithRefreshToken(options);
   }
 }

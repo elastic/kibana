@@ -245,7 +245,7 @@ export class UserConnectorTokenClient {
         MAX_RETRY_ATTEMPTS
       );
 
-      return { ...result.attributes, id: this.formatTokenId(actualId) } as UserConnectorToken;
+      return { ...result.attributes, id } as UserConnectorToken;
     } catch (err) {
       this.logger.error(
         `Failed to update user_connector_token for id "${id}" with ${context}. Error: ${err.message}`
@@ -660,7 +660,7 @@ export class UserConnectorTokenClient {
         MAX_RETRY_ATTEMPTS
       );
 
-      return { ...result.attributes, id: this.formatTokenId(actualId) } as UserConnectorToken;
+      return { ...result.attributes, id } as UserConnectorToken;
     } catch (err) {
       this.logger.error(
         `Failed to update user_connector_token with refresh token for id "${id}" and ${context}. Error: ${err.message}`

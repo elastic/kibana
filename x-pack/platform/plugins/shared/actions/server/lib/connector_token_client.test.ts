@@ -328,9 +328,9 @@ describe('update()', () => {
       expiresAtMillis: expiresAt,
     });
 
-    // Should treat unprefixed ID as shared and return with shared: prefix
+    // Should preserve the unprefixed ID as-is
     expect(result).toEqual({
-      id: 'shared:1',
+      id: '1',
       connectorId: '123',
       tokenType: 'access_token',
       token: 'newtokenvalue',
