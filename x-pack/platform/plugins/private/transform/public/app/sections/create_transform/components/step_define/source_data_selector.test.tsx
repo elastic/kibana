@@ -11,17 +11,21 @@ import { fireEvent, render } from '@testing-library/react';
 
 import { SourceDataSelector } from './source_data_selector';
 
-jest.mock('@kbn/saved-objects-finder-plugin/public', () => ({
-  SavedObjectFinder: ({ onChoose }) => (
+jest.mock('../../../transform_management/components/search_selection', () => ({
+  SearchSelection: ({ onSearchSelected }: any) => (
     <div>
-      <button data-test-subj="mockChooseDataView" onClick={() => onChoose('dv-1', 'index-pattern')}>
+      <button data-test-subj="mockChooseDataView" onClick={() => onSearchSelected('dv-1')}>
         choose data view
       </button>
-      <button data-test-subj="mockChooseDiscoverSession" onClick={() => onChoose('ss-1', 'search')}>
+      <button data-test-subj="mockChooseDiscoverSession" onClick={() => onSearchSelected('ss-1')}>
         choose discover session
       </button>
     </div>
   ),
+}));
+
+jest.mock('@kbn/saved-objects-finder-plugin/public', () => ({
+  SavedObjectFinder: ({ children }: any) => <div>{children}</div>,
 }));
 
 jest.mock('../../../../app_dependencies', () => ({

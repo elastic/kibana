@@ -5,26 +5,14 @@
  * 2.0.
  */
 
-import React, { type FC, Fragment, useMemo, useState } from 'react';
+import React, { type FC, useMemo, useState } from 'react';
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiPopover,
-  EuiPopoverTitle,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFormRow, EuiModal, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-
+import { css } from '@emotion/react';
 import { useAppDependencies } from '../../../../app_dependencies';
 import type { SearchItems } from '../../../../hooks/use_search_items';
-
-type SavedObject = SavedObjectCommon<FinderAttributes & { isTextBasedQuery?: boolean }>;
-
-const fixedPageSize: number = 8;
+import { SearchSelection } from '../../../transform_management/components/search_selection';
 
 export interface SourceDataSelectorProps {
   searchItems?: SearchItems;
@@ -33,9 +21,9 @@ export interface SourceDataSelectorProps {
 
 export const SourceDataSelector: FC<SourceDataSelectorProps> = React.memo(
   ({ searchItems, onSelectSavedObjectId }) => {
-    const { contentManagement, uiSettings, dataViewEditor } = useAppDependencies();
+    const { dataViewEditor } = useAppDependencies();
 
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const isDisabled = onSelectSavedObjectId === undefined;
 
@@ -60,9 +48,22 @@ export const SourceDataSelector: FC<SourceDataSelectorProps> = React.memo(
 
     const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
 
+    const useStyles = () => {
+      const { euiTheme } = useEuiTheme();
+
+      return {
+        dialog: css`
+          width: calc(${euiTheme.size.l} * 30);
+          min-height: calc(${euiTheme.size.l} * 25);
+        `,
+      };
+    };
+
+    const styles = useStyles();
+
     const createNewDataView = () => {
       if (!dataViewEditor) return;
-      setIsPopoverOpen(false);
+      setIsModalOpen(false);
       dataViewEditor.openEditor({
         onSave: async (createdDataView) => {
           if (createdDataView.id) {
@@ -80,93 +81,39 @@ export const SourceDataSelector: FC<SourceDataSelectorProps> = React.memo(
           defaultMessage: 'Select data source',
         })}
       >
-        <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-          <EuiFlexItem>
-            <EuiPopover
-              isOpen={isPopoverOpen}
-              closePopover={() => setIsPopoverOpen(false)}
-              panelPaddingSize="s"
-              button={
-                <EuiButtonEmpty
-                  flush="left"
-                  iconType="arrowDown"
-                  iconSide="right"
-                  onClick={() => setIsPopoverOpen((v) => !v)}
-                  isDisabled={isDisabled}
-                  data-test-subj="transformSourceDataSelectorButton"
-                >
-                  {selectedSourceLabel}
-                </EuiButtonEmpty>
-              }
-            >
-              <EuiPopoverTitle>
-                {i18n.translate('xpack.transform.sourceDataSelector.popoverTitle', {
-                  defaultMessage: 'Choose a source',
-                })}
-              </EuiPopoverTitle>
+        <>
+          <EuiButtonEmpty
+            flush="left"
+            iconType="arrowDown"
+            iconSide="right"
+            onClick={() => setIsModalOpen(true)}
+            isDisabled={isDisabled}
+            data-test-subj="transformSourceDataSelectorButton"
+          >
+            {selectedSourceLabel}
+          </EuiButtonEmpty>
 
-              <SavedObjectFinder
-                id="transformWizardSourceFinder"
-                key="transformWizardSourceFinder"
-                onChoose={(id: string) => {
-                  setIsPopoverOpen(false);
+          {isModalOpen && (
+            <EuiModal
+              onClose={() => setIsModalOpen(false)}
+              css={styles.dialog}
+              aria-label={i18n.translate('xpack.transform.sourceDataSelector.modalAriaLabel', {
+                defaultMessage: 'Choose a source',
+              })}
+              data-test-subj="transformSourceDataSelectorModal"
+            >
+              <SearchSelection
+                onSearchSelected={(id: string) => {
+                  setIsModalOpen(false);
                   onSelectSavedObjectId?.(id);
                 }}
-                showFilter
-                noItemsMessage={i18n.translate(
-                  'xpack.transform.sourceDataSelector.notFoundLabel',
-                  {
-                    defaultMessage: 'No matching indices or saved Discover sessions found.',
-                  }
-                )}
-                savedObjectMetaData={[
-                  {
-                    type: 'search',
-                    getIconForSavedObject: () => 'discoverApp',
-                    name: i18n.translate(
-                      'xpack.transform.sourceDataSelector.savedObjectType.discoverSession',
-                      {
-                        defaultMessage: 'Discover session',
-                      }
-                    ),
-                    showSavedObject: (savedObject: SavedObject) =>
-                      // ES|QL based saved searches are not supported in transforms
-                      savedObject.attributes.isTextBasedQuery !== true,
-                  },
-                  {
-                    type: 'index-pattern',
-                    getIconForSavedObject: () => 'indexPatternApp',
-                    name: i18n.translate(
-                      'xpack.transform.sourceDataSelector.savedObjectType.dataView',
-                      {
-                        defaultMessage: 'Data view',
-                      }
-                    ),
-                  },
-                ]}
-                fixedPageSize={fixedPageSize}
-                services={{ contentClient: contentManagement.client, uiSettings }}
-              >
-                {canEditDataView ? (
-                  <EuiButtonEmpty
-                    onClick={createNewDataView}
-                    iconType="plusInCircle"
-                    data-test-subj="transformSourceDataSelectorCreateDataViewButton"
-                    disabled={!canEditDataView}
-                  >
-                    {i18n.translate('xpack.transform.sourceDataSelector.createDataViewLabel', {
-                      defaultMessage: 'Create a data view',
-                    })}
-                  </EuiButtonEmpty>
-                ) : (
-                  <Fragment />
-                )}
-              </SavedObjectFinder>
-            </EuiPopover>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+                canEditDataView={canEditDataView}
+                createNewDataView={createNewDataView}
+              />
+            </EuiModal>
+          )}
+        </>
       </EuiFormRow>
     );
   }
 );
-
