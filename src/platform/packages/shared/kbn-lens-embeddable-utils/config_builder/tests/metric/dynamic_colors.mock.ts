@@ -133,7 +133,7 @@ export const dynamicColorsMetricAttributes: LensAttributes = {
     adHocDataViews: {},
   },
   title: 'Metric - dynamic colors',
-  version: 1,
+  version: 2,
   visualizationType: 'lnsMetric',
   references: [
     {

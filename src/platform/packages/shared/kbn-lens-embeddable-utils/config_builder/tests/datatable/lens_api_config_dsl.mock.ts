@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableState } from '../../schema';
+import type { DatatableState, DatatableStateNoESQL } from '../../schema';
 
 /**
  * Basic datatable with single metric column and ad hoc dataView
@@ -28,7 +28,7 @@ export const singleMetricDatatableWithAdhocDataView: DatatableState = {
       empty_as_null: true,
     },
   ],
-};
+} satisfies DatatableStateNoESQL;
 
 /**
  * Datatable with multiple metrics, rows, and split_metrics_by columns
@@ -104,7 +104,7 @@ export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableState = {
       },
     },
   ],
-};
+} satisfies DatatableStateNoESQL;
 
 /**
  * Full config datatable and ad hoc dataView
@@ -130,29 +130,28 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
         range: 'absolute',
         steps: [
           {
-            type: 'from',
             color: '#d4efe6',
-            from: 20,
+            lt: 20,
           },
           {
-            type: 'exact',
             color: '#b1e4d1',
-            value: 40,
+            gte: 20,
+            lt: 40,
           },
           {
-            type: 'exact',
             color: '#8cd9bb',
-            value: 60,
+            gte: 40,
+            lt: 60,
           },
           {
-            type: 'exact',
             color: '#62cea6',
-            value: 80,
+            gte: 60,
+            lt: 80,
           },
           {
-            type: 'to',
             color: '#24c292',
-            to: 100,
+            gte: 80,
+            lte: 100,
           },
         ],
       },
@@ -167,29 +166,28 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
         range: 'absolute',
         steps: [
           {
-            type: 'from',
             color: '#d4efe6',
-            from: 20,
+            lt: 20,
           },
           {
-            type: 'exact',
             color: '#b1e4d1',
-            value: 40,
+            gte: 20,
+            lt: 40,
           },
           {
-            type: 'exact',
             color: '#8cd9bb',
-            value: 60,
+            gte: 40,
+            lt: 60,
           },
           {
-            type: 'exact',
             color: '#62cea6',
-            value: 80,
+            gte: 60,
+            lt: 80,
           },
           {
-            type: 'to',
             color: '#24c292',
-            to: 100,
+            gte: 80,
+            lte: 100,
           },
         ],
       },
@@ -270,7 +268,7 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
     },
   },
   paging: 10,
-};
+} satisfies DatatableStateNoESQL;
 
 /**
  * Full config datatable and dataView
@@ -295,29 +293,28 @@ export const fullConfigDatatableWithDataView: DatatableState = {
         range: 'absolute',
         steps: [
           {
-            type: 'from',
             color: '#d4efe6',
-            from: 20,
+            lt: 20,
           },
           {
-            type: 'exact',
             color: '#b1e4d1',
-            value: 40,
+            gte: 20,
+            lt: 40,
           },
           {
-            type: 'exact',
             color: '#8cd9bb',
-            value: 60,
+            gte: 40,
+            lt: 60,
           },
           {
-            type: 'exact',
             color: '#62cea6',
-            value: 80,
+            gte: 60,
+            lt: 80,
           },
           {
-            type: 'to',
             color: '#24c292',
-            to: 100,
+            gte: 80,
+            lte: 100,
           },
         ],
       },
@@ -332,29 +329,28 @@ export const fullConfigDatatableWithDataView: DatatableState = {
         range: 'absolute',
         steps: [
           {
-            type: 'from',
             color: '#d4efe6',
-            from: 20,
+            lt: 20,
           },
           {
-            type: 'exact',
             color: '#b1e4d1',
-            value: 40,
+            gte: 20,
+            lt: 40,
           },
           {
-            type: 'exact',
             color: '#8cd9bb',
-            value: 60,
+            gte: 40,
+            lt: 60,
           },
           {
-            type: 'exact',
             color: '#62cea6',
-            value: 80,
+            gte: 60,
+            lt: 80,
           },
           {
-            type: 'to',
             color: '#24c292',
-            to: 100,
+            gte: 80,
+            lte: 100,
           },
         ],
       },
@@ -435,7 +431,7 @@ export const fullConfigDatatableWithDataView: DatatableState = {
     },
   },
   paging: 10,
-};
+} satisfies DatatableStateNoESQL;
 
 /**
  * Datatable sorted by a transposed metric column (split_metrics_by)
@@ -460,29 +456,28 @@ export const sortedByTransposedMetricColumnDatatable: DatatableState = {
         range: 'absolute',
         steps: [
           {
-            type: 'from',
             color: '#d4efe6',
-            from: 20,
+            lt: 20,
           },
           {
-            type: 'exact',
             color: '#b1e4d1',
-            value: 40,
+            gte: 20,
+            lt: 40,
           },
           {
-            type: 'exact',
             color: '#8cd9bb',
-            value: 60,
+            gte: 40,
+            lt: 60,
           },
           {
-            type: 'exact',
             color: '#62cea6',
-            value: 80,
+            gte: 60,
+            lt: 80,
           },
           {
-            type: 'to',
             color: '#24c292',
-            to: 100,
+            gte: 80,
+            lte: 100,
           },
         ],
       },
@@ -497,29 +492,28 @@ export const sortedByTransposedMetricColumnDatatable: DatatableState = {
         range: 'absolute',
         steps: [
           {
-            type: 'from',
             color: '#d4efe6',
-            from: 20,
+            lt: 20,
           },
           {
-            type: 'exact',
             color: '#b1e4d1',
-            value: 40,
+            gte: 20,
+            lt: 40,
           },
           {
-            type: 'exact',
             color: '#8cd9bb',
-            value: 60,
+            gte: 40,
+            lt: 60,
           },
           {
-            type: 'exact',
             color: '#62cea6',
-            value: 80,
+            gte: 60,
+            lt: 80,
           },
           {
-            type: 'to',
             color: '#24c292',
-            to: 100,
+            gte: 80,
+            lte: 100,
           },
         ],
       },
@@ -606,7 +600,7 @@ export const sortedByTransposedMetricColumnDatatable: DatatableState = {
     values: ['US', 'CH'],
     direction: 'desc',
   },
-};
+} satisfies DatatableStateNoESQL;
 
 /**
  * Datatable sorted by a row column
@@ -631,29 +625,28 @@ export const sortedByRowDatatable: DatatableState = {
         range: 'absolute',
         steps: [
           {
-            type: 'from',
             color: '#d4efe6',
-            from: 20,
+            lt: 20,
           },
           {
-            type: 'exact',
             color: '#b1e4d1',
-            value: 40,
+            gte: 20,
+            lt: 40,
           },
           {
-            type: 'exact',
             color: '#8cd9bb',
-            value: 60,
+            gte: 40,
+            lt: 60,
           },
           {
-            type: 'exact',
             color: '#62cea6',
-            value: 80,
+            gte: 60,
+            lt: 80,
           },
           {
-            type: 'to',
             color: '#24c292',
-            to: 100,
+            gte: 80,
+            lte: 100,
           },
         ],
       },
@@ -668,29 +661,28 @@ export const sortedByRowDatatable: DatatableState = {
         range: 'absolute',
         steps: [
           {
-            type: 'from',
             color: '#d4efe6',
-            from: 20,
+            lt: 20,
           },
           {
-            type: 'exact',
             color: '#b1e4d1',
-            value: 40,
+            gte: 20,
+            lt: 40,
           },
           {
-            type: 'exact',
             color: '#8cd9bb',
-            value: 60,
+            gte: 40,
+            lt: 60,
           },
           {
-            type: 'exact',
             color: '#62cea6',
-            value: 80,
+            gte: 60,
+            lt: 80,
           },
           {
-            type: 'to',
             color: '#24c292',
-            to: 100,
+            gte: 80,
+            lte: 100,
           },
         ],
       },
@@ -776,4 +768,4 @@ export const sortedByRowDatatable: DatatableState = {
     index: 1,
     direction: 'asc',
   },
-};
+} satisfies DatatableStateNoESQL;

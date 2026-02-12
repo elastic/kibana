@@ -129,30 +129,36 @@ const colorByValueBaseSchema = schema.object({
   steps: colorByValueStepsSchema,
 });
 
-export const colorByValueAbsoluteSchema = colorByValueBaseSchema.extends({
-  range: schema.literal('absolute'),
-}, {
-  meta: {
-    id: 'colorByValueAbsolute',
+export const colorByValueAbsoluteSchema = colorByValueBaseSchema.extends(
+  {
+    range: schema.literal('absolute'),
   },
-});
+  {
+    meta: {
+      id: 'colorByValueAbsolute',
+    },
+  }
+);
 
-export const colorByValuePercentageSchema = colorByValueBaseSchema.extends({
-  range: schema.literal('percentage'),
-}, {
-  meta: {
-    id: 'colorByValuePercentage',
+export const colorByValuePercentageSchema = colorByValueBaseSchema.extends(
+  {
+    range: schema.literal('percentage'),
   },
-});
+  {
+    meta: {
+      id: 'colorByValuePercentage',
+    },
+  }
+);
 
-export const colorByValueSchema = schema.oneOf([
-  colorByValueAbsoluteSchema,
-  colorByValuePercentageSchema,
-], {
-  meta: {
-    id: 'colorByValue',
-  },
-});
+export const colorByValueSchema = schema.oneOf(
+  [colorByValueAbsoluteSchema, colorByValuePercentageSchema],
+  {
+    meta: {
+      id: 'colorByValue',
+    },
+  }
+);
 
 export const staticColorSchema = schema.object(
   {
