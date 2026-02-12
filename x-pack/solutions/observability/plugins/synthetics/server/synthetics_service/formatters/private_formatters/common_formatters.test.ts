@@ -6,8 +6,8 @@
  */
 
 import { ConfigKey } from '../../../../common/runtime_types';
+import { secondsToCronFormatter } from '../formatting_utils';
 import {
-  secondsToCronFormatter,
   arrayToJsonFormatter,
   objectToJsonFormatter,
   stringToJsonFormatter,

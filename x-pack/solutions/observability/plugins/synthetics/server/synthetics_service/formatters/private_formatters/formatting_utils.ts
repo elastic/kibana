@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { inlineSourceFormatter } from '../formatting_utils';
+import { inlineSourceFormatter, secondsToCronFormatter } from '../formatting_utils';
 import type { MonitorFields } from '../../../../common/runtime_types';
 import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
 import { HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS } from '../../../../common/constants/monitor_defaults';
@@ -74,11 +74,11 @@ export const stringifyString = (value?: string) => {
   }
 };
 
-export const secondsToCronFormatter: FormatterFn = (fields, key) => {
-  const value = (fields[key] as string) ?? '';
+// export const secondsToCronFormatter: FormatterFn = (fields, key) => {
+//   const value = (fields[key] as string) ?? '';
 
-  return value !== undefined && value !== null ? `${value}s` : null;
-};
+//   return value !== undefined && value !== null ? `${value}s` : null;
+// };
 
 export const privateTimeoutFormatter: FormatterFn = (fields) => {
   const value = (fields[ConfigKey.TIMEOUT] as string) ?? '';
