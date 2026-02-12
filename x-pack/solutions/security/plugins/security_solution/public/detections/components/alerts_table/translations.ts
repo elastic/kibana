@@ -405,6 +405,6 @@ export const RUN_WORKFLOW_BUTTON = i18n.translate(
 export const SELECT_WORKFLOW_PANEL_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.workflow.select.title',
   {
-    defaultMessage: 'Alert workflows',
+    defaultMessage: 'Workflows',
   }
 );
