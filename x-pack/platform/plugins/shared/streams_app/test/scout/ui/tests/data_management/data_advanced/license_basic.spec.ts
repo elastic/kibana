@@ -115,4 +115,3 @@ test.describe('Advanced tab with basic license', { tag: ['@ess'] }, () => {
     await expect(page.getByRole('heading', { name: 'Delete stream' })).toBeVisible();
   });
 });
-

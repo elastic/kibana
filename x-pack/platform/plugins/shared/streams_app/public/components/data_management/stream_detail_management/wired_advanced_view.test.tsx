@@ -44,7 +44,9 @@ jest.mock('./advanced_view/delete_stream', () => ({
   DeleteStreamPanel: () => <div data-test-subj="deleteStreamPanel" />,
 }));
 
-const mockUseStreamsPrivileges = useStreamsPrivileges as jest.MockedFunction<typeof useStreamsPrivileges>;
+const mockUseStreamsPrivileges = useStreamsPrivileges as jest.MockedFunction<
+  typeof useStreamsPrivileges
+>;
 
 const mockRefreshDefinition = jest.fn();
 
@@ -63,7 +65,9 @@ describe('WiredAdvancedView', () => {
       },
     } as any);
 
-    renderWithI18n(<WiredAdvancedView definition={definition} refreshDefinition={mockRefreshDefinition} />);
+    renderWithI18n(
+      <WiredAdvancedView definition={definition} refreshDefinition={mockRefreshDefinition} />
+    );
 
     expect(screen.queryByTestId('streamDescriptionPanel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('streamFeatureConfigurationPanel')).not.toBeInTheDocument();
@@ -77,7 +81,9 @@ describe('WiredAdvancedView', () => {
       },
     } as any);
 
-    renderWithI18n(<WiredAdvancedView definition={definition} refreshDefinition={mockRefreshDefinition} />);
+    renderWithI18n(
+      <WiredAdvancedView definition={definition} refreshDefinition={mockRefreshDefinition} />
+    );
 
     expect(screen.queryByTestId('streamDescriptionPanel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('streamFeatureConfigurationPanel')).not.toBeInTheDocument();
@@ -91,10 +97,11 @@ describe('WiredAdvancedView', () => {
       },
     } as any);
 
-    renderWithI18n(<WiredAdvancedView definition={definition} refreshDefinition={mockRefreshDefinition} />);
+    renderWithI18n(
+      <WiredAdvancedView definition={definition} refreshDefinition={mockRefreshDefinition} />
+    );
 
     expect(screen.getByTestId('streamDescriptionPanel')).toBeInTheDocument();
     expect(screen.getByTestId('streamFeatureConfigurationPanel')).toBeInTheDocument();
   });
 });
-

@@ -36,7 +36,9 @@ jest.mock('./unmanaged_elasticsearch_assets', () => ({
 jest.mock('../../../hooks/use_streams_privileges');
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 
-const mockUseStreamsPrivileges = useStreamsPrivileges as jest.MockedFunction<typeof useStreamsPrivileges>;
+const mockUseStreamsPrivileges = useStreamsPrivileges as jest.MockedFunction<
+  typeof useStreamsPrivileges
+>;
 
 const mockRefreshDefinition = jest.fn();
 
@@ -58,7 +60,10 @@ describe('Classic advanced view gating', () => {
     } as any);
 
     renderWithI18n(
-      <ClassicStreamDetailManagement definition={definition} refreshDefinition={mockRefreshDefinition} />
+      <ClassicStreamDetailManagement
+        definition={definition}
+        refreshDefinition={mockRefreshDefinition}
+      />
     );
 
     expect(screen.queryByTestId('streamDescriptionPanel')).not.toBeInTheDocument();
@@ -76,7 +81,10 @@ describe('Classic advanced view gating', () => {
     } as any);
 
     renderWithI18n(
-      <ClassicStreamDetailManagement definition={definition} refreshDefinition={mockRefreshDefinition} />
+      <ClassicStreamDetailManagement
+        definition={definition}
+        refreshDefinition={mockRefreshDefinition}
+      />
     );
 
     expect(screen.queryByTestId('streamDescriptionPanel')).not.toBeInTheDocument();
@@ -94,11 +102,13 @@ describe('Classic advanced view gating', () => {
     } as any);
 
     renderWithI18n(
-      <ClassicStreamDetailManagement definition={definition} refreshDefinition={mockRefreshDefinition} />
+      <ClassicStreamDetailManagement
+        definition={definition}
+        refreshDefinition={mockRefreshDefinition}
+      />
     );
 
     expect(screen.getByTestId('streamDescriptionPanel')).toBeInTheDocument();
     expect(screen.getByTestId('unmanagedAssetsPanel')).toBeInTheDocument();
   });
 });
-

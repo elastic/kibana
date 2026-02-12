@@ -31,7 +31,9 @@ export function WiredAdvancedView({
     features: { contentPacks, significantEvents },
   } = useStreamsPrivileges();
   const aiFeatures = useAIFeatures();
-  const isSignificantEventsEnabled = Boolean(significantEvents?.enabled && significantEvents?.available);
+  const isSignificantEventsEnabled = Boolean(
+    significantEvents?.enabled && significantEvents?.available
+  );
 
   const { onPageReady } = usePerformanceContext();
 
