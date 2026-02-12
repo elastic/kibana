@@ -1009,58 +1009,63 @@ export const QueryBarTopRow = React.memo(
     const isScreenshotMode = props.isScreenshotMode === true;
     const styles = useMemoCss(inputStringStyles);
 
+    const flexDirection: 'column' | 'row' =
+      isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row';
+    const flexJustifyContent: 'flexStart' | 'flexEnd' = shouldShowDatePickerAsBadge()
+      ? 'flexStart'
+      : 'flexEnd';
+    const queryBarFlexGroupProps = {
+      className: 'kbnQueryBar',
+      'data-test-subj': 'kbnQueryBar',
+      direction: flexDirection,
+      responsive: false as const,
+      gutterSize: 's' as const,
+      justifyContent: flexJustifyContent,
+      wrap: true,
+      css: css`
+        padding: ${isQueryLangSelected && !props.disableExternalPadding ? euiTheme.size.s : 0};
+      `,
+    };
+
     return (
-      <EsqlEditorActionsProvider>
-        <>
-          <SharingMetaFields
-            from={currentDateRange.from}
-            to={currentDateRange.to}
-            dateFormat={uiSettings.get('dateFormat')}
-          />
-          {!isScreenshotMode && (
-            <>
-              <EuiFlexGroup
-                className="kbnQueryBar"
-                data-test-subj="kbnQueryBar"
-                direction={isMobile && !shouldShowDatePickerAsBadge() ? 'column' : 'row'}
-                responsive={false}
-                gutterSize="s"
-                css={css`
-                  padding: ${isQueryLangSelected && !props.disableExternalPadding
-                    ? euiTheme.size.s
-                    : 0};
-                `}
-                justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
-                wrap
-              >
+      <>
+        <SharingMetaFields
+          from={currentDateRange.from}
+          to={currentDateRange.to}
+          dateFormat={uiSettings.get('dateFormat')}
+        />
+        {!isScreenshotMode &&
+          (isQueryLangSelected ? (
+            <EsqlEditorActionsProvider>
+              <EuiFlexGroup {...queryBarFlexGroupProps}>
                 {props.dataViewPickerOverride || renderDataViewsPicker()}
-                {isQueryLangSelected ? (
-                  <>
-                    {renderDatePickerWithUpdateBtn()}
-                    {/* Optional wrapper for the ES|QL controls elements */}
-                    {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
-                      <EuiFlexItem grow={false}>
-                        {props.esqlVariablesConfig?.controlsWrapper}
-                      </EuiFlexItem>
-                    )}
-                    {shouldShowDatePickerAsBadge() && props.filterBar}
-                    {renderEsqlMenuPopover()}
-                  </>
-                ) : (
-                  <>
-                    {renderQueryInput()}
-                    {props.renderQueryInputAppend?.()}
-                    {shouldShowDatePickerAsBadge() && props.filterBar}
-                    {renderDatePickerWithUpdateBtn()}
-                  </>
+                {renderDatePickerWithUpdateBtn()}
+                {/* Optional wrapper for the ES|QL controls elements */}
+                {Boolean(props.esqlVariablesConfig?.controlsWrapper) && (
+                  <EuiFlexItem grow={false}>
+                    {props.esqlVariablesConfig?.controlsWrapper}
+                  </EuiFlexItem>
                 )}
+                {shouldShowDatePickerAsBadge() && props.filterBar}
+                {renderEsqlMenuPopover()}
+              </EuiFlexGroup>
+              {!shouldShowDatePickerAsBadge() && props.filterBar}
+              {renderTextLangEditor()}
+            </EsqlEditorActionsProvider>
+          ) : (
+            <>
+              <EuiFlexGroup {...queryBarFlexGroupProps}>
+                {props.dataViewPickerOverride || renderDataViewsPicker()}
+                {renderQueryInput()}
+                {props.renderQueryInputAppend?.()}
+                {shouldShowDatePickerAsBadge() && props.filterBar}
+                {renderDatePickerWithUpdateBtn()}
               </EuiFlexGroup>
               {!shouldShowDatePickerAsBadge() && props.filterBar}
               {renderTextLangEditor()}
             </>
-          )}
-        </>
-      </EsqlEditorActionsProvider>
+          ))}
+      </>
     );
   },
   ({ query: prevQuery, ...prevProps }, { query: nextQuery, ...nextProps }) => {
