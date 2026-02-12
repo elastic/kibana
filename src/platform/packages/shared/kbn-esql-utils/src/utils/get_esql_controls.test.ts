@@ -9,10 +9,11 @@
 
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
-import { EsqlControlType, ESQLVariableType, type ESQLControlState } from '@kbn/esql-types';
+import { EsqlControlType, ESQLVariableType } from '@kbn/esql-types';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import { getEsqlControls } from './get_esql_controls';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 
 const createPresentationContainer = (children: unknown[]) =>
   ({
@@ -22,7 +23,7 @@ const createPresentationContainer = (children: unknown[]) =>
     },
   } as unknown as PresentationContainer);
 
-const createControlState = (variableName: string): ESQLControlState => ({
+const createControlState = (variableName: string): OptionsListESQLControlState => ({
   title: 'Control title',
   selectedOptions: ['option-1'],
   variableName,
@@ -33,7 +34,11 @@ const createControlState = (variableName: string): ESQLControlState => ({
   availableOptions: ['option-1', 'option-2'],
 });
 
-const createControlApi = (uuid: string, state: ESQLControlState, type = ESQL_CONTROL) => ({
+const createControlApi = (
+  uuid: string,
+  state: OptionsListESQLControlState,
+  type = ESQL_CONTROL
+) => ({
   uuid,
   type,
   serializeState: () => state,

@@ -10,7 +10,7 @@
 import type { Serializable } from '@kbn/utility-types';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { ESQLControlState } from '@kbn/esql-types';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import { apiHasSerializableState, apiHasType, apiHasUniqueId } from '@kbn/presentation-publishing';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
@@ -37,7 +37,7 @@ export function getEsqlControls(
         return acc;
       }
 
-      const controlState = api.serializeState() as ESQLControlState;
+      const controlState = api.serializeState() as OptionsListESQLControlState;
       const variableName = controlState.variableName;
       if (!variableName) return acc;
       const isUsed = usedVariables.includes(variableName);

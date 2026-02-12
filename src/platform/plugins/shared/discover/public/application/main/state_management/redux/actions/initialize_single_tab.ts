@@ -11,8 +11,8 @@ import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { cloneDeep, isEqual, isObject, pick } from 'lodash';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
-import type { ESQLControlState } from '@kbn/esql-types';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { internalStateSlice, type TabActionPayload } from '../internal_state';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { type DiscoverAppState } from '..';
@@ -43,7 +43,7 @@ export interface InitializeSingleTabsParams {
   stateContainer: DiscoverStateContainer;
   customizationService: ConnectedCustomizationService;
   dataViewSpec: DataViewSpec | undefined;
-  esqlControls: ControlPanelsState<ESQLControlState> | undefined;
+  esqlControls: ControlPanelsState<OptionsListESQLControlState> | undefined;
   defaultUrlState: DiscoverAppState | undefined;
 }
 
