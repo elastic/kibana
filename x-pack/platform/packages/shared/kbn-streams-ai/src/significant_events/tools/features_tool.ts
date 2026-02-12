@@ -20,7 +20,8 @@ export const SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES = [
   ERROR_LOGS_FEATURE_TYPE,
 ] as const;
 
-export type SignificantEventsFeatureToolType =`${SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES}`
+export type SignificantEventsFeatureToolType =
+  (typeof SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES)[number];
 
 export interface GetStreamFeaturesInput {
   feature_types?: unknown;
