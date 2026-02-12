@@ -128,7 +128,7 @@ describe('Slack', () => {
   });
 
   describe('resolveChannelId action', () => {
-    it('should resolve a channel id by exact name match (and cache it)', async () => {
+    it('should resolve a channel id by exact name match', async () => {
       const mockResponse = {
         data: {
           ok: true,
@@ -155,22 +155,6 @@ describe('Slack', () => {
         pagesFetched: 1,
         nextCursor: 'next123',
       });
-
-      jest.clearAllMocks();
-
-      const cachedResult = (await Slack.actions.resolveChannelId.handler(mockContext, {
-        name: 'general',
-      })) as {
-        ok: boolean;
-        found: boolean;
-        id?: string;
-        source?: string;
-      };
-      expect(mockClient.get).not.toHaveBeenCalled();
-      expect(cachedResult.ok).toBe(true);
-      expect(cachedResult.found).toBe(true);
-      expect(cachedResult.id).toBe('C1');
-      expect(cachedResult.source).toBe('cache');
     });
 
     it('should paginate until found (contains match)', async () => {
@@ -325,14 +309,14 @@ describe('Slack', () => {
           user_id: 'U123',
         },
       };
-      mockClient.post.mockResolvedValue(mockResponse);
+      mockClient.get.mockResolvedValue(mockResponse);
 
       if (!Slack.test) {
         throw new Error('Test handler not defined');
       }
       const result = await Slack.test.handler(mockContext);
 
-      expect(mockClient.post).toHaveBeenCalledWith('https://slack.com/api/auth.test');
+      expect(mockClient.get).toHaveBeenCalledWith('https://slack.com/api/auth.test');
       expect(result.ok).toBe(true);
       expect(result.message).toContain('My Team');
     });
@@ -344,7 +328,7 @@ describe('Slack', () => {
           error: 'invalid_auth',
         },
       };
-      mockClient.post.mockResolvedValue(mockResponse);
+      mockClient.get.mockResolvedValue(mockResponse);
 
       if (!Slack.test) {
         throw new Error('Test handler not defined');
@@ -356,7 +340,7 @@ describe('Slack', () => {
     });
 
     it('should return failure on network error', async () => {
-      mockClient.post.mockRejectedValue(new Error('Network timeout'));
+      mockClient.get.mockRejectedValue(new Error('Network timeout'));
 
       if (!Slack.test) {
         throw new Error('Test handler not defined');

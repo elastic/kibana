@@ -9,25 +9,295 @@
 
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../../connector_spec';
+import type { AxiosError, AxiosResponse } from 'axios';
+import type { ConnectorSpec, ActionContext } from '../../connector_spec';
 
 const SLACK_API_BASE = 'https://slack.com/api';
 const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Temporary: remove once OAuth UX is fully unblocked.
 const SLACK_CONVERSATION_TYPES = ['public_channel', 'private_channel', 'im', 'mpim'] as const;
 
-type SlackHeaders = Record<string, unknown>;
-interface SlackHttpResponse<TData> {
-  data: TData;
-  headers?: SlackHeaders;
-}
+const SlackSearchMessagesInputSchema = z.object({
+  query: z
+    .string()
+    .min(1)
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.query.description',
+        {
+          defaultMessage:
+            'Search query to find messages (supports Slack search operators; see optional constraint fields)',
+        }
+      )
+    ),
+  inChannel: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.inChannel.description',
+        {
+          defaultMessage:
+            'Optional Slack search constraint. Adds `in:<channel_name>` to the query.',
+        }
+      )
+    ),
+  fromUser: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.fromUser.description',
+        {
+          defaultMessage:
+            'Optional Slack search constraint. Adds `from:<@UserID>` or `from:username` to the query.',
+        }
+      )
+    ),
+  after: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.after.description',
+        {
+          defaultMessage:
+            'Optional Slack search constraint. Adds `after:<date>` to the query (e.g. 2026-02-10).',
+        }
+      )
+    ),
+  before: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.before.description',
+        {
+          defaultMessage:
+            'Optional Slack search constraint. Adds `before:<date>` to the query (e.g. 2026-02-10).',
+        }
+      )
+    ),
+  sort: z
+    .enum(['score', 'timestamp'])
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.sort.description',
+        {
+          defaultMessage: 'Sort order: score (relevance) or timestamp',
+        }
+      )
+    ),
+  sortDir: z
+    .enum(['asc', 'desc'])
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.sortDir.description',
+        { defaultMessage: 'Sort direction' }
+      )
+    ),
+  count: z
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.count.description',
+        {
+          defaultMessage: 'Number of results to return (1-100)',
+        }
+      )
+    ),
+  page: z
+    .number()
+    .int()
+    .min(1)
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.page.description',
+        {
+          defaultMessage: 'Page number for pagination',
+        }
+      )
+    ),
+  highlight: z
+    .boolean()
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.highlight.description',
+        { defaultMessage: 'Whether to include highlight markers in results' }
+      )
+    ),
+  raw: z
+    .boolean()
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.raw.description',
+        {
+          defaultMessage:
+            'Return the full raw Slack API response instead of a compact, LLM-friendly result.',
+        }
+      )
+    ),
+});
+type SlackSearchMessagesInput = z.infer<typeof SlackSearchMessagesInputSchema>;
+
+const SlackResolveChannelIdInputSchema = z.object({
+  name: z
+    .string()
+    .min(1)
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.name.description',
+        {
+          defaultMessage:
+            'Channel name to resolve (e.g. "general" or "#general"). Returns the matching conversation ID (C.../G...).',
+        }
+      )
+    ),
+  types: z
+    .array(z.enum(SLACK_CONVERSATION_TYPES))
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.types.description',
+        {
+          defaultMessage:
+            'Conversation types to search. Defaults to public_channel. Valid: public_channel, private_channel, im, mpim.',
+        }
+      )
+    ),
+  match: z
+    .enum(['exact', 'contains'])
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.match.description',
+        {
+          defaultMessage:
+            'How to match the channel name. exact is fastest/most precise. contains can help when you only know part of the name.',
+        }
+      )
+    ),
+  excludeArchived: z
+    .boolean()
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.excludeArchived.description',
+        { defaultMessage: 'Exclude archived channels (default true)' }
+      )
+    ),
+  cursor: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.cursor.description',
+        { defaultMessage: 'Optional cursor to resume a previous scan (advanced). Usually omit.' }
+      )
+    ),
+  limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(1000)
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.limit.description',
+        {
+          defaultMessage: 'Channels per page to request (1-1000). Defaults to 1000.',
+        }
+      )
+    ),
+  maxPages: z
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.maxPages.description',
+        {
+          defaultMessage: 'Maximum number of pages to scan before giving up. Defaults to 10.',
+        }
+      )
+    ),
+});
+type SlackResolveChannelIdInput = z.infer<typeof SlackResolveChannelIdInputSchema>;
+
+const SlackSendMessageInputSchema = z.object({
+  channel: z
+    .string()
+    .min(1)
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.sendMessage.input.channel.description',
+        {
+          defaultMessage:
+            'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs). Use resolveChannelId to discover channel IDs.',
+        }
+      )
+    ),
+  text: z
+    .string()
+    .min(1)
+    .describe(
+      i18n.translate('core.kibanaConnectorSpecs.slack.actions.sendMessage.input.text.description', {
+        defaultMessage: 'The message text to send',
+      })
+    ),
+  threadTs: z
+    .string()
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.sendMessage.input.threadTs.description',
+        {
+          defaultMessage: 'Timestamp of another message to reply to (creates a threaded reply)',
+        }
+      )
+    ),
+  unfurlLinks: z
+    .boolean()
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.sendMessage.input.unfurlLinks.description',
+        {
+          defaultMessage: 'Whether to enable unfurling of primarily text-based content',
+        }
+      )
+    ),
+  unfurlMedia: z
+    .boolean()
+    .optional()
+    .describe(
+      i18n.translate(
+        'core.kibanaConnectorSpecs.slack.actions.sendMessage.input.unfurlMedia.description',
+        {
+          defaultMessage: 'Whether to enable unfurling of media content',
+        }
+      )
+    ),
+});
+type SlackSendMessageInput = z.infer<typeof SlackSendMessageInputSchema>;
 
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
 
 const asString = (v: unknown): string | undefined => (typeof v === 'string' ? v : undefined);
 
-function getHeader(headers: SlackHeaders | undefined, headerName: string): string | undefined {
-  if (!headers) return undefined;
+function getHeader(headers: unknown, headerName: string): string | undefined {
+  if (!isRecord(headers)) return undefined;
   const needle = headerName.toLowerCase();
   for (const [k, v] of Object.entries(headers)) {
     if (k.toLowerCase() !== needle) continue;
@@ -54,7 +324,7 @@ function getSlackErrorFields(responseData: unknown): SlackErrorFields {
 function formatSlackApiErrorMessage(params: {
   action: string;
   responseData?: unknown;
-  responseHeaders?: SlackHeaders;
+  responseHeaders?: unknown;
 }) {
   const { action, responseData, responseHeaders } = params;
   const { error: slackError, needed, provided } = getSlackErrorFields(responseData);
@@ -79,7 +349,7 @@ function formatSlackApiErrorMessage(params: {
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function getSlackRetryDelayMs(params: {
-  responseHeaders?: SlackHeaders;
+  responseHeaders?: unknown;
   attempt: number;
   defaultBaseDelayMs?: number;
 }) {
@@ -99,24 +369,6 @@ function getSlackRetryDelayMs(params: {
   const jitterMs = Math.floor(Math.random() * 250);
   return Math.min(60_000, base + jitterMs);
 }
-
-interface CacheEntry<T> {
-  value: T;
-  expiresAt: number;
-}
-const slackResolveChannelIdCache = new Map<string, CacheEntry<string>>();
-const getCached = <T>(cache: Map<string, CacheEntry<T>>, key: string): T | undefined => {
-  const entry = cache.get(key);
-  if (!entry) return undefined;
-  if (Date.now() > entry.expiresAt) {
-    cache.delete(key);
-    return undefined;
-  }
-  return entry.value;
-};
-const setCached = <T>(cache: Map<string, CacheEntry<T>>, key: string, value: T, ttlMs: number) => {
-  cache.set(key, { value, expiresAt: Date.now() + ttlMs });
-};
 
 interface SlackSearchMatch {
   score?: number;
@@ -167,32 +419,28 @@ function extractMentionedUserIds(match: SlackSearchMatch): string[] {
   return Array.from(ids);
 }
 
-async function slackGetWithRateLimitRetry<TData>(params: {
-  ctx: {
-    client: { get: (url: string) => Promise<SlackHttpResponse<TData>> };
-    log: { debug: (msg: string) => void };
-  };
-  url: string;
+async function slackRequestWithRateLimitRetry<TData>(params: {
+  ctx: ActionContext;
   action: string;
+  request: () => Promise<AxiosResponse<TData>>;
   maxRetries?: number;
-}): Promise<SlackHttpResponse<TData>> {
-  const { ctx, url, action, maxRetries = 3 } = params;
+}): Promise<AxiosResponse<TData>> {
+  const { ctx, action, request, maxRetries = 3 } = params;
 
   let attempt = 0;
 
   while (true) {
     try {
-      return await ctx.client.get(url);
+      return await request();
     } catch (error) {
-      const err = error as {
-        response?: { status?: number; headers?: SlackHeaders; data?: unknown };
-        message?: string;
-      };
+      const err = error as AxiosError<unknown>;
 
       const status = err.response?.status;
       const slackError = getSlackErrorFields(err.response?.data).error;
       const isRateLimited =
-        status === 429 || slackError === 'ratelimited' || err.message?.includes('ratelimited');
+        status === 429 ||
+        slackError === 'ratelimited' ||
+        (typeof err.message === 'string' && err.message.includes('ratelimited'));
 
       if (!isRateLimited || attempt >= maxRetries) {
         throw error;
@@ -217,8 +465,8 @@ async function slackGetWithRateLimitRetry<TData>(params: {
  * Slack connector using OAuth2 Authorization Code flow.
  *
  * Required Slack App scopes:
- * MVP (public channels only):
- * - channels:read,channels:history - to list public channels and read public channel history
+ * MVP:
+ * - channels:read - to list channels/conversations (public/private/DMs depending on workspace + membership)
  * - chat:write - for sending messages to public channels
  * - search:read - for searching messages (requires a user token)
  *
@@ -245,25 +493,27 @@ export const Slack: ConnectorSpec = {
 
   auth: {
     types: [
-      {
-        type: 'oauth_authorization_code',
-        defaults: {
-          authorizationUrl: 'https://slack.com/oauth/v2/authorize',
-          tokenUrl: 'https://slack.com/api/oauth.v2.access',
-          scope:
-            'channels:read,channels:history,groups:read,im:read,mpim:read,chat:write,search:read',
-          scopeQueryParam: 'user_scope', // Slack OAuth v2 uses user_scope for user token scopes
-          tokenExtractor: 'slackUserToken', // extract authed_user.access_token for user-token-only scopes (e.g. search:read)
-          useBasicAuth: false, // Slack uses POST body for client credentials
-        },
-        overrides: {
-          meta: {
-            scope: { hidden: true },
-            authorizationUrl: { hidden: true },
-            tokenUrl: { hidden: true },
-          },
-        },
-      },
+      // Temporarily disabled until OAuth UX is fully unblocked!
+      //
+      // {
+      //   type: 'oauth_authorization_code',
+      //   defaults: {
+      //     authorizationUrl: 'https://slack.com/oauth/v2/authorize',
+      //     tokenUrl: 'https://slack.com/api/oauth.v2.access',
+      //     scope:
+      //       'channels:read,channels:history,groups:read,im:read,mpim:read,chat:write,search:read',
+      //     scopeQueryParam: 'user_scope', // Slack OAuth v2 uses user_scope for user token scopes
+      //     tokenExtractor: 'slackUserToken', // extract authed_user.access_token for user-token-only scopes (e.g. search:read)
+      //     useBasicAuth: false, // Slack uses POST body for client credentials
+      //   },
+      //   overrides: {
+      //     meta: {
+      //       scope: { hidden: true },
+      //       authorizationUrl: { hidden: true },
+      //       tokenUrl: { hidden: true },
+      //     },
+      //   },
+      // },
       ...(ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH
         ? ([
             {
@@ -310,154 +560,9 @@ export const Slack: ConnectorSpec = {
           defaultMessage: 'Search for messages in Slack (uses the authorized user token)',
         }
       ),
-      input: z.object({
-        query: z
-          .string()
-          .min(1)
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.query.description',
-              {
-                defaultMessage:
-                  'Search query to find messages (supports Slack search operators; see optional constraint fields)',
-              }
-            )
-          ),
-        inChannel: z
-          .string()
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.inChannel.description',
-              {
-                defaultMessage:
-                  'Optional Slack search constraint. Adds `in:<channel_name>` to the query.',
-              }
-            )
-          ),
-        fromUser: z
-          .string()
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.fromUser.description',
-              {
-                defaultMessage:
-                  'Optional Slack search constraint. Adds `from:<@UserID>` or `from:username` to the query.',
-              }
-            )
-          ),
-        after: z
-          .string()
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.after.description',
-              {
-                defaultMessage:
-                  'Optional Slack search constraint. Adds `after:<date>` to the query (e.g. 2026-02-10).',
-              }
-            )
-          ),
-        before: z
-          .string()
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.before.description',
-              {
-                defaultMessage:
-                  'Optional Slack search constraint. Adds `before:<date>` to the query (e.g. 2026-02-10).',
-              }
-            )
-          ),
-        sort: z
-          .enum(['score', 'timestamp'])
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.sort.description',
-              {
-                defaultMessage: 'Sort order: score (relevance) or timestamp',
-              }
-            )
-          ),
-        sortDir: z
-          .enum(['asc', 'desc'])
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.sortDir.description',
-              {
-                defaultMessage: 'Sort direction',
-              }
-            )
-          ),
-        count: z
-          .number()
-          .int()
-          .min(1)
-          .max(100)
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.count.description',
-              {
-                defaultMessage: 'Number of results to return (1-100)',
-              }
-            )
-          ),
-        page: z
-          .number()
-          .int()
-          .min(1)
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.page.description',
-              {
-                defaultMessage: 'Page number for pagination',
-              }
-            )
-          ),
-        highlight: z
-          .boolean()
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.highlight.description',
-              {
-                defaultMessage: 'Whether to include highlight markers in results',
-              }
-            )
-          ),
-        raw: z
-          .boolean()
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.raw.description',
-              {
-                defaultMessage:
-                  'Return the full raw Slack API response instead of a compact, LLM-friendly result.',
-              }
-            )
-          ),
-      }),
+      input: SlackSearchMessagesInputSchema,
       handler: async (ctx, input) => {
-        const typedInput = input as {
-          query: string;
-          inChannel?: string;
-          fromUser?: string;
-          after?: string;
-          before?: string;
-          sort?: 'score' | 'timestamp';
-          sortDir?: 'asc' | 'desc';
-          count?: number;
-          page?: number;
-          highlight?: boolean;
-          raw?: boolean;
-        };
+        const typedInput: SlackSearchMessagesInput = SlackSearchMessagesInputSchema.parse(input);
 
         const queryParts: string[] = [typedInput.query];
         if (typedInput.inChannel) queryParts.push(`in:${typedInput.inChannel}`);
@@ -477,9 +582,12 @@ export const Slack: ConnectorSpec = {
 
         try {
           ctx.log.debug(`Slack searchMessages request`);
-          const response = await ctx.client.get(
-            `${SLACK_API_BASE}/search.messages?${params.toString()}`
-          );
+          const response = await slackRequestWithRateLimitRetry({
+            ctx,
+            action: 'searchMessages',
+            maxRetries: 5,
+            request: () => ctx.client.get(`${SLACK_API_BASE}/search.messages?${params.toString()}`),
+          });
 
           if (!response.data.ok) {
             throw new Error(
@@ -515,10 +623,7 @@ export const Slack: ConnectorSpec = {
             })),
           };
         } catch (error) {
-          const err = error as {
-            message?: string;
-            response?: { status?: number; data?: unknown };
-          };
+          const err = error as AxiosError<unknown>;
           ctx.log.error(
             `Slack searchMessages failed: ${err.message}, Status: ${
               err.response?.status
@@ -530,7 +635,7 @@ export const Slack: ConnectorSpec = {
     },
 
     // Helper for LLMs: resolve a channel ID (C.../G...) from a human name (e.g. "#general").
-    // Deterministic (uses conversations.list) and caches results briefly to avoid repeat pagination.
+    // Deterministic (uses conversations.list). No caching to avoid cross-tenant/process state.
     // https://api.slack.com/methods/conversations.list
     resolveChannelId: {
       isTool: true,
@@ -538,124 +643,13 @@ export const Slack: ConnectorSpec = {
         'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.description',
         {
           defaultMessage:
-            'Resolve a Slack channel/conversation ID from a channel name (rate-limit-aware pagination + short-lived cache)',
+            'Resolve a Slack channel/conversation ID from a channel name (rate-limit-aware pagination)',
         }
       ),
-      input: z.object({
-        name: z
-          .string()
-          .min(1)
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.name.description',
-              {
-                defaultMessage:
-                  'Channel name to resolve (e.g. "general" or "#general"). Returns the matching conversation ID (C.../G...).',
-              }
-            )
-          ),
-        types: z
-          .array(z.enum(SLACK_CONVERSATION_TYPES))
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.types.description',
-              {
-                defaultMessage:
-                  'Conversation types to search. Defaults to public_channel. Valid: public_channel, private_channel, im, mpim.',
-              }
-            )
-          ),
-        match: z
-          .enum(['exact', 'contains'])
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.match.description',
-              {
-                defaultMessage:
-                  'How to match the channel name. exact is fastest/most precise. contains can help when you only know part of the name.',
-              }
-            )
-          ),
-        excludeArchived: z
-          .boolean()
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.excludeArchived.description',
-              {
-                defaultMessage: 'Exclude archived channels (default true)',
-              }
-            )
-          ),
-        cursor: z
-          .string()
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.cursor.description',
-              {
-                defaultMessage:
-                  'Optional cursor to resume a previous scan (advanced). Usually omit.',
-              }
-            )
-          ),
-        limit: z
-          .number()
-          .int()
-          .min(1)
-          .max(1000)
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.limit.description',
-              {
-                defaultMessage: 'Channels per page to request (1-1000). Defaults to 1000.',
-              }
-            )
-          ),
-        maxPages: z
-          .number()
-          .int()
-          .min(1)
-          .max(100)
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.maxPages.description',
-              {
-                defaultMessage: 'Maximum number of pages to scan before giving up. Defaults to 10.',
-              }
-            )
-          ),
-        cacheTtlMs: z
-          .number()
-          .int()
-          .min(1_000)
-          .max(86_400_000)
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.cacheTtlMs.description',
-              {
-                defaultMessage:
-                  'How long to cache successful resolutions in-memory (ms). Defaults to 10 minutes.',
-              }
-            )
-          ),
-      }),
+      input: SlackResolveChannelIdInputSchema,
       handler: async (ctx, input) => {
-        const typedInput = input as {
-          name: string;
-          types?: Array<(typeof SLACK_CONVERSATION_TYPES)[number]>;
-          match?: 'exact' | 'contains';
-          excludeArchived?: boolean;
-          cursor?: string;
-          limit?: number;
-          maxPages?: number;
-          cacheTtlMs?: number;
-        };
+        const typedInput: SlackResolveChannelIdInput =
+          SlackResolveChannelIdInputSchema.parse(input);
 
         const nameNorm = typedInput.name.trim().replace(/^#/, '').toLowerCase();
         const types =
@@ -666,21 +660,6 @@ export const Slack: ConnectorSpec = {
         const excludeArchived = typedInput.excludeArchived ?? true;
         const limit = typedInput.limit ?? 1000;
         const maxPages = typedInput.maxPages ?? 10;
-        const cacheTtlMs = typedInput.cacheTtlMs ?? 10 * 60 * 1000;
-
-        const cacheKey = `${types.join(',')}|${nameNorm}|${match}|${excludeArchived}`;
-        const cached = getCached(slackResolveChannelIdCache, cacheKey);
-        if (cached) {
-          return {
-            ok: true,
-            found: true,
-            id: cached,
-            name: nameNorm,
-            source: 'cache',
-            pagesFetched: 0,
-            nextCursor: undefined,
-          };
-        }
 
         let cursor = typedInput.cursor;
         let pagesFetched = 0;
@@ -693,7 +672,7 @@ export const Slack: ConnectorSpec = {
           if (cursor) params.append('cursor', cursor);
 
           ctx.log.debug(`Slack resolveChannelId scan (page ${pagesFetched + 1})`);
-          const response = await slackGetWithRateLimitRetry<{
+          const response = await slackRequestWithRateLimitRetry<{
             ok: boolean;
             error?: string;
             needed?: string;
@@ -703,8 +682,9 @@ export const Slack: ConnectorSpec = {
           }>({
             ctx,
             action: 'resolveChannelId',
-            url: `${SLACK_API_BASE}/conversations.list?${params.toString()}`,
             maxRetries: 5,
+            request: () =>
+              ctx.client.get(`${SLACK_API_BASE}/conversations.list?${params.toString()}`),
           });
 
           if (!response.data.ok) {
@@ -725,7 +705,6 @@ export const Slack: ConnectorSpec = {
           });
 
           if (found?.id) {
-            setCached(slackResolveChannelIdCache, cacheKey, found.id, cacheTtlMs);
             return {
               ok: true,
               found: true,
@@ -767,73 +746,9 @@ export const Slack: ConnectorSpec = {
           defaultMessage: 'Send a message to a Slack channel',
         }
       ),
-      input: z.object({
-        channel: z
-          .string()
-          .min(1)
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.sendMessage.input.channel.description',
-              {
-                defaultMessage:
-                  'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs). Use resolveChannelId to discover channel IDs.',
-              }
-            )
-          ),
-        text: z
-          .string()
-          .min(1)
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.sendMessage.input.text.description',
-              {
-                defaultMessage: 'The message text to send',
-              }
-            )
-          ),
-        threadTs: z
-          .string()
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.sendMessage.input.threadTs.description',
-              {
-                defaultMessage:
-                  'Timestamp of another message to reply to (creates a threaded reply)',
-              }
-            )
-          ),
-        unfurlLinks: z
-          .boolean()
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.sendMessage.input.unfurlLinks.description',
-              {
-                defaultMessage: 'Whether to enable unfurling of primarily text-based content',
-              }
-            )
-          ),
-        unfurlMedia: z
-          .boolean()
-          .optional()
-          .describe(
-            i18n.translate(
-              'core.kibanaConnectorSpecs.slack.actions.sendMessage.input.unfurlMedia.description',
-              {
-                defaultMessage: 'Whether to enable unfurling of media content',
-              }
-            )
-          ),
-      }),
+      input: SlackSendMessageInputSchema,
       handler: async (ctx, input) => {
-        const typedInput = input as {
-          channel: string;
-          text: string;
-          threadTs?: string;
-          unfurlLinks?: boolean;
-          unfurlMedia?: boolean;
-        };
+        const typedInput: SlackSendMessageInput = SlackSendMessageInputSchema.parse(input);
 
         const payload: Record<string, unknown> = {
           channel: typedInput.channel,
@@ -852,10 +767,16 @@ export const Slack: ConnectorSpec = {
 
         try {
           ctx.log.debug(`Slack sendMessage request: channel=${typedInput.channel}`);
-          const response = await ctx.client.post(`${SLACK_API_BASE}/chat.postMessage`, payload, {
-            headers: {
-              'Content-Type': 'application/json; charset=utf-8',
-            },
+          const response = await slackRequestWithRateLimitRetry({
+            ctx,
+            action: 'sendMessage',
+            maxRetries: 5,
+            request: () =>
+              ctx.client.post(`${SLACK_API_BASE}/chat.postMessage`, payload, {
+                headers: {
+                  'Content-Type': 'application/json; charset=utf-8',
+                },
+              }),
           });
 
           if (!response.data.ok) {
@@ -870,10 +791,7 @@ export const Slack: ConnectorSpec = {
 
           return response.data;
         } catch (error) {
-          const err = error as {
-            message?: string;
-            response?: { status?: number; data?: unknown };
-          };
+          const err = error as AxiosError<unknown>;
           ctx.log.error(
             `Slack sendMessage failed: ${err.message}, Status: ${
               err.response?.status
@@ -894,7 +812,7 @@ export const Slack: ConnectorSpec = {
 
       try {
         // Test connection by calling auth.test which validates the token
-        const response = await ctx.client.post(`${SLACK_API_BASE}/auth.test`);
+        const response = await ctx.client.get(`${SLACK_API_BASE}/auth.test`);
 
         if (!response.data.ok) {
           return {
