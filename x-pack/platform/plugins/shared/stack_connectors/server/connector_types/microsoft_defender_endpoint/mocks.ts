@@ -18,7 +18,7 @@ import type {
   MicrosoftDefenderEndpointSecrets,
 } from '@kbn/connector-schemas/microsoft_defender_endpoint';
 import { CONNECTOR_ID } from '@kbn/connector-schemas/microsoft_defender_endpoint';
-import type { SharedConnectorTokenClient } from '@kbn/actions-plugin/server/lib/shared_connector_token_client';
+import type { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
 import { MicrosoftDefenderEndpointConnector } from './microsoft_defender_endpoint';
 import type { ConnectorInstanceMock } from '../lib/mocks';
 import { createAxiosResponseMock, createConnectorInstanceMock } from '../lib/mocks';
@@ -48,33 +48,57 @@ const createConnectorTokenMock = (overrides: Partial<ConnectorToken> = {}): Conn
 };
 
 const applyConnectorTokenClientInstanceMock = (
-  connectorTokenClient: SharedConnectorTokenClient
+  connectorTokenClient: ConnectorTokenClientContract
 ): void => {
   // Make connector token client a mocked class instance
   let cachedTokenMock: ConnectorToken | null = null;
 
-  jest.spyOn(connectorTokenClient, 'updateOrReplace');
+  jest.spyOn(connectorTokenClient, 'updateOrReplace').mockImplementation(async (options) => {
+    const expiresAt = new Date(
+      options.tokenRequestDate + (options.expiresInSec ?? 0) * 1000
+    ).toISOString();
+    cachedTokenMock = createConnectorTokenMock({
+      connectorId: options.connectorId,
+      token: options.newToken,
+      expiresAt,
+      tokenType: 'access_token',
+    });
+  });
   jest
-    .spyOn(connectorTokenClient, 'create')
-    .mockImplementation(
-      async ({ connectorId, token, expiresAtMillis: expiresAt, tokenType = 'access_token' }) => {
-        cachedTokenMock = createConnectorTokenMock({
-          connectorId,
-          token,
-          expiresAt,
-          tokenType,
-        });
-        return cachedTokenMock;
-      }
-    );
+    .spyOn(
+      connectorTokenClient as unknown as { create: ConnectorTokenClientContract['create'] },
+      'create'
+    )
+    .mockImplementation((async ({
+      connectorId,
+      token,
+      expiresAtMillis: expiresAt,
+      tokenType = 'access_token',
+    }: {
+      connectorId: string;
+      token?: string;
+      expiresAtMillis?: string;
+      tokenType?: string;
+    }) => {
+      cachedTokenMock = createConnectorTokenMock({
+        connectorId,
+        token: token ?? '',
+        expiresAt,
+        tokenType,
+      });
+      return cachedTokenMock;
+    }) as unknown as ConnectorTokenClientContract['create']);
   jest
-    .spyOn(connectorTokenClient, 'update')
+    .spyOn(
+      connectorTokenClient as unknown as { update: ConnectorTokenClientContract['update'] },
+      'update'
+    )
     .mockImplementation(
       async ({ token, expiresAtMillis: expiresAt, tokenType = 'access_token' }) => {
         if (cachedTokenMock) {
           cachedTokenMock = {
             ...cachedTokenMock,
-            token,
+            token: token ?? cachedTokenMock.token,
             expiresAt,
             tokenType,
           };
@@ -176,9 +200,7 @@ const createMicrosoftDefenderConnectorMock = (): CreateMicrosoftDefenderConnecto
     }
   );
 
-  applyConnectorTokenClientInstanceMock(
-    options.services.connectorTokenClient.getSharedConnectorTokenClient()
-  );
+  applyConnectorTokenClientInstanceMock(options.services.connectorTokenClient);
 
   return {
     options,

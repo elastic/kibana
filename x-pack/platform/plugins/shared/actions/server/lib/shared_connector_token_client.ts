@@ -60,6 +60,18 @@ export class SharedConnectorTokenClient {
     this.logger = logger;
   }
 
+  private formatTokenId(rawId: string): string {
+    return `shared:${rawId}`;
+  }
+
+  private parseTokenId(id: string): string {
+    if (id.startsWith('shared:')) {
+      return id.substring(7);
+    }
+    // Accept unprefixed IDs for backward compatibility
+    return id;
+  }
+
   /**
    * Create new token for connector
    */
@@ -85,7 +97,10 @@ export class SharedConnectorTokenClient {
         { id }
       );
 
-      return result.attributes as ConnectorToken;
+      return {
+        ...result.attributes,
+        id: this.formatTokenId(id),
+      } as ConnectorToken;
     } catch (err) {
       this.logger.error(
         `Failed to create connector_token for connectorId "${connectorId}" and tokenType: "${
@@ -105,10 +120,11 @@ export class SharedConnectorTokenClient {
     expiresAtMillis,
     tokenType,
   }: UpdateOptions): Promise<ConnectorToken | null> {
+    const actualId = this.parseTokenId(id);
     const { attributes, references, version } =
       await this.unsecuredSavedObjectsClient.get<ConnectorToken>(
         CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-        id
+        actualId
       );
     const createTime = Date.now();
 
@@ -139,12 +155,15 @@ export class SharedConnectorTokenClient {
 
       const result = await retryIfConflicts(
         this.logger,
-        `accessToken.create('${id}')`,
+        `accessToken.create('${actualId}')`,
         updateOperation,
         MAX_RETRY_ATTEMPTS
       );
 
-      return result.attributes as ConnectorToken;
+      return {
+        ...result.attributes,
+        id: this.formatTokenId(actualId),
+      } as ConnectorToken;
     } catch (err) {
       this.logger.error(
         `Failed to update connector_token for id "${id}" and tokenType: "${
@@ -232,7 +251,7 @@ export class SharedConnectorTokenClient {
     return {
       hasErrors: false,
       connectorToken: {
-        id: connectorTokensResult[0].id,
+        id: this.formatTokenId(connectorTokensResult[0].id),
         ...connectorTokensResult[0].attributes,
         token: accessToken,
       },
@@ -302,6 +321,7 @@ export class SharedConnectorTokenClient {
           `Cannot update connector token for connectorId "${connectorId}": token id is missing`
         );
       }
+      // Token ID should already have shared: prefix from get()
       await this.update({
         id: tokenId,
         token: newToken,
@@ -355,7 +375,10 @@ export class SharedConnectorTokenClient {
         { id }
       );
 
-      return result.attributes as ConnectorToken;
+      return {
+        ...result.attributes,
+        id: this.formatTokenId(id),
+      } as ConnectorToken;
     } catch (err) {
       this.logger.error(
         `Failed to create connector_token with refresh token for connectorId "${connectorId}". Error: ${err.message}`
@@ -382,10 +405,11 @@ export class SharedConnectorTokenClient {
     refreshTokenExpiresIn?: number;
     tokenType?: string;
   }): Promise<ConnectorToken | null> {
+    const actualId = this.parseTokenId(id);
     const { attributes, references, version } =
       await this.unsecuredSavedObjectsClient.get<ConnectorToken>(
         CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-        id
+        actualId
       );
     const now = Date.now();
     const expiresInMillis = expiresIn ? new Date(now + expiresIn * 1000).toISOString() : undefined;
@@ -426,12 +450,15 @@ export class SharedConnectorTokenClient {
 
       const result = await retryIfConflicts(
         this.logger,
-        `accessToken.updateWithRefreshToken('${id}')`,
+        `accessToken.updateWithRefreshToken('${actualId}')`,
         updateOperation,
         MAX_RETRY_ATTEMPTS
       );
 
-      return result.attributes as ConnectorToken;
+      return {
+        ...result.attributes,
+        id: this.formatTokenId(actualId),
+      } as ConnectorToken;
     } catch (err) {
       this.logger.error(
         `Failed to update connector_token with refresh token for id "${id}". Error: ${err.message}`

@@ -82,18 +82,19 @@ export class UserConnectorTokenClient {
     this.logger = logger;
   }
 
-  private parseTokenId(id: string): { scope: 'personal' | 'shared'; actualId: string } {
-    if (id.startsWith('personal:')) {
-      return { scope: 'personal', actualId: id.substring(9) };
+  private parseTokenId(id: string): { scope: 'per-user' | 'shared'; actualId: string } {
+    if (id.startsWith('per-user:')) {
+      return { scope: 'per-user', actualId: id.substring(9) };
     }
     if (id.startsWith('shared:')) {
       return { scope: 'shared', actualId: id.substring(7) };
     }
-    return { scope: 'shared', actualId: id };
+    // Default unprefixed IDs to per-user when called on user client
+    return { scope: 'per-user', actualId: id };
   }
 
   private formatTokenId(rawId: string): string {
-    return `personal:${rawId}`;
+    return `per-user:${rawId}`;
   }
 
   private getContextString(
@@ -108,9 +109,9 @@ export class UserConnectorTokenClient {
     return parts.join(', ');
   }
 
-  private parseOAuthPersonalCredentials(credentials: unknown): OAuthPersonalCredentials | null {
+  private parseOAuthPerUserCredentials(credentials: unknown): OAuthPersonalCredentials | null {
     const schema = z.object({
-      accessToken: z.string(),
+      accessToken: z.string().min(1),
       refreshToken: z.string().optional(),
     });
 
@@ -119,7 +120,7 @@ export class UserConnectorTokenClient {
   }
 
   /**
-   * Create new personal token for connector
+   * Create new per-user token for connector
    */
   public async create({
     profileUid,
@@ -138,7 +139,7 @@ export class UserConnectorTokenClient {
       credentials ?? (token ? { accessToken: token } : ({} as SavedObjectAttributes));
 
     if (Object.keys(resolvedCredentials).length === 0) {
-      throw new Error('Personal credentials are required to create a user connector token');
+      throw new Error('Per-user credentials are required to create a user connector token');
     }
 
     const context = this.getContextString(profileUid, connectorId, resolvedCredentialType);
@@ -173,7 +174,7 @@ export class UserConnectorTokenClient {
   }
 
   /**
-   * Update personal connector token
+   * Update per-user connector token
    */
   public async update({
     id,
@@ -211,7 +212,7 @@ export class UserConnectorTokenClient {
             : (attributesWithoutId as PersonalTokenAttributes).credentials);
 
         if (Object.keys(resolvedCredentials).length === 0) {
-          throw new Error('Personal credentials are required to update a user connector token');
+          throw new Error('Per-user credentials are required to update a user connector token');
         }
 
         const updatedAttributes: PersonalTokenAttributes = {
@@ -254,7 +255,7 @@ export class UserConnectorTokenClient {
   }
 
   /**
-   * Get personal connector token
+   * Get per-user connector token
    */
   public async get({
     profileUid,
@@ -320,11 +321,11 @@ export class UserConnectorTokenClient {
           connectorTokensResult[0].id
         );
 
-      const personalToken = decrypted.attributes as UserConnectorToken;
+      const perUserToken = decrypted.attributes as UserConnectorToken;
 
       this.logger.debug(
-        `Retrieved personal credentials for ${context}, credentialKeys: ${Object.keys(
-          personalToken.credentials as Record<string, unknown>
+        `Retrieved per-user credentials for ${context}, credentialKeys: ${Object.keys(
+          perUserToken.credentials as Record<string, unknown>
         ).join(', ')}`
       );
 
@@ -332,7 +333,7 @@ export class UserConnectorTokenClient {
         hasErrors: false,
         connectorToken: {
           id: this.formatTokenId(connectorTokensResult[0].id),
-          ...personalToken,
+          ...perUserToken,
         },
       };
     } catch (err) {
@@ -344,7 +345,7 @@ export class UserConnectorTokenClient {
   }
 
   /**
-   * Get OAuth personal token with parsed credentials
+   * Get OAuth per-user token with parsed credentials
    */
   public async getOAuthPersonalToken({
     profileUid,
@@ -368,12 +369,20 @@ export class UserConnectorTokenClient {
 
     if (!('credentials' in connectorToken)) {
       this.logger.error(
-        `Expected personal credentials for connectorId "${connectorId}", profileUid "${profileUid}".`
+        `Expected per-user credentials for connectorId "${connectorId}", profileUid "${profileUid}".`
       );
       return { hasErrors: true, connectorToken: null };
     }
 
-    const parsedCredentials = this.parseOAuthPersonalCredentials(connectorToken.credentials);
+    // Verify credential type matches oauth before parsing
+    if (connectorToken.credentialType !== 'oauth') {
+      this.logger.error(
+        `Expected OAuth credential type but found "${connectorToken.credentialType}" for connectorId "${connectorId}", profileUid "${profileUid}".`
+      );
+      return { hasErrors: true, connectorToken: null };
+    }
+
+    const parsedCredentials = this.parseOAuthPerUserCredentials(connectorToken.credentials);
     if (!parsedCredentials) {
       this.logger.error(
         `Invalid OAuth credentials shape for connectorId "${connectorId}", profileUid "${profileUid}".`
@@ -392,7 +401,7 @@ export class UserConnectorTokenClient {
   }
 
   /**
-   * Delete all personal connector tokens
+   * Delete all per-user connector tokens
    */
   public async deleteConnectorTokens({
     profileUid,
@@ -479,7 +488,7 @@ export class UserConnectorTokenClient {
   }
 
   /**
-   * Create new personal token with refresh token support
+   * Create new per-user token with refresh token support
    */
   public async createWithRefreshToken({
     profileUid,
@@ -518,7 +527,7 @@ export class UserConnectorTokenClient {
     }
 
     this.logger.debug(
-      `Creating personal token with credentials blob for profileUid: ${profileUid}, connectorId: ${connectorId}, credentialKeys: ${Object.keys(
+      `Creating per-user token with credentials blob for profileUid: ${profileUid}, connectorId: ${connectorId}, credentialKeys: ${Object.keys(
         credentials
       ).join(', ')}`
     );
@@ -557,7 +566,7 @@ export class UserConnectorTokenClient {
   }
 
   /**
-   * Update personal token with refresh token
+   * Update per-user token with refresh token
    */
   public async updateWithRefreshToken({
     id,
@@ -614,7 +623,7 @@ export class UserConnectorTokenClient {
         }
 
         this.logger.debug(
-          `Updating personal token with refresh token for id: ${id}, credentialKeys: ${Object.keys(
+          `Updating per-user token with refresh token for id: ${id}, credentialKeys: ${Object.keys(
             credentials
           ).join(', ')}`
         );

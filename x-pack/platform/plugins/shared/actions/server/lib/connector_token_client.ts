@@ -8,7 +8,7 @@
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { Logger, SavedObjectsClientContract, SavedObjectAttributes } from '@kbn/core/server';
 import { SharedConnectorTokenClient } from './shared_connector_token_client';
-import type { ConnectorToken, UserConnectorToken, UserConnectorOAuthToken } from '../types';
+import type { ConnectorToken, UserConnectorToken } from '../types';
 import { UserConnectorTokenClient } from './user_connector_token_client';
 
 export const MAX_TOKENS_RETURNED = 1;
@@ -59,13 +59,14 @@ export class ConnectorTokenClient {
     this.userClient = new UserConnectorTokenClient(options);
   }
 
-  private parseTokenId(id: string): { scope: 'personal' | 'shared'; actualId: string } {
-    if (id.startsWith('personal:')) {
-      return { scope: 'personal', actualId: id.substring(9) };
+  private parseTokenId(id: string): { scope: 'per-user' | 'shared'; actualId: string } {
+    if (id.startsWith('per-user:')) {
+      return { scope: 'per-user', actualId: id.substring(9) };
     }
     if (id.startsWith('shared:')) {
       return { scope: 'shared', actualId: id.substring(7) };
     }
+    // Default unprefixed IDs to shared for backward compatibility
     return { scope: 'shared', actualId: id };
   }
 
@@ -75,7 +76,7 @@ export class ConnectorTokenClient {
     fields,
   }: {
     method: string;
-    scope: 'personal' | 'shared';
+    scope: 'per-user' | 'shared';
     fields: Record<string, string | boolean>;
   }): void {
     const parts = Object.entries(fields).map(([key, value]) =>
@@ -103,7 +104,7 @@ export class ConnectorTokenClient {
     credentialType?: string;
   }): Promise<UserConnectorToken>;
   public async create(options: CreateOptions): Promise<ConnectorToken | UserConnectorToken> {
-    const scope = options.profileUid ? 'personal' : 'shared';
+    const scope = options.profileUid ? 'per-user' : 'shared';
     this.log({ method: 'create', scope, fields: { connectorId: options.connectorId } });
     if (options.profileUid) {
       return this.userClient.create(options as Parameters<typeof this.userClient.create>[0]);
@@ -117,7 +118,7 @@ export class ConnectorTokenClient {
   public async update(options: UpdateOptions): Promise<ConnectorToken | UserConnectorToken | null> {
     const { scope, actualId } = this.parseTokenId(options.id);
     this.log({ method: 'update', scope, fields: { id: actualId } });
-    if (scope === 'personal') {
+    if (scope === 'per-user') {
       return this.userClient.update({ ...options, id: actualId });
     }
     if (options.token) {
@@ -163,30 +164,12 @@ export class ConnectorTokenClient {
     hasErrors: boolean;
     connectorToken: ConnectorToken | UserConnectorToken | null;
   }> {
-    const scope = options.profileUid ? 'personal' : 'shared';
+    const scope = options.profileUid ? 'per-user' : 'shared';
     this.log({ method: 'get', scope, fields: { connectorId: options.connectorId } });
     if (options.profileUid) {
       return this.userClient.get(options as Parameters<typeof this.userClient.get>[0]);
     }
     return this.sharedClient.get(options as Parameters<typeof this.sharedClient.get>[0]);
-  }
-
-  /**
-   * Get OAuth personal token with parsed credentials
-   */
-  public async getOAuthPersonalToken(options: {
-    profileUid: string;
-    connectorId: string;
-  }): Promise<{
-    hasErrors: boolean;
-    connectorToken: UserConnectorOAuthToken | null;
-  }> {
-    this.log({
-      method: 'getOAuthPersonalToken',
-      scope: 'personal',
-      fields: { connectorId: options.connectorId },
-    });
-    return this.userClient.getOAuthPersonalToken(options);
   }
 
   /**
@@ -198,7 +181,7 @@ export class ConnectorTokenClient {
     tokenType?: string;
     credentialType?: string;
   }): Promise<void | unknown[]> {
-    const scope = options.profileUid ? 'personal' : 'shared';
+    const scope = options.profileUid ? 'per-user' : 'shared';
     this.log({
       method: 'deleteConnectorTokens',
       scope,
@@ -215,7 +198,7 @@ export class ConnectorTokenClient {
   }
 
   public async updateOrReplace(options: UpdateOrReplaceOptions) {
-    const scope = options.profileUid ? 'personal' : 'shared';
+    const scope = options.profileUid ? 'per-user' : 'shared';
     this.log({ method: 'updateOrReplace', scope, fields: { connectorId: options.connectorId } });
     if (options.profileUid) {
       return this.userClient.updateOrReplace(
@@ -240,7 +223,7 @@ export class ConnectorTokenClient {
     tokenType?: string;
     credentialType?: string;
   }): Promise<ConnectorToken | UserConnectorToken> {
-    const scope = options.profileUid ? 'personal' : 'shared';
+    const scope = options.profileUid ? 'per-user' : 'shared';
     this.log({
       method: 'createWithRefreshToken',
       scope,
@@ -270,17 +253,9 @@ export class ConnectorTokenClient {
   }): Promise<ConnectorToken | UserConnectorToken | null> {
     const { scope, actualId } = this.parseTokenId(options.id);
     this.log({ method: 'updateWithRefreshToken', scope, fields: { id: actualId } });
-    if (scope === 'personal') {
+    if (scope === 'per-user') {
       return this.userClient.updateWithRefreshToken({ ...options, id: actualId });
     }
     return this.sharedClient.updateWithRefreshToken({ ...options, id: actualId });
-  }
-
-  public getSharedConnectorTokenClient(): SharedConnectorTokenClient {
-    return this.sharedClient;
-  }
-
-  public getUserConnectorTokenClient(): UserConnectorTokenClient {
-    return this.userClient;
   }
 }

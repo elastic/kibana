@@ -67,6 +67,7 @@ describe('SharedConnectorTokenClient', () => {
         token: 'testtokenvalue',
       });
       expect(result).toEqual({
+        id: 'shared:mock-saved-object-id',
         connectorId: '123',
         tokenType: 'access_token',
         token: 'testtokenvalue',
@@ -118,7 +119,7 @@ describe('SharedConnectorTokenClient', () => {
       expect(result).toEqual({
         hasErrors: false,
         connectorToken: {
-          id: '1',
+          id: 'shared:1',
           connectorId: '123',
           tokenType: 'access_token',
           token: 'testtokenvalue',
@@ -172,12 +173,13 @@ describe('SharedConnectorTokenClient', () => {
       });
 
       const result = await sharedClient.update({
-        id: '1',
+        id: 'shared:1',
         tokenType: 'access_token',
         token: 'testtokenvalue',
         expiresAtMillis: expiresAt,
       });
       expect(result).toEqual({
+        id: 'shared:1',
         connectorId: '123',
         tokenType: 'access_token',
         token: 'testtokenvalue',
@@ -291,13 +293,14 @@ describe('SharedConnectorTokenClient', () => {
       });
 
       const result = await sharedClient.updateWithRefreshToken({
-        id: '1',
+        id: 'shared:1',
         token: 'newtoken',
         refreshToken: 'newrefresh',
         expiresIn: 3600,
       });
 
       expect(result).toMatchObject({
+        id: 'shared:1',
         connectorId: '123',
         token: 'newtoken',
         refreshToken: 'newrefresh',

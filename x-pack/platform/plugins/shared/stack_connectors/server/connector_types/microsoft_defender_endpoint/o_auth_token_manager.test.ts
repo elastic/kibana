@@ -8,17 +8,16 @@
 import type { CreateMicrosoftDefenderConnectorMockResponse } from './mocks';
 import { microsoftDefenderEndpointConnectorMocks } from './mocks';
 import { OAuthTokenManager } from './o_auth_token_manager';
-import type { SharedConnectorTokenClient } from '@kbn/actions-plugin/server/lib/shared_connector_token_client';
+import type { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
 
 describe('Microsoft Defender for Endpoint oAuth token manager', () => {
   let testMock: CreateMicrosoftDefenderConnectorMockResponse;
   let msOAuthManagerMock: OAuthTokenManager;
-  let connectorTokenManagerClientMock: jest.Mocked<SharedConnectorTokenClient>;
+  let connectorTokenManagerClientMock: jest.Mocked<ConnectorTokenClientContract>;
 
   beforeEach(() => {
     testMock = microsoftDefenderEndpointConnectorMocks.create();
-    connectorTokenManagerClientMock =
-      testMock.options.services.connectorTokenClient.getSharedConnectorTokenClient() as jest.Mocked<SharedConnectorTokenClient>;
+    connectorTokenManagerClientMock = jest.mocked(testMock.options.services.connectorTokenClient);
     msOAuthManagerMock = new OAuthTokenManager({
       ...testMock.options,
       apiRequest: async (...args) => testMock.instanceMock.request(...args),
