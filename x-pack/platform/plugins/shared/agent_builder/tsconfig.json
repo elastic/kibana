@@ -101,6 +101,7 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/home-plugin",
     "@kbn/data-plugin",
-    "@kbn/security-plugin"
+    "@kbn/security-plugin",
+    "@kbn/core-chrome-sidebar"
   ]
 }
