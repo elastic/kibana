@@ -78,8 +78,10 @@ describe('reportMetrics', () => {
       'test-plugin': {
         apiCount: 5,
         missingComments: [],
+        missingComplexTypeInfo: [],
         isAnyType: [],
         noReferences: [],
+        paramDocMismatches: [],
         missingExports: 0,
         deprecatedAPIsReferencedCount: 0,
         unreferencedDeprecatedApisCount: 0,
