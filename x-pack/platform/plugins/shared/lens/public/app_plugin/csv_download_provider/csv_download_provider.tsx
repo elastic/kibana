@@ -14,12 +14,19 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { ExportShare, RegisterShareIntegrationArgs } from '@kbn/share-plugin/public/types';
+import type { JsonValue } from '@kbn/utility-types';
+import { ExportSourcePanel } from '@kbn/as-code-export-source';
 import type { FormatFactory } from '../../../common/types';
 
 export interface CSVSharingData {
   title: string;
   datatables: Datatable[];
   csvEnabled: boolean;
+}
+
+export interface ExportSourceSharingData {
+  title: string;
+  exportSource: JsonValue;
 }
 
 declare global {
@@ -160,6 +167,38 @@ export const downloadCsvLensShareProvider = ({
                 <FormattedMessage id="xpack.lens.share.csvButton" defaultMessage="Download CSV" />
               ),
             }),
+      };
+    },
+  };
+};
+
+export const exportSourceLensShareProvider = (): RegisterShareIntegrationArgs<ExportShare> => {
+  return {
+    id: 'exportSourceLens',
+    groupId: 'export',
+    getShareIntegrationConfig: async ({ sharingData }) => {
+      const { exportSource } = sharingData as unknown as ExportSourceSharingData;
+
+      return {
+        id: 'exportSourceLens',
+        name: 'exportSourceLens',
+        icon: 'code',
+        label: i18n.translate('xpack.lens.exportSource.label', {
+          defaultMessage: 'Export source',
+        }),
+        exportType: 'lens_export_source',
+        generateAssetExport: () => Promise.resolve(),
+        generateAssetComponent: (
+          <ExportSourcePanel
+            title={i18n.translate('xpack.lens.exportSource.panelTitle', {
+              defaultMessage: 'Lens export source',
+            })}
+            description={i18n.translate('xpack.lens.exportSource.panelDescription', {
+              defaultMessage: 'Use this JSON as the source for automated exports.',
+            })}
+            source={exportSource}
+          />
+        ),
       };
     },
   };

@@ -645,6 +645,7 @@ export const LensTopNavMenu = ({
         csvEnabled,
         reportingDisabled: !csvEnabled,
         title: title || defaultLensTitle,
+        exportSource: currentDoc ?? reportingLocatorParams,
         locatorParams: {
           id: LENS_APP_LOCATOR,
           params: reportingLocatorParams,
@@ -691,6 +692,9 @@ export const LensTopNavMenu = ({
             integration: {
               export: {
                 csvDownloadLens: {
+                  draftModeCallOut: true,
+                },
+                exportSourceLens: {
                   draftModeCallOut: true,
                 },
                 imageReports: {

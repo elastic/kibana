@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ComponentProps } from 'react';
 import type { EuiCodeBlock } from '@elastic/eui';
 import type { JsonValue } from '@kbn/utility-types';
 
@@ -14,6 +15,6 @@ export interface ExportSourcePanelProps {
   title: string;
   description?: string;
   source: JsonValue;
-  language?: React.ComponentProps<typeof EuiCodeBlock>['language'];
+  language?: ComponentProps<typeof EuiCodeBlock>['language'];
   dataTestSubj?: string;
 }

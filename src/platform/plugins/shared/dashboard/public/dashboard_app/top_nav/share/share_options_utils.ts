@@ -16,6 +16,7 @@ import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-uti
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { topNavStrings } from '../../_dashboard_app_strings';
 import type { DashboardLocatorParams } from '../../../../common';
+import type { DashboardApi } from '../../../dashboard_api/types';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 import { dataService, shareService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
@@ -98,6 +99,7 @@ export function getExportObjectTypeMeta() {
     config: {
       integration: {
         export: {
+          exportSourceDashboard: { draftModeCallOut: true },
           pdfReports: { draftModeCallOut: true },
           imageReports: { draftModeCallOut: true },
         },
@@ -109,13 +111,18 @@ export function getExportObjectTypeMeta() {
 /**
  * Builds sharingData for export operations.
  */
-export function buildExportSharingData(title: string, locatorParams: DashboardLocatorParams) {
+export function buildExportSharingData(
+  title: string,
+  locatorParams: DashboardLocatorParams,
+  dashboardApi: DashboardApi
+) {
   return {
     title,
     locatorParams: {
       id: DASHBOARD_APP_LOCATOR,
       params: locatorParams,
     },
+    exportSource: dashboardApi.getSerializedState().attributes,
   };
 }
 
@@ -133,6 +140,15 @@ export function buildShareableUrlLocatorParams(locatorParams: DashboardLocatorPa
 
 export const mapExportIntegrationToMetaData = (intgrationId: string) => {
   switch (intgrationId) {
+    case 'exportSourceDashboard':
+      return {
+        label: i18n.translate('dashboard.topNav.exportSourceLabel', {
+          defaultMessage: 'Export source',
+        }),
+        testId: 'exportMenuItem-ExportSource',
+        iconType: 'code',
+        order: 0,
+      };
     case 'pdfReports':
       return {
         label: topNavStrings.export.pdfLabel,
