@@ -46,8 +46,8 @@ run(async ({ log, flags }) => {
     if (!IS_CI) {
       fullArgs.push('-u');
     } else {
-      // moon ci doesn't support -u; use MOON_CACHE=off when update-cache requested in CI
-      env.MOON_CACHE = 'off';
+      // moon ci doesn't support -u, set it to 'write' if it's not set already
+      env.MOON_CACHE = env.MOON_CACHE ?? 'write';
     }
   }
 
