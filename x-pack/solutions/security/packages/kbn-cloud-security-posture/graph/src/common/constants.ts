@@ -10,7 +10,6 @@ export const EVENT_GRAPH_VISUALIZATION_API = '/internal/cloud_security_posture/g
 export const RELATED_ENTITY = 'related.entity' as const;
 export const EVENT_ACTION = 'event.action' as const;
 export const EVENT_ID = 'event.id' as const;
-export const DOC_ID = `_id` as const;
 
 export const SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY =
   'securitySolution.graphInvestigation:showSearchBarButtonTour' as const;
