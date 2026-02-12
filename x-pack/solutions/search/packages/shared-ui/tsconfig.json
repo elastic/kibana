@@ -17,6 +17,5 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/i18n",
   ],
 }
