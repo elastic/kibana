@@ -8,6 +8,7 @@
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
+import type { GeneratorConfig } from '../openapi_generator';
 import { getApiOperationsList } from './lib/get_api_operations_list';
 import { getComponents } from './lib/get_components';
 import type { ImportsMap } from './lib/get_imports_map';
@@ -23,15 +24,20 @@ export interface GenerationContext {
   info: OpenAPIV3.InfoObject;
   imports: ImportsMap;
   circularRefs: Set<string>;
+  config: Pick<GeneratorConfig, 'schemaNameTransform'>;
 }
 
 export interface BundleGenerationContext {
   operations: NormalizedOperation[];
   sources: ParsedSource[];
   info: OpenAPIV3.InfoObject;
+  config: Pick<GeneratorConfig, 'schemaNameTransform'>;
 }
 
-export function getGenerationContext(document: OpenApiDocument): GenerationContext {
+export function getGenerationContext(
+  document: OpenApiDocument,
+  config: GenerationContext['config']
+): GenerationContext {
   const normalizedDocument = normalizeSchema(document);
 
   const components = getComponents(normalizedDocument);
@@ -46,5 +52,6 @@ export function getGenerationContext(document: OpenApiDocument): GenerationConte
     info,
     imports,
     circularRefs,
+    config,
   };
 }
