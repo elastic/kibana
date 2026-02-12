@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       mixedReadabilityTestCases.forEach((index) => {
-        it(`sets rule status to partial failure for KQL rule with index param: ${index}`, async () => {
+        it(`successfully executes the rule if some of the index patterns can be read`, async () => {
           const rule = {
             ...getRuleForAlertTesting(index),
             query: 'process.executable: "/usr/bin/sudo"',
