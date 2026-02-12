@@ -40,7 +40,7 @@ export const TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX = new RegExp(
     `\/(?:(platform)|solutions\/(\\w+))` + // 1: platform, 2: solution
     `\/(plugins|packages)` + // 3: plugin or package
     `\/?(shared|private|)` + // 4: artifact visibility
-    `\/([\\w|-]*)` + // 5: plugin/package name
+    `\/([\\w|-]+(?:\\/[\\w|-]+)*)` + // 5: plugin/package name (supports nested paths like vis_types/timelion)
     `\/test\/scout(?:_([^\\/]*))?` // 6: custom target config set name
 );
 

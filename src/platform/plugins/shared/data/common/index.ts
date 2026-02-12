@@ -511,6 +511,7 @@ export {
   isAbortResponse,
   isRunningResponse,
   getUserTimeZone,
+  strategyToString,
   SearchSessionStatus,
   SearchStatus,
   SEARCH_SESSION_TYPE,
