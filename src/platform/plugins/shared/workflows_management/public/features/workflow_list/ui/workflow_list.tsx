@@ -30,6 +30,7 @@ import { WorkflowsUtilityBar } from './workflows_utility_bar';
 import { WorkflowsEmptyState } from '../../../components';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useTelemetry } from '../../../hooks/use_telemetry';
 import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
@@ -48,6 +49,18 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   const { application, notifications } = useKibana().services;
   const { data: workflows, isLoading: isLoadingWorkflows, error, refetch } = useWorkflows(search);
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
+  const telemetry = useTelemetry();
+
+  // Report list viewed telemetry when workflows are loaded
+  React.useEffect(() => {
+    if (!isLoadingWorkflows && workflows) {
+      telemetry.reportWorkflowListViewed({
+        workflowCount: workflows.results.length,
+        pageNumber: search.page || 1,
+        search: { ...search },
+      });
+    }
+  }, [isLoadingWorkflows, workflows, search, telemetry]);
 
   const [selectedItems, setSelectedItems] = useState<WorkflowListItemDto[]>([]);
   const [executeWorkflow, setExecuteWorkflow] = useState<WorkflowListItemDto | null>(null);
@@ -74,9 +87,9 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   }, [refetch, selectedItems]);
 
   const handleRunWorkflow = useCallback(
-    (id: string, event: Record<string, unknown>) => {
+    (id: string, event: Record<string, unknown>, triggerTab?: 'manual' | 'alert' | 'index') => {
       runWorkflow.mutate(
-        { id, inputs: event },
+        { id, inputs: event, triggerTab },
         {
           onSuccess: ({ workflowExecutionId }) => {
             notifications?.toasts.addSuccess('Workflow run started', {

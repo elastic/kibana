@@ -34,6 +34,12 @@ describe('UIStateContext', () => {
         isCreateDataStreamFlyoutOpen: false,
         openCreateDataStreamFlyout: expect.any(Function),
         closeCreateDataStreamFlyout: expect.any(Function),
+        isEditPipelineFlyoutOpen: false,
+        selectedDataStream: null,
+        openEditPipelineFlyout: expect.any(Function),
+        closeEditPipelineFlyout: expect.any(Function),
+        selectedPipelineTab: 'table',
+        selectPipelineTab: expect.any(Function),
       });
     });
   });

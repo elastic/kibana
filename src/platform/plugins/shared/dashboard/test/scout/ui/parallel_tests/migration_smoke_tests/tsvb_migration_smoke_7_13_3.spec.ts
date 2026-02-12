@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, expect, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import {
   ensureIndexPatternFromExport,
   findImportedSavedObjectId,
@@ -24,7 +25,7 @@ const DASHBOARD_TITLE = 'TSVB 7.13.3';
 
 let dashboardId = '';
 
-spaceTest.describe('TSVB migration smoke (7.13.3)', { tag: tags.ESS_ONLY }, () => {
+spaceTest.describe('TSVB migration smoke (7.13.3)', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ scoutSpace, kbnClient }) => {
     await scoutSpace.savedObjects.cleanStandardList();
     const imported = await scoutSpace.savedObjects.load(EXPORT_PATH);

@@ -56,7 +56,7 @@ export const createThreatSignal = async ({
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty threat list and we do not want to return everything as being
     // a hit so opt to return the existing result.
-    ruleExecutionLogger.debug(
+    ruleExecutionLogger.trace(
       'Indicator items are empty after filtering for missing data, returning without attempting a match'
     );
     return currentResult;
@@ -74,7 +74,7 @@ export const createThreatSignal = async ({
       loadFields: true,
     });
 
-    ruleExecutionLogger.debug(
+    ruleExecutionLogger.trace(
       `${threatFilter.query?.bool.should.length} indicator items are being checked for existence of matches`
     );
 
@@ -115,12 +115,12 @@ export const createThreatSignal = async ({
       result = await searchAfterAndBulkCreate(searchAfterBulkCreateParams);
     }
 
-    ruleExecutionLogger.debug(
-      `${
+    ruleExecutionLogger.trace(
+      `Match checks completed\n${
         threatFilter.query?.bool.should.length
-      } items have completed match checks and the total times to search were ${
+      } items have completed match checks. Search times (ms): ${
         result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
-      }ms`
+      }.`
     );
     return result;
   }

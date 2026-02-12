@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsServiceSetup } from '@kbn/core/server';
+import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../common';
 import { maintenanceWindowMappings } from './mapping';
 import { maintenanceWindowModelVersions } from './model_versions';
 
-export const registerSavedObject = (savedObjects: SavedObjectsServiceSetup, logger: Logger) => {
-  savedObjects.registerType({
-    name: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
-    hidden: true,
-    namespaceType: 'multiple-isolated',
-    mappings: maintenanceWindowMappings,
-    modelVersions: maintenanceWindowModelVersions,
-  });
+export const registerSavedObject = (savedObjects: SavedObjectsServiceSetup) => {
+  savedObjects.registerType(maintenanceWindowSavedObjectType);
+};
+
+export const maintenanceWindowSavedObjectType: SavedObjectsType = {
+  name: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
+  indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+  hidden: true,
+  namespaceType: 'multiple-isolated' as const,
+  mappings: maintenanceWindowMappings,
+  modelVersions: maintenanceWindowModelVersions,
 };

@@ -914,5 +914,15 @@ describe('validation logic', () => {
       expect(errorsNoPolicies.some((e) => e.code === 'unknownIndex')).toBe(true);
       expect(errorsNoPolicies.some((e) => e.code === 'unknownPolicy')).toBe(false);
     });
+
+    it('should no flag Promql metrics/labels as unknown after a pipe', async () => {
+      const callbacks = getCallbackMocks();
+      const { errors } = await validateQuery(
+        'Promql step="5m" sum(doubleField) | KEEP step',
+        callbacks
+      );
+
+      expect(errors.some((e) => e.code === 'unknownColumn')).toBe(false);
+    });
   });
 });

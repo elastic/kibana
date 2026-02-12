@@ -19,6 +19,7 @@ import type {
   IngestPipelineRemoveProcessor,
   IngestPipelineDropProcessor,
   IngestPipelineReplaceProcessor,
+  IngestPipelineRedactProcessor,
   IngestPipelineUppercaseProcessor,
   IngestPipelineLowercaseProcessor,
   IngestPipelineTrimProcessor,
@@ -45,6 +46,7 @@ export interface ActionToIngestType {
   trim: WithOptionalTracingTag<IngestPipelineTrimProcessor>;
   join: WithOptionalTracingTag<IngestPipelineJoinProcessor>;
   replace: WithOptionalTracingTag<IngestPipelineReplaceProcessor>;
+  redact: WithOptionalTracingTag<IngestPipelineRedactProcessor>;
   concat: WithOptionalTracingTag<IngestPipelineConcatProcessor>;
   manual_ingest_pipeline: WithOptionalTracingTag<IngestPipelineManualIngestPipelineProcessor>;
 }

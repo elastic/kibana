@@ -154,3 +154,24 @@ export const selectEditorYamlLineCounter = createSelector(
   selectEditorComputed,
   (computed) => computed?.yamlLineCounter
 );
+
+export const selectConnectorFlyout = createSelector(
+  selectDetail,
+  (detail) => detail.connectorFlyout
+);
+export const selectIsConnectorFlyoutOpen = createSelector(
+  selectConnectorFlyout,
+  (flyout) => flyout.isOpen
+);
+export const selectConnectorFlyoutType = createSelector(
+  selectConnectorFlyout,
+  (flyout) => flyout.connectorType
+);
+export const selectConnectorFlyoutConnectorToEdit = createSelector(
+  selectConnectorFlyout,
+  (flyout) => flyout.connectorIdToEdit
+);
+export const selectConnectorFlyoutInsertPosition = createSelector(
+  selectConnectorFlyout,
+  (flyout) => flyout.insertPosition
+);

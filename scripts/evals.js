@@ -272,6 +272,7 @@ function runFastHelp() {
   logInfo('Commands:');
   logInfo('  list [--refresh] [--json]     List eval suites');
   logInfo('  run --suite <id> [...]        Run an eval suite');
+  logInfo('  compare <run-a> <run-b>       Compare two eval runs');
   logInfo('  doctor                        Check local prerequisites');
   logInfo('  env                           List environment variables');
   logInfo('  ci-map [--json]               Output CI label mapping');

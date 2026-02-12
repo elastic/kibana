@@ -26,11 +26,9 @@ export const selectDraftProcessor = (context: InteractiveModeContext) => {
   return draft && isActionBlock(snapshot?.context.step)
     ? {
         processor: snapshot?.context.step,
-        resources: snapshot?.context.resources,
       }
     : {
         processor: undefined,
-        resources: undefined,
       };
 };
 

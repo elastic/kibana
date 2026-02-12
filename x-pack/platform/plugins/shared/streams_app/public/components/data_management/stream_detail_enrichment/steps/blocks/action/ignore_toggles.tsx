@@ -17,7 +17,7 @@ export const IgnoreFailureToggle = () => {
 
   return (
     <ToggleField
-      name="ignore_failure"
+      name={'ignore_failure'}
       label={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.ignoreFailuresLabel',
         { defaultMessage: 'Ignore failures for this processor' }
@@ -42,7 +42,7 @@ export const IgnoreFailureToggle = () => {
 export const IgnoreMissingToggle = () => {
   return (
     <ToggleField
-      name="ignore_missing"
+      name={'ignore_missing'}
       label={i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.ignoreMissingLabel',
         { defaultMessage: 'Ignore missing' }

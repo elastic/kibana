@@ -129,7 +129,6 @@ export const DiscoverTopNav = ({
   );
   const { onSaveControl, getActivePanels } = useESQLVariables({
     isEsqlMode,
-    stateContainer,
     currentEsqlVariables: esqlVariables,
     controlGroupApi,
     onUpdateESQLQuery,
@@ -385,6 +384,7 @@ export const DiscoverTopNav = ({
         displayStyle="detached"
         textBasedLanguageModeErrors={esqlModeErrors ? [esqlModeErrors] : undefined}
         textBasedLanguageModeWarning={esqlModeWarning}
+        enableResourceBrowser={isEsqlMode}
         prependFilterBar={
           searchBarCustomization?.PrependFilterBar ? (
             <searchBarCustomization.PrependFilterBar />

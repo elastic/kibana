@@ -21,4 +21,6 @@ const converters: Record<string, (n: number) => number> = {
   memory: (n) => Number(n) / 100,
   tx: (n) => Number(n) / 8,
   rx: (n) => Number(n) / 8,
+  txV2: (n) => Number(n) / 8,
+  rxV2: (n) => Number(n) / 8,
 };

@@ -182,6 +182,9 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
       columns={columns}
       sorting={sorting}
       selection={isReadOnly ? undefined : selection}
+      tableCaption={i18n.translate('xpack.osquery.pack.queriesTable.tableCaption', {
+        defaultMessage: 'Pack queries',
+      })}
     />
   );
 };

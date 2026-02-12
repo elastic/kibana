@@ -51,8 +51,19 @@ export const isRuleParametersFieldOrSubfield = (field: string, prependField?: st
   (prependField?.includes(ALERT_RULE_PARAMETERS) || field === ALERT_RULE_PARAMETERS) &&
   !nonFlattenedFormatParamsFields.includes(field);
 
-export const isThreatEnrichmentFieldOrSubfield = (field: string, prependField?: string) =>
-  prependField?.includes(ENRICHMENT_DESTINATION_PATH) || field === ENRICHMENT_DESTINATION_PATH;
+// threat.enrichments is a nested type, excluded from ecsFieldMap to prevent mapping conflicts.
+// We must handle it specially to ensure enrichment data still displays correctly in the UI.
+const KNOWN_THREAT_ENRICHMENT_SUBFIELDS = ['indicator', 'matched'];
+
+export const isThreatEnrichmentFieldOrSubfield = (field: string, prependField?: string) => {
+  // Build the full dotted path
+  const dotField = prependField ? `${prependField}.${field}` : field;
+  // Check if this is the threat.enrichments field itself or a subfield of it
+  return (
+    dotField === ENRICHMENT_DESTINATION_PATH ||
+    dotField.startsWith(`${ENRICHMENT_DESTINATION_PATH}.`)
+  );
+};
 
 // Helper functions
 const createFieldItem = (
@@ -103,7 +114,7 @@ const processNestedFields = (
   );
 };
 
-type DisjointFieldNames = 'ecs.version' | 'event.action' | 'event.kind' | 'event.original';
+type DisjointFieldNames = 'ecs.version' | 'event.action' | 'event.kind' | 'event.original' | 'tags';
 
 // Memoized field maps
 const fieldMaps: EcsFieldMap &
@@ -141,19 +152,36 @@ export const getDataFromFieldsHits = (
 
     const isEcsField = fieldMaps[field as keyof typeof fieldMaps] !== undefined;
     const isRuleParameters = isRuleParametersFieldOrSubfield(field, prependField);
+    const isThreatEnrichment = isThreatEnrichmentFieldOrSubfield(field, prependField);
 
-    // Handle simple fields
-    if (!isObjectArray || (!isEcsField && !isRuleParameters)) {
+    // Handle simple fields - but don't treat threat enrichments as simple fields
+    // even if they're not in ecsFieldMap (they were excluded as nested type)
+    if (!isObjectArray || (!isEcsField && !isRuleParameters && !isThreatEnrichment)) {
       const simpleItem = processSimpleField(dotField, strArr, isObjectArray, fieldCategory);
       resultMap.set(dotField, simpleItem);
       // eslint-disable-next-line no-continue
       continue;
     }
 
-    // Handle threat enrichment
-    if (isThreatEnrichmentFieldOrSubfield(field, prependField)) {
+    // Handle threat enrichment - add the stringified value first
+    if (isThreatEnrichment) {
       const enrichmentItem = createFieldItem(fieldCategory, dotField, strArr, isObjectArray);
       resultMap.set(dotField, enrichmentItem);
+
+      // For threat enrichment subfields, only recurse into known ECS subfields (indicator, matched).
+      // Custom fields stay JSON-stringified to prevent over-flattening.
+      // Note: We can't use ecsFieldMap here because all threat.enrichments.* fields are excluded
+      // from ecsFieldMap (they're children of a nested type).
+      if (dotField !== ENRICHMENT_DESTINATION_PATH) {
+        // This is a subfield of threat.enrichments - check if it's a known ECS subfield
+        const isKnownThreatEnrichmentSubfield = KNOWN_THREAT_ENRICHMENT_SUBFIELDS.includes(field);
+        if (!isKnownThreatEnrichmentSubfield) {
+          // Don't recurse into custom/unknown fields like "lazer"
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+      }
+      // For threat.enrichments itself, always recurse to process its children
     }
 
     // Process nested fields
@@ -161,7 +189,7 @@ export const getDataFromFieldsHits = (
       item,
       dotField,
       fieldCategory,
-      isRuleParameters || isThreatEnrichmentFieldOrSubfield(field, prependField)
+      isRuleParameters || isThreatEnrichment
     );
     // Merge results
     for (const nestedItem of nestedFields) {

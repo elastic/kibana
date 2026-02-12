@@ -9,11 +9,17 @@ jest.mock('@kbn/inference-tracing', () => ({
   // Avoid initializing tracing in unit tests (can keep Jest alive).
   withInferenceContext: (fn: () => unknown) => fn(),
 }));
+jest.mock('../utils/tracing', () => ({
+  withTaskSpan: jest.fn((_name: string, _opts: unknown, cb: () => unknown) => cb()),
+  withEvaluatorSpan: jest.fn((_name: string, _opts: unknown, cb: () => unknown) => cb()),
+  getCurrentTraceId: jest.fn(),
+}));
 
 import { ModelFamily, ModelProvider } from '@kbn/inference-common';
 import type { Model } from '@kbn/inference-common';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { EvaluationDataset, Evaluator, RanExperiment } from '../types';
+import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tracing';
 import { KibanaEvalsClient } from './client';
 
 describe('KibanaEvalsClient', () => {
@@ -41,6 +47,7 @@ describe('KibanaEvalsClient', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (getCurrentTraceId as jest.Mock).mockReturnValue('default-trace-id');
   });
 
   it('computes a stable datasetId across equivalent datasets', async () => {
@@ -174,6 +181,67 @@ describe('KibanaEvalsClient', () => {
     const all = await client.getRanExperiments();
     expect(all).toHaveLength(1);
     expect(all[0].id).toBe(exp.id);
+  });
+
+  it('captures and stores trace IDs for tasks and evaluators', async () => {
+    const client = createClient();
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [{ input: { q: 1 }, output: { expected: 1 } }],
+    };
+    const task = async () => ({ value: 1 });
+    const evaluators: Array<Evaluator<EvaluationDataset['examples'][number], { value: number }>> = [
+      {
+        name: 'HasValue',
+        kind: 'CODE',
+        evaluate: async ({ output }) => ({ score: typeof output?.value === 'number' ? 1 : 0 }),
+      },
+    ];
+
+    const mockTaskTraceId = 'task-trace-id';
+    const mockEvalTraceId = 'evaluator-trace-id';
+    (getCurrentTraceId as jest.Mock)
+      .mockReturnValueOnce(mockTaskTraceId)
+      .mockReturnValueOnce(mockEvalTraceId);
+
+    const exp = await client.runExperiment({ dataset, task }, evaluators);
+    const [firstRun] = Object.values(exp.runs);
+    expect(firstRun).toBeDefined();
+    expect(firstRun.traceId).toBe(mockTaskTraceId);
+
+    expect(exp.evaluationRuns).toHaveLength(1);
+    expect(exp.evaluationRuns[0].traceId).toBe(mockEvalTraceId);
+
+    expect(withTaskSpan).toHaveBeenCalled();
+    expect(withEvaluatorSpan).toHaveBeenCalled();
+    expect(getCurrentTraceId).toHaveBeenCalled();
+  });
+
+  it('handles missing trace IDs gracefully', async () => {
+    const client = createClient();
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [{ input: { q: 1 }, output: { expected: 1 } }],
+    };
+    const task = async () => ({ value: 1 });
+    const evaluators: Array<Evaluator<EvaluationDataset['examples'][number], { value: number }>> = [
+      {
+        name: 'HasValue',
+        kind: 'CODE',
+        evaluate: async ({ output }) => ({ score: typeof output?.value === 'number' ? 1 : 0 }),
+      },
+    ];
+
+    (getCurrentTraceId as jest.Mock).mockReturnValue(null);
+
+    const exp = await client.runExperiment({ dataset, task }, evaluators);
+    const runKeys = Object.keys(exp.runs);
+    const firstRun = exp.runs[runKeys[0]];
+    expect(firstRun.traceId).toBeNull();
+    expect(exp.evaluationRuns[0].traceId).toBeNull();
+    expect(exp.evaluationRuns.length).toBeGreaterThan(0);
   });
 
   it('limits concurrent task execution using the concurrency option', async () => {

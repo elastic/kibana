@@ -9,13 +9,13 @@ pageLoadAssetSize:
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
-  automaticImportVTwo: 10605
+  automaticImportVTwo: 13752
   banners: 4087
   canvas: 15142
   cases: 225900
   charts: 40269
   cloud: 10648
-  cloudConnect: 7932
+  cloudConnect: 9149
   cloudDataMigration: 5687
   cloudDefend: 8146
   cloudExperiments: 103984
@@ -26,8 +26,8 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 10786
-  core: 558848
-  cps: 5918
+  core: 556473
+  cps: 5930
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
@@ -50,11 +50,11 @@ pageLoadAssetSize:
   discoverShared: 2322
   elasticAssistant: 338870
   elasticAssistantSharedState: 4881
-  embeddable: 17521
+  embeddable: 17466
   embeddableAlertsTable: 6524
   embeddableEnhanced: 4488
   enterpriseSearch: 40244
-  entityStore: 1755
+  entityStore: 71717
   esql: 18224
   esqlDataGrid: 10209
   esUiShared: 101220
@@ -70,6 +70,7 @@ pageLoadAssetSize:
   expressionTagcloud: 14009
   expressionXY: 45000
   features: 4145
+  feedback: 7000
   fieldFormats: 64634
   fieldsMetadata: 4901
   files: 6037
@@ -82,7 +83,7 @@ pageLoadAssetSize:
   globalSearchProviders: 4646
   graph: 9924
   grokdebugger: 5484
-  home: 13560
+  home: 13091
   imageEmbeddable: 6727
   indexLifecycleManagement: 29818
   indexManagement: 35522
@@ -209,5 +210,5 @@ pageLoadAssetSize:
   visualizations: 53333
   watcher: 10485
   workflowsExtensions: 90040
-  workflowsManagement: 8497
+  workflowsManagement: 21318
   workplaceAIApp: 65731

@@ -13,10 +13,10 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import moment from 'moment';
 import { executeEsqlQuery } from '../infra/elasticsearch/esql';
 import { ingestEntities } from '../infra/elasticsearch/ingest';
-import { HASHED_ID } from './logs_extraction/logs_extraction_query_builder';
+import { HASHED_ID_FIELD } from './logs_extraction/logs_extraction_query_builder';
 import { LogExtractionState, type EngineDescriptorClient } from './definitions/saved_objects';
 import { ENGINE_STATUS } from './constants';
-import type { EntityType } from './definitions/entity_schema';
+import type { EntityType } from '../../common/domain/definitions/entity_schema';
 
 jest.mock('../infra/elasticsearch/esql');
 jest.mock('../infra/elasticsearch/ingest');
@@ -80,7 +80,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
           { name: 'user.name', type: 'keyword' },
           { name: 'host.name', type: 'keyword' },
         ],
@@ -112,7 +112,7 @@ describe('LogsExtractionClient', () => {
       expect(result.success && result.scannedIndices).toContain('logs-*');
       expect(result.success && result.scannedIndices).toContain('filebeat-*');
       expect(result.success && result.scannedIndices).toContain(
-        '.entities.v2.updates.security_user_default'
+        '.entities.v2.updates.security_default'
       );
       expect(result.success && result.scannedIndices).not.toContain(
         '.alerts-security.alerts-default'
@@ -129,8 +129,8 @@ describe('LogsExtractionClient', () => {
       expect(mockIngestEntities).toHaveBeenCalledWith({
         esClient: mockEsClient,
         esqlResponse: mockEsqlResponse,
-        esIdField: HASHED_ID,
-        targetIndex: expect.stringContaining('.entities.v2.latest.security_user_default'),
+        esIdField: HASHED_ID_FIELD,
+        targetIndex: expect.stringContaining('.entities.v2.latest.security_default'),
         logger: expect.any(Object),
       });
 
@@ -146,7 +146,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
           { name: 'user.name', type: 'keyword' },
         ],
         values: [],
@@ -187,7 +187,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
         ],
         values: [],
       };
@@ -230,7 +230,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
         ],
         values: [],
       };
@@ -325,7 +325,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
         ],
         values: [],
       };
@@ -365,7 +365,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
         ],
         values: [
           ['2024-01-02T10:00:00.000Z', 'hash1'],
@@ -400,6 +400,71 @@ describe('LogsExtractionClient', () => {
       expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
     });
 
+    it('should run query and return count without ingesting or updating when countOnly is true', async () => {
+      const mockEsqlResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
+          { name: 'user.name', type: 'keyword' },
+        ],
+        values: [
+          ['2024-01-02T10:00:00.000Z', 'hash1', 'user1'],
+          ['2024-01-02T11:00:00.000Z', 'hash2', 'user2'],
+          ['2024-01-02T12:00:00.000Z', 'hash3', 'user3'],
+        ],
+      };
+
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+
+      const result = await client.extractLogs('user', { countOnly: true });
+
+      expect(result.success).toBe(true);
+      expect(result.success && result.count).toBe(3);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockIngestEntities).not.toHaveBeenCalled();
+      expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+    });
+
+    it('should return count 0 when countOnly is true and ESQL returns no rows', async () => {
+      const mockEsqlResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
+        ],
+        values: [],
+      };
+
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
+
+      const result = await client.extractLogs('user', { countOnly: true });
+
+      expect(result.success).toBe(true);
+      expect(result.success && result.count).toBe(0);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockIngestEntities).not.toHaveBeenCalled();
+      expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+    });
+
     it('should handle errors from executeEsqlQuery', async () => {
       const mockDataView = {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
@@ -428,7 +493,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
         ],
         values: [['2024-01-02T10:00:00.000Z', 'hash1']],
       };
@@ -460,7 +525,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
         ],
         values: [],
       };
@@ -487,7 +552,7 @@ describe('LogsExtractionClient', () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID, type: 'keyword' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
         ],
         values: [[lastTimestamp, 'hash1']],
       };
@@ -511,7 +576,7 @@ describe('LogsExtractionClient', () => {
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
       expect(mockIngestEntities).toHaveBeenCalledWith(
         expect.objectContaining({
-          targetIndex: expect.stringContaining('.entities.v2.latest.security_host_default'),
+          targetIndex: expect.stringContaining('.entities.v2.latest.security_default'),
         })
       );
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('host', {

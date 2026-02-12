@@ -106,7 +106,6 @@ function createGetPromqlFields(
       return [];
     }
 
-    // TODO: Replace fetchFields with PromQL AST-based column extraction
     return fetchFields(synth.cmd`FROM ${indexName}`.toString());
   };
 }
