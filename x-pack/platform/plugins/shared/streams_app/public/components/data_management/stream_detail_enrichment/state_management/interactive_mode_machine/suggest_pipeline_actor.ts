@@ -83,7 +83,9 @@ async function extractGrokPatternsClientSide(
   }
 }
 
-export async function schedulePipelineSuggestionTaskLogic(input: SuggestPipelineInput): Promise<void> {
+export async function schedulePipelineSuggestionTaskLogic(
+  input: SuggestPipelineInput
+): Promise<void> {
   const { streamName, connectorId, signal, streamsRepositoryClient } = input;
 
   // Extract FlattenRecord documents from SampleDocumentWithUIAttributes
@@ -159,7 +161,9 @@ export const createSchedulePipelineSuggestionTaskActor = ({
 
 // --- Get Suggestion Status Actor ---
 
-type PipelineSuggestionStatusPayload = { pipeline: unknown | null };
+interface PipelineSuggestionStatusPayload {
+  pipeline: unknown | null;
+}
 export type PipelineSuggestionTaskStatusResult = TaskResult<PipelineSuggestionStatusPayload>;
 
 export interface GetPipelineSuggestionStatusInputMinimal {

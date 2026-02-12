@@ -25,12 +25,17 @@ const settleActor = async () => {
   await flushMicrotasks();
 };
 
-const waitForMatch = async (actor: { getSnapshot: () => { matches: (s: string) => boolean; value: unknown } }, match: string) => {
+const waitForMatch = async (
+  actor: { getSnapshot: () => { matches: (s: string) => boolean; value: unknown } },
+  match: string
+) => {
   for (let i = 0; i < 25; i++) {
     if (actor.getSnapshot().matches(match)) return;
     await settleActor();
   }
-  throw new Error(`Timed out waiting for ${match}, last value: ${JSON.stringify(actor.getSnapshot().value)}`);
+  throw new Error(
+    `Timed out waiting for ${match}, last value: ${JSON.stringify(actor.getSnapshot().value)}`
+  );
 };
 
 const createParentRef = (): InteractiveModeParentRef => {
@@ -114,7 +119,9 @@ describe('interactive mode pipeline suggestion polling', () => {
   it('stops polling when cancelled while waiting', async () => {
     jest.useFakeTimers();
 
-    const getPipelineSuggestionStatusMock = jest.fn(async () => ({ status: TaskStatus.InProgress } as any));
+    const getPipelineSuggestionStatusMock = jest.fn(
+      async () => ({ status: TaskStatus.InProgress } as any)
+    );
 
     const testMachine = interactiveModeMachine.provide({
       actors: {
