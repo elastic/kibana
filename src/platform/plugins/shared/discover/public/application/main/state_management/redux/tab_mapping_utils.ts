@@ -61,12 +61,13 @@ export const fromSavedObjectTabToTabState = ({
     previousAppState: existingTab?.appState ?? appState,
     globalState: {
       timeRange: tab.timeRestore ? tab.timeRange : existingTab?.globalState.timeRange,
-      refreshInterval: tab.timeRange
+      refreshInterval: tab.timeRestore
         ? tab.refreshInterval
         : existingTab?.globalState.refreshInterval,
     },
     attributes: {
       ...DEFAULT_TAB_STATE.attributes,
+      timeRestore: tab.timeRestore ?? false,
       visContext: tab.visContext,
       controlGroupState: tab.controlGroupJson
         ? parseControlGroupJson(tab.controlGroupJson)
@@ -102,9 +103,9 @@ export const fromSavedObjectTabToSavedSearch = async ({
   hideAggregatedPreview: tab.hideAggregatedPreview,
   rowHeight: tab.rowHeight,
   headerRowHeight: tab.headerRowHeight,
-  timeRestore: tab.timeRestore,
-  timeRange: tab.timeRange,
-  refreshInterval: tab.refreshInterval,
+  timeRestore: tab.timeRestore, // managed via Redux state now
+  timeRange: tab.timeRange, // managed via Redux state now
+  refreshInterval: tab.refreshInterval, // managed via Redux state now
   rowsPerPage: tab.rowsPerPage,
   sampleSize: tab.sampleSize,
   breakdownField: tab.breakdownField,
@@ -116,14 +117,15 @@ export const fromSavedObjectTabToSavedSearch = async ({
 
 export const fromTabStateToSavedObjectTab = ({
   tab,
-  timeRestore,
+  overridenTimeRestore,
   services,
 }: {
   tab: TabState;
-  timeRestore: boolean;
+  overridenTimeRestore?: boolean;
   services: DiscoverServices;
 }): DiscoverSessionTab => {
   const allowedSampleSize = getAllowedSampleSize(tab.appState.sampleSize, services.uiSettings);
+  const timeRestore = overridenTimeRestore ?? tab.attributes.timeRestore ?? false;
 
   return {
     id: tab.id,
@@ -164,6 +166,7 @@ export const fromSavedSearchToSavedObjectTab = ({
 }: {
   tab: Pick<TabState, 'id' | 'label'> & {
     attributes?: TabState['attributes'];
+    globalState?: TabState['globalState'];
   };
   savedSearch: SavedSearch;
   services: DiscoverServices;
@@ -184,9 +187,17 @@ export const fromSavedSearchToSavedObjectTab = ({
     hideAggregatedPreview: savedSearch.hideAggregatedPreview,
     rowHeight: savedSearch.rowHeight,
     headerRowHeight: savedSearch.headerRowHeight,
-    timeRestore: savedSearch.timeRestore,
-    timeRange: savedSearch.timeRange,
-    refreshInterval: savedSearch.refreshInterval,
+    timeRestore: (tab.attributes ? tab.attributes.timeRestore : savedSearch.timeRestore) ?? false,
+    timeRange: tab.attributes
+      ? tab.attributes.timeRestore
+        ? tab.globalState?.timeRange
+        : undefined
+      : savedSearch.timeRange,
+    refreshInterval: tab.attributes
+      ? tab.attributes.timeRestore
+        ? tab.globalState?.refreshInterval
+        : undefined
+      : savedSearch.refreshInterval,
     rowsPerPage: savedSearch.rowsPerPage,
     sampleSize:
       savedSearch.sampleSize && savedSearch.sampleSize === allowedSampleSize

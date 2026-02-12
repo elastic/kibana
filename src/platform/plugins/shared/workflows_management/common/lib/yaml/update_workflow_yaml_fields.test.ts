@@ -63,6 +63,52 @@ steps: []`;
     expect(result).toContain('enabled: false');
   });
 
+  it('should preserve comments, blank lines, and formatting when toggling enabled', () => {
+    const yaml = `# Workflow configuration
+name: Test Workflow
+
+# Whether the workflow is active
+enabled: false
+
+steps:
+  # Create a Jira ticket
+  - name: step1
+    type: jira
+    params:
+      summary: test`;
+    const workflow: Partial<EsWorkflow> = { enabled: true };
+
+    const result = updateWorkflowYamlFields(yaml, workflow, true);
+
+    expect(result).toContain('enabled: true');
+    expect(result).not.toContain('enabled: false');
+    expect(result).toContain('# Workflow configuration');
+    expect(result).toContain('# Whether the workflow is active');
+    expect(result).toContain('# Create a Jira ticket');
+    const blankLineCount = (result.match(/\n\n/g) || []).length;
+    expect(blankLineCount).toBeGreaterThanOrEqual(2);
+    expect(result).toContain('name: Test Workflow');
+    expect(result).toContain('summary: test');
+  });
+
+  it('should preserve quoted template expressions when toggling enabled', () => {
+    const yaml = `name: Test Workflow
+enabled: false
+steps:
+  - name: step1
+    type: jira
+    params:
+      comment: "{{ inputs.comment }}"
+      summary: "{{ inputs.summary }}"`;
+    const workflow: Partial<EsWorkflow> = { enabled: true };
+
+    const result = updateWorkflowYamlFields(yaml, workflow, true);
+
+    expect(result).toContain('enabled: true');
+    expect(result).toContain('comment: "{{ inputs.comment }}"');
+    expect(result).toContain('summary: "{{ inputs.summary }}"');
+  });
+
   it('should use enabledValue parameter when provided', () => {
     const yaml = 'name: Test Workflow\nenabled: true\nsteps: []';
     const workflow: Partial<EsWorkflow> = { enabled: true }; // Request to enable

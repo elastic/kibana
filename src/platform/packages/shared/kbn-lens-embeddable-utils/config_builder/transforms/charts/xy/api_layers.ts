@@ -150,7 +150,13 @@ function convertDataLayerToAPI(
     y: y || [],
     ...(breakdown_by
       ? {
-          breakdown_by,
+          breakdown_by: {
+            ...breakdown_by,
+            ...(visualization.colorMapping
+              ? { color: fromColorMappingLensStateToAPI(visualization.colorMapping) }
+              : {}),
+            ...(visualization.collapseFn ? { collapse_by: visualization.collapseFn } : {}),
+          },
         }
       : {}),
   };
