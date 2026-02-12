@@ -62,23 +62,26 @@ export const QualityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
   const categories: Array<CategoryData<IndexInfoWithStatus>> = useMemo(() => {
     if (!getReadinessCategoriesData?.mainCategoriesMap) return [];
 
-    return getReadinessCategoriesData.mainCategoriesMap
-      .filter((category) => activeCategories.includes(category.category as MainCategories))
-      .map((category) => ({
-        category: category.category,
-        items: category.indices.map((index) => {
-          const result = indexDataQualityMap.get(index.indexName);
-          const incompatibleCount = result?.incompatibleFieldCount ?? 0;
-          const isIncompatible = incompatibleCount > 0;
+    const activeOnly = getReadinessCategoriesData.mainCategoriesMap.filter((category) =>
+      activeCategories.includes(category.category as MainCategories)
+    );
 
-          return {
-            ...index,
-            status: isIncompatible ? ('incompatible' as const) : ('healthy' as const),
-            incompatibleFieldCount: incompatibleCount,
-            checkedAt: result?.checkedAt,
-          };
-        }),
-      }));
+    const withStatus = activeOnly.map((category) => ({
+      category: category.category,
+      items: category.indices.map((index) => {
+        const result = indexDataQualityMap.get(index.indexName);
+        const incompatibleCount = result?.incompatibleFieldCount ?? 0;
+
+        return {
+          ...index,
+          status: incompatibleCount > 0 ? ('incompatible' as const) : ('healthy' as const),
+          incompatibleFieldCount: incompatibleCount,
+          checkedAt: result?.checkedAt,
+        };
+      }),
+    }));
+
+    return withStatus.filter((category) => category.items.length > 0);
   }, [getReadinessCategoriesData?.mainCategoriesMap, indexDataQualityMap, activeCategories]);
 
   // Calculate total incompatible indices

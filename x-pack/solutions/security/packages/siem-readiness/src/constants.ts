@@ -11,12 +11,5 @@ export const GET_SIEM_READINESS_CATEGORIES_API_PATH = '/api/siem_readiness/get_c
 export const GET_SIEM_READINESS_PIPELINES_API_PATH = '/api/siem_readiness/get_pipelines';
 export const GET_INDEX_RESULTS_LATEST_API_PATH =
   '/internal/ecs_data_quality_dashboard/results_latest';
-
-export const ALL_CATEGORIES: MainCategories[] = [
-  'Endpoint',
-  'Identity',
-  'Network',
-  'Cloud',
-  'Application/SaaS',
-];
 export const CATEGORY_ORDER = ['Endpoint', 'Identity', 'Network', 'Cloud', 'Application/SaaS'];
+export const ALL_CATEGORIES = CATEGORY_ORDER as MainCategories[];

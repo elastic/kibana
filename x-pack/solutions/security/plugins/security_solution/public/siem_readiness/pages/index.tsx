@@ -84,11 +84,12 @@ const SiemReadinessDashboard = () => {
           activeCategories={activeCategories ?? ALL_CATEGORIES}
         />
       </EuiPageSection>
-      <CategoryConfigurationPanel
-        isVisible={isConfigModalVisible}
-        onClose={() => setIsConfigModalVisible(false)}
-        onSave={setActiveCategories}
-      />
+      {isConfigModalVisible && (
+        <CategoryConfigurationPanel
+          onClose={() => setIsConfigModalVisible(false)}
+          onSave={setActiveCategories}
+        />
+      )}
     </div>
   );
 };

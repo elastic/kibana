@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   EuiPanel,
   EuiCheckbox,
@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiCallOut,
   EuiHorizontalRule,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -33,8 +34,6 @@ export const ACTIVE_CATEGORIES_STORAGE_KEY = 'siem_readiness_configurations:acti
 export interface SiemReadinessTabActiveCategoriesProps {
   activeCategories: MainCategories[];
 }
-
-const MAX_COLUMNS_PER_ROW = 3;
 
 // Category labels for i18n
 const CATEGORY_LABELS: Record<MainCategories, string> = {
@@ -59,24 +58,18 @@ const CATEGORY_LABELS: Record<MainCategories, string> = {
   ),
 };
 
-// Split categories into rows for layout
-const CATEGORY_ROWS: MainCategories[][] = [
-  ['Endpoint', 'Identity', 'Network'],
-  ['Cloud', 'Application/SaaS'],
-];
-
 interface CategoryConfigurationPanelProps {
-  isVisible: boolean;
   onClose: () => void;
   /** Notifies parent to re-render since useLocalStorage doesn't sync across components in the same tab */
   onSave?: (categories: MainCategories[]) => void;
 }
 
 export const CategoryConfigurationPanel: React.FC<CategoryConfigurationPanelProps> = ({
-  isVisible,
   onClose,
   onSave,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   // Read/write to localStorage
   const [activeCategories, setActiveCategories] = useLocalStorage<MainCategories[]>(
     ACTIVE_CATEGORIES_STORAGE_KEY,
@@ -87,13 +80,6 @@ export const CategoryConfigurationPanel: React.FC<CategoryConfigurationPanelProp
   const [draftCategories, setDraftCategories] = useState<MainCategories[]>(
     activeCategories ?? ALL_CATEGORIES
   );
-
-  // Reset draft when modal opens
-  useEffect(() => {
-    if (isVisible) {
-      setDraftCategories(activeCategories ?? ALL_CATEGORIES);
-    }
-  }, [isVisible, activeCategories]);
 
   const toggleCategory = (category: MainCategories) => {
     setDraftCategories((prev) =>
@@ -108,10 +94,6 @@ export const CategoryConfigurationPanel: React.FC<CategoryConfigurationPanelProp
   };
 
   const hasNoSelection = draftCategories.length === 0;
-
-  if (!isVisible) {
-    return null;
-  }
 
   return (
     <EuiModal
@@ -160,25 +142,23 @@ export const CategoryConfigurationPanel: React.FC<CategoryConfigurationPanelProp
           </EuiFlexGroup>
 
           <EuiSpacer size="m" />
-          <EuiFlexGroup direction="column" gutterSize="m">
-            {CATEGORY_ROWS.map((row, rowIndex) => (
-              <EuiFlexItem key={rowIndex}>
-                <EuiFlexGroup gutterSize="m" alignItems="center">
-                  {row.map((category) => (
-                    <EuiFlexItem key={category} grow={false} style={{ minWidth: '150px' }}>
-                      <EuiCheckbox
-                        id={category}
-                        label={CATEGORY_LABELS[category]}
-                        checked={draftCategories.includes(category)}
-                        onChange={() => toggleCategory(category)}
-                      />
-                    </EuiFlexItem>
-                  ))}
-                  {row.length < MAX_COLUMNS_PER_ROW && <EuiFlexItem grow={false} />}
-                </EuiFlexGroup>
-              </EuiFlexItem>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: euiTheme.size.m,
+            }}
+          >
+            {ALL_CATEGORIES.map((category) => (
+              <EuiCheckbox
+                key={category}
+                id={category}
+                label={CATEGORY_LABELS[category]}
+                checked={draftCategories.includes(category)}
+                onChange={() => toggleCategory(category)}
+              />
             ))}
-          </EuiFlexGroup>
+          </div>
           <div style={{ height: '120px' }} />
           {hasNoSelection && (
             <>

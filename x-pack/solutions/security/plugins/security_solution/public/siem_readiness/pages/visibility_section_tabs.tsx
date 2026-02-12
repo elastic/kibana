@@ -47,7 +47,7 @@ export const VisibilitySectionTabs: React.FC<VisibilitySectionTabsProps> = ({
       name: i18n.translate('xpack.securitySolution.siemReadiness.visibility.continuity.tab.title', {
         defaultMessage: 'Continuity',
       }),
-      content: <ContinuityTab />,
+      content: <ContinuityTab activeCategories={activeCategories} />,
     },
     {
       id: 'retention',
