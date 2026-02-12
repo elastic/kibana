@@ -1,6 +1,6 @@
 {
-  "lastModified": "2026-02-02T17:20:21.254Z",
-  "sha1": "57010dd991222326376b56d731e50da23b96cc36",
+  "lastModified": "2026-02-09T18:40:27.329Z",
+  "sha1": "b083f9988949ad2c7283a13d601359f74fdd542a",
   "tests": [
     {
       "id": "8f4537eda390f03-adcaac7d214a25d",
@@ -18,13 +18,15 @@
       "title": "Cloud Connectors - Create New AWS CSPM - Create organization account with new cloud connector",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSecurity"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel_tests/cloud_connectors/create_cloud_connector.spec.ts",
-        "line": 43,
-        "column": 12
+        "line": 47,
+        "column": 14
       }
     },
     {
@@ -32,13 +34,15 @@
       "title": "Cloud Connectors - Create New Azure CSPM - Create organization account with new cloud connector",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSecurity"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel_tests/cloud_connectors/create_cloud_connector.spec.ts",
-        "line": 123,
-        "column": 12
+        "line": 127,
+        "column": 14
       }
     },
     {
@@ -46,12 +50,14 @@
       "title": "Cloud Connectors - Reuse Existing Connector AWS CSPM - Request includes cloud_connector_id when reusing existing connector",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSecurity"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel_tests/cloud_connectors/reuse_cloud_connector.spec.ts",
-        "line": 102,
+        "line": 103,
         "column": 14
       }
     },
@@ -60,12 +66,14 @@
       "title": "Cloud Connectors - Reuse Existing Connector Azure CSPM - Request includes cloud_connector_id when reusing existing connector",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSecurity"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel_tests/cloud_connectors/reuse_cloud_connector.spec.ts",
-        "line": 203,
+        "line": 204,
         "column": 14
       }
     },
@@ -74,12 +82,14 @@
       "title": "Cloud Connectors - Switch Setup Technology AWS CSPM - Switch FROM cloud connectors to direct access keys",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSecurity"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel_tests/cloud_connectors/switch_setup_technology.spec.ts",
-        "line": 40,
+        "line": 41,
         "column": 14
       }
     },
@@ -88,12 +98,14 @@
       "title": "Cloud Connectors - Switch Setup Technology Azure CSPM - Switch FROM cloud connectors to service principal with client secret",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSecurity"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel_tests/cloud_connectors/switch_setup_technology.spec.ts",
-        "line": 115,
+        "line": 116,
         "column": 14
       }
     },
@@ -102,12 +114,14 @@
       "title": "Cloud Connectors - Switch Setup Technology AWS CSPM - Switch FROM cloud connectors to agent-based",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSecurity"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel_tests/cloud_connectors/switch_setup_technology.spec.ts",
-        "line": 183,
+        "line": 184,
         "column": 14
       }
     },
@@ -116,12 +130,14 @@
       "title": "Cloud Connectors - Switch Setup Technology Azure CSPM - Switch FROM cloud connectors to agent-based",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSecurity"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/cloud_security_posture/test/scout_cspm_agentless/ui/parallel_tests/cloud_connectors/switch_setup_technology.spec.ts",
-        "line": 261,
+        "line": 262,
         "column": 14
       }
     }

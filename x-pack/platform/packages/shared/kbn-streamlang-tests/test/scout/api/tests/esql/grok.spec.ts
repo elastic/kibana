@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { GrokProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileEsql as transpile } from '@kbn/streamlang';
 import { expectDefined } from '../../../utils';
@@ -14,7 +15,7 @@ import { streamlangApiTest as apiTest } from '../..';
 apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
   apiTest(
     'should correctly parse a log line with the grok processor',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-grok';
       const streamlangDSL: StreamlangDSL = {
@@ -46,7 +47,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
 
   apiTest(
     'should creates a multi-valued column if filed is repeated in a pattern',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-grok-multi';
       const streamlangDSL: StreamlangDSL = {
@@ -68,7 +69,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
 
   apiTest(
     'should produce a column when grok pattern does not match',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-grok-fail';
       const streamlangDSL: StreamlangDSL = {
@@ -90,7 +91,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
 
   apiTest(
     'should grok an alias-only pattern',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-grok-alias-only';
       const streamlangDSL: StreamlangDSL = {
@@ -132,7 +133,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
 
   apiTest(
     'should ignore missing field when ignore_missing is true',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-grok-ignore-missing';
       const streamlangDSL: StreamlangDSL = {
@@ -172,7 +173,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
 
   apiTest(
     'should fail if field is missing and ignore_missing is false',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-grok-fail-missing';
       const streamlangDSL: StreamlangDSL = {
@@ -194,7 +195,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
 
   apiTest(
     'should not grok when where is false',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-grok-where-false';
       const streamlangDSL: StreamlangDSL = {
@@ -244,7 +245,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
 
   apiTest(
     'should handle field type mismatches gracefully (pre-existing numeric vs GROK string output)',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-grok-type-mismatch';
       const streamlangDSL: StreamlangDSL = {
@@ -307,7 +308,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
 
   apiTest(
     'should grok only when both ignore_missing and where conditions match (fork logic)',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-grok-ignore-missing-where';
       const streamlangDSL: StreamlangDSL = {
@@ -378,7 +379,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
   // This test fails on Serverless which is a different behavior from Stateful and needs to be investigated
   apiTest(
     'should handle exhaustive pattern with mixed overrides, intact values, typed fields, and skip branches without type conflicts',
-    { tag: ['@ess'] },
+    { tag: tags.stateful.classic },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-grok-exhaustive';
       const pattern =
@@ -499,7 +500,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
 
   apiTest(
     'should not be able to retain ingested precision if field is mapped as long',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-grok-precision';
       const streamlangDSL: StreamlangDSL = {
@@ -538,7 +539,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
 
   apiTest(
     'should reject Mustache template syntax {{ and {{{',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async () => {
       const streamlangDSL: StreamlangDSL = {
         steps: [
@@ -559,7 +560,7 @@ apiTest.describe('Streamlang to ES|QL - Grok Processor', () => {
 
   apiTest(
     'should parse Android log line with regex pattern containing escaped dot',
-    { tag: ['@ess', '@svlOblt'] },
+    { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
     async ({ testBed, esql }) => {
       const indexName = 'stream-e2e-test-grok-android-log';
       const streamlangDSL: StreamlangDSL = {

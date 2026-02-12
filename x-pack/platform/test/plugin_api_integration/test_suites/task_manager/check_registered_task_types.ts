@@ -54,6 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
       const types = (await getRegisteredTypes())
         .filter((t: string) => !TEST_TYPES.includes(t) && !actionTypeIdsFromSpecs.has(t))
         .sort();
+
       expect(types).to.eql([
         'Fleet-Metrics-Task',
         'Fleet-Usage-Logger',
@@ -157,6 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:xpack.uptime.alerts.tlsCertificate',
         'alerting_health_check',
         'alerting_telemetry',
+        'alerting_v2:dispatcher',
         'alerting_v2:rule_executor',
         'alerts_invalidate_api_keys',
         'apm-source-map-migration-task',
