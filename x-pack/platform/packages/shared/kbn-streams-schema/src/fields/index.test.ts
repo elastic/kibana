@@ -21,4 +21,20 @@ describe('fieldDefinitionConfigSchema', () => {
     };
     expect(() => fieldDefinitionConfigSchema.parse(invalidField)).toThrow();
   });
+
+  it.each([
+    'integer',
+    'short',
+    'byte',
+    'float',
+    'half_float',
+    'text',
+    'wildcard',
+    'version',
+    'unsigned_long',
+    'date_nanos',
+  ] as const)('should accept %s type', (type) => {
+    const field = { type };
+    expect(fieldDefinitionConfigSchema.parse(field)).toEqual(field);
+  });
 });
