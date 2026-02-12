@@ -854,8 +854,6 @@ export class Authenticator {
 
     let newSessionValue: Readonly<SessionValue> | null;
     if (!existingSessionValue) {
-      const startTime = performance.now();
-
       newSessionValue = await this.session.create(
         request,
         {
