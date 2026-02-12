@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -20,6 +21,8 @@ import {
 } from '@kbn/discover-utils';
 import { getChartHidden } from '@kbn/unified-histogram';
 import { cloneDeep } from 'lodash';
+import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
+import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState } from '../redux';
 import {
@@ -32,11 +35,13 @@ import { getValidViewMode } from '../../utils/get_valid_view_mode';
 
 export function getInitialAppState({
   initialUrlState,
+  hasGlobalState = false,
   persistedTab,
   dataView,
   services,
 }: {
   initialUrlState: DiscoverAppState | undefined;
+  hasGlobalState?: boolean;
   persistedTab: DiscoverSessionTab | undefined;
   dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   services: DiscoverServices;
@@ -45,6 +50,8 @@ export function getInitialAppState({
     persistedTab,
     dataView,
     services,
+    initialUrlState,
+    hasGlobalState,
   });
   const mergedState = { ...defaultAppState, ...initialUrlState };
 
@@ -77,18 +84,62 @@ function getDefaultColumns(
     : undefined;
 }
 
+function getDefaultQuery({
+  initialUrlState,
+  hasGlobalState,
+  persistedTab,
+  services,
+  dataView,
+}: {
+  persistedTab: DiscoverSessionTab | undefined;
+  services: DiscoverServices;
+  dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
+  initialUrlState: DiscoverAppState | undefined;
+  hasGlobalState: boolean;
+}): Query | AggregateQuery | undefined {
+  if (persistedTab?.serializedSearchSource.query) return persistedTab.serializedSearchSource.query;
+
+  // If there is global or app state (_g or _a) in the URL we should respect it and assume it's a classic query
+  // This is also useful to reuse the query mode if we are opening a new tab from an existing one
+  const hasInitialUrlState = Object.keys(initialUrlState || {}).length > 0;
+  if (hasGlobalState || hasInitialUrlState)
+    return initialUrlState?.query || services.data.query.queryString.getDefaultQuery();
+
+  // If the last query mode used by the user was classic, just return the default query
+  const queryMode = services.storage.get(DISCOVER_QUERY_MODE_KEY);
+  if (queryMode === 'classic') return services.data.query.queryString.getDefaultQuery();
+
+  // If the last query mode used by the user was esql, or if esql is default, return the initial esql query
+  const canUseEsql = services.uiSettings.get(ENABLE_ESQL) && dataView instanceof DataView;
+  const isEsqlDefault = services.discoverFeatureFlags.getIsEsqlDefault();
+  if (canUseEsql && (queryMode === 'esql' || isEsqlDefault))
+    return { esql: getInitialESQLQuery(dataView, true) };
+
+  // Lastly, fall back to classic if we can't use anything else
+  return services.data.query.queryString.getDefaultQuery();
+}
+
 function getDefaultAppState({
   persistedTab,
   dataView,
   services,
+  initialUrlState,
+  hasGlobalState,
 }: {
   persistedTab: DiscoverSessionTab | undefined;
   dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   services: DiscoverServices;
+  initialUrlState: DiscoverAppState | undefined;
+  hasGlobalState: boolean;
 }) {
-  const { data, uiSettings, storage } = services;
-  const query =
-    persistedTab?.serializedSearchSource.query || data.query.queryString.getDefaultQuery();
+  const { uiSettings, storage } = services;
+  const query = getDefaultQuery({
+    persistedTab,
+    services,
+    dataView,
+    initialUrlState,
+    hasGlobalState,
+  });
   const isEsqlQuery = isOfAggregateQueryType(query);
   // If the data view doesn't have a getFieldByName method (e.g. if it's a spec or list item),
   // we assume the sort array is valid since we can't know for sure
