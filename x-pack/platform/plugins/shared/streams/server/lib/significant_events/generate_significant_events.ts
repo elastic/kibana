@@ -17,11 +17,11 @@ interface Params {
   connectorId: string;
   system?: System;
   systemPrompt: string;
-  featureClient: FeatureClient;
 }
 
 interface Dependencies {
   inferenceClient: InferenceClient;
+  featureClient: FeatureClient;
   logger: Logger;
   signal: AbortSignal;
 }
@@ -34,8 +34,8 @@ export async function generateSignificantEventDefinitions(
   tokensUsed: ChatCompletionTokenCount;
   toolUsage: SignificantEventsToolUsage;
 }> {
-  const { definition, connectorId, system, systemPrompt, featureClient } = params;
-  const { inferenceClient, logger, signal } = dependencies;
+  const { definition, connectorId, system, systemPrompt } = params;
+  const { inferenceClient, featureClient, logger, signal } = dependencies;
 
   const boundInferenceClient = inferenceClient.bindTo({
     connectorId,

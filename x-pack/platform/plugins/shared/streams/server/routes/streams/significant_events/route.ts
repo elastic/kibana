@@ -238,10 +238,10 @@ const generateSignificantEventsRoute = createServerRoute({
           system: params.body?.system,
           connectorId,
           systemPrompt: significantEventsPromptOverride,
-          featureClient,
         },
         {
           inferenceClient,
+          featureClient,
           logger: logger.get('significant_events'),
           signal: getRequestAbortSignal(request),
         }
