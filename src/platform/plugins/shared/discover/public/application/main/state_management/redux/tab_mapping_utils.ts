@@ -247,6 +247,8 @@ export const fromTabStateToByValueAttributes = ({
   dataView: DataView;
   services: DiscoverServices;
 }): SavedSearchByValueAttributes => {
+  const sessionTab = fromTabStateToSavedObjectTab({ tab, dataView, services });
+
   const searchSource = createSearchSource({
     dataView,
     appState: tab.appState,
@@ -254,44 +256,39 @@ export const fromTabStateToByValueAttributes = ({
     services,
   });
   const { searchSourceJSON, references } = searchSource.serialize();
-  const usesAdHocDataView = isObject(searchSource.getSerializedFields().index);
-  const timeRestore = tab.attributes.timeRestore ?? false;
 
-  // Tab-specific attributes (shared between top-level and tabs array)
   const tabAttributes = {
     kibanaSavedObjectMeta: { searchSourceJSON },
-    sort: (tab.appState.sort ?? []) as SortOrder[],
-    columns: tab.appState.columns ?? [],
-    grid: tab.appState.grid ?? {},
-    hideChart: tab.appState.hideChart ?? false,
-    viewMode: tab.appState.viewMode,
-    hideAggregatedPreview: tab.appState.hideAggregatedPreview,
-    rowHeight: tab.appState.rowHeight,
-    headerRowHeight: tab.appState.headerRowHeight,
-    isTextBasedQuery: isOfAggregateQueryType(tab.appState.query),
-    usesAdHocDataView,
-    timeRestore,
-    timeRange: timeRestore ? tab.globalState.timeRange : undefined,
-    refreshInterval: timeRestore ? tab.globalState.refreshInterval : undefined,
-    rowsPerPage: tab.appState.rowsPerPage,
-    sampleSize: tab.appState.sampleSize,
-    breakdownField: tab.appState.breakdownField,
-    chartInterval: tab.appState.interval,
-    density: tab.appState.density,
-    visContext: tab.attributes.visContext,
-    controlGroupJson: tab.attributes.controlGroupState
-      ? JSON.stringify(tab.attributes.controlGroupState)
-      : undefined,
+    sort: sessionTab.sort,
+    columns: sessionTab.columns,
+    grid: sessionTab.grid,
+    hideChart: sessionTab.hideChart,
+    isTextBasedQuery: sessionTab.isTextBasedQuery,
+    usesAdHocDataView: sessionTab.usesAdHocDataView,
+    viewMode: sessionTab.viewMode,
+    hideAggregatedPreview: sessionTab.hideAggregatedPreview,
+    rowHeight: sessionTab.rowHeight,
+    headerRowHeight: sessionTab.headerRowHeight,
+    timeRestore: sessionTab.timeRestore ?? false,
+    timeRange: sessionTab.timeRange,
+    refreshInterval: sessionTab.refreshInterval,
+    rowsPerPage: sessionTab.rowsPerPage,
+    sampleSize: sessionTab.sampleSize,
+    breakdownField: sessionTab.breakdownField,
+    chartInterval: sessionTab.chartInterval,
+    density: sessionTab.density,
+    visContext: sessionTab.visContext,
+    controlGroupJson: sessionTab.controlGroupJson,
   };
 
   return {
     ...tabAttributes,
-    title: tab.label ?? '',
+    title: sessionTab.label,
     description: '',
     tabs: [
       {
-        id: tab.id,
-        label: tab.label ?? '',
+        id: sessionTab.id,
+        label: sessionTab.label,
         attributes: tabAttributes,
       },
     ],

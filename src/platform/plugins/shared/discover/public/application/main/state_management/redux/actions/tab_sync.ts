@@ -92,16 +92,14 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       };
     };
 
-    const savedSearchContainer = stateContainer.savedSearchState;
-
     const initializeAndSyncUrlState = () => {
-      const currentSavedSearch = savedSearchContainer.getState();
+      const { persistedDiscoverSession } = getState();
 
-      addLog('[tab_sync] initialize state and sync with URL', currentSavedSearch);
+      addLog('[tab_sync] initialize state and sync with URL', { persistedDiscoverSession });
 
       // Set the default profile state only if not loading a saved search,
       // to avoid overwriting saved search state
-      if (!currentSavedSearch.id) {
+      if (!persistedDiscoverSession?.id) {
         const { breakdownField, columns, rowHeight, hideChart } = getCurrentUrlState(
           urlStateStorage,
           services

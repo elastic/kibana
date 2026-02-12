@@ -15,7 +15,7 @@ import { getTabStateMock } from '../__mocks__/internal_state.mocks';
 import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverServices } from '../../../../../build_services';
 import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
-import { internalStateActions, selectTabRuntimeState } from '..';
+import { internalStateActions } from '..';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { internalStateSlice } from '../internal_state';
@@ -142,18 +142,6 @@ describe('saveDiscoverSession', () => {
   it('should update runtime state for applicable tabs', async () => {
     const { toolkit, services, saveDiscoverSessionSpy } = await setup({ initializeTab: true });
 
-    const tabRuntimeState = selectTabRuntimeState(
-      toolkit.runtimeStateManager,
-      toolkit.getCurrentTab().id
-    );
-    const stateContainer = tabRuntimeState.stateContainer$.getValue()!;
-
-    stateContainer.savedSearchState.assignNextSavedSearch({
-      ...stateContainer.savedSearchState.getState(),
-      breakdownField: 'breakdown-test',
-    });
-
-    // Also update the breakdownField in the Redux appState, since that's the source of truth
     const currentTabId = toolkit.getCurrentTab().id;
     toolkit.internalState.dispatch(
       internalStateActions.updateAppState({
@@ -169,7 +157,6 @@ describe('saveDiscoverSession', () => {
       'resetOnSavedSearchChange'
     );
     const setDataViewSpy = jest.spyOn(tabStateDataViewActions, 'setDataView');
-    const setSavedSearchSpy = jest.spyOn(stateContainer.savedSearchState, 'set');
 
     jest
       .spyOn(services.data.search.searchSource, 'create')
@@ -185,9 +172,7 @@ describe('saveDiscoverSession', () => {
       tabId: currentTabId,
       dataView: dataViewMockWithTimeField,
     });
-    expect(setSavedSearchSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ breakdownField: 'breakdown-test' })
-    );
+    expect(toolkit.getCurrentTab().appState.breakdownField).toBe('breakdown-test');
   });
 
   it('should not update local state if saveDiscoverSession returns undefined', async () => {

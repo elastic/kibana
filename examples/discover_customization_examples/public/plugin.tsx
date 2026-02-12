@@ -15,9 +15,11 @@ import type {
   DiscoverSetup,
   DiscoverStart,
 } from '@kbn/discover-plugin/public';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
+import { from, map } from 'rxjs';
 import {
   ControlGroupRenderer,
   type ControlPanelsState,
@@ -118,9 +120,12 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             });
           }, []);
 
-          const currentSavedSearch = useObservable(
-            stateContainer.savedSearchState.getCurrent$(),
-            stateContainer.savedSearchState.getState()
+          const persistedSession$ = from(stateContainer.internalState).pipe(
+            map((state) => state.persistedDiscoverSession)
+          );
+          const persistedSession = useObservable<DiscoverSession | undefined>(
+            persistedSession$,
+            stateContainer.internalState.getState().persistedDiscoverSession
           );
 
           return (
@@ -134,7 +139,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                     onClick={togglePopover}
                     data-test-subj="logsViewSelectorButton"
                   >
-                    {currentSavedSearch.title ?? 'None selected'}
+                    {persistedSession?.title ?? 'None selected'}
                   </EuiButton>
                 }
                 isOpen={isPopoverOpen}
@@ -156,7 +161,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                               discoverSessionId: savedSearch.id,
                             })
                           ),
-                        icon: savedSearch.id === currentSavedSearch.id ? 'check' : 'empty',
+                        icon: savedSearch.id === persistedSession?.id ? 'check' : 'empty',
                         'data-test-subj': `logsViewSelectorOption-${savedSearch.attributes.title.replace(
                           /[^a-zA-Z0-9]/g,
                           ''
