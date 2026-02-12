@@ -728,13 +728,13 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllRules(supertest, log);
       });
 
-      it('should create rule with response actions when use has authz', async () => {
+      it('should create rule with response actions when user has authz', async () => {
         const { body } = await detectionsApi.createRule({ body: apiCreatePayload }).expect(200);
 
         expect(body.response_actions).toEqual(apiCreatePayload.response_actions);
       });
 
-      it('should error creating rule with response actions when use DOE NOT have authz', async () => {
+      it('should error creating rule with response actions when user DOES NOT have authz', async () => {
         const { body } = await superTestResponseActionsNoAuthz
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')

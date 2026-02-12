@@ -149,7 +149,7 @@ describe('Rules Endpoint response actions validators', () => {
       }
     );
 
-    it('should succeed if response actions have not been changed between payload and existing rule and use has no Authz', async () => {
+    it('should succeed if response actions have not been changed between payload and existing rule and user has no Authz', async () => {
       endpointAuthz.canIsolateHost = false;
       options.existingRule = existingRule;
       existingRule.params.responseActions = [createExistingRuleResponseActionMock()];
