@@ -810,32 +810,39 @@ All monitors fail with "journey did not finish executing, 3 steps ran" - the 5-s
 
 ### 4.13 Results: SYNTHETICS_LIMIT_BROWSER Environment Variable Test
 
-**Objective**: Test whether the `SYNTHETICS_LIMIT_BROWSER` environment variable can increase browser concurrency beyond the default CPU-based limit.
+**Objective**: Verify whether `SYNTHETICS_LIMIT_BROWSER` is actually applied by the agent scheduler, and measure impact on throughput/latency on a constrained 2-CPU host.
 
 #### Test Setup
 
 - **Monitors**: 24 browser monitors
 - **Schedule**: 3 minutes
-- **Journey Duration**: ~21 seconds (Medium complexity)
-- **Environment Variable**: `SYNTHETICS_LIMIT_BROWSER=4`
+- **Journey**: simple browser journey (`page.goto('https://www.elastic.co')`)
+- **Agent limits (both runs)**: `--cpus=2 --memory=2g`
+- **Run A**: `SYNTHETICS_LIMIT_BROWSER=2`
+- **Run B**: `SYNTHETICS_LIMIT_BROWSER=4`
 
 #### Results
 
-| Configuration | CPU | Memory | Up | Down | CPU Usage | Memory Usage |
-|:--------------|:----|:-------|:---|:-----|:----------|:-------------|
-| Test 1 | 2 cores | 2 GB | 22 | 2 | ~200% | 84% (1.68 GB) |
-| Test 2 | 2 cores | 4 GB | 22 | 2 | ~200% | 46% (1.83 GB) |
+| Metric | `LIMIT=2` | `LIMIT=4` |
+|:-------|:----------|:----------|
+| Max concurrent browser starts (same second, from agent logs) | 2 | 4 |
+| Completed summary checks in window (`summary.final_attempt=true`) | 64 | 60 |
+| Status counts | 64 up / 0 down | 60 up / 0 down |
+| Duration p50 | 4.47s | 10.35s |
+| Duration p95 | 6.48s | 15.23s |
+| CPU peak | ~206% | ~201% |
+| Memory peak | ~948 MiB | ~1.52 GiB |
 
 #### Key Findings
 
-1. **`SYNTHETICS_LIMIT_BROWSER` cannot override hardware constraints** - Setting it to 4 on a 2-core container did not increase concurrency beyond 2 concurrent browsers
-2. **CPU is the limiting factor** for browser monitor concurrency, not memory
-3. **Each browser instance requires ~1 CPU core** - this cannot be bypassed via configuration
-4. **Memory had no impact on throughput** - doubling memory (2GB → 4GB) produced identical results
-5. **The variable serves as an upper limit**, useful only when CPU cores exceed the default concurrency
+1. **`SYNTHETICS_LIMIT_BROWSER` is applied** - setting `4` increased observed concurrent browser starts from 2 to 4.
+2. **No core-count auto-tuning observed** - concurrency was not capped back to 2 by scheduler logic.
+3. **Throughput did not improve on 2 CPU** - completed checks were slightly lower (60 vs 64) in the same window.
+4. **Latency worsened at higher concurrency** - p50/p95 durations increased substantially with `LIMIT=4`.
+5. **CPU stayed saturated in both runs** and memory pressure increased with `LIMIT=4`, indicating contention rather than throughput gain.
 
 > [!IMPORTANT]
-> **Conclusion**: To increase browser concurrency, allocate additional CPU cores. `SYNTHETICS_LIMIT_BROWSER` should only be used to *restrict* concurrency below the CPU-based default, not to exceed it.
+> **Conclusion**: `SYNTHETICS_LIMIT_BROWSER` controls an upper concurrency limit and can raise concurrent browser execution beyond 2. On a 2-CPU agent, increasing it to 4 increased contention (higher duration, higher memory) without throughput gain. For this host size, `2` remains the stable setting.
 
 ---
 
@@ -864,10 +871,10 @@ All monitors fail with "journey did not finish executing, 3 steps ran" - the 5-s
 
 #### SYNTHETICS_LIMIT_BROWSER Tests
 
-| Configuration | CPU | Memory | Up | Down | Status |
-|---------------|-----|--------|----|----|--------|
-| SYNTHETICS_LIMIT_BROWSER=4 | 2 cores | 2 GB | 22 | 2 | CPU-bound at 200% |
-| SYNTHETICS_LIMIT_BROWSER=4 | 2 cores | 4 GB | 22 | 2 | CPU-bound at 200% |
+| Configuration | CPU | Memory | Completed Checks | Up | Down | Notes |
+|---------------|-----|--------|------------------|----|------|-------|
+| `SYNTHETICS_LIMIT_BROWSER=2` | 2 cores | 2 GB | 64 | 64 | 0 | Max observed concurrency: 2 |
+| `SYNTHETICS_LIMIT_BROWSER=4` | 2 cores | 2 GB | 60 | 60 | 0 | Max observed concurrency: 4; higher p50/p95 |
 
 ### Cycle Spread Analysis
 
