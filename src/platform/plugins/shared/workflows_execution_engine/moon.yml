@@ -18,7 +18,7 @@ project:
   metadata:
     sourceRoot: src/platform/plugins/shared/workflows_execution_engine
 dependsOn:
-  - '@kbn/core'
+  - '@kbn/datemath'
   - '@kbn/config-schema'
   - '@kbn/actions-plugin'
   - '@kbn/workflows'
