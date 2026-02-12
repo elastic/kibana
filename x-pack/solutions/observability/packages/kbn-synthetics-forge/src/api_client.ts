@@ -310,7 +310,7 @@ export class SyntheticsApiClient {
         schedule: { number: '3', unit: 'm' },
         locations: [{ id: privateLocation.id, isServiceManaged: false }],
         enabled: true,
-        timeout: '16',
+        timeout: null,
         tags,
         'source.inline.script': script,
         screenshots: 'on',
