@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/common';
+import { APPLY_FILTER_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SerializedDrilldowns } from '../../../server';
 import { generateRefName } from './dynamic_actions/dashboard_drilldown_persistable_state';
 import type { DynamicActionsState, SerializedEvent } from './dynamic_actions/types';

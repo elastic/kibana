@@ -16,6 +16,7 @@ import type {
   PublicAppInfo,
 } from '@kbn/core/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { EmbeddableStateTransfer } from './state_transfer';
 import { setKibanaServices } from './kibana_services';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
@@ -33,7 +34,6 @@ import {
 } from './bwc/legacy_url_transform';
 import { registerDrilldown } from './drilldowns/registry';
 import { OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN } from './ui_actions/constants';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
