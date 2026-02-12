@@ -34,7 +34,7 @@ export const throttlingFormatter: Formatter = (fields) => {
   });
 };
 
-export const browserTimeoutFormatterPrivate: Formatter = (fields) => {
+export const timeoutFormatterPrivate: Formatter = (fields) => {
   const value = (fields[ConfigKey.TIMEOUT] as string) ?? '';
   if (!value) return null;
 
@@ -68,6 +68,6 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.JOURNEY_FILTERS_TAGS]: arrayToJsonFormatter,
   [ConfigKey.THROTTLING_CONFIG]: throttlingFormatter,
   ...commonFormatters,
-  [ConfigKey.TIMEOUT]: browserTimeoutFormatterPrivate,
+  [ConfigKey.TIMEOUT]: timeoutFormatterPrivate,
   ...tlsFormatters,
 };
