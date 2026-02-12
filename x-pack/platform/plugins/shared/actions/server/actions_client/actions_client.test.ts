@@ -52,6 +52,8 @@ import type { estypes } from '@elastic/elasticsearch';
 import { ConnectorRateLimiter } from '../lib/connector_rate_limiter';
 import { getConnectorType } from '../fixtures';
 import { createMockInMemoryConnector } from '../application/connector/mocks';
+import { authTypeRegistryMock } from '../auth_types/auth_type_registry.mock';
+import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -99,7 +101,7 @@ let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistry: ActionTypeRegistry;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
-
+let authTypeRegistry: AuthTypeRegistry;
 const connectorTokenClient = connectorTokenClientMock.create();
 const inMemoryMetrics = inMemoryMetricsMock.create();
 
@@ -134,9 +136,11 @@ beforeEach(() => {
     inMemoryConnectors: [],
   };
   actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+  authTypeRegistry = authTypeRegistryMock.create() as unknown as AuthTypeRegistry;
   actionsClient = new ActionsClient({
     logger,
     actionTypeRegistry,
+    authTypeRegistry,
     unsecuredSavedObjectsClient,
     scopedClusterClient,
     kibanaIndices,
@@ -563,6 +567,7 @@ describe('create()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -642,6 +647,7 @@ describe('create()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -715,6 +721,7 @@ describe('create()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -774,6 +781,7 @@ describe('get()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -811,6 +819,7 @@ describe('get()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -866,6 +875,7 @@ describe('get()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -909,6 +919,7 @@ describe('get()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -1018,6 +1029,7 @@ describe('get()', () => {
     expect(result).toContainConnector({
       id: '1',
       isMissingSecrets: false,
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
@@ -1032,6 +1044,7 @@ describe('get()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1067,6 +1080,7 @@ describe('get()', () => {
       isPreconfigured: true,
       name: 'test',
       config: undefined, // in memory connectors do not return unless exposeConfig is true
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
@@ -1075,6 +1089,7 @@ describe('get()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1106,6 +1121,7 @@ describe('get()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1135,6 +1151,7 @@ describe('get()', () => {
       id: 'system-connector-.cases',
       isSystemAction: true,
       name: 'System action: .cases',
+      authMode: 'shared',
     });
   });
 });
@@ -1172,6 +1189,7 @@ describe('getBulk()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -1309,6 +1327,7 @@ describe('getBulk()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1353,6 +1372,7 @@ describe('getBulk()', () => {
         actionTypeId: '.slack',
         isPreconfigured: true,
         name: 'test',
+        authMode: 'shared',
       },
       {
         id: '1',
@@ -1360,6 +1380,7 @@ describe('getBulk()', () => {
         name: 'test',
         config: { foo: 'bar' },
         isMissingSecrets: false,
+        authMode: 'shared',
       },
     ]);
   });
@@ -1396,6 +1417,7 @@ describe('getBulk()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1464,6 +1486,7 @@ describe('getBulk()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1507,12 +1530,14 @@ describe('getBulk()', () => {
         id: 'testPreconfigured',
         isPreconfigured: true,
         name: 'test',
+        authMode: 'shared',
       },
       {
         actionTypeId: '.cases',
         id: 'system-connector-.cases',
         isSystemAction: true,
         name: 'System action: .cases',
+        authMode: 'shared',
       },
       {
         actionTypeId: 'test',
@@ -1520,6 +1545,7 @@ describe('getBulk()', () => {
         id: '1',
         isMissingSecrets: false,
         name: 'test',
+        authMode: 'shared',
       },
     ]);
   });
@@ -1532,6 +1558,7 @@ describe('getOAuthAccessToken()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1940,6 +1967,7 @@ describe('delete()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1979,6 +2007,7 @@ describe('delete()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -2467,6 +2496,7 @@ describe('update()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -2513,6 +2543,7 @@ describe('update()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -2608,6 +2639,7 @@ describe('execute()', () => {
         ],
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -2667,6 +2699,7 @@ describe('execute()', () => {
         ],
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -2722,6 +2755,7 @@ describe('execute()', () => {
         ],
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -2992,6 +3026,7 @@ describe('isPreconfigured()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -3037,6 +3072,7 @@ describe('isPreconfigured()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -3084,6 +3120,7 @@ describe('isSystemAction()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -3129,6 +3166,7 @@ describe('isSystemAction()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,

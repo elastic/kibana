@@ -528,6 +528,7 @@ export class ActionsPlugin
         logger,
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
+        authTypeRegistry: this.authTypeRegistry!,
         kibanaIndices: core.savedObjects.getAllIndices(),
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
         inMemoryConnectors: this.inMemoryConnectors,
@@ -820,6 +821,7 @@ export class ActionsPlugin
   ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
       actionTypeRegistry,
+      authTypeRegistry,
       isESOCanEncrypt,
       getInMemoryConnectors,
       actionExecutor,
@@ -857,6 +859,7 @@ export class ActionsPlugin
             logger,
             unsecuredSavedObjectsClient,
             actionTypeRegistry: actionTypeRegistry!,
+            authTypeRegistry: authTypeRegistry!,
             kibanaIndices: savedObjects.getAllIndices(),
             scopedClusterClient: coreContext.elasticsearch.client,
             inMemoryConnectors,
