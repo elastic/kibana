@@ -17,11 +17,8 @@ import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { Runner } from '@kbn/agent-builder-server';
 import { getCurrentSpaceId } from '../../utils/spaces';
-import type {
-  AgentsServiceSetup,
-  AgentsServiceStart,
-  RemoveToolRefsParams,
-} from './types';
+import type { AgentsServiceSetup, AgentsServiceStart, ToolRefsParams } from './types';
+import type { AgentsUsingToolsResult } from './persisted/types';
 import type { ToolsServiceStart } from '../tools';
 import {
   createBuiltinAgentRegistry,
@@ -110,7 +107,7 @@ export class AgentsService {
     const removeToolRefsFromAgents = async ({
       request,
       toolIds,
-    }: RemoveToolRefsParams): Promise<void> => {
+    }: ToolRefsParams): Promise<void> => {
       const spaceId = getCurrentSpaceId({ request, spaces });
       await runToolRefCleanup({
         storage: internalStorage,
@@ -120,12 +117,28 @@ export class AgentsService {
       });
     };
 
+    const getAgentsUsingTools = async ({
+      request,
+      toolIds,
+    }: ToolRefsParams): Promise<AgentsUsingToolsResult> => {
+      const spaceId = getCurrentSpaceId({ request, spaces });
+      const result = await runToolRefCleanup({
+        storage: internalStorage,
+        spaceId,
+        toolIds,
+        logger,
+        checkOnly: true,
+      });
+      return result as AgentsUsingToolsResult;
+    };
+
     return {
       getRegistry,
       execute: async (args) => {
         return getRunner().runAgent(args);
       },
       removeToolRefsFromAgents,
+      getAgentsUsingTools,
     };
   }
 }

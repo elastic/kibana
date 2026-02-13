@@ -5,16 +5,39 @@
  * 2.0.
  */
 
+import {
+  elasticsearchServiceMock,
+  httpServerMock,
+  savedObjectsServiceMock,
+  securityServiceMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
+import type { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
 import { AgentsService } from './agents_service';
-import { createMockedAgent } from '../../test_utils/agents';
+import type { AgentsServiceStart } from './types';
+import type { AgentsServiceStartDeps } from './agents_service';
+import { createMockedAgent, createToolsServiceStartMock } from '../../test_utils';
+import { runToolRefCleanup } from './persisted/tool_reference_cleanup';
 
 jest.mock('@kbn/agent-builder-server/allow_lists');
+jest.mock('./persisted/tool_reference_cleanup');
 
 const isAllowedBuiltinAgentMock = isAllowedBuiltinAgent as jest.MockedFunction<
   typeof isAllowedBuiltinAgent
 >;
+const runToolRefCleanupMock = runToolRefCleanup as jest.MockedFunction<typeof runToolRefCleanup>;
+
+const createStartDeps = (): AgentsServiceStartDeps => ({
+  getRunner: () => ({ runAgent: jest.fn() } as any),
+  security: securityServiceMock.createStart(),
+  elasticsearch: elasticsearchServiceMock.createStart(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+  savedObjects: savedObjectsServiceMock.createStartContract(),
+  spaces: undefined,
+  toolsService: createToolsServiceStartMock(),
+});
 
 describe('AgentsService', () => {
   let logger: ReturnType<typeof loggerMock.create>;
@@ -27,6 +50,7 @@ describe('AgentsService', () => {
 
   afterEach(() => {
     isAllowedBuiltinAgentMock.mockReset();
+    runToolRefCleanupMock.mockReset();
   });
 
   describe('#setup', () => {
@@ -47,6 +71,76 @@ describe('AgentsService', () => {
         "Built-in agent with id \\"test_agent\\" is not in the list of allowed built-in agents.
                      Please add it to the list of allowed built-in agents in the \\"@kbn/agent-builder-server/allow_lists.ts\\" file."
       `);
+    });
+  });
+
+  describe('#start', () => {
+    let started: AgentsServiceStart;
+    let request: KibanaRequest;
+
+    beforeEach(() => {
+      isAllowedBuiltinAgentMock.mockReturnValue(true);
+      service.setup({ logger });
+      started = service.start(createStartDeps());
+      request = httpServerMock.createKibanaRequest();
+    });
+
+    describe('#getAgentsUsingTools', () => {
+      it('returns agents that use the given tool IDs', async () => {
+        const agents = [
+          { id: 'agent-1', name: 'Agent One' },
+          { id: 'agent-2', name: 'Agent Two' },
+        ];
+        runToolRefCleanupMock.mockResolvedValue({ agents });
+
+        const result = await started.getAgentsUsingTools({ request, toolIds: ['tool-1'] });
+
+        expect(result).toEqual({ agents });
+        expect(runToolRefCleanupMock).toHaveBeenCalledTimes(1);
+        expect(runToolRefCleanupMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            toolIds: ['tool-1'],
+            checkOnly: true,
+            spaceId: 'default',
+          })
+        );
+      });
+
+      it('returns empty agents list when runToolRefCleanup returns no agents', async () => {
+        runToolRefCleanupMock.mockResolvedValue({ agents: [] });
+
+        const result = await started.getAgentsUsingTools({
+          request,
+          toolIds: ['tool-1', 'tool-2'],
+        });
+
+        expect(result).toEqual({ agents: [] });
+        expect(runToolRefCleanupMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            toolIds: ['tool-1', 'tool-2'],
+            checkOnly: true,
+          })
+        );
+      });
+    });
+
+    describe('#removeToolRefsFromAgents', () => {
+      it('calls runToolRefCleanup without checkOnly and resolves', async () => {
+        runToolRefCleanupMock.mockResolvedValue(undefined);
+
+        await expect(
+          started.removeToolRefsFromAgents({ request, toolIds: ['tool-1', 'tool-2'] })
+        ).resolves.toBeUndefined();
+
+        expect(runToolRefCleanupMock).toHaveBeenCalledTimes(1);
+        expect(runToolRefCleanupMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            toolIds: ['tool-1', 'tool-2'],
+            spaceId: 'default',
+          })
+        );
+        expect(runToolRefCleanupMock.mock.calls[0][0]).not.toHaveProperty('checkOnly');
+      });
     });
   });
 });
