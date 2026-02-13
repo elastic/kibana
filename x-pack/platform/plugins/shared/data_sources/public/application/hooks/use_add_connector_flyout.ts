@@ -10,6 +10,7 @@ import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import type { IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import { MCPAuthType } from '@kbn/connector-schemas/mcp';
 import { useKibana } from './use_kibana';
 import { API_BASE_PATH } from '../../../common/constants';
 import { queryKeys } from '../query_keys';
@@ -19,6 +20,7 @@ export interface UseAddConnectorFlyoutOptions {
   dataSourceType?: string;
   suggestedName?: string;
   icon?: IconType;
+  preloadUrl?: string;
 }
 
 interface CreateDataConnectorPayload {
@@ -35,6 +37,7 @@ export const useAddConnectorFlyout = ({
   dataSourceType,
   suggestedName,
   icon,
+  preloadUrl,
 }: UseAddConnectorFlyoutOptions = {}) => {
   const {
     services: {
@@ -159,6 +162,14 @@ export const useAddConnectorFlyout = ({
         initialConnector: {
           actionTypeId: selectedConnectorType,
           ...(suggestedName && { name: suggestedName }),
+          ...(preloadUrl &&
+            selectedConnectorType && {
+              config: {
+                serverUrl: preloadUrl,
+                hasAuth: true,
+                authType: MCPAuthType.ApiKeyInUrl,
+              },
+            }),
         },
       }),
     });
@@ -167,6 +178,7 @@ export const useAddConnectorFlyout = ({
     selectedConnectorType,
     suggestedName,
     icon,
+    preloadUrl,
     closeFlyout,
     handleConnectorCreated,
     triggersActionsUi,

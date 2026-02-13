@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MCPAuthType } from '@kbn/connector-schemas/mcp';
+import { API_KEY_URL_PLACEHOLDER, MCPAuthType } from '@kbn/connector-schemas/mcp';
 import type { DataSource } from '@kbn/data-catalog-plugin';
 
 export const firecrawlDataSource: DataSource = {
@@ -22,11 +22,18 @@ export const firecrawlDataSource: DataSource = {
     {
       type: '.mcp',
       config: {
-        serverUrl: 'https://api.firecrawl.dev/mcp', // placeholder; update when Firecrawl MCP endpoint is known
+        serverUrl: `https://mcp.firecrawl.dev/${API_KEY_URL_PLACEHOLDER}/v2/mcp`,
         hasAuth: true,
-        authType: MCPAuthType.Bearer,
+        authType: MCPAuthType.ApiKeyInUrl,
       },
-      importedTools: [],
+      preloadUrl: `https://mcp.firecrawl.dev/${API_KEY_URL_PLACEHOLDER}/v2/mcp`,
+      importedTools: [
+        { name: 'firecrawl_scrape' },
+        { name: 'firecrawl_batch_scrape' },
+        { name: 'firecrawl_search' },
+        { name: 'firecrawl_crawl' },
+        { name: 'firecrawl_extract' },
+      ],
     },
   ],
 

@@ -61,6 +61,11 @@ export interface StackConnectorConfig {
   type: string;
   config: Record<string, unknown>;
   importedTools?: ImportedTool[];
+  /**
+   * When set, the data_sources add-connector flyout preloads the form with
+   * { serverUrl: preloadUrl, hasAuth: true }. Used by the UI only; no backend behavior.
+   */
+  preloadUrl?: string;
 }
 
 export interface ImportedTool {
