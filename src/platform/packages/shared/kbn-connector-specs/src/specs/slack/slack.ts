@@ -388,8 +388,9 @@ function extractMentionedUserIds(match: SlackSearchMatch): string[] {
 
   const text = typeof match.text === 'string' ? match.text : '';
   const re = /<@([A-Z0-9]+)(?:\\|[^>]+)?>/g;
-  for (let m = re.exec(text); m; m = re.exec(text)) {
-    if (m[1]) ids.add(m[1]);
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    ids.add(m[1]);
   }
 
   const stack: unknown[] = match.blocks ? [match.blocks] : [];
@@ -470,7 +471,7 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
  * - chat:write - for sending messages to public channels
  * - search:read - for searching messages (requires a user token)
  *
- * Optional (not required for MVP):
+ * Optional (possible future usage):
  * - groups:read - to list private channels (future)
  * - im:read - to list DMs (future)
  * - mpim:read - to list group DMs (future)

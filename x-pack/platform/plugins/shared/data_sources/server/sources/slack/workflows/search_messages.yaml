@@ -1,6 +1,6 @@
 version: '1'
 name: 'sources.slack.search_messages'
-description: 'Search Slack messages and return compact results suitable for LLM summaries and follow-up navigation. Actions and inputs: searchMessages (query, optional in_channel, optional from_user, optional after, optional before, optional sort, optional sort_dir, optional count, optional page, optional highlight, optional raw). Output (compact default): matches with text, channel {id,name}, sender, mentions, and permalink. Requires a user token with search:read.'
+description: 'Search Slack messages and return compact results suitable for LLM summaries and follow-up navigation. Actions and inputs: searchMessages (required query, optional in_channel, optional from_user, optional after, optional before, optional sort, optional sort_dir, optional count, optional page, optional highlight, optional raw). Output (compact default): matches with text, channel {id,name}, sender, mentions, and permalink. Requires a user token with search:read.'
 tags: ['agent-builder-tool']
 enabled: true
 triggers:
@@ -8,6 +8,7 @@ triggers:
 inputs:
   - name: query
     type: string
+    required: true
     description: 'Search query. You can include Slack search operators directly (e.g. in:#general from:@user after:2026-02-10).'
   - name: in_channel
     type: string
@@ -16,7 +17,7 @@ inputs:
   - name: from_user
     type: string
     required: false
-    description: 'Optional constraint. Appends `from:<@UserID>` or `from:username` to the query.'
+    description: 'Optional constraint. Appends `from:<@UserID>` or `from:username` to the query. Keep in mind that Slack usernames may need space characters replaced by periods. John Doe becomes john.doe'
   - name: after
     type: string
     required: false
