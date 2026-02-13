@@ -47,6 +47,10 @@ const saveOverflowMenuCss = css`
   width: 160px;
 `;
 
+const primaryButtonCss = css`
+  block-size: 28px;
+`;
+
 const DashboardSaveSplitButton: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const panels = [
@@ -70,6 +74,7 @@ const DashboardSaveSplitButton: React.FC = () => {
       })}
     >
       <EuiSplitButton.ActionPrimary
+        css={primaryButtonCss}
         iconType="save"
         data-test-subj="headerGlobalNav-appActionsSaveButton"
         minWidth={false}
@@ -81,6 +86,7 @@ const DashboardSaveSplitButton: React.FC = () => {
       <EuiPopover
         button={React.cloneElement(
           <EuiSplitButton.ActionSecondary
+            css={primaryButtonCss}
             iconType="arrowDown"
             aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveOptionsAriaLabel', {
               defaultMessage: 'Save options',
@@ -143,6 +149,7 @@ const DashboardPrimaryActions: React.FC = () => {
           />
           <DashboardSaveSplitButton />
           <EuiButton
+            css={primaryButtonCss}
             size="s"
             color="success"
             minWidth={false}
@@ -160,9 +167,11 @@ const DashboardPrimaryActions: React.FC = () => {
         </>
       ) : (
         <EuiButton
+          css={primaryButtonCss}
           size="s"
           color="text"
           fill={false}
+          minWidth={false}
           iconType="pencil"
           onClick={() => {
             dashboardHeaderIsEditMode = true;

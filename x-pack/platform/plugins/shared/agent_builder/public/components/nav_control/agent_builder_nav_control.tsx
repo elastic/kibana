@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { type ComponentProps, useCallback, useEffect } from 'react';
-import { EuiButton, EuiButtonIcon, EuiShowFor, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiButtonIcon, EuiShowFor, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -76,7 +76,7 @@ export function AgentBuilderNavControl() {
   > = (props) => (
     <>
       <EuiShowFor sizes={['m', 'l', 'xl']}>
-        <EuiButton {...props} data-test-subj="AgentBuilderNavControlButton" />
+        <EuiButtonEmpty {...props} data-test-subj="AgentBuilderNavControlButton" />
       </EuiShowFor>
       <EuiShowFor sizes={['xs', 's']}>
         <EuiButtonIcon

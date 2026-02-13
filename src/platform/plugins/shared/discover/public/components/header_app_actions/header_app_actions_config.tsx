@@ -39,6 +39,10 @@ const overflowKeyPadItemCss = css`
   min-height: 48px;
 `;
 
+const primaryButtonCss = css`
+  block-size: 28px;
+`;
+
 const OverflowKeyPadSection: React.FC = () => (
   <>
     <EuiKeyPadMenu css={overflowKeyPadCss}>
@@ -98,6 +102,7 @@ const DiscoverSaveButton: React.FC = () => {
       })}
     >
       <EuiSplitButton.ActionPrimary
+        css={primaryButtonCss}
         iconType="save"
         data-test-subj="headerGlobalNav-appActionsSaveButton"
         minWidth={false}
@@ -107,6 +112,7 @@ const DiscoverSaveButton: React.FC = () => {
       <EuiPopover
         button={React.cloneElement(
           <EuiSplitButton.ActionSecondary
+            css={primaryButtonCss}
             iconType="arrowDown"
             aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveOptionsAriaLabel', {
               defaultMessage: 'Save options',
