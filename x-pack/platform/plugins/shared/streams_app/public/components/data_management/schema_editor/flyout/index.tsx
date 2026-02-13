@@ -111,7 +111,7 @@ export const SchemaEditorFlyout = ({
   const isDescriptionOnlyEditing =
     isEditing &&
     streamType === 'wired' &&
-    (field.status === 'inherited' || nextField.type === 'unmapped');
+    field.status === 'inherited';
   const hasDescriptionChanged =
     (nextField.description ?? undefined) !== (field.description ?? undefined);
   const isInheritedDescriptionOnlyEditing =

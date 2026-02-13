@@ -85,10 +85,19 @@ export const DetectedFieldsEditor = ({ schemaEditorFields }: DetectedFieldsEdito
         // We will enable it once we add geo_point support for wired.
         enableGeoPointSuggestions={false}
         onFieldUpdate={(field) => {
+          const normalizedDescription = field.description?.trim();
           if (field.status === 'mapped') {
-            mapField(field);
+            const isTypelessMappedField = !field.type || field.type === 'unmapped';
+            if (isTypelessMappedField) {
+              if (normalizedDescription) {
+                stageDocOnlyOverride({ fieldName: field.name, description: normalizedDescription });
+              } else {
+                unmapField(field.name);
+              }
+            } else {
+              mapField(field);
+            }
           } else if (field.status === 'unmapped') {
-            const normalizedDescription = field.description?.trim();
             // Keep "Unmapped" selectable for documentation-only overrides, but ensure we never
             // persist `type: 'unmapped'` over the API.
             if (normalizedDescription) {
