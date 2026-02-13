@@ -86,7 +86,7 @@ export const mockDataStreamData: DataStreamAttributes = {
     created_at: '2024-01-01T00:00:00.000Z',
   },
   result: {
-    ingest_pipeline: 'test-pipeline',
+    ingest_pipeline: { name: 'test-pipeline', processors: [] },
     field_mapping: {
       'test-field': 'test-value',
     },

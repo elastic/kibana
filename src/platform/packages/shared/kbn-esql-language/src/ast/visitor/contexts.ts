@@ -304,7 +304,7 @@ export class CommandVisitorContext<
         continue;
       }
 
-      if (arg.type === 'query') {
+      if (arg.type === 'query' && 'commands' in arg) {
         const result = this.visitSubQuery(arg);
         yield result;
       }

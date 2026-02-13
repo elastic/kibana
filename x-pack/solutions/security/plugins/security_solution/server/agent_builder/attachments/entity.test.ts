@@ -130,7 +130,9 @@ describe('createEntityAttachmentType', () => {
       };
 
       const formatted = await attachmentType.format(attachment, formatContext);
-      const representation = await formatted.getRepresentation();
+      const representation = formatted.getRepresentation
+        ? await formatted.getRepresentation()
+        : { type: 'text', value: attachment.data };
 
       expect(representation.type).toBe('text');
       expect(representation.value).toBe('identifier: hostname-1, identifierType: host');

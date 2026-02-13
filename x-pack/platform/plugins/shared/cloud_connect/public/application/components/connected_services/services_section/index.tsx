@@ -40,6 +40,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
     showDisableModal,
     closeDisableModal,
     handleEnableServiceByUrl,
+    handleRotateServiceApiKey,
   } = useServiceActions({ onServiceUpdate, services });
 
   // Check if there's an active subscription (active or trial)
@@ -74,6 +75,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
             defaultMessage: 'Elastic Inference Service',
           })
         ),
+      onRotateApiKey: services.eis?.enabled ? () => handleRotateServiceApiKey('eis') : undefined,
       isLoading: loadingService === 'eis' || autoEnablingEis,
       subscriptionRequired: services.eis?.subscription?.required,
       hasActiveSubscription,

@@ -57,8 +57,8 @@ export class FleetHomePage {
     await this.getAgentPoliciesTab().click();
   }
 
-  getAgentPolicyNameLink() {
-    return this.page.testSubj.locator('agentPolicyNameLink');
+  getAgentPolicyNameLink(title: string) {
+    return this.page.getByRole('link', { name: title });
   }
 
   getAddPackagePolicyButton() {

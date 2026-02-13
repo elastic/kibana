@@ -22,6 +22,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
+import type { TelemetryServiceClient } from './common/lib/telemetry/types';
 
 /**
  * AgentBuilder plugin start contract interface.
@@ -78,6 +79,9 @@ export interface WorkflowsPublicPluginStartAdditionalServices {
   storage: Storage;
   /** Agent Builder service - registered dynamically by the agentBuilder plugin */
   agentBuilder?: AgentBuilderPluginStartContract;
+  workflowsManagement: {
+    telemetry: TelemetryServiceClient;
+  };
 }
 
 export type WorkflowsServices = CoreStart &

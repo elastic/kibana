@@ -51,6 +51,7 @@ const asyncNoop = async () => {};
 
 export class StreamManager {
   private readonly clientStreams: Map<SynthtraceEsClient<Fields>, PassThrough> = new Map();
+  private readonly clientIndexPromises: Map<SynthtraceEsClient<Fields>, Promise<void>> = new Map();
   private readonly trackedGeneratorStreams: Writable[] = [];
   public readonly trackedWorkers: Worker[] = [];
 
@@ -148,7 +149,7 @@ export class StreamManager {
     } else {
       stream = new PassThrough({ objectMode: true });
       this.clientStreams.set(client, stream);
-      client.index(stream);
+      this.clientIndexPromises.set(client, client.index(stream));
     }
 
     return stream;
@@ -212,6 +213,14 @@ export class StreamManager {
       this.logger.debug(`Ending ${clientStreams.length} client streams`);
 
       await Promise.all(clientStreams.map(endStream));
+    }
+    const clientIndexPromises = Array.from(this.clientIndexPromises.values());
+
+    if (clientIndexPromises.length) {
+      // ending client index promises
+      this.logger.debug(`Ending ${clientIndexPromises.length} client index promises`);
+
+      await Promise.all(clientIndexPromises);
     }
 
     await this.teardownCallback();

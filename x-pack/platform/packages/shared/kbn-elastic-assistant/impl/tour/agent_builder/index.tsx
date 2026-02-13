@@ -19,6 +19,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
 import type { AgentBuilderTourState } from './step_config';
 import { agentBuilderTourStep1, tourDefaultConfig } from './step_config';
@@ -50,15 +51,18 @@ const AgentBuilderTourStepComponent: React.FC<Props> = ({
   const shouldShowTour = tourState?.isTourActive && !isDisabled;
   const [isTimerExhausted, setIsTimerExhausted] = useState(false);
 
+  const { notifications } = useKibana().services;
+  const userAllowsTours = notifications?.tours.isEnabled() ?? true;
+
   useEffect(() => {
-    if (shouldShowTour) {
+    if (shouldShowTour && userAllowsTours) {
       const timer = setTimeout(() => {
         setIsTimerExhausted(true);
       }, 1000);
 
       return () => clearTimeout(timer);
     }
-  }, [shouldShowTour]);
+  }, [shouldShowTour, userAllowsTours]);
 
   const finishTour = useCallback(() => {
     setTourState((prev = tourDefaultConfig) => ({
@@ -81,7 +85,7 @@ const AgentBuilderTourStepComponent: React.FC<Props> = ({
     return null;
   }
 
-  const isStepOpen = shouldShowTour && isTimerExhausted;
+  const isStepOpen = shouldShowTour && isTimerExhausted && userAllowsTours;
 
   return (
     <EuiTourStep

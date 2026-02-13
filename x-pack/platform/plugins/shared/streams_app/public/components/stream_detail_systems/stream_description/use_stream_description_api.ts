@@ -47,15 +47,17 @@ export const useStreamDescriptionApi = ({
     async (nextDescription: string) => {
       setIsUpdating(true);
 
-      const stream = {
-        ...omit(definition.stream, ['name', 'updated_at']),
-        ingest: {
-          ...definition.stream.ingest,
-          processing: {
-            ...omit(definition.stream.ingest.processing, ['updated_at']),
-          },
-        },
-      };
+      const stream = Streams.ingest.all.Definition.is(definition.stream)
+        ? {
+            ...omit(definition.stream, ['name', 'updated_at']),
+            ingest: {
+              ...definition.stream.ingest,
+              processing: {
+                ...omit(definition.stream.ingest.processing, ['updated_at']),
+              },
+            },
+          }
+        : omit(definition.stream, ['name', 'updated_at']);
 
       return updateStream(
         Streams.all.UpsertRequest.parse({
@@ -82,14 +84,13 @@ export const useStreamDescriptionApi = ({
         })
         .catch((error) => {
           if (!silent) {
-            notifications.toasts.addError(error, {
+            notifications.toasts.addError(getFormattedError(error), {
               title: i18n.translate(
                 'xpack.streams.streamDetailView.streamDescription.saveErrorTitle',
                 {
                   defaultMessage: 'Failed to save description',
                 }
               ),
-              toastMessage: getFormattedError(error).message,
             });
           }
         })

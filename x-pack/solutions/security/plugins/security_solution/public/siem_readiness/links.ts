@@ -25,6 +25,7 @@ export const siemReadinessLinks: LinkItem = {
     }),
   ],
   experimentalKey: 'siemReadinessDashboard',
+  hideTimeline: true,
   uiSettingRequired: ENABLE_SIEM_READINESS_SETTING,
   id: SecurityPageName.siemReadiness,
   path: SIEM_READINESS_PATH,

@@ -8,7 +8,7 @@
  */
 
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { buildDataViewMock, shallowMockedFields } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 export const buildHitMock = (
@@ -16,7 +16,7 @@ export const buildHitMock = (
   customIndex: string = 'index',
   dataView: DataView = buildDataViewMock({
     name: 'data-view-mock',
-    fields: shallowMockedFields,
+    fields: deepMockedFields,
   })
 ) =>
   buildDataTableRecord(

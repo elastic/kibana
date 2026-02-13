@@ -29,14 +29,24 @@ import {
   generateFleetServerOutputSSLConfig,
 } from './full_agent_policy';
 import { getMonitoringPermissions } from './monitoring_permissions';
+import { generateOtelcolConfig } from './otel_collector';
+import { fetchRelatedSavedObjects } from './related_saved_objects';
 
 jest.mock('../epm/packages');
 jest.mock('../fleet_server_host');
+jest.mock('./otel_collector');
+jest.mock('./related_saved_objects');
 
 const mockedGetElasticAgentMonitoringPermissions = getMonitoringPermissions as jest.Mock<
   ReturnType<typeof getMonitoringPermissions>
 >;
 const mockedAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+const mockedGenerateOtelcolConfig = generateOtelcolConfig as jest.Mock<
+  ReturnType<typeof generateOtelcolConfig>
+>;
+const mockedFetchRelatedSavedObjects = fetchRelatedSavedObjects as jest.Mock<
+  ReturnType<typeof fetchRelatedSavedObjects>
+>;
 
 const soClientMock = createSavedObjectClientMock();
 const mockedGetPackageInfo = getPackageInfo as jest.Mock<ReturnType<typeof getPackageInfo>>;
@@ -128,6 +138,8 @@ jest.mock('../agents');
 jest.mock('../package_policy');
 
 jest.mock('./monitoring_permissions');
+jest.mock('./otel_collector');
+jest.mock('./related_saved_objects');
 
 jest.mock('../download_source', () => {
   return {
@@ -180,6 +192,9 @@ describe('getFullAgentPolicy', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
     jest.spyOn(appContextService, 'getMessageSigningService').mockReturnValue(undefined);
+    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableOtelIntegrations: true,
+    } as any);
 
     mockedGetFleetServerHostsForAgentPolicy.mockResolvedValue({
       name: 'default Fleet Server',
@@ -189,9 +204,56 @@ describe('getFullAgentPolicy', () => {
       is_preconfigured: false,
     });
 
+    mockedGenerateOtelcolConfig.mockReturnValue({});
+
     getAgentPolicyUpdateMock().mockClear();
     mockedAgentPolicyService.get.mockReset();
     mockedGetElasticAgentMonitoringPermissions.mockReset();
+    mockedGenerateOtelcolConfig.mockReset();
+    mockedFetchRelatedSavedObjects.mockReset();
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [
+        {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+      ],
+      proxies: [],
+      dataOutput: {
+        id: 'test-id',
+        is_default: true,
+        is_default_monitoring: true,
+        name: 'default',
+        type: 'elasticsearch',
+        hosts: ['http://127.0.0.1:9201'],
+      },
+      monitoringOutput: {
+        id: 'test-id',
+        is_default: true,
+        is_default_monitoring: true,
+        name: 'default',
+        type: 'elasticsearch',
+        hosts: ['http://127.0.0.1:9201'],
+      },
+      downloadSource: {
+        id: 'default-download-source-id',
+        is_default: true,
+        name: 'Default host',
+        host: 'http://default-registry.co',
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: {
+        name: 'default Fleet Server',
+        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+        is_preconfigured: false,
+      },
+    });
     mockedGetElasticAgentMonitoringPermissions.mockImplementation(
       async (soClient, { logs, metrics }, namespace) => {
         const names: string[] = [];
@@ -409,6 +471,57 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should support a different monitoring output', async () => {
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [
+        {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+        {
+          id: 'monitoring-output-id',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Monitoring output',
+          type: 'elasticsearch',
+          hosts: ['http://es-monitoring.co:9201'],
+        },
+      ],
+      proxies: [],
+      dataOutput: {
+        id: 'test-id',
+        is_default: true,
+        is_default_monitoring: true,
+        name: 'default',
+        type: 'elasticsearch',
+        hosts: ['http://127.0.0.1:9201'],
+      },
+      monitoringOutput: {
+        id: 'monitoring-output-id',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Monitoring output',
+        type: 'elasticsearch',
+        hosts: ['http://es-monitoring.co:9201'],
+      },
+      downloadSource: {
+        id: 'default-download-source-id',
+        is_default: true,
+        name: 'Default host',
+        host: 'http://default-registry.co',
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: {
+        name: 'default Fleet Server',
+        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+        is_preconfigured: false,
+      },
+    });
     mockAgentPolicy({
       namespace: 'default',
       revision: 1,
@@ -421,6 +534,49 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should support a different data output', async () => {
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [
+        {
+          id: 'data-output-id',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Data output',
+          type: 'elasticsearch',
+          hosts: ['http://es-data.co:9201'],
+        },
+      ],
+      proxies: [],
+      dataOutput: {
+        id: 'data-output-id',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Data output',
+        type: 'elasticsearch',
+        hosts: ['http://es-data.co:9201'],
+      },
+      monitoringOutput: {
+        id: 'data-output-id',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Data output',
+        type: 'elasticsearch',
+        hosts: ['http://es-data.co:9201'],
+      },
+      downloadSource: {
+        id: 'default-download-source-id',
+        is_default: true,
+        name: 'Default host',
+        host: 'http://default-registry.co',
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: {
+        name: 'default Fleet Server',
+        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+        is_preconfigured: false,
+      },
+    });
     mockAgentPolicy({
       namespace: 'default',
       revision: 1,
@@ -433,6 +589,57 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should support both different outputs for data and monitoring ', async () => {
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [
+        {
+          id: 'data-output-id',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Data output',
+          type: 'elasticsearch',
+          hosts: ['http://es-data.co:9201'],
+        },
+        {
+          id: 'monitoring-output-id',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Monitoring output',
+          type: 'elasticsearch',
+          hosts: ['http://es-monitoring.co:9201'],
+        },
+      ],
+      proxies: [],
+      dataOutput: {
+        id: 'data-output-id',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Data output',
+        type: 'elasticsearch',
+        hosts: ['http://es-data.co:9201'],
+      },
+      monitoringOutput: {
+        id: 'monitoring-output-id',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Monitoring output',
+        type: 'elasticsearch',
+        hosts: ['http://es-monitoring.co:9201'],
+      },
+      downloadSource: {
+        id: 'default-download-source-id',
+        is_default: true,
+        name: 'Default host',
+        host: 'http://default-registry.co',
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: {
+        name: 'default Fleet Server',
+        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+        is_preconfigured: false,
+      },
+    });
     mockAgentPolicy({
       namespace: 'default',
       revision: 1,
@@ -463,6 +670,49 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should use output id as the default policy id when remote elasticsearch', async () => {
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [
+        {
+          id: 'test-remote-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'remote_elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+      ],
+      proxies: [],
+      dataOutput: {
+        id: 'test-remote-id',
+        is_default: true,
+        is_default_monitoring: true,
+        name: 'default',
+        type: 'remote_elasticsearch',
+        hosts: ['http://127.0.0.1:9201'],
+      },
+      monitoringOutput: {
+        id: 'test-remote-id',
+        is_default: true,
+        is_default_monitoring: true,
+        name: 'default',
+        type: 'remote_elasticsearch',
+        hosts: ['http://127.0.0.1:9201'],
+      },
+      downloadSource: {
+        id: 'default-download-source-id',
+        is_default: true,
+        name: 'Default host',
+        host: 'http://default-registry.co',
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: {
+        name: 'default Fleet Server',
+        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+        is_preconfigured: false,
+      },
+    });
     mockAgentPolicy({
       id: 'policy',
       status: 'active',
@@ -480,6 +730,57 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should return the right outputs and permissions when package policies use their own outputs', async () => {
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [
+        {
+          id: 'data-output-id',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Data output',
+          type: 'elasticsearch',
+          hosts: ['http://es-data.co:9201'],
+        },
+        {
+          id: 'test-remote-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'remote_elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+      ],
+      proxies: [],
+      dataOutput: {
+        id: 'data-output-id',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Data output',
+        type: 'elasticsearch',
+        hosts: ['http://es-data.co:9201'],
+      },
+      monitoringOutput: {
+        id: 'data-output-id',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Data output',
+        type: 'elasticsearch',
+        hosts: ['http://es-data.co:9201'],
+      },
+      downloadSource: {
+        id: 'default-download-source-id',
+        is_default: true,
+        name: 'Default host',
+        host: 'http://default-registry.co',
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: {
+        name: 'default Fleet Server',
+        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+        is_preconfigured: false,
+      },
+    });
     mockedGetPackageInfo.mockResolvedValue({
       data_streams: [
         {
@@ -600,6 +901,57 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should return the right outputs and permissions when package policies use their own outputs (with default output)', async () => {
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [
+        {
+          id: 'data-output-id',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Data output',
+          type: 'elasticsearch',
+          hosts: ['http://es-data.co:9201'],
+        },
+        {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+      ],
+      proxies: [],
+      dataOutput: {
+        id: 'data-output-id',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Data output',
+        type: 'elasticsearch',
+        hosts: ['http://es-data.co:9201'],
+      },
+      monitoringOutput: {
+        id: 'data-output-id',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Data output',
+        type: 'elasticsearch',
+        hosts: ['http://es-data.co:9201'],
+      },
+      downloadSource: {
+        id: 'default-download-source-id',
+        is_default: true,
+        name: 'Default host',
+        host: 'http://default-registry.co',
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: {
+        name: 'default Fleet Server',
+        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+        is_preconfigured: false,
+      },
+    });
     mockedGetPackageInfo.mockResolvedValue({
       data_streams: [
         {
@@ -720,6 +1072,54 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should return agent binary sourceURI and ssl options from the agent policy', async () => {
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [
+        {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+      ],
+      proxies: [],
+      dataOutput: {
+        id: 'test-id',
+        is_default: true,
+        is_default_monitoring: true,
+        name: 'default',
+        type: 'elasticsearch',
+        hosts: ['http://127.0.0.1:9201'],
+      },
+      monitoringOutput: {
+        id: 'test-id',
+        is_default: true,
+        is_default_monitoring: true,
+        name: 'default',
+        type: 'elasticsearch',
+        hosts: ['http://127.0.0.1:9201'],
+      },
+      downloadSource: {
+        id: 'test-ds-1',
+        is_default: false,
+        name: 'Test',
+        host: 'http://custom-registry-test',
+        ssl: {
+          certificate: 'cert',
+          certificate_authorities: ['ca'],
+          key: 'KEY1',
+        },
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: {
+        name: 'default Fleet Server',
+        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+        is_preconfigured: false,
+      },
+    });
     mockAgentPolicy({
       namespace: 'default',
       revision: 1,
@@ -763,6 +1163,54 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should return agent binary with secrets if there are any present', async () => {
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [
+        {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+      ],
+      proxies: [],
+      dataOutput: {
+        id: 'test-id',
+        is_default: true,
+        is_default_monitoring: true,
+        name: 'default',
+        type: 'elasticsearch',
+        hosts: ['http://127.0.0.1:9201'],
+      },
+      monitoringOutput: {
+        id: 'test-id',
+        is_default: true,
+        is_default_monitoring: true,
+        name: 'default',
+        type: 'elasticsearch',
+        hosts: ['http://127.0.0.1:9201'],
+      },
+      downloadSource: {
+        id: 'test-ds-1',
+        is_default: false,
+        name: 'Test',
+        host: 'http://custom-registry-test',
+        secrets: {
+          ssl: {
+            key: 'KEY1',
+          },
+        },
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: {
+        name: 'default Fleet Server',
+        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+        is_preconfigured: false,
+      },
+    });
     mockAgentPolicy({
       namespace: 'default',
       revision: 1,
@@ -1098,6 +1546,52 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should return a policy with logs permissions when write_to_logs_streams is enabled', async () => {
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [
+        {
+          id: 'test-streams-id',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'streams output',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+          write_to_logs_streams: true,
+        },
+      ],
+      proxies: [],
+      dataOutput: {
+        id: 'test-streams-id',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'streams output',
+        type: 'elasticsearch',
+        hosts: ['http://127.0.0.1:9201'],
+        write_to_logs_streams: true,
+      },
+      monitoringOutput: {
+        id: 'test-streams-id',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'streams output',
+        type: 'elasticsearch',
+        hosts: ['http://127.0.0.1:9201'],
+        write_to_logs_streams: true,
+      },
+      downloadSource: {
+        id: 'default-download-source-id',
+        is_default: true,
+        name: 'Default host',
+        host: 'http://default-registry.co',
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: {
+        name: 'default Fleet Server',
+        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+        is_preconfigured: false,
+      },
+    });
     mockedGetPackageInfo.mockResolvedValue({
       data_streams: [
         {
@@ -1201,7 +1695,7 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should have ssl options in outputs when fleet server host has es ssl options', async () => {
-    mockedGetFleetServerHostsForAgentPolicy.mockResolvedValue({
+    const fleetServerHostWithSSL = {
       name: 'default Fleet Server',
       id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
       is_default: true,
@@ -1215,6 +1709,44 @@ describe('getFullAgentPolicy', () => {
         es_certificate: 'my-es-cert',
         es_key: 'my-es-key',
       },
+    };
+    mockedGetFleetServerHostsForAgentPolicy.mockResolvedValue(fleetServerHostWithSSL);
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [
+        {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+      ],
+      proxies: [],
+      dataOutput: {
+        id: 'test-id',
+        is_default: true,
+        is_default_monitoring: true,
+        name: 'default',
+        type: 'elasticsearch',
+        hosts: ['http://127.0.0.1:9201'],
+      },
+      monitoringOutput: {
+        id: 'test-id',
+        is_default: true,
+        is_default_monitoring: true,
+        name: 'default',
+        type: 'elasticsearch',
+        hosts: ['http://127.0.0.1:9201'],
+      },
+      downloadSource: {
+        id: 'default-download-source-id',
+        is_default: true,
+        name: 'Default host',
+        host: 'http://default-registry.co',
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: fleetServerHostWithSSL,
     });
 
     mockAgentPolicy({});
@@ -1233,6 +1765,202 @@ describe('getFullAgentPolicy', () => {
         },
         type: 'elasticsearch',
       },
+    });
+  });
+
+  describe('OTel config generation', () => {
+    it('should call generateOtelcolConfig with packageInfoCache when enableOtelIntegrations is true', async () => {
+      const packageInfo: PackageInfo = {
+        name: 'otelpackage',
+        version: '1.0.0',
+        type: 'input',
+        policy_templates: [
+          {
+            name: 'template1',
+            title: 'OTel Template',
+            input: 'otelcol',
+            type: 'logs',
+            template_path: 'input.yml.hbs',
+            dynamic_signal_types: true,
+            vars: [],
+          },
+        ],
+      } as any;
+
+      mockedGetPackageInfo.mockResolvedValue(packageInfo);
+      mockedGenerateOtelcolConfig.mockReturnValue({
+        receivers: {},
+        processors: {},
+        service: {
+          pipelines: {},
+        },
+      });
+
+      mockAgentPolicy({
+        package_policies: [
+          {
+            id: 'package-policy-1',
+            name: 'otel-policy',
+            namespace: 'default',
+            enabled: true,
+            package: { name: 'otelpackage', version: '1.0.0', title: 'OTel Package' },
+            inputs: [
+              {
+                type: 'otelcol',
+                enabled: true,
+                streams: [
+                  {
+                    id: 'stream-1',
+                    enabled: true,
+                    data_stream: { type: 'logs', dataset: 'otel.dataset' },
+                    vars: {},
+                  },
+                ],
+              },
+            ],
+            created_at: '',
+            updated_at: '',
+            created_by: '',
+            updated_by: '',
+            revision: 1,
+            policy_id: '',
+            policy_ids: [''],
+          },
+        ],
+      });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0];
+      expect(callArgs).toBeDefined();
+      // Third argument should be the packageInfoCache Map
+      expect(callArgs[2]).toBeInstanceOf(Map);
+      const packageInfoCache = callArgs[2] as Map<string, PackageInfo>;
+      expect(packageInfoCache.has('otelpackage-1.0.0')).toBe(true);
+      expect(packageInfoCache.get('otelpackage-1.0.0')).toEqual(packageInfo);
+    });
+
+    it('should include otelcolConfig in full agent policy when generated', async () => {
+      const mockOtelConfig = {
+        receivers: {
+          otlp: {
+            protocols: {
+              grpc: {
+                endpoint: '0.0.0.0:4317',
+              },
+            },
+          },
+        },
+        processors: {
+          'transform/test-routing': {
+            log_statements: [
+              {
+                context: 'log',
+                statements: [
+                  'set(attributes["data_stream.type"], "logs")',
+                  'set(attributes["data_stream.dataset"], "test.dataset")',
+                  'set(attributes["data_stream.namespace"], "default")',
+                ],
+              },
+            ],
+          },
+        },
+        service: {
+          pipelines: {
+            logs: {
+              receivers: ['otlp'],
+              processors: ['transform/test-routing'],
+              exporters: ['elasticsearch'],
+            },
+          },
+        },
+      };
+
+      mockedGenerateOtelcolConfig.mockReturnValue(mockOtelConfig);
+      mockedGetPackageInfo.mockResolvedValue({
+        name: 'otelpackage',
+        version: '1.0.0',
+        type: 'input',
+        policy_templates: [],
+      } as any);
+
+      mockAgentPolicy({
+        package_policies: [
+          {
+            id: 'package-policy-1',
+            name: 'otel-policy',
+            namespace: 'default',
+            enabled: true,
+            package: { name: 'otelpackage', version: '1.0.0', title: 'OTel Package' },
+            inputs: [
+              {
+                type: 'otelcol',
+                enabled: true,
+                streams: [
+                  {
+                    id: 'stream-1',
+                    enabled: true,
+                    data_stream: { type: 'logs', dataset: 'otel.dataset' },
+                    vars: {},
+                  },
+                ],
+              },
+            ],
+            created_at: '',
+            updated_at: '',
+            created_by: '',
+            updated_by: '',
+            revision: 1,
+            policy_id: '',
+            policy_ids: [''],
+          },
+        ],
+      });
+
+      const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(agentPolicy).toMatchObject({
+        receivers: mockOtelConfig.receivers,
+        processors: mockOtelConfig.processors,
+        service: mockOtelConfig.service,
+      });
+    });
+
+    it('should not call generateOtelcolConfig when enableOtelIntegrations is false', async () => {
+      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        enableOtelIntegrations: false,
+      } as any);
+
+      mockAgentPolicy({
+        package_policies: [
+          {
+            id: 'package-policy-1',
+            name: 'otel-policy',
+            namespace: 'default',
+            enabled: true,
+            package: { name: 'otelpackage', version: '1.0.0', title: 'OTel Package' },
+            inputs: [
+              {
+                type: 'otelcol',
+                enabled: true,
+                streams: [],
+              },
+            ],
+            created_at: '',
+            updated_at: '',
+            created_by: '',
+            updated_by: '',
+            revision: 1,
+            policy_id: '',
+            policy_ids: [''],
+          },
+        ],
+      });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).not.toHaveBeenCalled();
     });
   });
 });

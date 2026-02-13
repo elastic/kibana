@@ -10,7 +10,7 @@
   "plugin": {
     "id": "urlDrilldown",
     "browser": true,
-    "server": false,
+    "server": true,
     "requiredPlugins": [
       "embeddable",
       "uiActionsEnhanced"

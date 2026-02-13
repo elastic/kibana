@@ -15,6 +15,7 @@ export function buildConnectorIdFilter(connectorNames: string[]): Filter[] {
         key: 'kibana.alert.attack_discovery.api_config.name',
         type: 'term',
         index: '.alerts-security.attack.discovery.alerts',
+        disabled: false,
       },
       query: {
         terms: {

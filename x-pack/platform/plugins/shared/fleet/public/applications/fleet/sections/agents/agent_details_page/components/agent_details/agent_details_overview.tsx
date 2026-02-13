@@ -22,8 +22,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 
+import type { OutputsForAgentPolicy } from '../../../../../../../../server/types';
+
 import type { Agent, AgentPolicy } from '../../../../../types';
-import { useAgentVersion, useGetInfoOutputsForPolicy } from '../../../../../hooks';
+import { useAgentVersion } from '../../../../../hooks';
+import { hasVersionSuffix } from '../../../../../../../../common/services/version_specific_policies_utils';
 import { isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
@@ -42,11 +45,9 @@ const FlexItemWithMinWidth = styled(EuiFlexItem)`
 export const AgentDetailsOverviewSection: React.FunctionComponent<{
   agent: Agent;
   agentPolicy?: AgentPolicy;
-}> = memo(({ agent, agentPolicy }) => {
+  outputs?: OutputsForAgentPolicy;
+}> = memo(({ agent, agentPolicy, outputs }) => {
   const latestAgentVersion = useAgentVersion();
-
-  const outputRes = useGetInfoOutputsForPolicy(agentPolicy?.id);
-  const outputs = outputRes?.data?.item;
 
   return (
     <EuiPanel>
@@ -162,7 +163,12 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Agent policy',
               }),
               description: agentPolicy ? (
-                <AgentPolicySummaryLine policy={agentPolicy} agent={agent} />
+                <AgentPolicySummaryLine
+                  policy={agentPolicy}
+                  agent={agent}
+                  showPolicyId
+                  isVersionSpecific={hasVersionSuffix(agent.policy_id ?? '')}
+                />
               ) : (
                 <EuiSkeletonText lines={1} />
               ),

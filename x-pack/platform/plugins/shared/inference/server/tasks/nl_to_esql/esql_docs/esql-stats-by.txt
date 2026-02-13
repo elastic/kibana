@@ -1,0 +1,133 @@
+# STATS-BY
+
+The STATS command groups rows based on shared values and calculates one or more aggregated values over these groups. Each aggregated value can be filtered using a WHERE clause. If BY is omitted, the output contains a single row with aggregations over the entire dataset. Supported aggregation functions include ABSENT, AVG, COUNT, COUNT_DISTINCT, MAX, MEDIAN, MEDIAN_ABSOLUTE_DEVIATION, MIN, PERCENTILE, PRESENT, SAMPLE, ST_CENTROID_AGG, ST_EXTENT_AGG, STD_DEV, SUM, TOP, VALUES, VARIANCE, and WEIGHTED_AVG. When used with the TS source command, time series aggregation functions are also available. Supported grouping functions are BUCKET, TBUCKET, and CATEGORIZE.
+
+## Syntax
+
+`STATS [column1 =] expression1 [WHERE boolean_expression1][, ..., [columnN =] expressionN [WHERE boolean_expressionN]] [BY grouping_expression1[, ..., grouping_expressionN]]`
+
+### Parameters
+
+#### columnX
+
+The name for the aggregated value returned. If omitted, the name defaults to the corresponding expression. If multiple columns share the same name, only the rightmost column is kept.
+
+#### expressionX
+
+An expression that computes an aggregated value.
+
+#### grouping_expressionX
+
+An expression that determines the values to group by. If its name matches a computed column, that column will be ignored.
+
+#### boolean_expressionX
+
+(Optional) A condition that must be met for a row to be included in the evaluation of expressionX.
+
+## Examples
+
+Calculates the count of employees for each language and sorts the results by language.
+```esql
+FROM employees
+| STATS count = COUNT(emp_no) BY languages
+| SORT languages
+```
+
+Calculates the average value of the languages column across all employees.
+```esql
+FROM employees
+| STATS avg_lang = AVG(languages)
+```
+
+Calculates both the average and maximum values of the languages column for all employees.
+```esql
+FROM employees
+| STATS avg_lang = AVG(languages), max_lang = MAX(languages)
+```
+
+Calculates the average salary for employees born before 1960 and those born in or after 1960, grouped by gender, and sorts the results by gender.
+```esql
+FROM employees
+| STATS avg50s = AVG(salary)::LONG WHERE birth_date < "1960-01-01",
+        avg60s = AVG(salary)::LONG WHERE birth_date >= "1960-01-01"
+        BY gender
+| SORT gender
+```
+
+Counts the number of employees in different salary ranges: under 40K, between 40K and 60K, over 60K, and the total count.
+```esql
+FROM employees
+| EVAL Ks = salary / 1000
+| STATS under_40K = COUNT(*) WHERE Ks < 40,
+        inbetween = COUNT(*) WHERE 40 <= Ks AND Ks < 60,
+        over_60K  = COUNT(*) WHERE 60 <= Ks,
+        total     = COUNT(*)
+```
+
+Calculates the average salary for each combination of hiring year and language, rounds the result, and sorts by hiring year and language.
+```esql
+FROM employees
+| EVAL hired = DATE_FORMAT("yyyy", hire_date)
+| STATS avg_salary = AVG(salary) BY hired, languages.long
+| EVAL avg_salary = ROUND(avg_salary)
+| SORT hired, languages.long
+```
+
+Demonstrates that if the grouping key is multivalued, the input row is included in all groups for each color.
+```esql
+ROW price = 10, color = ["blue", "pink", "yellow"]
+| STATS SUM(price) BY color
+```
+
+Shows that if all grouping keys are multivalued, the input row is included in all possible group combinations of color and size.
+```esql
+ROW price = 10, color = ["blue", "pink", "yellow"], size = ["s", "m", "l"]
+| STATS SUM(price) BY color, size
+```
+
+Illustrates that the input row is included in all groups, including group keys, when grouping by a multivalued column.
+```esql
+ROW color = ["blue", "pink", "yellow"]
+| STATS VALUES(color) BY color
+```
+
+Demonstrates how to send each group key to the aggregation function by expanding the multivalued column first.
+```esql
+ROW color = ["blue", "pink", "yellow"]
+| MV_EXPAND color
+| STATS VALUES(color) BY color
+```
+
+Calculates the average salary change by first computing the average of salary changes per row and then averaging those values across all employees, rounding the result to 10 decimal places.
+```esql
+FROM employees
+| STATS avg_salary_change = ROUND(AVG(MV_AVG(salary_change)), 10)
+```
+
+Groups employees by the first letter of their last name and counts the number of employees in each group, then sorts the results.
+```esql
+FROM employees
+| STATS my_count = COUNT() BY LEFT(last_name, 1)
+| SORT `LEFT(last_name, 1)`
+```
+
+Shows that if the output column name is not specified, it defaults to the aggregation expression.
+```esql
+FROM employees
+| STATS AVG(salary)
+```
+
+Demonstrates how to use backticks to reference column names with special characters and round the average salary.
+```esql
+FROM employees
+| STATS AVG(salary)
+| EVAL avg_salary_rounded = ROUND(`AVG(salary)`)
+```
+
+## Limitations
+
+- STATS without any groups is significantly faster than when grouping is used.
+- Grouping on a single expression is much more optimized than grouping on multiple expressions. Grouping on a single keyword column can be up to five times faster than grouping on two keyword columns. Combining columns with CONCAT and then grouping does not improve performance.
+- Individual null values are skipped when computing aggregations.
+- If a grouping expression or output column name coincides, the column will be ignored.
+- Refer to elasticsearch/issues/134792 for more details on multivalued grouping behavior.

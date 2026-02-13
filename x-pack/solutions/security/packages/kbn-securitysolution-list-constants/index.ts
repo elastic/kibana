@@ -38,7 +38,7 @@ export const INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL = `${INTERNAL_EXCEPTION
  * Exception list spaces
  */
 export const EXCEPTION_LIST_NAMESPACE_AGNOSTIC = 'exception-list-agnostic';
-export const EXCEPTION_LIST_NAMESPACE = 'exception-list';
+export const EXCEPTION_LIST_NAMESPACE_AWARE = 'exception-list';
 
 /**
  * Specific routes for the single global space agnostic endpoint list

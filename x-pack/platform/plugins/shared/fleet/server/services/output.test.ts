@@ -122,6 +122,19 @@ function getMockedSoClient(
         });
       }
 
+      case outputIdToUuid(
+        'existing-preconfigured-default-output-allow-edit-write-to-logs-streams'
+      ): {
+        return mockOutputSO(
+          'existing-preconfigured-default-output-allow-edit-write-to-logs-streams',
+          {
+            is_default: true,
+            is_preconfigured: true,
+            allow_edit: ['write_to_logs_streams'],
+          }
+        );
+      }
+
       case outputIdToUuid('existing-preconfigured-default-output-allow-edit-name'): {
         return mockOutputSO('existing-preconfigured-default-output-allow-edit-name', {
           name: 'test',
@@ -1381,12 +1394,17 @@ describe('Output Service', () => {
       );
     });
 
-    it('should allow to update write_to_logs_streams field in preconfigured output outside from preconfiguration', async () => {
+    it('should allow to update write_to_logs_streams field in preconfigured output outside from preconfiguration if allow_edits is set', async () => {
       const soClient = getMockedSoClient();
-      await outputService.update(soClient, esClientMock, 'existing-preconfigured-default-output', {
-        write_to_logs_streams: true,
-        ssl: { certificate: '', certificate_authorities: [] },
-      });
+      await outputService.update(
+        soClient,
+        esClientMock,
+        'existing-preconfigured-default-output-allow-edit-write-to-logs-streams',
+        {
+          write_to_logs_streams: true,
+          ssl: { certificate: '', certificate_authorities: [] },
+        }
+      );
       expect(soClient.update).toBeCalled();
     });
 

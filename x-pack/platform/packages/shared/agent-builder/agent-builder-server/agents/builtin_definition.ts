@@ -14,13 +14,23 @@ import type { AgentDefinition, AgentConfiguration } from '@kbn/agent-builder-com
 export type BuiltInAgentConfiguration = AgentConfiguration;
 
 /**
+ * Context passed to dynamic configuration handlers.
+ */
+export interface AgentConfigContext {
+  request: KibanaRequest;
+  spaceId: string;
+}
+
+/**
  * Represents a built-in agent definition, as registered by the consumers using the agents setup contract.
  */
 export type BuiltInAgentDefinition = Pick<
   AgentDefinition,
   'id' | 'name' | 'description' | 'labels' | 'avatar_icon' | 'avatar_symbol' | 'avatar_color'
 > & {
-  configuration: BuiltInAgentConfiguration;
+  configuration:
+    | BuiltInAgentConfiguration
+    | ((ctx: AgentConfigContext) => MaybePromise<BuiltInAgentConfiguration>);
   /**
    * Optional dynamic availability configuration.
    */

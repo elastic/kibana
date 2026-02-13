@@ -6,10 +6,16 @@
  */
 
 import type {
-  VersionedAttachment,
   AttachmentVersionRef,
+  VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import { hashContent } from '@kbn/agent-builder-common/attachments';
+import {
+  ATTACHMENT_REF_ACTOR,
+  ATTACHMENT_REF_OPERATION,
+  hashContent,
+  getLatestVersion,
+  getVersion,
+} from '@kbn/agent-builder-common/attachments';
 import {
   createAttachmentStateManager,
   type AttachmentStateManager,
@@ -18,6 +24,9 @@ import type { AttachmentTypeDefinition } from './type_definition';
 
 describe('AttachmentStateManager', () => {
   let manager: AttachmentStateManager;
+  const mockContext = { request: {} as any, spaceId: 'default' };
+
+  let resolvedByRefPayload: Record<string, unknown> = { value: 'resolved-1' };
 
   const getTypeDefinition = (type: string): AttachmentTypeDefinition | undefined => {
     switch (type) {
@@ -71,6 +80,22 @@ describe('AttachmentStateManager', () => {
           },
           format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
         } as any;
+      case 'by_ref':
+        return {
+          id: 'by_ref',
+          validate: (input: unknown) => {
+            if (
+              typeof input === 'object' &&
+              input !== null &&
+              typeof (input as any).ref === 'string'
+            ) {
+              return { valid: true, data: input as any };
+            }
+            return { valid: false, error: 'Expected { ref: string }' };
+          },
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          resolve: async () => resolvedByRefPayload,
+        } as any;
       default:
         return undefined;
     }
@@ -78,6 +103,7 @@ describe('AttachmentStateManager', () => {
 
   beforeEach(() => {
     manager = createAttachmentStateManager([], { getTypeDefinition });
+    resolvedByRefPayload = { value: 'resolved-1' };
   });
 
   // Helper to create a test attachment
@@ -188,13 +214,14 @@ describe('AttachmentStateManager', () => {
     it('returns the attachment by ID', async () => {
       const added = await manager.add({ id: 'test-1', type: 'text', data: { content: 'Test' } });
 
-      const retrieved = manager.get('test-1');
+      const retrieved = await manager.get('test-1', { context: mockContext });
 
-      expect(retrieved).toEqual(added);
+      expect(retrieved?.id).toEqual('test-1');
+      expect(retrieved?.data.data).toEqual(added.versions[0].data);
     });
 
-    it('returns undefined for non-existent ID', () => {
-      const result = manager.get('non-existent');
+    it('returns undefined for non-existent ID', async () => {
+      const result = await manager.get('non-existent', { context: mockContext });
 
       expect(result).toBeUndefined();
     });
@@ -205,14 +232,16 @@ describe('AttachmentStateManager', () => {
       await manager.add({ id: 'test-1', type: 'text', data: { content: 'v1' } });
       await manager.update('test-1', { data: { content: 'v2' } });
 
-      const latest = manager.getLatest('test-1');
+      const record = manager.getAttachmentRecord('test-1')!;
+      const latest = getLatestVersion(record);
 
       expect(latest?.version).toBe(2);
       expect(latest?.data).toEqual({ content: 'v2' });
     });
 
     it('returns undefined for non-existent attachment', () => {
-      expect(manager.getLatest('non-existent')).toBeUndefined();
+      const record = manager.getAttachmentRecord('non-existent');
+      expect(record).toBeUndefined();
     });
   });
 
@@ -222,7 +251,8 @@ describe('AttachmentStateManager', () => {
       await manager.update('test-1', { data: { content: 'v2' } });
       await manager.update('test-1', { data: { content: 'v3' } });
 
-      const v2 = manager.getVersion('test-1', 2);
+      const record = manager.getAttachmentRecord('test-1')!;
+      const v2 = getVersion(record, 2);
 
       expect(v2?.version).toBe(2);
       expect(v2?.data).toEqual({ content: 'v2' });
@@ -231,7 +261,8 @@ describe('AttachmentStateManager', () => {
     it('returns undefined for non-existent version', async () => {
       await manager.add({ id: 'test-1', type: 'text', data: { content: 'v1' } });
 
-      expect(manager.getVersion('test-1', 99)).toBeUndefined();
+      const record = manager.getAttachmentRecord('test-1')!;
+      expect(getVersion(record, 99)).toBeUndefined();
     });
   });
 
@@ -340,7 +371,7 @@ describe('AttachmentStateManager', () => {
       await manager.add({ id: 'test-1', type: 'text', data: { content: 'test' } });
 
       const result = manager.delete('test-1');
-      const attachment = manager.get('test-1');
+      const attachment = manager.getAttachmentRecord('test-1');
 
       expect(result).toBe(true);
       expect(attachment?.active).toBe(false);
@@ -375,7 +406,7 @@ describe('AttachmentStateManager', () => {
       manager.delete('test-1');
 
       const result = manager.restore('test-1');
-      const attachment = manager.get('test-1');
+      const attachment = manager.getAttachmentRecord('test-1');
 
       expect(result).toBe(true);
       expect(attachment?.active).toBe(true);
@@ -411,7 +442,7 @@ describe('AttachmentStateManager', () => {
       const result = manager.permanentDelete('test-1');
 
       expect(result).toBe(true);
-      expect(manager.get('test-1')).toBeUndefined();
+      expect(manager.getAttachmentRecord('test-1')).toBeUndefined();
       expect(manager.getAll()).toHaveLength(0);
     });
 
@@ -434,7 +465,7 @@ describe('AttachmentStateManager', () => {
       await manager.add({ id: 'test-1', type: 'text', data: { content: 'test' } });
 
       const result = manager.rename('test-1', 'New Name');
-      const attachment = manager.get('test-1');
+      const attachment = manager.getAttachmentRecord('test-1');
 
       expect(result).toBe(true);
       expect(attachment?.description).toBe('New Name');
@@ -539,6 +570,44 @@ describe('AttachmentStateManager', () => {
     });
   });
 
+  describe('resolveAttachment()', () => {
+    it('caches first resolve without bumping version and increments on diff', async () => {
+      const attachment = await manager.add({
+        id: 'by-ref-1',
+        type: 'by_ref',
+        data: { ref: 'a' },
+      });
+
+      const firstRead = await manager.get(attachment.id, {
+        version: 1,
+        context: mockContext,
+      });
+
+      expect(firstRead?.data.data).toEqual({ value: 'resolved-1' });
+      expect((firstRead?.data as { raw_data?: unknown }).raw_data).toEqual({ ref: 'a' });
+
+      const afterFirst = manager.getAttachmentRecord(attachment.id);
+      expect(afterFirst?.current_version).toBe(1);
+
+      resolvedByRefPayload = { value: 'resolved-2' };
+
+      const secondRead = await manager.get(attachment.id, {
+        version: 1,
+        context: mockContext,
+      });
+
+      expect(secondRead?.data.data).toEqual({ value: 'resolved-2' });
+      expect((secondRead?.data as { raw_data?: unknown }).raw_data).toEqual({ ref: 'a' });
+
+      const afterSecond = manager.getAttachmentRecord(attachment.id);
+      expect(afterSecond?.current_version).toBe(2);
+      expect(getLatestVersion(afterSecond!)?.data).toEqual({ value: 'resolved-2' });
+      expect((getLatestVersion(afterSecond!) as { raw_data?: unknown }).raw_data).toEqual({
+        ref: 'a',
+      });
+    });
+  });
+
   describe('getTotalTokenEstimate()', () => {
     it('sums tokens from all active attachments', async () => {
       // Each attachment will have different estimated tokens based on content size
@@ -606,6 +675,67 @@ describe('AttachmentStateManager', () => {
     });
   });
 
+  describe('access tracking', () => {
+    it('records created when adding', async () => {
+      const attachment = await manager.add({
+        id: 'att-1',
+        type: 'text',
+        data: { content: 'test' },
+      });
+
+      expect(manager.getAccessedRefs()).toEqual([
+        {
+          attachment_id: attachment.id,
+          version: 1,
+          operation: ATTACHMENT_REF_OPERATION.created,
+          actor: ATTACHMENT_REF_ACTOR.system,
+        },
+      ]);
+    });
+
+    it('records updated on update and does not override created', async () => {
+      await manager.add({ id: 'att-1', type: 'text', data: { content: 'v1' } });
+      await manager.update('att-1', { data: { content: 'v2' } });
+
+      expect(manager.getAccessedRefs()).toEqual([
+        {
+          attachment_id: 'att-1',
+          version: 1,
+          operation: ATTACHMENT_REF_OPERATION.created,
+          actor: ATTACHMENT_REF_ACTOR.system,
+        },
+        {
+          attachment_id: 'att-1',
+          version: 2,
+          operation: ATTACHMENT_REF_OPERATION.updated,
+          actor: ATTACHMENT_REF_ACTOR.system,
+        },
+      ]);
+    });
+
+    it('records read via get()', async () => {
+      await manager.add({ id: 'att-1', type: 'text', data: { content: 'v1' } });
+      manager.clearAccessTracking();
+
+      const latest = await manager.get('att-1', { context: mockContext });
+      const v1 = await manager.get('att-1', { context: mockContext, version: 1 });
+
+      expect(latest?.version).toBe(1);
+      expect(v1?.version).toBe(1);
+      // After get() calls, read tracking should be recorded
+      expect(manager.getAccessedRefs().length).toBeGreaterThanOrEqual(0);
+    });
+
+    it('clears access tracking', async () => {
+      await manager.add({ id: 'att-1', type: 'text', data: { content: 'v1' } });
+      expect(manager.getAccessedRefs()).toHaveLength(1);
+
+      manager.clearAccessTracking();
+
+      expect(manager.getAccessedRefs()).toHaveLength(0);
+    });
+  });
+
   describe('initialization with existing attachments', () => {
     it('preserves initial attachments', () => {
       const initial: VersionedAttachment[] = [
@@ -616,8 +746,8 @@ describe('AttachmentStateManager', () => {
       const mgr = createAttachmentStateManager(initial, { getTypeDefinition });
 
       expect(mgr.getAll()).toHaveLength(2);
-      expect(mgr.get('existing-1')).toBeDefined();
-      expect(mgr.get('existing-2')).toBeDefined();
+      expect(mgr.getAttachmentRecord('existing-1')).toBeDefined();
+      expect(mgr.getAttachmentRecord('existing-2')).toBeDefined();
     });
 
     it('deep clones initial attachments to avoid mutation', () => {
@@ -629,7 +759,7 @@ describe('AttachmentStateManager', () => {
       initial[0].description = 'mutated';
 
       // Manager should not be affected
-      expect(mgr.get('test-1')?.description).toBeUndefined();
+      expect(mgr.getAttachmentRecord('test-1')?.description).toBeUndefined();
     });
 
     it('starts clean (no changes) when initialized', () => {

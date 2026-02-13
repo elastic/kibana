@@ -9,7 +9,7 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import { aiClassifyStepDefinition } from './ai/ai_classify_step/step';
-import { aiPromptStepDefinition } from './ai/ai_prompt_step';
+import { aiPromptStepDefinition } from './ai/ai_prompt_step/step';
 import { aiSummarizeStepDefinition } from './ai/ai_summarize_step/step';
 import {
   dataDedupeStepDefinition,

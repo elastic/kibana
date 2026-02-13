@@ -15,11 +15,16 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
-import { type Attachment } from '@kbn/agent-builder-common/attachments';
+import React, { useState } from 'react';
+import type {
+  Attachment,
+  AttachmentVersionRef,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ROUNDED_BORDER_RADIUS_LARGE } from '../../../../common.styles';
-import { AttachmentPillsRow } from '../conversation_input/attachment_pills_row';
 import { RoundResponseActions } from './round_response/round_response_actions';
+import { RoundAttachmentReferences } from './round_attachment_references';
 
 const labels = {
   userMessage: i18n.translate('xpack.agentBuilder.round.userInput', {
@@ -29,10 +34,17 @@ const labels = {
 
 interface RoundInputProps {
   input: string;
-  attachments?: Attachment[];
+  attachmentRefs?: AttachmentVersionRef[];
+  conversationAttachments?: VersionedAttachment[];
+  fallbackAttachments?: Attachment[];
 }
 
-export const RoundInput = ({ input, attachments }: RoundInputProps) => {
+export const RoundInput = ({
+  input,
+  attachmentRefs,
+  conversationAttachments,
+  fallbackAttachments,
+}: RoundInputProps) => {
   const { euiTheme } = useEuiTheme();
   const [isHovering, setIsHovering] = useState(false);
 
@@ -44,11 +56,6 @@ export const RoundInput = ({ input, attachments }: RoundInputProps) => {
     white-space: pre-wrap;
     border-radius: ${`${ROUNDED_BORDER_RADIUS_LARGE} ${ROUNDED_BORDER_RADIUS_LARGE} 0 ${ROUNDED_BORDER_RADIUS_LARGE}`};
   `;
-
-  const visibleAttachments = useMemo(() => {
-    if (!attachments) return [];
-    return attachments.filter((attachment) => !attachment.hidden);
-  }, [attachments]);
 
   return (
     <EuiFlexGroup
@@ -71,11 +78,15 @@ export const RoundInput = ({ input, attachments }: RoundInputProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-      {visibleAttachments.length > 0 && (
-        <EuiFlexItem grow={false}>
-          <AttachmentPillsRow attachments={visibleAttachments} justifyContent="flexEnd" />
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <RoundAttachmentReferences
+          attachmentRefs={attachmentRefs}
+          conversationAttachments={conversationAttachments}
+          fallbackAttachments={fallbackAttachments}
+          actorFilter={[ATTACHMENT_REF_ACTOR.user]}
+          justifyContent="flexEnd"
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <RoundResponseActions content={input} isVisible={isHovering} />
       </EuiFlexItem>

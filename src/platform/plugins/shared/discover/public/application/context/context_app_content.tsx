@@ -78,7 +78,6 @@ export function clamp(value: number) {
   return Math.max(Math.min(MAX_CONTEXT_SIZE, value), MIN_CONTEXT_SIZE);
 }
 
-const DiscoverGridMemoized = React.memo(DiscoverGrid);
 const ActionBarMemoized = React.memo(ActionBar);
 
 export function ContextAppContent({
@@ -223,7 +222,7 @@ export function ContextAppContent({
       </WrapperWithPadding>
       <div css={dscDocsGridCss}>
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
-          <DiscoverGridMemoized
+          <DiscoverGrid
             ariaLabelledBy="surDocumentsAriaLabel"
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
             cellActionsMetadata={cellActionsMetadata}

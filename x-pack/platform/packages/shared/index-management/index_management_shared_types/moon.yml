@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/utility-types'
   - '@kbn/share-plugin'
   - '@kbn/management-plugin'
+  - '@kbn/core'
 tags:
   - shared-common
   - package

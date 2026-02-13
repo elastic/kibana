@@ -6,3 +6,5 @@
  */
 
 export const GET_SIEM_READINESS_CATEGORIES_API_PATH = '/api/siem_readiness/get_categories';
+export const GET_INDEX_RESULTS_LATEST_API_PATH =
+  '/internal/ecs_data_quality_dashboard/results_latest';

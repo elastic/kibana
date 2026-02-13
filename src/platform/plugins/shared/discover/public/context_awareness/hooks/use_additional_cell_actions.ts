@@ -10,6 +10,7 @@
 import { createCellActionFactory } from '@kbn/cell-actions/actions';
 import { useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import type { AdditionalCellActionsParams } from '../types';
 import {
   DISCOVER_CELL_ACTIONS_TRIGGER,
   type AdditionalCellAction,
@@ -34,13 +35,19 @@ export const useAdditionalCellActions = ({
   query,
   filters,
   timeRange,
-}: Omit<AdditionalCellActionContext, 'field' | 'value'>) => {
+  extensionActions,
+}: Omit<AdditionalCellActionContext, 'field' | 'value'> & {
+  extensionActions?: AdditionalCellActionsParams['actions'];
+}) => {
   const { uiActions } = useDiscoverServices();
   const [instanceId, setInstanceId] = useState<string | undefined>();
   const getAdditionalCellActionsAccessor = useProfileAccessor('getAdditionalCellActions');
   const additionalCellActions = useMemo(
-    () => getAdditionalCellActionsAccessor(() => [])(),
-    [getAdditionalCellActionsAccessor]
+    () =>
+      getAdditionalCellActionsAccessor(() => [])({
+        actions: extensionActions ?? {},
+      }),
+    [extensionActions, getAdditionalCellActionsAccessor]
   );
 
   useEffect(() => {

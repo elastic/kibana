@@ -6,7 +6,7 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
 import { SERVICE_OPBEANS_JAVA } from '../constants';
 

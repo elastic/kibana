@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 import { getFleetAllIntegrationsNoneRole } from '../fixtures/services/privileges';
 
 test.describe(
   'When the user has All privilege for Fleet but None for integrations',
-  { tag: ['@ess'] },
+  { tag: tags.stateful.classic },
   () => {
     test('Fleet is accessible', async ({ browserAuth, pageObjects }) => {
       // Login with custom role: Fleet v2 (all) but Fleet (none) - which means integrations are none

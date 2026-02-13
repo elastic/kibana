@@ -213,7 +213,7 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
   );
   // PromQL queries always use @timestamp as timefield
   const isPromQLQuery = root.commands.some(({ name }) => name === 'promql');
-  if (isPromQLQuery && timeNamedParam) {
+  if (isPromQLQuery) {
     return '@timestamp';
   }
 

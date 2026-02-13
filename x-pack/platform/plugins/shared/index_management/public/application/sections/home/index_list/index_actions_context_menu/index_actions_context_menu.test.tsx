@@ -17,7 +17,9 @@ import type { Index } from '@kbn/index-management-shared-types';
 import { notificationService } from '../../../../services/notification';
 import { navigateToIndexDetailsPage, getIndexDetailsLink } from '../../../../services/routing';
 
-const user = userEvent.setup();
+// EUI context menus keep inactive panels mounted with `pointer-events: none`,
+// which can cause user-event to throw when interacting with menu items.
+const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
 
 jest.mock('../../../../services/routing', () => ({
   ...jest.requireActual('../../../../services/routing'),
@@ -299,7 +301,8 @@ describe('IndexActionsContextMenu', () => {
         renderWithProviders(<IndexActionsContextMenu {...closed} />);
 
         await openContextMenu();
-        const openBtn = await screen.findByTestId('openIndexMenuButton');
+        const menu = await screen.findByTestId('indexContextMenu');
+        const openBtn = await within(menu).findByTestId('openIndexMenuButton');
 
         await user.click(openBtn);
 
@@ -406,15 +409,18 @@ describe('IndexActionsContextMenu', () => {
         );
 
         await openContextMenu();
-        const overviewBtn = await screen.findByText(/show index overview/i);
+        const menu = await screen.findByTestId('indexContextMenu');
+        const overviewBtn = await within(menu).findByText(/show index overview/i);
         await user.click(overviewBtn);
 
         await openContextMenu();
-        const settingsBtn = await screen.findByText(/show index settings/i);
+        const menu2 = await screen.findByTestId('indexContextMenu');
+        const settingsBtn = await within(menu2).findByText(/show index settings/i);
         await user.click(settingsBtn);
 
         await openContextMenu();
-        const mappingBtn = await screen.findByText(/show index mapping/i);
+        const menu3 = await screen.findByTestId('indexContextMenu');
+        const mappingBtn = await within(menu3).findByText(/show index mapping/i);
         await user.click(mappingBtn);
 
         expect(navigateToIndexDetailsPage).toHaveBeenCalledTimes(3);

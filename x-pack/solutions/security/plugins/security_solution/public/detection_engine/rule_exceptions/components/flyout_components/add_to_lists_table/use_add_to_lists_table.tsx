@@ -49,7 +49,7 @@ export const useAddToSharedListTable = ({
 }: ExceptionsAddToListsComponentProps) => {
   const [listsToDisplay, setListsToDisplay] = useState<ExceptionListRuleReferencesSchema[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { read: canReadRules } = useUserPrivileges().rulesPrivileges;
+  const { read: canReadExceptions } = useUserPrivileges().rulesPrivileges.exceptions;
 
   const listsToFetch = useMemo(() => {
     return showAllSharedLists ? [] : sharedExceptionLists;
@@ -69,7 +69,7 @@ export const useAddToSharedListTable = ({
   const getReferences = useCallback(async () => {
     try {
       setIsLoading(true);
-      return canReadRules
+      return canReadExceptions
         ? getExceptionItemsReferences(
             (!listsToFetch.length
               ? [{ namespace_type: 'single' }]
@@ -79,7 +79,7 @@ export const useAddToSharedListTable = ({
     } catch (err) {
       setError(i18n.REFERENCES_FETCH_ERROR);
     }
-  }, [canReadRules, listsToFetch]);
+  }, [canReadExceptions, listsToFetch]);
 
   const fillListsToDisplay = useCallback(async () => {
     const result = (await getReferences()) as RuleReferences;

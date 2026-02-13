@@ -541,7 +541,12 @@ export class GlobalVisitorContext<
         return this.visitMapEntryExpression(parent, expressionNode, input as any);
       }
       case 'query': {
-        if (!this.methods.visitQuery || expressionNode.type !== 'query') break;
+        if (
+          !this.methods.visitQuery ||
+          expressionNode.type !== 'query' ||
+          !('commands' in expressionNode)
+        )
+          break;
         return this.visitQuery(parent, expressionNode, input as any);
       }
       case 'parens': {

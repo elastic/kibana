@@ -12,8 +12,8 @@ import { BlockListFlyout } from '../../../threat_intelligence/modules/block_list
 import { useIOCDetailsContext } from '../context';
 import { canAddToBlockList } from '../../../threat_intelligence/modules/block_list/utils/can_add_to_block_list';
 import { AddToBlockListContextMenu } from '../../../threat_intelligence/modules/block_list/components/add_to_block_list';
-import { AddToNewCase } from '../../../threat_intelligence/modules/cases/components/add_to_new_case';
-import { AddToExistingCase } from '../../../threat_intelligence/modules/cases/components/add_to_existing_case';
+import { AddToNewCase } from '../../../cases/attachments/indicator/components/add_to_new_case';
+import { AddToExistingCase } from '../../../cases/attachments/indicator/components/add_to_existing_case';
 import { InvestigateInTimelineContextMenu } from '../../../threat_intelligence/modules/timeline/components/investigate_in_timeline';
 
 export const TAKE_ACTION_BUTTON_TEST_ID = 'tiIndicatorFlyoutTakeActionButton';

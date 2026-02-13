@@ -24,11 +24,15 @@ interface SearchSessionAttrRestResponse {
   username?: string;
   version: string;
   isCanceled?: boolean;
+  status?: StatusRestRespone;
 }
 
 interface SearchSessionRequestInfoRestResponse {
   id: string;
   strategy: string;
+  startedAt?: string;
+  completedAt?: string;
+  status?: string;
 }
 
 export interface SearchSessionRestResponse {
@@ -36,9 +40,14 @@ export interface SearchSessionRestResponse {
   attributes: SearchSessionAttrRestResponse;
 }
 
-export interface SearchSessionStatusRestResponse {
+interface Status {
   status: StatusRestRespone;
   errors?: string[];
+}
+
+export type SearchSessionStatusRestResponse = Status;
+export interface SearchSessionStatusesResponse {
+  statuses: Record<string, Status>;
 }
 
 type StatusRestRespone = 'in_progress' | 'error' | 'complete' | 'cancelled' | 'expired';
@@ -49,7 +58,7 @@ export interface SearchSessionsFindRestResponse {
   /**
    * Map containing calculated statuses of search sessions from the find response
    */
-  statuses: Record<string, SearchSessionStatusRestResponse>;
+  statuses: Record<string, Status>;
 }
 
 export interface SearchSessionsUpdateRestResponse {

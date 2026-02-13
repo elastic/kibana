@@ -1,0 +1,119 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
+import type { RuleExecutionStatus, RuleLastRun } from '@kbn/alerting-types';
+import { transformAction } from '@kbn/alerts-ui-shared/src/common/transformations';
+import type { ResolvedRule, Rule, RuleUiAction, RuleTemplate } from '..';
+
+const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
+  last_execution_date: lastExecutionDate,
+  last_duration: lastDuration,
+  ...rest
+}) => ({
+  lastExecutionDate,
+  lastDuration,
+  ...rest,
+});
+
+const transformLastRun: RewriteRequestCase<RuleLastRun> = ({
+  outcome_msg: outcomeMsg,
+  outcome_order: outcomeOrder,
+  alerts_count: alertsCount,
+  ...rest
+}) => ({
+  outcomeMsg,
+  outcomeOrder,
+  alertsCount,
+  ...rest,
+});
+
+const transformFlapping = (flapping: AsApiContract<Rule['flapping']>) => {
+  if (!flapping) {
+    return flapping;
+  }
+
+  return {
+    enabled: flapping.enabled,
+    lookBackWindow: flapping.look_back_window,
+    statusChangeThreshold: flapping.status_change_threshold,
+  };
+};
+
+export const transformRule: RewriteRequestCase<Rule> = ({
+  rule_type_id: ruleTypeId,
+  created_by: createdBy,
+  updated_by: updatedBy,
+  created_at: createdAt,
+  updated_at: updatedAt,
+  api_key_owner: apiKeyOwner,
+  api_key_created_by_user: apiKeyCreatedByUser,
+  notify_when: notifyWhen,
+  mute_all: muteAll,
+  muted_alert_ids: mutedInstanceIds,
+  scheduled_task_id: scheduledTaskId,
+  execution_status: executionStatus,
+  actions: actions,
+  snooze_schedule: snoozeSchedule,
+  is_snoozed_until: isSnoozedUntil,
+  active_snoozes: activeSnoozes,
+  last_run: lastRun,
+  next_run: nextRun,
+  alert_delay: alertDelay,
+  flapping,
+  ...rest
+}: any) => ({
+  ruleTypeId,
+  createdBy,
+  updatedBy,
+  createdAt,
+  updatedAt,
+  apiKeyOwner,
+  notifyWhen,
+  muteAll,
+  mutedInstanceIds,
+  snoozeSchedule,
+  executionStatus: executionStatus ? transformExecutionStatus(executionStatus) : undefined,
+  actions: actions
+    ? actions.map((action: AsApiContract<RuleUiAction>) => transformAction(action))
+    : [],
+  scheduledTaskId,
+  isSnoozedUntil,
+  activeSnoozes,
+  ...(lastRun ? { lastRun: transformLastRun(lastRun) } : {}),
+  ...(nextRun ? { nextRun } : {}),
+  ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
+  ...(alertDelay ? { alertDelay } : {}),
+  ...(flapping !== undefined ? { flapping: transformFlapping(flapping) } : {}),
+  ...rest,
+});
+
+export const transformResolvedRule: RewriteRequestCase<ResolvedRule> = ({
+  alias_target_id,
+  alias_purpose,
+  outcome,
+  ...rest
+}: any) => {
+  return {
+    ...transformRule(rest),
+    alias_target_id,
+    alias_purpose,
+    outcome,
+  };
+};
+
+export const transformRuleTemplate: RewriteRequestCase<RuleTemplate> = ({
+  rule_type_id: ruleTypeId,
+  alert_delay: alertDelay,
+  flapping,
+  ...rest
+}: any) => ({
+  ruleTypeId,
+  ...(alertDelay ? { alertDelay } : {}),
+  ...(flapping !== undefined ? { flapping: transformFlapping(flapping) } : {}),
+  ...rest,
+});

@@ -60,7 +60,7 @@ export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized 
     [attack.replacements, detailsMarkdown]
   );
 
-  const tacticMetadata = useMemo(() => getTacticMetadata(attack), [attack]);
+  const tacticMetadata = useMemo(() => getTacticMetadata(attack.mitreAttackTactics), [attack]);
 
   const originalAlertIds = useMemo(
     () => attack.alertIds.map((id) => attack.replacements?.[id] ?? id),
@@ -107,7 +107,7 @@ export const SummaryTab = React.memo<SummaryTabProps>(({ attack, showAnonymized 
             <h2>{i18n.ATTACK_CHAIN}</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <AttackChain attackDiscovery={attack} />
+          <AttackChain attackTactics={attack.mitreAttackTactics} />
           <EuiSpacer size="l" />
         </>
       )}

@@ -13,16 +13,18 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import type { Writable } from '@kbn/utility-types';
 import { capitalize } from 'lodash';
 import type { XYState } from '../../../schema';
+import type { DataSourceStateLayer } from '../../utils';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
 import { getIdForLayer, isLensStateDataLayer } from './helpers';
-import type { DataSourceStateLayer } from '../../utils';
 import { nonNullable, isFormBasedLayer, isTextBasedLayer } from '../../utils';
 import {
   buildAPIAnnotationsLayer,
   buildAPIDataLayer,
   buildAPIReferenceLinesLayer,
 } from './api_layers';
+import { stripUndefined } from '../utils';
+import { convertAppearanceToAPIFormat, convertAppearanceToStateFormat } from './appearances';
 
 function convertFittingToStateFormat(fitting: XYState['fitting']) {
   return {
@@ -126,55 +128,20 @@ function convertAxisSettingsToStateFormat(
   const yRightTitle = axis?.right?.title?.value;
   const yLeftScale = axis?.left?.scale;
   const yRightScale = axis?.right?.scale;
-  return {
-    ...(xTitle && xTitle !== '' ? { xTitle } : {}),
-    ...(yTitle && yTitle !== '' ? { yTitle } : {}),
-    ...(yRightTitle && yRightTitle !== '' ? { yRightTitle } : {}),
-    ...(yLeftScale ? { yLeftScale } : {}),
-    ...(yRightScale ? { yRightScale } : {}),
-    ...(axisTitlesVisibilitySettings ? { axisTitlesVisibilitySettings } : {}),
-    ...(tickLabelsVisibilitySettings ? { tickLabelsVisibilitySettings } : {}),
-    ...(gridlinesVisibilitySettings ? { gridlinesVisibilitySettings } : {}),
-    ...(xExtent ? { xExtent } : {}),
-    ...(yLeftExtent ? { yLeftExtent } : {}),
-    ...(yRightExtent ? { yRightExtent } : {}),
-    ...(labelsOrientation ? { labelsOrientation } : {}),
-  };
-}
-
-const curveType = {
-  linear: 'LINEAR',
-  smooth: 'CURVE_MONOTONE_X',
-  stepped: 'CURVE_STEP_AFTER',
-} as const;
-
-function convertAppearanceToStateFormat(
-  config: XYState
-): Pick<
-  XYLensState,
-  | 'valueLabels'
-  | 'labelsOrientation'
-  | 'curveType'
-  | 'fillOpacity'
-  | 'minBarHeight'
-  | 'hideEndzones'
-  | 'showCurrentTimeMarker'
-  | 'pointVisibility'
-> {
-  return {
-    ...(config.decorations?.value_labels != null
-      ? { valueLabels: config.decorations?.value_labels ? 'show' : 'hide' }
-      : {}),
-    ...(config.decorations?.line_interpolation
-      ? { curveType: curveType[config.decorations?.line_interpolation] }
-      : {}),
-    ...(config.decorations?.fill_opacity != null
-      ? { fillOpacity: config.decorations?.fill_opacity }
-      : {}),
-    ...(config.decorations?.minimum_bar_height
-      ? { minBarHeight: config.decorations?.minimum_bar_height }
-      : {}),
-  };
+  return stripUndefined({
+    xTitle: xTitle && xTitle !== '' ? xTitle : undefined,
+    yTitle: yTitle && yTitle !== '' ? yTitle : undefined,
+    yRightTitle: yRightTitle && yRightTitle !== '' ? yRightTitle : undefined,
+    yLeftScale,
+    yRightScale,
+    axisTitlesVisibilitySettings,
+    tickLabelsVisibilitySettings,
+    gridlinesVisibilitySettings,
+    xExtent,
+    yLeftExtent,
+    yRightExtent,
+    labelsOrientation,
+  });
 }
 
 type LayerToDataView = Record<string, string>;
@@ -191,7 +158,7 @@ export function buildVisualizationState(
     ...convertLegendToStateFormat(config.legend),
     ...convertFittingToStateFormat(config.fitting),
     ...convertAxisSettingsToStateFormat(config.axis),
-    ...convertAppearanceToStateFormat(config),
+    ...(config.decorations ? convertAppearanceToStateFormat(config.decorations) : {}),
     layers,
   };
 }
@@ -212,12 +179,13 @@ export function buildVisualizationAPI(
       'Data layers must have at least one accessor defined to build the XY API state'
     );
   }
+  const decorations = convertAppearanceToAPIFormat(config);
   return {
     type: 'xy',
     ...convertLegendToAPIFormat(config.legend),
     ...convertFittingToAPIFormat(config),
     ...convertAxisSettingsToAPIFormat(config),
-    ...convertAppearanceToAPIFormat(config),
+    ...(decorations ? { decorations } : {}),
     layers: buildXYLayerAPI(config, layers, adHocDataViews, references, internalReferences),
   };
 }
@@ -282,94 +250,99 @@ function convertXExtent(extent: AxisExtentConfig | undefined): {
 function convertAxisSettingsToAPIFormat(config: XYLensState): Pick<XYState, 'axis'> | {} {
   const axis: EditableAxisType = {};
 
-  const xAxis: XAxisType = {
-    ...(config.xTitle
-      ? {
-          title: {
+  const xAxis: XAxisType = stripUndefined({
+    title:
+      config.xTitle || config.axisTitlesVisibilitySettings?.x != null
+        ? stripUndefined({
             value: config.xTitle,
-            ...(config.axisTitlesVisibilitySettings?.x != null
-              ? { visible: config.axisTitlesVisibilitySettings.x }
-              : {}),
-          },
-        }
-      : {}),
-    ...(config.tickLabelsVisibilitySettings?.x != null
-      ? { ticks: config.tickLabelsVisibilitySettings.x }
-      : {}),
-    ...(config.gridlinesVisibilitySettings?.x != null
-      ? { grid: config.gridlinesVisibilitySettings.x }
-      : {}),
+            visible:
+              config.axisTitlesVisibilitySettings?.x != null
+                ? config.axisTitlesVisibilitySettings.x
+                : undefined,
+          })
+        : undefined,
+
+    ticks:
+      config.tickLabelsVisibilitySettings?.x != null
+        ? config.tickLabelsVisibilitySettings.x
+        : undefined,
+    grid:
+      config.gridlinesVisibilitySettings?.x != null
+        ? config.gridlinesVisibilitySettings.x
+        : undefined,
     ...convertXExtent(config.xExtent),
-    ...(config.labelsOrientation?.x != null
-      ? {
-          label_orientation: Object.entries(orientationDictionary).find(
+    label_orientation:
+      config.labelsOrientation?.x != null
+        ? (Object.entries(orientationDictionary).find(
             ([_, value]) => value === config.labelsOrientation?.x
-          )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined,
-        }
-      : {}),
-  };
+          )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined)
+        : undefined,
+  });
   if (Object.keys(xAxis).length) {
     axis.x = xAxis;
   }
 
-  const leftAxis = {
-    ...(config.yTitle
-      ? {
-          title: {
+  const leftAxis = stripUndefined({
+    title:
+      config.yTitle || config.axisTitlesVisibilitySettings?.yLeft != null
+        ? stripUndefined({
             value: config.yTitle,
-            ...(config.axisTitlesVisibilitySettings?.yLeft != null
-              ? { visible: config.axisTitlesVisibilitySettings.yLeft }
-              : {}),
-          },
-        }
-      : {}),
-    ...(config.yLeftScale ? { scale: config.yLeftScale } : {}),
-    ...(config.tickLabelsVisibilitySettings?.yLeft != null
-      ? { ticks: config.tickLabelsVisibilitySettings.yLeft }
-      : {}),
-    ...(config.gridlinesVisibilitySettings?.yLeft != null
-      ? { grid: config.gridlinesVisibilitySettings.yLeft }
-      : {}),
+            visible:
+              config.axisTitlesVisibilitySettings?.yLeft != null
+                ? config.axisTitlesVisibilitySettings.yLeft
+                : undefined,
+          })
+        : undefined,
+    scale: config.yLeftScale ? config.yLeftScale : undefined,
+    ticks:
+      config.tickLabelsVisibilitySettings?.yLeft != null
+        ? config.tickLabelsVisibilitySettings.yLeft
+        : undefined,
+    grid:
+      config.gridlinesVisibilitySettings?.yLeft != null
+        ? config.gridlinesVisibilitySettings.yLeft
+        : undefined,
     ...convertExtendsToAPIFormat(config.yLeftExtent),
-    ...(config.labelsOrientation?.yLeft != null
-      ? {
-          label_orientation: Object.entries(orientationDictionary).find(
+    label_orientation:
+      config.labelsOrientation?.yLeft != null
+        ? (Object.entries(orientationDictionary).find(
             ([_, value]) => value === config.labelsOrientation?.yLeft
-          )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined,
-        }
-      : {}),
-  };
+          )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined)
+        : undefined,
+  });
   if (Object.keys(leftAxis).length) {
     axis.left = leftAxis;
   }
 
-  const rightAxis = {
-    ...(config.yRightTitle
-      ? {
-          title: {
+  const rightAxis = stripUndefined({
+    title:
+      config.yRightTitle || config.axisTitlesVisibilitySettings?.yRight != null
+        ? stripUndefined({
             value: config.yRightTitle,
-            ...(config.axisTitlesVisibilitySettings?.yRight != null
-              ? { visible: config.axisTitlesVisibilitySettings.yRight }
-              : {}),
-          },
-        }
-      : {}),
-    ...(config.yRightScale ? { scale: config.yRightScale } : {}),
-    ...(config.tickLabelsVisibilitySettings?.yRight != null
-      ? { ticks: config.tickLabelsVisibilitySettings.yRight }
-      : {}),
-    ...(config.gridlinesVisibilitySettings?.yRight != null
-      ? { grid: config.gridlinesVisibilitySettings.yRight }
-      : {}),
+            visible:
+              config.axisTitlesVisibilitySettings?.yRight != null
+                ? config.axisTitlesVisibilitySettings.yRight
+                : undefined,
+          })
+        : undefined,
+    scale: config.yRightScale ? config.yRightScale : undefined,
+    ticks:
+      config.tickLabelsVisibilitySettings?.yRight != null
+        ? config.tickLabelsVisibilitySettings.yRight
+        : undefined,
+    grid:
+      config.gridlinesVisibilitySettings?.yRight != null
+        ? config.gridlinesVisibilitySettings.yRight
+        : undefined,
+
     ...convertExtendsToAPIFormat(config.yRightExtent),
-    ...(config.labelsOrientation?.yRight != null
-      ? {
-          label_orientation: Object.entries(orientationDictionary).find(
+    label_orientation:
+      config.labelsOrientation?.yRight != null
+        ? (Object.entries(orientationDictionary).find(
             ([_, value]) => value === config.labelsOrientation?.yRight
-          )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined,
-        }
-      : {}),
-  };
+          )?.[0] as 'horizontal' | 'vertical' | 'angled' | undefined)
+        : undefined,
+  });
 
   if (Object.keys(rightAxis).length) {
     axis.right = rightAxis;
@@ -380,27 +353,6 @@ function convertAxisSettingsToAPIFormat(config: XYLensState): Pick<XYState, 'axi
   }
 
   return { axis };
-}
-
-function convertAppearanceToAPIFormat(config: XYLensState): Pick<XYState, 'decorations'> | {} {
-  const decorations: XYState['decorations'] = {
-    ...(config.valueLabels != null ? { value_labels: config.valueLabels === 'show' } : {}),
-    ...(config.curveType
-      ? {
-          line_interpolation: (Object.entries(curveType).find(
-            ([_, value]) => value === config.curveType
-          )?.[0] || 'linear') as 'linear' | 'smooth' | 'stepped',
-        }
-      : {}),
-    ...(config.fillOpacity != null ? { fill_opacity: config.fillOpacity } : {}),
-    ...(config.minBarHeight != null ? { minimum_bar_height: config.minBarHeight } : {}),
-  };
-
-  if (Object.keys(decorations).length === 0) {
-    return {};
-  }
-
-  return { decorations };
 }
 
 function buildXYLayerAPI(

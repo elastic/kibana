@@ -10,3 +10,4 @@
 export { Header } from './header';
 export { ProjectHeader } from './project';
 export { LoadingIndicator } from './loading_indicator';
+export { Sidebar } from './sidebar';

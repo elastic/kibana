@@ -29,7 +29,7 @@ describe('Metric Flyout Overview Tab', () => {
   const createMockMetric = (overrides: Partial<MetricField> = {}): MetricField => ({
     name: 'test.metric',
     index: 'test-index',
-    type: 'double',
+    type: ES_FIELD_TYPES.DOUBLE,
     unit: 'ms',
     dimensions: [],
     ...overrides,
@@ -49,7 +49,7 @@ describe('Metric Flyout Overview Tab', () => {
     });
 
     it('renders main description list', () => {
-      const metric = createMockMetric({ index: 'my-data-stream', type: 'long' });
+      const metric = createMockMetric({ index: 'my-data-stream', type: ES_FIELD_TYPES.LONG });
       const { getByTestId, getByText } = render(<OverviewTab metric={metric} />);
 
       expect(getByTestId('metricsExperienceFlyoutOverviewTabDescriptionList')).toBeInTheDocument();
@@ -167,6 +167,19 @@ describe('Metric Flyout Overview Tab', () => {
       expect(
         queryByTestId('metricsExperienceFlyoutOverviewTabDimensionsPagination')
       ).not.toBeInTheDocument();
+    });
+
+    it('keeps pagination visible when on last page with fewer items than page size', () => {
+      const dimensions = Array.from({ length: 25 }, (_, i) => ({
+        name: `dimension.${String(i).padStart(2, '0')}`,
+        type: ES_FIELD_TYPES.KEYWORD,
+      }));
+      const metric = createMockMetric({ dimensions });
+      const { getByTestId } = render(<OverviewTab metric={metric} />);
+
+      expect(
+        getByTestId('metricsExperienceFlyoutOverviewTabDimensionsPagination')
+      ).toBeInTheDocument();
     });
 
     it('sorts dimensions alphabetically', () => {

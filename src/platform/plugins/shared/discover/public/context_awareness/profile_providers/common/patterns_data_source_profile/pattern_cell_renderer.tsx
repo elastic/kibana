@@ -12,7 +12,6 @@ import type { FC } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiCode, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { DataTableRecord } from '@kbn/discover-utils';
 import { extractCategorizeTokens } from '@kbn/esql-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -91,19 +90,17 @@ const componentStyles = {
       color: euiTheme.colors.textPrimary,
       fontSize: euiTheme.size.m,
     }),
-  detailsContainer: ({ euiTheme }: UseEuiTheme) =>
+  detailsContainer: () =>
     css({
       maxWidth: '600px',
     }),
 };
 
 export function getPatternCellRenderer(
-  row: DataTableRecord,
-  columnId: string,
+  pattern: unknown,
   isDetails: boolean,
   defaultRowHeight?: number
 ) {
-  const pattern = row.flattened[columnId];
   if (pattern === undefined) {
     return '-';
   }

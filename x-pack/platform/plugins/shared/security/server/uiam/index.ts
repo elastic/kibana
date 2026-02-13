@@ -6,3 +6,4 @@
  */
 
 export { UiamService, type UiamServicePublic } from './uiam_service';
+export { isUiamCredential } from './utils';

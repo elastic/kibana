@@ -124,28 +124,28 @@ describe('SET Autocomplete', () => {
       });
     });
 
-    describe('Approximate setting', () => {
-      const setting = settings.find((s) => s.name === Settings.APPROXIMATE) as unknown as {
+    describe('Approximation setting', () => {
+      const setting = settings.find((s) => s.name === Settings.APPROXIMATION) as unknown as {
         mapParams: string;
       };
       it('suggests parameter names after assignment operator', async () => {
-        await setExpectSuggestions('SET approximate = ', ['false;', 'true;', '{ $0 };']);
+        await setExpectSuggestions('SET approximation = ', ['false;', 'true;', '{ $0 };']);
       });
 
       it('suggests map parameter names after selecting the map option', async () => {
         const parameters = parseMapParams(setting?.mapParams || '');
         const paramNames = Object.keys(parameters).map((paramName) => `"${paramName}": `);
-        await setExpectSuggestions('SET approximate = { ', paramNames);
+        await setExpectSuggestions('SET approximation = { ', paramNames);
       });
 
       it('suggests map parameter name after completing a parameter entry', async () => {
-        await setExpectSuggestions('SET approximate = { "num_rows": 100, ', [
+        await setExpectSuggestions('SET approximation = { "num_rows": 100, ', [
           '"confidence_level": ',
         ]);
       });
 
       it('suggests map parameter values after parameter name and colon: num_rows', async () => {
-        await setExpectSuggestions('SET approximate = { "num_rows": ', [
+        await setExpectSuggestions('SET approximation = { "num_rows": ', [
           '100000',
           '1000000',
           '500000',
@@ -153,7 +153,7 @@ describe('SET Autocomplete', () => {
       });
 
       it('suggests map parameter values after parameter name and colon:confidence_level', async () => {
-        await setExpectSuggestions('SET approximate = { "confidence_level": ', [
+        await setExpectSuggestions('SET approximation = { "confidence_level": ', [
           '0.99',
           '0.95',
           '0.9',

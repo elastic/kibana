@@ -46,7 +46,8 @@ export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
                     'The alias source object identifier. This is the legacy object identifier.',
                 },
               }),
-            })
+            }),
+            { maxSize: 1000 }
           ),
         }),
       },

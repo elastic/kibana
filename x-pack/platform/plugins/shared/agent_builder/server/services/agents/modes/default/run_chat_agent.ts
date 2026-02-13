@@ -8,21 +8,18 @@
 import { v4 as uuidv4 } from 'uuid';
 import { filter, finalize, from, merge, shareReplay, Subject } from 'rxjs';
 import { Command } from '@langchain/langgraph';
-import {
-  isStreamEvent,
-  type ToolIdMapping,
-  toolsToLangchain,
-} from '@kbn/agent-builder-genai-utils/langchain';
+import { isStreamEvent, type ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
-import type { StructuredTool } from '@langchain/core/tools';
+import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
-import type { PromptManager } from '@kbn/agent-builder-server/runner';
+import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import { ToolManagerToolType, type PromptManager } from '@kbn/agent-builder-server/runner';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
+import { createResultTransformer } from '../utils/create_result_transformer';
 import {
   addRoundCompleteEvent,
-  conversationToLangchainMessages,
   extractRound,
   prepareConversation,
   selectTools,
@@ -36,8 +33,8 @@ import { roundToActions } from '../utils/round_to_actions';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
-import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
 import { steps } from './constants';
+import { createPromptFactory } from './prompts';
 import type { StateType } from './state';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
@@ -69,6 +66,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     startTime = new Date(),
     configurationOverrides,
+    action,
   },
   context
 ) => {
@@ -76,17 +74,27 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     logger,
     modelProvider,
     toolProvider,
+    toolRegistry,
     attachments,
     request,
     stateManager,
     events,
     promptManager,
+    filestore,
+    skills,
+    toolManager,
+    experimentalFeatures,
   } = context;
 
-  ensureValidInput({ input: nextInput, conversation });
+  ensureValidInput({ input: nextInput, conversation, action });
 
   const pendingRound = getPendingRound(conversation);
   const conversationTimestamp = pendingRound?.started_at ?? startTime.toISOString();
+
+  // Only clear access tracking for a brand new round; keep it when resuming (HITL).
+  if (!pendingRound) {
+    context.attachmentStateManager.clearAccessTracking();
+  }
 
   const model = await modelProvider.getDefaultModel();
   const resolvedCapabilities = resolveCapabilities(capabilities);
@@ -97,60 +105,91 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventEmitter: AgentEventEmitterFn = (event) => {
     manualEvents$.next(event);
   };
-
+  // Pass action so regenerate uses the last round's original input instead of request input
   const processedConversation = await prepareConversation({
     nextInput,
     previousRounds: conversation?.rounds ?? [],
     context,
+    action,
   });
 
-  const selectedTools = await selectTools({
+  const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
+    request,
+    abortSignal,
+    nextInput: processedConversation.nextInput,
+  });
+  processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
+
+  const { staticTools, dynamicTools } = await selectTools({
     conversation: processedConversation,
+    previousDynamicToolIds: conversation?.state?.dynamic_tool_ids ?? [],
+    skills,
     toolProvider,
     agentConfiguration,
     attachmentsService: attachments,
+    filestore,
     request,
+    experimentalFeatures,
     spaceId: context.spaceId,
     runner: context.runner,
   });
 
-  const {
-    tools: langchainTools,
-    idMappings: toolIdMapping,
-    agentBuilderToLangchainIdMap,
-  } = await toolsToLangchain({
-    tools: selectedTools,
-    logger,
-    request,
-    sendEvent: eventEmitter,
-  });
-
-  let browserLangchainTools: StructuredTool[] = [];
-  let browserIdMappings = new Map<string, string>();
-  if (browserApiTools && browserApiTools.length > 0) {
-    const browserToolResult = browserToolsToLangchain({
-      browserApiTools,
-    });
-    browserLangchainTools = browserToolResult.tools;
-    browserIdMappings = browserToolResult.idMappings;
-  }
-
-  const allTools = [...langchainTools, ...browserLangchainTools];
-  const allToolIdMappings = new Map([...toolIdMapping, ...browserIdMappings]);
+  await Promise.all([
+    toolManager.addTools({
+      type: ToolManagerToolType.executable,
+      tools: staticTools,
+      logger,
+      eventEmitter,
+    }),
+    toolManager.addTools({
+      type: ToolManagerToolType.browser,
+      tools: browserApiTools ?? [],
+    }),
+    toolManager.addTools(
+      {
+        type: ToolManagerToolType.executable,
+        tools: dynamicTools,
+        logger,
+        eventEmitter,
+      },
+      {
+        dynamic: true,
+      }
+    ),
+  ]);
 
   const cycleLimit = 10;
   const graphRecursionLimit = getRecursionLimit(cycleLimit);
+
+  // Create unified result transformer for tool result optimization
+  const resultTransformer = createResultTransformer({
+    toolRegistry,
+    filestore,
+    filestoreEnabled: experimentalFeatures.filestore,
+  });
+
+  const promptFactory = createPromptFactory({
+    configuration: resolvedConfiguration,
+    capabilities: resolvedCapabilities,
+    filestore,
+    processedConversation,
+    resultTransformer,
+    outputSchema,
+    conversationTimestamp,
+    experimentalFeatures,
+  });
 
   const agentGraph = createAgentGraph({
     logger,
     events: { emit: eventEmitter },
     chatModel: model.chatModel,
-    tools: allTools,
+    toolManager,
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
     structuredOutput,
     outputSchema,
     processedConversation,
+    promptFactory,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
@@ -158,9 +197,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const eventStream = agentGraph.streamEvents(
     createInitializerCommand({
       conversation: processedConversation,
-      agentBuilderToLangchainIdMap,
+      agentBuilderToLangchainIdMap: toolManager.getToolIdMapping(),
       cycleLimit,
-      conversationTimestamp,
     }),
     {
       version: 'v2',
@@ -179,7 +217,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     filter(isStreamEvent),
     convertGraphEvents({
       graphName: chatAgentGraphName,
-      toolIdMapping: allToolIdMappings,
+      toolManager,
       logger,
       startTime,
       pendingRound,
@@ -198,7 +236,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
-      getConversationState: () => getConversationState({ promptManager }),
+      getConversationState: () => getConversationState({ promptManager, toolManager }),
       pendingRound,
       startTime,
       modelProvider,
@@ -218,7 +256,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const round = await extractRound(events$);
-
   return {
     round,
   };
@@ -226,11 +263,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
 const getConversationState = ({
   promptManager,
+  toolManager,
 }: {
   promptManager: PromptManager;
+  toolManager: ToolManager;
 }): ConversationInternalState => {
   return {
     prompt: promptManager.dump(),
+    dynamic_tool_ids: toolManager.getDynamicToolIds(),
   };
 };
 
@@ -238,18 +278,12 @@ const createInitializerCommand = ({
   conversation,
   cycleLimit,
   agentBuilderToLangchainIdMap,
-  conversationTimestamp,
 }: {
   conversation: ProcessedConversation;
   cycleLimit: number;
   agentBuilderToLangchainIdMap: ToolIdMapping;
-  conversationTimestamp: string;
 }): Command => {
-  const initialMessages = conversationToLangchainMessages({
-    conversation,
-  });
-
-  const initialState: Partial<StateType> = { initialMessages, cycleLimit, conversationTimestamp };
+  const initialState: Partial<StateType> = { cycleLimit };
   let startAt = steps.init;
 
   const lastRound = conversation.previousRounds.length

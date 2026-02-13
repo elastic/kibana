@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { ActionTypeSelectorModal } from './action_type_selector_modal';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
@@ -48,6 +48,10 @@ const defaultProps = {
 };
 
 describe('ActionTypeSelectorModal', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should render modal with header and body when actionTypes is not empty', () => {
     const { getByTestId, getAllByTestId } = render(<ActionTypeSelectorModal {...defaultProps} />);
 
@@ -77,5 +81,50 @@ describe('ActionTypeSelectorModal', () => {
     fireEvent.click(getByTestId(`action-option-${actionTypes[1].name}`));
 
     expect(onSelect).toHaveBeenCalledWith(actionTypes[1]);
+  });
+
+  it('should disable all action buttons when isMissingConnectorPrivileges is true', () => {
+    const { getByTestId } = render(
+      <ActionTypeSelectorModal
+        {...defaultProps}
+        isMissingConnectorPrivileges={true}
+        missingPrivilegesTooltip="Test tooltip"
+      />
+    );
+
+    const button1 = getByTestId(`action-option-${actionTypes[0].name}`);
+    const button2 = getByTestId(`action-option-${actionTypes[1].name}`);
+
+    expect(button1).toBeDisabled();
+    expect(button2).toBeDisabled();
+  });
+
+  it('should show tooltip for disabled actions when missing privileges', async () => {
+    const missingPrivilegesTooltip = 'Test tooltip';
+    render(
+      <ActionTypeSelectorModal
+        {...defaultProps}
+        isMissingConnectorPrivileges={true}
+        missingPrivilegesTooltip={missingPrivilegesTooltip}
+      />
+    );
+
+    fireEvent.mouseOver(screen.getByTestId(`action-option-${actionTypes[0].name}`));
+
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(missingPrivilegesTooltip);
+  });
+
+  it('should not call onSelect when clicking a disabled button due to missing privileges', () => {
+    const { getByTestId } = render(
+      <ActionTypeSelectorModal
+        {...defaultProps}
+        isMissingConnectorPrivileges={true}
+        missingPrivilegesTooltip="Test tooltip"
+      />
+    );
+
+    fireEvent.click(getByTestId(`action-option-${actionTypes[1].name}`));
+
+    expect(onSelect).not.toHaveBeenCalled();
   });
 });

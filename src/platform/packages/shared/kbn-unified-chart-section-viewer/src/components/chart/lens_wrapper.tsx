@@ -73,6 +73,13 @@ export function LensWrapper({
       left: 50%;
       transform: translate(-50%, -50%);
     }
+
+    // Style mark elements (from EuiHighlight) in panel headers to match Discover's highlight colors
+    & .embPanel__header mark,
+    & [data-test-subj='embeddablePanelTitle'] mark {
+      color: ${euiTheme.colors.textAccent};
+      background-color: ${euiTheme.colors.backgroundLightAccent};
+    }
   `;
 
   const handleExploreInDiscoverTab = useCallback(

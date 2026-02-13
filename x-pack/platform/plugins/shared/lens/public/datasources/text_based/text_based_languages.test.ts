@@ -230,6 +230,81 @@ describe('Textbased Data Source', () => {
         }
       `);
     });
+
+    it('uses label instead of fieldName when label is present', () => {
+      const map = TextBasedDatasource.uniqueLabels(
+        {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'a',
+                  fieldName: 'bucket_0_0',
+                  label: 'Avg',
+                  meta: {
+                    type: 'number',
+                  },
+                },
+                {
+                  columnId: 'b',
+                  fieldName: 'bucket_1_1',
+                  label: 'Sum',
+                  meta: {
+                    type: 'number',
+                  },
+                },
+              ],
+              index: 'foo',
+            },
+          },
+        } as unknown as TextBasedPrivateState,
+        {}
+      );
+
+      expect(map).toMatchInlineSnapshot(`
+        Object {
+          "a": "Avg",
+          "b": "Sum",
+        }
+      `);
+    });
+
+    it('falls back to fieldName when label is not present', () => {
+      const map = TextBasedDatasource.uniqueLabels(
+        {
+          layers: {
+            a: {
+              columns: [
+                {
+                  columnId: 'a',
+                  fieldName: 'bucket_0_0',
+                  meta: {
+                    type: 'number',
+                  },
+                },
+                {
+                  columnId: 'b',
+                  fieldName: 'bucket_1_1',
+                  label: 'Sum',
+                  meta: {
+                    type: 'number',
+                  },
+                },
+              ],
+              index: 'foo',
+            },
+          },
+        } as unknown as TextBasedPrivateState,
+        {}
+      );
+
+      expect(map).toMatchInlineSnapshot(`
+        Object {
+          "a": "bucket_0_0",
+          "b": "Sum",
+        }
+      `);
+    });
   });
 
   describe('#getPersistedState', () => {

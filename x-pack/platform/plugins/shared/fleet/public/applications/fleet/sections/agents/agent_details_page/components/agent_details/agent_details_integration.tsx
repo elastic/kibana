@@ -22,12 +22,14 @@ import styled from 'styled-components';
 
 import type { EuiAccordionProps } from '@elastic/eui/src/components/accordion';
 
+import type { OutputsForAgentPolicy } from '../../../../../../../../server/types';
 import type { Agent, AgentPolicy, PackagePolicy } from '../../../../../types';
 import { useLink, useUIExtension } from '../../../../../hooks';
 import { ExtensionWrapper, PackageIcon } from '../../../../../components';
 
 import { AgentDetailsIntegrationInputs } from './agent_details_integration_inputs';
-import { getInputUnitsByPackage } from './input_status_utils';
+import { getInputUnitsByPackage, getOutputUnitsByPackage } from './input_status_utils';
+import { AgentDetailsIntegrationOutputs } from './agent_details_integration_outputs';
 
 const StyledEuiAccordion = styled(EuiAccordion)`
   .euiAccordion__button {
@@ -96,11 +98,19 @@ const CollapsablePanel: React.FC<{
 export const AgentDetailsIntegration: React.FunctionComponent<{
   agent: Agent;
   agentPolicy: AgentPolicy;
+  outputs?: OutputsForAgentPolicy;
   packagePolicy: PackagePolicy;
   linkToLogs: boolean;
   'data-test-subj'?: string;
 }> = memo(
-  ({ agent, agentPolicy, packagePolicy, linkToLogs = true, 'data-test-subj': dataTestSubj }) => {
+  ({
+    agent,
+    agentPolicy,
+    outputs,
+    packagePolicy,
+    linkToLogs = true,
+    'data-test-subj': dataTestSubj,
+  }) => {
     const { getHref } = useLink();
     const theme = useEuiTheme();
 
@@ -129,9 +139,15 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
       if (!agent.components) {
         return [];
       }
-      return getInputUnitsByPackage(agent.components, packagePolicy).filter(
-        (u) => u.status === 'DEGRADED' || u.status === 'FAILED'
-      );
+
+      return [
+        ...packagePolicy.inputs.flatMap((input) =>
+          getInputUnitsByPackage(agent.components ?? [], input.id ?? packagePolicy.id)
+        ),
+        ...packagePolicy.inputs.flatMap((input) =>
+          getOutputUnitsByPackage(agent.components ?? [], input.id ?? packagePolicy.id)
+        ),
+      ].filter((u) => u.status === 'DEGRADED' || u.status === 'FAILED');
     }, [agent.components, packagePolicy]);
 
     const showNeedsAttentionBadge =
@@ -208,6 +224,12 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
           agent={agent}
           packagePolicy={packagePolicy}
           linkToLogs={linkToLogs}
+        />
+        <AgentDetailsIntegrationOutputs
+          agent={agent}
+          packagePolicy={packagePolicy}
+          linkToLogs={linkToLogs}
+          outputs={outputs}
         />
         {policyResponseExtensionViewWrapper}
         {genericErrorsListExtensionViewWrapper}

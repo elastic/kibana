@@ -92,7 +92,7 @@ export const createExternalService = (
     throw Error(`[Action]${CONNECTOR_NAME}: Wrong configuration.`);
   }
 
-  const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets.secretHeaders);
+  const mergedHeaders = mergeConfigHeadersWithSecretHeaders(headers, secrets?.secretHeaders);
 
   const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
     username: basicAuth.auth?.username,

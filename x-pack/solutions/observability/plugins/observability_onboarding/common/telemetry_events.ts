@@ -157,6 +157,11 @@ interface OnboardingAutoDetectEventContext {
   title: string;
 }
 
+interface OnboardingCloudForwarderEventContext {
+  selectedLogType?: string;
+  cloudServiceProvider?: string;
+}
+
 /**
  * Additional flow-specific context that might
  * be attached to telemetry events.
@@ -164,6 +169,7 @@ interface OnboardingAutoDetectEventContext {
 export interface OnboardingFlowEventContext {
   autoDetect?: OnboardingAutoDetectEventContext;
   firehose?: OnboardingFirehoseFlowEventContext;
+  cloudforwarder?: OnboardingCloudForwarderEventContext;
 }
 
 const flowContextSchema: SchemaValue<OnboardingFlowEventContext | undefined> = {
@@ -210,6 +216,29 @@ const flowContextSchema: SchemaValue<OnboardingFlowEventContext | undefined> = {
         optional: true,
       },
     },
+    cloudforwarder: {
+      properties: {
+        selectedLogType: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'Which log type is selected in the UI (e.g. vpcflow, elbaccess, cloudtrail). Serves as a good indication of the type of logs the user chose to forward.',
+            optional: true,
+          },
+        },
+        cloudServiceProvider: {
+          type: 'keyword',
+          _meta: {
+            description:
+              "The cloud service provider where the cloud forwarder is deployed. Can be 'aws', 'gcp' or 'azure'",
+            optional: true,
+          },
+        },
+      },
+      _meta: {
+        optional: true,
+      },
+    },
   },
   _meta: {
     optional: true,
@@ -241,7 +270,7 @@ export const OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT: EventTypeOp
       type: 'keyword',
       _meta: {
         description:
-          'The current step in the onboarding flow. Possible values: "in_progress", "awaiting_data", "data_received"',
+          'The current step in the onboarding flow. Possible values: "in_progress", "awaiting_data", "data_received", "aws_launch_stack"',
       },
     },
     context: flowContextSchema,

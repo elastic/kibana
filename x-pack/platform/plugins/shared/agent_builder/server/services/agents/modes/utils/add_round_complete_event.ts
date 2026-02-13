@@ -21,6 +21,8 @@ import type {
   ToolResultEvent,
   RuntimeAgentConfigurationOverrides,
 } from '@kbn/agent-builder-common';
+import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   ChatEventType,
@@ -85,6 +87,7 @@ export const addRoundCompleteEvent = ({
       shared$.pipe(
         toArray(),
         map<SourceEvents[], RoundCompleteEvent>((events) => {
+          const attachmentRefs = attachmentStateManager.getAccessedRefs();
           const round = pendingRound
             ? resumeRound({
                 pendingRound,
@@ -93,6 +96,7 @@ export const addRoundCompleteEvent = ({
                 startTime,
                 endTime,
                 modelProvider,
+                attachmentRefs,
                 configurationOverrides,
               })
             : createRound({
@@ -101,6 +105,7 @@ export const addRoundCompleteEvent = ({
                 startTime,
                 endTime,
                 modelProvider,
+                attachmentRefs,
                 configurationOverrides,
               });
 
@@ -130,6 +135,7 @@ const resumeRound = ({
   startTime,
   endTime = new Date(),
   modelProvider,
+  attachmentRefs,
   configurationOverrides,
 }: {
   pendingRound: ConversationRound;
@@ -138,6 +144,7 @@ const resumeRound = ({
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
+  attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
 }): ConversationRound => {
   // resuming / replaying tool events for the pending step
@@ -164,6 +171,7 @@ const resumeRound = ({
     startTime,
     endTime,
     modelProvider,
+    attachmentRefs,
     configurationOverrides,
   });
 
@@ -188,7 +196,7 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
     status: next.status,
     pending_prompt: next.pending_prompt,
     state: undefined, // state is recomputed after the merge
-    input: previous.input,
+    input: mergeRoundInput(previous.input, next.input),
     steps: [...previous.steps, ...next.steps],
     trace_id: traceId,
     started_at: previous.started_at,
@@ -202,12 +210,43 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
   return mergedRound;
 };
 
+const mergeRoundInput = (previous: RoundInput, next: RoundInput): RoundInput => {
+  const mergedRefs = mergeAttachmentRefs(previous.attachment_refs, next.attachment_refs);
+  return {
+    ...previous,
+    ...next,
+    ...(mergedRefs ? { attachment_refs: mergedRefs } : {}),
+  };
+};
+
+const mergeAttachmentRefs = (
+  previous?: AttachmentVersionRef[],
+  next?: AttachmentVersionRef[]
+): AttachmentVersionRef[] | undefined => {
+  if (!previous?.length && !next?.length) return undefined;
+  const merged = new Map<string, AttachmentVersionRef>();
+  for (const ref of previous ?? []) {
+    merged.set(
+      `${ref.attachment_id}:${ref.version}:${ref.actor ?? ATTACHMENT_REF_ACTOR.system}`,
+      ref
+    );
+  }
+  for (const ref of next ?? []) {
+    merged.set(
+      `${ref.attachment_id}:${ref.version}:${ref.actor ?? ATTACHMENT_REF_ACTOR.system}`,
+      ref
+    );
+  }
+  return Array.from(merged.values());
+};
+
 const createRound = ({
   events,
   input,
   startTime,
   endTime = new Date(),
   modelProvider,
+  attachmentRefs,
   configurationOverrides,
 }: {
   events: SourceEvents[];
@@ -215,6 +254,7 @@ const createRound = ({
   startTime: Date;
   endTime?: Date;
   modelProvider: ModelProvider;
+  attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent);
@@ -265,7 +305,10 @@ const createRound = ({
       : ConversationRoundStatus.completed,
     pending_prompt: promptRequest ? promptRequest.data.prompt : undefined,
     state: undefined,
-    input,
+    input: {
+      ...input,
+      ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
+    },
     steps: stepEvents.flatMap(eventToStep),
     trace_id: getCurrentTraceId(),
     started_at: startTime.toISOString(),

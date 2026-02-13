@@ -26,8 +26,8 @@ import type { LensApi } from '@kbn/lens-common-2';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import type { ESQLControlState } from '@kbn/esql-types';
-import { apiPublishesControlsLayout } from '@kbn/controls-renderer';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers/interfaces/presentation_container';
+import { isControlGroupRendererApi } from '@kbn/control-group-renderer';
 import { isLensApi } from '../react_embeddable/type_guards';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {
@@ -113,9 +113,7 @@ function getEsqlControls(embeddable: LensApi) {
   if (!apiIsPresentationContainer(parentApi)) return null;
 
   const usedVariables = getESQLQueryVariables(embeddableQuery.esql);
-  const controlsLayout = apiPublishesControlsLayout(parentApi)
-    ? parentApi.layout$.getValue().controls
-    : {};
+  const controlsLayout = isControlGroupRendererApi(parentApi) ? parentApi.getControls() : {};
   const esqlControlState = Object.values(parentApi.children$.getValue()).reduce(
     (acc: { [uuid: string]: Serializable }, api, index) => {
       if (

@@ -7,8 +7,9 @@
 
 import { core } from '@elastic/opentelemetry-node/sdk';
 import { createWithActiveSpan, withActiveSpan } from '@kbn/tracing-utils';
-import { trace } from '@opentelemetry/api';
+import { propagation, trace } from '@opentelemetry/api';
 import { createInferenceContext } from './create_inference_context';
+import { EVAL_RUN_ID_BAGGAGE_KEY } from './baggage';
 import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
 
 /**
@@ -29,6 +30,9 @@ export const withActiveInferenceSpan = createWithActiveSpan(
     }
 
     const { context: parentContext, isRoot } = createInferenceContext();
+    const evalRunId = propagation
+      .getBaggage(parentContext)
+      ?.getEntry(EVAL_RUN_ID_BAGGAGE_KEY)?.value;
 
     return withActiveSpan(
       name,
@@ -37,6 +41,7 @@ export const withActiveInferenceSpan = createWithActiveSpan(
         attributes: {
           ...opts.attributes,
           [IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME]: isRoot,
+          ...(evalRunId ? { [EVAL_RUN_ID_BAGGAGE_KEY]: evalRunId } : {}),
         },
       },
       parentContext,

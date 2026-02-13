@@ -9,7 +9,7 @@
 
 import { createSlice } from '@reduxjs/toolkit';
 import type { EsWorkflow, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
-import type { ActiveTab, ComputedData, WorkflowDetailState } from './types';
+import type { ActiveTab, ComputedData, LineColumnPosition, WorkflowDetailState } from './types';
 import { addLoadingStateReducers, initialLoadingState } from './utils/loading_states';
 import { findStepByLine } from './utils/step_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
@@ -28,6 +28,12 @@ const initialState: WorkflowDetailState = {
   highlightedStepId: undefined,
   isTestModalOpen: false,
   loading: initialLoadingState,
+  connectorFlyout: {
+    isOpen: false,
+    connectorType: undefined,
+    connectorIdToEdit: undefined,
+    insertPosition: undefined,
+  },
 };
 
 // Slice
@@ -76,6 +82,23 @@ const workflowDetailSlice = createSlice({
       state.activeTab = action.payload;
     },
 
+    // Connector flyout actions
+    openCreateConnectorFlyout: (
+      state,
+      action: { payload: { connectorType: string; insertPosition?: LineColumnPosition } }
+    ) => {
+      state.connectorFlyout = { isOpen: true, ...action.payload };
+    },
+    openEditConnectorFlyout: (
+      state,
+      action: { payload: { connectorType: string; connectorIdToEdit: string } }
+    ) => {
+      state.connectorFlyout = { isOpen: true, ...action.payload };
+    },
+    closeConnectorFlyout: (state) => {
+      state.connectorFlyout = { isOpen: false }; // connectorType, connectorToEdit, and insertPosition are undefined
+    },
+
     // Internal actions - these are not for components usage
     _setComputedDataInternal: (state, action: { payload: ComputedData }) => {
       state.computed = action.payload;
@@ -110,6 +133,9 @@ export const {
   setExecution,
   clearExecution,
   setActiveTab,
+  openCreateConnectorFlyout,
+  openEditConnectorFlyout,
+  closeConnectorFlyout,
 
   // Internal action creators for middleware use only
   _setComputedDataInternal,

@@ -83,13 +83,13 @@ const allFields: MetricField[] = [
     name: 'field1',
     dimensions: [dimensions[0]],
     index: 'metrics-*',
-    type: 'long',
+    type: ES_FIELD_TYPES.LONG,
   },
   {
     name: 'field2',
     dimensions: [dimensions[1]],
     index: 'metrics-*',
-    type: 'long',
+    type: ES_FIELD_TYPES.LONG,
   },
 ];
 
