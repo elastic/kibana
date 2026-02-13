@@ -7,13 +7,6 @@
 
 import type { PricingProductFeature } from '@kbn/core-pricing-common';
 
-// Re-export from kbn-streams-schema for backwards compatibility
-export {
-  validateStreamName,
-  MAX_STREAM_NAME_LENGTH,
-  INVALID_STREAM_NAME_CHARACTERS,
-} from '@kbn/streams-schema';
-
 export const ASSET_VERSION = 1;
 
 export const ATTACHMENT_SUGGESTIONS_LIMIT = 50;
