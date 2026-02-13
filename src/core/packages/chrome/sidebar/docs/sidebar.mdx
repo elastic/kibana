@@ -261,7 +261,7 @@ function MyToolbarButton() {
 }
 ```
 
-## Manage accessibility
+## Manage app status
 
 Use `status: 'inaccessible'` when the app depends on async checks (license, permissions).
 
@@ -298,6 +298,56 @@ import { sidebarServiceMock } from '@kbn/core-chrome-sidebar-mocks';
 
 const setupMock = sidebarServiceMock.createSetupContract();
 const startMock = sidebarServiceMock.createStartContract();
+```
+
+## Accessibility
+
+The sidebar renders as an `<aside>` landmark. `SidebarHeader` and `SidebarBody` handle most a11y concerns automatically, but apps must follow a few rules.
+
+### Panel label
+
+The sidebar panel uses `aria-labelledby` to link the `<aside>` landmark to the heading rendered by `SidebarHeader`. This happens automatically — `SidebarHeader` places the shared heading ID on its `<h2>`, and the panel references it. A fallback `aria-label="Side panel"` is used when no heading is present.
+
+`SidebarHeader` requires a `title` prop. It renders as an `<h2>` heading that labels the panel. When using custom header content via `children`, `title` is still required — it renders as a visually hidden heading so `aria-labelledby` always works:
+
+```tsx
+<SidebarHeader title="My App" onClose={onClose}>
+  <CustomHeaderContent />
+</SidebarHeader>
+```
+
+If you don't use `SidebarHeader` at all (fully custom header), you must place the heading ID on your own heading element via `useSidebarPanel`:
+
+```tsx
+import { useSidebarPanel } from '@kbn/core-chrome-sidebar-components';
+
+const { headingId } = useSidebarPanel();
+
+return <h2 id={headingId}>My App</h2>;
+```
+
+### Focus rescue
+
+When the sidebar closes while focus is inside, focus is automatically moved to the main content area. Apps can override this with a custom callback via `useSidebarPanel`:
+
+```tsx
+import { useSidebarPanel } from '@kbn/core-chrome-sidebar-components';
+
+const { setOnFocusRescue } = useSidebarPanel();
+
+useEffect(() => {
+  setOnFocusRescue(() => triggerButtonRef.current?.focus());
+}, [setOnFocusRescue]);
+```
+
+### Scrollable body
+
+Pass `scrollable` to make `SidebarBody` keyboard-scrollable (`tabIndex={0}`) and announce it as a region to screen readers:
+
+```tsx
+<SidebarBody scrollable>
+  {/* long content */}
+</SidebarBody>
 ```
 
 ## Design rationale

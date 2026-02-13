@@ -2701,8 +2701,9 @@ module.exports = {
         ],
       },
     },
+    // Custom rules for scout tests
     {
-      // Custom rules for scout tests
+      // Platform & Solutions
       files: [
         'src/platform/plugins/**/test/{scout,scout_*}/**/*.ts',
         'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/*.ts',
@@ -2712,9 +2713,30 @@ module.exports = {
         '@kbn/eslint/scout_no_describe_configure': 'error',
         '@kbn/eslint/scout_max_one_describe': 'error',
         '@kbn/eslint/scout_test_file_naming': 'error',
-        '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
         '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
         '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
+        '@kbn/eslint/scout_require_api_client_in_api_test': 'error',
+        '@kbn/eslint/require_include_in_check_a11y': 'warn',
+      },
+    },
+    {
+      // Platform & Solutions API Tests
+      files: [
+        'src/platform/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+      ],
+      rules: {
+        '@kbn/eslint/scout_require_api_client_in_api_test': [
+          'error',
+          { alternativeFixtures: ['esClient'] },
+        ],
+      },
+    },
+    {
+      // Ensure correct expect import path in solutions scout API tests
+      files: ['x-pack/solutions/**/plugins/**/test/scout/api/**/*.ts'],
+      rules: {
         '@kbn/eslint/scout_expect_import': 'error',
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },

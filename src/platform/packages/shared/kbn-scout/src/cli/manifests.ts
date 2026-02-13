@@ -46,30 +46,32 @@ async function updateScoutConfigManifests(
   const updatedConfigPaths: string[] = [];
 
   // Update manifests for files that are outdated
-  for (const config of testConfigs.all) {
-    expectedManifestPaths.push(config.manifest.path);
-    const configDirSHA1 = await getGitSHA1ForPath(path.dirname(config.path));
+  await Promise.all(
+    testConfigs.all.map(async (config) => {
+      expectedManifestPaths.push(config.manifest.path);
+      const configDirSHA1 = await getGitSHA1ForPath(path.dirname(config.path));
 
-    if (onlyOutdated && config.manifest.exists && config.manifest.sha1 === configDirSHA1) {
-      log.debug(` ✅ ${config.module.name} / ${config.category} / ${config.type}`);
-      continue;
-    }
-
-    if (config.manifest.exists) {
-      if (config.manifest.sha1 !== configDirSHA1) {
-        log.info(
-          `Manifest file is outdated for Scout test config at ${config.path} ` +
-            `(expected parent directory git object hash '${config.manifest.sha1}' but got '${configDirSHA1}')`
-        );
+      if (onlyOutdated && config.manifest.exists && config.manifest.sha1 === configDirSHA1) {
+        log.debug(` ✅ ${config.module.name} / ${config.category} / ${config.type}`);
+        return;
       }
-    } else {
-      log.info(`No manifest file found for Scout test config at ${config.path}`);
-    }
 
-    log.info(`Generating manifest for test config at '${config.path}'`);
-    await generateScoutConfigManifest(config.path, log);
-    updatedConfigPaths.push(config.path);
-  }
+      if (config.manifest.exists) {
+        if (config.manifest.sha1 !== configDirSHA1) {
+          log.info(
+            `Manifest file is outdated for Scout test config at ${config.path} ` +
+              `(expected parent directory git object hash '${config.manifest.sha1}' but got '${configDirSHA1}')`
+          );
+        }
+      } else {
+        log.info(`No manifest file found for Scout test config at ${config.path}`);
+      }
+
+      log.info(`Generating manifest for test config at '${config.path}'`);
+      await generateScoutConfigManifest(config.path, log);
+      updatedConfigPaths.push(config.path);
+    })
+  );
 
   if (removeDangling) {
     // Remove any manifest files that no longer have a corresponding test config

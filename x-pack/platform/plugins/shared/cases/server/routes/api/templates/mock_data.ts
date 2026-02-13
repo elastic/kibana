@@ -17,7 +17,7 @@ export const mockTemplates: Template[] = [
     definition: yaml.dump({
       fields: [
         {
-          control: 'text',
+          control: 'INPUT_TEXT',
           name: 'incident_type',
           label: 'Incident Type',
           type: 'keyword',
@@ -25,7 +25,7 @@ export const mockTemplates: Template[] = [
           metadata: { required: true },
         },
         {
-          control: 'select',
+          control: 'SELECT_BASIC',
           name: 'severity',
           label: 'Severity Level',
           type: 'keyword',
@@ -43,7 +43,7 @@ export const mockTemplates: Template[] = [
     definition: yaml.dump({
       fields: [
         {
-          control: 'text',
+          control: 'INPUT_TEXT',
           name: 'alert_source',
           label: 'Alert Source',
           type: 'keyword',

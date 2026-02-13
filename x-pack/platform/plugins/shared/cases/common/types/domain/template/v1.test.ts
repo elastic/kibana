@@ -8,11 +8,11 @@
 import {
   TemplateSchema,
   ParsedTemplateSchema,
-  ParsedTemplateFieldSchema,
   CreateTemplateInputSchema,
   UpdateTemplateInputSchema,
   PatchTemplateInputSchema,
 } from './v1';
+import { FieldSchema } from './fields';
 
 describe('TemplateSchema', () => {
   const validTemplate = {
@@ -117,9 +117,9 @@ describe('TemplateSchema', () => {
   });
 });
 
-describe('ParsedTemplateFieldSchema', () => {
+describe('FieldSchema', () => {
   const validField = {
-    control: 'text-input',
+    control: 'INPUT_TEXT',
     name: 'test_field',
     label: 'Test Field',
     type: 'keyword' as const,
@@ -130,7 +130,7 @@ describe('ParsedTemplateFieldSchema', () => {
   };
 
   it('validates a valid field', () => {
-    const result = ParsedTemplateFieldSchema.safeParse(validField);
+    const result = FieldSchema.safeParse(validField);
 
     expect(result.success).toBe(true);
     if (result.success) {
@@ -140,13 +140,13 @@ describe('ParsedTemplateFieldSchema', () => {
 
   it('accepts field without optional label', () => {
     const fieldWithoutLabel = {
-      control: 'text-input',
+      control: 'INPUT_TEXT',
       name: 'test_field',
       type: 'keyword' as const,
       metadata: {},
     };
 
-    const result = ParsedTemplateFieldSchema.safeParse(fieldWithoutLabel);
+    const result = FieldSchema.safeParse(fieldWithoutLabel);
 
     expect(result.success).toBe(true);
     if (result.success) {
@@ -160,7 +160,7 @@ describe('ParsedTemplateFieldSchema', () => {
       type: 'text', // should be 'keyword'
     };
 
-    const result = ParsedTemplateFieldSchema.safeParse(invalidField);
+    const result = FieldSchema.safeParse(invalidField);
 
     expect(result.success).toBe(false);
   });
@@ -179,7 +179,7 @@ describe('ParsedTemplateFieldSchema', () => {
       },
     };
 
-    const result = ParsedTemplateFieldSchema.safeParse(fieldWithComplexMetadata);
+    const result = FieldSchema.safeParse(fieldWithComplexMetadata);
 
     expect(result.success).toBe(true);
   });
@@ -193,13 +193,13 @@ describe('ParsedTemplateSchema', () => {
     definition: {
       fields: [
         {
-          control: 'text-input',
+          control: 'INPUT_TEXT',
           name: 'field1',
           type: 'keyword' as const,
           metadata: {},
         },
         {
-          control: 'select',
+          control: 'SELECT_BASIC',
           name: 'field2',
           label: 'Field 2',
           type: 'keyword' as const,
@@ -260,20 +260,47 @@ describe('ParsedTemplateSchema', () => {
       definition: {
         fields: [
           {
-            control: 'text-input',
+            control: 'INPUT_TEXT',
             name: 'valid_field',
             type: 'keyword' as const,
             metadata: {},
           },
           {
             // missing required properties
-            control: 'select',
+            control: 'SELECT_BASIC',
           },
         ],
       },
     };
 
     const result = ParsedTemplateSchema.safeParse(templateWithInvalidField);
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects parsed template with duplicate field names', () => {
+    const templateWithDuplicateFields = {
+      ...validParsedTemplate,
+      definition: {
+        fields: [
+          {
+            control: 'INPUT_TEXT',
+            name: 'duplicate_field',
+            type: 'keyword' as const,
+            metadata: {},
+          },
+          {
+            control: 'SELECT_BASIC',
+            name: 'duplicate_field',
+            label: 'Duplicate Field',
+            type: 'keyword' as const,
+            metadata: { options: ['a', 'b'] },
+          },
+        ],
+      },
+    };
+
+    const result = ParsedTemplateSchema.safeParse(templateWithDuplicateFields);
 
     expect(result.success).toBe(false);
   });

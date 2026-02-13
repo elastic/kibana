@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataSource } from '@kbn/data-catalog-plugin';
-import { EARSSupportedOAuthProvider } from '@kbn/data-catalog-plugin';
 
 export const notionDataSource: DataSource = {
   id: 'notion',
@@ -17,13 +16,6 @@ export const notionDataSource: DataSource = {
   }),
 
   iconType: '.notion',
-
-  oauthConfiguration: {
-    provider: EARSSupportedOAuthProvider.NOTION,
-    initiatePath: '/oauth/start/notion',
-    fetchSecretsPath: '/oauth/fetch_request_secrets',
-    oauthBaseUrl: 'https://localhost:8052',
-  },
 
   stackConnector: {
     type: '.notion',

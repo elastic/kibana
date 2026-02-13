@@ -9,7 +9,7 @@ pageLoadAssetSize:
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
-  automaticImportVTwo: 12306
+  automaticImportVTwo: 13752
   banners: 4087
   canvas: 15142
   cases: 225900
@@ -27,7 +27,7 @@ pageLoadAssetSize:
   contentManagement: 8350
   controls: 10786
   core: 556473
-  cps: 5918
+  cps: 5930
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
@@ -50,7 +50,7 @@ pageLoadAssetSize:
   discoverShared: 2322
   elasticAssistant: 338870
   elasticAssistantSharedState: 4881
-  embeddable: 17521
+  embeddable: 17466
   embeddableAlertsTable: 6524
   embeddableEnhanced: 4488
   enterpriseSearch: 40244
@@ -83,7 +83,7 @@ pageLoadAssetSize:
   globalSearchProviders: 4646
   graph: 9924
   grokdebugger: 5484
-  home: 13560
+  home: 13091
   imageEmbeddable: 6727
   indexLifecycleManagement: 29818
   indexManagement: 35522

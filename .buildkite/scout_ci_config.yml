@@ -27,6 +27,7 @@ plugins:
     - transform
     - dashboard
     - workflows_extensions
+    - global_search
   disabled:
 
 packages:

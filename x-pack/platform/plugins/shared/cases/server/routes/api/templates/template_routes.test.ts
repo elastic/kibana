@@ -20,7 +20,7 @@ import { bulkExportTemplatesRoute } from './bulk_export_templates_route';
 const validDefinition = yaml.dump({
   fields: [
     {
-      control: 'text',
+      control: 'INPUT_TEXT',
       name: 'test_field',
       label: 'Test Field',
       type: 'keyword',
@@ -233,7 +233,7 @@ describe('Template Routes', () => {
       expect(body.definition).toEqual({
         fields: [
           expect.objectContaining({
-            control: 'text',
+            control: 'INPUT_TEXT',
             name: 'test_field',
             type: 'keyword',
           }),
