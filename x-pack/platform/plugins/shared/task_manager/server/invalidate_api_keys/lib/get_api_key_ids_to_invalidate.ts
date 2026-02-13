@@ -17,6 +17,12 @@ export interface ApiKeyIdAndSOId {
   apiKeyId: string;
 }
 
+export interface UiamApiKeyAndSOId {
+  id: string;
+  apiKeyId: string;
+  uiamApiKey: string;
+}
+
 interface GetApiKeyIdsToInvalidateOpts {
   apiKeySOsPendingInvalidation: SavedObjectsFindResponse<ApiKeyToInvalidate>;
   encryptedSavedObjectsClient?: EncryptedSavedObjectsClient;
@@ -27,6 +33,7 @@ interface GetApiKeyIdsToInvalidateOpts {
 
 interface GetApiKeysToInvalidateResult {
   apiKeyIdsToInvalidate: ApiKeyIdAndSOId[];
+  uiamApiKeysToInvalidate?: UiamApiKeyAndSOId[];
   apiKeyIdsToExclude: ApiKeyIdAndSOId[];
 }
 
@@ -37,38 +44,64 @@ export async function getApiKeyIdsToInvalidate({
   savedObjectType,
   savedObjectTypesToQuery,
 }: GetApiKeyIdsToInvalidateOpts): Promise<GetApiKeysToInvalidateResult> {
-  let apiKeyIds: ApiKeyIdAndSOId[] = [];
+  const apiKeyIds: ApiKeyIdAndSOId[] = [];
+  const uiamApiKeys: UiamApiKeyAndSOId[] = [];
+
   if (encryptedSavedObjectsClient) {
     // Decrypt the apiKeyId for each pending invalidation SO
-    apiKeyIds = await Promise.all(
+    await Promise.all(
       apiKeySOsPendingInvalidation.saved_objects.map(async (apiKeyPendingInvalidationSO) => {
         const decryptedApiKeyPendingInvalidationObject =
           await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ApiKeyToInvalidate>(
             savedObjectType,
             apiKeyPendingInvalidationSO.id
           );
-        return {
-          id: decryptedApiKeyPendingInvalidationObject.id,
-          apiKeyId: decryptedApiKeyPendingInvalidationObject.attributes.apiKeyId,
-        };
+
+        const { uiamApiKey, apiKeyId } = decryptedApiKeyPendingInvalidationObject.attributes;
+        if (uiamApiKey) {
+          uiamApiKeys.push({
+            id: decryptedApiKeyPendingInvalidationObject.id,
+            apiKeyId,
+            uiamApiKey,
+          });
+        } else {
+          apiKeyIds.push({
+            id: decryptedApiKeyPendingInvalidationObject.id,
+            apiKeyId,
+          });
+        }
       })
     );
   } else {
     // No decryption needed, return the apiKeyId as-is
-    apiKeyIds = apiKeySOsPendingInvalidation.saved_objects.map((apiKeyPendingInvalidationSO) => ({
-      id: apiKeyPendingInvalidationSO.id,
-      apiKeyId: apiKeyPendingInvalidationSO.attributes.apiKeyId,
-    }));
+    apiKeySOsPendingInvalidation.saved_objects.forEach((apiKeyPendingInvalidationSO) => {
+      const { uiamApiKey, apiKeyId } = apiKeyPendingInvalidationSO.attributes;
+      if (uiamApiKey) {
+        uiamApiKeys.push({
+          id: apiKeyPendingInvalidationSO.id,
+          apiKeyId,
+          uiamApiKey,
+        });
+      } else {
+        apiKeyIds.push({
+          id: apiKeyPendingInvalidationSO.id,
+          apiKeyId,
+        });
+      }
+    });
   }
 
   // Query saved objects index to see if any API keys are in use
   const apiKeyIdStrings = apiKeyIds.map(({ apiKeyId }) => apiKeyId);
+  const uiamApiKeyIdStrings = uiamApiKeys.map(({ apiKeyId }) => apiKeyId);
+  const allApiKeyIdStrings = apiKeyIdStrings.concat(uiamApiKeyIdStrings);
+
   let apiKeyIdsInUseBuckets: AggregationsStringTermsBucketKeys[] = [];
 
   for (const type of savedObjectTypesToQuery) {
     apiKeyIdsInUseBuckets = apiKeyIdsInUseBuckets.concat(
       await queryForApiKeysInUse({
-        apiKeyIds: apiKeyIdStrings,
+        apiKeyIds: allApiKeyIdStrings,
         savedObjectTypeToQuery: type,
         savedObjectsClient,
       })
@@ -76,7 +109,9 @@ export async function getApiKeyIdsToInvalidate({
   }
 
   const apiKeyIdsToInvalidate: ApiKeyIdAndSOId[] = [];
+  const uiamApiKeysToInvalidate: UiamApiKeyAndSOId[] = [];
   const apiKeyIdsToExclude: ApiKeyIdAndSOId[] = [];
+
   apiKeyIds.forEach(({ id, apiKeyId }) => {
     if (apiKeyIdsInUseBuckets.find((bucket) => bucket.key === apiKeyId)) {
       apiKeyIdsToExclude.push({ id, apiKeyId });
@@ -85,5 +120,17 @@ export async function getApiKeyIdsToInvalidate({
     }
   });
 
-  return { apiKeyIdsToInvalidate, apiKeyIdsToExclude };
+  uiamApiKeys.forEach(({ id, apiKeyId, uiamApiKey }) => {
+    if (apiKeyIdsInUseBuckets.find((bucket) => bucket.key === apiKeyId)) {
+      apiKeyIdsToExclude.push({ id, apiKeyId });
+    } else {
+      uiamApiKeysToInvalidate.push({ id, apiKeyId, uiamApiKey });
+    }
+  });
+
+  return {
+    apiKeyIdsToInvalidate,
+    apiKeyIdsToExclude,
+    ...(uiamApiKeysToInvalidate.length > 0 ? { uiamApiKeysToInvalidate } : {}),
+  };
 }

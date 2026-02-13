@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { rawApiKeyPendingInvalidationSchema as rawApiKeyPendingInvalidationSchemaV1 } from './v1';
-export { rawApiKeyPendingInvalidationSchema as rawApiKeyPendingInvalidationSchemaV2 } from './v2';
+import { schema } from '@kbn/config-schema';
+import { rawRuleSchema as rawRuleSchemaV8 } from './v8';
+
+export const rawRuleSchema = rawRuleSchemaV8.extends({
+  uiamApiKey: schema.maybe(schema.nullable(schema.string())),
+});

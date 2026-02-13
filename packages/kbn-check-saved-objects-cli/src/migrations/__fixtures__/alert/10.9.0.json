@@ -1,0 +1,165 @@
+{
+  "10.8.0": [
+    {
+      "name": "string",
+      "enabled": "boolean",
+      "consumer": "string",
+      "tags": "array",
+      "alertTypeId": "string",
+      "apiKeyOwner": "string?|null",
+      "apiKey": "string?|null",
+      "apiKeyCreatedByUser": "boolean?|null",
+      "createdBy": "string?|null",
+      "updatedBy": "string?|null",
+      "updatedAt": "string",
+      "createdAt": "string",
+      "muteAll": "boolean",
+      "mutedInstanceIds": "array",
+      "throttle": "string?|null",
+      "revision": "number",
+      "running": "boolean?|null",
+      "legacyId": "string?|null",
+      "scheduledTaskId": "string?|null",
+      "isSnoozedUntil": "string?|null",
+      "snoozeSchedule": "array?",
+      "actions": "array",
+      "notifyWhen": "onActionGroupChange?|onActiveAlert?|onThrottleInterval?|null",
+      "lastRun": "object?|null",
+      "nextRun": "string?|null",
+      "params": "record",
+      "typeVersion": "number?",
+      "flapping": "object?|null",
+      "schedule": {
+        "interval": "string"
+      },
+      "meta": {
+        "versionApiKeyLastmodified": "string?"
+      },
+      "executionStatus": {
+        "status": "ok|active|error|pending|unknown|warning",
+        "lastExecutionDate": "string",
+        "lastDuration": "number?",
+        "error": "object?|null",
+        "warning": "object?|null"
+      },
+      "mapped_params": {
+        "risk_score": "number?",
+        "severity": "string?"
+      },
+      "alertDelay": {
+        "active": "number"
+      },
+      "artifacts": {
+        "dashboards": "array?",
+        "investigation_guide": {
+          "blob": "string"
+        }
+      },
+      "monitoring": {
+        "run": {
+          "history": "array",
+          "calculated_metrics": {
+            "p50": "number?",
+            "p95": "number?",
+            "p99": "number?",
+            "success_ratio": "number"
+          },
+          "last_run": {
+            "timestamp": "string",
+            "metrics": {
+              "duration": "number?",
+              "total_search_duration_ms": "number?|null",
+              "total_indexing_duration_ms": "number?|null",
+              "total_alerts_detected": "number?|null",
+              "total_alerts_created": "number?|null",
+              "gap_duration_s": "number?|null",
+              "gap_range": "object?|null"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "10.9.0": [
+    {
+      "name": "string",
+      "enabled": "boolean",
+      "consumer": "string",
+      "tags": "array",
+      "alertTypeId": "string",
+      "apiKeyOwner": "string?|null",
+      "apiKey": "string?|null",
+      "apiKeyCreatedByUser": "boolean?|null",
+      "createdBy": "string?|null",
+      "updatedBy": "string?|null",
+      "updatedAt": "string",
+      "createdAt": "string",
+      "muteAll": "boolean",
+      "mutedInstanceIds": "array",
+      "throttle": "string?|null",
+      "revision": "number",
+      "running": "boolean?|null",
+      "legacyId": "string?|null",
+      "scheduledTaskId": "string?|null",
+      "isSnoozedUntil": "string?|null",
+      "snoozeSchedule": "array?",
+      "actions": "array",
+      "notifyWhen": "onActionGroupChange?|onActiveAlert?|onThrottleInterval?|null",
+      "lastRun": "object?|null",
+      "nextRun": "string?|null",
+      "params": "record",
+      "typeVersion": "number?",
+      "flapping": "object?|null",
+      "uiamApiKey": "string?|null",
+      "schedule": {
+        "interval": "string"
+      },
+      "meta": {
+        "versionApiKeyLastmodified": "string?"
+      },
+      "executionStatus": {
+        "status": "ok|active|error|pending|unknown|warning",
+        "lastExecutionDate": "string",
+        "lastDuration": "number?",
+        "error": "object?|null",
+        "warning": "object?|null"
+      },
+      "mapped_params": {
+        "risk_score": "number?",
+        "severity": "string?"
+      },
+      "alertDelay": {
+        "active": "number"
+      },
+      "artifacts": {
+        "dashboards": "array?",
+        "investigation_guide": {
+          "blob": "string"
+        }
+      },
+      "monitoring": {
+        "run": {
+          "history": "array",
+          "calculated_metrics": {
+            "p50": "number?",
+            "p95": "number?",
+            "p99": "number?",
+            "success_ratio": "number"
+          },
+          "last_run": {
+            "timestamp": "string",
+            "metrics": {
+              "duration": "number?",
+              "total_search_duration_ms": "number?|null",
+              "total_indexing_duration_ms": "number?|null",
+              "total_alerts_detected": "number?|null",
+              "total_alerts_created": "number?|null",
+              "gap_duration_s": "number?|null",
+              "gap_range": "object?|null"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

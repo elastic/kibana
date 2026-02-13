@@ -1,0 +1,15 @@
+{
+  "10.1.0": [
+    {
+      "apiKeyId": "string",
+      "createdAt": "string"
+    }
+  ],
+  "10.2.0": [
+    {
+      "apiKeyId": "string",
+      "createdAt": "string",
+      "uiamApiKey": "string?"
+    }
+  ]
+}

@@ -249,6 +249,7 @@ export class AlertingPlugin {
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
+  private isUiamEnabled: boolean = false;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -601,6 +602,8 @@ export class AlertingPlugin {
     } = this;
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
+    this.isUiamEnabled = core.security.authc.apiKeys.uiam !== null;
+
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes: [
         RULE_SAVED_OBJECT_TYPE,
@@ -654,6 +657,8 @@ export class AlertingPlugin {
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: core.uiSettings,
       securityService: core.security,
+      isServerless: this.isServerless,
+      isUiamEnabled: this.isUiamEnabled,
     });
 
     rulesSettingsClientFactory.initialize({
@@ -735,6 +740,9 @@ export class AlertingPlugin {
       getEventLogClient: (request: KibanaRequest) => plugins.eventLog.getClient(request),
       isServerless: this.isServerless,
       apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
+      isUiamEnabled: this.isUiamEnabled,
+      getScopedClusterClientWithApiKey:
+        core.security.authc.apiKeys.uiam?.getScopedClusterClientWithApiKey,
     });
 
     this.eventLogService!.registerSavedObjectProvider(

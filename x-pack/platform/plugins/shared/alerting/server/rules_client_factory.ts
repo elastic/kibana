@@ -20,6 +20,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-p
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { isUiamApiKey } from '@kbn/security-plugin/server/uiam/utils';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import type { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
@@ -58,6 +59,8 @@ export interface RulesClientFactoryOpts {
   connectorAdapterRegistry: ConnectorAdapterRegistry;
   uiSettings: CoreStart['uiSettings'];
   securityService: CoreStart['security'];
+  isServerless: boolean;
+  isUiamEnabled: boolean;
 }
 
 export class RulesClientFactory {
@@ -84,6 +87,8 @@ export class RulesClientFactory {
   private connectorAdapterRegistry!: ConnectorAdapterRegistry;
   private uiSettings!: CoreStart['uiSettings'];
   private securityService!: CoreStart['security'];
+  private isServerless: boolean = false;
+  private isUiamEnabled: boolean = false;
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -112,6 +117,8 @@ export class RulesClientFactory {
     this.connectorAdapterRegistry = options.connectorAdapterRegistry;
     this.uiSettings = options.uiSettings;
     this.securityService = options.securityService;
+    this.isServerless = options.isServerless;
+    this.isUiamEnabled = options.isUiamEnabled;
   }
 
   /**
@@ -198,6 +205,8 @@ export class RulesClientFactory {
       backfillClient: this.backfillClient,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: this.uiSettings,
+      isServerless: this.isServerless,
+      isUiamEnabled: this.isUiamEnabled,
 
       async getUserName() {
         const user = securityService.authc.getCurrentUser(request);
@@ -210,7 +219,16 @@ export class RulesClientFactory {
         // Create an API key using the new grant API - in this case the Kibana system user is creating the
         // API key for the user, instead of having the user create it themselves, which requires api_key
         // privileges
-        const createAPIKeyResult = await securityPluginStart.authc.apiKeys.grantAsInternalUser(
+        let createUiamApiKeyResult;
+        const shouldCreateUiamApiKey = this.isServerless && this.isUiamEnabled;
+
+        if (shouldCreateUiamApiKey) {
+          createUiamApiKeyResult = await securityService.authc.apiKeys.uiam?.grant(request, {
+            name: `uiam-${name}`,
+          });
+        }
+
+        const createAPIKeyResult = await securityService.authc.apiKeys.grantAsInternalUser(
           request,
           {
             name,
@@ -218,13 +236,16 @@ export class RulesClientFactory {
             metadata: { managed: true, kibana: { type: 'alerting_rule' } },
           }
         );
-        if (!createAPIKeyResult) {
+
+        if (!createAPIKeyResult || (shouldCreateUiamApiKey && !createUiamApiKeyResult)) {
+          this.logger.error(`Failed to create API key for alerting rule : ${name}`);
           return { apiKeysEnabled: false };
         }
 
         return {
           apiKeysEnabled: true,
           result: createAPIKeyResult,
+          ...(createUiamApiKeyResult ? { uiamResult: createUiamApiKeyResult } : {}),
         };
       },
       async getActionsClient() {
@@ -250,15 +271,37 @@ export class RulesClientFactory {
       getAuthenticationAPIKey(name: string) {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
         if (authorizationHeader && authorizationHeader.credentials) {
-          const apiKey = Buffer.from(authorizationHeader.credentials, 'base64')
+          const [apiKeyId, apiKey] = Buffer.from(authorizationHeader.credentials, 'base64')
             .toString()
             .split(':');
+
+          if (!apiKeyId || !apiKey) {
+            throw new Error(
+              `Failed to parse API key credentials from authorization header for alerting rule : ${name}`
+            );
+          }
+
+          if (isUiamApiKey(apiKey) && !this.isServerless) {
+            throw new Error('UIAM API keys should only be used in serverless environments');
+          }
+
+          if (isUiamApiKey(apiKey)) {
+            return {
+              apiKeysEnabled: true,
+              uiamResult: {
+                name: `uiam-${name}`,
+                id: apiKeyId,
+                api_key: apiKey,
+              },
+            };
+          }
+
           return {
             apiKeysEnabled: true,
             result: {
               name,
-              id: apiKey[0],
-              api_key: apiKey[1],
+              id: apiKeyId,
+              api_key: apiKey,
             },
           };
         }

@@ -86,6 +86,7 @@
     "snoozeSchedule.skipRecurrences",
     "tags",
     "throttle",
+    "uiamApiKey",
     "updatedAt",
     "updatedBy"
   ],
@@ -97,7 +98,8 @@
   ],
   "api_key_pending_invalidation": [
     "apiKeyId",
-    "createdAt"
+    "createdAt",
+    "uiamApiKey"
   ],
   "api_key_to_invalidate": [
     "apiKeyId",
