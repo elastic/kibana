@@ -255,15 +255,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const metricSetFilters = [
             {
               name: 'raw transaction events (processor.event: transaction)',
-              kqlFilter: 'processor.event: "transaction"',
+              kqlFilter: 'transaction.duration.us : *',
             },
             {
               name: 'transaction metrics (metricset.name: transaction)',
-              kqlFilter: 'processor.event: "metric" AND metricset.name: "transaction"',
+              kqlFilter: 'metricset.name: "transaction"',
             },
             {
               name: 'service transaction metrics (metricset.name: service_transaction)',
-              kqlFilter: 'processor.event: "metric" AND metricset.name: "service_transaction"',
+              kqlFilter: 'metricset.name: "service_transaction"',
             },
           ] as const;
 
