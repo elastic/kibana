@@ -36,30 +36,35 @@ jest.mock('../../../../hooks/use_fallback_to_transactions_fetcher', () => ({
   }),
 }));
 
+const mockKibanaServices = {
+  triggersActionsUi: {
+    ruleTypeRegistry: {
+      get: jest.fn(),
+      list: jest.fn().mockReturnValue([]),
+    },
+    actionTypeRegistry: {
+      get: jest.fn(),
+      list: jest.fn().mockReturnValue([]),
+    },
+    getAddRuleFlyout: jest.fn().mockReturnValue(null),
+  },
+  slo: {
+    getCreateSLOFormFlyout: jest.fn().mockReturnValue(null),
+  },
+  uiSettings: {
+    get: jest.fn().mockReturnValue(false),
+  },
+  apmSourcesAccess: {
+    getApmIndexSettings: jest.fn().mockResolvedValue({ apmIndexSettings: [] }),
+  },
+};
+
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
     useKibana: () => ({
-      services: {
-        triggersActionsUi: {
-          ruleTypeRegistry: {
-            get: jest.fn(),
-            list: jest.fn().mockReturnValue([]),
-          },
-          actionTypeRegistry: {
-            get: jest.fn(),
-            list: jest.fn().mockReturnValue([]),
-          },
-          getAddRuleFlyout: jest.fn().mockReturnValue(null),
-        },
-        slo: {
-          getCreateSLOFormFlyout: jest.fn().mockReturnValue(null),
-        },
-        uiSettings: {
-          get: jest.fn().mockReturnValue(false),
-        },
-      },
+      services: mockKibanaServices,
     }),
   };
 });
