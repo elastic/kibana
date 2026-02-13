@@ -492,7 +492,12 @@ export const initUiSettings = (
             // default reasons are stored as snake case
             const asSnakeCase = snakeCase(value);
             if (asSnakeCase in DefaultClosingReasonSchema.enum) {
-              return `${asSnakeCase} is a default reason`;
+              return `${asSnakeCase} ${i18n.translate(
+                'xpack.securitySolution.uiSettings.invalidClosingReason',
+                {
+                  defaultMessage: 'is an invalid closing reason.',
+                }
+              )}`;
             }
           },
           minLength: 1,
@@ -501,7 +506,9 @@ export const initUiSettings = (
           validate: (values) => {
             const uniqueCount = new Set(values).size;
             if (uniqueCount !== values.length) {
-              return 'No duplicate values';
+              return i18n.translate('xpack.securitySolution.uiSettings.duplicateClosingReason', {
+                defaultMessage: 'No duplicate values.',
+              });
             }
           },
         }

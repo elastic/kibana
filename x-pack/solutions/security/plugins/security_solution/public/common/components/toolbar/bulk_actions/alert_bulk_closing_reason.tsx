@@ -64,19 +64,16 @@ const BulkAlertClosingReasonComponent: React.FC<BulkAlertClosingReasonComponentP
   }, [onSubmit, selectedOption]);
 
   useEffect(() => {
-    setOptions((prevOptions) => {
-      const customClosingReasons = uiSettings.get<string[]>(DEFAULT_ALERT_CLOSE_REASONS_KEY);
-
-      return [
-        ...prevOptions,
-        ...customClosingReasons.map((reason) => {
-          return {
-            label: reason,
-            key: reason,
-          };
-        }),
-      ];
-    });
+    const customClosingReasons = uiSettings.get<string[]>(DEFAULT_ALERT_CLOSE_REASONS_KEY);
+    setOptions([
+      ...defaultClosingReasons,
+      ...customClosingReasons.map((reason) => {
+        return {
+          label: reason,
+          key: reason,
+        };
+      }),
+    ]);
   }, [uiSettings]);
 
   return (
