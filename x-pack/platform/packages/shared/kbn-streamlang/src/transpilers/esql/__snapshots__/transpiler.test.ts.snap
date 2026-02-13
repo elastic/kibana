@@ -1,5 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`transpile - Streamlang DSL to ES|QL) prelude support should include prelude when preludeFields are provided 1`] = `
+"INSIST_🐔 \`attributes.foo\`
+  | INSIST_🐔 \`body.message\`
+  | EVAL \`attributes.foo\` = \`attributes.foo\`::INTEGER
+  | EVAL \`body.message\` = \`body.message\`::STRING
+  | EVAL \`attributes.status\` = \\"active\\""
+`;
+
+exports[`transpile - Streamlang DSL to ES|QL) prelude support should prepend INSIST_🐔 and typed EVAL casts in deterministic order 1`] = `
+"INSIST_🐔 a_field
+  | INSIST_🐔 m_field
+  | INSIST_🐔 z_field
+  | EVAL a_field = a_field::BOOLEAN
+  | EVAL z_field = z_field::LONG
+  | EVAL \`attributes.status\` = \\"active\\""
+`;
+
 exports[`transpile - Streamlang DSL to ES|QL) should handle not conditions 1`] = `
 "  | EVAL \`attributes.not_flag\` = CASE(NOT \`attributes.status\` == \\"active\\", \\"not-active\\", \`attributes.not_flag\`)
   | EVAL \`attributes.not_nested\` = CASE(NOT (\`attributes.a\` == 1 OR \`attributes.b\` == 2), \\"not-a-or-b\\", \`attributes.not_nested\`)"
@@ -13,6 +30,7 @@ Object {
   | EVAL \`attributes.numeric_450_test\` = CASE(\`attributes.status_code\` == 450 AND \`attributes.status_code_str\` == \\"450\\" AND \`attributes.other_code\` != 450 AND \`attributes.other_code_str\` != \\"450\\", \\"matched_450_test\\", \`attributes.numeric_450_test\`)
   | EVAL \`attributes.mixed_coercion_test\` = CASE(\`attributes.response_time\` > 100 AND \`attributes.response_time_str\` > \\"100\\" AND \`attributes.port\` >= \\"8000\\" AND \`attributes.port\` <= \\"9000\\" AND \`attributes.is_enabled\` == TRUE AND \`attributes.count_str\` == \\"42\\", \\"matched_mixed_coercion\\", \`attributes.mixed_coercion_test\`)",
   ],
+  "prelude": undefined,
   "query": "  | EVAL \`attributes.boolean_true_test\` = CASE(\`attributes.is_active\` == TRUE AND \`attributes.is_active_str\` == \\"true\\" AND \`attributes.is_inactive\` != TRUE AND \`attributes.is_inactive_str\` != \\"true\\", \\"matched_true_test\\", \`attributes.boolean_true_test\`)
   | EVAL \`attributes.boolean_false_test\` = CASE(\`attributes.is_disabled\` == FALSE AND \`attributes.is_disabled_str\` == \\"false\\" AND \`attributes.is_enabled\` != FALSE AND \`attributes.is_enabled_str\` != \\"false\\", \\"matched_false_test\\", \`attributes.boolean_false_test\`)
   | EVAL \`attributes.numeric_450_test\` = CASE(\`attributes.status_code\` == 450 AND \`attributes.status_code_str\` == \\"450\\" AND \`attributes.other_code\` != 450 AND \`attributes.other_code_str\` != \\"450\\", \\"matched_450_test\\", \`attributes.numeric_450_test\`)

@@ -87,12 +87,35 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     query_streams: false,
   };
 
+  /**
+   * Tracks if this stream is transitioning from draft to non-draft.
+   * When true, the stream needs full ES materialization (templates, pipelines, etc.)
+   * even though it's an "update" operation.
+   */
+  private _fromDraftToNonDraft: boolean = false;
+
   constructor(definition: Streams.WiredStream.Definition, dependencies: StateDependencies) {
     super(definition, dependencies);
   }
 
   protected doClone(): StreamActiveRecord<Streams.WiredStream.Definition> {
-    return new WiredStream(cloneDeep(this._definition), this.dependencies);
+    const clone = new WiredStream(cloneDeep(this._definition), this.dependencies);
+    clone._fromDraftToNonDraft = this._fromDraftToNonDraft;
+    return clone;
+  }
+
+  /**
+   * Returns true if this stream is transitioning from draft to non-draft (materialization).
+   */
+  public isFromDraftToNonDraft(): boolean {
+    return this._fromDraftToNonDraft;
+  }
+
+  /**
+   * Returns true if this stream is a draft stream.
+   */
+  public isDraft(): boolean {
+    return Boolean(this._definition.ingest.wired.draft);
   }
 
   protected async doHandleUpsertChange(
@@ -107,8 +130,25 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         Streams.WiredStream.Definition.is(definition) &&
         isDescendantOf(definition.name, this._definition.name);
 
+      // Check if a child stream is transitioning from draft to non-draft.
+      // In this case, we need to update the parent's routing pipeline.
+      const childGoesFromDraftToNonDraft =
+        Streams.WiredStream.Definition.is(definition) &&
+        isChildOf(this._definition.name, definition.name) &&
+        !definition.ingest.wired.draft &&
+        (startingState.get(definition.name) as WiredStream | undefined)?._definition.ingest.wired
+          .draft;
+
+      if (childGoesFromDraftToNonDraft) {
+        // Mark routing as changed so we regenerate the reroute pipeline
+        this._changes.routing = true;
+      }
+
       return {
-        changeStatus: ancestorHasChanged && !this.isDeleted() ? 'upserted' : this.changeStatus,
+        changeStatus:
+          (ancestorHasChanged || childGoesFromDraftToNonDraft) && !this.isDeleted()
+            ? 'upserted'
+            : this.changeStatus,
         cascadingChanges: [],
       };
     }
@@ -126,6 +166,27 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       !Streams.WiredStream.Definition.is(startingStateStreamDefinition)
     ) {
       throw new StatusError('Unexpected starting state stream type', 400);
+    }
+
+    // Validate draft mode transitions:
+    // - Cannot change a non-draft stream back to a draft stream
+    // - Can change a draft stream to a non-draft stream (materialization)
+    if (
+      startingStateStreamDefinition &&
+      !startingStateStreamDefinition.ingest.wired.draft &&
+      this._definition.ingest.wired.draft
+    ) {
+      throw new StatusError('Cannot change a non-draft stream to a draft stream', 400);
+    }
+
+    // Track if we're going from draft to non-draft (materialization)
+    const goFromDraftToNonDraft =
+      startingStateStreamDefinition &&
+      startingStateStreamDefinition.ingest.wired.draft &&
+      !this._definition.ingest.wired.draft;
+
+    if (goFromDraftToNonDraft) {
+      this._fromDraftToNonDraft = true;
     }
 
     this._changes.ownFields =
@@ -229,6 +290,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
                 wired: {
                   fields: {},
                   routing: [],
+                  // Child streams inherit draft status from their parent
+                  ...(this._definition.ingest.wired.draft ? { draft: true } : {}),
                 },
                 failure_store: { inherit: {} },
               },
@@ -444,6 +507,45 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         };
       }
       children.add(routing.destination);
+    }
+
+    // Validate draft routing constraints:
+    // 1. Draft streams must come after non-draft streams in routing order
+    // 2. Draft streams cannot have non-draft children
+    const isDraft = this._definition.ingest.wired.draft;
+    let seenDraftChild = false;
+
+    for (const routing of this._definition.ingest.wired.routing) {
+      const childDefinition = desiredState.get(routing.destination)?.definition;
+      if (childDefinition && Streams.WiredStream.Definition.is(childDefinition)) {
+        const childIsDraft = Boolean(childDefinition.ingest.wired.draft);
+
+        // Check routing order: once we've seen a draft child, all subsequent children must be drafts
+        if (childIsDraft) {
+          seenDraftChild = true;
+        } else if (seenDraftChild) {
+          return {
+            isValid: false,
+            errors: [
+              new Error(
+                `Cannot route a non-draft stream "${routing.destination}" after a draft stream in the routing of "${this._definition.name}". Draft streams must come last in routing order.`
+              ),
+            ],
+          };
+        }
+
+        // Check draft parent constraint: draft streams cannot have non-draft children
+        if (isDraft && !childIsDraft) {
+          return {
+            isValid: false,
+            errors: [
+              new Error(
+                `Cannot create draft stream "${this._definition.name}" with a non-draft child stream "${routing.destination}". All children of a draft stream must also be drafts.`
+              ),
+            ],
+          };
+        }
+      }
     }
 
     for (const stream of desiredState.all()) {
@@ -673,6 +775,17 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   }
 
   protected async doDetermineCreateActions(desiredState: State): Promise<ElasticsearchAction[]> {
+    // For draft streams, only persist the definition document - skip ES materialization
+    // (no templates, pipelines, data streams, etc.)
+    if (this._definition.ingest.wired.draft) {
+      return [
+        {
+          type: 'upsert_dot_streams_document',
+          request: this._definition,
+        },
+      ];
+    }
+
     const ancestors = getAncestorsAndSelf(this._definition.name).map(
       (id) => desiredState.get(id)!.definition as Streams.WiredStream.Definition
     );
@@ -800,6 +913,22 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     startingState: State,
     startingStateStream: WiredStream
   ): Promise<ElasticsearchAction[]> {
+    // If transitioning from draft to non-draft, perform full materialization
+    // (same as creating a new non-draft stream)
+    if (this._fromDraftToNonDraft) {
+      return this.doDetermineCreateActions(desiredState);
+    }
+
+    // For draft streams, only update the definition document
+    if (this._definition.ingest.wired.draft) {
+      return [
+        {
+          type: 'upsert_dot_streams_document',
+          request: this._definition,
+        },
+      ];
+    }
+
     const actions: ElasticsearchAction[] = [];
     if (this.hasChangedFields()) {
       actions.push({
@@ -942,6 +1071,18 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
   }
 
   protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {
+    // For draft streams, only delete the definition document - no ES artifacts exist
+    if (this._definition.ingest.wired.draft) {
+      return [
+        {
+          type: 'delete_dot_streams_document',
+          request: {
+            name: this._definition.name,
+          },
+        },
+      ];
+    }
+
     return [
       {
         type: 'delete_index_template',
