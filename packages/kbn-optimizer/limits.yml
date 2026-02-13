@@ -31,10 +31,10 @@ pageLoadAssetSize:
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 20000
-  dashboardEnhanced: 11961
-  dashboardMarkdown: 4994
-  data: 495550
   dashboardAgent: 5135
+  dashboardEnhanced: 11651
+  dashboardMarkdown: 4994
+  data: 494465
   dataQuality: 11469
   datasetQuality: 49315
   dataSources: 6748
@@ -47,14 +47,14 @@ pageLoadAssetSize:
   developerToolbar: 4467
   devTools: 8109
   discover: 28284
-  discoverEnhanced: 5660
+  discoverEnhanced: 5517
   discoverShared: 2322
   elasticAssistant: 338870
   elasticAssistantSharedState: 4881
   embeddable: 14545
   embeddableAlertsTable: 6524
   embeddableEnhanced: 4488
-  enterpriseSearch: 40158
+  enterpriseSearch: 37566
   entityStore: 71717
   esql: 19247
   esqlDataGrid: 10209
