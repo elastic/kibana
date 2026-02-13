@@ -167,5 +167,4 @@ describe('buildkite_checkpoint', () => {
       );
     });
   });
-
 });

@@ -76,5 +76,3 @@ export async function isConfigCompleted(config: string): Promise<boolean> {
     return false;
   }
 }
-
-

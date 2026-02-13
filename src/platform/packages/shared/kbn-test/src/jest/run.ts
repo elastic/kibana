@@ -31,11 +31,7 @@ import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 import type { Config } from '@jest/types';
 
 import jestFlags from './jest_flags.json';
-import {
-  isInBuildkite,
-  isConfigCompleted,
-  markConfigCompleted,
-} from './buildkite_checkpoint';
+import { isInBuildkite, isConfigCompleted, markConfigCompleted } from './buildkite_checkpoint';
 
 const JEST_CACHE_DIR = 'data/jest-cache';
 
@@ -137,7 +133,11 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
 
     // Buildkite checkpoint: mark this config as completed so retries can skip it.
     // Jest sets process.exitCode before resolving; 0 or undefined means all tests passed.
-    if (isInBuildkite() && resolvedConfigPath && (process.exitCode === 0 || process.exitCode === undefined)) {
+    if (
+      isInBuildkite() &&
+      resolvedConfigPath &&
+      (process.exitCode === 0 || process.exitCode === undefined)
+    ) {
       await markConfigCompleted(resolvedConfigPath);
     }
   });

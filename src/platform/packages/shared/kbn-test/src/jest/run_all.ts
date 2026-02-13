@@ -18,11 +18,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { tmpdir } from 'os';
 import { getJestConfigs } from './configs/get_jest_configs';
-import {
-  isInBuildkite,
-  markConfigCompleted,
-  isConfigCompleted,
-} from './buildkite_checkpoint';
+import { isInBuildkite, markConfigCompleted, isConfigCompleted } from './buildkite_checkpoint';
 
 interface JestConfigResult {
   config: string;
