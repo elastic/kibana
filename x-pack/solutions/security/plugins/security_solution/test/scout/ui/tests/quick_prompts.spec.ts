@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test } from '../fixtures';
+import { test, expect, tags } from '../fixtures';
 import {
   azureConnectorPayload,
   createAzureConnector,
@@ -24,31 +24,50 @@ const testPrompt = {
 const mockConvo1 = { id: 'spooky', title: 'Spooky convo', messages: [] };
 const mockConvo2 = { id: 'silly', title: 'Silly convo', messages: [] };
 
-test.describe('AI Assistant Quick Prompts', { tag: ['@ess', '@svlSecurity'] }, () => {
-  test.beforeEach(async ({ kbnClient, esClient, browserAuth }) => {
-    await deleteConnectors(kbnClient);
-    await deleteConversations(esClient);
-    await deletePrompts(esClient);
-    await createAzureConnector(kbnClient);
-    await createConversation(kbnClient, mockConvo1);
-    await createConversation(kbnClient, mockConvo2);
-    await browserAuth.loginAsAdmin();
-  });
+test.describe(
+  'AI Assistant Quick Prompts',
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  () => {
+    test.beforeEach(async ({ kbnClient, esClient }) => {
+      await deleteConnectors(kbnClient);
+      await deleteConversations(esClient);
+      await deletePrompts(esClient);
+      await createAzureConnector(kbnClient);
+      await createConversation(kbnClient, mockConvo1);
+      await createConversation(kbnClient, mockConvo2);
+    });
 
-  test('Add a quick prompt and send it in the conversation', async ({
-    page,
-    pageObjects,
-    kbnUrl,
-  }) => {
-    test.setTimeout(180_000);
-    await page.goto(kbnUrl.get('/app/security/get_started'));
-    await waitForPageReady(page);
-    await pageObjects.assistant.openAssistant();
-    await pageObjects.assistant.createQuickPrompt(testPrompt.name, testPrompt.content);
-    await pageObjects.assistant.selectConnector(azureConnectorPayload.name);
-    await pageObjects.assistant.assertConnectorSelected(azureConnectorPayload.name);
-    await pageObjects.assistant.sendQuickPrompt(testPrompt.name);
-    await pageObjects.assistant.assertMessageSent(testPrompt.content);
-    await pageObjects.assistant.assertErrorResponse();
-  });
-});
+    test.afterEach(async ({ kbnClient, esClient }) => {
+      await deleteConnectors(kbnClient);
+      await deleteConversations(esClient);
+      await deletePrompts(esClient);
+    });
+
+    test('Add a quick prompt and send it in the conversation', async ({
+      browserAuth,
+      page,
+      pageObjects,
+      kbnUrl,
+    }) => {
+      test.setTimeout(180_000);
+      await browserAuth.loginAsAdmin();
+      await page.goto(kbnUrl.get('/app/security/get_started'));
+      await waitForPageReady(page);
+      await pageObjects.assistant.openAssistant();
+
+      await test.step('create quick prompt', async () => {
+        await pageObjects.assistant.createQuickPrompt(testPrompt.name, testPrompt.content);
+      });
+
+      await test.step('select connector and send quick prompt', async () => {
+        await pageObjects.assistant.selectConnector(azureConnectorPayload.name);
+        await expect(pageObjects.assistant.connectorSelector).toHaveText(
+          azureConnectorPayload.name
+        );
+        await pageObjects.assistant.sendQuickPrompt(testPrompt.name);
+        await expect(pageObjects.assistant.messageAt(0)).toContainText(testPrompt.content);
+        await expect(pageObjects.assistant.errorComment).toBeVisible({ timeout: 30_000 });
+      });
+    });
+  }
+);

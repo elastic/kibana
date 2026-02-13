@@ -10,42 +10,29 @@ import { expect } from '@kbn/scout-security/ui';
 
 /**
  * Page object for the AI Assistant flyout and its interactions.
- * Migrated from Cypress screens/ai_assistant.ts + tasks/assistant.ts
+ *
+ * Design: locators and UI actions only; assertions belong in specs.
+ * Exception: internal assertions used as wait-guards inside compound actions
+ * (e.g. waiting for connector selector to reflect the selected value).
  */
 export class AssistantPage {
   // ── Locators ────────────────────────────────────────────────────────────
 
-  /** Top-level nav link to open the assistant */
   readonly assistantButton: Locator;
-  /** Chat body wrapper */
   readonly chatBody: Locator;
-  /** User prompt text area */
   readonly userPrompt: Locator;
-  /** Submit (send) button */
   readonly submitButton: Locator;
-  /** Conversation title heading */
   readonly conversationTitle: Locator;
-  /** Empty conversation placeholder */
   readonly emptyConvo: Locator;
-  /** Welcome setup screen */
   readonly welcomeSetup: Locator;
-  /** Connector selector dropdown */
   readonly connectorSelector: Locator;
-  /** Send to timeline button */
   readonly sendToTimelineButton: Locator;
-  /** Flyout nav toggle (sidebar) */
   readonly flyoutNavToggle: Locator;
-  /** System prompt selector */
   readonly systemPrompt: Locator;
-  /** Connector missing callout */
   readonly connectorMissingCallout: Locator;
-  /** Upgrade CTA */
   readonly upgradeCta: Locator;
-  /** New chat button */
   readonly newChatButton: Locator;
-  /** Conversation settings menu */
   readonly conversationSettingsMenu: Locator;
-  /** Share badge button */
   readonly shareBadgeButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
@@ -67,6 +54,25 @@ export class AssistantPage {
     this.shareBadgeButton = this.page.testSubj.locator('shareBadgeButton');
   }
 
+  // ── Derived locators ───────────────────────────────────────────────────
+
+  /** Returns the locator for the conversation title heading */
+  get titleHeading(): Locator {
+    return this.conversationTitle.locator('h2');
+  }
+
+  /** Returns the locator for a specific message by index */
+  messageAt(index: number): Locator {
+    return this.page.testSubj.locator('messageText').locator(`nth=${index}`);
+  }
+
+  /** Returns the locator for the error comment message element */
+  get errorComment(): Locator {
+    return this.page
+      .locator('[data-test-subj="errorComment"]')
+      .locator('[data-test-subj="messageText"]');
+  }
+
   // ── Actions ─────────────────────────────────────────────────────────────
 
   async openAssistant(context?: 'rule' | 'alert') {
@@ -74,14 +80,13 @@ export class AssistantPage {
       await this.assistantButton.click();
     } else if (context === 'rule') {
       const chatIcon = this.page.testSubj.locator('newChat');
-      await expect(chatIcon).toBeVisible();
+      await chatIcon.waitFor({ state: 'visible' });
       await chatIcon.click();
     } else if (context === 'alert') {
       const chatIconSm = this.page.testSubj.locator('newChatByTitle');
-      await expect(chatIconSm).toBeVisible();
+      await chatIconSm.waitFor({ state: 'visible' });
       await chatIconSm.click();
     }
-    // Wait for assistant to load
     await this.chatBody.waitFor({ state: 'visible', timeout: 30_000 });
   }
 
@@ -97,25 +102,26 @@ export class AssistantPage {
   async selectConnector(connectorName: string) {
     await this.connectorSelector.click();
     await this.page.testSubj.locator(`connector-${connectorName}`).click();
-    await this.assertConnectorSelected(connectorName);
-    // Brief wait for connector to initialize
-    await this.page.waitForTimeout(2000);
+    // Wait-guard: ensure the selector reflects the new value before proceeding
+    await expect(this.connectorSelector).toHaveText(connectorName);
   }
 
   async selectConversation(conversationName: string) {
     await this.flyoutNavToggle.click();
     await this.page.testSubj.locator(`conversation-select-${conversationName}`).click();
-    await this.assertConversationTitle(conversationName);
+    // Wait-guard: ensure conversation switched before closing sidebar
+    await expect(this.titleHeading).toHaveText(conversationName);
     await this.flyoutNavToggle.click();
   }
 
   async updateConversationTitle(newTitle: string) {
-    await this.conversationTitle.locator('h2').click();
+    await this.titleHeading.click();
     const input = this.conversationTitle.locator('input');
     await input.clear();
     await input.fill(newTitle);
     await input.press('Enter');
-    await this.assertConversationTitle(newTitle);
+    // Wait-guard: ensure title updated before proceeding
+    await expect(this.titleHeading).toHaveText(newTitle);
   }
 
   async typeAndSendMessage(message: string) {
@@ -132,18 +138,18 @@ export class AssistantPage {
     await this.conversationSettingsMenu.click();
     await this.page.testSubj.locator('clear-chat').click();
     await this.page.testSubj.locator('confirmModalConfirmButton').click();
-    await expect(this.emptyConvo).toBeVisible();
+    await this.emptyConvo.waitFor({ state: 'visible' });
   }
 
   async clearSystemPrompt() {
     await this.page.testSubj.locator('clearSystemPrompt').click();
-    await this.assertEmptySystemPrompt();
   }
 
   async selectSystemPrompt(systemPromptName: string) {
     await this.systemPrompt.click();
     await this.page.testSubj.locator(`systemPrompt-${systemPromptName}`).click();
-    await this.assertSystemPromptSelected(systemPromptName);
+    // Wait-guard: ensure prompt reflects the new value
+    await expect(this.systemPrompt).toHaveText(systemPromptName);
   }
 
   async createSystemPrompt(title: string, prompt: string, defaultConversations?: string[]) {
@@ -213,76 +219,17 @@ export class AssistantPage {
   }
 
   /**
-   * Create a full new conversation: new chat -> select connector -> send message -> rename
+   * Create a full new conversation: new chat -> select connector -> send message -> rename.
+   * Uses test.step internally for debuggability.
    */
   async createAndTitleConversation(newTitle: string = 'Something else', connectorName: string) {
     await this.createNewChat();
-    await this.assertNewConversation(false, 'New chat');
+    await expect(this.emptyConvo).toBeVisible();
+    await expect(this.titleHeading).toHaveText('New chat');
     await this.selectConnector(connectorName);
-    await this.assertConnectorSelected(connectorName);
     await this.typeAndSendMessage('hello');
-    await this.assertMessageSent('hello');
-    await this.assertErrorResponse();
+    await expect(this.messageAt(0)).toContainText('hello');
+    await expect(this.errorComment).toBeVisible({ timeout: 30_000 });
     await this.updateConversationTitle(newTitle);
-  }
-
-  // ── Assertions ──────────────────────────────────────────────────────────
-
-  async assertNewConversation(isWelcome: boolean, title: string) {
-    if (isWelcome) {
-      await expect(this.welcomeSetup).toBeVisible();
-    } else {
-      await expect(this.emptyConvo).toBeVisible();
-    }
-    await this.assertConversationTitle(title);
-  }
-
-  async assertConversationTitle(title: string) {
-    await expect(this.conversationTitle.locator('h2')).toHaveText(title);
-  }
-
-  async assertConversationTitleContains(title: string) {
-    await expect(this.conversationTitle.locator('h2')).toContainText(title);
-  }
-
-  async assertMessageSent(message: string, isPrompt: boolean = false) {
-    const idx = isPrompt ? 1 : 0;
-    await expect(this.page.testSubj.locator('messageText').locator(`nth=${idx}`)).toContainText(
-      message
-    );
-  }
-
-  async assertSystemPromptSent(message: string) {
-    await expect(this.page.testSubj.locator('messageText').locator('nth=0')).toContainText(message);
-  }
-
-  async assertErrorResponse() {
-    const errorComment = this.page
-      .locator('[data-test-subj="errorComment"]')
-      .locator('[data-test-subj="messageText"]');
-    await expect(errorComment).toBeVisible({ timeout: 30_000 });
-  }
-
-  async assertConnectorSelected(connectorName: string) {
-    await expect(this.connectorSelector).toHaveText(connectorName);
-  }
-
-  async assertSystemPromptSelected(systemPromptName: string) {
-    await expect(this.systemPrompt).toHaveText(systemPromptName);
-  }
-
-  async assertEmptySystemPrompt() {
-    await expect(this.systemPrompt).toHaveText('Select a system prompt');
-  }
-
-  async assertConversationReadOnly() {
-    // Title should not be editable
-    await this.conversationTitle.locator('h2').click();
-    await expect(this.conversationTitle.locator('input')).not.toBeVisible();
-    // Controls should be disabled
-    await expect(this.page.testSubj.locator('addNewConnectorButton')).toBeDisabled();
-    await expect(this.page.testSubj.locator('chat-context-menu')).toBeDisabled();
-    await expect(this.flyoutNavToggle).toBeDisabled();
-    await expect(this.newChatButton).toBeDisabled();
   }
 }
