@@ -67,6 +67,31 @@ export class NotificationPolicyClient {
     }
   }
 
+  public async getNotificationPolicies({
+    ids,
+  }: {
+    ids: string[];
+  }): Promise<NotificationPolicyResponse[]> {
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const docs = await this.notificationPolicySavedObjectService.bulkGetByIds(ids);
+
+    return docs.flatMap((doc) => {
+      if ('error' in doc) {
+        if (doc.error.statusCode === 404) {
+          return [];
+        }
+        throw Boom.boomify(new Error(doc.error.message), {
+          statusCode: doc.error.statusCode,
+        });
+      }
+
+      return [{ id: doc.id, version: doc.version, ...doc.attributes }];
+    });
+  }
+
   public async updateNotificationPolicy(
     params: UpdateNotificationPolicyParams
   ): Promise<NotificationPolicyResponse> {
