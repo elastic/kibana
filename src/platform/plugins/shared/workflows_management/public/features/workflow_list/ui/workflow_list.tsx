@@ -35,6 +35,7 @@ import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shar
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
 import {
   areSimilarResults,
+  keepPreviousWorkflowOrder,
   shouldShowWorkflowsEmptyState,
 } from '../../../shared/utils/workflow_utils';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
@@ -79,6 +80,11 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
 
   const onRefresh = useCallback(async () => {
     const result = await refetch();
+
+    if(workflows && result.data && areSimilarResults(result.data, workflows)) {
+      keepPreviousWorkflowOrder({ previousData: workflows, freshData: result.data });
+    }
+
     // Update selected items with fresh data after refetch
     if (result.data?.results && selectedItems.length > 0) {
       const selectedIds = new Set(selectedItems.map((item) => item.id));
@@ -155,15 +161,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
           areSimilar: (previous, fresh) => {
             return areSimilarResults(fresh, previous);
           },
-          onSuccessWhenSimilar: ({ previousData, freshData, updatedWorkflowId }) => {
-            // resort the freshData to the same order as the previousData
-            const previousDataIndexById = new Map(previousData.results.map((r, i) => [r.id, i]));
-
-            freshData.results.sort(
-              (a, b) =>
-                (previousDataIndexById.get(a.id) ?? -1) - (previousDataIndexById.get(b.id) ?? -1)
-            );
-          },
+          onSuccessWhenSimilar: keepPreviousWorkflowOrder,
         },
         {
           onError: (err: unknown) => {
