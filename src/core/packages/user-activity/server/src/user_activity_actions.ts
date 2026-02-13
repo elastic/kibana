@@ -61,7 +61,7 @@ export const removedUserActivityActions = {
     ownerTeam: '@elastic/kibana-core',
     groupName: 'Example plugins',
     versionAddedAt: '0.0',
-    versionRemovedAt: '10.0',
+    versionRemovedAt: '9.0',
   },
   example_action_3: {
     description: `just an example so the first team using the service can use this as a guide, 
@@ -69,6 +69,6 @@ export const removedUserActivityActions = {
     ownerTeam: '@elastic/kibana-core',
     groupName: 'Example plugins #2',
     versionAddedAt: '0.0',
-    versionRemovedAt: '10.0',
+    versionRemovedAt: '9.0',
   },
 } as const satisfies Record<string, RemovedUserActivityActionDefinition>;
