@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AlertClosingReasonValues } from '../../../../../common/types';
 import { updateAlertStatus } from './update_alerts';
+import { DefaultClosingReasonSchema } from '../../../../../common/types';
 
 const mockUpdateAlertStatusByIds = jest.fn().mockReturnValue(new Promise(() => {}));
 const mockUpdateAlertStatusByQuery = jest.fn().mockReturnValue(new Promise(() => {}));
@@ -46,7 +46,7 @@ describe('updateAlertStatus', () => {
 
   it('should call updateAlertStatusByIds with `reason` if provided', () => {
     const signalIds = ['1', '2'];
-    const mockReason = AlertClosingReasonValues.benign_positive;
+    const mockReason = DefaultClosingReasonSchema.enum.benign_positive;
     updateAlertStatus({
       status,
       signalIds,
