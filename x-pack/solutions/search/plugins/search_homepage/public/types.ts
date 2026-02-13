@@ -16,6 +16,7 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { DataSourcesPluginStart } from '@kbn/data-sources-plugin/public';
 import type { App } from './components/stack_app';
 
 export interface SearchHomepageAppInfo {
@@ -57,6 +58,7 @@ export interface SearchHomepageAppPluginStartDependencies {
   licensing: LicensingPluginStart;
   dataViews?: DataViewsPublicPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
+  dataSources?: DataSourcesPluginStart;
 }
 
 export interface SearchHomepageServicesContextDeps {

@@ -17,12 +17,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { DATA_SOURCES_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { useDashboardsStats } from '../../hooks/api/use_dashboards_stats';
 import { useIndicesStats } from '../../hooks/api/use_indices_stats';
 import { useStats } from '../../hooks/api/use_stats';
 import { useAgentCount } from '../../hooks/api/use_agent_count';
+import { useDataSourcesCount } from '../../hooks/api/use_data_sources_count';
+import { useKibana } from '../../hooks/use_kibana';
 
-const BASIC_METRIC_PANEL_TYPES = ['indices', 'storage', 'agentBuilder', 'discover'] as const;
+const BASIC_METRIC_PANEL_TYPES = [
+  'indices',
+  'storage',
+  'agentBuilder',
+  'dataSources',
+  'discover',
+] as const;
 
 type BasicMetricPanelType = (typeof BASIC_METRIC_PANEL_TYPES)[number];
 
@@ -67,6 +76,10 @@ const BasicMetricPanel = ({
 };
 
 export const BasicMetricBadges = () => {
+  const { services: { uiSettings } } = useKibana();
+  
+  const isDataSourcesEnabled = uiSettings.get<boolean>(DATA_SOURCES_ENABLED_SETTING_ID, false);
+  
   const {
     data: storageStats,
     isLoading: isLoadingStorageStats,
@@ -83,6 +96,11 @@ export const BasicMetricBadges = () => {
     isError: isErrorDashboards,
   } = useDashboardsStats();
   const { tools, agents, isLoading: isLoadingAgents, isError: isErrorAgents } = useAgentCount();
+  const {
+    count: dataSourcesCount,
+    isLoading: isLoadingDataSources,
+    isError: isErrorDataSources,
+  } = useDataSourcesCount();
 
   const basicPanels: Array<BasicMetricPanel> = [
     {
@@ -129,6 +147,24 @@ export const BasicMetricBadges = () => {
       isLoading: isLoadingAgents,
       isError: isErrorAgents,
     },
+    ...(isDataSourcesEnabled
+      ? [
+          {
+            type: 'dataSources' as const,
+            title: i18n.translate('xpack.searchHomepage.metricPanel.basic.dataSources.title', {
+              defaultMessage: 'Data Sources',
+            }),
+            metric: i18n.translate('xpack.searchHomepage.metricPanel.basic.dataSources.count', {
+              defaultMessage: '{count, plural, one {# source} other {# sources}}',
+              values: {
+                count: dataSourcesCount,
+              },
+            }),
+            isLoading: isLoadingDataSources,
+            isError: isErrorDataSources,
+          },
+        ]
+      : []),
     {
       type: 'discover',
       title: i18n.translate('xpack.searchHomepage.metricPanel.basic.discover.title', {

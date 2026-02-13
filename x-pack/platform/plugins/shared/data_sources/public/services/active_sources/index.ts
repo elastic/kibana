@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { AvailableDataSourcesService } from './data_sources_api';
-export { ActiveSourcesService, createPublicActiveSourcesContract } from './active_sources';
+export { ActiveSourcesService } from './active_sources_service';
+export { createPublicActiveSourcesContract } from './create_public_active_sources_contract';
