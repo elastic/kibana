@@ -22,6 +22,9 @@ node scripts/eslint.js src/platform/packages/shared/shared-ux/datetime/kbn-date-
 # Lint (ESLint) + Format (Prettier) — fix
 node scripts/eslint.js --fix src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker
 
+# Check types
+yarn test:type_check --project src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker/tsconfig.json
+
 # Storybook
 yarn storybook shared_ux
 ```

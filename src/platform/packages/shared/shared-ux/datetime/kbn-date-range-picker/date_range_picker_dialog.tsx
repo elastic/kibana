@@ -71,6 +71,7 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
 
   return (
     <EuiPopover
+      css={css({ maxInlineSize: maxWidth })}
       button={<DateRangePickerControl />}
       isOpen={isEditing}
       closePopover={closePopover}
@@ -78,19 +79,18 @@ export function DateRangePickerDialog({ children }: PropsWithChildren) {
       attachToAnchor={true}
       repositionToCrossAxis={false}
       display="block"
-      css={css({ maxInlineSize: maxWidth })}
       ownFocus={false}
       panelPaddingSize="none"
     >
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
       <div
+        css={css({ minWidth: maxWidth })}
         ref={panelRef}
         id={panelId}
         role="dialog"
         aria-label="Date range picker dialog"
         tabIndex={-1}
         onKeyDown={onPanelKeyDown}
-        style={{ minWidth: maxWidth }}
       >
         {children}
       </div>

@@ -136,21 +136,19 @@ export function DateRangePickerControl() {
     [isEditing, setIsEditing]
   );
 
+  const containerStyles = css`
+    display: flex;
+    align-items: center;
+    gap: ${euiTheme.size.s};
+    max-inline-size: ${maxWidth};
+  `;
+
   const tooltipStyles = css`
     max-inline-size: min(58ch, 90vw);
   `;
 
   return (
-    <div
-      ref={controlRef}
-      onKeyDown={onControlKeyDown}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: euiTheme.size.s,
-        maxInlineSize: maxWidth,
-      }}
-    >
+    <div css={containerStyles} ref={controlRef} onKeyDown={onControlKeyDown}>
       <EuiFormControlLayout
         compressed={compressed}
         isInvalid={isInvalid}
