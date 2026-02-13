@@ -141,7 +141,7 @@ function hostMetricsColumns(
         <MetricsNodeDetailsLink
           id={name}
           label={name}
-          nodeType={'host'}
+          nodeType="host"
           timerange={timerange}
           schema={schema}
           metricIndices={metricIndices}
