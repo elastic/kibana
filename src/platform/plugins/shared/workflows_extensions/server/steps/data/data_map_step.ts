@@ -61,6 +61,8 @@ export const dataMapStepDefinition = createServerStepDefinition({
       context.logger.debug(`Successfully mapped ${mappedItems.length} item(s)`);
 
       const output = applyTransform(context.input.transform, mappedItems);
+
+      // Return object if input was object, otherwise return array
       return { output: shouldReturnObject ? output[0] : output };
     } catch (error) {
       context.logger.error('Failed to map items', error);
