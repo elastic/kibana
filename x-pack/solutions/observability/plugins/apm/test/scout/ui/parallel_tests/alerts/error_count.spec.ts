@@ -164,9 +164,10 @@ test.describe('Alerts', () => {
             name: 'Error count threshold',
           })
         ).toBeVisible();
-        await alertsControls.addRuleFlyout.fillIsAbove(0);
+        // Ensure the rule doesn't trigger alerts to avoid polluting the test environment with active alerts that could interfere with other tests
+        await alertsControls.addRuleFlyout.fillIsAbove(1000000);
         await expect(alertsControls.addRuleFlyout.isAboveExpression).toHaveText(
-          'is above 0 errors'
+          'is above 1000000 errors'
         );
       });
 
