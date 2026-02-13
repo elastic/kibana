@@ -492,12 +492,13 @@ export const initUiSettings = (
             // default reasons are stored as snake case
             const asSnakeCase = snakeCase(value);
             if (asSnakeCase in DefaultClosingReasonSchema.enum) {
-              return `${asSnakeCase} ${i18n.translate(
-                'xpack.securitySolution.uiSettings.invalidClosingReason',
+              return i18n.translate(
+                'xpack.securitySolution.uiSettings.closingReasonValidationError',
                 {
-                  defaultMessage: 'is an invalid closing reason.',
+                  defaultMessage: '"{reason}" is an invalid closing reason.',
+                  values: { reason: value },
                 }
-              )}`;
+              );
             }
           },
           minLength: 1,
