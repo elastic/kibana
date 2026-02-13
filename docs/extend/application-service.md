@@ -5,7 +5,7 @@ mapped_pages:
 
 # Application service [application-service]
 
-Kibana has migrated to be a Single Page Application. Plugins should use `Application service` API to instruct Kibana that an application should be loaded and rendered in the UI in response to user interactions. The service also provides utilities for controlling the navigation link state, seamlessly integrating routing between applications, and loading async chunks on demand.
+Plugins utilize the `Application service` API to load and render applications within Kibana's Single Page Application UI in response to user interactions. This service also provides utilities for managing navigation link state, integrating routing between applications, and handling on-demand loading of async chunks.
 
 ::::{note}
 The Application service is only available client side.
@@ -37,11 +37,11 @@ export class MyPlugin implements Plugin {
 }
 ```
 
-1. Refer to  [application.register interface](https://github.com/elastic/kibana/tree/master/src/core/packages/application/browser/src/contracts.ts)
+1. [application.register interface](https://github.com/elastic/kibana/tree/master/src/core/packages/application/browser/src/contracts.ts)
 2. Application specific URL.
 3. `mount` callback is invoked when a user navigates to the application-specific URL.
 4. `core.getStartServices` method provides API available during `start` lifecycle.
-5. `mount` method must return a function that will be called to unmount the application, which is called when Kibana unmounts the application. You can put a clean-up logic there.
+5. The `mount` method must return an unmount function, which Kibana invokes when the application unmounts. This is where cleanup logic should be placed.
 
 
 ::::{note}
