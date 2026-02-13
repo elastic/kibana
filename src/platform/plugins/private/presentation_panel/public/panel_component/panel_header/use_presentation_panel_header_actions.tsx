@@ -51,11 +51,10 @@ export const usePresentationPanelHeaderActions = <
     };
 
     const handleActionCompatibilityChange = (
-      type: 'badge' | 'notification',
+      type: 'notification',
       isCompatible: boolean,
       action: AnyApiAction
     ) => {
-      if (type === 'badge') console.log(type, isCompatible, action);
       if (canceled) return;
       setNotifications((currentActions) => {
         const newActions = currentActions?.filter((current) => current.id !== action.id);
