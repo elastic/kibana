@@ -24,7 +24,6 @@ export type {
   WorkflowsExtensionsServerPluginStart,
   WorkflowsExtensionsServerPluginSetupDeps,
   WorkflowsExtensionsServerPluginStartDeps,
-  WorkflowsExtensionsTriggerStartContract,
 } from './types';
 
 export type {

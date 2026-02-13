@@ -75,12 +75,6 @@ export class WorkflowsExtensionsServerPlugin
       getAllStepDefinitions: () => {
         return this.stepRegistry.getAll();
       },
-      getTrigger: (id: string) => {
-        return this.triggerRegistry.get(id);
-      },
-      hasTrigger: (id: string) => {
-        return this.triggerRegistry.has(id);
-      },
       listTriggers: () => {
         return this.triggerRegistry.list();
       },

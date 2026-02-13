@@ -43,22 +43,9 @@ export interface WorkflowsExtensionsServerPluginSetup {
 }
 
 /**
- * Server-side trigger API exposed on the workflows extensions start contract.
- * Exposes methods for retrieving registered trigger definitions.
+ * Server-side trigger list API exposed on start.
  */
-export interface WorkflowsExtensionsTriggerStartContract {
-  /**
-   * Get definition for a specific trigger id.
-   * @param triggerId - The trigger identifier
-   * @returns The trigger definition, or undefined if not found
-   */
-  getTrigger(triggerId: string): ServerTriggerDefinition | undefined;
-  /**
-   * Check if definition for a trigger id is registered.
-   * @param triggerId - The trigger identifier
-   * @returns True if definition for the trigger id is registered, false otherwise
-   */
-  hasTrigger(triggerId: string): boolean;
+export interface WorkflowsExtensionsTriggerListStartContract {
   /**
    * Get all registered trigger definitions.
    * @returns Array of all registered trigger definitions
@@ -68,10 +55,11 @@ export interface WorkflowsExtensionsTriggerStartContract {
 
 /**
  * Server-side plugin start contract.
- * Exposes methods for retrieving registered server-side step implementations and trigger definitions.
+ * Exposes methods for retrieving registered server-side step implementations and triggers.
  */
 export type WorkflowsExtensionsServerPluginStart =
-  WorkflowsExtensionsStartContract<ServerStepDefinition> & WorkflowsExtensionsTriggerStartContract;
+  WorkflowsExtensionsStartContract<ServerStepDefinition> &
+    WorkflowsExtensionsTriggerListStartContract;
 
 /**
  * Dependencies for the server plugin setup phase.
