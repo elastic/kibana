@@ -150,6 +150,7 @@ export {
   isToolCallEvent,
   isBrowserToolCallEvent,
   isToolResultEvent,
+  isToolUiEvent,
   isReasoningEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
@@ -161,4 +162,4 @@ export {
   isPromptRequestEvent,
 } from './chat';
 export * from './telemetry';
-export type { VersionedAttachment } from './attachments';
+export { getLatestVersion, type VersionedAttachment } from './attachments';
