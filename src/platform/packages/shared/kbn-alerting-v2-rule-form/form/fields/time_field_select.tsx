@@ -38,9 +38,12 @@ export const TimeFieldSelect = React.forwardRef<HTMLSelectElement, Props>(
     });
 
     useEffect(() => {
-      if (fields?.length) {
+      if (fields && Object.values(fields).length) {
         const newTimeFieldOptions = getTimeFieldOptions(fields);
         setTimeFieldOptions([firstFieldOption, ...newTimeFieldOptions]);
+
+        /* If the current value is not in the new options due to query change,
+         * reset it to empty */
         if (!newTimeFieldOptions.find((option) => option.value === value)) {
           onChange('');
         }
