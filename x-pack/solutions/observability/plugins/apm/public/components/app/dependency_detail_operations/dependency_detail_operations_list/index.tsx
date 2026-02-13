@@ -206,6 +206,7 @@ export function DependencyDetailOperationsList() {
       initialSortDirection="desc"
       isLoading={primaryStatsFetch.status === FETCH_STATUS.LOADING}
       initialPageSize={25}
+      data-test-subj="apmDependencyDetailOperationsListTable"
     />
   );
 }

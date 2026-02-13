@@ -1,17 +1,18 @@
 {
-  "lastModified": "2025-12-08T16:58:37.117Z",
-  "sha1": "bf0aa4087bc3474f73e1703271bfa2af80018f45",
+  "lastModified": "2026-02-12T15:58:14.682Z",
+  "sha1": "7447c62cd0faa915dbb85eaf31d509f6995f66ab",
   "tests": [
     {
       "id": "27cb3cfb52afaa0-d4057e4746e6d25",
       "title": "Annotations List create an annotation",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 22,
+        "line": 23,
         "column": 7
       }
     },
@@ -20,11 +21,12 @@
       "title": "Annotations List validate annotation list",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 35,
+        "line": 36,
         "column": 7
       }
     },
@@ -33,11 +35,12 @@
       "title": "Annotations List Go to slos",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 48,
+        "line": 49,
         "column": 7
       }
     },
@@ -46,11 +49,12 @@
       "title": "Annotations List check that annotation is displayed",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 56,
+        "line": 57,
         "column": 7
       }
     },
@@ -59,11 +63,12 @@
       "title": "Annotations List update annotation",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 65,
+        "line": 66,
         "column": 7
       }
     },
@@ -72,11 +77,12 @@
       "title": "Annotations List delete annotation",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 84,
+        "line": 85,
         "column": 7
       }
     },
@@ -85,13 +91,15 @@
       "title": "SLOs Overview Go to slos overview and validate data retention tab",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slos_overview.spec.ts",
-        "line": 28,
-        "column": 7
+        "line": 32,
+        "column": 9
       }
     }
   ]

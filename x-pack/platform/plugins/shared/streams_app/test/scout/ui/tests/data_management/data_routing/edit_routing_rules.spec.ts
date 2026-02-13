@@ -9,100 +9,109 @@
 /* eslint-disable playwright/expect-expect */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
-test.describe('Stream data routing - editing routing rules', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
-    // Clear existing rules
-    await apiServices.streams.clearStreamChildren('logs');
-    // Create a test stream with routing rules first
-    await apiServices.streams.forkStream('logs', 'logs.edit-test', {
-      field: 'service.name',
-      eq: 'test-service',
+test.describe(
+  'Stream data routing - editing routing rules',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+      await browserAuth.loginAsAdmin();
+      // Clear existing rules
+      await apiServices.streams.clearStreamChildren('logs');
+      // Create a test stream with routing rules first
+      await apiServices.streams.forkStream('logs', 'logs.edit-test', {
+        field: 'service.name',
+        eq: 'test-service',
+      });
+
+      await pageObjects.streams.gotoPartitioningTab('logs');
     });
 
-    await pageObjects.streams.gotoPartitioningTab('logs');
-  });
-
-  test.afterAll(async ({ apiServices }) => {
-    // Clear existing rules
-    await apiServices.streams.clearStreamChildren('logs');
-  });
-
-  test('should edit an existing routing rule', async ({ page, pageObjects }) => {
-    const rountingRuleName = 'logs.edit-test';
-    await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
-
-    // Update condition
-    await pageObjects.streams.fillConditionEditor({ value: 'updated-service' });
-    await pageObjects.streams.updateRoutingRule();
-
-    // Verify success
-    const routingRuleLocator = page.testSubj.locator(`streamDetailRoutingItem-${rountingRuleName}`);
-    await expect(routingRuleLocator).toBeVisible();
-    await expect(routingRuleLocator.locator('[title="service.name"]')).toBeVisible();
-    await expect(routingRuleLocator.locator('text=equals')).toBeVisible();
-    await expect(routingRuleLocator.locator('[title="updated-service"]')).toBeVisible();
-  });
-
-  test('should cancel editing routing rule', async ({ page, pageObjects }) => {
-    const rountingRuleName = 'logs.edit-test';
-    await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
-
-    // Update and cancel changes
-    await pageObjects.streams.fillConditionEditor({ value: 'updated-service' });
-    await pageObjects.streams.cancelRoutingRule();
-
-    // Verify success
-    const routingRuleLocator = page.testSubj.locator(`streamDetailRoutingItem-${rountingRuleName}`);
-    await expect(routingRuleLocator).toBeVisible();
-    await expect(routingRuleLocator.locator('[title="service.name"]')).toBeVisible();
-    await expect(routingRuleLocator.locator('text=equals')).toBeVisible();
-    await expect(routingRuleLocator.locator('[title="test-service"]')).toBeVisible();
-  });
-
-  test('should switch between editing different rules', async ({ pageObjects, page }) => {
-    // Create another test rule
-    await pageObjects.streams.clickCreateRoutingRule();
-    await pageObjects.streams.fillRoutingRuleName('edit-test-2');
-    await pageObjects.streams.fillConditionEditor({
-      field: 'log.level',
-      value: 'info',
-      operator: 'equals',
+    test.afterAll(async ({ apiServices }) => {
+      // Clear existing rules
+      await apiServices.streams.clearStreamChildren('logs');
     });
-    await pageObjects.streams.saveRoutingRule();
 
-    // Edit first rule
-    await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+    test('should edit an existing routing rule', async ({ page, pageObjects }) => {
+      const rountingRuleName = 'logs.edit-test';
+      await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
 
-    // Switch to edit second rule without saving
-    await pageObjects.streams.clickEditRoutingRule('logs.edit-test-2');
+      // Update condition
+      await pageObjects.streams.fillConditionEditor({ value: 'updated-service' });
+      await pageObjects.streams.updateRoutingRule();
 
-    // Should now be editing the second rule
-    await expect(page.getByTestId('streamsAppConditionEditorValueText')).toHaveValue('info');
-  });
+      // Verify success
+      const routingRuleLocator = page.testSubj.locator(
+        `streamDetailRoutingItem-${rountingRuleName}`
+      );
+      await expect(routingRuleLocator).toBeVisible();
+      await expect(routingRuleLocator.locator('[title="service.name"]')).toBeVisible();
+      await expect(routingRuleLocator.locator('text=equals')).toBeVisible();
+      await expect(routingRuleLocator.locator('[title="updated-service"]')).toBeVisible();
+    });
 
-  test('should remove routing rule with confirmation', async ({ pageObjects }) => {
-    await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+    test('should cancel editing routing rule', async ({ page, pageObjects }) => {
+      const rountingRuleName = 'logs.edit-test';
+      await pageObjects.streams.clickEditRoutingRule(rountingRuleName);
 
-    await pageObjects.streams.removeRoutingRule();
+      // Update and cancel changes
+      await pageObjects.streams.fillConditionEditor({ value: 'updated-service' });
+      await pageObjects.streams.cancelRoutingRule();
 
-    // Confirm deletion in modal
-    await pageObjects.streams.confirmStreamDeleteInModal('logs.edit-test');
+      // Verify success
+      const routingRuleLocator = page.testSubj.locator(
+        `streamDetailRoutingItem-${rountingRuleName}`
+      );
+      await expect(routingRuleLocator).toBeVisible();
+      await expect(routingRuleLocator.locator('[title="service.name"]')).toBeVisible();
+      await expect(routingRuleLocator.locator('text=equals')).toBeVisible();
+      await expect(routingRuleLocator.locator('[title="test-service"]')).toBeVisible();
+    });
 
-    await pageObjects.streams.expectRoutingRuleHidden('logs.edit-test');
-    await pageObjects.toasts.waitFor();
-  });
+    test('should switch between editing different rules', async ({ pageObjects, page }) => {
+      // Create another test rule
+      await pageObjects.streams.clickCreateRoutingRule();
+      await pageObjects.streams.fillRoutingRuleName('edit-test-2');
+      await pageObjects.streams.fillConditionEditor({
+        field: 'log.level',
+        value: 'info',
+        operator: 'equals',
+      });
+      await pageObjects.streams.saveRoutingRule();
 
-  test('should cancel rule removal', async ({ pageObjects }) => {
-    await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
-    await pageObjects.streams.removeRoutingRule();
+      // Edit first rule
+      await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
 
-    // Cancel deletion
-    await pageObjects.streams.cancelDeleteInModal();
+      // Switch to edit second rule without saving
+      await pageObjects.streams.clickEditRoutingRule('logs.edit-test-2');
 
-    // Verify rule still exists
-    await pageObjects.streams.expectRoutingRuleVisible('logs.edit-test');
-  });
-});
+      // Should now be editing the second rule
+      await expect(page.getByTestId('streamsAppConditionEditorValueText')).toHaveValue('info');
+    });
+
+    test('should remove routing rule with confirmation', async ({ pageObjects }) => {
+      await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+
+      await pageObjects.streams.removeRoutingRule();
+
+      // Confirm deletion in modal
+      await pageObjects.streams.confirmStreamDeleteInModal('logs.edit-test');
+
+      await pageObjects.streams.expectRoutingRuleHidden('logs.edit-test');
+      await pageObjects.toasts.waitFor();
+    });
+
+    test('should cancel rule removal', async ({ pageObjects }) => {
+      await pageObjects.streams.clickEditRoutingRule('logs.edit-test');
+      await pageObjects.streams.removeRoutingRule();
+
+      // Cancel deletion
+      await pageObjects.streams.cancelDeleteInModal();
+
+      // Verify rule still exists
+      await pageObjects.streams.expectRoutingRuleVisible('logs.edit-test');
+    });
+  }
+);
