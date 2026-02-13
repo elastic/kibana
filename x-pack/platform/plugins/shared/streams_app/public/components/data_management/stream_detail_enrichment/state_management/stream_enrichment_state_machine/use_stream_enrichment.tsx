@@ -8,14 +8,14 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
-import { isActionBlock } from '@kbn/streamlang/types/streamlang';
 import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
   StreamlangDSL,
   StreamlangConditionBlock,
 } from '@kbn/streamlang';
-import type { DraftGrokExpression } from '@kbn/grok-ui';
+import { GrokCollection, GrokCollectionProvider } from '@kbn/grok-ui';
+import type { Streams } from '@kbn/streams-schema';
 import type { EnrichmentDataSource } from '../../../../../../common/url_schema';
 import {
   streamEnrichmentMachine,
@@ -28,8 +28,6 @@ import type {
   SimulationContext,
 } from '../simulation_state_machine';
 import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
-import { isGrokProcessor } from '../../utils';
-import type { StepActorRef } from '../steps_state_machine';
 import type { InteractiveModeSnapshot } from '../interactive_mode_machine';
 import type { YamlModeSnapshot } from '../yaml_mode_machine';
 
@@ -177,65 +175,35 @@ export const StreamEnrichmentContextProvider = ({
   children,
   definition,
   ...deps
-}: React.PropsWithChildren<StreamEnrichmentServiceDependencies & StreamEnrichmentInput>) => {
+}: React.PropsWithChildren<
+  StreamEnrichmentServiceDependencies & { definition: Streams.ingest.all.GetResponse }
+>) => {
+  // Create a single GrokCollection instance that will be shared across all components
+  const grokCollection = useMemo(() => new GrokCollection(), []);
+
   return (
-    <StreamEnrichmentContext.Provider
-      logic={streamEnrichmentMachine.provide(createStreamEnrichmentMachineImplementations(deps))}
-      options={{
-        id: 'streamEnrichment',
-        inspect: consoleInspector,
-        input: {
-          definition,
-        },
-      }}
-    >
-      <StreamEnrichmentCleanupOnUnmount />
-      <ListenForDefinitionChanges definition={definition}>{children}</ListenForDefinitionChanges>
-    </StreamEnrichmentContext.Provider>
+    <GrokCollectionProvider grokCollection={grokCollection}>
+      <StreamEnrichmentContext.Provider
+        logic={streamEnrichmentMachine.provide(createStreamEnrichmentMachineImplementations(deps))}
+        options={{
+          id: 'streamEnrichment',
+          inspect: consoleInspector,
+          input: {
+            definition,
+            grokCollection,
+          },
+        }}
+      >
+        <ListenForDefinitionChanges definition={definition}>{children}</ListenForDefinitionChanges>
+      </StreamEnrichmentContext.Provider>
+    </GrokCollectionProvider>
   );
-};
-
-/* Grok resources are not directly modeled by Xstate (they are not first class machines or actors etc) */
-const StreamEnrichmentCleanupOnUnmount = () => {
-  const service = StreamEnrichmentContext.useActorRef();
-
-  useEffect(() => {
-    return () => {
-      const snapshot = service.getSnapshot();
-      const context = snapshot.context;
-
-      // Only clean up stepRefs if we're in interactive mode
-      const isInteractiveMode = snapshot.matches({
-        ready: { enrichment: { managingProcessors: 'interactive' } },
-      });
-
-      if (isInteractiveMode && context.interactiveModeRef) {
-        const modeSnapshot = context.interactiveModeRef.getSnapshot();
-        const stepRefs: StepActorRef[] = modeSnapshot.context.stepRefs;
-
-        if (stepRefs) {
-          stepRefs.forEach((procRef: StepActorRef) => {
-            const procContext = procRef.getSnapshot().context;
-            if (isActionBlock(procContext.step) && isGrokProcessor(procContext.step)) {
-              const draftGrokExpressions: DraftGrokExpression[] =
-                procContext.resources?.grokExpressions ?? [];
-              draftGrokExpressions.forEach((expression: DraftGrokExpression) => {
-                expression.destroy();
-              });
-            }
-          });
-        }
-      }
-    };
-  }, [service]);
-
-  return null;
 };
 
 const ListenForDefinitionChanges = ({
   children,
   definition,
-}: React.PropsWithChildren<StreamEnrichmentInput>) => {
+}: React.PropsWithChildren<Omit<StreamEnrichmentInput, 'grokCollection'>>) => {
   const service = StreamEnrichmentContext.useActorRef();
 
   useEffect(() => {

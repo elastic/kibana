@@ -16,12 +16,14 @@ export enum AttachmentType {
   screenContext = 'screen_context',
   text = 'text',
   esql = 'esql',
+  visualization = 'visualization',
 }
 
 interface AttachmentDataMap {
   [AttachmentType.esql]: EsqlAttachmentData;
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
+  [AttachmentType.visualization]: VisualizationAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -75,6 +77,44 @@ export interface ScreenContextAttachmentData {
   description?: string;
   /** arbitrary additional context data */
   additional_data?: Record<string, string>;
+}
+
+export const visualizationAttachmentDataSchema = z.object({
+  query: z.string(),
+  visualization: z.record(z.unknown()),
+  chart_type: z.string(),
+  esql: z.string(),
+});
+
+/**
+ * Data for a visualization attachment.
+ * Same shape for both by-value and resolved by-ref attachments.
+ */
+export interface VisualizationAttachmentData {
+  /** The display query */
+  query: string;
+  /** Lens API configuration */
+  visualization: Record<string, unknown>;
+  /** Chart type identifier */
+  chart_type: string;
+  /** The ES|QL query */
+  esql: string;
+}
+
+export const visualizationOriginDataSchema = z.object({
+  saved_object_id: z.string(),
+  title: z.string().optional(),
+  description: z.string().optional(),
+});
+
+/**
+ * Origin data for a visualization attachment created by-reference.
+ * Stored on the attachment for UI purposes (e.g., "Open in Lens" link).
+ */
+export interface VisualizationOriginData {
+  saved_object_id: string;
+  title?: string;
+  description?: string;
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

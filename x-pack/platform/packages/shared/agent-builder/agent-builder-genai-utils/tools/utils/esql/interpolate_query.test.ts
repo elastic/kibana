@@ -72,4 +72,67 @@ describe('interpolateEsqlQuery', () => {
 | WHERE device_id == "sensor-3-14" AND temp > 25.5 AND enabled == TRUE`;
     expect(interpolateEsqlQuery(template, params)).toBe(expected);
   });
+
+  describe('array parameters', () => {
+    it('should correctly interpolate array of integers', () => {
+      const template = 'FROM logs | WHERE MV_CONTAINS(?ids, id)';
+      const params = { ids: [1, 2, 3] };
+      const expected = 'FROM logs | WHERE MV_CONTAINS([1, 2, 3], id)';
+      expect(interpolateEsqlQuery(template, params)).toBe(expected);
+    });
+
+    it('should correctly interpolate array of strings', () => {
+      const template = 'FROM users | WHERE MV_CONTAINS(?names, name)';
+      const params = { names: ['alice', 'bob', 'charlie'] };
+      const expected = 'FROM users | WHERE MV_CONTAINS(["alice", "bob", "charlie"], name)';
+      expect(interpolateEsqlQuery(template, params)).toBe(expected);
+    });
+
+    it('should correctly interpolate array of decimals', () => {
+      const template = 'FROM metrics | WHERE MV_CONTAINS(?values, value)';
+      const params = { values: [1.5, 2.7, 3.14] };
+      const expected = 'FROM metrics | WHERE MV_CONTAINS([1.5, 2.7, 3.14], value)';
+      expect(interpolateEsqlQuery(template, params)).toBe(expected);
+    });
+
+    it('should replace all occurrences of an array parameter', () => {
+      const template = 'FROM logs | WHERE MV_CONTAINS(?ids, id) OR MV_CONTAINS(?ids, parent_id)';
+      const params = { ids: [10, 20, 30] };
+      const expected = `FROM logs
+| WHERE MV_CONTAINS([10, 20, 30], id) OR MV_CONTAINS([10, 20, 30], parent_id)`;
+      expect(interpolateEsqlQuery(template, params)).toBe(expected);
+    });
+
+    it('should handle multiple array parameters in one query', () => {
+      const template =
+        'FROM events | WHERE MV_CONTAINS(?ids, id) AND MV_CONTAINS(?statuses, status)';
+      const params = { ids: [1, 2, 3], statuses: ['active', 'pending'] };
+      const expected = `FROM events
+| WHERE MV_CONTAINS([1, 2, 3], id) AND MV_CONTAINS(["active", "pending"], status)`;
+      expect(interpolateEsqlQuery(template, params)).toBe(expected);
+    });
+
+    it('should handle mix of array and non-array parameters', () => {
+      const template = 'FROM tickets | WHERE priority == ?priority AND MV_CONTAINS(?ids, id)';
+      const params = { priority: 'high', ids: [100, 200, 300] };
+      const expected =
+        'FROM tickets | WHERE priority == "high" AND MV_CONTAINS([100, 200, 300], id)';
+      expect(interpolateEsqlQuery(template, params)).toBe(expected);
+    });
+
+    it('should handle array with single element', () => {
+      const template = 'FROM users | WHERE MV_CONTAINS(?ids, id)';
+      const params = { ids: [42] };
+      const expected = 'FROM users | WHERE MV_CONTAINS([42], id)';
+      expect(interpolateEsqlQuery(template, params)).toBe(expected);
+    });
+
+    it('should handle array parameter with string containing special characters', () => {
+      const template = 'FROM logs | WHERE MV_CONTAINS(?messages, message)';
+      const params = { messages: ['hello "world"', "it's ok", 'test\\backslash'] };
+      const expected = `FROM logs
+| WHERE MV_CONTAINS(["hello \\"world\\"", "it's ok", "test\\\\backslash"], message)`;
+      expect(interpolateEsqlQuery(template, params)).toBe(expected);
+    });
+  });
 });

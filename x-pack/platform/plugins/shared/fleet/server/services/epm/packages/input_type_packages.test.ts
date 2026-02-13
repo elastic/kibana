@@ -129,6 +129,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       assetsMap: new Map(),
       paths: [],
     } as any);
+
     const mockedLogger = jest.mocked(appContextService.getLogger());
 
     await installAssetsForInputPackagePolicy({

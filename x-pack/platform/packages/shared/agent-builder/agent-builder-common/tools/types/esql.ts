@@ -21,6 +21,7 @@ export enum EsqlToolFieldType {
   FLOAT = 'float',
   BOOLEAN = 'boolean',
   DATE = 'date',
+  ARRAY = 'array',
 }
 
 export type EsqlToolFieldTypes = `${EsqlToolFieldType}`;
@@ -28,7 +29,7 @@ export type EsqlToolFieldTypes = `${EsqlToolFieldType}`;
 /**
  * Valid types for parameter values and default values
  */
-export type EsqlToolParamValue = string | number | boolean;
+export type EsqlToolParamValue = string | number | boolean | string[] | number[];
 
 export interface EsqlToolParam {
   /**

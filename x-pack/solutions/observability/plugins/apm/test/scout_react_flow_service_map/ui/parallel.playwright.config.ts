@@ -14,9 +14,9 @@ import { createPlaywrightConfig } from '@kbn/scout-oblt';
  * serviceMapUseReactFlow feature flag automatically.
  *
  * Run tests (serverless) with:
- * npx playwright test --config=x-pack/solutions/observability/plugins/apm/test/scout_react_flow_service_map/ui/parallel.playwright.config.ts --grep=@svlOblt --project=local
+ * npx playwright test --config=x-pack/solutions/observability/plugins/apm/test/scout_react_flow_service_map/ui/parallel.playwright.config.ts --grep=@local-serverless-observability_complete --project=local
  * or run tests (stateful) with:
- * npx playwright test --config=x-pack/solutions/observability/plugins/apm/test/scout_react_flow_service_map/ui/parallel.playwright.config.ts --grep=@ess --project=local
+ * npx playwright test --config=x-pack/solutions/observability/plugins/apm/test/scout_react_flow_service_map/ui/parallel.playwright.config.ts --grep=@local-stateful-classic --project=local
  */
 
 export default createPlaywrightConfig({

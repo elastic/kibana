@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt/ui';
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT } from '../constants';

@@ -23,6 +23,7 @@ import type {
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
+import { asError } from '../utils/as_error';
 
 export function registerToolsRoutes({
   router,
@@ -176,17 +177,30 @@ export function registerToolsRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { tools: toolService } = getInternalServices();
+        const { tools: toolService, auditLogService } = getInternalServices();
         const createRequest: CreateToolPayload = request.body;
         const registry = await toolService.getRegistry({ request });
-        const tool = await registry.create(createRequest);
-        analyticsService?.reportToolCreated({
-          toolId: createRequest.id,
-          toolType: createRequest.type,
-        });
-        return response.ok<CreateToolResponse>({
-          body: await toDescriptorWithSchema(tool),
-        });
+        try {
+          const tool = await registry.create(createRequest);
+          analyticsService?.reportToolCreated({
+            toolId: createRequest.id,
+            toolType: createRequest.type,
+          });
+          auditLogService.logToolCreated(request, {
+            toolId: tool.id,
+            toolType: tool.type,
+          });
+          return response.ok<CreateToolResponse>({
+            body: await toDescriptorWithSchema(tool),
+          });
+        } catch (error) {
+          auditLogService.logToolCreated(request, {
+            toolId: createRequest.id,
+            toolType: createRequest.type,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 
@@ -251,14 +265,26 @@ export function registerToolsRoutes({
         },
       },
       wrapHandler(async (ctx, request, response) => {
-        const { tools: toolService } = getInternalServices();
+        const { tools: toolService, auditLogService } = getInternalServices();
         const { toolId } = request.params;
         const update: UpdateToolPayload = request.body;
         const registry = await toolService.getRegistry({ request });
-        const tool = await registry.update(toolId, update);
-        return response.ok<UpdateToolResponse>({
-          body: await toDescriptorWithSchema(tool),
-        });
+        try {
+          const tool = await registry.update(toolId, update);
+          auditLogService.logToolUpdated(request, {
+            toolId: tool.id,
+            toolType: tool.type,
+          });
+          return response.ok<UpdateToolResponse>({
+            body: await toDescriptorWithSchema(tool),
+          });
+        } catch (error) {
+          auditLogService.logToolUpdated(request, {
+            toolId,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 
@@ -298,12 +324,28 @@ export function registerToolsRoutes({
       },
       wrapHandler(async (ctx, request, response) => {
         const { toolId } = request.params;
-        const { tools: toolService } = getInternalServices();
+        const { tools: toolService, auditLogService } = getInternalServices();
         const registry = await toolService.getRegistry({ request });
-        const success = await registry.delete(toolId);
-        return response.ok<DeleteToolResponse>({
-          body: { success },
-        });
+        try {
+          const success = await registry.delete(toolId);
+          if (success) {
+            auditLogService.logToolDeleted(request, { toolId });
+          } else {
+            auditLogService.logToolDeleted(request, {
+              toolId,
+              error: new Error('Tool delete returned false'),
+            });
+          }
+          return response.ok<DeleteToolResponse>({
+            body: { success },
+          });
+        } catch (error) {
+          auditLogService.logToolDeleted(request, {
+            toolId,
+            error: asError(error),
+          });
+          throw error;
+        }
       })
     );
 
@@ -315,9 +357,9 @@ export function registerToolsRoutes({
         authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
       access: 'public',
-      summary: 'Execute a Tool',
+      summary: 'Run a tool',
       description:
-        'Execute a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
+        'Run a tool with parameters. Use this endpoint to run a tool directly with specified inputs and optional external connector integration. To learn more, refer to the [tools documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/tools).',
       options: {
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,

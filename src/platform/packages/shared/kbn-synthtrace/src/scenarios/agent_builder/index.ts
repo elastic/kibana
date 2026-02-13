@@ -9,7 +9,7 @@
 
 export * from './tools/get_hosts/hosts';
 export * from './tools/get_services/services';
-export * from './tools/get_log_categories/log_categories';
+export * from './tools/get_log_groups/log_groups';
 export * from './tools/get_correlated_logs/correlated_logs';
 export * from './tools/get_downstream_dependencies/dependencies';
 export * from './tools/get_alerts/alerts';
@@ -21,3 +21,4 @@ export * from './tools/get_index_info/field_discovery';
 export * from './tools/get_log_change_points/log_change_points';
 export * from './tools/get_metric_change_points/metric_change_points';
 export * from './tools/get_trace_change_points/trace_change_points';
+export * from './tools/get_runtime_metrics/runtime_metrics';

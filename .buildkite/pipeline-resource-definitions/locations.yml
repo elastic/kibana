@@ -23,7 +23,7 @@ spec:
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-deploy-cloud.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-deploy-project.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-entity-store-performance-from-pr.yml
-    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-forward-testing-9-dot-1.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-forward-testing-9-dot-2.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-forward-testing.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-serverless-snapshots.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-es-snapshots.yml
@@ -50,6 +50,7 @@ spec:
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-serverless-release-testing.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-serverless-release.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-storybooks-from-pr.yml
+    - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-uiam-verify-and-promote.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/kibana-vm-images.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/scalability_testing-daily.yml
     - https://github.com/elastic/kibana/blob/main/.buildkite/pipeline-resource-definitions/security-solution-ess/gen-ai-evals.yml

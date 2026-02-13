@@ -84,7 +84,7 @@ Download drive item (text)
     - **itemId** (required): The drive item ID.
 
 Download item from URL
-:   Download item content from a pre-authenticated `downloadUrl`, returning text.
+:   Download item content from a pre-authenticated `downloadUrl`, returning base64.
     - **downloadUrl** (required): A pre-authenticated download URL.
 
 Call Graph API

@@ -9,23 +9,15 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { z } from '@kbn/zod/v4';
 import {
   AiClassifyStepCommonDefinition,
-  type AiClassifyStepInputSchema,
   AiClassifyStepTypeId,
   buildStructuredOutputSchema,
 } from '../../../common/steps/ai';
-import { ActionsMenuGroup, type PublicStepDefinition } from '../../step_registry/types';
+import { ActionsMenuGroup, createPublicStepDefinition } from '../../step_registry/types';
 
-export const AiClassifyStepDefinition: PublicStepDefinition = {
+export const AiClassifyStepDefinition = createPublicStepDefinition({
   ...AiClassifyStepCommonDefinition,
-  editorHandlers: {
-    dynamicSchema: {
-      getOutputSchema: ({ input }) =>
-        buildStructuredOutputSchema(input as z.infer<AiClassifyStepInputSchema>),
-    },
-  },
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/sparkles').then(({ icon }) => ({
       default: icon,
@@ -118,4 +110,17 @@ When \`allowMultipleCategories\` is true, the output includes a \`categories\` a
 \`\`\``,
     ],
   },
-};
+  editorHandlers: {
+    config: {
+      'connector-id': {
+        connectorIdSelection: {
+          connectorTypes: ['inference.unified_completion', 'bedrock', 'gen-ai', 'gemini'],
+          enableCreation: false,
+        },
+      },
+    },
+    dynamicSchema: {
+      getOutputSchema: ({ input }) => buildStructuredOutputSchema(input),
+    },
+  },
+});

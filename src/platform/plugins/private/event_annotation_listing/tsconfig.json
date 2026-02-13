@@ -39,7 +39,9 @@
     "@kbn/core-notifications-browser",
     "@kbn/content-management-table-list-view-common",
     "@kbn/test-eui-helpers",
-    "@kbn/kql"
+    "@kbn/kql",
+    "@kbn/dashboard-plugin",
+    "@kbn/embeddable-plugin"
   ],
   "exclude": [
     "target/**/*",

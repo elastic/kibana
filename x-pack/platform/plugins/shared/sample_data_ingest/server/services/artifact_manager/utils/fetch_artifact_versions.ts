@@ -7,7 +7,6 @@
 
 import { DocumentationProduct, parseArtifactName, type ProductName } from '@kbn/product-doc-common';
 import * as fs from 'fs';
-import fetch from 'node-fetch';
 import * as Path from 'path';
 import { URL } from 'url';
 import { parseString } from 'xml2js';

@@ -102,6 +102,7 @@ export class ReactFlowServiceMapPage {
   }
 
   async waitForPopoverToBeVisible() {
+    await this.serviceMapPopover.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await this.serviceMapPopoverContent.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
@@ -115,5 +116,49 @@ export class ReactFlowServiceMapPage {
 
   async getPopoverTitle() {
     return this.serviceMapPopoverTitle.textContent();
+  }
+
+  /* Accessibility helpers */
+  async focusNode(nodeId: string) {
+    const node = this.getNodeById(nodeId);
+    await node.focus();
+  }
+
+  async focusNodeAndWaitForFocus(nodeId: string) {
+    await this.waitForNodeToLoad(nodeId);
+    const node = this.getNodeById(nodeId);
+    const button = node.locator('[role="button"]');
+    await button.focus();
+    await this.page.waitForFunction((id) => {
+      const nodeEl = document.querySelector(`[data-id="${id}"]`);
+      const buttonEl = nodeEl?.querySelector('[role="button"]');
+      return (
+        buttonEl === document.activeElement ||
+        nodeEl === document.activeElement ||
+        nodeEl?.contains(document.activeElement)
+      );
+    }, nodeId);
+  }
+
+  async openPopoverWithKeyboard(nodeId: string, key: 'Enter' | ' ') {
+    await this.focusNodeAndWaitForFocus(nodeId);
+
+    const node = this.getNodeById(nodeId);
+    const button = node.locator('[role="button"]');
+    await button.press(key === ' ' ? 'Space' : key);
+    await this.waitForPopoverToBeVisible();
+  }
+
+  async isNodeFocused(nodeId: string): Promise<boolean> {
+    return this.page.evaluate((id) => {
+      const nodeEl = document.querySelector(`[data-id="${id}"]`);
+      return nodeEl === document.activeElement || nodeEl?.contains(document.activeElement) || false;
+    }, nodeId);
+  }
+
+  async getNodeAriaLabel(nodeId: string): Promise<string | null> {
+    const node = this.getNodeById(nodeId);
+    const interactiveElement = node.locator('[role="button"]');
+    return interactiveElement.getAttribute('aria-label');
   }
 }

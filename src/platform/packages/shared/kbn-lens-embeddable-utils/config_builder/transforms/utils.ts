@@ -17,14 +17,14 @@ import type {
   TextBasedPersistedState,
 } from '@kbn/lens-common';
 import { cleanupFormulaReferenceColumns } from '@kbn/lens-common';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType, type Filter, type Query } from '@kbn/es-query';
 import type { LensAttributes, LensDatatableDataset } from '../types';
 import type { LensApiAllOperations, LensApiState, NarrowByType } from '../schema';
 import { fromBucketLensStateToAPI } from './columns/buckets';
 import { getMetricApiColumnFromLensState } from './columns/metric';
-import type { AnyLensStateColumn } from './columns/types';
+import type { AnyLensStateColumn, APIAdHocDataView, APIDataView } from './columns/types';
 import { isLensStateBucketColumnType } from './columns/utils';
 import { LENS_LAYER_SUFFIX, LENS_DEFAULT_TIME_FIELD, INDEX_PATTERN_ID } from './constants';
 import {
@@ -106,19 +106,11 @@ export function isTextBasedLayer(
   return 'index' in layer && 'query' in layer;
 }
 
-function generateAdHocDataViewId(dataView: {
-  type: 'adHocDataView';
-  index: string;
-  timeFieldName: string;
-}) {
+function generateAdHocDataViewId(dataView: APIAdHocDataView) {
   return `${dataView.index}-${dataView.timeFieldName ?? 'no_time_field'}`;
 }
 
-function getAdHocDataViewSpec(dataView: {
-  type: 'adHocDataView';
-  index: string;
-  timeFieldName: string;
-}) {
+function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
   return {
     // Improve id genertation to be more predictable and hit cache more often
     id: generateAdHocDataViewId(dataView),
@@ -134,22 +126,13 @@ function getAdHocDataViewSpec(dataView: {
   };
 }
 
-export const getAdhocDataviews = (
-  dataviews: Record<
-    string,
-    | { type: 'dataView'; id: string }
-    | { type: 'adHocDataView'; index: string; timeFieldName: string }
-  >
-) => {
+export const getAdhocDataviews = (dataviews: Record<string, APIDataView | APIAdHocDataView>) => {
   // filter out ad hoc dataViews only
   const adHocDataViewsFiltered = Object.entries(dataviews).filter(
     ([_layerId, dataViewEntry]) => dataViewEntry.type === 'adHocDataView'
-  ) as [string, { type: 'adHocDataView'; index: string; timeFieldName: string }][];
+  ) as [string, APIAdHocDataView][];
 
-  const internalReferencesMap = new Map<
-    { type: 'adHocDataView'; index: string; timeFieldName: string },
-    { layerIds: string[]; id: string }
-  >();
+  const internalReferencesMap = new Map<APIAdHocDataView, { layerIds: string[]; id: string }>();
 
   // dedupe and map multiple layer references to the same ad hoc dataview
   for (const [layerId, dataViewEntry] of adHocDataViewsFiltered) {
@@ -206,7 +189,7 @@ export function buildDatasetStateNoESQL(
       return {
         type: 'index',
         index: dataViewSpec.title!,
-        time_field: dataViewSpec.timeFieldName ?? LENS_DEFAULT_TIME_FIELD,
+        time_field: dataViewSpec.timeFieldName,
       };
     }
   }
@@ -279,7 +262,7 @@ export function getDatasetIndex(dataset: DatasetType) {
     case 'esql':
       return {
         index: getIndexPatternFromESQLQuery(dataset.query),
-        timeFieldName,
+        timeFieldName: getTimeFieldFromESQLQuery(dataset.query),
       };
     case 'dataView':
       return {
@@ -298,11 +281,11 @@ function buildDatasourceStatesLayer(
   layer: unknown,
   i: number,
   dataset: DatasetType,
-  datasetIndex: { index: string; timeFieldName: string },
+  datasetIndex: { index: string; timeFieldName: string | undefined },
   buildDataLayer: (
     config: unknown,
     i: number,
-    index: { index: string; timeFieldName: string }
+    index: { index: string; timeFieldName: string | undefined }
   ) => FormBasedPersistedState['layers'] | PersistedIndexPatternLayer | undefined,
   getValueColumns: (layer: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
 ): ['textBased' | 'formBased', DataSourceStateLayer | undefined] {
@@ -337,7 +320,7 @@ function buildDatasourceStatesLayer(
     return {
       index: datasetIndex.index,
       query: { esql: ds.query },
-      timeField: LENS_DEFAULT_TIME_FIELD,
+      timeField: getTimeFieldFromESQLQuery(ds.query) || undefined,
       columns,
     };
   }
@@ -367,19 +350,18 @@ export const buildDatasourceStates = (
   buildDataLayers: (
     config: unknown,
     i: number,
-    index: { index: string; timeFieldName: string }
+    index: { index: string; timeFieldName: string | undefined }
   ) => PersistedIndexPatternLayer | FormBasedPersistedState['layers'] | undefined,
   getValueColumns: (config: any, i: number) => TextBasedLayerColumn[]
-) => {
+): {
+  layers: LensAttributes['state']['datasourceStates'];
+  usedDataviews: Record<string, APIDataView | APIAdHocDataView>;
+} => {
   let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 
   // XY charts have dataset encoded per layer not at the root level
   const mainDataset = 'dataset' in config && config.dataset;
-  const usedDataviews: Record<
-    string,
-    | { type: 'dataView'; id: string }
-    | { type: 'adHocDataView'; index: string; timeFieldName: string }
-  > = {};
+  const usedDataviews: Record<string, APIDataView | APIAdHocDataView> = {};
   // a few charts types support multiple layers
   const hasMultipleLayers = 'layers' in config;
   const configLayers = hasMultipleLayers ? config.layers : [config];
@@ -446,12 +428,18 @@ export const addLayerColumn = (
 ) => {
   const [column, referenceColumn] = Array.isArray(config) ? config : [config];
   const name = columnName + postfix;
-  const referenceColumnId = `${name}_reference`;
+
   layer.columns = {
     ...layer.columns,
     [name]: column,
-    ...(referenceColumn ? { [referenceColumnId]: referenceColumn } : {}),
   };
+
+  const referenceColumnId = `${name}_reference`;
+  if (referenceColumn && 'references' in column) {
+    column.references = [referenceColumnId];
+    layer.columns[referenceColumnId] = referenceColumn;
+  }
+
   if (first) {
     layer.columnOrder.unshift(name);
     if (referenceColumn) {

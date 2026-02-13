@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Request, Server } from '@hapi/hapi';
+import type { Request, ResponseToolkit, Server } from '@hapi/hapi';
 import hapiAuthCookie from '@hapi/cookie';
 
 import type { Logger } from '@kbn/logging';
@@ -16,6 +16,7 @@ import type {
   SessionStorageFactory,
   SessionStorage,
   SessionStorageCookieOptions,
+  SessionStorageSetOptions,
 } from '@kbn/core-http-server';
 
 import { isDeepStrictEqual } from 'util';
@@ -26,8 +27,13 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
   constructor(
     private readonly log: Logger,
     private readonly server: Server,
-    private readonly request: Request
+    private readonly request: Request,
+    private readonly cookieOptions: SessionStorageCookieOptions<T>
   ) {}
+
+  private getResponseToolkit(): ResponseToolkit {
+    return (this.request.cookieAuth as unknown as { h: ResponseToolkit }).h;
+  }
 
   public async get(): Promise<T | null> {
     try {
@@ -74,8 +80,21 @@ class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> 
     }
   }
 
-  public set(sessionValue: T) {
-    return this.request.cookieAuth.set(sessionValue);
+  public set(sessionValue: T, options?: SessionStorageSetOptions) {
+    if (!options) {
+      // Use default cookie auth
+      return this.request.cookieAuth.set(sessionValue);
+    }
+
+    // Use custom cookie options
+    const h = this.getResponseToolkit();
+    const isSecure = options?.isSecure ?? this.cookieOptions.isSecure;
+    const sameSite = options?.sameSite ?? this.cookieOptions.sameSite;
+
+    h.state(this.cookieOptions.name, sessionValue, {
+      isSecure,
+      isSameSite: sameSite,
+    });
   }
 
   public clear() {
@@ -93,8 +112,11 @@ function validateOptions(options: SessionStorageCookieOptions<any>) {
  * Creates SessionStorage factory, which abstract the way of
  * session storage implementation and scoping to the incoming requests.
  *
+ * @param log - logger instance
  * @param server - hapi server to create SessionStorage for
  * @param cookieOptions - cookies configuration
+ * @param disableEmbedding - whether embedding is disabled
+ * @param basePath - optional base path for the Kibana server
  */
 export async function createCookieSessionStorageFactory<T extends object>(
   log: Logger,
@@ -140,7 +162,12 @@ export async function createCookieSessionStorageFactory<T extends object>(
 
   return {
     asScoped(request: KibanaRequest) {
-      return new ScopedCookieSessionStorage<T>(log, server, ensureRawRequest(request));
+      return new ScopedCookieSessionStorage<T>(
+        log,
+        server,
+        ensureRawRequest(request),
+        cookieOptions
+      );
     },
   };
 }

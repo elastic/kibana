@@ -273,13 +273,9 @@ export class MapsPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
 
     setupEmbeddable(plugins.embeddable, getFilterMigrations, getDataViewMigrations);
 
-    plugins.embeddable.registerTransforms(
-      MAP_SAVED_OBJECT_TYPE,
-      getTransforms(
-        plugins.embeddable.transformEnhancementsIn,
-        plugins.embeddable.transformEnhancementsOut
-      )
-    );
+    plugins.embeddable.registerTransforms(MAP_SAVED_OBJECT_TYPE, {
+      getTransforms,
+    });
 
     return {
       config: config$,

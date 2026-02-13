@@ -91,48 +91,6 @@
       "reason": "Prints version scheme warning - not needed"
     },
     {
-      "path": "@opentelemetry/exporter-metrics-otlp-grpc/node_modules/protobufjs",
-      "lifecycle": "postinstall",
-      "required": false,
-      "reason": "Nested protobufjs dependency - prints version scheme warning, not needed"
-    },
-    {
-      "path": "@opentelemetry/exporter-metrics-otlp-http/node_modules/protobufjs",
-      "lifecycle": "postinstall",
-      "required": false,
-      "reason": "Nested protobufjs dependency - prints version scheme warning, not needed"
-    },
-    {
-      "path": "@opentelemetry/exporter-metrics-otlp-proto/node_modules/protobufjs",
-      "lifecycle": "postinstall",
-      "required": false,
-      "reason": "Nested protobufjs dependency - prints version scheme warning, not needed"
-    },
-    {
-      "path": "@opentelemetry/exporter-trace-otlp-grpc/node_modules/protobufjs",
-      "lifecycle": "postinstall",
-      "required": false,
-      "reason": "Nested protobufjs dependency - prints version scheme warning, not needed"
-    },
-    {
-      "path": "@opentelemetry/exporter-trace-otlp-http/node_modules/protobufjs",
-      "lifecycle": "postinstall",
-      "required": false,
-      "reason": "Nested protobufjs dependency - prints version scheme warning, not needed"
-    },
-    {
-      "path": "@opentelemetry/exporter-trace-otlp-proto/node_modules/protobufjs",
-      "lifecycle": "postinstall",
-      "required": false,
-      "reason": "Nested protobufjs dependency - prints version scheme warning, not needed"
-    },
-    {
-      "path": "@opentelemetry/otlp-exporter-base/node_modules/protobufjs",
-      "lifecycle": "postinstall",
-      "required": false,
-      "reason": "Nested protobufjs dependency - prints version scheme warning, not needed"
-    },
-    {
       "path": "puppeteer",
       "lifecycle": "postinstall",
       "required": false,

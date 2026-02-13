@@ -38,6 +38,7 @@ export const GroupedResourcesNode = memo(
         targetPosition={targetPosition}
         testSubjPrefix="groupedResources"
         iconAltFallback="grouped resources"
+        groupedCount={data.count}
         badge={
           <EuiBadge color="hollow" css={badgeStyles}>
             {data.count}

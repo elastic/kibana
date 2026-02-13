@@ -19,10 +19,10 @@ import {
   getDefaultGcpHiddenVars,
 } from './utils';
 import { AWS_PROVIDER } from './constants';
-import {
-  CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS,
-  ARM_TEMPLATE_URL_CLOUD_CONNECTORS,
-} from './cloud_connector/constants';
+
+// Constants moved to Fleet - define locally for test assertions
+const CLOUD_FORMATION_TEMPLATE_URL_CLOUD_CONNECTORS = 'cloud_formation_cloud_connectors_template';
+const ARM_TEMPLATE_URL_CLOUD_CONNECTORS = 'arm_template_cloud_connectors_url';
 
 // Internal test mocks
 const TEMPLATE_NAME = 'cspm';

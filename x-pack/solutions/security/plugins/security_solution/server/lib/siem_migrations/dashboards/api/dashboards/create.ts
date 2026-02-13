@@ -87,7 +87,10 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
             );
 
             const resourceIdentifier = new DashboardResourceIdentifier(
-              items[0].original_dashboard.vendor
+              items[0].original_dashboard.vendor,
+              {
+                experimentalFeatures: ctx.securitySolution.getConfig().experimentalFeatures,
+              }
             );
 
             const [, extractedResources] = await Promise.all([

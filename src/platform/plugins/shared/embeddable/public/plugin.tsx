@@ -16,7 +16,6 @@ import type {
   PublicAppInfo,
 } from '@kbn/core/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { registerTriggers } from './ui_actions/register_triggers';
 import { EmbeddableStateTransfer } from './state_transfer';
 import { setKibanaServices } from './kibana_services';
 import { registerReactEmbeddableFactory } from './react_embeddable_system';
@@ -31,9 +30,7 @@ import {
   registerLegacyURLTransform,
   hasLegacyURLTransform,
   getLegacyURLTransform,
-} from './transforms_registry';
-import { enhancementsPersistableState } from '../common/bwc/enhancements/enhancements_persistable_state';
-import { transformEnhancementsOut } from '../common/bwc/enhancements/transform_enhancements_out';
+} from './bwc/legacy_url_transform';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
@@ -43,14 +40,10 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
-    registerTriggers(uiActions);
-
     return {
       registerReactEmbeddableFactory,
       registerAddFromLibraryType,
       registerLegacyURLTransform,
-      transformEnhancementsIn: enhancementsPersistableState.extract,
-      transformEnhancementsOut,
     };
   }
 

@@ -7,7 +7,8 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { type ScoutPage, expect, EuiFieldTextWrapper } from '@kbn/scout';
+import { type ScoutPage, EuiFieldTextWrapper } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 
 export class AbstractPageObject {
   constructor(public readonly page: ScoutPage) {}

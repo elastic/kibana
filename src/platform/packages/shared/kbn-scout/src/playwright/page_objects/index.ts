@@ -14,17 +14,21 @@ import { CollapsibleNav } from './collapsible_nav';
 import { DashboardApp } from './dashboard_app';
 import { DatePicker } from './date_picker';
 import { DiscoverApp } from './discover_app';
-import { FilterBar } from './fiter_bar';
+import { FilterBar } from './filter_bar';
 import { MapsPage } from './maps_page';
 import { RenderablePage } from './renderable_page';
 import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
 import { Inspector } from './inspector';
+import { LensApp } from './lens_app';
+import { LoginPage } from './login_page';
+import type { KibanaUrl } from '../../common/services/kibana_url';
 
 export interface PageObjectsFixtures {
   page: ScoutPage;
   config: ScoutTestConfig;
   log: ScoutLogger;
+  kbnUrl: KibanaUrl;
 }
 
 export interface PageObjects {
@@ -37,6 +41,8 @@ export interface PageObjects {
   collapsibleNav: CollapsibleNav;
   toasts: Toasts;
   inspector: Inspector;
+  lens: LensApp;
+  login: LoginPage;
 }
 
 /**
@@ -56,6 +62,8 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
     toasts: createLazyPageObject(Toasts, fixtures.page),
     inspector: createLazyPageObject(Inspector, fixtures.page),
+    lens: createLazyPageObject(LensApp, fixtures.page),
+    login: createLazyPageObject(LoginPage, fixtures.page, fixtures.kbnUrl),
     // Add new page objects here
   };
 }

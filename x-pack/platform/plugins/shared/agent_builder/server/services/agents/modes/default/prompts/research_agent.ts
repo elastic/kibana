@@ -9,12 +9,14 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { platformCoreTools } from '@kbn/agent-builder-common';
+import { getSkillsInstructions } from '../../../../skills/prompts';
 import { getConversationAttachmentsSystemMessages } from '../../utils/attachment_presentation';
+import { convertPreviousRounds } from '../../utils/to_langchain_messages';
 import { attachmentTypeInstructions } from './utils/attachments';
 import { customInstructionsBlock, structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
 import { formatDate } from './utils/helpers';
-import { getFileSystemInstructions, FILESTORE_ENABLED } from '../../../../runner/store';
+import { getFileSystemInstructions } from '../../../../runner/store';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 
 const tools = {
@@ -28,8 +30,15 @@ type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntim
 export const getResearchAgentPrompt = async (
   params: ResearchAgentPromptParams
 ): Promise<BaseMessageLike[]> => {
-  const { initialMessages, actions } = params;
+  const { actions, processedConversation, resultTransformer } = params;
   const clearSystemMessage = params.configuration.research.replace_default_instructions;
+
+  // Generate messages from the conversation's rounds
+  const previousRoundsAsMessages = await convertPreviousRounds({
+    conversation: processedConversation,
+    resultTransformer,
+  });
+
   return [
     [
       'system',
@@ -40,7 +49,7 @@ export const getResearchAgentPrompt = async (
     ...getConversationAttachmentsSystemMessages(
       params.processedConversation.versionedAttachmentPresentation
     ),
-    ...initialMessages,
+    ...previousRoundsAsMessages,
     ...formatResearcherActionHistory({ actions }),
   ];
 };
@@ -53,6 +62,7 @@ export const getBaseSystemMessage = async ({
   processedConversation: { attachmentTypes },
   outputSchema,
   filestore,
+  experimentalFeatures,
 }: ResearchAgentPromptParams): Promise<string> => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -65,7 +75,9 @@ That answering agent will have access to the conversation history and to all inf
 2) Once you have gathered sufficient information, you will stop calling tools. Your final step is to respond in plain text. This response will serve as a handover note for the answering agent, summarizing your readiness or providing key context. This plain text handover is the ONLY time you should not call a tool.
 3) One tool call at a time: You must only call one tool per turn. Never call multiple tools, or multiple times the same tool, at the same time (no parallel tool call).
 
-${FILESTORE_ENABLED ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
+${experimentalFeatures.filestore ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
+
+${experimentalFeatures.skills ? await getSkillsInstructions({ filesystem: filestore }) : ''}
 
 ## INSTRUCTIONS
 
@@ -92,6 +104,7 @@ export const getResearchSystemMessage = async ({
   processedConversation: { attachmentTypes },
   outputSchema,
   filestore,
+  experimentalFeatures,
 }: ResearchAgentPromptParams): Promise<string> => {
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -178,7 +191,9 @@ Constraints:
       - **DO NOT** summarize the tool outputs or repeat facts from the tool call history. The answering agent has full access to this information.
       - Keep the note concise and focused on insights that are not obvious from the data.
 
-${FILESTORE_ENABLED ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
+${experimentalFeatures.filestore ? await getFileSystemInstructions({ filesystem: filestore }) : ''}
+
+${experimentalFeatures.skills ? await getSkillsInstructions({ filesystem: filestore }) : ''}
 
 ${customInstructionsBlock(customInstructions)}
 

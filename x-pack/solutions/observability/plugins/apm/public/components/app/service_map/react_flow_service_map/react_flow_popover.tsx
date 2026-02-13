@@ -10,6 +10,7 @@ import type { MouseEvent } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { ReactFlowInstance, Viewport } from '@xyflow/react';
 import { useReactFlow } from '@xyflow/react';
+import { i18n } from '@kbn/i18n';
 import {
   DEFAULT_NODE_SIZE,
   OFFSCREEN_POSITION,
@@ -252,8 +253,25 @@ export function ReactFlowPopover({
 
   const trigger = <div style={{ width: 1, height: 1, visibility: 'hidden' }} aria-hidden="true" />;
 
+  // Build accessible label for the popover
+  const popoverAriaLabel = useMemo(() => {
+    if (selectedEdge) {
+      return i18n.translate('xpack.apm.serviceMap.popover.edgeAriaLabel', {
+        defaultMessage: 'Details for connection from {source} to {target}. Press Escape to close.',
+        values: { source: selectedEdge.source, target: selectedEdge.target },
+      });
+    }
+    if (selectedNode) {
+      return i18n.translate('xpack.apm.serviceMap.popover.nodeAriaLabel', {
+        defaultMessage: 'Details for {nodeName}. Press Escape to close.',
+        values: { nodeName: selectedNode.data.label || selectedNode.id },
+      });
+    }
+    return '';
+  }, [selectedNode, selectedEdge]);
+
   return (
-    <div style={popoverStyle} role="presentation">
+    <div style={popoverStyle} role="presentation" aria-hidden={!isOpen}>
       <EuiPopover
         anchorPosition="upCenter"
         button={trigger}
@@ -262,6 +280,12 @@ export function ReactFlowPopover({
         ref={popoverRef}
         zIndex={Number(euiTheme.levels.menu)}
         data-test-subj="serviceMapPopover"
+        aria-label={popoverAriaLabel}
+        panelProps={{
+          'aria-live': 'polite',
+          role: 'dialog',
+          'aria-modal': 'false',
+        }}
       >
         {elementData && (
           <PopoverContent

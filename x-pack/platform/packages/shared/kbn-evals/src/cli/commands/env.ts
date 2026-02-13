@@ -45,13 +45,15 @@ const ENV_DOCS = [
   },
   {
     name: 'SELECTED_EVALUATORS',
-    description: 'Comma-separated list of evaluator names to run.',
-    example: 'SELECTED_EVALUATORS="Factuality,Relevance"',
+    description:
+      'Comma-separated list of evaluator names to run. Supports patterns: Precision@K, Recall@K, F1@K match all K-specific evaluators.',
+    example: 'SELECTED_EVALUATORS="Precision@K,Recall@K,F1@K,Factuality"',
   },
   {
     name: 'RAG_EVAL_K',
-    description: 'Overrides default k used by RAG evaluators.',
-    example: 'RAG_EVAL_K=5',
+    description:
+      'Overrides default k used by RAG evaluators. Supports comma-separated values for multi-K evaluation.',
+    example: 'RAG_EVAL_K=5,10,20',
   },
   {
     name: 'INDEX_FOCUSED_RAG_EVAL',

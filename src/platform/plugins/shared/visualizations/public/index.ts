@@ -62,9 +62,6 @@ export type { SavedVisState } from '../common';
 export type { IEditorController, EditorRenderProps } from './visualize_app/types';
 
 export {
-  VISUALIZE_EDITOR_TRIGGER,
-  AGG_BASED_VISUALIZATION_TRIGGER,
-  DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
   ACTION_CONVERT_TO_LENS,
   ACTION_CONVERT_AGG_BASED_TO_LENS,
   ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
@@ -74,3 +71,8 @@ export const getConvertToLensModule = async () => {
   return await import('./convert_to_lens');
 };
 export { getDataViewByIndexPatternId } from './convert_to_lens/datasource';
+
+export {
+  toTableListViewSavedObject,
+  type VisualizeUserContent,
+} from './utils/to_table_list_view_saved_object';

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { FetchStatus } from '../../../types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -238,6 +238,7 @@ describe('useDiscoverHistogram', () => {
     it('should not sync Unified Histogram state with the state container if there are no changes', async () => {
       const { toolkit, stateContainer } = await setup();
       const updateAppStateSpy = jest.spyOn(internalStateActions, 'updateAppState').mockClear();
+      const setAppStateSpy = jest.spyOn(internalStateActions, 'setAppState').mockClear();
       const { hook } = await renderUseDiscoverHistogram({ toolkit });
       const containerState = stateContainer.getCurrentTab().appState;
       const state = {
@@ -250,7 +251,8 @@ describe('useDiscoverHistogram', () => {
       act(() => {
         hook.result.current.setUnifiedHistogramApi(api);
       });
-      expect(updateAppStateSpy).not.toHaveBeenCalled();
+      expect(updateAppStateSpy).toHaveBeenCalled();
+      expect(setAppStateSpy).not.toHaveBeenCalled();
     });
 
     it('should sync the state container state with Unified Histogram', async () => {
@@ -301,13 +303,18 @@ describe('useDiscoverHistogram', () => {
           appState: { hideChart: true },
         })
       );
-      expect(Object.keys(params ?? {})).toEqual(['chartHidden']);
+      await waitFor(() => {
+        expect(params).toEqual({ chartHidden: true });
+      });
       params = {};
       stateContainer.internalState.dispatch(
         stateContainer.injectCurrentTab(internalStateActions.updateAppState)({
           appState: { hideChart: false },
         })
       );
+      await waitFor(() => {
+        expect(params).toEqual({ chartHidden: false });
+      });
       act(() => {
         subject$.next({
           ...state,
@@ -315,7 +322,9 @@ describe('useDiscoverHistogram', () => {
           totalHitsResult: 100,
         });
       });
-      expect(Object.keys(params ?? {})).toEqual(['chartHidden']);
+      await waitFor(() => {
+        expect(params).toEqual({ chartHidden: false });
+      });
     });
 
     it('should update total hits when the total hits state changes', async () => {
@@ -501,10 +510,11 @@ describe('useDiscoverHistogram', () => {
         suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
       } as UnifiedHistogramVisContext;
       act(() => {
-        stateContainer.savedSearchState.set({
-          ...stateContainer.savedSearchState.getState(),
-          visContext,
-        });
+        stateContainer.internalState.dispatch(
+          stateContainer.injectCurrentTab(internalStateActions.updateAttributes)({
+            attributes: { visContext },
+          })
+        );
       });
       expect(api.fetch).toHaveBeenCalledTimes(2);
       expect(api.fetch).toHaveBeenLastCalledWith(

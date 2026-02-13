@@ -75,6 +75,7 @@ import { ServicePanel } from './entity_details/service_right';
 import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
 import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
 import {
+  ATTACK_DETAILS_LEFT_PANEL_ARIA_LABEL,
   ATTACK_DETAILS_RIGHT_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_ALERT_REASON_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_ANALYZER_PANEL_ARIA_LABEL,
@@ -116,10 +117,14 @@ import {
   VulnerabilityFindingsPreviewPanelKey,
 } from './csp_details/vulnerabilities_flyout/constants';
 import { FindingsVulnerabilityPanel } from './csp_details/vulnerabilities_flyout/vulnerabilities_right';
-import { AttackDetailsRightPanelKey } from './attack_details/constants/panel_keys';
+import {
+  AttackDetailsLeftPanelKey,
+  AttackDetailsRightPanelKey,
+} from './attack_details/constants/panel_keys';
 import type { AttackDetailsProps } from './attack_details/types';
 import { AttackDetailsProvider } from './attack_details/context';
 import { AttackDetailsPanel } from './attack_details';
+import { AttackDetailsLeftPanel } from './attack_details/left';
 import type { IOCDetailsProps } from './ioc_details/types';
 import { IOCDetailsProvider } from './ioc_details/context';
 import { IOCPanel } from './ioc_details';
@@ -321,6 +326,15 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
       </AttackDetailsProvider>
     ),
     'aria-label': ATTACK_DETAILS_RIGHT_PANEL_ARIA_LABEL,
+  },
+  {
+    key: AttackDetailsLeftPanelKey,
+    component: (props) => (
+      <AttackDetailsProvider {...(props as AttackDetailsProps).params}>
+        <AttackDetailsLeftPanel path={props.path as AttackDetailsProps['path']} />
+      </AttackDetailsProvider>
+    ),
+    'aria-label': ATTACK_DETAILS_LEFT_PANEL_ARIA_LABEL,
   },
   {
     key: MisconfigurationFindingsPreviewPanelKey,

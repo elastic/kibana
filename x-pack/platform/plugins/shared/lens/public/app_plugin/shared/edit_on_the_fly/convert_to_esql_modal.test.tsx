@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { render, screen } from '@testing-library/react';
-import type { ConvertibleLayer } from './convert_to_esql_modal';
+import type { ConvertibleLayer } from './esql_conversion_types';
 import { ConvertToEsqlModal } from './convert_to_esql_modal';
 import userEvent from '@testing-library/user-event';
 import { IconChartBarAnnotations, IconChartBarReferenceLine } from '@kbn/chart-icons';
