@@ -189,6 +189,80 @@ describe('runToolRefCleanup', () => {
     );
   });
 
+  describe('checkOnly: true', () => {
+    it('returns list of agents that reference the tool without modifying data', async () => {
+      const source1 = createAgentSource({
+        id: 'agent-1',
+        name: 'Agent One',
+        config: { instructions: '', tools: [{ tool_ids: ['tool-a'] }] },
+      });
+      const source2 = createAgentSource({
+        id: 'agent-2',
+        name: 'Agent Two',
+        config: { instructions: '', tools: [{ tool_ids: ['tool-a', 'tool-b'] }] },
+      });
+      const storage = createMockStorage({
+        hits: [
+          { _id: 'doc-1', _source: source1 },
+          { _id: 'doc-2', _source: source2 },
+        ],
+      });
+      const result = await runToolRefCleanup({
+        storage,
+        spaceId: SPACE_ID,
+        toolIds: ['tool-a'],
+        checkOnly: true,
+      });
+      expect(result).toEqual({
+        agents: [
+          { id: 'agent-1', name: 'Agent One' },
+          { id: 'agent-2', name: 'Agent Two' },
+        ],
+      });
+      expect(storage.getClient().bulk).not.toHaveBeenCalled();
+    });
+
+    it('returns empty agents list when no agents reference the tool', async () => {
+      const storage = createMockStorage({
+        hits: [
+          {
+            _id: '1',
+            _source: createAgentSource({
+              config: { instructions: '', tools: [{ tool_ids: ['tool-c'] }] },
+            }),
+          },
+        ],
+      });
+      const result = await runToolRefCleanup({
+        storage,
+        spaceId: SPACE_ID,
+        toolIds: ['tool-a'],
+        checkOnly: true,
+      });
+      expect(result).toEqual({ agents: [] });
+      expect(storage.getClient().bulk).not.toHaveBeenCalled();
+    });
+
+    it('returns agent id only when name is missing', async () => {
+      const source = createAgentSource({
+        id: 'agent-1',
+        name: undefined,
+        config: { instructions: '', tools: [{ tool_ids: ['tool-a'] }] },
+      });
+      const storage = createMockStorage({
+        hits: [{ _id: 'doc-1', _source: source }],
+      });
+      const result = await runToolRefCleanup({
+        storage,
+        spaceId: SPACE_ID,
+        toolIds: ['tool-a'],
+        checkOnly: true,
+      });
+      expect(result).toEqual({ agents: [{ id: 'agent-1' }] });
+      expect(storage.getClient().bulk).not.toHaveBeenCalled();
+    });
+  });
+
   it('logs error and rethrows when bulk fails', async () => {
     const logger = { warn: jest.fn(), error: jest.fn() };
     const storage = createMockStorage({
