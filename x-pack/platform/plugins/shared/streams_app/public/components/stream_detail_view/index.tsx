@@ -7,14 +7,12 @@
 import { EuiBadgeGroup, EuiButton, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useStreamDetailAsIngestStream } from '../../hooks/use_stream_detail';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import type { StatefulStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
-import { useKibana } from '../../hooks/use_kibana';
-import { getStreamDetailHeaderAppActionsConfig } from '../../header_app_actions/header_app_actions_config';
 import { RedirectTo } from '../redirect_to';
 import { ClassicStreamBadge, LifecycleBadge, WiredStreamBadge } from '../stream_badges';
 import { StreamDetailAttachments } from '../stream_detail_attachments';
@@ -64,19 +62,10 @@ export function StreamDetailView() {
   const router = useStreamsAppRouter();
   const { path } = useStreamsAppParams('/{key}/{tab}', true);
   const { key, tab } = path;
-  const { core } = useKibana();
 
   const { definition } = useStreamDetailAsIngestStream();
 
   const { features } = useStreamsPrivileges();
-
-  // Global header app actions: overflow (Feedback) + primary (Discover icon)
-  useEffect(() => {
-    core.chrome.setHeaderAppActionsConfig(getStreamDetailHeaderAppActionsConfig());
-    return () => {
-      core.chrome.setHeaderAppActionsConfig(undefined);
-    };
-  }, [core.chrome]);
 
   if (tab === 'management') {
     return <RedirectTo path="/{key}/management/{tab}" params={{ path: { tab: 'retention' } }} />;
