@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   EuiIcon,
   EuiAccordion,
@@ -23,7 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { getConnectorFamily, getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
 import type { Observable } from 'rxjs';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
@@ -71,25 +70,33 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
   const [chatExperience] = useUiSetting$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
   const isAgentChatExperienceEnabled = chatExperience === AIChatExperience.Agent;
 
-  const { hasConnectors, selectedConnector } = useGenAIConnectors();
+  const { hasConnectors } = useGenAIConnectors();
 
   const hasEnterpriseLicense = license?.hasAtLeast('enterprise');
   const hasAgentBuilderAccess = application?.capabilities.agentBuilder?.show === true;
 
-  const { isLoading, error, summary, context, wasStopped, fetch, stop, regenerate } =
+  const { isLoading, error, summary, context, connectorInfo, wasStopped, fetch, stop, regenerate } =
     useStreamingAiInsight(createStream);
 
-  const connectorInfo = useMemo(() => {
-    if (!selectedConnector) return undefined;
-    return {
-      connectorId: selectedConnector.connectorId,
-      name: selectedConnector.name,
-      type: selectedConnector.type,
-      modelFamily: getConnectorFamily(selectedConnector),
-      modelProvider: getConnectorProvider(selectedConnector),
-      modelId: getConnectorModel(selectedConnector),
-    };
-  }, [selectedConnector]);
+  // Report the opened event when the stream finishes (completely or stopped)
+  useEffect(() => {
+    const hasContent = Boolean(summary && summary.trim());
+    const hasGeneratedInsight = !isLoading && hasContent && !error;
+
+    if (hasGeneratedInsight && connectorInfo) {
+      try {
+        analytics?.reportEvent(
+          ObservabilityAgentBuilderTelemetryEventType.AiInsightResponseGenerated,
+          {
+            insightType,
+            connector: connectorInfo,
+          }
+        );
+      } catch (e) {
+        // do nothing
+      }
+    }
+  }, [analytics, connectorInfo, error, insightType, isLoading, summary]);
 
   const handleStartConversation = useCallback(() => {
     if (!agentBuilder?.openConversationFlyout) return;
@@ -184,15 +191,6 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
         onToggle={(open) => {
           setIsOpen(open);
           if (open && !error && !summary && !isLoading) {
-            try {
-              analytics?.reportEvent(ObservabilityAgentBuilderTelemetryEventType.AiInsightOpened, {
-                insightType,
-                connector: connectorInfo,
-              });
-            } catch (e) {
-              // eslint-disable-next-line no-console
-              console.debug('Failed to report AI insight opened event', e);
-            }
             fetch();
           }
         }}
