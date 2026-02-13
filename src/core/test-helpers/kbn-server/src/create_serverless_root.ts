@@ -129,6 +129,7 @@ function createServerlessES({ enableCPS = false }: { enableCPS?: boolean } = {})
         ...esServerlessImageParams,
         ...(enableCPS
           ? {
+              kibanaUrl: 'http://localhost:5601/',
               ssl: true,
               uiam: true,
               esArgs: [
