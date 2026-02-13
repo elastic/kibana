@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { defaultConfig } from '../../../config_sets/default/stateful/base.config';
+import { defaultConfig } from '../../default/stateful/base.config';
 
 /**
  * Custom Scout server configuration for Osquery tests.

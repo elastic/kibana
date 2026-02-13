@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { servers as securityServerlessConfig } from '../../../config_sets/default/serverless/security_complete.serverless.config';
+import { servers as securityServerlessConfig } from '../../default/serverless/security_complete.serverless.config';
 
 /**
  * Custom Scout server configuration for Osquery tests in serverless security mode.
