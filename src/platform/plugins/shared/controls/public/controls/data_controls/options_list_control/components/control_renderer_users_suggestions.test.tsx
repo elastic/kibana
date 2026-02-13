@@ -83,12 +83,12 @@ describe('UsersSuggestions', () => {
     });
   });
 
-  it('continues rendering user suggestions from suggestUserProfilesWithAvatar', async () => {
+  it('renders display name and email for user suggestions', async () => {
     mockHttpFetch.mockResolvedValueOnce([
       {
         uid: 'uid-1',
         enabled: true,
-        user: { username: 'user1', full_name: 'User One' },
+        user: { username: 'user1', full_name: 'User One', email: 'user1@example.com' },
         data: { avatar: {} },
       },
     ]);
@@ -101,6 +101,28 @@ describe('UsersSuggestions', () => {
         expect.anything()
       );
       expect(rendered.getByText('User One')).toBeInTheDocument();
+      expect(rendered.getByText('user1@example.com')).toBeInTheDocument();
+    });
+  });
+
+  it('does not render duplicate email when it matches display name', async () => {
+    mockHttpFetch.mockResolvedValueOnce([
+      {
+        uid: 'uid-2',
+        enabled: true,
+        user: { username: 'user2', full_name: 'dupe@example.com', email: 'dupe@example.com' },
+        data: { avatar: {} },
+      },
+    ]);
+
+    const { rendered } = mountComponent();
+
+    await waitFor(() => {
+      expect(mockHttpFetch).toHaveBeenCalledWith(
+        '/internal/detection_engine/users/_find',
+        expect.anything()
+      );
+      expect(rendered.getAllByText('dupe@example.com')).toHaveLength(1);
     });
   });
 });

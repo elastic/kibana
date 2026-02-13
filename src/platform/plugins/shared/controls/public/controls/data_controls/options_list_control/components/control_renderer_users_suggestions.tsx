@@ -8,7 +8,7 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFieldSearch, EuiHighlight, EuiSelectable, EuiSpacer } from '@elastic/eui';
+import { EuiFieldSearch, EuiHighlight, EuiSelectable, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { getUserDisplayName, UserAvatar } from '@kbn/user-profile-components';
@@ -32,10 +32,29 @@ export const UsersSuggestions = memo(() => {
   );
 
   const renderOption = useCallback((option: EuiSelectableOption, searchStringValue: string) => {
+    if (option.key === NO_ASSIGNEES_OPTION_KEY) {
+      return <EuiHighlight search="">{option.label}</EuiHighlight>;
+    }
+
+    const profile = option.key ? getCachedUserProfileWithAvatar(String(option.key)) : undefined;
+    const displayName = profile?.user ? getUserDisplayName(profile.user) : option.label ?? '';
+    const email = profile?.user?.email;
+
     return (
-      <EuiHighlight search={option.key === NO_ASSIGNEES_OPTION_KEY ? '' : searchStringValue}>
-        {option.label}
-      </EuiHighlight>
+      <>
+        <div className="eui-textTruncate">
+          <EuiHighlight search={searchStringValue}>{displayName}</EuiHighlight>
+        </div>
+        {email && email !== displayName ? (
+          <EuiText size="xs" color="subdued" className="eui-textTruncate">
+            {searchStringValue ? (
+              <EuiHighlight search={searchStringValue}>{email}</EuiHighlight>
+            ) : (
+              email
+            )}
+          </EuiText>
+        ) : undefined}
+      </>
     );
   }, []);
 
@@ -74,9 +93,11 @@ export const UsersSuggestions = memo(() => {
     const userSuggestions = suggestedUserIds.map((uid) => {
       const profile = getCachedUserProfileWithAvatar(uid);
 
+      const displayName = profile?.user ? getUserDisplayName(profile.user) : undefined;
+
       return {
         key: uid,
-        label: profile?.user ? getUserDisplayName(profile.user) : undefined,
+        label: displayName,
         checked: selectedOptionsSet.has(uid) ? 'on' : undefined,
         prepend: profile?.user ? (
           <UserAvatar user={profile.user} avatar={profile.data.avatar} size="s" />
@@ -103,7 +124,7 @@ export const UsersSuggestions = memo(() => {
         <EuiSelectable
           options={selectableOptions}
           renderOption={(option) => renderOption(option, searchString)}
-          listProps={{ onFocusBadge: false }}
+          listProps={{ onFocusBadge: false, rowHeight: 48 }}
           aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(
             fieldName,
             selectableOptions.length
