@@ -842,7 +842,7 @@
             "DYNAMIC_KEY": {
               "type": "long",
               "_meta": {
-                "description": "Breakdown for unknown rule type."
+                "description": "Breakdown for other rule types."
               }
             },
             "__index-threshold": {
@@ -1080,7 +1080,7 @@
             "DYNAMIC_KEY": {
               "type": "long",
               "_meta": {
-                "description": "Breakdown for unknown rule type."
+                "description": "Breakdown for other rule types."
               }
             },
             "__index-threshold": {
@@ -1324,7 +1324,7 @@
             "DYNAMIC_KEY": {
               "type": "long",
               "_meta": {
-                "description": "Breakdown for unknown rule type."
+                "description": "Breakdown for other rule types."
               }
             },
             "__index-threshold": {
@@ -1586,7 +1586,7 @@
                 "DYNAMIC_KEY": {
                   "type": "long",
                   "_meta": {
-                    "description": "Breakdown for unknown rule type."
+                    "description": "Breakdown for other rule types."
                   }
                 },
                 "__index-threshold": {
@@ -1824,7 +1824,7 @@
                 "DYNAMIC_KEY": {
                   "type": "long",
                   "_meta": {
-                    "description": "Breakdown for unknown rule type."
+                    "description": "Breakdown for other rule types."
                   }
                 },
                 "__index-threshold": {
@@ -2062,7 +2062,7 @@
                 "DYNAMIC_KEY": {
                   "type": "long",
                   "_meta": {
-                    "description": "Breakdown for unknown rule type."
+                    "description": "Breakdown for other rule types."
                   }
                 },
                 "__index-threshold": {
@@ -2300,7 +2300,7 @@
                 "DYNAMIC_KEY": {
                   "type": "long",
                   "_meta": {
-                    "description": "Breakdown for unknown rule type."
+                    "description": "Breakdown for other rule types."
                   }
                 },
                 "__index-threshold": {
@@ -2538,7 +2538,7 @@
                 "DYNAMIC_KEY": {
                   "type": "long",
                   "_meta": {
-                    "description": "Breakdown for unknown rule type."
+                    "description": "Breakdown for other rule types."
                   }
                 },
                 "__index-threshold": {
@@ -2781,7 +2781,7 @@
             "DYNAMIC_KEY": {
               "type": "long",
               "_meta": {
-                "description": "Breakdown for unknown rule type."
+                "description": "Breakdown for other rule types."
               }
             },
             "__index-threshold": {
@@ -3037,7 +3037,7 @@
                 "DYNAMIC_KEY": {
                   "type": "long",
                   "_meta": {
-                    "description": "Breakdown for unknown rule type."
+                    "description": "Breakdown for other rule types."
                   }
                 },
                 "__index-threshold": {
@@ -3275,7 +3275,7 @@
                 "DYNAMIC_KEY": {
                   "type": "long",
                   "_meta": {
-                    "description": "Breakdown for unknown rule type."
+                    "description": "Breakdown for other rule types."
                   }
                 },
                 "__index-threshold": {
@@ -3513,7 +3513,7 @@
                 "DYNAMIC_KEY": {
                   "type": "long",
                   "_meta": {
-                    "description": "Breakdown for unknown rule type."
+                    "description": "Breakdown for other rule types."
                   }
                 },
                 "__index-threshold": {
@@ -3775,7 +3775,7 @@
             "DYNAMIC_KEY": {
               "type": "long",
               "_meta": {
-                "description": "Breakdown for unknown rule type."
+                "description": "Breakdown for other rule types."
               }
             },
             "__index-threshold": {
@@ -4077,7 +4077,7 @@
             "DYNAMIC_KEY": {
               "type": "long",
               "_meta": {
-                "description": "Breakdown for unknown rule type."
+                "description": "Breakdown for other rule types."
               }
             },
             "__index-threshold": {
@@ -4318,7 +4318,7 @@
             "DYNAMIC_KEY": {
               "type": "long",
               "_meta": {
-                "description": "Breakdown for unknown rule type."
+                "description": "Breakdown for other rule types."
               }
             },
             "__index-threshold": {
@@ -4559,7 +4559,7 @@
             "DYNAMIC_KEY": {
               "type": "long",
               "_meta": {
-                "description": "Breakdown for unknown rule type."
+                "description": "Breakdown for other rule types."
               }
             },
             "__index-threshold": {
@@ -4812,7 +4812,7 @@
                 "DYNAMIC_KEY": {
                   "type": "long",
                   "_meta": {
-                    "description": "Breakdown for unknown rule type."
+                    "description": "Breakdown for other rule types."
                   }
                 },
                 "__index-threshold": {
@@ -5050,7 +5050,7 @@
                 "DYNAMIC_KEY": {
                   "type": "long",
                   "_meta": {
-                    "description": "Breakdown for unknown rule type."
+                    "description": "Breakdown for other rule types."
                   }
                 },
                 "__index-threshold": {
@@ -5288,7 +5288,7 @@
                 "DYNAMIC_KEY": {
                   "type": "long",
                   "_meta": {
-                    "description": "Breakdown for unknown rule type."
+                    "description": "Breakdown for other rule types."
                   }
                 },
                 "__index-threshold": {
@@ -5543,7 +5543,7 @@
                 "DYNAMIC_KEY": {
                   "type": "long",
                   "_meta": {
-                    "description": "Breakdown for unknown rule type."
+                    "description": "Breakdown for other rule types."
                   }
                 },
                 "__index-threshold": {
@@ -5781,7 +5781,7 @@
                 "DYNAMIC_KEY": {
                   "type": "long",
                   "_meta": {
-                    "description": "Breakdown for unknown rule type."
+                    "description": "Breakdown for other rule types."
                   }
                 },
                 "__index-threshold": {
@@ -6019,7 +6019,7 @@
                 "DYNAMIC_KEY": {
                   "type": "long",
                   "_meta": {
-                    "description": "Breakdown for unknown rule type."
+                    "description": "Breakdown for other rule types."
                   }
                 },
                 "__index-threshold": {
@@ -6262,7 +6262,7 @@
             "DYNAMIC_KEY": {
               "type": "long",
               "_meta": {
-                "description": "Breakdown for unknown rule type."
+                "description": "Breakdown for other rule types."
               }
             },
             "__index-threshold": {
@@ -6500,7 +6500,7 @@
             "DYNAMIC_KEY": {
               "type": "long",
               "_meta": {
-                "description": "Breakdown for unknown rule type."
+                "description": "Breakdown for other rule types."
               }
             },
             "__index-threshold": {
@@ -6738,7 +6738,7 @@
             "DYNAMIC_KEY": {
               "type": "long",
               "_meta": {
-                "description": "Breakdown for unknown rule type."
+                "description": "Breakdown for other rule types."
               }
             },
             "__index-threshold": {
@@ -6976,7 +6976,7 @@
             "DYNAMIC_KEY": {
               "type": "long",
               "_meta": {
-                "description": "Breakdown for unknown rule type."
+                "description": "Breakdown for other rule types."
               }
             },
             "__index-threshold": {
