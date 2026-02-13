@@ -29,6 +29,10 @@ export const ADD_TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.addTempl
   defaultMessage: 'Add template',
 });
 
+export const EDIT_TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.editTemplateTitle', {
+  defaultMessage: 'Edit template',
+});
+
 export const YAML_EDITOR_TITLE = i18n.translate('xpack.cases.templates.yamlEditorTitle', {
   defaultMessage: 'YAML Editor',
 });
