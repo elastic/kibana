@@ -35,9 +35,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
 
-  // https://github.com/elastic/kibana/pull/190690
-  // fails after missing `awaits` were added
-  // Flaky: See https://github.com/elastic/kibana/issues/241493
   describe('Case View', function () {
     before(async () => {
       await svlCommonPage.loginWithPrivilegedRole();
