@@ -1,6 +1,6 @@
 {
-  "lastModified": "2026-01-30T09:08:59.989Z",
-  "sha1": "a956b47d46590516392db19f4b9ed94426cfc214",
+  "lastModified": "2026-02-04T19:00:23.582Z",
+  "sha1": "65f75ae3f6a21cc3a89a582d5f56d6ac595b91bc",
   "tests": [
     {
       "id": "4402bb6f4421c38-1054e603e578b92",
@@ -18,12 +18,14 @@
       "title": "Entity analytics dashboard page enables risk score followed by the store",
       "expectedStatus": "skipped",
       "tags": [
-        "@ess",
-        "@svlSecurity"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/entity_analytics/dashboard.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 14
       }
     },
@@ -32,13 +34,15 @@
       "title": "Expandable flyout state sync should test flyout url sync",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSecurity"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/flyout/alert_details_url_sync.spec.ts",
-        "line": 25,
-        "column": 12
+        "line": 33,
+        "column": 14
       }
     }
   ]

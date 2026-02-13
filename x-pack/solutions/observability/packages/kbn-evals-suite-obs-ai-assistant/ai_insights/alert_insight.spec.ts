@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import type { AlertInsightParams } from '../src/clients/ai_insight_client';
 import { apmErrorCountAIInsight } from '../src/alert_templates/alerts';
@@ -19,7 +20,7 @@ const APM_ALERTS_INDEX = '.alerts-observability.apm.alerts-default';
 const ALERT_CREATION_WAIT_MS = 3000;
 const INDEX_REFRESH_WAIT_MS = 2500;
 
-evaluate.describe('Alert AI Insights', { tag: '@svlOblt' }, () => {
+evaluate.describe('Alert AI Insights', { tag: tags.serverless.observability.complete }, () => {
   let ruleId: string;
   let alertId: string;
 
