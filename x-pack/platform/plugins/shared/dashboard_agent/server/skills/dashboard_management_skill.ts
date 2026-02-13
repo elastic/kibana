@@ -54,10 +54,8 @@ Use this skill when:
 - A user asks for a multi-panel overview of their data (e.g., "give me an overview of my logs").
 
 Do **not** use this skill when:
-- The user asks for a single chart or visualization without mentioning a dashboard. Use ${
-    platformCoreTools.createVisualization
-  } directly instead.
-- The user only needs to query or explore data without building a visual. Use data query tools directly.
+- The user asks for a single chart or visualization without mentioning a dashboard.
+- The user only needs to query or explore data without building a visual.
 - The user asks about saved or persisted dashboards in Kibana. This skill manages in-memory dashboards only.
 
 ## Available Tools and Their Roles
@@ -76,22 +74,11 @@ This skill has access to the following tools. Each has a specific role in the da
 - **${
     platformCoreTools.executeEsql
   }**: Execute an ES|QL query and return results. Use to validate that data actually exists or to preview the data shape before building visualizations.
-- **${
-    platformCoreTools.createVisualization
-  }**: Create a single standalone visualization (not part of a dashboard). Use only when the user wants exactly one visualization, not a dashboard.
 - **${manageDashboardToolId}**: Create or update an in-memory dashboard with panels. This is the primary tool for this skill.
 
 ## Core Instructions
 
-### Step 1: Determine the output format
-
-Decide whether the request needs a **dashboard** or a **single visualization**:
-- **Dashboard**: the user mentions "dashboard", asks for multiple visualizations, wants an overview, or mentions panels.
-- **Single visualization**: the user asks for exactly one chart, graph, or metric without mentioning a dashboard.
-
-If the intent is unclear, prefer creating a dashboard. A single-panel dashboard is valid and can be expanded later.
-
-### Step 2: Discover and validate data
+### Step 1: Discover and validate data
 
 Before generating any visualization, always ground your work in real data:
 
@@ -104,7 +91,7 @@ Before generating any visualization, always ground your work in real data:
 3. **Never invent index names or field names.** Only use names returned by the tools.
 4. If the user mentions specific field names, verify they exist in the mapping. If they do not exist, suggest the closest matching fields from the mapping.
 
-### Step 3: Optionally pre-generate or validate queries
+### Step 2: Optionally pre-generate or validate queries
 
 This step is optional. Use it when the user's request involves complex aggregations, specific filtering, or transformations:
 
@@ -119,7 +106,7 @@ You can pass the pre-generated ES|QL query as the \`esql\` field in \`visualizat
 
 For straightforward requests (e.g., "show X over time"), skip this step and let the dashboard tool handle query generation internally.
 
-### Step 4: Create or update the dashboard
+### Step 3: Create or update the dashboard
 
 #### Creating a new dashboard
 
@@ -140,7 +127,7 @@ Call ${manageDashboardToolId} with:
 
 **Keeping the markdown summary in sync:** After adding or removing panels, the existing markdown summary panel may no longer reflect the current dashboard content. If the update changes the panel composition (new panels added or existing ones removed), check whether the markdown summary still accurately describes the dashboard. If it does not, ask the user whether they would like you to update the markdown summary to match the new dashboard state. Do not update it silently — let the user decide.
 
-### Step 5: Interpret results and communicate to the user
+### Step 4: Interpret results and communicate to the user
 
 After a successful call, the tool returns:
 - \`data.dashboardAttachment.id\`: the attachment ID needed for future updates.
@@ -316,14 +303,6 @@ Base panel selection on the fields actually available in the discovered index ma
    \`\`\`
 
 4. **Report to user:** "I added the CPU chart to the dashboard."
-
-### Example 4: Single visualization — do not create a dashboard
-
-**User request:** "Show me CPU usage over time"
-
-This is a single-visualization request with no mention of a dashboard. Use ${
-    platformCoreTools.createVisualization
-  } directly instead of ${manageDashboardToolId}.
 
 ## Edge Cases and Limitations
 
@@ -513,10 +492,6 @@ On error, the dashboard was not created or updated. Inform the user about what w
 `,
     },
   ],
-  getAllowedTools: () => [
-    platformCoreTools.createVisualization,
-    platformCoreTools.generateEsql,
-    platformCoreTools.executeEsql,
-  ],
+  getAllowedTools: () => [platformCoreTools.generateEsql, platformCoreTools.executeEsql],
   getInlineTools: () => [manageDashboardTool()],
 });
