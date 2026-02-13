@@ -5,21 +5,34 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import type { EuidAttribute } from '../definitions/entity_schema';
 
 interface FieldValue {
   [key: string]: string;
 }
 
-export function getFieldValue(doc: any, field: string): string | undefined {
-  const brokenFields = field.split('.');
+/**
+ * Assumes the document has previously been validated
+ * to not be null or undefined.
+ */
+export function getDocument(doc: any): any {
+  if (doc._source && typeof doc._source === 'object') {
+    return doc._source;
+  }
+  return doc;
+}
 
-  let fieldInObject = doc;
-  for (const brokenField of brokenFields) {
-    fieldInObject = fieldInObject[brokenField];
-    if (!fieldInObject) {
-      return undefined;
-    }
+function isEmpty(value: any): boolean {
+  return value === undefined || value === null || value === '';
+}
+
+export function getFieldValue(doc: any, field: string): string | undefined {
+  const flattenedValue = doc[field];
+  const fieldInObject = isEmpty(flattenedValue) ? get(doc, field) : flattenedValue;
+
+  if (isEmpty(fieldInObject)) {
+    return undefined;
   }
 
   // In theory we should not have multi valued fields.
@@ -27,14 +40,18 @@ export function getFieldValue(doc: any, field: string): string | undefined {
   // client returns an array of values.
   if (Array.isArray(fieldInObject)) {
     if (fieldInObject.length > 0) {
-      return fieldInObject[0];
+      return String(fieldInObject[0]);
     } else {
       throw new Error(`Field ${field} is an array but has no values`);
     }
   }
 
   if (typeof fieldInObject === 'object') {
-    throw new Error(`Field ${field} is an object, can't convert to value`);
+    throw new Error(
+      `Field ${field} is an object, can't convert to value (value: ${JSON.stringify(
+        fieldInObject
+      )})`
+    );
   }
 
   return String(fieldInObject);
