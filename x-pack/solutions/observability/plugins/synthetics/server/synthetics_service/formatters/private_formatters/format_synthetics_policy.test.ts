@@ -15,10 +15,19 @@ const testMW = [
     id: '190bd51b-985a-4553-9fba-57222ddde6b7',
     title: 'test',
     enabled: true,
-    duration: 1800000,
     expirationDate: '2026-06-10T11:43:25.175Z',
     events: [{ gte: '2025-06-10T11:40:29.124Z', lte: '2025-06-10T12:10:29.124Z' }],
-    rRule: { dtstart: '2025-06-10T11:40:29.124Z', tzid: 'Europe/Berlin', freq: 0, count: 1 },
+    schedule: {
+      custom: {
+        duration: '30m',
+        start: '2025-06-10T11:40:29.124Z',
+        timezone: 'Europe/Berlin',
+        recurring: {
+          every: '1y',
+          occurrences: 1,
+        },
+      },
+    },
     createdBy: 'elastic',
     updatedBy: 'elastic',
     createdAt: '2025-06-10T11:43:25.176Z',
@@ -27,7 +36,9 @@ const testMW = [
     eventEndTime: '2025-06-10T12:10:29.124Z',
     status: 'running',
     categoryIds: null,
-    scopedQuery: null,
+    scope: {
+      alerting: null,
+    },
   },
 ] as MaintenanceWindow[];
 
@@ -463,7 +474,7 @@ describe('formatSyntheticsPolicy', () => {
                 maintenance_windows: {
                   type: 'yaml',
                   value:
-                    '[{"dtstart":"2025-06-10T11:40:29.124Z","tzid":"Europe/Berlin","freq":"yearly","count":1,"duration":"1800000ms"}]',
+                    '[{"count":1,"interval":1,"freq":"yearly","dtstart":"2025-06-10T11:40:29.124Z","tzid":"Europe/Berlin","duration":"1800000ms"}]',
                 },
               },
             },

@@ -49,6 +49,8 @@ export {
   getScopedQueryErrorMessage,
   isScopedQueryError,
 } from './maintenance_window_scoped_query_error_message';
+export { getDurationInMilliseconds } from '../server/lib/transforms/custom_to_rrule/util';
+export { transformCustomScheduleToRRule } from '../server/lib/transforms/custom_to_rrule/v1';
 
 export type { MaintenanceWindowAttributes } from '../server/data/types/maintenance_window_attributes';
 

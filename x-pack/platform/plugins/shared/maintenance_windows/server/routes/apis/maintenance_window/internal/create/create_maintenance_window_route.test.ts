@@ -17,6 +17,7 @@ import { MaintenanceWindowStatus } from '../../../../../../common';
 
 import type { MaintenanceWindow } from '../../../../../application/types';
 import type { CreateMaintenanceWindowRequestBody } from '../../../../schemas/maintenance_window/internal/request/create';
+import { createBodySchemaV1 } from '../../../../schemas/maintenance_window/internal/request/create';
 import { transformCreateBody } from './transforms';
 import { transformInternalMaintenanceWindowToExternal } from '../transforms';
 
@@ -43,7 +44,6 @@ const createParams = {
     freq: Frequency.WEEKLY,
     count: 2,
   },
-  category_ids: ['observability'],
 } as CreateMaintenanceWindowRequestBody;
 
 describe('createMaintenanceWindowRoute', () => {
@@ -195,5 +195,23 @@ describe('createMaintenanceWindowRoute', () => {
     expect(res.ok).toHaveBeenLastCalledWith({
       body: transformInternalMaintenanceWindowToExternal(mockMaintenanceWindow2),
     });
+  });
+
+  test('should reject request with category_ids field', () => {
+    const invalidParams = {
+      title: 'test-title',
+      duration: 1000,
+      r_rule: {
+        tzid: 'UTC',
+        dtstart: '2023-02-26T00:00:00.000Z',
+        freq: Frequency.WEEKLY,
+        count: 2,
+      },
+      category_ids: ['observability'],
+    };
+
+    expect(() => createBodySchemaV1.validate(invalidParams)).toThrow(
+      '[category_ids]: definition for this key is missing'
+    );
   });
 });

@@ -138,4 +138,48 @@ describe('getActiveMaintenanceWindowsRoute', () => {
 
     expect(res.ok).toHaveBeenLastCalledWith({ body: [] });
   });
+
+  test('should return maintenance window with category_ids when present', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    getActiveMaintenanceWindowsRoute(router, licenseState);
+
+    const mockMaintenanceWindowWithCategories = [
+      {
+        ...getMockMaintenanceWindow({ categoryIds: ['observability', 'securitySolution'] }),
+        eventStartTime: new Date().toISOString(),
+        eventEndTime: new Date().toISOString(),
+        status: MaintenanceWindowStatus.Running,
+        id: 'test-id-with-categories',
+      },
+    ];
+
+    maintenanceWindowClient.getActiveMaintenanceWindows.mockResolvedValueOnce(
+      mockMaintenanceWindowWithCategories
+    );
+    const [, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ maintenanceWindowClient }, { body: {} });
+
+    await handler(context, req, res);
+
+    expect(maintenanceWindowClient.getActiveMaintenanceWindows).toHaveBeenCalled();
+    expect(res.ok).toHaveBeenCalledWith({
+      body: mockMaintenanceWindowWithCategories.map((data) => {
+        const { schedule, categoryIds, ...mwWithoutScheduleAndCategoryIds } = data; // internal api response doesn't have schedule, and categoryIds is transformed to category_ids
+        return {
+          ...rewritePartialMaintenanceBodyRes(mwWithoutScheduleAndCategoryIds),
+          r_rule: {
+            count: 2,
+            dtstart: '2023-02-26T00:00:00.000Z',
+            freq: 2,
+            interval: 1,
+            tzid: 'UTC',
+          },
+          duration: 3600000,
+          category_ids: ['observability', 'securitySolution'],
+        };
+      }),
+    });
+  });
 });

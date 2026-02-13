@@ -46,6 +46,7 @@ export const maintenanceWindowSchema = schema.object({
     schema.literal(maintenanceWindowStatus.ARCHIVED),
     schema.literal(maintenanceWindowStatus.DISABLED),
   ]),
+  categoryIds: maintenanceWindowCategoryIdsSchema,
   schedule: schema.object({ custom: scheduleSchema }),
   scope: schema.maybe(
     schema.object({

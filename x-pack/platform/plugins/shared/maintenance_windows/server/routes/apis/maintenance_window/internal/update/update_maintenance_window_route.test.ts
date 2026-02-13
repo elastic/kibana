@@ -15,6 +15,7 @@ import { MaintenanceWindowStatus } from '../../../../../../common';
 import { transformUpdateBody } from './transforms';
 import { rewritePartialMaintenanceBodyRes } from '../../../../lib';
 import type { UpdateMaintenanceWindowRequestBody } from '../../../../schemas/maintenance_window/internal/request/update';
+import { updateBodySchema as updateBodySchemaV1 } from '../../../../schemas/maintenance_window/internal/request/update';
 import type { MaintenanceWindow } from '../../../../../application/types';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
@@ -41,7 +42,6 @@ const updateParams: UpdateMaintenanceWindowRequestBody = {
     freq: 2 as const,
     count: 10,
   },
-  category_ids: ['observability'],
 };
 
 describe('updateMaintenanceWindowRoute', () => {
@@ -238,5 +238,24 @@ describe('updateMaintenanceWindowRoute', () => {
         duration: 5000,
       },
     });
+  });
+
+  test('should reject request with category_ids field', () => {
+    const invalidParams = {
+      title: 'new-title',
+      duration: 5000,
+      enabled: false,
+      r_rule: {
+        tzid: 'CET',
+        dtstart: '2023-03-26T00:00:00.000Z',
+        freq: 2 as const,
+        count: 10,
+      },
+      category_ids: ['observability'],
+    };
+
+    expect(() => updateBodySchemaV1.validate(invalidParams)).toThrow(
+      '[category_ids]: definition for this key is missing'
+    );
   });
 });

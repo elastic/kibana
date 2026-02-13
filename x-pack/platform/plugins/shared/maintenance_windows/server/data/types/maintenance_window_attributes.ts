@@ -31,6 +31,7 @@ export interface MaintenanceWindowAttributes {
   updatedBy: string | null;
   createdAt: string;
   updatedAt: string;
+  categoryIds?: MaintenanceWindowCategoryIdTypes[] | null;
   schedule: { custom: Schedule };
   scope?: {
     alerting: AlertsFilterQueryAttributes | null;
