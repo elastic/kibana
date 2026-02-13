@@ -20,7 +20,6 @@ import {
   initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, merge } from 'rxjs';
-import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import {
   APPLY_FILTER_TRIGGER,
   VALUE_CLICK_TRIGGER,
