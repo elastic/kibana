@@ -48,6 +48,13 @@ const UNIT_MS: Record<RoundedUnit, number> = {
   minutes: MS_PER.minute,
 };
 
+/**
+ * Ordered list of unit thresholds for the duration display.
+ *
+ * 1. Order matters -- the array is searched top-to-bottom, so largest units come first.
+ * 2. Each threshold subtracts half the next-smaller unit to create a rounding boundary
+ *    (e.g. `MS_PER.year - MS_PER.month / 2` so that 11.5+ months rounds up to "1y").
+ */
 const UNIT_THRESHOLDS: Array<{ unit: RoundedUnit; threshold: number; divisor: number }> = [
   { unit: 'years', threshold: MS_PER.year - MS_PER.month / 2, divisor: MS_PER.year },
   { unit: 'months', threshold: MS_PER.month - MS_PER.week / 2, divisor: MS_PER.month },
