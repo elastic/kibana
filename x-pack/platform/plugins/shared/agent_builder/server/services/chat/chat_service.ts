@@ -14,6 +14,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import {
+  type ConversationAction,
   type ChatEvent,
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
@@ -80,6 +81,8 @@ class ChatServiceImpl implements ChatService {
     nextInput,
     autoCreateConversationWithId = false,
     browserApiTools,
+    configurationOverrides,
+    action,
   }: ChatConverseParams): Observable<ChatEvent> {
     const { trackingService, analyticsService } = this.dependencies;
     const requestId = trackingService?.trackQueryStart();
@@ -95,8 +98,6 @@ class ChatServiceImpl implements ChatService {
         });
 
         span?.setAttribute('elastic.connector.id', services.selectedConnectorId);
-
-        // Get conversation and determine operation (CREATE or UPDATE)
         const conversation = await getConversation({
           agentId,
           conversationId,
@@ -134,9 +135,11 @@ class ChatServiceImpl implements ChatService {
             defaultConnectorId: context.selectedConnectorId,
             agentService: this.dependencies.agentService,
             browserApiTools,
+            configurationOverrides,
+            action,
           });
 
-          // Generate title (for CREATE) or use existing title (for UPDATE)
+          // Generate title (for CREATE) or use existing title (for UPDATE/RESEND)
           const title$ =
             context.conversation.operation === 'CREATE'
               ? generateTitle({
@@ -147,6 +150,8 @@ class ChatServiceImpl implements ChatService {
               : of(context.conversation.title);
 
           // Persist conversation (optional)
+          // Pass action to persistConversation so updateConversation$ knows to replace
+          // the last round for regenerate action
           const persistenceEvents$ = storeConversation
             ? persistConversation({
                 agentId,
@@ -155,6 +160,7 @@ class ChatServiceImpl implements ChatService {
                 conversationId,
                 title$,
                 agentEvents$,
+                action,
               })
             : EMPTY;
 
@@ -177,7 +183,10 @@ class ChatServiceImpl implements ChatService {
               try {
                 if (isRoundCompleteEvent(event)) {
                   if (requestId) trackingService?.trackQueryEnd(requestId);
-                  const currentRoundCount = (context.conversation.rounds?.length ?? 0) + 1;
+                  const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
+                  const currentRoundCount = isReplacingRound
+                    ? context.conversation.rounds.length
+                    : (context.conversation.rounds?.length ?? 0) + 1;
                   if (conversationId) {
                     trackingService?.trackConversationRound(conversationId, currentRoundCount);
                   }
@@ -203,7 +212,7 @@ class ChatServiceImpl implements ChatService {
 }
 
 /**
- * Creates events for conversation persistence (create/update)
+ * Creates events for conversation persistence (create/update/resend)
  */
 const persistConversation = ({
   agentId,
@@ -212,6 +221,7 @@ const persistConversation = ({
   conversationId,
   title$,
   agentEvents$,
+  action,
 }: {
   agentId: string;
   conversation: ConversationWithOperation;
@@ -219,6 +229,7 @@ const persistConversation = ({
   conversationId?: string;
   title$: Observable<string>;
   agentEvents$: Observable<ChatEvent>;
+  action?: ConversationAction;
 }): Observable<ChatEvent> => {
   const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
@@ -237,5 +248,6 @@ const persistConversation = ({
     conversation,
     title$,
     roundCompletedEvents$,
+    action,
   });
 };

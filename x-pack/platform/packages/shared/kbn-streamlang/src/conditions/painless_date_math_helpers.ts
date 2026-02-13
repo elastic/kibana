@@ -6,7 +6,7 @@
  */
 
 import dateMath from '@kbn/datemath';
-import { encodeValue } from '../../types/utils';
+import { encodeValue } from '../../types/utils/painless_encoding';
 
 /**
  * Helper to normalize various date formats to ISO format

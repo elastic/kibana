@@ -7,71 +7,113 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createFlagError } from '@kbn/dev-cli-errors';
+import apm from 'elastic-apm-node';
+import { runBuildApiDocsCli } from './build_api_docs_cli';
+import {
+  parseCliFlags,
+  setupProject,
+  buildApiMap,
+  collectStats,
+  reportMetrics,
+  writeDocs,
+} from './cli';
+import { runCheckPackageDocs } from './check_package_docs_cli';
 
-// Test flag validation logic directly without executing the full CLI
-describe('build_api_docs_cli flag validation', () => {
-  // Test the validation logic that would be in build_api_docs_cli
-  function isStringArray(arr: unknown | string[]): arr is string[] {
-    return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
-  }
+jest.mock('elastic-apm-node', () => {
+  const tx = {
+    startSpan: jest.fn(),
+    end: jest.fn(),
+    setOutcome: jest.fn(),
+  };
+  return {
+    startTransaction: jest.fn(() => tx),
+    isStarted: jest.fn(() => false),
+    flush: jest.fn(),
+    __tx: tx,
+  };
+});
 
-  it('validates plugin flag must be string array', () => {
-    const pluginFilter = { invalid: 'object' };
+jest.mock('@kbn/apm-config-loader', () => ({
+  initApm: jest.fn(),
+}));
 
-    if (pluginFilter && !isStringArray(pluginFilter)) {
-      expect(() => {
-        throw createFlagError('expected --plugin must only contain strings');
-      }).toThrow('expected --plugin must only contain strings');
-    }
+let registeredHandler: any;
+jest.mock('@kbn/dev-cli-runner', () => ({
+  run: jest.fn((handler: any) => {
+    registeredHandler = handler;
+  }),
+}));
+
+jest.mock('./cli', () => ({
+  parseCliFlags: jest.fn(),
+  setupProject: jest.fn(),
+  buildApiMap: jest.fn(),
+  collectStats: jest.fn(),
+  reportMetrics: jest.fn(),
+  writeDocs: jest.fn(),
+}));
+
+jest.mock('./check_package_docs_cli', () => ({
+  runCheckPackageDocs: jest.fn(),
+}));
+
+const mockTx = (apm as any).__tx;
+
+describe('build_api_docs_cli', () => {
+  const log = { info: jest.fn(), warning: jest.fn(), error: jest.fn() };
+
+  beforeEach(() => {
+    registeredHandler = undefined;
+    jest.clearAllMocks();
   });
 
-  it('validates stats flag values', () => {
-    const stats = ['invalid'];
+  it('routes --stats to check CLI and skips build tasks', async () => {
+    (parseCliFlags as jest.Mock).mockReturnValue({ stats: ['any'], collectReferences: false });
 
-    if (
-      (stats &&
-        isStringArray(stats) &&
-        stats.find((s) => s !== 'any' && s !== 'comments' && s !== 'exports')) ||
-      (stats && !isStringArray(stats))
-    ) {
-      expect(() => {
-        throw createFlagError(
-          'expected --stats must only contain `any`, `comments` and/or `exports`'
-        );
-      }).toThrow('expected --stats must only contain');
-    }
+    runBuildApiDocsCli();
+    expect(registeredHandler).toBeDefined();
+
+    await registeredHandler({ log, flags: { stats: 'any' } });
+
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('--stats is deprecated'));
+    expect(runCheckPackageDocs).toHaveBeenCalledWith(log, { stats: 'any' });
+    expect(setupProject).not.toHaveBeenCalled();
+    expect(mockTx.end).toHaveBeenCalled();
   });
 
-  it('accepts valid stats values', () => {
-    const stats = ['any', 'comments'];
+  it('runs build flow when stats are not provided', async () => {
+    const setupResult = {
+      project: {},
+      plugins: [
+        { id: 'p1', manifest: { owner: { name: 'team' }, serviceFolders: [] }, isPlugin: true },
+      ],
+    };
+    const apiMapResult = {
+      pluginApiMap: {},
+      missingApiItems: {},
+      referencedDeprecations: {},
+      unreferencedDeprecations: {},
+      adoptionTrackedAPIs: {},
+    };
+    (parseCliFlags as jest.Mock).mockReturnValue({ stats: undefined, collectReferences: false });
+    (setupProject as jest.Mock).mockResolvedValue(setupResult);
+    (buildApiMap as jest.Mock).mockReturnValue(apiMapResult);
+    (collectStats as jest.Mock).mockResolvedValue({});
 
-    if (
-      (stats &&
-        isStringArray(stats) &&
-        stats.find((s) => s !== 'any' && s !== 'comments' && s !== 'exports')) ||
-      (stats && !isStringArray(stats))
-    ) {
-      throw new Error('Should not throw for valid stats');
-    }
+    runBuildApiDocsCli();
+    await registeredHandler({ log, flags: {} });
 
-    // Should not throw
-    expect(stats).toEqual(['any', 'comments']);
-  });
-
-  it('handles single string plugin flag', () => {
-    const plugin = 'single-plugin';
-    const pluginFilter = typeof plugin === 'string' ? [plugin] : plugin;
-
-    expect(Array.isArray(pluginFilter)).toBe(true);
-    expect(pluginFilter).toEqual(['single-plugin']);
-  });
-
-  it('handles array plugin flag', () => {
-    const plugin = ['plugin1', 'plugin2'];
-    const pluginFilter = typeof plugin === 'string' ? [plugin] : plugin;
-
-    expect(Array.isArray(pluginFilter)).toBe(true);
-    expect(pluginFilter).toEqual(['plugin1', 'plugin2']);
+    expect(setupProject).toHaveBeenCalled();
+    expect(buildApiMap).toHaveBeenCalledWith(
+      setupResult.project,
+      setupResult.plugins,
+      log,
+      mockTx,
+      { stats: undefined, collectReferences: false }
+    );
+    expect(collectStats).toHaveBeenCalled();
+    expect(reportMetrics).toHaveBeenCalled();
+    expect(writeDocs).toHaveBeenCalled();
+    expect(mockTx.end).toHaveBeenCalled();
   });
 });

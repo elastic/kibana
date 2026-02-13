@@ -182,7 +182,7 @@ export class FileUploadManager {
     this.http = dependencies.http;
     this.notifications = dependencies.notifications;
 
-    this.uploadSessionId = Math.random().toString(36).substring(2, 15);
+    this.uploadSessionId = FileUploadTelemetryService.generateId();
     this.setExistingIndexName(existingIndexName);
     this.initializedWithExistingIndex = existingIndexName !== null;
 

@@ -22,6 +22,8 @@
     "@kbn/code-editor",
     "@kbn/rollup",
     "@kbn/css-utils",
+    "@kbn/cps-utils",
+    "@kbn/cps",
   ],
   "exclude": [
     "target/**/*",

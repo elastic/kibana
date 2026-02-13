@@ -132,7 +132,7 @@ function validateWithSchema<
           break;
         case 'secrets':
           name = 'connector type secrets';
-          if (actionType.validate.secrets) {
+          if (actionType.validate.secrets && value !== undefined && value !== null) {
             const validatedValue = actionType.validate.secrets.schema.parse(value);
 
             if (actionType.validate.secrets.customValidator) {

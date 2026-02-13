@@ -76,6 +76,7 @@ export const initialState: LensAppState = {
   annotationGroups: {},
   projectRouting: undefined,
   managed: false,
+  hideTextBasedEditor: false,
 };
 
 export const getPreloadedState = ({
@@ -122,6 +123,9 @@ export const getPreloadedState = ({
     ? data.query.queryString.getDefaultQuery()
     : getQueryFromContext(initialContext, data);
 
+  const isDashboardListingOrigin =
+    embeddableEditorIncomingState?.originatingApp === 'dashboards' &&
+    Boolean(embeddableEditorIncomingState?.originatingPath?.includes('/list/'));
   const state: LensAppState = {
     ...initialState,
     isLoading: true,
@@ -136,7 +140,7 @@ export const getPreloadedState = ({
     searchSessionId: data.search.session.getSessionId() ?? '',
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(
-      embeddableEditorIncomingState?.originatingApp ??
+      (embeddableEditorIncomingState?.originatingApp && !isDashboardListingOrigin) ??
         (initialContext && 'isEmbeddable' in initialContext && initialContext.isEmbeddable)
     ),
     activeDatasourceId: initialDatasourceId,
@@ -162,6 +166,8 @@ export interface InitialAppState {
   redirectCallback?: (savedObjectId?: string) => void;
   history?: History<unknown>;
   inlineEditing?: boolean;
+  /** If true, hides the ES|QL editor in the flyout, used by Discover */
+  hideTextBasedEditor?: boolean;
 }
 
 export const setState = createAction<Partial<LensAppState>>('lens/setState');

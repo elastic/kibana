@@ -12,6 +12,7 @@ export type {
   AgentHandlerFn,
   AgentEventEmitter,
   AgentEventEmitterFn,
+  ExperimentalFeatures,
 } from './provider';
 export type {
   RunAgentFn,
@@ -24,6 +25,7 @@ export type {
 export type {
   BuiltInAgentDefinition,
   BuiltInAgentConfiguration,
+  AgentConfigContext,
   AgentAvailabilityContext,
   AgentAvailabilityHandler,
   AgentAvailabilityResult,

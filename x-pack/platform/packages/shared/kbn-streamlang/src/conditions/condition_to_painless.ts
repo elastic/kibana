@@ -16,7 +16,7 @@ import type {
 } from '../../types/conditions';
 import { BINARY_OPERATORS } from '../../types/conditions';
 import { painlessFieldAccessor } from '../../types/utils';
-import { encodeValue } from '../../types/utils';
+import { encodeValue } from '../../types/utils/painless_encoding';
 import { evaluateDateMath } from './painless_date_math_helpers';
 
 // Type for mapping field names to variable names
@@ -189,6 +189,15 @@ function shorthandBinaryToPainless(
       const stringExpr = stringClauses.length > 0 ? stringClauses.join(' && ') : 'true';
 
       return `((${safeFieldAccessor} instanceof Number && ${numberExpr}) || (${safeFieldAccessor} instanceof String && ${stringExpr}))`;
+    }
+    case 'includes': {
+      // Handle both List (multivalue) and single value (after unwrapping of single-element lists)
+      // Fast path: try direct contains first (works if types already match)
+      // Fallback: convert elements to strings for type-safe comparison
+      const encodedValue = encodeValue(value as StringOrNumberOrBoolean);
+      const encodedStringValue = encodeValue(String(value));
+      // If List: check contains or string match. If single value (unwrapped): check equality
+      return `(${safeFieldAccessor} instanceof List ? (${safeFieldAccessor}.contains(${encodedValue}) || ${safeFieldAccessor}.stream().anyMatch(e -> String.valueOf(e).equals(${encodedStringValue}))) : (${safeFieldAccessor} == ${encodedValue} || String.valueOf(${safeFieldAccessor}).equals(${encodedStringValue})))`;
     }
     case 'neq':
     default: // eq

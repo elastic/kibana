@@ -26,6 +26,8 @@ export {
   type IndexAutocompleteItem,
   type ResolveIndexResponse,
   type ESQLSourceResult,
+  type EsqlView,
+  type EsqlViewsResult,
 } from './src/sources_autocomplete_types';
 
 export { type RecommendedQuery, type RecommendedField } from './src/extensions_autocomplete_types';
@@ -56,6 +58,7 @@ export {
   type TelemetryLatencyProps,
 } from './src/esql_telemetry_types';
 
+export { type ESQLQueryStats, type ESQLControlsContext } from './src/editor_types';
 export {
   type ESQLCallbacks,
   type PartialFieldsMetadataClient,

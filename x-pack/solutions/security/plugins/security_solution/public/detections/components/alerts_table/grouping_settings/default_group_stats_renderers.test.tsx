@@ -9,7 +9,6 @@ import { render } from '@testing-library/react';
 import { defaultGroupStatsRenderer, Severity } from '.';
 import React from 'react';
 import type { GenericBuckets } from '@kbn/grouping/src';
-import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
 
 describe('Severity', () => {
   it('should return a single low severity UI', () => {
@@ -237,28 +236,6 @@ describe('defaultGroupStatsRenderer', () => {
           badge.component == null &&
           badge.badge != null &&
           badge.badge.value === 18
-      )
-    ).toBeTruthy();
-  });
-
-  it('should return array of badges for ALERT_ATTACK_IDS field', () => {
-    const badges = defaultGroupStatsRenderer(ALERT_ATTACK_IDS, {
-      key: '',
-      severitiesSubAggregation: { buckets: [{ key: 'medium', doc_count: 10 }] },
-      usersCountAggregation: { value: 3 },
-      hostsCountAggregation: { value: 5 },
-      rulesCountAggregation: { value: 2 },
-      doc_count: 10,
-    });
-
-    expect(badges.length).toBe(1);
-    expect(
-      badges.find(
-        (badge) =>
-          badge.title === 'Alerts:' &&
-          badge.component == null &&
-          badge.badge != null &&
-          badge.badge.value === 10
       )
     ).toBeTruthy();
   });

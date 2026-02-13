@@ -27,6 +27,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/share-plugin",
     "@kbn/i18n",
+    "@kbn/core-chrome-browser",
   ],
   "exclude": [
     "target/**/*",

@@ -10,14 +10,16 @@ import type { Feature, Streams, System } from '@kbn/streams-schema';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
+import type { FormattedDocumentAnalysis } from '@kbn/ai-tools';
 import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { conditionToQueryDsl } from '@kbn/streamlang';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import { fromKueryExpression } from '@kbn/es-query';
+import { dateRangeQuery, fromKueryExpression, getKqlFieldNamesFromExpression } from '@kbn/es-query';
 import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
 import type { SignificantEventType } from './types';
 import { sumTokens } from '../helpers/sum_tokens';
+import { getComputedFeatureInstructions } from '../features/computed';
 
 interface Query {
   kql: string;
@@ -26,6 +28,22 @@ interface Query {
   severity_score: number;
   evidence?: string[];
 }
+
+/**
+ * Given a list of field names extracted from a KQL expression and a set of
+ * mapped fields, returns the subset of field names that do not match any
+ * mapped field. Wildcard patterns (e.g. `server.*`) are matched against all
+ * mapped fields using regex conversion.
+ */
+export const getUnmappedFields = (fieldNames: string[], mappedFields: Set<string>): string[] => {
+  return fieldNames.filter((fieldName) => {
+    if (fieldName.includes('*')) {
+      const regex = new RegExp('^' + fieldName.replace(/\*/g, '.*') + '$');
+      return !Array.from(mappedFields).some((mapped) => regex.test(mapped));
+    }
+    return !mappedFields.has(fieldName);
+  });
+};
 
 /**
  * Generate significant event definitions, based on:
@@ -63,18 +81,40 @@ export async function generateSignificantEvents({
 }> {
   logger.debug('Starting significant event generation');
 
-  logger.trace('Describing dataset for significant event generation');
-  const analysis = await withSpan('describe_dataset_for_significant_event_generation', () =>
-    describeDataset({
-      sampleDocsSize,
-      start,
-      end,
-      esClient,
-      index: stream.name,
-      filter: system?.filter ? conditionToQueryDsl(system.filter) : undefined,
-    })
-  );
+  let formattedAnalysis: FormattedDocumentAnalysis | undefined;
 
+  if (system?.filter) {
+    logger.trace('Describing dataset for significant event generation (with filter)');
+    const analysis = await withSpan('describe_dataset_for_significant_event_generation', () =>
+      describeDataset({
+        sampleDocsSize,
+        start,
+        end,
+        esClient,
+        index: stream.name,
+        filter: conditionToQueryDsl(system.filter),
+      })
+    );
+    formattedAnalysis = formatDocumentAnalysis(analysis, { dropEmpty: true });
+  }
+
+  const fieldCapsResponse = await esClient
+    .fieldCaps({
+      index: stream.name,
+      fields: '*',
+      index_filter: {
+        bool: {
+          filter: dateRangeQuery(start, end),
+        },
+      },
+    })
+    .catch((error) => {
+      throw new Error(
+        `Failure to retrieve mappings to determine field eligibility: ${error.message}`
+      );
+    });
+
+  const mappedFields = new Set(Object.keys(fieldCapsResponse.fields));
   const prompt = createGenerateSignificantEventsPrompt({ systemPrompt });
 
   logger.trace('Generating significant events via reasoning agent');
@@ -82,11 +122,12 @@ export async function generateSignificantEvents({
     executeAsReasoningAgent({
       input: {
         name: system?.name || stream.name,
-        dataset_analysis: JSON.stringify(formatDocumentAnalysis(analysis, { dropEmpty: true })),
+        dataset_analysis: formattedAnalysis ? JSON.stringify(formattedAnalysis) : '',
         description: system?.description || stream.description,
         features: JSON.stringify(
           features.map((feature) => omit(feature, ['id', 'status', 'last_seen']))
         ),
+        computed_feature_instructions: getComputedFeatureInstructions(),
       },
       maxSteps: 4,
       prompt,
@@ -96,17 +137,36 @@ export async function generateSignificantEvents({
           const queries = toolCall.function.arguments.queries;
 
           const queryValidationResults = queries.map((query) => {
-            let validation: { valid: true } | { valid: false; error: Error } = { valid: true };
             try {
               fromKueryExpression(query.kql);
             } catch (error) {
-              validation = { valid: false, error };
+              return {
+                query,
+                valid: false,
+                status: 'Failed to add',
+                error: error.message,
+              };
             }
+
+            const fieldNames = getKqlFieldNamesFromExpression(query.kql);
+            const unmappedFields = getUnmappedFields(fieldNames, mappedFields);
+
+            if (unmappedFields.length > 0) {
+              return {
+                query,
+                valid: false,
+                status: 'Failed to add',
+                error: `Query references unmapped fields: ${unmappedFields.join(
+                  ', '
+                )}. Use only fields that are tagged with (mapped) in the dataset_analysis.`,
+              };
+            }
+
             return {
               query,
-              valid: validation.valid,
-              status: validation.valid ? 'Added' : 'Failed to add',
-              error: 'error' in validation ? validation.error.message : undefined,
+              valid: true,
+              status: 'Added',
+              error: undefined,
             };
           });
 

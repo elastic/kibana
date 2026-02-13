@@ -10,11 +10,21 @@
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { camelCase, isEmpty } from 'lodash';
+import type { ValidReadAuthEditFields } from '@kbn/alerting-plugin/common/constants';
+import { validFields } from '@kbn/alerting-plugin/common/constants';
+import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
+
+import { convertObjectKeysToCamelCase } from '../../../../../utils/object_case_converters';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema/common_attributes.gen';
 import { throwAuthzError } from '../../../../machine_learning/validation';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine';
+import type {
+  ReadAuthRulePatchWithRuleSource,
+  RuleResponse,
+} from '../../../../../../common/api/detection_engine';
+import type { RuleParams } from '../../../rule_schema';
 
 export const toggleRuleEnabledOnUpdate = async (
   rulesClient: RulesClient,
@@ -91,5 +101,49 @@ export const mergeExceptionLists = (
     // Carry over the previous version's exception list
     latestPrebuiltRule.exceptions_list = existingRule.exceptions_list;
     return latestPrebuiltRule;
+  }
+};
+
+/**
+ * Typeguard to determine if given key is one of
+ * valid string literals for editable rule fields
+ * with read authz
+ * @param key string
+ * @returns boolean
+ */
+export const isKeyUpdateableWithReadPermission = (key: string): boolean =>
+  Object.values(validFields).includes(camelCase(key) as ValidReadAuthEditFields);
+
+/**
+ * Utility for formatting errors found in bulk patch response
+ * @param appliedPatchWithReadPrivs BulkEditResult<RuleParams>
+ */
+export const formatBulkEditResultErrors = (
+  appliedPatchWithReadPrivs: BulkEditResult<RuleParams>
+) => {
+  if (!isEmpty(appliedPatchWithReadPrivs.errors)) {
+    return appliedPatchWithReadPrivs.errors.reduce((acc, error) => `${acc}\n${error.message}`, '');
+  }
+};
+
+/**
+ * Generate parameter for editable rule field
+ * with read authz
+ * @param field
+ * @param rulePatch
+ * @returns
+ */
+export const getReadAuthFieldValue = (
+  field: string,
+  rulePatch: ReadAuthRulePatchWithRuleSource
+) => {
+  switch (camelCase(field)) {
+    case validFields.EXCEPTIONS_LIST:
+      if (rulePatch.exceptions_list != null) {
+        return rulePatch.exceptions_list;
+      }
+
+    case validFields.RULE_SOURCE:
+      return convertObjectKeysToCamelCase(rulePatch.rule_source);
   }
 };

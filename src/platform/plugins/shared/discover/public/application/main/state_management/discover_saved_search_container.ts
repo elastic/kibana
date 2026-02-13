@@ -9,10 +9,7 @@
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import type { ESQLControlState } from '@kbn/esql-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
-import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import type { DiscoverAppState } from './redux';
@@ -37,8 +34,6 @@ export interface UpdateParams {
 /**
  * Container for the saved search state, allowing to update the saved search
  * It centralizes functionality that was spread across the Discover main codebase
- * There are 2 hooks to access the state of the saved search in React components:
- * - useSavedSearch for the current state, that's updated on every relevant state change
  */
 export interface DiscoverSavedSearchContainer {
   /**
@@ -71,20 +66,6 @@ export interface DiscoverSavedSearchContainer {
    * @param params
    */
   update: (params: UpdateParams) => SavedSearch;
-  /**
-   * Updates the current state of the saved search with new time range and refresh interval
-   */
-  updateTimeRange: () => void;
-  /**
-   * Updates the current value of visContext in saved search
-   * @param params
-   */
-  updateVisContext: (params: { nextVisContext: UnifiedHistogramVisContext | undefined }) => void;
-  /**
-   * Updates the current value of controlState in saved search
-   * @param params
-   */
-  updateControlState: (params: { nextControlState: ControlPanelsState<ESQLControlState> }) => void;
 }
 
 export function getSavedSearchContainer({
@@ -122,7 +103,6 @@ export function getSavedSearchContainer({
     const nextSavedSearch = updateSavedSearch({
       savedSearch: { ...previousSavedSearch },
       dataView,
-      initialInternalState: undefined,
       appState: nextState || {},
       globalState: getCurrentTab().globalState,
       services,
@@ -135,55 +115,6 @@ export function getSavedSearchContainer({
     return nextSavedSearch;
   };
 
-  const updateTimeRange = () => {
-    const previousSavedSearch = getState();
-    if (!previousSavedSearch.timeRestore) {
-      return;
-    }
-    const refreshInterval = services.timefilter.getRefreshInterval();
-    const nextSavedSearch: SavedSearch = {
-      ...previousSavedSearch,
-      timeRange: services.timefilter.getTime(),
-      refreshInterval: { value: refreshInterval.value, pause: refreshInterval.pause },
-    };
-
-    assignNextSavedSearch({ nextSavedSearch });
-
-    addLog('[savedSearch] updateWithTimeRange done', nextSavedSearch);
-  };
-
-  const updateVisContext = ({
-    nextVisContext,
-  }: {
-    nextVisContext: UnifiedHistogramVisContext | undefined;
-  }) => {
-    const previousSavedSearch = getState();
-    const nextSavedSearch: SavedSearch = {
-      ...previousSavedSearch,
-      visContext: nextVisContext,
-    };
-
-    assignNextSavedSearch({ nextSavedSearch });
-
-    addLog('[savedSearch] updateVisContext done', nextSavedSearch);
-  };
-
-  const updateControlState = ({
-    nextControlState,
-  }: {
-    nextControlState: ControlPanelsState<ESQLControlState> | undefined;
-  }) => {
-    const previousSavedSearch = getState();
-    const nextSavedSearch: SavedSearch = {
-      ...previousSavedSearch,
-      controlGroupJson: JSON.stringify(nextControlState),
-    };
-
-    assignNextSavedSearch({ nextSavedSearch });
-
-    addLog('[savedSearch] updateControlState done', nextSavedSearch);
-  };
-
   return {
     getCurrent$,
     getInitial$,
@@ -191,9 +122,6 @@ export function getSavedSearchContainer({
     set,
     assignNextSavedSearch: (nextSavedSearch) => assignNextSavedSearch({ nextSavedSearch }),
     update,
-    updateTimeRange,
-    updateVisContext,
-    updateControlState,
   };
 }
 

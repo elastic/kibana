@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
 import { generateLogsData } from '../fixtures/generators';
 
@@ -13,7 +14,7 @@ const CLASSIC_STREAM_NAME = 'logs-generic-dataset';
 
 test.describe(
   'Discover integration - Classic Stream - Navigate to Stream processing from document flyout',
-  { tag: ['@svlOblt'] },
+  { tag: tags.serverless.observability.complete },
   () => {
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       // Generate logs data for a classic stream
@@ -46,14 +47,7 @@ test.describe(
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.waitForDocTableRendered();
 
-      // Expand the first document row to open the flyout
-      const expandButton = page.locator(
-        '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
-      );
-
-      // Wait for the row to be rendered before clicking
-      await expandButton.waitFor({ state: 'visible', timeout: 30_000 });
-      await expandButton.click();
+      await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
 
       // Verify the doc viewer flyout is open
       await pageObjects.discover.waitForDocViewerFlyoutOpen();
@@ -102,14 +96,7 @@ test.describe(
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.waitForDocTableRendered();
 
-      // Expand the first document row to open the flyout
-      const expandButton = page.locator(
-        '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
-      );
-
-      // Wait for the row to be rendered before clicking
-      await expandButton.waitFor({ state: 'visible', timeout: 30_000 });
-      await expandButton.click();
+      await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
 
       // Verify the doc viewer flyout is open
       await pageObjects.discover.waitForDocViewerFlyoutOpen();

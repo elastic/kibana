@@ -15,11 +15,7 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import type { AppMountParameters } from '@kbn/core/public';
 import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import React from 'react';
-import {
-  fromTabStateToSavedObjectTab,
-  selectHasUnsavedChanges,
-  selectTabRuntimeState,
-} from '../redux';
+import { fromTabStateToSavedObjectTab, selectHasUnsavedChanges } from '../redux';
 import { getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
 import type { AppLeaveActionFactory } from '@kbn/core-application-browser';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
@@ -45,7 +41,6 @@ describe('useUnsavedChanges', () => {
           serializedSearchSource: { index: dataViewWithTimefieldMock.id },
         },
       }),
-      timeRestore: false,
       services,
     });
 
@@ -76,12 +71,8 @@ describe('useUnsavedChanges', () => {
     });
 
     await initializeTabs({ persistedDiscoverSession: getPersistedDiscoverSession({ services }) });
-    await initializeSingleTab({ tabId: getCurrentTab().id });
 
-    const stateContainer = selectTabRuntimeState(
-      runtimeStateManager,
-      getCurrentTab().id
-    ).stateContainer$.getValue()!;
+    const { stateContainer } = await initializeSingleTab({ tabId: getCurrentTab().id });
 
     const result = renderHook(useUnsavedChanges, {
       initialProps: { internalState, runtimeStateManager, onAppLeave },

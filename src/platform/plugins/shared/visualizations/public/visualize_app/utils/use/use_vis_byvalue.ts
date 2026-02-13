@@ -62,14 +62,19 @@ export const useVisByValue = (
         ? () => navigateToApp(originatingApp, { path: originatingPath })
         : undefined;
 
+      const editBreadcrumbs = getEditBreadcrumbs({
+        byValue: true,
+        originatingAppName,
+        redirectToOrigin,
+      });
       if (serverless?.setBreadcrumbs) {
         serverless.setBreadcrumbs(
           getEditServerlessBreadcrumbs({ byValue: true, originatingAppName, redirectToOrigin })
         );
       } else {
-        chrome?.setBreadcrumbs(
-          getEditBreadcrumbs({ byValue: true, originatingAppName, redirectToOrigin })
-        );
+        chrome?.setBreadcrumbs(editBreadcrumbs, {
+          project: { value: editBreadcrumbs, absolute: true },
+        });
       }
 
       loaded.current = true;

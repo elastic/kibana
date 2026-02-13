@@ -89,13 +89,17 @@ export class BrowserShortUrlClient implements IShortUrlClient {
       if (timeRange?.from && timeRange?.to) {
         timeRanges.timeRange = {
           from: convertRelativeTimeStringToAbsoluteTimeString(timeRange.from as string),
-          to: convertRelativeTimeStringToAbsoluteTimeString(timeRange.to as string),
+          to: convertRelativeTimeStringToAbsoluteTimeString(timeRange.to as string, {
+            roundUp: true,
+          }),
         };
       }
       if (timeRangeSnakeCase?.from && timeRangeSnakeCase?.to) {
         timeRanges.time_range = {
           from: convertRelativeTimeStringToAbsoluteTimeString(timeRangeSnakeCase.from as string),
-          to: convertRelativeTimeStringToAbsoluteTimeString(timeRangeSnakeCase.to as string),
+          to: convertRelativeTimeStringToAbsoluteTimeString(timeRangeSnakeCase.to as string, {
+            roundUp: true,
+          }),
         };
       }
       return {

@@ -16,3 +16,4 @@ export {
 export { processFieldCapsResponse, type FieldListFromFieldCapsResponse } from './field_caps';
 export { generateXmlTree, type XmlNode } from './formatting';
 export { errorResult, otherResult } from './results';
+export { estimateTokens, truncateTokens } from './token_count';

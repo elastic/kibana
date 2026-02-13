@@ -39,7 +39,7 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
       await this.buildSource(slo, slo.indicator),
       this.buildDestination(slo),
       this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
-      this.buildAggregations(slo, slo.indicator),
+      await this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, slo.indicator.params.timestampField),
       slo
     );
@@ -72,7 +72,7 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
     };
   }
 
-  private buildAggregations(slo: SLODefinition, indicator: MetricCustomIndicator) {
+  private async buildAggregations(slo: SLODefinition, indicator: MetricCustomIndicator) {
     if (indicator.params.good.equation.match(INVALID_EQUATION_REGEX)) {
       throw new Error(`Invalid equation: ${indicator.params.good.equation}`);
     }
@@ -81,7 +81,11 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
       throw new Error(`Invalid equation: ${indicator.params.total.equation}`);
     }
 
-    const getCustomMetricIndicatorAggregation = new GetCustomMetricIndicatorAggregation(indicator);
+    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
+    const getCustomMetricIndicatorAggregation = new GetCustomMetricIndicatorAggregation(
+      indicator,
+      dataView
+    );
     return {
       ...getCustomMetricIndicatorAggregation.execute({
         type: 'good',

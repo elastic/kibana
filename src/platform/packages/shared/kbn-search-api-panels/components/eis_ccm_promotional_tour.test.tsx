@@ -15,6 +15,7 @@ import { EisCloudConnectPromoTour } from './eis_ccm_promotional_tour';
 import { useKibana } from '../hooks/use_kibana';
 import { useShowEisPromotionalContent } from '../hooks/use_show_eis_promotional_content';
 import * as i18n from '../translations';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('../hooks/use_show_eis_promotional_content');
 jest.mock('../hooks/use_kibana');
@@ -37,6 +38,7 @@ const mockUseKibana = (overrides?: Partial<any>) => {
           },
         },
       },
+      notifications: notificationServiceMock.createStartContract(),
       ...overrides,
     },
   });
@@ -98,6 +100,25 @@ describe('EisCloudConnectPromoTour', () => {
     });
 
     renderComponent({ isSelfManaged: false });
+
+    expect(screen.getByTestId(childTestId)).toBeInTheDocument();
+    expect(screen.queryByTestId(dataId)).not.toBeInTheDocument();
+  });
+
+  it('renders children and does not render the tour when tours is disabled', () => {
+    (useShowEisPromotionalContent as jest.Mock).mockReturnValue({
+      isPromoVisible: true,
+      onDismissPromo: jest.fn(),
+    });
+    mockUseKibana({
+      notifications: {
+        tours: {
+          isEnabled: jest.fn().mockReturnValue(false),
+        },
+      },
+    });
+
+    renderComponent();
 
     expect(screen.getByTestId(childTestId)).toBeInTheDocument();
     expect(screen.queryByTestId(dataId)).not.toBeInTheDocument();

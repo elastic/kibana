@@ -7,7 +7,6 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import { omit } from 'lodash';
-import fetch from 'node-fetch';
 import type { Url } from 'url';
 import { format, parse } from 'url';
 
@@ -53,7 +52,6 @@ async function getKibanaUrl({ kibana, log }: { kibana: string; log: ToolingLog }
           : {}),
       },
       method: 'HEAD',
-      follow: 1,
       redirect: 'manual',
     });
 

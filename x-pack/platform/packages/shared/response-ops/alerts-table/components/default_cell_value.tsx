@@ -1,0 +1,114 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ComponentProps } from 'react';
+import React from 'react';
+import { isEmpty } from 'lodash';
+import type { AlertConsumers } from '@kbn/rule-data-utils';
+import {
+  ALERT_DURATION,
+  ALERT_RULE_NAME,
+  ALERT_RULE_UUID,
+  ALERT_START,
+  TIMESTAMP,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_PRODUCER,
+} from '@kbn/rule-data-utils';
+import { EuiBadge, EuiLink } from '@elastic/eui';
+import type { JsonValue } from '@kbn/utility-types';
+import type { AlertsTableSupportedConsumers, GetAlertsTableProp } from '../types';
+import {
+  alertProducersData,
+  observabilityFeatureIds,
+  STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX,
+} from '../constants';
+import { useFieldFormatter } from '../hooks/use_field_formatter';
+import { useAlertsTableContext } from '../contexts/alerts_table_context';
+
+export const DefaultCellValue = ({
+  alert,
+  columnId,
+  openLinksInNewTab,
+}: Pick<
+  ComponentProps<GetAlertsTableProp<'renderCellValue'>>,
+  'alert' | 'columnId' | 'openLinksInNewTab'
+>) => {
+  const {
+    services: { fieldFormats, http },
+  } = useAlertsTableContext();
+  const formatField = useFieldFormatter(fieldFormats);
+  const rawValue = alert[columnId];
+  const value = extractFieldValue(rawValue);
+
+  switch (columnId) {
+    case TIMESTAMP:
+    case ALERT_START:
+      return <>{formatField('date')(value)}</>;
+
+    case ALERT_RULE_NAME:
+      if (!alert) {
+        return <>{value}</>;
+      }
+      const ruleName = alert?.[ALERT_RULE_NAME]?.[0] as string | undefined;
+      const ruleUuid = alert?.[ALERT_RULE_UUID]?.[0] as string | undefined;
+      if (!ruleName || !ruleUuid) {
+        return null;
+      }
+      return (
+        <EuiLink
+          href={http.basePath.prepend(`${STACK_MANAGEMENT_RULE_PAGE_URL_PREFIX}${ruleUuid}`)}
+          target={openLinksInNewTab ? '_blank' : undefined}
+        >
+          {ruleName}
+        </EuiLink>
+      );
+
+    case ALERT_DURATION:
+      return (
+        <>
+          {formatField('duration', {
+            inputFormat: 'microseconds',
+            outputFormat: 'humanizePrecise',
+          })(value) || '--'}
+        </>
+      );
+
+    case ALERT_RULE_CONSUMER:
+      const producer = alert?.[ALERT_RULE_PRODUCER]?.[0] as AlertConsumers;
+      const consumer = (
+        observabilityFeatureIds.includes(producer)
+          ? 'observability'
+          : producer && (value === 'alerts' || value === 'stackAlerts' || value === 'discover')
+          ? producer
+          : value
+      ) as AlertsTableSupportedConsumers;
+      const consumerData = alertProducersData[consumer];
+      if (!consumerData) {
+        return <>{value}</>;
+      }
+      return <EuiBadge iconType={consumerData.icon}>{consumerData.displayName}</EuiBadge>;
+
+    default:
+      return <>{value}</>;
+  }
+};
+
+/**
+ * Extracts the value from the raw json ES field
+ */
+const extractFieldValue = (rawValue: string | number | JsonValue[]) => {
+  const value = Array.isArray(rawValue) ? rawValue.join() : rawValue;
+
+  if (!isEmpty(value)) {
+    if (typeof value === 'object') {
+      return JSON.stringify(value);
+    }
+    return value;
+  }
+
+  return '—';
+};

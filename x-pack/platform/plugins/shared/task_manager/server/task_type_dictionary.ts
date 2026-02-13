@@ -30,6 +30,9 @@ export const REMOVED_TYPES: string[] = [
 
   // deprecated in https://github.com/elastic/kibana/pull/216916
   'obs-ai-assistant:knowledge-base-migration',
+
+  // removed in https://github.com/elastic/kibana/pull/250218
+  'logs-data-telemetry',
 ];
 
 export const SHARED_CONCURRENCY_TASKS: string[][] = [

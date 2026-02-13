@@ -1,0 +1,37 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/field-types",
+    "@kbn/unified-histogram",
+    "@kbn/shared-ux-utility",
+    "@kbn/esql-language",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/chart-icons",
+    "@kbn/data-plugin",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/data-views-plugin",
+    "@kbn/lens-plugin",
+    "@kbn/esql-composer",
+    "@kbn/shared-ux-toolbar-selector",
+    "@kbn/ui-actions-plugin",
+    "@kbn/react-hooks",
+    "@kbn/discover-utils",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/shared-ux-button-toolbar",
+    "@kbn/apm-types",
+    "@kbn/esql-utils",
+    "@kbn/field-utils",
+    "@kbn/restorable-state",
+    "@kbn/esql-types",
+    "@kbn/presentation-panel-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/ebt-tools",
+    "@kbn/es-query",
+  ]
+}

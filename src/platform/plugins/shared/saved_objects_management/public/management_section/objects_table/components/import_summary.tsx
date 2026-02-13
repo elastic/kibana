@@ -28,9 +28,12 @@ import type {
   SavedObjectsImportSuccess,
   SavedObjectsImportWarning,
   IBasePath,
+  CoreStart,
 } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { StartDependencies } from '@kbn/content-management-plugin/public/types';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import type { FailedImport } from '../../../lib';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
@@ -202,9 +205,26 @@ const ImportWarnings: FC<{ warnings: SavedObjectsImportWarning[]; basePath: IBas
 };
 
 const ImportWarning: FC<{ warning: SavedObjectsImportWarning; basePath: IBasePath }> = ({
-  warning,
+  warning: providedWarning,
   basePath,
 }) => {
+  const kibana = useKibana<CoreStart & StartDependencies>();
+  const isUnifiedRulesPageEnabled = useMemo(
+    () => kibana.services.application?.isAppRegistered?.('rules') ?? false,
+    [kibana.services.application]
+  );
+
+  const warning = useMemo(
+    () =>
+      isUnifiedRulesPageEnabled && 'actionPath' in providedWarning
+        ? {
+            ...providedWarning,
+            actionPath: '/app/rules',
+          }
+        : providedWarning,
+    [isUnifiedRulesPageEnabled, providedWarning]
+  );
+
   const warningContent = useMemo(() => {
     if (warning.type === 'action_required') {
       return (
@@ -213,6 +233,7 @@ const ImportWarning: FC<{ warning: SavedObjectsImportWarning; basePath: IBasePat
             <EuiButton
               size="s"
               color="warning"
+              data-test-subj="warningActionButton"
               href={basePath.prepend(warning.actionPath)}
               target="_blank"
             >

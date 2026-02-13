@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { SECURITY_CELL_ACTIONS_ALERTS_COUNT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -34,11 +35,7 @@ import * as i18n from '../translations';
 import { ITEMS_PER_PAGE } from '../utils';
 import type { HostAlertsItem } from './use_host_alerts_items';
 import { useHostAlertsItems } from './use_host_alerts_items';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
+import { CellActionsMode, SecurityCellActions } from '../../../../common/components/cell_actions';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 import { useRiskSeverityColors } from '../../../../common/utils/risk_color_palette';
 
@@ -109,6 +106,7 @@ export const HostAlertsTable = React.memo(({ signalIndexName }: HostAlertsTableP
               columns={columns}
               loading={isLoading}
               data-test-subj="severityHostAlertsTable"
+              tableCaption={i18n.HOST_ALERTS_SECTION_TITLE}
               noItemsMessage={
                 <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
               }
@@ -162,7 +160,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
               field: 'host.name',
             }}
             mode={CellActionsMode.HOVER_RIGHT}
-            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            triggerId={SECURITY_CELL_ACTIONS_ALERTS_COUNT}
             sourcererScopeId={PageScope.alerts}
             metadata={{
               andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
@@ -193,7 +191,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                   field: 'host.name',
                 }}
                 mode={CellActionsMode.HOVER_RIGHT}
-                triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+                triggerId={SECURITY_CELL_ACTIONS_ALERTS_COUNT}
                 sourcererScopeId={PageScope.alerts}
                 metadata={{
                   andFilters: [
@@ -227,7 +225,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                   field: 'host.name',
                 }}
                 mode={CellActionsMode.HOVER_RIGHT}
-                triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+                triggerId={SECURITY_CELL_ACTIONS_ALERTS_COUNT}
                 sourcererScopeId={PageScope.alerts}
                 metadata={{
                   andFilters: [
@@ -258,7 +256,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                   field: 'host.name',
                 }}
                 mode={CellActionsMode.HOVER_RIGHT}
-                triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+                triggerId={SECURITY_CELL_ACTIONS_ALERTS_COUNT}
                 sourcererScopeId={PageScope.alerts}
                 metadata={{
                   andFilters: [
@@ -289,7 +287,7 @@ const useGetTableColumns: GetTableColumns = (handleClick) => {
                   field: 'host.name',
                 }}
                 mode={CellActionsMode.HOVER_RIGHT}
-                triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+                triggerId={SECURITY_CELL_ACTIONS_ALERTS_COUNT}
                 sourcererScopeId={PageScope.alerts}
                 metadata={{
                   andFilters: [

@@ -197,7 +197,8 @@ export async function getTemplateInputs(
 
   let otelcolConfig;
   if (experimentalFeature.enableOtelIntegrations) {
-    otelcolConfig = generateOtelcolConfig(inputs);
+    // Template inputs don't have package info cache, so pass undefined
+    otelcolConfig = generateOtelcolConfig(inputs, undefined, undefined);
   }
   // filter out the otelcol inputs, they will be added at the root of the config
   const filteredInputs = inputs.filter((input) => input.type !== OTEL_COLLECTOR_INPUT_TYPE);

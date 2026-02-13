@@ -10,7 +10,7 @@
 import React, { type MouseEvent } from 'react';
 import { SplitButtonWithNotification } from '@kbn/split-button';
 import { upperFirst } from 'lodash';
-import type { EuiButtonColor, PopoverAnchorPosition } from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
 import { EuiButton, EuiHideFor, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getRouterLinkProps } from '@kbn/router-utils';
@@ -30,7 +30,6 @@ type AppMenuActionButtonProps = (AppMenuPrimaryActionItem | AppMenuSecondaryActi
   isPopoverOpen: boolean;
   onPopoverToggle: () => void;
   onPopoverClose: () => void;
-  popoverAnchorPosition?: PopoverAnchorPosition;
   onCloseOverflowButton?: () => void;
 };
 
@@ -56,7 +55,6 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     popoverTestId,
     onPopoverToggle,
     onPopoverClose,
-    popoverAnchorPosition,
     onCloseOverflowButton,
   } = props;
 
@@ -205,7 +203,6 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         popoverTestId={popoverTestId}
         onClose={onPopoverClose}
         onCloseOverflowButton={onCloseOverflowButton}
-        anchorPosition={popoverAnchorPosition}
       />
     );
   }

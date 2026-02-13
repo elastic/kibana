@@ -11,6 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { BulkActionSkipResult, GapFillStatus } from '@kbn/alerting-plugin/common';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
+import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -44,7 +45,6 @@ import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
 import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
-import type { ConfigType } from '../../../../../../config';
 import { checkAlertSuppressionBulkEditSupport } from '../../../logic/bulk_actions/check_alert_suppression_bulk_edit_support';
 import { bulkScheduleRuleGapFilling } from './bulk_schedule_rule_gap_filling';
 
@@ -132,8 +132,7 @@ const prepareGapParams = ({
 
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml'],
-  config: ConfigType
+  ml: SetupPlugins['ml']
 ) => {
   router.versioned
     .post({
@@ -205,6 +204,9 @@ export const performBulkActionRoute = (
           const actionsClient = ctx.actions.getActionsClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+          const endpointAuthz = await ctx.securitySolution.getEndpointAuthz();
+          const endpointService = ctx.securitySolution.getEndpointService();
+          const spaceId = ctx.securitySolution.getSpaceId();
 
           const { getExporter, getClient } = ctx.core.savedObjects;
           const client = getClient({ includedHiddenTypes: ['action'] });
@@ -299,6 +301,14 @@ export const performBulkActionRoute = (
                 executor: async (rule) => {
                   await validateBulkDuplicateRule({ mlAuthz, rule });
 
+                  await validateRuleResponseActions({
+                    endpointAuthz,
+                    endpointService,
+                    rulePayload: {},
+                    spaceId,
+                    existingRule: rule,
+                  });
+
                   // during dry run only validation is getting performed and rule is not saved in ES, thus return early
                   if (isDryRun) {
                     return rule;
@@ -377,7 +387,6 @@ export const performBulkActionRoute = (
               const suppressionSupportError = await checkAlertSuppressionBulkEditSupport({
                 editActions: body.edit,
                 licensing: ctx.licensing,
-                experimentalFeatures: config.experimentalFeatures,
               });
 
               if (suppressionSupportError) {

@@ -99,6 +99,9 @@ const i18nTexts = {
       defaultMessage: 'Filter',
     }
   ),
+  tableCaption: i18n.translate('xpack.upgradeAssistant.kibanaDeprecations.table.tableCaption', {
+    defaultMessage: 'List of Kibana deprecations',
+  }),
 };
 
 interface Props {
@@ -269,6 +272,7 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       })}
       data-test-subj="kibanaDeprecationsTable"
       tableLayout="auto"
+      tableCaption={i18nTexts.tableCaption}
     />
   );
 };

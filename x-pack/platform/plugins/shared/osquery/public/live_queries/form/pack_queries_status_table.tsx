@@ -32,6 +32,7 @@ import { PackViewInLensAction } from '../../lens/pack_view_in_lens';
 import { PackViewInDiscoverAction } from '../../discover/pack_view_in_discover';
 import { AddToCaseWrapper } from '../../cases/add_to_cases';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
+import type { AddToTimelineHandler } from '../../types';
 
 const truncateTooltipTextCss = {
   width: '100%',
@@ -140,6 +141,7 @@ interface PackQueriesStatusTableProps {
   startDate?: string;
   expirationDate?: string;
   showResultsHeader?: boolean;
+  addToTimeline?: AddToTimelineHandler;
 }
 
 const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = ({
@@ -150,6 +152,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   startDate,
   expirationDate,
   showResultsHeader,
+  addToTimeline,
 }) => {
   const [queryDetailsFlyoutOpen, setQueryDetailsFlyoutOpen] = useState<{
     id: string;
@@ -242,6 +245,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                   agentIds={agentIds}
                   failedAgentsCount={item?.failed ?? 0}
                   error={item.error}
+                  addToTimeline={addToTimeline}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -251,7 +255,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         return itemIdToExpandedRowMapValues;
       });
     },
-    [actionId, startDate, expirationDate, agentIds]
+    [actionId, startDate, expirationDate, agentIds, addToTimeline]
   );
 
   const renderToggleResultsAction = useCallback(
@@ -285,7 +289,12 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         {
           render: (item: { action_id: string }) =>
             item.action_id && (
-              <AddToTimelineButton field="action_id" value={item.action_id} isIcon={true} />
+              <AddToTimelineButton
+                field="action_id"
+                value={item.action_id}
+                isIcon={true}
+                addToTimeline={addToTimeline}
+              />
             ),
         },
         {
@@ -317,6 +326,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     },
     [
       actionId,
+      addToTimeline,
       agentIds,
       handleQueryFlyoutOpen,
       renderDiscoverResultsAction,
@@ -422,10 +432,14 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           queryIds={queryIds as string[]}
           actionId={actionId}
           agentIds={agentIds}
+          addToTimeline={addToTimeline}
         />
       )}
       <EuiBasicTable
         css={euiBasicTableCss}
+        tableCaption={i18n.translate('xpack.osquery.pack.queriesTable.tableCaption', {
+          defaultMessage: 'Pack queries',
+        })}
         items={data ?? EMPTY_ARRAY}
         itemId={getItemId}
         columns={columns}

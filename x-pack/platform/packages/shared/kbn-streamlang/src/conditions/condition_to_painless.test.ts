@@ -61,7 +61,16 @@ const operatorConditionAndResults = [
     condition: { field: 'log.logger', exists: false },
     result: "$('log.logger', null) == null",
   },
-
+  {
+    condition: { field: 'tags', includes: 'error' },
+    result:
+      "($('tags', null) !== null && ($('tags', null) instanceof List ? ($('tags', null).contains(\"error\") || $('tags', null).stream().anyMatch(e -> String.valueOf(e).equals(\"error\"))) : ($('tags', null) == \"error\" || String.valueOf($('tags', null)).equals(\"error\"))))",
+  },
+  {
+    condition: { field: 'status_codes', includes: 200 },
+    result:
+      "($('status_codes', null) !== null && ($('status_codes', null) instanceof List ? ($('status_codes', null).contains(200) || $('status_codes', null).stream().anyMatch(e -> String.valueOf(e).equals(\"200\"))) : ($('status_codes', null) == 200 || String.valueOf($('status_codes', null)).equals(\"200\"))))",
+  },
   {
     condition: {
       field: 'http.response.status_code',

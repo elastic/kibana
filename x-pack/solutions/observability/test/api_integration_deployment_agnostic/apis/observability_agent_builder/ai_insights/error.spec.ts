@@ -8,12 +8,13 @@
 import expect from '@kbn/expect';
 import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
-import { createLlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
-  createLlmProxyActionConnector,
-  deleteActionConnector,
-} from '../utils/llm_proxy/action_connectors';
+  setupLlmProxy,
+  teardownLlmProxy,
+  getLlmMessages,
+  type LlmMessage,
+} from '../utils/llm_proxy/llm_test_helpers';
 import {
   createDistributedTraceWithErrors,
   type DistributedTraceData,
@@ -22,7 +23,6 @@ import {
 const MOCKED_AI_SUMMARY = 'This is a mocked AI insight summary for the payment timeout error.';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const log = getService('log');
   const observabilityAgentBuilderApi = getService('observabilityAgentBuilderApi');
 
   describe('AI Insights: Error', function () {
@@ -35,13 +35,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
       let logsSynthtraceEsClient: LogsSynthtraceEsClient;
       let traceData: DistributedTraceData;
-      let systemMessage: any;
-      let userMessage: any;
+      let systemMessage: LlmMessage;
+      let userMessage: LlmMessage;
       let apiResponse: { summary: string; context: string };
 
       before(async () => {
-        llmProxy = await createLlmProxy(log);
-        connectorId = await createLlmProxyActionConnector(getService, { port: llmProxy.getPort() });
+        ({ llmProxy, connectorId } = await setupLlmProxy(getService));
 
         ({ apmSynthtraceEsClient, logsSynthtraceEsClient, traceData } =
           await createDistributedTraceWithErrors({
@@ -71,22 +70,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        const llmRequest = llmProxy.interceptedRequests.find(
-          (r) => r.matchingInterceptorName === 'error-ai-insight'
-        );
-        const llmRequestBody = llmRequest?.requestBody;
-
-        systemMessage = llmRequestBody?.messages?.find(
-          (m: { role: string }) => m.role === 'system'
-        );
-        userMessage = llmRequestBody?.messages?.find((m: { role: string }) => m.role === 'user');
+        const messages = getLlmMessages(llmProxy, 'error-ai-insight');
+        systemMessage = messages.system;
+        userMessage = messages.user;
       });
 
       after(async () => {
         await apmSynthtraceEsClient.clean();
         await logsSynthtraceEsClient.clean();
-        await deleteActionConnector(getService, { actionId: connectorId });
-        llmProxy.close();
+        await teardownLlmProxy(getService, { llmProxy, connectorId });
       });
 
       describe('LLM context', () => {
@@ -137,14 +129,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           // Verify all services from the distributed trace are present
           for (const service of traceData.services) {
             expect(userMessage.content).to.contain(service);
-          }
-        });
-
-        it('includes TraceLogCategories with log patterns from the trace', () => {
-          expect(userMessage.content).to.contain('<TraceLogCategories>');
-
-          for (const logMessage of traceData.logMessages) {
-            expect(userMessage.content).to.contain(logMessage);
           }
         });
       });

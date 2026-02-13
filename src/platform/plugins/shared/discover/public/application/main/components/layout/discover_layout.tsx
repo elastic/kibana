@@ -72,7 +72,7 @@ import {
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
-import { useReadCascadeConfig } from './cascaded_documents/hooks/config';
+import { isCascadedDocumentsVisible } from './cascaded_documents';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
@@ -129,12 +129,12 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const dataState: DataMainMsg = useDataState(main$);
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
   const esqlVariables = useCurrentTabSelector((state) => state.esqlVariables);
-
-  const cascadeConfig = useReadCascadeConfig();
-
-  const isCascadeLayoutSelected = useMemo(() => {
-    return Boolean(cascadeConfig?.selectedCascadeGroups?.length);
-  }, [cascadeConfig]);
+  const isCascadeLayoutSelected = useCurrentTabSelector((tab) =>
+    isCascadedDocumentsVisible(
+      tab.cascadedDocumentsState.availableCascadeGroups,
+      tab.appState.query
+    )
+  );
 
   const fetchCounter = useRef<number>(0);
 
@@ -381,13 +381,12 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const panelsToggle: ReactElement<PanelsToggleProps> = useMemo(() => {
     return (
       <PanelsToggle
-        stateContainer={stateContainer}
         sidebarToggleState$={sidebarToggleState$}
         renderedFor="root"
         isChartAvailable={undefined}
       />
     );
-  }, [stateContainer, sidebarToggleState$]);
+  }, [sidebarToggleState$]);
 
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
@@ -597,7 +596,7 @@ const componentStyles = {
   }),
   sidebarContainer: css({
     width: '100%',
-    height: 'inherit',
+    height: '100%',
     display: 'flex',
     flex: '1 1 auto',
   }),

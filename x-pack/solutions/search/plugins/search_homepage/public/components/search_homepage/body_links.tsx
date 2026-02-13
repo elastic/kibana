@@ -59,7 +59,7 @@ const BodyLink: React.FC<BodyLink> = ({ title, description, link, category }: Bo
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText color="subdued">
+            <EuiText color="subdued" size="s">
               <p>{description}</p>
             </EuiText>
           </EuiFlexItem>

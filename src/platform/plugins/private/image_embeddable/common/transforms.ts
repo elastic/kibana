@@ -6,41 +6,23 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import type { Reference } from '@kbn/content-management-utils';
-import type {
-  TransformEnhancementsIn,
-  TransformEnhancementsOut,
-} from '@kbn/embeddable-plugin/common';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { transformTitlesOut } from '@kbn/presentation-publishing';
+import { flow } from 'lodash';
 import type { ImageEmbeddableState } from '../server';
 
-export function getTransforms(
-  transformEnhancementsIn: TransformEnhancementsIn,
-  transformEnhancementsOut: TransformEnhancementsOut
-) {
+export function getTransforms(drilldownTransforms: DrilldownTransforms) {
   return {
     transformIn: (state: ImageEmbeddableState) => {
-      const enhancementResult = state.enhancements
-        ? transformEnhancementsIn(state.enhancements)
-        : { state: undefined, references: [] };
-
-      return {
-        state: {
-          ...state,
-          ...(enhancementResult.state ? { enhancements: enhancementResult.state } : {}),
-        },
-        references: enhancementResult.references,
-      };
+      return drilldownTransforms.transformIn(state);
     },
-    transformOut: (state: ImageEmbeddableState, references?: Reference[]) => {
-      const enhancementsState = state.enhancements
-        ? transformEnhancementsOut(state.enhancements, references ?? [])
-        : undefined;
-
-      return {
-        ...state,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
-      };
+    transformOut: (storedState: ImageEmbeddableState, references?: Reference[]) => {
+      const transformsFlow = flow(
+        transformTitlesOut<ImageEmbeddableState>,
+        (state: ImageEmbeddableState) => drilldownTransforms.transformOut(state, references)
+      );
+      return transformsFlow(storedState);
     },
   };
 }

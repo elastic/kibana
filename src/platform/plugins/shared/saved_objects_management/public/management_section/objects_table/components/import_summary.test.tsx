@@ -11,12 +11,15 @@ import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import type { ImportSummaryProps } from './import_summary';
 import { ImportSummary } from './import_summary';
 import type { FailedImport } from '../../../lib';
 
 describe('ImportSummary', () => {
   let basePath: ReturnType<typeof httpServiceMock.createBasePath>;
+  type PrependType = jest.MockInstance<string, [url: string], unknown> & ((url: string) => string);
 
   const getProps = (parts: Partial<ImportSummaryProps>): ImportSummaryProps => ({
     basePath,
@@ -174,5 +177,62 @@ describe('ImportSummary', () => {
     const wrapper = mountWithI18nProvider(<ImportSummary {...props} />);
 
     expect(findWarnings(wrapper)).toHaveLength(2);
+  });
+
+  it('should use /app/rules actionPath when rules app is registered', async () => {
+    const coreStart = coreMock.createStart();
+    coreStart.application.isAppRegistered = jest.fn().mockReturnValue(true);
+    basePath.prepend = ((path: string) => path) as PrependType;
+
+    const props = getProps({
+      successfulImports: [successNew],
+      importWarnings: [
+        {
+          type: 'action_required',
+          message: 'Rules need to be enabled',
+          actionPath: '/app/management/insightsAndAlerting/triggersActions/rules',
+        },
+      ],
+    });
+
+    const wrapper = mountWithI18nProvider(
+      <KibanaContextProvider services={coreStart}>
+        <ImportSummary {...props} />
+      </KibanaContextProvider>
+    );
+
+    const button = wrapper.find('EuiButton[data-test-subj="warningActionButton"]');
+    expect(button).toHaveLength(1);
+    expect(button.prop('href')).toBe('/app/rules');
+    expect(coreStart.application.isAppRegistered).toHaveBeenCalledWith('rules');
+  });
+
+  it('should use original actionPath when rules app is not registered', async () => {
+    const coreStart = coreMock.createStart();
+    coreStart.application.isAppRegistered = jest.fn().mockReturnValue(false);
+    basePath.prepend = ((path: string) => path) as PrependType;
+
+    const originalActionPath = '/app/management/insightsAndAlerting/triggersActions/rules';
+    const props = getProps({
+      successfulImports: [successNew],
+      importWarnings: [
+        {
+          type: 'action_required',
+          message: 'Rules need to be enabled',
+          actionPath: originalActionPath,
+        },
+      ],
+    });
+
+    const wrapper = mountWithI18nProvider(
+      <KibanaContextProvider services={coreStart}>
+        <ImportSummary {...props} />
+      </KibanaContextProvider>
+    );
+
+    const button = wrapper.find('EuiButton[data-test-subj="warningActionButton"]');
+    expect(button).toHaveLength(1);
+    expect(button.prop('href')).toBe(originalActionPath);
+    expect(coreStart.application.isAppRegistered).toHaveBeenCalledWith('rules');
   });
 });

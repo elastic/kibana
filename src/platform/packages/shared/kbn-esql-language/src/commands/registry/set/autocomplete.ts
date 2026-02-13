@@ -35,6 +35,8 @@ export async function autocomplete(
   const settingLeftSide = isBinaryExpression(settingArg) ? settingArg.args[0] : null;
   const settingRightSide = isBinaryExpression(settingArg) ? settingArg.args[1] : null;
 
+  const hasSemicolonAtEnd = /^\s*;/.test(query.substring(cursorPosition || 0));
+
   if (!settingArg) {
     // settingLeftSide is not built until user types '=', so we need to check with regex if the leftside is present
     const hasSettingLeftSide = /SET\s+\S+\s+$/.test(innerText);
@@ -64,8 +66,11 @@ export async function autocomplete(
     (isMap(settingRightSide) && settingRightSide.incomplete)
   ) {
     return settingsValueCompletions.map((item) => {
-      const text =
-        item.category === SuggestionCategory.CONSTANT_VALUE ? `"${item.text}";` : item.text;
+      let text = item.category === SuggestionCategory.CONSTANT_VALUE ? `"${item.text}"` : item.text;
+
+      if (!isMap(settingRightSide) && !hasSemicolonAtEnd) {
+        text += ';';
+      }
       return { ...item, text };
     });
   }
@@ -99,7 +104,7 @@ export async function autocomplete(
   }
 
   // SET <setting> = <value>/
-  if (isBinaryExpression(settingArg) && !settingArg.incomplete) {
+  if (isBinaryExpression(settingArg) && !settingArg.incomplete && !hasSemicolonAtEnd) {
     return [
       {
         ...semiColonCompleteItem,

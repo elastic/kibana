@@ -17,6 +17,7 @@ import {
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
+  ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
 import { pipe } from 'lodash/fp';
@@ -154,5 +155,6 @@ export const transformAttackDiscoveryAlertDocumentToApi = ({
       ? attackDiscoveryAlertDocument[ALERT_ATTACK_DISCOVERY_USERS]
       : undefined,
     assignees: attackDiscoveryAlertDocument[ALERT_WORKFLOW_ASSIGNEE_IDS],
+    tags: attackDiscoveryAlertDocument[ALERT_WORKFLOW_TAGS],
   };
 };

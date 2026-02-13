@@ -10,7 +10,7 @@
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import { fromTabStateToSavedObjectTab, internalStateActions, selectTabRuntimeState } from './redux';
+import { fromTabStateToSavedObjectTab, internalStateActions } from './redux';
 import { omit } from 'lodash';
 import { getDiscoverInternalStateMock } from '../../../__mocks__/discover_state.mock';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
@@ -28,24 +28,15 @@ describe('DiscoverSavedSearchContainer', () => {
     persistedDiscoverSession?: DiscoverSession;
     services?: DiscoverServices;
   } = {}) => {
-    const {
-      internalState,
-      runtimeStateManager,
-      initializeTabs,
-      initializeSingleTab,
-      getCurrentTab,
-    } = getDiscoverInternalStateMock({
-      services,
-      persistedDataViews: [dataViewWithTimefieldMock],
-    });
+    const { internalState, initializeTabs, initializeSingleTab, getCurrentTab } =
+      getDiscoverInternalStateMock({
+        services,
+        persistedDataViews: [dataViewWithTimefieldMock],
+      });
 
     await initializeTabs({ persistedDiscoverSession });
-    await initializeSingleTab({ tabId: getCurrentTab().id });
 
-    const stateContainer = selectTabRuntimeState(
-      runtimeStateManager,
-      getCurrentTab().id
-    ).stateContainer$.getValue()!;
+    const { stateContainer } = await initializeSingleTab({ tabId: getCurrentTab().id });
 
     return { internalState, stateContainer, getCurrentTab };
   };
@@ -58,7 +49,7 @@ describe('DiscoverSavedSearchContainer', () => {
           serializedSearchSource: { index: dataViewWithTimefieldMock.id },
         },
       }),
-      timeRestore: false,
+      overridenTimeRestore: false,
       services,
     });
 

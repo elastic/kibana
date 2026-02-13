@@ -6,13 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import React from 'react';
 import { createMemoryHistory } from 'history';
-
-// Mock dependencies to avoid issues with external modules like monaco
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  KibanaContextProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
+import { render, screen } from '@testing-library/react';
+import { DiscoverRouter } from './discover_router';
+import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
+import { createDiscoverServicesMock } from '../__mocks__/services';
+import type { HistoryLocationState } from '../build_services';
 
 // Mock the component dependencies
 jest.mock('./context', () => ({
@@ -35,20 +36,19 @@ jest.mock('./not_found', () => ({
   NotFoundRoute: () => <div data-test-subj="not-found-route" />,
 }));
 
-// Import testing utilities after mocks
-import { render, screen } from '@testing-library/react';
-import { Router } from '@kbn/shared-ux-router';
-import { DiscoverRoutes } from './discover_router';
-import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
+const services = createDiscoverServicesMock();
 
 const renderWithRouter = (path: string) => {
-  const history = createMemoryHistory({
+  const history = createMemoryHistory<HistoryLocationState>({
     initialEntries: [path],
   });
+
   render(
-    <Router history={history}>
-      <DiscoverRoutes onAppLeave={jest.fn()} customizationContext={mockCustomizationContext} />
-    </Router>
+    <DiscoverRouter
+      services={{ ...services, history }}
+      onAppLeave={jest.fn()}
+      customizationContext={mockCustomizationContext}
+    />
   );
 
   return history;

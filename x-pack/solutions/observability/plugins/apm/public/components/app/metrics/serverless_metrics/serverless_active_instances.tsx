@@ -205,6 +205,9 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
             columns={columns}
             pagination={{ showPerPageOptions: false, pageSize: 5 }}
             sorting={sorting}
+            tableCaption={i18n.translate('xpack.apm.serverlessMetrics.activeInstances.caption', {
+              defaultMessage: 'Active serverless instances',
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

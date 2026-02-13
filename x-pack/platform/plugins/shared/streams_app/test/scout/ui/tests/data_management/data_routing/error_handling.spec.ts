@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 import { test } from '../../../fixtures';
 
 test.describe(
   'Stream data routing - error handling and recovery',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
@@ -76,6 +77,46 @@ test.describe(
       // Should succeed
       await pageObjects.toasts.waitFor();
       expect(await pageObjects.toasts.getHeaderText()).toBe('Stream saved');
+    });
+
+    test('should show server error message in Full error modal', async ({ page, pageObjects }) => {
+      const serverErrorMessage = 'Stream name contains invalid characters: must be lowercase';
+
+      // Intercept the fork stream API endpoint and return an error with a specific message
+      await page.route('**/api/streams/**/_fork*', async (route) => {
+        await route.fulfill({
+          status: 400,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: serverErrorMessage,
+          }),
+        });
+      });
+
+      await pageObjects.streams.clickCreateRoutingRule();
+      await pageObjects.streams.fillRoutingRuleName('test-error-modal');
+      await pageObjects.streams.saveRoutingRule();
+
+      // Wait for the error toast
+      await pageObjects.toasts.waitFor();
+
+      // Click "See the full error" button
+      const fullErrorButton = page.getByTestId('errorToastBtn');
+      await expect(fullErrorButton).toBeVisible();
+      await fullErrorButton.click();
+
+      // Verify the modal shows the server error message
+      const errorModalBody = page.getByTestId('errorModalBody');
+      await expect(errorModalBody).toBeVisible();
+      await expect(errorModalBody).toContainText(serverErrorMessage);
+
+      // Close the modal
+      await page.getByRole('button', { name: 'Close', exact: true }).click();
+
+      // Restore normal API behavior
+      await page.unroute('**/api/streams/**/_fork*');
     });
   }
 );

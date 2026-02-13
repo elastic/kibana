@@ -28,10 +28,9 @@ describe('stripUnmappedKeys', () => {
   it('should not drop mapped panel types', () => {
     mockGetTransforms.mockImplementation(() => {
       return {
-        getSchema: () =>
-          schema.object({
-            foo: schema.string(),
-          }),
+        schema: schema.object({
+          foo: schema.string(),
+        }),
       };
     });
     const dashboardState = {
@@ -110,7 +109,7 @@ describe('stripUnmappedKeys', () => {
   it('should drop unmapped panel types when throwOnUnmappedPanel throws', () => {
     mockGetTransforms.mockImplementation(() => {
       return {
-        getSchema: () => schema.any(),
+        schema: schema.any(),
         throwOnUnmappedPanel: () => {
           throw new Error('Unmapped panel type');
         },
@@ -150,10 +149,9 @@ describe('stripUnmappedKeys', () => {
   it('should drop panel enhancements', () => {
     mockGetTransforms.mockImplementation(() => {
       return {
-        getSchema: () =>
-          schema.object({
-            foo: schema.string(),
-          }),
+        schema: schema.object({
+          foo: schema.string(),
+        }),
       };
     });
     const dashboardState = {
@@ -274,10 +272,9 @@ describe('throwOnUnmappedKeys', () => {
   it('should not throw when there are no unmapped keys', () => {
     mockGetTransforms.mockImplementation(() => {
       return {
-        getSchema: () =>
-          schema.object({
-            foo: schema.string(),
-          }),
+        schema: schema.object({
+          foo: schema.string(),
+        }),
       };
     });
     const dashboardState = {
@@ -324,7 +321,7 @@ describe('throwOnUnmappedKeys', () => {
   it('should throw when dashboard contains a panel with enhancements', () => {
     mockGetTransforms.mockImplementation(() => {
       return {
-        getSchema: () => schema.object({}),
+        schema: schema.object({}),
       };
     });
     const dashboardState = {

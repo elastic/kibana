@@ -61,6 +61,12 @@ export const sloKeys = {
     includeOutdatedOnly: boolean;
     validTags: string;
   }) => [...sloKeys.allDefinitions(), params],
+  searchDefinitions: (params: {
+    search: string;
+    size: number;
+    searchAfter?: string;
+    remoteName?: string;
+  }) => [...sloKeys.all, 'searchDefinitions', params] as const,
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
   allHealth: () => [...sloKeys.all, 'health'] as const,
   health: (list: Array<{ id: string; instanceId: string }>) =>

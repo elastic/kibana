@@ -11,7 +11,6 @@ import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import type { Logger } from '@kbn/logging';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
-import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from './constants';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
@@ -67,9 +66,7 @@ export const attackDiscoverySearchTool = (
         }
       },
     },
-    handler: async ({ alertIds }, { request, esClient }) => {
-      const spaceId = getSpaceIdFromRequest(request);
-
+    handler: async ({ alertIds }, { spaceId, esClient }) => {
       logger.debug(
         `${SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID} tool called with alertIds: ${JSON.stringify(
           alertIds
@@ -110,9 +107,8 @@ export const attackDiscoverySearchTool = (
             },
           },
           {
-            type: ToolResultType.tabularData,
+            type: ToolResultType.esqlResults,
             data: {
-              source: 'esql',
               query: esqlQuery,
               columns: esqlResponse.columns,
               values: esqlResponse.values,

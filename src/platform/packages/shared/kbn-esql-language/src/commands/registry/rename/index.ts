@@ -13,6 +13,7 @@ import { columnsAfter } from './columns_after';
 import { validate } from './validate';
 import { summary } from './summary';
 import type { ICommandContext } from '../types';
+import { Commands } from '../../definitions/keywords';
 
 const renameCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
@@ -22,7 +23,7 @@ const renameCommandMethods: ICommandMethods<ICommandContext> = {
 };
 
 export const renameCommand = {
-  name: 'rename',
+  name: Commands.RENAME,
   methods: renameCommandMethods,
   metadata: {
     description: i18n.translate('kbn-esql-language.esql.definitions.renameDoc', {

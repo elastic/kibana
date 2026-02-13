@@ -145,7 +145,7 @@ describe('buildResultsQuery', () => {
       expect(result.sort).toEqual([]);
     });
 
-    it('should build query with time range filter', () => {
+    it('should build query with time range filter using event.ingested', () => {
       const startDate = '2024-01-01T00:00:00.000Z';
       const expectedEndDate = moment(startDate).clone().add(30, 'minutes').toISOString();
 
@@ -173,7 +173,7 @@ describe('buildResultsQuery', () => {
           filter: [
             {
               range: {
-                '@timestamp': {
+                'event.ingested': {
                   gte: startDate,
                   lte: expectedEndDate,
                 },
@@ -265,7 +265,7 @@ describe('buildResultsQuery', () => {
             filter: [
               {
                 range: {
-                  '@timestamp': {
+                  'event.ingested': {
                     gte: startDate,
                     lte: expectedEndDate,
                   },

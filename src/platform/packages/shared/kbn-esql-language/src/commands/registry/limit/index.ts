@@ -10,13 +10,14 @@ import { i18n } from '@kbn/i18n';
 import type { ICommandMethods } from '../registry';
 import { autocomplete } from './autocomplete';
 import type { ICommandContext } from '../types';
+import { Commands } from '../../definitions/keywords';
 
 const limitCommandMethods: ICommandMethods<ICommandContext> = {
   autocomplete,
 };
 
 export const limitCommand = {
-  name: 'limit',
+  name: Commands.LIMIT,
   methods: limitCommandMethods,
   metadata: {
     description: i18n.translate('kbn-esql-language.esql.definitions.limitDoc', {

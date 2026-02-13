@@ -19,20 +19,55 @@ import type { Message, ToolOptions, InferenceConnector } from '@kbn/inference-co
 import { MessageRole } from '@kbn/inference-common';
 import { OpenAiProviderType } from './types';
 
+/**
+ * Recursively processes a schema to ensure all array types have an `items` property.
+ * OpenAI requires `items` to be present for array types.
+ */
+function ensureArrayItems(schema: Record<string, unknown>): Record<string, unknown> {
+  if (typeof schema !== 'object' || schema === null) {
+    return schema;
+  }
+
+  const result = { ...schema };
+
+  if (result.type === 'array' && !('items' in result)) {
+    result.items = {};
+  }
+
+  if (result.items && typeof result.items === 'object') {
+    result.items = ensureArrayItems(result.items as Record<string, unknown>);
+  }
+
+  if (result.properties && typeof result.properties === 'object') {
+    const properties = result.properties as Record<string, unknown>;
+    result.properties = Object.fromEntries(
+      Object.entries(properties).map(([key, value]) => [
+        key,
+        ensureArrayItems(value as Record<string, unknown>),
+      ])
+    );
+  }
+
+  return result;
+}
+
 export function toolsToOpenAI(
   tools: ToolOptions['tools']
 ): OpenAI.ChatCompletionCreateParams['tools'] {
   return tools
     ? Object.entries(tools).map(([toolName, { description, schema }]) => {
+        const parameters = schema ?? {
+          type: 'object' as const,
+          properties: {},
+        };
         return {
           type: 'function',
           function: {
             name: toolName,
             description,
-            parameters: (schema ?? {
-              type: 'object' as const,
-              properties: {},
-            }) as unknown as Record<string, unknown>,
+            parameters: ensureArrayItems(
+              parameters as unknown as Record<string, unknown>
+            ) as unknown as Record<string, unknown>,
           },
         };
       })

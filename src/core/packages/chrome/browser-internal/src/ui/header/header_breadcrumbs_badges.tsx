@@ -34,6 +34,7 @@ export const HeaderBreadcrumbsBadges = ({
       data-test-subj="header-breadcrumbs-badge-group"
       css={css`
         margin-left: ${isFirst ? euiTheme.size.xs : 0};
+        align-items: center;
       `}
     >
       {badges.map(createBadge)}

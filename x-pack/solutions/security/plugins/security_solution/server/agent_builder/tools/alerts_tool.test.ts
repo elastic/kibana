@@ -138,6 +138,22 @@ describe('alertsTool', () => {
       expect(callArgs.nlQuery).toContain(fieldsList);
     });
 
+    it('uses handler context spaceId when building default index', async () => {
+      (runSearchTool as jest.Mock).mockResolvedValue({ results: [] });
+
+      await tool.handler(
+        { query: 'find all alerts' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+          modelProvider: mockModelProvider as ToolHandlerContext['modelProvider'],
+          events: mockEvents as ToolHandlerContext['events'],
+          spaceId: 'custom-space',
+        })
+      );
+
+      const callArgs = (runSearchTool as jest.Mock).mock.calls[0][0];
+      expect(callArgs.index).toBe(`${DEFAULT_ALERTS_INDEX}-custom-space`);
+    });
+
     it('calls runSearchTool with explicit index when provided', async () => {
       const mockResults = [{ type: ToolResultType.other, data: 'test results' }];
       (runSearchTool as jest.Mock).mockResolvedValue({ results: mockResults });

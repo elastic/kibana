@@ -33,6 +33,8 @@ export function createSecurityTests(
     const esArchiver = getService('esArchiver');
     const securityService = getService('security');
     const globalNav = getService('globalNav');
+    const kibanaServer = getService('kibanaServer');
+    const testSubjects = getService('testSubjects');
     const { common, discover, security, dashboard, maps, visualize, spaceSelector } =
       getPageObjects([
         'common',
@@ -43,7 +45,6 @@ export function createSecurityTests(
         'visualize',
         'spaceSelector',
       ]);
-    const kibanaServer = getService('kibanaServer');
 
     async function login(
       featureName: FeatureName,
@@ -107,6 +108,26 @@ export function createSecurityTests(
       }
     }
 
+    async function assertReadOnlyBadgeExists(appName: FeatureApp) {
+      switch (appName) {
+        case 'discover':
+          await testSubjects.existOrFail('discover-readonly-badge');
+          break;
+        default:
+          await globalNav.badgeExistsOrFail('Read only');
+      }
+    }
+
+    async function assertReadOnlyBadgeMissing(appName: FeatureApp) {
+      switch (appName) {
+        case 'discover':
+          await testSubjects.missingOrFail('discover-readonly-badge');
+          break;
+        default:
+          await globalNav.badgeMissingOrFail();
+      }
+    }
+
     describe('Security', () => {
       describe('App vs Global privilege', () => {
         featureConfigs.forEach(({ feature, app, hasImplicitSaveQueryManagement }) => {
@@ -149,7 +170,7 @@ export function createSecurityTests(
             });
 
             it('shows read-only badge', async () => {
-              await globalNav.badgeExistsOrFail('Read only');
+              await assertReadOnlyBadgeExists(app);
             });
 
             savedQuerySecurityUtils.shouldAllowSavingQueries();
@@ -167,7 +188,7 @@ export function createSecurityTests(
             });
 
             it('shows read-only badge', async () => {
-              await globalNav.badgeExistsOrFail('Read only');
+              await assertReadOnlyBadgeExists(app);
             });
 
             savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();
@@ -184,7 +205,7 @@ export function createSecurityTests(
             });
 
             it('shows read-only badge', async () => {
-              await globalNav.badgeExistsOrFail('Read only');
+              await assertReadOnlyBadgeExists(app);
             });
 
             if (hasImplicitSaveQueryManagement) {
@@ -205,7 +226,7 @@ export function createSecurityTests(
             });
 
             it("doesn't show read-only badge", async () => {
-              await globalNav.badgeMissingOrFail();
+              await assertReadOnlyBadgeMissing(app);
             });
 
             savedQuerySecurityUtils.shouldAllowSavingQueries();
@@ -222,7 +243,7 @@ export function createSecurityTests(
             });
 
             it("doesn't show read-only badge", async () => {
-              await globalNav.badgeMissingOrFail();
+              await assertReadOnlyBadgeMissing(app);
             });
 
             if (hasImplicitSaveQueryManagement) {
@@ -243,7 +264,7 @@ export function createSecurityTests(
             });
 
             it("doesn't show read-only badge", async () => {
-              await globalNav.badgeMissingOrFail();
+              await assertReadOnlyBadgeMissing(app);
             });
 
             if (hasImplicitSaveQueryManagement) {

@@ -176,7 +176,7 @@ interface ColumnsProps {
 }
 
 const useRulesColumns = ({ currentTab }: ColumnsProps): Array<EuiBasicTableColumn<Rule>> => {
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
   const enabledColumn = useEnabledColumn({
     hasCRUDPermissions: canEditRules,

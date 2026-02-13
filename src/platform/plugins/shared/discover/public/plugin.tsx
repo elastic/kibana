@@ -26,6 +26,8 @@ import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -39,11 +41,7 @@ import { registerFeature } from './plugin_imports/register_feature';
 import type { UrlTracker } from './build_services';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import { defaultCustomizationContext } from './customizations/defaults';
-import {
-  SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER,
-  ACTION_VIEW_SAVED_SEARCH,
-  LEGACY_LOG_STREAM_EMBEDDABLE,
-} from './embeddable/constants';
+import { ACTION_VIEW_SAVED_SEARCH, LEGACY_LOG_STREAM_EMBEDDABLE } from './embeddable/constants';
 import {
   DiscoverContainerInternal,
   type DiscoverContainerProps,
@@ -56,7 +54,6 @@ import type {
   DiscoverStart,
   DiscoverStartPlugins,
 } from './types';
-import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
 import type { DiscoverEBTContextProps, DiscoverEBTManager } from './ebt_manager';
 import { registerDiscoverEBTManagerAnalytics } from './ebt_manager/discover_ebt_manager_registrations';
 import type { ProfileProviderSharedServices, ProfilesManager } from './context_awareness';
@@ -240,15 +237,13 @@ export class DiscoverPlugin
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
     plugins.uiActions.addTriggerActionAsync(
-      'CONTEXT_MENU_TRIGGER',
+      CONTEXT_MENU_TRIGGER,
       ACTION_VIEW_SAVED_SEARCH,
       async () => {
         const { ViewSavedSearchAction } = await getEmbeddableServices();
         return new ViewSavedSearchAction(core.application, this.locator!);
       }
     );
-    plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
-    plugins.uiActions.registerTrigger(DISCOVER_CELL_ACTIONS_TRIGGER);
 
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
 
@@ -417,47 +412,8 @@ export class DiscoverPlugin
 
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
-        const {
-          addControlsFromSavedSession,
-          apiPublishesEditablePauseFetch,
-          apiHasUniqueId,
-          apiPublishesESQLVariables,
-        } = await getEmbeddableServices();
-
-        const savedSessionAttributes = savedObject.attributes as SavedSearchAttributes;
-
-        const mightHaveVariables =
-          apiPublishesESQLVariables(container) &&
-          savedSessionAttributes.controlGroupJson &&
-          savedSessionAttributes.controlGroupJson.length > 0;
-
-        // pause fetching so that we don't try to build an ES|QL query without necessary variables
-        const shouldPauseFetch = mightHaveVariables && apiPublishesEditablePauseFetch(container);
-        if (shouldPauseFetch) container.setFetchPaused(true);
-
-        const api = await container.addNewPanel(
-          {
-            panelType: SEARCH_EMBEDDABLE_TYPE,
-            serializedState: {
-              savedObjectId: savedObject.id,
-            },
-          },
-          {
-            displaySuccessMessage: true,
-          }
-        );
-
-        const uuid = apiHasUniqueId(api) ? api.uuid : undefined;
-        if (mightHaveVariables) {
-          await addControlsFromSavedSession(
-            container,
-            savedSessionAttributes.controlGroupJson!, // this is verified via mightHaveVariables
-            uuid
-          );
-        }
-
-        // unpause fetching if necessary now that ES|QL variables exist
-        if (shouldPauseFetch) container.setFetchPaused(false);
+        const { addPanelFromLibrary } = await getEmbeddableServices();
+        await addPanelFromLibrary(container, savedObject);
       },
       savedObjectType: SavedSearchType,
       savedObjectName: i18n.translate('discover.savedSearch.savedObjectName', {
@@ -494,12 +450,13 @@ export class DiscoverPlugin
       });
     });
 
-    plugins.embeddable.registerLegacyURLTransform(SEARCH_EMBEDDABLE_TYPE, async () => {
-      const { getSearchEmbeddableTransforms } = await getEmbeddableServices();
-      const { transformEnhancementsIn, transformEnhancementsOut } = plugins.embeddable;
-      return getSearchEmbeddableTransforms(transformEnhancementsIn, transformEnhancementsOut)
-        .transformOut;
-    });
+    plugins.embeddable.registerLegacyURLTransform(
+      SEARCH_EMBEDDABLE_TYPE,
+      async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+        const { getTransformOut } = await getEmbeddableServices();
+        return getTransformOut(transformDrilldownsOut);
+      }
+    );
   }
 }
 

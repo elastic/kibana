@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
+import type { TaskOutput } from '../types';
 
 export const getStringMeta = (
   metadata: Record<string, unknown> | null | undefined,

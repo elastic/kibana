@@ -63,6 +63,7 @@ const mockGetById: jest.Mock<
 
 describe('useFetchLog', () => {
   const id = 'test-log-id';
+  const index = 'remote_cluster:.ds-logs-apm.error-default-2026.01.14-000054';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -75,7 +76,7 @@ describe('useFetchLog', () => {
   it('should return undefined when feature is not registered', async () => {
     mockGetById.mockReturnValue(undefined);
 
-    const { result } = renderHook(() => useFetchLog({ id }));
+    const { result } = renderHook(() => useFetchLog({ id, index }));
 
     await waitFor(() => !result.current.loading);
 
@@ -109,6 +110,20 @@ describe('useFetchLog', () => {
     expect(mockFetchLogDocumentById).toHaveBeenCalledWith(
       {
         id,
+      },
+      expect.any(AbortSignal)
+    );
+  });
+
+  it('should pass index when provided', async () => {
+    mockFetchLogDocumentById.mockImplementation(() => new Promise(() => {})); // keep loading
+
+    renderHook(() => useFetchLog({ id, index }));
+
+    expect(mockFetchLogDocumentById).toHaveBeenCalledWith(
+      {
+        id,
+        index,
       },
       expect.any(AbortSignal)
     );
@@ -232,7 +247,7 @@ describe('useFetchLog', () => {
       .mockResolvedValueOnce(mockLogData2);
 
     const { result, rerender } = renderHook(
-      ({ logId }: { logId: string }) => useFetchLog({ id: logId }),
+      ({ logId }: { logId: string }) => useFetchLog({ id: logId, index }),
       {
         initialProps: { logId: 'log-1' },
       }
@@ -243,6 +258,7 @@ describe('useFetchLog', () => {
     expect(mockFetchLogDocumentById).toHaveBeenCalledWith(
       {
         id: 'log-1',
+        index,
       },
       expect.any(AbortSignal)
     );
@@ -254,6 +270,7 @@ describe('useFetchLog', () => {
     expect(mockFetchLogDocumentById).toHaveBeenCalledWith(
       {
         id: 'log-2',
+        index,
       },
       expect.any(AbortSignal)
     );

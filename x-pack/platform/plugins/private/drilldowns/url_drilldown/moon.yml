@@ -29,11 +29,11 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/monaco'
   - '@kbn/std'
-  - '@kbn/image-embeddable-plugin'
   - '@kbn/core-ui-settings-browser-mocks'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/core-theme-browser-mocks'
   - '@kbn/presentation-publishing'
+  - '@kbn/config-schema'
 tags:
   - plugin
   - prod
@@ -42,7 +42,9 @@ tags:
   - jest-unit-tests
 fileGroups:
   src:
+    - common/**/*
     - public/**/*
+    - server/**/*
     - '!target/**/*'
 tasks:
   jest:

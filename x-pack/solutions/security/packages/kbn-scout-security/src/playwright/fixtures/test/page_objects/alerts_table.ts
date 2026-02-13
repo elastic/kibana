@@ -6,7 +6,7 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
-import { expect } from '@kbn/scout';
+import { expect } from '../../../../../ui';
 
 const PAGE_URL = 'security/alerts';
 
@@ -17,8 +17,8 @@ export class AlertsTablePage {
 
   constructor(private readonly page: ScoutPage) {
     this.detectionsAlertsWrapper = this.page.testSubj.locator('alerts-by-rule-table');
-    this.alertRow = this.page.locator('div.euiDataGridRow');
     this.alertsTable = this.page.testSubj.locator('alertsTableIsLoaded'); // Search for loaded Alerts table
+    this.alertRow = this.page.testSubj.locator('alertsTableIsLoaded').locator('div.euiDataGridRow');
   }
 
   async navigate() {
@@ -27,14 +27,19 @@ export class AlertsTablePage {
 
   async expandAlertDetailsFlyout(ruleName: string) {
     await this.alertsTable.waitFor({ state: 'visible' });
-    // Filter alert by unique rule name
-    const row = this.alertRow.filter({ hasText: ruleName });
-    await expect(
-      row,
-      `Alert with rule '${ruleName}' is not displayed in the alerts table`
-    ).toBeVisible();
+    // 1. Find the rule name cell (unique per alert)
+    const ruleNameCell = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
 
-    return row.locator(`[data-test-subj='expand-event']`).click();
+    await expect(
+      ruleNameCell,
+      `Alert with rule '${ruleName}' is not displayed in the alerts table`
+    ).toHaveCount(1);
+
+    // 2. Climb up to the DataGrid row
+    const row = ruleNameCell.locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
+
+    // 3. Click expand button in the row
+    await row.getByTestId('expand-event').click();
   }
 
   async waitForDetectionsAlertsWrapper() {

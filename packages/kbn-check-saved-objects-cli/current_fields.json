@@ -90,6 +90,7 @@
     "updatedBy"
   ],
   "alerting_rule_template": [
+    "description",
     "name",
     "ruleTypeId",
     "tags"
@@ -322,14 +323,10 @@
     "version"
   ],
   "data_connector": [
-    "config",
-    "createdAt",
-    "features",
     "kscIds",
     "name",
     "toolIds",
     "type",
-    "updatedAt",
     "workflowIds"
   ],
   "data_stream-config": [
@@ -341,12 +338,7 @@
     "job_info.job_type",
     "job_info.status",
     "metadata",
-    "metadata.created_at",
-    "metadata.sample_count",
-    "metadata.version",
-    "result",
-    "result.field_mapping",
-    "result.ingest_pipeline"
+    "result"
   ],
   "dynamic-config-overrides": [],
   "endpoint:unified-user-artifact-manifest": [
@@ -385,6 +377,28 @@
   ],
   "entity-discovery-api-key": [
     "apiKey"
+  ],
+  "entity-engine-descriptor-v2": [
+    "error",
+    "error.action",
+    "error.message",
+    "logExtractionState",
+    "logExtractionState.additionalIndexPattern",
+    "logExtractionState.delay",
+    "logExtractionState.docsLimit",
+    "logExtractionState.fieldHistoryLength",
+    "logExtractionState.filter",
+    "logExtractionState.frequency",
+    "logExtractionState.lastExecutionTimestamp",
+    "logExtractionState.lookbackPeriod",
+    "logExtractionState.paginationTimestamp",
+    "logExtractionState.timeout",
+    "status",
+    "type",
+    "versionState",
+    "versionState.isMigratedFromV1",
+    "versionState.state",
+    "versionState.version"
   ],
   "entity-engine-status": [
     "fieldHistoryLength",
@@ -827,6 +841,7 @@
     "delete_unenrolled_agents",
     "delete_unenrolled_agents.enabled",
     "delete_unenrolled_agents.is_preconfigured",
+    "download_source_auth_secret_storage_requirements_met",
     "fleet_server_hosts",
     "has_seen_add_data_notice",
     "ilm_migration_status",
@@ -843,10 +858,6 @@
     "data_stream_count",
     "integration_id",
     "metadata",
-    "metadata.created_at",
-    "metadata.description",
-    "metadata.title",
-    "metadata.version",
     "status"
   ],
   "intercept_interaction_record": [],
@@ -1042,6 +1053,7 @@
     "realmName",
     "realmType",
     "sessionId",
+    "status",
     "username"
   ],
   "search-telemetry": [],

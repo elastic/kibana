@@ -48,7 +48,6 @@ import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
-import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
@@ -100,6 +99,8 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
+import { createLazyFocusedTraceWaterfallRenderer } from './components/shared/focused_trace_waterfall/lazy_create_focused_trace_waterfall_renderer';
+import { createLazyFullTraceWaterfallRenderer } from './components/shared/trace_waterfall/lazy_create_full_trace_waterfall_renderer';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = ReturnType<ApmPlugin['start']>;
@@ -346,14 +347,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       import('./tutorial/config_agent/rum_script').then((mod) => mod.TutorialConfigAgentRumScript)
     );
 
-    pluginSetupDeps.uiActions.registerTrigger({
-      id: ObservabilityTriggerId.ApmTransactionContextMenu,
-    });
-
-    pluginSetupDeps.uiActions.registerTrigger({
-      id: ObservabilityTriggerId.ApmErrorContextMenu,
-    });
-
     plugins.observability.dashboard.register({
       appName: 'apm',
       hasData: async () => {
@@ -519,7 +512,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   }
 
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
-    const { fleet } = plugins;
+    const { fleet, discoverShared } = plugins;
 
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');
@@ -527,6 +520,16 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       mod.registerAssistantFunctions({
         registerRenderFunction,
       });
+    });
+
+    discoverShared.features.registry.register({
+      id: 'observability-focused-trace-waterfall',
+      render: createLazyFocusedTraceWaterfallRenderer({ core }),
+    });
+
+    discoverShared.features.registry.register({
+      id: 'observability-full-trace-waterfall',
+      render: createLazyFullTraceWaterfallRenderer({ core }),
     });
 
     if (fleet) {
