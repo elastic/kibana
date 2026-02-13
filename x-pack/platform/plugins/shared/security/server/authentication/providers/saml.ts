@@ -702,6 +702,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
           requestIdMap: this.updateRequestIdMap(requestId, redirectURL, state?.requestIdMap),
           realm,
         },
+        stateCookieOptions: { sameSite: 'None', isSecure: true },
       });
     } catch (err) {
       this.logger.debug(() => `Failed to initiate SAML handshake: ${getDetailedErrorMessage(err)}`);
