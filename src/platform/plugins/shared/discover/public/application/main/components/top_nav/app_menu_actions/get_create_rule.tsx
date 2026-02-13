@@ -7,19 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState, useRef, useMemo } from 'react';
-import type { DataView } from '@kbn/data-plugin/common';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { DiscoverAppMenuItemType, DiscoverAppMenuPopoverItem } from '@kbn/discover-utils';
 import { AppMenuActionId } from '@kbn/discover-utils';
 import { ESQLRuleFormFlyout } from '@kbn/alerting-v2-rule-form';
 import { type Observable, type BehaviorSubject, filter, map, pairwise, startWith } from 'rxjs';
+import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 import type { DiscoverAppState } from '../../../state_management/redux';
 import type { DataMainMsg } from '../../../state_management/discover_data_state_container';
+import { CreateAlertFlyout, getManageRulesUrl, getTimeField } from './get_alerts';
 
 export function CreateESQLRuleFlyout({
   discoverParams,
@@ -33,7 +34,7 @@ export function CreateESQLRuleFlyout({
   onClose: () => void;
 }) {
   const { dataView } = discoverParams;
-  const timeField = getTimeField(dataView);
+  const timeField = useMemo(() => getTimeField(dataView), [dataView]);
   const [query, setQuery] = useState<string>(
     (stateContainer.getCurrentTab().appState.query as AggregateQuery)?.esql || ''
   );
@@ -103,14 +104,61 @@ export const getCreateRuleMenuItem = ({
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
 }): DiscoverAppMenuItemType => {
-  const alertingRuleItem: DiscoverAppMenuPopoverItem = {
-    id: 'alerting-rule',
+  const { dataView, isEsqlMode } = discoverParams;
+  const timeField = getTimeField(dataView);
+  const hasTimeFieldName = !isEsqlMode ? Boolean(dataView?.timeFieldName) : Boolean(timeField);
+
+  const legacyItems: DiscoverAppMenuPopoverItem[] = [];
+
+  if (services.capabilities.management?.insightsAndAlerting?.triggersActions) {
+    if (discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)) {
+      legacyItems.push({
+        id: 'legacy-search-threshold',
+        order: 1,
+        label: i18n.translate('discover.localMenu.legacySearchThresholdTitle', {
+          defaultMessage: 'Search threshold rule',
+        }),
+        iconType: 'bell',
+        testId: 'discoverLegacySearchThresholdButton',
+        disableButton: !hasTimeFieldName,
+        tooltipContent: hasTimeFieldName
+          ? undefined
+          : i18n.translate('discover.localMenu.legacyMissedTimeFieldToolTip', {
+              defaultMessage: 'Data view does not have a time field.',
+            }),
+        run: ({ context: { onFinishAction } }) => {
+          return (
+            <CreateAlertFlyout
+              onFinishAction={onFinishAction}
+              discoverParams={discoverParams}
+              services={services}
+              stateContainer={stateContainer}
+            />
+          );
+        },
+      });
+    }
+
+    legacyItems.push({
+      id: 'manage-rules-connectors',
+      order: Number.MAX_SAFE_INTEGER,
+      label: i18n.translate('discover.localMenu.manageRulesAndConnectors', {
+        defaultMessage: 'Manage rules and connectors',
+      }),
+      iconType: 'tableOfContents',
+      testId: 'discoverManageRulesButton',
+      href: getManageRulesUrl(services),
+    });
+  }
+
+  const createRuleItem: DiscoverAppMenuPopoverItem = {
+    id: 'create-rule',
     order: 1,
-    label: i18n.translate('discover.localMenu.alertingRuleTitle', {
-      defaultMessage: 'Alerting rule',
+    label: i18n.translate('discover.localMenu.createRuleTitle', {
+      defaultMessage: 'Create rule',
     }),
     iconType: 'bell',
-    testId: 'discoverAlertingRuleButton',
+    testId: 'discoverCreateRuleButton',
     run: ({ context: { onFinishAction } }) => {
       return (
         <CreateESQLRuleFlyout
@@ -123,47 +171,37 @@ export const getCreateRuleMenuItem = ({
     },
   };
 
-  const detectionRuleItem: DiscoverAppMenuPopoverItem = {
-    id: 'detection-rule',
+  const legacyRulesItem: DiscoverAppMenuPopoverItem = {
+    id: 'legacy-rules',
     order: 2,
-    label: i18n.translate('discover.localMenu.detectionRuleTitle', {
-      defaultMessage: 'Detection rule',
+    label: i18n.translate('discover.localMenu.legacyRulesTitle', {
+      defaultMessage: 'Create legacy rules',
     }),
-    iconType: 'securitySignal',
-    testId: 'discoverDetectionRuleButton',
-    run: ({ context: { onFinishAction } }) => {
-      // TODO: Replace with Security solution's detection rule creation
-      return (
-        <CreateESQLRuleFlyout
-          discoverParams={discoverParams}
-          services={services}
-          stateContainer={stateContainer}
-          onClose={onFinishAction}
-        />
-      );
-    },
+    testId: 'discoverLegacyRulesButton',
+    items: legacyItems,
   };
+
+  const items: DiscoverAppMenuPopoverItem[] = [createRuleItem];
+
+  if (legacyItems.length > 0) {
+    items.push(legacyRulesItem);
+  }
 
   return {
     id: AppMenuActionId.createRule,
     order: 3,
     label: i18n.translate('discover.localMenu.ruleTitle', {
-      defaultMessage: 'Create Rule',
+      defaultMessage: 'Rules',
     }),
     iconType: 'bell',
-    testId: 'discoverCreateRuleButton',
+    testId: 'discoverRulesMenuButton',
     tooltipContent: i18n.translate('discover.localMenu.ruleDescription', {
-      defaultMessage: 'Create an alerting or detection rule from this query',
+      defaultMessage: 'Create alerting rules from this query',
     }),
-    items: [alertingRuleItem, detectionRuleItem],
-    popoverTestId: 'discoverCreateRulePopover',
+    items,
+    popoverTestId: 'discoverRulesPopover',
   };
 };
-
-function getTimeField(dataView: DataView | undefined) {
-  const dateFields = dataView?.fields.getByType('date');
-  return dataView?.timeFieldName || dateFields?.[0]?.name;
-}
 
 const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
   return state$.pipe(

@@ -21,21 +21,21 @@ import type { DiscoverStateContainer } from '../../../state_management/discover_
 import type { AppMenuDiscoverParams } from './types';
 import type { DiscoverServices } from '../../../../../build_services';
 
-const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
+export const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
   AlertConsumers.LOGS,
   AlertConsumers.OBSERVABILITY,
   STACK_ALERTS_FEATURE_ID,
 ];
 
-interface EsQueryAlertMetaData extends RuleTypeMetaData {
+export interface EsQueryAlertMetaData extends RuleTypeMetaData {
   isManagementPage?: boolean;
   adHocDataViewList: DataView[];
 }
 
-const RuleFormFlyoutWithType = RuleFormFlyout<EsQueryAlertMetaData>;
+export const RuleFormFlyoutWithType = RuleFormFlyout<EsQueryAlertMetaData>;
 
-const CreateAlertFlyout: React.FC<{
+export const CreateAlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;
   services: DiscoverServices;
   onFinishAction: () => void;
@@ -135,11 +135,7 @@ export const getAlertsAppMenuItem = ({
       }),
       iconType: 'tableOfContents',
       testId: 'discoverManageAlertsButton',
-      href: services.application.getUrlForApp(
-        services.application.isAppRegistered('rules')
-          ? 'rules'
-          : 'management/insightsAndAlerting/triggersActions/rules'
-      ),
+      href: getManageRulesUrl(services),
     });
 
     if (discoverParams.authorizedRuleTypeIds.includes(ES_QUERY_ID)) {
@@ -184,7 +180,15 @@ export const getAlertsAppMenuItem = ({
   };
 };
 
-function getTimeField(dataView: DataView | undefined) {
+export function getTimeField(dataView: DataView | undefined) {
   const dateFields = dataView?.fields.getByType('date');
   return dataView?.timeFieldName || dateFields?.[0]?.name;
+}
+
+export function getManageRulesUrl(services: DiscoverServices) {
+  return services.application.getUrlForApp(
+    services.application.isAppRegistered('rules')
+      ? 'rules'
+      : 'management/insightsAndAlerting/triggersActions/rules'
+  );
 }

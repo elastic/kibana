@@ -14,7 +14,12 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL, getInitialESQLQuery } from '@kbn/esql-utils';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { DiscoverAppMenuItemType } from '@kbn/discover-utils';
-import { AppMenuRegistry, dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
+import {
+  AppMenuActionId,
+  AppMenuRegistry,
+  dismissFlyouts,
+  DiscoverFlyouts,
+} from '@kbn/discover-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
@@ -109,6 +114,11 @@ export const useTopNavLinks = ({
     [isEsqlMode, dataView, adHocDataViews, dispatch, authorizedRuleTypes]
   );
 
+  // Alerting V2: alertingVTwo.uiEnabled capability is enabled (controlled by xpack.alerting_v2.ui.enabled)
+  const canCreateESQLRule =
+    (services.capabilities.alertingVTwo as { uiEnabled?: boolean } | undefined)?.uiEnabled ?? false;
+  const showCreateRuleV2 = isEsqlMode && canCreateESQLRule;
+
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
 
@@ -116,10 +126,6 @@ export const useTopNavLinks = ({
     items.push(inspectAppMenuItem);
 
     // Alerting V2: alertingVTwo.uiEnabled capability is enabled (controlled by xpack.alerting_v2.ui.enabled)
-    const canCreateESQLRule =
-      (services.capabilities.alertingVTwo as { uiEnabled?: boolean } | undefined)?.uiEnabled ??
-      false;
-    const showCreateRuleV2 = discoverParams.isEsqlMode && canCreateESQLRule;
     const showLegacyAlerts =
       services.triggersActionsUi &&
       discoverParams.authorizedRuleTypeIds.length &&
@@ -225,6 +231,8 @@ export const useTopNavLinks = ({
     hasUnsavedChanges,
     totalHitsState,
     intl,
+    canCreateESQLRule,
+    showCreateRuleV2,
   ]);
 
   const transitionFromDataViewToESQL = useCurrentTabAction(
@@ -232,10 +240,25 @@ export const useTopNavLinks = ({
   );
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');
+
   const appMenuRegistry = useMemo(() => {
     const newAppMenuRegistry = new AppMenuRegistry();
 
     newAppMenuRegistry.registerItems(appMenuItems);
+
+    // Register legacyRules as a top-level item when v2 rules are enabled
+    // This allows profile extensions to add items to it via registerPopoverItem
+    // The items are then merged into the createRule menu's legacy submenu
+    if (showCreateRuleV2) {
+      newAppMenuRegistry.registerItem({
+        id: AppMenuActionId.legacyRules,
+        label: '', // Not displayed directly - items are pulled into the v2 menu's submenu
+        iconType: 'empty',
+        order: Number.MAX_SAFE_INTEGER,
+        hidden: 'all', // Hide at all breakpoints since this is just a container for registry items
+        items: [],
+      });
+    }
 
     // Only show the ES|QL button in classic mode (not in ES|QL mode)
     // The "Switch to Classic" option is now in the tab menu when in ES|QL mode
@@ -360,7 +383,19 @@ export const useTopNavLinks = ({
       appMenuRegistry: () => newAppMenuRegistry,
     }));
 
-    return getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
+    const registry = getAppMenu(discoverParams).appMenuRegistry(newAppMenuRegistry);
+
+    // Merge items from legacyRules into the createRule menu's legacy-rules submenu
+    // This allows profile extensions to add rule types to the v2 rules menu
+    if (showCreateRuleV2) {
+      registry.mergePopoverItems(
+        AppMenuActionId.createRule,
+        'legacy-rules',
+        AppMenuActionId.legacyRules
+      );
+    }
+
+    return registry;
   }, [
     getAppMenuAccessor,
     discoverParams,
@@ -372,6 +407,7 @@ export const useTopNavLinks = ({
     state,
     hasUnsavedChanges,
     transitionFromDataViewToESQL,
+    showCreateRuleV2,
   ]);
 
   return useMemo((): AppMenuConfig => {
