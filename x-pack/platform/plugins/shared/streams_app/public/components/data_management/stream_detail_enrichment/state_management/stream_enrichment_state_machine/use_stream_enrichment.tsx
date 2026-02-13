@@ -23,6 +23,7 @@ import {
 } from './stream_enrichment_state_machine';
 import type {
   StreamEnrichmentActorSnapshot,
+  StreamEnrichmentEvent,
   StreamEnrichmentInput,
   StreamEnrichmentServiceDependencies,
 } from './types';
@@ -39,6 +40,15 @@ const consoleInspector = createConsoleInspector();
 
 const StreamEnrichmentContext = createActorContext(streamEnrichmentMachine);
 
+interface StreamEnrichmentService {
+  send: (event: StreamEnrichmentEvent) => void;
+  getSnapshot: () => StreamEnrichmentActorSnapshot;
+}
+
+const useStreamEnrichmentService = (): StreamEnrichmentService => {
+  return StreamEnrichmentContext.useActorRef() as unknown as StreamEnrichmentService;
+};
+
 export const useStreamEnrichmentSelector = <T,>(
   selector: (state: StreamEnrichmentActorSnapshot) => T
 ): T => {
@@ -48,12 +58,12 @@ export const useStreamEnrichmentSelector = <T,>(
 export type StreamEnrichmentEvents = ReturnType<typeof useStreamEnrichmentEvents>;
 
 export const useGetStreamEnrichmentState = () => {
-  const service = StreamEnrichmentContext.useActorRef();
+  const service = useStreamEnrichmentService();
   return useCallback(() => service.getSnapshot(), [service]);
 };
 
 export const useStreamEnrichmentEvents = () => {
-  const service = StreamEnrichmentContext.useActorRef();
+  const service = useStreamEnrichmentService();
 
   return useMemo(
     () => ({
@@ -212,7 +222,7 @@ const ListenForDefinitionChanges = ({
   children,
   definition,
 }: React.PropsWithChildren<Omit<StreamEnrichmentInput, 'grokCollection'>>) => {
-  const service = StreamEnrichmentContext.useActorRef();
+  const service = useStreamEnrichmentService();
 
   useEffect(() => {
     service.send({ type: 'stream.received', definition });
