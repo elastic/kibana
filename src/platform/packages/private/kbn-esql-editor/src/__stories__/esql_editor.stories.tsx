@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import React, { useMemo } from 'react';
+import { BehaviorSubject, of } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { StoryObj } from '@storybook/react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -50,22 +50,38 @@ const uiActions = {
   }),
 };
 
+const data = dataPluginMock.createStartContract();
+(data.search.search as jest.Mock).mockReturnValue(
+  of({
+    rawResponse: { columns: [], all_columns: [] },
+    isPartial: false,
+    isRunning: false,
+    total: 0,
+    loaded: 0,
+  })
+);
+
 const services = {
   core,
   application: core.application,
   uiSettings,
   settings: { client: uiSettings },
-  data: dataPluginMock.createStartContract(),
+  data,
   kql,
   storage,
   uiActions,
 };
 
-const Template = (args: ESQLEditorProps) => (
-  <KibanaContextProvider services={services}>
-    <ESQLEditor {...args} />
-  </KibanaContextProvider>
-);
+const StoryWrapper = ({ args }: { args: ESQLEditorProps }) => {
+  const stableServices = useMemo(() => services, []);
+  return (
+    <KibanaContextProvider services={stableServices}>
+      <ESQLEditor {...args} />
+    </KibanaContextProvider>
+  );
+};
+
+const Template = (args: ESQLEditorProps) => <StoryWrapper args={args} />;
 
 export default {
   title: 'Text based languages editor',
@@ -80,6 +96,8 @@ export const ExpandedMode: StoryObj<typeof ESQLEditor> = {
     query: {
       esql: 'from dataview | keep field1, field2',
     },
+    hideQueryHistory: true,
+    disableAutoFocus: true,
   },
 
   argTypes: {
@@ -101,9 +119,9 @@ export const WithErrors: StoryObj<typeof ESQLEditor> = {
     query: {
       esql: 'from dataview | keep field1, field2',
     },
-
     dataTestSubj: 'test-id',
-
+    hideQueryHistory: true,
+    disableAutoFocus: true,
     errors: [
       new Error(
         '[essql] > Unexpected error from Elasticsearch: verification_exception - Found 1 problem line 1:16: Unknown column [field10]'
