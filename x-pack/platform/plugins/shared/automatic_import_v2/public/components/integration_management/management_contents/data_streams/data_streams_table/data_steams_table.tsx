@@ -66,20 +66,11 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
     });
   }, [items, sortField, sortDirection]);
 
-  const deletingDataStreamId = deleteDataStreamMutation.isLoading
-    ? deleteDataStreamMutation.variables?.dataStreamId
-    : undefined;
-
   const reanalyzingDataStreamId = reanalyzeDataStreamMutation.isLoading
     ? reanalyzeDataStreamMutation.variables?.dataStreamId
     : undefined;
 
-  // Check if item is being deleted (either actively loading or server-side status)
-  const isDeleting = useMemo(
-    () => (item: DataStreamResponse) =>
-      item.status === 'deleting' || item.dataStreamId === deletingDataStreamId,
-    [deletingDataStreamId]
-  );
+  const isDeleting = (item: DataStreamResponse) => item.status === 'deleting';
 
   const handleDeleteConfirm = () => {
     if (dataStreamDeleteTarget) {
@@ -196,7 +187,6 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
     ];
   }, [
     reanalyzingDataStreamId,
-    isDeleting,
     openEditPipelineFlyout,
     reanalyzeDataStreamMutation,
     integrationId,

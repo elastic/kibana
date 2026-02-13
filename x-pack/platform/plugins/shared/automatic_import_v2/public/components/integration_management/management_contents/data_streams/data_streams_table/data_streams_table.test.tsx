@@ -213,20 +213,21 @@ describe('DataStreamsTable', () => {
       });
     });
 
-    it('should pass isDeleting to Status when deletion in progress', () => {
-      mockDeleteDataStreamMutation.isLoading = true;
-      mockDeleteDataStreamMutation.variables = { dataStreamId: 'ds-1' };
+    it('should show deleting status when item status is deleting (set via optimistic update)', () => {
+      // With optimistic updates, the useDeleteDataStream hook updates the cache
+      // to set status='deleting' before the API call completes. The table component
+      // now simply checks item.status === 'deleting' rather than tracking isLoading.
+      const items = [createMockDataStream({ status: 'deleting' })];
 
-      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       expect(screen.getByText('Deleting...')).toBeInTheDocument();
     });
 
-    it('should disable delete button while deleting that item', () => {
-      mockDeleteDataStreamMutation.isLoading = true;
-      mockDeleteDataStreamMutation.variables = { dataStreamId: 'ds-1' };
+    it('should disable delete button when item status is deleting', () => {
+      const items = [createMockDataStream({ status: 'deleting' })];
 
-      renderWithProvider(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       const deleteButton = screen.getByTestId('deleteDataStreamButton');
       expect(deleteButton).toBeDisabled();
