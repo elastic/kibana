@@ -725,7 +725,7 @@ const OBVIOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         },
         {
           id: 'version-upgrade-handling',
-          text: 'Should handle the version upgrade correctly — the older version may optionally be noted in meta.observed_versions or meta.notes',
+          text: 'Should handle the version upgrade correctly — the older version may optionally be noted in meta.observed_versions or meta.note',
           score: 1,
         },
       ],
@@ -850,7 +850,7 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         },
         {
           id: 'inferred-tagging',
-          text: 'Features identified from indirect signals must be tagged as "inferred" with meta.notes explaining the reasoning',
+          text: 'Features identified from indirect signals must be tagged as "inferred" with meta.note explaining the reasoning',
           score: 1,
         },
         {
@@ -981,7 +981,7 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         },
         {
           id: 'inferred-tagging',
-          text: 'Inferred features must have "inferred" tag and meta.notes explaining the reasoning',
+          text: 'Inferred features must have "inferred" tag and meta.note explaining the reasoning',
           score: 1,
         },
         {
@@ -1106,7 +1106,7 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         },
         {
           id: 'inferred-tagging',
-          text: 'Features inferred from indirect evidence must be tagged as "inferred" with meta.notes explanation',
+          text: 'Features inferred from indirect evidence must be tagged as "inferred" with meta.note explanation',
           score: 1,
         },
         {
@@ -1232,7 +1232,7 @@ const INFERENCE_REQUIRED_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         },
         {
           id: 'inferred-tagging',
-          text: 'Scala, PostgreSQL, and IBM Cloud must be tagged as "inferred" with meta.notes explaining the reasoning',
+          text: 'Scala, PostgreSQL, and IBM Cloud must be tagged as "inferred" with meta.note explaining the reasoning',
           score: 1,
         },
         {
@@ -1419,7 +1419,7 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         },
         {
           id: 'inferred-tag-if-emitted',
-          text: 'Any features extracted must be tagged as "inferred" with meta.notes explaining the weak reasoning',
+          text: 'Any features extracted must be tagged as "inferred" with meta.note explaining the weak reasoning',
           score: 1,
         },
       ],
@@ -1615,7 +1615,7 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         },
         {
           id: 'inferred-tag-if-emitted',
-          text: 'Any features extracted must be tagged as "inferred" with meta.notes explaining the ambiguity',
+          text: 'Any features extracted must be tagged as "inferred" with meta.note explaining the ambiguity',
           score: 1,
         },
       ],
@@ -1768,7 +1768,7 @@ const AMBIGUOUS_EVIDENCE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         },
         {
           id: 'conflict-noted-in-meta',
-          text: 'If any database feature is emitted despite the conflict, it must include meta.notes explaining the contradictory PostgreSQL vs MySQL signals',
+          text: 'If any database feature is emitted despite the conflict, it must include meta.note explaining the contradictory PostgreSQL vs MySQL signals',
           score: 2,
         },
       ],
@@ -2434,7 +2434,7 @@ const FALSE_POSITIVE_EXAMPLES: FeatureIdentificationEvaluationExample[] = [
         },
         {
           id: 'source-target-context',
-          text: 'Should optionally note source vs target role in meta.role or meta.notes to provide migration context',
+          text: 'Should optionally note source vs target role in meta.role or meta.note to provide migration context',
           score: 1,
         },
       ],
