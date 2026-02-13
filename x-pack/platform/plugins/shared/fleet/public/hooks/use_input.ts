@@ -78,6 +78,7 @@ export function useInput(
       return true;
     },
     setValue,
+    setErrors,
     hasChanged,
   };
 }
@@ -146,6 +147,7 @@ export function useSecretInput(
       return true;
     },
     setValue,
+    setErrors,
     hasChanged,
   };
 }

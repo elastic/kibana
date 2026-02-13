@@ -213,10 +213,10 @@ describe('ClassicAdvancedView', () => {
   });
 
   describe('Significant Events Feature (Stream Description & Feature Configuration)', () => {
-    it('should render Stream description panel when significantEvents feature is enabled', () => {
+    it('should render Stream description panel when significantEvents feature is enabled and available', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
-          significantEvents: { enabled: true },
+          significantEvents: { enabled: true, available: true },
         },
       } as any);
 
@@ -231,10 +231,10 @@ describe('ClassicAdvancedView', () => {
       expect(screen.getByText('Stream description')).toBeInTheDocument();
     });
 
-    it('should render Stream discovery panel when significantEvents feature is enabled', () => {
+    it('should render Stream discovery panel when significantEvents feature is enabled and available', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
-          significantEvents: { enabled: true },
+          significantEvents: { enabled: true, available: true },
         },
       } as any);
 
@@ -249,10 +249,10 @@ describe('ClassicAdvancedView', () => {
       expect(screen.getByText('Stream discovery')).toBeInTheDocument();
     });
 
-    it('should NOT render Stream description or Feature identification when significantEvents is disabled', () => {
+    it('should NOT render Stream description or Stream discovery when significantEvents is disabled', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
-          significantEvents: { enabled: false },
+          significantEvents: { enabled: false, available: true },
         },
       } as any);
 
@@ -267,10 +267,47 @@ describe('ClassicAdvancedView', () => {
       expect(screen.queryByText('Stream discovery')).not.toBeInTheDocument();
     });
 
-    it('should NOT render Stream description or Feature identification when significantEvents is undefined', () => {
+    it('should NOT render Stream description or Stream discovery when significantEvents is enabled but not available (basic license)', () => {
+      mockUseStreamsPrivileges.mockReturnValue({
+        features: {
+          significantEvents: { enabled: true, available: false },
+        },
+      } as any);
+
+      renderWithProviders(
+        <ClassicAdvancedView
+          definition={createMockDefinition()}
+          refreshDefinition={mockRefreshDefinition}
+        />
+      );
+
+      // These components require enterprise license and should NOT render with basic license
+      expect(screen.queryByText('Stream description')).not.toBeInTheDocument();
+      expect(screen.queryByText('Stream discovery')).not.toBeInTheDocument();
+    });
+
+    it('should NOT render Stream description or Stream discovery when significantEvents is undefined', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
           significantEvents: undefined,
+        },
+      } as any);
+
+      renderWithProviders(
+        <ClassicAdvancedView
+          definition={createMockDefinition()}
+          refreshDefinition={mockRefreshDefinition}
+        />
+      );
+
+      expect(screen.queryByText('Stream description')).not.toBeInTheDocument();
+      expect(screen.queryByText('Stream discovery')).not.toBeInTheDocument();
+    });
+
+    it('should NOT render Stream description or Stream discovery when significantEvents available is undefined', () => {
+      mockUseStreamsPrivileges.mockReturnValue({
+        features: {
+          significantEvents: { enabled: true, available: undefined },
         },
       } as any);
 
@@ -427,10 +464,10 @@ describe('ClassicAdvancedView', () => {
   });
 
   describe('All Features Enabled', () => {
-    it('should render all panels when significantEvents is enabled', () => {
+    it('should render all panels when significantEvents is enabled and available', () => {
       mockUseStreamsPrivileges.mockReturnValue({
         features: {
-          significantEvents: { enabled: true },
+          significantEvents: { enabled: true, available: true },
         },
       } as any);
 
