@@ -10,7 +10,7 @@ export interface IndexInfo {
   docs: number;
 }
 
-type MainCategories = 'Endpoint' | 'Identity' | 'Network' | 'Cloud' | 'Application/SaaS';
+export type MainCategories = 'Endpoint' | 'Identity' | 'Network' | 'Cloud' | 'Application/SaaS';
 
 export interface CategoryGroup {
   category: MainCategories | string;
@@ -70,6 +70,7 @@ export interface DataQualityResultDocument {
 
 export interface RelatedIntegrationRuleResponse {
   related_integrations?: Array<RelatedIntegration>;
+  enabled: boolean;
 }
 
 export interface RelatedIntegration {
@@ -85,4 +86,17 @@ export interface SiemReadinessPackageInfo {
   version: string;
   status: string;
   categories?: string[];
+}
+
+export interface PipelineStats {
+  name: string;
+  indices: string[];
+  docsCount: number;
+  failedDocsCount: number;
+}
+export interface CasesSearchResponse {
+  total: number;
+  countOpenCases: number;
+  countClosedCases: number;
+  countInProgressCases: number;
 }

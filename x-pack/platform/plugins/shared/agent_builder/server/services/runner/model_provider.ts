@@ -6,6 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type {
   ModelProvider,
   ScopedModel,
@@ -17,12 +19,15 @@ import { getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
 import type { TrackingService } from '../../telemetry';
 import { MODEL_TELEMETRY_METADATA } from '../../telemetry';
+import { resolveSelectedConnectorId } from '../../utils/resolve_selected_connector_id';
 
 export interface CreateModelProviderOpts {
   inference: InferenceServerStart;
   request: KibanaRequest;
   defaultConnectorId?: string;
   trackingService?: TrackingService;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
 }
 
 export type CreateModelProviderFactoryFn = (
@@ -51,13 +56,21 @@ export const createModelProvider = ({
   request,
   defaultConnectorId,
   trackingService,
+  uiSettings,
+  savedObjects,
 }: CreateModelProviderOpts): ModelProvider => {
   const getDefaultConnectorId = async () => {
-    if (defaultConnectorId) {
-      return defaultConnectorId;
+    const resolvedConnectorId = await resolveSelectedConnectorId({
+      uiSettings,
+      savedObjects,
+      request,
+      connectorId: defaultConnectorId,
+      inference,
+    });
+    if (!resolvedConnectorId) {
+      throw new Error('No connector available');
     }
-    const defaultConnector = await inference.getDefaultConnector(request);
-    return defaultConnector.connectorId;
+    return resolvedConnectorId;
   };
 
   const completedCalls: ModelCallInfo[] = [];

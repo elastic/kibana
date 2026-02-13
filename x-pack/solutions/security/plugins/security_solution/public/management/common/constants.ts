@@ -49,11 +49,3 @@ export const MANAGEMENT_DEFAULT_SORT_FIELD = 'created_at';
 // --[ DEFAULTS ]---------------------------------------------------------------------------
 /** The default polling interval for API calls that require a refresh interval */
 export const DEFAULT_POLL_INTERVAL = 10000;
-
-export const SCRIPT_LIBRARY_SORTABLE_FIELDS = Object.freeze([
-  'name',
-  'createdAt',
-  'createdBy',
-  'updatedAt',
-  'updatedBy',
-]);

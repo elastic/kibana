@@ -26,10 +26,10 @@ export const ecommerceSpecProvider: SampleDatasetProvider = ({ staticAssets }) =
     name: ecommerceName,
     description: ecommerceDescription,
     previewImagePath: staticAssets.getPluginAssetHref(
-      '/sample_data_resources/ecommerce/dashboard.webp'
+      '/sample_data_resources/ecommerce/search_window_illustration.svg'
     ),
     darkPreviewImagePath: staticAssets.getPluginAssetHref(
-      '/sample_data_resources/ecommerce/dashboard_dark.webp'
+      '/sample_data_resources/ecommerce/search_window_illustration.svg'
     ),
     overviewDashboard: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
     defaultIndex: 'ff959d40-b880-11e8-a6d9-e546fe2bba5f',

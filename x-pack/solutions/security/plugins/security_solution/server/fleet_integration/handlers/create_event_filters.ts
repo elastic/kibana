@@ -54,6 +54,7 @@ export const createEventFilters = async (
         immutable: false,
         meta: undefined,
         tags: [],
+        osTypes: [],
         version: 1,
       });
       logger.debug(

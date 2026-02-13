@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { getTransformIn } from './get_transform_in';
 import { getTransformOut } from './get_transform_out';
 
-export function getTransforms(
-  transformEnhancementsIn: EmbeddableSetup['transformEnhancementsIn'],
-  transformEnhancementsOut: EmbeddableSetup['transformEnhancementsOut']
-) {
+export function getTransforms(drilldownTransforms: DrilldownTransforms) {
   return {
-    transformIn: getTransformIn(transformEnhancementsIn),
-    transformOut: getTransformOut(transformEnhancementsOut),
+    transformIn: getTransformIn(drilldownTransforms.transformIn),
+    transformOut: getTransformOut(drilldownTransforms.transformOut),
   };
 }

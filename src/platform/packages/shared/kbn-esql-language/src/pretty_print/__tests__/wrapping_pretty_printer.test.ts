@@ -365,6 +365,19 @@ FROM index
       )`);
     });
   });
+
+  describe('PROMQL', () => {
+    test('realistic command', () => {
+      const src =
+        'PROMQL step = "5m" start = ?_tstart end = ?_tend index = kibana_sample_data_logstsdb col0 = (sum(avg(quantile_over_time(0.9,bytes{event.dataset="job"}[5m]))))';
+      const { text } = reprint(src);
+
+      expect('\n' + text).toBe(`
+PROMQL
+  step = "5m" start = ?_tstart end = ?_tend index = kibana_sample_data_logstsdb
+  col0 = (sum(avg(quantile_over_time(0.9,bytes{event.dataset="job"}[5m]))))`);
+    });
+  });
 });
 
 describe('casing', () => {
@@ -464,6 +477,18 @@ FROM index
     expect('\n' + text).toBe(`
 >FROM index
 >  | WHERE a == 123`);
+  });
+
+  describe('map expression', () => {
+    describe('bare map', () => {
+      test('with initial indentation', () => {
+        const query = 'PROMQL a = b c = d e = f g = (query)';
+        const text = reprint(query).text;
+
+        expect('\n' + text).toBe(`
+PROMQL a = b c = d e = f g = (query)`);
+      });
+    });
   });
 });
 
@@ -1051,6 +1076,36 @@ FROM index
     end = ?_end
   rate(byres_counter[5m])`
         );
+      });
+    });
+
+    describe('bare map', () => {
+      test('wrapped', () => {
+        const query =
+          'PROMQL key1 = value1 key2 = value2 key3 = value3 query_name = (some_very_very_very_long_query_that_will_force_wrapping)';
+        const text = reprint(query).text;
+
+        expect('\n' + text).toBe(`
+PROMQL
+  key1 = value1 key2 = value2 key3 = value3
+  query_name = (some_very_very_very_long_query_that_will_force_wrapping)`);
+      });
+
+      test('broken down by line', () => {
+        const query =
+          'PROMQL key1 = value1 key2 = value2 key3 = value3 key4 = value4 key5 = value5 key6 = value6 key7 = value7 query_name = (query)';
+        const text = reprint(query).text;
+
+        expect('\n' + text).toBe(`
+PROMQL
+    key1 = value1
+    key2 = value2
+    key3 = value3
+    key4 = value4
+    key5 = value5
+    key6 = value6
+    key7 = value7
+  query_name = (query)`);
       });
     });
   });

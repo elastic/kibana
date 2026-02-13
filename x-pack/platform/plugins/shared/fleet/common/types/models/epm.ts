@@ -261,6 +261,7 @@ export enum RegistryPolicyTemplateKeys {
   deployment_modes = 'deployment_modes',
   configuration_links = 'configuration_links',
   fips_compatible = 'fips_compatible',
+  dynamic_signal_types = 'dynamic_signal_types',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -286,6 +287,7 @@ export interface RegistryPolicyInputOnlyTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.template_path]: string;
   [RegistryPolicyTemplateKeys.required_vars]?: RegistryRequiredVars;
   [RegistryPolicyTemplateKeys.vars]?: RegistryVarsEntry[];
+  [RegistryPolicyTemplateKeys.dynamic_signal_types]?: boolean;
 }
 
 export type RegistryPolicyTemplate =
@@ -671,7 +673,7 @@ export enum INSTALL_STATES {
   INSTALL_ESQL_VIEWS = 'install_esql_views',
   INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
   INSTALL_ILM_POLICIES = 'install_ilm_policies',
-  CREATE_ALERTING_RULES = 'create_alerting_rules',
+  CREATE_ALERTING_ASSETS = 'create_alerting_assets',
   INSTALL_ML_MODEL = 'install_ml_model',
   INSTALL_INDEX_TEMPLATE_PIPELINES = 'install_index_template_pipelines',
   REMOVE_LEGACY_TEMPLATES = 'remove_legacy_templates',

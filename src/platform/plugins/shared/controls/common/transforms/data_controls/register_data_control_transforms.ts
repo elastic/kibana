@@ -17,8 +17,10 @@ export const registerDataControlTransforms = (
   legacyRefNames: string[]
 ) => {
   embeddable.registerTransforms(type, {
-    transformIn: (state) => extractReferences(state, refName),
-    transformOut: (state, panelReferences, containerReferences, id) =>
-      injectReferences(id, state, legacyRefNames, panelReferences, containerReferences),
+    getTransforms: () => ({
+      transformIn: (state) => extractReferences(state, refName),
+      transformOut: (state, panelReferences, containerReferences, id) =>
+        injectReferences(id, state, legacyRefNames, panelReferences, containerReferences),
+    }),
   });
 };

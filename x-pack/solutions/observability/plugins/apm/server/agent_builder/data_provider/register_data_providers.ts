@@ -12,7 +12,6 @@ import { parseDatemath } from '../utils/time';
 import { getApmServiceSummary } from './get_apm_service_summary';
 import { getApmDownstreamDependencies } from './get_apm_downstream_dependencies';
 import { getServicesItems } from '../../routes/services/get_services/get_services_items';
-import { getApmErrors } from './get_apm_errors';
 import { ApmDocumentType } from '../../../common/document_type';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getExitSpanChangePoints, getServiceChangePoints } from './get_change_points';
@@ -80,14 +79,6 @@ export function registerDataProviders({
           end,
         },
       });
-    }
-  );
-
-  observabilityAgentBuilder.registerDataProvider(
-    'apmErrors',
-    async ({ request, serviceName, serviceEnvironment, start, end }) => {
-      const { apmEventClient } = await buildApmToolResources({ core, plugins, request, logger });
-      return getApmErrors({ apmEventClient, serviceName, serviceEnvironment, start, end });
     }
   );
 

@@ -60,7 +60,7 @@ const spaceSchema = schema.object({
         description: 'The list of features that are turned off in the space.',
       },
     }),
-    { defaultValue: [] }
+    { defaultValue: [], maxSize: 100 }
   ),
   _reserved: schema.maybe(schema.boolean()),
   imageUrl: schema.maybe(

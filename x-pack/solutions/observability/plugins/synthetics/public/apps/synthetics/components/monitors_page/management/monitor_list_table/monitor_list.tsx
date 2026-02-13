@@ -126,6 +126,9 @@ export const MonitorList = ({
           aria-label={i18n.translate('xpack.synthetics.management.monitorList.title', {
             defaultMessage: 'Synthetics monitors list',
           })}
+          tableCaption={i18n.translate('xpack.synthetics.management.monitorList.caption', {
+            defaultMessage: 'Synthetics monitors',
+          })}
           error={error?.body?.message}
           loading={loading}
           itemId="config_id"

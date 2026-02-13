@@ -60,6 +60,7 @@ export const createSharedExceptionListRoute = (router: SecuritySolutionPluginRou
             name,
             namespaceType: 'single',
             tags: [],
+            osTypes: [],
             type: 'detection',
             version: 1,
           });

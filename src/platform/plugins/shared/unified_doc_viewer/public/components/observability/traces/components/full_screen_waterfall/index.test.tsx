@@ -15,20 +15,23 @@ import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import type { UnifiedDocViewerServices } from '../../../../../types';
 
 jest.mock('./waterfall_flyout/span_flyout', () => ({
-  SpanFlyout: ({ traceId, spanId, _, activeSection }: any) => (
-    <div
-      data-test-subj="spanFlyout"
-      data-trace-id={traceId}
-      data-span-id={spanId}
-      data-active-section={activeSection}
-    />
-  ),
   spanFlyoutId: 'spanFlyout',
 }));
 
 jest.mock('./waterfall_flyout/logs_flyout', () => ({
-  LogsFlyout: ({ id, _ }: any) => <div data-test-subj="logsFlyout" data-id={id} />,
   logsFlyoutId: 'logsFlyout',
+}));
+
+jest.mock('./waterfall_flyout/document_detail_flyout', () => ({
+  DocumentDetailFlyout: ({ type, docId, traceId, activeSection }: any) => (
+    <div
+      data-test-subj={type === 'spanFlyout' ? 'spanFlyout' : 'logsFlyout'}
+      data-trace-id={traceId}
+      data-span-id={docId}
+      data-id={docId}
+      data-active-section={activeSection}
+    />
+  ),
 }));
 
 describe('FullScreenWaterfall', () => {

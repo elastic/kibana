@@ -250,7 +250,7 @@ export const SharepointOnline: ConnectorSpec = {
         ctx.log.debug(`SharePoint getting drive items from ${url}`);
         const response = await ctx.client.get(url, {
           params: {
-            $select:
+            select:
               'id,name,webUrl,createdDateTime,lastModifiedDateTime,size,@microsoft.graph.downloadUrl',
           },
         });
@@ -296,7 +296,7 @@ export const SharepointOnline: ConnectorSpec = {
       output: z.object({
         contentType: z.string().optional().describe('Content-Type header'),
         contentLength: z.string().optional().describe('Content-Length header'),
-        text: z.string().describe('File content as UTF-8 text'),
+        base64: z.string().describe('File content as base64-encoded string'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -311,7 +311,7 @@ export const SharepointOnline: ConnectorSpec = {
         return {
           contentType: response.headers?.['content-type'],
           contentLength: response.headers?.['content-length'],
-          text: buffer.toString('utf8'),
+          base64: buffer.toString('base64'),
         };
       },
     },
@@ -405,7 +405,6 @@ export const SharepointOnline: ConnectorSpec = {
           ],
         };
 
-        ctx.log.debug(`SharePoint search: ${JSON.stringify(typedInput.query)}`);
         const response = await ctx.client.post(
           'https://graph.microsoft.com/v1.0/search/query',
           searchRequest

@@ -1,69 +1,113 @@
-You are extracting **features** from log data. Features are stable facts about real system entities (environment, deployment, agent, runtime, services, dependencies, etc.) that are **explicitly supported by log evidence**. These features will be used downstream to generate queries for significant events, error patterns, and CVEs/vulnerabilities, so prioritize **correctness, deduplication, and actionable technology/version details**.
+You are extracting **features** from log data. Features are stable facts about real system components that are **explicitly supported by log evidence**. Prioritize **correctness, deduplication, and actionable details**.
+
+The primary goal is to identify **entities** (what distinct components exist in the system) and **dependencies** (how they are connected). Additionally, extract relevant **infrastructure** and **technology** details as standalone features when they provide independent value.
 
 Every feature you output MUST include ALL required fields:
-- `type` (string): one of `infrastructure`, `technology`, `dependency`
-- `name` (string): generic snake_case name
-- `title` (string): very short human-readable title for UI display (e.g. "Ubuntu 20.04", "Log4j 2.14.1", "api-service → user-service"). Keep it to a few words; it can summarize type + key value (e.g. technology + version or source → target for dependencies).
+- `type` (string): one of `entity`, `infrastructure`, `technology`, `dependency`
+- `subtype` (string): categorization within the type (e.g. `service`, `database`, `cloud_deployment`, `programming_language`, `service_dependency`)
+- `id` (string): unique concise identifier for deduplication across runs (e.g. "order-service", "postgresql-db", "aws-deployment", "log4j-2.14.1")
+- `title` (string): very short human-readable title for UI display (e.g. "Order Service", "PostgreSQL", "AWS", "api-service → user-service"). Keep it to a few words.
 - `description` (string): a short summary of what the feature represents
-- `value` (object): stable, low-cardinality properties for deduplication
+- `properties` (object): stable, low-cardinality key facts for deduplication
 - `confidence` (number): 0–100
 - `evidence` (array of strings): supporting evidence from logs (2–5 items)
 - `tags` (array of strings): descriptive tags
-- `meta` (object): high-cardinality or variable data (can be `{}`)
+- `meta` (object): supplementary information that doesn't fit in `properties` — use for high-cardinality data, contextual notes, or interesting observations (can be `{}`)
 
 ## Feature Types
 
-Extract features in three categories:
-- **infrastructure**: cloud provider/deployment, container orchestration, operating systems, networking, hardware
-  - Example names: `cloud_deployment`, `container_orchestration`, `operating_system`
-- **technology**: programming languages, web servers, databases, libraries, frameworks
-  - Example names: `programming_language`, `web_server`, `database`, `logging_library`
-- **dependency**: explicit relationships between systems (service-to-service calls, DB connections, API integrations)
-  - Example names: `service_dependency`, `database_connection`, `api_integration`
+Extract features in four categories:
+
+### Entity (Primary Focus)
+
+Entities represent **high-level, stable system components** identifiable from the log data. Focus on the logical service or component, not individual instances backing it.
+
+- Example subtypes: `service`, `database`, `message_queue`, `cache`, `api_gateway`, `load_balancer`, `storage`
+- Each entity should carry relevant technology and infrastructure context in its `properties` and `meta` fields (e.g. the programming language it uses, the runtime version, the infrastructure it runs on)
+- **Only create an entity when there is sufficient evidence** to identify it as a distinct component in the system. It is acceptable to omit an entity when evidence is ambiguous or insufficient.
+- Do not create entities for individual instances (pods, containers, nodes, hosts) — instead capture the high-level service or component they belong to
+
+### Infrastructure
+
+Infrastructure features describe the **environment and platform** in which the system operates. These are valuable both as standalone context and as enrichment for entities.
+
+- Example subtypes: `cloud_deployment`, `container_orchestration`, `operating_system`, `networking`
+
+### Technology
+
+Technology features describe **languages, frameworks, libraries, and tools** detected in the logs. Extract these even when their precise association to a specific entity is unclear.
+
+- Example subtypes: `programming_language`, `web_server`, `database_engine`, `logging_library`, `framework`
+
+### Dependency
+
+Dependency features describe **explicit relationships between components** (service-to-service calls, database connections, API integrations).
+
+- Example subtypes: `service_dependency`, `database_connection`, `api_integration`
+
+## Entity Extraction Guidelines
+
+- **Identify high-level components**: Focus on services, databases, queues, caches, and other architectural building blocks — not individual instances, pods, or hosts.
+- **Attach context to entities**: When technology or infrastructure details can be attributed to a specific entity, include them in the entity's `properties` or `meta`. This duplication with standalone infrastructure/technology features is expected and desirable — entities carry their own context while standalone features provide system-wide visibility.
+- **Require sufficient evidence**: Do not speculatively create entities. Only emit an entity when the log evidence clearly identifies a distinct, named system component.
+- **Keep rules generic**: Entity identification is not tied to specific technologies or log patterns. Any log evidence that reveals a distinct, named system component qualifies.
 
 ## Consolidation Rules
 
-**Consolidate** when properties belong to the same entity and appear together in logs:
-- Good: A single cloud deployment feature with provider in `value` and regions/zones in `meta`
-- Good: A single container orchestration feature for Kubernetes with stable platform/version in `value`
+**Consolidate** when properties belong to the same logical component and appear together in logs:
+- Good: A single entity feature for a service, with its technology stack and infrastructure context attached
+- Good: A single infrastructure feature for a cloud deployment with provider in `properties` and regions/zones in `meta`
 
-**Separate** distinct technologies even if related:
-- Good: Separate features for `web_server` (nginx), `database` (postgresql), `cache` (redis)
-- Bad: Do not combine multiple distinct technologies into one feature
+**Separate** when features represent distinct concerns:
+- Good: Separate entity features for each distinct component identified in the logs
+- Good: Standalone infrastructure and technology features even when also referenced in an entity's context — they carry independent value
+- Bad: Do not combine multiple unrelated components or technologies into one feature
 
-Also: **do not emit multiple features with the same (`type`, `name`, `value`) tuple**. Merge evidence/tags/meta instead.
+Also: **do not emit multiple features with the same (`type`, `subtype`, `properties`) tuple**. Merge evidence/tags/meta instead.
 
 ## Naming Conventions
 
-Use **generic names** with specific values in the `value` object:
-- Good: `{ "name": "programming_language", "value": { "language": "java", "version": "11" } }`
-- Bad: `{ "name": "java_runtime", "value": { "version": "11" } }`
+Use **generic subtypes** with specific values in the `properties` object:
+- Good: `{ "subtype": "service", "properties": { "name": "order-service" } }`
+- Bad: `{ "subtype": "order_service", "properties": {} }`
+- Good: `{ "subtype": "programming_language", "properties": { "language": "java", "version": "11" } }`
+- Bad: `{ "subtype": "java_runtime", "properties": { "version": "11" } }`
 
-Rules:
-- Use `snake_case` for `name`
-- Keep names descriptive but concise
-- Put specificity in `value`, not in `name`
+Subtype rules:
+- Use `snake_case` for `subtype`
+- Keep subtypes descriptive but concise
+- Put specificity in `properties`, not in `subtype`
 
-## Value vs Meta Fields
+ID rules:
+- Generate a short, stable identifier based on key properties
+- Use hyphens for readability (e.g. "order-service", "aws-deployment", "log4j-2.14.1", "api-user-http")
+- Include distinguishing characteristics (name, provider, version, or source/target for dependencies)
+- Keep it concise (typically 2-5 tokens)
 
-The `value` field MUST contain **stable, low-cardinality properties** that enable deduplication across many log lines and deployments.
+## Properties vs Meta Fields
 
-- Use `value` for: cloud provider (`aws`, `gcp`, `azure`), technology/library name, protocol, major/normalized version, stable service names
-- Use `meta` for: regions/availability zones, hostnames, instance IDs, pod/container names, IPs, URLs/paths, request/trace IDs, endpoint lists, build hashes/edition labels
+The `properties` field MUST contain **stable, low-cardinality key facts** that enable deduplication across many log lines and deployments.
+
+- Use `properties` for: entity name, cloud provider (`aws`, `gcp`, `azure`), technology/library name, protocol, major/normalized version, stable service names
+- Use `meta` for: supplementary details like regions/availability zones, hostnames, instance IDs, pod/container names, IPs, URLs/paths, request/trace IDs, endpoint lists, build hashes/edition labels, contextual notes, security observations, or any interesting information that doesn't fit as a stable property
+
+Example (entity):
+- Good: `properties: { "name": "order-service", "technology": "java" }` (stable)
+- Good: `meta: { "runtime_version": "11.0.2", "kubernetes_namespace": "production", "pods_observed": ["order-abc123"] }` (variable/high-cardinality)
 
 Example (cloud deployment):
-- Good: `value: { "provider": "aws" }` (stable)
-- Good: `meta: { "regions": ["eu-west-1"], "availability_zones": ["eu-west-1a"] }` (variable/high-cardinality)
+- Good: `properties: { "provider": "aws" }` (stable)
+- Good: `meta: { "regions": ["eu-west-1"], "availability_zones": ["eu-west-1a"], "note": "Multi-region deployment pattern observed" }` (variable/high-cardinality + contextual info)
 
 **Conflict & cardinality rules**:
-- If multiple values are observed for the same property, prefer the most frequently supported value in `value` and record alternates in `meta.observed_*` with evidence.
+- If multiple values are observed for the same property, prefer the most frequently supported value in `properties` and record alternates in `meta.observed_*` with evidence.
 - Avoid emitting separate features that differ only by high-cardinality metadata. Merge into one feature and store varying details in `meta`.
 
 ## Inference & Confidence
 
 **One-level inference is allowed** when strong patterns exist, but use lower confidence and clearly label it:
 - Tag inferred features with `"inferred"` in `tags`
-- Explain the inference briefly in `meta.notes`
+- Explain the inference briefly in `meta.note`
 
 Confidence bands:
 - **90–100**: explicit, unambiguous evidence
@@ -80,22 +124,102 @@ Evidence requirements:
 - Prefer stable `field.path=value` snippets when possible; otherwise short direct quotes
 - Evidence must directly support the feature claim
 
-Version formatting rules (important for CVE/vulnerability analysis):
-- Prefer normalized numeric versions in `value.version` (e.g., `"11"`, `"11.0"`, `"11.0.2"`)
+Version formatting rules (important for vulnerability analysis):
+- Prefer normalized numeric versions in `properties.version` (e.g., `"11"`, `"11.0"`, `"11.0.2"`)
 - Strip leading `v` and surrounding text; keep only the numeric portion when possible
-- If the original version contains labels (LTS/Enterprise/codename/build metadata), store the normalized numeric part in `value.version` and store the original in `meta.raw_version`
-- Remove codenames/release names/edition labels from `value.version`
+- If the original version contains labels (LTS/Enterprise/codename/build metadata), store the normalized numeric part in `properties.version` and store the original in `meta.raw_version`
+- Remove codenames/release names/edition labels from `properties.version`
 
 ## Examples
 
-**Example 1 - Infrastructure with clean version**
+**Example 1 — Entity: a service identified from logs**
+```
+{
+  "type": "entity",
+  "subtype": "service",
+  "id": "api-service",
+  "title": "API Service",
+  "description": "API service handling HTTP requests, built with Java",
+  "properties": {
+    "name": "api-service",
+    "technology": "java"
+  },
+  "confidence": 88,
+  "evidence": [
+    "service.name=api-service",
+    "process.runtime.name=OpenJDK Runtime Environment",
+    "http.method=GET http.url=/api/users http.status_code=200"
+  ],
+  "tags": ["entity", "service", "java"],
+  "meta": {
+    "runtime_version": "11.0.2",
+    "kubernetes_namespace": "production",
+    "observed_endpoints": ["/api/users", "/api/orders", "/api/health"]
+  }
+}
+```
+
+**Example 2 — Entity: a database identified from connection logs**
+```
+{
+  "type": "entity",
+  "subtype": "database",
+  "id": "users-postgresql",
+  "title": "Users PostgreSQL",
+  "description": "PostgreSQL database serving user data",
+  "properties": {
+    "name": "users-db",
+    "technology": "postgresql"
+  },
+  "confidence": 82,
+  "evidence": [
+    "db.system=postgresql",
+    "db.name=users",
+    "db.statement=SELECT * FROM users WHERE id=$1"
+  ],
+  "tags": ["entity", "database", "postgresql"],
+  "meta": {
+    "version": "14.2",
+    "observed_tables": ["users", "user_sessions", "user_preferences"]
+  }
+}
+```
+
+**Example 3 — Infrastructure: cloud deployment showing properties vs meta**
 ```
 {
   "type": "infrastructure",
-  "name": "operating_system",
+  "subtype": "cloud_deployment",
+  "id": "aws-deployment",
+  "title": "AWS",
+  "description": "AWS cloud deployment observed across one or more regions/availability zones",
+  "properties": {
+    "provider": "aws"
+  },
+  "confidence": 92,
+  "evidence": [
+    "cloud.provider=aws",
+    "cloud.region=eu-west-1",
+    "cloud.availability_zone=eu-west-1a"
+  ],
+  "tags": ["infrastructure", "cloud"],
+  "meta": {
+    "regions": ["eu-west-1"],
+    "availability_zones": ["eu-west-1a", "eu-west-1b"],
+    "note": "Multi-AZ deployment pattern observed"
+  }
+}
+```
+
+**Example 4 — Infrastructure: operating system with clean version**
+```
+{
+  "type": "infrastructure",
+  "subtype": "operating_system",
+  "id": "ubuntu-20.04.6",
   "title": "Ubuntu 20.04.6",
   "description": "Ubuntu Linux operating system version 20.04.6",
-  "value": {
+  "properties": {
     "os": "ubuntu",
     "version": "20.04.6"
   },
@@ -111,38 +235,15 @@ Version formatting rules (important for CVE/vulnerability analysis):
 }
 ```
 
-**Example 2 - Infrastructure showing value vs meta**
-```
-{
-  "type": "infrastructure",
-  "name": "cloud_deployment",
-  "title": "AWS",
-  "description": "AWS cloud deployment observed across one or more regions/availability zones",
-  "value": {
-    "provider": "aws"
-  },
-  "confidence": 92,
-  "evidence": [
-    "cloud.provider=aws",
-    "cloud.region=eu-west-1",
-    "cloud.availability_zone=eu-west-1a"
-  ],
-  "tags": ["infrastructure", "cloud"],
-  "meta": {
-    "regions": ["eu-west-1"],
-    "availability_zones": ["eu-west-1a", "eu-west-1b"]
-  }
-}
-```
-
-**Example 3 - Technology feature with version**
+**Example 5 — Technology: library with version**
 ```
 {
   "type": "technology",
-  "name": "logging_library",
+  "subtype": "logging_library",
+  "id": "log4j-2.14.1",
   "title": "Log4j 2.14.1",
   "description": "Apache Log4j logging library version 2.14.1",
-  "value": {
+  "properties": {
     "library": "log4j",
     "version": "2.14.1"
   },
@@ -153,41 +254,43 @@ Version formatting rules (important for CVE/vulnerability analysis):
   ],
   "tags": ["technology", "library", "logging"],
   "meta": {
-    "security_note": "Library versions can be used for CVE/vulnerability queries."
+    "note": "Version 2.14.1 may have known CVEs; suitable for vulnerability queries"
   }
 }
 ```
 
-**Example 4 - Inferred feature with lower confidence**
+**Example 6 — Technology: inferred with lower confidence**
 ```
 {
   "type": "technology",
-  "name": "programming_language",
-  "title": "Java",
-  "description": "Java programming language (inferred from exception patterns)",
-  "value": {
-    "language": "java"
+  "subtype": "programming_language",
+  "id": "python",
+  "title": "Python",
+  "description": "Python programming language (inferred from traceback patterns)",
+  "properties": {
+    "language": "python"
   },
   "confidence": 45,
   "evidence": [
-    "exception=java.lang.NullPointerException",
-    "stacktrace=at com.example.Service.handle(Service.java:42)"
+    "Traceback (most recent call last):",
+    "File \"/app/main.py\", line 42, in handle_request"
   ],
   "tags": ["technology", "inferred"],
   "meta": {
-    "notes": "Inferred from Java exception class names and .java stack trace references."
+    "note": "Inferred from Python-style traceback format and .py file references"
   }
 }
 ```
 
-**Example 5 - Dependency feature showing value vs meta + aggregation/capping**
+**Example 7 — Dependency: service-to-service relationship**
 ```
 {
   "type": "dependency",
-  "name": "service_dependency",
+  "subtype": "service_dependency",
+  "id": "api-user-http",
   "title": "api-service → user-service",
   "description": "Service-to-service HTTP dependency from api-service to user-service",
-  "value": {
+  "properties": {
     "source": "api-service",
     "target": "user-service",
     "protocol": "http"
@@ -201,16 +304,19 @@ Version formatting rules (important for CVE/vulnerability analysis):
   "meta": {
     "endpoints": ["/users", "/users/:id", "/users/:id/profile", "/users/search"],
     "methods": ["GET", "POST", "PUT"],
-    "notes": "Aggregate endpoints under one dependency; cap the list (e.g., max 10) and summarize additional entries."
+    "note": "Aggregate endpoints under one dependency; cap the list (e.g., max 10) and summarize additional entries"
   }
 }
 ```
 
 ## Output Quality Requirements
 
+- Prioritize entity identification: look for distinct system components first, then extract their dependencies, and supplement with standalone infrastructure and technology features.
 - Extract all features that meet the confidence threshold and have supporting evidence.
 - Prefer fewer, higher-confidence features over many speculative ones.
-- Sort features by descending `confidence` (and within ties, stable alphabetical order by `type`, then `name`).
+- Sort features by descending `confidence` (and within ties, stable alphabetical order by `type`, then `subtype`).
 - Dependency anti-spam: only emit a dependency feature when logs contain explicit evidence of a relationship; aggregate endpoints in `meta.endpoints` and cap the list.
+- Entity threshold: only create entity features when there is clear evidence of a distinct, named system component. When in doubt, omit the entity.
 
-Extract all features that meet the confidence threshold and have supporting evidence. Use the finalize_features tool to return the results.
+Extract all features that meet the confidence threshold and have supporting evidence.
+Build one complete, deduplicated feature list internally, then call **finalize_features** exactly once.

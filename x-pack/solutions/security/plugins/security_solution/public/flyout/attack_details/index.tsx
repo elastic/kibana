@@ -17,6 +17,7 @@ import type { AttackDetailsPanelTabType } from './tabs';
 import { useKibana } from '../../common/lib/kibana';
 
 import { useTabs } from './hooks/use_tabs';
+import { useNavigateToAttackDetailsLeftPanel } from './hooks/use_navigate_to_attack_details_left_panel';
 import { useAttackDetailsContext } from './context';
 import { PanelHeader } from './header';
 
@@ -29,6 +30,7 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
   const { storage } = useKibana().services;
   const { openRightPanel } = useExpandableFlyoutApi();
   const { attackId, indexName } = useAttackDetailsContext();
+  const expandDetails = useNavigateToAttackDetailsLeftPanel();
 
   const { tabsDisplayed, selectedTabId } = useTabs({ path });
 
@@ -47,7 +49,7 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
 
   return (
     <>
-      <FlyoutNavigation flyoutIsExpandable={false} />
+      <FlyoutNavigation flyoutIsExpandable={true} expandDetails={expandDetails} />
       <PanelHeader
         selectedTabId={selectedTabId}
         setSelectedTabId={setSelectedTabId}

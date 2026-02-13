@@ -86,36 +86,30 @@ journey('AlertingDefaults', async ({ page, params }) => {
     await page.click('.euiComboBox__inputWrap');
     await page.click('button[role="option"]:has-text("Test email")');
     await page.click(byTestId('toEmailAddressInput'));
-    await page.fill(
-      'text=To CcBccCombo box. Selected. Combo box input. Type some text or, to display a li >> input[role="combobox"]',
-      'test@gmail.com'
-    );
-    await page.keyboard.press('Enter');
-    await page.fill(
-      'text=test@gmail.comCombo box. Selected. test@gmail.com. Press Backspace to delete tes >> input[role="combobox"]',
-      'tesyt'
-    );
+    await page
+      .getByTestId('toEmailAddressInput')
+      .getByTestId('comboBoxSearchInput')
+      .fill('test@gmail.com');
     await page.keyboard.press('Enter');
 
-    await page.click('[aria-label="Remove tesyt from selection in this group"]');
+    await page.getByTestId('toEmailAddressInput').getByTestId('comboBoxSearchInput').fill('test');
+    await page.keyboard.press('Enter');
+
+    await page.click('[aria-label="Remove test from selection in this group"]');
     await page.click('button:has-text("Cc")');
     await page.click(byTestId('ccEmailAddressInput'));
 
-    await page.fill(`${byTestId('ccEmailAddressInput')} >> input[role="combobox"]`, 'wow');
+    await page.getByTestId('ccEmailAddressInput').getByTestId('comboBoxSearchInput').fill('wow');
     await page.keyboard.press('Enter');
   });
   step('Click text=wow is not a valid email.', async () => {
     await page.click('text=wow is not a valid email.');
-    await page.click('text=wowwow is not a valid email. >> [aria-label="Clear input"]');
-    await page.fill(`${byTestId('ccEmailAddressInput')} >> input[role="combobox"]`, 'list');
-    await page.click(
-      'text=Default emailEmail settings required for selected email alert connectors.To Bcct'
-    );
+    await page.click('[aria-label="Remove wow from selection in this group"]');
+    await page.getByTestId('ccEmailAddressInput').getByTestId('comboBoxSearchInput').fill('list');
+    await page.click('.euiForm');
     await page.click('[aria-label="Remove list from selection in this group"]');
-    await page.click(
-      'text=Default emailEmail settings required for selected email alert connectors.To Bcct'
-    );
-    await page.click('text=To Bcctest@gmail.com >> [aria-label="Clear input"]');
+    await page.click('.euiForm');
+    await page.click('[aria-label="Remove test@gmail.com from selection in this group"]');
     await page.click('.euiForm');
     await page.click('text=To: Email is required for selected email connector');
   });

@@ -44,6 +44,7 @@ export const PreviewFlyout = ({
         flyoutType={'push'}
         services={{
           toastNotifications: core.notifications.toasts,
+          chrome: core.chrome,
         }}
         isEsqlQuery={false}
         hit={currentDoc}

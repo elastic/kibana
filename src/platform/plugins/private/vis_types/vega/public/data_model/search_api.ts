@@ -57,7 +57,7 @@ export class SearchAPI {
     public readonly inspectorAdapters?: VegaInspectorAdapters,
     private readonly searchSessionId?: string,
     private readonly executionContext?: KibanaExecutionContext,
-    private readonly projectRouting?: ProjectRouting
+    public readonly projectRouting?: ProjectRouting
   ) {}
 
   search(searchRequests: SearchRequest[]) {
@@ -160,6 +160,7 @@ export class SearchAPI {
                   abortSignal: this.abortSignal,
                   sessionId: this.searchSessionId,
                   executionContext: this.executionContext,
+                  projectRouting: this.projectRouting,
                 }
               )
               .pipe(

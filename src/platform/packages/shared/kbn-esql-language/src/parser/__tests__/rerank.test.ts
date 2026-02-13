@@ -132,10 +132,12 @@ describe('RERANK', () => {
             name: '=',
             args: [
               {},
-              {
-                type: 'function',
-                name: 'substring',
-              },
+              [
+                {
+                  type: 'function',
+                  name: 'substring',
+                },
+              ],
             ],
           },
         ],
@@ -244,12 +246,7 @@ describe('RERANK', () => {
       expect(rerankCmd).toMatchObject({
         type: 'command',
         name: 'rerank',
-        fields: [
-          expect.objectContaining({
-            type: 'column',
-            incomplete: true,
-          }),
-        ],
+        fields: [],
       });
 
       expect(errors).toHaveLength(1);

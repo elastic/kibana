@@ -11,29 +11,35 @@ import {
   EuiFlexItem,
   EuiHighlight,
   EuiIcon,
+  EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
   EuiLoadingSpinner,
+  EuiToolTip,
   EuiTourStep,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, TaskStatus } from '@kbn/streams-schema';
+import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import React, { useState } from 'react';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { useStreamsTour } from '../../../streams_tour';
+import { FeaturesColumn } from './features_column';
 import { QueriesColumn } from './queries_column';
 import { SignificantEventsColumn } from './significant_events_column';
 import {
   ACTIONS_COLUMN_HEADER,
-  SYSTEMS_COLUMN_HEADER,
+  FEATURES_COLUMN_HEADER,
   NAME_COLUMN_HEADER,
   NO_STREAMS_MESSAGE,
+  ONBOARDING_STATUS_COLUMN_HEADER,
   QUERIES_COLUMN_HEADER,
-  RUN_STREAM_DISCOVERY_BUTTON_LABEL,
+  RUN_STREAM_ONBOARDING_BUTTON_LABEL,
   SIGNIFICANT_EVENTS_COLUMN_HEADER,
+  STOP_STREAM_ONBOARDING_BUTTON_LABEL,
   STREAMS_TABLE_CAPTION_ARIA_LABEL,
 } from './translations';
 import type { SortableField, TableRow } from './utils';
@@ -45,18 +51,23 @@ import {
   filterStreamsByQuery,
   shouldComposeTree,
 } from './utils';
-import { SystemsColumn } from './systems_column';
 
 export function StreamsTreeTable({
   loading,
   streams = [],
-  onSelectionChange,
+  streamOnboardingResultMap,
   searchQuery,
+  selection,
+  onOnboardStreamActionClick,
+  onStopOnboardingActionClick,
 }: {
   streams?: ListStreamDetail[];
+  streamOnboardingResultMap: Record<string, TaskResult<OnboardingResult>>;
   loading?: boolean;
   searchQuery?: Query;
-  onSelectionChange?: (selectedStreams: ListStreamDetail[]) => void;
+  selection: EuiTableSelectionType<TableRow>;
+  onOnboardStreamActionClick: (streamName: string) => void;
+  onStopOnboardingActionClick: (streamName: string) => void;
 }) {
   const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
@@ -229,11 +240,6 @@ export function StreamsTreeTable({
     </EuiFlexGroup>
   );
 
-  const selection: EuiTableSelectionType<TableRow> = {
-    initialSelected: [],
-    onSelectionChange,
-  };
-
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
@@ -252,6 +258,7 @@ export function StreamsTreeTable({
                 const treeMode = shouldComposeTree(sortField);
                 const hasChildren = !!item.children && item.children.length > 0;
                 const isCollapsed = collapsed.has(item.stream.name);
+
                 return (
                   <EuiFlexGroup
                     alignItems="center"
@@ -311,26 +318,66 @@ export function StreamsTreeTable({
                         </EuiHighlight>
                       </EuiLink>
                     </EuiFlexItem>
-                    {false && (
-                      <EuiFlexItem grow={false}>
-                        <EuiLoadingSpinner size="m" />
-                      </EuiFlexItem>
-                    )}
                   </EuiFlexGroup>
                 );
               },
             },
             {
-              name: SYSTEMS_COLUMN_HEADER,
+              name: ONBOARDING_STATUS_COLUMN_HEADER,
               width: '120px',
               align: 'left',
-              render: (item: TableRow) => <SystemsColumn streamName={item.stream.name} />,
+              render: (item: TableRow) => {
+                const onboardingResult = streamOnboardingResultMap[item.stream.name];
+
+                if (onboardingResult === undefined) {
+                  return '-';
+                }
+
+                switch (onboardingResult.status) {
+                  case TaskStatus.InProgress:
+                  case TaskStatus.BeingCanceled:
+                    return <EuiLoadingSpinner size="m" />;
+                  case TaskStatus.NotStarted:
+                  case TaskStatus.Canceled:
+                    return '-';
+                  case TaskStatus.Completed:
+                  case TaskStatus.Acknowledged:
+                    return <EuiIcon type="checkInCircleFilled" color="success" size="m" />;
+                  case TaskStatus.Stale:
+                    return <EuiIcon type="checkInCircleFilled" color="subdued" size="m" />;
+                  case TaskStatus.Failed:
+                    return (
+                      <EuiIconTip
+                        size="m"
+                        type="crossInCircle"
+                        color="danger"
+                        content={onboardingResult.error}
+                      />
+                    );
+                }
+              },
+            },
+            {
+              name: FEATURES_COLUMN_HEADER,
+              width: '120px',
+              align: 'left',
+              render: (item: TableRow) => (
+                <FeaturesColumn
+                  stream={item.stream}
+                  streamOnboardingResult={streamOnboardingResultMap[item.stream.name]}
+                />
+              ),
             },
             {
               name: QUERIES_COLUMN_HEADER,
               width: '120px',
               align: 'left',
-              render: (item: TableRow) => <QueriesColumn streamName={item.stream.name} />,
+              render: (item: TableRow) => (
+                <QueriesColumn
+                  streamName={item.stream.name}
+                  streamOnboardingResult={streamOnboardingResultMap[item.stream.name]}
+                />
+              ),
             },
             {
               name: SIGNIFICANT_EVENTS_COLUMN_HEADER,
@@ -346,11 +393,43 @@ export function StreamsTreeTable({
               sortable: false,
               dataType: 'string',
               render: (_: unknown, item: TableRow) => {
+                const onboardingResult = streamOnboardingResultMap[item.stream.name];
+
+                if (
+                  [TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(
+                    onboardingResult?.status
+                  )
+                ) {
+                  return (
+                    <EuiToolTip
+                      position="top"
+                      content={STOP_STREAM_ONBOARDING_BUTTON_LABEL}
+                      display="block"
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        iconType="stop"
+                        aria-label={STOP_STREAM_ONBOARDING_BUTTON_LABEL}
+                        disabled={onboardingResult.status === TaskStatus.BeingCanceled}
+                        onClick={() => onStopOnboardingActionClick(item.stream.name)}
+                      />
+                    </EuiToolTip>
+                  );
+                }
+
                 return (
-                  <EuiButtonIcon
-                    iconType="securitySignalDetected"
-                    aria-label={RUN_STREAM_DISCOVERY_BUTTON_LABEL}
-                  />
+                  <EuiToolTip
+                    position="top"
+                    content={RUN_STREAM_ONBOARDING_BUTTON_LABEL}
+                    display="block"
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="securitySignal"
+                      aria-label={RUN_STREAM_ONBOARDING_BUTTON_LABEL}
+                      onClick={() => onOnboardStreamActionClick(item.stream.name)}
+                    />
+                  </EuiToolTip>
                 );
               },
             },

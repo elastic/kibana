@@ -15,6 +15,9 @@
       "data",
       "dataViews"
     ],
+    "optionalPlugins": [
+      "cps"
+    ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",

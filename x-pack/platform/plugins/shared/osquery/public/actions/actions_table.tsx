@@ -291,6 +291,9 @@ const ActionsTableComponent = () => {
       onChange={onTableChange}
       rowProps={rowProps}
       data-test-subj="liveQueryActionsTable"
+      tableCaption={i18n.translate('xpack.osquery.liveQueryActions.table.tableCaption', {
+        defaultMessage: 'Live query actions',
+      })}
     />
   );
 };

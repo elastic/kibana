@@ -6,7 +6,7 @@
  */
 import type { Capabilities } from '@kbn/core/public';
 import { RULES_UI_READ } from '@kbn/security-solution-features/constants';
-import { SECURITY_FEATURE_ID, CASES_FEATURE_ID } from '../common/constants';
+import { SECURITY_FEATURE_ID, CASES_FEATURE_ID, RULES_FEATURE_ID } from '../common/constants';
 
 export function hasAccessToSecuritySolution(capabilities: Capabilities): boolean {
   return Boolean(
@@ -17,7 +17,7 @@ export function hasAccessToSecuritySolution(capabilities: Capabilities): boolean
 }
 
 export function hasAccessToRules(capabilities: Capabilities): boolean {
-  return Boolean(capabilities.securitySolutionRulesV1?.[RULES_UI_READ]);
+  return Boolean(capabilities[RULES_FEATURE_ID]?.[RULES_UI_READ]);
 }
 
 export function hasAccessToCases(capabilities: Capabilities): boolean {

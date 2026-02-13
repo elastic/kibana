@@ -1,6 +1,6 @@
 # COS
 
-The `COS` function returns the cosine of a given angle.
+Returns the cosine of an angle, where the angle is specified in radians.
 
 ## Syntax
 
@@ -8,15 +8,15 @@ The `COS` function returns the cosine of a given angle.
 
 ### Parameters
 
-#### `angle`
+#### angle
 
-An angle, in radians. If `null`, the function returns `null`.
+An angle in radians. If the value is `null`, the function returns `null`.
 
 ## Examples
 
+Calculates the cosine of the value in column `a` (which is set to 1.8 radians) and stores the result in a new column called `cos`:
+
 ```esql
 ROW a=1.8
-| EVAL cos = COS(a)
+| EVAL cos=COS(a)
 ```
-
-Calculate the cosine of the angle `1.8` radians.

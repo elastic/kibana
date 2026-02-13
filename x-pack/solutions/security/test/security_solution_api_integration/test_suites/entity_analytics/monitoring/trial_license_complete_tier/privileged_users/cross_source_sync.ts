@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
       const csvUploadResponse = await privMonUtils.bulkUploadUsersCsv(csvContent);
 
       expect(csvUploadResponse.status).toBe(200);
-      expect(csvUploadResponse.body.stats.successful).toBeGreaterThanOrEqual(1);
+      expect(csvUploadResponse.body.stats.successfulOperations).toBeGreaterThanOrEqual(1);
 
       users = (await entityAnalyticsApi.listPrivMonUsers({ query: {} }))
         .body as ListPrivMonUsersResponse;

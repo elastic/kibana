@@ -22,15 +22,25 @@ jest.mock('../app_context', () => ({
 
 jest.mock('../agent_policy', () => ({
   agentPolicyService: {
-    getFullAgentPolicy: jest.fn().mockImplementation(async (_, id, { agentVersion }) => ({
-      inputs: agentVersion.startsWith('9.')
+    getFullAgentPolicy: jest.fn().mockImplementation(async (_, id, { agentVersion }) => {
+      const inputs = agentVersion.startsWith('9.')
         ? [
             {
               type: 'cel',
             },
           ]
-        : [],
-    })),
+        : [];
+
+      if (id === 'policyBothConditions') {
+        inputs.unshift({
+          meta: { package: { agentVersion: '>=9.3.0' } },
+        } as any);
+      }
+
+      return {
+        inputs,
+      };
+    }),
   },
 }));
 
@@ -188,6 +198,49 @@ describe('getVersionSpecificPolicies', () => {
           ],
         },
         policy_id: 'policy1#9.1',
+      },
+    ]);
+  });
+
+  it('should create version specific policies with common agent versions and both package and template level condition', async () => {
+    const policies = await getVersionSpecificPolicies(soClient, fleetServerPolicy, {
+      id: 'policyBothConditions',
+      inputs: [
+        {
+          meta: { package: { agentVersion: '>=9.3.0' } },
+        },
+        {},
+      ],
+    } as any);
+    expect(policies).toEqual([
+      {
+        data: {
+          inputs: [
+            {
+              meta: { package: { agentVersion: '>=9.3.0' } },
+            },
+            {
+              type: 'cel',
+            },
+          ],
+        },
+        policy_id: 'policyBothConditions#9.3',
+      },
+      {
+        data: {
+          inputs: [
+            {
+              type: 'cel',
+            },
+          ],
+        },
+        policy_id: 'policyBothConditions#9.2',
+      },
+      {
+        data: {
+          inputs: [],
+        },
+        policy_id: 'policyBothConditions#8.9',
       },
     ]);
   });

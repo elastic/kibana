@@ -13,23 +13,24 @@ import { AnalyticsEvents } from '../analytics/constants';
 
 export const useShowManagedLLMCostTour = () => {
   const usageTracker = useUsageTracker();
-  const { cloud } = useKibana().services;
+  const { cloud, notifications } = useKibana().services;
   const [isTourVisible, setIsTourVisible] = useState<boolean>(false);
   const onSkipTour = useCallback(() => {
     localStorage.setItem(ELASTIC_LLM_COST_TOUR_SKIP_KEY, 'true');
     setIsTourVisible(false);
     usageTracker?.click(AnalyticsEvents.closedCostTransparencyTour);
   }, [usageTracker]);
+  const isTourEnabled = notifications.tours.isEnabled();
 
   useEffect(() => {
     const isTourSkipped = localStorage.getItem(ELASTIC_LLM_COST_TOUR_SKIP_KEY) === 'true';
     const isCloud = cloud?.isServerlessEnabled ?? false;
 
-    if (!isTourSkipped && isCloud && !isTourVisible) {
+    if (!isTourSkipped && isCloud && !isTourVisible && isTourEnabled) {
       setIsTourVisible(true);
       usageTracker?.click(AnalyticsEvents.viewCostTransparencyTour);
     }
-  }, [cloud, isTourVisible, usageTracker]);
+  }, [cloud, isTourVisible, usageTracker, isTourEnabled]);
 
   return { isTourVisible, onSkipTour };
 };

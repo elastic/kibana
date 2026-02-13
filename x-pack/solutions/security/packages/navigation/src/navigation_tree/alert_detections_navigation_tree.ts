@@ -22,12 +22,12 @@ export const createAlertDetectionsNavigationTree = (): NodeDefinition => ({
       breadcrumbStatus: 'hidden',
       children: [
         {
-          id: SecurityPageName.attacks,
-          link: securityLink(SecurityPageName.attacks),
-        },
-        {
           id: SecurityPageName.alerts,
           link: securityLink(SecurityPageName.alerts),
+        },
+        {
+          id: SecurityPageName.attacks,
+          link: securityLink(SecurityPageName.attacks),
         },
       ],
     },
