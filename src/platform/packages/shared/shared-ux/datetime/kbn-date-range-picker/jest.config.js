@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/datetime/date_range_picker'],
+  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker'],
 };

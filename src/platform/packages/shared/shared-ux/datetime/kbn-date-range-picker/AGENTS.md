@@ -14,13 +14,13 @@ Run from Kibana root directory.
 
 ```bash
 # Unit tests
-yarn test:jest src/platform/packages/shared/shared-ux/datetime/date_range_picker
+yarn test:jest src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker
 
 # Lint (ESLint) — check
-node scripts/eslint.js src/platform/packages/shared/shared-ux/datetime/date_range_picker
+node scripts/eslint.js src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker
 
 # Lint (ESLint) + Format (Prettier) — fix
-node scripts/eslint.js --fix src/platform/packages/shared/shared-ux/datetime/date_range_picker
+node scripts/eslint.js --fix src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker
 
 # Storybook
 yarn storybook shared_ux

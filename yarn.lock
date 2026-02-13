@@ -6481,7 +6481,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/date-range-picker@link:src/platform/packages/shared/shared-ux/datetime/date_range_picker":
+"@kbn/date-range-picker@link:src/platform/packages/shared/shared-ux/datetime/kbn-date-range-picker":
   version "0.0.0"
   uid ""
 
