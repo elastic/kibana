@@ -11,7 +11,6 @@ import type { Logger } from '@kbn/core/server';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID } from '../../common';
-import type { ObservabilityAgentBuilderCoreSetup } from '../types';
 import type { ObservabilityAgentBuilderDataRegistry } from '../data_registry/data_registry';
 
 const GET_SERVICE_DETAILS_TOOL_ID = 'get_service_details';
@@ -26,11 +25,9 @@ const serviceDataSchema = z.object({
 export type ServiceAttachmentData = z.infer<typeof serviceDataSchema>;
 
 export function createServiceAttachmentType({
-  core,
   logger,
   dataRegistry,
 }: {
-  core: ObservabilityAgentBuilderCoreSetup;
   logger: Logger;
   dataRegistry: ObservabilityAgentBuilderDataRegistry;
 }): AttachmentTypeDefinition<

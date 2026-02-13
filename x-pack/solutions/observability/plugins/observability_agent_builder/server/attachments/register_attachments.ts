@@ -35,7 +35,7 @@ export async function registerAttachments({
     createErrorAttachmentType({ logger, dataRegistry }),
     createAlertAttachmentType({ core, logger }),
     createLogAttachmentType({ core, logger }),
-    createServiceAttachmentType({ core, logger, dataRegistry }),
+    createServiceAttachmentType({ logger, dataRegistry }),
     createSloAttachmentType({ logger, dataRegistry }),
   ];
 
