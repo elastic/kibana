@@ -60,7 +60,7 @@ import {
 } from './steps';
 import type { StateMachineDefinition, StateMachineStates } from './state_machine';
 import { handleState } from './state_machine';
-import { stepCreateAlertingRules } from './steps/step_create_alerting_rules';
+import { stepCreateAlertingAssets } from './steps/step_create_alerting_assets';
 import { cleanupEsqlViewsStep, stepInstallEsqlViews } from './steps/step_install_esql_views';
 
 export interface InstallContext extends StateContext<StateNames> {
@@ -167,11 +167,11 @@ export const regularStatesDefinition: StateMachineStates<StateNames> = {
   },
   resolve_kibana_promise: {
     onTransition: stepResolveKibanaPromise,
-    nextState: INSTALL_STATES.CREATE_ALERTING_RULES,
+    nextState: INSTALL_STATES.CREATE_ALERTING_ASSETS,
     onPostTransition: updateLatestExecutedState,
   },
-  create_alerting_rules: {
-    onTransition: stepCreateAlertingRules,
+  create_alerting_assets: {
+    onTransition: stepCreateAlertingAssets,
     nextState: INSTALL_STATES.UPDATE_SO,
     onPostTransition: updateLatestExecutedState,
   },

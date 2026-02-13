@@ -38,7 +38,7 @@ inputs:
 steps:
   - name: search-sharepoint
     type: sharepoint-online.search
-    connector-id: <%= stackConnectorId %>
+    connector-id: <%= sharepoint-online-stack-connector-id %>
     with:
       query: "${{ inputs.query }}"
       entityTypes: ${{ inputs.entity_types }}
