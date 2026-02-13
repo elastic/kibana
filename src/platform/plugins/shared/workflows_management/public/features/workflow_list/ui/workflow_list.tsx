@@ -81,7 +81,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
   const onRefresh = useCallback(async () => {
     const result = await refetch();
 
-    if(workflows && result.data && areSimilarResults(result.data, workflows)) {
+    if (workflows && result.data && areSimilarResults(result.data, workflows)) {
       keepPreviousWorkflowOrder({ previousData: workflows, freshData: result.data });
     }
 

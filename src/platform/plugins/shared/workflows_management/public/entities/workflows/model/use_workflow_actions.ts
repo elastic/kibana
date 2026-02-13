@@ -366,6 +366,6 @@ export function useWorkflowActions() {
     deleteWorkflows,
     runWorkflow,
     runIndividualStep,
-    cloneWorkflow
+    cloneWorkflow,
   };
 }

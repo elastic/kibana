@@ -17,10 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
-import {
-  areSimilarResults,
-  keepPreviousWorkflowOrder,
-} from '../../../shared/utils/workflow_utils';
+import { areSimilarResults, keepPreviousWorkflowOrder } from '../../../shared/utils/workflow_utils';
 
 interface UseWorkflowBulkActionsProps {
   selectedWorkflows: WorkflowListItemDto[];

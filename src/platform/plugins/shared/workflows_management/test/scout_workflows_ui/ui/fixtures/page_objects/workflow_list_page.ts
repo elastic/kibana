@@ -24,13 +24,17 @@ export class WorkflowListPage {
 
   /** Returns the state toggle switch locator for the specified workflow. */
   getWorkflowStateToggle(workflowName: string, index: number = 0): Locator {
-    const toggles = this.getWorkflowRow(workflowName).locator('[data-test-subj^="workflowToggleSwitch-"]');
+    const toggles = this.getWorkflowRow(workflowName).locator(
+      '[data-test-subj^="workflowToggleSwitch-"]'
+    );
     return toggles.nth(index);
   }
 
   /** Returns the checkbox locator for selecting the specified workflow. */
   getSelectCheckboxForWorkflow(workflowName: string, index: number = 0): Locator {
-    const checkboxes = this.getWorkflowRow(workflowName).locator('td:first-child input[type="checkbox"]');
+    const checkboxes = this.getWorkflowRow(workflowName).locator(
+      'td:first-child input[type="checkbox"]'
+    );
     return checkboxes.nth(index);
   }
 
@@ -54,10 +58,11 @@ export class WorkflowListPage {
       | 'editWorkflowAction'
       | 'cloneWorkflowAction'
       | 'deleteWorkflowAction',
-      index: number = 0
+    index: number = 0
   ): Promise<Locator> {
-    const buttons =await this.getWorkflowRow(workflowName)
-      .locator('[data-test-subj="euiCollapsedItemActionsButton"]');
+    const buttons = this.getWorkflowRow(workflowName).locator(
+      '[data-test-subj="euiCollapsedItemActionsButton"]'
+    );
     buttons.nth(index).click();
     return this.page.locator(`.euiContextMenuPanel [data-test-subj="${action}"]`);
   }
@@ -84,8 +89,7 @@ export class WorkflowListPage {
   /** Returns workflow names in current table order (visible page only). */
   async getVisibleWorkflowNamesInOrder(): Promise<string[]> {
     await this.page.testSubj.waitForSelector('workflowListTable', { state: 'visible' });
-    const links = this.page.testSubj
-      .locator('workflowListTable workflowNameLink');
+    const links = this.page.testSubj.locator('workflowListTable workflowNameLink');
     const texts = await links.allTextContents();
     return texts.map((t) => t.trim());
   }
