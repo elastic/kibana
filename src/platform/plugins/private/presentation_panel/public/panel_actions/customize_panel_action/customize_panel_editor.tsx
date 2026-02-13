@@ -272,6 +272,7 @@ export const CustomizePanelEditor = ({
               end={timeRange?.to ?? undefined}
               onTimeChange={({ start, end }) => setTimeRange({ from: start, to: end })}
               showUpdateButton={false}
+              canRoundRelativeUnits={false}
               dateFormat={dateFormat}
               commonlyUsedRanges={commonlyUsedRangesForDatePicker}
               data-test-subj="customizePanelTimeRangeDatePicker"
