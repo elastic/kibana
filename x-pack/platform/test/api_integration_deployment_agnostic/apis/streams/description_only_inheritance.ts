@@ -51,10 +51,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       const {
-        name: _childStreamName,
         ingest: childIngest,
         description: childDescription,
-        ..._childRest
       } = childBefore.stream;
       const { updated_at: _childProcessingUpdatedAt, ...childProcessing } = childIngest.processing;
 
@@ -97,10 +95,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       const {
-        name: _parentStreamName,
         ingest: parentIngest,
         description: parentDescription,
-        ..._parentRest
       } = parentBefore.stream;
       const { updated_at: _parentProcessingUpdatedAt, ...parentProcessing } =
         parentIngest.processing;
