@@ -83,7 +83,6 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
       }
 
       const sourceNames = sources.filter((source) => !source.hidden).map((source) => source.name);
-
       // Generate dash patterns from the source names
       const dashPatterns = generateIndexPatterns(sourceNames);
 
@@ -91,7 +90,6 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
         ...dashPatterns.map((pattern) => ({ label: pattern })),
         ...sourceNames.map((name) => ({ label: name })),
       ];
-
       setFetchedSources(allOptions);
     };
 
@@ -105,15 +103,9 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
   }, [core, fetchedSources.length, getLicense, isMounted]);
 
   useEffect(() => {
-    if (hasAutoSelectedDefaultSource.current) {
+    if (hasAutoSelectedDefaultSource.current || fetchedSources.length === 0) {
       return;
     }
-
-    // Only decide about auto-selecting once we actually have options.
-    if (fetchedSources.length === 0) {
-      return;
-    }
-
     hasAutoSelectedDefaultSource.current = true;
 
     if (!currentSources.length) {
