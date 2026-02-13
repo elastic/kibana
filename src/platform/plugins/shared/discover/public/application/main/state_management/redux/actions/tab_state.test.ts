@@ -235,6 +235,7 @@ describe('tab_state actions', () => {
       expect(tab.attributes).toStrictEqual({
         controlGroupState: mockControlState,
         visContext: undefined,
+        timeRestore: false,
       });
     });
 

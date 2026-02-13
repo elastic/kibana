@@ -14,7 +14,7 @@ import {
   METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE,
   METRIC_OTEL_JVM_PROCESS_MEMORY_COMMITTED,
   METRIC_OTEL_JVM_PROCESS_MEMORY_LIMIT,
-  VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP,
+  VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP,
   LABEL_TYPE,
   AGENT_NAME,
 } from '../../../../../../common/es_fields/apm';
@@ -85,7 +85,7 @@ export async function getNonHeapMemoryChart({
   const additionalFilters = isOpenTelemetry
     ? [
         { terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } },
-        { term: { [LABEL_TYPE]: VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP } },
+        { term: { [LABEL_TYPE]: VALUE_OTEL_JVM_MEMORY_TYPE_NON_HEAP } },
       ]
     : [{ terms: { [AGENT_NAME]: JAVA_AGENT_NAMES } }];
 
