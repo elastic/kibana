@@ -7,14 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
+  EuiContextMenu,
   EuiHorizontalRule,
   EuiIcon,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
+  EuiPopover,
+  EuiSplitButton,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -35,6 +39,124 @@ const overflowKeyPadItemCss = css`
   min-width: 72px;
   min-height: 48px;
 `;
+
+const saveOverflowMenuCss = css`
+  width: 160px;
+`;
+
+const DashboardSaveSplitButton: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const panels = [
+    {
+      id: 0,
+      title: '',
+      items: [
+        { name: 'Save as', icon: 'save', onClick: () => setIsOpen(false) },
+        { name: 'Reset changes', icon: 'editorUndo', onClick: () => setIsOpen(false) },
+      ],
+    },
+  ];
+  return (
+    <EuiSplitButton
+      size="s"
+      color="text"
+      fill={false}
+      data-test-subj="headerGlobalNav-appActionsSaveSplitButton"
+      aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveAriaLabel', {
+        defaultMessage: 'Save',
+      })}
+    >
+      <EuiSplitButton.ActionPrimary
+        iconType="save"
+        data-test-subj="headerGlobalNav-appActionsSaveButton"
+        minWidth={false}
+      >
+        {i18n.translate('core.ui.chrome.headerGlobalNav.saveButton', {
+          defaultMessage: 'Save',
+        })}
+      </EuiSplitButton.ActionPrimary>
+      <EuiPopover
+        button={React.cloneElement(
+          <EuiSplitButton.ActionSecondary
+            iconType="arrowDown"
+            aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.saveOptionsAriaLabel', {
+              defaultMessage: 'Save options',
+            })}
+            data-test-subj="headerGlobalNav-appActionsSaveDropdown"
+          />,
+          { onClick: () => setIsOpen(true) }
+        )}
+        isOpen={isOpen}
+        closePopover={() => setIsOpen(false)}
+        anchorPosition="downLeft"
+        panelPaddingSize="none"
+      >
+        <EuiContextMenu css={saveOverflowMenuCss} panels={panels} initialPanelId={0} />
+      </EuiPopover>
+    </EuiSplitButton>
+  );
+};
+
+const DashboardPrimaryActions: React.FC = () => {
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  return (
+    <>
+      {!isEditMode && (
+        <EuiButtonIcon
+          size="xs"
+          color="text"
+          iconType="fullScreen"
+          onClick={noop}
+          data-test-subj="headerGlobalNav-appActionsFullScreenButton"
+          aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.fullScreenAriaLabel', {
+            defaultMessage: 'Full screen',
+          })}
+        />
+      )}
+      <EuiButtonIcon
+        size="xs"
+        color="text"
+        iconType="share"
+        onClick={noop}
+        data-test-subj="headerGlobalNav-appActionsShareButton"
+      >
+        Share
+      </EuiButtonIcon>
+      {isEditMode ? (
+        <>
+          <EuiButtonIcon
+            size="xs"
+            color="text"
+            iconType="logOut"
+            onClick={() => setIsEditMode(false)}
+            data-test-subj="headerGlobalNav-appActionsExitEditButton"
+            aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.exitEditAriaLabel', {
+              defaultMessage: 'Exit edit',
+            })}
+          />
+          <DashboardSaveSplitButton />
+        </>
+      ) : (
+        <EuiButton
+          size="s"
+          color="text"
+          fill={false}
+          iconType="pencil"
+          onClick={() => setIsEditMode(true)}
+          data-test-subj="headerGlobalNav-appActionsEditButton"
+          aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.editAriaLabel', {
+            defaultMessage: 'Edit',
+          })}
+        >
+          {i18n.translate('core.ui.chrome.headerGlobalNav.editButton', {
+            defaultMessage: 'Edit',
+          })}
+        </EuiButton>
+      )}
+    </>
+  );
+};
 
 const DashboardOverflowKeyPadSection: React.FC = () => (
   <>
@@ -101,42 +223,6 @@ export function getDashboardHeaderAppActionsConfig(): ChromeHeaderAppActionsConf
         ],
       },
     ],
-    primaryActions: [
-      <EuiButtonIcon
-        key="fullscreen"
-        size="xs"
-        color="text"
-        iconType="fullScreen"
-        onClick={noop}
-        data-test-subj="headerGlobalNav-appActionsFullScreenButton"
-        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.fullScreenAriaLabel', {
-          defaultMessage: 'Full screen',
-        })}
-      />,
-      <EuiButtonIcon
-        key="share"
-        size="xs"
-        color="text"
-        iconType="share"
-        onClick={noop}
-        data-test-subj="headerGlobalNav-appActionsShareButton"
-      >
-        Share
-      </EuiButtonIcon>,
-      <EuiButton
-        key="edit"
-        size="s"
-        color="text"
-        fill={false}
-        iconType="pencil"
-        onClick={noop}
-        data-test-subj="headerGlobalNav-appActionsEditButton"
-        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.editAriaLabel', {
-          defaultMessage: 'Edit',
-        })}
-      >
-        Edit
-      </EuiButton>,
-    ],
+    primaryActions: [<DashboardPrimaryActions key="dashboard-primary-actions" />],
   };
 }
