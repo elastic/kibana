@@ -6,8 +6,10 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
-import { getCaseByIdStepDefinition } from './get_case_by_id';
+import { getCaseStepDefinition } from './get_case';
 import { createCreateCaseStepDefinition } from './create_case';
+import { createUpdateCaseStepDefinition } from './update_case';
+import { addCommentStepDefinition } from './add_comment';
 import type { CasesPublicSetupDependencies } from '../types';
 
 export function registerCasesSteps(
@@ -17,6 +19,8 @@ export function registerCasesSteps(
   if (!workflowsExtensions) {
     return;
   }
-  workflowsExtensions.registerStepDefinition(getCaseByIdStepDefinition);
+  workflowsExtensions.registerStepDefinition(getCaseStepDefinition);
   workflowsExtensions.registerStepDefinition(createCreateCaseStepDefinition(core));
+  workflowsExtensions.registerStepDefinition(createUpdateCaseStepDefinition(core));
+  workflowsExtensions.registerStepDefinition(addCommentStepDefinition);
 }

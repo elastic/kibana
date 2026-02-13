@@ -6,21 +6,24 @@
  */
 
 import React from 'react';
-import type { CoreSetup, HttpStart } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { ActionsMenuGroup, createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { getAllConnectorsUrl } from '../../common/utils/connectors_api';
 import { OwnerEnum } from '../../docs/openapi/bundled-types.gen';
 import {
   createCaseStepCommonDefinition,
   CreateCaseStepTypeId,
 } from '../../common/workflows/steps/create_case';
-
-interface ConnectorOption {
-  id: string;
-  name: string;
-  actionTypeId?: string;
-}
+import {
+  buildBooleanSelectionHandler,
+  buildConnectorSelectionHandler,
+  buildCustomFieldKeySelectionHandler,
+  buildCustomFieldTypeSelectionHandler,
+  buildEnumSelectionHandler,
+  buildStringValueSelectionHandler,
+  buildTemplateSelectionHandler,
+  createCasesWorkflowAutocompleteDataSources,
+} from './case_autocomplete';
 
 const ownerOptions = Object.values(OwnerEnum).map((owner) => ({
   value: owner,
@@ -28,19 +31,13 @@ const ownerOptions = Object.values(OwnerEnum).map((owner) => ({
 }));
 
 export const createCreateCaseStepDefinition = (core: CoreSetup) => {
-  let httpPromise: Promise<HttpStart> | null = null;
-
-  const getHttp = async (): Promise<HttpStart> => {
-    if (!httpPromise) {
-      httpPromise = core.getStartServices().then(([coreStart]) => coreStart.http);
-    }
-    return httpPromise;
-  };
-
-  const getConnectors = async (): Promise<ConnectorOption[]> => {
-    const http = await getHttp();
-    return http.get<ConnectorOption[]>(getAllConnectorsUrl());
-  };
+  const {
+    getConnectors,
+    getTemplateOptions,
+    getCustomFieldOptions,
+    getCategoryOptions,
+    getTagOptions,
+  } = createCasesWorkflowAutocompleteDataSources(core);
 
   return createPublicStepDefinition({
     ...createCaseStepCommonDefinition,
@@ -173,7 +170,6 @@ export const createCreateCaseStepDefinition = (core: CoreSetup) => {
               _context: unknown,
               option: { value: string; label: string } | null
             ) => {
-              console.log({ value, option });
               if (option) {
                 return {
                   message: `Owner "${option.label}" is valid for case workflows.`,
@@ -188,61 +184,53 @@ export const createCreateCaseStepDefinition = (core: CoreSetup) => {
             },
           },
         },
-        // TODO: add assignees selection support when array item paths are supported in editor handlers.
         'connector.id': {
-          selection: {
-            search: async (input: string) => {
-              const connectors = await getConnectors();
-              const query = input.trim().toLowerCase();
-              return connectors
-                .filter(
-                  (connector) =>
-                    query.length === 0 ||
-                    connector.id.toLowerCase().includes(query) ||
-                    connector.name.toLowerCase().includes(query)
-                )
-                .map((connector) => ({
-                  value: connector.id,
-                  label: connector.name,
-                  description: connector.actionTypeId
-                    ? `Connector type: ${connector.actionTypeId}`
-                    : undefined,
-                }));
-            },
-            resolve: async (value: string) => {
-              const connectors = await getConnectors();
-              const connector = connectors.find((item) => item.id === value);
-
-              if (!connector) {
-                return null;
-              }
-
-              return {
-                value: connector.id,
-                label: connector.name,
-                description: connector.actionTypeId
-                  ? `Connector type: ${connector.actionTypeId}`
-                  : undefined,
-              };
-            },
-            getDetails: async (
-              value: string,
-              _context: unknown,
-              option: { value: string; label: string } | null
-            ) => {
-              if (option) {
-                return {
-                  message: `Connector "${option.label}" is available for case workflows.`,
-                };
-              }
-
-              return {
-                message: `Connector "${value}" was not found. Select an existing connector in Kibana connectors.`,
-              };
-            },
-          },
+          selection: buildConnectorSelectionHandler(getConnectors, 'id'),
         },
-      },
+        'connector.name': {
+          selection: buildConnectorSelectionHandler(getConnectors, 'name'),
+        },
+        'connector.type': {
+          selection: buildEnumSelectionHandler(
+            [
+              '.cases-webhook',
+              '.jira',
+              '.none',
+              '.resilient',
+              '.servicenow',
+              '.servicenow-sir',
+              '.swimlane',
+            ],
+            'Connector type'
+          ),
+        },
+        severity: {
+          selection: buildEnumSelectionHandler(['low', 'medium', 'high', 'critical'], 'Severity'),
+        },
+        category: {
+          selection: buildStringValueSelectionHandler(getCategoryOptions, 'Category'),
+        },
+        tags: {
+          selection: buildStringValueSelectionHandler(getTagOptions, 'Tag'),
+        },
+        'settings.syncAlerts': {
+          selection: buildBooleanSelectionHandler('alert sync'),
+        },
+        'settings.extractObservables': {
+          selection: buildBooleanSelectionHandler('observable extraction'),
+        },
+        // editorHandlers do not currently support array item paths reliably.
+        // Use customFields.key and customFields.type to provide discoverability for values from case configuration.
+        'customFields.key': {
+          selection: buildCustomFieldKeySelectionHandler(getCustomFieldOptions),
+        },
+        'customFields.type': {
+          selection: buildCustomFieldTypeSelectionHandler(getCustomFieldOptions),
+        },
+        template: {
+          selection: buildTemplateSelectionHandler(getTemplateOptions),
+        },
+      } as Record<string, unknown>,
     },
   });
 };

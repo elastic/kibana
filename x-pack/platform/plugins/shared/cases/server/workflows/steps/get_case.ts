@@ -8,24 +8,24 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
-  getCaseByIdStepCommonDefinition,
-  type GetCaseByIdStepInput,
-  type GetCaseByIdStepOutput,
-} from '../../../common/workflows/steps/get_case_by_id';
+  getCaseStepCommonDefinition,
+  type GetCaseStepInput,
+  type GetCaseStepOutput,
+} from '../../../common/workflows/steps/get_case';
 import type { CasesClient } from '../../client';
 import { createCasesStepHandler } from './utils';
 
-export const getCaseByIdStepDefinition = (
+export const getCaseStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
 ) =>
   createServerStepDefinition({
-    ...getCaseByIdStepCommonDefinition,
-    handler: createCasesStepHandler(getCasesClient, async (client, input: GetCaseByIdStepInput) => {
+    ...getCaseStepCommonDefinition,
+    handler: createCasesStepHandler(getCasesClient, async (client, input: GetCaseStepInput) => {
       const theCase = await client.cases.get({
         id: input.case_id,
         includeComments: input.include_comments,
       });
 
-      return theCase as GetCaseByIdStepOutput['case'];
+      return theCase as GetCaseStepOutput['case'];
     }),
   });

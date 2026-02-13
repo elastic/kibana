@@ -10,25 +10,25 @@ import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
 import { i18n } from '@kbn/i18n';
 import { ActionsMenuGroup } from '@kbn/workflows-extensions/public';
 import {
-  getCaseByIdStepCommonDefinition,
-  GetCaseByIdStepTypeId,
-} from '../../common/workflows/steps/get_case_by_id';
+  getCaseStepCommonDefinition,
+  GetCaseStepTypeId,
+} from '../../common/workflows/steps/get_case';
 
-export const getCaseByIdStepDefinition: PublicStepDefinition = {
-  ...getCaseByIdStepCommonDefinition,
+export const getCaseStepDefinition: PublicStepDefinition = {
+  ...getCaseStepCommonDefinition,
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/magnify').then(({ icon }) => ({
       default: icon,
     }))
   ),
-  label: i18n.translate('xpack.cases.workflowSteps.getCaseById.label', {
+  label: i18n.translate('xpack.cases.workflowSteps.getCase.label', {
     defaultMessage: 'Get case by ID',
   }),
-  description: i18n.translate('xpack.cases.workflowSteps.getCaseById.description', {
+  description: i18n.translate('xpack.cases.workflowSteps.getCase.description', {
     defaultMessage: 'Retrieves a case using its unique identifier',
   }),
   documentation: {
-    details: i18n.translate('xpack.cases.workflowSteps.getCaseById.documentation.details', {
+    details: i18n.translate('xpack.cases.workflowSteps.getCase.documentation.details', {
       defaultMessage:
         'This step retrieves a complete case object from the cases system using its ID. You can optionally include comments and attachments in the response.',
     }),
@@ -36,16 +36,16 @@ export const getCaseByIdStepDefinition: PublicStepDefinition = {
       `## Basic usage
 \`\`\`yaml
 - name: get_case
-  type: ${GetCaseByIdStepTypeId}
+  type: ${GetCaseStepTypeId}
   with:
-    id: "abc-123-def-456"
+    case_id: "abc-123-def-456"
 \`\`\``,
       `## With comments included
 \`\`\`yaml
 - name: get_case_with_comments
-  type: ${GetCaseByIdStepTypeId}
+  type: ${GetCaseStepTypeId}
   with:
-    id: "abc-123-def-456"
+    case_id: "abc-123-def-456"
     include_comments: true
 \`\`\``,
       `## Using case from previous step
@@ -56,9 +56,9 @@ export const getCaseByIdStepDefinition: PublicStepDefinition = {
     search_term: "critical incident"
 
 - name: get_first_case
-  type: ${GetCaseByIdStepTypeId}
+  type: ${GetCaseStepTypeId}
   with:
-    id: \${{ steps.find_cases.output.cases[0].id }}
+    case_id: \${{ steps.find_cases.output.cases[0].id }}
     include_comments: true
 \`\`\``,
     ],

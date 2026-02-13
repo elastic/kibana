@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { CaseResponseProperties } from '../../../docs/openapi/bundled-types.gen';
 
-export const GetCaseByIdStepTypeId = 'cases.getCaseById';
+export const GetCaseStepTypeId = 'case.getCase';
 
 export const InputSchema = z.object({
   case_id: z.string().min(1, 'case_id is required'),
@@ -20,25 +20,17 @@ export const OutputSchema = z.object({
   case: CaseResponseProperties,
 });
 
-export const ConfigSchema = z.object({
-  id: z.string(),
-});
+export type GetCaseStepInputSchema = typeof InputSchema;
+export type GetCaseStepOutputSchema = typeof OutputSchema;
 
-export type GetCaseByIdStepInputSchema = typeof InputSchema;
-export type GetCaseByIdStepOutputSchema = typeof OutputSchema;
-export type GetCaseByIdStepConfigSchema = typeof ConfigSchema;
+export type GetCaseStepInput = z.infer<typeof InputSchema>;
+export type GetCaseStepOutput = z.infer<typeof OutputSchema>;
 
-export type GetCaseByIdStepInput = z.infer<typeof InputSchema>;
-export type GetCaseByIdStepOutput = z.infer<typeof OutputSchema>;
-export type GetCaseByIdStepConfig = z.infer<typeof ConfigSchema>;
-
-export const getCaseByIdStepCommonDefinition: CommonStepDefinition<
-  GetCaseByIdStepInputSchema,
-  GetCaseByIdStepOutputSchema,
-  GetCaseByIdStepConfigSchema
+export const getCaseStepCommonDefinition: CommonStepDefinition<
+  GetCaseStepInputSchema,
+  GetCaseStepOutputSchema
 > = {
-  id: GetCaseByIdStepTypeId,
+  id: GetCaseStepTypeId,
   inputSchema: InputSchema,
   outputSchema: OutputSchema,
-  configSchema: ConfigSchema,
 };

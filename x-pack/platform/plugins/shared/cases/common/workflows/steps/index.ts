@@ -6,20 +6,22 @@
  */
 
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { getCaseByIdStepCommonDefinition } from './get_case_by_id';
+import { getCaseStepCommonDefinition } from './get_case';
 import { createCaseStepCommonDefinition } from './create_case';
+import { updateCaseStepCommonDefinition } from './update_case';
+import { addCommentStepCommonDefinition } from './add_comment';
 
 // Export specific items to avoid naming conflicts for generic schema names
 export {
-  GetCaseByIdStepTypeId,
-  getCaseByIdStepCommonDefinition,
-  type GetCaseByIdStepInputSchema,
-  type GetCaseByIdStepOutputSchema,
-  type GetCaseByIdStepConfigSchema,
-  type GetCaseByIdStepInput,
-  type GetCaseByIdStepOutput,
-  type GetCaseByIdStepConfig,
-} from './get_case_by_id';
+  GetCaseStepTypeId,
+  getCaseStepCommonDefinition,
+  type GetCaseStepInputSchema,
+  type GetCaseStepOutputSchema,
+  type GetCaseStepConfigSchema,
+  type GetCaseStepInput,
+  type GetCaseStepOutput,
+  type GetCaseStepConfig,
+} from './get_case';
 
 export {
   CreateCaseStepTypeId,
@@ -32,13 +34,33 @@ export {
   type CreateCaseStepConfig,
 } from './create_case';
 
+export {
+  UpdateCaseStepTypeId,
+  updateCaseStepCommonDefinition,
+  type UpdateCaseStepInputSchema,
+  type UpdateCaseStepOutputSchema,
+  type UpdateCaseStepInput,
+  type UpdateCaseStepOutput,
+} from './update_case';
+
+export {
+  AddCommentStepTypeId,
+  addCommentStepCommonDefinition,
+  type AddCommentStepInputSchema,
+  type AddCommentStepOutputSchema,
+  type AddCommentStepInput,
+  type AddCommentStepOutput,
+} from './add_comment';
+
 /**
  * Collection for cases workflow step definitions.
  * Each concrete step implementation will register its common definition here.
  */
 export const casesWorkflowSteps: ReadonlyArray<CommonStepDefinition> = Object.freeze([
-  getCaseByIdStepCommonDefinition,
+  getCaseStepCommonDefinition,
   createCaseStepCommonDefinition,
+  updateCaseStepCommonDefinition,
+  addCommentStepCommonDefinition,
 ]);
 
 /**

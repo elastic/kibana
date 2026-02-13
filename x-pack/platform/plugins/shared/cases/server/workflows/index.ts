@@ -9,8 +9,10 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { CasesServerSetupDependencies } from '../types';
 import type { CasesClient } from '../client';
 
-import { getCaseByIdStepDefinition } from './steps/get_case_by_id';
+import { getCaseStepDefinition } from './steps/get_case';
 import { createCaseStepDefinition } from './steps/create_case';
+import { updateCaseStepDefinition } from './steps/update_case';
+import { addCommentStepDefinition } from './steps/add_comment';
 
 export function registerCaseWorkflowSteps(
   workflowsExtensions: CasesServerSetupDependencies['workflowsExtensions'],
@@ -20,6 +22,8 @@ export function registerCaseWorkflowSteps(
     return;
   }
 
-  workflowsExtensions.registerStepDefinition(getCaseByIdStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(getCaseStepDefinition(getCasesClient));
   workflowsExtensions.registerStepDefinition(createCaseStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(updateCaseStepDefinition(getCasesClient));
+  workflowsExtensions.registerStepDefinition(addCommentStepDefinition(getCasesClient));
 }
