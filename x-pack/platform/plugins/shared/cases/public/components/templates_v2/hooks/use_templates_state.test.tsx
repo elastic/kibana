@@ -31,6 +31,7 @@ describe('useTemplatesState', () => {
       search: '',
       tags: [],
       author: [],
+      isDeleted: false,
     });
   });
 
@@ -74,6 +75,7 @@ describe('useTemplatesState', () => {
       search: '',
       tags: [],
       author: [],
+      isDeleted: false,
     });
   });
 
@@ -189,6 +191,7 @@ describe('useTemplatesState', () => {
       search: 'test',
       tags: [],
       author: [],
+      isDeleted: false,
     });
   });
 });
