@@ -6,6 +6,7 @@
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
+import { tags } from '@kbn/scout-oblt';
 import { test } from '../../fixtures';
 import {
   HOST1_NAME,
@@ -20,7 +21,7 @@ import type { MetricsTabQuickAccessItem } from '../../fixtures/page_objects/asse
 
 test.describe(
   'Infrastructure Inventory - Host Asset Details Flyout',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let savedViewId: string = '';
 
