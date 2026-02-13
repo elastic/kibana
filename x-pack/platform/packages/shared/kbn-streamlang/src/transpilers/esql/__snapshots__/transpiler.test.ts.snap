@@ -3,8 +3,8 @@
 exports[`transpile - Streamlang DSL to ES|QL) prelude support should include prelude when preludeFields are provided 1`] = `
 "INSIST_🐔 \`attributes.foo\`
   | INSIST_🐔 \`body.message\`
-  | EVAL \`attributes.foo\` = \`attributes.foo\`::INTEGER
-  | EVAL \`body.message\` = \`body.message\`::STRING
+  | EVAL \`attributes.foo\` = COALESCE(NULL, \`attributes.foo\`::INTEGER)
+  | EVAL \`body.message\` = COALESCE(NULL, \`body.message\`::STRING)
   | EVAL \`attributes.status\` = \\"active\\""
 `;
 
@@ -12,8 +12,8 @@ exports[`transpile - Streamlang DSL to ES|QL) prelude support should prepend INS
 "INSIST_🐔 a_field
   | INSIST_🐔 m_field
   | INSIST_🐔 z_field
-  | EVAL a_field = a_field::BOOLEAN
-  | EVAL z_field = z_field::LONG
+  | EVAL a_field = COALESCE(NULL, a_field::BOOLEAN)
+  | EVAL z_field = COALESCE(NULL, z_field::LONG)
   | EVAL \`attributes.status\` = \\"active\\""
 `;
 
