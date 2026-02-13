@@ -6381,6 +6381,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dashboard-agent-common@link:x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dashboard-agent-plugin@link:x-pack/platform/plugins/shared/dashboard_agent":
   version "0.0.0"
   uid ""
