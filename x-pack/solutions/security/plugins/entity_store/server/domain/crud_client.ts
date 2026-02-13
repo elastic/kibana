@@ -6,7 +6,11 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { Result } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  BulkOperationContainer,
+  BulkUpdateAction,
+  Result,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { createHash } from 'crypto';
 import { unset } from 'lodash';
@@ -21,6 +25,7 @@ import type {
   ManagedEntityDefinition,
 } from '../../common/domain/definitions/entity_schema';
 import { getEuidFromObject } from '../../common/domain/euid';
+import { getUpdatesEntitiesDataStreamName } from './assets/updates_data_stream';
 
 interface EntityManagerDependencies {
   logger: Logger;
@@ -61,25 +66,19 @@ export class CRUDClient {
       document.entity.id = id;
     }
 
-    // TODO:
-    // - reimplement ID logic to follow Romulo discussion
-    // - extract checks and ID fixes to a single function (for bulk as well)
-    // - update bulk to actually use esClient.bulk() and create all docs in updates index
-    // - add buildDocumentToUpdate() to format the docs
-
     const definition = getEntityDefinition(entityType, this.namespace);
     if (!force) {
       const flat = getFlattenedObject(document);
       const fieldDescriptions = getFieldDescriptions(id, flat, definition);
       assertOnlyNonForcedAttributesInReq(id, fieldDescriptions);
     }
-    prepareDocumentForUpsert(entityType, document);
+    const preparedDoc = prepareDocumentForUpsert(entityType, document);
 
     try {
       await this.esClient.create({
         index: getLatestEntitiesIndexName(this.namespace),
         id,
-        document,
+        document: preparedDoc,
         refresh: 'wait_for',
       });
       this.logger.info(`Created entity ID ${id}`);
@@ -90,11 +89,11 @@ export class CRUDClient {
       }
     }
 
-    removeEUIDFields(definition, document);
+    removeEUIDFields(definition, preparedDoc);
     const { result } = await this.esClient.update({
       index: getLatestEntitiesIndexName(this.namespace),
       id,
-      doc: document,
+      doc: preparedDoc,
     });
 
     switch (result as Result) {
@@ -111,7 +110,25 @@ export class CRUDClient {
   }
 
   public async upsertEntitiesBulk(objects: BulkObject[], force: boolean) {
-    await Promise.all(objects.map((obj) => this.upsertEntity(obj.type, obj.document, force)));
+    const operations: (BulkOperationContainer | BulkUpdateAction)[] = [];
+
+    for (const { type: entityType, document } of objects) {
+      const definition = getEntityDefinition(entityType, this.namespace);
+      if (!force) {
+        const flat = getFlattenedObject(document);
+        // TODO: make these two throw regular Errors and try-catch this block as BadCRUDRequest.
+        const fieldDescriptions = getFieldDescriptions('', flat, definition);
+        assertOnlyNonForcedAttributesInReq('', fieldDescriptions);
+      }
+      const preparedDoc = prepareDocumentForUpsert(entityType, document);
+
+      operations.push({ create: {} }, preparedDoc);
+    }
+
+    await this.esClient.bulk({
+      index: getUpdatesEntitiesDataStreamName(this.namespace),
+      operations,
+    });
   }
 
   public async deleteEntity(id: string) {
@@ -164,7 +181,7 @@ function getFieldDescriptions(
     const invalidString = invalid.join(', ');
     throw new BadCRUDRequestError(
       id,
-      `The following attributes are not allowed to be updated: ${invalidString}`
+      `The following attributes are not allowed to be updated: [${invalidString}]`
     );
   }
 
@@ -190,7 +207,10 @@ function assertOnlyNonForcedAttributesInReq(id: string, fields: Record<string, E
   }
 }
 
-function prepareDocumentForUpsert(type: EntityType, data: Partial<Entity>) {
+function prepareDocumentForUpsert(
+  type: EntityType,
+  data: Partial<Entity>
+): Record<string, unknown> {
   const now = new Date().toISOString();
 
   if (type === 'generic') {
@@ -223,7 +243,7 @@ function prepareDocumentForUpsert(type: EntityType, data: Partial<Entity>) {
   return doc;
 }
 
-function removeEUIDFields(definition: ManagedEntityDefinition, document: Entity) {
+function removeEUIDFields(definition: ManagedEntityDefinition, document: Record<string, unknown>) {
   for (const euidField of definition.identityField.requiresOneOfFields) {
     unset(document, euidField);
   }
