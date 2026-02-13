@@ -13,13 +13,20 @@
       "../../../../../typings/emotion.d.ts"
     ]
   },
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["target/**/*"],
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*",
+    "packaging/target/**/*",
+    "packaging/example/**/*"
+  ],
   "kbn_references": [
-    "@kbn/core-chrome-layout-components",
-    "@kbn/core-chrome-layout-constants",
     "@kbn/i18n",
     "@kbn/i18n-react",
-    "@kbn/core-chrome-layout-utils"
+    "@kbn/core-chrome-layout-components",
+    "@kbn/core-chrome-layout-utils",
+    "@kbn/core-chrome-layout-constants"
   ]
 }
