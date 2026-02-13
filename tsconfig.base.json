@@ -850,6 +850,8 @@
       "@kbn/cypress-config/*": ["src/platform/packages/shared/kbn-cypress-config/*"],
       "@kbn/cypress-test-helper": ["src/platform/packages/shared/kbn-cypress-test-helper"],
       "@kbn/cypress-test-helper/*": ["src/platform/packages/shared/kbn-cypress-test-helper/*"],
+      "@kbn/dashboard-agent-common": ["x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common"],
+      "@kbn/dashboard-agent-common/*": ["x-pack/platform/packages/shared/dashboard-agent/dashboard-agent-common/*"],
       "@kbn/dashboard-agent-plugin": ["x-pack/platform/plugins/shared/dashboard_agent"],
       "@kbn/dashboard-agent-plugin/*": ["x-pack/platform/plugins/shared/dashboard_agent/*"],
       "@kbn/dashboard-enhanced-plugin": ["x-pack/platform/plugins/shared/dashboard_enhanced"],

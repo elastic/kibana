@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type {
   DashboardAgentSetupDependencies,
   DashboardAgentStartDependencies,
@@ -15,9 +14,10 @@ import type {
   DashboardAgentPluginStart,
 } from './types';
 import { registerDashboardAgent } from './register_agent';
-import { createDashboardTool, updateDashboardTool } from './tools';
+import { manageDashboardTool } from './tools';
 import { getIsDashboardAgentEnabled } from './utils/get_is_dashboard_agent_enabled';
 import { DASHBOARD_AGENT_FEATURE_FLAG } from '../common/constants';
+import { createDashboardAttachmentType } from './attachment_types';
 
 export class DashboardAgentPlugin
   implements
@@ -64,28 +64,11 @@ export class DashboardAgentPlugin
     coreSetup: CoreSetup<DashboardAgentStartDependencies, DashboardAgentPluginStart>,
     setupDeps: DashboardAgentSetupDependencies
   ) {
-    const [coreStart, startDeps] = await coreSetup.getStartServices();
+    // Register the dashboard attachment type
+    setupDeps.agentBuilder.attachments.registerType(createDashboardAttachmentType() as any);
 
-    const dashboardLocator =
-      startDeps.share?.url?.locators?.get<DashboardLocatorParams>('DASHBOARD_APP_LOCATOR');
-
-    if (!dashboardLocator) {
-      this.logger.warn('Dashboard locator is unavailable; skipping dashboard tool registration.');
-      return;
-    }
-
-    setupDeps.agentBuilder.tools.register(
-      createDashboardTool(startDeps.dashboard, coreStart.savedObjects, {
-        dashboardLocator,
-        spaces: startDeps.spaces,
-      })
-    );
-    setupDeps.agentBuilder.tools.register(
-      updateDashboardTool(startDeps.dashboard, coreStart.savedObjects, {
-        dashboardLocator,
-        spaces: startDeps.spaces,
-      })
-    );
+    // Register the consolidated manage_dashboard tool
+    setupDeps.agentBuilder.tools.register(manageDashboardTool({}));
 
     // Register the dashboard agent
     registerDashboardAgent(setupDeps.agentBuilder);
