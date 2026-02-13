@@ -7,10 +7,8 @@
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
 import { BIGGER_TIMEOUT } from '../../constants';
-import {
-  ServiceDetailsPageTabName,
-  ServiceDetailsTab,
-} from '../service_details/service_details_tab';
+import type { ServiceDetailsPageTabName } from '../service_details/service_details_tab';
+import { ServiceDetailsTab } from '../service_details/service_details_tab';
 
 export class OverviewTab extends ServiceDetailsTab {
   public readonly tabName: ServiceDetailsPageTabName = 'overview';
