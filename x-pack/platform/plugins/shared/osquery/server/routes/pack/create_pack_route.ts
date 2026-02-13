@@ -35,6 +35,7 @@ import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
 import { createPackRequestBodySchema } from '../../../common/api';
 import { getUserInfo } from '../../lib/get_user_info';
+import { escapeFilterValue } from '../utils/generate_copy_name';
 
 type PackSavedObjectLimited = Omit<PackSavedObject, 'saved_object_id' | 'references'>;
 
@@ -84,7 +85,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;
         const conflictingEntries = await spaceScopedClient.find({
           type: packSavedObjectType,
-          filter: `${packSavedObjectType}.attributes.name: "${name}"`,
+          filter: `${packSavedObjectType}.attributes.name: "${escapeFilterValue(name)}"`,
         });
 
         if (

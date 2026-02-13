@@ -11,6 +11,7 @@ import { ENTRY_SESSION_ENTITY_ID_PROPERTY } from '@kbn/session-view-plugin/publi
 import { useDispatch } from 'react-redux';
 import { EVENT_ACTION } from '@kbn/rule-data-utils';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useAddBulkToTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import type { SessionsComponentsProps } from './types';
@@ -24,7 +25,6 @@ import { getDefaultControlColumn } from '../../../timelines/components/timeline/
 import { useLicense } from '../../hooks/use_license';
 import { eventsDefaultModel } from '../events_viewer/default_model';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
-import { SecurityCellActionsTrigger } from '../cell_actions';
 
 export const TEST_ID = 'security_solution:sessions_viewer:sessions_view';
 
@@ -148,7 +148,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
   return (
     <div data-test-subj={TEST_ID}>
       <StatefulEventsViewer
-        cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
+        cellActionsTriggerId={SECURITY_CELL_ACTIONS_DEFAULT}
         pageFilters={sessionsFilter}
         defaultModel={getSessionsDefaultModel(columns, defaultColumns)}
         end={endDate}

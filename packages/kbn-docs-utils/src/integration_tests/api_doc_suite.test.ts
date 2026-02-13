@@ -153,11 +153,13 @@ beforeAll(async () => {
       missingExports: pluginAStats.missingExports,
       missingComments: pluginAStats.missingComments.length,
       paramDocMismatches: pluginAStats.paramDocMismatches.length,
+      missingComplexTypeInfo: pluginAStats.missingComplexTypeInfo.length,
       isAnyType: pluginAStats.isAnyType.length,
       noReferences: pluginAStats.noReferences.length,
     },
     missingComments: pluginAStats.missingComments.map(mapStat),
     paramDocMismatches: pluginAStats.paramDocMismatches.map(mapStat),
+    missingComplexTypeInfo: pluginAStats.missingComplexTypeInfo.map(mapStat),
     isAnyType: pluginAStats.isAnyType.map(mapStat),
     noReferences: pluginAStats.noReferences.map(mapStat),
   };

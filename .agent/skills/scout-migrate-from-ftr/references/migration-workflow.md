@@ -16,9 +16,33 @@ Use this as a checklist when migrating FTR tests to Scout.
 
 ## 3) Translate the test structure
 
-- `describe/it` -> `test.describe/test` or `apiTest.describe/apiTest`.
+- `describe/it` -> `test.describe/test` or `apiTest.describe/apiTest` (but don’t assume 1:1 `it` -> `test`).
 - `before/after` -> `test.beforeAll/test.afterAll`.
 - `beforeEach/afterEach` -> `test.beforeEach/test.afterEach`.
+
+### `it` blocks are sometimes steps (not full test cases)
+
+In FTR it’s common for multiple `it(...)` blocks in one `describe(...)` to behave like a single user journey (shared browser state across `it`s).
+In Scout (Playwright), each `test(...)` runs with a fresh browser context, so you usually can’t preserve that state across multiple `test`s.
+
+Guideline:
+
+- If the FTR suite uses multiple `it(...)` blocks as sequential steps of one flow, combine them into a single `test(...)` and convert the step boundaries into `test.step(...)`.
+- If an `it(...)` block is already an independent test case, keep it as its own `test(...)` and ensure it sets up its own preconditions.
+
+Minimal sketch:
+
+```ts
+// FTR: multiple `it`s continue in the same browser context
+it('create entity', async () => {});
+it('edit entity', async () => {}); // continues...
+
+// Scout: combine into one test and use `test.step` for debuggability
+test('create and edit entity', async () => {
+  await test.step('create entity', async () => {});
+  await test.step('edit entity', async () => {});
+});
+```
 
 ## 4) Replace FTR dependencies
 

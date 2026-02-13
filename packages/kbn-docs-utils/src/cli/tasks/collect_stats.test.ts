@@ -78,6 +78,7 @@ describe('collectStats', () => {
       isAnyType: [],
       noReferences: [],
       paramDocMismatches: [],
+      missingComplexTypeInfo: [],
       missingExports: 0,
       deprecatedAPIsReferencedCount: 0,
       unreferencedDeprecatedApisCount: 0,
