@@ -18,7 +18,7 @@ import {
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
 import type { DiscoverAppState } from '../redux';
-import { isEqualState } from './state_comparators';
+import { isEqualState, isEqualFilters } from './state_comparators';
 import { addLog } from '../../../../utils/add_log';
 import { FetchStatus } from '../../../types';
 import { loadAndResolveDataView } from './resolve_data_view';
@@ -85,7 +85,7 @@ export const buildStateSubscribe =
     const sampleSizeChanged = nextState.sampleSize !== sampleSize;
     const docTableSortChanged = !isEqual(nextState.sort, sort) && !isEsqlMode;
     const dataSourceChanged = !isEqual(nextState.dataSource, dataSource) && !isEsqlMode;
-    const appFiltersChanged = !isEqual(nextState.filters, prevState.filters) && !isEsqlMode;
+    const appFiltersChanged = !isEqualFilters(nextState.filters, prevState.filters) && !isEsqlMode;
 
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.dataSource && dataSourceChanged) {
