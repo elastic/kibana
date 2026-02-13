@@ -42,3 +42,5 @@ export type {
   RegisterAPIRoutesArgs,
   RegisterAPIRouteFn,
 } from './types';
+
+export type { DiscoverDrilldownState } from './drilldowns/types';

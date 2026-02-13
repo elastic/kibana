@@ -190,22 +190,17 @@ describe('Data Loader', () => {
     });
   });
 
-  it('should re-render when dashboard view/edit mode changes if dynamic actions are set', async () => {
+  it('should re-render when dashboard view/edit mode changes if drilldowns are set', async () => {
     await expectRerenderOnDataLoader(async ({ api, getState }) => {
       getState.mockReturnValue({
         attributes: getLensAttributesMock(),
-        enhancements: {
-          dynamicActions: {
-            events: [
-              // make sure there's at least one event
-              {
-                eventId: 'test',
-                triggers: [],
-                action: { factoryId: 'test', name: 'testAction', config: {} },
-              },
-            ],
+        drilldowns: [
+          {
+            label: 'Go to',
+            type: 'test',
+            trigger: 'on_click',
           },
-        },
+        ],
       });
       // trigger a change by changing the title in the attributes
       (api.viewMode$ as BehaviorSubject<ViewMode | undefined>).next('view');
@@ -214,16 +209,11 @@ describe('Data Loader', () => {
     });
   });
 
-  it('should not re-render when dashboard view/edit mode changes if dynamic actions are not set', async () => {
+  it('should not re-render when dashboard view/edit mode changes if there are no drilldowns', async () => {
     await expectRerenderOnDataLoader(async ({ api, getState }) => {
       getState.mockReturnValue({
         attributes: getLensAttributesMock(),
-        enhancements: {
-          dynamicActions: {
-            // empty list should not trigger
-            events: [],
-          },
-        },
+        drilldowns: [],
       });
       // trigger a change by changing the title in the attributes
       (api.viewMode$ as BehaviorSubject<ViewMode | undefined>).next('view');

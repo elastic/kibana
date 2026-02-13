@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createElement } from 'react';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { ILicense } from '@kbn/licensing-types';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { DrilldownDefinition } from '../drilldowns';
 import type {
   ActionFactoryDefinition,
   BaseActionConfig,
@@ -90,63 +88,6 @@ export class UiActionsServiceEnhancements {
    */
   public readonly getActionFactories = (): ActionFactory[] => {
     return [...this.actionFactories.values()];
-  };
-
-  /**
-   * Convenience method to register a {@link DrilldownDefinition | drilldown}.
-   */
-  public readonly registerDrilldown = <
-    Config extends BaseActionConfig = BaseActionConfig,
-    ExecutionContext extends object = object,
-    FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
-  >({
-    id: factoryId,
-    isBeta,
-    order,
-    CollectConfig,
-    createConfig,
-    isConfigValid,
-    getDisplayName,
-    actionMenuItem,
-    euiIcon,
-    execute,
-    getHref,
-    minimalLicense,
-    licenseFeatureName,
-    supportedTriggers,
-    isCompatible,
-    isConfigurable,
-  }: DrilldownDefinition<Config, ExecutionContext, FactoryContext>): void => {
-    const actionFactory: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext> = {
-      id: factoryId,
-      isBeta,
-      minimalLicense,
-      licenseFeatureName,
-      order,
-      CollectConfig,
-      createConfig,
-      isConfigValid,
-      getDisplayName,
-      supportedTriggers,
-      getIconType: () => euiIcon,
-      isCompatible: async (context) => !isConfigurable || isConfigurable(context),
-      create: (serializedAction) => ({
-        id: '',
-        type: factoryId,
-        getIconType: () => euiIcon,
-        getDisplayName: () => serializedAction.name,
-        MenuItem: actionMenuItem
-          ? ({ context }) => createElement(actionMenuItem, { context, config: serializedAction })
-          : undefined,
-        execute: async (context) => await execute(serializedAction.config, context),
-        getHref: getHref ? async (context) => getHref(serializedAction.config, context) : undefined,
-        isCompatible: isCompatible
-          ? async (context) => isCompatible(serializedAction.config, context)
-          : undefined,
-      }),
-    } as ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>;
-
-    this.registerActionFactory(actionFactory);
   };
 
   private registerFeatureUsage = (definition: ActionFactoryDefinition): void => {

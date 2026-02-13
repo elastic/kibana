@@ -87,6 +87,7 @@ describe('getAnomalySwimLaneEmbeddableFactory', () => {
       },
     };
     const { api, Component } = await factory.buildEmbeddable({
+      initializeDrilldownsManager: jest.fn(),
       initialState: {
         swimlaneType: 'viewBy',
         jobIds: ['my-job'],

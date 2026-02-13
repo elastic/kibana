@@ -30,7 +30,6 @@
       "packages/kbn-cloud-security-posture"
     ],
     "xpack.customBranding": "platform/plugins/private/custom_branding",
-    "xpack.dashboard": "platform/plugins/shared/dashboard_enhanced",
     "xpack.dataQuality": "platform/plugins/shared/data_quality",
     "xpack.datasetQuality": "platform/plugins/shared/dataset_quality",
     "xpack.dataUsage": "platform/plugins/private/data_usage",
@@ -40,7 +39,6 @@
     "xpack.elasticAssistantCommon": "platform/packages/shared/kbn-elastic-assistant-common",
     "xpack.elasticAssistantPlugin": "solutions/security/plugins/elastic_assistant",
     "xpack.ecsDataQualityDashboard": "solutions/security/plugins/ecs_data_quality_dashboard",
-    "xpack.embeddableEnhanced": "platform/plugins/shared/embeddable_enhanced",
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "solutions/search/plugins/enterprise_search",
     "xpack.features": "platform/plugins/shared/features",

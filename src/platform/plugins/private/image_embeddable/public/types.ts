@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
+import type { HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { HasEditCapabilities, HasSupportedTriggers } from '@kbn/presentation-publishing';
 import type { ImageEmbeddableState } from '../server';
@@ -15,6 +15,6 @@ import type { ImageEmbeddableState } from '../server';
 export type ImageEmbeddableApi = DefaultEmbeddableApi<ImageEmbeddableState> &
   HasEditCapabilities &
   HasSupportedTriggers &
-  HasDynamicActions;
+  HasDrilldowns;
 
 export type { ImageConfig } from '../server';

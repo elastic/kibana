@@ -15,7 +15,7 @@ export type { EmbeddableRegistryDefinition } from './types';
 
 export type {
   DrilldownState,
-  DrilldownsState,
+  SerializedDrilldowns,
   GetDrilldownsSchemaFnType,
 } from './drilldowns/types';
 

@@ -21,7 +21,6 @@ export type Start = jest.Mocked<AdvancedUiActionsStart>;
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     ...uiActionsPluginMock.createSetupContract(),
-    registerDrilldown: jest.fn(),
   };
   return setupContract;
 };
@@ -32,7 +31,6 @@ const createStartContract = (): Start => {
     getActionFactories: jest.fn(),
     getActionFactory: jest.fn(),
     hasActionFactory: jest.fn(),
-    DrilldownManager: jest.fn(),
   };
 
   return startContract;

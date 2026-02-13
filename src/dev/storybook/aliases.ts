@@ -24,7 +24,6 @@ export const storybookAliases = {
   classic_stream_flyout: 'x-pack/platform/packages/shared/kbn-classic-stream-flyout/.storybook',
   custom_icons: 'src/platform/packages/shared/kbn-custom-icons/.storybook',
   custom_integrations: 'src/platform/plugins/shared/custom_integrations/storybook',
-  dashboard_enhanced: 'x-pack/platform/plugins/shared/dashboard_enhanced/.storybook',
   dashboard: 'src/platform/plugins/shared/dashboard/.storybook',
   data: 'src/platform/plugins/shared/data/.storybook',
   discover: 'src/platform/plugins/shared/discover/.storybook',

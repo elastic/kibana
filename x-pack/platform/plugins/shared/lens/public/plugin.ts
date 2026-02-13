@@ -33,7 +33,6 @@ import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ACTION_VISUALIZE_FIELD, ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { SharePluginSetup, ExportShare, SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   ContentManagementPublicSetup,
@@ -56,7 +55,6 @@ import type {
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-components';
 import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -114,6 +112,7 @@ import type { TagcloudVisualization as TagcloudVisualizationType } from './visua
 
 import {
   APP_ID,
+  DISCOVER_DRILLDOWN_TYPE,
   getEditPath,
   LENS_EMBEDDABLE_TYPE,
   LENS_ICON,
@@ -126,7 +125,6 @@ import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
 import { setupExpressions } from './expressions';
-import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import type { ChartInfoApi } from './chart_info_api';
 import { LensAppLocatorDefinition } from '../common/locator/locator';
 
@@ -156,7 +154,6 @@ export interface LensPluginSetupDependencies {
   charts: ChartsPluginSetup;
   globalSearch?: GlobalSearchPluginSetup;
   usageCollection?: UsageCollectionSetup;
-  uiActionsEnhanced: AdvancedUiActionsSetup;
   share?: SharePluginSetup;
   contentManagement: ContentManagementPublicSetup;
 }
@@ -187,7 +184,6 @@ export interface LensPluginStartDependencies {
   contentManagement: ContentManagementPublicStart;
   serverless?: ServerlessPluginStart;
   licensing?: LicensingPluginStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   fieldsMetadata?: FieldsMetadataPublicStart;
   cps?: CPSPluginStart;
 }
@@ -334,7 +330,6 @@ export class LensPlugin {
       charts,
       globalSearch,
       usageCollection,
-      uiActionsEnhanced,
       share,
       contentManagement,
     }: LensPluginSetupDependencies
@@ -438,6 +433,16 @@ export class LensPlugin {
         }),
         getIconForSavedObject: () => LENS_ICON,
       });
+
+      embeddable.registerDrilldown(DISCOVER_DRILLDOWN_TYPE, async () => {
+        const { getDiscoverDrilldown } = await import('./async_services');
+        return getDiscoverDrilldown({
+          dataViews: () => this.dataViewsService!,
+          locator: () => share?.url.locators.get('DISCOVER_APP_LOCATOR'),
+          hasDiscoverAccess: () => this.hasDiscoverAccess,
+          application: () => startServices().core.application,
+        });
+      });
     }
 
     if (share) {
@@ -462,15 +467,6 @@ export class LensPlugin {
     }
 
     visualizations.registerAlias(lensVisTypeAlias);
-
-    uiActionsEnhanced.registerDrilldown(
-      new OpenInDiscoverDrilldown({
-        dataViews: () => this.dataViewsService!,
-        locator: () => share?.url.locators.get('DISCOVER_APP_LOCATOR'),
-        hasDiscoverAccess: () => this.hasDiscoverAccess,
-        application: () => startServices().core.application,
-      })
-    );
 
     contentManagement.registry.register({
       id: LENS_CONTENT_TYPE,
@@ -742,9 +738,7 @@ export class LensPlugin {
         CONTEXT_MENU_TRIGGER,
         'ACTION_OPEN_IN_DISCOVER',
         async () => {
-          const { createOpenInDiscoverAction } = await import(
-            './trigger_actions/open_in_discover_action'
-          );
+          const { createOpenInDiscoverAction } = await import('./async_services');
           return createOpenInDiscoverAction(
             discoverLocator,
             startDependencies.dataViews,

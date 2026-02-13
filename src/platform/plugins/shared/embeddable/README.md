@@ -63,7 +63,7 @@ The table below lists optional publishing package interfaces. Embeddables may im
 
 | Interface | Description | Used by |
 | --------- | ----------- | --------- |
-| HasDynamicActions | Interface for accessing dynamic actions. Dynamics actions are actions that manage their own state. Dynamic action state is stored in embeddable state but managed by the dynamic action. | OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN |
+| HasDrilldowns | Interface for accessing drilldowns. Drilldowns manage their own state. Drilldown state is stored in embeddable state but managed by drilldown manager. | OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN |
 | HasEditCapabilities | Interface for editing embeddable state | ACTION_EDIT_PANEL | 
 | HasInspectorAdapters | Interface for accessing embeddable inspector adaptors | ACTION_INSPECT_PANEL, ACTION_EXPORT_CSV |
 | HasLibraryTransforms | Interface for linking to and unlinking from the library | ACTION_ADD_TO_LIBRARY, ACTION_UNLINK_FROM_LIBRARY |
@@ -138,8 +138,8 @@ The table below lists the UiActions registered to embeddable panel triggers.
 | open-in-anomaly-explorer | Open in Anomaly Explorer | CONTEXT_MENU_TRIGGER | |
 | open-in-single-metric-viewer | Open in Single Metric Viewer | CONTEXT_MENU_TRIGGER | |
 | CUSTOM_TIME_RANGE_BADGE | Displays custom time range badge | PANEL_BADGE_TRIGGER | PublishesTimeRange |
-| OPEN_FLYOUT_ADD_DRILLDOWN | Create drilldown | CONTEXT_MENU_TRIGGER | HasDynamicActions, HasSupportedTriggers |
-| OPEN_FLYOUT_EDIT_DRILLDOWN | Edit drilldown | CONTEXT_MENU_TRIGGER | HasDynamicActions, HasSupportedTriggers |
+| OPEN_FLYOUT_ADD_DRILLDOWN | Create drilldown | CONTEXT_MENU_TRIGGER | HasDrilldowns, HasSupportedTriggers |
+| OPEN_FLYOUT_EDIT_DRILLDOWN | Edit drilldown | CONTEXT_MENU_TRIGGER | HasDrilldowns, HasSupportedTriggers |
 | SYNCHRONIZE_MOVEMENT_ACTION | Synchronize maps, so that if you zoom and pan in one map, the movement is reflected in other maps | CONTEXT_MENU_TRIGGER | |
 | URL_DRILLDOWN | Go to URL | CONTEXT_MENU_TRIGGER | |
 

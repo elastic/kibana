@@ -17,8 +17,8 @@
     - 'src/platform/plugins/shared/embeddable/**/*.*'
     - 'src/plugins/dashboard_embeddable_container/**/*.*'
 - 'Feature:Drilldowns':
+    - 'src/platform/plugins/shared/embeddable/**/*.*'
     - 'x-pack/plugins/drilldowns/**/*.*'
-    - 'x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/**/*.*'
 - 'Feature:ExpressionLanguage':
     - 'src/platform/plugins/shared/expressions/**/*.*'
     - 'src/plugins/bfetch/**/*.*'
