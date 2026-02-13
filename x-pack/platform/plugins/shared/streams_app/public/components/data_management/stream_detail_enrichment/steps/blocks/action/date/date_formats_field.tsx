@@ -32,7 +32,7 @@ export const DateFormatsField = ({ onGenerate }: { onGenerate?: () => void }) =>
   };
 
   const handleCreateOption = (value: string) => {
-    field.onChange([...field.value, value]);
+    field.onChange([...(field.value ?? []), value]);
   };
 
   const { invalid, error } = fieldState;
@@ -88,7 +88,7 @@ export const DateFormatsField = ({ onGenerate }: { onGenerate?: () => void }) =>
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.dateFormatsPlaceholder',
           { defaultMessage: 'Type and then hit "ENTER"' }
         )}
-        selectedOptions={field.value.map((label) => ({ label }))}
+        selectedOptions={(field.value ?? []).map((label) => ({ label }))}
       />
     </EuiFormRow>
   );
