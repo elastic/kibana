@@ -10,13 +10,13 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { getMcpToolType, listMcpTools } from './tool_type';
 
-jest.mock('@n8n/json-schema-to-zod', () => ({
-  jsonSchemaToZod: jest.fn(),
+jest.mock('@kbn/zod/v4/from_json_schema', () => ({
+  fromJSONSchema: jest.fn(),
 }));
 
-import { jsonSchemaToZod } from '@n8n/json-schema-to-zod';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 
-const mockJsonSchemaToZod = jsonSchemaToZod as jest.MockedFunction<typeof jsonSchemaToZod>;
+const mockFromJSONSchema = fromJSONSchema as jest.MockedFunction<typeof fromJSONSchema>;
 
 describe('MCP tool_type', () => {
   let mockActions: jest.Mocked<ActionsPluginStart>;
@@ -322,8 +322,8 @@ describe('MCP tool_type', () => {
           data: mockToolsResponse,
         });
 
-        const mockZodSchema = { _def: { typeName: 'ZodObject' } };
-        mockJsonSchemaToZod.mockReturnValue(mockZodSchema as any);
+        const mockZodSchema = { _zod: { typeName: 'ZodObject' } };
+        mockFromJSONSchema.mockReturnValue(mockZodSchema as any);
 
         const schema = await dynamicProps.getSchema();
 
@@ -334,7 +334,7 @@ describe('MCP tool_type', () => {
             subActionParams: {},
           },
         });
-        expect(mockJsonSchemaToZod).toHaveBeenCalledWith(mockToolsResponse.tools[0].inputSchema);
+        expect(mockFromJSONSchema).toHaveBeenCalledWith(mockToolsResponse.tools[0].inputSchema);
         expect(schema).toBe(mockZodSchema);
       });
 
@@ -352,7 +352,7 @@ describe('MCP tool_type', () => {
 
         const schema = await dynamicProps.getSchema();
         expect(schema).toBeDefined();
-        expect(mockJsonSchemaToZod).not.toHaveBeenCalled();
+        expect(mockFromJSONSchema).not.toHaveBeenCalled();
       });
 
       it('should return empty schema when tool not found in listTools response', async () => {
@@ -371,10 +371,10 @@ describe('MCP tool_type', () => {
 
         const schema = await dynamicProps.getSchema();
         expect(schema).toBeDefined();
-        expect(mockJsonSchemaToZod).not.toHaveBeenCalled();
+        expect(mockFromJSONSchema).not.toHaveBeenCalled();
       });
 
-      it('should throw error when jsonSchemaToZod fails', async () => {
+      it('should return empty schema when fromJSONSchema returns undefined', async () => {
         const toolType = getMcpToolType({ actions: mockActions });
         const dynamicProps = await toolType.getDynamicProps(testConfig, {
           request: mockRequest,
@@ -386,11 +386,10 @@ describe('MCP tool_type', () => {
           data: mockToolsResponse,
         });
 
-        mockJsonSchemaToZod.mockImplementation(() => {
-          throw new Error('Invalid JSON Schema');
-        });
+        mockFromJSONSchema.mockReturnValue(undefined);
 
-        await expect(dynamicProps.getSchema()).rejects.toThrow('Invalid JSON Schema');
+        const schema = await dynamicProps.getSchema();
+        expect(schema).toBeDefined();
       });
     });
 

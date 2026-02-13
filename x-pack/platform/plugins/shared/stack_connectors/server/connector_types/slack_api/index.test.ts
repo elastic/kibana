@@ -63,7 +63,7 @@ describe('validate config', () => {
     expect(() => {
       validateConfig(connectorType, { message: 1 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type config: Unrecognized key(s) in object: 'message'"`
+      `"error validating connector type config: ✖ Unrecognized key: \\"message\\""`
     );
   });
 
@@ -78,22 +78,11 @@ describe('validate params', () => {
   test('should validate and throw error when params are invalid', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: 2 errors:
-       [1]: Field \\"subAction\\": Invalid literal value, expected \\"validChannelId\\", Invalid literal value, expected \\"postMessage\\", Invalid literal value, expected \\"postBlockkit\\";
-       [2]: Field \\"subActionParams\\": Required, Required, Required"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(`"error validating action params: ✖ Invalid input"`);
 
     expect(() => {
       validateParams(connectorType, { message: 1 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action params: 5 errors:
-       [1]: Unrecognized key(s) in object: 'message';
-       [2]: Unrecognized key(s) in object: 'message';
-       [3]: Unrecognized key(s) in object: 'message';
-       [4]: Field \\"subAction\\": Invalid literal value, expected \\"validChannelId\\", Invalid literal value, expected \\"postMessage\\", Invalid literal value, expected \\"postBlockkit\\";
-       [5]: Field \\"subActionParams\\": Required, Required, Required"
-    `);
+    }).toThrowErrorMatchingInlineSnapshot(`"error validating action params: ✖ Invalid input"`);
   });
 
   test('should validate and pass when channels is used as a valid params for post message', () => {
@@ -143,9 +132,10 @@ describe('validate secrets', () => {
   test('should validate and throw error when secrets is empty', () => {
     expect(() => {
       validateSecrets(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: Field \\"token\\": Required"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type secrets: ✖ Invalid input: expected string, received undefined
+        → at token"
+    `);
   });
 
   test('should validate and pass when secrets is valid', () => {
@@ -161,9 +151,10 @@ describe('validate secrets', () => {
   test('should validate and throw error when secrets is invalid', () => {
     expect(() => {
       validateSecrets(connectorType, { token: 1 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating connector type secrets: Field \\"token\\": Expected string, received number"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type secrets: ✖ Invalid input: expected string, received number
+        → at token"
+    `);
   });
 
   test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {

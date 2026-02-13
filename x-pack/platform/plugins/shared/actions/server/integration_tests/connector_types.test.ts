@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ActionTypeRegistry } from '../action_type_registry';
 import { setupTestServers } from './lib';
@@ -127,11 +128,20 @@ describe('Connector type config checks', () => {
         });
       }
 
-      const toJsonSchema = (schema: z.ZodType) => {
-        const { $schema, ...jsonSchema } = z.toJSONSchema(schema, {
-          unrepresentable: 'any',
-          io: 'input',
-        }) as Record<string, unknown>;
+      const toJsonSchema = (schema: unknown) => {
+        if (schema && typeof schema === 'object' && '_zod' in schema) {
+          // Zod v4 schema
+          const { $schema, ...jsonSchema } = z.toJSONSchema(schema as z.ZodType, {
+            unrepresentable: 'any',
+            io: 'input',
+          }) as Record<string, unknown>;
+          return jsonSchema;
+        }
+        // Zod v3 schema
+        const { $schema, ...jsonSchema } = zodToJsonSchema(schema as any) as Record<
+          string,
+          unknown
+        >;
         return jsonSchema;
       };
 
