@@ -2789,6 +2789,9 @@
           }
         }
       },
+      "download_source_auth_secret_storage_requirements_met": {
+        "type": "boolean"
+      },
       "fleet_server_hosts": {
         "type": "keyword"
       },

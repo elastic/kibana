@@ -10,7 +10,9 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 export const dataSourceExclusionsSchema = schema.recordOf(
   schema.string(),
-  schema.arrayOf(schema.oneOf([schema.literal('readOnly'), schema.literal('reindex')])),
+  schema.arrayOf(schema.oneOf([schema.literal('readOnly'), schema.literal('reindex')]), {
+    maxSize: 1000,
+  }),
   { defaultValue: {} }
 );
 

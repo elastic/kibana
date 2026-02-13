@@ -152,10 +152,14 @@ beforeAll(async () => {
       apiCount: pluginAStats.apiCount,
       missingExports: pluginAStats.missingExports,
       missingComments: pluginAStats.missingComments.length,
+      paramDocMismatches: pluginAStats.paramDocMismatches.length,
+      missingComplexTypeInfo: pluginAStats.missingComplexTypeInfo.length,
       isAnyType: pluginAStats.isAnyType.length,
       noReferences: pluginAStats.noReferences.length,
     },
     missingComments: pluginAStats.missingComments.map(mapStat),
+    paramDocMismatches: pluginAStats.paramDocMismatches.map(mapStat),
+    missingComplexTypeInfo: pluginAStats.missingComplexTypeInfo.map(mapStat),
     isAnyType: pluginAStats.isAnyType.map(mapStat),
     noReferences: pluginAStats.noReferences.map(mapStat),
   };
@@ -243,12 +247,12 @@ describe('functions', () => {
     const hi = obj?.children?.find((c) => c.label === 'hi');
     expect(hi).toBeDefined();
 
-    const obj2 = fn?.children?.find((c) => c.label === '{ fn1, fn2 }');
-    expect(obj2).toBeDefined();
-    expect(obj2!.children?.length).toBe(2);
-    expect(obj2!.id).toBe('def-public.crazyFunction.$2');
+    const fnsParam = fn?.children?.find((c) => c.label === 'fns');
+    expect(fnsParam).toBeDefined();
+    expect(fnsParam!.children?.length).toBe(2);
+    expect(fnsParam!.id).toBe('def-public.crazyFunction.$2');
 
-    const fn1 = obj2?.children?.find((c) => c.label === 'fn1');
+    const fn1 = fnsParam?.children?.find((c) => c.label === 'fn1');
     expect(fn1).toBeDefined();
     expect(fn1?.type).toBe(TypeKind.FunctionKind);
     expect(fn1!.id).toBe('def-public.crazyFunction.$2.fn1');
@@ -360,7 +364,7 @@ describe('Types', () => {
           "section": "def-public.MyProps",
           "text": "MyProps",
         },
-        ", string | React.JSXElementConstructor<any>>",
+        ">",
       ]
     `);
   });
@@ -762,8 +766,8 @@ describe('validation and stats', () => {
       expect(objParam!.children).toBeDefined();
       expect(objParam!.children!.length).toBe(1);
 
-      // Second parameter: { fn1, fn2 }
-      const fnParam = fn!.children?.find((c) => c.label === '{ fn1, fn2 }');
+      // Second parameter: fns: { fn1, fn2 }
+      const fnParam = fn!.children?.find((c) => c.label === 'fns');
       expect(fnParam).toBeDefined();
       expect(fnParam!.children).toBeDefined();
       expect(fnParam!.children!.length).toBe(2);
@@ -776,19 +780,12 @@ describe('validation and stats', () => {
       const objParam = fn!.children?.find((c) => c.label === 'obj');
       expect(objParam).toBeDefined();
 
-      // Current behavior: parent parameter comments are NOT extracted for TypeLiteral parameters
-      // This is a known limitation - when a parameter has a TypeLiteral type (destructured params),
-      // buildApiDeclaration is called directly without extracting the JSDoc comment for the parameter name.
-      // This will be fixed in Phase 4.1
       expect(objParam!.description).toBeDefined();
-      // Currently, the description is empty for destructured parameters
-      // After Phase 4.1, this should contain the @param obj comment
-      expect(objParam!.description!.length).toBe(0);
+      expect(objParam!.description!.length).toBeGreaterThan(0);
+      expect(objParam!.description![0]).toContain('crazy parameter');
     });
 
-    it('validates property-level comments are not currently extracted (current limitation)', () => {
-      // This test documents current behavior: property-level @param tags are not extracted
-      // After Phase 4.1, this should be updated to test that property-level comments ARE extracted
+    it('validates property-level comments are extracted', () => {
       const fn = doc.client.find((c) => c.label === 'crazyFunction');
       expect(fn).toBeDefined();
 
@@ -798,17 +795,16 @@ describe('validation and stats', () => {
       const hiProp = objParam!.children?.find((c) => c.label === 'hi');
       expect(hiProp).toBeDefined();
 
-      // Current behavior: property-level comments are not extracted
-      // Even if @param obj.hi existed in JSDoc, it wouldn't be found
       expect(hiProp!.description).toBeDefined();
-      expect(hiProp!.description!.length).toBe(0);
+      expect(hiProp!.description!.length).toBeGreaterThan(0);
+      expect(hiProp!.description![0]).toContain('Greeting');
     });
 
     it('validates nested destructured parameters are extracted', () => {
       const fn = doc.client.find((c) => c.label === 'crazyFunction');
       expect(fn).toBeDefined();
 
-      const fnParam = fn!.children?.find((c) => c.label === '{ fn1, fn2 }');
+      const fnParam = fn!.children?.find((c) => c.label === 'fns');
       expect(fnParam).toBeDefined();
 
       const fn1 = fnParam!.children?.find((c) => c.label === 'fn1');
@@ -964,10 +960,8 @@ describe('validation and stats', () => {
     });
   });
 
-  describe('property-level JSDoc validation (future enhancement)', () => {
-    it('documents that property-level JSDoc is not currently validated', () => {
-      // This test documents current limitation
-      // After Phase 4.1, property-level @param tags like @param obj.prop should be validated
+  describe('property-level JSDoc validation', () => {
+    it('does not flag property-level JSDoc when present', () => {
       const fn = doc.client.find((c) => c.label === 'crazyFunction');
       expect(fn).toBeDefined();
 
@@ -976,21 +970,14 @@ describe('validation and stats', () => {
 
       const hiProp = objParam!.children?.find((c) => c.label === 'hi');
       expect(hiProp).toBeDefined();
+      expect(hiProp!.description?.length).toBeGreaterThan(0);
 
-      // Current behavior: property-level comments are not checked
-      // Future: should check for @param obj.hi and not flag as missing if it exists
       const missingComment = pluginAStats.missingComments.find((d) => d.id === hiProp!.id);
-      // Currently flagged as missing (false positive)
-      expect(missingComment).toBeDefined();
+      expect(missingComment).toBeUndefined();
     });
 
-    it('documents expected future behavior for property-level validation', () => {
-      // After Phase 4.1 and 4.2, the validation should:
-      // 1. Check for property-level @param tags (e.g., @param obj.prop)
-      // 2. Not flag as missing if parent has comment OR property-level tag exists
-      // 3. Support nested property access (e.g., @param obj.nested.prop)
-
-      // For now, this is a placeholder test documenting expected behavior
+    it('documents expected behavior for property-level validation', () => {
+      // placeholder to keep suite shape; property-level validation is active
       expect(true).toBe(true);
     });
   });

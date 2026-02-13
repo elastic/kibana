@@ -10,6 +10,7 @@ import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DataStreamsTable } from './data_steams_table';
 import type { DataStreamResponse } from '../../../../../../common';
+import { UIStateProvider } from '../../../contexts';
 
 // Components are further tested in their own files. We just want to test if it renders.
 jest.mock('./input_types_badges', () => ({
@@ -65,6 +66,10 @@ const createMockDataStream = (overrides: Partial<DataStreamResponse> = {}): Data
   ...overrides,
 });
 
+const renderWithProvider = (ui: React.ReactElement) => {
+  return render(<UIStateProvider>{ui}</UIStateProvider>);
+};
+
 describe('DataStreamsTable', () => {
   const defaultProps = {
     integrationId: 'integration-123',
@@ -79,7 +84,7 @@ describe('DataStreamsTable', () => {
 
   describe('rendering', () => {
     it('should render the table with a data stream title', () => {
-      render(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
 
       expect(screen.getByText('Test Data Stream')).toBeInTheDocument();
     });
@@ -90,26 +95,26 @@ describe('DataStreamsTable', () => {
         createMockDataStream({ dataStreamId: 'ds-2', title: 'Second Stream' }),
       ];
 
-      render(<DataStreamsTable {...defaultProps} items={items} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       expect(screen.getByText('First Stream')).toBeInTheDocument();
       expect(screen.getByText('Second Stream')).toBeInTheDocument();
     });
 
     it('should render InputTypesBadges component for each row', () => {
-      render(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
 
       expect(screen.getByTestId('mock-input-types-badges')).toBeInTheDocument();
     });
 
     it('should render Status component for each row', () => {
-      render(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
 
       expect(screen.getByTestId('mock-status')).toBeInTheDocument();
     });
 
     it('should render empty table when no items', () => {
-      render(<DataStreamsTable {...defaultProps} items={[]} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={[]} />);
 
       expect(screen.queryByText('Test Data Stream')).not.toBeInTheDocument();
     });
@@ -122,7 +127,7 @@ describe('DataStreamsTable', () => {
         createMockDataStream({ dataStreamId: 'ds-1', title: 'Alpha Stream' }),
       ];
 
-      render(<DataStreamsTable {...defaultProps} items={items} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       const rows = screen.getAllByRole('row');
       // Second row should be Alpha (sorted ascending)
@@ -135,7 +140,7 @@ describe('DataStreamsTable', () => {
         createMockDataStream({ dataStreamId: 'ds-2', title: 'Zebra Stream' }),
       ];
 
-      render(<DataStreamsTable {...defaultProps} items={items} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       // Click title column header to toggle sort
       const titleHeader = screen.getByRole('button', { name: /title/i });
@@ -149,7 +154,7 @@ describe('DataStreamsTable', () => {
 
   describe('delete functionality', () => {
     it('should show delete confirmation modal when delete action clicked', async () => {
-      render(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
 
       const deleteButton = screen.getByTestId('deleteDataStreamButton');
       await userEvent.click(deleteButton);
@@ -160,7 +165,7 @@ describe('DataStreamsTable', () => {
     });
 
     it('should close modal when cancel is clicked', async () => {
-      render(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
 
       const deleteButton = screen.getByTestId('deleteDataStreamButton');
       await userEvent.click(deleteButton);
@@ -172,7 +177,7 @@ describe('DataStreamsTable', () => {
     });
 
     it('should call delete mutation when confirm is clicked', async () => {
-      render(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
 
       const deleteButton = screen.getByTestId('deleteDataStreamButton');
       await userEvent.click(deleteButton);
@@ -191,7 +196,7 @@ describe('DataStreamsTable', () => {
       mockDeleteDataStreamMutation.isLoading = true;
       mockDeleteDataStreamMutation.variables = { dataStreamId: 'ds-1' };
 
-      render(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
 
       expect(screen.getByText('Deleting...')).toBeInTheDocument();
     });
@@ -200,7 +205,7 @@ describe('DataStreamsTable', () => {
       mockDeleteDataStreamMutation.isLoading = true;
       mockDeleteDataStreamMutation.variables = { dataStreamId: 'ds-1' };
 
-      render(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
 
       const deleteButton = screen.getByTestId('deleteDataStreamButton');
       expect(deleteButton).toBeDisabled();
@@ -211,7 +216,7 @@ describe('DataStreamsTable', () => {
     it('should disable expand button for non-completed data streams', () => {
       const items = [createMockDataStream({ status: 'pending' })];
 
-      render(<DataStreamsTable {...defaultProps} items={items} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       const expandButton = screen.getByTestId('expandDataStreamButton');
       expect(expandButton).toBeDisabled();
@@ -220,7 +225,7 @@ describe('DataStreamsTable', () => {
     it('should enable expand button for completed data streams', () => {
       const items = [createMockDataStream({ status: 'completed' })];
 
-      render(<DataStreamsTable {...defaultProps} items={items} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       const expandButton = screen.getByTestId('expandDataStreamButton');
       expect(expandButton).not.toBeDisabled();
@@ -229,7 +234,7 @@ describe('DataStreamsTable', () => {
     it('should disable refresh button for pending data streams', () => {
       const items = [createMockDataStream({ status: 'pending' })];
 
-      render(<DataStreamsTable {...defaultProps} items={items} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       const refreshButton = screen.getByTestId('refreshDataStreamButton');
       expect(refreshButton).toBeDisabled();
@@ -238,7 +243,7 @@ describe('DataStreamsTable', () => {
     it('should enable refresh button for completed data streams', () => {
       const items = [createMockDataStream({ status: 'completed' })];
 
-      render(<DataStreamsTable {...defaultProps} items={items} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       const refreshButton = screen.getByTestId('refreshDataStreamButton');
       expect(refreshButton).not.toBeDisabled();
@@ -247,7 +252,7 @@ describe('DataStreamsTable', () => {
     it('should enable refresh button for failed data streams', () => {
       const items = [createMockDataStream({ status: 'failed' })];
 
-      render(<DataStreamsTable {...defaultProps} items={items} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} items={items} />);
 
       const refreshButton = screen.getByTestId('refreshDataStreamButton');
       expect(refreshButton).not.toBeDisabled();
@@ -256,7 +261,7 @@ describe('DataStreamsTable', () => {
 
   describe('column rendering', () => {
     it('should render title column with tooltip', () => {
-      render(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
 
       const titleCell = screen.getByText('Test Data Stream');
       expect(titleCell).toBeInTheDocument();
@@ -264,19 +269,19 @@ describe('DataStreamsTable', () => {
     });
 
     it('should render Data Collection Methods column', () => {
-      render(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
 
       expect(screen.getByText('Data Collection Methods')).toBeInTheDocument();
     });
 
     it('should render Status column', () => {
-      render(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
 
       expect(screen.getByText('Status')).toBeInTheDocument();
     });
 
     it('should render Actions column', () => {
-      render(<DataStreamsTable {...defaultProps} />);
+      renderWithProvider(<DataStreamsTable {...defaultProps} />);
 
       expect(screen.getByText('Actions')).toBeInTheDocument();
     });
