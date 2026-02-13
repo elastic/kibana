@@ -85,6 +85,18 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageLabels = {
       defaultMessage: 'Event filter list export failed',
     }
   ),
+  pageImportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.eventFilters.pageImportSuccessToastTitle',
+    {
+      defaultMessage: 'Event filter list imported successfully',
+    }
+  ),
+  pageImportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.eventFilters.pageImportErrorToastTitle',
+    {
+      defaultMessage: 'Event filter list import failed',
+    }
+  ),
   getShowingCountLabel: (total) =>
     i18n.translate('xpack.securitySolution.eventFilters.showingTotal', {
       defaultMessage: 'Showing {total} {total, plural, one {event filter} other {event filters}}',
@@ -158,6 +170,10 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageLabels = {
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.eventFilters.emptyStatePrimaryButtonLabel',
     { defaultMessage: 'Add event filter' }
+  ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.eventFilters.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import event filter list' }
   ),
   searchPlaceholderInfo: i18n.translate(
     'xpack.securitySolution.eventFilters.searchPlaceholderInfo',

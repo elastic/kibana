@@ -7,8 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { PolicyArtifactsPageLabels } from '../artifacts/translations';
 
-export const POLICY_ARTIFACT_TRUSTED_APPS_LABELS = Object.freeze({
+export const POLICY_ARTIFACT_TRUSTED_APPS_LABELS: Omit<
+  PolicyArtifactsPageLabels,
+  'layoutAboutMessage'
+> = Object.freeze({
   deleteModalTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.trustedApps.list.removeDialog.title',
     {
@@ -123,6 +127,10 @@ export const POLICY_ARTIFACT_TRUSTED_APPS_LABELS = Object.freeze({
   emptyUnexistingPrimaryActionButtonTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.trustedApps.empty.unexisting.action',
     { defaultMessage: 'Add trusted applications' }
+  ),
+  emptyUnexistingImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.endpoint.policy.trustedApps.empty.unexisting.importAction',
+    { defaultMessage: 'Import trusted application list' }
   ),
   listTotalItemCountMessage: (totalItemsCount: number): string =>
     i18n.translate('xpack.securitySolution.endpoint.policy.trustedApps.list.totalItemCount', {

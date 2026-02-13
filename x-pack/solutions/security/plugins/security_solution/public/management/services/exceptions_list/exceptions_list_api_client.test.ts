@@ -6,7 +6,10 @@
  */
 
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
-import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  CreateExceptionListSchema,
+  ImportExceptionsResponseSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
@@ -242,6 +245,37 @@ describe('Exceptions List Api Client', () => {
           filter: fakeQklFilter,
           list_id: getFakeListId(),
           namespace_type: 'agnostic',
+        },
+      });
+    });
+
+    it('import method calls http.post with params', async () => {
+      const exceptionsListApiClientInstance = getInstance();
+
+      const apiResponse: ImportExceptionsResponseSchema = {
+        success: true,
+        success_count: 1,
+        success_exception_lists: true,
+        success_count_exception_lists: 1,
+        success_exception_list_items: true,
+        success_count_exception_list_items: 0,
+        errors: [],
+      };
+
+      fakeHttpServices.post.mockResolvedValueOnce(apiResponse);
+
+      const mockFile = new File(['test content'], 'test.ndjson');
+
+      const res = await exceptionsListApiClientInstance.import(mockFile);
+
+      expect(res).toBe(apiResponse);
+      expect(fakeHttpServices.post).toHaveBeenCalledTimes(1);
+      expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/exception_lists/_import', {
+        version: apiVersion,
+        headers: { 'Content-Type': undefined },
+        body: expect.any(FormData),
+        query: {
+          overwrite: false,
         },
       });
     });

@@ -12,6 +12,7 @@ import type {
   ExceptionListSchema,
   ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
+  ImportExceptionsResponseSchema,
   ListId,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -22,6 +23,7 @@ import {
   INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
 } from '@kbn/securitysolution-list-constants';
 import type { HttpStart } from '@kbn/core/public';
+import type { ImportExceptionListRequestQuery } from '@kbn/securitysolution-exceptions-common/api';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 
 /**
@@ -305,6 +307,22 @@ export class ExceptionsListApiClient {
         list_id: this.listId,
         namespace_type: 'agnostic',
       },
+    });
+  }
+
+  async import(file: File): Promise<ImportExceptionsResponseSchema> {
+    const formData = new FormData();
+    formData.append('file', file as Blob);
+
+    return this.http.post<ImportExceptionsResponseSchema>(`${EXCEPTION_LIST_URL}/_import`, {
+      version: this.version,
+      body: formData,
+      headers: { 'Content-Type': undefined },
+      query: {
+        // Do not overwrite the whole list, as it is space agnostic behind the scenes:
+        // validator will handle individual item overwrites instead.
+        overwrite: false,
+      } as ImportExceptionListRequestQuery,
     });
   }
 
