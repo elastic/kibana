@@ -42,7 +42,7 @@ export function applyTransform(
  */
 function applyPick(value: unknown, pick: unknown): unknown {
   try {
-    return applyPickRecursive(pick, value, 1);
+    return applyPickRecursive(value, pick, 1);
   } catch (error: ApplyIncludeDepthError) {
     return error;
   }
@@ -61,7 +61,7 @@ class ApplyIncludeDepthError extends Error {
 /**
  * Recurses and throws ApplyIncludeDepthError when depth is exceeded so the error propagates to the caller.
  */
-function applyPickRecursive(pick: unknown, value: unknown, recurseDepth: number): unknown {
+function applyPickRecursive(value: unknown, pick: unknown, recurseDepth: number): unknown {
   if (recurseDepth > MAX_APPLY_INCLUDE_DEPTH) {
     throw new ApplyIncludeDepthError();
   }
@@ -70,7 +70,7 @@ function applyPickRecursive(pick: unknown, value: unknown, recurseDepth: number)
     return value;
   }
   if (Array.isArray(value)) {
-    return value.map((item) => applyPickRecursive(spec, item, recurseDepth + 1));
+    return value.map((item) => applyPickRecursive(item, spec, recurseDepth + 1));
   }
   if (isPlainObject(value)) {
     const result: Record<string, unknown> = {};
@@ -79,7 +79,7 @@ function applyPickRecursive(pick: unknown, value: unknown, recurseDepth: number)
         const childSpec = spec[key];
         const childValue = value[key];
         if (isNonEmptyPlainObject(childSpec)) {
-          result[key] = applyPickRecursive(childSpec, childValue, recurseDepth + 1);
+          result[key] = applyPickRecursive(childValue, childSpec, recurseDepth + 1);
         } else {
           result[key] = childValue;
         }
