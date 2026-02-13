@@ -178,7 +178,7 @@ async function runConfigs(
     const completionStatus = await Promise.all(
       allConfigs.map(async (config) => {
         const completed = await isConfigCompleted(config);
-        log.info(`[jest-checkpoint]   ${completed ? 'SKIP' : 'RUN '} ${config}`);
+        log.info(`[jest-checkpoint]   ${completed ? 'SKIP' : 'RUN '} ${relative(REPO_ROOT, config)}`);
         return { config, completed };
       })
     );
@@ -194,6 +194,8 @@ async function runConfigs(
       log.info(
         `[jest-checkpoint] Resumed: skipped ${skipped.length} already-completed, ${configs.length} remaining`
       );
+    } else {
+      log.info(`[jest-checkpoint] No prior checkpoints found, running all ${configs.length} configs`);
     }
   }
 
@@ -282,7 +284,7 @@ async function runConfigs(
 
           // Write checkpoint for successful configs before proceeding
           if (code === 0 && isInBuildkite()) {
-            log.info(`[jest-checkpoint] Marking ${config} as completed`);
+            log.info(`[jest-checkpoint] Marking ${relative(REPO_ROOT, config)} as completed`);
             markConfigCompleted(config).then(proceed, proceed);
           } else {
             proceed();
