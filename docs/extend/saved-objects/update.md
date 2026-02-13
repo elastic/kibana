@@ -1,5 +1,5 @@
 ---
-navigation_title: Update
+navigation_title: Update a type
 ---
 
 # Update a Saved Object type [saved-objects-update]
@@ -190,6 +190,63 @@ Update the root `mappings` to include `dolly` as in the previous example.
 :::{note}
 For a non-indexed field with a default, use only the `data_backfill` change (no `mappings_addition` or root mapping update).
 :::
+
+### Adding a new, searchable field [adding-a-new-searchable-field]
+
+Adding a new field that will be used by business logic for search/filter/aggregation must be done in two releases to preserve rollback safety:
+
+1. **Release N** — Add the field mapping and a new model version (plus `data_backfill` if needed), but do **not** depend on the field in business logic yet.
+2. **Release N+1** — Update business logic to read/search/filter using the field.
+
+If business logic starts depending on the field in the same release where it is introduced, rollback windows can hit partially migrated data and lead to inconsistent behavior.
+
+*Version N — introduce the field and migration changes:*
+
+```ts
+let modelVersion2: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'data_backfill',
+      transform: (document) => {
+        return { attributes: { searchable_field: 'default_value' } };
+      },
+    },
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        searchable_field: { type: 'keyword' },
+      },
+    },
+  ],
+  schemas: {
+    forwardCompatibility: schema.object(
+      { foo: schema.string(), bar: schema.string(), searchable_field: schema.string() },
+      { unknowns: 'ignore' }
+    ),
+    create: schema.object(
+      { foo: schema.string(), bar: schema.string(), searchable_field: schema.string() },
+    )
+  },
+};
+
+// And update root mappings:
+mappings: {
+  properties: {
+    foo: { type: 'text' },
+    bar: { type: 'text' },
+    searchable_field: { type: 'keyword' },
+  },
+},
+```
+
+*Version N+1 — start relying on the field in business logic:*
+
+```ts
+const result = await soClient.find({
+  type: 'my_type',
+  filter: 'my_type.attributes.searchable_field: "default_value"',
+});
+```
 
 ### Removing an existing field [removing-an-existing-field]
 

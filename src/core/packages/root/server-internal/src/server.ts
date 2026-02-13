@@ -308,6 +308,7 @@ export class Server {
       analytics: analyticsSetup,
       http: httpSetup,
       executionContext: executionContextSetup,
+      security: securitySetup,
     });
 
     const dataStreamsSetup = await this.dataStreams.setup();

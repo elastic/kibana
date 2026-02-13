@@ -10,7 +10,7 @@ import { renderHook, act } from '@testing-library/react';
 
 import { TestProviders } from '../../../common/mock';
 import { useTemplatesPagination } from './use_templates_pagination';
-import type { QueryParams } from '../types';
+import type { TemplatesFindRequest } from '../../../../common/types/api/template/v1';
 import { PAGE_SIZE_OPTIONS } from '../constants';
 
 describe('useTemplatesPagination', () => {
@@ -18,7 +18,7 @@ describe('useTemplatesPagination', () => {
     <TestProviders>{children}</TestProviders>
   );
 
-  const defaultQueryParams: QueryParams = {
+  const defaultQueryParams: TemplatesFindRequest = {
     page: 1,
     perPage: 10,
     sortField: 'name',
@@ -26,6 +26,7 @@ describe('useTemplatesPagination', () => {
     search: '',
     tags: [],
     author: [],
+    isDeleted: false,
   };
 
   const setQueryParams = jest.fn();
