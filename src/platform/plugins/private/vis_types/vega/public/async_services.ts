@@ -13,3 +13,4 @@ export { VegaVisComponent } from './components/vega_vis_component';
 export { VegaParser } from './data_model/vega_parser';
 export { getServiceSettings } from './vega_view/vega_map_view/service_settings/get_service_settings';
 export { VegaView } from './vega_view/vega_view';
+export { getVegaInspectorView } from './vega_inspector/vega_inspector';

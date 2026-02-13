@@ -15,7 +15,6 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { InspectorViewRegistry } from './view_registry';
 import type { InspectorOptions, InspectorSession } from './types';
 import type { Adapters } from '../common';
-import { getRequestsViewDescription } from './views';
 
 export interface InspectorPluginStartDeps {
   share: SharePluginStart;
@@ -23,6 +22,7 @@ export interface InspectorPluginStartDeps {
 
 export interface Setup {
   registerView: InspectorViewRegistry['register'];
+  registerViewAsync: InspectorViewRegistry['registerAsync'];
 }
 
 export interface Start {
@@ -34,7 +34,7 @@ export interface Start {
    * @returns {boolean} True, if a call to `open` with the same adapters
    *    would have shown the inspector panel, false otherwise.
    */
-  isAvailable: (adapters?: Adapters) => boolean;
+  isAvailable: (adapters?: Adapters) => Promise<boolean>;
 
   /**
    * Opens the inspector panel for the given adapters and close any previously opened
@@ -49,7 +49,11 @@ export interface Start {
    * @return {InspectorSession} The session instance for the opened inspector.
    * @throws {Error}
    */
-  open: (adapters: Adapters, options?: InspectorOptions, parentApi?: unknown) => InspectorSession;
+  open: (
+    adapters: Adapters,
+    options?: InspectorOptions,
+    parentApi?: unknown
+  ) => Promise<InspectorSession>;
 }
 
 const closeButtonLabel = i18n.translate('inspector.closeButton', {
@@ -64,19 +68,25 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
   public setup(_core: CoreSetup) {
     this.views = new InspectorViewRegistry();
 
-    this.views.register(getRequestsViewDescription());
+    this.views.registerAsync(async () => {
+      const { getRequestsViewDescription } = await import('./async_services');
+      return getRequestsViewDescription();
+    });
 
     return {
       registerView: this.views!.register.bind(this.views),
+      registerViewAsync: this.views!.registerAsync.bind(this.views),
     };
   }
 
   public start(core: CoreStart, startDeps: InspectorPluginStartDeps) {
-    const isAvailable: Start['isAvailable'] = (adapters) =>
-      this.views!.getVisible(adapters).length > 0;
+    const isAvailable: Start['isAvailable'] = async (adapters) => {
+      const views = await this.views!.getVisible(adapters);
+      return views.length > 0;
+    };
 
-    const open: Start['open'] = (adapters, options = {}, parentApi) => {
-      const views = this.views!.getVisible(adapters);
+    const open: Start['open'] = async (adapters, options = {}, parentApi) => {
+      const views = await this.views!.getVisible(adapters);
 
       // Don't open inspector if there are no views available for the passed adapters
       if (!views || views.length === 0) {
