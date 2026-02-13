@@ -115,7 +115,7 @@ export const insightFeedbackEventSchema: EventTypeOpts<InsightFeedbackEvent> = {
   schema: {
     insightType: insightTypeSchema,
     feedback: {
-      type: 'keyword',
+      type: 'text',
       _meta: {
         description: 'Whether the user found the insight helpful: positive or negative',
       },
