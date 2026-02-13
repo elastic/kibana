@@ -53,7 +53,9 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/cloud'
   - '@kbn/agent-builder-plugin'
+  - '@kbn/data-sources-plugin'
   - '@kbn/scout-search'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
