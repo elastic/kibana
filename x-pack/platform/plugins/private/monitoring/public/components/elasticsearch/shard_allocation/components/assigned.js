@@ -21,7 +21,7 @@ const childTitleStyle = (theme) => css`
   ${logicalCSS('padding', `${theme.euiTheme.size.l} ${theme.euiTheme.size.s}`)}
   text-align: center;
   font-size: ${euiFontSize(theme, 'xs').fontSize};
-  color: ${theme.euiTheme.colors.ghost};
+  color: ${theme.euiTheme.colors.textGhost};
   display: flex;
   flex-direction: row;
   align-items: center;

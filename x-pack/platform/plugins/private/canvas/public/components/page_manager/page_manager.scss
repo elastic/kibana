@@ -34,7 +34,7 @@
   .canvasPageManager__addPage {
     width: $euiSizeXXL + $euiSize;
     background: $euiColorPrimary;
-    color: $euiColorGhost;
+    color: $euiColorPlainLight;
     opacity: 0;
     animation: buttonPop $euiAnimSpeedNormal $euiAnimSlightResistance;
     animation-fill-mode: forwards;
@@ -107,7 +107,7 @@
     opacity: 0;
     transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
     transition-delay: $euiAnimSpeedNormal;
-    background: transparentize($euiColorGhost, .5);
+    background: transparentize($euiColorPlainLight, .5);
     border-radius: $euiBorderRadius;
   }
 }

@@ -28,7 +28,7 @@ export const usePaneStyles = () => {
     right: var(--kbn-layout--application-right, 0px);
     bottom: var(--kbn-layout--application-bottom, 0px);
     // TODO EUI: add color with transparency
-    background: ${transparentize(euiTheme.colors.ink, 0.5)};
+    background: ${transparentize(euiTheme.colors.plainDark, 0.5)};
     z-index: ${euiTheme.levels.maskBelowHeader};
 
     ${euiCanAnimate} {
