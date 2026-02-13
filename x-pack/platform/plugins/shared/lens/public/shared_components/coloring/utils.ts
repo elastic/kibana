@@ -27,6 +27,7 @@ import { getOriginalId } from '@kbn/transpose-utils';
 import type { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { KbnPalettes } from '@kbn/palettes';
 import type { DataType, DatasourcePublicAPI, OperationDescriptor } from '@kbn/lens-common';
+import { defaultPaletteParams } from './constants';
 
 /**
  * Determines if a data type is numeric.
@@ -183,3 +184,37 @@ export const findMinMaxByColumnId = (columnIds: string[], table: Datatable | und
   }
   return minMaxMap;
 };
+
+export function getColorByValuePalette(
+  paletteService: PaletteRegistry,
+  dataBounds: DataBounds,
+  existingPalette?: PaletteOutput<CustomPaletteParams>
+): {
+  palette: PaletteOutput<CustomPaletteParams>;
+  displayStops: Array<{ color: string; stop: number }>;
+} {
+  // Use existing palette or create default
+  const activePalette: PaletteOutput<CustomPaletteParams> = existingPalette
+    ? {
+        type: 'palette',
+        name: existingPalette.name,
+        params: { ...existingPalette.params },
+      }
+    : {
+        type: 'palette',
+        name: defaultPaletteParams.name,
+        params: { ...defaultPaletteParams },
+      };
+
+  const displayStops = applyPaletteParams(paletteService, activePalette, dataBounds);
+
+  // For non-custom palettes -> update the stops with computed values
+  if (activePalette.name !== CUSTOM_PALETTE) {
+    activePalette.params = {
+      ...activePalette.params,
+      stops: displayStops,
+    };
+  }
+
+  return { palette: activePalette, displayStops };
+}
