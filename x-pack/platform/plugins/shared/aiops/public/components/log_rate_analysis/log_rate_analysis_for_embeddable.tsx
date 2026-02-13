@@ -11,6 +11,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service';
 
+import { calculateBounds } from '@kbn/data-plugin/common';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
 import { useSearch } from '../../hooks/use_search';
@@ -19,8 +20,6 @@ import { getDefaultLogRateAnalysisAppState } from '../../application/url_state/l
 
 import { LogRateAnalysisDocumentCountChartData } from './log_rate_analysis_content/log_rate_analysis_document_count_chart_data';
 import { LogRateAnalysisContent } from './log_rate_analysis_content/log_rate_analysis_content';
-
-import { calculateBounds } from '@kbn/data-plugin/common';
 
 export interface LogRateAnalysisForEmbeddableProps {
   timeRange: TimeRange;

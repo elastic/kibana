@@ -21,6 +21,7 @@ import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import { AIOPS_ANALYSIS_RUN_ORIGIN, AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import useMountedState from 'react-use/lib/useMountedState';
 import { getEsQueryConfig } from '@kbn/data-service';
+import { calculateBounds } from '@kbn/data-plugin/common';
 import { useFilterQueryUpdates } from '../../../hooks/use_filters_query';
 import type { PatternAnalysisProps } from '../../../shared_components/pattern_analysis';
 import { useSearch } from '../../../hooks/use_search';
@@ -38,7 +39,6 @@ import { useMinimumTimeRange } from './use_minimum_time_range';
 import { FieldValidationCallout } from '../category_validation_callout';
 import { useActions } from '../category_table/use_actions';
 import { InformationText } from '../information_text';
-import { calculateBounds } from '@kbn/data-plugin/common';
 
 export type LogCategorizationEmbeddableProps = Readonly<
   EmbeddablePatternAnalysisInput & PatternAnalysisProps
