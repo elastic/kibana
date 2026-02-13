@@ -78,6 +78,14 @@ function normalizeBuildkiteKey(value: string): string {
     .replace(/^-|-$/g, '');
 }
 
+function normalizeEisConnectorIdFromModelId(modelId: string): string {
+  return `eis-${normalizeBuildkiteKey(modelId)}`;
+}
+
+function normalizeLitellmConnectorIdFromModelGroup(modelGroup: string): string {
+  return `litellm-${normalizeBuildkiteKey(modelGroup)}`;
+}
+
 function parseGithubPrLabels(raw: string): string[] {
   // Historically this env var has been provided as a comma/newline separated string,
   // but some contexts may pass JSON (e.g. ["a","b"]). Handle both.
@@ -631,10 +639,16 @@ function buildEvalsYaml({
     //   matches one of those model groups.
     // - `models:all` can be used to explicitly opt into all models (ignored if combined with specifics).
     const parsedLabels = parseGithubPrLabels(GITHUB_PR_LABELS);
-    const evaluationConnectorId = parsedLabels
+    const rawEvaluationConnectorId = parsedLabels
       .find((label) => label.startsWith('models:judge:'))
       ?.slice('models:judge:'.length)
       ?.trim();
+    const evaluationConnectorId =
+      rawEvaluationConnectorId && rawEvaluationConnectorId.startsWith('eis/')
+        ? normalizeEisConnectorIdFromModelId(rawEvaluationConnectorId.slice('eis/'.length))
+        : rawEvaluationConnectorId && rawEvaluationConnectorId.includes('/')
+          ? normalizeLitellmConnectorIdFromModelGroup(rawEvaluationConnectorId)
+        : rawEvaluationConnectorId;
     const includeEisModels =
       parsedLabels.includes('models:all') ||
       parsedLabels.some((label) => label.startsWith('models:eis/')) ||

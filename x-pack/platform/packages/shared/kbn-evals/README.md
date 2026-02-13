@@ -157,36 +157,33 @@ Evals support optional PR labels for selecting which connector projects to run a
 
 The helper script `scripts/create_models_labels.sh` is idempotent (safe to re-run) and supports targeting a specific repo.
 
-Create/update EIS model labels from a local discovery artifact:
+Update **all** model + judge labels (LiteLLM + EIS) using default discovery sources:
 
 ```bash
-./scripts/create_models_labels.sh --repo elastic/kibana \
-  --from-eis-models-json target/eis_models.json
+./scripts/create_models_labels.sh --repo elastic/kibana --update-all-labels
 ```
 
-Create/update LiteLLM model labels by first exporting a connectors JSON map (uses the same LiteLLM “team info” discovery as CI):
+If you need to run only a subset:
 
 ```bash
-node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
-  --api-key "$LITELLM_VIRTUAL_KEY" \
-  --format json > /tmp/litellm_connectors.json
+# EIS model labels (models:eis/<modelId>)
+./scripts/create_models_labels.sh --repo elastic/kibana --from-eis-models-json
 
-./scripts/create_models_labels.sh --repo elastic/kibana \
-  --from-litellm-connectors-json /tmp/litellm_connectors.json
+# EIS judge labels (models:judge:eis/<modelId>)
+./scripts/create_models_labels.sh --repo elastic/kibana --judge-from-eis-models-json
+
+# LiteLLM model labels (models:<model-group>)
+./scripts/create_models_labels.sh --repo elastic/kibana --from-litellm-vault-config
+
+# LiteLLM judge labels (models:judge:<model-group>)
+./scripts/create_models_labels.sh --repo elastic/kibana --judge-from-litellm-vault-config
 ```
 
-Create/update specific judge override labels:
+Create/update a specific judge override label:
 
 ```bash
 ./scripts/create_models_labels.sh --repo elastic/kibana \
   --judge litellm-llm-gateway-gpt-4o
-```
-
-Create/update judge override labels for **all** EIS models in `target/eis_models.json` (judge labels must use connector ids, which are derived from model ids):
-
-```bash
-./scripts/create_models_labels.sh --repo elastic/kibana \
-  --judge-from-eis-models-json target/eis_models.json
 ```
 
 ### CI ops: sharing a Vault update command
