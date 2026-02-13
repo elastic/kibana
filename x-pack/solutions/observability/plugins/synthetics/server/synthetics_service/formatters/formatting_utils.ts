@@ -81,7 +81,7 @@ const allParamsAreMissing = (parsedVars: ParsedVars, params: Record<string, stri
 export const secondsToCronFormatter: FormatterFn<string> = (fields, key) => {
   const value = (fields[key] as string) ?? '';
 
-  return value !== undefined && value !== null ? `${value}s` : null;
+  return value ? `${value}s` : null;
 };
 
 export const maxAttemptsFormatter: FormatterFn = (fields, key) => {
