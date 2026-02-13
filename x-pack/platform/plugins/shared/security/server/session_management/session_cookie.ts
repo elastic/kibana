@@ -10,6 +10,7 @@ import type {
   KibanaRequest,
   Logger,
   SessionStorageFactory,
+  SessionStorageSetOptions,
 } from '@kbn/core/server';
 
 import type { ConfigType } from '../config';
@@ -125,11 +126,16 @@ export class SessionCookie {
    * Sets session value for the specified request.
    * @param request Request instance to set session value for.
    * @param sessionValue Session value parameters.
+   * @param options Optional overrides for cookie attributes (isSecure, sameSite).
    */
-  async set(request: KibanaRequest, sessionValue: Readonly<Omit<SessionCookieValue, 'path'>>) {
+  async set(
+    request: KibanaRequest,
+    sessionValue: Readonly<Omit<SessionCookieValue, 'path'>>,
+    options?: SessionStorageSetOptions
+  ) {
     (await this.cookieSessionValueStorage)
       .asScoped(request)
-      .set({ ...sessionValue, path: this.serverBasePath });
+      .set({ ...sessionValue, path: this.serverBasePath }, options);
   }
 
   /**
