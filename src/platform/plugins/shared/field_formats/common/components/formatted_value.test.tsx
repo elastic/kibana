@@ -10,9 +10,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { FormattedValue } from './formatted_value';
-import { FieldFormat } from '../../common';
-import type { ReactContextTypeConvert, TextContextTypeOptions } from '../../common';
-import { asPrettyString } from '../../common/utils';
+import { FieldFormat } from '../field_format';
+import type { ReactContextTypeConvert, TextContextTypeOptions } from '../types';
+import { asPrettyString } from '../utils';
 
 const createMockFormat = ({
   textConvert,

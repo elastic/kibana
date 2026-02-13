@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FormattedValue, type FormattedValueProps } from './formatted_value';
+// Re-export from common for backward compatibility
+export { FormattedValue, type FormattedValueProps } from '../../common/components';

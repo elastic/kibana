@@ -13,3 +13,5 @@ export {
   checkForMissingValueReact,
   type EmptyValueProps,
 } from './empty_value';
+
+export { FormattedValue, type FormattedValueProps } from './formatted_value';

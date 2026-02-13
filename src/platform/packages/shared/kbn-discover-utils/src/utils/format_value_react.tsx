@@ -11,9 +11,9 @@ import React, { type FC, memo } from 'react';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   FormattedValue,
-  type FieldFormatsStart,
+  type FieldFormatsStartCommon,
   type FormattedValueProps,
-} from '@kbn/field-formats-plugin/public';
+} from '@kbn/field-formats-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { EsHitRecord } from '../types';
 
@@ -31,7 +31,7 @@ export interface FormatFieldValueReactProps {
   /**
    * Field formatters service
    */
-  fieldFormats: FieldFormatsStart;
+  fieldFormats: FieldFormatsStartCommon;
 
   /**
    * The data view if available
@@ -130,7 +130,7 @@ FormatFieldValueReact.displayName = 'FormatFieldValueReact';
  * @returns The field formatter to use
  */
 export function getFieldFormatter(
-  fieldFormats: FieldFormatsStart,
+  fieldFormats: FieldFormatsStartCommon,
   dataView?: DataView,
   field?: DataViewField
 ) {

@@ -8,7 +8,7 @@
  */
 
 import React, { type FC, type ReactNode, memo, useMemo } from 'react';
-import type { IFieldFormat, HtmlContextTypeOptions, ReactContextTypeOptions } from '../../common';
+import type { IFieldFormat, HtmlContextTypeOptions, ReactContextTypeOptions } from '../types';
 
 /**
  * Props for the FormattedValue component
@@ -137,7 +137,7 @@ LegacyHtmlAdapter.displayName = 'LegacyHtmlAdapter';
  * ## Usage
  *
  * ```tsx
- * import { FormattedValue } from '@kbn/field-formats-plugin/public';
+ * import { FormattedValue } from '@kbn/field-formats-plugin/common';
  *
  * <FormattedValue
  *   fieldFormat={dataView.getFormatterForField(field)}

@@ -41,6 +41,8 @@ export {
   EMPTY_VALUE_CLASS,
   checkForMissingValueReact,
   type EmptyValueProps,
+  FormattedValue,
+  type FormattedValueProps,
 } from './components';
 
 export { DEFAULT_CONVERTER_COLOR } from './constants/color_default';
