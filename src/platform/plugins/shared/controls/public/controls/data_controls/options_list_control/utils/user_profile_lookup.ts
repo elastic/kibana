@@ -13,7 +13,7 @@ import { coreServices } from '../../../../services/kibana_services';
 const userProfilesCache = new Map<string, UserProfileWithAvatar | null>();
 const inFlight = new Set<string>();
 
-const SECURITY_SOLUTION_SUGGEST_USERS_PATH = '/internal/detection_engine/users/_find';
+const CONTROLS_SUGGEST_USERS_PATH = '/internal/controls/user_profile/_suggest';
 
 /**
  * Returns a cached user profile for `uid`.
@@ -68,7 +68,7 @@ export const suggestUserProfilesWithAvatar = async ({
   try {
     const trimmed = name.trim();
     const profiles = await coreServices.http.fetch<UserProfileWithAvatar[]>(
-      SECURITY_SOLUTION_SUGGEST_USERS_PATH,
+      CONTROLS_SUGGEST_USERS_PATH,
       {
         method: 'GET',
         version: '1',

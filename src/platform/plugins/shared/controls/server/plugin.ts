@@ -18,6 +18,7 @@ import { registerRangeSliderControlTransforms } from './transforms/range_slider_
 import { registerTimeSliderControlTransforms } from './transforms/time_slider_control_transforms';
 import { setupOptionsListClusterSettingsRoute } from './options_list/options_list_cluster_settings_route';
 import { setupOptionsListSuggestionsRoute } from './options_list/options_list_suggestions_route';
+import { setupOptionsListUserProfileSuggestRoute } from './options_list/options_list_user_profile_suggest_route';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -34,6 +35,7 @@ export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
 
     setupOptionsListClusterSettingsRoute(core);
     setupOptionsListSuggestionsRoute(core, kql.autocomplete.getAutocompleteSettings);
+    setupOptionsListUserProfileSuggestRoute(core);
     return {};
   }
 

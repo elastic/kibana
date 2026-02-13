@@ -97,7 +97,7 @@ describe('UsersSuggestions', () => {
 
     await waitFor(() => {
       expect(mockHttpFetch).toHaveBeenCalledWith(
-        '/internal/detection_engine/users/_find',
+        '/internal/controls/user_profile/_suggest',
         expect.anything()
       );
       expect(rendered.getByText('User One')).toBeInTheDocument();
@@ -119,7 +119,7 @@ describe('UsersSuggestions', () => {
 
     await waitFor(() => {
       expect(mockHttpFetch).toHaveBeenCalledWith(
-        '/internal/detection_engine/users/_find',
+        '/internal/controls/user_profile/_suggest',
         expect.anything()
       );
       expect(rendered.getAllByText('dupe@example.com')).toHaveLength(1);

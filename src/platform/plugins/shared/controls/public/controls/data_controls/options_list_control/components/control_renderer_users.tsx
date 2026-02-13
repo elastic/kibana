@@ -40,26 +40,6 @@ import { UsersSuggestions } from './control_renderer_users_suggestions';
 
 const optionListControlStyles = {
   selectionWrapper: css({ overflow: 'hidden !important' }),
-  excludeSelected: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      fontSize: euiTheme.size.m,
-      fontWeight: euiTheme.font.weight.bold,
-      color: euiTheme.colors.danger,
-    }),
-  validOption: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      color: euiTheme.colors.textParagraph,
-      fontWeight: euiTheme.font.weight.regular,
-    }),
-  invalidOption: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      color: euiTheme.colors.textWarning,
-      fontWeight: euiTheme.font.weight.medium,
-    }),
-  optionsListExistsFilter: ({ euiTheme }: UseEuiTheme) => css`
-    font-style: italic;
-    font-weight: ${euiTheme.font.weight.medium};
-  `,
   invalidSelectionsToken: css({ verticalAlign: 'text-bottom' }),
   filterButton: ({ euiTheme }: UseEuiTheme) =>
     css({
