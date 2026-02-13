@@ -127,9 +127,9 @@ export const isPromqlAcrossSeriesFunction = (name: string): boolean => {
   );
 };
 
-/* Converts a PromQL operator definition into an autocomplete suggestion. */
-const getPromqlOperatorSuggestion = (op: PromQLFunctionDefinition): ISuggestionItem => {
-  const { description, examples, operator, name, preview } = op;
+/* Converts a PromQL symbol definition (operator or label matcher) into an autocomplete suggestion. */
+const buildPromqlSymbolSuggestion = (definition: PromQLFunctionDefinition): ISuggestionItem => {
+  const { description, examples, operator, name, preview } = definition;
   const detail = description;
   const docDetail = preview ? `**[${techPreviewLabel}]** ${detail}` : detail;
   const symbol = operator ?? name;
@@ -150,33 +150,14 @@ const getPromqlOperatorSuggestion = (op: PromQLFunctionDefinition): ISuggestionI
 export const getPromqlOperatorSuggestions = (): ISuggestionItem[] => {
   return promqlOperatorDefinitions
     .filter((op) => !op.ignoreAsSuggestion)
-    .map((op) => getPromqlOperatorSuggestion(op));
-};
-
-/* Converts a PromQL label matcher definition into an autocomplete suggestion. */
-const getPromqlLabelMatcherSuggestion = (op: PromQLFunctionDefinition): ISuggestionItem => {
-  const { description, examples, operator, name, preview } = op;
-  const detail = description;
-  const docDetail = preview ? `**[${techPreviewLabel}]** ${detail}` : detail;
-  const symbol = operator ?? name;
-
-  return {
-    label: symbol,
-    text: `${symbol} `,
-    asSnippet: false,
-    kind: 'Operator',
-    detail,
-    documentation: {
-      value: buildFunctionDocumentation(docDetail, [], examples),
-    },
-  };
+    .map((op) => buildPromqlSymbolSuggestion(op));
 };
 
 /* Returns all PromQL label matcher suggestions suitable for autocomplete. */
 export const getPromqlLabelMatcherSuggestions = (): ISuggestionItem[] => {
   return promqlLabelMatcherDefinitions
     .filter((op) => !op.ignoreAsSuggestion)
-    .map((op) => getPromqlLabelMatcherSuggestion(op));
+    .map((op) => buildPromqlSymbolSuggestion(op));
 };
 
 export function getIndexFromPromQLParams({
