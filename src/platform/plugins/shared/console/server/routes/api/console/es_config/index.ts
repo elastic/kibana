@@ -8,6 +8,7 @@
  */
 
 import type { EsConfigApiResponse } from '../../../../../common/types/api_responses';
+import { stripCredentialsFromUrl } from '../../../../lib/utils';
 import type { RouteDependencies } from '../../..';
 
 export const registerEsConfigRoute = ({ router, services, proxy }: RouteDependencies): void => {
@@ -28,20 +29,21 @@ export const registerEsConfigRoute = ({ router, services, proxy }: RouteDependen
       // Always get the actual proxy hosts for allHosts
       const legacyConfig = await proxy.readLegacyESConfig();
       const { hosts } = legacyConfig;
+      const sanitizedHosts = hosts.map(stripCredentialsFromUrl);
 
       if (cloudUrl) {
         const body: EsConfigApiResponse = {
-          host: cloudUrl,
+          host: stripCredentialsFromUrl(cloudUrl),
           // Use actual proxy hosts, not cloudUrl
-          allHosts: hosts,
+          allHosts: sanitizedHosts,
         };
 
         return res.ok({ body });
       }
 
       const body: EsConfigApiResponse = {
-        host: hosts[0],
-        allHosts: hosts,
+        host: sanitizedHosts[0],
+        allHosts: sanitizedHosts,
       };
 
       return res.ok({ body });
