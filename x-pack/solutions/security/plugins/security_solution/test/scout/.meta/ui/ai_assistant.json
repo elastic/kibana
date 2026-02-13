@@ -1,0 +1,322 @@
+{
+  "lastModified": "2026-02-13T18:55:50.833Z",
+  "sha1": "f895a1956a421e2af68b600eeb9e71a2c28ae4b2",
+  "tests": [
+    {
+      "id": "e10b7aba254c752-af29967c4812fcd",
+      "title": "AI Assistant Conversations Shows welcome setup when no connectors or conversations exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/conversations.spec.ts",
+        "line": 40,
+        "column": 9
+      }
+    },
+    {
+      "id": "e10b7aba254c752-68c5d2ded20f103",
+      "title": "AI Assistant Conversations Creating a new connector from welcome setup automatically sets the connector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/conversations.spec.ts",
+        "line": 55,
+        "column": 9
+      }
+    },
+    {
+      "id": "e10b7aba254c752-d24ca99a4a60e70",
+      "title": "AI Assistant Conversations Properly switches back and forth between conversations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/conversations.spec.ts",
+        "line": 70,
+        "column": 9
+      }
+    },
+    {
+      "id": "e10b7aba254c752-72e74d37e3cc4f1",
+      "title": "AI Assistant Conversations Correctly creates and titles new conversations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/conversations.spec.ts",
+        "line": 118,
+        "column": 9
+      }
+    },
+    {
+      "id": "b631a6bb8cb0e87-5eb1cec978fc45b",
+      "title": "ES|QL Assistant should properly propagate esql query to discover",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/esql_assistant.spec.ts",
+        "line": 18,
+        "column": 9
+      }
+    },
+    {
+      "id": "b631a6bb8cb0e87-3e69777d8d1a72b",
+      "title": "ES|QL Assistant should properly propagate KQL query",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/esql_assistant.spec.ts",
+        "line": 22,
+        "column": 9
+      }
+    },
+    {
+      "id": "b631a6bb8cb0e87-0daf81641a10a6a",
+      "title": "ES|QL Assistant should properly propagate EQL query",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/esql_assistant.spec.ts",
+        "line": 26,
+        "column": 9
+      }
+    },
+    {
+      "id": "2063a01328e7803-0c6d461d8018b0b",
+      "title": "AI Assistant - Basic License user with Basic license should not be able to use assistant",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/ess_basic.spec.ts",
+        "line": 18,
+        "column": 9
+      }
+    },
+    {
+      "id": "12fda1ab179e556-5232e3c3771a971",
+      "title": "App Features for Security Complete should have AI Assistant available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/feature_complete.spec.ts",
+        "line": 15,
+        "column": 9
+      }
+    },
+    {
+      "id": "2d260ea9102f475-f77ebeae37db093",
+      "title": "App Features for Security Essentials should not have AI Assistant available",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/feature_essentials.spec.ts",
+        "line": 17,
+        "column": 9
+      }
+    },
+    {
+      "id": "c11772215ff3e25-436dce08f6573d1",
+      "title": "AI Assistant Messages A message with a kql query can be used in the timeline only from pages with timeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/messages.spec.ts",
+        "line": 60,
+        "column": 9
+      }
+    },
+    {
+      "id": "207033786b69ebc-d10174d260ff69c",
+      "title": "AI Assistant System Prompts No prompt is selected by default, custom prompts can be selected and deselected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/prompts.spec.ts",
+        "line": 59,
+        "column": 9
+      }
+    },
+    {
+      "id": "207033786b69ebc-7bdaf550cfaeea8",
+      "title": "AI Assistant System Prompts Deselecting a system prompt prevents prompt from being sent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/prompts.spec.ts",
+        "line": 77,
+        "column": 9
+      }
+    },
+    {
+      "id": "207033786b69ebc-8bb8a21cc94f337",
+      "title": "AI Assistant System Prompts Last selected system prompt persists in conversation",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/prompts.spec.ts",
+        "line": 112,
+        "column": 10
+      }
+    },
+    {
+      "id": "207033786b69ebc-d1fb1525f6ba0e5",
+      "title": "AI Assistant System Prompts Add prompt from system prompt selector without setting a default conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/prompts.spec.ts",
+        "line": 116,
+        "column": 9
+      }
+    },
+    {
+      "id": "207033786b69ebc-ee1ec7a9380cff5",
+      "title": "AI Assistant System Prompts Add prompt and set multiple conversations as default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/prompts.spec.ts",
+        "line": 143,
+        "column": 9
+      }
+    },
+    {
+      "id": "363690c7fb689fe-6491c9e2ee5abf3",
+      "title": "AI Assistant Quick Prompts Add a quick prompt and send it in the conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/quick_prompts.spec.ts",
+        "line": 46,
+        "column": 9
+      }
+    },
+    {
+      "id": "21458912016898d-1a2f2b64ffc7943",
+      "title": "Assistant Conversation Sharing Share modal works",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/shared_conversations.spec.ts",
+        "line": 18,
+        "column": 9
+      }
+    },
+    {
+      "id": "21458912016898d-789687e6e06b0e8",
+      "title": "Assistant Conversation Sharing Shared conversations appear for the user they were shared with",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/shared_conversations.spec.ts",
+        "line": 22,
+        "column": 9
+      }
+    },
+    {
+      "id": "21458912016898d-a1000c033c1ecd1",
+      "title": "Assistant Conversation Sharing Dismissed callout remains dismissed",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/shared_conversations.spec.ts",
+        "line": 26,
+        "column": 9
+      }
+    },
+    {
+      "id": "21458912016898d-1e8981e262a7db7",
+      "title": "Assistant Conversation Sharing Duplicate conversation allows user to continue a shared conversation",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/tests/shared_conversations.spec.ts",
+        "line": 30,
+        "column": 9
+      }
+    }
+  ]
+}

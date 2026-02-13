@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-security/ui';
-import { test } from '../fixtures';
+import { test, expect, tags } from '../fixtures';
 import {
   createAzureConnector,
   createConversation,
@@ -40,37 +39,52 @@ const mockConvo = {
   ],
 };
 
-test.describe('AI Assistant Messages', { tag: ['@ess', '@svlSecurity'] }, () => {
-  test.beforeEach(async ({ kbnClient, esClient, browserAuth }) => {
-    await deleteConnectors(kbnClient);
-    await deleteConversations(esClient);
-    await deletePrompts(esClient);
-    await createAzureConnector(kbnClient);
-    await createConversation(kbnClient, mockConvo);
-    await browserAuth.loginAsAdmin();
-  });
+test.describe(
+  'AI Assistant Messages',
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  () => {
+    test.beforeEach(async ({ kbnClient, esClient }) => {
+      await deleteConnectors(kbnClient);
+      await deleteConversations(esClient);
+      await deletePrompts(esClient);
+      await createAzureConnector(kbnClient);
+      await createConversation(kbnClient, mockConvo);
+    });
 
-  test('A message with a kql query can be used in the timeline only from pages with timeline', async ({
-    page,
-    pageObjects,
-    kbnUrl,
-  }) => {
-    test.setTimeout(180_000);
+    test.afterEach(async ({ kbnClient, esClient }) => {
+      await deleteConnectors(kbnClient);
+      await deleteConversations(esClient);
+      await deletePrompts(esClient);
+    });
 
-    // From get_started page - Send to Timeline should be disabled
-    await page.goto(kbnUrl.get('/app/security/get_started'));
-    await waitForPageReady(page);
-    await pageObjects.assistant.openAssistant();
-    await pageObjects.assistant.selectConversation(mockConvo.title);
-    await expect(pageObjects.assistant.sendToTimelineButton).toBeDisabled();
+    test('A message with a kql query can be used in the timeline only from pages with timeline', async ({
+      browserAuth,
+      page,
+      pageObjects,
+      kbnUrl,
+    }) => {
+      test.setTimeout(180_000);
+      await browserAuth.loginAsAdmin();
 
-    // From cases page (has timeline) - Send to Timeline should work
-    await page.goto(kbnUrl.get('/app/security/cases'));
-    await waitForPageReady(page);
-    await pageObjects.assistant.openAssistant();
-    await pageObjects.assistant.sendQueryToTimeline();
+      await test.step('from get_started page, Send to Timeline should be disabled', async () => {
+        await page.goto(kbnUrl.get('/app/security/get_started'));
+        await waitForPageReady(page);
+        await pageObjects.assistant.openAssistant();
+        await pageObjects.assistant.selectConversation(mockConvo.title);
+        await expect(pageObjects.assistant.sendToTimelineButton).toBeDisabled();
+      });
 
-    // Verify query appears in timeline
-    await expect(page.testSubj.locator('timelineQueryInput')).toHaveText(mockTimelineQuery);
-  });
-});
+      await test.step(
+        'from cases page (has timeline), Send to Timeline should work',
+        async () => {
+          await page.goto(kbnUrl.get('/app/security/cases'));
+          await waitForPageReady(page);
+          await pageObjects.assistant.openAssistant();
+          await pageObjects.assistant.sendQueryToTimeline();
+
+          await expect(page.testSubj.locator('timelineQueryInput')).toHaveText(mockTimelineQuery);
+        }
+      );
+    });
+  }
+);

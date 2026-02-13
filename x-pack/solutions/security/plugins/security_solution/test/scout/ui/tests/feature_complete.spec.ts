@@ -5,15 +5,23 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-security/ui';
-import { test } from '../fixtures';
+import { test, expect, tags } from '../fixtures';
 import { waitForPageReady } from '../common/constants';
 
-test.describe('App Features for Security Complete', { tag: ['@svlSecurity'] }, () => {
-  test('should have AI Assistant available', async ({ browserAuth, page, pageObjects, kbnUrl }) => {
-    await browserAuth.loginAsAdmin();
-    await page.goto(kbnUrl.get('/app/security/get_started'));
-    await waitForPageReady(page);
-    await expect(pageObjects.assistant.assistantButton).toBeVisible();
-  });
-});
+test.describe(
+  'App Features for Security Complete',
+  { tag: [...tags.serverless.security.complete] },
+  () => {
+    test('should have AI Assistant available', async ({
+      browserAuth,
+      page,
+      pageObjects,
+      kbnUrl,
+    }) => {
+      await browserAuth.loginAsAdmin();
+      await page.goto(kbnUrl.get('/app/security/get_started'));
+      await waitForPageReady(page);
+      await expect(pageObjects.assistant.assistantButton).toBeVisible();
+    });
+  }
+);

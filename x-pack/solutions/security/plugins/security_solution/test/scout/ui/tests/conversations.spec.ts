@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test } from '../fixtures';
+import { test, expect, tags } from '../fixtures';
 import {
   azureConnectorPayload,
   bedrockConnectorPayload,
@@ -21,97 +21,119 @@ import { waitForPageReady } from '../common/constants';
 const mockConvo1 = { id: 'spooky', title: 'Spooky convo', messages: [] };
 const mockConvo2 = { id: 'silly', title: 'Silly convo', messages: [] };
 
-test.describe('AI Assistant Conversations', { tag: ['@ess', '@svlSecurity'] }, () => {
-  test.beforeEach(async ({ kbnClient, esClient }) => {
-    await deleteConnectors(kbnClient);
-    await deleteConversations(esClient);
-    await deleteAlertsAndRules(kbnClient);
-  });
+test.describe(
+  'AI Assistant Conversations',
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  () => {
+    test.beforeEach(async ({ kbnClient, esClient }) => {
+      await deleteConnectors(kbnClient);
+      await deleteConversations(esClient);
+      await deleteAlertsAndRules(kbnClient);
+    });
 
-  test('Shows welcome setup when no connectors or conversations exist', async ({
-    browserAuth,
-    page,
-    pageObjects,
-    kbnUrl,
-  }) => {
-    await browserAuth.loginAsAdmin();
-    await page.goto(kbnUrl.get('/app/security/get_started'));
-    await waitForPageReady(page);
-    await pageObjects.assistant.openAssistant();
-    await pageObjects.assistant.assertNewConversation(true, 'New chat');
-  });
+    test.afterEach(async ({ kbnClient, esClient }) => {
+      await deleteConnectors(kbnClient);
+      await deleteConversations(esClient);
+      await deleteAlertsAndRules(kbnClient);
+    });
 
-  test('Creating a new connector from welcome setup automatically sets the connector', async ({
-    browserAuth,
-    page,
-    pageObjects,
-    kbnUrl,
-  }) => {
-    await browserAuth.loginAsAdmin();
-    await page.goto(kbnUrl.get('/app/security/get_started'));
-    await waitForPageReady(page);
-    await pageObjects.assistant.openAssistant();
-    await pageObjects.assistant.createOpenAIConnector('My OpenAI Connector');
-    await pageObjects.assistant.assertConnectorSelected('My OpenAI Connector');
-  });
+    test('Shows welcome setup when no connectors or conversations exist', async ({
+      browserAuth,
+      page,
+      pageObjects,
+      kbnUrl,
+    }) => {
+      await browserAuth.loginAsAdmin();
+      await page.goto(kbnUrl.get('/app/security/get_started'));
+      await waitForPageReady(page);
+      await pageObjects.assistant.openAssistant();
 
-  test('Properly switches back and forth between conversations', async ({
-    browserAuth,
-    kbnClient,
-    page,
-    pageObjects,
-    kbnUrl,
-  }) => {
-    test.setTimeout(180_000);
-    await createConversation(kbnClient, mockConvo1);
-    await createConversation(kbnClient, mockConvo2);
-    await createAzureConnector(kbnClient);
-    await createBedrockConnector(kbnClient);
-    await browserAuth.loginAsAdmin();
-    await page.goto(kbnUrl.get('/app/security/get_started'));
-    await waitForPageReady(page);
-    await pageObjects.assistant.openAssistant();
+      await expect(pageObjects.assistant.welcomeSetup).toBeVisible();
+      await expect(pageObjects.assistant.titleHeading).toHaveText('New chat');
+    });
 
-    // Select first conversation and send message
-    await pageObjects.assistant.selectConversation(mockConvo1.title);
-    await pageObjects.assistant.selectConnector(azureConnectorPayload.name);
-    await pageObjects.assistant.typeAndSendMessage('hello');
-    await pageObjects.assistant.assertMessageSent('hello');
-    await pageObjects.assistant.assertErrorResponse();
+    test('Creating a new connector from welcome setup automatically sets the connector', async ({
+      browserAuth,
+      page,
+      pageObjects,
+      kbnUrl,
+    }) => {
+      await browserAuth.loginAsAdmin();
+      await page.goto(kbnUrl.get('/app/security/get_started'));
+      await waitForPageReady(page);
+      await pageObjects.assistant.openAssistant();
+      await pageObjects.assistant.createOpenAIConnector('My OpenAI Connector');
 
-    // Select second conversation and send message
-    await pageObjects.assistant.selectConversation(mockConvo2.title);
-    await pageObjects.assistant.selectConnector(bedrockConnectorPayload.name);
-    await pageObjects.assistant.typeAndSendMessage('goodbye');
-    await pageObjects.assistant.assertMessageSent('goodbye');
-    await pageObjects.assistant.assertErrorResponse();
+      await expect(pageObjects.assistant.connectorSelector).toHaveText('My OpenAI Connector');
+    });
 
-    // Switch back and verify persistence
-    await pageObjects.assistant.selectConversation(mockConvo1.title);
-    await pageObjects.assistant.assertConnectorSelected(azureConnectorPayload.name);
-    await pageObjects.assistant.assertMessageSent('hello');
+    test('Properly switches back and forth between conversations', async ({
+      browserAuth,
+      kbnClient,
+      page,
+      pageObjects,
+      kbnUrl,
+    }) => {
+      test.setTimeout(180_000);
+      await createConversation(kbnClient, mockConvo1);
+      await createConversation(kbnClient, mockConvo2);
+      await createAzureConnector(kbnClient);
+      await createBedrockConnector(kbnClient);
+      await browserAuth.loginAsAdmin();
+      await page.goto(kbnUrl.get('/app/security/get_started'));
+      await waitForPageReady(page);
+      await pageObjects.assistant.openAssistant();
 
-    await pageObjects.assistant.selectConversation(mockConvo2.title);
-    await pageObjects.assistant.assertConnectorSelected(bedrockConnectorPayload.name);
-    await pageObjects.assistant.assertMessageSent('goodbye');
-  });
+      await test.step('select first conversation and send message', async () => {
+        await pageObjects.assistant.selectConversation(mockConvo1.title);
+        await pageObjects.assistant.selectConnector(azureConnectorPayload.name);
+        await pageObjects.assistant.typeAndSendMessage('hello');
+        await expect(pageObjects.assistant.messageAt(0)).toContainText('hello');
+        await expect(pageObjects.assistant.errorComment).toBeVisible({ timeout: 30_000 });
+      });
 
-  test('Correctly creates and titles new conversations', async ({
-    browserAuth,
-    kbnClient,
-    page,
-    pageObjects,
-    kbnUrl,
-  }) => {
-    test.setTimeout(180_000);
-    await createAzureConnector(kbnClient);
-    await browserAuth.loginAsAdmin();
-    await page.goto(kbnUrl.get('/app/security/get_started'));
-    await waitForPageReady(page);
-    await pageObjects.assistant.openAssistant();
-    await pageObjects.assistant.createAndTitleConversation(
-      'Something else',
-      azureConnectorPayload.name
-    );
-  });
-});
+      await test.step('select second conversation and send message', async () => {
+        await pageObjects.assistant.selectConversation(mockConvo2.title);
+        await pageObjects.assistant.selectConnector(bedrockConnectorPayload.name);
+        await pageObjects.assistant.typeAndSendMessage('goodbye');
+        await expect(pageObjects.assistant.messageAt(0)).toContainText('goodbye');
+        await expect(pageObjects.assistant.errorComment).toBeVisible({ timeout: 30_000 });
+      });
+
+      await test.step('switch back and verify persistence', async () => {
+        await pageObjects.assistant.selectConversation(mockConvo1.title);
+        await expect(pageObjects.assistant.connectorSelector).toHaveText(
+          azureConnectorPayload.name
+        );
+        await expect(pageObjects.assistant.messageAt(0)).toContainText('hello');
+
+        await pageObjects.assistant.selectConversation(mockConvo2.title);
+        await expect(pageObjects.assistant.connectorSelector).toHaveText(
+          bedrockConnectorPayload.name
+        );
+        await expect(pageObjects.assistant.messageAt(0)).toContainText('goodbye');
+      });
+    });
+
+    test('Correctly creates and titles new conversations', async ({
+      browserAuth,
+      kbnClient,
+      page,
+      pageObjects,
+      kbnUrl,
+    }) => {
+      test.setTimeout(180_000);
+      await createAzureConnector(kbnClient);
+      await browserAuth.loginAsAdmin();
+      await page.goto(kbnUrl.get('/app/security/get_started'));
+      await waitForPageReady(page);
+      await pageObjects.assistant.openAssistant();
+      await pageObjects.assistant.createAndTitleConversation(
+        'Something else',
+        azureConnectorPayload.name
+      );
+
+      await expect(pageObjects.assistant.titleHeading).toHaveText('Something else');
+    });
+  }
+);

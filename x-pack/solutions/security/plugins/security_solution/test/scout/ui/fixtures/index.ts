@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test as baseTest } from '@kbn/scout-security';
+import { test as baseTest, tags } from '@kbn/scout-security';
 import type { AiAssistantPageObjects } from '../page_objects';
 import { extendPageObjects } from '../page_objects';
 
@@ -20,4 +20,5 @@ export const test = baseTest.extend<AiAssistantTestFixtures>({
   },
 });
 
+export { tags };
 export { expect } from '@kbn/scout-security/ui';
