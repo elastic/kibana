@@ -206,6 +206,83 @@ describe('WiredStream draft mode', () => {
       expect(actions[0].request.query).toContain('processed');
     });
 
+    it('includes INSIST_🐔 and EVAL prelude for fields in WHERE clause', async () => {
+      const definition = createDraftStreamDefinition('logs.draft');
+      const stream = new WiredStream(definition, mockDependencies);
+
+      // Create parent with routing using a field condition
+      const parentDefinition = createWiredStreamDefinition('logs');
+      parentDefinition.ingest.wired.routing = [
+        {
+          destination: 'logs.draft',
+          where: { field: 'attributes.filepath', eq: 'Proxifier.log' },
+          status: 'enabled',
+        },
+      ];
+
+      const mockState = {
+        get: (name: string) => {
+          if (name === 'logs') {
+            return new WiredStream(parentDefinition, mockDependencies);
+          }
+          return undefined;
+        },
+      } as unknown as State;
+
+      const actions = await (stream as any).doDetermineCreateActions(mockState);
+
+      expect(actions[0].type).toBe('upsert_esql_view');
+      const query = actions[0].request.query;
+
+      // The query should contain INSIST_🐔 for the field used in WHERE clause
+      expect(query).toContain('INSIST_🐔');
+      expect(query).toContain('attributes.filepath');
+
+      // INSIST_🐔 should come before WHERE
+      const insistIndex = query.indexOf('INSIST_🐔');
+      const whereIndex = query.indexOf('WHERE');
+      expect(insistIndex).toBeLessThan(whereIndex);
+    });
+
+    it('includes typed EVAL casts when field has known type', async () => {
+      const definition = createDraftStreamDefinition('logs.draft');
+      // Add a field definition with a known type
+      definition.ingest.wired.fields = {
+        'attributes.status': { type: 'keyword' },
+      };
+      const stream = new WiredStream(definition, mockDependencies);
+
+      // Create parent with routing using the typed field
+      const parentDefinition = createWiredStreamDefinition('logs');
+      parentDefinition.ingest.wired.routing = [
+        {
+          destination: 'logs.draft',
+          where: { field: 'attributes.status', eq: 'error' },
+          status: 'enabled',
+        },
+      ];
+
+      const mockState = {
+        get: (name: string) => {
+          if (name === 'logs') {
+            return new WiredStream(parentDefinition, mockDependencies);
+          }
+          return undefined;
+        },
+      } as unknown as State;
+
+      const actions = await (stream as any).doDetermineCreateActions(mockState);
+
+      expect(actions[0].type).toBe('upsert_esql_view');
+      const query = actions[0].request.query;
+
+      // The query should contain both INSIST_🐔 and EVAL cast for the typed field
+      expect(query).toContain('INSIST_🐔');
+      expect(query).toContain('EVAL');
+      // The EVAL should cast to string (for keyword type)
+      expect(query).toContain('::STRING');
+    });
+
     it('includes all ES materialization actions for non-draft streams', async () => {
       const definition = createWiredStreamDefinition('logs.nondraft');
       const stream = new WiredStream(definition, mockDependencies);

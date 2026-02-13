@@ -33,7 +33,14 @@ import {
   isDisabledLifecycleFailureStore,
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
-import { validateStreamlang, transpileEsql, conditionToESQL } from '@kbn/streamlang';
+import {
+  validateStreamlang,
+  transpileEsql,
+  conditionToESQL,
+  getConditionFields,
+  generatePrelude,
+  type PreludeField,
+} from '@kbn/streamlang';
 import { MAX_STREAM_NAME_LENGTH } from '../../../../../common/constants';
 import { generateLayer } from '../../component_templates/generate_layer';
 import { getComponentTemplateName } from '../../component_templates/name';
@@ -778,10 +785,11 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
   /**
    * Builds the ESQL query for a draft stream's ESQL view.
-   * The query reads from the parent stream's data stream, applies the routing condition
-   * from the parent that routes to this draft stream, and applies the processing steps.
+   * The query reads from the root stream's data stream, applies INSIST_🐔/EVAL prelude for
+   * fields used in the routing condition, applies the routing condition from the parent
+   * that routes to this draft stream, and applies the processing steps.
    *
-   * Format: FROM <parent_data_stream> | WHERE <routing_condition> | <processing_steps>
+   * Format: FROM <root_data_stream> | INSIST_🐔 | EVAL casts | WHERE <routing_condition> | <processing_steps>
    */
   private buildDraftStreamEsqlQuery(desiredState: State): string {
     const parentId = getParentId(this._definition.name);
@@ -806,9 +814,54 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
       );
     }
 
+    // Collect all fields from the stream definition and ancestors for type lookup
+    const ancestors = getAncestors(this._definition.name)
+      .map((name) => desiredState.get(name))
+      .filter(
+        (stream): stream is StreamActiveRecord<Streams.WiredStream.Definition> =>
+          !!stream && Streams.WiredStream.Definition.is(stream.definition)
+      )
+      .map((stream) => stream.definition);
+
+    const allFields = {
+      ...this._definition.ingest.wired.fields,
+      ...getInheritedFieldsFromAncestors(ancestors),
+    };
+
+    // Extract fields used in the routing condition
+    const conditionFields = getConditionFields(routingRule.where);
+
+    // Build prelude fields with type information from the stream's field definitions
+    const preludeFields: PreludeField[] = conditionFields.map((field) => {
+      const fieldDef = allFields[field.name];
+      // Use the field type from the stream definition if available and not 'system'
+      // The PreludeFieldType is compatible with FieldDefinitionType (minus 'system' and 'wildcard')
+      const type =
+        fieldDef && fieldDef.type !== 'system' && fieldDef.type !== 'wildcard'
+          ? (fieldDef.type as PreludeField['type'])
+          : undefined;
+      return { name: field.name, type };
+    });
+
     // Use the root stream's data stream as the source
     const rootStreamName = getRoot(this._definition.name);
     const queryParts: string[] = [`FROM ${rootStreamName}`];
+
+    // Add INSIST_🐔 and EVAL prelude for fields used in the WHERE clause
+    if (preludeFields.length > 0) {
+      const { query: preludeQuery } = generatePrelude({ fields: preludeFields });
+      if (preludeQuery) {
+        // The preludeQuery contains newline-separated commands starting with "| "
+        // We need to split and add them as individual parts
+        queryParts.push(
+          ...preludeQuery
+            .split('\n')
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .map((line) => (line.startsWith('| ') ? line.slice(2) : line))
+        );
+      }
+    }
 
     // Add WHERE clause for the routing condition
     const whereClause = conditionToESQL(routingRule.where);
