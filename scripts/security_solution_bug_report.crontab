@@ -1,0 +1,21 @@
+# SecuritySolution Bug Report Cron Configuration
+#
+# This file contains the cron schedule to run the SecuritySolution bug report daily at 10:00 AM
+#
+# To install this cron job:
+# 1. Set up the required environment variables (see README_SECURITY_SOLUTION_BUG_REPORT.md)
+# 2. Edit your crontab: crontab -e
+# 3. Add the line below (adjust paths and environment variables as needed)
+#
+# Important: Cron jobs don't inherit your shell environment, so you need to set
+# environment variables directly in the crontab or source them from a file.
+
+# Run daily at 10:00 AM (adjust timezone as needed)
+# Format: minute hour day month day-of-week command
+# 0 10 * * * cd /path/to/kibana && /path/to/node scripts/report_security_solution_bugs.js >> /var/log/security_solution_bug_report.log 2>&1
+
+# Example with environment variables sourced from a file:
+# 0 10 * * * source /home/user/.env && cd /home/runner/work/kibana/kibana && node scripts/report_security_solution_bugs.js >> /var/log/security_solution_bug_report.log 2>&1
+
+# Alternative: Using env command to set variables inline
+# 0 10 * * * cd /home/runner/work/kibana/kibana && env GITHUB_TOKEN=your_token SMTP_HOST=smtp.gmail.com SMTP_PORT=587 SMTP_USER=your@email.com SMTP_PASS=your_pass REPORT_EMAIL_TO=team@example.com node scripts/report_security_solution_bugs.js >> /var/log/security_solution_bug_report.log 2>&1
