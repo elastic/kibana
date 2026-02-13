@@ -316,6 +316,9 @@ export const TestRunsTable = ({
               }
             : undefined
         }
+        tableCaption={i18n.translate('xpack.synthetics.monitorDetails.summary.testRunsCaption', {
+          defaultMessage: 'Recent test runs',
+        })}
       />
     </EuiPanel>
   );

@@ -9,6 +9,7 @@
 
 import type {
   OnPostAuthHandler,
+  OnPreAuthHandler,
   OnPreResponseHandler,
   OnPreResponseInfo,
   KibanaRequest,
@@ -42,6 +43,28 @@ export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler
 
     if (!isSafeMethod(request.route.method) && !hasVersionHeader && !hasXsrfHeader) {
       return response.badRequest({ body: `Request must contain a ${XSRF_HEADER} header.` });
+    }
+
+    return toolkit.next();
+  };
+};
+
+export const createExcludeRoutesPreAuthHandler = (
+  config: HttpConfig,
+  log: Logger
+): OnPreAuthHandler => {
+  const excludedRoutes = new Set(config.excludeRoutes);
+  log = log.get('server', 'exclude_routes');
+
+  return (request, response, toolkit) => {
+    if (excludedRoutes.size === 0) {
+      return toolkit.next();
+    }
+
+    const routePath = request.route.routePath ?? request.route.path;
+    if (excludedRoutes.has(routePath)) {
+      log.warn(`Access to route [${routePath}] is blocked by server.excludeRoutes`);
+      return response.notFound();
     }
 
     return toolkit.next();
