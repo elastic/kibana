@@ -63,11 +63,11 @@ export {
   getViews,
   getInferenceEndpoints,
   getEditorExtensions,
-  hasDateBreakdown,
   getProjectRoutingFromEsqlQuery,
   hasOnlySourceCommand,
   isComputedColumn,
   getQuerySummary,
+  getEsqlControls,
   type ESQLStatsQueryMeta,
 } from './src';
 
