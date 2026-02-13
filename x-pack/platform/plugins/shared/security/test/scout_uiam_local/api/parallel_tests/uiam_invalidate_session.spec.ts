@@ -19,7 +19,7 @@ import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../../../common/constants';
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS, extractAttributeValue } from '../fixtures';
 
 // These tests cannot be run on MKI because we cannot obtain the raw UIAM tokens required to verify their invalidation.
 apiTest.describe(
@@ -103,19 +103,6 @@ apiTest.describe(
     );
   }
 );
-
-const extractAttributeValue = (xmlDocument: string, attributeName: string) => {
-  const [, attributeValue] =
-    xmlDocument.match(
-      new RegExp(
-        `Name="${attributeName}"[\\s\\S]*?<saml:AttributeValue[^>]*>([\\s\\S]*?)<\\/saml:AttributeValue>`
-      )
-    ) ?? [];
-  if (!attributeValue) {
-    throw new Error(`Attribute ${attributeName} isn't found in SAML response.`);
-  }
-  return attributeValue.trim();
-};
 
 const checkUiamAccessToken = async (accessToken: string) =>
   await fetch(`${MOCK_IDP_UIAM_SERVICE_URL}/uiam/api/v1/authentication/_authenticate`, {
