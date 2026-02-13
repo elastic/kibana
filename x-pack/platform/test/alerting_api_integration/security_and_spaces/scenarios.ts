@@ -271,6 +271,32 @@ export const EnableDisableOnlyUser: User = {
   },
 };
 
+export const ManageRuleSettingsOnlyUser: User = {
+  username: 'manage_rule_settings_only',
+  fullName: 'manage_rule_settings_only',
+  password: 'manage_rule_settings_only-password',
+  role: {
+    name: 'manage_rule_settings_only_role',
+    kibana: [
+      {
+        feature: {
+          actions: ['all'],
+          alertsFixture: ['read', 'manage_rule_settings'],
+        },
+        spaces: ['space1'],
+      },
+    ],
+    elasticsearch: {
+      indices: [
+        {
+          names: [`${ES_TEST_INDEX_NAME}*`],
+          privileges: ['all'],
+        },
+      ],
+    },
+  },
+};
+
 export const Users: User[] = [
   NoKibanaPrivileges,
   Superuser,
@@ -282,6 +308,7 @@ export const Users: User[] = [
   StackAlertsOnly,
   ManualRunOnlyUser,
   EnableDisableOnlyUser,
+  ManageRuleSettingsOnlyUser,
 ];
 
 export const Space1: Space = {
@@ -415,6 +442,16 @@ interface ManualRunOnlyUserAtSpace1 extends Scenario {
 export const ManualRunOnlyUserAtSpace1: ManualRunOnlyUserAtSpace1 = {
   id: 'manual_run_only at space1',
   user: ManualRunOnlyUser,
+  space: Space1,
+};
+
+interface ManageRuleSettingsOnlyUserAtSpace1 extends Scenario {
+  id: 'manage_rule_settings_only at space1';
+}
+
+export const ManageRuleSettingsOnlyUserAtSpace1: ManageRuleSettingsOnlyUserAtSpace1 = {
+  id: 'manage_rule_settings_only at space1',
+  user: ManageRuleSettingsOnlyUser,
   space: Space1,
 };
 

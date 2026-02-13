@@ -180,6 +180,24 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             },
           ],
         },
+        {
+          name: 'Manage rule settings',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Manage rule settings',
+                  id: 'manage_rule_settings',
+                  includeIn: 'all',
+                  savedObject: { all: [], read: [] },
+                  alerting: { rule: { manage_rule_settings: testAlertingFeatures } },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
       ],
     });
 

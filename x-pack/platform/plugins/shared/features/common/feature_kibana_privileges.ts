@@ -139,6 +139,16 @@ export interface FeatureKibanaPrivileges {
        * ```
        */
       manual_run?: AlertingKibanaPrivilege;
+      /**
+       * List of rule types and consumers for which users should have the ability to manage rule settings (e.g. gap auto-fill scheduler) when granted this privilege.
+       * @example
+       * ```ts
+       *  {
+       *    manage_rule_settings: [{ ruleTypeId: 'my-alert-type-within-my-feature', consumers: ['my-consumer-within-my-feature'] }]
+       *  }
+       * ```
+       */
+      manage_rule_settings?: AlertingKibanaPrivilege;
     };
     alert?: {
       /**
