@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils/src/types';
 import { transformTitlesOut } from '@kbn/presentation-publishing';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common';
 import { MARKDOWN_SAVED_OBJECT_REF_NAME } from './get_transform_in';
 import type { StoredMarkdownEmbeddableState } from '../types';
 
 export function getTransformOut() {
-  function transformOut(storedState: StoredMarkdownEmbeddableState, panelReferences?: Reference[]) {
+  function transformOut(
+    storedState: StoredMarkdownEmbeddableState,
+    panelReferences?: SavedObjectReference[]
+  ) {
     const state = transformTitlesOut(storedState);
 
     // by ref

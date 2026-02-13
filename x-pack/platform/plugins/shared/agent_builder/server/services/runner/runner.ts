@@ -25,6 +25,7 @@ import type {
   RunAgentReturn,
   WritableToolResultStore,
   ModelProvider,
+  HooksServiceStart,
 } from '@kbn/agent-builder-server';
 import type {
   ScopedRunnerRunToolsParams,
@@ -65,10 +66,16 @@ export interface CreateScopedRunnerDeps {
   promptManager: PromptManager;
   stateManager: ConversationStateManager;
   trackingService?: TrackingService;
+  hooks: HooksServiceStart;
   // other deps
   logger: Logger;
   request: KibanaRequest;
   defaultConnectorId?: string;
+  /**
+   * Optional abort signal for the run (e.g. from the request).
+   * Propagated to hooks so they can respect cancellation.
+   */
+  abortSignal?: AbortSignal;
   // context-aware deps
   resultStore: WritableToolResultStore;
   attachmentStateManager: AttachmentStateManager;
@@ -163,12 +170,14 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     conversation,
     nextInput,
     promptState,
+    abortSignal,
   }: {
     request: KibanaRequest;
     defaultConnectorId?: string;
     conversation?: Conversation;
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
+    abortSignal?: AbortSignal;
   }): ScopedRunner => {
     const { resultStore, skillsStore, filestore } = createStore({ conversation, runnerDeps });
 
@@ -186,6 +195,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       modelProvider,
       request,
       defaultConnectorId,
+      abortSignal,
       resultStore,
       skillsStore,
       attachmentStateManager,
@@ -199,23 +209,36 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
 
   return {
     runTool: (runToolParams) => {
-      const { request, defaultConnectorId, promptState, ...otherParams } = runToolParams;
-      const runner = createScopedRunnerWithDeps({ request, promptState, defaultConnectorId });
+      const { request, defaultConnectorId, promptState, abortSignal, ...otherParams } =
+        runToolParams;
+      const runner = createScopedRunnerWithDeps({
+        request,
+        promptState,
+        defaultConnectorId,
+        abortSignal,
+      });
       return runner.runTool(otherParams);
     },
     runInternalTool: (runToolParams) => {
-      const { request, defaultConnectorId, promptState, ...otherParams } = runToolParams;
-      const runner = createScopedRunnerWithDeps({ request, promptState, defaultConnectorId });
+      const { request, defaultConnectorId, promptState, abortSignal, ...otherParams } =
+        runToolParams;
+      const runner = createScopedRunnerWithDeps({
+        request,
+        promptState,
+        defaultConnectorId,
+        abortSignal,
+      });
       return runner.runInternalTool(otherParams);
     },
     runAgent: (params) => {
-      const { request, defaultConnectorId, ...otherParams } = params;
+      const { request, defaultConnectorId, abortSignal, ...otherParams } = params;
       const { nextInput, conversation } = params.agentParams;
       const runner = createScopedRunnerWithDeps({
         request,
         defaultConnectorId,
         conversation,
         nextInput,
+        abortSignal,
         promptState: getAgentPromptStorageState({
           input: nextInput,
           conversation,

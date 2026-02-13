@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Reference } from '@kbn/content-management-utils';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { MARKDOWN_SAVED_OBJECT_TYPE } from '../../../common';
 import type { MarkdownByReferenceState, MarkdownEmbeddableState } from '../..';
 import type { StoredMarkdownEmbeddableState } from '../types';
@@ -17,7 +17,7 @@ export const MARKDOWN_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 export function getTransformIn() {
   function transformIn(state: MarkdownEmbeddableState): {
     state: StoredMarkdownEmbeddableState;
-    references: Reference[];
+    references: SavedObjectReference[];
   } {
     // by ref
     if ((state as MarkdownByReferenceState).ref_id) {
