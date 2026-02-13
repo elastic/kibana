@@ -54,6 +54,28 @@ describe('Converter Helpers', () => {
       expect(Streams.WiredStream.Definition.is(definition)).toEqual(true);
     });
 
+    it('preserves suggestion field when converting wired streams', () => {
+      const request: Streams.WiredStream.UpsertRequest = {
+        ...emptyAssets,
+        stream: {
+          description: '',
+          suggestion: true,
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
+            wired: { fields: {}, routing: [] },
+            failure_store: { inherit: {} },
+          },
+        },
+      };
+
+      const definition = convertUpsertRequestIntoDefinition('suggested-wired-stream', request);
+
+      expect(Streams.WiredStream.Definition.is(definition)).toEqual(true);
+      expect((definition as Streams.WiredStream.Definition).suggestion).toEqual(true);
+    });
+
     it('converts query streams', () => {
       const request: Streams.QueryStream.UpsertRequest = {
         ...emptyAssets,
@@ -159,6 +181,53 @@ describe('Converter Helpers', () => {
       const upsertRequest = convertGetResponseIntoUpsertRequest(getResponse);
 
       expect(Streams.WiredStream.UpsertRequest.is(upsertRequest)).toEqual(true);
+    });
+
+    it('preserves suggestion field when converting wired streams', () => {
+      const getResponse: Streams.WiredStream.GetResponse = {
+        stream: {
+          name: 'suggested-wired-stream',
+          description: '',
+          updated_at: new Date().toISOString(),
+          suggestion: true,
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [], updated_at: new Date().toISOString() },
+            settings: {},
+            wired: {
+              fields: {},
+              routing: [],
+            },
+            failure_store: { inherit: {} },
+          },
+        },
+        privileges: {
+          lifecycle: true,
+          manage: true,
+          monitor: true,
+          simulate: true,
+          text_structure: true,
+          read_failure_store: true,
+          manage_failure_store: true,
+          view_index_metadata: true,
+        },
+        effective_lifecycle: {
+          dsl: {},
+          from: 'logs',
+        },
+        effective_settings: {},
+        inherited_fields: {},
+        effective_failure_store: {
+          disabled: {},
+          from: 'logs',
+        },
+        ...emptyAssets,
+      };
+
+      const upsertRequest = convertGetResponseIntoUpsertRequest(getResponse);
+
+      expect(Streams.WiredStream.UpsertRequest.is(upsertRequest)).toEqual(true);
+      expect((upsertRequest as Streams.WiredStream.UpsertRequest).stream.suggestion).toEqual(true);
     });
 
     it('converts query streams', () => {

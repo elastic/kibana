@@ -17,9 +17,9 @@ import {
 import { css } from '@emotion/react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import { isRootStreamDefinition, Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
@@ -34,6 +34,7 @@ import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { StreamsTreeTable } from './tree_table';
 import { CreateQueryStreamFlyout } from '../query_streams/create_query_stream_flyout';
 import { getFormattedError } from '../../util/errors';
+import { StreamsSuggestionButton } from './streams_suggestion_button';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -86,16 +87,28 @@ export function StreamListView() {
     fetchClassicStatus();
   }, [getClassicStatus, core.notifications.toasts]);
 
-  const { hasClassicStreams, firstClassicStreamName } = useMemo(() => {
+  const { hasClassicStreams, firstClassicStreamName, firstWiredRootStreamName } = useMemo(() => {
     const allStreams = streamsListFetch.value?.streams ?? [];
     const classicStreams = allStreams.filter(
       (item) => item.stream && Streams.ClassicStream.Definition.is(item.stream)
     );
+    // Find the first wired root stream (e.g., "logs") for suggestion generation
+    const wiredRootStreams = allStreams.filter(
+      (item) =>
+        item.stream &&
+        Streams.WiredStream.Definition.is(item.stream) &&
+        isRootStreamDefinition(item.stream)
+    );
     return {
       hasClassicStreams: classicStreams.length > 0,
       firstClassicStreamName: classicStreams[0]?.stream?.name,
+      firstWiredRootStreamName: wiredRootStreams[0]?.stream?.name,
     };
   }, [streamsListFetch.value?.streams]);
+
+  const handleSuggestionComplete = useCallback(() => {
+    streamsListFetch.refresh();
+  }, [streamsListFetch]);
 
   // Telemetry for TTFMP (time to first meaningful paint)
   useEffect(() => {
@@ -159,6 +172,16 @@ export function StreamListView() {
                 </EuiButton>
               </EuiFlexItem>
             )}
+            {significantEventsDiscovery?.available &&
+              significantEventsDiscovery.enabled &&
+              firstWiredRootStreamName && (
+                <EuiFlexItem grow={false}>
+                  <StreamsSuggestionButton
+                    streamName={firstWiredRootStreamName}
+                    onSuggestionComplete={handleSuggestionComplete}
+                  />
+                </EuiFlexItem>
+              )}
             <FeedbackButton />
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty

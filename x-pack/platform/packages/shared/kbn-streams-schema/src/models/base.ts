@@ -27,6 +27,11 @@ export namespace BaseStream {
      * Names must follow the parent.childname naming convention.
      */
     query_streams?: QueryStreamReference[];
+    /**
+     * Indicates this stream was auto-generated as a suggestion
+     * by the streams suggestion workflow.
+     */
+    suggestion?: boolean;
   }
 
   export type Source<TDefinition extends Definition = Definition> = TDefinition;
@@ -65,6 +70,7 @@ export const BaseStream: ModelValidation<IModel, BaseStream.Model> = modelValida
         })
       )
       .optional(),
+    suggestion: z.boolean().optional(),
   }),
   Source: z.object({}),
   GetResponse: z.object({

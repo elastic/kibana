@@ -27,6 +27,40 @@ describe('WiredStream', () => {
           failure_store: { inherit: {} },
         },
       },
+      // Test with suggestion field set to true
+      {
+        name: 'suggested-wired-stream',
+        description: '',
+        updated_at: new Date().toISOString(),
+        suggestion: true,
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          wired: {
+            fields: {},
+            routing: [],
+          },
+          failure_store: { inherit: {} },
+        },
+      },
+      // Test with suggestion field set to false
+      {
+        name: 'non-suggested-wired-stream',
+        description: '',
+        updated_at: new Date().toISOString(),
+        suggestion: false,
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: {},
+          wired: {
+            fields: {},
+            routing: [],
+          },
+          failure_store: { inherit: {} },
+        },
+      },
     ] satisfies WiredStream.Definition[])('is valid %s', (val) => {
       expect(WiredStream.Definition.is(val)).toBe(true);
       expect(WiredStream.Definition.right.parse(val)).toEqual(val);
