@@ -13,7 +13,7 @@ import type {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
+import type { Trigger } from '../types';
 import type { Action, ActionExecutionContext, ActionInternal } from '../actions';
 
 export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
