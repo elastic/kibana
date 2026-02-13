@@ -9,6 +9,7 @@ import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import {
   createBadRequestError,
+  createSkillNotFoundError,
   validateSkillId,
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
@@ -68,7 +69,7 @@ class SkillRegistryImpl implements SkillRegistry {
         return skill;
       }
     }
-    throw createBadRequestError(`Skill with id '${skillId}' not found`);
+    throw createSkillNotFoundError({ skillId });
   }
 
   async list(): Promise<InternalSkillDefinition[]> {
@@ -117,7 +118,7 @@ class SkillRegistryImpl implements SkillRegistry {
         return provider.update(skillId, update);
       }
     }
-    throw createBadRequestError(`Skill with id '${skillId}' not found`);
+    throw createSkillNotFoundError({ skillId });
   }
 
   async delete(skillId: string): Promise<boolean> {
@@ -129,7 +130,7 @@ class SkillRegistryImpl implements SkillRegistry {
         return provider.delete(skillId);
       }
     }
-    throw createBadRequestError(`Skill with id '${skillId}' not found`);
+    throw createSkillNotFoundError({ skillId });
   }
 
   /**

@@ -19,7 +19,7 @@ import { createBuiltinSkillProvider } from './builtin';
 import { createPersistedSkillProvider } from './persisted';
 
 export interface SkillServiceSetup {
-  registerSkill(skill: SkillDefinition): Promise<void>;
+  registerSkill(skill: SkillDefinition): void;
 }
 
 export interface SkillServiceStart {
@@ -53,9 +53,7 @@ class SkillServiceImpl implements SkillService {
 
   setup(): SkillServiceSetup {
     return {
-      registerSkill: async (skill) => {
-        await validateSkillDefinition(skill);
-
+      registerSkill: (skill) => {
         if (this.skills.has(skill.id)) {
           throw new Error(`Skill type with id ${skill.id} already registered`);
         }
@@ -78,8 +76,16 @@ class SkillServiceImpl implements SkillService {
     logger,
     getToolRegistry,
   }: SkillServiceStartDeps): SkillServiceStart {
+    // Validate all registered skills eagerly at start time (deferred from setup
+    // to keep registration sync, matching the tool registration pattern).
+    // The promise is cached so validation runs once and getRegistry awaits it.
+    const validated = Promise.all(
+      [...this.skills.values()].map((skill) => validateSkillDefinition(skill))
+    );
+
     return {
       getRegistry: async ({ request }) => {
+        await validated;
         const space = getCurrentSpaceId({ request, spaces });
         const builtinProvider = createBuiltinSkillProvider([...this.skills.values()]);
         const persistedProvider = createPersistedSkillProvider({

@@ -61,7 +61,8 @@ export interface AttachmentsSetup {
 
 export interface SkillsSetup {
   /**
-   * Register a skill to be available in agentBuilder.
+   * Register a built-in skill to be available in agentBuilder.
+   * Registration is synchronous; validation is deferred to start.
    */
   register: SkillServiceSetup['registerSkill'];
 }

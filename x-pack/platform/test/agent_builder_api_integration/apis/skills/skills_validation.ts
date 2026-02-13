@@ -102,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
             content: 'Should not work.',
             tool_ids: [],
           })
-          .expect(400);
+          .expect(404);
       });
     });
 
@@ -119,7 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
         await supertest
           .delete('/api/agent_builder/skills/non-existent-skill-id')
           .set('kbn-xsrf', 'kibana')
-          .expect(400);
+          .expect(404);
       });
     });
   });

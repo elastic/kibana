@@ -7,10 +7,11 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { createBadRequestError } from '@kbn/agent-builder-common';
-import type {
-  PersistedSkillCreateRequest,
-  PersistedSkillUpdateRequest,
+import {
+  createBadRequestError,
+  createSkillNotFoundError,
+  type PersistedSkillCreateRequest,
+  type PersistedSkillUpdateRequest,
 } from '@kbn/agent-builder-common';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
 import type { SkillStorage } from './storage';
@@ -55,7 +56,7 @@ class SkillClientImpl implements SkillClient {
   async get(id: string): Promise<SkillPersistedDefinition> {
     const document = await this._get(id);
     if (!document) {
-      throw createBadRequestError(`Skill with id '${id}' not found`);
+      throw createSkillNotFoundError({ skillId: id });
     }
     return fromEs(document);
   }
@@ -94,7 +95,7 @@ class SkillClientImpl implements SkillClient {
   async update(id: string, update: PersistedSkillUpdateRequest): Promise<SkillPersistedDefinition> {
     const document = await this._get(id);
     if (!document) {
-      throw createBadRequestError(`Skill with id '${id}' not found`);
+      throw createSkillNotFoundError({ skillId: id });
     }
 
     const updatedAttributes = updateDocument({
@@ -116,11 +117,11 @@ class SkillClientImpl implements SkillClient {
   async delete(id: string): Promise<boolean> {
     const document = await this._get(id);
     if (!document) {
-      throw createBadRequestError(`Skill with id '${id}' not found`);
+      throw createSkillNotFoundError({ skillId: id });
     }
     const result = await this.storage.getClient().delete({ id: document._id });
     if (result.result === 'not_found') {
-      throw createBadRequestError(`Skill with id '${id}' not found`);
+      throw createSkillNotFoundError({ skillId: id });
     }
     return true;
   }

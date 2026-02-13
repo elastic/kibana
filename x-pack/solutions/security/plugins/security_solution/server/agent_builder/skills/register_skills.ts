@@ -11,6 +11,6 @@ import { alertAnalysisSampleSkill } from './alert_analysis_skill';
 /**
  * Registers all security agent builder skills with the agentBuilder plugin
  */
-export const registerSkills = async (agentBuilder: AgentBuilderPluginSetup): Promise<void> => {
-  await agentBuilder.skills.register(alertAnalysisSampleSkill);
+export const registerSkills = (agentBuilder: AgentBuilderPluginSetup): void => {
+  agentBuilder.skills.register(alertAnalysisSampleSkill);
 };

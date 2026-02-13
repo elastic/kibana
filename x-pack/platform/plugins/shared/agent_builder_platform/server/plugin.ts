@@ -27,6 +27,7 @@ export class AgentBuilderPlatformPlugin
       PluginStartDependencies
     >
 {
+  // @ts-expect-error unused for now
   private logger: Logger;
   // @ts-expect-error unused for now
   private config: AgentBuilderConfig;
@@ -50,9 +51,7 @@ export class AgentBuilderPlatformPlugin
     });
 
     // Register built-in skills
-    setupDeps.agentBuilder.skills.register(dataExplorationSkill).catch((err) => {
-      this.logger.error(`Failed to register built-in data-exploration skill: ${err.message}`);
-    });
+    setupDeps.agentBuilder.skills.register(dataExplorationSkill);
 
     return {};
   }

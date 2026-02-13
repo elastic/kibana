@@ -156,7 +156,7 @@ describe('createSkillRegistry', () => {
       });
 
       await expect(registry.get('non-existent')).rejects.toThrow(
-        "Skill with id 'non-existent' not found"
+        'Skill non-existent not found'
       );
     });
   });
@@ -318,7 +318,7 @@ describe('createSkillRegistry', () => {
       });
 
       await expect(registry.update('non-existent', { name: 'Updated' })).rejects.toThrow(
-        "Skill with id 'non-existent' not found"
+        'Skill non-existent not found'
       );
     });
 
@@ -370,7 +370,7 @@ describe('createSkillRegistry', () => {
       });
 
       await expect(registry.delete('non-existent')).rejects.toThrow(
-        "Skill with id 'non-existent' not found"
+        'Skill non-existent not found'
       );
     });
   });
