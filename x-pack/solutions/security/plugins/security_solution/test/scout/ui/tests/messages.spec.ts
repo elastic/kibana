@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { test, expect, tags } from '../fixtures';
+import { expect } from '@kbn/scout-security/ui';
+import { test, tags } from '../fixtures';
 import {
   createAzureConnector,
   createConversation,
@@ -74,17 +75,14 @@ test.describe(
         await expect(pageObjects.assistant.sendToTimelineButton).toBeDisabled();
       });
 
-      await test.step(
-        'from cases page (has timeline), Send to Timeline should work',
-        async () => {
-          await page.goto(kbnUrl.get('/app/security/cases'));
-          await waitForPageReady(page);
-          await pageObjects.assistant.openAssistant();
-          await pageObjects.assistant.sendQueryToTimeline();
+      await test.step('from cases page (has timeline), Send to Timeline should work', async () => {
+        await page.goto(kbnUrl.get('/app/security/cases'));
+        await waitForPageReady(page);
+        await pageObjects.assistant.openAssistant();
+        await pageObjects.assistant.sendQueryToTimeline();
 
-          await expect(page.testSubj.locator('timelineQueryInput')).toHaveText(mockTimelineQuery);
-        }
-      );
+        await expect(page.testSubj.locator('timelineQueryInput')).toHaveText(mockTimelineQuery);
+      });
     });
   }
 );
