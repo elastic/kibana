@@ -58,19 +58,27 @@ export const bulkGetUserProfilesWithAvatar = async (uids: string[]): Promise<voi
   }
 };
 
-export const suggestUserProfilesWithAvatar = async (
-  name: string
-): Promise<UserProfileWithAvatar[]> => {
-  const trimmed = name.trim();
-  if (!trimmed) return [];
-  const profiles = await coreServices.http.fetch<UserProfileWithAvatar[]>(
-    SECURITY_SOLUTION_SUGGEST_USERS_PATH,
-    {
-      method: 'GET',
-      version: '1',
-      query: { searchTerm: trimmed },
-    }
-  );
-  profiles.forEach((profile) => userProfilesCache.set(profile.uid, profile));
-  return profiles;
+export const suggestUserProfilesWithAvatar = async ({
+  name,
+  signal,
+}: {
+  name: string;
+  signal?: AbortSignal;
+}): Promise<UserProfileWithAvatar[]> => {
+  try {
+    const trimmed = name.trim();
+    const profiles = await coreServices.http.fetch<UserProfileWithAvatar[]>(
+      SECURITY_SOLUTION_SUGGEST_USERS_PATH,
+      {
+        method: 'GET',
+        version: '1',
+        query: { searchTerm: trimmed },
+        signal,
+      }
+    );
+    profiles.forEach((profile) => userProfilesCache.set(profile.uid, profile));
+    return profiles;
+  } catch {
+    return [];
+  }
 };
