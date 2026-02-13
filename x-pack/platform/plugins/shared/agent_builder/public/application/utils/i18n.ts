@@ -208,20 +208,10 @@ export const labels = {
         defaultMessage: 'Tool "{toolId}" deleted',
         values: { toolId },
       }),
-    deleteToolRemovedFromAgentsToast: (agentsUpdated: number) =>
-      i18n.translate('xpack.agentBuilder.tools.deleteToolRemovedFromAgentsToast', {
-        defaultMessage: 'Removed from {agentsUpdated, plural, one {# agent} other {# agents}}',
-        values: { agentsUpdated },
-      }),
     bulkDeleteToolsSuccessToast: (count: number) =>
       i18n.translate('xpack.agentBuilder.tools.bulkDeleteToolsSuccessToast', {
         defaultMessage: 'Deleted {count, plural, one {# tool} other {# tools}}',
         values: { count },
-      }),
-    bulkDeleteToolsRemovedFromAgentsToast: (agentsUpdated: number) =>
-      i18n.translate('xpack.agentBuilder.tools.bulkDeleteToolsRemovedFromAgentsToast', {
-        defaultMessage: 'Removed from {agentsUpdated, plural, one {# agent} other {# agents}}',
-        values: { agentsUpdated },
       }),
     createEsqlToolSuccessToast: (toolId: string) =>
       i18n.translate('xpack.agentBuilder.tools.createEsqlToolSuccessToast', {

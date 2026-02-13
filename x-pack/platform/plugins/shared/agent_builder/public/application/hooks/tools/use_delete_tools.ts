@@ -126,12 +126,8 @@ export const useDeleteTool = ({
       return;
     }
 
-    const agentsUpdated = data.agentsUpdated ?? 0;
     addSuccessToast({
       title: labels.tools.deleteToolSuccessToast(toolId),
-      ...(agentsUpdated > 0 && {
-        text: labels.tools.deleteToolRemovedFromAgentsToast(agentsUpdated),
-      }),
     });
     setDeleteToolId(null);
   };
@@ -190,10 +186,7 @@ export const useDeleteTools = ({
     setDeleteToolIds(toolIds);
   }, []);
 
-  const handleSuccess: DeleteToolsSuccessCallback = (
-    { results, agentsUpdated: agentsUpdatedCount },
-    { toolIds }
-  ) => {
+  const handleSuccess: DeleteToolsSuccessCallback = ({ results }, { toolIds }) => {
     if (results.some((result) => !result.success)) {
       const failedTools = results
         .filter((result) => !result.success)
@@ -215,12 +208,8 @@ export const useDeleteTools = ({
       return;
     }
 
-    const agentsUpdated = agentsUpdatedCount ?? 0;
     addSuccessToast({
       title: labels.tools.bulkDeleteToolsSuccessToast(toolIds.length),
-      ...(agentsUpdated > 0 && {
-        text: labels.tools.bulkDeleteToolsRemovedFromAgentsToast(agentsUpdated),
-      }),
     });
     setDeleteToolIds([]);
   };

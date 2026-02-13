@@ -9,7 +9,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { RunAgentFn } from '@kbn/agent-builder-server';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { AgentRegistry } from './agent_registry';
-import type { ToolRefCleanupResult } from './persisted/types';
 
 export interface AgentsServiceSetup {
   register(agent: BuiltInAgentDefinition): void;
@@ -20,10 +19,10 @@ export interface RemoveToolRefsParams {
   toolIds: string[];
 }
 
-export type RemoveToolRefsResult = ToolRefCleanupResult;
+export type RemoveToolRefsResult = void;
 
 export interface AgentsServiceStart {
   execute: RunAgentFn;
   getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
-  removeToolRefsFromAgents: (params: RemoveToolRefsParams) => Promise<RemoveToolRefsResult>;
+  removeToolRefsFromAgents: (params: RemoveToolRefsParams) => Promise<void>;
 }

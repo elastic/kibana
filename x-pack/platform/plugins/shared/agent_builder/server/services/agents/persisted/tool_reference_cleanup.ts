@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { ToolSelection } from '@kbn/agent-builder-common';
 import type { AgentProfileStorage, AgentProperties } from './client/storage';
-import type { AgentRef, AgentsUsingToolsResult, ToolRefCleanupResult } from './types';
+import type { AgentRef, AgentsUsingToolsResult } from './types';
 import { updateRequestToEs } from './client/converters';
 import { removeToolIdsFromToolSelection } from './client/utils';
 import { createSpaceDslFilter } from '../../../utils/spaces';
@@ -23,7 +23,7 @@ export interface ToolRefCleanupParams {
   checkOnly?: boolean;
 }
 
-export type ToolRefCleanupRunResult = ToolRefCleanupResult | AgentsUsingToolsResult;
+export type ToolRefCleanupRunResult = AgentsUsingToolsResult | void;
 
 function getToolsFromSource(source: AgentProperties): ToolSelection[] {
   return source.configuration?.tools ?? source.config?.tools ?? [];
@@ -109,6 +109,4 @@ export async function runToolRefCleanup({
       throw err;
     }
   }
-
-  return { agentsUpdated: bulkOperations.length };
 }

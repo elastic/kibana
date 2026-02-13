@@ -9,10 +9,6 @@ import type { AgentDefinition } from '@kbn/agent-builder-common';
 
 export type PersistedAgentDefinition = Omit<AgentDefinition, 'readonly'>;
 
-export interface ToolRefCleanupResult {
-  agentsUpdated: number;
-}
-
 export interface AgentRef {
   id: string;
   name: string;

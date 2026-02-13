@@ -330,7 +330,7 @@ export function registerToolsRoutes({
           auditLogService,
         } = getInternalServices();
 
-        const { agentsUpdated } = await agentsService.removeToolRefsFromAgents({
+        await agentsService.removeToolRefsFromAgents({
           request,
           toolIds: [toolId],
         });
@@ -347,7 +347,7 @@ export function registerToolsRoutes({
             });
           }
           return response.ok<DeleteToolResponse>({
-            body: { success, agentsUpdated },
+            body: { success },
           });
         } catch (error) {
           auditLogService.logToolDeleted(request, {

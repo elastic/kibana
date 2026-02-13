@@ -64,7 +64,7 @@ export function registerInternalToolsRoutes({
       const { ids } = request.body;
       const { tools: toolService, agents: agentsService, auditLogService } = getInternalServices();
 
-      const { agentsUpdated } = await agentsService.removeToolRefsFromAgents({
+      await agentsService.removeToolRefsFromAgents({
         request,
         toolIds: ids,
       });
@@ -92,10 +92,7 @@ export function registerInternalToolsRoutes({
       auditLogService.logBulkToolDeleteResults(request, { ids, deleteResults });
 
       return response.ok<BulkDeleteToolResponse>({
-        body: {
-          results,
-          agentsUpdated,
-        },
+        body: { results },
       });
     })
   );
