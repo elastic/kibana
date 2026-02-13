@@ -91,7 +91,7 @@ export const AgentDashboardLink: React.FunctionComponent<{
 
   const isLogAndMetricsEnabled = agentPolicy?.monitoring_enabled?.length ?? 0 > 0;
 
-  const buttonArgs: any =
+  const buttonArgs =
     !isInstalled || isLoading || !isLogAndMetricsEnabled ? { disabled: true } : { href: link };
 
   const button = (
