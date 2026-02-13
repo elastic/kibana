@@ -84,6 +84,7 @@ paths:
         Create multiple Kibana saved objects.
 
         WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
+        NOTE: For forward compatibility, include `coreMigrationVersion` and `typeMigrationVersion` when creating saved objects outside of Kibana or when persisting raw saved objects outside of Kibana.
       deprecated: true
       tags:
         - saved objects
@@ -102,6 +103,15 @@ paths:
               type: array
               items:
                 type: object
+                properties:
+                  coreMigrationVersion:
+                    description: |
+                      The Kibana version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                    type: string
+                  typeMigrationVersion:
+                    description: |
+                      The type version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                    type: string
       responses:
         '200':
           description: Indicates a successful call.
@@ -494,6 +504,7 @@ paths:
         Create a Kibana saved object with a randomly generated identifier.
 
         WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
+        NOTE: For forward compatibility, include `coreMigrationVersion` and `typeMigrationVersion` when creating saved objects outside of Kibana or when persisting raw saved objects outside of Kibana.
       deprecated: true
       tags:
         - saved objects
@@ -516,6 +527,14 @@ paths:
               properties:
                 attributes:
                   $ref: '#/components/schemas/attributes'
+                coreMigrationVersion:
+                  description: |
+                    The Kibana version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                  type: string
+                typeMigrationVersion:
+                  description: |
+                    The type version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                  type: string
                 initialNamespaces:
                   $ref: '#/components/schemas/initial_namespaces'
                 references:
@@ -567,6 +586,7 @@ paths:
         Create a Kibana saved object and specify its identifier instead of using a randomly generated ID.
 
         WARNING: This API is intended to be removed in a future Elastic stack version. Consider using the import API for your use case.
+        NOTE: For forward compatibility, include `coreMigrationVersion` and `typeMigrationVersion` when creating saved objects outside of Kibana or when persisting raw saved objects outside of Kibana.
       deprecated: true
       tags:
         - saved objects
@@ -590,10 +610,18 @@ paths:
               properties:
                 attributes:
                   $ref: '#/components/schemas/attributes'
+                coreMigrationVersion:
+                  description: |
+                    The Kibana version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                  type: string
+                typeMigrationVersion:
+                  description: |
+                    The type version that last migrated this document. When creating saved objects outside of Kibana, preserve this field to retain forward compatibility.
+                  type: string
                 initialNamespaces:
                   $ref: '#/components/schemas/initial_namespaces'
                 references:
-                  $ref: '#/components/schemas/initial_namespaces'
+                  $ref: '#/components/schemas/references'
       responses:
         '200':
           description: Indicates a successful call.
@@ -741,7 +769,7 @@ components:
     attributes:
       type: object
       description: |
-        The data that you want to create. WARNING: When you create saved objects, attributes are not validated, which allows you to pass arbitrary and ill-formed data into the API that can break Kibana. Make sure any data that you send to the API is properly formed.
+        The data that you want to create. WARNING: Attributes may be validated depending on the saved object type. Supplying malformed data can cause errors or break Kibana. When creating or persisting raw saved objects outside of Kibana, preserve `coreMigrationVersion` and `typeMigrationVersion` (and related migration metadata) to retain forward compatibility across Kibana versions.
     initial_namespaces:
       type: array
       description: |
