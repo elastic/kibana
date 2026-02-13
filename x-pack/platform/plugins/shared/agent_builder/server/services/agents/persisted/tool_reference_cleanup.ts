@@ -8,7 +8,8 @@
 import type { Logger } from '@kbn/logging';
 import type { ToolSelection } from '@kbn/agent-builder-common';
 import type { AgentProfileStorage, AgentProperties } from './client/storage';
-import type { AgentRef, AgentsUsingToolsResult } from './types';
+import type { AgentRef } from '../../../../common/http_api/tools';
+import type { AgentsUsingToolsResult } from './types';
 import { updateRequestToEs } from './client/converters';
 import { removeToolIdsFromToolSelection } from './client/utils';
 import { createSpaceDslFilter } from '../../../utils/spaces';

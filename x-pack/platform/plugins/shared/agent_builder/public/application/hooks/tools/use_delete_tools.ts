@@ -9,17 +9,16 @@ import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useCallback, useRef, useState } from 'react';
-import type { BulkDeleteToolResponse, DeleteToolResponse } from '../../../../common/http_api/tools';
+import type {
+  AgentRef,
+  BulkDeleteToolResponse,
+  DeleteToolResponse,
+} from '../../../../common/http_api/tools';
 import { TOOL_USED_BY_AGENTS_ERROR_CODE } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';
 import { labels } from '../../utils/i18n';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useToasts } from '../use_toasts';
-
-export interface AgentRef {
-  id: string;
-  name: string;
-}
 
 export interface ToolUsedByAgents {
   toolId: string;
