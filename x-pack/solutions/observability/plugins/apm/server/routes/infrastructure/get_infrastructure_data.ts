@@ -7,6 +7,7 @@
 
 import { rangeQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { termQuery } from '@kbn/es-query';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import {
   SERVICE_NAME,
@@ -16,7 +17,6 @@ import {
   HOST_NAME,
 } from '../../../common/es_fields/apm';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { termQuery } from '@kbn/es-query';
 
 export const getInfrastructureData = async ({
   kuery,

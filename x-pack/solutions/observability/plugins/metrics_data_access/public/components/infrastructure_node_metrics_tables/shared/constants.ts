@@ -50,8 +50,7 @@ export const ECS_POD_CPU_USAGE_LIMIT_PCT = 'kubernetes.pod.cpu.usage.limit.pct';
 export const MEMORY_LIMIT_UTILIZATION = 'memory_limit_utilization';
 
 /** ECS custom metric sub-fields (node memory for equation) */
-export const KUBERNETES_NODE_MEMORY_ALLOCATABLE_BYTES =
-  'kubernetes.node.memory.allocatable.bytes';
+export const KUBERNETES_NODE_MEMORY_ALLOCATABLE_BYTES = 'kubernetes.node.memory.allocatable.bytes';
 export const KUBERNETES_NODE_MEMORY_USAGE_BYTES = 'kubernetes.node.memory.usage.bytes';
 
 /** SemConv K8s pod metric field names */
