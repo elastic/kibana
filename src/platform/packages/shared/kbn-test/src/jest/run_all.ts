@@ -177,10 +177,10 @@ async function runConfigs(
 
     const completionStatus = await Promise.all(
       allConfigs.map(async (config) => {
-        const completed = await isConfigCompleted(config);
-        log.info(
-          `[jest-checkpoint]   ${completed ? 'SKIP' : 'RUN '} ${relative(REPO_ROOT, config)}`
-        );
+        // Use relative path for checkpoint key so it's stable across different CI agents
+        const relConfig = relative(REPO_ROOT, config);
+        const completed = await isConfigCompleted(relConfig);
+        log.info(`[jest-checkpoint]   ${completed ? 'SKIP' : 'RUN '} ${relConfig}`);
         return { config, completed };
       })
     );
@@ -265,19 +265,20 @@ async function runConfigs(
           // Print buffered output after completion to keep logs grouped per config
           const sec = Math.round(durationMs / 1000);
 
+          const relConfigPath = relative(REPO_ROOT, config);
           log.info(
-            `Output for ${config} (exit ${code} - ${
+            `Output for ${relConfigPath} (exit ${code} - ${
               code === 0 ? 'success' : 'failure'
             }, ${sec}s)\n` +
               buffer +
               '\n'
           );
 
-          // Log how many configs are left to complete
-          const remaining = configs.length - results.length;
-          log.info(`Configs left: ${remaining}`);
-
           const proceed = () => {
+            // Log how many configs are left to complete (after checkpoint is written)
+            const remaining = configs.length - results.length;
+            log.info(`Configs left: ${remaining}`);
+
             active -= 1;
             if (index < configs.length) {
               launchNext();
@@ -287,9 +288,10 @@ async function runConfigs(
           };
 
           // Write checkpoint for successful configs before proceeding
+          // Use relative path for stable keys across CI agents
           if (code === 0 && isInBuildkite()) {
-            log.info(`[jest-checkpoint] Marking ${relative(REPO_ROOT, config)} as completed`);
-            markConfigCompleted(config).then(proceed, proceed);
+            log.info(`[jest-checkpoint] Marking ${relConfigPath} as completed`);
+            markConfigCompleted(relConfigPath).then(proceed, proceed);
           } else {
             proceed();
           }

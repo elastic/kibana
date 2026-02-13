@@ -69,22 +69,20 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
   let resolvedConfigPath: string = parsedArguments.config ?? '';
 
   // Buildkite checkpoint resume: skip this config if it already passed on a previous attempt.
+  // Use relative path for checkpoint key so it's stable across different CI agents.
   if (isInBuildkite() && resolvedConfigPath) {
+    const relConfigForCheckpoint = relative(REPO_ROOT, resolvedConfigPath);
     log.info(
-      `[jest-checkpoint] Checking prior completion for ${relative(
-        REPO_ROOT,
-        resolvedConfigPath
-      )} (step=${process.env.BUILDKITE_STEP_ID || ''}, job=${
-        process.env.BUILDKITE_PARALLEL_JOB || '0'
-      }, retry=${process.env.BUILDKITE_RETRY_COUNT || '0'})`
+      `[jest-checkpoint] Checking prior completion for ${relConfigForCheckpoint} (step=${
+        process.env.BUILDKITE_STEP_ID || ''
+      }, job=${process.env.BUILDKITE_PARALLEL_JOB || '0'}, retry=${
+        process.env.BUILDKITE_RETRY_COUNT || '0'
+      })`
     );
-    const alreadyCompleted = await isConfigCompleted(resolvedConfigPath);
+    const alreadyCompleted = await isConfigCompleted(relConfigForCheckpoint);
     if (alreadyCompleted) {
       log.info(
-        `[jest-checkpoint] Skipping ${relative(
-          REPO_ROOT,
-          resolvedConfigPath
-        )} (already completed on previous attempt)`
+        `[jest-checkpoint] Skipping ${relConfigForCheckpoint} (already completed on previous attempt)`
       );
       process.exit(0);
     }
@@ -152,8 +150,9 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
       resolvedConfigPath &&
       (process.exitCode === 0 || process.exitCode === undefined)
     ) {
-      log.info(`[jest-checkpoint] Marking ${relative(REPO_ROOT, resolvedConfigPath)} as completed`);
-      await markConfigCompleted(resolvedConfigPath);
+      const relConfig = relative(REPO_ROOT, resolvedConfigPath);
+      log.info(`[jest-checkpoint] Marking ${relConfig} as completed`);
+      await markConfigCompleted(relConfig);
     }
   });
 }
