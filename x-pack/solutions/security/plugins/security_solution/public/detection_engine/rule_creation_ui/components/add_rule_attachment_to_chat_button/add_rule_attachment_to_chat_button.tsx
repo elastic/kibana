@@ -73,47 +73,44 @@ export const AddRuleAttachmentToChatButton: React.FC<AddRuleAttachmentToChatButt
 
   // Format rule for AI assistant attachment from either form state or an existing rule response.
   const ruleAttachment = useMemo(() => {
+    let formattedRule: RuleCreateProps;
+    let attachmentLabel: string | undefined;
+
     if (isFormProps(props)) {
-      const formattedRule = formatRule<RuleCreateProps>(
+      formattedRule = formatRule<RuleCreateProps>(
         props.defineStepData,
         props.aboutStepData,
         props.scheduleStepData,
         props.actionsStepData,
         props.actionTypeRegistry
       );
-      const ruleName = props.aboutStepData.name;
-
-      return {
-        attachmentType: SecurityAgentBuilderAttachments.rule,
-        attachmentData: {
-          text: JSON.stringify(formattedRule),
-          attachmentLabel: ruleName,
-        },
-        attachmentPrompt:
-          mode === 'exploration' ? RULE_EXPLORATION_ATTACHMENT_PROMPT : RULE_ATTACHMENT_PROMPT,
-      };
+      attachmentLabel = props.aboutStepData.name;
+    } else {
+      const { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData } = getStepsData({
+        rule: props.rule,
+        detailsView: true,
+      });
+      formattedRule = formatRule<RuleCreateProps>(
+        defineRuleData,
+        aboutRuleData,
+        scheduleRuleData,
+        ruleActionsData,
+        triggersActionsUi.actionTypeRegistry
+      );
+      attachmentLabel = props.rule.name;
     }
 
-    const { aboutRuleData, defineRuleData, scheduleRuleData, ruleActionsData } = getStepsData({
-      rule: props.rule,
-      detailsView: true,
-    });
-    const formattedRule = formatRule<RuleCreateProps>(
-      defineRuleData,
-      aboutRuleData,
-      scheduleRuleData,
-      ruleActionsData,
-      triggersActionsUi.actionTypeRegistry
-    );
+    const text = `<rule>${JSON.stringify(formattedRule)}</rule>`;
+    const attachmentPrompt =
+      mode === 'exploration' ? RULE_EXPLORATION_ATTACHMENT_PROMPT : RULE_ATTACHMENT_PROMPT;
 
     return {
       attachmentType: SecurityAgentBuilderAttachments.rule,
       attachmentData: {
-        text: JSON.stringify(formattedRule),
-        attachmentLabel: props.rule.name,
+        text,
+        attachmentLabel,
       },
-      attachmentPrompt:
-        mode === 'exploration' ? RULE_EXPLORATION_ATTACHMENT_PROMPT : RULE_ATTACHMENT_PROMPT,
+      attachmentPrompt,
     };
   }, [mode, props, triggersActionsUi.actionTypeRegistry]);
 
