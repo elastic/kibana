@@ -102,7 +102,7 @@ export const useCytoscapeOptions = (): cytoscape.CytoscapeOptions => {
           selector: 'node',
           style: {
             'background-color': (el: cytoscape.NodeSingular) =>
-              el.data('isRoot') ? euiTheme.colors.warning : euiTheme.colors.ghost,
+              el.data('isRoot') ? euiTheme.colors.warning : euiTheme.colors.plainLight,
             'background-height': '60%',
             'background-width': '60%',
             'border-color': (el: cytoscape.NodeSingular) => borderColorForNode(el, euiTheme),
