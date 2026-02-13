@@ -315,7 +315,7 @@ export const ProjectHeader = ({
             </EuiHeaderSection>
 
             {headerAppActionsConfig && (
-              <EuiHeaderSection grow={false} css={{ paddingInline: euiTheme.size.xs }}>
+              <EuiHeaderSection grow={false} css={{ paddingInline: euiTheme.size.s }}>
                 <EuiHeaderSectionItem>
                   <GlobalHeaderAppActionsFromConfig config={headerAppActionsConfig} />
                 </EuiHeaderSectionItem>

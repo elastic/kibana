@@ -29,7 +29,7 @@ import {
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   SecurityPageName,
 } from '../../../common/constants';
-import { HeaderPage } from '../../common/components/header_page';
+// import { HeaderPage } from '../../common/components/header_page'; // page header commented out
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/kuery';
@@ -39,7 +39,7 @@ import { Actions } from './header/actions';
 import { CONNECTOR_ID_LOCAL_STORAGE_KEY, getDefaultQuery, getSize } from './helpers';
 import { deserializeQuery } from './local_storage/deserialize_query';
 import { deserializeFilters } from './local_storage/deserialize_filters';
-import { PageTitle } from './page_title';
+// import { PageTitle } from './page_title'; // page header commented out
 import { History } from './results/history';
 import type { SettingsOverrideOptions } from './results/history/types';
 import { SettingsFlyout } from './settings_flyout';
@@ -150,7 +150,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     [setLocalStorageAttackDiscoveryConnectorId]
   );
 
-  const pageTitle = useMemo(() => <PageTitle />, []);
+  // const pageTitle = useMemo(() => <PageTitle />, []); // page header commented out
 
   const { sourcererDataView: oldSourcererDataView } = useSourcererDataView();
   const { dataView: experimentalDataView } = useDataView();
@@ -242,6 +242,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       data-test-subj="fullHeightContainer"
     >
       <div data-test-subj="attackDiscoveryPage">
+        {/* Page header commented out
         <HeaderPage border title={pageTitle}>
           <Actions
             isLoading={isLoading}
@@ -251,8 +252,8 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           />
           <EuiSpacer size={'s'} />
         </HeaderPage>
-
         <EuiSpacer size="s" />
+        */}
 
         {enableAlertsAndAttacksAlignment && (
           <>

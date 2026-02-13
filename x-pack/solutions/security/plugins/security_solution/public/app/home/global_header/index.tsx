@@ -14,7 +14,7 @@ import { useLocation, matchPath } from 'react-router-dom';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { ALERTS_PATH } from '../../../../common/constants';
+import { ALERTS_PATH, ATTACK_DISCOVERY_PATH } from '../../../../common/constants';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../common/lib/kibana';
@@ -30,6 +30,7 @@ import {
 } from '../../../sourcerer/containers/sourcerer_paths';
 import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
 import { getAlertsHeaderAppActionsConfig } from '../header_app_actions/header_app_actions_config';
+import { getAttackDiscoveryHeaderAppActionsConfig } from '../header_app_actions/attack_discovery_header_app_actions_config';
 
 // Commented out so the app menu is not dominated by a single "Add integrations" item
 // const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
@@ -52,6 +53,9 @@ export const GlobalHeader = React.memo(() => {
   const { pathname } = useLocation();
 
   const isOnAlertsPage = Boolean(matchPath(pathname, { path: ALERTS_PATH, exact: true }));
+  const isOnAttackDiscoveryPage = Boolean(
+    matchPath(pathname, { path: ATTACK_DISCOVERY_PATH, exact: true })
+  );
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const showTimeline = useShallowEqualSelector(
@@ -71,6 +75,8 @@ export const GlobalHeader = React.memo(() => {
     if (chrome?.setHeaderAppActionsConfig) {
       if (isOnAlertsPage) {
         chrome.setHeaderAppActionsConfig(getAlertsHeaderAppActionsConfig());
+      } else if (isOnAttackDiscoveryPage) {
+        chrome.setHeaderAppActionsConfig(getAttackDiscoveryHeaderAppActionsConfig());
       } else {
         chrome.setHeaderAppActionsConfig(undefined);
       }
@@ -78,7 +84,7 @@ export const GlobalHeader = React.memo(() => {
         chrome.setHeaderAppActionsConfig(undefined);
       };
     }
-  }, [chrome, isOnAlertsPage]);
+  }, [chrome, isOnAlertsPage, isOnAttackDiscoveryPage]);
 
   useEffect(() => {
     if (!setHeaderActionMenu) return;
