@@ -16,7 +16,13 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ESQLControlVariable, ESQLQueryStats, ESQLControlsContext, ESQLCallbacks, ESQLTelemetryCallbacks } from '@kbn/esql-types';
+import type {
+  ESQLControlVariable,
+  ESQLQueryStats,
+  ESQLControlsContext,
+  ESQLCallbacks,
+  ESQLTelemetryCallbacks,
+} from '@kbn/esql-types';
 
 export interface DataErrorsControl {
   enabled: boolean;

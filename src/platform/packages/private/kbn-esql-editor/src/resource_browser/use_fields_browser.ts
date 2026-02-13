@@ -22,7 +22,7 @@ import {
   getRangeFromOffsets,
 } from './utils';
 import { BROWSER_POPOVER_VERTICAL_OFFSET, DEFAULT_FIELDS_BROWSER_INDEX } from './constants';
-import { BrowserPopoverPosition } from './types';
+import type { BrowserPopoverPosition } from './types';
 
 interface UseFieldsBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;

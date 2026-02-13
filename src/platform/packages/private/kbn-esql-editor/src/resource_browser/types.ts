@@ -38,7 +38,7 @@ export interface CommandRange {
 
 /**
  * This is used to represent a source item in the query.
- * 
+ *
  * min: the start offset of the source item
  * max: the end offset of the source item
  * type: the type of the source item

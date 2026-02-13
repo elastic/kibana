@@ -23,7 +23,8 @@ import {
   getSourceCommandContextFromQuery,
   getRangeFromOffsets,
 } from './utils';
-import { IndicesBrowserOpenMode, BrowserPopoverPosition } from './types';
+import type { BrowserPopoverPosition } from './types';
+import { IndicesBrowserOpenMode } from './types';
 import { BROWSER_POPOVER_VERTICAL_OFFSET } from './constants';
 
 interface UseDataSourceBrowserParams {

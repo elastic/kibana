@@ -9,7 +9,8 @@
 
 import { Parser, isSource } from '@kbn/esql-language';
 import type { monaco } from '@kbn/monaco';
-import { IndicesBrowserOpenMode, CommandRange, SourceCommandContext, LocatedSourceItem } from './types';
+import type { CommandRange, SourceCommandContext, LocatedSourceItem } from './types';
+import { IndicesBrowserOpenMode } from './types';
 import { SUPPORTED_COMMANDS } from './constants';
 
 export const getRangeFromOffsets = (
