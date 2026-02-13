@@ -13,7 +13,7 @@ import { COMMON_HEADERS, DATA_VIEW_PATH_LEGACY } from '../fixtures/constants';
 
 apiTest.describe(
   `DELETE ${DATA_VIEW_PATH_LEGACY}/{id} - errors (legacy index pattern api)`,
-  { tag: tags.DEPLOYMENT_AGNOSTIC },
+  { tag: tags.deploymentAgnostic },
   () => {
     let adminApiCredentials: RoleApiCredentials;
 

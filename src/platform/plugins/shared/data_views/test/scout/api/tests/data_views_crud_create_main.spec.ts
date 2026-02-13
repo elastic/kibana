@@ -18,7 +18,7 @@ import {
 
 apiTest.describe(
   `POST ${DATA_VIEW_PATH} - main (data view api)`,
-  { tag: tags.DEPLOYMENT_AGNOSTIC },
+  { tag: tags.deploymentAgnostic },
   () => {
     let adminApiCredentials: RoleApiCredentials;
     // Track created data view IDs for cleanup

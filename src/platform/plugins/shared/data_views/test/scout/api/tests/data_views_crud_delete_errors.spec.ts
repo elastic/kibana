@@ -13,7 +13,7 @@ import { COMMON_HEADERS, DATA_VIEW_PATH } from '../fixtures/constants';
 
 apiTest.describe(
   `DELETE ${DATA_VIEW_PATH}/{id} - errors (data view api)`,
-  { tag: tags.DEPLOYMENT_AGNOSTIC },
+  { tag: tags.deploymentAgnostic },
   () => {
     let adminApiCredentials: RoleApiCredentials;
 

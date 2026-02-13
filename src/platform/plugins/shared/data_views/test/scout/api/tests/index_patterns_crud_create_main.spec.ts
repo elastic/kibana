@@ -18,7 +18,7 @@ import {
 
 apiTest.describe(
   `POST ${DATA_VIEW_PATH_LEGACY} - main (legacy index pattern api)`,
-  { tag: tags.DEPLOYMENT_AGNOSTIC },
+  { tag: tags.deploymentAgnostic },
   () => {
     let adminApiCredentials: RoleApiCredentials;
     // Track created index pattern IDs for cleanup

@@ -18,7 +18,7 @@ import { COMMON_HEADERS, DATA_VIEW_PATH, SERVICE_KEY, SERVICE_PATH } from '../fi
  */
 apiTest.describe(
   'POST /api/data_views/data_view - spaces/namespaces',
-  { tag: tags.DEPLOYMENT_AGNOSTIC },
+  { tag: tags.deploymentAgnostic },
   () => {
     let adminApiCredentials: RoleApiCredentials;
     const fooNamespace = `foo-namespace-${Date.now()}`;

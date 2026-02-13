@@ -13,7 +13,7 @@ import { COMMON_HEADERS, DATA_VIEW_PATH_LEGACY, SERVICE_KEY_LEGACY } from '../fi
 
 apiTest.describe(
   `POST ${DATA_VIEW_PATH_LEGACY} - validation (legacy index pattern api)`,
-  { tag: tags.DEPLOYMENT_AGNOSTIC },
+  { tag: tags.deploymentAgnostic },
   () => {
     let adminApiCredentials: RoleApiCredentials;
 

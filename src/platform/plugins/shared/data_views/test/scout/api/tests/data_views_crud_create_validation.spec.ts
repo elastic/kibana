@@ -13,7 +13,7 @@ import { COMMON_HEADERS, DATA_VIEW_PATH, SERVICE_KEY } from '../fixtures/constan
 
 apiTest.describe(
   `POST ${DATA_VIEW_PATH} - validation (data view api)`,
-  { tag: tags.DEPLOYMENT_AGNOSTIC },
+  { tag: tags.deploymentAgnostic },
   () => {
     let adminApiCredentials: RoleApiCredentials;
 
