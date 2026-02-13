@@ -190,4 +190,146 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
     // manually checking object until we have a snapshot matcher
     expect(entities.hits.hits).toMatchObject(expectedGenericEntities);
   });
+
+  apiTest('Should properly overwrite values with newest list', async ({ apiClient, esClient }) => {
+    const ingestDoc = async (body: any) => {
+      return await esClient.index({
+        index: '.entities.v2.updates.security_default',
+        refresh: 'wait_for',
+        body,
+      });
+    };
+
+    const searchDoc = async (id: string) => {
+      await esClient.indices.refresh({ index: '.entities.v2.latest.security_default' });
+      return await esClient.search({
+        index: '.entities.v2.latest.security_default',
+        query: {
+          bool: {
+            filter: {
+              term: { 'entity.id': id },
+            },
+          },
+        },
+        size: 2,
+      });
+    };
+
+    const forceUserExtraction = async (fromDateISO: string, toDateISO: string) => {
+      return await apiClient.post(ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: { fromDateISO, toDateISO },
+      });
+    };
+
+    // Ingest a document without watchlists
+    await ingestDoc({
+      '@timestamp': '2026-02-13T11:00:00Z',
+      user: {
+        id: 'watchlist-test',
+        name: 'watchlist-test-name',
+      },
+    });
+
+    const firstExtractionResponse = await forceUserExtraction(
+      '2026-02-13T10:59:00Z',
+      '2026-02-13T11:01:00Z'
+    );
+    expect(firstExtractionResponse.statusCode).toBe(200);
+    expect(firstExtractionResponse.body.count).toBe(1);
+
+    const beforeWatchList = await searchDoc('user:watchlist-test');
+    expect(beforeWatchList.hits.hits).toHaveLength(1);
+    expect(beforeWatchList.hits.hits[0]._source).toMatchObject({
+      'entity.id': 'user:watchlist-test',
+      'entity.type': 'Identity',
+      'entity.name': 'watchlist-test-name',
+    });
+
+    // Add watchlists to the document
+    await ingestDoc({
+      '@timestamp': '2026-02-13T11:01:00Z',
+      user: {
+        id: 'watchlist-test',
+        entity: {
+          attributes: {
+            Watchlists: ['w1', 'w2', 'w3'],
+          },
+        },
+      },
+    });
+
+    const secondExtractionResponse = await forceUserExtraction(
+      '2026-02-13T11:00:00Z',
+      '2026-02-13T11:02:00Z'
+    );
+    expect(secondExtractionResponse.statusCode).toBe(200);
+    expect(secondExtractionResponse.body.count).toBe(1);
+
+    const afterWatchList = await searchDoc('user:watchlist-test');
+    expect(afterWatchList.hits.hits).toHaveLength(1);
+    expect(afterWatchList.hits.hits[0]._source).toMatchObject({
+      'entity.id': 'user:watchlist-test',
+      'entity.type': 'Identity',
+      'entity.name': 'watchlist-test-name',
+      'entity.attributes.Watchlists': ['w1', 'w2', 'w3'],
+    });
+
+    // Delete a watchlist from the document
+    // Add watchlists to the document
+    await ingestDoc({
+      '@timestamp': '2026-02-13T11:02:00Z',
+      user: {
+        id: 'watchlist-test',
+        entity: {
+          attributes: {
+            Watchlists: ['w1', 'w3'],
+          },
+        },
+      },
+    });
+
+    const thirdExtractionResponse = await forceUserExtraction(
+      '2026-02-13T11:01:00Z',
+      '2026-02-13T11:03:00Z'
+    );
+    expect(thirdExtractionResponse.statusCode).toBe(200);
+    expect(thirdExtractionResponse.body.count).toBe(1);
+
+    const updatedWatchList = await searchDoc('user:watchlist-test');
+    expect(updatedWatchList.hits.hits).toHaveLength(1);
+    expect(updatedWatchList.hits.hits[0]._source).toMatchObject({
+      'entity.id': 'user:watchlist-test',
+      'entity.type': 'Identity',
+      'entity.name': 'watchlist-test-name',
+      'entity.attributes.Watchlists': ['w1', 'w3'],
+    });
+
+    // Make sure watchlist is not overwritten from the document if not changed
+    await ingestDoc({
+      '@timestamp': '2026-02-13T11:03:00Z',
+      user: {
+        id: 'watchlist-test',
+        domain: 'example.com',
+      },
+    });
+
+    const fourthExtractionResponse = await forceUserExtraction(
+      '2026-02-13T11:02:00Z',
+      '2026-02-13T11:04:00Z'
+    );
+    expect(fourthExtractionResponse.statusCode).toBe(200);
+    expect(fourthExtractionResponse.body.count).toBe(1);
+
+    const updatedDomain = await searchDoc('user:watchlist-test');
+    expect(updatedDomain.hits.hits).toHaveLength(1);
+    expect(updatedDomain.hits.hits[0]._source).toMatchObject({
+      'entity.id': 'user:watchlist-test',
+      'entity.type': 'Identity',
+      'entity.name': 'watchlist-test-name',
+      'entity.attributes.Watchlists': ['w1', 'w3'],
+      'user.domain': 'example.com',
+    });
+  });
 });

@@ -6,7 +6,7 @@
  */
 
 import type { EntityType, EntityField } from './entity_schema';
-import { oldestValue, newestValue } from './field_retention_operations';
+import { oldestValue, newestValue, newestList } from './field_retention_operations';
 
 // Copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/common.ts
 
@@ -74,6 +74,13 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
       source: `${prefix}.attributes.Mfa_enabled`,
       destination: 'entity.attributes.Mfa_enabled',
       mapping: { type: 'boolean' },
+      allowAPIUpdate: true,
+    }),
+
+    newestList({
+      source: `${prefix}.attributes.Watchlists`,
+      destination: 'entity.attributes.Watchlists',
+      mapping: { type: 'keyword' },
       allowAPIUpdate: true,
     }),
 
