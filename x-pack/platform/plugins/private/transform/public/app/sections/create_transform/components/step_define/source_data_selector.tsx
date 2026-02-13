@@ -7,10 +7,22 @@
 
 import React, { type FC, useMemo, useState } from 'react';
 
-import { EuiButtonEmpty, EuiFormRow, EuiModal, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCopy,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormControlLayout,
+  EuiFormRow,
+  EuiModal,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useAppDependencies } from '../../../../app_dependencies';
+import { getIndexDevConsoleStatement } from '../../../../common/data_grid';
+import { getTransformConfigQuery } from '../../../../common/request';
 import type { SearchItems } from '../../../../hooks/use_search_items';
 import { SearchSelection } from '../../../transform_management/components/search_selection';
 
@@ -27,7 +39,39 @@ export const SourceDataSelector: FC<SourceDataSelectorProps> = React.memo(
 
     const isDisabled = onSelectSavedObjectId === undefined;
 
-    const selectedSourceLabel = useMemo(() => {
+    const isDiscoverSessionSelected = Boolean(searchItems?.savedSearch?.id);
+
+    const copyToClipboardSourceDescription = useMemo(
+      () =>
+        i18n.translate('xpack.transform.indexPreview.copyClipboardTooltip', {
+          defaultMessage: 'Copy Dev Console statement of the index preview to the clipboard.',
+        }),
+      []
+    );
+
+    const copyToClipboardSource = useMemo(() => {
+      if (!isDiscoverSessionSelected || !searchItems?.dataView || !searchItems?.combinedQuery) {
+        return '';
+      }
+
+      const transformConfigQuery = getTransformConfigQuery(searchItems.combinedQuery);
+      return getIndexDevConsoleStatement(
+        transformConfigQuery,
+        searchItems.dataView.getIndexPattern()
+      );
+    }, [isDiscoverSessionSelected, searchItems?.combinedQuery, searchItems?.dataView]);
+
+    const fieldPrependLabel = useMemo(() => {
+      return isDiscoverSessionSelected
+        ? i18n.translate('xpack.transform.sourceDataSelector.discoverSessionPrependLabel', {
+            defaultMessage: 'Discover session',
+          })
+        : i18n.translate('xpack.transform.sourceDataSelector.dataViewPrependLabel', {
+            defaultMessage: 'Data view',
+          });
+    }, [isDiscoverSessionSelected]);
+
+    const selectedSourceValue = useMemo(() => {
       if (searchItems?.savedSearch?.id) {
         return (
           (searchItems.savedSearch.title as string | undefined) ??
@@ -41,9 +85,7 @@ export const SourceDataSelector: FC<SourceDataSelectorProps> = React.memo(
         return searchItems.dataView.getIndexPattern();
       }
 
-      return i18n.translate('xpack.transform.sourceDataSelector.selectSourceLabel', {
-        defaultMessage: 'Select a source',
-      });
+      return '';
     }, [searchItems?.dataView, searchItems?.savedSearch?.id, searchItems?.savedSearch?.title]);
 
     const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
@@ -82,16 +124,65 @@ export const SourceDataSelector: FC<SourceDataSelectorProps> = React.memo(
         })}
       >
         <>
-          <EuiButtonEmpty
-            flush="left"
-            iconType="arrowDown"
-            iconSide="right"
-            onClick={() => setIsModalOpen(true)}
-            isDisabled={isDisabled}
-            data-test-subj="transformSourceDataSelectorButton"
-          >
-            {selectedSourceLabel}
-          </EuiButtonEmpty>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem>
+              <EuiFormControlLayout
+                fullWidth
+                compressed
+                prepend={fieldPrependLabel}
+                css={css`
+                  cursor: pointer;
+                `}
+              >
+                <EuiFieldText
+                  fullWidth
+                  compressed
+                  readOnly
+                  value={selectedSourceValue}
+                  placeholder={i18n.translate(
+                    'xpack.transform.sourceDataSelector.selectSourceLabel',
+                    {
+                      defaultMessage: 'Select a source',
+                    }
+                  )}
+                  onClick={() => {
+                    if (!isDisabled) {
+                      setIsModalOpen(true);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (isDisabled) return;
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setIsModalOpen(true);
+                    }
+                  }}
+                  aria-label={i18n.translate('xpack.transform.sourceDataSelector.fieldAriaLabel', {
+                    defaultMessage: 'Select data source',
+                  })}
+                  data-test-subj="transformSourceDataSelectorButton"
+                />
+              </EuiFormControlLayout>
+            </EuiFlexItem>
+
+            {isDiscoverSessionSelected && copyToClipboardSource && (
+              <EuiFlexItem grow={false}>
+                <EuiCopy
+                  beforeMessage={copyToClipboardSourceDescription}
+                  textToCopy={copyToClipboardSource}
+                >
+                  {(copy: () => void) => (
+                    <EuiButtonIcon
+                      onClick={copy}
+                      iconType="copyClipboard"
+                      aria-label={copyToClipboardSourceDescription}
+                      data-test-subj="transformDiscoverSessionCopyDevConsoleStatementButton"
+                    />
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
 
           {isModalOpen && (
             <EuiModal

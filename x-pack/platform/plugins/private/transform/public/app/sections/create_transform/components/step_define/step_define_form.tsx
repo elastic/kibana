@@ -11,8 +11,6 @@ import { merge } from 'rxjs';
 
 import {
   EuiButton,
-  EuiButtonIcon,
-  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -48,10 +46,7 @@ import {
   type TransformStorageMapped,
 } from '../../../../../../common/types/storage';
 
-import {
-  getIndexDevConsoleStatement,
-  getTransformPreviewDevConsoleStatement,
-} from '../../../../common/data_grid';
+import { getTransformPreviewDevConsoleStatement } from '../../../../common/data_grid';
 import type {
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
@@ -107,7 +102,6 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const [globalState, setGlobalState] = useUrlState('_g');
   const { searchItems } = props;
   const { dataView } = searchItems;
-  const indexPattern = useMemo(() => dataView.getIndexPattern(), [dataView]);
   const [frozenDataPreference, setFrozenDataPreference] = useStorage<
     TransformStorageKey,
     TransformStorageMapped<typeof TRANSFORM_FROZEN_TIER_PREFERENCE>
@@ -154,14 +148,6 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     stepDefineForm.transformFunction === TRANSFORM_FUNCTION.PIVOT
       ? stepDefineForm.pivotConfig.state
       : stepDefineForm.latestFunctionConfig;
-
-  const copyToClipboardSource = getIndexDevConsoleStatement(transformConfigQuery, indexPattern);
-  const copyToClipboardSourceDescription = i18n.translate(
-    'xpack.transform.indexPreview.copyClipboardTooltip',
-    {
-      defaultMessage: 'Copy Dev Console statement of the index preview to the clipboard.',
-    }
-  );
 
   const copyToClipboardPreviewRequest = getPreviewTransformRequestBody(
     dataView,
@@ -317,28 +303,6 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
           onSelectSavedObjectId={props.onSelectSavedObjectId}
         />
 
-        {searchItems.savedSearch?.id !== undefined && (
-          <EuiFormRow>
-            <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiCopy
-                  beforeMessage={copyToClipboardSourceDescription}
-                  textToCopy={copyToClipboardSource}
-                >
-                  {(copy: () => void) => (
-                    <EuiButtonIcon
-                      onClick={copy}
-                      iconType="copyClipboard"
-                      aria-label={copyToClipboardSourceDescription}
-                      data-test-subj="transformDiscoverSessionCopyDevConsoleStatementButton"
-                    />
-                  )}
-                </EuiCopy>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-        )}
-
         {hasValidTimeField && (
           <EuiFormRow
             fullWidth
@@ -395,13 +359,10 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
         <EuiFormRow
           fullWidth
           label={
-            searchItems?.savedSearch?.id !== undefined
-              ? i18n.translate('xpack.transform.stepDefineForm.discoverSessionLabel', {
-                  defaultMessage: 'Discover session',
-                })
-              : i18n.translate('xpack.transform.stepDefineForm.searchFilterLabel', {
-                  defaultMessage: 'Search filter',
-                })
+            searchItems?.savedSearch?.id === undefined &&
+            i18n.translate('xpack.transform.stepDefineForm.searchFilterLabel', {
+              defaultMessage: 'Search filter',
+            })
           }
         >
           <>
@@ -416,9 +377,6 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                     {isAdvancedSourceEditorEnabled && <AdvancedSourceEditor {...stepDefineForm} />}
                   </>
                 )}
-                {searchItems?.savedSearch?.id !== undefined && (
-                  <span>{searchItems.savedSearch.title}</span>
-                )}
               </EuiFlexItem>
 
               {/* Search options: Advanced Editor Switch / Copy to Clipboard / Advanced Editor Apply Button */}
@@ -430,20 +388,6 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                         {searchItems.savedSearch === undefined && (
                           <AdvancedQueryEditorSwitch {...stepDefineForm} />
                         )}
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiCopy
-                          beforeMessage={copyToClipboardSourceDescription}
-                          textToCopy={copyToClipboardSource}
-                        >
-                          {(copy: () => void) => (
-                            <EuiButtonIcon
-                              onClick={copy}
-                              iconType="copyClipboard"
-                              aria-label={copyToClipboardSourceDescription}
-                            />
-                          )}
-                        </EuiCopy>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>

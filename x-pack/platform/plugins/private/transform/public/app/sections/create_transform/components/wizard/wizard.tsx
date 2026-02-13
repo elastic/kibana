@@ -48,6 +48,7 @@ import {
 import { WizardNav } from '../wizard_nav';
 import { TransformFunctionSelector } from '../step_define/transform_function_selector';
 import { SourceDataSelector } from '../step_define/source_data_selector';
+import { ConfigSectionTitle } from '../step_define/step_define_form';
 
 import { TRANSFORM_STORAGE_KEYS } from './storage';
 
@@ -222,6 +223,8 @@ export const Wizard: FC<WizardProps> = React.memo(
                   selectedFunction={pendingTransformFunction}
                   onChange={setPendingTransformFunction}
                 />
+
+                <ConfigSectionTitle title="Source data" />
 
                 <SourceDataSelector
                   searchItems={searchItems}

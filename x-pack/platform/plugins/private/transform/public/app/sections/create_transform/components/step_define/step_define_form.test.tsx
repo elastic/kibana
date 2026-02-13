@@ -83,7 +83,7 @@ describe('Transform: <DefinePivotForm />', () => {
 
     const mockOnChange = jest.fn();
 
-    const { getByText } = render(
+    const { getByText, getByDisplayValue } = render(
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
           <KibanaContextProvider services={services}>
@@ -101,7 +101,7 @@ describe('Transform: <DefinePivotForm />', () => {
 
     await waitFor(() => {
       expect(getByText('Select data source')).toBeInTheDocument();
-      expect(getByText(searchItems.dataView.getIndexPattern())).toBeInTheDocument();
+      expect(getByDisplayValue(searchItems.dataView.getIndexPattern())).toBeInTheDocument();
       expect(mockOnChange).toBeCalled();
     });
   }, 10000);
