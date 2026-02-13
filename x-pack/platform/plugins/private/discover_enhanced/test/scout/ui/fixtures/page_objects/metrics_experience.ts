@@ -17,7 +17,7 @@ interface MetricsPagination {
 }
 
 function createPagination(parentContainer: Locator): MetricsPagination {
-  const container = parentContainer.locator('nav[aria-label="Metrics pagination"]');
+  const container = parentContainer.locator('[data-test-subj="metricsExperienceGridPagination"]');
   return {
     container,
     prevButton: container.locator('[data-test-subj="pagination-button-previous"]'),
@@ -37,10 +37,14 @@ function createPagination(parentContainer: Locator): MetricsPagination {
 }
 
 export class MetricsExperiencePage {
-  public readonly codeEditor: KibanaCodeEditorWrapper;
+  private readonly codeEditor: KibanaCodeEditorWrapper;
   public readonly container: Locator;
   public readonly grid: Locator;
+  public readonly cards: Locator;
   public readonly pagination: MetricsPagination;
+  public readonly searchButton: Locator;
+  public readonly searchInput: Locator;
+  public readonly emptyState: Locator;
 
   constructor(
     private readonly page: ScoutPage,
@@ -50,21 +54,20 @@ export class MetricsExperiencePage {
     // metricsExperienceRendered is the outer wrapper containing header, grid, and pagination
     this.container = page.testSubj.locator('metricsExperienceRendered');
     this.grid = page.testSubj.locator('unifiedMetricsExperienceGrid');
+    this.cards = this.grid.locator('[data-chart-index]');
     this.pagination = createPagination(this.container);
+    this.searchButton = page.testSubj.locator('metricsExperienceToolbarSearch');
+    this.searchInput = page.testSubj.locator('metricsExperienceGridToolbarSearch');
+    this.emptyState = page.testSubj.locator('metricsExperienceNoData');
   }
 
-  public async setEsqlQuery(query: string): Promise<void> {
-    await this.codeEditor.setCodeEditorValue(query);
-  }
-
-  public async submitQuery(): Promise<void> {
-    await this.page.testSubj.click('querySubmitButton');
-  }
-
+  /**
+   * Runs an ES|QL query and waits for results.
+   */
   public async runEsqlQuery(query: string): Promise<void> {
     await this.discover.selectTextBaseLang();
-    await this.setEsqlQuery(query);
-    await this.submitQuery();
+    await this.codeEditor.setCodeEditorValue(query);
+    await this.page.testSubj.click('querySubmitButton');
     await this.discover.waitUntilSearchingHasFinished();
   }
 
@@ -72,7 +75,15 @@ export class MetricsExperiencePage {
     return this.grid.locator(`[data-chart-index="${index}"]`);
   }
 
-  public async getVisibleCardCount(): Promise<number> {
-    return this.grid.locator('[data-chart-index]').count();
+  public async searchMetric(term: string): Promise<void> {
+    const isInputVisible = await this.searchInput.isVisible();
+    if (!isInputVisible) {
+      await this.searchButton.click();
+    }
+    await this.searchInput.fill(term);
+  }
+
+  public async clearSearch(): Promise<void> {
+    await this.searchInput.clear();
   }
 }

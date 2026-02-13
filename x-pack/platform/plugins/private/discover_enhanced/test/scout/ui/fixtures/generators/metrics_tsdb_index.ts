@@ -7,6 +7,7 @@
 
 import type { EsClient } from '@kbn/scout';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
+import { METRICS_TEST_INDEX_NAME } from '../constants';
 
 export interface MetricDefinition {
   readonly name: string;
@@ -34,7 +35,6 @@ type EsMappingProperty = Record<string, unknown>;
 const MAX_METRICS = 200;
 const MAX_DIMENSIONS = 50;
 const MAX_VALUES_PER_DIMENSION = 20;
-const DEFAULT_INDEX_NAME = 'test-metrics-experience';
 const PAGE_SIZE = 20;
 
 const INDEX_TIME_RANGE = {
@@ -53,7 +53,7 @@ export const DEFAULT_TIME_RANGE = {
 } as const;
 
 export const DEFAULT_CONFIG: MetricsIndexConfig = {
-  indexName: DEFAULT_INDEX_NAME,
+  indexName: METRICS_TEST_INDEX_NAME,
   dimensions: generateDimensions(30),
   metrics: [...generateMetrics(23, 'gauge'), ...generateMetrics(22, 'counter')],
   timeRange: INDEX_TIME_RANGE,
@@ -175,8 +175,12 @@ export async function cleanMetricsTestIndex(
   await esClient.indices.delete({ index: indexName, ignore_unavailable: true });
 }
 
-function buildDocument(index: number, baseTime: number): Record<string, unknown> {
-  const { dimensions, metrics } = DEFAULT_CONFIG;
+function buildDocument(
+  index: number,
+  baseTime: number,
+  config: MetricsIndexConfig
+): Record<string, unknown> {
+  const { dimensions, metrics } = config;
   return {
     '@timestamp': new Date(baseTime + index * 60_000).toISOString(),
     ...Object.fromEntries(dimensions.map((d) => [d.name, d.values[index % d.values.length]])),
@@ -189,13 +193,14 @@ function buildDocument(index: number, baseTime: number): Record<string, unknown>
  */
 export async function insertMetricsDocuments(
   esClient: EsClient,
+  config: MetricsIndexConfig = DEFAULT_CONFIG,
   count: number = 10
 ): Promise<void> {
-  const baseTime = new Date(DEFAULT_CONFIG.timeRange.documentsBaseTime).getTime();
+  const baseTime = new Date(config.timeRange.documentsBaseTime).getTime();
 
   const operations = Array.from({ length: count }).flatMap((_, i) => [
-    { index: { _index: DEFAULT_CONFIG.indexName } },
-    buildDocument(i, baseTime),
+    { index: { _index: config.indexName } },
+    buildDocument(i, baseTime, config),
   ]);
 
   await esClient.bulk({ operations, refresh: true });
