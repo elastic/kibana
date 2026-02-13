@@ -49,7 +49,10 @@ const getParams = (filter: PhraseFilter) => {
 };
 
 export const isMapPhraseFilter = (filter: unknown): filter is PhraseFilter =>
-  isPhraseFilter(filter as Filter) || isScriptedPhraseFilter(filter as Filter);
+  hasFilterShape(filter) && (isPhraseFilter(filter) || isScriptedPhraseFilter(filter));
+
+const hasFilterShape = (filter: unknown): filter is Filter =>
+  typeof filter === 'object' && filter !== null && 'meta' in filter && 'query' in filter;
 
 export const mapPhrase = (filter: Filter) => {
   if (!isMapPhraseFilter(filter)) {

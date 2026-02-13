@@ -622,7 +622,10 @@ export class SearchSource {
     val: SearchSourceFields[K],
     key: K
   ): false | void {
-    val = typeof val === 'function' ? val() : val;
+    if (typeof val === 'function') {
+      const fn = val as unknown as (searchSource?: SearchSource) => SearchSourceFields[K];
+      val = fn.length > 0 ? fn(this) : fn();
+    }
     if (val == null || !key) return;
 
     const addToRoot = (rootKey: string, value: unknown) => {
