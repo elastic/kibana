@@ -17285,7 +17285,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "fatal",
-            "description": [],
+            "description": [
+              "/**\n * @deprecated\n *\n * Pass `fatal` into the params object instead:\n *\n * ```ts\n * z.string().custom((val) => val.length > 5, { fatal: false })\n * ```\n *\n */"
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -25155,10 +25157,10 @@
           " | ",
           "ZodBoolean",
           " | ",
-          "ZodUnion",
-          "<any> | ",
           "ZodAny",
           " | ",
+          "ZodUnion",
+          "<any> | ",
           "ZodUndefined",
           " | ",
           "ZodNull",

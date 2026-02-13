@@ -15,7 +15,7 @@
       "label": "OsqueryPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-      "lineNumber": 31,
+      "lineNumber": 52,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -31,7 +31,7 @@
       "label": "OsqueryPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-      "lineNumber": 33,
+      "lineNumber": 54,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -57,7 +57,7 @@
             " | undefined; }) => React.JSX.Element) | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-          "lineNumber": 34,
+          "lineNumber": 55,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -75,7 +75,7 @@
             ") => React.JSX.Element"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-          "lineNumber": 35,
+          "lineNumber": 56,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -112,7 +112,7 @@
             ") => React.JSX.Element"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-          "lineNumber": 36,
+          "lineNumber": 57,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -151,7 +151,7 @@
             "<{ label: string; query: string; ecs_mapping: Record<string, unknown>; }, any, undefined>; }) => React.JSX.Element) | undefined"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-          "lineNumber": 37,
+          "lineNumber": 58,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -167,7 +167,7 @@
             "(props: { agentId: string; }) => boolean"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-          "lineNumber": 38,
+          "lineNumber": 59,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -180,7 +180,7 @@
               "label": "props",
               "description": [],
               "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-              "lineNumber": 38,
+              "lineNumber": 59,
               "columnNumber": 31,
               "deprecated": false,
               "trackAdoption": false,
@@ -193,7 +193,7 @@
                   "label": "agentId",
                   "description": [],
                   "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-                  "lineNumber": 38,
+                  "lineNumber": 59,
                   "columnNumber": 33,
                   "deprecated": false,
                   "trackAdoption": false
@@ -214,7 +214,7 @@
             "() => { loading: boolean; disabled: boolean; permissionDenied: boolean; }"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-          "lineNumber": 39,
+          "lineNumber": 60,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -234,7 +234,7 @@
             ") => React.JSX.Element"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-          "lineNumber": 40,
+          "lineNumber": 61,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -277,7 +277,7 @@
             "<object>[]; }; }, Error>"
           ],
           "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-          "lineNumber": 41,
+          "lineNumber": 62,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -293,7 +293,7 @@
                 "UseAllLiveQueriesConfig"
               ],
               "path": "x-pack/platform/plugins/shared/osquery/public/types.ts",
-              "lineNumber": 41,
+              "lineNumber": 62,
               "columnNumber": 25,
               "deprecated": false,
               "trackAdoption": false,

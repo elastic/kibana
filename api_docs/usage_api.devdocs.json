@@ -1,0 +1,84 @@
+{
+  "id": "usageApi",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "usageApi",
+      "id": "def-server.UsageApiSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "UsageApiSetup",
+      "description": [
+        "\nSetup contract"
+      ],
+      "path": "x-pack/platform/plugins/shared/usage_api/server/plugin.ts",
+      "lineNumber": 12,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "usageApi",
+          "id": "def-server.UsageApiSetup.config",
+          "type": "Object",
+          "tags": [],
+          "label": "config",
+          "description": [
+            "\nConfiguration for the Usage API."
+          ],
+          "signature": [
+            "{ readonly url?: string | undefined; readonly tls?: Readonly<{} & { key: string; certificate: string; ca: string; }> | undefined; readonly enabled: boolean; }"
+          ],
+          "path": "x-pack/platform/plugins/shared/usage_api/server/plugin.ts",
+          "lineNumber": 16,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "usageApi",
+      "id": "def-server.UsageApiStart",
+      "type": "Type",
+      "tags": [],
+      "label": "UsageApiStart",
+      "description": [
+        "\nStart contract"
+      ],
+      "signature": [
+        "void"
+      ],
+      "path": "x-pack/platform/plugins/shared/usage_api/server/plugin.ts",
+      "lineNumber": 22,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
