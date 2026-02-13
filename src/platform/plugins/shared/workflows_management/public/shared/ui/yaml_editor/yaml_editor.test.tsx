@@ -111,7 +111,12 @@ jest.mock('@kbn/code-editor', () => {
 // Mock lodash debounce to execute immediately in tests
 jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
-  debounce: (fn: Function) => fn,
+  debounce: (fn: Function) => {
+    const debouncedFn = fn as Function & { flush: () => void; cancel: () => void };
+    debouncedFn.flush = () => {};
+    debouncedFn.cancel = () => {};
+    return debouncedFn;
+  },
 }));
 
 // Mock the configureMonacoYamlSchema function
@@ -497,6 +502,82 @@ describe('YamlEditor', () => {
         '[data-testid="code-editor-textarea"]'
       ) as HTMLTextAreaElement;
       expect(textarea.value).toBe(newPropValue);
+    });
+  });
+
+  describe('onSyncStateChange callback', () => {
+    it('should call onSyncStateChange(false) then onSyncStateChange(true) when text changes', () => {
+      const onChange = jest.fn();
+      const onSyncStateChange = jest.fn();
+
+      const { container } = render(
+        <YamlEditor
+          value="test: initial"
+          onChange={onChange}
+          onSyncStateChange={onSyncStateChange}
+          schemas={null}
+        />
+      );
+
+      const textarea = container.querySelector(
+        '[data-testid="code-editor-textarea"]'
+      ) as HTMLTextAreaElement;
+
+      fireEvent.change(textarea, { target: { value: 'test: updated' } });
+
+      // With debounce mocked to execute immediately, both calls happen synchronously:
+      // 1. onSyncStateChange(false) — pending changes
+      // 2. onSyncStateChange(true) — debounced onChange flushed
+      expect(onSyncStateChange).toHaveBeenCalledTimes(2);
+      expect(onSyncStateChange).toHaveBeenNthCalledWith(1, false);
+      expect(onSyncStateChange).toHaveBeenNthCalledWith(2, true);
+    });
+
+    it('should call onSyncStateChange for each text change', () => {
+      const onChange = jest.fn();
+      const onSyncStateChange = jest.fn();
+
+      const { container } = render(
+        <YamlEditor
+          value="test: initial"
+          onChange={onChange}
+          onSyncStateChange={onSyncStateChange}
+          schemas={null}
+        />
+      );
+
+      const textarea = container.querySelector(
+        '[data-testid="code-editor-textarea"]'
+      ) as HTMLTextAreaElement;
+
+      fireEvent.change(textarea, { target: { value: 'test: first' } });
+      fireEvent.change(textarea, { target: { value: 'test: second' } });
+
+      // Each change produces a false then true call
+      expect(onSyncStateChange).toHaveBeenCalledTimes(4);
+      expect(onSyncStateChange).toHaveBeenNthCalledWith(1, false);
+      expect(onSyncStateChange).toHaveBeenNthCalledWith(2, true);
+      expect(onSyncStateChange).toHaveBeenNthCalledWith(3, false);
+      expect(onSyncStateChange).toHaveBeenNthCalledWith(4, true);
+    });
+
+    it('should work without onSyncStateChange (optional prop)', () => {
+      const onChange = jest.fn();
+
+      const { container } = render(
+        <YamlEditor value="test: initial" onChange={onChange} schemas={null} />
+      );
+
+      const textarea = container.querySelector(
+        '[data-testid="code-editor-textarea"]'
+      ) as HTMLTextAreaElement;
+
+      // Should not throw when onSyncStateChange is not provided
+      expect(() => {
+        fireEvent.change(textarea, { target: { value: 'test: updated' } });
+      }).not.toThrow();
+
+      expect(onChange).toHaveBeenCalledWith('test: updated');
     });
   });
 });
