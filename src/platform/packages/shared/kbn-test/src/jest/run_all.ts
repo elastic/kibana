@@ -178,7 +178,9 @@ async function runConfigs(
     const completionStatus = await Promise.all(
       allConfigs.map(async (config) => {
         const completed = await isConfigCompleted(config);
-        log.info(`[jest-checkpoint]   ${completed ? 'SKIP' : 'RUN '} ${relative(REPO_ROOT, config)}`);
+        log.info(
+          `[jest-checkpoint]   ${completed ? 'SKIP' : 'RUN '} ${relative(REPO_ROOT, config)}`
+        );
         return { config, completed };
       })
     );
@@ -195,7 +197,9 @@ async function runConfigs(
         `[jest-checkpoint] Resumed: skipped ${skipped.length} already-completed, ${configs.length} remaining`
       );
     } else {
-      log.info(`[jest-checkpoint] No prior checkpoints found, running all ${configs.length} configs`);
+      log.info(
+        `[jest-checkpoint] No prior checkpoints found, running all ${configs.length} configs`
+      );
     }
   }
 
