@@ -28,7 +28,9 @@ interface ClearExpiredSnoozedAlertsOpts {
  * time-based snoozes are cleaned up even when the snoozed alert does not fire
  * in the current execution cycle.
  */
-export async function clearExpiredSnoozedAlerts(opts: ClearExpiredSnoozedAlertsOpts): Promise<void> {
+export async function clearExpiredSnoozedAlerts(
+  opts: ClearExpiredSnoozedAlertsOpts
+): Promise<void> {
   const { esClient, logger, rule, version, auditLogger } = opts;
 
   if (!rule.snoozedAlerts || rule.snoozedAlerts.length === 0) return;

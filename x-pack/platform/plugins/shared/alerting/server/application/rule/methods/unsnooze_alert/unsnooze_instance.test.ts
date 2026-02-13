@@ -68,9 +68,7 @@ describe('unsnooze alert instance', () => {
       'alert',
       'rule-1',
       expect.objectContaining({
-        snoozedAlerts: [
-          expect.objectContaining({ alertInstanceId: 'alert-2' }),
-        ],
+        snoozedAlerts: [expect.objectContaining({ alertInstanceId: 'alert-2' })],
       }),
       expect.objectContaining({ version: 'abc' })
     );
