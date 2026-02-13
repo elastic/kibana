@@ -10,7 +10,7 @@
 import type { AggregateQuery } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { UiActionsActionDefinition, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { APPLY_FILTER_TRIGGER } from '../triggers';
+import { APPLY_FILTER_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 export interface SelectRangeActionContext {
   // Need to make this unknown to prevent circular dependencies.
@@ -39,7 +39,7 @@ export function createSelectRangeActionDefinition(
         const { createFiltersFromRangeSelectAction } = await import('./filters');
         const filters = await createFiltersFromRangeSelectAction(context.data);
         if (filters.length > 0) {
-          await getStartServices().uiActions.getTrigger(APPLY_FILTER_TRIGGER).exec({
+          await getStartServices().uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
             filters,
             embeddable: context.embeddable,
             timeFieldName: context.data.timeFieldName,

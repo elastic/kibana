@@ -46,18 +46,22 @@ core.chrome.sidebar.registerApp({
   appId: 'mySidebarApp',
   store: mySidebarStore,
   loadComponent: () => import('./my_sidebar_app').then((m) => m.MySidebarApp),
-  status: 'accessible',
+  status: 'available',
 });
 ```
 
-Required fields:
+The input to `registerApp` is a `SidebarAppConfig` object with the following fields:
+
+Required:
 - `appId`: Unique identifier for the sidebar app. It must be a valid sidebar app id.
 - `loadComponent`: Async function that resolves the sidebar React component.
 
-Optional fields:
+Optional (defaults applied on registration):
 - `store`: Store created via `createSidebarStore`. State persists to localStorage.
-- `status`: Accessibility status (defaults to `accessible`).
+- `status`: Availability status (defaults to `available`).
 - `restoreOnReload`: Whether the app auto-reopens on page reload (defaults to `true`).
+
+After registration, the app is stored as a `SidebarAppDefinition` with `status` and `restoreOnReload` guaranteed.
 
 ## Build a sidebar app component
 
@@ -263,17 +267,42 @@ function MyToolbarButton() {
 
 ## Manage app status
 
-Use `status: 'inaccessible'` when the app depends on async checks (license, permissions).
+Sidebar apps have three possible statuses to handle async checks (license, permissions, feature flags):
+
+- **`available`** (default): App is ready to render. Can be opened and restored on page reload.
+- **`pending`**: Async checks are in progress. Calling `open()` shows a loading skeleton that is replaced with the app component once status changes to `available`. Can be opened and restored on page reload.
+- **`unavailable`**: App will not become available. Cannot be opened (`open()` throws) or restored on reload. If the sidebar is currently showing this app, it closes automatically.
 
 ```tsx
 const updateMySidebarApp = core.chrome.sidebar.registerApp({
   appId: 'mySidebarApp',
   loadComponent: () => import('./my_sidebar_app').then((m) => m.MySidebarApp),
-  status: 'inaccessible',
+  status: 'pending',
 });
 
-// Later in start
-updateMySidebarApp({ status: 'accessible' });
+core.chrome.sidebar.getApp('mySidebarApp').open(); // Shows loading skeleton
+
+// After async checks complete
+updateMySidebarApp({ status: 'available' }); // App component appears
+
+// Or if the check fails
+updateMySidebarApp({ status: 'unavailable' }); // Sidebar closes automatically
+```
+
+Use `getStatus()` / `getStatus$()` or the `useSidebarApp` hook to check status reactively:
+
+```tsx
+import { useSidebarApp } from '@kbn/core-chrome-sidebar-components';
+
+function MyComponent() {
+  const { status, open } = useSidebarApp('mySidebarApp');
+  
+  return (
+    <button disabled={status === 'unavailable'} onClick={open}>
+      Open Sidebar
+    </button>
+  );
+}
 ```
 
 ## Control sidebar width

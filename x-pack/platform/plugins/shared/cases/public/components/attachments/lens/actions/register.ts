@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { CasesActionContextProps, Services } from './types';
 import { ADD_TO_EXISTING_CASE_ACTION_ID } from './constants';
 

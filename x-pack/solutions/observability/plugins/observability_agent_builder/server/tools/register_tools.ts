@@ -41,6 +41,10 @@ import {
   OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
 } from './get_trace_metrics/tool';
 import {
+  createGetRuntimeMetricsTool,
+  OBSERVABILITY_GET_RUNTIME_METRICS_TOOL_ID,
+} from './get_runtime_metrics/tool';
+import {
   OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
   createGetLogChangePointsTool,
 } from './get_log_change_points/tool';
@@ -71,6 +75,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
   OBSERVABILITY_GET_HOSTS_TOOL_ID,
   OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
+  OBSERVABILITY_GET_RUNTIME_METRICS_TOOL_ID,
   OBSERVABILITY_GET_LOG_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_METRIC_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
@@ -100,6 +105,7 @@ export async function registerTools({
     createGetCorrelatedLogsTool({ core, logger }),
     createGetHostsTool({ core, logger, dataRegistry }),
     createGetTraceMetricsTool({ core, plugins, logger }),
+    createGetRuntimeMetricsTool({ core, plugins, logger }),
     createGetLogChangePointsTool({ core, plugins, logger }),
     createGetMetricChangePointsTool({ core, plugins, logger }),
     createGetTraceChangePointsTool({ core, plugins, logger }),

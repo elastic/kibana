@@ -11,8 +11,8 @@
     "@kbn/embeddable-plugin",
     "@kbn/ui-actions-enhanced-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/data-plugin",
     "@kbn/presentation-publishing",
+    "@kbn/ui-actions-plugin",
   ],
   "exclude": [
     "target/**/*",
