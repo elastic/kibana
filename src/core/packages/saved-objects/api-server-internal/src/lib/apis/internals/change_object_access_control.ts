@@ -59,7 +59,7 @@ export interface ChangeAccessControlParams {
  * @returns true if the userProfileId matches the expected format
  */
 const isValidUserProfileId = (id: string): boolean => {
-  if (!id.startsWith('u_')) {
+  if (!id.startsWith('u_') || id.includes('\n')) {
     return false;
   }
   for (let i = 3; i < id.length - 1; i++) {
