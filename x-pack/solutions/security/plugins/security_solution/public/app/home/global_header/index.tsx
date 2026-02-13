@@ -58,11 +58,14 @@ export const GlobalHeader = React.memo(() => {
   const dashboardViewPath = isDashboardViewPath(pathname);
 
   const hasHeaderContent = showSourcerer && !showTimeline;
+  // On Alerts with the new data view picker, the picker lives in the Unified Search bar; don't show it in the app menu.
+  const showDataViewPickerInAppMenu =
+    hasHeaderContent && !(newDataViewPickerEnabled && sourcererScope === PageScope.alerts);
 
   useEffect(() => {
     if (!setHeaderActionMenu) return;
 
-    if (hasHeaderContent) {
+    if (showDataViewPickerInAppMenu) {
       setHeaderActionMenu((element) => {
         const mount = toMountPoint(<OutPortal node={portalNode} />, {
           theme,
@@ -83,7 +86,7 @@ export const GlobalHeader = React.memo(() => {
       setHeaderActionMenu(undefined);
     };
   }, [
-    hasHeaderContent,
+    showDataViewPickerInAppMenu,
     portalNode,
     setHeaderActionMenu,
     theme,
