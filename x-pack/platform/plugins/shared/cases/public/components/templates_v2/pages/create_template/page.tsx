@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageBody,
-  EuiPageSection,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import type { FC } from 'react';
 import React, { useEffect } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
-import { HeaderPage } from '../../../header_page';
-import { CreateTemplateForm } from './form';
-import { CreateTemplatePreview } from './preview';
+import type { FC } from 'react';
+import { useForm } from 'react-hook-form';
+import type { TemplateFormValues } from '../../components/template_form';
+import { CreateTemplateForm } from '../../components/template_form';
 import { exampleTemplateDefinition } from '../../field_types/constants';
 import { GENERAL_CASES_OWNER } from '../../../../../common/constants';
+import { TemplateFormLayout } from '../../components/template_form_layout';
 
 import * as i18n from '../../translations';
 
@@ -28,7 +20,7 @@ import * as i18n from '../../translations';
 export interface CreateTemplatePageProps {}
 
 export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
-  const form = useForm({
+  const form = useForm<TemplateFormValues>({
     defaultValues: {
       name: '',
       owner: GENERAL_CASES_OWNER,
@@ -40,35 +32,14 @@ export const CreateTemplatePage: FC<CreateTemplatePageProps> = () => {
   // For some reason it does not happen automatically.
   useEffect(() => {
     form.reset();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [form]);
 
   return (
-    <FormProvider {...form}>
-      <EuiPageSection restrictWidth={false}>
-        <HeaderPage data-test-subj="case-configure-title" title={i18n.ADD_TEMPLATE_TITLE} />
-        <EuiPageBody>
-          <EuiSpacer size="xs" />
-          <EuiFlexGroup>
-            <EuiFlexItem grow={3}>
-              <EuiText>
-                <h3>{i18n.YAML_EDITOR_TITLE}</h3>
-              </EuiText>
-              <EuiSpacer size="m" />
-              <CreateTemplateForm />
-              <EuiSpacer size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={1}>
-              <EuiText>
-                <h3>{i18n.INTERACTIVE_EDITOR_TITLE}</h3>
-              </EuiText>
-              <EuiSpacer size="m" />
-              <CreateTemplatePreview />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPageBody>
-      </EuiPageSection>
-    </FormProvider>
+    <TemplateFormLayout
+      form={form}
+      title={i18n.ADD_TEMPLATE_TITLE}
+      formContent={<CreateTemplateForm />}
+    />
   );
 };
 
