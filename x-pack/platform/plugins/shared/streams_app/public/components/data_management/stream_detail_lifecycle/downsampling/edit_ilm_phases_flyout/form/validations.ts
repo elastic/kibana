@@ -13,40 +13,62 @@ import type { DownsamplePhase, PreservedTimeUnit } from './types';
 import { toMilliseconds } from './utils';
 
 const { emptyField, isInteger } = fieldValidators;
-type AnyValidationFunc = ValidationFunc<any, any, any>;
+
+type PhaseName = 'hot' | 'warm' | 'cold' | 'frozen' | 'delete';
+type MinAgePhase = Exclude<PhaseName, 'hot'>;
+
+/**
+ * `hook-form-lib` validators receive a *flattened* `formData` object (keys like
+ * `_meta.warm.minAgeValue`). We keep access centralized to reduce `any`/casts at call sites.
+ */
+type StreamsIlmFlatFormData = Record<string, unknown>;
+type IlmValidationFunc<V = unknown> = ValidationFunc<any, string, V>;
+type IlmValidationArg<V = unknown> = Parameters<IlmValidationFunc<V>>[0];
+
+const asFlatFormData = (formData: unknown): StreamsIlmFlatFormData =>
+  (formData ?? {}) as StreamsIlmFlatFormData;
+
+const getAsBoolean = (formData: unknown, path: string): boolean =>
+  Boolean(asFlatFormData(formData)[path]);
+
+const getAsString = (formData: unknown, path: string, fallback = ''): string => {
+  const value = asFlatFormData(formData)[path];
+  return value === undefined || value === null ? fallback : String(value);
+};
+
+const getAsNumber = (formData: unknown, path: string, fallback: number): number => {
+  const value = asFlatFormData(formData)[path];
+  return typeof value === 'number' ? value : fallback;
+};
 
 /**
  * Note: validation functions receive a *flattened* `formData` object (keys like
  * `_meta.warm.minAgeValue`).
  */
-const isPhaseEnabled = (
-  formData: Record<string, unknown>,
-  phase: 'hot' | 'warm' | 'cold' | 'frozen' | 'delete'
-) => Boolean((formData as any)[`_meta.${phase}.enabled`]);
+const isPhaseEnabled = (formData: unknown, phase: PhaseName): boolean =>
+  getAsBoolean(formData, `_meta.${phase}.enabled`);
 
-const isDownsampleEnabled = (formData: Record<string, unknown>, phase: DownsamplePhase) =>
-  Boolean((formData as any)[`_meta.${phase}.downsampleEnabled`]);
+const isDownsampleEnabled = (formData: unknown, phase: DownsamplePhase): boolean =>
+  getAsBoolean(formData, `_meta.${phase}.downsampleEnabled`);
 
 export const requiredMinAgeValue =
-  (phase: 'warm' | 'cold' | 'frozen' | 'delete'): AnyValidationFunc =>
-  (...args) => {
-    const [{ formData }] = args as any as [{ formData: Record<string, unknown> }];
-    if (!isPhaseEnabled(formData, phase)) return;
+  (phase: MinAgePhase): IlmValidationFunc =>
+  (arg) => {
+    if (!isPhaseEnabled(arg.formData, phase)) return;
     return emptyField(
       i18n.translate('xpack.streams.editIlmPhasesFlyout.minAgeRequired', {
         defaultMessage: 'A value is required.',
       })
-    )(...args);
+    )(arg);
   };
 
-export const ifExistsNumberNonNegative: AnyValidationFunc = (...args) => {
-  const [{ value, formData, path }] = args as any as [
-    { value: unknown; formData: Record<string, unknown>; path: string }
-  ];
+export const ifExistsNumberNonNegative: IlmValidationFunc = (arg) => {
+  const { value, formData, path } = arg as IlmValidationArg;
 
   // Only validate when editing an enabled phase minAgeValue field.
   const match = /^_meta\.(warm|cold|frozen|delete)\.minAgeValue$/.exec(path);
-  if (match && !isPhaseEnabled(formData, match[1] as any)) return;
+  const phase = (match?.[1] as MinAgePhase | undefined) ?? undefined;
+  if (phase && !isPhaseEnabled(formData, phase)) return;
 
   if (value === '' || value === undefined || value === null) return;
   const num = Number(value);
@@ -60,15 +82,14 @@ export const ifExistsNumberNonNegative: AnyValidationFunc = (...args) => {
 };
 
 export const minAgeMustBeInteger =
-  (phase: 'warm' | 'cold' | 'frozen' | 'delete'): AnyValidationFunc =>
-  (...args) => {
-    const [{ formData }] = args as any as [{ formData: Record<string, unknown> }];
-    if (!isPhaseEnabled(formData, phase)) return;
+  (phase: MinAgePhase): IlmValidationFunc =>
+  (arg) => {
+    if (!isPhaseEnabled(arg.formData, phase)) return;
     return isInteger({
       message: i18n.translate('xpack.streams.editIlmPhasesFlyout.integerRequired', {
         defaultMessage: 'An integer is required.',
       }),
-    })(...args);
+    })(arg);
   };
 
 /**
@@ -77,9 +98,9 @@ export const minAgeMustBeInteger =
  * for display in error messages.
  */
 export const minAgeGreaterThanPreviousPhase =
-  (phase: 'cold' | 'frozen' | 'delete'): AnyValidationFunc =>
-  (...args) => {
-    const [{ formData }] = args as any as [{ formData: Record<string, unknown> }];
+  (phase: 'cold' | 'frozen' | 'delete'): IlmValidationFunc =>
+  (arg) => {
+    const { formData } = arg as IlmValidationArg;
     if (!isPhaseEnabled(formData, phase)) return;
 
     const getValueFor = (p: 'warm' | 'cold' | 'frozen' | 'delete') => {
@@ -87,11 +108,9 @@ export const minAgeGreaterThanPreviousPhase =
         return { milli: -1, esFormat: undefined as string | undefined };
       }
 
-      const minAgeValue = String((formData as any)[`_meta.${p}.minAgeValue`] ?? '');
-      const minAgeUnit = String(
-        (formData as any)[`_meta.${p}.minAgeUnit`] ?? 'd'
-      ) as PreservedTimeUnit;
-      const milli = (formData as any)[`_meta.${p}.minAgeToMilliSeconds`] ?? -1;
+      const minAgeValue = getAsString(formData, `_meta.${p}.minAgeValue`);
+      const minAgeUnit = getAsString(formData, `_meta.${p}.minAgeUnit`, 'd') as PreservedTimeUnit;
+      const milli = getAsNumber(formData, `_meta.${p}.minAgeToMilliSeconds`, -1);
 
       const computed = toMilliseconds(minAgeValue, minAgeUnit);
       const esFormat =
@@ -165,24 +184,21 @@ export const minAgeGreaterThanPreviousPhase =
   };
 
 export const requiredDownsampleIntervalValue =
-  (phase: DownsamplePhase): AnyValidationFunc =>
-  (...args) => {
-    const [{ formData }] = args as any as [{ formData: Record<string, unknown> }];
-    if (!isPhaseEnabled(formData, phase)) return;
-    if (!isDownsampleEnabled(formData, phase)) return;
+  (phase: DownsamplePhase): IlmValidationFunc =>
+  (arg) => {
+    if (!isPhaseEnabled(arg.formData, phase)) return;
+    if (!isDownsampleEnabled(arg.formData, phase)) return;
     return emptyField(
       i18n.translate('xpack.streams.editIlmPhasesFlyout.downsampleIntervalRequired', {
         defaultMessage: 'A value is required.',
       })
-    )(...args);
+    )(arg);
   };
 
 export const ifExistsNumberGreaterThanZero =
-  (phase: DownsamplePhase): AnyValidationFunc =>
-  (...args) => {
-    const [{ value, formData }] = args as any as [
-      { value: unknown; formData: Record<string, unknown> }
-    ];
+  (phase: DownsamplePhase): IlmValidationFunc =>
+  (arg) => {
+    const { value, formData } = arg as IlmValidationArg;
     if (!isPhaseEnabled(formData, phase)) return;
     if (!isDownsampleEnabled(formData, phase)) return;
 
@@ -198,22 +214,21 @@ export const ifExistsNumberGreaterThanZero =
   };
 
 export const downsampleIntervalMustBeInteger =
-  (phase: DownsamplePhase): AnyValidationFunc =>
-  (...args) => {
-    const [{ formData }] = args as any as [{ formData: Record<string, unknown> }];
-    if (!isPhaseEnabled(formData, phase)) return;
-    if (!isDownsampleEnabled(formData, phase)) return;
+  (phase: DownsamplePhase): IlmValidationFunc =>
+  (arg) => {
+    if (!isPhaseEnabled(arg.formData, phase)) return;
+    if (!isDownsampleEnabled(arg.formData, phase)) return;
     return isInteger({
       message: i18n.translate('xpack.streams.editIlmPhasesFlyout.integerRequired', {
         defaultMessage: 'An integer is required.',
       }),
-    })(...args);
+    })(arg);
   };
 
 export const downsampleIntervalMultipleOfPreviousOne =
-  (phase: 'warm' | 'cold'): AnyValidationFunc =>
-  (...args) => {
-    const [{ formData }] = args as any as [{ formData: Record<string, unknown> }];
+  (phase: 'warm' | 'cold'): IlmValidationFunc =>
+  (arg) => {
+    const { formData } = arg as IlmValidationArg;
     if (!isPhaseEnabled(formData, phase)) return;
     if (!isDownsampleEnabled(formData, phase)) return;
 
@@ -221,9 +236,11 @@ export const downsampleIntervalMultipleOfPreviousOne =
       if (!isPhaseEnabled(formData, p)) return null;
       if (!isDownsampleEnabled(formData, p)) return null;
 
-      const value = String((formData as any)[`_meta.${p}.downsample.fixedIntervalValue`] ?? '');
-      const unit = String(
-        (formData as any)[`_meta.${p}.downsample.fixedIntervalUnit`] ?? 'd'
+      const value = getAsString(formData, `_meta.${p}.downsample.fixedIntervalValue`);
+      const unit = getAsString(
+        formData,
+        `_meta.${p}.downsample.fixedIntervalUnit`,
+        'd'
       ) as PreservedTimeUnit;
 
       if (!value || !unit) return null;
@@ -304,11 +321,11 @@ export const downsampleIntervalMultipleOfPreviousOne =
     }
   };
 
-export const requiredSearchableSnapshotRepository: AnyValidationFunc = (...args) => {
-  const [{ formData }] = args as any as [{ formData: Record<string, unknown> }];
+export const requiredSearchableSnapshotRepository: IlmValidationFunc = (arg) => {
+  const { formData } = arg as IlmValidationArg;
   const coldEnabled =
     isPhaseEnabled(formData, 'cold') &&
-    Boolean((formData as any)['_meta.cold.searchableSnapshotEnabled']);
+    getAsBoolean(formData, '_meta.cold.searchableSnapshotEnabled');
   const frozenEnabled = isPhaseEnabled(formData, 'frozen');
 
   if (!coldEnabled && !frozenEnabled) return;
@@ -317,5 +334,5 @@ export const requiredSearchableSnapshotRepository: AnyValidationFunc = (...args)
     i18n.translate('xpack.streams.editIlmPhasesFlyout.searchableSnapshotRepoRequired', {
       defaultMessage: 'A snapshot repository is required.',
     })
-  )(...args);
+  )(arg);
 };
