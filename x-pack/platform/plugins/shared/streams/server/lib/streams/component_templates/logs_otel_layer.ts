@@ -10,7 +10,7 @@ import type {
   IndicesIndexSettings,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
-import { namespacePrefixes } from '@kbn/streams-schema';
+import { getRoot, namespacePrefixes } from '@kbn/streams-schema';
 import type { FieldDefinition, InheritedFieldDefinition, Streams } from '@kbn/streams-schema';
 
 // This map is used to find the ECS equivalent field for a given OpenTelemetry attribute.
@@ -240,13 +240,14 @@ export function addAliasesForNamespacedFields(
     inheritedFields
   );
 
-  // Add aliases defined in the base mappings
+  // Add aliases defined in the OTEL base mappings
+  const rootStream = getRoot(streamDefinition.name);
   Object.entries(otelBaseMappings).forEach(([key, fieldDef]) => {
     if (fieldDef.type === 'alias') {
       inheritedFields[key] = {
         type: otelBaseFields[fieldDef.path!].type,
         alias_for: fieldDef.path,
-        from: 'logs',
+        from: rootStream,
       };
     }
   });

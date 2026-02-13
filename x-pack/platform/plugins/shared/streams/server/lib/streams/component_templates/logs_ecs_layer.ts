@@ -34,23 +34,29 @@ export const ecsBaseFields: FieldDefinition = {
   },
   'scope.name': {
     type: 'keyword',
+    ignore_above: 1024,
   },
   'host.name': {
     type: 'keyword',
+    ignore_above: 1024,
   },
   'trace.id': {
     type: 'keyword',
+    ignore_above: 1024,
   },
   'span.id': {
     type: 'keyword',
+    ignore_above: 1024,
   },
   'service.name': {
     type: 'keyword',
+    ignore_above: 1024,
   },
   message: {
     type: 'match_only_text',
   },
   'log.level': {
     type: 'keyword',
+    ignore_above: 1024,
   },
 };

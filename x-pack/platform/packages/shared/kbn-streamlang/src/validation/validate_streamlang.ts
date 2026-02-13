@@ -49,7 +49,7 @@ export function validateStreamlang(
   streamlangDSL: StreamlangDSL,
   options: StreamlangValidationOptions
 ): StreamlangValidationResult {
-  const { reservedFields, streamType = 'wired' } = options;
+  const { reservedFields, streamType = 'wired', skipNamespaceValidation = false } = options;
   const errors: StreamlangValidationError[] = [];
   let fieldTypesByProcessor = new Map<string, FieldTypeMap>();
 
@@ -93,9 +93,11 @@ export function validateStreamlang(
 
     // 4c. Wired stream specific validations
     if (streamType === 'wired') {
-      // Validate namespacing
-      const namespaceErrors = validateNamespacing(step, processorNumber, processorId);
-      errors.push(...namespaceErrors);
+      // Validate namespacing (skipped for logs.ecs streams which use ECS field conventions)
+      if (!skipNamespaceValidation) {
+        const namespaceErrors = validateNamespacing(step, processorNumber, processorId);
+        errors.push(...namespaceErrors);
+      }
 
       // Validate reserved fields
       const reservedErrors = validateReservedFields(
