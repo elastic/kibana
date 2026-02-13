@@ -31,7 +31,7 @@ describe('updateDataStreams', () => {
     jest.clearAllMocks();
   });
 
-  it(`should update data streams`, async () => {
+  it(`should update data streams when expandIndexPattern is true`, async () => {
     const dataStreamName = 'test_data_stream-default';
     esClient.indices.getDataStream.mockResolvedValueOnce({
       data_streams: [{ name: dataStreamName } as IndicesDataStream],
@@ -42,6 +42,7 @@ describe('updateDataStreams', () => {
       logger,
       name,
       totalFieldsLimit,
+      expandIndexPattern: true,
     });
 
     expect(esClient.indices.getDataStream).toHaveBeenCalledWith({ name, expand_wildcards: 'all' });
@@ -59,7 +60,27 @@ describe('updateDataStreams', () => {
     });
   });
 
-  it(`should update multiple data streams`, async () => {
+  it(`should update multiple data streams when expandIndexPattern is true`, async () => {
+    const dataStreamName1 = 'test_data_stream-1';
+    const dataStreamName2 = 'test_data_stream-2';
+    esClient.indices.getDataStream.mockResolvedValueOnce({
+      data_streams: [{ name: dataStreamName1 }, { name: dataStreamName2 }] as IndicesDataStream[],
+    });
+
+    await updateDataStreams({
+      esClient,
+      logger,
+      name,
+      totalFieldsLimit,
+      expandIndexPattern: true,
+    });
+
+    expect(esClient.indices.putSettings).toHaveBeenCalledTimes(2);
+    expect(esClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(2);
+    expect(esClient.indices.putMapping).toHaveBeenCalledTimes(2);
+  });
+
+  it('should update data stream pattern by default', async () => {
     const dataStreamName1 = 'test_data_stream-1';
     const dataStreamName2 = 'test_data_stream-2';
     esClient.indices.getDataStream.mockResolvedValueOnce({
@@ -73,9 +94,9 @@ describe('updateDataStreams', () => {
       totalFieldsLimit,
     });
 
-    expect(esClient.indices.putSettings).toHaveBeenCalledTimes(2);
-    expect(esClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(2);
-    expect(esClient.indices.putMapping).toHaveBeenCalledTimes(2);
+    expect(esClient.indices.putSettings).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.putMapping).toHaveBeenCalledTimes(1);
   });
 
   it(`should not update data streams when not exist`, async () => {
