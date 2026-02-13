@@ -304,4 +304,28 @@ export const InferenceEndpoints: InferenceAPIConfigResponse[] = [
       return_documents: true,
     },
   },
+  {
+    inference_id: 'alibabacloud-endpoint-without-model-id',
+    task_type: 'completion',
+    service: 'alibabacloud-ai-search',
+    service_settings: {
+      api_key: 'test-api-key',
+      service_id: 'test-service-id',
+      host: 'test-host',
+      workspace: 'test-workspace',
+      http_schema: 'https',
+      rate_limit: {
+        requests_per_minute: 1000,
+      },
+    },
+  },
+  {
+    inference_id: 'hugging-face-endpoint-without-model-id',
+    task_type: 'text_embedding',
+    service: 'hugging_face',
+    service_settings: {
+      api_key: 'test-api-key',
+      url: 'https://example.com/model-endpoint',
+    },
+  },
 ];
