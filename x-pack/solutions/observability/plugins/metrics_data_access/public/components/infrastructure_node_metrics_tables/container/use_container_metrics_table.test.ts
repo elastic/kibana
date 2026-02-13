@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+import {
+  ECS_CONTAINER_CPU_USAGE_LIMIT_PCT,
+  ECS_CONTAINER_MEMORY_USAGE_BYTES,
+  SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION,
+  SEMCONV_DOCKER_CONTAINER_MEMORY_USAGE_TOTAL,
+  SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION,
+  SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION,
+} from './constants';
 import { useContainerMetricsTable } from './use_container_metrics_table';
 import { useInfrastructureNodeMetrics } from '../shared';
 import { renderHook } from '@testing-library/react';
@@ -27,6 +35,7 @@ describe('useContainerMetricsTable hook', () => {
     useInfrastructureNodeMetricsMock.mockReturnValue({
       isLoading: true,
       data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
     });
 
     renderHook(() =>
@@ -37,7 +46,7 @@ describe('useContainerMetricsTable hook', () => {
       })
     );
 
-    const kueryWithEventModuleFilter = `event.dataset: "kubernetes.container" AND ${kuery}`;
+    const kueryWithEventModuleFilter = `event.dataset: "kubernetes.container" AND (${kuery})`;
 
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -54,6 +63,7 @@ describe('useContainerMetricsTable hook', () => {
     useInfrastructureNodeMetricsMock.mockReturnValue({
       isLoading: true,
       data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
     });
 
     renderHook(() =>
@@ -68,10 +78,10 @@ describe('useContainerMetricsTable hook', () => {
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          kuery,
+          kuery: `(${kuery})`,
           metrics: expect.arrayContaining([
-            expect.objectContaining({ field: 'metrics.container.cpu.utilization' }),
-            expect.objectContaining({ field: 'metrics.container.memory.usage.total' }),
+            expect.objectContaining({ field: SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION }),
+            expect.objectContaining({ field: SEMCONV_DOCKER_CONTAINER_MEMORY_USAGE_TOTAL }),
           ]),
         }),
       })
@@ -84,6 +94,7 @@ describe('useContainerMetricsTable hook', () => {
     useInfrastructureNodeMetricsMock.mockReturnValue({
       isLoading: true,
       data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
     });
 
     renderHook(() =>
@@ -99,13 +110,13 @@ describe('useContainerMetricsTable hook', () => {
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
         metricsExplorerOptions: expect.objectContaining({
-          kuery,
+          kuery: `(${kuery})`,
           metrics: expect.arrayContaining([
             expect.objectContaining({
-              field: 'metrics.k8s.container.cpu_limit_utilization',
+              field: SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION,
             }),
             expect.objectContaining({
-              field: 'metrics.k8s.container.memory_limit_utilization',
+              field: SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION,
             }),
           ]),
         }),
@@ -119,6 +130,7 @@ describe('useContainerMetricsTable hook', () => {
     useInfrastructureNodeMetricsMock.mockReturnValue({
       isLoading: true,
       data: { state: 'empty-indices' },
+      metricIndices: 'test-index',
     });
 
     renderHook(() =>
@@ -130,7 +142,7 @@ describe('useContainerMetricsTable hook', () => {
       })
     );
 
-    const kueryWithEventModuleFilter = `event.dataset: "kubernetes.container" AND ${kuery}`;
+    const kueryWithEventModuleFilter = `event.dataset: "kubernetes.container" AND (${kuery})`;
 
     expect(useInfrastructureNodeMetricsMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -138,10 +150,10 @@ describe('useContainerMetricsTable hook', () => {
           kuery: kueryWithEventModuleFilter,
           metrics: expect.arrayContaining([
             expect.objectContaining({
-              field: 'kubernetes.container.cpu.usage.limit.pct',
+              field: ECS_CONTAINER_CPU_USAGE_LIMIT_PCT,
             }),
             expect.objectContaining({
-              field: 'kubernetes.container.memory.usage.bytes',
+              field: ECS_CONTAINER_MEMORY_USAGE_BYTES,
             }),
           ]),
         }),

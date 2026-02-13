@@ -7,67 +7,75 @@
 
 import type { MetricsQueryOptions, UseNodeMetricsTableOptions } from '../shared';
 import { createMetricByFieldLookup, makeUnpackMetric, metricsToApiOptions } from '../shared';
+import {
+  ECS_CONTAINER_CPU_USAGE_LIMIT_PCT,
+  ECS_CONTAINER_MEMORY_USAGE_BYTES,
+  SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION,
+  SEMCONV_DOCKER_CONTAINER_MEMORY_USAGE_TOTAL,
+  SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION,
+  SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION,
+} from './constants';
 
 export type ContainerSemconvRuntime = 'k8s' | 'docker';
 
 // --- ECS (Elastic Common Schema) ---
 type ContainerMetricsFieldEcs =
-  | 'kubernetes.container.cpu.usage.limit.pct'
-  | 'kubernetes.container.memory.usage.bytes';
+  | typeof ECS_CONTAINER_CPU_USAGE_LIMIT_PCT
+  | typeof ECS_CONTAINER_MEMORY_USAGE_BYTES;
 
 const containerMetricsQueryConfigEcs: MetricsQueryOptions<ContainerMetricsFieldEcs> = {
   sourceFilter: `event.dataset: "kubernetes.container"`,
   groupByField: 'container.id',
   metricsMap: {
-    'kubernetes.container.cpu.usage.limit.pct': {
+    [ECS_CONTAINER_CPU_USAGE_LIMIT_PCT]: {
       aggregation: 'avg',
-      field: 'kubernetes.container.cpu.usage.limit.pct',
+      field: ECS_CONTAINER_CPU_USAGE_LIMIT_PCT,
     },
-    'kubernetes.container.memory.usage.bytes': {
+    [ECS_CONTAINER_MEMORY_USAGE_BYTES]: {
       aggregation: 'avg',
-      field: 'kubernetes.container.memory.usage.bytes',
+      field: ECS_CONTAINER_MEMORY_USAGE_BYTES,
     },
   },
 };
 
 // --- SemConv Docker (generic container metrics) ---
 type ContainerMetricsFieldSemconvDocker =
-  | 'metrics.container.cpu.utilization'
-  | 'metrics.container.memory.usage.total';
+  | typeof SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION
+  | typeof SEMCONV_DOCKER_CONTAINER_MEMORY_USAGE_TOTAL;
 
 const containerMetricsQueryConfigSemconvDocker: MetricsQueryOptions<ContainerMetricsFieldSemconvDocker> =
   {
     sourceFilter: '',
     groupByField: 'container.id',
     metricsMap: {
-      'metrics.container.cpu.utilization': {
+      [SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION]: {
         aggregation: 'avg',
-        field: 'metrics.container.cpu.utilization',
+        field: SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION,
       },
-      'metrics.container.memory.usage.total': {
+      [SEMCONV_DOCKER_CONTAINER_MEMORY_USAGE_TOTAL]: {
         aggregation: 'avg',
-        field: 'metrics.container.memory.usage.total',
+        field: SEMCONV_DOCKER_CONTAINER_MEMORY_USAGE_TOTAL,
       },
     },
   };
 
 // --- SemConv K8s (Kubernetes container metrics) ---
 type ContainerMetricsFieldSemconvK8s =
-  | 'metrics.k8s.container.cpu_limit_utilization'
-  | 'metrics.k8s.container.memory_limit_utilization';
+  | typeof SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION
+  | typeof SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION;
 
 const containerMetricsQueryConfigSemconvK8s: MetricsQueryOptions<ContainerMetricsFieldSemconvK8s> =
   {
     sourceFilter: '',
     groupByField: 'container.id',
     metricsMap: {
-      'metrics.k8s.container.cpu_limit_utilization': {
+      [SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION]: {
         aggregation: 'avg',
-        field: 'metrics.k8s.container.cpu_limit_utilization',
+        field: SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION,
       },
-      'metrics.k8s.container.memory_limit_utilization': {
+      [SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION]: {
         aggregation: 'avg',
-        field: 'metrics.k8s.container.memory_limit_utilization',
+        field: SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION,
       },
     },
   };

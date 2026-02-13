@@ -31,7 +31,7 @@ interface MetricsNodeDetailsLinkProps {
   timerange: { from: string; to: string };
   schema?: DataSchemaFormat;
   /** Infrastructure/metrics index pattern from settings; used for Discover ES|QL when schema is semconv. */
-  metricIndices?: string;
+  metricsIndices?: string;
 }
 
 /** Build an ES|QL query that filters by the given node type and entity id. */
@@ -57,7 +57,7 @@ export const MetricsNodeDetailsLink = ({
   nodeType,
   timerange,
   schema,
-  metricIndices,
+  metricsIndices,
 }: MetricsNodeDetailsLinkProps) => {
   const { share } = useKibanaContextForPlugin().services;
   const { getAssetDetailUrl } = useAssetDetailsRedirect();
@@ -70,7 +70,7 @@ export const MetricsNodeDetailsLink = ({
       const discoverParams = {
         timeRange: { from: timerange.from, to: timerange.to },
         query: {
-          esql: getDiscoverEsqlQueryForNode(nodeType, id, metricIndices ?? DEFAULT_METRICS_INDEX),
+          esql: getDiscoverEsqlQueryForNode(nodeType, id, metricsIndices ?? DEFAULT_METRICS_INDEX),
         },
       };
       const href = discoverLocator?.getRedirectUrl(discoverParams) ?? '#';
@@ -105,7 +105,7 @@ export const MetricsNodeDetailsLink = ({
     id,
     label,
     schema,
-    metricIndices,
+    metricsIndices,
     getAssetDetailUrl,
   ]);
 

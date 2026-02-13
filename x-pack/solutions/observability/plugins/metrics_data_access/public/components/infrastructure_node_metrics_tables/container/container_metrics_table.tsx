@@ -25,6 +25,10 @@ import {
 } from '../shared';
 import type { DataSchemaFormat } from '../../../../common';
 import type { ContainerSemconvRuntime } from './container_metrics_configs';
+import {
+  SEMCONV_CONTAINER_CPU_LIMIT_UTILIZATION_DISPLAY,
+  SEMCONV_CONTAINER_MEMORY_LIMIT_UTILIZATION_DISPLAY,
+} from './constants';
 import type { ContainerNodeMetricsRow } from './use_container_metrics_table';
 
 export interface ContainerMetricsTableProps {
@@ -38,7 +42,7 @@ export interface ContainerMetricsTableProps {
     to: string;
   };
   schema?: DataSchemaFormat;
-  metricIndices?: string;
+  metricsIndices?: string;
   /** When schema is 'semconv', used to choose correct unit for memory (e.g. % for k8s, MB for docker). */
   semconvRuntime?: ContainerSemconvRuntime;
 }
@@ -52,13 +56,13 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
     sortState,
     timerange,
     schema,
-    metricIndices,
+    metricsIndices,
     semconvRuntime,
   } = props;
 
   const columns = useMemo(
-    () => containerNodeColumns(timerange, schema, metricIndices, semconvRuntime),
-    [timerange, schema, metricIndices, semconvRuntime]
+    () => containerNodeColumns({ timerange, schema, metricsIndices, semconvRuntime }),
+    [timerange, schema, metricsIndices, semconvRuntime]
   );
 
   const sortSettings: EuiTableSortingType<ContainerNodeMetricsRow> = {
@@ -157,7 +161,7 @@ function containerNodeColumns({
             nodeType={'container'}
             timerange={timerange}
             schema={schema}
-            metricIndices={metricIndices}
+            metricsIndices={metricsIndices}
           />
         );
       },
@@ -182,7 +186,7 @@ function containerNodeColumns({
                     defaultMessage:
                       '{metricName} is optional and may not appear for all containers. Visibility depends on your container metrics collection setup.',
                     values: {
-                      metricName: 'metrics.container.cpu_limit_utilization',
+                      metricName: SEMCONV_CONTAINER_CPU_LIMIT_UTILIZATION_DISPLAY,
                     },
                   }
                 )}
@@ -217,7 +221,7 @@ function containerNodeColumns({
                     defaultMessage:
                       '{metricName} is optional and may not appear for all containers. Visibility depends on your container metrics collection setup.',
                     values: {
-                      metricName: 'metrics.container.memory_limit_utilization',
+                      metricName: SEMCONV_CONTAINER_MEMORY_LIMIT_UTILIZATION_DISPLAY,
                     },
                   }
                 )}

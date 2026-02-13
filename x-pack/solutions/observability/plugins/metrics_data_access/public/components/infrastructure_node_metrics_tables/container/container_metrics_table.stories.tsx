@@ -66,28 +66,28 @@ export default {
 const loadedContainers: ContainerNodeMetricsRow[] = [
   {
     id: 'gke-edge-oblt-pool-1-9a60016d-lgg1',
-    averageCpuUsagePercent: 99,
-    averageMemoryUsageMegabytes: 34,
+    averageCpuUsage: 99,
+    averageMemoryUsage: 34,
   },
   {
     id: 'gke-edge-oblt-pool-1-9a60016d-lgg2',
-    averageCpuUsagePercent: 72,
-    averageMemoryUsageMegabytes: 68,
+    averageCpuUsage: 72,
+    averageMemoryUsage: 68,
   },
   {
     id: 'gke-edge-oblt-pool-1-9a60016d-lgg3',
-    averageCpuUsagePercent: 54,
-    averageMemoryUsageMegabytes: 132,
+    averageCpuUsage: 54,
+    averageMemoryUsage: 132,
   },
   {
     id: 'gke-edge-oblt-pool-1-9a60016d-lgg4',
-    averageCpuUsagePercent: 34,
-    averageMemoryUsageMegabytes: 264,
+    averageCpuUsage: 34,
+    averageMemoryUsage: 264,
   },
   {
     id: 'gke-edge-oblt-pool-1-9a60016d-lgg5',
-    averageCpuUsagePercent: 13,
-    averageMemoryUsageMegabytes: 512,
+    averageCpuUsage: 13,
+    averageMemoryUsage: 512,
   },
 ];
 

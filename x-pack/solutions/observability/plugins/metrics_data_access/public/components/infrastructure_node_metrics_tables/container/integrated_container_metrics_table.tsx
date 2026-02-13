@@ -29,7 +29,7 @@ function HookedContainerMetricsTable({
     <ContainerMetricsTable
       {...containerMetricsTableProps}
       schema={schema}
-      metricIndices={containerMetricsTableProps.metricIndices}
+      metricsIndices={containerMetricsTableProps.metricIndices}
       semconvRuntime={semconvRuntime}
     />
   );

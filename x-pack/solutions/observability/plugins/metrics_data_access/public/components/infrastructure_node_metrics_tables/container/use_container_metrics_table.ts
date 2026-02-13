@@ -19,6 +19,14 @@ import {
   unpackMetricSemconvK8s,
   type ContainerSemconvRuntime,
 } from './container_metrics_configs';
+import {
+  ECS_CONTAINER_CPU_USAGE_LIMIT_PCT,
+  ECS_CONTAINER_MEMORY_USAGE_BYTES,
+  SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION,
+  SEMCONV_DOCKER_CONTAINER_MEMORY_USAGE_TOTAL,
+  SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION,
+  SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION,
+} from './constants';
 
 export type { ContainerSemconvRuntime };
 export { metricByFieldEcs, metricByField } from './container_metrics_configs';
@@ -30,8 +38,8 @@ export interface UseContainerMetricsTableOptions extends UseNodeMetricsTableOpti
 
 export interface ContainerNodeMetricsRow {
   id: string;
-  averageCpuUsagePercent: number | null;
-  averageMemoryUsageMegabytes: number | null;
+  averageCpuUsage: number | null;
+  averageMemoryUsage: number | null;
 }
 
 type UnpackMetricsFn = (row: MetricsExplorerRow) => Omit<ContainerNodeMetricsRow, 'id'>;
@@ -43,37 +51,44 @@ function getUnpackMetricsForSchema(
   if (schema === 'semconv') {
     if (semconvRuntime === 'k8s') {
       return (row) => {
+        // semconv k8s unpack metrics
         const cpuUtilization = unpackMetricSemconvK8s(
           row,
-          'metrics.k8s.container.cpu_limit_utilization'
+          SEMCONV_K8S_CONTAINER_CPU_LIMIT_UTILIZATION
         );
         const memoryUsage = unpackMetricSemconvK8s(
           row,
-          'metrics.k8s.container.memory_limit_utilization'
+          SEMCONV_K8S_CONTAINER_MEMORY_LIMIT_UTILIZATION
         );
         return {
-          averageCpuUsagePercent:
-            cpuUtilization !== null ? scaleUpPercentage(cpuUtilization) : null,
-          averageMemoryUsageMegabytes: memoryUsage !== null ? scaleUpPercentage(memoryUsage) : null,
+          averageCpuUsage: cpuUtilization !== null ? scaleUpPercentage(cpuUtilization) : null,
+          averageMemoryUsage: memoryUsage !== null ? scaleUpPercentage(memoryUsage) : null,
         };
       };
     }
     return (row) => {
-      const cpuUtilization = unpackMetricSemconvDocker(row, 'metrics.container.cpu.utilization');
-      const memoryBytes = unpackMetricSemconvDocker(row, 'metrics.container.memory.usage.total');
+      // semconv docker unpack metrics
+      const cpuUtilization = unpackMetricSemconvDocker(
+        row,
+        SEMCONV_DOCKER_CONTAINER_CPU_UTILIZATION
+      );
+      const memoryBytes = unpackMetricSemconvDocker(
+        row,
+        SEMCONV_DOCKER_CONTAINER_MEMORY_USAGE_TOTAL
+      );
       return {
-        averageCpuUsagePercent: cpuUtilization !== null ? scaleUpPercentage(cpuUtilization) : null,
-        averageMemoryUsageMegabytes:
-          memoryBytes !== null ? Math.floor(memoryBytes / 1000000) : null,
+        averageCpuUsage: cpuUtilization !== null ? scaleUpPercentage(cpuUtilization) : null,
+        averageMemoryUsage: memoryBytes !== null ? Math.floor(memoryBytes / 1_000_000) : null,
       };
     };
   }
   return (row) => {
-    const rawCpu = unpackMetricEcs(row, 'kubernetes.container.cpu.usage.limit.pct');
-    const memoryBytes = unpackMetricEcs(row, 'kubernetes.container.memory.usage.bytes');
+    // ecs unpack metrics
+    const rawCpu = unpackMetricEcs(row, ECS_CONTAINER_CPU_USAGE_LIMIT_PCT);
+    const memoryBytes = unpackMetricEcs(row, ECS_CONTAINER_MEMORY_USAGE_BYTES);
     return {
-      averageCpuUsagePercent: rawCpu !== null ? scaleUpPercentage(rawCpu) : null,
-      averageMemoryUsageMegabytes: memoryBytes !== null ? Math.floor(memoryBytes / 1000000) : null,
+      averageCpuUsage: rawCpu !== null ? scaleUpPercentage(rawCpu) : null,
+      averageMemoryUsage: memoryBytes !== null ? Math.floor(memoryBytes / 1_000_000) : null,
     };
   };
 }
@@ -87,7 +102,7 @@ export function useContainerMetricsTable({
 }: UseContainerMetricsTableOptions) {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [sortState, setSortState] = useState<SortState<ContainerNodeMetricsRow>>({
-    field: 'averageCpuUsagePercent',
+    field: 'averageCpuUsage',
     direction: 'desc',
   });
 
@@ -139,51 +154,51 @@ function seriesToContainerNodeMetricsRow(
 function rowWithoutMetrics(id: string): ContainerNodeMetricsRow {
   return {
     id,
-    averageCpuUsagePercent: null,
-    averageMemoryUsageMegabytes: null,
+    averageCpuUsage: null,
+    averageMemoryUsage: null,
   };
 }
 
 function calculateMetricAverages(rows: MetricsExplorerRow[], unpackMetrics: UnpackMetricsFn) {
-  const { averageCpuUsagePercentValues, averageMemoryUsageMegabytesValues } = collectMetricValues(
+  const { averageCpuUsageValues, averageMemoryUsageValues } = collectMetricValues(
     rows,
     unpackMetrics
   );
 
-  let averageCpuUsagePercent: number | null = null;
-  if (averageCpuUsagePercentValues.length !== 0) {
-    averageCpuUsagePercent = averageOfValues(averageCpuUsagePercentValues);
+  let averageCpuUsage: number | null = null;
+  if (averageCpuUsageValues.length !== 0) {
+    averageCpuUsage = averageOfValues(averageCpuUsageValues);
   }
 
-  let averageMemoryUsageMegabytes: number | null = null;
-  if (averageMemoryUsageMegabytesValues.length !== 0) {
-    averageMemoryUsageMegabytes = Math.floor(averageOfValues(averageMemoryUsageMegabytesValues));
+  let averageMemoryUsage: number | null = null;
+  if (averageMemoryUsageValues.length !== 0) {
+    averageMemoryUsage = Math.floor(averageOfValues(averageMemoryUsageValues));
   }
 
   return {
-    averageCpuUsagePercent,
-    averageMemoryUsageMegabytes,
+    averageCpuUsage,
+    averageMemoryUsage,
   };
 }
 
 function collectMetricValues(rows: MetricsExplorerRow[], unpackMetrics: UnpackMetricsFn) {
-  const averageCpuUsagePercentValues: number[] = [];
-  const averageMemoryUsageMegabytesValues: number[] = [];
+  const averageCpuUsageValues: number[] = [];
+  const averageMemoryUsageValues: number[] = [];
 
   rows.forEach((row) => {
-    const { averageCpuUsagePercent, averageMemoryUsageMegabytes } = unpackMetrics(row);
+    const { averageCpuUsage, averageMemoryUsage: averageMemoryUsageMegabytes } = unpackMetrics(row);
 
-    if (averageCpuUsagePercent !== null) {
-      averageCpuUsagePercentValues.push(averageCpuUsagePercent);
+    if (averageCpuUsage !== null) {
+      averageCpuUsageValues.push(averageCpuUsage);
     }
 
     if (averageMemoryUsageMegabytes !== null) {
-      averageMemoryUsageMegabytesValues.push(averageMemoryUsageMegabytes);
+      averageMemoryUsageValues.push(averageMemoryUsageMegabytes);
     }
   });
 
   return {
-    averageCpuUsagePercentValues,
-    averageMemoryUsageMegabytesValues,
+    averageCpuUsageValues,
+    averageMemoryUsageValues,
   };
 }
