@@ -35,7 +35,7 @@ export type SkillsDirectoryStructure = Directory<{
       alerts: FileDirectory<{
         rules: FileDirectory;
       }>;
-      entities: FileDirectory;
+      entities: FileDirectory<{}>;
     }>;
     search: FileDirectory<{}>;
   }>;

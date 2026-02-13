@@ -10,6 +10,7 @@ import type {
   ScopedRunnerRunToolsParams,
   AgentBuilderToolEvent,
   ToolHandlerFn,
+  HooksServiceStart,
 } from '@kbn/agent-builder-server';
 import type { ScopedRunnerRunInternalToolParams } from '@kbn/agent-builder-server/runner';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
@@ -23,6 +24,7 @@ import {
 import { RunnerManager } from './runner';
 import { runTool, runInternalTool } from './run_tool';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import { HookLifecycle } from '@kbn/agent-builder-common';
 
 jest.mock('@kbn/agent-builder-server/tools/utils', () => ({
   ...jest.requireActual('@kbn/agent-builder-server/tools/utils'),
@@ -37,10 +39,12 @@ describe('runTool', () => {
   let registry: ToolRegistryMock;
   let tool: MockedTool;
   let toolHandler: jest.MockedFunction<ToolHandlerFn>;
+  let hooksRunMock: jest.MockedFunction<HooksServiceStart['run']>;
 
   beforeEach(() => {
     runnerDeps = createScopedRunnerDepsMock();
     runnerManager = new RunnerManager(runnerDeps);
+    hooksRunMock = runnerDeps.hooks.run as jest.MockedFunction<HooksServiceStart['run']>;
 
     getToolResultIdMock.mockReturnValue('some-result-id');
 
@@ -217,6 +221,79 @@ describe('runTool', () => {
         message: 'some progress',
       },
     });
+  });
+
+  it('when hooks are present: beforeToolCall is called and updated toolParams are passed to the tool handler', async () => {
+    hooksRunMock.mockImplementation(async (lifecycle, context) =>
+      lifecycle === HookLifecycle.beforeToolCall
+        ? { ...context, toolParams: { foo: 'from-beforeToolCall-hook' } }
+        : context
+    );
+
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar' },
+    };
+
+    await runTool({
+      toolExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    expect(hooksRunMock).toHaveBeenCalledWith(
+      HookLifecycle.beforeToolCall,
+      expect.objectContaining({
+        toolId: 'test-tool',
+        toolParams: { foo: 'bar' },
+        source: 'unknown',
+      })
+    );
+    expect(toolHandler).toHaveBeenCalledWith(
+      { foo: 'from-beforeToolCall-hook' },
+      expect.any(Object)
+    );
+  });
+
+  it('when hooks are present: afterToolCall is called and its return is used as the result', async () => {
+    const modifiedToolReturn = {
+      results: [
+        {
+          tool_result_id: 'some-result-id',
+          type: ToolResultType.other,
+          data: { from: 'afterToolCall-hook' },
+        },
+      ],
+    };
+    hooksRunMock.mockImplementation(async (lifecycle, context) =>
+      lifecycle === HookLifecycle.afterToolCall
+        ? { ...context, toolReturn: modifiedToolReturn }
+        : context
+    );
+
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar' },
+    };
+
+    toolHandler.mockReturnValue({
+      results: [{ type: ToolResultType.other, data: { original: true } }],
+    });
+
+    const results = await runTool({
+      toolExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    expect(results).toEqual(modifiedToolReturn);
+    expect(hooksRunMock).toHaveBeenCalledWith(
+      HookLifecycle.afterToolCall,
+      expect.objectContaining({
+        toolId: 'test-tool',
+        toolReturn: expect.objectContaining({
+          results: expect.arrayContaining([expect.objectContaining({ data: { original: true } })]),
+        }),
+      })
+    );
   });
 });
 
