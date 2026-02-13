@@ -92,7 +92,7 @@ export const MetricInsightsFlyout = ({ metric, esqlQuery, onClose }: MetricInsig
         data-test-subj="metricsExperienceFlyout"
         aria-labelledby={metricFlyoutTitleId}
         onKeyDown={onKeyDown}
-        ownFocus={false} // TODO: Workaround to avoid EuiFlyout emotion bug
+        ownFocus
         minWidth={minWidth}
         maxWidth={maxWidth}
         resizable={true}
