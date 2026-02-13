@@ -10,7 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useForm, FormProvider } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { GroupFieldSelect } from './group_by_select';
+import { GroupFieldSelect } from './group_field_select';
 import type { FormValues } from '../types';
 import { useQueryColumns } from '../hooks/use_query_columns';
 

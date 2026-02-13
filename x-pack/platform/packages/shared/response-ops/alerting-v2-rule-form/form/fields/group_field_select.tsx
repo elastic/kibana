@@ -44,19 +44,21 @@ export const GroupFieldSelect: React.FC<GroupBySelectProps> = ({ services }) => 
   }, [columnNames, currentGroupingKey, setValue]);
 
   return (
-    <EuiFormRow
-      id={groupByRowId}
-      label={i18n.translate('xpack.alertingV2.ruleForm.groupingKeyLabel', {
-        defaultMessage: 'Group Fields',
-      })}
-    >
-      <Controller
-        name="groupingKey"
-        control={control}
-        render={({ field }) => {
-          const selectedOptions = (field.value ?? []).map((val) => ({ label: val }));
+    <Controller
+      name="groupingKey"
+      control={control}
+      render={({ field, fieldState: { error } }) => {
+        const selectedOptions = (field.value ?? []).map((val) => ({ label: val }));
 
-          return (
+        return (
+          <EuiFormRow
+            id={groupByRowId}
+            label={i18n.translate('xpack.alertingV2.ruleForm.groupingKeyLabel', {
+              defaultMessage: 'Group Fields',
+            })}
+            isInvalid={!!error}
+            error={error?.message}
+          >
             <EuiComboBox
               id={groupByRowId}
               options={options}
@@ -66,10 +68,11 @@ export const GroupFieldSelect: React.FC<GroupBySelectProps> = ({ services }) => 
                 field.onChange([...(field.value ?? []), searchValue]);
               }}
               isClearable={true}
+              isInvalid={!!error}
             />
-          );
-        }}
-      />
-    </EuiFormRow>
+          </EuiFormRow>
+        );
+      }}
+    />
   );
 };

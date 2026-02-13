@@ -47,26 +47,28 @@ export const KindField: React.FC = () => {
   const { control } = useFormContext<FormValues>();
 
   return (
-    <EuiFormRow
-      label={i18n.translate('xpack.alertingV2.ruleForm.kindLabel', {
-        defaultMessage: 'Rule kind',
-      })}
-      helpText={i18n.translate('xpack.alertingV2.ruleForm.kindHelpText', {
-        defaultMessage: 'Choose whether this rule creates monitors or alerts.',
-      })}
-    >
-      <Controller
-        name="kind"
-        control={control}
-        render={({ field: { value, onChange, ref } }) => {
-          const selectedId = value ? kindToSelection[value] : 'monitor';
+    <Controller
+      name="kind"
+      control={control}
+      render={({ field: { value, onChange, ref }, fieldState: { error } }) => {
+        const selectedId = value ? kindToSelection[value] : 'monitor';
 
-          const handleChange = (id: string) => {
-            const selection = id as KindSelection;
-            onChange(selectionToKind[selection]);
-          };
+        const handleChange = (id: string) => {
+          const selection = id as KindSelection;
+          onChange(selectionToKind[selection]);
+        };
 
-          return (
+        return (
+          <EuiFormRow
+            label={i18n.translate('xpack.alertingV2.ruleForm.kindLabel', {
+              defaultMessage: 'Rule kind',
+            })}
+            helpText={i18n.translate('xpack.alertingV2.ruleForm.kindHelpText', {
+              defaultMessage: 'Choose whether this rule creates monitors or alerts.',
+            })}
+            isInvalid={!!error}
+            error={error?.message}
+          >
             <div ref={ref}>
               <EuiButtonGroup
                 legend={i18n.translate('xpack.alertingV2.ruleForm.kindField.legend', {
@@ -81,9 +83,9 @@ export const KindField: React.FC = () => {
                 data-test-subj="kindField"
               />
             </div>
-          );
-        }}
-      />
-    </EuiFormRow>
+          </EuiFormRow>
+        );
+      }}
+    />
   );
 };

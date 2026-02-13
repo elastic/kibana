@@ -52,27 +52,30 @@ export const DescriptionField: React.FC = () => {
   }
 
   return (
-    <EuiFormRow
-      id={DESCRIPTION_ROW_ID}
-      label={i18n.translate('xpack.alertingV2.ruleForm.descriptionLabel', {
-        defaultMessage: 'Description',
-      })}
-    >
-      <Controller
-        name="description"
-        control={control}
-        render={({ field: { ref, ...field } }) => (
+    <Controller
+      name="description"
+      control={control}
+      render={({ field: { ref, ...field }, fieldState: { error } }) => (
+        <EuiFormRow
+          id={DESCRIPTION_ROW_ID}
+          label={i18n.translate('xpack.alertingV2.ruleForm.descriptionLabel', {
+            defaultMessage: 'Description',
+          })}
+          isInvalid={!!error}
+          error={error?.message}
+        >
           <EuiTextArea
             {...field}
             inputRef={ref}
             rows={2}
+            isInvalid={!!error}
             placeholder={i18n.translate('xpack.alertingV2.ruleForm.descriptionPlaceholder', {
               defaultMessage: 'Add an optional description for this rule...',
             })}
             data-test-subj="ruleDescriptionInput"
           />
-        )}
-      />
-    </EuiFormRow>
+        </EuiFormRow>
+      )}
+    />
   );
 };
