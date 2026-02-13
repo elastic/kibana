@@ -54,6 +54,7 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
               body: error as EntityNotFoundError,
             });
           }
+
           logger.error(error);
           throw error;
         }

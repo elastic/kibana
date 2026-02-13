@@ -12,15 +12,17 @@ import { EntityType } from '../../../common/domain/definitions/entity_schema';
 import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
-import { EntityStoreNotInstalledError } from '../../domain/errors';
+import { BadCRUDRequestError, EntityStoreNotInstalledError } from '../../domain/errors';
 import { Entity } from '../../../common/domain/definitions/entity.gen';
 
-const bodySchema = z.array(
-  z.object({
-    type: EntityType,
-    document: Entity,
-  })
-);
+const bodySchema = z.object({
+  entities: z.array(
+    z.object({
+      type: EntityType,
+      document: Entity,
+    })
+  ),
+});
 
 const querySchema = z.object({
   force: BooleanFromString.optional().default(false),
@@ -56,8 +58,12 @@ export function registerCRUDUpsertBulk(router: EntityStorePluginRouter) {
         }
 
         try {
-          await crudClient.upsertEntitiesBulk(req.body, req.query.force);
+          await crudClient.upsertEntitiesBulk(req.body.entities, req.query.force);
         } catch (error) {
+          if (error instanceof BadCRUDRequestError) {
+            return res.badRequest({ body: error as BadCRUDRequestError });
+          }
+
           logger.error(error);
           throw error;
         }

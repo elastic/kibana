@@ -8,6 +8,8 @@
 import type { EntityType, EntityField } from './entity_schema';
 import { oldestValue, newestValue } from './field_retention_operations';
 
+export const ENTITY_ID_FIELD = 'entity.id';
+
 // Copied from x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/entity_definitions/entity_descriptions/common.ts
 
 export const getCommonFieldDescriptions = (

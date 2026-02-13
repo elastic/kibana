@@ -15,6 +15,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { createHash } from 'crypto';
 import { unset } from 'lodash';
 import { getFlattenedObject } from '@kbn/std';
+import { ENTITY_ID_FIELD } from '../../common/domain/definitions/common_fields';
 import { getLatestEntitiesIndexName } from './assets/latest_index';
 import { BadCRUDRequestError, EntityNotFoundError } from './errors';
 import type { Entity } from '../../common/domain/definitions/entity.gen';
@@ -159,7 +160,7 @@ function getFieldDescriptions(
   const descriptions: Record<string, EntityField & { value: unknown }> = {};
 
   for (const [key, value] of Object.entries(flatProps)) {
-    if (description.identityField.requiresOneOfFields.includes(key)) {
+    if (key === ENTITY_ID_FIELD || description.identityField.requiresOneOfFields.includes(key)) {
       continue;
     }
 
