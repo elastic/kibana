@@ -98,8 +98,10 @@ describe('ml_executor', () => {
       isAlertSuppressionActive: true,
       scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
-    expect(ruleExecutionLogger.debug).toHaveBeenCalled();
-    expect(ruleExecutionLogger.debug.mock.calls[0][0]).toContain('ML jobs are not started');
+    expect(ruleExecutionLogger.warn).toHaveBeenCalled();
+    expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
+      'Machine learning job(s) are not started'
+    );
     expect(result.warningMessages.length).toEqual(1);
   });
 
@@ -120,8 +122,10 @@ describe('ml_executor', () => {
       isAlertSuppressionActive: true,
       scheduleNotificationResponseActionsService: mockScheduledNotificationResponseAction,
     });
-    expect(ruleExecutionLogger.debug).toHaveBeenCalled();
-    expect(ruleExecutionLogger.debug.mock.calls[0][0]).toContain('ML jobs are not started');
+    expect(ruleExecutionLogger.warn).toHaveBeenCalled();
+    expect(ruleExecutionLogger.warn.mock.calls[0][0]).toContain(
+      'Machine learning job(s) are not started'
+    );
     expect(result.warningMessages.length).toEqual(1);
   });
 

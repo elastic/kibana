@@ -18,12 +18,13 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CATEGORY_ORDER, useSiemReadinessApi } from '@kbn/siem-readiness';
+import { useSiemReadinessApi } from '@kbn/siem-readiness';
 import type { PipelineStats } from '@kbn/siem-readiness';
 import {
   CategoryAccordionTable,
   type CategoryData,
 } from '../../components/category_accordion_table';
+import type { SiemReadinessTabActiveCategoriesProps } from '../../components/configuration_panel';
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
 import { useBasePath } from '../../../../common/lib/kibana';
 import { ContinuityWarningPrompt } from './continuity_warning_prompt';
@@ -60,7 +61,9 @@ export const getIngestPipelineUrl = (basePath: string, pipelineName: string): st
   )}`;
 };
 
-export const ContinuityTab: React.FC = () => {
+export const ContinuityTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
+  activeCategories,
+}) => {
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
   const { getReadinessCategories, getReadinessPipelines } = useSiemReadinessApi();
@@ -113,9 +116,9 @@ export const ContinuityTab: React.FC = () => {
       });
     });
 
-    // Build result in category order, sorted by count descending
+    // Build result in category order, filtered by active categories
     const result: Array<CategoryData<PipelineInfoWithStatus>> = [];
-    CATEGORY_ORDER.forEach((category) => {
+    activeCategories.forEach((category) => {
       const items = categoryPipelinesMap.get(category);
       if (!items) return;
 
@@ -126,7 +129,7 @@ export const ContinuityTab: React.FC = () => {
     });
 
     return result;
-  }, [pipelinesData, indexToCategoryMap]);
+  }, [pipelinesData, indexToCategoryMap, activeCategories]);
 
   // Check if any pipeline has failures
   const hasDocCriticalFailures = useMemo(() => {
@@ -363,6 +366,34 @@ export const ContinuityTab: React.FC = () => {
               defaultMessage:
                 'No ingest pipeline statistics were found. This could mean no data has been ingested yet.',
             })}
+          </p>
+        </EuiCallOut>
+      </>
+    );
+  }
+
+  if (categorizedPipelines.length === 0) {
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.securitySolution.siemReadiness.continuity.noCategoryData.title',
+            {
+              defaultMessage: 'No data available',
+            }
+          )}
+          color="primary"
+          iconType="iInCircle"
+          announceOnMount
+        >
+          <p>
+            {i18n.translate(
+              'xpack.securitySolution.siemReadiness.continuity.noCategoryData.description',
+              {
+                defaultMessage: 'No pipeline data found for the selected categories.',
+              }
+            )}
           </p>
         </EuiCallOut>
       </>
