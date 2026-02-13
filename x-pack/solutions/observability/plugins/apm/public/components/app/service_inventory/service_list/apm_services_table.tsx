@@ -536,7 +536,7 @@ export function ApmServicesTable({
         params: {
           kuery,
           serviceName: item.serviceName,
-          transactionType: item.transactionType,
+          transactionType: indexType === 'traces' ? item.transactionType : undefined,
           environment,
         },
         indexSettings: indexSettingsData.apmIndexSettings,
