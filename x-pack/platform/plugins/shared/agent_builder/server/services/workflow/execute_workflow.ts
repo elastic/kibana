@@ -6,8 +6,10 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { safeJsonStringify } from '@kbn/std';
 import { ExecutionStatus as WorkflowExecutionStatus } from '@kbn/workflows/types/v1';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import {
   getExecutionState,
   type WorkflowExecutionState,
@@ -58,56 +60,80 @@ export const executeWorkflow = async ({
       error: `Workflow '${workflowId}' has validation errors and cannot be executed.`,
     };
   }
-  if (!workflow.definition) {
+  const definition = workflow.definition;
+  if (!definition) {
     return {
       success: false,
       error: `Workflow '${workflowId}' has no definition and cannot be executed.`,
     };
   }
 
-  const executionId = await workflowApi.runWorkflow(
-    {
-      id: workflow.id,
-      name: workflow.name,
-      enabled: workflow.enabled,
-      definition: workflow.definition,
-      yaml: workflow.yaml,
-    },
-    spaceId,
-    workflowParams,
-    request
-  );
-
-  const waitLimit = Date.now() + completionTimeoutSec * 1000;
-  await waitMs(INITIAL_WAIT_MS);
-
-  let execution: WorkflowExecutionState | null | undefined;
-  do {
-    try {
-      execution = await getExecutionState({ executionId, spaceId, workflowApi });
-
-      const shouldReturn = waitForCompletion
-        ? execution && finalStatuses.includes(execution.status)
-        : execution;
-
-      if (shouldReturn && execution) {
-        return { success: true, execution };
-      }
-    } catch (e) {
-      // trap - we just keep waiting until timeout
-    }
-
-    await waitMs(CHECK_INTERVAL_MS);
-  } while (Date.now() < waitLimit);
-
-  if (execution) {
-    return { success: true, execution };
-  }
-
-  return {
-    success: false,
-    error: `Workflow '${workflowId}' executed but execution not found after ${completionTimeoutSec}s.`,
+  const workflowForExecution = {
+    id: workflow.id,
+    name: workflow.name,
+    enabled: workflow.enabled,
+    definition,
+    yaml: workflow.yaml,
   };
+
+  return withActiveInferenceSpan(
+    `Workflow: ${workflow.name}`,
+    {
+      attributes: {
+        [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
+        'elastic.workflow.id': workflow.id,
+        'elastic.workflow.name': workflow.name,
+        'input.value': safeJsonStringify(workflowParams) ?? '{}',
+      },
+    },
+    async (span) => {
+      const executionId = await workflowApi.runWorkflow(
+        workflowForExecution,
+        spaceId,
+        workflowParams,
+        request
+      );
+
+      span?.setAttribute('elastic.workflow.execution_id', executionId);
+
+      const waitLimit = Date.now() + completionTimeoutSec * 1000;
+      await waitMs(INITIAL_WAIT_MS);
+
+      let execution: WorkflowExecutionState | null | undefined;
+      do {
+        try {
+          execution = await getExecutionState({ executionId, spaceId, workflowApi });
+
+          const shouldReturn = waitForCompletion
+            ? execution && finalStatuses.includes(execution.status)
+            : execution;
+
+          if (shouldReturn && execution) {
+            const result: WorkflowExecutionResult = { success: true, execution };
+            span?.setAttribute('output.value', safeJsonStringify(result) ?? 'unknown');
+            return result;
+          }
+        } catch (e) {
+          // trap - we just keep waiting until timeout
+        }
+
+        await waitMs(CHECK_INTERVAL_MS);
+      } while (Date.now() < waitLimit);
+
+      if (execution) {
+        const result: WorkflowExecutionResult = { success: true, execution };
+        span?.setAttribute('output.value', safeJsonStringify(result) ?? 'unknown');
+        return result;
+      }
+
+      const result: WorkflowExecutionResult = {
+        success: false,
+        error: `Workflow '${workflowId}' executed but execution not found after ${completionTimeoutSec}s.`,
+      };
+      span?.setAttribute('output.value', safeJsonStringify(result) ?? 'unknown');
+      return result;
+    }
+  );
 };
 
 const waitMs = (durationMs: number): Promise<void> =>

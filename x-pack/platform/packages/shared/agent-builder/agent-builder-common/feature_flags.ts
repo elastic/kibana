@@ -9,4 +9,4 @@
  * Core feature flag name for agent workflows (pre-execution workflows).
  * When disabled, workflow UI and server-side execution are gated.
  */
-export const AGENT_WORKFLOWS_FEATURE_FLAG = 'agentBuilder.agentWorkflowsEnabled';
+export const AGENT_WORKFLOWS_FEATURE_FLAG = 'agentBuilder.agentWorkflows:enabled';
