@@ -8,27 +8,14 @@
 import { inject, injectable } from 'inversify';
 import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
-import type { CreateRuleData, RuleKind } from '@kbn/alerting-v2-schemas';
+import type { CreateRuleData, RuleResponse, UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import { INTERNAL_ALERTING_V2_RULE_API_PATH } from '../constants';
 
-export interface RuleListItem {
-  id: string;
-  name: string;
-  kind: RuleKind;
-  enabled?: boolean;
-  query?: string;
-  schedule?: { custom?: string };
-  tags?: string[];
-}
-
-export interface RuleDetails extends RuleListItem {
-  timeField?: string;
-  lookbackWindow?: string;
-  groupingKey?: string[];
-}
+/** Re-exported from the shared schemas package. */
+export type { RuleResponse as RuleApiResponse };
 
 export interface FindRulesResponse {
-  items: RuleListItem[];
+  items: RuleResponse[];
   total: number;
   page: number;
   perPage: number;
@@ -45,17 +32,17 @@ export class RulesApi {
   }
 
   public async createRule(payload: CreateRuleData) {
-    return this.http.post(INTERNAL_ALERTING_V2_RULE_API_PATH, {
+    return this.http.post<RuleResponse>(INTERNAL_ALERTING_V2_RULE_API_PATH, {
       body: JSON.stringify(payload),
     });
   }
 
   public async getRule(id: string) {
-    return this.http.get<RuleDetails>(`${INTERNAL_ALERTING_V2_RULE_API_PATH}/${id}`);
+    return this.http.get<RuleResponse>(`${INTERNAL_ALERTING_V2_RULE_API_PATH}/${id}`);
   }
 
-  public async updateRule(id: string, payload: CreateRuleData) {
-    return this.http.patch(`${INTERNAL_ALERTING_V2_RULE_API_PATH}/${id}`, {
+  public async updateRule(id: string, payload: UpdateRuleData) {
+    return this.http.patch<RuleResponse>(`${INTERNAL_ALERTING_V2_RULE_API_PATH}/${id}`, {
       body: JSON.stringify(payload),
     });
   }
