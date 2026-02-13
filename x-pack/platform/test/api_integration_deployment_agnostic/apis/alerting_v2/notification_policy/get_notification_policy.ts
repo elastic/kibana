@@ -39,6 +39,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           name: 'policy-name',
           description: 'policy-description',
           workflow_id: 'policy-workflow-id',
+          matcher: "env == 'production' && region == 'us-east-1'",
+          group_by: ['service.name'],
+          throttle: { interval: '10m' },
         });
 
       const createdPolicyId = createResponse.body.id;
@@ -54,6 +57,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(response.body.name).to.be('policy-name');
       expect(response.body.description).to.be('policy-description');
       expect(response.body.workflow_id).to.be('policy-workflow-id');
+      expect(response.body.matcher).to.be("env == 'production' && region == 'us-east-1'");
+      expect(response.body.group_by).to.eql(['service.name']);
+      expect(response.body.throttle).to.eql({ interval: '10m' });
       expect(response.body.createdAt).to.be.a('string');
       expect(response.body.updatedAt).to.be.a('string');
     });
