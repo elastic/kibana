@@ -38,7 +38,7 @@ interface BrowserPopoverPosition {
   left?: number;
 }
 
-const DEFAULT_FIELDS_BROWSER_INDEX = '.kibana';
+const DEFAULT_FIELDS_BROWSER_INDEX = '*';
 
 export function useFieldsBrowser({
   editorRef,
