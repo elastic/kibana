@@ -27,9 +27,5 @@
     "@kbn/react-query",
     "@kbn/search-types",
     "@kbn/alerting-v2-schemas",
-    "@kbn/ui-actions-plugin",
-    "@kbn/kibana-utils-plugin",
-    "@kbn/fields-metadata-plugin",
-    "@kbn/usage-collection-plugin",
   ]
 }
