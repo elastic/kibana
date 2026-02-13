@@ -88,7 +88,7 @@ export interface ScreenContextAttachmentData {
 
 export const visualizationAttachmentDataSchema = z.object({
   query: z.string(),
-  visualization: z.record(z.unknown()),
+  visualization: z.record(z.string(), z.unknown()),
   chart_type: z.string(),
   esql: z.string(),
 });
