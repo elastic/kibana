@@ -290,6 +290,19 @@ apiTest.describe('Entity Store Logs Extraction', { tag: ENTITY_STORE_TAGS }, () 
       },
     });
 
+    // Document with data beforfe that should be ignored
+    await ingestDoc({
+      '@timestamp': '2026-02-13T11:01:59Z',
+      user: {
+        id: 'watchlist-test',
+        entity: {
+          attributes: {
+            Watchlists: ['should', 'be', 'ignored'],
+          },
+        },
+      },
+    });
+
     const thirdExtractionResponse = await forceUserExtraction(
       '2026-02-13T11:01:00Z',
       '2026-02-13T11:03:00Z'

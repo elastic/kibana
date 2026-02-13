@@ -106,7 +106,7 @@ function recentFieldStats(fields: EntityField[]) {
         case 'prefer_oldest_value':
           return `${recentDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD})`;
         case 'prefer_newest_list':
-          return `${recentDest} = VALUES(${castedSrc})`;
+          return `${recentDest} = MV_DEDUPE(LAST(${castedSrc}, ${TIMESTAMP_FIELD}))`;
         default:
           throw new Error('unknown field operation');
       }
