@@ -649,3 +649,21 @@ export function createIndicesBrowserSuggestion(
     commandArgs,
   });
 }
+
+export function createFieldsBrowserSuggestion(
+  commandArgs?: Record<string, string>
+): ISuggestionItem {
+  return createResourceBrowserSuggestion({
+    label: i18n.translate('kbn-esql-language.esql.autocomplete.fieldsBrowser.suggestionLabel', {
+      defaultMessage: 'Browse fields',
+    }),
+    description: i18n.translate(
+      'kbn-esql-language.esql.autocomplete.fieldsBrowser.suggestionDescription',
+      {
+        defaultMessage: 'Open fields browser',
+      }
+    ),
+    commandId: 'esql.fieldsBrowser.open',
+    commandArgs,
+  });
+}
