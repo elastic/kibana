@@ -26,6 +26,7 @@ const SECOND = 1000;
 
 export class DockerServersService {
   private servers: DockerServer[];
+  private externallyManaged: boolean;
 
   constructor(
     configs: {
@@ -35,19 +36,32 @@ export class DockerServersService {
     private lifecycle: Lifecycle,
     private disabled?: boolean
   ) {
-    this.servers = Object.entries(configs).map(([name, config]) => ({
-      ...config,
-      name,
-      url: Url.format({
-        protocol: 'http:',
-        hostname: 'localhost',
-        port: config.port,
-      }),
-    }));
+    // Check if docker servers are already running (started by run_tests.ts)
+    const externalServers = (global as any).__kibanaDockerServers;
+    this.externallyManaged = !!externalServers;
 
-    this.lifecycle.beforeTests.add(async () => {
-      await this.startServers();
-    });
+    this.servers = this.externallyManaged
+      ? externalServers
+      : Object.entries(configs).map(([name, config]) => ({
+          ...config,
+          name,
+          url: Url.format({
+            protocol: 'http:',
+            hostname: 'localhost',
+            port: config.port,
+          }),
+        }));
+
+    // Only start servers if not externally managed
+    if (!this.externallyManaged) {
+      this.lifecycle.beforeTests.add(async () => {
+        await this.startServers();
+      });
+    } else {
+      this.log.info(
+        'Docker servers are externally managed, skipping start in DockerServersService'
+      );
+    }
   }
 
   isEnabled(name: string) {

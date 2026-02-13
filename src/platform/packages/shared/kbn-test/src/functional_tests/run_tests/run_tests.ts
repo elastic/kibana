@@ -22,6 +22,7 @@ import { Config, readConfigFile } from '../../functional_test_runner';
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
+import { runDockerServers } from '../lib/run_docker_servers';
 import type { RunTestsOptions } from './flags';
 /**
  * Run servers and tests for each config
@@ -111,6 +112,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         };
 
         let shutdownEs: (() => Promise<void>) | undefined;
+        let shutdownDockerServers: (() => Promise<void>) | undefined;
 
         try {
           if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
@@ -121,6 +123,27 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               return;
             }
           }
+
+          // Start docker servers (e.g., package registry) early alongside ES
+          // Only some tests need this, but if they need it it's faster to start them here.
+          // runDockerServers decides if the test needs docker servers
+          shutdownDockerServers = await runDockerServers({ log, config, onEarlyExit });
+          if (abortCtrl.signal.aborted) {
+            return;
+          }
+
+          await runKibanaServer({
+            procs,
+            config,
+            logsDir: options.logsDir,
+            installDir: options.installDir,
+            onEarlyExit,
+            extraKbnOpts: [
+              config.get('serverless')
+                ? '--server.versioned.versionResolution=newest'
+                : '--server.versioned.versionResolution=oldest',
+            ],
+          });
 
           await withSpan('start_kibana', () =>
             runKibanaServer({
@@ -200,6 +223,10 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
             await withSpan('shutdown_kibana', () => procs.stop('kibana'));
           } finally {
+            // Clean up docker servers before ES
+            if (shutdownDockerServers) {
+              await withSpan('shutdown_docker_servers', () => shutdownDockerServers!());
+            }
             if (shutdownEs) {
               await withSpan('shutdown_es', () => shutdownEs!());
             }
