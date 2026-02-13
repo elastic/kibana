@@ -75,12 +75,17 @@ export function areSimilarResults(
  * This function has side effects:
  * - It sorts the freshData to the same order as the previousData modifying the results in place
  */
-export function keepPreviousWorkflowOrder({ previousData, freshData }: { previousData: WorkflowListDto, freshData: WorkflowListDto }) {
+export function keepPreviousWorkflowOrder({
+  previousData,
+  freshData,
+}: {
+  previousData: WorkflowListDto;
+  freshData: WorkflowListDto;
+}) {
   // resort the freshData to the same order as the previousData
   const previousDataIndexById = new Map(previousData.results.map((r, i) => [r.id, i]));
 
   freshData.results.sort(
-    (a, b) =>
-      (previousDataIndexById.get(a.id) ?? -1) - (previousDataIndexById.get(b.id) ?? -1)
+    (a, b) => (previousDataIndexById.get(a.id) ?? -1) - (previousDataIndexById.get(b.id) ?? -1)
   );
 }
