@@ -647,7 +647,7 @@ function buildEvalsYaml({
       rawEvaluationConnectorId && rawEvaluationConnectorId.startsWith('eis/')
         ? normalizeEisConnectorIdFromModelId(rawEvaluationConnectorId.slice('eis/'.length))
         : rawEvaluationConnectorId && rawEvaluationConnectorId.includes('/')
-          ? normalizeLitellmConnectorIdFromModelGroup(rawEvaluationConnectorId)
+        ? normalizeLitellmConnectorIdFromModelGroup(rawEvaluationConnectorId)
         : rawEvaluationConnectorId;
     const includeEisModels =
       parsedLabels.includes('models:all') ||
