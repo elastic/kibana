@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["public/**/*", "server/**/*", "common/**/*", "../../../../../typings/**/*"],
+  "include": [
+    "public/**/*",
+    "server/**/*",
+    "common/**/*",
+    "test/**/*",
+    "../../../../../typings/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/screenshot-mode-plugin",
@@ -13,6 +19,7 @@
     "@kbn/shared-ux-markdown",
     "@kbn/react-kibana-mount",
     "@kbn/licensing-types",
+    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",
