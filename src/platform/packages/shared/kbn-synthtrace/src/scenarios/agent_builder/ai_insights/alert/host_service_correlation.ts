@@ -16,14 +16,15 @@
  * Setup:
  * - `otel-host-03`: 95% CPU, 85% memory (under pressure)
  *   - Services:
- *     - `order-processor` (HIGH latency 3s, 20% error rate) ← the culprit
+ *     - `order-processor` (50ms latency, 100% error rate) ← the culprit, fail-fast crash loop
  *     - `api-gateway` (normal latency 80ms, 0.5% error rate) ← healthy
  *     - `cache-service` (normal latency 5ms, 0.1% error rate) ← healthy
  *
  * Expected AI Insight:
  * - Alert on host CPU threshold
  * - Insight finds services running on the host
- * - Identifies `order-processor` as likely cause due to degraded APM metrics
+ * - Insight finds error logs from `order-processor` (OutOfMemoryError, connection pool exhausted, etc.)
+ * - Identifies `order-processor` as the cause based on 100% error rate + error logs
  *
  * Usage:
  * ```
@@ -39,9 +40,19 @@
  * ```
  */
 
-import { Serializable, apm, ApmSynthtracePipelineSchema } from '@kbn/synthtrace-client';
+import { Serializable, apm, otelLog, ApmSynthtracePipelineSchema } from '@kbn/synthtrace-client';
 import type { Scenario } from '../../../../cli/scenario';
 import { withClient } from '../../../../lib/utils/with_client';
+
+// Error messages for order-processor crash loop
+const ORDER_PROCESSOR_ERRORS = [
+  'java.lang.OutOfMemoryError: Java heap space',
+  'FATAL: Connection pool exhausted - cannot acquire database connection',
+  'java.lang.NullPointerException at com.orders.OrderService.processOrder(OrderService.java:142)',
+  'ERROR: Circuit breaker open - downstream payment-service unavailable',
+  'CRITICAL: Message queue consumer crashed - restarting in 5s',
+  'java.util.concurrent.RejectedExecutionException: Thread pool saturated',
+];
 
 interface ServiceConfig {
   name: string;
@@ -61,8 +72,8 @@ const HOST: HostConfig = {
   cpuUsage: 0.95, // 95% CPU - under pressure
   memoryUsage: 0.85, // 85% memory
   services: [
-    // The culprit - high latency and errors
-    { name: 'order-processor', latencyMs: 3000, errorRate: 0.2 },
+    // The culprit - completely broken, failing fast with 100% errors
+    { name: 'order-processor', latencyMs: 50, errorRate: 1.0 },
     // Healthy services
     { name: 'api-gateway', latencyMs: 80, errorRate: 0.005 },
     { name: 'cache-service', latencyMs: 5, errorRate: 0.001 },
@@ -71,7 +82,7 @@ const HOST: HostConfig = {
 
 const scenario: Scenario<any> = async ({ logger }) => {
   return {
-    generate: ({ range, clients: { infraEsClient, apmEsClient } }) => {
+    generate: ({ range, clients: { infraEsClient, apmEsClient, logsEsClient } }) => {
       // Generate OTel host metrics (semconv format)
       const hostMetrics = range
         .interval('30s')
@@ -185,6 +196,29 @@ const scenario: Scenario<any> = async ({ logger }) => {
           })
         );
 
+      // Generate OTel error logs for order-processor (the broken service)
+      const errorLogs = range
+        .interval('30s')
+        .rate(3) // Multiple errors per interval
+        .generator((timestamp) => {
+          const errorMessage =
+            ORDER_PROCESSOR_ERRORS[Math.floor(Math.random() * ORDER_PROCESSOR_ERRORS.length)];
+
+          return otelLog
+            .create()
+            .message(errorMessage)
+            .logLevel('error')
+            .service('order-processor')
+            .hostName(HOST.name)
+            .addResourceAttributes({
+              'service.environment': 'production',
+            })
+            .addAttributes({
+              'error.type': 'crash',
+            })
+            .timestamp(timestamp);
+        });
+
       return [
         withClient(
           infraEsClient,
@@ -193,6 +227,10 @@ const scenario: Scenario<any> = async ({ logger }) => {
         withClient(
           apmEsClient,
           logger.perf('generating_otel_apm_traces', () => apmTraces)
+        ),
+        withClient(
+          logsEsClient,
+          logger.perf('generating_error_logs', () => errorLogs)
         ),
       ];
     },
