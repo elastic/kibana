@@ -5,23 +5,28 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
 
-test.describe('Storage Explorer - Viewer (No Permissions)', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsViewer();
-  });
-
-  test('displays permission denied message', async ({
-    page,
-    pageObjects: { storageExplorerPage },
-  }) => {
-    await storageExplorerPage.goto();
-    await expect(storageExplorerPage.pageTitle).toBeVisible();
-
-    await test.step('verify permission denied is shown', async () => {
-      await expect(page.getByText('You need permission')).toBeVisible();
+test.describe(
+  'Storage Explorer - Viewer (No Permissions)',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginAsViewer();
     });
-  });
-});
+
+    test('displays permission denied message', async ({
+      page,
+      pageObjects: { storageExplorerPage },
+    }) => {
+      await storageExplorerPage.goto();
+      await expect(storageExplorerPage.pageTitle).toBeVisible();
+
+      await test.step('verify permission denied is shown', async () => {
+        await expect(page.getByText('You need permission')).toBeVisible();
+      });
+    });
+  }
+);
