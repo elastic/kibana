@@ -31,6 +31,7 @@ interface JsonCodeEditorCommonProps {
   hasLineNumbers?: boolean;
   hideCopyButton?: boolean;
   enableFindAction?: boolean;
+  'data-test-subj'?: string;
 }
 
 export const JsonCodeEditorCommon = ({
@@ -41,6 +42,7 @@ export const JsonCodeEditorCommon = ({
   onEditorDidMount,
   hideCopyButton,
   enableFindAction,
+  'data-test-subj': dataTestSubj,
 }: JsonCodeEditorCommonProps) => {
   const styles = useMemoCss(componentStyles);
   if (jsonValue === '') {
@@ -82,7 +84,12 @@ export const JsonCodeEditorCommon = ({
     return codeEditor;
   }
   return (
-    <EuiFlexGroup css={styles.codeEditor} direction="column" gutterSize="s">
+    <EuiFlexGroup
+      css={styles.codeEditor}
+      direction="column"
+      gutterSize="s"
+      data-test-subj={dataTestSubj}
+    >
       <EuiFlexItem grow={false} css={styles.copyButtonContainer}>
         <EuiCopy textToCopy={jsonValue}>
           {(copy) => (
