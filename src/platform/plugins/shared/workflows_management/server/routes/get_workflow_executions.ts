@@ -19,7 +19,7 @@ import {
   GetWorkflowExecutionsRequestParams,
   GetWorkflowExecutionsRequestQuery,
 } from '../../common/model/api/workflow_executions.gen';
-import type { SearchWorkflowExecutionsParams } from '../workflows_management/workflows_management_service';
+import type { SearchWorkflowExecutionsParams } from '../service/workflows_management_service';
 
 export function registerGetWorkflowExecutionsRoute({
   router,

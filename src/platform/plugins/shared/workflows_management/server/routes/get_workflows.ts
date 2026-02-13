@@ -14,9 +14,9 @@ import { WORKFLOW_READ_SECURITY } from './lib/route_security';
 import type { RouteDependencies } from './lib/types';
 import { withLicenseCheck } from './lib/with_license_check';
 import { API_VERSIONS, WORKFLOWS_API_PATHS } from '../../common/api/constants';
-import { GetListWorkflowsRequestQuery } from '../../common/model/api/workflows.gen';
+import { GetWorkflowsRequestQuery } from '../../common/model/api/workflows.gen';
 
-export function registerGetListWorkflowsRoute({ router, api, logger, spaces }: RouteDependencies) {
+export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
     .get({
       access: 'public',
@@ -29,15 +29,26 @@ export function registerGetListWorkflowsRoute({ router, api, logger, spaces }: R
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(GetListWorkflowsRequestQuery),
+            query: buildRouteValidationWithZod(GetWorkflowsRequestQuery),
           },
         },
       },
       withLicenseCheck(async (context, request, response) => {
         try {
+          const { size, page, enabled, createdBy, tags, query } = request.query;
           const spaceId = spaces.getSpaceId(request);
           return response.ok({
-            body: await api.getWorkflows(request.query, spaceId),
+            body: await api.getWorkflows(
+              {
+                size: size ?? 100,
+                page: page ?? 1,
+                enabled,
+                createdBy,
+                tags,
+                query,
+              },
+              spaceId
+            ),
           });
         } catch (error) {
           return handleRouteError(response, error);

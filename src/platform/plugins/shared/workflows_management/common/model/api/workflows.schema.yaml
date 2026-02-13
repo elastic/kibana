@@ -120,10 +120,10 @@ paths:
 
   /api/workflows:
     get:
-      summary: List or search workflows
-      operationId: GetListWorkflows
+      summary: Get workflows
+      operationId: GetWorkflows
       x-codegen-enabled: true
-      description: Lists workflows with optional filters and pagination (query params)
+      description: Lists or searches workflows with optional filters and pagination (query params)
       tags:
         - Workflows
       parameters:

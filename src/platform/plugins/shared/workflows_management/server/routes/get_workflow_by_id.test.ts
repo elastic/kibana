@@ -16,7 +16,7 @@ import {
   mockLogger,
 } from './lib/test_utils';
 import { API_VERSIONS, WORKFLOWS_API_PATHS } from '../../common/api/constants';
-import type { WorkflowsManagementApi } from '../workflows_management/workflows_management_api';
+import type { WorkflowsManagementApi } from '../service/workflows_management_api';
 
 jest.mock('./lib/with_license_check', () => ({
   withLicenseCheck: (handler: unknown) => handler,

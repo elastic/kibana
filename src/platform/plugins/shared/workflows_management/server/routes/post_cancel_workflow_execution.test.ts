@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { registerDeleteWorkflowByIdRoute } from './delete_workflow_by_id';
 import {
   createMockResponse,
   createMockRouterInstance,
@@ -15,14 +14,15 @@ import {
   createSpacesMock,
   mockLogger,
 } from './lib/test_utils';
-import { API_VERSIONS, WORKFLOWS_API_PATHS } from '../../common/api/constants';
+import { registerPostCancelWorkflowExecutionRoute } from './post_cancel_workflow_execution';
+import { API_VERSIONS, WORKFLOWS_EXECUTIONS_API_PATHS } from '../../common/api/constants';
 import type { WorkflowsManagementApi } from '../service/workflows_management_api';
 
 jest.mock('./lib/with_license_check', () => ({
   withLicenseCheck: (handler: unknown) => handler,
 }));
 
-describe('DELETE /api/workflows/{id}', () => {
+describe('POST /api/workflows-executions/{executionId}/cancel', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: any;
   let mockSpaces: any;
@@ -38,46 +38,42 @@ describe('DELETE /api/workflows/{id}', () => {
     let routeHandler: any;
 
     beforeEach(() => {
-      registerDeleteWorkflowByIdRoute({
+      registerPostCancelWorkflowExecutionRoute({
         router: mockRouter,
         api: workflowsApi,
         logger: mockLogger,
         spaces: mockSpaces,
       });
-      const route = mockRouter.versioned.getRoute('delete', WORKFLOWS_API_PATHS.BY_ID);
+      const route = mockRouter.versioned.getRoute('post', WORKFLOWS_EXECUTIONS_API_PATHS.CANCEL);
       routeHandler = route.versions[API_VERSIONS.public.v1].handler;
     });
 
-    it('should delete workflow successfully', async () => {
-      workflowsApi.deleteWorkflows = jest.fn().mockResolvedValue(undefined);
+    it('should cancel workflow execution successfully', async () => {
+      workflowsApi.cancelWorkflowExecution = jest.fn().mockResolvedValue(undefined);
 
       const mockContext = {};
       const mockRequest = {
-        params: { id: 'workflow-123' },
+        params: { executionId: 'execution-123' },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123' },
+        url: { pathname: '/api/workflows-executions/execution-123/cancel' },
       };
       const mockResponse = createMockResponse();
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(workflowsApi.deleteWorkflows).toHaveBeenCalledWith(
-        ['workflow-123'],
-        'default',
-        mockRequest
-      );
+      expect(workflowsApi.cancelWorkflowExecution).toHaveBeenCalledWith('execution-123', 'default');
       expect(mockResponse.ok).toHaveBeenCalledWith();
     });
 
     it('should handle API errors gracefully', async () => {
-      const errorMessage = 'Elasticsearch connection failed';
-      workflowsApi.deleteWorkflows = jest.fn().mockRejectedValue(new Error(errorMessage));
+      const errorMessage = 'Execution engine connection failed';
+      workflowsApi.cancelWorkflowExecution = jest.fn().mockRejectedValue(new Error(errorMessage));
 
       const mockContext = {};
       const mockRequest = {
-        params: { id: 'workflow-123' },
+        params: { executionId: 'execution-123' },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123' },
+        url: { pathname: '/api/workflows-executions/execution-123/cancel' },
       };
       const mockResponse = createMockResponse();
 
@@ -92,38 +88,35 @@ describe('DELETE /api/workflows/{id}', () => {
     });
 
     it('should work with different space contexts', async () => {
-      workflowsApi.deleteWorkflows = jest.fn().mockResolvedValue(undefined);
+      workflowsApi.cancelWorkflowExecution = jest.fn().mockResolvedValue(undefined);
       mockSpaces.getSpaceId = jest.fn().mockReturnValue('custom-space');
 
       const mockContext = {};
       const mockRequest = {
-        params: { id: 'workflow-123' },
+        params: { executionId: 'execution-456' },
         headers: {},
-        url: { pathname: '/s/custom-space/api/workflows/workflow-123' },
+        url: { pathname: '/s/custom-space/api/workflows-executions/execution-456/cancel' },
       };
       const mockResponse = createMockResponse();
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(workflowsApi.deleteWorkflows).toHaveBeenCalledWith(
-        ['workflow-123'],
-        'custom-space',
-        mockRequest
+      expect(workflowsApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'execution-456',
+        'custom-space'
       );
       expect(mockResponse.ok).toHaveBeenCalledWith();
     });
 
-    it('should handle Elasticsearch connection errors', async () => {
-      const esError = new Error('Connection refused');
-      esError.name = 'ConnectionError';
-
-      workflowsApi.deleteWorkflows = jest.fn().mockRejectedValue(esError);
+    it('should handle execution engine errors', async () => {
+      const executionError = new Error('Execution engine connection failed');
+      workflowsApi.cancelWorkflowExecution = jest.fn().mockRejectedValue(executionError);
 
       const mockContext = {};
       const mockRequest = {
-        params: { id: 'workflow-123' },
+        params: { executionId: 'execution-123' },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123' },
+        url: { pathname: '/api/workflows-executions/execution-123/cancel' },
       };
       const mockResponse = createMockResponse();
 
@@ -132,41 +125,20 @@ describe('DELETE /api/workflows/{id}', () => {
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: {
-          message: 'Internal server error: ConnectionError: Connection refused',
+          message: 'Internal server error: Error: Execution engine connection failed',
         },
       });
     });
 
-    it('should handle workflow not found gracefully', async () => {
-      workflowsApi.deleteWorkflows = jest.fn().mockResolvedValue(undefined);
-
-      const mockContext = {};
-      const mockRequest = {
-        params: { id: 'non-existent-workflow' },
-        headers: {},
-        url: { pathname: '/api/workflows/non-existent-workflow' },
-      };
-      const mockResponse = createMockResponse();
-
-      await routeHandler(mockContext, mockRequest, mockResponse);
-
-      expect(workflowsApi.deleteWorkflows).toHaveBeenCalledWith(
-        ['non-existent-workflow'],
-        'default',
-        mockRequest
-      );
-      expect(mockResponse.ok).toHaveBeenCalledWith();
-    });
-
     it('should handle service initialization errors', async () => {
       const serviceError = new Error('WorkflowsService not initialized');
-      workflowsApi.deleteWorkflows = jest.fn().mockRejectedValue(serviceError);
+      workflowsApi.cancelWorkflowExecution = jest.fn().mockRejectedValue(serviceError);
 
       const mockContext = {};
       const mockRequest = {
-        params: { id: 'workflow-123' },
+        params: { executionId: 'execution-123' },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123' },
+        url: { pathname: '/api/workflows-executions/execution-123/cancel' },
       };
       const mockResponse = createMockResponse();
 

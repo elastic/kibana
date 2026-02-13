@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { registerDeleteWorkflowByIdRoute } from './delete_workflow_by_id';
+import { registerGetWorkflowJsonSchemaRoute } from './get_workflow_json_schema';
 import {
   createMockResponse,
   createMockRouterInstance,
@@ -22,7 +22,7 @@ jest.mock('./lib/with_license_check', () => ({
   withLicenseCheck: (handler: unknown) => handler,
 }));
 
-describe('DELETE /api/workflows/{id}', () => {
+describe('GET /api/workflows/workflow-json-schema', () => {
   let workflowsApi: WorkflowsManagementApi;
   let mockRouter: any;
   let mockSpaces: any;
@@ -38,46 +38,69 @@ describe('DELETE /api/workflows/{id}', () => {
     let routeHandler: any;
 
     beforeEach(() => {
-      registerDeleteWorkflowByIdRoute({
+      registerGetWorkflowJsonSchemaRoute({
         router: mockRouter,
         api: workflowsApi,
         logger: mockLogger,
         spaces: mockSpaces,
       });
-      const route = mockRouter.versioned.getRoute('delete', WORKFLOWS_API_PATHS.BY_ID);
+      const route = mockRouter.versioned.getRoute('get', WORKFLOWS_API_PATHS.JSON_SCHEMA);
       routeHandler = route.versions[API_VERSIONS.public.v1].handler;
     });
 
-    it('should delete workflow successfully', async () => {
-      workflowsApi.deleteWorkflows = jest.fn().mockResolvedValue(undefined);
+    it('should return workflow JSON schema successfully', async () => {
+      const mockJsonSchema = {
+        $schema: 'http://json-schema.org/draft-07/schema#',
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: 'Workflow name' },
+          description: { type: 'string', description: 'Workflow description' },
+          steps: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'string', description: 'Step ID' },
+                name: { type: 'string', description: 'Step name' },
+                type: { type: 'string', description: 'Step type' },
+                inputs: { type: 'object', description: 'Step inputs' },
+              },
+              required: ['id', 'name', 'type'],
+            },
+          },
+        },
+        required: ['name', 'steps'],
+      };
+
+      workflowsApi.getWorkflowJsonSchema = jest.fn().mockResolvedValue(mockJsonSchema);
 
       const mockContext = {};
       const mockRequest = {
-        params: { id: 'workflow-123' },
+        query: { loose: false },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123' },
+        url: { pathname: '/api/workflows/workflow-json-schema' },
       };
       const mockResponse = createMockResponse();
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(workflowsApi.deleteWorkflows).toHaveBeenCalledWith(
-        ['workflow-123'],
+      expect(workflowsApi.getWorkflowJsonSchema).toHaveBeenCalledWith(
+        { loose: false },
         'default',
         mockRequest
       );
-      expect(mockResponse.ok).toHaveBeenCalledWith();
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockJsonSchema });
     });
 
     it('should handle API errors gracefully', async () => {
-      const errorMessage = 'Elasticsearch connection failed';
-      workflowsApi.deleteWorkflows = jest.fn().mockRejectedValue(new Error(errorMessage));
+      const errorMessage = 'Schema generation failed';
+      workflowsApi.getWorkflowJsonSchema = jest.fn().mockRejectedValue(new Error(errorMessage));
 
       const mockContext = {};
       const mockRequest = {
-        params: { id: 'workflow-123' },
+        query: { loose: false },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123' },
+        url: { pathname: '/api/workflows/workflow-json-schema' },
       };
       const mockResponse = createMockResponse();
 
@@ -92,38 +115,57 @@ describe('DELETE /api/workflows/{id}', () => {
     });
 
     it('should work with different space contexts', async () => {
-      workflowsApi.deleteWorkflows = jest.fn().mockResolvedValue(undefined);
+      const mockJsonSchema = {
+        $schema: 'http://json-schema.org/draft-07/schema#',
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: 'Workflow name' },
+          steps: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                name: { type: 'string' },
+                type: { type: 'string' },
+              },
+              required: ['id', 'name', 'type'],
+            },
+          },
+        },
+        required: ['name', 'steps'],
+      };
+
+      workflowsApi.getWorkflowJsonSchema = jest.fn().mockResolvedValue(mockJsonSchema);
       mockSpaces.getSpaceId = jest.fn().mockReturnValue('custom-space');
 
       const mockContext = {};
       const mockRequest = {
-        params: { id: 'workflow-123' },
+        query: { loose: false },
         headers: {},
-        url: { pathname: '/s/custom-space/api/workflows/workflow-123' },
+        url: { pathname: '/s/custom-space/api/workflows/workflow-json-schema' },
       };
       const mockResponse = createMockResponse();
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(workflowsApi.deleteWorkflows).toHaveBeenCalledWith(
-        ['workflow-123'],
+      expect(workflowsApi.getWorkflowJsonSchema).toHaveBeenCalledWith(
+        { loose: false },
         'custom-space',
         mockRequest
       );
-      expect(mockResponse.ok).toHaveBeenCalledWith();
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockJsonSchema });
     });
 
-    it('should handle Elasticsearch connection errors', async () => {
-      const esError = new Error('Connection refused');
-      esError.name = 'ConnectionError';
-
-      workflowsApi.deleteWorkflows = jest.fn().mockRejectedValue(esError);
+    it('should handle schema generation errors', async () => {
+      const schemaError = new Error('Zod schema compilation failed');
+      workflowsApi.getWorkflowJsonSchema = jest.fn().mockRejectedValue(schemaError);
 
       const mockContext = {};
       const mockRequest = {
-        params: { id: 'workflow-123' },
+        query: { loose: false },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123' },
+        url: { pathname: '/api/workflows/workflow-json-schema' },
       };
       const mockResponse = createMockResponse();
 
@@ -132,41 +174,20 @@ describe('DELETE /api/workflows/{id}', () => {
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
         body: {
-          message: 'Internal server error: ConnectionError: Connection refused',
+          message: 'Internal server error: Error: Zod schema compilation failed',
         },
       });
     });
 
-    it('should handle workflow not found gracefully', async () => {
-      workflowsApi.deleteWorkflows = jest.fn().mockResolvedValue(undefined);
-
-      const mockContext = {};
-      const mockRequest = {
-        params: { id: 'non-existent-workflow' },
-        headers: {},
-        url: { pathname: '/api/workflows/non-existent-workflow' },
-      };
-      const mockResponse = createMockResponse();
-
-      await routeHandler(mockContext, mockRequest, mockResponse);
-
-      expect(workflowsApi.deleteWorkflows).toHaveBeenCalledWith(
-        ['non-existent-workflow'],
-        'default',
-        mockRequest
-      );
-      expect(mockResponse.ok).toHaveBeenCalledWith();
-    });
-
     it('should handle service initialization errors', async () => {
       const serviceError = new Error('WorkflowsService not initialized');
-      workflowsApi.deleteWorkflows = jest.fn().mockRejectedValue(serviceError);
+      workflowsApi.getWorkflowJsonSchema = jest.fn().mockRejectedValue(serviceError);
 
       const mockContext = {};
       const mockRequest = {
-        params: { id: 'workflow-123' },
+        query: { loose: false },
         headers: {},
-        url: { pathname: '/api/workflows/workflow-123' },
+        url: { pathname: '/api/workflows/workflow-json-schema' },
       };
       const mockResponse = createMockResponse();
 

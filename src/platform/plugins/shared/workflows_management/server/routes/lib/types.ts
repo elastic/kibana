@@ -10,8 +10,8 @@
 import type { Logger } from '@kbn/core/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { ExecutionStatus, ExecutionType } from '@kbn/workflows';
+import type { WorkflowsManagementApi } from '../../service/workflows_management_api';
 import type { WorkflowsRouter } from '../../types';
-import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
 
 // Pagination constants
 export const MAX_PAGE_SIZE = 100; // Limit to prevent performance issues with large result sets

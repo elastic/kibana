@@ -16,12 +16,7 @@ import { withLicenseCheck } from './lib/with_license_check';
 import { API_VERSIONS, WORKFLOWS_API_PATHS } from '../../common/api/constants';
 import { DeleteWorkflowByIdRequestParams } from '../../common/model/api/workflows.gen';
 
-export function registerDeleteWorkflowByIdRoute({
-  router,
-  api,
-  logger,
-  spaces,
-}: RouteDependencies) {
+export function registerDeleteWorkflowByIdRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
     .delete({
       access: 'public',

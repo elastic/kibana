@@ -21,8 +21,8 @@ export function useWorkflows(params: WorkflowsSearchParams) {
       if (!http) {
         return Promise.reject(new Error('Http service is not available'));
       }
-      return http.post<WorkflowListDto>('/api/workflows/search', {
-        body: JSON.stringify(params),
+      return http.get<WorkflowListDto>('/api/workflows', {
+        query: params,
       });
     },
     keepPreviousData: true,

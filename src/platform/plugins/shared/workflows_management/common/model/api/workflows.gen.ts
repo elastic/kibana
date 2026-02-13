@@ -50,25 +50,9 @@ export const GetConnectorsResponse = z.object({
   connectorTypes: z.object({}).catchall(z.unknown()).optional(),
   totalConnectors: z.number().optional(),
 });
-export type GetListWorkflowsRequestQuery = z.infer<typeof GetListWorkflowsRequestQuery>;
-export const GetListWorkflowsRequestQuery = z.object({
-  size: z.coerce.number().optional(),
-  page: z.coerce.number().optional(),
-  enabled: ArrayFromString(z.boolean()).optional(),
-  createdBy: ArrayFromString(z.string()).optional(),
-  tags: ArrayFromString(z.string()).optional(),
-  query: z.string().optional(),
-});
-export type GetListWorkflowsRequestQueryInput = z.input<typeof GetListWorkflowsRequestQuery>;
-
-export type GetListWorkflowsResponse = z.infer<typeof GetListWorkflowsResponse>;
-export const GetListWorkflowsResponse = z.object({
-  results: z.array(z.unknown()).optional(),
-  total: z.number().optional(),
-});
 export type GetWorkflowAggsRequestQuery = z.infer<typeof GetWorkflowAggsRequestQuery>;
 export const GetWorkflowAggsRequestQuery = z.object({
-  fields: ArrayFromString(z.string()).pipe(z.array(z.string()).max(25)),
+  fields: ArrayFromString(z.string()).max(25),
 });
 export type GetWorkflowAggsRequestQueryInput = z.input<typeof GetWorkflowAggsRequestQuery>;
 
@@ -93,6 +77,22 @@ export type GetWorkflowJsonSchemaRequestQueryInput = z.input<
 
 export type GetWorkflowJsonSchemaResponse = z.infer<typeof GetWorkflowJsonSchemaResponse>;
 export const GetWorkflowJsonSchemaResponse = z.object({}).catchall(z.unknown());
+export type GetWorkflowsRequestQuery = z.infer<typeof GetWorkflowsRequestQuery>;
+export const GetWorkflowsRequestQuery = z.object({
+  size: z.coerce.number().optional(),
+  page: z.coerce.number().optional(),
+  enabled: ArrayFromString(z.boolean()).optional(),
+  createdBy: ArrayFromString(z.string()).optional(),
+  tags: ArrayFromString(z.string()).optional(),
+  query: z.string().optional(),
+});
+export type GetWorkflowsRequestQueryInput = z.input<typeof GetWorkflowsRequestQuery>;
+
+export type GetWorkflowsResponse = z.infer<typeof GetWorkflowsResponse>;
+export const GetWorkflowsResponse = z.object({
+  results: z.array(z.unknown()).optional(),
+  total: z.number().optional(),
+});
 
 export type GetWorkflowStatsResponse = z.infer<typeof GetWorkflowStatsResponse>;
 export const GetWorkflowStatsResponse = z.object({}).catchall(z.unknown());

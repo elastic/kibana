@@ -13,7 +13,6 @@ import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { registerDeleteWorkflowByIdRoute } from './delete_workflow_by_id';
 import { registerDeleteWorkflowsBulkRoute } from './delete_workflows_bulk';
 import { registerGetConnectorsRoute } from './get_connectors';
-import { registerGetListWorkflowsRoute } from './get_list_workflows';
 import { registerGetStepExecutionRoute } from './get_step_execution';
 import { registerGetWorkflowAggsRoute } from './get_workflow_aggs';
 import { registerGetWorkflowByIdRoute } from './get_workflow_by_id';
@@ -22,6 +21,7 @@ import { registerGetWorkflowExecutionLogsRoute } from './get_workflow_execution_
 import { registerGetWorkflowExecutionsRoute } from './get_workflow_executions';
 import { registerGetWorkflowJsonSchemaRoute } from './get_workflow_json_schema';
 import { registerGetWorkflowStatsRoute } from './get_workflow_stats';
+import { registerGetWorkflowsRoute } from './get_workflows';
 import type { RouteDependencies } from './lib/types';
 import { registerPostBulkCreateWorkflowsRoute } from './post_bulk_create_workflows';
 import { registerPostCancelWorkflowExecutionRoute } from './post_cancel_workflow_execution';
@@ -32,8 +32,8 @@ import { registerPostSearchWorkflowsRoute } from './post_search_workflows';
 import { registerPostTestStepRoute } from './post_test_step';
 import { registerPostTestWorkflowRoute } from './post_test_workflow';
 import { registerPutUpdateWorkflowRoute } from './put_update_workflow';
+import type { WorkflowsManagementApi } from '../service/workflows_management_api';
 import type { WorkflowsRouter } from '../types';
-import type { WorkflowsManagementApi } from '../workflows_management/workflows_management_api';
 
 export function defineRoutes(
   router: WorkflowsRouter,
@@ -47,7 +47,7 @@ export function defineRoutes(
   registerGetWorkflowAggsRoute(deps);
   registerGetWorkflowByIdRoute(deps);
   registerGetConnectorsRoute(deps);
-  registerGetListWorkflowsRoute(deps);
+  registerGetWorkflowsRoute(deps);
   registerPostSearchWorkflowsRoute(deps);
   registerPostCreateWorkflowRoute(deps);
   registerPostBulkCreateWorkflowsRoute(deps);

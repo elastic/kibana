@@ -13,7 +13,7 @@
  */
 export const API_VERSIONS = {
   public: {
-    v1: '2025-02-13',
+    v1: '2023-10-31',
   },
   internal: {
     v1: '1',

@@ -17,7 +17,7 @@ const DEFAULT_PAGE_SIZE = 100;
 const MAX_RETRIES = 3;
 
 interface UseWorkflowExecutionsParams {
-  workflowId: string;
+  workflowId: string | null;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
@@ -42,6 +42,9 @@ export function useWorkflowExecutions(
 
   const queryFn = useCallback(
     async ({ pageParam = 1 }: { pageParam?: number }) => {
+      if (!params.workflowId) {
+        throw new Error('Workflow ID is required'); // This should never happen
+      }
       return http.get<WorkflowExecutionListDto>(getWorkflowExecutionsListPath(params.workflowId), {
         query: {
           statuses: params.statuses,
@@ -84,8 +87,9 @@ export function useWorkflowExecutions(
     isLoading: isInitialLoading,
     refetch,
     error,
-  } = useInfiniteQuery(
-    [
+  } = useInfiniteQuery({
+    networkMode: 'always',
+    queryKey: [
       'workflows',
       params.workflowId,
       'executions',
