@@ -18,10 +18,10 @@ import {
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
+  apiPublishesSettings,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, merge } from 'rxjs';
-import { apiPublishesSettings } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { MapApi } from './types';
 import { SavedMap } from '../routes/map_page';

@@ -12,8 +12,6 @@ import type {
   PublishesReload,
   PublishesViewMode,
   PublishesUnifiedSearch,
-} from '@kbn/presentation-publishing';
-import type {
   CanAddNewPanel,
   HasLastSavedChildState,
   HasSerializedChildState,

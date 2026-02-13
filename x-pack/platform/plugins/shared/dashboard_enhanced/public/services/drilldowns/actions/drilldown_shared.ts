@@ -10,8 +10,6 @@ import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugi
 import {
   apiIsPresentationContainer,
   type PresentationContainer,
-} from '@kbn/presentation-publishing';
-import {
   getTitle,
   type PublishesTitle,
   type HasUniqueId,

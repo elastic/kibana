@@ -8,18 +8,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { PresentationContainer } from '@kbn/presentation-publishing';
-import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type {
-  CanAccessViewMode,
-  EmbeddableApiContext,
-  HasParentApi,
-  HasUniqueId,
-  PublishesDescription,
-  PublishesTitle,
-} from '@kbn/presentation-publishing';
-import {
+  type PresentationContainer,
+  type CanAccessViewMode,
+  type EmbeddableApiContext,
+  type HasParentApi,
+  type HasUniqueId,
+  type PublishesDescription,
+  type PublishesTitle,
   apiCanAccessViewMode,
+  apiIsPresentationContainer,
   apiHasParentApi,
   apiHasUniqueId,
   getInheritedViewMode,
