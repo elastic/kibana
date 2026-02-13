@@ -24,6 +24,7 @@ export default createStatefulTestConfig({
           appenders: ['default'],
         },
       ])}`,
+      '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
     ],
   },
 });
