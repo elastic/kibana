@@ -34,6 +34,70 @@ EVAL_FANOUT="${EVAL_FANOUT:-}"
 EVAL_PROJECT="${EVAL_PROJECT:-}"
 EVAL_FANOUT_CONCURRENCY="${EVAL_FANOUT_CONCURRENCY:-4}"
 
+# Optional: extend eval connectors with EIS models (Elastic Inference Service).
+# This is intentionally done here (post-bootstrap) so Node scripts can import repo packages if needed.
+if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
+  NEED_EIS_CONNECTORS="false"
+  if [[ "${EVAL_INCLUDE_EIS_MODELS:-}" =~ ^(1|true)$ ]]; then
+    NEED_EIS_CONNECTORS="true"
+  fi
+  # Fanout child steps only need EIS connectors when running an EIS project.
+  if [[ -n "${EVAL_PROJECT:-}" ]] && [[ "${EVAL_PROJECT}" == eis-* ]]; then
+    NEED_EIS_CONNECTORS="true"
+  fi
+
+  if [[ "${NEED_EIS_CONNECTORS}" == "true" ]]; then
+    if [[ -z "${KIBANA_EIS_CCM_API_KEY:-}" ]]; then
+      echo "FTR_EIS_CCM was set but KIBANA_EIS_CCM_API_KEY is missing"
+      exit 1
+    fi
+
+    echo "--- Discovering EIS models for eval connectors"
+    node scripts/discover_eis_models.js
+
+    echo "--- Generating EIS connectors"
+    EIS_CONNECTORS_B64="$(
+      node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_eis_connectors.js
+    )"
+
+    export EIS_CONNECTORS_B64
+
+    echo "--- Merging LiteLLM + EIS connectors"
+    export KIBANA_TESTING_AI_CONNECTORS="$(
+      node - <<'NODE'
+const rawLite = process.env.KIBANA_TESTING_AI_CONNECTORS || '';
+const rawEis = process.env.EIS_CONNECTORS_B64 || '';
+
+function tryParseJson(text) {
+  try {
+    const obj = JSON.parse(text);
+    if (obj && typeof obj === 'object') return obj;
+  } catch {}
+  return null;
+}
+
+function parseMaybeBase64Json(raw) {
+  if (!raw) return {};
+  const parsed = tryParseJson(raw);
+  if (parsed) return parsed;
+  try {
+    const decoded = Buffer.from(raw, 'base64').toString('utf8');
+    return tryParseJson(decoded) ?? {};
+  } catch {
+    return {};
+  }
+}
+
+const lite = parseMaybeBase64Json(rawLite);
+const eis = parseMaybeBase64Json(rawEis);
+
+const merged = { ...lite, ...eis };
+process.stdout.write(Buffer.from(JSON.stringify(merged), 'utf8').toString('base64'));
+NODE
+    )"
+  fi
+fi
+
 if [[ "${EVAL_FANOUT:-}" == "1" ]] && [[ -z "${EVAL_PROJECT:-}" ]]; then
   if ! command -v buildkite-agent >/dev/null 2>&1; then
     echo "EVAL_FANOUT=1 requires buildkite-agent; falling back to running all projects in-process"
@@ -79,14 +143,32 @@ const connectorIds =
     : connectorEntries
         .filter(([id, connector]) => {
           const defaultModel = connector?.config?.defaultModel;
-          return requested.includes(id) || (typeof defaultModel === 'string' && requested.includes(defaultModel));
+          const eisModelId = connector?.config?.providerConfig?.model_id;
+
+          const matchesRequested = (requestedValue) => {
+            if (requestedValue === id) return true;
+            if (typeof defaultModel === 'string' && requestedValue === defaultModel) return true;
+            if (typeof eisModelId === 'string') {
+              if (requestedValue === eisModelId) return true;
+              if (requestedValue.startsWith('eis/') && requestedValue.slice('eis/'.length) === eisModelId)
+                return true;
+            }
+            return false;
+          };
+
+          return requested.some(matchesRequested);
         })
         .map(([id]) => id);
 
 if (requested.length > 0 && !requested.includes('all') && connectorIds.length === 0) {
-  const availableModels = connectorEntries
-    .map(([, connector]) => connector?.config?.defaultModel)
-    .filter((m) => typeof m === 'string');
+  const availableModels = connectorEntries.flatMap(([, connector]) => {
+    const out = [];
+    const defaultModel = connector?.config?.defaultModel;
+    if (typeof defaultModel === 'string') out.push(defaultModel);
+    const eisModelId = connector?.config?.providerConfig?.model_id;
+    if (typeof eisModelId === 'string') out.push(`eis/${eisModelId}`);
+    return out;
+  });
   console.error(
     `No connectors matched EVAL_MODEL_GROUPS="${requested.join(',')}". ` +
       `Available models: ${availableModels.join(',')}`
@@ -135,6 +217,9 @@ EOF
         command: "bash .buildkite/scripts/steps/evals/run_suite.sh"
         env:
           KBN_EVALS: "1"
+          FTR_EIS_CCM: "${FTR_EIS_CCM:-}"
+          EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
+          EVALUATION_CONNECTOR_ID: "${EVALUATION_CONNECTOR_ID:-}"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_PROJECT: "${connector_id}"
           EVAL_FANOUT: "0"
@@ -164,7 +249,7 @@ EOF
 fi
 
 # Start Scout server in background (run Kibana from the distributable)
-node scripts/scout start-server --location local --arch stateful --domain classic --kibanaInstallDir "${KIBANA_BUILD_LOCATION:?}" &
+node scripts/scout start-server --location local --arch stateful --domain classic --serverConfigSet evals --kibanaInstallDir "${KIBANA_BUILD_LOCATION:?}" &
 SCOUT_PID=$!
 
 # Wait for Scout to write servers config (and fail fast if the Scout server process exits)
@@ -183,6 +268,53 @@ done
 if [[ ! -f .scout/servers/local.json ]]; then
   echo "Timed out waiting for .scout/servers/local.json"
   exit 1
+fi
+
+# Enable EIS Cloud Connected Mode (CCM) on the Scout ES cluster so EIS-backed
+# inference endpoints are available for `.inference` connectors.
+if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
+  NEED_EIS_RUNTIME="false"
+  if [[ -n "${EVAL_PROJECT:-}" ]] && [[ "${EVAL_PROJECT}" == eis-* ]]; then
+    NEED_EIS_RUNTIME="true"
+  fi
+  if [[ -n "${EVALUATION_CONNECTOR_ID:-}" ]] && [[ "${EVALUATION_CONNECTOR_ID}" == eis-* ]]; then
+    NEED_EIS_RUNTIME="true"
+  fi
+  if [[ "${EVAL_MODEL_GROUPS:-}" == *"eis/"* ]]; then
+    NEED_EIS_RUNTIME="true"
+  fi
+
+  if [[ "${NEED_EIS_RUNTIME}" != "true" ]]; then
+    echo "EIS CCM enabled but not required for this run; skipping CCM setup"
+  else
+    if [[ -z "${KIBANA_EIS_CCM_API_KEY:-}" ]]; then
+      echo "FTR_EIS_CCM was set but KIBANA_EIS_CCM_API_KEY is missing"
+      exit 1
+    fi
+
+  ES_URL="$(jq -r '.hosts.elasticsearch' .scout/servers/local.json | sed 's:/*$::')"
+  echo "--- Enabling EIS Cloud Connected Mode (CCM) on $ES_URL"
+
+  curl -sSf -u elastic:changeme \
+    -H 'content-type: application/json' \
+    -X PUT "$ES_URL/_inference/_ccm" \
+    -d "{\"api_key\":\"${KIBANA_EIS_CCM_API_KEY:?}\"}" >/dev/null
+
+  echo "--- Waiting for EIS inference endpoints"
+  for attempt in {1..10}; do
+    if curl -sSf -u elastic:changeme "$ES_URL/_inference/_all" \
+      | jq -e '.endpoints | any(.task_type=="chat_completion" and .service=="elastic")' >/dev/null; then
+      echo "✅ EIS endpoints available"
+      break
+    fi
+    if [[ "$attempt" == "10" ]]; then
+      echo "❌ Timed out waiting for EIS endpoints"
+      curl -sSf -u elastic:changeme "$ES_URL/_inference/_all" || true
+      exit 1
+    fi
+    sleep 3
+  done
+  fi
 fi
 
 # Wait for Kibana to be ready (and fail fast if the Scout server process exits)

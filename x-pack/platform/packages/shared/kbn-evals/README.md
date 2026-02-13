@@ -140,6 +140,55 @@ Eval suites can be triggered in PR CI by adding GitHub labels:
 - `evals:<suite-id>` (or the explicit `ciLabels` value from `evals.suites.json`)
 - `evals:all` to run **all** eval suites
 
+### CI labels: model selection + judge override
+
+Evals support optional PR labels for selecting which connector projects to run and (separately) which connector should be used for LLM-as-a-judge evaluators:
+
+- **Model selection**:
+  - `models:all` to opt into **all** available connector projects (LiteLLM + EIS)
+  - `models:<model-group>` to select one or more model groups
+    - LiteLLM model groups typically look like `llm-gateway/<model>`
+    - EIS model groups are expressed as `eis/<modelId>` (e.g. `models:eis/gpt-4.1`)
+- **Judge override**:
+  - `models:judge:<connector-id>` to override the connector id used for LLM-as-a-judge evaluators in CI.
+    This takes precedence over the Vault `evaluationConnectorId` fallback (env var overrides still apply in local runs).
+
+#### CI ops: create/update model + judge labels
+
+The helper script `scripts/create_models_labels.sh` is idempotent (safe to re-run) and supports targeting a specific repo.
+
+Create/update EIS model labels from a local discovery artifact:
+
+```bash
+./scripts/create_models_labels.sh --repo elastic/kibana \
+  --from-eis-models-json target/eis_models.json
+```
+
+Create/update LiteLLM model labels by first exporting a connectors JSON map (uses the same LiteLLM “team info” discovery as CI):
+
+```bash
+node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
+  --api-key "$LITELLM_VIRTUAL_KEY" \
+  --format json > /tmp/litellm_connectors.json
+
+./scripts/create_models_labels.sh --repo elastic/kibana \
+  --from-litellm-connectors-json /tmp/litellm_connectors.json
+```
+
+Create/update specific judge override labels:
+
+```bash
+./scripts/create_models_labels.sh --repo elastic/kibana \
+  --judge litellm-llm-gateway-gpt-4o
+```
+
+Create/update judge override labels for **all** EIS models in `target/eis_models.json` (judge labels must use connector ids, which are derived from model ids):
+
+```bash
+./scripts/create_models_labels.sh --repo elastic/kibana \
+  --judge-from-eis-models-json target/eis_models.json
+```
+
 ### CI ops: sharing a Vault update command
 
 If you need to update the kbn-evals CI Vault config (and want an easy copy/paste command to share with @kibana-ops),
@@ -157,6 +206,12 @@ node x-pack/platform/packages/shared/kbn-evals/scripts/vault/get_command.js
 ```
 
 Share the output via a secure pastebin (for example `https://p.elstc.co`) and have ops run it.
+
+To sync your local `config.json` from Vault (requires Vault auth):
+
+```bash
+node x-pack/platform/packages/shared/kbn-evals/scripts/vault/retrieve_secrets.js --vault ci-prod
+```
 
 ### Local dev: LiteLLM (SSO)
 

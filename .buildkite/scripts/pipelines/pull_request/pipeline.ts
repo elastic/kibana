@@ -102,9 +102,13 @@ function parseGithubPrLabels(raw: string): string[] {
 function buildEvalsYaml({
   selectedSuites,
   modelGroups,
+  evaluationConnectorId,
+  includeEisModels,
 }: {
   selectedSuites: EvalsSuiteMetadataEntry[];
   modelGroups: string[] | undefined;
+  evaluationConnectorId: string | undefined;
+  includeEisModels: boolean;
 }): string {
   const suiteSteps = selectedSuites
     .map((suite) => {
@@ -114,14 +118,23 @@ function buildEvalsYaml({
         modelGroups && modelGroups.length > 0
           ? `          EVAL_MODEL_GROUPS: '${modelGroups.join(',')}'`
           : null;
+      const evaluationConnectorIdEnv = evaluationConnectorId
+        ? `          EVALUATION_CONNECTOR_ID: '${evaluationConnectorId}'`
+        : null;
+      const includeEisModelsEnv = includeEisModels
+        ? `          EVAL_INCLUDE_EIS_MODELS: '1'`
+        : null;
       return [
         `      - label: '${label}'`,
         `        key: ${key}`,
         `        command: bash .buildkite/scripts/steps/evals/run_suite.sh`,
         `        env:`,
         `          KBN_EVALS: '1'`,
+        `          FTR_EIS_CCM: '1'`,
         `          EVAL_SUITE_ID: '${suite.id}'`,
         `          EVAL_FANOUT: '1'`,
+        ...(evaluationConnectorIdEnv ? [evaluationConnectorIdEnv] : []),
+        ...(includeEisModelsEnv ? [includeEisModelsEnv] : []),
         ...(modelGroupsEnv ? [modelGroupsEnv] : []),
         `        timeout_in_minutes: 60`,
         `        agents:`,
@@ -618,8 +631,16 @@ function buildEvalsYaml({
     //   matches one of those model groups.
     // - `models:all` can be used to explicitly opt into all models (ignored if combined with specifics).
     const parsedLabels = parseGithubPrLabels(GITHUB_PR_LABELS);
+    const evaluationConnectorId = parsedLabels
+      .find((label) => label.startsWith('models:judge:'))
+      ?.slice('models:judge:'.length)
+      ?.trim();
+    const includeEisModels =
+      parsedLabels.includes('models:all') ||
+      parsedLabels.some((label) => label.startsWith('models:eis/')) ||
+      (typeof evaluationConnectorId === 'string' && evaluationConnectorId.startsWith('eis-'));
     const selectedModelGroups = parsedLabels
-      .filter((label) => label.startsWith('models:'))
+      .filter((label) => label.startsWith('models:') && !label.startsWith('models:judge:'))
       .map((label) => label.slice('models:'.length))
       .map((value) => value.trim())
       .filter(Boolean)
@@ -630,6 +651,8 @@ function buildEvalsYaml({
         buildEvalsYaml({
           selectedSuites: selectedEvalSuites,
           modelGroups: selectedModelGroups.length > 0 ? selectedModelGroups : undefined,
+          evaluationConnectorId,
+          includeEisModels,
         })
       );
     }
