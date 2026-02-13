@@ -7,7 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { kqlQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery } from '@kbn/observability-utils-server/es/queries/kql_query';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import type { ServicesItemsItem } from '../../data_registry/data_registry_types';
 import type {
