@@ -10,19 +10,21 @@ import { ConfigKey, MonitorTypeEnum } from '../../../common/runtime_types';
 
 interface MonitorWarning {
   monitorId: string;
+  publicLocationIds: string[];
   message: string;
 }
 
-const buildBrowserTimeoutWarning = (monitorId: string): MonitorWarning => ({
+const buildBrowserTimeoutWarning = (monitorId: string, publicLocationIds: string[]): MonitorWarning => ({
   monitorId,
   message: i18n.translate(
     'xpack.synthetics.server.monitors.browserTimeoutNoPrivateLocationsWarning',
     {
       defaultMessage:
-        'For browser monitors, timeout is only supported on private locations. Browser monitor {monitorId} specifies a timeout but has no private locations configured, so the timeout will have no effect.',
-      values: { monitorId },
+        'For browser monitors, timeout is only supported on private locations. Browser monitor {monitorId} specifies a timeout and is running on public locations: {publicLocationIds}. The timeout will have no effect on these locations.',
+      values: { monitorId, publicLocationIds: publicLocationIds.join(', ') },
     }
   ),
+  publicLocationIds,
 });
 
 export const getBrowserTimeoutWarningForMonitor = (
@@ -35,22 +37,25 @@ export const getBrowserTimeoutWarningForMonitor = (
   if (!monitor[ConfigKey.TIMEOUT]) {
     return null;
   }
-  const hasPrivateLocations = monitor.locations?.some((location) => !location.isServiceManaged);
-  if (hasPrivateLocations) {
+  const publicLocationIds = monitor.locations?.filter((location) => location.isServiceManaged).map((location) => location.id);
+  if (publicLocationIds.length === 0) {
     return null;
   }
-  return buildBrowserTimeoutWarning(monitorId);
+  return buildBrowserTimeoutWarning(monitorId, publicLocationIds);
 };
 
 export const getBrowserTimeoutWarningsForProjectMonitors = (
   monitors: ProjectMonitor[]
 ): MonitorWarning[] => {
   return monitors
-    .filter(
-      (monitor) =>
-        monitor.type === MonitorTypeEnum.BROWSER &&
+    .reduce<MonitorWarning[]>((acc, monitor) => {
+
+      if (monitor.type === MonitorTypeEnum.BROWSER &&
         Boolean(monitor.timeout) &&
-        (monitor.privateLocations ?? []).length === 0
-    )
-    .map((monitor) => buildBrowserTimeoutWarning(monitor.id));
+        (monitor.locations ?? []).length > 0) {
+        acc.push(buildBrowserTimeoutWarning(monitor.id, monitor.locations as string[]))
+      }
+
+      return acc;
+    }, [])
 };

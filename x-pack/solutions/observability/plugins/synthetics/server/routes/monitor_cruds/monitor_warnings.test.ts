@@ -23,11 +23,12 @@ describe('monitor warnings', () => {
       expect(getBrowserTimeoutWarningForMonitor(monitor, 'monitor-id')).toEqual({
         monitorId: 'monitor-id',
         message:
-          'For browser monitors, timeout is only supported on private locations. Browser monitor monitor-id specifies a timeout but has no private locations configured, so the timeout will have no effect.',
+          'For browser monitors, timeout is only supported on private locations. Browser monitor monitor-id specifies a timeout and is running on public locations: us-east. The timeout will have no effect on these locations.',
+        publicLocationIds: ['us-east'],
       });
     });
 
-    it('returns null when browser monitor has private locations', () => {
+    it('returns null when browser monitor has no public locations', () => {
       const monitor = {
         [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
         [ConfigKey.TIMEOUT]: '60',
@@ -58,7 +59,7 @@ describe('monitor warnings', () => {
   });
 
   describe('getBrowserTimeoutWarningsForProjectMonitors', () => {
-    it('returns warning for browser project monitor with timeout and no private locations', () => {
+    it('returns warning for browser project monitor with timeout and public locations', () => {
       const monitors = [
         {
           id: 'journey-1',
@@ -66,7 +67,8 @@ describe('monitor warnings', () => {
           name: 'Browser monitor',
           schedule: '10',
           timeout: '60',
-          privateLocations: [],
+          privateLocations: ['private-1'],
+          locations: ['public-1']
         } as ProjectMonitor,
       ];
 
@@ -74,7 +76,8 @@ describe('monitor warnings', () => {
         {
           monitorId: 'journey-1',
           message:
-            'For browser monitors, timeout is only supported on private locations. Browser monitor journey-1 specifies a timeout but has no private locations configured, so the timeout will have no effect.',
+            'For browser monitors, timeout is only supported on private locations. Browser monitor journey-1 specifies a timeout and is running on public locations: public-1. The timeout will have no effect on these locations.',
+          publicLocationIds: ['public-1'],
         },
       ]);
     });
