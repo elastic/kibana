@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import type { InferenceConnector } from '@kbn/inference-common';
+import { getDefaultConnector } from '@kbn/inference-plugin/public';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 import { useKibana } from './use_kibana';
 
@@ -46,7 +47,7 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
         return defaultConnector;
       }
     }
-    return connectors[0];
+    return getDefaultConnector({ connectors });
   }, [connectors, defaultConnectorId]);
 
   return {
