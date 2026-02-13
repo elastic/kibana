@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   EuiIcon,
   EuiAccordion,
@@ -79,6 +79,18 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
   const { isLoading, error, summary, context, wasStopped, fetch, stop, regenerate } =
     useStreamingAiInsight(createStream);
 
+  const connectorInfo = useMemo(() => {
+    if (!selectedConnector) return undefined;
+    return {
+      connectorId: selectedConnector.connectorId,
+      name: selectedConnector.name,
+      type: selectedConnector.type,
+      modelFamily: getConnectorFamily(selectedConnector),
+      modelProvider: getConnectorProvider(selectedConnector),
+      modelId: getConnectorModel(selectedConnector),
+    };
+  }, [selectedConnector]);
+
   const handleStartConversation = useCallback(() => {
     if (!agentBuilder?.openConversationFlyout) return;
 
@@ -91,27 +103,35 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
 
   const handleFeedback = useCallback(
     (feedback: Feedback) => {
-      if (!selectedConnector) return;
+      if (!connectorInfo) return;
       try {
         analytics?.reportEvent(ObservabilityAgentBuilderTelemetryEventType.AiInsightFeedback, {
           feedback,
           insightType,
-          connector: {
-            connectorId: selectedConnector.connectorId,
-            name: selectedConnector.name,
-            type: selectedConnector.type,
-            modelFamily: getConnectorFamily(selectedConnector),
-            modelProvider: getConnectorProvider(selectedConnector),
-            modelId: getConnectorModel(selectedConnector),
-          },
+          connector: connectorInfo,
         });
       } catch (e) {
         // eslint-disable-next-line no-console
         console.debug('Failed to report AI insight feedback event', e);
       }
     },
-    [analytics, insightType, selectedConnector]
+    [analytics, connectorInfo, insightType]
   );
+
+  useEffect(() => {
+    if (error) {
+      try {
+        analytics?.reportEvent(ObservabilityAgentBuilderTelemetryEventType.AiInsightFailed, {
+          insightType,
+          errorMessage: error,
+          connector: connectorInfo,
+        });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.debug('Failed to report AI insight failed event', e);
+      }
+    }
+  }, [analytics, connectorInfo, error, insightType]);
 
   if (
     !hasConnectors ||
@@ -164,6 +184,15 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
         onToggle={(open) => {
           setIsOpen(open);
           if (open && !error && !summary && !isLoading) {
+            try {
+              analytics?.reportEvent(ObservabilityAgentBuilderTelemetryEventType.AiInsightOpened, {
+                insightType,
+                connector: connectorInfo,
+              });
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              console.debug('Failed to report AI insight opened event', e);
+            }
             fetch();
           }
         }}

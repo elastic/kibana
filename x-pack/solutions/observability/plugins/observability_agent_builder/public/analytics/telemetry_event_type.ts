@@ -6,5 +6,7 @@
  */
 
 export enum ObservabilityAgentBuilderTelemetryEventType {
+  AiInsightOpened = 'observability_agent_builder_ai_insight_opened',
+  AiInsightFailed = 'observability_agent_builder_ai_insight_failed',
   AiInsightFeedback = 'observability_agent_builder_ai_insight_feedback',
 }

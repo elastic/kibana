@@ -6,13 +6,23 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import { insightFeedbackEventSchema } from './schemas/insight_feedback';
-
-const schemas = [insightFeedbackEventSchema];
+import {
+  insightFailedEventSchema,
+  insightFeedbackEventSchema,
+  insightOpenedEventSchema,
+} from './schemas/insight_feedback';
 
 export const registerTelemetryEventTypes = (analytics: AnalyticsServiceSetup) => {
-  schemas.forEach((schema) => analytics.registerEventType(schema));
+  analytics.registerEventType(insightOpenedEventSchema);
+  analytics.registerEventType(insightFailedEventSchema);
+  analytics.registerEventType(insightFeedbackEventSchema);
 };
 
 export { ObservabilityAgentBuilderTelemetryEventType } from './telemetry_event_type';
-export type { InsightType, InsightFeedback, ConnectorInfo } from './schemas/insight_feedback';
+export type {
+  ConnectorInfo,
+  InsightFailedEvent,
+  InsightFeedbackEvent,
+  InsightOpenedEvent,
+  InsightType,
+} from './schemas/insight_feedback';
