@@ -24,7 +24,7 @@ import {
   ENVIRONMENT_NOT_DEFINED_VALUE,
 } from '../../../../../common/environment_filter_values';
 
-type IndexType = 'traces' | 'error';
+export type IndexType = 'traces' | 'error';
 
 const INDEX_CONFIG_MAP: Record<IndexType, string[]> = {
   traces: ['span', 'transaction'],

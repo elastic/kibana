@@ -9,7 +9,7 @@
 
 import getopts from 'getopts';
 import { promises as fs } from 'fs';
-import { relative, dirname } from 'path';
+import { relative } from 'path';
 import { spawn } from 'child_process';
 import Table from 'cli-table3';
 import chalk from 'chalk';
@@ -18,6 +18,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { tmpdir } from 'os';
 import { getJestConfigs } from './configs/get_jest_configs';
+import { isInBuildkite, markConfigCompleted, isConfigCompleted } from './buildkite_checkpoint';
 
 interface JestConfigResult {
   config: string;
@@ -149,23 +150,6 @@ export async function runJestAll() {
     testFiles: results.map((r) => relative(process.cwd(), r.config)),
   });
 
-  // Persist failed configs for retry logic if requested
-  if (process.env.JEST_ALL_FAILED_CONFIGS_PATH) {
-    const failed = results.filter((r) => r.code !== 0).map((r) => r.config);
-
-    try {
-      await fs.mkdir(dirname(process.env.JEST_ALL_FAILED_CONFIGS_PATH), { recursive: true });
-
-      await fs.writeFile(
-        process.env.JEST_ALL_FAILED_CONFIGS_PATH,
-        JSON.stringify(failed, null, 2),
-        'utf8'
-      );
-    } catch (err) {
-      log.warning(`Unable to write failed configs file: ${(err as Error).message}`);
-    }
-  }
-
   log.write('--- Combined Jest run summary');
 
   await writeSummary(results, log, totalMs);
@@ -174,10 +158,55 @@ export async function runJestAll() {
 }
 
 async function runConfigs(
-  configs: string[],
+  allConfigs: string[],
   maxParallel: number,
   log: ToolingLog
 ): Promise<JestConfigResult[]> {
+  const skippedResults: JestConfigResult[] = [];
+  let configs = allConfigs;
+
+  // In Buildkite, skip configs already completed on a previous attempt (checkpoint resume)
+  if (isInBuildkite()) {
+    log.info(
+      `[jest-checkpoint] Checking ${allConfigs.length} configs for prior completion (step=${
+        process.env.BUILDKITE_STEP_ID || ''
+      }, job=${process.env.BUILDKITE_PARALLEL_JOB || '0'}, retry=${
+        process.env.BUILDKITE_RETRY_COUNT || '0'
+      })`
+    );
+
+    const completionStatus = await Promise.all(
+      allConfigs.map(async (config) => {
+        // Use relative path for checkpoint key so it's stable across different CI agents
+        const relConfig = relative(REPO_ROOT, config);
+        const completed = await isConfigCompleted(relConfig);
+        log.info(`[jest-checkpoint]   ${completed ? 'SKIP' : 'RUN '} ${relConfig}`);
+        return { config, completed };
+      })
+    );
+
+    const skipped = completionStatus.filter((c) => c.completed);
+    configs = completionStatus.filter((c) => !c.completed).map((c) => c.config);
+
+    for (const { config } of skipped) {
+      skippedResults.push({ config, code: 0, durationMs: 0 });
+    }
+
+    if (skipped.length > 0) {
+      log.info(
+        `[jest-checkpoint] Resumed: skipped ${skipped.length} already-completed, ${configs.length} remaining`
+      );
+    } else {
+      log.info(
+        `[jest-checkpoint] No prior checkpoints found, running all ${configs.length} configs`
+      );
+    }
+  }
+
+  if (configs.length === 0) {
+    return skippedResults;
+  }
+
   const results: JestConfigResult[] = [];
   let active = 0;
   let index = 0;
@@ -186,6 +215,20 @@ async function runConfigs(
   await fs.mkdir(slowTestsDir, { recursive: true });
 
   await new Promise<void>((resolveAll) => {
+    const wallStart = Date.now();
+
+    // Periodic heartbeat so CI logs show progress even when no config has finished yet
+    const heartbeat = setInterval(() => {
+      const elapsedSec = Math.round((Date.now() - wallStart) / 1000);
+      const min = Math.floor(elapsedSec / 60);
+      const sec = elapsedSec % 60;
+      const queued = configs.length - index;
+      log.info(
+        `[jest-progress] ${active} running, ${results.length} completed, ${queued} queued (elapsed ${min}m ${sec}s)`
+      );
+    }, 60_000);
+    heartbeat.unref(); // don't keep the process alive just for the timer
+
     const launchNext = () => {
       while (active < maxParallel && index < configs.length) {
         const config = configs[index++];
@@ -236,23 +279,36 @@ async function runConfigs(
           // Print buffered output after completion to keep logs grouped per config
           const sec = Math.round(durationMs / 1000);
 
+          const relConfigPath = relative(REPO_ROOT, config);
           log.info(
-            `Output for ${config} (exit ${code} - ${
+            `Output for ${relConfigPath} (exit ${code} - ${
               code === 0 ? 'success' : 'failure'
             }, ${sec}s)\n` +
               buffer +
               '\n'
           );
 
-          // Log how many configs are left to complete
-          const remaining = configs.length - results.length;
-          log.info(`Configs left: ${remaining}`);
+          const proceed = () => {
+            // Log how many configs are left to complete (after checkpoint is written)
+            const remaining = configs.length - results.length;
+            log.info(`Configs left: ${remaining}`);
 
-          active -= 1;
-          if (index < configs.length) {
-            launchNext();
-          } else if (active === 0) {
-            resolveAll();
+            active -= 1;
+            if (index < configs.length) {
+              launchNext();
+            } else if (active === 0) {
+              clearInterval(heartbeat);
+              resolveAll();
+            }
+          };
+
+          // Write checkpoint for successful configs before proceeding
+          // Use relative path for stable keys across CI agents
+          if (code === 0 && isInBuildkite()) {
+            log.info(`[jest-checkpoint] Marking ${relConfigPath} as completed`);
+            markConfigCompleted(relConfigPath).then(proceed, proceed);
+          } else {
+            proceed();
           }
         });
       }
@@ -260,7 +316,7 @@ async function runConfigs(
     launchNext();
   });
 
-  return results;
+  return [...skippedResults, ...results];
 }
 
 function parseFailedTests(output: string): FailedTest[] {

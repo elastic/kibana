@@ -48,10 +48,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     let endDate: string;
     const objectRemover = new ObjectRemover(supertest);
 
-    beforeEach(async () => {
-      await esTestIndexTool.destroy();
+    before(async () => {
       await esTestIndexTool.setup();
+    });
 
+    beforeEach(async () => {
       // write documents in the future, figure out the end date
       const endDateMillis = Date.now() + (RULE_INTERVALS_TO_WRITE - 1) * RULE_INTERVAL_MILLIS;
       endDate = new Date(endDateMillis).toISOString();
@@ -64,6 +65,10 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         query: { match_all: {} },
         conflicts: 'proceed',
       });
+    });
+
+    after(async () => {
+      await esTestIndexTool.destroy();
     });
 
     [ESQL_ASYNC_SEARCH_STRATEGY, ENHANCED_ES_SEARCH_STRATEGY, EQL_SEARCH_STRATEGY].forEach(
