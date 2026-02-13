@@ -10,7 +10,7 @@
 import type { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
 import { formatTime, isValidUTCDate } from '../../../../utils';
 import { coreWorkerFixtures } from '..';
-import type { ImportSavedObjects, ScoutSpaceParallelFixture } from '.';
+import type { ImportSavedObjects, ScoutSpaceParallelFixture, SpaceSolutionView } from '.';
 import { measurePerformanceAsync } from '../../../../../common';
 
 export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
@@ -114,6 +114,20 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         );
       };
 
+      const setSolutionView = async (solution: SpaceSolutionView) => {
+        return measurePerformanceAsync(
+          log,
+          `space.setSolutionView({spaceId:'${spaceId}', solution:'${solution}'})`,
+          async () => {
+            await kbnClient.request({
+              method: 'PUT',
+              path: `/internal/spaces/space/${spaceId}/solution`,
+              body: { solution },
+            });
+          }
+        );
+      };
+
       const savedObjects = {
         load,
         cleanStandardList,
@@ -127,7 +141,7 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
       };
 
       log.serviceMessage('scoutSpace', `New Kibana space '${spaceId}' created`);
-      await use({ savedObjects, uiSettings, id: spaceId });
+      await use({ savedObjects, uiSettings, id: spaceId, setSolutionView });
 
       // Cleanup space after tests via API call
       await measurePerformanceAsync(log, `space.delete(${spaceId})`, async () => {

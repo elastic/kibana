@@ -12,7 +12,7 @@ import { i18nStrings } from '../i18n_strings';
 
 export const createMachineLearningNavigationTree = (): NodeDefinition => ({
   id: SecurityGroupName.machineLearning,
-  icon: 'machineLearningApp',
+  icon: 'productML',
   title: SecurityLinkGroup[SecurityGroupName.machineLearning].title,
   renderAs: 'panelOpener',
   children: [
