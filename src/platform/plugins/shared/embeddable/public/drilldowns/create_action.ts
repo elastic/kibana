@@ -34,6 +34,7 @@ export function createAction(embeddableUuid: string, drilldownState: DrilldownAc
 
     return {
       id: actionId,
+      type,
       getDisplayName: () => label,
       getIconType: () => euiIcon,
       ...(getHref
