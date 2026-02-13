@@ -19,5 +19,14 @@ export const filterBarStyles = ({ euiTheme }: UseEuiTheme, afterQueryBar?: boole
         margin-top: ${afterQueryBar ? euiTheme.size.s : 0};
       }
     `,
+    /** Pills group without margin - for use when nested in collapsible wrapper */
+    groupWithoutMargin: css`
+      gap: ${euiTheme.size.xs};
+    `,
+    /** Scrollable container for filter pills when expanded */
+    pillsScrollContainer: css`
+      max-height: 150px;
+      overflow-y: auto;
+    `,
   };
 };

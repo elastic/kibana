@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { buildPhraseFilter, isOfAggregateQueryType } from '@kbn/es-query';
 import {
   appendWhereClauseToESQLQuery,
   hasTransformationalCommand,
@@ -204,6 +204,37 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       } mode. The index pattern is the ${dataView.getIndexPattern()}`,
     });
   }, [dataView, isEsqlMode, observabilityAIAssistant?.service]);
+
+  // Dev helper: run __kbnAddDiscoverTestFilters() in the browser console to add 40 test filter pills
+  useEffect(() => {
+    const fields = dataView.fields.filter((f) => !f.name.startsWith('_') && f.aggregatable);
+    const fieldPool =
+      fields.length > 0
+        ? fields
+        : [
+            { name: 'message', type: 'string' as const },
+            { name: 'host.name', type: 'string' as const },
+            { name: 'event.action', type: 'string' as const },
+          ];
+    const addTestFilters = () => {
+      const filters = Array.from({ length: 40 }, (_, i) => {
+        const field = fieldPool[i % fieldPool.length];
+        const f = buildPhraseFilter(
+          { name: field.name, type: field.type },
+          `test-value-${i + 1}`,
+          dataView
+        );
+        return { ...f, meta: { ...f.meta, disabled: true } };
+      });
+      filterManager.addFilters(filters);
+    };
+    (window as unknown as { __kbnAddDiscoverTestFilters?: () => void }).__kbnAddDiscoverTestFilters =
+      addTestFilters;
+    return () => {
+      delete (window as unknown as { __kbnAddDiscoverTestFilters?: () => void })
+        .__kbnAddDiscoverTestFilters;
+    };
+  }, [dataView, filterManager]);
 
   const onAddFilter = useCallback<DocViewFilterFn>(
     (field, values, operation) => {
