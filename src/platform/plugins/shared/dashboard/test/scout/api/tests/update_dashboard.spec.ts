@@ -38,9 +38,7 @@ apiTest.describe('dashboards - update', { tag: tags.stateful.classic }, () => {
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        data: {
-          title: 'Refresh Requests (Updated)',
-        },
+        title: 'Refresh Requests (Updated)',
       },
       responseType: 'json',
     });
@@ -57,9 +55,7 @@ apiTest.describe('dashboards - update', { tag: tags.stateful.classic }, () => {
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        data: {
-          title: 'Some other dashboard (updated)',
-        },
+        title: 'Some other dashboard (updated)',
       },
       responseType: 'json',
     });
@@ -77,15 +73,13 @@ apiTest.describe('dashboards - update', { tag: tags.stateful.classic }, () => {
         ...COMMON_HEADERS,
         ...editorCredentials.apiKeyHeader,
       },
-      body: {
-        data: {},
-      },
+      body: {},
       responseType: 'json',
     });
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.message).toBe(
-      '[request body.data.title]: expected value of type [string] but got [undefined]'
+      '[request body.title]: expected value of type [string] but got [undefined]'
     );
   });
 
@@ -96,17 +90,15 @@ apiTest.describe('dashboards - update', { tag: tags.stateful.classic }, () => {
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        data: {
-          title: 'foo',
-          panels: {},
-        },
+        title: 'foo',
+        panels: {},
       },
       responseType: 'json',
     });
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.message).toBe(
-      '[request body.data.panels]: expected value of type [array] but got [Object]'
+      '[request body.panels]: expected value of type [array] but got [Object]'
     );
   });
 });

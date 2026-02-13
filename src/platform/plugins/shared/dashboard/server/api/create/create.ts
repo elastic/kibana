@@ -11,17 +11,18 @@ import Boom from '@hapi/boom';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { DashboardCreateRequestBody } from './types';
+import type { DashboardCreateRequestBody, DashboardCreateRequestParams } from './types';
 import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../saved_object_utils';
 import type { DashboardCreateResponseBody } from './types';
 
 export async function create(
   requestCtx: RequestHandlerContext,
-  createBody: DashboardCreateRequestBody
+  createBody: DashboardCreateRequestBody,
+  createParams?: DashboardCreateRequestParams
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
-  const { access_control: accessControl, ...restOfData } = createBody.data;
+  const { access_control: accessControl, ...restOfData } = createBody;
 
   const {
     attributes: soAttributes,
@@ -41,8 +42,7 @@ export async function create(
     soAttributes,
     {
       references: soReferences,
-      ...(createBody.id && { id: createBody.id }),
-      ...(createBody.spaces && { initialNamespaces: createBody.spaces }),
+      ...(createParams?.id && { id: createParams.id }),
       ...(accessControl?.access_mode &&
         supportsAccessControl && {
           accessControl: {

@@ -44,10 +44,8 @@ export const dashboardClient = {
         allowUnmappedKeys: true,
       },
       body: JSON.stringify({
-        data: {
-          ...dashboardState,
-          ...(accessMode && { access_control: { access_mode: accessMode } }),
-        },
+        ...dashboardState,
+        ...(accessMode && { access_control: { access_mode: accessMode } }),
       }),
     });
   },
@@ -106,9 +104,7 @@ export const dashboardClient = {
         query: {
           allowUnmappedKeys: true,
         },
-        body: JSON.stringify({
-          data: dashboardState,
-        }),
+        body: JSON.stringify(dashboardState),
       }
     );
     cache.delete(id);

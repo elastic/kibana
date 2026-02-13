@@ -85,7 +85,9 @@ This tool will:
         const normalizedPanels = [markdownPanel, ...normalizePanels(panels, yOffset, resultStore)];
 
         const dashboardCreateResponse = await dashboard.client.create(requestHandlerContext, {
-          data: { title, description, panels: normalizedPanels },
+          title,
+          description,
+          panels: normalizedPanels,
         });
 
         logger.info(`Dashboard created successfully: ${dashboardCreateResponse.id}`);
