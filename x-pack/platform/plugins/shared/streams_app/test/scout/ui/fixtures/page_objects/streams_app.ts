@@ -849,10 +849,6 @@ export class StreamsApp {
     await this.page.getByTestId(`option-type-${type}`).click();
   }
 
-  async getFieldTypeOptionValues(): Promise<string[]> {
-    return this.fieldTypeSuperSelect.getOptionValues();
-  }
-
   async stageFieldMappingChanges() {
     await this.page.getByTestId('streamsAppSchemaEditorFieldStageButton').click();
   }
