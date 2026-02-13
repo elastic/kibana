@@ -45,6 +45,14 @@ jest.mock('./configs/get_jest_configs', () => ({
   getJestConfigs: jest.fn(),
 }));
 
+jest.mock('./shard_config', () => {
+  const actual = jest.requireActual('./shard_config');
+  return {
+    ...actual,
+    loadShardConfig: jest.fn().mockReturnValue({}),
+  };
+});
+
 // Mock process.exit to prevent tests from actually exiting
 const mockProcessExit = jest
   .spyOn(process, 'exit')
@@ -608,6 +616,267 @@ describe('run_all.ts', () => {
         // Should log duration in seconds
         expect(mockLog.info).toHaveBeenCalledWith(
           expect.stringMatching(/exit 0 - success, \d+s\)/)
+        );
+      });
+    });
+
+    describe('shard annotation handling', () => {
+      let mockLoadShardConfig: jest.Mock;
+
+      beforeEach(() => {
+        mockLoadShardConfig = jest.mocked(
+          jest.requireMock('./shard_config').loadShardConfig
+        );
+      });
+
+      it('should strip shard annotations before passing to getJestConfigs (CI path)', async () => {
+        mockGetopts.mockReturnValue({
+          configs: 'config1.js||shard=1/2,config1.js||shard=2/2',
+          maxParallel: undefined,
+        });
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
+          emptyConfigs: [],
+        });
+
+        const mockProcess = new EventEmitter() as any;
+        mockProcess.stdout = new EventEmitter();
+        mockProcess.stderr = new EventEmitter();
+        mockSpawn.mockReturnValue(mockProcess);
+
+        const runPromise = runJestAll().catch(() => {});
+
+        process.nextTick(() => {
+          mockProcess.emit('exit', 0);
+          if (mockSpawn.mock.calls.length > 1) {
+            mockProcess.emit('exit', 0);
+          }
+        });
+
+        await runPromise;
+
+        // Should pass clean config path (without shard annotation) to getJestConfigs
+        expect(mockGetJestConfigs).toHaveBeenCalledWith(['config1.js']);
+      });
+
+      it('should pass --shard flag to spawned processes for annotated configs', async () => {
+        mockGetopts.mockReturnValue({
+          configs: 'config1.js||shard=1/2,config1.js||shard=2/2',
+          maxParallel: '2',
+        });
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
+          emptyConfigs: [],
+        });
+
+        const processes: any[] = [];
+        mockSpawn.mockImplementation(() => {
+          const proc = new EventEmitter() as any;
+          proc.stdout = new EventEmitter();
+          proc.stderr = new EventEmitter();
+          processes.push(proc);
+          process.nextTick(() => proc.emit('exit', 0));
+          return proc;
+        });
+
+        try {
+          await runJestAll();
+        } catch {
+          // Expected
+        }
+
+        // Should spawn 2 processes (one per shard)
+        expect(mockSpawn).toHaveBeenCalledTimes(2);
+
+        // First process should get --shard=1/2
+        expect(mockSpawn.mock.calls[0][1]).toEqual(
+          expect.arrayContaining(['--shard=1/2'])
+        );
+        // Config should be clean (without annotation)
+        expect(mockSpawn.mock.calls[0][1]).toEqual(
+          expect.arrayContaining(['--config', 'config1.js'])
+        );
+
+        // Second process should get --shard=2/2
+        expect(mockSpawn.mock.calls[1][1]).toEqual(
+          expect.arrayContaining(['--shard=2/2'])
+        );
+      });
+
+      it('should NOT pass --shard flag for non-annotated configs not in shard map', async () => {
+        mockGetopts.mockReturnValue({
+          configs: 'config1.js',
+          maxParallel: undefined,
+        });
+
+        mockLoadShardConfig.mockReturnValue({});
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [{ config: '/path/to/config1.js', testFiles: ['test1.js'] }],
+          emptyConfigs: [],
+        });
+
+        const mockProcess = new EventEmitter() as any;
+        mockProcess.stdout = new EventEmitter();
+        mockProcess.stderr = new EventEmitter();
+        mockSpawn.mockReturnValue(mockProcess);
+
+        const runPromise = runJestAll().catch(() => {});
+
+        process.nextTick(() => {
+          mockProcess.emit('exit', 0);
+        });
+
+        await runPromise;
+
+        const spawnArgs = mockSpawn.mock.calls[0][1] as string[];
+        expect(spawnArgs).not.toEqual(expect.arrayContaining([expect.stringMatching(/--shard/)]));
+      });
+
+      it('should auto-expand sharded configs from shard map when using --configs locally', async () => {
+        mockGetopts.mockReturnValue({
+          configs: 'fleet/jest.integration.config.js',
+          maxParallel: '2',
+        });
+
+        mockLoadShardConfig.mockReturnValue({
+          'fleet/jest.integration.config.js': 2,
+        });
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [
+            {
+              config: '/path/to/fleet/jest.integration.config.js',
+              testFiles: ['test1.js'],
+            },
+          ],
+          emptyConfigs: [],
+        });
+
+        const processes: any[] = [];
+        mockSpawn.mockImplementation(() => {
+          const proc = new EventEmitter() as any;
+          proc.stdout = new EventEmitter();
+          proc.stderr = new EventEmitter();
+          processes.push(proc);
+          process.nextTick(() => proc.emit('exit', 0));
+          return proc;
+        });
+
+        try {
+          await runJestAll();
+        } catch {
+          // Expected
+        }
+
+        // Should spawn 2 processes: shard 1/2 and shard 2/2
+        expect(mockSpawn).toHaveBeenCalledTimes(2);
+
+        const allArgs = mockSpawn.mock.calls.map((call: any[]) => call[1] as string[]);
+        expect(allArgs[0]).toEqual(expect.arrayContaining(['--shard=1/2']));
+        expect(allArgs[1]).toEqual(expect.arrayContaining(['--shard=2/2']));
+      });
+
+      it('should prefer CI annotations over shard map auto-expansion', async () => {
+        // CI passes explicit shard 1/3 only — auto-expansion must NOT override
+        mockGetopts.mockReturnValue({
+          configs: 'fleet/jest.integration.config.js||shard=1/3',
+          maxParallel: undefined,
+        });
+
+        mockLoadShardConfig.mockReturnValue({
+          'fleet/jest.integration.config.js': 3,
+        });
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [
+            {
+              config: '/path/to/fleet/jest.integration.config.js',
+              testFiles: ['test1.js'],
+            },
+          ],
+          emptyConfigs: [],
+        });
+
+        const processes: any[] = [];
+        mockSpawn.mockImplementation(() => {
+          const proc = new EventEmitter() as any;
+          proc.stdout = new EventEmitter();
+          proc.stderr = new EventEmitter();
+          processes.push(proc);
+          process.nextTick(() => proc.emit('exit', 0));
+          return proc;
+        });
+
+        try {
+          await runJestAll();
+        } catch {
+          // Expected
+        }
+
+        // Should spawn only 1 process — the explicit shard=1/3 from CI, not 3 from the map
+        expect(mockSpawn).toHaveBeenCalledTimes(1);
+
+        const args = mockSpawn.mock.calls[0][1] as string[];
+        expect(args).toEqual(expect.arrayContaining(['--shard=1/3']));
+      });
+
+      it('should auto-expand sharded configs from shard map in local path (no --configs)', async () => {
+        // Local path: no configsArg
+        mockGetopts.mockReturnValue({
+          configs: undefined,
+          maxParallel: '2',
+        });
+
+        mockGetJestConfigs.mockResolvedValue({
+          configsWithTests: [
+            { config: '/path/to/config1.js', testFiles: ['test1.js'] },
+            { config: '/path/to/fleet/jest.integration.config.js', testFiles: ['test2.js'] },
+          ],
+          emptyConfigs: [],
+        });
+
+        // Shard map: fleet config has 2 shards
+        mockLoadShardConfig.mockReturnValue({
+          'fleet/jest.integration.config.js': 2,
+        });
+
+        const processes: any[] = [];
+        mockSpawn.mockImplementation(() => {
+          const proc = new EventEmitter() as any;
+          proc.stdout = new EventEmitter();
+          proc.stderr = new EventEmitter();
+          processes.push(proc);
+          process.nextTick(() => proc.emit('exit', 0));
+          return proc;
+        });
+
+        try {
+          await runJestAll();
+        } catch {
+          // Expected
+        }
+
+        // Should spawn 3 processes: 1 for config1 + 2 shards for fleet
+        expect(mockSpawn).toHaveBeenCalledTimes(3);
+
+        // Check that the fleet shards get --shard flags
+        const allArgs = mockSpawn.mock.calls.map((call: any[]) => call[1] as string[]);
+        const shardArgs = allArgs.filter((args) =>
+          args.some((a) => a.startsWith('--shard='))
+        );
+        expect(shardArgs).toHaveLength(2);
+        expect(shardArgs[0]).toEqual(expect.arrayContaining(['--shard=1/2']));
+        expect(shardArgs[1]).toEqual(expect.arrayContaining(['--shard=2/2']));
+
+        // config1 should have no --shard
+        const config1Args = allArgs.find((args) =>
+          args.includes('config1.js')
+        );
+        expect(config1Args).not.toEqual(
+          expect.arrayContaining([expect.stringMatching(/--shard/)])
         );
       });
     });

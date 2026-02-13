@@ -22,6 +22,8 @@ import { resolve, relative, sep as osSep, join } from 'path';
 import { promises as fs, existsSync } from 'fs';
 import { run } from 'jest';
 import { readInitialOptions } from 'jest-config';
+import { spawn } from 'child_process';
+import chalk from 'chalk';
 import getopts from 'getopts';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
@@ -31,6 +33,7 @@ import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 import type { Config } from '@jest/types';
 
 import jestFlags from './jest_flags.json';
+import { getShardCountForConfig } from './shard_config';
 
 const JEST_CACHE_DIR = 'data/jest-cache';
 
@@ -84,6 +87,24 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
       const commonTestFiles = commonBasePath(testFiles);
       const workingDirectory = testFilesProvided ? commonTestFiles : currentWorkingDirectory;
       process.argv.push(relative(workingDirectory, currentWorkingDirectory));
+    }
+  }
+
+  // Auto-shard: if the config is in the shard map and --shard is not already specified,
+  // spawn N child processes with --shard=i/N instead of running Jest directly.
+  if (resolvedConfigPath && !parsedArguments.shard) {
+    const shardCount = getShardCountForConfig(resolvedConfigPath);
+    if (shardCount && shardCount > 1) {
+      log.info(
+        `Auto-sharding ${relative(REPO_ROOT, resolvedConfigPath)} into ${shardCount} shards`
+      );
+      const exitCode = await runSharded(resolvedConfigPath, shardCount, log);
+      reportTime(runStartTime, 'total', {
+        success: exitCode === 0,
+        isXpack: currentWorkingDirectory.includes('x-pack'),
+        testFiles: testFiles.map((testFile) => relative(currentWorkingDirectory, testFile)),
+      });
+      process.exit(exitCode);
     }
   }
 
@@ -393,4 +414,101 @@ export function removeFlagFromArgv(argv: string[], flag: string): string[] {
   }
 
   return filteredArguments;
+}
+
+/**
+ * Runs a sharded Jest config by spawning N child processes, each with `--shard=i/N`.
+ * Output from each shard is buffered and printed sequentially when completed.
+ *
+ * @param configPath - Absolute path to the Jest config file
+ * @param shardCount - Number of shards to split into
+ * @param log - Logger instance
+ * @returns Exit code (0 if all shards pass, worst exit code otherwise)
+ */
+export async function runSharded(
+  configPath: string,
+  shardCount: number,
+  log: ToolingLog
+): Promise<number> {
+  // Forward all original CLI args except --config (we provide our own) and --shard (we provide per-shard).
+  const forwardArgs = removeFlagFromArgv(
+    removeFlagFromArgv(process.argv.slice(NODE_ARGV_SLICE_INDEX), 'config'),
+    'shard'
+  );
+
+  // Assign a distinct color to each shard for easy visual distinction
+  const shardColors = [chalk.cyan, chalk.magenta, chalk.yellow, chalk.green, chalk.blue];
+
+  // Run all shards in parallel with prefixed streaming output.
+  // Each line is prefixed with a colored shard label so output is easy to follow.
+  const results = await Promise.all(
+    Array.from({ length: shardCount }, (_, i) => {
+      const shardIndex = i + 1;
+      const shardArg = `${shardIndex}/${shardCount}`;
+      const colorFn = shardColors[i % shardColors.length];
+      const prefix = colorFn(`[shard ${shardArg}] `);
+
+      return new Promise<{ shardIndex: number; code: number }>((resolvePromise) => {
+        const args = [
+          'scripts/jest',
+          '--config',
+          relative(REPO_ROOT, configPath),
+          `--shard=${shardArg}`,
+          ...forwardArgs,
+        ];
+
+        log.info(`${prefix}Starting: node ${args.join(' ')}`);
+
+        const proc = spawn(process.execPath, args, {
+          cwd: REPO_ROOT,
+          env: process.env,
+          stdio: ['ignore', 'pipe', 'pipe'],
+        });
+
+        // Stream each line with a colored shard prefix
+        const prefixStream = (stream: NodeJS.ReadableStream, target: NodeJS.WritableStream) => {
+          let partial = '';
+          stream.on('data', (chunk: Buffer) => {
+            const text = partial + chunk.toString();
+            const lines = text.split('\n');
+            // Last element may be a partial line — hold it for next chunk
+            partial = lines.pop() || '';
+            for (const line of lines) {
+              target.write(`${prefix}${line}\n`);
+            }
+          });
+          stream.on('end', () => {
+            if (partial) {
+              target.write(`${prefix}${partial}\n`);
+            }
+          });
+        };
+
+        prefixStream(proc.stdout, process.stdout);
+        prefixStream(proc.stderr, process.stderr);
+
+        proc.on('exit', (c) => {
+          const code = c ?? 1;
+          const status = code === 0 ? chalk.green('passed') : chalk.red('failed');
+          log.info(`${prefix}${status} (exit ${code})`);
+          resolvePromise({ shardIndex, code });
+        });
+      });
+    })
+  );
+
+  const failedShards = results.filter((r) => r.code !== 0);
+  if (failedShards.length > 0) {
+    log.info(
+      chalk.red(
+        `\n${failedShards.length} of ${shardCount} shards failed: ${failedShards
+          .map((s) => `shard ${s.shardIndex}`)
+          .join(', ')}`
+      )
+    );
+    return Math.max(...failedShards.map((s) => s.code));
+  }
+
+  log.info(chalk.green(`\nAll ${shardCount} shards passed`));
+  return 0;
 }

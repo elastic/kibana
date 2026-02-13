@@ -9,7 +9,7 @@
 
 import getopts from 'getopts';
 import { promises as fs } from 'fs';
-import { relative, dirname } from 'path';
+import { relative, dirname, resolve } from 'path';
 import { spawn } from 'child_process';
 import Table from 'cli-table3';
 import chalk from 'chalk';
@@ -18,6 +18,12 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { tmpdir } from 'os';
 import { getJestConfigs } from './configs/get_jest_configs';
+import {
+  parseShardAnnotation,
+  annotateConfigWithShard,
+  loadShardConfig,
+  expandShardedConfigs,
+} from './shard_config';
 
 interface JestConfigResult {
   config: string;
@@ -69,25 +75,77 @@ export async function runJestAll() {
       .map((c) => c.trim())
       .filter(Boolean);
 
-    const { configsWithTests, emptyConfigs } = await getJestConfigs(passedConfigs);
+    // CI path: configs may have shard annotations (e.g., config.js||shard=1/2).
+    // Strip annotations before passing to getJestConfigs, then re-annotate.
+    const shardAnnotations = new Map<string, string[]>(); // cleanRelPath -> ['1/2', '2/2']
+    const cleanPassedConfigs: string[] = [];
 
-    writeConfigDiscoverySummary(passedConfigs, configsWithTests, emptyConfigs, log);
+    for (const entry of passedConfigs) {
+      const { config: cleanConfig, shard } = parseShardAnnotation(entry);
+      if (!cleanPassedConfigs.includes(cleanConfig)) {
+        cleanPassedConfigs.push(cleanConfig);
+      }
+      if (shard) {
+        const shards = shardAnnotations.get(cleanConfig) || [];
+        shards.push(shard);
+        shardAnnotations.set(cleanConfig, shards);
+      }
+    }
+
+    const { configsWithTests, emptyConfigs } = await getJestConfigs(cleanPassedConfigs);
+
+    writeConfigDiscoverySummary(cleanPassedConfigs, configsWithTests, emptyConfigs, log);
 
     hasAnyConfigs = Boolean(configsWithTests.length || emptyConfigs.length);
 
-    configs = configsWithTests.map((c) => c.config);
+    // Re-expand configs with their shard annotations.
+    // On CI, annotations are pre-embedded by pick_test_group_run_order.ts and take priority.
+    // For local runs (no annotations), auto-expand from the shard config JSON.
+    const shardMap = shardAnnotations.size > 0 ? null : loadShardConfig();
+
+    for (const { config: absPath } of configsWithTests) {
+      const relPath = relative(REPO_ROOT, absPath);
+      const shards = shardAnnotations.get(relPath);
+      if (shards && shards.length > 0) {
+        // CI path: use the explicit annotations provided upstream
+        for (const shard of shards) {
+          configs.push(annotateConfigWithShard(absPath, shard));
+        }
+      } else if (shardMap && shardMap[relPath]) {
+        // Local path: auto-expand from shard config JSON
+        const count = shardMap[relPath];
+        for (let i = 1; i <= count; i++) {
+          configs.push(annotateConfigWithShard(absPath, `${i}/${count}`));
+        }
+      } else {
+        configs.push(absPath);
+      }
+    }
   } else {
     log.info('--configs flag is not passed. Finding and running all configs in the repo.');
 
     const { configsWithTests, emptyConfigs } = await getJestConfigs();
 
-    configs = configsWithTests.map((c) => c.config);
+    const rawConfigs = configsWithTests.map((c) => c.config);
 
-    hasAnyConfigs = Boolean(configs.length);
+    hasAnyConfigs = Boolean(rawConfigs.length);
 
     log.info(
-      `Found ${configs.length} configs to run. Found ${emptyConfigs.length} configs with no tests. Skipping them.`
+      `Found ${rawConfigs.length} configs to run. Found ${emptyConfigs.length} configs with no tests. Skipping them.`
     );
+
+    // Local path: auto-expand sharded configs from the shard config JSON.
+    // Convert absolute paths to relative for shard map lookup, then back.
+    const shardMap = loadShardConfig();
+    const relConfigs = rawConfigs.map((c) => relative(REPO_ROOT, c));
+    const expandedRel = expandShardedConfigs(relConfigs, shardMap);
+    configs = expandedRel.map((c) => {
+      const { config: cleanRel } = parseShardAnnotation(c);
+      const absPath = resolve(REPO_ROOT, cleanRel);
+      // If it had a shard annotation, re-annotate the absolute path
+      const { shard } = parseShardAnnotation(c);
+      return shard ? annotateConfigWithShard(absPath, shard) : absPath;
+    });
   }
 
   log.info(
@@ -192,17 +250,22 @@ async function runConfigs(
         const start = Date.now();
         active += 1;
 
+        // Parse shard annotation if present (e.g., "/abs/path/config.js||shard=1/2")
+        const { config: cleanConfig, shard } = parseShardAnnotation(config);
+
         // Create unique output file for this config's slow tests
-        const configHash = config.replace(/[^a-zA-Z0-9]/g, '_');
-        const slowTestsFile = `${slowTestsDir}/slow-tests-${configHash}-${Date.now()}.json`;
+        const configHash = cleanConfig.replace(/[^a-zA-Z0-9]/g, '_');
+        const shardSuffix = shard ? `_shard_${shard.replace('/', '_')}` : '';
+        const slowTestsFile = `${slowTestsDir}/slow-tests-${configHash}${shardSuffix}-${Date.now()}.json`;
 
         const args = [
           'scripts/jest',
           '--config',
-          relative(REPO_ROOT, config),
+          relative(REPO_ROOT, cleanConfig),
           '--runInBand',
           '--coverage=false',
           '--passWithNoTests',
+          ...(shard ? [`--shard=${shard}`] : []),
         ];
 
         const proc = spawn(process.execPath, args, {

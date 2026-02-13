@@ -52,7 +52,17 @@ jest.mock('@kbn/repo-info', () => ({
 
 jest.mock('getopts', () => jest.fn());
 
+jest.mock('child_process', () => ({
+  spawn: jest.fn(),
+}));
+
+jest.mock('./shard_config', () => ({
+  getShardCountForConfig: jest.fn().mockReturnValue(undefined),
+}));
+
+import { EventEmitter } from 'events';
 import { relative } from 'path';
+import { spawn } from 'child_process';
 import {
   commonBasePath,
   parseJestArguments,
@@ -61,6 +71,7 @@ import {
   resolveJestConfig,
   prepareJestExecution,
   removeFlagFromArgv,
+  runSharded,
 } from './run';
 
 describe('run.ts', () => {
@@ -835,6 +846,158 @@ describe('run.ts', () => {
           expect(process.env.JEST_CONFIG_PATH).toBeUndefined();
         });
       });
+    });
+  });
+
+  describe('runSharded', () => {
+    const mockSpawn = spawn as jest.MockedFunction<typeof spawn>;
+    let mockLog: { info: jest.Mock; error: jest.Mock; warning: jest.Mock; debug: jest.Mock };
+    let stdoutWriteSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockLog = {
+        info: jest.fn(),
+        error: jest.fn(),
+        warning: jest.fn(),
+        debug: jest.fn(),
+      };
+      stdoutWriteSpy = jest.spyOn(process.stdout, 'write').mockReturnValue(true);
+      // Save and set process.argv for forwarding
+      process.argv = ['node', 'scripts/jest', '--config', '/some/config.js', '--verbose'];
+    });
+
+    afterEach(() => {
+      stdoutWriteSpy.mockRestore();
+    });
+
+    it('should spawn N child processes in parallel with correct --shard flags', async () => {
+      mockSpawn.mockImplementation((() => {
+        const proc = new EventEmitter() as any;
+        proc.stdout = new EventEmitter();
+        proc.stderr = new EventEmitter();
+        process.nextTick(() => proc.emit('exit', 0));
+        return proc;
+      }) as any);
+
+      const code = await runSharded('/mock/repo/root/path/config.js', 3, mockLog as any);
+
+      expect(code).toBe(0);
+      expect(mockSpawn).toHaveBeenCalledTimes(3);
+
+      // Check each shard gets the right --shard flag
+      expect((mockSpawn.mock.calls[0][1] as string[])).toEqual(
+        expect.arrayContaining(['--shard=1/3'])
+      );
+      expect((mockSpawn.mock.calls[1][1] as string[])).toEqual(
+        expect.arrayContaining(['--shard=2/3'])
+      );
+      expect((mockSpawn.mock.calls[2][1] as string[])).toEqual(
+        expect.arrayContaining(['--shard=3/3'])
+      );
+
+      // Check config is relative path
+      expect((mockSpawn.mock.calls[0][1] as string[])).toEqual(
+        expect.arrayContaining(['--config', 'path/config.js'])
+      );
+    });
+
+    it('should use piped stdio for prefixed output', async () => {
+      mockSpawn.mockImplementation((() => {
+        const proc = new EventEmitter() as any;
+        proc.stdout = new EventEmitter();
+        proc.stderr = new EventEmitter();
+        process.nextTick(() => proc.emit('exit', 0));
+        return proc;
+      }) as any);
+
+      await runSharded('/mock/repo/root/path/config.js', 1, mockLog as any);
+
+      expect(mockSpawn).toHaveBeenCalledWith(
+        process.execPath,
+        expect.any(Array),
+        expect.objectContaining({
+          stdio: ['ignore', 'pipe', 'pipe'],
+        })
+      );
+    });
+
+    it('should prefix output lines with shard label', async () => {
+      mockSpawn.mockImplementation((() => {
+        const proc = new EventEmitter() as any;
+        proc.stdout = new EventEmitter();
+        proc.stderr = new EventEmitter();
+        process.nextTick(() => {
+          proc.stdout.emit('data', Buffer.from('PASS test.ts\nTests: 1 passed\n'));
+          proc.stdout.emit('end');
+          proc.emit('exit', 0);
+        });
+        return proc;
+      }) as any);
+
+      await runSharded('/mock/repo/root/path/config.js', 1, mockLog as any);
+
+      // Output should be written to process.stdout with a shard prefix
+      const writtenLines = stdoutWriteSpy.mock.calls.map((c: any[]) => c[0] as string);
+      expect(writtenLines.some((line) => line.includes('shard 1/1') && line.includes('PASS'))).toBe(
+        true
+      );
+    });
+
+    it('should return worst exit code when shards fail', async () => {
+      let callIdx = 0;
+      mockSpawn.mockImplementation((() => {
+        const proc = new EventEmitter() as any;
+        proc.stdout = new EventEmitter();
+        proc.stderr = new EventEmitter();
+        const idx = callIdx++;
+        process.nextTick(() => proc.emit('exit', idx === 1 ? 5 : 0));
+        return proc;
+      }) as any);
+
+      const code = await runSharded('/mock/repo/root/path/config.js', 2, mockLog as any);
+
+      expect(code).toBe(5);
+      expect(mockLog.info).toHaveBeenCalledWith(
+        expect.stringContaining('1 of 2 shards failed')
+      );
+    });
+
+    it('should forward CLI args except --config and --shard', async () => {
+      process.argv = ['node', 'scripts/jest', '--config', '/some/cfg.js', '--verbose', '--bail'];
+
+      mockSpawn.mockImplementation((() => {
+        const proc = new EventEmitter() as any;
+        proc.stdout = new EventEmitter();
+        proc.stderr = new EventEmitter();
+        process.nextTick(() => proc.emit('exit', 0));
+        return proc;
+      }) as any);
+
+      await runSharded('/mock/repo/root/path/config.js', 2, mockLog as any);
+
+      const args = mockSpawn.mock.calls[0][1] as string[];
+      // --verbose and --bail should be forwarded
+      expect(args).toEqual(expect.arrayContaining(['--verbose', '--bail']));
+      // Original --config should NOT be in forwarded args (we provide our own)
+      const configCount = args.filter((a) => a === '--config').length;
+      expect(configCount).toBe(1); // Only our --config, not the original
+    });
+
+    it('should log success message when all shards pass', async () => {
+      mockSpawn.mockImplementation((() => {
+        const proc = new EventEmitter() as any;
+        proc.stdout = new EventEmitter();
+        proc.stderr = new EventEmitter();
+        process.nextTick(() => proc.emit('exit', 0));
+        return proc;
+      }) as any);
+
+      await runSharded('/mock/repo/root/path/config.js', 2, mockLog as any);
+
+      expect(mockLog.info).toHaveBeenCalledWith(
+        expect.stringContaining('All 2 shards passed')
+      );
     });
   });
 });
