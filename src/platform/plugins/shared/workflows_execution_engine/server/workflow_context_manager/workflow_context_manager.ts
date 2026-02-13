@@ -11,6 +11,7 @@ import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KQLSyntaxError } from '@kbn/es-query';
 import {
+  type EsWorkflowStepExecution,
   type SerializedError,
   type StackFrame,
   type StepContext,
@@ -23,7 +24,7 @@ import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
-import { buildStepExecutionId, evaluateKql } from '../utils';
+import { buildStepExecutionId, evaluateKql, isTemplateExpression } from '../utils';
 
 export interface ContextManagerInit {
   // New properties for logging
@@ -323,7 +324,7 @@ export class WorkflowContextManager {
         switch (stepExecution.stepType) {
           case 'foreach':
             if (!stepContext.foreach) {
-              stepContext.foreach = stepExecution.state as StepContext['foreach'];
+              stepContext.foreach = this.buildForeachContext(stepExecution, stepContext);
             }
             break;
         }
@@ -341,6 +342,79 @@ export class WorkflowContextManager {
           }
         }
       }
+    }
+  }
+
+  /**
+   * Builds the foreach context by combining the persisted state (index, total)
+   * with items derived by re-evaluating the foreach expression at resolution time.
+   * This avoids storing the entire items array in the step execution state on every iteration.
+   */
+  private buildForeachContext(
+    stepExecution: EsWorkflowStepExecution,
+    stepContext: StepContext
+  ): StepContext['foreach'] {
+    const foreachState = stepExecution.state ?? {};
+    const index = typeof foreachState.index === 'number' ? foreachState.index : 0;
+    const total = typeof foreachState.total === 'number' ? foreachState.total : 0;
+
+    // Re-evaluate the foreach expression (stored in the step input at entry time)
+    // to derive the full items array and current item without persisting them in state.
+    const foreachExpression = this.extractForeachExpression(stepExecution.input);
+    const items = foreachExpression
+      ? this.resolveForeachItems(foreachExpression, stepContext)
+      : undefined;
+
+    const availableItems = items ?? [];
+
+    return {
+      items: availableItems,
+      item: availableItems[index],
+      index,
+      total,
+    };
+  }
+
+  /**
+   * Extracts the foreach expression string from a step execution's input.
+   * The input is typed as JsonValue, so we narrow it to a record and pull the `foreach` key.
+   */
+  private extractForeachExpression(input: EsWorkflowStepExecution['input']): string | undefined {
+    if (input !== null && typeof input === 'object' && !Array.isArray(input)) {
+      const { foreach: expression } = input;
+      return typeof expression === 'string' ? expression : undefined;
+    }
+    return undefined;
+  }
+
+  /**
+   * Evaluates a foreach expression against the given context and returns the resulting array.
+   * Mirrors the evaluation logic in EnterForeachNodeImpl.processForeachConfiguration / getItems.
+   */
+  private resolveForeachItems(
+    foreachExpression: string,
+    context: Record<string, unknown>
+  ): unknown[] | undefined {
+    try {
+      let resolvedValue: unknown;
+
+      if (isTemplateExpression(foreachExpression)) {
+        resolvedValue = this.templateEngine.evaluateExpression(foreachExpression, context);
+      } else {
+        resolvedValue = this.templateEngine.render(foreachExpression, context);
+      }
+
+      if (typeof resolvedValue === 'string') {
+        try {
+          resolvedValue = JSON.parse(resolvedValue);
+        } catch {
+          return undefined;
+        }
+      }
+
+      return Array.isArray(resolvedValue) ? resolvedValue : undefined;
+    } catch {
+      return undefined;
     }
   }
 

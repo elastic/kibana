@@ -507,10 +507,9 @@ describe('WorkflowContextManager', () => {
           if (stepExecutionId === 'outerForeachStep_generated') {
             return {
               stepType: 'foreach',
+              input: { foreach: JSON.stringify(['item1', 'item2', 'item3']) },
               state: {
-                items: ['item1', 'item2', 'item3'],
                 index: 0,
-                item: 'item1',
                 total: 3,
               },
             };
@@ -519,10 +518,9 @@ describe('WorkflowContextManager', () => {
           if (stepExecutionId === 'innerForeachStep_generated') {
             return {
               stepType: 'foreach',
+              input: { foreach: JSON.stringify(['1', '2', '3', '4']) },
               state: {
-                items: ['1', '2', '3', '4'],
                 index: 1,
-                item: '2',
                 total: 4,
               },
             };
@@ -601,10 +599,9 @@ describe('WorkflowContextManager', () => {
           if (stepExecutionId === 'outerForeachStep_generated') {
             return {
               stepType: 'foreach',
+              input: { foreach: JSON.stringify(['item1', 'item2', 'item3']) },
               state: {
-                items: ['item1', 'item2', 'item3'],
                 index: 0,
-                item: 'item1',
                 total: 3,
               },
             };
