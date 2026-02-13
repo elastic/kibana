@@ -207,20 +207,20 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
     setActivePage(0); // Reset to first page when changing page size
   };
 
-  // Navigate to workflows with query param
-  const handleWorkflowsClick = useCallback(
+  // Generate workflows URL with query param
+  const getWorkflowsUrl = useCallback(
     (source: ActiveSource) => {
       const path = `?query=${encodeURIComponent(source.name)}`;
-      application.navigateToApp(WORKFLOWS_APP_ID, { path, openInNewTab: true });
+      return application.getUrlForApp(WORKFLOWS_APP_ID, { path });
     },
     [application]
   );
 
-  // Navigate to tools with search param
-  const handleToolsClick = useCallback(
+  // Generate tools URL with search param
+  const getToolsUrl = useCallback(
     (sourceType: string) => {
       const path = `/tools?search=${encodeURIComponent(sourceType)}`;
-      application.navigateToApp(AGENT_BUILDER_APP_ID, { path, openInNewTab: true });
+      return application.getUrlForApp(AGENT_BUILDER_APP_ID, { path });
     },
     [application]
   );
@@ -273,7 +273,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       align: 'center',
       render: (workflows: string[], source: ActiveSource) =>
         workflows.length > 0 ? (
-          <EuiLink onClick={() => handleWorkflowsClick(source)} data-test-subj="workflowsLink">
+          <EuiLink href={getWorkflowsUrl(source)} data-test-subj="workflowsLink">
             <EuiText size="s">{workflows.length}</EuiText>
           </EuiLink>
         ) : (
@@ -288,7 +288,7 @@ export const ActiveSourcesTable: React.FC<ActiveSourcesTableProps> = ({
       align: 'center',
       render: (agentTools: string[], source: ActiveSource) =>
         agentTools.length > 0 ? (
-          <EuiLink onClick={() => handleToolsClick(source.type)} data-test-subj="toolsLink">
+          <EuiLink href={getToolsUrl(source.type)} data-test-subj="toolsLink">
             <EuiText size="s">{agentTools.length}</EuiText>
           </EuiLink>
         ) : (
