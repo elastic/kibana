@@ -353,6 +353,7 @@ export const useTopNavLinks = ({
     state,
     hasUnsavedChanges,
     transitionFromDataViewToESQL,
+    persistedDiscoverSession,
   ]);
 
   return useMemo((): AppMenuConfig => {
