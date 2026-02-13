@@ -9,7 +9,7 @@
 
 import getopts from 'getopts';
 import { promises as fs } from 'fs';
-import { relative, dirname, resolve } from 'path';
+import { relative, dirname } from 'path';
 import { spawn } from 'child_process';
 import Table from 'cli-table3';
 import chalk from 'chalk';
@@ -21,8 +21,6 @@ import { getJestConfigs } from './configs/get_jest_configs';
 import {
   parseShardAnnotation,
   annotateConfigWithShard,
-  loadShardConfig,
-  expandShardedConfigs,
 } from './shard_config';
 
 interface JestConfigResult {
@@ -98,11 +96,9 @@ export async function runJestAll() {
 
     hasAnyConfigs = Boolean(configsWithTests.length || emptyConfigs.length);
 
-    // Re-expand configs with their shard annotations.
-    // On CI, annotations are pre-embedded by pick_test_group_run_order.ts and take priority.
-    // For local runs (no annotations), auto-expand from the shard config JSON.
-    const shardMap = shardAnnotations.size > 0 ? null : loadShardConfig();
-
+    // Re-expand configs with their shard annotations from CI.
+    // On CI, annotations are pre-embedded by pick_test_group_run_order.ts.
+    // Locally (no annotations), configs run without sharding.
     for (const { config: absPath } of configsWithTests) {
       const relPath = relative(REPO_ROOT, absPath);
       const shards = shardAnnotations.get(relPath);
@@ -110,12 +106,6 @@ export async function runJestAll() {
         // CI path: use the explicit annotations provided upstream
         for (const shard of shards) {
           configs.push(annotateConfigWithShard(absPath, shard));
-        }
-      } else if (shardMap && shardMap[relPath]) {
-        // Local path: auto-expand from shard config JSON
-        const count = shardMap[relPath];
-        for (let i = 1; i <= count; i++) {
-          configs.push(annotateConfigWithShard(absPath, `${i}/${count}`));
         }
       } else {
         configs.push(absPath);
@@ -134,18 +124,9 @@ export async function runJestAll() {
       `Found ${rawConfigs.length} configs to run. Found ${emptyConfigs.length} configs with no tests. Skipping them.`
     );
 
-    // Local path: auto-expand sharded configs from the shard config JSON.
-    // Convert absolute paths to relative for shard map lookup, then back.
-    const shardMap = loadShardConfig();
-    const relConfigs = rawConfigs.map((c) => relative(REPO_ROOT, c));
-    const expandedRel = expandShardedConfigs(relConfigs, shardMap);
-    configs = expandedRel.map((c) => {
-      const { config: cleanRel } = parseShardAnnotation(c);
-      const absPath = resolve(REPO_ROOT, cleanRel);
-      // If it had a shard annotation, re-annotate the absolute path
-      const { shard } = parseShardAnnotation(c);
-      return shard ? annotateConfigWithShard(absPath, shard) : absPath;
-    });
+    // Locally, run all discovered configs without auto-sharding.
+    // Sharding is only applied on CI via pick_test_group_run_order.ts annotations.
+    configs = rawConfigs;
   }
 
   log.info(

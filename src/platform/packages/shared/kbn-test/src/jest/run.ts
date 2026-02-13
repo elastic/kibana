@@ -22,7 +22,6 @@ import { resolve, relative, sep as osSep, join } from 'path';
 import { promises as fs, existsSync } from 'fs';
 import { run } from 'jest';
 import { readInitialOptions } from 'jest-config';
-import { spawn } from 'child_process';
 import getopts from 'getopts';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
@@ -32,7 +31,7 @@ import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 import type { Config } from '@jest/types';
 
 import jestFlags from './jest_flags.json';
-import { getShardCountForConfig } from './shard_config';
+import { parseShardAnnotation } from './shard_config';
 
 const JEST_CACHE_DIR = 'data/jest-cache';
 
@@ -65,6 +64,32 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
     process.env.NODE_ENV = 'test';
   }
 
+  // CI shard annotation support: if --config contains a shard annotation
+  // (e.g., "config.js||shard=1/2"), strip it and inject --shard into the args.
+  // This allows run.ts to be a drop-in replacement for run_all.ts on CI,
+  // where pick_test_group_run_order.ts embeds shard info into config names.
+  if (parsedArguments.config) {
+    const { config: cleanConfig, shard } = parseShardAnnotation(parsedArguments.config);
+    if (shard) {
+      parsedArguments.config = cleanConfig;
+      parsedArguments.shard = shard;
+      // Update process.argv so Jest and downstream code see clean values
+      for (let i = 0; i < process.argv.length; i++) {
+        if (process.argv[i] === '--config' && i + 1 < process.argv.length) {
+          process.argv[i + 1] = cleanConfig;
+          break;
+        }
+        // Handle --config=value form
+        if (process.argv[i].startsWith('--config=')) {
+          process.argv[i] = `--config=${cleanConfig}`;
+          break;
+        }
+      }
+      process.argv.push('--shard', shard);
+      log.info(`Parsed shard annotation: config=${cleanConfig}, shard=${shard}`);
+    }
+  }
+
   const currentWorkingDirectory: string = process.env.INIT_CWD || process.cwd();
   let testFiles: string[] = [];
   let resolvedConfigPath: string = parsedArguments.config ?? '';
@@ -86,28 +111,6 @@ export async function runJest(configName = 'jest.config.js'): Promise<void> {
       const commonTestFiles = commonBasePath(testFiles);
       const workingDirectory = testFilesProvided ? commonTestFiles : currentWorkingDirectory;
       process.argv.push(relative(workingDirectory, currentWorkingDirectory));
-    }
-  }
-
-  // Auto-shard: if the config is in the shard map and --shard is not already specified,
-  // spawn N sequential child processes with --shard=i/N instead of running Jest directly.
-  // Skip auto-sharding when positional arguments (test files, folders, or patterns) are
-  // provided — the user is targeting a specific subset and sharding adds overhead with
-  // negligible benefit.
-  const hasPositionalArgs = parsedArguments._.length > 0 || parsedArguments.testPathPattern;
-  if (resolvedConfigPath && !parsedArguments.shard && !hasPositionalArgs) {
-    const shardCount = getShardCountForConfig(resolvedConfigPath);
-    if (shardCount && shardCount > 1) {
-      log.info(
-        `Auto-sharding ${relative(REPO_ROOT, resolvedConfigPath)} into ${shardCount} sequential shards`
-      );
-      const exitCode = await runSharded(resolvedConfigPath, shardCount, log);
-      reportTime(runStartTime, 'total', {
-        success: exitCode === 0,
-        isXpack: currentWorkingDirectory.includes('x-pack'),
-        testFiles: testFiles.map((testFile) => relative(currentWorkingDirectory, testFile)),
-      });
-      process.exit(exitCode);
     }
   }
 
@@ -419,74 +422,3 @@ export function removeFlagFromArgv(argv: string[], flag: string): string[] {
   return filteredArguments;
 }
 
-/**
- * Runs a sharded Jest config by spawning N child processes sequentially,
- * each with `--shard=i/N` and inherited stdio for native Jest output.
- *
- * Sequential execution ensures clean, uninterleaved output — each shard's
- * results appear in order, exactly as if Jest were run directly.
- *
- * Auto-sharding is skipped when:
- * - `--shard` is already specified (caller controls sharding)
- * - Positional args are present (user targets specific tests/folders)
- *
- * @param configPath - Absolute path to the Jest config file
- * @param shardCount - Number of shards to split into
- * @param log - Logger instance
- * @returns Exit code (0 if all shards pass, worst exit code otherwise)
- */
-export async function runSharded(
-  configPath: string,
-  shardCount: number,
-  log: ToolingLog
-): Promise<number> {
-  // Forward all original CLI args except --config (we provide our own) and --shard (we provide per-shard).
-  const forwardArgs = removeFlagFromArgv(
-    removeFlagFromArgv(process.argv.slice(NODE_ARGV_SLICE_INDEX), 'config'),
-    'shard'
-  );
-
-  const results: Array<{ shardIndex: number; code: number }> = [];
-
-  for (let i = 0; i < shardCount; i++) {
-    const shardIndex = i + 1;
-    const shardArg = `${shardIndex}/${shardCount}`;
-
-    const args = [
-      'scripts/jest',
-      '--config',
-      relative(REPO_ROOT, configPath),
-      `--shard=${shardArg}`,
-      ...forwardArgs,
-    ];
-
-    log.info(`\n--- Shard ${shardArg} ---`);
-
-    const code = await new Promise<number>((resolveCode) => {
-      const proc = spawn(process.execPath, args, {
-        cwd: REPO_ROOT,
-        env: process.env,
-        stdio: 'inherit',
-      });
-
-      proc.on('exit', (c) => {
-        resolveCode(c ?? 1);
-      });
-    });
-
-    results.push({ shardIndex, code });
-  }
-
-  const failedShards = results.filter((r) => r.code !== 0);
-  if (failedShards.length > 0) {
-    log.info(
-      `\n${failedShards.length} of ${shardCount} shards failed: ${failedShards
-        .map((s) => `shard ${s.shardIndex}`)
-        .join(', ')}`
-    );
-    return Math.max(...failedShards.map((s) => s.code));
-  }
-
-  log.info(`\nAll ${shardCount} shards passed`);
-  return 0;
-}
