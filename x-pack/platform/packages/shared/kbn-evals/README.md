@@ -86,14 +86,14 @@ Then use helpers like `selectEvaluators<MyExample, MyTaskOutput>(...)` so your e
 ### Available fixtures
 
 | Fixture                     | Description                                                                                                                                                                                              |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `inferenceClient`           | Bound to the connector declared by the active Playwright project.                                                                                                                                        |
 | `executorClient`            | **Executor client** (implements `EvalsExecutorClient`) used to run experiments. Defaults to the **in-Kibana executor**; can be switched to the Phoenix-backed executor via `KBN_EVALS_EXECUTOR=phoenix`. |
 | `phoenixClient`             | Alias for `executorClient` (kept for backwards compatibility).                                                                                                                                           |
 | `evaluationAnalysisService` | Service for analyzing and comparing evaluation results across different models and datasets                                                                                                              |
 | `reportModelScore`          | Function that displays evaluation results (can be overridden for custom reporting)                                                                                                                       |
 | `traceEsClient`             | Dedicated ES client for querying traces. Defaults to `esClient` Scout fixture. See [Trace-Based Evaluators](#trace-based-evaluators-optional)                                                            |
-| `evaluationsEsClient`       | Dedicated ES client for storing evaluation results. Defaults to `esClient` Scout fixture. See [Using a Separate Cluster for Evaluation Results](#using-a-separate-cluster-for-evaluation-results) |
+| `evaluationsEsClient`       | Dedicated ES client for storing evaluation results. Defaults to `esClient` Scout fixture. See [Using a Separate Cluster for Evaluation Results](#using-a-separate-cluster-for-evaluation-results)        |
 
 ## Running the suite
 
@@ -157,6 +157,8 @@ node x-pack/platform/packages/shared/kbn-evals/scripts/vault/get_command.js
 ```
 
 Share the output via a secure pastebin (for example `https://p.elstc.co`) and have ops run it.
+
+The Vault config supports an optional `tracingExporters` array that configures OTel trace exporters for the eval Playwright worker process in CI. This is exported as the `TRACING_EXPORTERS` environment variable. See `config.example.json` for the full schema and [Configuring Trace Exporters via Environment Variable](#configuring-trace-exporters-via-environment-variable) for usage details.
 
 ### Local dev: LiteLLM (SSO)
 
@@ -291,6 +293,27 @@ TRACING_ES_URL=http://elastic:changeme@localhost:9200 node scripts/playwright te
 ```
 
 This creates a dedicated `traceEsClient` that connects to your monitoring cluster while `esClient` continues to use your test environment cluster.
+
+#### Configuring Trace Exporters via Environment Variable
+
+Instead of configuring trace exporters in `kibana.dev.yml`, you can set the `TRACING_EXPORTERS` environment variable to a JSON array of exporter configs. This is useful in CI or when you want to override the local config without editing YAML files.
+
+The JSON array uses the same structure as `telemetry.tracing.exporters` in `kibana.dev.yml` and supports all exporter types: `http`, `grpc`, `phoenix`, and `langfuse`.
+
+```bash
+# HTTP exporter (e.g. to a remote OTLP ingest endpoint)
+TRACING_EXPORTERS='[{"http":{"url":"https://ingest.elastic.cloud:443/v1/traces","headers":{"Authorization":"ApiKey ..."}}}]'
+
+# Phoenix exporter
+TRACING_EXPORTERS='[{"phoenix":{"base_url":"https://my-phoenix","api_key":"..."}}]'
+
+# Multiple exporters
+TRACING_EXPORTERS='[{"http":{"url":"https://ingest.elastic.cloud:443/v1/traces"}},{"phoenix":{"base_url":"https://my-phoenix"}}]'
+```
+
+When `TRACING_EXPORTERS` is set, it takes priority over any `telemetry.tracing.exporters` configured in `kibana.dev.yml`. When unset, `kibana.dev.yml` is used as before.
+
+In CI, this is automatically extracted from the `tracingExporters` field in the vault config (see [CI ops: sharing a Vault update command](#ci-ops-sharing-a-vault-update-command)).
 
 ### RAG Evaluators
 

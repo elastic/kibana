@@ -18,6 +18,15 @@
   "tracingEs": {
     "url": "https://example.es.tracing.elastic-cloud.com",
     "apiKey": "REDACTED"
-  }
+  },
+  "tracingExporters": [
+    {
+      "http": {
+        "url": "https://example.ingest.elastic-cloud.com:443/v1/traces",
+        "headers": {
+          "Authorization": "ApiKey REDACTED"
+        }
+      }
+    }
+  ]
 }
-

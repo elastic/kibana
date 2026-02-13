@@ -148,6 +148,38 @@ function validateConfigShape(config) {
     assertNonEmptyString(config, 'tracingEs.url');
     assertNonEmptyString(config, 'tracingEs.apiKey');
   }
+
+  // Optional tracingExporters array (supports http, grpc, phoenix, langfuse exporters)
+  const tracingExporters = config.tracingExporters;
+  if (tracingExporters !== undefined && tracingExporters !== null) {
+    if (!Array.isArray(tracingExporters) || tracingExporters.length === 0) {
+      die(
+        'Invalid kbn-evals CI config: "tracingExporters" must be a non-empty array when provided'
+      );
+    }
+    const allowedKeys = new Set(['http', 'grpc', 'phoenix', 'langfuse']);
+    for (let i = 0; i < tracingExporters.length; i++) {
+      const entry = tracingExporters[i];
+      if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+        die(`Invalid kbn-evals CI config: "tracingExporters[${i}]" must be an object`);
+      }
+      const keys = Object.keys(entry);
+      if (keys.length !== 1) {
+        die(
+          `Invalid kbn-evals CI config: "tracingExporters[${i}]" must have exactly one key (one of: ${[
+            ...allowedKeys,
+          ].join(', ')})`
+        );
+      }
+      if (!allowedKeys.has(keys[0])) {
+        die(
+          `Invalid kbn-evals CI config: "tracingExporters[${i}]" has unknown key "${
+            keys[0]
+          }" (allowed: ${[...allowedKeys].join(', ')})`
+        );
+      }
+    }
+  }
 }
 
 async function readStdin() {

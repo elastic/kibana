@@ -164,7 +164,11 @@ EOF
 fi
 
 # Start Scout server in background (run Kibana from the distributable)
-node scripts/scout start-server --location local --arch stateful --domain classic --kibanaInstallDir "${KIBANA_BUILD_LOCATION:?}" &
+SCOUT_SERVER_ARGS=(start-server --location local --arch stateful --domain classic --kibanaInstallDir "${KIBANA_BUILD_LOCATION:?}")
+if [[ -n "${TRACING_EXPORTERS:-}" ]]; then
+  SCOUT_SERVER_ARGS+=(--serverConfigSet evals_tracing)
+fi
+node scripts/scout "${SCOUT_SERVER_ARGS[@]}" &
 SCOUT_PID=$!
 
 # Wait for Scout to write servers config (and fail fast if the Scout server process exits)

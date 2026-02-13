@@ -15,7 +15,7 @@ die() {
 # This file uses bash features (`[[ ]]`, here-strings, etc.), so sourcing it from zsh will behave poorly
 # and can terminate the session. Ensure we're running under bash.
 if [[ -z "${BASH_VERSION:-}" ]]; then
-  die "This script must be sourced from bash. Try: bash -lc 'source x-pack/platform/packages/shared/kbn-evals/scripts/ci/local_ci_env.sh x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json && env | rg \"^(LITELLM_|EVALUATION_|EVALUATIONS_ES_|TRACING_ES_|KIBANA_TESTING_AI_CONNECTORS)\"'"
+  die "This script must be sourced from bash. Try: bash -lc 'source x-pack/platform/packages/shared/kbn-evals/scripts/ci/local_ci_env.sh x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json && env | rg \"^(LITELLM_|EVALUATION_|EVALUATIONS_ES_|TRACING_ES_|TRACING_EXPORTERS|KIBANA_TESTING_AI_CONNECTORS)\"'"
 fi
 
 CONFIG_PATH="${1:-x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json}"
@@ -44,6 +44,8 @@ EVALUATIONS_ES_API_KEY="$(jq -r '.evaluationsEs.apiKey // empty' <<<"$CONFIG_JSO
 TRACING_ES_URL="$(jq -r '.tracingEs.url // empty' <<<"$CONFIG_JSON")"
 TRACING_ES_API_KEY="$(jq -r '.tracingEs.apiKey // empty' <<<"$CONFIG_JSON")"
 
+TRACING_EXPORTERS_JSON="$(jq -c '.tracingExporters // empty' <<<"$CONFIG_JSON")"
+
 if [[ -z "$LITELLM_BASE_URL" || -z "$LITELLM_VIRTUAL_KEY" ]]; then
   die "Missing litellm.baseUrl or litellm.virtualKey in $CONFIG_PATH"
 fi
@@ -60,6 +62,9 @@ export EVALUATIONS_ES_URL
 export EVALUATIONS_ES_API_KEY
 export TRACING_ES_URL
 export TRACING_ES_API_KEY
+if [[ -n "$TRACING_EXPORTERS_JSON" && "$TRACING_EXPORTERS_JSON" != "null" ]]; then
+  export TRACING_EXPORTERS="$TRACING_EXPORTERS_JSON"
+fi
 
 # NOTE: bash `set -e` does not reliably fail the script for errors inside `$(...)` in all contexts.
 # Generate into a variable, then explicitly validate it, so we never feed empty/invalid data into JSON.parse below.
@@ -109,5 +114,10 @@ echo "  LITELLM_TEAM_ID=${LITELLM_TEAM_ID:+<redacted>}"
 echo "  EVALUATION_CONNECTOR_ID=$EVALUATION_CONNECTOR_ID"
 echo "  EVALUATIONS_ES_URL=${EVALUATIONS_ES_URL:-<empty>}"
 echo "  TRACING_ES_URL=${TRACING_ES_URL:-<empty>}"
+if [[ -n "${TRACING_EXPORTERS:-}" ]]; then
+  echo "  TRACING_EXPORTERS=<set (JSON array)>"
+else
+  echo "  TRACING_EXPORTERS=<empty>"
+fi
 echo "  Generated connectors: $CONNECTOR_COUNT"
 

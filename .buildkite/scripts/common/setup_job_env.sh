@@ -210,6 +210,12 @@ EOF
     # Optional: separate cluster for trace-based evaluators
     export TRACING_ES_URL="$(jq -r '.tracingEs.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
     export TRACING_ES_API_KEY="$(jq -r '.tracingEs.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+
+    # Optional: trace exporters for the Playwright worker process (supports http/grpc/phoenix/langfuse)
+    TRACING_EXPORTERS_JSON="$(jq -c '.tracingExporters // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    if [[ -n "$TRACING_EXPORTERS_JSON" && "$TRACING_EXPORTERS_JSON" != "null" ]]; then
+      export TRACING_EXPORTERS="$TRACING_EXPORTERS_JSON"
+    fi
   fi
 }
 

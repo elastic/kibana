@@ -50,6 +50,12 @@ const ENV_DOCS = [
     example: 'TRACING_ES_API_KEY=...',
   },
   {
+    name: 'TRACING_EXPORTERS',
+    description:
+      'JSON array of trace exporter configs (http/grpc/phoenix/langfuse). Overrides kibana.dev.yml tracing exporters when set.',
+    example: 'TRACING_EXPORTERS=\'[{"http":{"url":"https://ingest.example.com/v1/traces"}}]\'',
+  },
+  {
     name: 'EVALUATIONS_ES_URL',
     description: 'Elasticsearch URL where evaluation results are exported.',
     example: 'EVALUATIONS_ES_URL=http://elastic:changeme@localhost:9200',
