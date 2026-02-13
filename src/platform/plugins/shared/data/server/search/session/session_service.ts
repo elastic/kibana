@@ -402,7 +402,16 @@ export class SearchSessionService implements ISearchSessionService {
       })
     );
 
-    return { statuses: this.mapSessionStatusesToResponse(sessionStatuses) };
+    const sessionsData: SearchSessionStatusesResponse['sessions'] = {};
+    sessions.forEach((session) => {
+      sessionsData[session.id] = {
+        name: session.attributes.name,
+        restoreState: session.attributes.restoreState,
+        locatorId: session.attributes.locatorId,
+      };
+    });
+
+    return { statuses: this.mapSessionStatusesToResponse(sessionStatuses), sessions: sessionsData };
   }
 
   private bulkGet = async (
