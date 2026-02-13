@@ -22,6 +22,10 @@ interface ChartSectionActions {
 
 export interface UnifiedMetricsGridProps extends ChartSectionProps {
   actions: ChartSectionActions;
+  /**
+   * Breakdown field from Discover's app state, synced from sidebar "Add Breakdown" action
+   */
+  breakdownField?: string;
 }
 
 export interface Dimension {
