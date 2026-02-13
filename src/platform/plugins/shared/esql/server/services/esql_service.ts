@@ -172,6 +172,21 @@ export class EsqlService {
   }
 
   /**
+   * Get all ES|QL views from the cluster (GET _query/view).
+   * @returns A promise that resolves to the views response (list of view names and queries).
+   */
+  public async getViews(): Promise<{ views: Array<{ name: string; query: string }> }> {
+    const { client } = this.options;
+    const response = await client.transport.request<{
+      views: Array<{ name: string; query: string }>;
+    }>({
+      method: 'GET',
+      path: '/_query/view',
+    });
+    return response ?? { views: [] };
+  }
+
+  /**
    * Get inference endpoints for a specific task type.
    * @param taskType The type of inference task to retrieve endpoints for.
    * @returns A promise that resolves to the inference endpoints autocomplete result.

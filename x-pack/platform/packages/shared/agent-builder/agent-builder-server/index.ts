@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export type { ProcessedAttachment, ProcessedRoundInput } from './processed_input';
 export type {
   ToolProvider,
   ToolProviderHasOptions,
@@ -72,4 +73,25 @@ export type {
   RunAgentOnEventFn,
   ExperimentalFeatures,
 } from './agents';
+export type {
+  AgentBuilderHooks,
+  HookContext,
+  HookContextByLifecycle as HookContextByEvent,
+  BlockingHookHandler as HookHandler,
+  HookHandlerResult,
+  HookHandlerResultByLifecycle as HookHandlerResultByEvent,
+  HookRegistration,
+  HooksServiceSetup,
+  HooksServiceStart,
+  BeforeAgentHookContext,
+  BeforeToolCallHookContext,
+  AfterToolCallHookContext,
+} from './hooks/types';
+export { HookLifecycle, HookExecutionMode } from './hooks/types';
+export {
+  applyHookResultByLifecycle,
+  applyBeforeAgentResult,
+  applyBeforeToolCallResult,
+  applyAfterToolCallResult,
+} from './hooks/apply_result';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';
