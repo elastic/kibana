@@ -35,7 +35,6 @@ interface EsReplacementsDocument {
   }>;
   created_at: string;
   updated_at: string;
-  expires_at?: string;
   created_by: string;
   namespace: string;
 }
@@ -59,7 +58,6 @@ interface UpdateReplacementsParams {
 
 /** Maximum number of token source entries per replacements set. */
 const MAX_TOKEN_SOURCES = 10000;
-const DEFAULT_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 const ENCRYPTION_VERSION = 'v1';
 
 /**
@@ -68,17 +66,14 @@ const ENCRYPTION_VERSION = 'v1';
  */
 export class ReplacementsRepository {
   private readonly encryptionKey: string | undefined;
-  private readonly retentionMs: number;
 
   constructor(
     private readonly esClient: ElasticsearchClient,
     options?: {
       encryptionKey?: string;
-      retentionMs?: number;
     }
   ) {
     this.encryptionKey = options?.encryptionKey;
-    this.retentionMs = options?.retentionMs ?? DEFAULT_RETENTION_MS;
   }
 
   private deriveKey(secret: string): Buffer {
@@ -146,17 +141,6 @@ export class ReplacementsRepository {
     return doc.token_to_original ?? {};
   }
 
-  private getExpiryIso(nowIso: string): string {
-    return new Date(Date.parse(nowIso) + this.retentionMs).toISOString();
-  }
-
-  private isExpired(doc: EsReplacementsDocument): boolean {
-    if (!doc.expires_at) {
-      return false;
-    }
-    return Date.parse(doc.expires_at) <= Date.now();
-  }
-
   /**
    * Creates a new replacements set.
    */
@@ -186,7 +170,6 @@ export class ReplacementsRepository {
       })),
       created_at: now,
       updated_at: now,
-      expires_at: this.getExpiryIso(now),
       created_by: params.createdBy,
       namespace: params.namespace,
     };
@@ -212,7 +195,7 @@ export class ReplacementsRepository {
       });
 
       const doc = result._source;
-      if (!doc || doc.namespace !== namespace || this.isExpired(doc)) {
+      if (!doc || doc.namespace !== namespace) {
         return null;
       }
 
@@ -249,11 +232,7 @@ export class ReplacementsRepository {
       size: 1,
     });
 
-    const doc = result.hits.hits
-      .map((hit) => hit._source)
-      .find((candidate): candidate is EsReplacementsDocument =>
-        Boolean(candidate && !this.isExpired(candidate))
-      );
+    const doc = result.hits.hits[0]?._source;
     return doc ? this.toReplacementsSet(doc) : null;
   }
 
@@ -329,7 +308,6 @@ export class ReplacementsRepository {
           first_seen_at: s.firstSeenAt,
         })),
         updated_at: now,
-        expires_at: this.getExpiryIso(now),
       },
       refresh: 'wait_for',
     });
@@ -386,23 +364,6 @@ export class ReplacementsRepository {
     });
 
     return result!;
-  }
-
-  async deleteExpired(): Promise<number> {
-    const nowIso = new Date().toISOString();
-    const result = await this.esClient.deleteByQuery({
-      index: ANONYMIZATION_REPLACEMENTS_INDEX,
-      refresh: true,
-      conflicts: 'proceed',
-      query: {
-        range: {
-          expires_at: {
-            lte: nowIso,
-          },
-        },
-      },
-    });
-    return result.deleted ?? 0;
   }
 
   /**

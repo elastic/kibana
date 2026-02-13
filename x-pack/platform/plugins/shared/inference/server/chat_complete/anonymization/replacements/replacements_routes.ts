@@ -25,7 +25,6 @@ export const registerReplacementsRoutes = (
   logger: Logger,
   options: {
     encryptionKey: string;
-    retentionMs: number;
   }
 ): void => {
   // GET /internal/inference/anonymization/replacements/{id} — Resolve by ID

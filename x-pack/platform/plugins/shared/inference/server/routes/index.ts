@@ -24,7 +24,6 @@ export const registerRoutes = ({
   coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>;
   replacements: {
     encryptionKey: string;
-    retentionMs: number;
   };
 }) => {
   registerChatCompleteRoute({ router, coreSetup, logger: logger.get('chatComplete') });

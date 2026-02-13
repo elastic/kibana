@@ -45,7 +45,6 @@ export const ANONYMIZATION_REPLACEMENTS_MAPPINGS = {
     },
     created_at: { type: 'date' as const },
     updated_at: { type: 'date' as const },
-    expires_at: { type: 'date' as const },
     created_by: { type: 'keyword' as const },
     namespace: { type: 'keyword' as const },
   },

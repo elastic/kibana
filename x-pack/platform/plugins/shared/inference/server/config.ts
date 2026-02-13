@@ -10,7 +10,6 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   replacements: schema.object({
-    retention: schema.duration({ defaultValue: '30d' }),
     encryptionKey: schema.string({
       defaultValue: 'inference.replacements.default.encryption.key.change.in.production',
     }),
