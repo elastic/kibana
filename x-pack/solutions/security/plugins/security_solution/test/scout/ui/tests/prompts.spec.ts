@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { test, expect, tags } from '../fixtures';
+import { expect } from '@kbn/scout-security/ui';
+import { test, tags } from '../fixtures';
 import {
   azureConnectorPayload,
   createAzureConnector,
@@ -165,21 +166,18 @@ test.describe(
         await pageObjects.assistant.resetConversation();
       });
 
-      await test.step(
-        'create system prompt assigned to both conversations',
-        async () => {
-          await pageObjects.assistant.createSystemPrompt(testPrompt.name, testPrompt.content, [
-            'Lucky title',
-            'Lovely title',
-          ]);
-          await expect(pageObjects.assistant.systemPrompt).toHaveText(testPrompt.name);
-          await pageObjects.assistant.selectConnector(azureConnectorPayload.name);
-          await pageObjects.assistant.typeAndSendMessage('hello');
-          await expect(pageObjects.assistant.messageAt(0)).toContainText(testPrompt.content);
-          await expect(pageObjects.assistant.messageAt(1)).toContainText('hello');
-          await expect(pageObjects.assistant.errorComment).toBeVisible({ timeout: 30_000 });
-        }
-      );
+      await test.step('create system prompt assigned to both conversations', async () => {
+        await pageObjects.assistant.createSystemPrompt(testPrompt.name, testPrompt.content, [
+          'Lucky title',
+          'Lovely title',
+        ]);
+        await expect(pageObjects.assistant.systemPrompt).toHaveText(testPrompt.name);
+        await pageObjects.assistant.selectConnector(azureConnectorPayload.name);
+        await pageObjects.assistant.typeAndSendMessage('hello');
+        await expect(pageObjects.assistant.messageAt(0)).toContainText(testPrompt.content);
+        await expect(pageObjects.assistant.messageAt(1)).toContainText('hello');
+        await expect(pageObjects.assistant.errorComment).toBeVisible({ timeout: 30_000 });
+      });
 
       await test.step('switch to other conversation and verify prompt is set', async () => {
         await pageObjects.assistant.selectConversation('Lucky title');
