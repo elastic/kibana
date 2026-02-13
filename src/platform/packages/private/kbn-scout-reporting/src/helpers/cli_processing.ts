@@ -26,6 +26,26 @@ export const stripRunCommand = (commandArgs: string[]): string => {
   return `npx playwright ${restArgs.join(' ')}`;
 };
 
+/**
+ * Returns the command line used to run Scout tests.
+ *
+ * When Scout starts Playwright, the Playwright process argv no longer contains the Scout CLI invocation.
+ * In those cases, Scout sets SCOUT_RUN_COMMAND and we prefer it for reporting.
+ */
+export function getRunCommand(argv: string[] = process.argv): string {
+  const scoutRunCommand = process.env.SCOUT_RUN_COMMAND;
+  if (typeof scoutRunCommand === 'string' && scoutRunCommand.trim() !== '') {
+    return scoutRunCommand;
+  }
+
+  try {
+    return stripRunCommand(argv);
+  } catch {
+    // As a last resort, avoid failing reporting; show the raw argv.
+    return Array.isArray(argv) ? argv.join(' ') : '';
+  }
+}
+
 export function getRunTarget(argv: string[] = process.argv): string {
   // First, try to get the target from the environment variable (set by the scout run-tests command)
   if (process.env.SCOUT_TARGET_MODE) {

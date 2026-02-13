@@ -40,7 +40,7 @@ export class HistogramTransformGenerator extends TransformGenerator {
       await this.buildSource(slo, slo.indicator),
       this.buildDestination(slo),
       this.buildCommonGroupBy(slo, slo.indicator.params.timestampField),
-      this.buildAggregations(slo, slo.indicator),
+      await this.buildAggregations(slo, slo.indicator),
       this.buildSettings(slo, slo.indicator.params.timestampField),
       slo
     );
@@ -74,8 +74,12 @@ export class HistogramTransformGenerator extends TransformGenerator {
     };
   }
 
-  private buildAggregations(slo: SLODefinition, indicator: HistogramIndicator) {
-    const getHistogramIndicatorAggregations = new GetHistogramIndicatorAggregation(indicator);
+  private async buildAggregations(slo: SLODefinition, indicator: HistogramIndicator) {
+    const dataView = await this.getIndicatorDataView(indicator.params.dataViewId);
+    const getHistogramIndicatorAggregations = new GetHistogramIndicatorAggregation(
+      indicator,
+      dataView
+    );
 
     return {
       ...getHistogramIndicatorAggregations.execute({
