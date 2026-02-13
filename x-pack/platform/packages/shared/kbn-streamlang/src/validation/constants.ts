@@ -55,6 +55,7 @@ export const KEEP_FIELDS = [
   'event_name',
   'dropped_attributes_count',
   'scope',
+  'scope.name',
   'body.text',
   'body.structured',
   'resource.schema_url',
