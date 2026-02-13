@@ -123,7 +123,7 @@ describe('useDataFields', () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.data).toEqual(undefined);
+    expect(result.current.data).toEqual({});
     expect(result.current.error).toBe(testError);
   });
 

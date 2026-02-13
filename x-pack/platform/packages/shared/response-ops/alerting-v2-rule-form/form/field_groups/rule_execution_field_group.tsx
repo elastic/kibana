@@ -17,32 +17,23 @@ import { FieldGroup } from './field_group';
 import { RuleSchedule } from '../fields/rule_schedule';
 import { TimeFieldSelect } from '../fields/time_field_select';
 import { LookbackWindow } from '../fields/lookback_window';
-import { GroupBySelect } from '../fields/group_by_select';
-import { useQueryColumns } from '../hooks/use_query_columns';
-
+import { GroupFieldSelect } from '../fields/group_by_select';
 interface RuleExecutionFieldGroupProps {
   services: {
     http: HttpStart;
     data: DataPublicPluginStart;
     dataViews: DataViewsPublicPluginStart;
   };
-  query: string;
 }
 
 const SCHEDULE_ROW_ID = 'ruleV2FormScheduleField';
 const LOOKBACK_WINDOW_ROW_ID = 'ruleV2FormLookbackWindowField';
 
-export const RuleExecutionFieldGroup: React.FC<RuleExecutionFieldGroupProps> = ({
-  query,
-  services,
-}) => {
+export const RuleExecutionFieldGroup: React.FC<RuleExecutionFieldGroupProps> = ({ services }) => {
   const {
     control,
     formState: { errors },
   } = useFormContext<FormValues>();
-
-  // Columns come from the ES|QL query result (used for grouping)
-  const { data: columns } = useQueryColumns({ query, search: services.data.search.search });
 
   return (
     <FieldGroup
@@ -108,7 +99,7 @@ export const RuleExecutionFieldGroup: React.FC<RuleExecutionFieldGroupProps> = (
         />
       </EuiFormRow>
 
-      <GroupBySelect columns={columns} />
+      <GroupFieldSelect services={services} />
     </FieldGroup>
   );
 };

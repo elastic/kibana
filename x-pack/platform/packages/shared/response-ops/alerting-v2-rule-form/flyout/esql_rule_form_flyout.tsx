@@ -29,7 +29,7 @@ import type { HttpStart } from '@kbn/core/public';
 import type { FormValues } from '../form/types';
 import { ErrorCallOut } from './error_callout';
 import { useCreateRule } from '../form/hooks/use_create_rule';
-import { useDefaultGroupBy } from '../form/hooks/use_default_group_by';
+import { useFormDefaults } from '../form/hooks/use_form_defaults';
 import { RuleFields } from '../form/rule_fields';
 
 export interface ESQLRuleFormFlyoutProps {
@@ -54,30 +54,18 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
   services,
   isQueryInvalid,
 }) => {
+  // Compute all default values upfront from the query
+  const defaultValues = useFormDefaults({ query, defaultTimeField });
+
   const form = useForm<FormValues>({
     mode: 'onBlur',
-    defaultValues: {
-      kind: 'alert',
-      name: '',
-      description: '',
-      tags: [],
-      schedule: {
-        custom: '5m',
-      },
-      lookbackWindow: '5m',
-      timeField: defaultTimeField,
-      enabled: true,
-      groupingKey: [],
-    },
+    defaultValues,
   });
   const { setValue, setError, clearErrors, handleSubmit } = form;
   const { http, notifications } = services;
 
   const flyoutTitleId = 'ruleV2FormFlyoutTitle';
   const formId = 'ruleV2Form';
-
-  // Extract default grouping from the query's STATS ... BY clause
-  const { defaultGroupBy } = useDefaultGroupBy({ query });
 
   const handleClose = () => {
     if (onClose) {
@@ -95,13 +83,11 @@ const ESQLRuleFormFlyoutComponent: React.FC<ESQLRuleFormFlyoutProps> = ({
     createRule(values);
   };
 
+  // Sync query prop to form when it changes after initialization
+  // (groupingKey is only set on init via useFormDefaults to preserve user customization)
   useEffect(() => {
     setValue('query', query);
-    // Set default grouping from query's BY clause if available
-    if (defaultGroupBy.length > 0) {
-      setValue('groupingKey', defaultGroupBy);
-    }
-  }, [query, defaultGroupBy, setValue]);
+  }, [query, setValue]);
 
   // Handle query validation errors from the parent (e.g., Discover)
   useEffect(() => {

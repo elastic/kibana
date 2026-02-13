@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import type { HttpStart } from '@kbn/core/public';
 import { useWatch, useFormContext } from 'react-hook-form';
 import { EuiSelect } from '@elastic/eui';
@@ -29,24 +30,25 @@ export const TimeFieldSelect = React.forwardRef<HTMLSelectElement, Props>(
     const { control } = useFormContext();
     const query = useWatch({ name: 'query', control });
 
-    const { data: fields } = useDataFields({
-      query,
-      http: services.http,
-      dataViews: services.dataViews,
-    });
-
-    useEffect(() => {
-      if (fields && Object.values(fields).length) {
+    const handleFieldsSuccess = useCallback(
+      (fields: DataViewFieldMap) => {
         const newTimeFieldOptions = getTimeFieldOptions(fields);
         setTimeFieldOptions([firstFieldOption, ...newTimeFieldOptions]);
 
-        /* If the current value is not in the new options due to query change,
-         * reset it to empty */
-        if (!newTimeFieldOptions.find((option) => option.value === value)) {
+        // If current value is not in the new options due to query change, reset it
+        if (value && !newTimeFieldOptions.some((option) => option.value === value)) {
           onChange('');
         }
-      }
-    }, [fields, value, onChange]);
+      },
+      [onChange, value]
+    );
+
+    useDataFields({
+      query,
+      http: services.http,
+      dataViews: services.dataViews,
+      onSuccess: handleFieldsSuccess,
+    });
 
     return (
       <EuiSelect

@@ -9,14 +9,20 @@ import React, { useEffect, useMemo } from 'react';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FormValues } from '../types';
+import { useQueryColumns } from '../hooks/use_query_columns';
 
 interface GroupBySelectProps {
-  columns: Array<{ name: string; type: string }>;
+  services: {
+    data: DataPublicPluginStart;
+  };
 }
 
-export const GroupBySelect: React.FC<GroupBySelectProps> = ({ columns }) => {
-  const { control, setValue } = useFormContext<FormValues>();
+export const GroupFieldSelect: React.FC<GroupBySelectProps> = ({ services }) => {
+  const { control, setValue, watch } = useFormContext<FormValues>();
+  const query = watch('query');
+  const { data: columns } = useQueryColumns({ query, search: services.data.search.search });
   const options = useMemo(
     () => columns.map((col) => ({ label: col.name, value: col.name })),
     [columns]
@@ -41,7 +47,7 @@ export const GroupBySelect: React.FC<GroupBySelectProps> = ({ columns }) => {
     <EuiFormRow
       id={groupByRowId}
       label={i18n.translate('xpack.alertingV2.ruleForm.groupingKeyLabel', {
-        defaultMessage: 'Group By',
+        defaultMessage: 'Group Fields',
       })}
     >
       <Controller
