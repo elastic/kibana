@@ -49,7 +49,7 @@ export async function loadSavedQuery(
     id: payload.id ?? randomString(),
   };
 
-  const { data } = await kbnClient.request({
+  const { data } = await kbnClient.request<any>({
     method: 'POST',
     path: '/api/osquery/saved_queries',
     body,
@@ -60,7 +60,7 @@ export async function loadSavedQuery(
 
 export async function cleanupSavedQuery(kbnClient: KbnClient, id: string): Promise<void> {
   try {
-    await kbnClient.request({
+    await kbnClient.request<any>({
       method: 'DELETE',
       path: `/api/osquery/saved_queries/${id}`,
     });
@@ -140,7 +140,7 @@ export async function loadPack(
 
   const path = space === 'default' ? '/api/osquery/packs' : `/s/${space}/api/osquery/packs`;
 
-  const { data } = await kbnClient.request({
+  const { data } = await kbnClient.request<any>({
     method: 'POST',
     path,
     body,
@@ -150,7 +150,7 @@ export async function loadPack(
 }
 
 export async function getPack(kbnClient: KbnClient, packId: string): Promise<any> {
-  const { data } = await kbnClient.request({
+  const { data } = await kbnClient.request<any>({
     method: 'GET',
     path: `/api/osquery/packs/${packId}`,
   });
@@ -166,7 +166,7 @@ export async function cleanupPack(
   try {
     const path =
       space === 'default' ? `/api/osquery/packs/${id}` : `/s/${space}/api/osquery/packs/${id}`;
-    await kbnClient.request({
+    await kbnClient.request<any>({
       method: 'DELETE',
       path,
     });
@@ -181,7 +181,7 @@ export async function loadLiveQuery(
   kbnClient: KbnClient,
   payload = { agent_all: true, query: 'select * from uptime;', kuery: '' }
 ): Promise<any> {
-  const { data } = await kbnClient.request({
+  const { data } = await kbnClient.request<any>({
     method: 'POST',
     path: '/api/osquery/live_queries',
     body: payload,
@@ -262,7 +262,7 @@ export async function loadRule(kbnClient: KbnClient, includeResponseActions = fa
     ];
   }
 
-  const { data } = await kbnClient.request({
+  const { data } = await kbnClient.request<any>({
     method: 'POST',
     path: '/api/detection_engine/rules',
     body,
@@ -273,7 +273,7 @@ export async function loadRule(kbnClient: KbnClient, includeResponseActions = fa
 
 export async function cleanupRule(kbnClient: KbnClient, id: string): Promise<void> {
   try {
-    await kbnClient.request({
+    await kbnClient.request<any>({
       method: 'DELETE',
       path: `/api/detection_engine/rules?id=${id}`,
     });
@@ -285,7 +285,7 @@ export async function cleanupRule(kbnClient: KbnClient, id: string): Promise<voi
 // ── Cases ─────────────────────────────────────────────────────────────────────
 
 export async function loadCase(kbnClient: KbnClient, owner: string): Promise<any> {
-  const { data } = await kbnClient.request({
+  const { data } = await kbnClient.request<any>({
     method: 'POST',
     path: '/api/cases',
     body: {
@@ -305,7 +305,7 @@ export async function loadCase(kbnClient: KbnClient, owner: string): Promise<any
 
 export async function cleanupCase(kbnClient: KbnClient, id: string): Promise<void> {
   try {
-    await kbnClient.request({
+    await kbnClient.request<any>({
       method: 'DELETE',
       path: '/api/cases',
       query: { ids: JSON.stringify([id]) },
@@ -320,7 +320,7 @@ export async function cleanupCase(kbnClient: KbnClient, id: string): Promise<voi
 export async function loadSpace(kbnClient: KbnClient): Promise<{ id: string }> {
   const spaceId = randomString();
 
-  const { data } = await kbnClient.request({
+  const { data } = await kbnClient.request<any>({
     method: 'POST',
     path: '/api/spaces/space',
     body: { id: spaceId, name: spaceId },
@@ -331,7 +331,7 @@ export async function loadSpace(kbnClient: KbnClient): Promise<{ id: string }> {
 
 export async function cleanupSpace(kbnClient: KbnClient, id: string): Promise<void> {
   try {
-    await kbnClient.request({
+    await kbnClient.request<any>({
       method: 'DELETE',
       path: `/api/spaces/space/${id}`,
     });
@@ -356,7 +356,7 @@ export async function shareOsqueryPackagePoliciesToSpace(
   spaceId: string
 ): Promise<void> {
   // Get all package policies
-  const { data: policiesData } = await kbnClient.request({
+  const { data: policiesData } = await kbnClient.request<any>({
     method: 'GET',
     path: '/api/fleet/package_policies?perPage=100',
   });
@@ -375,7 +375,7 @@ export async function shareOsqueryPackagePoliciesToSpace(
     id: p.id,
   }));
 
-  await kbnClient.request({
+  await kbnClient.request<any>({
     method: 'POST',
     path: '/api/spaces/_update_objects_spaces',
     body: {
@@ -397,7 +397,7 @@ export async function shareOsqueryPackagePoliciesToSpace(
     }));
 
     try {
-      await kbnClient.request({
+      await kbnClient.request<any>({
         method: 'POST',
         path: '/api/spaces/_update_objects_spaces',
         body: {
@@ -415,14 +415,14 @@ export async function shareOsqueryPackagePoliciesToSpace(
     // field to match the policy's space_ids.
     for (const policyId of agentPolicyIds) {
       try {
-        const { data: agentsData } = await kbnClient.request({
+        const { data: agentsData } = await kbnClient.request<any>({
           method: 'GET',
           path: `/api/fleet/agents?perPage=100&kuery=policy_id:${policyId}`,
         });
 
         for (const agent of agentsData?.items ?? []) {
           try {
-            await kbnClient.request({
+            await kbnClient.request<any>({
               method: 'POST',
               path: `/api/fleet/agents/${agent.id}/reassign`,
               body: { policy_id: policyId },
@@ -446,7 +446,7 @@ export async function shareOsqueryPackagePoliciesToSpace(
  */
 export async function getFirstPackagePolicyIds(kbnClient: KbnClient): Promise<string[]> {
   try {
-    const { data: policiesResponse } = await kbnClient.request({
+    const { data: policiesResponse } = await kbnClient.request<any>({
       method: 'GET',
       path: '/internal/osquery/fleet_wrapper/package_policies',
       headers: { 'elastic-api-version': '1' },
@@ -468,7 +468,7 @@ export async function getFirstPackagePolicyIds(kbnClient: KbnClient): Promise<st
 // ── Agent Policies ────────────────────────────────────────────────────────────
 
 export async function loadAgentPolicy(kbnClient: KbnClient): Promise<any> {
-  const { data } = await kbnClient.request({
+  const { data } = await kbnClient.request<any>({
     method: 'POST',
     path: '/api/fleet/agent_policies',
     body: {
@@ -484,7 +484,7 @@ export async function loadAgentPolicy(kbnClient: KbnClient): Promise<any> {
 }
 
 export async function getInstalledOsqueryIntegrationVersion(kbnClient: KbnClient): Promise<string> {
-  const { data } = await kbnClient.request({
+  const { data } = await kbnClient.request<any>({
     method: 'GET',
     path: '/api/fleet/epm/packages/osquery_manager',
   });
@@ -500,7 +500,7 @@ export async function addOsqueryToAgentPolicy(
 ): Promise<any> {
   const version = integrationVersion ?? (await getInstalledOsqueryIntegrationVersion(kbnClient));
 
-  const { data } = await kbnClient.request({
+  const { data } = await kbnClient.request<any>({
     method: 'POST',
     path: '/api/fleet/package_policies',
     body: {
@@ -523,7 +523,7 @@ export async function cleanupAgentPolicy(
   agentPolicyId: string
 ): Promise<void> {
   try {
-    await kbnClient.request({
+    await kbnClient.request<any>({
       method: 'POST',
       path: '/api/fleet/agent_policies/delete',
       body: { agentPolicyId },

@@ -7,7 +7,7 @@
 
 import { createPlaywrightConfig } from '@kbn/scout';
 
-export default {
+const config: ReturnType<typeof createPlaywrightConfig> = {
   ...createPlaywrightConfig({
     testDir: './tests',
     workers: 1,
@@ -17,3 +17,5 @@ export default {
   // and pack triggering — all of which can take well over the default 60 s.
   timeout: 300_000,
 };
+
+export default config;

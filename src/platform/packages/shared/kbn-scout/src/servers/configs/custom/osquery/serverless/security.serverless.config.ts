@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { servers as securityServerlessConfig } from '../../../default/serverless/security.serverless.config';
+import { servers as securityServerlessConfig } from '../../../config_sets/default/serverless/security_complete.serverless.config';
 
 /**
  * Custom Scout server configuration for Osquery tests in serverless security mode.
@@ -32,7 +32,7 @@ import { servers as securityServerlessConfig } from '../../../default/serverless
 // Filter out default Fleet host settings that use localhost — Docker containers cannot
 // resolve localhost back to the host machine, so we replace them with host.docker.internal.
 const kbnServerArgsWithoutFleetHosts = securityServerlessConfig.kbnTestServer.serverArgs.filter(
-  (arg) =>
+  (arg: string) =>
     !arg.startsWith('--xpack.fleet.fleetServerHosts=') && !arg.startsWith('--xpack.fleet.outputs=')
 );
 

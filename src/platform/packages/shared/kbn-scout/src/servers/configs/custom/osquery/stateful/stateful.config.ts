@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { defaultConfig } from '../../../default/stateful/base.config';
+import { defaultConfig } from '../../../config_sets/default/stateful/base.config';
 
 /**
  * Custom Scout server configuration for Osquery tests.
@@ -30,7 +30,7 @@ import { defaultConfig } from '../../../default/stateful/base.config';
 // Filter out default Fleet host settings that use localhost — Docker containers cannot
 // resolve localhost back to the host machine, so we replace them with host.docker.internal.
 const kbnServerArgsWithoutFleetHosts = defaultConfig.kbnTestServer.serverArgs.filter(
-  (arg) =>
+  (arg: string) =>
     !arg.startsWith('--xpack.fleet.fleetServerHosts=') && !arg.startsWith('--xpack.fleet.outputs=')
 );
 

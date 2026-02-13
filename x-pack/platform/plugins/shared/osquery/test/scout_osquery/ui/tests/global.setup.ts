@@ -62,7 +62,7 @@ async function isContainerRunning(name: string): Promise<boolean> {
 
 async function getOnlineAgentCount(kbnClient: KbnClient): Promise<number> {
   try {
-    const { data } = await kbnClient.request({
+    const { data } = await kbnClient.request<any>({
       method: 'GET',
       path: '/api/fleet/agents',
       query: { perPage: 100 },
@@ -128,7 +128,7 @@ async function waitForOsqueryReady(kbnClient: KbnClient, log: any, timeoutMs = 3
   while (Date.now() - start < timeoutMs) {
     try {
       // Submit a simple live query
-      const { data: queryResponse } = await kbnClient.request({
+      const { data: queryResponse } = await kbnClient.request<any>({
         method: 'POST',
         path: '/api/osquery/live_queries',
         body: {
@@ -150,7 +150,7 @@ async function waitForOsqueryReady(kbnClient: KbnClient, log: any, timeoutMs = 3
       for (let i = 0; i < 24; i++) {
         await new Promise((r) => setTimeout(r, 5_000));
         try {
-          const { data: detailsResponse } = await kbnClient.request({
+          const { data: detailsResponse } = await kbnClient.request<any>({
             method: 'GET',
             path: `/api/osquery/live_queries/${actionId}`,
           });
@@ -353,7 +353,7 @@ globalSetupHook(
 
     // ── 3. Fleet setup ─────────────────────────────────────────────────
     log.info('[osquery-setup] Calling Fleet setup...');
-    await kbnClient.request({ method: 'POST', path: '/api/fleet/setup' });
+    await kbnClient.request<any>({ method: 'POST', path: '/api/fleet/setup' });
     log.info('[osquery-setup] Fleet setup complete');
 
     // ── 4–6. Start Fleet Server ────────────────────────────────────────
@@ -376,7 +376,7 @@ globalSetupHook(
     } else {
       // ── Stateful: managed Fleet Server ───────────────────────────────
       log.info('[osquery-setup] Generating Fleet service token...');
-      const { data: tokenResponse } = await kbnClient.request({
+      const { data: tokenResponse } = await kbnClient.request<any>({
         method: 'POST',
         path: '/api/fleet/service_tokens',
         body: {},
@@ -426,7 +426,7 @@ globalSetupHook(
       // since there's no Fleet Server policy auto-registration
       log.info('[osquery-setup] Registering Fleet Server host in Fleet settings...');
       try {
-        await kbnClient.request({
+        await kbnClient.request<any>({
           method: 'POST',
           path: '/api/fleet/fleet_server_hosts',
           body: {
@@ -486,7 +486,7 @@ globalSetupHook(
       log.info(`[osquery-setup] Created "${policyName}" policy: ${policyId}`);
 
       // Add osquery_manager integration
-      await kbnClient.request({
+      await kbnClient.request<any>({
         method: 'POST',
         path: '/api/fleet/package_policies',
         body: {
