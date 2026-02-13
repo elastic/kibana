@@ -1365,7 +1365,7 @@ describe('data telemetry collection tasks', () => {
   describe('otel_sdk_distro', () => {
     const task = tasks.find((t) => t.name === 'otel_sdk_distro');
 
-    it('returns SDK and distro telemetry', async () => {
+    it('returns SDK and distro telemetry with service counts per version', async () => {
       const search = jest.fn().mockResolvedValueOnce({
         hits: {
           total: { value: 1000 },
@@ -1381,6 +1381,7 @@ describe('data telemetry collection tasks', () => {
                   distro_name: null,
                 },
                 doc_count: 500,
+                services: { value: 5 },
               },
               {
                 key: {
@@ -1390,6 +1391,7 @@ describe('data telemetry collection tasks', () => {
                   distro_name: null,
                 },
                 doc_count: 200,
+                services: { value: 2 },
               },
               {
                 key: {
@@ -1399,6 +1401,7 @@ describe('data telemetry collection tasks', () => {
                   distro_name: 'elastic',
                 },
                 doc_count: 300,
+                services: { value: 3 },
               },
               {
                 key: {
@@ -1408,6 +1411,7 @@ describe('data telemetry collection tasks', () => {
                   distro_name: 'elastic',
                 },
                 doc_count: 200,
+                services: { value: 1 },
               },
             ],
           },
@@ -1436,17 +1440,27 @@ describe('data telemetry collection tasks', () => {
               '1.20.0': 500,
               '1.19.0': 200,
             },
+            services_per_version: {
+              '1.20.0': 5,
+              '1.19.0': 2,
+            },
           },
           'opentelemetry/python/elastic': {
             docs: 300,
             versions: {
               '1.15.0': 300,
             },
+            services_per_version: {
+              '1.15.0': 3,
+            },
           },
           'opentelemetry/java/elastic': {
             docs: 200,
             versions: {
               '1.12.0': 200,
+            },
+            services_per_version: {
+              '1.12.0': 1,
             },
           },
         },
@@ -1456,6 +1470,10 @@ describe('data telemetry collection tasks', () => {
             versions: {
               '1.15.0': 300,
               '1.12.0': 200,
+            },
+            services_per_version: {
+              '1.15.0': 3,
+              '1.12.0': 1,
             },
           },
         },
@@ -1508,6 +1526,7 @@ describe('data telemetry collection tasks', () => {
                   distro_name: 'elastic',
                 },
                 doc_count: 300,
+                services: { value: 4 },
               },
               {
                 key: {
@@ -1517,6 +1536,7 @@ describe('data telemetry collection tasks', () => {
                   distro_name: null,
                 },
                 doc_count: 100,
+                services: { value: 1 },
               },
               {
                 key: {
@@ -1526,6 +1546,7 @@ describe('data telemetry collection tasks', () => {
                   distro_name: 'unknown',
                 },
                 doc_count: 100,
+                services: { value: 1 },
               },
             ],
           },
@@ -1554,6 +1575,9 @@ describe('data telemetry collection tasks', () => {
             versions: {
               '1.20.0': 300,
             },
+            services_per_version: {
+              '1.20.0': 4,
+            },
           },
         },
         otel_distro: {
@@ -1561,6 +1585,9 @@ describe('data telemetry collection tasks', () => {
             docs: 300,
             versions: {
               '1.20.0': 300,
+            },
+            services_per_version: {
+              '1.20.0': 4,
             },
           },
         },

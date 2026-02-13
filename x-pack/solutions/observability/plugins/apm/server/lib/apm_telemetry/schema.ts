@@ -890,6 +890,14 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           },
         },
       },
+      services_per_version: {
+        DYNAMIC_KEY: {
+          type: 'long',
+          _meta: {
+            description: 'Number of unique services per SDK version',
+          },
+        },
+      },
     },
   },
   otel_distro: {
@@ -905,6 +913,14 @@ export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
           type: 'long',
           _meta: {
             description: 'Number of documents per distro version',
+          },
+        },
+      },
+      services_per_version: {
+        DYNAMIC_KEY: {
+          type: 'long',
+          _meta: {
+            description: 'Number of unique services per distro version',
           },
         },
       },

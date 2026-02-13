@@ -103,11 +103,11 @@ export interface APMUsage {
   };
   otel_sdk: Record<
     string,
-    { docs: number; versions: Record<string, number> }
+    { docs: number; versions: Record<string, number>; services_per_version: Record<string, number> }
   >;
   otel_distro: Record<
     string,
-    { docs: number; versions: Record<string, number> }
+    { docs: number; versions: Record<string, number>; services_per_version: Record<string, number> }
   >;
   version: {
     apm_server: {

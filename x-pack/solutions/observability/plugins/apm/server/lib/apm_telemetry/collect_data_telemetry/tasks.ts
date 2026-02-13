@@ -1894,7 +1894,8 @@ export const tasks: TelemetryTask[] = [
                     field: SDK_NAME_FIELD,
                   },
                 },
-                range1d,
+                // range1d,
+                { range: { '@timestamp': { gte: 'now-15m' } } },
               ],
           },
         },
@@ -2013,7 +2014,8 @@ export const tasks: TelemetryTask[] = [
                     field: SDK_NAME_FIELD,
                   },
                 },
-                range1d,
+                // range1d,
+                { range: { '@timestamp': { gte: 'now-15m' } } },
               ],
             },
           },
@@ -2138,7 +2140,8 @@ export const tasks: TelemetryTask[] = [
         query: {
           bool: {
             filter: [{ exists: { field: SDK_NAME_FIELD } }, 
-              range1d,
+              // range1d,
+              { range: { '@timestamp': { gte: 'now-15m' } } },
             ],
           },
         },
@@ -2161,6 +2164,13 @@ export const tasks: TelemetryTask[] = [
                 },
               ],
             },
+            aggs: {
+              services: {
+                cardinality: {
+                  field: SERVICE_NAME,
+                },
+              },
+            },
           },
         },
       });
@@ -2168,9 +2178,9 @@ export const tasks: TelemetryTask[] = [
       // Process SDK results
       const sdkStats: Record<
         string,
-        { docs: number; versions: Record<string, number> }
+        { docs: number; versions: Record<string, number>; services_per_version: Record<string, number> }
       > = {};
-      const distroStats: Record<string, { docs: number; versions: Record<string, number> }> = {};
+      const distroStats: Record<string, { docs: number; versions: Record<string, number>; services_per_version: Record<string, number> }> = {};
       
       const sdkBuckets =
         (
@@ -2178,6 +2188,7 @@ export const tasks: TelemetryTask[] = [
             buckets?: Array<{
               key: { sdk_name: string; sdk_version?: string; sdk_language?: string; distro_name?: string };
               doc_count: number;
+              services?: { value: number };
             }>;
           }
         )?.buckets ?? [];
@@ -2187,6 +2198,7 @@ export const tasks: TelemetryTask[] = [
         const sdkVersion = bucket.key.sdk_version || 'unknown';
         const sdkLanguage = bucket.key.sdk_language || 'unknown';
         const distroName = bucket.key.distro_name;
+        const serviceCount = bucket.services?.value || 0;
 
         if (!sdkName || sdkName === 'unknown' || sdkName === '') {
           continue;
@@ -2196,21 +2208,25 @@ export const tasks: TelemetryTask[] = [
         const key = distroName ? `${sdkName}/${sdkLanguage}/${distroName}` : `${sdkName}/${sdkLanguage}`;
 
         if (!sdkStats[key]) {
-          sdkStats[key] = { docs: 0, versions: {} };
+          sdkStats[key] = { docs: 0, versions: {}, services_per_version: {} };
         }
 
         sdkStats[key].docs += bucket.doc_count;
         sdkStats[key].versions[sdkVersion] =
           (sdkStats[key].versions[sdkVersion] || 0) + bucket.doc_count;
+        sdkStats[key].services_per_version[sdkVersion] =
+          (sdkStats[key].services_per_version[sdkVersion] || 0) + serviceCount;
 
         // Also track distro separately if it exists
         if (distroName && distroName !== 'unknown' && distroName !== '') {
           if (!distroStats[distroName]) {
-            distroStats[distroName] = { docs: 0, versions: {} };
+            distroStats[distroName] = { docs: 0, versions: {}, services_per_version: {} };
           }
           distroStats[distroName].docs += bucket.doc_count;
           distroStats[distroName].versions[sdkVersion] =
             (distroStats[distroName].versions[sdkVersion] || 0) + bucket.doc_count;
+          distroStats[distroName].services_per_version[sdkVersion] =
+            (distroStats[distroName].services_per_version[sdkVersion] || 0) + serviceCount;
         }
       }
 
