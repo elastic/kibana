@@ -143,7 +143,9 @@ describe('Transform: <DefinePivotForm />', () => {
     );
 
     await waitFor(() => {
-      expect(getByTestId('transformDiscoverSessionCopyDevConsoleStatementButton')).toBeInTheDocument();
+      expect(
+        getByTestId('transformDiscoverSessionCopyDevConsoleStatementButton')
+      ).toBeInTheDocument();
     });
   });
 });
