@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import type { Point } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
+import type {
+  TextContextTypeConvert,
+  HtmlContextTypeConvert,
+  ReactContextTypeConvert,
+} from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString, geoUtils } from '../utils';
+import { checkForMissingValueReact } from '../components';
 const { ddToMGRS, ddToDMS } = geoUtils;
 const TRANSFORM_OPTIONS = [
   {
@@ -155,5 +161,14 @@ DMS: ${ddToDMS(point.coordinates[1], point.coordinates[0])}`;
     }
 
     return this.textConvert(val, options);
+  };
+
+  reactConvert: ReactContextTypeConvert = (val, options) => {
+    const missing = checkForMissingValueReact(val);
+    if (missing) {
+      return missing;
+    }
+
+    return <>{this.textConvert(val, options)}</>;
   };
 }

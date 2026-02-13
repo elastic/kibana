@@ -8,6 +8,7 @@
  */
 
 import type { Serializable, SerializableRecord } from '@kbn/utility-types';
+import type { ReactNode } from 'react';
 import type { FieldFormat } from './field_format';
 import type { FieldFormatsRegistry } from './field_formats_registry';
 
@@ -45,6 +46,31 @@ export interface TextContextTypeOptions {
 export type TextContextTypeConvert = (value: any, options?: TextContextTypeOptions) => string;
 
 /**
+ * React converter options (extends HTML options since it can use same context)
+ * @public
+ */
+export interface ReactContextTypeOptions extends HtmlContextTypeOptions {
+  /**
+   * Optional CSS class name to apply to the root element
+   */
+  className?: string;
+}
+
+/**
+ * To React element converter function
+ * @public
+ *
+ * Field formatters can optionally implement this to return a React element
+ * directly instead of an HTML string. This is the preferred rendering path
+ * for client-side UI as it avoids dangerouslySetInnerHTML.
+ *
+ * When a formatter provides reactConvert, consumers should prefer using it
+ * over htmlConvert for rendering. The text conversion remains unchanged
+ * and is used for sorting, filtering, export, and other non-visual operations.
+ */
+export type ReactContextTypeConvert = (value: any, options?: ReactContextTypeOptions) => ReactNode;
+
+/**
  * Converter function
  * @public
  */
@@ -54,6 +80,18 @@ export type FieldFormatConvertFunction = HtmlContextTypeConvert | TextContextTyp
 export interface FieldFormatConvert {
   text: TextContextTypeConvert;
   html: HtmlContextTypeConvert;
+}
+
+/**
+ * Extended converter object that includes optional React rendering
+ * @public
+ */
+export interface FieldFormatConvertWithReact extends FieldFormatConvert {
+  /**
+   * Optional React converter. When provided, UI consumers should prefer
+   * this over the HTML converter for rendering formatted values.
+   */
+  react?: ReactContextTypeConvert;
 }
 
 /** @public **/

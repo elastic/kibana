@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
 import { createCustomFieldFormat } from './converters/custom';
@@ -14,15 +15,25 @@ import type {
   FieldFormatsGetConfigFn,
   FieldFormatsContentType,
   FieldFormatInstanceType,
-  FieldFormatConvert,
   FieldFormatConvertFunction,
   HtmlContextTypeOptions,
   TextContextTypeOptions,
+  ReactContextTypeOptions,
   FieldFormatMetaParams,
   FieldFormatParams,
+  FieldFormatConvertWithReact,
 } from './types';
-import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
-import type { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
+import {
+  htmlContentTypeSetup,
+  textContentTypeSetup,
+  reactContentTypeSetup,
+  TEXT_CONTEXT_TYPE,
+} from './content_types';
+import type {
+  HtmlContextTypeConvert,
+  TextContextTypeConvert,
+  ReactContextTypeConvert,
+} from './types';
 
 const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
 
@@ -59,15 +70,26 @@ export abstract class FieldFormat {
   static fieldType: string | string[];
 
   /**
-   * @property {FieldFormatConvert}
+   * @property {FieldFormatConvertWithReact}
    * @internal
    * have to remove the private because of
    * https://github.com/Microsoft/TypeScript/issues/17293
    */
-  convertObject: FieldFormatConvert | undefined;
+  convertObject: FieldFormatConvertWithReact | undefined;
 
   /**
-   * @property {htmlConvert}
+   * HTML conversion function for formatting values as HTML strings.
+   *
+   * @deprecated Use `reactConvert` instead for new formatters. The HTML conversion
+   * path uses `dangerouslySetInnerHTML` which poses security risks and prevents
+   * React's reconciliation optimizations.
+   *
+   * This property is maintained for backward compatibility with existing formatters
+   * and third-party plugins. New formatters should implement `reactConvert` instead.
+   *
+   * @see reactConvert for the recommended approach
+   * @see README.md for migration guidance
+   *
    * @protected
    * have to remove the protected because of
    * https://github.com/Microsoft/TypeScript/issues/17293
@@ -81,6 +103,19 @@ export abstract class FieldFormat {
    * https://github.com/Microsoft/TypeScript/issues/17293
    */
   textConvert: TextContextTypeConvert | undefined;
+
+  /**
+   * @property {reactConvert}
+   * @protected
+   * Optional React conversion function. When implemented, consumers should
+   * prefer using this over htmlConvert for rendering formatted values.
+   * This avoids dangerouslySetInnerHTML and provides a more React-native
+   * rendering path.
+   *
+   * have to remove the protected because of
+   * https://github.com/Microsoft/TypeScript/issues/17293
+   */
+  reactConvert: ReactContextTypeConvert | undefined;
 
   /**
    * @property {Function} - ref to child class
@@ -135,6 +170,45 @@ export abstract class FieldFormat {
     }
 
     return this.convertObject[contentType] ?? this.convertObject.text;
+  }
+
+  /**
+   * Convert a raw value to a React element for rendering.
+   *
+   * Returns a React element if this formatter supports React rendering,
+   * or undefined if it does not (in which case consumers should fall back
+   * to the HTML conversion via a legacy adapter).
+   *
+   * @param value - The value to format
+   * @param options - Optional context (field, hit, highlight, className)
+   * @returns A React element, or undefined if React rendering is not supported
+   * @public
+   */
+  convertToReact(value: unknown, options?: ReactContextTypeOptions): ReactNode | undefined {
+    if (!this.convertObject) {
+      this.convertObject = this.setupContentType();
+    }
+
+    const reactConverter = this.convertObject.react;
+    if (!reactConverter) {
+      return undefined;
+    }
+
+    return reactConverter.call(this, value, options);
+  }
+
+  /**
+   * Check if this formatter supports React rendering.
+   *
+   * @returns true if the formatter has a reactConvert implementation
+   * @public
+   */
+  hasReactSupport(): boolean {
+    if (!this.convertObject) {
+      this.convertObject = this.setupContentType();
+    }
+
+    return this.convertObject.react !== undefined;
   }
 
   /**
@@ -206,10 +280,11 @@ export abstract class FieldFormat {
     return createCustomFieldFormat(convertFn);
   }
 
-  setupContentType(): FieldFormatConvert {
+  setupContentType(): FieldFormatConvertWithReact {
     return {
       text: textContentTypeSetup(this, this.textConvert),
       html: htmlContentTypeSetup(this, this.htmlConvert),
+      react: reactContentTypeSetup(this, this.reactConvert),
     };
   }
 

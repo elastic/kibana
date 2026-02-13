@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { escape, memoize } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { getHighlightHtml } from '../utils';
+import { getHighlightHtml, getHighlightReact } from '../utils';
 import { FieldFormat } from '../field_format';
 import type {
   TextContextTypeConvert,
   HtmlContextTypeConvert,
+  ReactContextTypeConvert,
   FieldFormatMetaParams,
   FieldFormatParams,
 } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
+import { checkForMissingValueReact } from '../components';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const allowedUrlSchemes = ['http://', 'https://', 'mailto:'];
@@ -134,6 +137,52 @@ export class UrlFormat extends FieldFormat {
     return `<img src="${url}" alt="${imageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
   }
 
+  private getImgStyle(): React.CSSProperties {
+    const parsedWidth = parseInt(this.param('width'), 10);
+    const parsedHeight = parseInt(this.param('height'), 10);
+    const isValidWidth = !isNaN(parsedWidth);
+    const isValidHeight = !isNaN(parsedHeight);
+
+    return {
+      width: 'auto',
+      height: 'auto',
+      maxWidth: isValidWidth ? `${parsedWidth}px` : 'none',
+      maxHeight: isValidHeight ? `${parsedHeight}px` : 'none',
+    };
+  }
+
+  /**
+   * Calculate the URL prefix for relative URLs based on parsedUrl context.
+   * This is shared between htmlConvert and reactConvert.
+   */
+  private getUrlPrefix(url: string): string {
+    const { parsedUrl } = this._params;
+    const { basePath, pathname, origin } = parsedUrl || {};
+
+    const allowed = allowedUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
+    if (allowed) {
+      return '';
+    }
+
+    if (!parsedUrl) {
+      return '';
+    }
+
+    // Handles urls like: `#/discover`
+    if (url[0] === '#') {
+      return `${origin}${pathname}`;
+    }
+    // Handle urls like: `/app/kibana` or `/xyz/app/kibana`
+    else if (url.indexOf(basePath || '/') === 0) {
+      return `${origin}`;
+    }
+    // Handle urls like: `../app/kibana`
+    else {
+      const prefixEnd = url[0] === '/' ? '' : '/';
+      return `${origin}${basePath || ''}/app${prefixEnd}`;
+    }
+  }
+
   textConvert: TextContextTypeConvert = (value: string) => {
     const missing = this.checkForMissingValueText(value);
     if (missing) {
@@ -213,6 +262,58 @@ export class UrlFormat extends FieldFormat {
         const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
 
         return `<a href="${prefix}${url}" target="${linkTarget}" rel="noopener noreferrer">${linkLabel}</a>`;
+    }
+  };
+
+  reactConvert: ReactContextTypeConvert = (rawValue: string, options = {}) => {
+    const missing = checkForMissingValueReact(rawValue);
+    if (missing) {
+      return missing;
+    }
+
+    const { field, hit } = options;
+    const { parsedUrl } = this._params;
+
+    // Note: We don't escape for React since React handles escaping automatically
+    const url = this.formatUrl(rawValue);
+    const label = this.formatLabel(rawValue, url);
+
+    switch (this.param('type')) {
+      case 'audio':
+        return <audio controls preload="none" src={url} />;
+
+      case 'img': {
+        // If the URL hasn't been formatted to become a meaningful label then the best we can do
+        // is tell screen readers where the image comes from.
+        const imageLabel =
+          label === url ? `A dynamically-specified image located at ${url}` : label;
+
+        return <img src={url} alt={imageLabel} style={this.getImgStyle()} />;
+      }
+      default: {
+        const allowed = allowedUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
+        if (!allowed && !parsedUrl) {
+          return <>{url}</>;
+        }
+
+        const prefix = this.getUrlPrefix(url);
+
+        // Handle highlighting in React
+        let linkLabel: ReactNode;
+        if (hit?.highlight?.[field?.name!]) {
+          linkLabel = getHighlightReact(label, hit.highlight[field!.name]);
+        } else {
+          linkLabel = label;
+        }
+
+        const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
+
+        return (
+          <a href={`${prefix}${url}`} target={linkTarget} rel="noopener noreferrer">
+            {linkLabel}
+          </a>
+        );
+      }
     }
   };
 }

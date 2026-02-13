@@ -19,6 +19,9 @@ export const fieldFormatsMock: IFieldFormatsRegistry = {
     convert: jest.fn().mockImplementation((t: string) => t),
     getConverterFor: jest.fn().mockImplementation(() => (t: string) => t),
     toJSON: jest.fn(),
+    // Support FormattedValue React rendering fallback path
+    convertToReact: jest.fn().mockReturnValue(undefined),
+    hasReactSupport: jest.fn().mockReturnValue(false),
   })),
   getDefaultInstanceCacheResolver: jest.fn(),
   getDefaultInstancePlain: jest.fn(),

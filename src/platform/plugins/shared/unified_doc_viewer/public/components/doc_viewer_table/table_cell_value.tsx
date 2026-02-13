@@ -97,7 +97,10 @@ const IgnoreWarning: React.FC<IgnoreWarningProps> = React.memo(({ rawValue, reas
 
 interface TableFieldValueProps {
   field: string;
-  formattedValue: string;
+  /**
+   * React element containing the formatted value (preferred)
+   */
+  formattedValueReact: React.ReactNode;
   rawValue: unknown;
   ignoreReason?: IgnoredReason;
   isDetails?: boolean; // true when inside EuiDataGrid cell popover
@@ -105,7 +108,7 @@ interface TableFieldValueProps {
 }
 
 export const TableFieldValue = ({
-  formattedValue,
+  formattedValueReact,
   field,
   rawValue,
   ignoreReason,
@@ -190,10 +193,9 @@ export const TableFieldValue = ({
             ]}
             id={valueElementId}
             data-test-subj={valueElementId}
-            // Value returned from formatFieldValue is always sanitized
-            // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{ __html: formattedValue }}
-          />
+          >
+            {formattedValueReact}
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </Fragment>

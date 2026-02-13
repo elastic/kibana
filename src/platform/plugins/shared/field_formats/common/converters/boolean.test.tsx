@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+import { render } from '@testing-library/react';
 import { BoolFormat } from './boolean';
 import { HTML_CONTEXT_TYPE, TEXT_CONTEXT_TYPE } from '../content_types';
+import { EMPTY_VALUE_CLASS } from '../components';
 
 describe('Boolean Format', () => {
   let boolean: BoolFormat;
@@ -75,5 +78,41 @@ describe('Boolean Format', () => {
     expect(boolean.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
       '<span class="ffString__emptyValue">(null)</span>'
     );
+  });
+
+  describe('React conversion', () => {
+    test('has React support', () => {
+      expect(boolean.hasReactSupport()).toBe(true);
+    });
+
+    test('converts boolean values to React elements', () => {
+      const result = boolean.convertToReact(true);
+      const { container } = render(<>{result}</>);
+      expect(container.textContent).toBe('true');
+    });
+
+    test('converts false to React element', () => {
+      const result = boolean.convertToReact(false);
+      const { container } = render(<>{result}</>);
+      expect(container.textContent).toBe('false');
+    });
+
+    test('handles missing values in React conversion', () => {
+      const resultNull = boolean.convertToReact(null);
+      const { container: containerNull } = render(<>{resultNull}</>);
+      expect(containerNull.textContent).toBe('(null)');
+      expect(containerNull.querySelector(`.${EMPTY_VALUE_CLASS}`)).not.toBeNull();
+
+      const resultUndefined = boolean.convertToReact(undefined);
+      const { container: containerUndefined } = render(<>{resultUndefined}</>);
+      expect(containerUndefined.textContent).toBe('(null)');
+      expect(containerUndefined.querySelector(`.${EMPTY_VALUE_CLASS}`)).not.toBeNull();
+    });
+
+    test('converts non-boolean values correctly', () => {
+      const result = boolean.convertToReact('not a boolean');
+      const { container } = render(<>{result}</>);
+      expect(container.textContent).toBe('not a boolean');
+    });
   });
 });

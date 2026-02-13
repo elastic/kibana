@@ -7,17 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, type ReactNode } from 'react';
 import { css } from '@emotion/react';
-import type {
-  DataTableRecord,
-  EsHitRecord,
-  FormattedHit,
-  ShouldShowFieldInTableHandler,
-} from '@kbn/discover-utils/src/types';
+import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { formatFieldValue, formatHit } from '@kbn/discover-utils';
+import { formatHitReact, FormatFieldValueReact, type FormattedHitReact } from '@kbn/discover-utils';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -57,15 +52,15 @@ export function SourceDocument({
   isCompressed?: boolean;
 }) {
   const styles = useMemoCss(componentStyles);
-  const pairs: FormattedHit = useTopLevelObjectColumns
-    ? getTopLevelObjectPairs(
-        row.raw,
+  const pairs: FormattedHitReact = useTopLevelObjectColumns
+    ? getTopLevelObjectPairsReact(
+        row,
         columnId,
         dataView,
         shouldShowFieldHandler,
         fieldFormats
       ).slice(0, maxEntries)
-    : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
+    : formatHitReact(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
 
   return (
     <EuiDescriptionList
@@ -84,10 +79,9 @@ export function SourceDocument({
             <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
               {fieldDisplayName}
             </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription
-              className="unifiedDataTable__descriptionListDescription"
-              dangerouslySetInnerHTML={{ __html: value }}
-            />
+            <EuiDescriptionListDescription className="unifiedDataTable__descriptionListDescription">
+              {value}
+            </EuiDescriptionListDescription>
           </Fragment>
         );
       })}
@@ -99,35 +93,49 @@ export function SourceDocument({
  * Helper function to show top level objects
  * this is used for legacy stuff like displaying products of our ecommerce dataset
  */
-function getTopLevelObjectPairs(
-  row: EsHitRecord,
+function getTopLevelObjectPairsReact(
+  row: DataTableRecord,
   columnId: string,
   dataView: DataView,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   fieldFormats: FieldFormatsStart
-) {
-  const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
+): FormattedHitReact {
+  const innerColumns = getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
-  const highlights: Record<string, unknown> = (row.highlight as Record<string, unknown>) ?? {};
-  const highlightPairs: FormattedHit = [];
-  const sourcePairs: FormattedHit = [];
+  const highlights: Record<string, unknown> = (row.raw.highlight as Record<string, unknown>) ?? {};
+  const highlightPairs: Array<[string, ReactNode, string]> = [];
+  const sourcePairs: Array<[string, ReactNode, string]> = [];
+
   Object.entries(innerColumns).forEach(([key, values]) => {
     const subField = dataView.getFieldByName(key);
     const displayKey = dataView.fields.getByName
       ? dataView.fields.getByName(key)?.displayName
       : undefined;
-    const formatted = values
-      .map((value: unknown) => formatFieldValue(value, row, fieldFormats, dataView, subField))
-      .join(', ');
+
+    // Format values as React elements joined by comma separators
+    const formatted = values.map((value: unknown, index: number) => (
+      <Fragment key={`${key}-${index}`}>
+        {index > 0 && ', '}
+        <FormatFieldValueReact
+          value={value}
+          hit={row.raw}
+          fieldFormats={fieldFormats}
+          dataView={dataView}
+          field={subField}
+        />
+      </Fragment>
+    ));
+
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     if (displayKey) {
       if (shouldShowFieldHandler(displayKey)) {
-        pairs.push([displayKey, formatted, key]);
+        pairs.push([displayKey, <>{formatted}</>, key]);
       }
     } else {
-      pairs.push([key, formatted, key]);
+      pairs.push([key, <>{formatted}</>, key]);
     }
   });
+
   return [...highlightPairs, ...sourcePairs];
 }
 

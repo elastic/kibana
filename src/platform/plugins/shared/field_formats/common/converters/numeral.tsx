@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 // @ts-ignore
 import numeral from '@elastic/numeral';
 // @ts-ignore
@@ -14,9 +15,14 @@ import numeralLanguages from '@elastic/numeral/languages';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { MISSING_TOKEN, NAN_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
 import { FieldFormat } from '../field_format';
-import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
+import type {
+  HtmlContextTypeConvert,
+  TextContextTypeConvert,
+  ReactContextTypeConvert,
+} from '../types';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 import { asPrettyString } from '../utils';
+import { checkForMissingValueReact } from '../components';
 
 const numeralInst = numeral();
 
@@ -87,5 +93,16 @@ export abstract class NumeralFormat extends FieldFormat {
 
   textConvert: TextContextTypeConvert = (val) => {
     return this.getConvertedValue(val);
+  };
+
+  reactConvert: ReactContextTypeConvert = (val) => {
+    const missing = checkForMissingValueReact(val);
+    if (missing) {
+      return missing;
+    }
+    if (typeof val === 'object' && !Array.isArray(val)) {
+      return <>{asPrettyString(val)}</>;
+    }
+    return <>{this.getConvertedValue(val)}</>;
   };
 }

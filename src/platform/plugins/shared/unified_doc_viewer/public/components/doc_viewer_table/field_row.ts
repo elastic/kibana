@@ -20,6 +20,18 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getFieldIconType, getTextBasedColumnIconType } from '@kbn/field-utils';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 
+/**
+ * Data needed for React-based field value rendering.
+ * This allows lazy rendering without caching React elements.
+ */
+export interface FieldRowRenderData {
+  value: unknown;
+  hit: DataTableRecord;
+  dataView: DataView;
+  fieldFormats: FieldFormatsStart;
+  dataViewField: DataViewField | undefined;
+}
+
 export class FieldRow {
   readonly name: string;
   readonly displayNameOverride: string | undefined;
@@ -135,5 +147,20 @@ export class FieldRow {
     return this.dataViewField
       ? getIgnoredReason(this.dataViewField, this.#hit.raw._ignored)
       : undefined;
+  }
+
+  /**
+   * Returns data needed for React-based rendering.
+   * This allows the caller to render the value using React components
+   * instead of dangerouslySetInnerHTML with HTML strings.
+   */
+  public get renderData(): FieldRowRenderData {
+    return {
+      value: this.flattenedValue,
+      hit: this.#hit,
+      dataView: this.#dataView,
+      fieldFormats: this.#fieldFormats,
+      dataViewField: this.dataViewField,
+    };
   }
 }

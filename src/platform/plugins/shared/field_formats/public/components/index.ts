@@ -7,13 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldFormatsPlugin } from './plugin';
-export { DateFormat, DateNanosFormat } from './lib/converters';
-
-// React rendering components
-export { FormattedValue, type FormattedValueProps } from './components';
-
-export function plugin() {
-  return new FieldFormatsPlugin();
-}
-export type { FieldFormatsSetup, FieldFormatsStart } from './plugin';
+export { FormattedValue, type FormattedValueProps } from './formatted_value';

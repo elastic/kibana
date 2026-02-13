@@ -44,7 +44,7 @@ export interface PreviewListItemProps {
 const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
 
 export const PreviewListItem: React.FC<PreviewListItemProps> = ({
-  field: { key, value, formattedValue, isPinned = false },
+  field: { key, value, formattedValue, formattedValueReact, isPinned = false },
   toggleIsPinned,
   hasScriptError,
   isFromScript = false,
@@ -63,6 +63,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
   const showPinIcon = isPinHovered || isPinFocused || isPinned;
 
+  // Check for image using HTML string (needed for image preview modal)
   const doesContainImage = formattedValue?.includes('<img');
 
   const renderName = () => {
@@ -134,12 +135,18 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
       );
     }
 
+    if (formattedValueReact !== undefined) {
+      return withTooltip(<span css={styles.keyAndValueWrapper}>{formattedValueReact}</span>);
+    }
+
+    // Fall back to formattedValue (HTML string) for script preview fields
+    // that haven't been migrated to React rendering
     if (formattedValue !== undefined) {
       return withTooltip(
         <span
           css={styles.keyAndValueWrapper}
-          // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
-          dangerouslySetInnerHTML={{ __html: formattedValue! }} // eslint-disable-line react/no-danger
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: formattedValue }}
         />
       );
     }

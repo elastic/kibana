@@ -104,7 +104,15 @@ export interface Params {
 export interface FieldPreview {
   key: string;
   value: unknown;
+  /**
+   * @deprecated Use formattedValueReact for new code. This HTML string is kept for backward
+   * compatibility with image preview modal which manipulates the HTML directly.
+   */
   formattedValue?: string;
+  /**
+   * React node containing the formatted value (preferred for rendering)
+   */
+  formattedValueReact?: React.ReactNode;
   type?: string;
 }
 

@@ -7,12 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { memoize, noop } from 'lodash';
 import moment from 'moment';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { NULL_LABEL } from '@kbn/field-formats-common';
-import { FieldFormat, FIELD_FORMAT_IDS, type HtmlContextTypeConvert } from '../../../common';
+import {
+  FieldFormat,
+  FIELD_FORMAT_IDS,
+  type HtmlContextTypeConvert,
+  type ReactContextTypeConvert,
+  checkForMissingValueReact,
+} from '../../../common';
 import type { TextContextTypeConvert } from '../../../common/types';
 
 export class DateFormat extends FieldFormat {
@@ -70,5 +77,14 @@ export class DateFormat extends FieldFormat {
     }
 
     return this.textConvert(val, options);
+  };
+
+  reactConvert: ReactContextTypeConvert = (val, options) => {
+    const missing = checkForMissingValueReact(val);
+    if (missing) {
+      return missing;
+    }
+
+    return <>{this.textConvert(val, options)}</>;
   };
 }
