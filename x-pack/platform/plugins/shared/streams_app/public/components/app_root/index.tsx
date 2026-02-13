@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import {
   BreadcrumbsContextProvider,
@@ -37,6 +37,11 @@ export function AppRoot({
   isServerless: boolean;
 } & { appMountParameters: AppMountParameters }) {
   const { history } = appMountParameters;
+
+  // App menu (optional band below global header) set to undefined so it is not visible
+  useEffect(() => {
+    appMountParameters.setHeaderActionMenu?.(undefined);
+  }, [appMountParameters]);
 
   const context = {
     appParams: appMountParameters,
