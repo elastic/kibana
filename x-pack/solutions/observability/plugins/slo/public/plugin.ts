@@ -135,7 +135,7 @@ export class SLOPlugin
         pluginsStart.presentationUtil.registerPanelPlacementSettings(
           SLO_OVERVIEW_EMBEDDABLE_ID,
           (serializedState?: SloOverviewEmbeddableState) => {
-            if (serializedState?.showAllGroupByInstances || serializedState?.groupFilters) {
+            if (serializedState?.show_all_group_by_instances || serializedState?.group_filters) {
               return { placementSettings: { width: 24, height: 8 } };
             }
             return { placementSettings: { width: 12, height: 8 } };

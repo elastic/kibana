@@ -75,11 +75,11 @@ function SingleSloConfiguration({ overviewMode, onCreate, onCancel }: SingleConf
     const remoteName: string | undefined = selectedSloDefinition?.remote?.remoteName;
 
     onCreate({
-      showAllGroupByInstances,
-      sloId: selectedSloDefinition.id,
-      sloInstanceId: selectedInstanceId ?? ALL_VALUE,
-      remoteName,
-      overviewMode,
+      show_all_group_by_instances: showAllGroupByInstances,
+      slo_id: selectedSloDefinition.id,
+      slo_instance_id: selectedInstanceId ?? ALL_VALUE,
+      remote_name: remoteName,
+      overview_mode: overviewMode,
     });
   };
 
@@ -150,16 +150,16 @@ function GroupSloConfiguration({
   initialInput,
 }: GroupConfigurationProps) {
   const [selectedGroupFilters, setSelectedGroupFilters] = useState<GroupFilters>({
-    groupBy: initialInput?.groupFilters?.groupBy ?? 'status',
-    filters: initialInput?.groupFilters?.filters ?? [],
-    kqlQuery: initialInput?.groupFilters?.kqlQuery ?? '',
-    groups: initialInput?.groupFilters?.groups ?? [],
+    group_by: initialInput?.group_filters?.group_by ?? 'status',
+    filters: initialInput?.group_filters?.filters ?? [],
+    kql_query: initialInput?.group_filters?.kql_query ?? '',
+    groups: initialInput?.group_filters?.groups ?? [],
   });
 
   const onConfirmClick = () =>
     onCreate({
-      groupFilters: selectedGroupFilters,
-      overviewMode,
+      group_filters: selectedGroupFilters,
+      overview_mode: overviewMode,
     });
 
   return (
@@ -203,7 +203,7 @@ function GroupSloConfiguration({
 
 export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfigurationProps) {
   const [overviewMode, setOverviewMode] = useState<OverviewMode>(
-    initialInput?.overviewMode ?? 'single'
+    initialInput?.overview_mode ?? 'single'
   );
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'overviewConfigurationFlyout',
@@ -226,7 +226,7 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
               </h2>
             </EuiTitle>
           </EuiFlexItem>
-          {initialInput?.overviewMode === undefined && (
+          {initialInput?.overview_mode === undefined && (
             <EuiFlexItem>
               <OverviewModeSelector
                 value={overviewMode}

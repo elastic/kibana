@@ -6,6 +6,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
+import type { TypeOf } from '@kbn/config-schema';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -34,9 +35,10 @@ import { SloCardChartList } from './slo_overview_grid';
 import type {
   GroupSloCustomInput,
   SloOverviewApi,
-  SloOverviewEmbeddableState,
+  SloOverviewEmbeddableState, // TODO import from schema in common 
   SloOverviewState,
 } from './types';
+import type { SingleOverviewCustomSchema, GroupOverviewCustomSchema } from '../../../../common/embeddables/overview/schema';
 import { openSloConfiguration } from './slo_overview_open_configuration';
 
 const getOverviewPanelTitle = () =>
@@ -45,12 +47,12 @@ const getOverviewPanelTitle = () =>
   });
 
 const defaultSloEmbeddableState: WithAllKeys<SloOverviewState> = {
-  sloId: undefined,
-  sloInstanceId: undefined,
-  showAllGroupByInstances: undefined,
-  overviewMode: undefined,
-  groupFilters: undefined,
-  remoteName: undefined,
+  slo_id: undefined,
+  slo_instance_id: undefined,
+  overview_mode: undefined,
+  group_filters: undefined,
+  remote_name: undefined,
+  show_all_group_by_instances: undefined,
 };
 
 export const getOverviewEmbeddableFactory = ({
@@ -72,7 +74,6 @@ export const getOverviewEmbeddableFactory = ({
       () => titleManager.api.title$.getValue(),
       initialState
     );
-
     const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
     const titleManager = initializeTitleManager(state);
@@ -99,12 +100,12 @@ export const getOverviewEmbeddableFactory = ({
         sloStateManager.anyStateChange$
       ),
       getComparators: () => ({
-        sloId: 'referenceEquality',
-        sloInstanceId: 'referenceEquality',
-        groupFilters: 'referenceEquality',
-        showAllGroupByInstances: 'referenceEquality',
-        remoteName: 'referenceEquality',
-        overviewMode: 'referenceEquality',
+        slo_id: 'referenceEquality',
+        slo_instance_id: 'referenceEquality',
+        group_filters: 'referenceEquality',
+        show_all_group_by_instances: 'referenceEquality',
+        remote_name: 'referenceEquality',
+        overview_mode: 'referenceEquality',
         ...titleComparators,
         ...(dynamicActionsManager?.comparators ?? { drilldowns: 'skip', enhancements: 'skip' }),
       }),
@@ -128,7 +129,7 @@ export const getOverviewEmbeddableFactory = ({
         i18n.translate('xpack.slo.editSloOverviewEmbeddableTitle.typeDisplayName', {
           defaultMessage: 'criteria',
         }),
-      isEditingEnabled: () => api.getSloGroupOverviewConfig().overviewMode === 'groups',
+      isEditingEnabled: () => api.getSloGroupOverviewConfig().overview_mode === 'groups',
       onEdit: async function onEdit() {
         try {
           const result = await openSloConfiguration(
@@ -144,14 +145,14 @@ export const getOverviewEmbeddableFactory = ({
       },
       serializeState,
       getSloGroupOverviewConfig: () => {
-        const { groupFilters, overviewMode } = sloStateManager.getLatestState();
+        const { group_filters, overview_mode } = sloStateManager.getLatestState();
         return {
-          groupFilters,
-          overviewMode,
+          group_filters,
+          overview_mode,
         };
       },
       updateSloGroupOverviewConfig: (update: GroupSloCustomInput) => {
-        sloStateManager.api.setGroupFilters(update.groupFilters);
+        sloStateManager.api.setGroupFilters(update.group_filters);
       },
     });
 
@@ -179,6 +180,7 @@ export const getOverviewEmbeddableFactory = ({
           sloStateManager.api.groupFilters$,
           sloStateManager.api.remoteName$
         );
+        
 
         useEffect(() => {
           return () => {
@@ -188,8 +190,8 @@ export const getOverviewEmbeddableFactory = ({
         }, []);
         const renderOverview = () => {
           if (overviewMode === 'groups') {
-            const groupBy = groupFilters?.groupBy ?? 'status';
-            const kqlQuery = groupFilters?.kqlQuery ?? '';
+            const groupBy = groupFilters?.group_by ?? 'status';
+            const kqlQuery = groupFilters?.kql_query ?? '';
             const groups = groupFilters?.groups ?? [];
             return (
               <div
@@ -224,11 +226,11 @@ export const getOverviewEmbeddableFactory = ({
           } else {
             return (
               <SloOverview
-                sloId={sloId}
+                sloId={sloId!}
                 sloInstanceId={sloInstanceId}
                 reloadSubject={reload$}
-                showAllGroupByInstances={showAllGroupByInstances}
                 remoteName={remoteName}
+                showAllGroupByInstances={showAllGroupByInstances}
               />
             );
           }
