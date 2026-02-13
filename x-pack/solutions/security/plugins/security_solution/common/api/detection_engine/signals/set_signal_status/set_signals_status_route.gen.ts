@@ -36,7 +36,7 @@ export const CloseAlertsByIds = z.object({
   signal_ids: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
   status: z.literal('closed'),
   /**
-   * The reason for closing the alerts
+   * The reason for closing the alerts. Can be one of following default reasons: [false_positive, duplicate, true_positive, benign_positive, automated_closure, other] or a custom reason provided by the user through the advanced settings.
    */
   reason: z.string().optional(),
 });
@@ -60,7 +60,7 @@ export const CloseAlertsByQuery = z.object({
   status: z.literal('closed'),
   conflicts: z.enum(['abort', 'proceed']).optional().default('abort'),
   /**
-   * The reason for closing the alerts
+   * The reason for closing the alerts. Can be one of following default reasons: [false_positive, duplicate, true_positive, benign_positive, automated_closure, other] or a custom reason provided by the user through the advanced settings.
    */
   reason: z.string().optional(),
 });
