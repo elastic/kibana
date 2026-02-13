@@ -128,7 +128,7 @@ function generateOtelTypeTransforms(
   };
 }
 
-function extractSignalTypesFromPipelines(
+export function extractSignalTypesFromPipelines(
   pipelines: Record<OTelCollectorPipelineID, OTelCollectorPipeline>
 ): string[] {
   const signalTypes = new Set<string>();
@@ -334,7 +334,7 @@ function generateOtelcolExporter(dataOutput: Output): Record<OTelCollectorCompon
   }
 }
 
-function getSignalType(id: string): string {
+export function getSignalType(id: string): string {
   const slashIndex = id.indexOf('/');
   // If there's a '/', return the part before it (e.g., 'logs' from 'logs/otlp')
   // If there's no '/', return the whole string (e.g., 'logs')

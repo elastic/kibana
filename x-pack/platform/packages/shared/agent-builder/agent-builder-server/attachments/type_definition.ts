@@ -14,7 +14,11 @@ import type { AttachmentBoundedTool } from './tools';
 /**
  * Server-side definition of an attachment type.
  */
-export interface AttachmentTypeDefinition<TType extends string = string, TContent = unknown> {
+export interface AttachmentTypeDefinition<
+  TType extends string = string,
+  TContent = unknown,
+  TOrigin = unknown
+> {
   /**
    * Unique identifier for the attachment type to register.
    */
@@ -31,18 +35,22 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
     context: AttachmentFormatContext
   ) => MaybePromise<AgentFormattedAttachment>;
   /**
-   * Optional hook to resolve additional data on-demand when an attachment is read.
+   * Receives origin data and returns resolved content.
+   * Only called once at add time — not on every read.
    *
-   * This is primarily intended for "by-reference" attachment types, where the stored data is a
-   * reference to another entity (e.g. a saved object), and the actual content is resolved at read time.
-   *
-   * The return value is intentionally generic and will be exposed under a `resolved` key by
-   * `attachment_read` (and related server APIs).
+   * When defined, the type supports by-reference creation:
+   * consumer provides origin info → optionally validated by `validateOrigin()` →
+   * `resolve()` called → content stored as `data`.
    */
   resolve?: (
-    attachment: Attachment<TType, TContent>,
+    origin: TOrigin,
     context: AttachmentResolveContext
-  ) => MaybePromise<unknown>;
+  ) => MaybePromise<TContent | undefined>;
+  /**
+   * Optional validation for origin/reference data.
+   * Called when an attachment is created with `origin` but no `data`.
+   */
+  validateOrigin?: (input: unknown) => MaybePromise<AttachmentValidationResult<TOrigin>>;
   /**
    * should return the list of tools from the registry which should be exposed to the agent
    * when attachments of that type are present in the conversation.

@@ -10,7 +10,7 @@ export interface IndexInfo {
   docs: number;
 }
 
-type MainCategories = 'Endpoint' | 'Identity' | 'Network' | 'Cloud' | 'Application/SaaS';
+export type MainCategories = 'Endpoint' | 'Identity' | 'Network' | 'Cloud' | 'Application/SaaS';
 
 export interface CategoryGroup {
   category: MainCategories | string;
@@ -86,6 +86,13 @@ export interface SiemReadinessPackageInfo {
   version: string;
   status: string;
   categories?: string[];
+}
+
+export interface PipelineStats {
+  name: string;
+  indices: string[];
+  docsCount: number;
+  failedDocsCount: number;
 }
 export interface CasesSearchResponse {
   total: number;

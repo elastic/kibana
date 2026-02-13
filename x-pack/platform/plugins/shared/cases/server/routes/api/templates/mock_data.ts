@@ -14,18 +14,19 @@ export const mockTemplates: Template[] = [
     templateId: 'template-1',
     name: 'Security Incident Template',
     owner: 'securitySolution',
+    tags: ['security', 'incident'],
+    author: 'alice',
     definition: yaml.dump({
+      name: 'Security Incident Template',
       fields: [
         {
-          control: 'text',
+          control: 'INPUT_TEXT',
           name: 'incident_type',
           label: 'Incident Type',
           type: 'keyword',
-          default: 'malware installed on target host',
-          metadata: { required: true },
         },
         {
-          control: 'select',
+          control: 'SELECT_BASIC',
           name: 'severity',
           label: 'Severity Level',
           type: 'keyword',
@@ -40,14 +41,16 @@ export const mockTemplates: Template[] = [
     templateId: 'template-2',
     name: 'Observability Alert Template',
     owner: 'observability',
+    tags: ['observability', 'alert'],
+    author: 'bob',
     definition: yaml.dump({
+      name: 'Observability Alert Template',
       fields: [
         {
-          control: 'text',
+          control: 'INPUT_TEXT',
           name: 'alert_source',
           label: 'Alert Source',
           type: 'keyword',
-          metadata: {},
         },
       ],
     }),
@@ -58,6 +61,8 @@ export const mockTemplates: Template[] = [
     templateId: 'template-3',
     name: 'Deleted Template',
     owner: 'securitySolution',
+    tags: ['security', 'deleted'],
+    author: 'charlie',
     definition: yaml.dump({ fields: [] }),
     templateVersion: 1,
     deletedAt: '2024-01-15T10:00:00.000Z',

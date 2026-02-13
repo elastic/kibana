@@ -45,6 +45,8 @@ export interface ContentListLabels {
   entity: string;
   /** Plural form of the entity name (e.g., "dashboards"). Should be i18n-translated. */
   entityPlural: string;
+  /** Placeholder text for the search input. Should be i18n-translated. */
+  searchPlaceholder?: string;
 }
 
 /**
