@@ -40,6 +40,7 @@ export const getRecentlyClosedTabStateMock = (
 export const getPersistedTabMock = ({
   tabId = 'test-tab',
   dataView,
+  attributesOverrides,
   appStateOverrides = {},
   globalStateOverrides = {},
   initialInternalStateOverrides = {},
@@ -81,6 +82,10 @@ export const getPersistedTabMock = ({
         ...appStateOverrides,
       },
       globalState: globalStateOverrides,
+      attributes: {
+        ...DEFAULT_TAB_STATE.attributes,
+        ...attributesOverrides,
+      },
     }),
     overridenTimeRestore,
     services,
