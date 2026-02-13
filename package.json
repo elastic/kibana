@@ -1368,7 +1368,7 @@
     "json-schema-to-ts": "3.1.1",
     "jsonwebtoken": "9.0.2",
     "jsts": "1.6.2",
-    "kea": "2.6.0",
+    "kea": "3.1.7",
     "langchain": "0.3.35",
     "langsmith": "0.3.72",
     "launchdarkly-js-client-sdk": "3.9.0",
