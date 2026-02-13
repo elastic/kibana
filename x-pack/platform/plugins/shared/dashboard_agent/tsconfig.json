@@ -24,7 +24,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/deeplinks-analytics",
     "@kbn/dashboard-markdown",
-    "@kbn/spaces-plugin"
   ],
   "exclude": ["target/**/*"]
 }
