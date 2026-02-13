@@ -1,0 +1,119 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { validateEsqlSyntax, hasRequiredFields, calculateSetMetrics, extractMitreTechniques } from './helpers';
+import type { ReferenceRule } from '../datasets/sample_rules';
+
+describe('helpers', () => {
+  describe('validateEsqlSyntax', () => {
+    it('should validate correct ESQL query', () => {
+      const query = 'process where host.os.type == "windows" and event.type == "start"';
+      const result = validateEsqlSyntax(query);
+      expect(result.valid).toBe(true);
+      expect(result.error).toBeUndefined();
+    });
+
+    it('should reject empty query', () => {
+      const result = validateEsqlSyntax('');
+      expect(result.valid).toBe(false);
+      expect(result.error).toBeDefined();
+    });
+
+    it('should reject query without where clause', () => {
+      const query = 'process';
+      const result = validateEsqlSyntax(query);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('WHERE');
+    });
+
+    it('should detect unbalanced parentheses', () => {
+      const query = 'process where (host.os.type == "windows"';
+      const result = validateEsqlSyntax(query);
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('parentheses');
+    });
+  });
+
+  describe('hasRequiredFields', () => {
+    it('should detect all required fields present', () => {
+      const rule: Partial<ReferenceRule> = {
+        name: 'Test Rule',
+        description: 'Test description',
+        query: 'process where true',
+        severity: 'medium',
+        tags: ['test'],
+      };
+      const result = hasRequiredFields(rule);
+      expect(result.hasAll).toBe(true);
+      expect(result.coverage).toBe(1.0);
+      expect(result.missing).toEqual([]);
+    });
+
+    it('should detect missing fields', () => {
+      const rule: Partial<ReferenceRule> = {
+        name: 'Test Rule',
+        query: 'process where true',
+      };
+      const result = hasRequiredFields(rule);
+      expect(result.hasAll).toBe(false);
+      expect(result.coverage).toBeLessThan(1.0);
+      expect(result.missing).toContain('description');
+      expect(result.missing).toContain('severity');
+      expect(result.missing).toContain('tags');
+    });
+  });
+
+  describe('calculateSetMetrics', () => {
+    it('should calculate perfect match', () => {
+      const predicted = new Set(['A', 'B', 'C']);
+      const expected = new Set(['A', 'B', 'C']);
+      const result = calculateSetMetrics(predicted, expected);
+      expect(result.precision).toBe(1.0);
+      expect(result.recall).toBe(1.0);
+      expect(result.f1).toBe(1.0);
+    });
+
+    it('should calculate partial match', () => {
+      const predicted = new Set(['A', 'B', 'D']);
+      const expected = new Set(['A', 'B', 'C']);
+      const result = calculateSetMetrics(predicted, expected);
+      expect(result.precision).toBeCloseTo(2 / 3, 2);
+      expect(result.recall).toBeCloseTo(2 / 3, 2);
+      expect(result.f1).toBeCloseTo(2 / 3, 2);
+    });
+
+    it('should handle empty sets', () => {
+      const predicted = new Set<string>();
+      const expected = new Set<string>();
+      const result = calculateSetMetrics(predicted, expected);
+      expect(result.precision).toBe(1.0);
+      expect(result.recall).toBe(1.0);
+      expect(result.f1).toBe(1.0);
+    });
+  });
+
+  describe('extractMitreTechniques', () => {
+    it('should extract techniques from rule', () => {
+      const rule: Partial<ReferenceRule> = {
+        threat: [
+          { technique: 'T1003.001', tactic: 'TA0006' },
+          { technique: 'T1005', tactic: 'TA0009' },
+        ],
+      };
+      const techniques = extractMitreTechniques(rule);
+      expect(techniques.size).toBe(2);
+      expect(techniques.has('T1003.001')).toBe(true);
+      expect(techniques.has('T1005')).toBe(true);
+    });
+
+    it('should handle rule without threat', () => {
+      const rule: Partial<ReferenceRule> = {};
+      const techniques = extractMitreTechniques(rule);
+      expect(techniques.size).toBe(0);
+    });
+  });
+});
