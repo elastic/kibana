@@ -103,11 +103,11 @@ async function getDiscoverLocationParams({
 }
 
 function getEsqlControls(embeddable: LensApi) {
-  const state = embeddable.getSerializedStateByValue();
+  const state = embeddable.getLegacySerializedState();
   if (!state) return null;
 
-  const embeddableQuery = state.query;
-  if (!isOfAggregateQueryType(embeddableQuery)) return null;
+  const embeddableQuery = state.attributes?.state?.query;
+  if (!embeddableQuery || !isOfAggregateQueryType(embeddableQuery)) return null;
 
   const parentApi = embeddable.parentApi;
   if (!apiIsPresentationContainer(parentApi)) return null;

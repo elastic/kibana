@@ -5,36 +5,39 @@
  * 2.0.
  */
 
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { RenderMode } from '@kbn/expressions-plugin/common';
+import type {
+  DatasourceStates,
+  FormBasedPersistedState,
+  GeneralDatasourceStates,
+  LensPanelProps,
+  LensRuntimeState,
+  LensSerializedState,
+  LensSharedProps,
+  LensUnifiedSearchContext,
+  StructuredDatasourceStates,
+  TextBasedPersistedState,
+} from '@kbn/lens-common';
+import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
+import type { LensByValueSerializedAPIConfig, LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import {
+  apiHasExecutionContext,
   apiHasParentApi,
   apiPublishesViewMode,
   getInheritedViewMode,
   type PublishingSubject,
-  apiHasExecutionContext,
 } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { RenderMode } from '@kbn/expressions-plugin/common';
-import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
-import type {
-  LensRuntimeState,
-  LensSerializedState,
-  StructuredDatasourceStates,
-  DatasourceStates,
-  GeneralDatasourceStates,
-  FormBasedPersistedState,
-  TextBasedPersistedState,
-} from '@kbn/lens-common';
-import type { LensByValueSerializedAPIConfig, LensSerializedAPIConfig } from '@kbn/lens-common-2';
 
-import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { getLensBuilder } from '../lazy_builder';
 import type { ESQLStartServices } from './esql';
 import { loadESQLAttributes } from './esql';
 import type { LensEmbeddableStartServices } from './types';
-import { getLensBuilder } from '../lazy_builder';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -72,9 +75,10 @@ export async function deserializeState(
     attributeService,
     ...services
   }: Pick<LensEmbeddableStartServices, 'attributeService'> & ESQLStartServices,
-  { savedObjectId, ...state }: LensSerializedAPIConfig
+  state: LensSerializedAPIConfig
 ): Promise<LensRuntimeState> {
   const fallbackAttributes = createEmptyLensState().attributes;
+  const savedObjectId = 'savedObjectId' in state ? state.savedObjectId : undefined;
 
   if (savedObjectId) {
     try {
@@ -198,10 +202,16 @@ export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSeri
   };
 }
 
-export function transformToApiConfig(state: LensSerializedState): LensByValueSerializedAPIConfig {
-  if (state.savedObjectId) {
+/**
+ * !Important! call stripDashboardContext before transforming to API config
+ */
+export function transformToApiConfig(
+  state: Omit<LensSerializedState, ExcludedDashboardStateKeys>
+): LensByValueSerializedAPIConfig {
+  const { savedObjectId, attributes } = state;
+
+  if (savedObjectId) {
     return {
-      ...state,
       attributes: undefined,
     };
   }
@@ -213,25 +223,62 @@ export function transformToApiConfig(state: LensSerializedState): LensByValueSer
     return state as LensByValueSerializedAPIConfig;
   }
 
-  const chartType = builder.getType(state.attributes);
+  const chartType = builder.getType(attributes);
 
   if (!builder.isSupported(chartType)) {
     // TODO: remove this once all formats are supported
     return state as LensByValueSerializedAPIConfig;
   }
 
-  if (!state.attributes) {
+  if (!attributes) {
     // This should only ever handle by-value state.
     throw new Error('attributes are missing');
   }
 
   const apiConfigAttributes = builder.toAPIFormat({
-    ...state.attributes,
-    visualizationType: state.attributes.visualizationType ?? LENS_UNKNOWN_VIS,
+    ...attributes,
+    visualizationType: attributes.visualizationType ?? LENS_UNKNOWN_VIS,
   });
 
   return {
     ...state,
     attributes: apiConfigAttributes,
   };
+}
+
+type ExcludedDashboardStateKeys =
+  | keyof LensUnifiedSearchContext
+  | keyof LensSharedProps
+  | Exclude<keyof LensPanelProps, 'disableTriggers'>;
+
+export function stripDashboardContext<
+  T extends Partial<Record<ExcludedDashboardStateKeys, unknown>>
+>(state: T): Omit<T, ExcludedDashboardStateKeys> {
+  const {
+    // LensUnifiedSearchContext
+    searchSessionId,
+    filters,
+    query,
+    timeRange,
+    timeslice,
+    lastReloadRequestTime,
+    // LensSharedProps
+    executionContext,
+    style,
+    className,
+    noPadding,
+    viewMode,
+    forceDSL,
+    esqlVariables,
+    // LensPanelProps (except disableTriggers)
+    id,
+    renderMode,
+    syncColors,
+    syncTooltips,
+    syncCursor,
+    palette,
+    ...cleanedState
+  } = state;
+
+  return cleanedState;
 }

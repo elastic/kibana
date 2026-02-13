@@ -10,27 +10,14 @@ import {
   getLanguageDisplayName,
   isOfAggregateQueryType,
 } from '@kbn/es-query';
-import { omit } from 'lodash';
-import type { HasSerializableState } from '@kbn/presentation-publishing';
-import type {
-  GetStateType,
-  LensRuntimeState,
-  IntegrationCallbacks,
-  LensSerializedState,
-} from '@kbn/lens-common';
+import type { GetStateType, IntegrationCallbacks, LensSerializedState } from '@kbn/lens-common';
 import type {
   LegacyLensStateApi,
-  LensSerializedAPIConfig,
   LensByRefSerializedAPIConfig,
-  LensByValueSerializedAPIConfig,
+  LensSerializedAPIConfig,
 } from '@kbn/lens-common-2';
-import { isTextBasedLanguage, transformToApiConfig } from '../helper';
-
-function cleanupSerializedState(state: LensRuntimeState) {
-  const cleanedState = omit(state, 'searchSessionId');
-
-  return cleanedState;
-}
+import type { HasSerializableState } from '@kbn/presentation-publishing';
+import { isTextBasedLanguage, stripDashboardContext, transformToApiConfig } from '../helper';
 
 export function initializeIntegrations(getLatestState: GetStateType): {
   api: Omit<
@@ -53,7 +40,7 @@ export function initializeIntegrations(getLatestState: GetStateType): {
        * Make sure to remove the attributes when the panel is by reference.
        */
       serializeState: (): LensSerializedAPIConfig => {
-        const currentState = cleanupSerializedState(getLatestState());
+        const currentState = stripDashboardContext(getLatestState());
 
         const { savedObjectId, attributes, ...state } = currentState;
         if (savedObjectId) {
@@ -65,10 +52,10 @@ export function initializeIntegrations(getLatestState: GetStateType): {
 
         const transformedState = transformToApiConfig(currentState);
 
-        return transformedState satisfies LensByValueSerializedAPIConfig;
+        return transformedState;
       },
       getLegacySerializedState: (): LensSerializedState => {
-        const currentState = cleanupSerializedState(getLatestState());
+        const currentState = getLatestState();
         const { savedObjectId, attributes, ...state } = currentState;
 
         if (savedObjectId) {
