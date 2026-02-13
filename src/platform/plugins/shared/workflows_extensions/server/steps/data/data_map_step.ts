@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { applyInclude } from './field_include_utils';
+import { applyTransform } from './step_transform_utils';
 import { dataMapStepCommonDefinition } from '../../../common/steps/data';
 import { createServerStepDefinition } from '../../step_registry/types';
 
@@ -60,12 +60,7 @@ export const dataMapStepDefinition = createServerStepDefinition({
 
       context.logger.debug(`Successfully mapped ${mappedItems.length} item(s)`);
 
-      let output = mappedItems;
-      const pick = context.input.transform?.pick;
-      if (pick != null) {
-        output = mappedItems.map((item) => applyInclude(item, pick)) as typeof mappedItems;
-      }
-
+      const output = applyTransform(context.input.transform, mappedItems);
       return { output: shouldReturnObject ? output[0] : output };
     } catch (error) {
       context.logger.error('Failed to map items', error);

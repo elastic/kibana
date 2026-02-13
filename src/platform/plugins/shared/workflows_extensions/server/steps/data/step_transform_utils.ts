@@ -8,12 +8,31 @@
  */
 
 /**
- * Shared field-projection (include/pick) logic for including fields in a step.
- * Normalizes object or array (dot-path + nested list) format into a spec and
- * applies it to values.
+ * Shared transform logic for steps (e.g. data.map). Applies context.input.transform
+ * to values; supports `pick` (field projection) and can be extended for other transforms.
  */
 
 export type FieldsSpec = Record<string, unknown>;
+export interface StepTransform {
+  pick?: unknown;
+}
+
+/**
+ * Applies the given transform to a value. If transform is null or undefined,
+ * returns the value unchanged. Applies all the transforms contained, which includes pick.
+ */
+export function applyTransform(
+  transform: StepTransform | null | undefined,
+  value: unknown
+): unknown {
+  let ret = value;
+  if (transform != null && isPlainObject(transform)) {
+    if (transform.pick !== null) {
+      ret = applyPick(ret, transform.pick);
+    }
+  }
+  return ret;
+}
 
 /**
  * Applies the include (field projection) to a value using raw `pick` input
@@ -21,8 +40,12 @@ export type FieldsSpec = Record<string, unknown>;
  * the same projection to each element. For objects, keeps only keys present in
  * the pick spec; if the spec value is a nested object, recurses into that branch.
  */
-export function applyInclude(value: unknown, pick: unknown): unknown {
-  return applyIncludeRecurse(pick, value, 1);
+function applyPick(value: unknown, pick: unknown): unknown {
+  try {
+    return applyPickRecursive(pick, value, 1);
+  } catch (error: ApplyIncludeDepthError) {
+    return error;
+  }
 }
 
 const MAX_APPLY_INCLUDE_DEPTH = 15;
@@ -38,7 +61,7 @@ class ApplyIncludeDepthError extends Error {
 /**
  * Recurses and throws ApplyIncludeDepthError when depth is exceeded so the error propagates to the caller.
  */
-function applyIncludeRecurse(pick: unknown, value: unknown, recurseDepth: number): unknown {
+function applyPickRecursive(pick: unknown, value: unknown, recurseDepth: number): unknown {
   if (recurseDepth > MAX_APPLY_INCLUDE_DEPTH) {
     throw new ApplyIncludeDepthError();
   }
@@ -47,7 +70,7 @@ function applyIncludeRecurse(pick: unknown, value: unknown, recurseDepth: number
     return value;
   }
   if (Array.isArray(value)) {
-    return value.map((item) => applyIncludeRecurse(spec, item, recurseDepth + 1));
+    return value.map((item) => applyPickRecursive(spec, item, recurseDepth + 1));
   }
   if (isPlainObject(value)) {
     const result: Record<string, unknown> = {};
@@ -56,7 +79,7 @@ function applyIncludeRecurse(pick: unknown, value: unknown, recurseDepth: number
         const childSpec = spec[key];
         const childValue = value[key];
         if (isNonEmptyPlainObject(childSpec)) {
-          result[key] = applyIncludeRecurse(childSpec, childValue, recurseDepth + 1);
+          result[key] = applyPickRecursive(childSpec, childValue, recurseDepth + 1);
         } else {
           result[key] = childValue;
         }
