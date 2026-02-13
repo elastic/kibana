@@ -101,8 +101,8 @@ describe(
       cy.get(comboBoxInput).first().click();
       cy.get(comboBoxInput).first().type('Privileged users{downArrow}{enter}');
 
-      cy.url({ timeout: 10000 }).should('include', ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL);
-      cy.url().should('include', 'watchlist_id=prebuilt-priv');
+      cy.url({ timeout: 6000 }).should('include', ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL);
+      cy.url().should('include', '/entity_analytics_privileged_user_monitoring');
     });
 
     it('displays timeline icon when data is available', () => {
