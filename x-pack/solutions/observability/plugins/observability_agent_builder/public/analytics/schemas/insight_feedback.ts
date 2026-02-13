@@ -15,6 +15,9 @@ export interface ConnectorInfo {
   connectorId: string;
   name: string;
   type: string;
+  modelFamily: string;
+  modelProvider: string;
+  modelId: string;
 }
 
 export interface InsightFeedback {
@@ -56,6 +59,24 @@ export const insightFeedbackEventSchema: EventTypeOpts<InsightFeedback> = {
           type: 'keyword',
           _meta: {
             description: 'The action type of the connector used',
+          },
+        },
+        modelFamily: {
+          type: 'keyword',
+          _meta: {
+            description: 'The model family of the connector used',
+          },
+        },
+        modelProvider: {
+          type: 'keyword',
+          _meta: {
+            description: 'The model provider of the connector used',
+          },
+        },
+        modelId: {
+          type: 'keyword',
+          _meta: {
+            description: 'The specific model ID of the connector used',
           },
         },
       },

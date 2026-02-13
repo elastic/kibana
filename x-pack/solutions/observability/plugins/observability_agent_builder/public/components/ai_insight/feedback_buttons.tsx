@@ -26,16 +26,10 @@ export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
 
   const [hasBeenClicked, setHasBeenClicked] = useState(false);
 
-  const handleClickPositive = () => {
-    onClickFeedback('positive');
+  const handleClick = (feedback: Feedback) => {
     setHasBeenClicked(true);
     notifications.toasts.addSuccess(THANK_YOU_MESSAGE);
-  };
-
-  const handleClickNegative = () => {
-    onClickFeedback('negative');
-    setHasBeenClicked(true);
-    notifications.toasts.addSuccess(THANK_YOU_MESSAGE);
+    onClickFeedback(feedback);
   };
 
   return (
@@ -59,7 +53,7 @@ export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
               disabled={hasBeenClicked}
               iconType="faceHappy"
               size="s"
-              onClick={handleClickPositive}
+              onClick={() => handleClick('positive')}
             >
               {i18n.translate(
                 'xpack.observabilityAgentBuilder.aiInsight.feedbackButtons.yesLabel',
@@ -77,7 +71,7 @@ export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
               disabled={hasBeenClicked}
               iconType="faceSad"
               size="s"
-              onClick={handleClickNegative}
+              onClick={() => handleClick('negative')}
             >
               {i18n.translate('xpack.observabilityAgentBuilder.aiInsight.feedbackButtons.noLabel', {
                 defaultMessage: 'No',

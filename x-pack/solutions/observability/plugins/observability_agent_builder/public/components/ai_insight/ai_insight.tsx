@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { getConnectorFamily, getConnectorProvider, getConnectorModel } from '@kbn/inference-common';
 import type { Observable } from 'rxjs';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
@@ -91,15 +92,23 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
   const handleFeedback = useCallback(
     (feedback: Feedback) => {
       if (!selectedConnector) return;
-      analytics.reportEvent(ObservabilityAgentBuilderTelemetryEventType.AiInsightFeedback, {
-        feedback,
-        insight_type: insightType,
-        connector: {
-          connectorId: selectedConnector.connectorId,
-          name: selectedConnector.name,
-          actionType: selectedConnector.type,
-        },
-      });
+      try {
+        analytics?.reportEvent(ObservabilityAgentBuilderTelemetryEventType.AiInsightFeedback, {
+          feedback,
+          insightType,
+          connector: {
+            connectorId: selectedConnector.connectorId,
+            name: selectedConnector.name,
+            type: selectedConnector.type,
+            modelFamily: getConnectorFamily(selectedConnector),
+            modelProvider: getConnectorProvider(selectedConnector),
+            modelId: getConnectorModel(selectedConnector),
+          },
+        });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.debug('Failed to report AI insight feedback event', e);
+      }
     },
     [analytics, insightType, selectedConnector]
   );
