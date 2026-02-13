@@ -215,6 +215,20 @@ async function runConfigs(
   await fs.mkdir(slowTestsDir, { recursive: true });
 
   await new Promise<void>((resolveAll) => {
+    const wallStart = Date.now();
+
+    // Periodic heartbeat so CI logs show progress even when no config has finished yet
+    const heartbeat = setInterval(() => {
+      const elapsedSec = Math.round((Date.now() - wallStart) / 1000);
+      const min = Math.floor(elapsedSec / 60);
+      const sec = elapsedSec % 60;
+      const queued = configs.length - index;
+      log.info(
+        `[jest-progress] ${active} running, ${results.length} completed, ${queued} queued (elapsed ${min}m ${sec}s)`
+      );
+    }, 60_000);
+    heartbeat.unref(); // don't keep the process alive just for the timer
+
     const launchNext = () => {
       while (active < maxParallel && index < configs.length) {
         const config = configs[index++];
@@ -283,6 +297,7 @@ async function runConfigs(
             if (index < configs.length) {
               launchNext();
             } else if (active === 0) {
+              clearInterval(heartbeat);
               resolveAll();
             }
           };
