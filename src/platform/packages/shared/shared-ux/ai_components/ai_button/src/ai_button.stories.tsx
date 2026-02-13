@@ -9,28 +9,43 @@
 
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-
-import { AiButton, type AiButtonVariant } from './ai_button';
+import { css } from '@emotion/react';
+import { EuiThemeProvider, useEuiTheme } from '@elastic/eui';
+import { AiButtonBase, type AiButtonBaseProps } from './ai_button_base';
 
 interface StoryArgs {
   label: string;
-  variant: AiButtonVariant;
-  iconOnlyVariant: Exclude<AiButtonVariant, 'iconOnly'>;
-  size: 's' | 'm';
+  variant: AiButtonBaseProps['variant'];
+  size: 'xs' | 's' | 'm';
   isDisabled: boolean;
   withIcon: boolean;
+  colorMode: 'light' | 'dark';
 }
+
+const StoryBackground: React.FC<React.PropsWithChildren> = ({ children }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      css={css`
+        background: ${euiTheme.colors.body};
+        padding: ${euiTheme.size.l};
+        min-height: 100vh;
+      `}
+    >
+      {children}
+    </div>
+  );
+};
 
 export default {
   title: 'AI components/AiButton',
   description: 'A wrapper around EuiButton that applies an “AI” gradient background and text.',
   argTypes: {
     label: { control: 'text' },
-    variant: { control: 'select', options: ['secondary', 'primary', 'empty', 'iconOnly'] },
-    iconOnlyVariant: { control: 'select', options: ['secondary', 'primary', 'empty'] },
-    size: { control: 'select', options: ['s', 'm'] },
     isDisabled: { control: 'boolean' },
     withIcon: { control: 'boolean' },
+    colorMode: { control: 'inline-radio', options: ['light', 'dark'] },
   },
   parameters: {
     docs: {
@@ -42,37 +57,90 @@ export default {
   },
 } as Meta<StoryArgs>;
 
+const renderWithBackground = (children: React.ReactNode, colorMode: StoryArgs['colorMode']) => (
+  <EuiThemeProvider colorMode={colorMode}>
+    <StoryBackground>{children}</StoryBackground>
+  </EuiThemeProvider>
+);
+
 export const Default: StoryObj<StoryArgs> = {
   render: (args) => {
-    const { label, variant, iconOnlyVariant, size, isDisabled, withIcon } = args;
+    const { label, variant, size, isDisabled, withIcon, colorMode } = args;
 
     const iconProps = withIcon ? { iconType: 'sparkles', iconSide: 'left' as const } : {};
+    const coercedSize: 's' | 'm' = size === 'xs' ? 's' : size;
 
-    if (variant === 'iconOnly') {
-      return (
-        <AiButton
-          size={size}
-          isDisabled={isDisabled}
-          aria-label={label}
-          iconType="sparkles"
-          variant="iconOnly"
-          iconOnlyVariant={iconOnlyVariant}
-        />
-      );
-    }
-
-    return (
-      <AiButton size={size} isDisabled={isDisabled} variant={variant} {...iconProps}>
+    return renderWithBackground(
+      <AiButtonBase size={coercedSize} isDisabled={isDisabled} variant={variant} {...iconProps}>
         {label}
-      </AiButton>
+      </AiButtonBase>,
+      colorMode
     );
   },
   args: {
     label: 'AI Assistant',
     variant: 'secondary',
-    iconOnlyVariant: 'secondary',
     size: 's',
     isDisabled: false,
     withIcon: false,
+    colorMode: 'light',
+  },
+  argTypes: {
+    variant: { control: 'select', options: ['secondary', 'primary'] },
+    size: { control: 'select', options: ['s', 'm'] },
+  },
+};
+
+export const Empty: StoryObj<StoryArgs> = {
+  render: (args) => {
+    const { label, size, isDisabled, withIcon, colorMode } = args;
+    const iconProps = withIcon ? { iconType: 'sparkles', iconSide: 'left' as const } : {};
+
+    return renderWithBackground(
+      <AiButtonBase size={size} isDisabled={isDisabled} variant="empty" {...iconProps}>
+        {label}
+      </AiButtonBase>,
+      colorMode
+    );
+  },
+  args: {
+    label: 'AI Assistant',
+    size: 's',
+    isDisabled: false,
+    withIcon: false,
+    colorMode: 'light',
+  },
+  argTypes: {
+    size: { control: 'select', options: ['xs', 's', 'm'] },
+  },
+};
+
+export const IconOnly: StoryObj<StoryArgs> = {
+  render: (args) => {
+    const { label, variant, size, isDisabled, colorMode } = args;
+
+    return renderWithBackground(
+      <AiButtonBase
+        iconOnly
+        size={size}
+        isDisabled={isDisabled}
+        aria-label={label}
+        iconType="sparkles"
+        variant={variant}
+      />,
+      colorMode
+    );
+  },
+  args: {
+    label: 'AI Assistant',
+    variant: 'secondary',
+    size: 's',
+    isDisabled: false,
+    withIcon: false,
+    colorMode: 'light',
+  },
+  argTypes: {
+    variant: { control: 'select', options: ['secondary', 'primary', 'empty'] },
+    size: { control: 'select', options: ['xs', 's', 'm'] },
   },
 };

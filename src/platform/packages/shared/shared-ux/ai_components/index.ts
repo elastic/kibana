@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { AiButton } from './ai_button/src/ai_button';
-export type { AiButtonProps, AiButtonVariant } from './ai_button/src/ai_button';
+export { AiButtonBase } from './ai_button/src/ai_button_base';
+export type { AiButtonBaseProps } from './ai_button/src/ai_button_base';
