@@ -13,7 +13,8 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import type { ParsedQuery } from 'query-string';
 import { parse } from 'query-string';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
 import type { RouteComponentProps } from 'react-router-dom';
 import { HashRouter, Redirect } from 'react-router-dom';
@@ -144,6 +145,21 @@ export async function mountApp({
     return <DashboardNoMatch history={routeProps.history} />;
   };
 
+  const DashboardHeaderAppActionsSync = () => {
+    const location = useLocation();
+    useEffect(() => {
+      const pathname = location.pathname;
+      const isListingPage =
+        pathname === LANDING_PAGE_PATH || pathname.startsWith(`${LANDING_PAGE_PATH}/`);
+      if (isListingPage) {
+        coreServices.chrome.setHeaderAppActionsConfig(undefined);
+      } else {
+        coreServices.chrome.setHeaderAppActionsConfig(getDashboardHeaderAppActionsConfig());
+      }
+    }, [location.pathname]);
+    return null;
+  };
+
   const hasEmbeddableIncoming = Boolean(
     embeddableService.getStateTransfer().getIncomingEmbeddablePackage(DASHBOARD_APP_ID, false)
   );
@@ -161,6 +177,7 @@ export async function mountApp({
     <KibanaRenderContextProvider {...coreStart}>
       <DashboardMountContext.Provider value={mountContext}>
         <HashRouter>
+          <DashboardHeaderAppActionsSync />
           <Routes>
             <Route
               path={[
@@ -194,8 +211,6 @@ export async function mountApp({
       },
     ],
   });
-
-  coreServices.chrome.setHeaderAppActionsConfig(getDashboardHeaderAppActionsConfig());
 
   if (!getDashboardCapabilities().showWriteControls) {
     coreServices.chrome.setBadge({
