@@ -167,6 +167,7 @@ dependsOn:
   - '@kbn/dashboard-plugin'
   - '@kbn/automatic-import-v2-plugin'
   - '@kbn/connector-specs'
+  - '@kbn/alerting-v2-plugin'
   - '@kbn/ftr-llm-proxy'
   - '@kbn/dev-cli-runner'
 tags:

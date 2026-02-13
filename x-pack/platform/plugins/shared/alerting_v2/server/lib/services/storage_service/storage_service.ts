@@ -1,0 +1,115 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { inject, injectable } from 'inversify';
+import type { LoggerServiceContract } from '../logger_service/logger_service';
+import { LoggerServiceToken } from '../logger_service/logger_service';
+
+export interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> {
+  index: string;
+  docs: TDocument[];
+}
+
+export interface StorageServiceContract {
+  bulkIndexDocs<TDocument extends Record<string, unknown>>(
+    params: BulkIndexDocsParams<TDocument>
+  ): Promise<void>;
+}
+
+@injectable()
+export class StorageService implements StorageServiceContract {
+  constructor(
+    private readonly esClient: ElasticsearchClient,
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+  ) {}
+
+  public async bulkIndexDocs<TDocument extends Record<string, unknown>>({
+    index,
+    docs,
+  }: BulkIndexDocsParams<TDocument>): Promise<void> {
+    if (docs.length === 0) {
+      return;
+    }
+
+    const operations: NonNullable<BulkRequest<TDocument>['operations']> = docs.flatMap((doc) => [
+      {
+        create: { _index: index },
+      },
+      doc,
+    ]);
+
+    try {
+      const response = await this.esClient.bulk({
+        operations,
+        refresh: 'wait_for',
+      });
+
+      this.logBulkIndexResponse({ index, docsCount: docs.length, response });
+    } catch (error) {
+      this.logger.error({
+        error,
+        code: 'BULK_INDEX_ERROR',
+        type: 'StorageServiceError',
+      });
+
+      throw error;
+    }
+  }
+
+  private logBulkIndexResponse({
+    index,
+    docsCount,
+    response,
+  }: {
+    index: string;
+    docsCount: number;
+    response: BulkResponse;
+  }): void {
+    this.logFirstBulkIndexItemError(response);
+    const message = this.getBulkIndexDebugMessage({ index, docsCount, response });
+    this.logger.debug({ message });
+  }
+
+  private logFirstBulkIndexItemError(response: BulkResponse): void {
+    if (!response.errors) {
+      return;
+    }
+
+    const firstErrorItem = response.items.find((item) => item.create?.error);
+    if (!firstErrorItem) {
+      return;
+    }
+
+    const error = firstErrorItem.create?.error;
+    this.logger.error({
+      error: new Error(`[${error?.type ?? 'UNKNOWN_ERROR'}] ${error?.reason ?? 'UNKNOWN_REASON'}`),
+      code: 'BULK_INDEX_ERROR',
+      type: 'StorageServiceError',
+    });
+  }
+
+  private getBulkIndexDebugMessage({
+    index,
+    docsCount,
+    response,
+  }: {
+    index: string;
+    docsCount: number;
+    response: BulkResponse;
+  }): string {
+    const failedItemCount = response.items.filter((item) => item.create?.error).length;
+
+    if (!response.errors) {
+      return `StorageService: Successfully bulk created ${docsCount} documents to index: ${index}`;
+    }
+
+    const successItemCount = docsCount - failedItemCount;
+    return `StorageService: Bulk create completed with errors for index: ${index} (successful: ${successItemCount}, failed: ${failedItemCount}, total: ${docsCount})`;
+  }
+}

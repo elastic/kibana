@@ -6,6 +6,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 13590
   aiops: 15227
   alerting: 22371
+  alertingVTwo: 358684
   apm: 38573
   apmSourcesAccess: 2278
   automaticImport: 12162
@@ -150,7 +151,7 @@ pageLoadAssetSize:
   screenshotMode: 2351
   screenshotting: 3252
   searchAssistant: 6150
-  searchGettingStarted: 6682
+  searchGettingStarted: 6596
   searchHomepage: 7962
   searchIndices: 9991
   searchInferenceEndpoints: 8071

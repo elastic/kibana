@@ -12,6 +12,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
 
     // load new oblt and platform deployment-agnostic test here
     // Note: if your tests runtime is over 5 minutes, create a new index and config file
+    loadTestFile(require.resolve('../../apis/alerting_v2'));
     loadTestFile(require.resolve('../../apis/core'));
     loadTestFile(require.resolve('../../apis/management'));
     loadTestFile(require.resolve('../../apis/painless_lab'));

@@ -55,6 +55,7 @@ type SupportedMappingPropertyType = AllMappingPropertyType &
     | 'date_nanos'
     | 'double'
     | 'long'
+    | 'flattened'
     | 'object'
   );
 

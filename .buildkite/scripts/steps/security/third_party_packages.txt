@@ -32,3 +32,4 @@ yaml-language-server
 @opentelemetry/instrumentation-hapi
 simple-statistics
 monaco-promql
+json-stable-stringify
