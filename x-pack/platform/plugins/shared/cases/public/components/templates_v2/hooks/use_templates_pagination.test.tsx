@@ -26,6 +26,7 @@ describe('useTemplatesPagination', () => {
     search: '',
     tags: [],
     author: [],
+    isDeleted: false,
   };
 
   const setQueryParams = jest.fn();

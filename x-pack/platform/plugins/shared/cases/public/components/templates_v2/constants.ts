@@ -21,6 +21,7 @@ export const DEFAULT_QUERY_PARAMS: TemplatesFindRequest = {
   search: '',
   tags: [],
   author: [],
+  isDeleted: false,
 };
 
 export const LINE_CLAMP = 3;

@@ -28,11 +28,12 @@ export type SortOrder = z.infer<typeof SortOrderSchema>;
 export const TemplatesFindRequestSchema = z.object({
   page: z.number(),
   perPage: z.number(),
-  sortField: TemplateSortFieldSchema,
-  sortOrder: SortOrderSchema,
-  search: z.string(),
-  tags: z.array(z.string()),
-  author: z.array(z.string()),
+  sortField: z.optional(TemplateSortFieldSchema).default('name'),
+  sortOrder: z.optional(SortOrderSchema).default('asc'),
+  search: z.optional(z.string()).default(''),
+  tags: z.optional(z.array(z.string())).default([]),
+  author: z.optional(z.array(z.string())).default([]),
+  isDeleted: z.optional(z.boolean()).default(false),
 });
 
 export type TemplatesFindRequest = z.infer<typeof TemplatesFindRequestSchema>;

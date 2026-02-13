@@ -22,6 +22,7 @@ describe('TemplatesTableFilters', () => {
     search: '',
     tags: [],
     author: [],
+    isDeleted: false,
   };
 
   const onQueryParamsChange = jest.fn();
