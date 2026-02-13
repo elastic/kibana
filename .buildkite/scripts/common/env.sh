@@ -157,3 +157,4 @@ if [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-2" ]] || [[ "${TEST_ENABLE_FIPS_VE
     echo -e '\nxpack.security.fipsMode.enabled: true' >>"$KIBANA_DIR/config/kibana.yml"
   fi
 fi
+
