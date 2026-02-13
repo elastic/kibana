@@ -11,7 +11,10 @@ import { FIELD_TYPE_MAP } from '../constants';
 describe('getFieldTypeOptions', () => {
   describe('alphabetical sorting', () => {
     it('returns options sorted alphabetically by display label', () => {
-      const options = getFieldTypeOptions({ streamType: 'classic', enableGeoPointSuggestions: true });
+      const options = getFieldTypeOptions({
+        streamType: 'classic',
+        enableGeoPointSuggestions: true,
+      });
       const labels = options.map((key) => FIELD_TYPE_MAP[key].label);
 
       // Verify the labels are in sorted order
@@ -30,7 +33,10 @@ describe('getFieldTypeOptions', () => {
 
   describe('filtering behavior', () => {
     it('excludes readonly types', () => {
-      const options = getFieldTypeOptions({ streamType: 'classic', enableGeoPointSuggestions: true });
+      const options = getFieldTypeOptions({
+        streamType: 'classic',
+        enableGeoPointSuggestions: true,
+      });
 
       // system is the only readonly type
       expect(options).not.toContain('system');
@@ -42,7 +48,10 @@ describe('getFieldTypeOptions', () => {
     });
 
     it('includes geo_point for classic streams with feature enabled', () => {
-      const options = getFieldTypeOptions({ streamType: 'classic', enableGeoPointSuggestions: true });
+      const options = getFieldTypeOptions({
+        streamType: 'classic',
+        enableGeoPointSuggestions: true,
+      });
       expect(options).toContain('geo_point');
     });
 
@@ -52,13 +61,22 @@ describe('getFieldTypeOptions', () => {
     });
 
     it('excludes geo_point for classic streams with feature disabled', () => {
-      const options = getFieldTypeOptions({ streamType: 'classic', enableGeoPointSuggestions: false });
+      const options = getFieldTypeOptions({
+        streamType: 'classic',
+        enableGeoPointSuggestions: false,
+      });
       expect(options).not.toContain('geo_point');
     });
 
     it('excludes geo_point for wired streams regardless of feature flag', () => {
-      const optionsWithFlagTrue = getFieldTypeOptions({ streamType: 'wired', enableGeoPointSuggestions: true });
-      const optionsWithFlagFalse = getFieldTypeOptions({ streamType: 'wired', enableGeoPointSuggestions: false });
+      const optionsWithFlagTrue = getFieldTypeOptions({
+        streamType: 'wired',
+        enableGeoPointSuggestions: true,
+      });
+      const optionsWithFlagFalse = getFieldTypeOptions({
+        streamType: 'wired',
+        enableGeoPointSuggestions: false,
+      });
       const optionsWithFlagUndefined = getFieldTypeOptions({ streamType: 'wired' });
 
       expect(optionsWithFlagTrue).not.toContain('geo_point');
@@ -69,7 +87,10 @@ describe('getFieldTypeOptions', () => {
 
   describe('option completeness', () => {
     it('includes all non-readonly types for classic streams with geo_point enabled', () => {
-      const options = getFieldTypeOptions({ streamType: 'classic', enableGeoPointSuggestions: true });
+      const options = getFieldTypeOptions({
+        streamType: 'classic',
+        enableGeoPointSuggestions: true,
+      });
 
       const expectedTypes = Object.keys(FIELD_TYPE_MAP).filter(
         (key) => !FIELD_TYPE_MAP[key as keyof typeof FIELD_TYPE_MAP].readonly
@@ -85,8 +106,7 @@ describe('getFieldTypeOptions', () => {
       const options = getFieldTypeOptions({ streamType: 'wired' });
 
       const expectedTypes = Object.keys(FIELD_TYPE_MAP).filter(
-        (key) =>
-          !FIELD_TYPE_MAP[key as keyof typeof FIELD_TYPE_MAP].readonly && key !== 'geo_point'
+        (key) => !FIELD_TYPE_MAP[key as keyof typeof FIELD_TYPE_MAP].readonly && key !== 'geo_point'
       );
 
       expect(options.length).toBe(expectedTypes.length);
