@@ -80,7 +80,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
     (
       titleKey: string,
       titleDefaultMessage: string,
-      description: React.ReactNode,
+      value: React.ReactNode,
       dataTestSubj?: string
     ) => ({
       label: (
@@ -103,7 +103,7 @@ export const OverviewTab = ({ metric, description }: OverviewTabProps) => {
               </strong>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>{description}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{value}</EuiFlexItem>
         </EuiFlexGroup>
       ),
     }),
