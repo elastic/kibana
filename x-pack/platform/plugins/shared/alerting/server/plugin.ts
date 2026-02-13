@@ -416,15 +416,11 @@ export class AlertingPlugin {
       this.config
     );
 
-    if (this.isServerless) {
-      this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
-        logger: this.logger,
-        core,
-        taskManager: plugins.taskManager,
-        isServerless: true,
-        config: this.config,
-      });
-    }
+    this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
+      logger: this.logger,
+      isServerless: true,
+    });
+    this.uiamApiKeyProvisioningTask.register({ core, taskManager: plugins.taskManager });
 
     const serviceStatus$ = new BehaviorSubject<ServiceStatus>({
       level: ServiceStatusLevels.available,

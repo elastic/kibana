@@ -18,7 +18,6 @@ import type {
   IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
 import { nodeBuilder, nodeTypes } from '@kbn/es-query';
-import type { AlertingConfig } from '../config';
 import type { RawRule } from '../types';
 import {
   RULE_SAVED_OBJECT_TYPE,
@@ -45,22 +44,27 @@ export class UiamApiKeyProvisioningTask {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
 
-  constructor({
-    logger,
-    core,
-    taskManager,
-    isServerless,
-    config,
-  }: {
-    logger: Logger;
-    core: CoreSetup<AlertingPluginsStart>;
-    taskManager: TaskManagerSetupContract;
-    isServerless: boolean;
-    config: AlertingConfig;
-  }) {
+  constructor({ logger, isServerless }: { logger: Logger; isServerless: boolean }) {
     this.logger = logger;
     this.isServerless = isServerless;
+  }
 
+  register({
+    core,
+    taskManager,
+  }: {
+    core: CoreSetup<AlertingPluginsStart>;
+    taskManager: TaskManagerSetupContract;
+  }) {
+    if (!this.isServerless) {
+      return;
+    }
+    if (!taskManager) {
+      this.logger.error(
+        `Missing required task manager service during registration of ${API_KEY_PROVISIONING_TASK_TYPE}`
+      );
+      return;
+    }
     taskManager.registerTaskDefinitions({
       [API_KEY_PROVISIONING_TASK_TYPE]: {
         title: 'API key migration task',
@@ -150,6 +154,8 @@ export class UiamApiKeyProvisioningTask {
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup<AlertingPluginsStart>
   ): Promise<{ state: LatestTaskStateSchema; runAt?: Date }> => {
+    this.logger.info('=====> Running UIAM API key provisioning task'); // For debugging purposes, to verify that the task is running as expected.
+
     const state = (taskInstance.state ?? emptyState) as LatestTaskStateSchema;
 
     const [coreStart] = await core.getStartServices();

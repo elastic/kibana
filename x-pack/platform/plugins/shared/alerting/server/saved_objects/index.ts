@@ -15,7 +15,6 @@ import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-obje
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { triggersActionsRoute, createRuleFromTemplateRoute } from '@kbn/rule-data-utils';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { UIAM_API_KEYS_PROVISIONING_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import { alertMappings } from '../../common/saved_objects/rules/mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
 import { ruleTemplateMappings } from './rule_template_mappings';
@@ -259,9 +258,10 @@ export function setupSavedObjects(
     modelVersions: ruleTemplateModelVersions,
   });
 
+  // Serverless only saved object used to track the status of UIAM API keys provisioning.
   savedObjects.registerType({
     name: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
-    indexPattern: UIAM_API_KEYS_PROVISIONING_SAVED_OBJECT_INDEX,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'agnostic',
     mappings: {

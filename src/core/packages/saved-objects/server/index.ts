@@ -68,6 +68,7 @@ export {
   USAGE_COUNTERS_SAVED_OBJECT_INDEX,
   ALL_SAVED_OBJECT_INDICES,
   SEARCH_SOLUTION_SAVED_OBJECT_INDEX,
+  UIAM_API_KEYS_PROVISIONING_SAVED_OBJECT_INDEX,
 } from './src/saved_objects_index_pattern';
 export type {
   SavedObjectsType,
