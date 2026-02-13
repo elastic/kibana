@@ -16,7 +16,7 @@ import type { CellActionFieldValue, CellActionsData } from '@kbn/cell-actions/sr
 import type { EuiButtonIconProps } from '@elastic/eui';
 import { PageScope } from '../../../data_view_manager/constants';
 import type { SecurityCellActionMetadata } from '../../../app/actions/types';
-import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
+import { SecurityCellActionType } from '../../../app/actions/constants';
 import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
 import { useDataViewId } from '../../hooks/use_data_view_id';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
@@ -26,7 +26,7 @@ import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 export * from '@kbn/cell-actions';
 export * from '@kbn/cell-actions/constants';
 
-export { SecurityCellActionsTrigger, SecurityCellActionType };
+export { SecurityCellActionType };
 
 export interface SecurityCellActionsData {
   /**
@@ -42,7 +42,7 @@ export interface SecurityCellActionsProps
   extends Omit<CellActionsProps, 'data' | 'metadata' | 'disabledActionTypes' | 'triggerId'> {
   sourcererScopeId?: PageScope;
   data: SecurityCellActionsData | SecurityCellActionsData[];
-  triggerId: SecurityCellActionsTrigger;
+  triggerId: string;
   disabledActionTypes?: SecurityCellActionType[];
   metadata?: SecurityCellActionMetadata;
   extraActionsIconType?: EuiButtonIconProps['iconType'];
@@ -51,7 +51,7 @@ export interface SecurityCellActionsProps
 
 export interface UseDataGridColumnsSecurityCellActionsProps
   extends UseDataGridColumnsCellActionsProps {
-  triggerId: SecurityCellActionsTrigger;
+  triggerId: string;
   disabledActionTypes?: SecurityCellActionType[];
   metadata?: SecurityCellActionMetadata;
 }

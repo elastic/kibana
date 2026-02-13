@@ -30,6 +30,11 @@ plugins:
     - streams_app
     - transform
     - workflows_extensions
+    - global_search
+    - banners
+    - workflows_management
+    - intercepts
+    - custom_branding
   disabled:
 
 packages:
