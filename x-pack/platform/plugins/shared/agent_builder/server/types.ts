@@ -27,6 +27,7 @@ import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { HooksServiceSetup } from '@kbn/agent-builder-server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { ToolsServiceSetup, ToolRegistry } from './services/tools';
+import type { AgentRegistry } from './services/agents';
 import type { AttachmentServiceSetup } from './services/attachments';
 import type { SkillServiceSetup } from './services/skills';
 
@@ -132,6 +133,10 @@ export interface AgentBuilderPluginStart {
    */
   agents: {
     runAgent: RunAgentFn;
+    /**
+     * Return an agent registry scoped to the current user and context.
+     */
+    getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
   };
   /**
    * Tools service, to manage or execute tools.

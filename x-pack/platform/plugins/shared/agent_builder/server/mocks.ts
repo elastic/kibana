@@ -7,6 +7,7 @@
 
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from './types';
 import { createMockedExecutableTool, createToolRegistryMock } from './test_utils/tools';
+import { createMockedAgentRegistry } from './test_utils/agents';
 import { createFormatContextMock } from './test_utils/attachments';
 import { createToolHandlerContextMock } from './test_utils/runner';
 
@@ -36,6 +37,7 @@ const createStartContractMock = (): jest.Mocked<AgentBuilderPluginStart> => {
   return {
     agents: {
       runAgent: jest.fn(),
+      getRegistry: jest.fn().mockImplementation(() => createMockedAgentRegistry()),
     },
     tools: {
       execute: jest.fn(),
