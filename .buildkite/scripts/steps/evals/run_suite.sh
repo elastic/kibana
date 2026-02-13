@@ -292,28 +292,52 @@ if [[ "${FTR_EIS_CCM:-}" =~ ^(1|true)$ ]]; then
       exit 1
     fi
 
-  ES_URL="$(jq -r '.hosts.elasticsearch' .scout/servers/local.json | sed 's:/*$::')"
-  echo "--- Enabling EIS Cloud Connected Mode (CCM) on $ES_URL"
+    ES_URL="$(jq -r '.hosts.elasticsearch' .scout/servers/local.json | sed 's:/*$::')"
 
-  curl -sSf -u elastic:changeme \
-    -H 'content-type: application/json' \
-    -X PUT "$ES_URL/_inference/_ccm" \
-    -d "{\"api_key\":\"${KIBANA_EIS_CCM_API_KEY:?}\"}" >/dev/null
+    echo "--- Waiting for Elasticsearch to be ready at $ES_URL"
+    ES_READY="false"
+    for _ in {1..120}; do
+      if ! kill -0 "$SCOUT_PID" 2>/dev/null; then
+        echo "Scout server exited before Elasticsearch became ready"
+        wait "$SCOUT_PID" || true
+        exit 1
+      fi
 
-  echo "--- Waiting for EIS inference endpoints"
-  for attempt in {1..10}; do
-    if curl -sSf -u elastic:changeme "$ES_URL/_inference/_all" \
-      | jq -e '.endpoints | any(.task_type=="chat_completion" and .service=="elastic")' >/dev/null; then
-      echo "✅ EIS endpoints available"
-      break
-    fi
-    if [[ "$attempt" == "10" ]]; then
-      echo "❌ Timed out waiting for EIS endpoints"
-      curl -sSf -u elastic:changeme "$ES_URL/_inference/_all" || true
+      if curl -sSf -u elastic:changeme \
+        "$ES_URL/_cluster/health?wait_for_status=yellow&timeout=1s" >/dev/null; then
+        ES_READY="true"
+        break
+      fi
+
+      sleep 1
+    done
+
+    if [[ "${ES_READY}" != "true" ]]; then
+      echo "Timed out waiting for Elasticsearch at $ES_URL"
       exit 1
     fi
-    sleep 3
-  done
+
+    echo "--- Enabling EIS Cloud Connected Mode (CCM) on $ES_URL"
+
+    curl -sSf -u elastic:changeme \
+      -H 'content-type: application/json' \
+      -X PUT "$ES_URL/_inference/_ccm" \
+      -d "{\"api_key\":\"${KIBANA_EIS_CCM_API_KEY:?}\"}" >/dev/null
+
+    echo "--- Waiting for EIS inference endpoints"
+    for attempt in {1..10}; do
+      if curl -sSf -u elastic:changeme "$ES_URL/_inference/_all" \
+        | jq -e '.endpoints | any(.task_type=="chat_completion" and .service=="elastic")' >/dev/null; then
+        echo "✅ EIS endpoints available"
+        break
+      fi
+      if [[ "$attempt" == "10" ]]; then
+        echo "❌ Timed out waiting for EIS endpoints"
+        curl -sSf -u elastic:changeme "$ES_URL/_inference/_all" || true
+        exit 1
+      fi
+      sleep 3
+    done
   fi
 fi
 
