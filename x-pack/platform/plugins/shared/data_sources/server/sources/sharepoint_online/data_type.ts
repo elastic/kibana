@@ -16,10 +16,12 @@ export const sharepointOnlineDataSource: DataSource = {
 
   iconType: '.sharepoint-online',
 
-  stackConnector: {
-    type: '.sharepoint-online',
-    config: {},
-  },
+  stackConnectors: [
+    {
+      type: '.sharepoint-online',
+      config: {},
+    },
+  ],
 
   workflows: {
     directory: __dirname + '/workflows',

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PromQLAstNode } from '../../promql/types';
+import type { PromQLAstNode } from '../../embedded_languages/promql/types';
 import type {
   ESQLAstCommand,
   ESQLAstQueryExpression,

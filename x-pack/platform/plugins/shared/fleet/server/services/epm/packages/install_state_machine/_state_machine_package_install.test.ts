@@ -41,7 +41,11 @@ import { installIndexTemplatesAndPipelines } from '../install_index_template_pip
 import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
 
 import { handleState } from './state_machine';
-import { _stateMachineInstallPackage } from './_state_machine_package_install';
+import {
+  _stateMachineInstallPackage,
+  regularStatesDefinition,
+  streamingStatesDefinition,
+} from './_state_machine_package_install';
 import { cleanupLatestExecutedState } from './steps';
 
 jest.mock('./state_machine');
@@ -345,5 +349,26 @@ describe('_stateMachineInstallPackage', () => {
       spaceId: DEFAULT_SPACE_ID,
     });
     await expect(installPromise).rejects.toThrowError(PackageSavedObjectConflictError);
+  });
+});
+
+describe('State machine parity', () => {
+  it('should have matching isAsync flags for common states in both regularStatesDefinition and streamingStatesDefinition', () => {
+    const commonStates = [
+      'create_restart_installation',
+      'install_kibana_assets',
+      'save_archive_entries_from_assets_map',
+      'save_knowledge_base',
+      'update_so',
+    ] as const;
+
+    commonStates.forEach((stateName) => {
+      const regularState = regularStatesDefinition[stateName];
+      const streamingState = streamingStatesDefinition[stateName];
+
+      if (regularState && streamingState) {
+        expect(regularState.isAsync).toEqual(streamingState.isAsync);
+      }
+    });
   });
 });

@@ -148,3 +148,144 @@ export const ZERO_STATE_DESCRIPTION = i18n.translate(
     defaultMessage: 'You have no data streams yet',
   }
 );
+
+export const TABLE_COLUMN_HEADERS = Object.freeze({
+  title: i18n.translate('xpack.automaticImportV2.dataStreams.table.titleColumnHeader', {
+    defaultMessage: 'Title',
+  }),
+  dataCollectionMethods: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.table.dataCollectionMethodsColumnHeader',
+    {
+      defaultMessage: 'Data Collection Methods',
+    }
+  ),
+  status: i18n.translate('xpack.automaticImportV2.dataStreams.table.statusColumnHeader', {
+    defaultMessage: 'Status',
+  }),
+  actions: i18n.translate('xpack.automaticImportV2.dataStreams.table.actionsColumnHeader', {
+    defaultMessage: 'Actions',
+  }),
+  field: i18n.translate('xpack.automaticImportV2.dataStreams.table.fieldColumnHeader', {
+    defaultMessage: 'Field',
+  }),
+  value: i18n.translate('xpack.automaticImportV2.dataStreams.table.valueColumnHeader', {
+    defaultMessage: 'Value',
+  }),
+});
+
+export const TABLE_ACTIONS = Object.freeze({
+  expand: i18n.translate('xpack.automaticImportV2.dataStreams.table.expandAction', {
+    defaultMessage: 'Expand',
+  }),
+  expandDescription: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.table.expandActionDescription',
+    {
+      defaultMessage: 'Expand for details about this data stream',
+    }
+  ),
+  refresh: i18n.translate('xpack.automaticImportV2.dataStreams.table.refreshAction', {
+    defaultMessage: 'Refresh',
+  }),
+  refreshDescription: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.table.refreshActionDescription',
+    {
+      defaultMessage: 'Refresh this data stream',
+    }
+  ),
+  delete: i18n.translate('xpack.automaticImportV2.dataStreams.table.deleteAction', {
+    defaultMessage: 'Delete',
+  }),
+  deleteDescription: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.table.deleteActionDescription',
+    {
+      defaultMessage: 'Delete this data stream',
+    }
+  ),
+});
+
+export const DELETE_MODAL = Object.freeze({
+  title: (dataStreamTitle: string) =>
+    i18n.translate('xpack.automaticImportV2.dataStreams.deleteModal.title', {
+      defaultMessage: 'Are you sure you want to delete "{dataStreamTitle}"?',
+      values: { dataStreamTitle },
+    }),
+  cancelButton: i18n.translate('xpack.automaticImportV2.dataStreams.deleteModal.cancelButton', {
+    defaultMessage: 'Cancel',
+  }),
+  confirmButton: i18n.translate('xpack.automaticImportV2.dataStreams.deleteModal.confirmButton', {
+    defaultMessage: 'Delete',
+  }),
+});
+
+export const EDIT_PIPELINE_FLYOUT = Object.freeze({
+  tableCaption: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.editPipelineFlyout.tableCaption',
+    {
+      defaultMessage: 'Pipeline fields',
+    }
+  ),
+  documents: i18n.translate('xpack.automaticImportV2.dataStreams.editPipelineFlyout.documents', {
+    defaultMessage: 'Documents',
+  }),
+  paginationAriaLabel: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.editPipelineFlyout.paginationAriaLabel',
+    {
+      defaultMessage: 'Edit pipeline pagination',
+    }
+  ),
+  tableTab: i18n.translate('xpack.automaticImportV2.dataStreams.editPipelineFlyout.tableTab', {
+    defaultMessage: 'Table',
+  }),
+  pipelineTab: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.editPipelineFlyout.pipelineTab',
+    {
+      defaultMessage: 'Ingest pipeline',
+    }
+  ),
+  filterPlaceholder: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.editPipelineFlyout.filterPlaceholder',
+    {
+      defaultMessage: 'Filter by field, value',
+    }
+  ),
+  errorTitle: i18n.translate('xpack.automaticImportV2.dataStreams.editPipelineFlyout.errorTitle', {
+    defaultMessage: 'Error loading data',
+  }),
+  errorMessage: i18n.translate(
+    'xpack.automaticImportV2.dataStreams.editPipelineFlyout.errorMessage',
+    {
+      defaultMessage: 'Failed to load pipeline results. Please try again.',
+    }
+  ),
+});
+
+export const STATUS_LABELS = Object.freeze({
+  analyzing: i18n.translate('xpack.automaticImportV2.dataStreams.status.analyzing', {
+    defaultMessage: 'Analyzing',
+  }),
+  success: i18n.translate('xpack.automaticImportV2.dataStreams.status.success', {
+    defaultMessage: 'Success',
+  }),
+  failed: i18n.translate('xpack.automaticImportV2.dataStreams.status.failed', {
+    defaultMessage: 'Failed',
+  }),
+  cancelled: i18n.translate('xpack.automaticImportV2.dataStreams.status.cancelled', {
+    defaultMessage: 'Cancelled',
+  }),
+  approved: i18n.translate('xpack.automaticImportV2.dataStreams.status.approved', {
+    defaultMessage: 'Approved',
+  }),
+  deleting: i18n.translate('xpack.automaticImportV2.dataStreams.status.deleting', {
+    defaultMessage: 'Deleting...',
+  }),
+});
+
+// Aria Labels
+export const ARIA_LABELS = Object.freeze({
+  uploadLogFile: i18n.translate('xpack.automaticImportV2.dataStreams.ariaLabels.uploadLogFile', {
+    defaultMessage: 'Upload log file',
+  }),
+  selectIndex: i18n.translate('xpack.automaticImportV2.dataStreams.ariaLabels.selectIndex', {
+    defaultMessage: 'Select an index',
+  }),
+});
