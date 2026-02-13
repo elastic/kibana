@@ -852,7 +852,6 @@ describe('run.ts', () => {
   describe('runSharded', () => {
     const mockSpawn = spawn as jest.MockedFunction<typeof spawn>;
     let mockLog: { info: jest.Mock; error: jest.Mock; warning: jest.Mock; debug: jest.Mock };
-    let stdoutWriteSpy: jest.SpyInstance;
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -862,20 +861,13 @@ describe('run.ts', () => {
         warning: jest.fn(),
         debug: jest.fn(),
       };
-      stdoutWriteSpy = jest.spyOn(process.stdout, 'write').mockReturnValue(true);
       // Save and set process.argv for forwarding
       process.argv = ['node', 'scripts/jest', '--config', '/some/config.js', '--verbose'];
     });
 
-    afterEach(() => {
-      stdoutWriteSpy.mockRestore();
-    });
-
-    it('should spawn N child processes in parallel with correct --shard flags', async () => {
+    it('should spawn N child processes sequentially with correct --shard flags', async () => {
       mockSpawn.mockImplementation((() => {
         const proc = new EventEmitter() as any;
-        proc.stdout = new EventEmitter();
-        proc.stderr = new EventEmitter();
         process.nextTick(() => proc.emit('exit', 0));
         return proc;
       }) as any);
@@ -902,11 +894,9 @@ describe('run.ts', () => {
       );
     });
 
-    it('should use piped stdio for prefixed output', async () => {
+    it('should use inherited stdio for native Jest output', async () => {
       mockSpawn.mockImplementation((() => {
         const proc = new EventEmitter() as any;
-        proc.stdout = new EventEmitter();
-        proc.stderr = new EventEmitter();
         process.nextTick(() => proc.emit('exit', 0));
         return proc;
       }) as any);
@@ -917,30 +907,8 @@ describe('run.ts', () => {
         process.execPath,
         expect.any(Array),
         expect.objectContaining({
-          stdio: ['ignore', 'pipe', 'pipe'],
+          stdio: 'inherit',
         })
-      );
-    });
-
-    it('should prefix output lines with shard label', async () => {
-      mockSpawn.mockImplementation((() => {
-        const proc = new EventEmitter() as any;
-        proc.stdout = new EventEmitter();
-        proc.stderr = new EventEmitter();
-        process.nextTick(() => {
-          proc.stdout.emit('data', Buffer.from('PASS test.ts\nTests: 1 passed\n'));
-          proc.stdout.emit('end');
-          proc.emit('exit', 0);
-        });
-        return proc;
-      }) as any);
-
-      await runSharded('/mock/repo/root/path/config.js', 1, mockLog as any);
-
-      // Output should be written to process.stdout with a shard prefix
-      const writtenLines = stdoutWriteSpy.mock.calls.map((c: any[]) => c[0] as string);
-      expect(writtenLines.some((line) => line.includes('shard 1/1') && line.includes('PASS'))).toBe(
-        true
       );
     });
 
@@ -948,8 +916,6 @@ describe('run.ts', () => {
       let callIdx = 0;
       mockSpawn.mockImplementation((() => {
         const proc = new EventEmitter() as any;
-        proc.stdout = new EventEmitter();
-        proc.stderr = new EventEmitter();
         const idx = callIdx++;
         process.nextTick(() => proc.emit('exit', idx === 1 ? 5 : 0));
         return proc;
@@ -968,8 +934,6 @@ describe('run.ts', () => {
 
       mockSpawn.mockImplementation((() => {
         const proc = new EventEmitter() as any;
-        proc.stdout = new EventEmitter();
-        proc.stderr = new EventEmitter();
         process.nextTick(() => proc.emit('exit', 0));
         return proc;
       }) as any);
@@ -987,8 +951,6 @@ describe('run.ts', () => {
     it('should log success message when all shards pass', async () => {
       mockSpawn.mockImplementation((() => {
         const proc = new EventEmitter() as any;
-        proc.stdout = new EventEmitter();
-        proc.stderr = new EventEmitter();
         process.nextTick(() => proc.emit('exit', 0));
         return proc;
       }) as any);
