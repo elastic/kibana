@@ -60,9 +60,7 @@ test.describe(
 
       // Step 4: Add an ES|QL panel
       await pageObjects.dashboard.openAddPanelFlyout();
-      await page.testSubj
-        .locator('dashboardPanelSelectionFlyout__searchInput')
-        .fill('ES|QL');
+      await page.testSubj.locator('dashboardPanelSelectionFlyout__searchInput').fill('ES|QL');
       await page.testSubj.click('create-action-ES|QL');
       await expect(page.testSubj.locator('ESQLEditor')).toBeVisible({ timeout: 15000 });
       await page.testSubj.click('applyFlyoutButton');
