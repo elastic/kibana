@@ -74,9 +74,7 @@ export interface MonitorableNode {
   monitor(monitoredContext: StepExecutionRuntime): Promise<void> | void;
 }
 
-export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
-  implements NodeImplementation
-{
+export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep> implements NodeImplementation {
   protected step: TStep;
   protected stepExecutionRuntime: StepExecutionRuntime;
   protected connectorExecutor: ConnectorExecutor;
@@ -103,18 +101,20 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   }
 
   public async run(): Promise<void> {
+    const stepSpan = apm.startSpan(`step: ${this.step.name}`, 'workflow', this.step.type);
+    if (stepSpan) {
+      stepSpan.setLabel('step_name', this.step.name);
+      stepSpan.setLabel('step_type', this.step.type);
+      stepSpan.setLabel('step_id', this.stepExecutionRuntime.stepExecutionId);
+    }
+    let input: any;
+
     try {
-      let input: any;
       // flush event logs after start step
       await this.stepExecutionRuntime.flushEventLogs();
 
       // Create APM span for step execution visibility in traces
-      const stepSpan = apm.startSpan(`step: ${this.step.name}`, 'workflow', this.step.type);
-      if (stepSpan) {
-        stepSpan.setLabel('step_name', this.step.name);
-        stepSpan.setLabel('step_type', this.step.type);
-        stepSpan.setLabel('step_id', this.stepExecutionRuntime.stepExecutionId);
-      }
+
       input = await this.getInput();
       this.stepExecutionRuntime.startStep(input);
 

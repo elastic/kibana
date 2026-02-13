@@ -8,65 +8,58 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type {
-  EsWorkflowStepExecution,
-  ExecutionStatus,
-  SerializedError,
-  StackFrame,
-} from '@kbn/workflows';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
-import { JsonValue } from '@kbn/utility-types';
-
-export interface StepExecutionEventBase {
-  stepExecutionId: string;
-  workflowRunId: string;
-  workflowId: string;
-  spaceId: string;
-  '@timestamp': string;
-}
-
-export interface StepExecutionStartedEvent extends StepExecutionEventBase {
-  type: 'started';
-  scopeStack: StackFrame[];
-  workflowRunId: string;
-  workflowId: string;
-  stepId: string;
-  stepType?: string;
-  topologicalIndex: number;
-  globalExecutionIndex: number;
-  stepExecutionIndex: number;
-  input?: JsonValue;
-}
-
-export interface StepExecutionFinishedEvent extends StepExecutionEventBase {
-  type: 'finished';
-  error?: SerializedError;
-  output?: JsonValue;
-}
-
-export interface StepExecutionWaitingEvent extends StepExecutionEventBase {
-  type: 'waiting';
-  resumeAt: string;
-}
-
-export type StepExecutionEvent =
-  | StepExecutionStartedEvent
-  | StepExecutionFinishedEvent
-  | StepExecutionWaitingEvent;
+import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { StepExecutionEvent } from './step_execution_data_stream';
+import { mapEventToStepExecution } from './utils';
 
 export class StepExecutionRepository {
-  private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
+  private indexName = '.workflows-step-data-stream-logs-v2';
 
   constructor(private esClient: ElasticsearchClient) {}
+
+  public async getStepExecutions(
+    stepExecutionIds: string[]
+  ): Promise<Array<EsWorkflowStepExecution>> {
+    const foundEvents = await this.getStepExecutionEvents(stepExecutionIds ?? []);
+
+    const groupedByStepExecutionId = new Map<string, StepExecutionEvent[]>();
+    foundEvents.forEach((event) => {
+      let existing = groupedByStepExecutionId.get(event.stepExecutionId);
+      if (!existing) {
+        existing = [];
+        groupedByStepExecutionId.set(event.stepExecutionId, existing);
+      }
+      existing.push(event);
+    });
+    const stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
+    groupedByStepExecutionId.entries().forEach(([stepExecutionId, events]) => {
+      const sorted = events.toSorted((a, b) => {
+        if (a.type === 'started' && b.type !== 'started') return -1;
+        if (a.type !== 'started' && b.type === 'started') return 1;
+        return 0;
+      });
+      stepExecutions.set(
+        stepExecutionId,
+        sorted.reduce(
+          (acc, event) => ({ ...acc, ...mapEventToStepExecution(event) }),
+          {}
+        ) as EsWorkflowStepExecution
+      );
+    });
+
+    return Array.from(stepExecutions.values());
+  }
 
   public async getStepExecutionEvents(
     stepExecutionIds: string[]
   ): Promise<Array<StepExecutionEvent>> {
-    const eventIds = stepExecutionIds.flatMap((id) => [`${id}-started`, `${id}-finished`]);
+    if (stepExecutionIds.length === 0) {
+      return [];
+    }
 
-    const mgetResponse = await this.esClient.mget<
-      StepExecutionStartedEvent | StepExecutionFinishedEvent
-    >({
+    const eventIds = stepExecutionIds.flatMap((id) => [`${id}_started`, `${id}_finished`]);
+
+    const mgetResponse = await this.esClient.mget<StepExecutionEvent>({
       index: this.indexName,
       ids: eventIds,
     });
@@ -93,7 +86,6 @@ export class StepExecutionRepository {
     });
 
     const bulkResponse = await this.esClient.bulk({
-      refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
       index: this.indexName,
       body: events.flatMap((event) => [
         { create: { _id: `${event.stepExecutionId}_${event.type}` } },

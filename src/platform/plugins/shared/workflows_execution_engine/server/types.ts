@@ -18,7 +18,11 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type {
+  EsWorkflowExecution,
+  EsWorkflowStepExecution,
+  WorkflowExecutionEngineModel,
+} from '@kbn/workflows';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -41,6 +45,8 @@ export interface WorkflowsExecutionEnginePluginStart {
   cancelWorkflowExecution: CancelWorkflowExecution;
   workflowEventLoggerService: IWorkflowEventLoggerService;
   scheduleWorkflow: ScheduleWorkflow;
+  getWorkflowExecution: GetWorkflowExecution;
+  getStepExecutions: GetStepExecutions;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
@@ -80,3 +86,13 @@ export type ScheduleWorkflow = (
   context: Record<string, any>,
   request: KibanaRequest
 ) => Promise<ExecuteWorkflowResponse>;
+
+export type GetWorkflowExecution = (
+  workflowExecutionId: string,
+  spaceId: string
+) => Promise<EsWorkflowExecution | null>;
+
+export type GetStepExecutions = (
+  workflowExecutionId: string,
+  spaceId: string
+) => Promise<EsWorkflowStepExecution[] | null>;

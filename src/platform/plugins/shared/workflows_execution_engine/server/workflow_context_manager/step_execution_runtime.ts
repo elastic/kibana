@@ -12,7 +12,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { WorkflowContextManager } from './workflow_context_manager';
-import type { WorkflowExecutionStateSnapshot } from './workflow_execution_state_snapshot';
+import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
 import { parseDuration } from '../utils';
@@ -21,7 +21,7 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface StepExecutionRuntimeInit {
   contextManager: WorkflowContextManager;
-  workflowExecutionState: WorkflowExecutionStateSnapshot;
+  workflowExecutionState: WorkflowExecutionState;
   workflowExecutionGraph: WorkflowGraph;
   stepLogger: IWorkflowEventLogger;
   stepExecutionId: string;
@@ -49,7 +49,7 @@ interface StepExecutionRuntimeInit {
  * and uses topological sorting to determine execution order.
  */
 export class StepExecutionRuntime {
-  private workflowExecutionState: WorkflowExecutionStateSnapshot;
+  private workflowExecutionState: WorkflowExecutionState;
   private workflowGraph: WorkflowGraph;
   private stackFrames: StackFrame[];
   private stepState: Record<string, any> | undefined = undefined;
@@ -125,17 +125,9 @@ export class StepExecutionRuntime {
       input,
       '@timestamp': new Date().toISOString(),
     });
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
     this.logStepStart(this.node.stepId, this.stepExecutionId);
   }
-
-  // // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // public setInput(input: Record<string, any>): void {
-  //   this.workflowExecutionState.upsertStep({
-  //     id: this.stepExecutionId,
-  //     input,
-  //   });
-  // }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public finishStep(stepOutput?: Record<string, any>): void {
@@ -145,12 +137,6 @@ export class StepExecutionRuntime {
       finishedAt: new Date().toISOString(),
       output: stepOutput,
     } as Partial<EsWorkflowStepExecution>;
-
-    // if (startedStepExecution?.startedAt) {
-    //   stepExecutionUpdate.executionTimeMs =
-    //     new Date(stepExecutionUpdate.finishedAt as string).getTime() -
-    //     new Date(startedStepExecution.startedAt).getTime();
-    // }
 
     this.workflowExecutionState.finishStep({
       stepExecutionId: this.stepExecutionId,
@@ -165,21 +151,7 @@ export class StepExecutionRuntime {
     // if not, create a new step execution with fail
     const executionError = ExecutionError.fromError(error);
     const serializedError = executionError.toSerializableObject();
-    // const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
-    // const stepExecutionUpdate = {
-    //   id: this.stepExecutionId,
-    //   status: ExecutionStatus.FAILED,
-    //   scopeStack: this.stackFrames,
-    //   finishedAt: new Date().toISOString(),
-    //   output: null,
-    //   error: serializedError,
-    // } as Partial<EsWorkflowStepExecution>;
 
-    // if (startedStepExecution && startedStepExecution.startedAt) {
-    //   stepExecutionUpdate.executionTimeMs =
-    //     new Date(stepExecutionUpdate.finishedAt as string).getTime() -
-    //     new Date(startedStepExecution.startedAt).getTime();
-    // }
     this.workflowExecutionState.updateWorkflowExecution({
       error: serializedError,
     });

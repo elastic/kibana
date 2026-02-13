@@ -152,7 +152,11 @@ export class WorkflowsPlugin
 
     this.workflowsService = new WorkflowsService(this.logger, getCoreStart, getPluginsStart);
 
-    this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);
+    this.api = new WorkflowsManagementApi(
+      this.workflowsService,
+      getWorkflowExecutionEngine,
+      this.logger
+    );
     this.spaces = plugins.spaces?.spacesService;
 
     if (!this.spaces) {

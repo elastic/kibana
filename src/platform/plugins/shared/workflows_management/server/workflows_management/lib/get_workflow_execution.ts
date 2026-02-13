@@ -116,7 +116,7 @@ export const getWorkflowExecution = async ({
   }
 };
 
-function transformToWorkflowExecutionDetailDto(
+export function transformToWorkflowExecutionDetailDto(
   id: string,
   workflowExecution: EsWorkflowExecution,
   stepExecutions: EsWorkflowStepExecution[],

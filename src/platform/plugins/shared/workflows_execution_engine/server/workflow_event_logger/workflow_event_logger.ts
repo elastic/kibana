@@ -251,7 +251,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     this.eventQueue = [];
 
     try {
-      await this.logsRepository.createLogs(events);
+      // await this.logsRepository.createLogs(events);
 
       this.logger.debug(`Successfully indexed ${events.length} workflow events`);
     } catch (error) {

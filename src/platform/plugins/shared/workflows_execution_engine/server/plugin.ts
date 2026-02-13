@@ -32,12 +32,15 @@ import {
 } from './execution_functions';
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';
-import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
+import { initializeStepExecutionEventsDataStream } from './repositories/step_executions/step_execution_data_stream';
+import { StepExecutionRepository } from './repositories/step_executions/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
   CancelWorkflowExecution,
   ExecuteWorkflow,
   ExecuteWorkflowStep,
+  GetStepExecutions,
+  GetWorkflowExecution,
   ScheduleWorkflow,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginSetupDeps,
@@ -86,7 +89,8 @@ export class WorkflowsExecutionEnginePlugin
     const logger = this.logger;
     const config = this.config;
 
-    initializeLogsRepositoryDataStream(core.dataStreams);
+    // initializeLogsRepositoryDataStream(core.dataStreams);
+    initializeStepExecutionEventsDataStream(core.dataStreams);
 
     const setupDependencies: SetupDependencies = { cloudSetup: plugins.cloud };
     this.setupDependencies = setupDependencies;
@@ -457,6 +461,9 @@ export class WorkflowsExecutionEnginePlugin
     const workflowExecutionRepository = new WorkflowExecutionRepository(
       coreStart.elasticsearch.client.asInternalUser
     );
+    const stepExecutionRepository = new StepExecutionRepository(
+      coreStart.elasticsearch.client.asInternalUser
+    );
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,
       workflowExecutionRepository
@@ -734,6 +741,33 @@ export class WorkflowsExecutionEnginePlugin
       await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
     };
 
+    const getWorkflowExecution: GetWorkflowExecution = async (workflowExecutionId, spaceId) => {
+      await checkLicense(plugins.licensing);
+
+      await this.initialize(coreStart);
+      return workflowExecutionRepository.getWorkflowExecutionById(workflowExecutionId, spaceId);
+    };
+
+    const getStepExecutions: GetStepExecutions = async (workflowExecutionId, spaceId) => {
+      await checkLicense(plugins.licensing);
+
+      await this.initialize(coreStart);
+      const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+        workflowExecutionId,
+        spaceId
+      );
+
+      if (!workflowExecution) {
+        return null;
+      }
+
+      const events = await stepExecutionRepository.getStepExecutions(
+        workflowExecution.stepExecutionIds || []
+      );
+
+      return events;
+    };
+
     const workflowEventLoggerService = new WorkflowEventLoggerService(
       coreStart.dataStreams,
       this.logger,
@@ -746,6 +780,8 @@ export class WorkflowsExecutionEnginePlugin
       executeWorkflowStep,
       scheduleWorkflow,
       cancelWorkflowExecution,
+      getWorkflowExecution,
+      getStepExecutions,
     };
   }
 

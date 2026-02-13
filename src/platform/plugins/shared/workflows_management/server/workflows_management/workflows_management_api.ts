@@ -9,7 +9,7 @@
 // TODO: remove eslint exceptions once we have a better way to handle this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type {
   ConnectorTypeInfo,
@@ -34,6 +34,7 @@ import type {
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { z } from '@kbn/zod/v4';
+import { transformToWorkflowExecutionDetailDto } from './lib/get_workflow_execution';
 import type {
   SearchWorkflowExecutionsParams,
   WorkflowsService,
@@ -116,7 +117,8 @@ export interface TestWorkflowParams {
 export class WorkflowsManagementApi {
   constructor(
     private readonly workflowsService: WorkflowsService,
-    private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
+    private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>,
+    private readonly logger: Logger
   ) {}
 
   public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
@@ -361,7 +363,27 @@ export class WorkflowsManagementApi {
     workflowExecutionId: string,
     spaceId: string
   ): Promise<WorkflowExecutionDto | null> {
-    return this.workflowsService.getWorkflowExecution(workflowExecutionId, spaceId);
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const workflowExecution = await workflowsExecutionEngine.getWorkflowExecution(
+      workflowExecutionId,
+      spaceId
+    );
+
+    if (!workflowExecution) {
+      return null;
+    }
+
+    const stepExecutions = await workflowsExecutionEngine.getStepExecutions(
+      workflowExecutionId,
+      spaceId
+    );
+
+    return transformToWorkflowExecutionDetailDto(
+      workflowExecutionId,
+      workflowExecution,
+      stepExecutions || [],
+      this.logger
+    );
   }
 
   public async getWorkflowExecutionLogs(params: {

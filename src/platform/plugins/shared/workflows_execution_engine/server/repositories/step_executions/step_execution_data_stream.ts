@@ -11,19 +11,19 @@ import type { DataStreamsSetup, DataStreamsStart } from '@kbn/core-data-streams-
 import type { IDataStreamClient } from '@kbn/data-streams';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
-import { StackFrame, SerializedError, } from '@kbn/workflows';
-import { JsonValue } from '@kbn/utility-types';
+import type { JsonValue } from '@kbn/utility-types';
+import type { SerializedError, StackFrame } from '@kbn/workflows';
 
-export const STEP_EXECUTION_EVENTS_DATA_STREAM = '.step-execution-event-data-stream-logs';
+export const STEP_EXECUTION_EVENTS_DATA_STREAM = '.workflows-step-data-stream-logs';
 // Note: Bump the version when you make changes to the definition.
 export const initializeStepExecutionEventsDataStream = (coreDataStreams: DataStreamsSetup) => {
-  return coreDataStreams.registerDataStream({
-    name: STEP_EXECUTION_EVENTS_DATA_STREAM,
-    version: 1,
-    template: {
-      mappings: stepExecutionEventsMappings,
-    },
-  });
+  // return coreDataStreams.registerDataStream({
+  //   name: STEP_EXECUTION_EVENTS_DATA_STREAM,
+  //   version: 1,
+  //   template: {
+  //     mappings: stepExecutionEventsMappings,
+  //   },
+  // });
 };
 
 // Note: Only define schema for fields that will be queries against in ES.
@@ -64,6 +64,11 @@ export interface StepExecutionWaitingEvent extends StepExecutionEventBase {
   type: 'waiting';
   resumeAt: string;
 }
+
+export type StepExecutionEvent =
+  | StepExecutionStartedEvent
+  | StepExecutionFinishedEvent
+  | StepExecutionWaitingEvent;
 
 export type StepExecutionEventsDataStreamClient = IDataStreamClient<
   typeof stepExecutionEventsMappings,

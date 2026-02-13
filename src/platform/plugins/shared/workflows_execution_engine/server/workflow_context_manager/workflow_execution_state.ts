@@ -11,20 +11,34 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import {
-  ExecutionStatus,
   type EsWorkflowExecution,
   type EsWorkflowStepExecution,
+  ExecutionStatus,
 } from '@kbn/workflows';
 import type {
-  StepExecutionRepository,
   StepExecutionEvent,
   StepExecutionFinishedEvent,
   StepExecutionStartedEvent,
   StepExecutionWaitingEvent,
-} from '../repositories/step_execution_repository';
+} from '../repositories/step_executions/step_execution_data_stream';
+import type { StepExecutionRepository } from '../repositories/step_executions/step_execution_repository';
+import { StepExecutionRepositoryOld } from '../repositories/step_executions/step_execution_repository_old';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
-export class WorkflowExecutionStateSnapshot {
+export class WorkflowExecutionState {
+  private stepExecutionRepositoryOld: StepExecutionRepositoryOld; // TODO: TO REMOVE
+  private stepDocumentsChanges: Map<string, Partial<EsWorkflowStepExecution>> = new Map(); // TODO: TO REMOVE
+  private async flushStepChangesOld(): Promise<void> {
+    // TODO: TO REMOVE
+    if (!this.stepDocumentsChanges.size) {
+      return;
+    }
+    const stepDocumentsChanges = Array.from(this.stepDocumentsChanges.values());
+
+    this.stepDocumentsChanges.clear();
+    await this.stepExecutionRepositoryOld.bulkUpsert(stepDocumentsChanges);
+  }
+
   private stepExecutions: Map<string, EsWorkflowStepExecution> = new Map();
   private workflowExecution: EsWorkflowExecution;
   private workflowDocumentChanges: Partial<EsWorkflowExecution> | undefined = undefined;
@@ -44,6 +58,10 @@ export class WorkflowExecutionStateSnapshot {
     private workflowStepExecutionRepository: StepExecutionRepository
   ) {
     this.workflowExecution = initialWorkflowExecution;
+
+    this.stepExecutionRepositoryOld = new StepExecutionRepositoryOld(
+      this.workflowStepExecutionRepository.esClient
+    );
   }
 
   public async load(): Promise<void> {
@@ -84,7 +102,7 @@ export class WorkflowExecutionStateSnapshot {
         stepId: startedEvent.stepId,
         stepType: startedEvent.stepType,
         status: ExecutionStatus.RUNNING,
-        startedAt: startedEvent['@timestamp'],
+        startedAt: startedEvent['@timestamp'] as string,
         topologicalIndex: startedEvent.topologicalIndex,
         globalExecutionIndex: startedEvent.globalExecutionIndex,
         stepExecutionIndex: startedEvent.stepExecutionIndex,
@@ -95,7 +113,7 @@ export class WorkflowExecutionStateSnapshot {
       return {
         id: finishedEvent.stepExecutionId,
         status: finishedEvent.error ? ExecutionStatus.FAILED : ExecutionStatus.COMPLETED,
-        finishedAt: finishedEvent['@timestamp'],
+        finishedAt: finishedEvent['@timestamp'] as string,
         error: finishedEvent.error,
         output: finishedEvent.output,
       };
@@ -167,6 +185,7 @@ export class WorkflowExecutionStateSnapshot {
 
     await this.workflowStepExecutionRepository.bulkUpsert(this.events);
     this.events = [];
+    // this.flushStepChangesOld(); // TODO: TO REMOVE
   }
 
   public async flush(): Promise<void> {
@@ -232,6 +251,10 @@ export class WorkflowExecutionStateSnapshot {
       globalExecutionIndex: newStep.globalExecutionIndex,
       stepExecutionIndex: newStep.stepExecutionIndex,
     });
+    this.stepDocumentsChanges.set(
+      event.stepExecutionId!,
+      this.stepExecutions.get(event.stepExecutionId!) || {}
+    );
   }
 
   finishStep(
@@ -253,6 +276,10 @@ export class WorkflowExecutionStateSnapshot {
       workflowRunId: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
     });
+    this.stepDocumentsChanges.set(
+      event.stepExecutionId!,
+      this.stepExecutions.get(event.stepExecutionId!) || {}
+    );
   }
 
   transitToWaiting(
@@ -272,6 +299,10 @@ export class WorkflowExecutionStateSnapshot {
       workflowRunId: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
     });
+    this.stepDocumentsChanges.set(
+      event.stepExecutionId!,
+      this.stepExecutions.get(event.stepExecutionId!) || {}
+    );
   }
 
   private buildStepIdExecutionIdIndex(): void {
