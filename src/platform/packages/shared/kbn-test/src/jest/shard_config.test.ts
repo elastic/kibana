@@ -121,10 +121,7 @@ describe('shard_config', () => {
     it('should expand configs that are in the shard map', () => {
       const configs = ['a/jest.config.js'];
       const result = expandShardedConfigs(configs, shardMap);
-      expect(result).toEqual([
-        'a/jest.config.js||shard=1/2',
-        'a/jest.config.js||shard=2/2',
-      ]);
+      expect(result).toEqual(['a/jest.config.js||shard=1/2', 'a/jest.config.js||shard=2/2']);
     });
 
     it('should expand to 3 shards', () => {

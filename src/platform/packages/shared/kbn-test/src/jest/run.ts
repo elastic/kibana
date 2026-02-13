@@ -421,4 +421,3 @@ export function removeFlagFromArgv(argv: string[], flag: string): string[] {
 
   return filteredArguments;
 }
-

@@ -617,7 +617,6 @@ describe('run_all.ts', () => {
     });
 
     describe('shard annotation handling', () => {
-
       it('should strip shard annotations before passing to getJestConfigs (CI path)', async () => {
         mockGetopts.mockReturnValue({
           configs: 'config1.js||shard=1/2,config1.js||shard=2/2',
@@ -680,18 +679,14 @@ describe('run_all.ts', () => {
         expect(mockSpawn).toHaveBeenCalledTimes(2);
 
         // First process should get --shard=1/2
-        expect(mockSpawn.mock.calls[0][1]).toEqual(
-          expect.arrayContaining(['--shard=1/2'])
-        );
+        expect(mockSpawn.mock.calls[0][1]).toEqual(expect.arrayContaining(['--shard=1/2']));
         // Config should be clean (without annotation)
         expect(mockSpawn.mock.calls[0][1]).toEqual(
           expect.arrayContaining(['--config', 'config1.js'])
         );
 
         // Second process should get --shard=2/2
-        expect(mockSpawn.mock.calls[1][1]).toEqual(
-          expect.arrayContaining(['--shard=2/2'])
-        );
+        expect(mockSpawn.mock.calls[1][1]).toEqual(expect.arrayContaining(['--shard=2/2']));
       });
 
       it('should NOT pass --shard flag for non-annotated configs', async () => {
