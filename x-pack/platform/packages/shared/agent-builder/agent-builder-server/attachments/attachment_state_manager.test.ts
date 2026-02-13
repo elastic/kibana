@@ -214,14 +214,14 @@ describe('AttachmentStateManager', () => {
     it('returns the attachment by ID', async () => {
       const added = await manager.add({ id: 'test-1', type: 'text', data: { content: 'Test' } });
 
-      const retrieved = await manager.get('test-1', { context: mockContext });
+      const retrieved = manager.get('test-1');
 
       expect(retrieved?.id).toEqual('test-1');
       expect(retrieved?.data.data).toEqual(added.versions[0].data);
     });
 
-    it('returns undefined for non-existent ID', async () => {
-      const result = await manager.get('non-existent', { context: mockContext });
+    it('returns undefined for non-existent ID', () => {
+      const result = manager.get('non-existent');
 
       expect(result).toBeUndefined();
     });
@@ -570,41 +570,75 @@ describe('AttachmentStateManager', () => {
     });
   });
 
-  describe('resolveAttachment()', () => {
-    it('caches first resolve without bumping version and increments on diff', async () => {
-      const attachment = await manager.add({
-        id: 'by-ref-1',
-        type: 'by_ref',
-        data: { ref: 'a' },
-      });
+  describe('add() with origin', () => {
+    it('resolves content from origin at add time and stores origin', async () => {
+      const attachment = await manager.add(
+        {
+          id: 'by-ref-1',
+          type: 'by_ref',
+          origin: { ref: 'a' },
+        },
+        undefined,
+        mockContext
+      );
 
-      const firstRead = await manager.get(attachment.id, {
-        version: 1,
-        context: mockContext,
-      });
+      // Content should be the resolved payload
+      expect(attachment.versions[0].data).toEqual({ value: 'resolved-1' });
+      // Origin should be stored on the attachment
+      expect(attachment.origin).toEqual({ ref: 'a' });
+      expect(attachment.current_version).toBe(1);
+    });
 
-      expect(firstRead?.data.data).toEqual({ value: 'resolved-1' });
-      expect((firstRead?.data as { raw_data?: unknown }).raw_data).toEqual({ ref: 'a' });
+    it('reads resolved content directly without re-resolve', async () => {
+      const attachment = await manager.add(
+        {
+          id: 'by-ref-2',
+          type: 'by_ref',
+          origin: { ref: 'a' },
+        },
+        undefined,
+        mockContext
+      );
 
-      const afterFirst = manager.getAttachmentRecord(attachment.id);
-      expect(afterFirst?.current_version).toBe(1);
-
+      // Change the resolve payload — should NOT affect future reads
       resolvedByRefPayload = { value: 'resolved-2' };
 
-      const secondRead = await manager.get(attachment.id, {
-        version: 1,
-        context: mockContext,
+      const retrieved = manager.get(attachment.id);
+      // Should still be the original resolved content
+      expect(retrieved?.data.data).toEqual({ value: 'resolved-1' });
+      // Version should not have changed
+      expect(manager.getAttachmentRecord(attachment.id)?.current_version).toBe(1);
+    });
+
+    it('throws when origin is provided without resolve context', async () => {
+      await expect(
+        manager.add({
+          id: 'by-ref-3',
+          type: 'by_ref',
+          origin: { ref: 'a' },
+        })
+      ).rejects.toThrow('Resolve context is required');
+    });
+
+    it('throws when neither data nor origin is provided', async () => {
+      await expect(
+        manager.add({
+          id: 'by-ref-4',
+          type: 'text',
+        } as any)
+      ).rejects.toThrow('Either data or origin must be provided');
+    });
+
+    it('stores both data and origin when both are provided', async () => {
+      const attachment = await manager.add({
+        id: 'both-1',
+        type: 'by_ref',
+        data: { ref: 'custom-data' },
+        origin: { ref: 'original-source' },
       });
 
-      expect(secondRead?.data.data).toEqual({ value: 'resolved-2' });
-      expect((secondRead?.data as { raw_data?: unknown }).raw_data).toEqual({ ref: 'a' });
-
-      const afterSecond = manager.getAttachmentRecord(attachment.id);
-      expect(afterSecond?.current_version).toBe(2);
-      expect(getLatestVersion(afterSecond!)?.data).toEqual({ value: 'resolved-2' });
-      expect((getLatestVersion(afterSecond!) as { raw_data?: unknown }).raw_data).toEqual({
-        ref: 'a',
-      });
+      expect(attachment.versions[0].data).toEqual({ ref: 'custom-data' });
+      expect(attachment.origin).toEqual({ ref: 'original-source' });
     });
   });
 
@@ -713,17 +747,17 @@ describe('AttachmentStateManager', () => {
       ]);
     });
 
-    it('records read via get()', async () => {
+    it('records read via get() with actor', async () => {
       await manager.add({ id: 'att-1', type: 'text', data: { content: 'v1' } });
       manager.clearAccessTracking();
 
-      const latest = await manager.get('att-1', { context: mockContext });
-      const v1 = await manager.get('att-1', { context: mockContext, version: 1 });
+      const latest = manager.get('att-1', { actor: ATTACHMENT_REF_ACTOR.agent });
+      const v1 = manager.get('att-1', { version: 1, actor: ATTACHMENT_REF_ACTOR.agent });
 
       expect(latest?.version).toBe(1);
       expect(v1?.version).toBe(1);
-      // After get() calls, read tracking should be recorded
-      expect(manager.getAccessedRefs().length).toBeGreaterThanOrEqual(0);
+      // After get() calls with actor, read tracking should be recorded
+      expect(manager.getAccessedRefs().length).toBeGreaterThanOrEqual(1);
     });
 
     it('clears access tracking', async () => {
