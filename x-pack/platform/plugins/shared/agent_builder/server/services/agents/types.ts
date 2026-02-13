@@ -6,7 +6,6 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { RunAgentFn } from '@kbn/agent-builder-server';
 import type { BuiltInAgentDefinition } from '@kbn/agent-builder-server/agents';
 import type { AgentRegistry } from './agent_registry';
 
@@ -15,6 +14,5 @@ export interface AgentsServiceSetup {
 }
 
 export interface AgentsServiceStart {
-  execute: RunAgentFn;
   getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
 }
