@@ -8,7 +8,7 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFieldSearch, EuiHighlight, EuiSelectable, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiHighlight, EuiSelectable, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { getUserDisplayName, UserAvatar } from '@kbn/user-profile-components';
@@ -110,20 +110,19 @@ export const UsersSuggestions = memo(() => {
 
   return (
     <>
-      <EuiFieldSearch
-        compressed
-        fullWidth
-        value={searchString}
-        onChange={(event) => componentApi.setSearchString(event.target.value)}
-        data-test-subj="optionsList-assignee-search-input"
-        placeholder={OptionsListStrings.popover.getSearchPlaceholder('exact')}
-        aria-label={OptionsListStrings.popover.getSearchAriaLabel(fieldName)}
-      />
-      <EuiSpacer size="s" />
       <div data-test-subj="optionsList--scrollListener">
         <EuiSelectable
           options={selectableOptions}
           renderOption={(option) => renderOption(option, searchString)}
+          searchable
+          isPreFiltered
+          searchProps={{
+            value: searchString,
+            onChange: (value: string) => componentApi.setSearchString(value),
+            'data-test-subj': 'optionsList-control-search-input',
+            placeholder: OptionsListStrings.popover.getSearchPlaceholder('exact'),
+            'aria-label': OptionsListStrings.popover.getSearchAriaLabel(fieldName),
+          }}
           listProps={{ onFocusBadge: false, rowHeight: 48 }}
           aria-label={OptionsListStrings.popover.getSuggestionsAriaLabel(
             fieldName,
@@ -134,7 +133,13 @@ export const UsersSuggestions = memo(() => {
             componentApi.makeSelection(changedOption.key, false);
           }}
         >
-          {(list) => list}
+          {(list, search) => (
+            <>
+              {search}
+              <EuiSpacer size="s" />
+              {list}
+            </>
+          )}
         </EuiSelectable>
       </div>
     </>

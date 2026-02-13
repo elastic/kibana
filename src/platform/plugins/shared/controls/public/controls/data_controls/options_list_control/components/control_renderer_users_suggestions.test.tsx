@@ -125,4 +125,82 @@ describe('UsersSuggestions', () => {
       expect(rendered.getAllByText('dupe@example.com')).toHaveLength(1);
     });
   });
+
+  it('supports keyboard filtering and keyboard selection', async () => {
+    mockHttpFetch.mockResolvedValueOnce([
+      {
+        uid: 'uid-1',
+        enabled: true,
+        user: { username: 'user1', full_name: 'User One', email: 'user1@example.com' },
+        data: { avatar: {} },
+      },
+      {
+        uid: 'uid-2',
+        enabled: true,
+        user: { username: 'user2', full_name: 'User Two', email: 'user2@example.com' },
+        data: { avatar: {} },
+      },
+    ]);
+    mockHttpFetch.mockResolvedValueOnce([
+      {
+        uid: 'uid-2',
+        enabled: true,
+        user: { username: 'user2', full_name: 'User Two', email: 'user2@example.com' },
+        data: { avatar: {} },
+      },
+    ]);
+
+    const { rendered, contextMock } = mountComponent();
+
+    await waitFor(() => {
+      expect(rendered.getByText('User One')).toBeInTheDocument();
+      expect(rendered.getByText('User Two')).toBeInTheDocument();
+    });
+
+    const input = rendered.getByTestId('optionsList-control-search-input');
+    fireEvent.change(input, { target: { value: 'Two' } });
+
+    await waitFor(() => {
+      expect(rendered.queryByRole('option', { name: /User One/i })).not.toBeInTheDocument();
+      expect(rendered.getByRole('option', { name: /User Two/i })).toBeInTheDocument();
+    });
+
+    fireEvent.keyDown(input, { key: 'ArrowDown', code: 'ArrowDown' });
+    fireEvent.keyDown(input, { key: 'ArrowDown', code: 'ArrowDown' });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+    await waitFor(() => {
+      expect(contextMock.componentApi.makeSelection).toHaveBeenCalledWith('uid-2', false);
+    });
+  });
+
+  it('keeps server-filtered email-domain matches visible and selectable', async () => {
+    mockHttpFetch.mockResolvedValueOnce([]);
+    mockHttpFetch.mockResolvedValueOnce([
+      {
+        uid: 'uid-3',
+        enabled: true,
+        user: { username: 'joe', full_name: 'Joe', email: 'joe@elastic.co' },
+        data: { avatar: {} },
+      },
+    ]);
+
+    const { rendered, contextMock } = mountComponent();
+
+    const input = rendered.getByTestId('optionsList-control-search-input');
+    fireEvent.change(input, { target: { value: 'elastic' } });
+
+    await waitFor(() => {
+      expect(rendered.getByRole('option', { name: /Joe/i })).toBeInTheDocument();
+      expect(rendered.getByRole('img', { name: 'Joe (joe@elastic.co)' })).toBeInTheDocument();
+    });
+
+    fireEvent.keyDown(input, { key: 'ArrowDown', code: 'ArrowDown' });
+    fireEvent.keyDown(input, { key: 'ArrowDown', code: 'ArrowDown' });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+
+    await waitFor(() => {
+      expect(contextMock.componentApi.makeSelection).toHaveBeenCalledWith('uid-3', false);
+    });
+  });
 });
