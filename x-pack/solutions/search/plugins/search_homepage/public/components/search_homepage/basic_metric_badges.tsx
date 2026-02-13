@@ -76,10 +76,12 @@ const BasicMetricPanel = ({
 };
 
 export const BasicMetricBadges = () => {
-  const { services: { uiSettings } } = useKibana();
-  
+  const {
+    services: { uiSettings },
+  } = useKibana();
+
   const isDataSourcesEnabled = uiSettings.get<boolean>(DATA_SOURCES_ENABLED_SETTING_ID, false);
-  
+
   const {
     data: storageStats,
     isLoading: isLoadingStorageStats,
