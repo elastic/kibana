@@ -816,42 +816,42 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         it('fails to create a wired stream with uppercase characters in the name', async () => {
           const response = await putStream(apiClient, 'logs.UpperCase', validStreamBody, 400);
-          expect((response as { message: string }).message).to.contain(
+          expect((response as unknown as { message: string }).message).to.contain(
             'Stream name cannot contain uppercase characters.'
           );
         });
 
         it('fails to create a wired stream with spaces in the name', async () => {
           const response = await putStream(apiClient, 'logs.with space', validStreamBody, 400);
-          expect((response as { message: string }).message).to.contain(
+          expect((response as unknown as { message: string }).message).to.contain(
             'Stream name cannot contain spaces.'
           );
         });
 
         it('fails to create a wired stream with asterisk in the name', async () => {
           const response = await putStream(apiClient, 'logs.with*asterisk', validStreamBody, 400);
-          expect((response as { message: string }).message).to.contain(
+          expect((response as unknown as { message: string }).message).to.contain(
             'Stream name cannot contain "*".'
           );
         });
 
         it('fails to create a wired stream with angle brackets in the name', async () => {
           const response = await putStream(apiClient, 'logs.with<brackets>', validStreamBody, 400);
-          expect((response as { message: string }).message).to.contain(
+          expect((response as unknown as { message: string }).message).to.contain(
             'Stream name cannot contain "<".'
           );
         });
 
         it('fails to create a wired stream with question mark in the name', async () => {
           const response = await putStream(apiClient, 'logs.with?question', validStreamBody, 400);
-          expect((response as { message: string }).message).to.contain(
+          expect((response as unknown as { message: string }).message).to.contain(
             'Stream name cannot contain "?".'
           );
         });
 
         it('fails to create a wired stream with pipe in the name', async () => {
           const response = await putStream(apiClient, 'logs.with|pipe', validStreamBody, 400);
-          expect((response as { message: string }).message).to.contain(
+          expect((response as unknown as { message: string }).message).to.contain(
             'Stream name cannot contain "|".'
           );
         });
@@ -868,7 +868,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             status,
           };
           const response = await forkStream(apiClient, 'logs', body, 400);
-          expect((response as { message: string }).message).to.contain(
+          expect((response as unknown as { message: string }).message).to.contain(
             'Stream name cannot contain "*".'
           );
         });
