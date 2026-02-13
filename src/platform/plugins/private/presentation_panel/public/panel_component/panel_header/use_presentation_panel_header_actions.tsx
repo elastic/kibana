@@ -114,25 +114,25 @@ export const usePresentationPanelHeaderActions = <
   const badgeElements = useMemo(() => {
     if (!showBadges) return [];
     const tooltipText = i18n.translate(
-      'inputControl.deprecationBadgeAction.deprecationWarningDescription',
+      'presentationPanel.legacyInputControl.deprecationWarningDescription',
       {
         defaultMessage:
           'Input controls are deprecated and will be removed in a future release. Use the new Controls to filter and interact with your dashboard data.',
       }
     );
-    return (
+    return [
       <EuiToolTip content={tooltipText}>
         <EuiBadge
           iconType="warning"
           data-test-subj="embeddablePanelBadge-deprecated"
           aria-label={tooltipText}
         >
-          {i18n.translate('inputControl.deprecationBadgeAction.deprecationBadgeLabel', {
+          {i18n.translate('presentationPanel.legacyInputControl.deprecationBadgeLabel', {
             defaultMessage: 'Deprecated',
           })}
         </EuiBadge>
-      </EuiToolTip>
-    );
+      </EuiToolTip>,
+    ];
   }, [showBadges]);
 
   const notificationElements = useMemo(() => {
