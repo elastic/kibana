@@ -23,18 +23,13 @@ import {
   getSourceCommandContextFromQuery,
   getRangeFromOffsets,
 } from './utils';
-import { IndicesBrowserOpenMode } from './open_mode';
+import { IndicesBrowserOpenMode, BrowserPopoverPosition } from './types';
 import { BROWSER_POPOVER_VERTICAL_OFFSET } from './constants';
 
 interface UseDataSourceBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   esqlCallbacks: ESQLCallbacks;
-}
-
-interface BrowserPopoverPosition {
-  top?: number;
-  left?: number;
 }
 
 const normalizeTimeseriesIndices = (result: IndicesAutocompleteResult): ESQLSourceResult[] => {

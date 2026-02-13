@@ -20,7 +20,7 @@ import {
 import type { CoreStart } from '@kbn/core/public';
 import type { ESQLEditorDeps } from './types';
 import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
-import { IndicesBrowserOpenMode } from './resource_browser/open_mode';
+import { IndicesBrowserOpenMode } from './resource_browser/types';
 
 export interface MonacoCommandDependencies {
   application?: CoreStart['application'];
@@ -141,11 +141,7 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
           try {
             const parsed = JSON.parse(payload.fields) as unknown;
             if (Array.isArray(parsed) && parsed.length > 0) {
-              // Support typed fields [{ name, type }, ...] or legacy string[] for backward compat
-              preloadedFields =
-                typeof parsed[0] === 'string'
-                  ? (parsed as string[]).map((name) => ({ name }))
-                  : (parsed as Array<{ name: string; type?: string }>);
+              preloadedFields = parsed as Array<{ name: string; type?: string }>;
             }
           } catch {
             preloadedFields = undefined;

@@ -13,7 +13,7 @@ import { monaco } from '@kbn/monaco';
 import { useCallback, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import { getSupportedCommand } from './utils';
-import { IndicesBrowserOpenMode } from './open_mode';
+import { IndicesBrowserOpenMode } from './types';
 import { SUPPORTED_COMMANDS } from './constants';
 
 interface UseSourcesBadgeParams {

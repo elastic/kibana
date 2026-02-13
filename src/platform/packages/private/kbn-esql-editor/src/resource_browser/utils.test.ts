@@ -16,7 +16,7 @@ import {
   getQueryWithoutLastPipe,
   getSourceCommandContextFromQuery,
 } from './utils';
-import { IndicesBrowserOpenMode } from './open_mode';
+import { IndicesBrowserOpenMode } from './types';
 
 describe('findPrevNonWhitespaceChar / findNextNonWhitespaceChar', () => {
   const text = 'a  ,  b';

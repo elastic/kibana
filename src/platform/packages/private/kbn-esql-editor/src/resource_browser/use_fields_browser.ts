@@ -22,6 +22,7 @@ import {
   getRangeFromOffsets,
 } from './utils';
 import { BROWSER_POPOVER_VERTICAL_OFFSET, DEFAULT_FIELDS_BROWSER_INDEX } from './constants';
+import { BrowserPopoverPosition } from './types';
 
 interface UseFieldsBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -31,11 +32,6 @@ interface UseFieldsBrowserParams {
   getTimeRange: () => TimeRange;
   signal?: AbortSignal;
   activeSolutionId?: SolutionId;
-}
-
-interface BrowserPopoverPosition {
-  top?: number;
-  left?: number;
 }
 
 export function useFieldsBrowser({

@@ -9,14 +9,8 @@
 
 import { Parser, isSource } from '@kbn/esql-language';
 import type { monaco } from '@kbn/monaco';
-import { IndicesBrowserOpenMode } from './open_mode';
+import { IndicesBrowserOpenMode, CommandRange, SourceCommandContext, LocatedSourceItem } from './types';
 import { SUPPORTED_COMMANDS } from './constants';
-
-export interface CommandRange {
-  lineNumber: number; // 1-based, assumes the command is on a single line
-  startColumn: number; // 1-based
-  endColumn: number; // 1-based, inclusive
-}
 
 export const getRangeFromOffsets = (
   model: monaco.editor.ITextModel,
@@ -67,32 +61,6 @@ export const getSupportedCommand = (
     return undefined;
   }
 };
-
-export interface LocatedSourceItem {
-  min: number;
-  max: number;
-  type?: string;
-  name?: string;
-}
-
-export interface SourceCommandContext {
-  /** The main source command in the query, if present. */
-  command?: 'from' | 'ts';
-  /**
-   * `[start, end)` offsets of the *existing* source arguments for the main `FROM`/`TS` command.
-   * When there are no existing sources (e.g. `FROM |`), these are `undefined`.
-   */
-  sourcesStartOffset?: number;
-  sourcesEndOffset?: number;
-  /**
-   * Where a newly selected source should be inserted, as a 0-based offset into the query string.
-   *
-   * - If opened from the badge and there are existing sources, we insert at the beginning of the
-   *   sources list.
-   * - Otherwise, we insert at the cursor (when available).
-   */
-  insertionOffset?: number;
-}
 
 /**
  * Computes the source-command context for opening the indices browser.

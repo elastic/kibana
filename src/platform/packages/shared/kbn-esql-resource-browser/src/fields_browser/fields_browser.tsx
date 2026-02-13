@@ -276,6 +276,7 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
       isLoading={isLoading}
       searchValue={searchValue}
       setSearchValue={setSearchValue}
+      isMultiSelect={false}
     />
   );
 };

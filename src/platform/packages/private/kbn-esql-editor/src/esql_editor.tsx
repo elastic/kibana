@@ -100,8 +100,8 @@ import {
 import { useEsqlCallbacks } from './use_esql_callbacks';
 import { useDataSourceBrowser } from './resource_browser/use_data_source_browser';
 import { useSourcesBadge } from './resource_browser/use_resource_browser_badge';
+import type { EsqlLanguageDeps } from './types';
 
-type EsqlLanguageDeps = ESQLCallbacks & Partial<{ telemetry: ESQLTelemetryCallbacks }>;
 const esqlDepsByModelUri = new Map<string, EsqlLanguageDeps>();
 
 // Single shared provider per language; resolves callbacks per Monaco model.
