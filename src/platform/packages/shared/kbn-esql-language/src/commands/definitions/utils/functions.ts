@@ -17,6 +17,7 @@ import {
   type FunctionParameterType,
   FunctionDefinitionTypes,
   type SupportedDataType,
+  type InlineCastingType,
 } from '../types';
 import { operatorsDefinitions } from '../all_operators';
 import { aggFunctionDefinitions } from '../generated/aggregation_functions';
@@ -28,12 +29,12 @@ import type { ESQLColumnData, ISuggestionItem } from '../../registry/types';
 import { withAutoSuggest } from './autocomplete/helpers';
 import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
-import type { ESQLAstItem, ESQLFunction, InlineCastingType } from '../../../types';
+import type { ESQLAstItem, ESQLFunction } from '../../../types';
 import { removeFinalUnknownIdentiferArg, techPreviewLabel } from './shared';
 import { getTestFunctions } from './test_functions';
 import { getMatchingSignatures } from './expressions';
 import { isLiteral } from '../../../ast/is';
-import { SuggestionCategory } from '../../../shared/sorting/types';
+import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
 

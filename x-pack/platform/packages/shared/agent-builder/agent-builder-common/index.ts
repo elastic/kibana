@@ -76,8 +76,12 @@ export {
   type AgentBuilderBadRequestError,
   type AgentBuilderRequestAbortedError,
   type AgentBuilderAgentExecutionError,
+  type AgentBuilderHooksExecutionError,
   type SerializedAgentBuilderError,
+  isHooksExecutionError,
+  createHooksExecutionError,
 } from './base/errors';
+export { HookLifecycle, HookExecutionMode } from './hooks/lifecycle';
 export { type UserIdAndName } from './base/users';
 export { EsResourceType } from './base/resources';
 export {
@@ -146,6 +150,7 @@ export {
   isToolCallEvent,
   isBrowserToolCallEvent,
   isToolResultEvent,
+  isToolUiEvent,
   isReasoningEvent,
   isMessageChunkEvent,
   isMessageCompleteEvent,
@@ -168,4 +173,4 @@ export {
   skillIdRegexp,
 } from './skills';
 export * from './telemetry';
-export type { VersionedAttachment } from './attachments';
+export { getLatestVersion, type VersionedAttachment } from './attachments';
