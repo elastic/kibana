@@ -6,7 +6,8 @@
  */
 
 import { createActor, fromEventObservable, fromObservable } from 'xstate5';
-import { EMPTY, Observable, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { EMPTY, of } from 'rxjs';
 import { ALWAYS_CONDITION } from '@kbn/streamlang';
 import { isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
 import type { SampleDocument, Streams } from '@kbn/streams-schema';
@@ -25,7 +26,9 @@ const stubRoutingSamplesMachine = routingSamplesMachine.provide({
       number | null | undefined,
       Pick<RoutingSamplesInput, 'condition' | 'definition' | 'documentMatchFilter'>
     >(() => of(undefined)),
-    subscribeTimeUpdates: fromEventObservable(() => EMPTY as unknown as Observable<{ type: string }>),
+    subscribeTimeUpdates: fromEventObservable(
+      () => EMPTY as unknown as Observable<{ type: string }>
+    ),
   },
 });
 
