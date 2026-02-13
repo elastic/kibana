@@ -40,6 +40,11 @@ export interface ContextManagerInit {
   dependencies: ContextDependencies;
 }
 
+interface ScopeEntry {
+  topFrame: NonNullable<ReturnType<WorkflowScopeStack['getCurrentScope']>>;
+  stepExecution: EsWorkflowStepExecution | undefined;
+}
+
 export class WorkflowContextManager {
   private workflowExecutionGraph: WorkflowGraph;
   private workflowExecutionState: WorkflowExecutionState;
@@ -308,38 +313,43 @@ export class WorkflowContextManager {
       this.workflowExecutionState.getWorkflowExecution().scopeStack
     );
 
+    const executionId = this.workflowExecutionState.getWorkflowExecution().id;
+    const scopeEntries: Array<ScopeEntry> = [];
+    const foreachEntries: Array<ScopeEntry> = [];
+
     while (!scopeStack.isEmpty()) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const topFrame = scopeStack.getCurrentScope()!;
       scopeStack = scopeStack.exitScope();
       const stepExecution = this.workflowExecutionState.getStepExecution(
-        buildStepExecutionId(
-          this.workflowExecutionState.getWorkflowExecution().id,
-          topFrame.stepId,
-          scopeStack.stackFrames
-        )
+        buildStepExecutionId(executionId, topFrame.stepId, scopeStack.stackFrames)
       );
+      scopeEntries.push({ topFrame, stepExecution });
+      if (stepExecution?.stepType === 'foreach') {
+        foreachEntries.push({ topFrame, stepExecution });
+      }
+    }
 
+    // Build foreach context in outer-to-inner order so inner expressions like
+    // {{foreach.item}} resolve against the outer foreach context.
+    for (const { stepExecution } of foreachEntries.reverse()) {
       if (stepExecution) {
-        switch (stepExecution.stepType) {
-          case 'foreach':
-            if (!stepContext.foreach) {
-              stepContext.foreach = this.buildForeachContext(stepExecution, stepContext);
-            }
-            break;
-        }
+        stepContext.foreach = this.buildForeachContext(stepExecution, stepContext);
+      }
+    }
 
-        if (topFrame.scopeId === 'fallback') {
-          // This is not good approach, but we can't do it better right now.
-          // The problem is that Context is dynamic depending on the step scopes (like whether the current step is inside foreach, fallback path, etc)
-          // but here we are trying to mutate the static StepContext object.
-          // Proper solution would be to have dynamic context object that would resolve properties on demand,
-          // but it requires significant changes in the codebase.
-          // So for now, we just set the error on the context when we are in fallback scope.
-          const stepContextGeneric = stepContext as Record<string, unknown>;
-          if (!stepContextGeneric.error) {
-            stepContextGeneric.error = stepExecution.state?.error;
-          }
+    // Apply fallback scope error in original (innermost-first) order.
+    for (const { topFrame, stepExecution } of scopeEntries) {
+      if (topFrame.scopeId === 'fallback' && stepExecution) {
+        // This is not good approach, but we can't do it better right now.
+        // The problem is that Context is dynamic depending on the step scopes (like whether the current step is inside foreach, fallback path, etc)
+        // but here we are trying to mutate the static StepContext object.
+        // Proper solution would be to have dynamic context object that would resolve properties on demand,
+        // but it requires significant changes in the codebase.
+        // So for now, we just set the error on the context when we are in fallback scope.
+        const stepContextGeneric = stepContext as Record<string, unknown>;
+        if (!stepContextGeneric.error) {
+          stepContextGeneric.error = stepExecution.state?.error;
         }
       }
     }
