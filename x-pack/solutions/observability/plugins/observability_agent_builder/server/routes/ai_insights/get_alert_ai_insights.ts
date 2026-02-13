@@ -21,6 +21,7 @@ import type {
 import { getToolHandler as getLogGroups } from '../../tools/get_log_groups/handler';
 import { getToolHandler as getRuntimeMetrics } from '../../tools/get_runtime_metrics/handler';
 import { getToolHandler as getHosts } from '../../tools/get_hosts/handler';
+import { getToolHandler as getServices } from '../../tools/get_services/handler';
 import { getEntityLinkingInstructions } from '../../agent/register_observability_agent';
 
 /**
@@ -94,6 +95,7 @@ const START_TIME_OFFSETS = {
   changePoints: 6 * 60, // 6 hours
   runtimeMetrics: 15,
   infraHosts: 15,
+  servicesOnHost: 15,
 } as const;
 
 async function fetchAlertContext({
@@ -243,6 +245,36 @@ async function fetchAlertContext({
     }
   }
 
+  // Reverse correlation: find services running on a host (for infra alerts)
+  async function fetchServicesOnHost() {
+    // Only fetch if we have a host name but no service name
+    // (for infra alerts that need to discover which services are affected)
+    if (!hostName || serviceName) return null;
+
+    try {
+      const start = getStart(START_TIME_OFFSETS.servicesOnHost);
+      const end = alertStart;
+      const result = await getServices({
+        core,
+        plugins,
+        request,
+        esClient,
+        dataRegistry,
+        logger,
+        start,
+        end,
+        kqlFilter: `host.name: "${hostName}"`,
+      });
+
+      return result.services.length > 0
+        ? { key: 'servicesOnHost' as const, start, end, data: result.services }
+        : null;
+    } catch (err) {
+      logger.debug(`AI insight: servicesOnHost failed: ${err}`);
+      return null;
+    }
+  }
+
   // APM-specific fetchers only run when we have a service name
   const apmFetchers = serviceName
     ? [
@@ -267,7 +299,7 @@ async function fetchAlertContext({
     : [];
 
   // These fetchers work with either service.name or host.name
-  const allFetchers = [...apmFetchers, fetchLogGroups(), fetchInfraHosts()];
+  const allFetchers = [...apmFetchers, fetchLogGroups(), fetchInfraHosts(), fetchServicesOnHost()];
 
   const results = await Promise.all(allFetchers);
   const contextParts = compact(results).map(
@@ -321,6 +353,7 @@ function generateAlertSummary({
     - Log categories: error messages and exception patterns
     - Service summary: instance counts, versions, anomalies, and metadata
     - Host infrastructure: CPU, memory, disk, network usage — indicates host-level resource pressure
+    - Services on host: for infrastructure alerts, shows services running on the affected host — helps identify which service may be causing resource pressure
 
     Note: Numeric values on a 0-1 scale represent percentages (e.g., 0.95 = 95%, 0.3 = 30%).
 

@@ -98,9 +98,12 @@ const scenario: Scenario<any> = async ({ logger }) => {
             };
 
             // CPU metrics with state dimension (OTel hostmetricsreceiver format)
+            // cpuV2 aggregation calculates: 1 - sum(idle + wait)
             const cpuIdleUtilization = 1 - host.cpuUsage;
+            const cpuWaitUtilization = 0;
             const cpuDocs = [
               { state: 'idle', 'system.cpu.utilization': cpuIdleUtilization },
+              { state: 'wait', 'system.cpu.utilization': cpuWaitUtilization },
               { state: 'user', 'system.cpu.utilization': host.cpuUsage * 0.7 },
               { state: 'system', 'system.cpu.utilization': host.cpuUsage * 0.3 },
             ].map((cpu) => ({
