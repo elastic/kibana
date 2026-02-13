@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+// import { EuiHorizontalRule } from '@elastic/eui'; // used by page header
 import styled from '@emotion/styled';
 import { noop } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -16,12 +17,12 @@ import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { PAGE_TITLE } from '../../pages/alerts/translations';
+// import { PAGE_TITLE } from '../../pages/alerts/translations'; // used by page header
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { HeaderPage } from '../../../common/components/header_page';
+// import { HeaderPage } from '../../../common/components/header_page'; // page header commented out
 import { KPIsSection } from './kpis/kpis_section';
 import { FiltersSection } from './filters/filters_section';
-import { HeaderSection } from './header/header_section';
+// import { HeaderSection } from './header/header_section'; // page header commented out
 import { SearchBarSection } from './search_bar/search_bar_section';
 import { TableSection } from './table/table_section';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
@@ -127,11 +128,13 @@ export const AlertsPageContent = memo(
           data-test-subj={SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID}
         >
           <Display show={!globalFullScreen}>
+            {/* Page header commented out
             <HeaderPage title={PAGE_TITLE}>
               <HeaderSection />
             </HeaderPage>
             <EuiHorizontalRule margin="none" />
-            <EuiSpacer size="l" />
+            <EuiSpacer />
+            */}
             <FiltersSection
               assignees={assignees}
               dataView={newDataViewPickerEnabled ? dataView : oldSourcererDataViewSpec}
@@ -146,13 +149,13 @@ export const AlertsPageContent = memo(
                 />
               }
             />
-            <EuiSpacer size="l" />
+            <EuiSpacer />
             <KPIsSection
               assignees={assignees}
               pageFilters={pageFilters}
               runtimeMappings={runtimeMappings}
             />
-            <EuiSpacer size="l" />
+            <EuiSpacer />
           </Display>
           <TableSection
             assignees={assignees}

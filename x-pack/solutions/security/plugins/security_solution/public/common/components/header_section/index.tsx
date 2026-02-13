@@ -34,7 +34,7 @@ const useStyles = (border?: boolean, height?: number) => {
       ${border ? `border-bottom: ${euiTheme.border.thin}; padding-bottom: ${euiTheme.size.l};` : ''}
 
       &.toggle-expand {
-        margin-bottom: ${euiTheme.size.l};
+        margin-bottom: ${euiTheme.size.s};
       }
 
       .no-margin {

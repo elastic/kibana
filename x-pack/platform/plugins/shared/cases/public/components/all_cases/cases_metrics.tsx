@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiStat,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import prettyMilliseconds from 'pretty-ms';
 import { CaseStatuses } from '../../../common/types/domain';
 import { StatusStats } from '../status/status_stats';
@@ -32,7 +33,7 @@ export const CasesMetrics: React.FC = () => {
 
   return (
     <>
-      <EuiPanel hasBorder paddingSize="m" grow={false}>
+      <EuiPanel hasBorder paddingSize="m" css={css`max-width: 800px;`} grow={false}>
         <EuiFlexGroup responsive={true} data-test-subj="cases-metrics-stats">
           <EuiFlexItem grow={true}>
             <StatusStats

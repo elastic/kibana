@@ -94,7 +94,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
             <KibanaPageTemplate.Section
               className="securityPageWrapper"
               data-test-subj="pageContainer"
-              paddingSize={rest.paddingSize ?? 'l'}
+              paddingSize={rest.paddingSize ?? 'm'}
               alignment="top"
               component="div"
               grow={true}
@@ -107,7 +107,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
               </AlertsContextProvider>
             </KibanaPageTemplate.Section>
             {isTimelineBottomBarVisible && (
-              <KibanaPageTemplate.BottomBar data-test-subj="timeline-bottom-bar-container">
+              <KibanaPageTemplate.BottomBar paddingSize="none" data-test-subj="timeline-bottom-bar-container">
                 <EuiThemeProvider colorMode={globalColorMode}>
                   <ExpandableFlyoutProvider urlKey={URL_PARAM_KEY.timelineFlyout}>
                     <Timeline />
