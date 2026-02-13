@@ -73,7 +73,6 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
   describe('alerts as data', function () {
     this.tags('skipFIPS');
     before(async () => {
-      await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
       await es.deleteByQuery({
         index: [alertsAsDataIndex, alwaysFiringAlertsAsDataIndex],
