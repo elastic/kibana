@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { parse } from '@kbn/datemath';
 import { EuiLink } from '@elastic/eui';
-import { type ComposerQuery, esql } from '@kbn/esql-language';
+import { esql } from '@kbn/esql-language';
 import type {
   DataSchemaFormat,
   InventoryItemType,

@@ -131,9 +131,15 @@ export const ContainerMetricsTable = (props: ContainerMetricsTableProps) => {
   }
 };
 
-function containerNodeColumns(
-  { timerange, schema, metricsIndices, semconvRuntime} : Pick<ContainerMetricsTableProps, 'timerange' | 'schema' | 'metricsIndices' | 'semconvRuntime'>
-): Array<EuiBasicTableColumn<ContainerNodeMetricsRow>> {
+function containerNodeColumns({
+  timerange,
+  schema,
+  metricsIndices,
+  semconvRuntime,
+}: Pick<
+  ContainerMetricsTableProps,
+  'timerange' | 'schema' | 'metricsIndices' | 'semconvRuntime'
+>): Array<EuiBasicTableColumn<ContainerNodeMetricsRow>> {
   const memoryUnit = schema === 'semconv' && semconvRuntime === 'k8s' ? '%' : ' MB';
   return [
     {
