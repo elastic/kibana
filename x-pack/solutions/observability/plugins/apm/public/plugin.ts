@@ -48,7 +48,6 @@ import type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
-import { ObservabilityTriggerId } from '@kbn/observability-shared-plugin/common';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
@@ -347,14 +346,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     pluginSetupDeps.home?.tutorials.registerCustomComponent('TutorialConfigAgentRumScript', () =>
       import('./tutorial/config_agent/rum_script').then((mod) => mod.TutorialConfigAgentRumScript)
     );
-
-    pluginSetupDeps.uiActions.registerTrigger({
-      id: ObservabilityTriggerId.ApmTransactionContextMenu,
-    });
-
-    pluginSetupDeps.uiActions.registerTrigger({
-      id: ObservabilityTriggerId.ApmErrorContextMenu,
-    });
 
     plugins.observability.dashboard.register({
       appName: 'apm',

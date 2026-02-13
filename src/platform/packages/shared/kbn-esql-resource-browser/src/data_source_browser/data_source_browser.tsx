@@ -25,6 +25,7 @@ import type { ESQLSourceResult } from '@kbn/esql-types';
 import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
 import { getSourceTypeKey, getSourceTypeLabel } from './utils';
 import { DATA_SOURCE_BROWSER_I18N_KEYS } from './i18n';
+import { DataSourceSelectionChange } from '../types';
 
 // Filter panel size constants
 const FILTER_PANEL_WIDTH = 250; // Width in pixels for the filter panel lists
@@ -36,7 +37,7 @@ interface DataSourceBrowserProps {
   allSources: ESQLSourceResult[];
   selectedSources?: string[];
   onClose: () => void;
-  onSelect: (selectedSources: string[]) => void;
+  onSelect: (sourceName: string, change: DataSourceSelectionChange) => void;
   position?: { top?: number; left?: number };
 }
 
@@ -187,16 +188,18 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
 
   const handleSelectionChange = useCallback(
     (changedOption: EuiSelectableOption | undefined) => {
-      let newSelected;
+      if (!changedOption?.key) return;
 
-      if (changedOption?.checked === 'on') {
-        newSelected = [...selectedItems, changedOption.key as string];
-      } else {
-        newSelected = selectedItems.filter((o) => o !== (changedOption?.key as string));
-      }
+      const key = changedOption.key as string;
+      const isAdding = changedOption.checked === 'on';
+      const newSelected = isAdding
+        ? selectedItems.includes(key)
+          ? selectedItems
+          : [...selectedItems, key]
+        : selectedItems.filter((o) => o !== key);
 
       setSelectedItems(newSelected);
-      onSelect(newSelected);
+      onSelect(key, isAdding ? DataSourceSelectionChange.Add : DataSourceSelectionChange.Remove);
     },
     [onSelect, selectedItems]
   );

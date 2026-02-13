@@ -7,6 +7,9 @@
 
 import type { StreamQuery } from '@kbn/streams-schema';
 
+// Legacy stored query links may not include rule_backed and should be treated as already backed.
+export const LEGACY_RULE_BACKED_FALLBACK = true;
+
 export interface QueryLink {
   'asset.uuid': string;
   'asset.type': 'query';

@@ -19,8 +19,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
   const supertest = getService('supertest');
   const utils = EntityStoreUtils(getService, namespace);
 
-  // Failing: See https://github.com/elastic/kibana/issues/246999
-  describe.skip('@ess Entity Store Engine APIs in non-default space', () => {
+  describe('@ess Entity Store Engine APIs in non-default space', () => {
     const dataView = dataViewRouteHelpersFactory(supertest, namespace);
 
     before(async () => {

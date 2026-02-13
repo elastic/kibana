@@ -127,3 +127,29 @@ export const deleteDataStream = async ({
       version: '1',
     }
   );
+
+export interface GetDataStreamResultsRequest {
+  integrationId: string;
+  dataStreamId: string;
+}
+
+export interface GetDataStreamResultsResponse {
+  ingest_pipeline: Record<string, unknown>;
+  results: Array<Record<string, unknown>>;
+}
+
+export const getDataStreamResults = async ({
+  http,
+  abortSignal,
+  integrationId,
+  dataStreamId,
+}: RequestDeps & GetDataStreamResultsRequest): Promise<GetDataStreamResultsResponse> =>
+  http.get<GetDataStreamResultsResponse>(
+    `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
+      integrationId
+    )}/data_streams/${encodeURIComponent(dataStreamId)}/results`,
+    {
+      version: '1',
+      signal: abortSignal,
+    }
+  );

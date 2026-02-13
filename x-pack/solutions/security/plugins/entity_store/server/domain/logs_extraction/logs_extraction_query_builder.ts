@@ -166,11 +166,13 @@ function castSrcType(field: EntityField) {
     case 'date':
       return `TO_STRING(${field.source})`;
     case 'boolean':
-      return `TO_STRING(${field.source})`;
+      return `TO_BOOLEAN(${field.source})`;
     case 'long':
       return `TO_LONG(${field.source})`;
+    case 'integer':
+      return `TO_INTEGER(${field.source})`;
     case 'ip':
-      return `TO_STRING(${field.source})`;
+      return `TO_IP(${field.source})`;
     // explicit no cast because it doesn't exist in ESQl
     // and it's a breaking point
     case 'scaled_float':
@@ -181,16 +183,11 @@ function castSrcType(field: EntityField) {
 }
 
 function castDestType(fieldName: string, field: EntityField) {
-  // We only to cast boolean, date and ip to string and back to the original type
+  // We only to cast date to string and back to the original type
   // because of a limitation in ESQL.
-  // This should not be needed after https://github.com/elastic/elasticsearch/issues/141101
   switch (field.mapping?.type) {
-    case 'boolean':
-      return `TO_BOOLEAN(${fieldName})`;
     case 'date':
       return `TO_DATETIME(${fieldName})`;
-    case 'ip':
-      return `TO_IP(${fieldName})`;
     default:
       return fieldName;
   }

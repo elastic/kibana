@@ -22,6 +22,8 @@ export type {
   ManagementSetup,
   ManagementStart,
   DefinedSections,
+  AutoOpsStatusHook,
+  AutoOpsStatusResult,
 } from './types';
 
 export { MANAGEMENT_APP_ID } from '../common/contants';

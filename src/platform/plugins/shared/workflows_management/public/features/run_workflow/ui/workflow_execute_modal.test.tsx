@@ -262,7 +262,7 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      expect(mockOnSubmit).toHaveBeenCalledWith({});
+      expect(mockOnSubmit).toHaveBeenCalledWith({}, 'manual');
       expect(mockOnClose).toHaveBeenCalled();
     });
 
