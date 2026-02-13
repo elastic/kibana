@@ -13,6 +13,7 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/i18n",
     "@kbn/i18n-react",
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/core-http-browser"
   ]
 }
