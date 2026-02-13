@@ -17,10 +17,7 @@ import { SuggestStreamPartitionsPrompt } from './prompt';
 import { schema } from './schema';
 
 const strictConditionSchema = DeepStrict(conditionSchema);
-export type PartitionSuggestionsReason =
-  | 'no_clusters'
-  | 'no_samples'
-  | 'all_data_partitioned';
+export type PartitionSuggestionsReason = 'no_clusters' | 'no_samples' | 'all_data_partitioned';
 
 export interface PartitionStreamResponse {
   partitions: Array<{ name: string; condition: Condition }>;

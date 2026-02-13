@@ -39,10 +39,7 @@ export const suggestPartitionsSchema = z.object({
 }) satisfies z.Schema<SuggestPartitionsParams>;
 
 type SuggestPartitionsResponse = Observable<
-  ServerSentEventBase<
-    'suggested_partitions',
-    Awaited<ReturnType<typeof partitionStream>>
-  >
+  ServerSentEventBase<'suggested_partitions', Awaited<ReturnType<typeof partitionStream>>>
 >;
 
 export const suggestPartitionsRoute = createServerRoute({

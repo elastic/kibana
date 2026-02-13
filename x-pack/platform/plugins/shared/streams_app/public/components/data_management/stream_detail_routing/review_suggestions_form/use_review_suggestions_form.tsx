@@ -30,10 +30,7 @@ export interface PartitionSuggestion {
   condition: Condition;
 }
 
-export type PartitionSuggestionReason =
-  | 'no_clusters'
-  | 'no_samples'
-  | 'all_data_partitioned';
+export type PartitionSuggestionReason = 'no_clusters' | 'no_samples' | 'all_data_partitioned';
 
 export type UseReviewSuggestionsFormResult = ReturnType<typeof useReviewSuggestionsForm>;
 
