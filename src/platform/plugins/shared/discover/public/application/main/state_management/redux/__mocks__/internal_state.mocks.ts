@@ -14,14 +14,27 @@ import { DEFAULT_TAB_STATE } from '../constants';
 import type { DiscoverAppState, RecentlyClosedTabState, TabState } from '../types';
 import { fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
 
-export const getTabStateMock = (partial: Partial<TabState> & Pick<TabState, 'id'>): TabState => ({
+export const getTabStateMock = (
+  partial: Partial<Omit<TabState, 'attributes'>> & {
+    id: TabState['id'];
+    attributes?: Partial<TabState['attributes']>;
+  }
+): TabState => ({
   ...DEFAULT_TAB_STATE,
   label: 'Untitled',
   ...partial,
+  attributes: {
+    ...DEFAULT_TAB_STATE.attributes,
+    ...partial.attributes,
+  },
 });
 
 export const getRecentlyClosedTabStateMock = (
-  partial: Partial<RecentlyClosedTabState> & Pick<RecentlyClosedTabState, 'id' | 'closedAt'>
+  partial: Partial<Omit<RecentlyClosedTabState, 'attributes'>> & {
+    id: RecentlyClosedTabState['id'];
+    closedAt: RecentlyClosedTabState['closedAt'];
+    attributes?: Partial<TabState['attributes']>;
+  }
 ): RecentlyClosedTabState => ({ ...getTabStateMock(partial), closedAt: partial.closedAt });
 
 export const getPersistedTabMock = ({
@@ -30,15 +43,16 @@ export const getPersistedTabMock = ({
   appStateOverrides = {},
   globalStateOverrides = {},
   initialInternalStateOverrides = {},
-  timeRestore = false,
+  overridenTimeRestore,
   services,
 }: {
   tabId?: string;
   dataView: DataView;
+  attributesOverrides?: Partial<TabState['attributes']>;
   appStateOverrides?: Partial<DiscoverAppState>;
   globalStateOverrides?: Partial<TabState['globalState']>;
   initialInternalStateOverrides?: Partial<TabState['initialInternalState']>;
-  timeRestore?: boolean;
+  overridenTimeRestore?: boolean;
   services: DiscoverServices;
 }) => {
   const defaultQuery = { query: '', language: 'kuery' };
@@ -68,7 +82,7 @@ export const getPersistedTabMock = ({
       },
       globalState: globalStateOverrides,
     }),
-    timeRestore,
+    overridenTimeRestore,
     services,
   });
 };

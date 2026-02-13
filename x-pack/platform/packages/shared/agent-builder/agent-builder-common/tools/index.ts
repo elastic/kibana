@@ -77,7 +77,6 @@ export {
   isResourceResult,
   isResourceListResult,
   isVisualizationResult,
-  isDashboardResult,
   isFileReferenceResult,
 } from './tool_result';
 export { type BrowserApiToolMetadata } from './browser_tool_metadata';
