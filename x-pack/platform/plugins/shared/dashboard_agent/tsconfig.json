@@ -15,7 +15,6 @@
     "@kbn/dashboard-plugin",
     "@kbn/dashboard-agent-common",
     "@kbn/zod",
-    "@kbn/management-settings-ids",
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-common-2",
     "@kbn/share-plugin",
