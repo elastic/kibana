@@ -340,7 +340,7 @@ export async function pickTestGroupRunOrder() {
             parallelism: unit.count,
             timeout_in_minutes: 120,
             key: 'jest',
-            agents: expandAgentQueue('n2-4-spot', 110),
+            agents: expandAgentQueue('n2d-4-spot', 110),
             depends_on: JEST_CONFIGS_DEPS,
             retry: {
               automatic: [
@@ -359,7 +359,7 @@ export async function pickTestGroupRunOrder() {
             parallelism: integration.count,
             timeout_in_minutes: 120,
             key: 'jest-integration',
-            agents: expandAgentQueue('n2-4-spot', 105),
+            agents: expandAgentQueue('n2d-4-spot', 105),
             depends_on: JEST_CONFIGS_DEPS,
             retry: {
               automatic: [
