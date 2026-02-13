@@ -10,9 +10,9 @@
 import React, { useState } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenu,
+  EuiContextMenuItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiKeyPadMenu,
@@ -27,6 +27,9 @@ import type { ChromeHeaderAppActionsConfig } from '@kbn/core-chrome-browser';
 const noop = () => {};
 
 const EXPORT_PANEL_ID = 1;
+
+/** Synced from DashboardPrimaryActions so overflow menu can hide "Reset changes" in edit mode. */
+let dashboardHeaderIsEditMode = false;
 
 const overflowKeyPadCss = css`
   justify-content: center;
@@ -102,6 +105,15 @@ const DashboardPrimaryActions: React.FC = () => {
 
   return (
     <>
+      <EuiButtonIcon
+        size="xs"
+        color="text"
+        iconType="share"
+        onClick={noop}
+        data-test-subj="headerGlobalNav-appActionsShareButton"
+      >
+        Share
+      </EuiButtonIcon>
       {!isEditMode && (
         <EuiButtonIcon
           size="xs"
@@ -114,28 +126,37 @@ const DashboardPrimaryActions: React.FC = () => {
           })}
         />
       )}
-      <EuiButtonIcon
-        size="xs"
-        color="text"
-        iconType="share"
-        onClick={noop}
-        data-test-subj="headerGlobalNav-appActionsShareButton"
-      >
-        Share
-      </EuiButtonIcon>
       {isEditMode ? (
         <>
           <EuiButtonIcon
             size="xs"
             color="text"
             iconType="logOut"
-            onClick={() => setIsEditMode(false)}
+            onClick={() => {
+              dashboardHeaderIsEditMode = false;
+              setIsEditMode(false);
+            }}
             data-test-subj="headerGlobalNav-appActionsExitEditButton"
             aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.exitEditAriaLabel', {
               defaultMessage: 'Exit edit',
             })}
           />
           <DashboardSaveSplitButton />
+          <EuiButton
+            size="s"
+            color="success"
+            minWidth={false}
+            iconType="plusInCircle"
+            onClick={noop}
+            data-test-subj="headerGlobalNav-appActionsAddButton"
+            aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.addAriaLabel', {
+              defaultMessage: 'Add',
+            })}
+          >
+            {i18n.translate('core.ui.chrome.headerGlobalNav.addButton', {
+              defaultMessage: 'Add',
+            })}
+          </EuiButton>
         </>
       ) : (
         <EuiButton
@@ -143,7 +164,10 @@ const DashboardPrimaryActions: React.FC = () => {
           color="text"
           fill={false}
           iconType="pencil"
-          onClick={() => setIsEditMode(true)}
+          onClick={() => {
+            dashboardHeaderIsEditMode = true;
+            setIsEditMode(true);
+          }}
           data-test-subj="headerGlobalNav-appActionsEditButton"
           aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.editAriaLabel', {
             defaultMessage: 'Edit',
@@ -204,11 +228,32 @@ export function getDashboardHeaderAppActionsConfig(): ChromeHeaderAppActionsConf
           { renderItem: () => <DashboardOverflowKeyPadSection />, key: 'keypad' },
           { name: 'Open', icon: 'folderOpen', onClick: noop },
           { name: 'Full screen', icon: 'fullScreen', onClick: noop },
-          { name: 'Duplicate', icon: 'copy', onClick: noop },
-          { name: 'Reset changes', icon: 'editorUndo', onClick: noop },
+          {
+            renderItem: () =>
+              dashboardHeaderIsEditMode ? null : (
+                <EuiContextMenuItem icon="copy" onClick={noop} size="s">
+                  {i18n.translate('core.ui.chrome.headerGlobalNav.duplicate', {
+                    defaultMessage: 'Duplicate',
+                  })}
+                </EuiContextMenuItem>
+              ),
+            key: 'duplicate',
+          },
+          {
+            renderItem: () =>
+              dashboardHeaderIsEditMode ? null : (
+                <EuiContextMenuItem icon="editorUndo" onClick={noop} size="s">
+                  {i18n.translate('core.ui.chrome.headerGlobalNav.resetChanges', {
+                    defaultMessage: 'Reset changes',
+                  })}
+                </EuiContextMenuItem>
+              ),
+            key: 'reset-changes',
+          },
           { name: 'Background searches', icon: 'backgroundTask', onClick: noop },
           { name: 'Export', icon: 'exportAction', onClick: noop, panel: EXPORT_PANEL_ID },
           { isSeparator: true as const, key: 'sep1' },
+          { name: 'Rename', icon: 'pencil', onClick: noop },
           { name: 'Settings', icon: 'gear', onClick: noop },
         ],
       },

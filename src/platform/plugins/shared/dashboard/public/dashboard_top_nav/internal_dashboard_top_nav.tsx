@@ -432,9 +432,9 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' ? <DashboardControlsRenderer /> : null}
 
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
-      <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
+      {/* <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
         <DashboardFavoriteButton dashboardId={lastSavedId} />
-      </MountPointPortal>
+      </MountPointPortal> */}
     </div>
   );
 }
@@ -458,12 +458,8 @@ const topNavStyles = {
         paddingTop: 0,
       },
     }),
-  updateIcon: ({ euiTheme }: UseEuiTheme) =>
+  updateIcon: () =>
     css({
-      '.kbnBody &': {
-        marginLeft: euiTheme.size.xs,
-        marginTop: `calc(-1 * ${euiTheme.size.xxs})`,
-        cursor: 'pointer',
-      },
+      display: 'none',
     }),
 };
