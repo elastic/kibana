@@ -28,11 +28,8 @@ import { TrackingService } from './telemetry/tracking_service';
 import { registerTelemetryCollector } from './telemetry/telemetry_collector';
 import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
-<<<<<<< HEAD
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
-=======
 import { registerTaskDefinitions } from './services/execution';
->>>>>>> kibana/main
 
 export class AgentBuilderPlugin
   implements
