@@ -15,12 +15,14 @@ import { AiButtonBase } from './ai_button_base';
 
 const mockUseSvgAiGradient = jest.fn();
 jest.mock('./use_ai_gradient_styles', () => ({
-  useAiButtonGradientStyles: jest.fn().mockReturnValue({ buttonCss: css``, labelCss: css`` }),
+  useAiButtonGradientStyles: jest
+    .fn()
+    .mockReturnValue({ buttonCss: undefined, labelCss: undefined }),
   useSvgAiGradient: (opts: unknown) => mockUseSvgAiGradient(opts),
 }));
 
 jest.mock('./svg_ai_gradient_defs', () => ({
-  SvgAiGradientDefs: () => <div data-testid="svg-ai-gradient-defs" />,
+  SvgAiGradientDefs: () => <div data-test-subj="svg-ai-gradient-defs" />,
 }));
 
 const defaultSvgGradient = {
