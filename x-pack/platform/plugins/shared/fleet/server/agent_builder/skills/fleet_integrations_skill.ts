@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const FLEET_INTEGRATIONS_SKILL: Skill = {
-  namespace: 'fleet.integrations',
-  name: 'Fleet Integrations',
+export const FLEET_INTEGRATIONS_SKILL = defineSkillType({
+  id: 'fleet.integrations',
+  name: 'integrations',
+  basePath: 'skills/fleet',
   description: 'Discover and manage integrations with guardrails',
   content: `# Fleet Integrations
 
@@ -23,8 +24,7 @@ Helps you discover integrations/packages and provide safe install/upgrade guidan
 ## Guardrails
 - Avoid broad changes without explicit user confirmation.\n
 `,
-  tools: [],
-};
+});
 
 
 

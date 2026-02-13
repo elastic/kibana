@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const OBSERVABILITY_SLOS_SKILL: Skill = {
-  namespace: 'observability.slos',
-  name: 'Observability SLOs',
+export const OBSERVABILITY_SLOS_SKILL = defineSkillType({
+  id: 'observability.slos',
+  name: 'slos',
+  basePath: 'skills/observability',
   description: 'Create and update SLOs safely',
   content: `# Observability SLOs
 
@@ -17,14 +18,10 @@ export const OBSERVABILITY_SLOS_SKILL: Skill = {
 Helps you manage SLOs and interpret burn rates and error budgets.
 
 ## When to use
-- The user wants to understand reliability over time.\n
-- The user wants an SLO created/updated (non-destructive).\n
+- The user wants to understand reliability over time.
+- The user wants an SLO created/updated (non-destructive).
 
 ## Guardrails
-- Do not delete SLOs.\n
+- Do not delete SLOs.
 `,
-  tools: [],
-};
-
-
-
+});

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const SECURITY_EXCEPTION_LISTS_SKILL: Skill = {
-    namespace: 'security.exception_lists',
-    name: 'Security Exception Lists',
-    description: 'Create and update exception list items safely',
-    content: `# Security Exception Lists
+export const SECURITY_EXCEPTION_LISTS_SKILL = defineSkillType({
+  id: 'security.exception_lists',
+  name: 'exception-lists',
+  basePath: 'skills/security/alerts/rules',
+  description: 'Create and update exception list items safely',
+  content: `# Security Exception Lists
 
 ## What this skill does
 Helps you find, inspect, create, and update exception list items with minimal risk and clear scope.
@@ -22,26 +22,23 @@ Helps you find, inspect, create, and update exception list items with minimal ri
 - The user wants to review existing exception list items.
 
 ## Inputs to ask the user for
-- **listId** (exception list id)\n
-- For create/update: **name**, **description**, and **entries**\n
-- Ensure scope is narrow (specific host/user/path/etc.)\n
+- **listId** (exception list id)
+- For create/update: **name**, **description**, and **entries**
+- Ensure scope is narrow (specific host/user/path/etc.)
 
 ## Tools and operations
-- Use \`security.exception_lists\`:\n
-  - \`find\`, \`get\` (read-only)\n
-  - \`create\`, \`update\` (**requires \`confirm: true\`**)\n
+- Use \`security.exception_lists\`:
+  - \`find\`, \`get\` (read-only)
+  - \`create\`, \`update\` (**requires \`confirm: true\`**)
 
 ## Entry guidance (LLM-friendly)
-- Prefer \`match\` / \`match_any\` / \`exists\` / \`wildcard\` entries.\n
-- Do not mix \`list\` entry type with other entry types in a single item.\n
+- Prefer \`match\` / \`match_any\` / \`exists\` / \`wildcard\` entries.
+- Do not mix \`list\` entry type with other entry types in a single item.
 
 ## Safe workflow
-1) Restate what will be excluded/included.\n
-2) Ask for explicit confirmation.\n
-3) Create/update with \`confirm: true\`.\n
+1) Restate what will be excluded/included.
+2) Ask for explicit confirmation.
+3) Create/update with \`confirm: true\`.
 `,
-    tools: [createToolProxy({ toolId: 'security.exception_lists' })],
-};
-
-
-
+  getAllowedTools: () => ['security.exception_lists'],
+});

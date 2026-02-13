@@ -5,24 +5,21 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { platformCoreTools } from '@kbn/agent-builder-common';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const OBSERVABILITY_CASES_SKILL: Skill = {
-    namespace: 'observability.cases',
-    name: 'Observability Cases',
-    description: 'Find and summarize Observability cases',
-    content: `# Observability Cases
+export const OBSERVABILITY_CASES_SKILL = defineSkillType({
+  id: 'observability.cases',
+  name: 'cases',
+  basePath: 'skills/observability',
+  description: 'Find and summarize Observability cases',
+  content: `# Observability Cases
 
 ## What this skill does
 Helps you find and summarize cases owned by Observability.
 
 ## Tools and operations
-- Use \`${platformCoreTools.cases}\` with \`owner: "observability"\`.\n
+- Use \`platform.core.cases\` with \`owner: "observability"\`.
+
 `,
-    tools: [createToolProxy({ toolId: platformCoreTools.cases })],
-};
-
-
-
+  getAllowedTools: () => ['platform.core.cases'],
+});

@@ -66,7 +66,7 @@ export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[num
  * This is a manually maintained list of all built-in skills registered in Agent Builder.
  * The intention is to force a code review from the Agent Builder team when any team adds a new skill.
  */
-export const AGENT_BUILDER_BUILTIN_SKILLS: string[] = [
+export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'security.get_alerts',
   'security.alert_triage',
   'platform.search',
@@ -116,7 +116,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS: string[] = [
   'osquery.packs',
   'osquery.saved_queries',
   'osquery.status',
-];
+] as const;
+
+export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];
 
 export const isAllowedBuiltinTool = (toolName: string) => {
   return (AGENT_BUILDER_BUILTIN_TOOLS as readonly string[]).includes(toolName);
@@ -127,5 +129,5 @@ export const isAllowedBuiltinAgent = (agentName: string) => {
 };
 
 export const isAllowedBuiltinSkill = (skillId: string) => {
-  return AGENT_BUILDER_BUILTIN_SKILLS.includes(skillId);
+  return (AGENT_BUILDER_BUILTIN_SKILLS as readonly string[]).includes(skillId);
 };

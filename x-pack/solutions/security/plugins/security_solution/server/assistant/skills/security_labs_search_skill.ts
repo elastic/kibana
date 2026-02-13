@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
 
@@ -13,9 +13,10 @@ import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/rou
  * Content-first skill that teaches the agent how to find Security Labs articles
  * using platform core search tools (rather than adding a dedicated skill tool).
  */
-export const SECURITY_LABS_SEARCH_SKILL: Skill = {
-  namespace: 'security.security_labs_search',
-  name: 'Security Labs Search',
+export const SECURITY_LABS_SEARCH_SKILL = defineSkillType({
+  id: 'security.security_labs_search',
+  name: 'security_labs_search',
+  basePath: 'skills/security',
   description: 'Find Security Labs articles via platform search tools',
   content: `# Security Labs Search
 
@@ -68,7 +69,4 @@ After you find relevant documents:
 - extract: IOCs, TTPs, ATT&CK mapping, detection opportunities, investigation steps
 - when answering users, cite the key findings and connect them back to the user’s question
 `,
-  tools: [],
-};
-
-
+});

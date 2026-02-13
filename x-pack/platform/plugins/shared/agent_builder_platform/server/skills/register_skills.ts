@@ -22,20 +22,23 @@ import { PLATFORM_WORKFLOWS_LOGS_SKILL } from './platform_workflows_logs_skill';
 import { PLATFORM_WORKFLOW_GENERATION_SKILL } from './platform_workflow_generation_skill';
 import { PLATFORM_WORKFLOWS_SKILL } from './platform_workflows_skill';
 
-export const registerSkills = (setupDeps: PluginSetupDependencies) => {
-  setupDeps.agentBuilder.skills.register(PLATFORM_SEARCH_SKILL);
-  setupDeps.agentBuilder.skills.register(PLATFORM_VISUALIZATION_SKILL);
-  setupDeps.agentBuilder.skills.register(PLATFORM_SAVED_OBJECTS_SKILL);
-  setupDeps.agentBuilder.skills.register(PLATFORM_DATA_VIEWS_SKILL);
-  setupDeps.agentBuilder.skills.register(PLATFORM_ALERTING_RULES_SKILL);
-  setupDeps.agentBuilder.skills.register(PLATFORM_CONNECTORS_ACTIONS_SKILL);
-  setupDeps.agentBuilder.skills.register(PLATFORM_GENERATE_ESQL_SKILL);
-  setupDeps.agentBuilder.skills.register(PLATFORM_WORKFLOWS_SKILL);
-  setupDeps.agentBuilder.skills.register(PLATFORM_WORKFLOW_GENERATION_SKILL);
-  setupDeps.agentBuilder.skills.register(PLATFORM_WORKFLOWS_LOGS_SKILL);
-  setupDeps.agentBuilder.skills.register(PLATFORM_CASES_SKILL);
-  setupDeps.agentBuilder.skills.register(PLATFORM_SPACES_SKILL);
-  setupDeps.agentBuilder.skills.register(PLATFORM_TAGS_SKILL);
-  setupDeps.agentBuilder.skills.register(PLATFORM_UI_SETTINGS_SKILL);
-  setupDeps.agentBuilder.skills.register(PLATFORM_PRIVILEGES_SKILL);
+export const registerSkills = async (setupDeps: PluginSetupDependencies): Promise<void> => {
+  const { agentBuilder } = setupDeps;
+  agentBuilder.skills.register(PLATFORM_WORKFLOW_GENERATION_SKILL);
+  await Promise.all([
+    agentBuilder.skill.registerSkill(PLATFORM_SEARCH_SKILL),
+    agentBuilder.skill.registerSkill(PLATFORM_VISUALIZATION_SKILL),
+    agentBuilder.skill.registerSkill(PLATFORM_SAVED_OBJECTS_SKILL),
+    agentBuilder.skill.registerSkill(PLATFORM_DATA_VIEWS_SKILL),
+    agentBuilder.skill.registerSkill(PLATFORM_ALERTING_RULES_SKILL),
+    agentBuilder.skill.registerSkill(PLATFORM_CONNECTORS_ACTIONS_SKILL),
+    agentBuilder.skill.registerSkill(PLATFORM_GENERATE_ESQL_SKILL),
+    agentBuilder.skill.registerSkill(PLATFORM_WORKFLOWS_SKILL),
+    agentBuilder.skill.registerSkill(PLATFORM_WORKFLOWS_LOGS_SKILL),
+    agentBuilder.skill.registerSkill(PLATFORM_CASES_SKILL),
+    agentBuilder.skill.registerSkill(PLATFORM_SPACES_SKILL),
+    agentBuilder.skill.registerSkill(PLATFORM_TAGS_SKILL),
+    agentBuilder.skill.registerSkill(PLATFORM_UI_SETTINGS_SKILL),
+    agentBuilder.skill.registerSkill(PLATFORM_PRIVILEGES_SKILL),
+  ]);
 };

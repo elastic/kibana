@@ -127,7 +127,9 @@ export class MlServerPlugin
     const { admin, user, apmUser } = getPluginPrivileges();
 
     if (plugins.onechat) {
-      registerAgentBuilderSkills(plugins.onechat);
+      registerAgentBuilderSkills(plugins.onechat).catch((error) => {
+        this.log.error(`Error registering ML agent builder skills: ${error}`);
+      });
     }
 
     plugins.features.registerKibanaFeature({

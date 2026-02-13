@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { platformCoreTools } from '@kbn/agent-builder-common';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const PLATFORM_CASES_SKILL: Skill = {
-  namespace: 'platform.cases',
-  name: 'Platform Cases',
+export const PLATFORM_CASES_SKILL = defineSkillType({
+  id: 'platform.cases',
+  name: 'cases',
+  basePath: 'skills/platform',
   description: 'Work with cases across solutions (Security, Observability, Stack Management)',
   content: `# Platform Cases
 
@@ -19,7 +18,7 @@ export const PLATFORM_CASES_SKILL: Skill = {
 Helps you find and summarize cases across Kibana solutions and (when explicitly requested) create updates via the Cases APIs.
 
 ## Tools and operations
-- Use \`${platformCoreTools.cases}\` to:\n
+- Use \`platform.core.cases\` to:\n
   - get a case by id\n
   - find cases by alert ids\n
   - search cases (optionally filtered by owner)\n
@@ -46,8 +45,5 @@ After calling the tool, respond **ONLY with what the tool returned**. Do not add
 ## Notes
 - Prefer read-only use unless the user explicitly asks for modifications.\n
 `,
-  tools: [createToolProxy({ toolId: platformCoreTools.cases })],
-};
-
-
-
+  getAllowedTools: () => ['platform.core.cases'],
+});

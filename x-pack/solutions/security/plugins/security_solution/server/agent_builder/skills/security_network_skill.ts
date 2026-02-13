@@ -5,64 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { z } from '@kbn/zod';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-/**
- * Schema for platform.search tool proxy.
- * This enables the LLM to understand the expected parameter structure.
- *
- * The tool uses a discriminated union on `operation`:
- * - `operation: 'search'` - For natural language queries (auto-selects index if not provided)
- * - `operation: 'execute_esql'` - For direct ES|QL queries
- */
-const platformSearchProxySchema = z.discriminatedUnion('operation', [
-  z
-    .object({
-      operation: z.literal('search').describe('Run a Kibana-mediated read-only search.'),
-      params: z
-        .object({
-          query: z.string().describe('A natural language query expressing the search request'),
-          index: z
-            .string()
-            .optional()
-            .describe(
-              '(optional) Index to search against. For network data, common indices include: logs-*, filebeat-*, packetbeat-*, auditbeat-*. If not provided, will attempt to auto-select based on the query.'
-            ),
-          fields: z
-            .array(z.string())
-            .optional()
-            .describe(
-              '(optional) Preferred output fields. For network data: source.ip, destination.ip, source.port, destination.port, network.bytes, network.protocol, dns.question.name, http.request.method, etc.'
-            ),
-        })
-        .passthrough()
-        .optional()
-        .describe('Parameters for the search operation'),
-    })
-    .passthrough(),
-  z
-    .object({
-      operation: z.literal('execute_esql').describe('Run a Kibana-mediated ES|QL query (read-only).'),
-      params: z
-        .object({
-          query: z
-            .string()
-            .describe(
-              'The ES|QL query to execute. Example: FROM packetbeat-* | WHERE destination.ip IS NOT NULL | STATS count = COUNT(*) BY destination.ip | SORT count DESC | LIMIT 20'
-            ),
-        })
-        .passthrough()
-        .optional()
-        .describe('Parameters for the ES|QL operation'),
-    })
-    .passthrough(),
-]);
-
-export const SECURITY_NETWORK_SKILL: Skill = {
-  namespace: 'security.network',
-  name: 'Security Network',
+export const SECURITY_NETWORK_SKILL = defineSkillType({
+  id: 'security.network',
+  name: 'network',
+  basePath: 'skills/security/network',
   description: 'Read-only network traffic analysis and investigation guidance',
   content: `# Security Network
 
@@ -103,7 +51,7 @@ Common network fields:
 - \`geo.country_iso_code\`, \`geo.city_name\` - Geographic data
 
 ## Tools and operations
-- Use \`platform.search\` for network data queries:
+- Use \`platform.core.search\` for network data queries:
   - \`operation: "search"\` for KQL-style queries
   - \`operation: "execute_esql"\` for ES|QL aggregations
 
@@ -112,7 +60,7 @@ Common network fields:
 ### Find top DNS domains
 \`\`\`
 tool("invoke_skill", {
-  name: "platform.search",
+  name: "platform.core.search",
   parameters: {
     operation: "execute_esql",
     params: {
@@ -125,7 +73,7 @@ tool("invoke_skill", {
 ### Find network traffic by country
 \`\`\`
 tool("invoke_skill", {
-  name: "platform.search",
+  name: "platform.core.search",
   parameters: {
     operation: "execute_esql",
     params: {
@@ -138,7 +86,7 @@ tool("invoke_skill", {
 ### Investigate specific IP
 \`\`\`
 tool("invoke_skill", {
-  name: "platform.search",
+  name: "platform.core.search",
   parameters: {
     operation: "search",
     params: {
@@ -161,12 +109,5 @@ tool("invoke_skill", {
 - Read-only only; do not block IPs or modify network rules.
 - Be mindful of large result sets; use LIMIT and aggregations.
 `,
-  tools: [
-    createToolProxy({
-      toolId: 'platform.search',
-      schema: platformSearchProxySchema,
-      description:
-        'Search network traffic data. Use operation: "search" for natural language queries or operation: "execute_esql" for ES|QL aggregations. Always specify index (e.g., packetbeat-*, logs-*) for network data.',
-    }),
-  ],
-};
+  getAllowedTools: () => ['platform.core.search'],
+});

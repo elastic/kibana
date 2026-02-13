@@ -6,6 +6,78 @@ This document contains best practices for writing high-quality evaluations for A
 
 ---
 
+## Skill Architecture (SkillDefinition)
+
+Skills are the primary mechanism for teaching the agent about domain-specific capabilities. Understanding the architecture helps write better evals.
+
+### New `SkillDefinition` Type
+
+Skills are defined using `defineSkillType` from `@kbn/agent-builder-server/skills/type_definition`:
+
+```typescript
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+
+export const MY_SKILL = defineSkillType({
+  id: 'platform.search',           // Unique skill ID (must be in AGENT_BUILDER_BUILTIN_SKILLS)
+  name: 'search',                  // Short lowercase name
+  basePath: 'skills/platform',     // Must match SkillsDirectoryStructure
+  description: 'Search and query data via Kibana (read-only)',
+  content: `# Platform Search        // Markdown instructions for the agent
+...`,
+  getAllowedTools: () => [          // References to registered builtin tools
+    'platform.core.search',
+    'platform.core.execute_esql',
+  ],
+});
+```
+
+### Three Tool Patterns
+
+| Pattern | When to use | Example |
+|---------|-------------|---------|
+| `getAllowedTools` | Skill delegates to registered builtin tools | `getAllowedTools: () => ['platform.core.search']` |
+| `getInlineTools` | Skill has custom tool logic (LangGraph, custom handlers) | Returns `BuiltinSkillBoundedTool[]` |
+| No tools | Guidance-only skill (instructions only) | Omit both `getAllowedTools` and `getInlineTools` |
+
+### Skill Registration
+
+Skills are registered via the new API in `register_skills.ts`:
+
+```typescript
+// ✅ New API (SkillDefinition)
+await agentBuilder.skill.registerSkill(MY_SKILL);
+
+// ❌ Legacy API (old Skill type) - being phased out
+agentBuilder.skills.register(legacySkill);
+```
+
+### Impact on Evals
+
+- **`expectedOnlyToolId`** should match the **builtin tool IDs** from `getAllowedTools`, not the skill ID. For example, if skill `platform.search` exposes `platform.core.search`, use `expectedOnlyToolId: 'platform.core.search'`.
+- **`invoke_skill`** pattern remains the same — the agent calls skills via the `invoke_skill` meta-tool, which the ToolUsageOnly evaluator handles.
+- **Skill `content`** is the primary mechanism for controlling agent behavior. When tuning eval scores, update skill `content` markdown (response format instructions, WHEN TO USE sections, FORBIDDEN RESPONSES).
+- **Directory structure**: Skills must have a `basePath` matching `SkillsDirectoryStructure` in `type_definition.ts`. Available paths include `skills/platform`, `skills/security`, `skills/security/cases`, `skills/observability`, `skills/fleet`, `skills/ml`, `skills/osquery`, `skills/dashboards`, etc.
+
+### Adding New Skills (Checklist)
+
+1. Define the skill using `defineSkillType` with proper `id`, `name`, `basePath`, `content`
+2. Add the skill ID to `AGENT_BUILDER_BUILTIN_SKILLS` in `allow_lists.ts`
+3. If the skill uses tools, add tool IDs to `getAllowedTools` (tools must exist in `AGENT_BUILDER_BUILTIN_TOOLS`)
+4. Register via `agentBuilder.skill.registerSkill()` in the plugin's `register_skills.ts`
+5. If a new directory is needed, extend `SkillsDirectoryStructure` in `type_definition.ts`
+6. Write/update evals for the skill (see sections below)
+
+### Legacy Skills (Not Yet Migrated)
+
+Some skills still use the legacy `Skill` type from `@kbn/agent-builder-common/skills`. These are:
+- Osquery skills (5) — need `OsqueryAppContext` not available in `ToolHandlerContext`
+- `platform.workflow_generation` — LangGraph tool needs `getInlineTools`
+- `security.alert_triage`, `security.entity_analytics` — custom tools with direct ES queries
+
+These are registered via the legacy `agentBuilder.skills.register()` API and will be migrated when infrastructure support is available.
+
+---
+
 ## Core Principles
 
 ### 1. Use the Default Agent When Possible
@@ -559,10 +631,13 @@ To enable LangSmith tracing, the backend needs to use `@kbn/langchain`'s LangSmi
 - [ ] Use default agent unless testing specific tool isolation
 - [ ] Expected outputs describe response content, not agent behavior
 - [ ] Include `expectedOnlyToolId` in metadata **only for examples that expect tool execution**
+- [ ] `expectedOnlyToolId` should be a **builtin tool ID** from `getAllowedTools` (e.g., `'platform.core.search'`), not the skill ID
 - [ ] Remove `expectedOnlyToolId` from informational/hypothetical questions
 - [ ] Dataset has clear name and description
 - [ ] Tests are grouped logically
 - [ ] Skill content includes response format instructions (for Relevance)
+- [ ] Skill uses `defineSkillType` with proper `id`, `name`, `basePath` (see Skill Architecture section)
+- [ ] Skill ID is in `AGENT_BUILDER_BUILTIN_SKILLS` allow list
 - [ ] **Use deterministic questions** (see section below)
 
 ---
@@ -739,14 +814,14 @@ These should have `expectedOnlyToolId`:
 
 ---
 
-## Checklist for New Evaluations
+## Checklist for New Evaluations (Quick Reference)
 
 - [ ] Use default agent unless testing specific tool isolation
 - [ ] Expected outputs describe response content, not agent behavior
-- [ ] Include `expectedOnlyToolId` in metadata **only for examples that expect tool execution**
-- [ ] Remove `expectedOnlyToolId` from informational/hypothetical questions
+- [ ] `expectedOnlyToolId` = builtin tool ID from `getAllowedTools`, not skill ID
+- [ ] Only include `expectedOnlyToolId` for tool-execution examples
+- [ ] Skill uses `defineSkillType` and is in `AGENT_BUILDER_BUILTIN_SKILLS`
 - [ ] Dataset has clear name and description
-- [ ] Tests are grouped logically
 - [ ] Skill content includes response format instructions (for Relevance)
 
 ---
@@ -912,3 +987,4 @@ Track significant updates to this document:
 | 2026-01-30 | Added guidance on Factuality evaluator sensitivity - consider excluding for action-oriented evals |
 | 2026-01-31 | Added "Improving ToolUsageOnly Scores" section - explicit tool references, strict skill content, FORBIDDEN RESPONSES |
 | 2026-02-01 | Added "Verify Tool Availability" insight - fixed Platform Index Explorer (listIndices instead of unavailable indexExplorer) |
+| 2026-02-13 | Added "Skill Architecture (SkillDefinition)" section documenting new `defineSkillType` pattern, `getAllowedTools`/`getInlineTools`, directory structure, registration API, and impact on evals |

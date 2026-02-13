@@ -5,28 +5,25 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const OBSERVABILITY_METRICS_SKILL: Skill = {
-    namespace: 'observability.metrics',
-    name: 'Observability Metrics',
-    description: 'Explore infrastructure metrics and anomalies',
-    content: `# Observability Metrics
+export const OBSERVABILITY_METRICS_SKILL = defineSkillType({
+  id: 'observability.metrics',
+  name: 'metrics',
+  basePath: 'skills/observability',
+  description: 'Explore infrastructure metrics and anomalies',
+  content: `# Observability Metrics
 
 ## What this skill does
 Helps you explore infra metrics (hosts, containers, k8s) and identify anomalies/regressions.
 
 ## When to use
-- CPU/memory/disk/network issues are suspected.\n
-- You need to correlate metrics with incidents/alerts.\n
+- CPU/memory/disk/network issues are suspected.
+- You need to correlate metrics with incidents/alerts.
 
 ## Inputs to ask the user for
-- Time range\n
-- Host/container identifiers\n
+- Time range
+- Host/container identifiers
 `,
-    tools: [createToolProxy({ toolId: 'observability.get_data_sources' })],
-};
-
-
-
+  getAllowedTools: () => ['observability.get_index_info'],
+});

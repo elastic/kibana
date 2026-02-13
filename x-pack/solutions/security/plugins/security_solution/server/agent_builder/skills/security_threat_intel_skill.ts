@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const SECURITY_THREAT_INTEL_SKILL: Skill = {
-  namespace: 'security.threat_intel',
-  name: 'Security Threat Intelligence',
+export const SECURITY_THREAT_INTEL_SKILL = defineSkillType({
+  id: 'security.threat_intel',
+  name: 'threat-intel',
+  basePath: 'skills/security/threat-intel',
   description: 'Read-only threat intel search and enrichment guidance',
   content: `# Security Threat Intelligence
 
@@ -22,10 +22,7 @@ Provides read-only guidance for TI lookups and indicator enrichment (without cha
 - You want suggestions for pivots and correlation queries.
 
 ## Guardrails
-- Read-only only; do not block/allowlist/disable protections.\n
+- Read-only only; do not block/allowlist/disable protections.
 `,
-  tools: [createToolProxy({ toolId: 'security.security_labs_search' })],
-};
-
-
-
+  getAllowedTools: () => ['security.security_labs_search'],
+});

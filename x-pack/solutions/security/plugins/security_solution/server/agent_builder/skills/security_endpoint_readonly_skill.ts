@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const SECURITY_ENDPOINT_READONLY_SKILL: Skill = {
-  namespace: 'security.endpoint_readonly',
-  name: 'Security Endpoint (Read-only)',
+export const SECURITY_ENDPOINT_READONLY_SKILL = defineSkillType({
+  id: 'security.endpoint_readonly',
+  name: 'endpoint-readonly',
+  basePath: 'skills/security/endpoints',
   description: 'Read-only endpoint posture and status guidance',
   content: `# Security Endpoint (Read-only)
 
@@ -21,11 +22,7 @@ Provides safe, read-only guidance for endpoint investigations (posture, status, 
 - You need to recommend investigation steps without taking action on hosts.
 
 ## Guardrails
-- Do not isolate/unisolate hosts.\n
-- Do not trigger destructive endpoint actions.\n
+- Do not isolate/unisolate hosts.
+- Do not trigger destructive endpoint actions.
 `,
-  tools: [],
-};
-
-
-
+});

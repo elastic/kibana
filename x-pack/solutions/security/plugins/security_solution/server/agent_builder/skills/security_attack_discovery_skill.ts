@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const SECURITY_ATTACK_DISCOVERY_SKILL: Skill = {
-  namespace: 'security.attack_discovery',
-  name: 'Security Attack Discovery',
+export const SECURITY_ATTACK_DISCOVERY_SKILL = defineSkillType({
+  id: 'security.attack_discovery',
+  name: 'attack-discovery',
+  basePath: 'skills/security/alerts',
   description: 'Search and summarize attack discovery results',
   content: `# Security Attack Discovery
 
@@ -18,7 +18,7 @@ export const SECURITY_ATTACK_DISCOVERY_SKILL: Skill = {
 Helps you run/search Attack Discovery and produce a concise triage summary with recommended next steps.
 
 ## When to use
-- The user asks for “what looks suspicious?” across a time range.
+- The user asks for "what looks suspicious?" across a time range.
 - You need high-level narratives and pivot points for investigation.
 
 ## Inputs to ask the user for
@@ -26,12 +26,9 @@ Helps you run/search Attack Discovery and produce a concise triage summary with 
 - Environment/data source constraints (if available)
 
 ## Safe workflow
-1) Run a targeted search.\n
-2) Summarize findings: key entities, tactics/techniques, timelines.\n
-3) Provide pivots (queries/filters) rather than destructive actions.\n
+1) Run a targeted search.
+2) Summarize findings: key entities, tactics/techniques, timelines.
+3) Provide pivots (queries/filters) rather than destructive actions.
 `,
-  tools: [createToolProxy({ toolId: 'security.attack_discovery_search' })],
-};
-
-
-
+  getAllowedTools: () => ['security.attack_discovery_search'],
+});

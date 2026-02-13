@@ -5,29 +5,26 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { platformCoreTools } from '@kbn/agent-builder-common';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const PLATFORM_PRIVILEGES_SKILL: Skill = {
-  namespace: 'platform.privileges',
-  name: 'Platform Privileges',
-  description: 'Explain permission errors by checking current user and saved object privileges (read-only)',
+export const PLATFORM_PRIVILEGES_SKILL = defineSkillType({
+  id: 'platform.privileges',
+  name: 'privileges',
+  basePath: 'skills/platform',
+  description:
+    'Explain permission errors by checking current user and saved object privileges (read-only)',
   content: `# Platform Privileges
 
 ## What this skill does
 Helps you explain why certain actions fail by checking the current user and (when available) saved object privileges.
 
 ## Tools and operations
-- Use \`${platformCoreTools.privileges}\`:\n
+- Use \`platform.core.privileges\`:\n
   - \`current_user\`\n
   - \`check_saved_objects\` (if Security authz is available)\n
 
 ## When to use
 - A tool returns an authorization error and you need to explain next steps.\n
 `,
-  tools: [createToolProxy({ toolId: platformCoreTools.privileges })],
-};
-
-
-
+  getAllowedTools: () => ['platform.core.privileges'],
+});

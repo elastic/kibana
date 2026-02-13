@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const ML_ANOMALY_DETECTION_JOBS_SKILL: Skill = {
-  namespace: 'ml.jobs_anomaly_detection',
-  name: 'ML Anomaly Detection Jobs',
+export const ML_ANOMALY_DETECTION_JOBS_SKILL = defineSkillType({
+  id: 'ml.jobs_anomaly_detection',
+  name: 'jobs_anomaly_detection',
+  basePath: 'skills/ml',
   description: 'List jobs, interpret job state, and navigate results (guidance)',
   content: `# ML Anomaly Detection Jobs
 
@@ -24,8 +25,7 @@ Provides read-only guidance for discovering anomaly detection jobs, understandin
 - Do not stop/close jobs.\n
 - Do not delete jobs.\n
 `,
-  tools: [],
-};
+});
 
 
 

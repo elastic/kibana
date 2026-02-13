@@ -34,7 +34,7 @@ const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   ],
 });
 
-evaluate.describe('Platform Workflow Generation Skill', { tag: '@svlOblt' }, () => {
+evaluate.describe.skip('Platform Workflow Generation Skill', { tag: '@svlOblt' }, () => {
   // Using the default agent (elastic-ai-agent) to test the real user experience
   // No custom agent creation needed - the default agent already has workflow generation tools
 

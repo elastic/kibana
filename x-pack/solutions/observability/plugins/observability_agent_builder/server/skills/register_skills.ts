@@ -16,17 +16,23 @@ import { OBSERVABILITY_SLO_READONLY_SKILL } from './observability_slo_readonly_s
 import { OBSERVABILITY_SLOS_SKILL } from './observability_slos_skill';
 import { OBSERVABILITY_SYNTHETICS_SKILL } from './observability_synthetics_skill';
 
-export const registerSkills = (plugins: ObservabilityAgentBuilderPluginSetupDependencies) => {
-  plugins.agentBuilder.skills.register(OBSERVABILITY_ALERTS_SKILL);
-  plugins.agentBuilder.skills.register(OBSERVABILITY_APM_SKILL);
-  plugins.agentBuilder.skills.register(OBSERVABILITY_LOGS_SKILL);
-  plugins.agentBuilder.skills.register(OBSERVABILITY_METRICS_SKILL);
-  plugins.agentBuilder.skills.register(OBSERVABILITY_SLOS_SKILL);
-  plugins.agentBuilder.skills.register(OBSERVABILITY_SYNTHETICS_SKILL);
-  plugins.agentBuilder.skills.register(OBSERVABILITY_CASES_SKILL);
-  plugins.agentBuilder.skills.register(OBSERVABILITY_ALERTS_EXECUTION_SKILL);
-  plugins.agentBuilder.skills.register(OBSERVABILITY_SLO_READONLY_SKILL);
+/**
+ * Registers all observability agent builder skills with the agentBuilder plugin
+ * using the new SkillDefinition-based registration API.
+ */
+export const registerSkills = async (
+  plugins: ObservabilityAgentBuilderPluginSetupDependencies
+): Promise<void> => {
+  const { agentBuilder } = plugins;
+  await Promise.all([
+    agentBuilder.skill.registerSkill(OBSERVABILITY_ALERTS_SKILL),
+    agentBuilder.skill.registerSkill(OBSERVABILITY_ALERTS_EXECUTION_SKILL),
+    agentBuilder.skill.registerSkill(OBSERVABILITY_APM_SKILL),
+    agentBuilder.skill.registerSkill(OBSERVABILITY_CASES_SKILL),
+    agentBuilder.skill.registerSkill(OBSERVABILITY_LOGS_SKILL),
+    agentBuilder.skill.registerSkill(OBSERVABILITY_METRICS_SKILL),
+    agentBuilder.skill.registerSkill(OBSERVABILITY_SLO_READONLY_SKILL),
+    agentBuilder.skill.registerSkill(OBSERVABILITY_SLOS_SKILL),
+    agentBuilder.skill.registerSkill(OBSERVABILITY_SYNTHETICS_SKILL),
+  ]);
 };
-
-
-

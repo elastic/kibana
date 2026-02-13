@@ -8,9 +8,6 @@
 import type { DashboardAgentSetupDependencies } from '../types';
 import { PLATFORM_DASHBOARD_SKILL } from './platform_dashboards_skill';
 
-export const registerSkills = (setupDeps: DashboardAgentSetupDependencies) => {
-    setupDeps.onechat.skills.register(PLATFORM_DASHBOARD_SKILL);
+export const registerSkills = async (setupDeps: DashboardAgentSetupDependencies): Promise<void> => {
+  await setupDeps.agentBuilder.skill.registerSkill(PLATFORM_DASHBOARD_SKILL);
 };
-
-
-

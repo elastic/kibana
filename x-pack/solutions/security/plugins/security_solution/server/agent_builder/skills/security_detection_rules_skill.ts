@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const SECURITY_DETECTION_RULES_SKILL: Skill = {
-  namespace: 'security.detection_rules',
-  name: 'Security Detection Rules',
+export const SECURITY_DETECTION_RULES_SKILL = defineSkillType({
+  id: 'security.detection_rules',
+  name: 'detection-rules',
+  basePath: 'skills/security/alerts/rules',
   description: 'Find/get, enable/disable, and create detection rules safely',
   content: `# Security Detection Rules
 
@@ -54,24 +54,24 @@ Helps you find, inspect, enable/disable, and create detection rules.
 - For create: rule name, description, type, query, severity, risk score
 
 ## Tools and operations
-- Use \`security.detection_rules\`:\n
-  - \`find\`, \`get\` (read-only)\n
-  - \`set_enabled\` (**requires \`confirm: true\`**)\n
-  - \`create\` (**requires \`confirm: true\`**)\n
+- Use \`security.detection_rules\`:
+  - \`find\`, \`get\` (read-only)
+  - \`set_enabled\` (**requires \`confirm: true\`**)
+  - \`create\` (**requires \`confirm: true\`**)
 
 ## Safe workflow for enable/disable
-1) Identify the exact rule(s).\n
-2) If you need a specific rule, **always call \`find\` first** and pick an \`id\`.\n
-3) Call \`get\` with \`params.id\` (required) to inspect the rule.\n
-4) Summarize the impact of enable/disable.\n
-5) Ask for explicit confirmation.\n
-6) Call \`set_enabled\` with \`confirm: true\`.\n
+1) Identify the exact rule(s).
+2) If you need a specific rule, **always call \`find\` first** and pick an \`id\`.
+3) Call \`get\` with \`params.id\` (required) to inspect the rule.
+4) Summarize the impact of enable/disable.
+5) Ask for explicit confirmation.
+6) Call \`set_enabled\` with \`confirm: true\`.
 
 ## Safe workflow for create
-1) Gather rule details from the user: name, description, type, query, severity, risk_score.\n
-2) Summarize the rule configuration you will create.\n
-3) Ask for explicit confirmation.\n
-4) Call \`create\` with \`confirm: true\`.\n
+1) Gather rule details from the user: name, description, type, query, severity, risk_score.
+2) Summarize the rule configuration you will create.
+3) Ask for explicit confirmation.
+4) Call \`create\` with \`confirm: true\`.
 
 ## Supported rule types
 - \`query\`: KQL or Lucene query rules
@@ -181,5 +181,5 @@ tool("invoke_skill", {
 })
 \`\`\`
 `,
-  tools: [createToolProxy({ toolId: 'security.detection_rules' })],
-};
+  getAllowedTools: () => ['security.detection_rules'],
+});

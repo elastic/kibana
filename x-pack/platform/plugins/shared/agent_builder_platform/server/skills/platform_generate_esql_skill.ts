@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { platformCoreTools } from '@kbn/agent-builder-common';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const PLATFORM_GENERATE_ESQL_SKILL: Skill = {
-  namespace: 'platform.generate_esql',
-  name: 'ES|QL Query Generation',
+export const PLATFORM_GENERATE_ESQL_SKILL = defineSkillType({
+  id: 'platform.generate_esql',
+  name: 'generate_esql',
+  basePath: 'skills/platform',
   description: 'Generate ES|QL queries from natural language descriptions',
   content: `# ES|QL Query Generation
 
@@ -79,5 +78,5 @@ State clearly what information is missing or why the query couldn't be generated
 2. What you want to find, count, or analyze
 3. Any filters or time constraints"
 `,
-  tools: [createToolProxy({ toolId: platformCoreTools.generateEsql })],
-};
+  getAllowedTools: () => ['platform.core.generate_esql'],
+});

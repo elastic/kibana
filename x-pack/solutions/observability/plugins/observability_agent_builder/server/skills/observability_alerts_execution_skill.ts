@@ -5,27 +5,23 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const OBSERVABILITY_ALERTS_EXECUTION_SKILL: Skill = {
-    namespace: 'observability.alerts_execution',
-    name: 'Observability Alerts (Execution)',
-    description: 'Execute read-only alert retrieval tools for Observability',
-    content: `# Observability Alerts (Execution)
+export const OBSERVABILITY_ALERTS_EXECUTION_SKILL = defineSkillType({
+  id: 'observability.alerts_execution',
+  name: 'alerts_execution',
+  basePath: 'skills/observability',
+  description: 'Execute read-only alert retrieval tools for Observability',
+  content: `# Observability Alerts (Execution)
 
 ## What this skill does
 Provides concrete, read-only tooling guidance for fetching Observability alerts.
 
 ## Tools
-- Use \`${internalNamespaces.observability}.get_alerts\` for retrieving alerts.\n
+- Use \`observability.get_alerts\` for retrieving alerts.
 
 ## Notes
-- This skill is read-only.\n
+- This skill is read-only.
 `,
-    tools: [createToolProxy({ toolId: `${internalNamespaces.observability}.get_alerts` })],
-};
-
-
-
+  getAllowedTools: () => ['observability.get_alerts'],
+});

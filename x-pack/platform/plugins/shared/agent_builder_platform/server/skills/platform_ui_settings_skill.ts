@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { platformCoreTools } from '@kbn/agent-builder-common';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const PLATFORM_UI_SETTINGS_SKILL: Skill = {
-  namespace: 'platform.ui_settings',
-  name: 'Platform UI Settings',
+export const PLATFORM_UI_SETTINGS_SKILL = defineSkillType({
+  id: 'platform.ui_settings',
+  name: 'ui_settings',
+  basePath: 'skills/platform',
   description: 'Inspect advanced settings (read-only; sensitive values redacted by default)',
   content: `# Platform UI Settings
 
@@ -40,7 +39,7 @@ You MUST use this tool when the user asks about:
 - Do NOT add suggestions unless asked
 
 ## Tools and operations
-- Use \`${platformCoreTools.uiSettings}\`:
+- Use \`platform.core.ui_settings\`:
   - \`get\` - get a specific setting
   - \`get_all\` - get all settings
   - \`get_user_provided\` - get user-modified settings
@@ -50,8 +49,5 @@ You MUST use this tool when the user asks about:
 - This skill is read-only
 - Sensitive keys are redacted unless explicitly requested
 `,
-  tools: [createToolProxy({ toolId: platformCoreTools.uiSettings })],
-};
-
-
-
+  getAllowedTools: () => ['platform.core.ui_settings'],
+});

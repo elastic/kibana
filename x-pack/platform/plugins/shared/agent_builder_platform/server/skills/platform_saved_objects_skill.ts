@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { platformCoreTools } from '@kbn/agent-builder-common';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const PLATFORM_SAVED_OBJECTS_SKILL: Skill = {
-  namespace: 'platform.saved_objects',
-  name: 'Platform Saved Objects',
+export const PLATFORM_SAVED_OBJECTS_SKILL = defineSkillType({
+  id: 'platform.saved_objects',
+  name: 'saved_objects',
+  basePath: 'skills/platform',
   description: 'Find, get, create, and update saved objects safely',
   content: `# Platform Saved Objects
 
@@ -42,8 +41,5 @@ Helps you safely find and inspect Kibana saved objects, and perform **explicit, 
 - **User**: “Update dashboard X title to Y.”\n
 - **Assistant**: \`find\` dashboard, \`get\` it, ask “Confirm update?” then \`update\` with \`confirm: true\`.
 `,
-  tools: [createToolProxy({ toolId: platformCoreTools.savedObjects })],
-};
-
-
-
+  getAllowedTools: () => ['platform.core.saved_objects'],
+});

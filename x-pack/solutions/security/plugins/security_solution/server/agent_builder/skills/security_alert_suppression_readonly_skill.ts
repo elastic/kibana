@@ -5,24 +5,21 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const SECURITY_ALERT_SUPPRESSION_READONLY_SKILL: Skill = {
-    namespace: 'security.alert_suppression_readonly',
-    name: 'Security Alert Suppression (Read-only)',
-    description: 'Explain alert suppression and why alerts may be missing (read-only)',
-    content: `# Security Alert Suppression (Read-only)
+export const SECURITY_ALERT_SUPPRESSION_READONLY_SKILL = defineSkillType({
+  id: 'security.alert_suppression_readonly',
+  name: 'alert-suppression-readonly',
+  basePath: 'skills/security/alerts',
+  description: 'Explain alert suppression and why alerts may be missing (read-only)',
+  content: `# Security Alert Suppression (Read-only)
 
 ## What this skill does
-Helps you explain alert suppression behavior and why alerts may be missing.\n
+Helps you explain alert suppression behavior and why alerts may be missing.
 
 ## How to use
-- Retrieve the detection rule (\`security.detection_rules -> get\`) and inspect its suppression-related fields.\n
-- Provide guidance and recommended next investigative pivots.\n
+- Retrieve the detection rule (\`security.detection_rules -> get\`) and inspect its suppression-related fields.
+- Provide guidance and recommended next investigative pivots.
 `,
-    tools: [createToolProxy({ toolId: 'security.detection_rules' })],
-};
-
-
-
+  getAllowedTools: () => ['security.detection_rules'],
+});

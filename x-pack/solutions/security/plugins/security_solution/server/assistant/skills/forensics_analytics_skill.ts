@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
 /**
  * Skill for forensics analytics and deep endpoint investigation.
  * This skill provides knowledge and playbooks for conducting forensic investigations
  * using osquery, ES|QL, and other Elastic Security tools.
  */
-export const FORENSICS_ANALYTICS_SKILL: Skill = {
-  namespace: 'security.forensics_analytics',
-  name: 'Forensics Analytics',
+export const FORENSICS_ANALYTICS_SKILL = defineSkillType({
+  id: 'security.forensics_analytics',
+  name: 'forensics_analytics',
+  basePath: 'skills/security',
   description:
     'Deep forensic investigation capabilities including artifact collection, IOC hunting, and evidence analysis',
   content: `# Forensics Analytics
@@ -416,5 +417,4 @@ platform.core.search({
 5. **Cross-Reference**: Validate findings across multiple data sources
 6. **Preserve Evidence**: Note original timestamps and avoid modifying evidence
 7. **Think Like an Attacker**: Follow the attack chain methodically`,
-  tools: [],
-};
+});

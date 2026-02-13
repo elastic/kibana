@@ -5,26 +5,23 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const OBSERVABILITY_SYNTHETICS_SKILL: Skill = {
-    namespace: 'observability.synthetics',
-    name: 'Observability Synthetics',
-    description: 'Create and update monitors safely',
-    content: `# Observability Synthetics
+export const OBSERVABILITY_SYNTHETICS_SKILL = defineSkillType({
+  id: 'observability.synthetics',
+  name: 'synthetics',
+  basePath: 'skills/observability',
+  description: 'Create and update monitors safely',
+  content: `# Observability Synthetics
 
 ## What this skill does
 Helps you manage synthetics monitors and triage failing steps.
 
 ## When to use
-- A monitor is failing and you need the failing step + likely cause.\n
-- The user asks to create/update a monitor (non-destructive).\n
+- A monitor is failing and you need the failing step + likely cause.
+- The user asks to create/update a monitor (non-destructive).
 
 ## Guardrails
-- Do not delete monitors.\n
+- Do not delete monitors.
 `,
-    tools: [],
-};
-
-
-
+});

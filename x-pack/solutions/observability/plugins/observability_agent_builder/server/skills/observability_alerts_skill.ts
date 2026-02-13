@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const OBSERVABILITY_ALERTS_SKILL: Skill = {
-  namespace: 'observability.alerts',
-  name: 'Observability Alerts',
+export const OBSERVABILITY_ALERTS_SKILL = defineSkillType({
+  id: 'observability.alerts',
+  name: 'alerts',
+  basePath: 'skills/observability',
   description: 'List and triage observability alerts',
   content: `# Observability Alerts
 
@@ -43,5 +43,5 @@ Your response MUST contain ONLY information from the tool results.
 ## What this skill does
 Helps you list and triage observability alerts.
 `,
-  tools: [createToolProxy({ toolId: 'observability.get_alerts' })],
-};
+  getAllowedTools: () => ['observability.get_alerts'],
+});

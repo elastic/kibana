@@ -5,37 +5,17 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { tool } from '@langchain/core/tools';
-import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
-import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
-import { getSpaceIdFromRequest } from '../../agent_builder/tools/helpers';
-
-/**
- * Safely extracts OneChat context from LangChain tool config.
- * Skill-tools receive context via config.configurable.onechat
- */
-const getOneChatContext = (config: unknown): Omit<ToolHandlerContext, 'resultStore'> | null => {
-  if (!config || typeof config !== 'object') {
-    return null;
-  }
-
-  const maybeConfig = config as {
-    configurable?: { onechat?: Omit<ToolHandlerContext, 'resultStore'> };
-  };
-
-  return maybeConfig.configurable?.onechat ?? null;
-};
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
 /**
  * Skill for retrieving and analyzing security alerts.
  * This skill provides knowledge about how to query, filter, and analyze alerts
  * in the Elastic Security solution.
  */
-export const GET_ALERTS_SKILL: Skill = {
-  namespace: 'security.get_alerts',
-  name: 'Get Security Alerts',
+export const GET_ALERTS_SKILL = defineSkillType({
+  id: 'security.get_alerts',
+  name: 'get_alerts',
+  basePath: 'skills/security',
   description: 'Instructions for retrieving security alerts',
   content: `# Security Alerts Retrieval Guide
 
@@ -151,168 +131,7 @@ invoke_skill({
 1. **Use natural language**: Describe what you want in plain English
 2. **Set isCount for counting**: Use \`isCount: true\` for "how many" questions
 3. **Include time ranges**: Mention time periods like "last 24 hours" or "this week"
-4. **Workflow status updates**: Always identify alerts first, then require explicit confirmation with \`confirm: true\``,
-  tools: [
-    tool(
-      async (input: unknown, config) => {
-        const onechat = getOneChatContext(config);
-        if (!onechat) {
-          throw new Error('OneChat context not available');
-        }
-
-        const toolId = 'security.alerts';
-        const available = await onechat.toolProvider.has({ toolId, request: onechat.request });
-        if (!available) {
-          return JSON.stringify({
-            error: { message: `Tool "${toolId}" not found. It may be disabled or not registered.` },
-            toolId,
-          });
-        }
-
-        const defaultIndex = `${DEFAULT_ALERTS_INDEX}-${getSpaceIdFromRequest(onechat.request)}`;
-
-        const toolParams: Record<string, unknown> = (() => {
-          const asAny = input as any;
-
-          // Preferred / correct shape
-          if (asAny?.mode === 'query' || typeof asAny?.query === 'string') {
-            const index = asAny.index ?? defaultIndex;
-            return {
-              query: asAny.query,
-              index,
-              ...(typeof asAny.isCount === 'boolean' ? { isCount: asAny.isCount } : {}),
-            };
-          }
-
-          // Write operation: set workflow status / acknowledge
-          if (asAny?.operation === 'set_workflow_status' || asAny?.operation === 'acknowledge') {
-            const index = asAny?.params?.index ?? asAny?.index ?? defaultIndex;
-            const status =
-              asAny?.operation === 'acknowledge' ? 'acknowledged' : asAny?.params?.status ?? asAny?.status;
-            const alertIds = asAny?.params?.alertIds ?? asAny?.alertIds;
-            const reason = asAny?.params?.reason ?? asAny?.reason;
-            const confirm = asAny?.params?.confirm ?? asAny?.confirm;
-            const confirmReason = asAny?.params?.confirmReason ?? asAny?.confirmReason;
-            return {
-              operation: asAny.operation,
-              index,
-              status,
-              alertIds,
-              ...(typeof reason === 'string' ? { reason } : {}),
-              confirm,
-              ...(typeof confirmReason === 'string' ? { confirmReason } : {}),
-            };
-          }
-
-          // Compat: `operation: "get_alert"` style
-          if (asAny?.operation === 'get_alert') {
-            // Accept both:
-            // - { operation: "get_alert", params: { alertId, index? } }
-            // - { operation: "get_alert", alertId, index? }  (legacy/LLM-guess)
-            const alertId = asAny?.params?.alertId ?? asAny?.alertId;
-            const index = asAny?.params?.index ?? asAny?.index ?? defaultIndex;
-            return {
-              query: `Find the security alert with id "${alertId}".`,
-              index,
-              isCount: false,
-            };
-          }
-
-          // Compat: `operation: "search"` style
-          const index = asAny?.params?.index ?? defaultIndex;
-          return {
-            query: asAny?.params?.query,
-            index,
-            ...(typeof asAny?.params?.isCount === 'boolean' ? { isCount: asAny.params.isCount } : {}),
-          };
-        })();
-
-        const result = await onechat.runner.runTool({
-          toolId,
-          toolParams,
-        });
-
-        return JSON.stringify(result);
-      },
-      {
-        name: 'security.alerts',
-        description:
-          'Search Elastic Security alerts (read-only) and optionally update alert workflow status (write). Prefer `{ query }` for searches. Updates require `confirm: true`.',
-        schema: z.union([
-          z.object({
-            mode: z.literal('query').optional().default('query'),
-            query: z
-              .string()
-              .min(1)
-              .describe('Natural language query for security alerts (include time range and filters).'),
-            index: z.string().optional().describe('Optional alerts index to search'),
-            isCount: z.boolean().optional().describe('Set true for count-only questions'),
-          }),
-          // Write: set workflow status
-          z.object({
-            operation: z.literal('set_workflow_status'),
-            params: z.object({
-              alertIds: z.array(z.string()).min(1).describe('List of alert ids/uuids to update.'),
-              status: z
-                .enum(['open', 'acknowledged', 'closed'])
-                .describe('Target workflow status to set.'),
-              reason: z.string().optional().describe('Optional reason for closing (only used when status="closed").'),
-              index: z.string().optional().describe('Optional alerts index to update'),
-              confirm: z.boolean().describe('REQUIRED. Must be true to perform this write operation.'),
-              confirmReason: z.string().optional().describe('Optional reason why this update is needed.'),
-            }),
-          }),
-          // Convenience: acknowledge
-          z.object({
-            operation: z.literal('acknowledge'),
-            params: z.object({
-              alertIds: z.array(z.string()).min(1).describe('List of alert ids/uuids to acknowledge.'),
-              index: z.string().optional().describe('Optional alerts index to update'),
-              confirm: z.boolean().describe('REQUIRED. Must be true to perform this write operation.'),
-              confirmReason: z.string().optional().describe('Optional reason why this update is needed.'),
-            }),
-          }),
-          // Legacy/LLM-guess flattened write shapes
-          z.object({
-            operation: z.literal('set_workflow_status'),
-            alertIds: z.array(z.string()).min(1).describe('List of alert ids/uuids to update.'),
-            status: z.enum(['open', 'acknowledged', 'closed']).describe('Target workflow status to set.'),
-            reason: z.string().optional().describe('Optional reason for closing (only used when status="closed").'),
-            index: z.string().optional().describe('Optional alerts index to update'),
-            confirm: z.boolean().describe('REQUIRED. Must be true to perform this write operation.'),
-            confirmReason: z.string().optional().describe('Optional reason why this update is needed.'),
-          }),
-          z.object({
-            operation: z.literal('acknowledge'),
-            alertIds: z.array(z.string()).min(1).describe('List of alert ids/uuids to acknowledge.'),
-            index: z.string().optional().describe('Optional alerts index to update'),
-            confirm: z.boolean().describe('REQUIRED. Must be true to perform this write operation.'),
-            confirmReason: z.string().optional().describe('Optional reason why this update is needed.'),
-          }),
-          z.object({
-            operation: z.literal('get_alert'),
-            params: z.object({
-              alertId: z.string().describe('Alert id to retrieve (will be searched by id).'),
-              index: z.string().optional().describe('Optional alerts index to search'),
-            }),
-          }),
-          // Legacy/LLM-guess shape: alertId at top-level
-          z.object({
-            operation: z.literal('get_alert'),
-            alertId: z.string().describe('Alert id to retrieve (will be searched by id).'),
-            index: z.string().optional().describe('Optional alerts index to search'),
-          }),
-          z.object({
-            operation: z.literal('search'),
-            params: z.object({
-              query: z.string().describe('Natural language query for security alerts.'),
-              index: z.string().optional().describe('Optional alerts index to search'),
-              isCount: z.boolean().optional().describe('Set true for count-only questions'),
-            }),
-          }),
-        ]),
-      }
-    ),
-  ],
-};
-
+4. **Workflow status updates**: Always identify alerts first, then require explicit confirmation with \`confirm: true\` (required for write operations)
+`,
+  getAllowedTools: () => ['security.alerts'],
+});

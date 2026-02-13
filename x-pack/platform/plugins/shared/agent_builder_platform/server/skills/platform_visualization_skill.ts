@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { platformCoreTools } from '@kbn/agent-builder-common';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const PLATFORM_VISUALIZATION_SKILL: Skill = {
-  namespace: 'platform.visualization',
-  name: 'Platform Visualization',
+export const PLATFORM_VISUALIZATION_SKILL = defineSkillType({
+  id: 'platform.visualization',
+  name: 'visualization',
+  basePath: 'skills/platform',
   description: 'Create and update visualizations safely',
   content: `# Platform Visualization
 
@@ -51,8 +50,5 @@ Helps you create or update Lens visualizations with clear defaults and minimal s
 - **Filters** and **time range**
 - Preferred chart type (bar/line/area/table)
 `,
-  tools: [createToolProxy({ toolId: platformCoreTools.createVisualization })],
-};
-
-
-
+  getAllowedTools: () => ['platform.core.create_visualization'],
+});

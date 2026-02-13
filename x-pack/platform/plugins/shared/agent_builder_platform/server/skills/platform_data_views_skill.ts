@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { platformCoreTools } from '@kbn/agent-builder-common';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const PLATFORM_DATA_VIEWS_SKILL: Skill = {
-  namespace: 'platform.data_views',
-  name: 'Platform Data Views',
+export const PLATFORM_DATA_VIEWS_SKILL = defineSkillType({
+  id: 'platform.data_views',
+  name: 'data_views',
+  basePath: 'skills/platform',
   description: 'Create and update data views safely',
   content: `# Platform Data Views
 
@@ -38,8 +37,5 @@ Helps you find, inspect, create, and update **data views** (index patterns) safe
 3) For writes, restate intended changes and ask for confirmation.\n
 4) Call \`create\`/ \`update\` with \`confirm: true\`.\n
 `,
-  tools: [createToolProxy({ toolId: platformCoreTools.dataViews })],
-};
-
-
-
+  getAllowedTools: () => ['platform.core.data_views'],
+});

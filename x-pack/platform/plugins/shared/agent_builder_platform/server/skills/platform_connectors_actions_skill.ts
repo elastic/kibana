@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { platformCoreTools } from '@kbn/agent-builder-common';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const PLATFORM_CONNECTORS_ACTIONS_SKILL: Skill = {
-  namespace: 'platform.connectors_actions',
-  name: 'Platform Connectors',
+export const PLATFORM_CONNECTORS_ACTIONS_SKILL = defineSkillType({
+  id: 'platform.connectors_actions',
+  name: 'connectors_actions',
+  basePath: 'skills/platform',
   description: 'List and inspect action connectors (no execution by default)',
   content: `# Platform Connectors
 
@@ -61,8 +60,5 @@ Respond with: "This tool is read-only. Use Stack Management > Connectors in Kiba
 - This skill is **read-only** - no execution, creation, or modification.
 - Secrets and credentials are NEVER shown.
 `,
-  tools: [createToolProxy({ toolId: platformCoreTools.connectors })],
-};
-
-
-
+  getAllowedTools: () => ['platform.core.connectors'],
+});

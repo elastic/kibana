@@ -22,12 +22,13 @@ import { registerSkills } from './skills/register_skills';
 
 export class DashboardAgentPlugin
   implements
-  Plugin<
-    DashboardAgentPluginSetup,
-    DashboardAgentPluginStart,
-    DashboardAgentSetupDependencies,
-    DashboardAgentStartDependencies
-  > {
+    Plugin<
+      DashboardAgentPluginSetup,
+      DashboardAgentPluginStart,
+      DashboardAgentSetupDependencies,
+      DashboardAgentStartDependencies
+    >
+{
   private logger: Logger;
 
   constructor(context: PluginInitializerContext) {
@@ -91,7 +92,7 @@ export class DashboardAgentPlugin
     registerDashboardAgent(setupDeps.agentBuilder);
 
     // Register the dashboards skill (built-in) so agents can discover and invoke the dashboard tools via /skills.
-    registerSkills(setupDeps);
+    await registerSkills(setupDeps);
   }
 
   start(
@@ -101,5 +102,5 @@ export class DashboardAgentPlugin
     return {};
   }
 
-  stop() { }
+  stop() {}
 }

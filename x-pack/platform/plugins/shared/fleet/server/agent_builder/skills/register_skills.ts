@@ -9,9 +9,11 @@ import type { OnechatPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { FLEET_AGENTS_SKILL } from './fleet_agents_skill';
 import { FLEET_INTEGRATIONS_SKILL } from './fleet_integrations_skill';
 
-export const registerAgentBuilderSkills = (onechat: OnechatPluginSetup) => {
-  onechat.skills.register(FLEET_AGENTS_SKILL);
-  onechat.skills.register(FLEET_INTEGRATIONS_SKILL);
+export const registerAgentBuilderSkills = async (onechat: OnechatPluginSetup): Promise<void> => {
+  await Promise.all([
+    onechat.skill.registerSkill(FLEET_AGENTS_SKILL),
+    onechat.skill.registerSkill(FLEET_INTEGRATIONS_SKILL),
+  ]);
 };
 
 

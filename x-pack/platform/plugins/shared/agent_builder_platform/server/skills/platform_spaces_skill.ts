@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { platformCoreTools } from '@kbn/agent-builder-common';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const PLATFORM_SPACES_SKILL: Skill = {
-  namespace: 'platform.spaces',
-  name: 'Platform Spaces',
+export const PLATFORM_SPACES_SKILL = defineSkillType({
+  id: 'platform.spaces',
+  name: 'spaces',
+  basePath: 'skills/platform',
   description: 'List/get spaces and determine the active space (read-only)',
   content: `# Platform Spaces
 
@@ -19,7 +18,7 @@ export const PLATFORM_SPACES_SKILL: Skill = {
 Helps you understand and navigate **space scoping** in Kibana (read-only).
 
 ## Tools and operations
-- Use \`${platformCoreTools.spaces}\`:\n
+- Use \`platform.core.spaces\`:\n
   - \`list\` spaces\n
   - \`get\` a specific space\n
   - \`get_active\` to identify the current request space\n
@@ -27,8 +26,5 @@ Helps you understand and navigate **space scoping** in Kibana (read-only).
 ## When to use
 - Tool calls behave differently between spaces and you need to confirm context.\n
 `,
-  tools: [createToolProxy({ toolId: platformCoreTools.spaces })],
-};
-
-
-
+  getAllowedTools: () => ['platform.core.spaces'],
+});

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const SECURITY_TIMELINES_SKILL: Skill = {
-  namespace: 'security.timelines',
-  name: 'Security Timelines',
+export const SECURITY_TIMELINES_SKILL = defineSkillType({
+  id: 'security.timelines',
+  name: 'timelines',
+  basePath: 'skills/security',
   description: 'Find, create and update timelines safely',
   content: `# Security Timelines
 
@@ -42,8 +42,5 @@ Show timeline details from tool results: title, description, ID.
 - \`find\`, \`get\` (read-only)
 - \`create\`, \`update\` (requires \`confirm: true\`)
 `,
-  tools: [createToolProxy({ toolId: 'security.timelines' })],
-};
-
-
-
+  getAllowedTools: () => ['security.timelines'],
+});

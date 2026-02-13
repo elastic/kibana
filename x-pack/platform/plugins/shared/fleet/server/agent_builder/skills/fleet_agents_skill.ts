@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const FLEET_AGENTS_SKILL: Skill = {
-  namespace: 'fleet.agents',
-  name: 'Fleet Agents',
+export const FLEET_AGENTS_SKILL = defineSkillType({
+  id: 'fleet.agents',
+  name: 'agents',
+  basePath: 'skills/fleet',
   description: 'Inspect agent status and troubleshoot enrollment/health (no unenroll)',
   content: `# Fleet Agents
 
@@ -24,8 +25,7 @@ Helps you troubleshoot Fleet agent health and common states (offline, unhealthy,
 - Do not unenroll agents.\n
 - Do not delete agents or policies.\n
 `,
-  tools: [],
-};
+});
 
 
 

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { platformCoreTools } from '@kbn/agent-builder-common';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const PLATFORM_TAGS_SKILL: Skill = {
-  namespace: 'platform.tags',
-  name: 'Platform Tags',
+export const PLATFORM_TAGS_SKILL = defineSkillType({
+  id: 'platform.tags',
+  name: 'tags',
+  basePath: 'skills/platform',
   description: 'List/create/update tags and assign tags to saved objects safely',
   content: `# Platform Tags
 
@@ -19,7 +18,7 @@ export const PLATFORM_TAGS_SKILL: Skill = {
 Helps you manage **tags** and assign them to taggable saved objects (dashboards, lens, searches, etc.).
 
 ## Tools and operations
-- Use \`${platformCoreTools.tags}\`:\n
+- Use \`platform.core.tags\`:\n
   - \`list\`, \`get\` (read-only)\n
   - \`create\`, \`update\`, \`update_object_tags\` (**require \`confirm: true\`**)\n
 
@@ -39,8 +38,5 @@ After calling the tool, respond **directly and concisely** using only the tool r
 2) For any write (create/update/assignment), restate the intended changes and require user confirmation.\n
 3) Call with \`confirm: true\`.\n
 `,
-  tools: [createToolProxy({ toolId: platformCoreTools.tags })],
-};
-
-
-
+  getAllowedTools: () => ['platform.core.tags'],
+});

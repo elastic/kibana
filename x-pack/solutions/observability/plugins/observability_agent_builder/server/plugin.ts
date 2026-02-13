@@ -61,7 +61,9 @@ export class ObservabilityAgentBuilderPlugin
       this.logger.error(`Error registering observability tools: ${error}`);
     });
 
-    registerSkills(plugins);
+    registerSkills(plugins).catch((error) => {
+      this.logger.error(`Error registering observability skills: ${error}`);
+    });
 
     registerAttachments({
       core,

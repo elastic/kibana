@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { platformCoreTools } from '@kbn/agent-builder-common';
-import { createToolProxy } from './utils/create_tool_proxy';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const PLATFORM_ALERTING_RULES_SKILL: Skill = {
-  namespace: 'platform.alerting_rules',
-  name: 'Platform Alerting Rules',
+export const PLATFORM_ALERTING_RULES_SKILL = defineSkillType({
+  id: 'platform.alerting_rules',
+  name: 'alerting_rules',
+  basePath: 'skills/platform',
   description: 'Find, create, and enable/disable alerting rules safely (no deletes)',
   content: `# Platform Alerting Rules
 
@@ -56,5 +55,5 @@ List available rule types with their IDs and descriptions.
 
 Use \`list_types\` to discover all available rule types.
 `,
-  tools: [createToolProxy({ toolId: platformCoreTools.alertingRules })],
-};
+  getAllowedTools: () => ['platform.core.alerting_rules'],
+});

@@ -27,7 +27,6 @@ export class AgentBuilderPlatformPlugin
       PluginStartDependencies
     >
 {
-  // @ts-expect-error unused for now
   private logger: Logger;
   // @ts-expect-error unused for now
   private config: AgentBuilderConfig;
@@ -49,7 +48,9 @@ export class AgentBuilderPlatformPlugin
       coreSetup,
       setupDeps,
     });
-    registerSkills(setupDeps);
+    registerSkills(setupDeps).catch((error) => {
+      this.logger.error(`Error registering platform skills: ${error}`);
+    });
 
     return {};
   }

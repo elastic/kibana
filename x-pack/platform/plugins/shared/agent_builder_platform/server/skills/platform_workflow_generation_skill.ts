@@ -571,12 +571,14 @@ const createWorkflowGenerationGraph = (model: ScopedModel, logger: Logger) => {
       .filter((action) => isGenerateAction(action) || isValidateAction(action))
       .map((action) => {
         if (isGenerateAction(action)) {
-          return `Attempt ${action.attempt}: ${action.success ? 'Generated YAML' : `Generation failed - ${action.error}`
-            }`;
+          return `Attempt ${action.attempt}: ${
+            action.success ? 'Generated YAML' : `Generation failed - ${action.error}`
+          }`;
         }
         if (isValidateAction(action)) {
-          return `Validation ${action.attempt}: ${action.success ? 'PASSED' : `FAILED - ${action.error}`
-            }`;
+          return `Validation ${action.attempt}: ${
+            action.success ? 'PASSED' : `FAILED - ${action.error}`
+          }`;
         }
         return '';
       })
@@ -840,9 +842,7 @@ const PLATFORM_WORKFLOW_GENERATION_TOOL = tool(
               }
             } catch (attachmentError) {
               // Log but don't fail - attachment is nice-to-have
-              onechat.logger.warn(
-                `Failed to create workflow_draft attachment: ${attachmentError}`
-              );
+              onechat.logger.warn(`Failed to create workflow_draft attachment: ${attachmentError}`);
             }
 
             return JSON.stringify({

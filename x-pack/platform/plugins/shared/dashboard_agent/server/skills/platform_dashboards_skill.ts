@@ -5,79 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
-import { z } from '@kbn/zod';
-import { tool } from '@langchain/core/tools';
-import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-const getOneChatContext = (config: unknown): Omit<ToolHandlerContext, 'resultStore'> | null => {
-  if (!config || typeof config !== 'object') {
-    return null;
-  }
-
-  const maybeConfig = config as {
-    configurable?: { onechat?: Omit<ToolHandlerContext, 'resultStore'> };
-  };
-
-  return maybeConfig.configurable?.onechat ?? null;
-};
-
-const PLATFORM_DASHBOARDS_TOOL = tool(
-  async (input, config) => {
-    const onechat = getOneChatContext(config);
-    if (!onechat) {
-      throw new Error('OneChat context not available');
-    }
-
-    const asAny = input as any;
-    const { operation, params, ...rest } = asAny ?? {};
-
-    const toolId =
-      operation === 'create'
-        ? 'platform.dashboard.create_dashboard'
-        : 'platform.dashboard.update_dashboard';
-
-    const available = await onechat.toolProvider.has({ toolId, request: onechat.request });
-    if (!available) {
-      return JSON.stringify({
-        error: {
-          message: `Tool "${toolId}" not found. It may be disabled, not registered, or unavailable in this deployment.`,
-        },
-        toolId,
-      });
-    }
-
-    const result = await onechat.runner.runTool({
-      toolId,
-      toolParams: ((params ?? rest) ?? {}) as Record<string, unknown>,
-    });
-
-    return JSON.stringify(result);
-  },
-  {
-    name: 'platform.dashboards',
-    description:
-      'Single entrypoint for dashboard creation and updates. Routes to the dashboard tools based on `operation`.',
-    schema: z.discriminatedUnion('operation', [
-      z
-        .object({
-          operation: z.literal('create').describe('Create a new dashboard.'),
-          params: z.object({}).passthrough().optional(),
-        })
-        .passthrough(),
-      z
-        .object({
-          operation: z.literal('update').describe('Update an existing dashboard.'),
-          params: z.object({}).passthrough().optional(),
-        })
-        .passthrough(),
-    ]),
-  }
-);
-
-export const PLATFORM_DASHBOARD_SKILL: Skill = {
-  namespace: 'platform.dashboards',
-  name: 'Platform Dashboards',
+export const PLATFORM_DASHBOARD_SKILL = defineSkillType({
+  id: 'platform.dashboards',
+  name: 'dashboards',
+  basePath: 'skills/dashboards',
   description: 'Create and update dashboards safely',
   content: `# Platform Dashboards
 
@@ -100,7 +33,8 @@ Helps you create and update dashboards in a non-destructive way, focusing on inc
 3) If applying changes, summarize exactly what will be created/updated.\n
 4) Prefer saved-object versioned updates when writing.\n
 `,
-  tools: [PLATFORM_DASHBOARDS_TOOL],
-};
-
-
+  getAllowedTools: () => [
+    'platform.dashboard.create_dashboard',
+    'platform.dashboard.update_dashboard',
+  ],
+});

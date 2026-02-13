@@ -376,7 +376,9 @@ export class FleetPlugin
     const config = this.configInitialValue;
 
     if (deps.onechat) {
-      registerAgentBuilderSkills(deps.onechat);
+      registerAgentBuilderSkills(deps.onechat).catch((error) => {
+        this.logger.error(`Error registering Fleet agent builder skills: ${error}`);
+      });
     }
 
     core.status.set(this.fleetStatus$.asObservable());

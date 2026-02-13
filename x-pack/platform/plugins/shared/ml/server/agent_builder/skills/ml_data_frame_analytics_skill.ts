@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { Skill } from '@kbn/agent-builder-common/skills';
+import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 
-export const ML_DATA_FRAME_ANALYTICS_SKILL: Skill = {
-  namespace: 'ml.data_frame_analytics',
-  name: 'ML Data Frame Analytics',
+export const ML_DATA_FRAME_ANALYTICS_SKILL = defineSkillType({
+  id: 'ml.data_frame_analytics',
+  name: 'data_frame_analytics',
+  basePath: 'skills/ml',
   description: 'Explain DFA jobs, configs, and results (guidance)',
   content: `# ML Data Frame Analytics
 
@@ -24,8 +25,7 @@ Provides read-only guidance for data frame analytics: what each analysis type do
 - Do not delete jobs.\n
 - Do not stop/close jobs.\n
 `,
-  tools: [],
-};
+});
 
 
 

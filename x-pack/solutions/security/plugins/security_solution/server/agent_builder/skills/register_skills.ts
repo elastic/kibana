@@ -6,6 +6,11 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import {
+  FORENSICS_ANALYTICS_SKILL,
+  GET_ALERTS_SKILL,
+  SECURITY_LABS_SEARCH_SKILL,
+} from '../../assistant/skills';
 import { SECURITY_ALERT_SUPPRESSION_READONLY_SKILL } from './security_alert_suppression_readonly_skill';
 import { SECURITY_ATTACK_DISCOVERY_SKILL } from './security_attack_discovery_skill';
 import { SECURITY_CASES_SKILL } from './security_cases_skill';
@@ -20,26 +25,23 @@ import { SECURITY_TIMELINES_SKILL } from './security_timelines_skill';
 
 /**
  * Registers all security agent builder skills with the agentBuilder plugin
+ * using the new SkillDefinition-based registration API.
  */
-export const registerSkills = async (
-  agentBuilder: AgentBuilderPluginSetup
-): Promise<void> => {
-  agentBuilder.skills.register(SECURITY_CASES_SKILL);
-  agentBuilder.skills.register(SECURITY_DETECTION_RULES_SKILL);
-  agentBuilder.skills.register(SECURITY_TIMELINES_SKILL);
-  agentBuilder.skills.register(SECURITY_EXCEPTION_LISTS_SKILL);
-  agentBuilder.skills.register(SECURITY_ATTACK_DISCOVERY_SKILL);
-  agentBuilder.skills.register(SECURITY_ENDPOINT_READONLY_SKILL);
-  agentBuilder.skills.register(SECURITY_NETWORK_SKILL);
-  agentBuilder.skills.register(SECURITY_THREAT_INTEL_SKILL);
-  agentBuilder.skills.register(SECURITY_ALERT_SUPPRESSION_READONLY_SKILL);
-  agentBuilder.skills.register(SECURITY_RULE_EXCEPTIONS_PREVIEW_SKILL);
-  agentBuilder.skills.register(SECURITY_ENDPOINT_RESPONSE_ACTIONS_READONLY_SKILL);
-};
-
-/**
- * @deprecated Use registerSkills instead. Kept for backward compatibility.
- */
-export const registerAgentBuilderSkills = (agentBuilder: AgentBuilderPluginSetup): void => {
-  void registerSkills(agentBuilder);
+export const registerSkills = async (agentBuilder: AgentBuilderPluginSetup): Promise<void> => {
+  await Promise.all([
+    agentBuilder.skill.registerSkill(GET_ALERTS_SKILL),
+    agentBuilder.skill.registerSkill(FORENSICS_ANALYTICS_SKILL),
+    agentBuilder.skill.registerSkill(SECURITY_LABS_SEARCH_SKILL),
+    agentBuilder.skill.registerSkill(SECURITY_CASES_SKILL),
+    agentBuilder.skill.registerSkill(SECURITY_DETECTION_RULES_SKILL),
+    agentBuilder.skill.registerSkill(SECURITY_TIMELINES_SKILL),
+    agentBuilder.skill.registerSkill(SECURITY_EXCEPTION_LISTS_SKILL),
+    agentBuilder.skill.registerSkill(SECURITY_ATTACK_DISCOVERY_SKILL),
+    agentBuilder.skill.registerSkill(SECURITY_ENDPOINT_READONLY_SKILL),
+    agentBuilder.skill.registerSkill(SECURITY_NETWORK_SKILL),
+    agentBuilder.skill.registerSkill(SECURITY_THREAT_INTEL_SKILL),
+    agentBuilder.skill.registerSkill(SECURITY_ALERT_SUPPRESSION_READONLY_SKILL),
+    agentBuilder.skill.registerSkill(SECURITY_RULE_EXCEPTIONS_PREVIEW_SKILL),
+    agentBuilder.skill.registerSkill(SECURITY_ENDPOINT_RESPONSE_ACTIONS_READONLY_SKILL),
+  ]);
 };

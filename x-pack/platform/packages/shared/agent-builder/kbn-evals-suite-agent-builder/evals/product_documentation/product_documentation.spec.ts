@@ -128,8 +128,7 @@ evaluate.describe(
           log.debug(`Deleted eval agent: ${productDocAgentId}`);
         } catch (e) {
           log.warning(
-            `Failed to delete eval agent "${productDocAgentId}": ${
-              e instanceof Error ? e.message : String(e)
+            `Failed to delete eval agent "${productDocAgentId}": ${e instanceof Error ? e.message : String(e)
             }`
           );
         }
@@ -144,8 +143,7 @@ evaluate.describe(
           log.debug('Uninstalled Elastic documentation');
         } catch (e) {
           log.warning(
-            `Failed to uninstall Elastic documentation: ${
-              e instanceof Error ? e.message : String(e)
+            `Failed to uninstall Elastic documentation: ${e instanceof Error ? e.message : String(e)
             }`
           );
         }
