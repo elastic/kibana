@@ -9,8 +9,7 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { manageDashboardTool } from '../tools';
-
-const manageDashboardToolId = 'platform.dashboard.manage_dashboard' as const;
+import { dashboardTools } from '../../common';
 
 /**
  * Describes when to use each supported chart type.
@@ -74,7 +73,7 @@ This skill has access to the following tools. Each has a specific role in the da
 - **${
     platformCoreTools.executeEsql
   }**: Execute an ES|QL query and return results. Use to validate that data actually exists or to preview the data shape before building visualizations.
-- **${manageDashboardToolId}**: Create or update an in-memory dashboard with panels. This is the primary tool for this skill.
+- **${dashboardTools.manageDashboard}**: Create or update an in-memory dashboard with panels. This is the primary tool for this skill.
 
 ## Core Instructions
 
@@ -110,7 +109,7 @@ For straightforward requests (e.g., "show X over time"), skip this step and let 
 
 #### Creating a new dashboard
 
-Call ${manageDashboardToolId} with:
+Call ${dashboardTools.manageDashboard} with:
 - \`title\` (**required**): a concise, descriptive title for the dashboard.
 - \`description\` (**required**): one sentence explaining what the dashboard shows.
 - \`visualizationQueries\` (**required**): an array of visualization requests. See "Writing Effective Visualization Queries" below.
@@ -119,7 +118,7 @@ Call ${manageDashboardToolId} with:
 #### Updating an existing dashboard
 
 1. Extract the dashboard attachment ID from the previous tool result: look for \`data.dashboardAttachment.id\`.
-2. Call ${manageDashboardToolId} with \`dashboardAttachmentId\` plus **only** the fields you need to change:
+2. Call ${dashboardTools.manageDashboard} with \`dashboardAttachmentId\` plus **only** the fields you need to change:
    - \`visualizationQueries\`: add new LLM-generated visualizations.
    - \`existingVisualizationIds\`: add visualization attachments that were already created earlier in the conversation. Pass their attachment IDs directly instead of regenerating them.
    - \`removePanelIds\`: remove panels by their \`panelId\`. Find panel IDs in the previous result at \`data.dashboardAttachment.content.panels[].panelId\`.
@@ -218,7 +217,7 @@ Base panel selection on the fields actually available in the discovered index ma
    - XY bar: top 10 URL paths by request count
    - XY line: CPU usage over time grouped by host
 
-3. **Call ${manageDashboardToolId}:**
+3. **Call ${dashboardTools.manageDashboard}:**
    \`\`\`json
    {
      "title": "Web Server Performance",
@@ -268,7 +267,7 @@ Base panel selection on the fields actually available in the discovered index ma
 
 2. No new data discovery needed — fields are already known from the creation step.
 
-3. **Call ${manageDashboardToolId}:**
+3. **Call ${dashboardTools.manageDashboard}:**
    \`\`\`json
    {
      "dashboardAttachmentId": "abc-123",
@@ -294,7 +293,7 @@ Base panel selection on the fields actually available in the discovered index ma
 1. The user previously asked for a standalone visualization, which was created with attachment ID \`"viz-456"\`.
 2. The current dashboard has attachment ID \`"abc-123"\`.
 
-3. **Call ${manageDashboardToolId}:**
+3. **Call ${dashboardTools.manageDashboard}:**
    \`\`\`json
    {
      "dashboardAttachmentId": "abc-123",
