@@ -96,7 +96,7 @@ export function useDateRangePickerContext(): DateRangePickerInternalContextValue
  */
 export function DateRangePickerProvider({
   children,
-  value,
+  defaultValue,
   onChange,
   dateFormat,
   isInvalid: isInvalidProp,
@@ -112,7 +112,7 @@ export function DateRangePickerProvider({
   const panelId = useGeneratedHtmlId({ prefix: 'dateRangePickerPanel' });
   const lastValidText = useRef('');
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [text, setText] = useState<string>(() => value ?? '');
+  const [text, setText] = useState<string>(() => defaultValue ?? '');
   const timeRange: TimeRange = useMemo(() => textToTimeRange(text), [text]);
   const displayText = useMemo(
     () => timeRangeToDisplayText(timeRange, { dateFormat }),
@@ -179,10 +179,14 @@ export function DateRangePickerProvider({
     [onChange, timeRange]
   );
 
-  const setIsEditingWithSave = useCallback(
+  const setIsEditingWithRestore = useCallback(
     (editing: boolean) => {
       if (editing && text) {
         lastValidText.current = text;
+      }
+      if (!editing && lastValidText.current) {
+        setText(lastValidText.current);
+        lastValidText.current = '';
       }
       setIsEditing(editing);
     },
@@ -196,7 +200,7 @@ export function DateRangePickerProvider({
       setText,
       applyRange,
       isEditing,
-      setIsEditing: setIsEditingWithSave,
+      setIsEditing: setIsEditingWithRestore,
       compressed,
       maxWidth,
       displayText,
@@ -214,7 +218,7 @@ export function DateRangePickerProvider({
       isInvalid,
       applyRange,
       isEditing,
-      setIsEditingWithSave,
+      setIsEditingWithRestore,
       compressed,
       maxWidth,
       displayText,

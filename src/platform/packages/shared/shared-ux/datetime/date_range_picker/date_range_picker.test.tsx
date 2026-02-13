@@ -14,7 +14,7 @@ import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 import { DateRangePicker, type DateRangePickerProps } from './date_range_picker';
 
 const defaultProps: DateRangePickerProps = {
-  value: 'last 20 minutes',
+  defaultValue: 'last 20 minutes',
   onChange: () => {},
 };
 
@@ -67,6 +67,18 @@ describe('DateRangePicker', () => {
       expect(onChange).not.toHaveBeenCalled();
       expect(screen.getByTestId('dateRangePickerControlButton')).toBeInTheDocument();
       expect(screen.queryByTestId('dateRangePickerInput')).not.toBeInTheDocument();
+    });
+
+    it('restores previous text on Escape after typing', () => {
+      renderWithEuiTheme(<DateRangePicker {...defaultProps} />);
+
+      const input = openEditing();
+
+      fireEvent.change(input, { target: { value: 'something else' } });
+      fireEvent.keyDown(input, { key: 'Escape' });
+
+      const button = screen.getByTestId('dateRangePickerControlButton');
+      expect(button).toHaveTextContent('Last 20 minutes');
     });
 
     it('closes on outside click and returns to display mode', () => {

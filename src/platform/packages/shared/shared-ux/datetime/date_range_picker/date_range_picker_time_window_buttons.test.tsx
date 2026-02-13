@@ -21,7 +21,7 @@ import {
 function renderPicker(overrides: Partial<DateRangePickerProps> = {}) {
   const onChange = jest.fn();
   const props: DateRangePickerProps = {
-    value: '-15m to now',
+    defaultValue: '-15m to now',
     onChange,
     showTimeWindowButtons: true,
     ...overrides,
@@ -98,7 +98,7 @@ describe('TimeWindowButtons', () => {
   describe('time shift', () => {
     it('calls onChange when stepping forward', async () => {
       const { onChange } = renderPicker({
-        value: '2025-01-01T00:00:00.000Z to 2025-01-02T00:00:00.000Z',
+        defaultValue: '2025-01-01T00:00:00.000Z to 2025-01-02T00:00:00.000Z',
       });
 
       await act(async () => {
@@ -113,7 +113,7 @@ describe('TimeWindowButtons', () => {
 
     it('calls onChange when stepping backward', async () => {
       const { onChange } = renderPicker({
-        value: '2025-01-02T00:00:00.000Z to 2025-01-03T00:00:00.000Z',
+        defaultValue: '2025-01-02T00:00:00.000Z to 2025-01-03T00:00:00.000Z',
       });
 
       await act(async () => {
@@ -132,7 +132,7 @@ describe('TimeWindowButtons', () => {
     const end = '2025-01-02T00:00:00.000Z';
 
     it('expands the window on both ends with default zoom factor', async () => {
-      const { onChange } = renderPicker({ value: `${start} to ${end}` });
+      const { onChange } = renderPicker({ defaultValue: `${start} to ${end}` });
 
       await act(async () => {
         fireEvent.click(screen.getByTestId('dateRangePickerZoomOutButton'));
@@ -152,7 +152,7 @@ describe('TimeWindowButtons', () => {
     it('accepts a custom zoom factor', async () => {
       const customZoomFactor = 1;
       const { onChange } = renderPicker({
-        value: `${start} to ${end}`,
+        defaultValue: `${start} to ${end}`,
         showTimeWindowButtons: { zoomFactor: customZoomFactor },
       });
 
@@ -173,7 +173,7 @@ describe('TimeWindowButtons', () => {
 
     it('expands by ZOOM_DELTA_FALLBACK_MS when time window is 0', async () => {
       const sameTime = '2025-01-01T12:00:00.000Z';
-      const { onChange } = renderPicker({ value: `${sameTime} to ${sameTime}` });
+      const { onChange } = renderPicker({ defaultValue: `${sameTime} to ${sameTime}` });
 
       await act(async () => {
         fireEvent.click(screen.getByTestId('dateRangePickerZoomOutButton'));
@@ -195,7 +195,7 @@ describe('TimeWindowButtons', () => {
 
     it('shrinks the window on both ends with default zoom factor', async () => {
       const { onChange } = renderPicker({
-        value: `${start} to ${end}`,
+        defaultValue: `${start} to ${end}`,
         showTimeWindowButtons: { showZoomIn: true },
       });
 
@@ -217,7 +217,7 @@ describe('TimeWindowButtons', () => {
     it('accepts a custom zoom factor', async () => {
       const customZoomFactor = 0.42;
       const { onChange } = renderPicker({
-        value: `${start} to ${end}`,
+        defaultValue: `${start} to ${end}`,
         showTimeWindowButtons: { showZoomIn: true, zoomFactor: customZoomFactor },
       });
 
@@ -239,7 +239,7 @@ describe('TimeWindowButtons', () => {
     it('does nothing when time window is 0', async () => {
       const sameTime = '2025-01-01T12:00:00.000Z';
       const { onChange } = renderPicker({
-        value: `${sameTime} to ${sameTime}`,
+        defaultValue: `${sameTime} to ${sameTime}`,
         showTimeWindowButtons: { showZoomIn: true },
       });
 

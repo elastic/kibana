@@ -18,7 +18,7 @@ export type { TimeWindowButtonsConfig } from './date_range_picker_time_window_bu
 
 export interface DateRangePickerProps {
   /** Text representation of the time range */
-  value?: string;
+  defaultValue?: string;
 
   /** Callback for when the time changes */
   onChange: (props: DateRangePickerOnChangeProps) => void;
@@ -48,7 +48,7 @@ export interface DateRangePickerOnChangeProps extends TimeRangeBounds {
   startDate: Date | null;
   /** End as Date object */
   endDate: Date | null;
-  /** Text representation fo the time range */
+  /** Text representation of the time range */
   value: string;
   /** Whether the time range is invalid */
   isInvalid: boolean;

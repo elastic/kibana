@@ -16,6 +16,7 @@ import {
   EuiFormControlButton,
   EuiFormControlLayout,
   EuiToolTip,
+  keys,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -91,15 +92,15 @@ export function DateRangePickerControl() {
   };
 
   const onInputKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Enter' && isEditing && text) {
+    if (event.key === keys.ENTER && isEditing && text) {
       // Prevent Enter's keyup firing `onButtonClick`
       event.preventDefault();
       applyRange();
     }
-    if (event.key === 'Escape' && isEditing) {
+    if (event.key === keys.ESCAPE && isEditing) {
       setIsEditing(false);
     }
-    if (event.key === 'ArrowDown' && isEditing) {
+    if (event.key === keys.ARROW_DOWN && isEditing) {
       event.preventDefault();
       resolveInitialFocus(panelRef, initialFocus)?.focus();
     }
@@ -113,7 +114,7 @@ export function DateRangePickerControl() {
   /** Exit editing mode when Tab leaves the control in either direction. */
   const onControlKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.key !== 'Tab' || !isEditing) return;
+      if (event.key !== keys.TAB || !isEditing) return;
 
       const control = controlRef.current;
       if (!control) return;
