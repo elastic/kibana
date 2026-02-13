@@ -143,6 +143,23 @@ const stateSchemaV6 = stateSchemaV5.extends({
   total_filled_gap_duration_ms: schema.number(),
 });
 
+const stateSchemaV7 = stateSchemaV6.extends({
+  gap_auto_fill_scheduler_runs_per_day: schema.number(),
+  gap_auto_fill_scheduler_runs_by_status_per_day: schema.recordOf(schema.string(), schema.number()),
+  gap_auto_fill_scheduler_duration_ms_per_day: schema.object({
+    min: schema.number(),
+    max: schema.number(),
+    avg: schema.number(),
+    sum: schema.number(),
+  }),
+  gap_auto_fill_scheduler_unique_rule_count_per_day: schema.number(),
+  gap_auto_fill_scheduler_processed_gaps_total_per_day: schema.number(),
+  gap_auto_fill_scheduler_results_by_status_per_day: schema.recordOf(
+    schema.string(),
+    schema.number()
+  ),
+});
+
 export const stateSchemaByVersion = {
   1: {
     // A task that was created < 8.10 will go through this "up" migration
@@ -276,9 +293,31 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV6,
   },
+  7: {
+    up: (state: Record<string, unknown>) => ({
+      ...stateSchemaByVersion[6].up(state),
+      gap_auto_fill_scheduler_runs_per_day: state.gap_auto_fill_scheduler_runs_per_day || 0,
+      gap_auto_fill_scheduler_runs_by_status_per_day:
+        state.gap_auto_fill_scheduler_runs_by_status_per_day || {},
+      gap_auto_fill_scheduler_duration_ms_per_day:
+        state.gap_auto_fill_scheduler_duration_ms_per_day || {
+          min: 0,
+          max: 0,
+          avg: 0,
+          sum: 0,
+        },
+      gap_auto_fill_scheduler_unique_rule_count_per_day:
+        state.gap_auto_fill_scheduler_unique_rule_count_per_day || 0,
+      gap_auto_fill_scheduler_processed_gaps_total_per_day:
+        state.gap_auto_fill_scheduler_processed_gaps_total_per_day || 0,
+      gap_auto_fill_scheduler_results_by_status_per_day:
+        state.gap_auto_fill_scheduler_results_by_status_per_day || {},
+    }),
+    schema: stateSchemaV7,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[6].schema;
+const latestTaskStateSchema = stateSchemaByVersion[7].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
@@ -367,4 +406,15 @@ export const emptyState: LatestTaskStateSchema = {
   count_ignored_fields_by_rule_type: {},
   count_rules_with_linked_dashboards: 0,
   count_rules_with_investigation_guide: 0,
+  gap_auto_fill_scheduler_runs_per_day: 0,
+  gap_auto_fill_scheduler_runs_by_status_per_day: {},
+  gap_auto_fill_scheduler_duration_ms_per_day: {
+    min: 0,
+    max: 0,
+    avg: 0,
+    sum: 0,
+  },
+  gap_auto_fill_scheduler_unique_rule_count_per_day: 0,
+  gap_auto_fill_scheduler_processed_gaps_total_per_day: 0,
+  gap_auto_fill_scheduler_results_by_status_per_day: {},
 };
