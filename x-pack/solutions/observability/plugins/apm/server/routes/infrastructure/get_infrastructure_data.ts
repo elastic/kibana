@@ -47,7 +47,7 @@ export const getInfrastructureData = async ({
       query: {
         bool: {
           filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
+            ...termQuery(SERVICE_NAME, serviceName),
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
