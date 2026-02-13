@@ -15,14 +15,16 @@ import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { InternalSecurityServiceStart } from '@kbn/core-security-browser-internal';
 import type { InternalUserProfileServiceStart } from '@kbn/core-user-profile-browser-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-browser';
 
 /** @internal */
 export interface InternalCoreStart
   extends Omit<
     CoreStart,
-    'application' | 'injection' | 'plugins' | 'http' | 'security' | 'userProfile'
+    'application' | 'injection' | 'plugins' | 'http' | 'security' | 'userProfile' | 'elasticsearch'
   > {
   application: InternalApplicationStart;
+  elasticsearch: ElasticsearchServiceStart;
   featureFlags: FeatureFlagsStart;
   injectedMetadata: InternalInjectedMetadataStart;
   injection: InternalCoreDiServiceStart;

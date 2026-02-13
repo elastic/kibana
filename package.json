@@ -360,6 +360,8 @@
     "@kbn/core-doc-links-browser-internal": "link:src/core/packages/doc-links/browser-internal",
     "@kbn/core-doc-links-server": "link:src/core/packages/doc-links/server",
     "@kbn/core-doc-links-server-internal": "link:src/core/packages/doc-links/server-internal",
+    "@kbn/core-elasticsearch-browser": "link:src/core/packages/elasticsearch/browser",
+    "@kbn/core-elasticsearch-browser-internal": "link:src/core/packages/elasticsearch/browser-internal",
     "@kbn/core-elasticsearch-client-server-internal": "link:src/core/packages/elasticsearch/client-server-internal",
     "@kbn/core-elasticsearch-server": "link:src/core/packages/elasticsearch/server",
     "@kbn/core-elasticsearch-server-internal": "link:src/core/packages/elasticsearch/server-internal",

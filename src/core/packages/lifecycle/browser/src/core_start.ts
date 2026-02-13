@@ -28,6 +28,7 @@ import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-browser';
 
 /**
  * Core services exposed to the `Plugin` start lifecycle
@@ -51,6 +52,8 @@ export interface CoreStart {
   docLinks: DocLinksStart;
   /** {@link ExecutionContextStart} */
   executionContext: ExecutionContextStart;
+  /** {@link ElasticsearchServiceStart} */
+  elasticsearch: ElasticsearchServiceStart;
   /** {@link FeatureFlagsStart} */
   featureFlags: FeatureFlagsStart;
   /** {@link HttpStart} */

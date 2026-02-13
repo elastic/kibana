@@ -12,26 +12,24 @@ import ReactDOM from 'react-dom';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ICPSManager } from '@kbn/cps-utils';
-import type { CPSPluginSetup, CPSPluginStart, CPSConfigType } from './types';
+import type { CPSPluginSetup, CPSPluginStart } from './types';
 import { CPSManager } from './services/cps_manager';
 
 export class CpsPlugin implements Plugin<CPSPluginSetup, CPSPluginStart> {
-  private readonly initializerContext: PluginInitializerContext<CPSConfigType>;
+  private readonly initializerContext: PluginInitializerContext;
 
-  constructor(initializerContext: PluginInitializerContext<CPSConfigType>) {
+  constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
   }
 
   public setup(core: CoreSetup): CPSPluginSetup {
-    const { cpsEnabled } = this.initializerContext.config.get();
-
     return {
-      cpsEnabled,
+      cpsEnabled: core.elasticsearch.getCpsEnabled(),
     };
   }
 
   public start(core: CoreStart): CPSPluginStart {
-    const { cpsEnabled } = this.initializerContext.config.get();
+    const cpsEnabled = core.elasticsearch.getCpsEnabled();
     let cpsManager: ICPSManager | undefined;
 
     // Only initialize cpsManager in serverless environments when CPS is enabled

@@ -188,3 +188,13 @@ jest.doMock('@kbn/core-di-internal', () => ({
   ...jest.requireActual('@kbn/core-di-internal'),
   CoreInjectionService: CoreInjectionServiceConstructor,
 }));
+
+export const MockElasticsearchService = {
+  setup: jest.fn().mockReturnValue({}),
+  start: jest.fn().mockReturnValue({ getCpsEnabled: jest.fn().mockReturnValue(false) }),
+  stop: jest.fn(),
+};
+export const ElasticsearchServiceConstructor = jest.fn(() => MockElasticsearchService);
+jest.doMock('@kbn/core-elasticsearch-browser-internal', () => ({
+  ElasticsearchService: ElasticsearchServiceConstructor,
+}));

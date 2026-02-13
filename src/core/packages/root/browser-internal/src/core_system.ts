@@ -43,6 +43,7 @@ import { PricingService } from '@kbn/core-pricing-browser-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
 import { SecurityService } from '@kbn/core-security-browser-internal';
 import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
+import { ElasticsearchService } from '@kbn/core-elasticsearch-browser-internal';
 import { version as REACT_VERSION } from 'react';
 import { muteLegacyRootWarning } from '@kbn/react-mute-legacy-root-warning';
 import { CoreInjectionService } from '@kbn/core-di-browser-internal';
@@ -115,6 +116,7 @@ export class CoreSystem {
   private readonly customBranding: CustomBrandingService;
   private readonly security: SecurityService;
   private readonly userProfile: UserProfileService;
+  private readonly elasticsearch: ElasticsearchService;
   private readonly pricing: PricingService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
@@ -153,6 +155,7 @@ export class CoreSystem {
     this.featureFlags = new FeatureFlagsService(this.coreContext);
     this.security = new SecurityService(this.coreContext);
     this.userProfile = new UserProfileService(this.coreContext);
+    this.elasticsearch = new ElasticsearchService();
     this.theme = new ThemeService();
     this.notifications = new NotificationsService();
     this.http = new HttpService();
@@ -264,6 +267,7 @@ export class CoreSystem {
       });
       this.httpRateLimiter.setup({ fatalErrors: this.fatalErrorsSetup, http });
       const injection = this.injection.setup();
+      const elasticsearch = this.elasticsearch.setup({ injectedMetadata });
       const security = this.security.setup();
       const userProfile = this.userProfile.setup();
       const chrome = this.chrome.setup({ analytics });
@@ -279,6 +283,7 @@ export class CoreSystem {
         analytics,
         application,
         chrome,
+        elasticsearch,
         fatalErrors: this.fatalErrorsSetup,
         featureFlags,
         http,
@@ -319,6 +324,7 @@ export class CoreSystem {
       const security = this.security.start();
       const userProfile = this.userProfile.start();
       const injectedMetadata = this.injectedMetadata.start();
+      const elasticsearch = this.elasticsearch.start();
       const injection = this.injection.start();
       const uiSettings = this.uiSettings.start();
       const settings = this.settings.start();
@@ -422,6 +428,7 @@ export class CoreSystem {
         chrome,
         docLinks,
         executionContext,
+        elasticsearch,
         featureFlags,
         http,
         theme,
@@ -501,6 +508,7 @@ export class CoreSystem {
     this.analytics.stop();
     this.featureFlags.stop();
     this.security.stop();
+    this.elasticsearch.stop();
     this.userProfile.stop();
     this.rootDomElement.textContent = '';
   }

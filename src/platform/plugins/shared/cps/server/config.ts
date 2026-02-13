@@ -26,9 +26,6 @@ type ConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: configSchema,
-  exposeToBrowser: {
-    cpsEnabled: true,
-  },
   deprecations: () => [
     (settings, fromPath, addDeprecation) => {
       const cpsCpsEnabled = get(settings, 'cps.cpsEnabled');
@@ -37,19 +34,14 @@ export const config: PluginConfigDescriptor<ConfigType> = {
           configPath: 'cps.cpsEnabled',
           title: 'Setting "cps.cpsEnabled" is deprecated',
           message:
-            '"cps.cpsEnabled" has been moved to "elasticsearch.cpsEnabled". Please update your configuration, this setting will be removed in a future version.',
-          level: 'warning',
+            '"cps.cpsEnabled" has been moved to "elasticsearch.cpsEnabled". Please update your kibana.yml to use the new setting.',
+          level: 'critical',
           correctiveActions: {
             manualSteps: [
               'Replace "cps.cpsEnabled" with "elasticsearch.cpsEnabled" in your Kibana config.',
             ],
           },
         });
-        if (get(settings, 'elasticsearch.cpsEnabled') === undefined) {
-          return {
-            set: [{ path: 'elasticsearch.cpsEnabled', value: cpsCpsEnabled }],
-          };
-        }
       }
     },
   ],

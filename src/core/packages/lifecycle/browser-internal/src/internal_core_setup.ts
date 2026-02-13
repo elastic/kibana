@@ -16,6 +16,7 @@ import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { InternalSecurityServiceSetup } from '@kbn/core-security-browser-internal';
 import type { InternalUserProfileServiceSetup } from '@kbn/core-user-profile-browser-internal';
 import type { FeatureFlagsSetup } from '@kbn/core-feature-flags-browser';
+import type { ElasticsearchServiceSetup } from '@kbn/core/packages/elasticsearch/browser';
 
 /** @internal */
 export interface InternalCoreSetup
@@ -29,9 +30,11 @@ export interface InternalCoreSetup
     | 'http'
     | 'security'
     | 'userProfile'
+    | 'elasticsearch'
   > {
   application: InternalApplicationSetup;
   chrome: InternalChromeSetup;
+  elasticsearch: ElasticsearchServiceSetup;
   featureFlags: FeatureFlagsSetup;
   injectedMetadata: InternalInjectedMetadataSetup;
   injection: InternalCoreDiServiceSetup;

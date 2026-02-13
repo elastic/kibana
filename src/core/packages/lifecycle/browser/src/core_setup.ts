@@ -22,6 +22,7 @@ import type { CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
 import type { PluginsServiceSetup } from '@kbn/core-plugins-contracts-browser';
 import type { SecurityServiceSetup } from '@kbn/core-security-browser';
 import type { UserProfileServiceSetup } from '@kbn/core-user-profile-browser';
+import type { ElasticsearchServiceSetup } from '@kbn/core-elasticsearch-browser';
 import type { CoreStart } from './core_start';
 
 /**
@@ -62,6 +63,8 @@ export interface CoreSetup<TPluginsStart extends Record<string, any> = {}, TStar
   uiSettings: IUiSettingsClient;
   /** {@link SettingsStart} */
   settings: SettingsStart;
+  /** {@link ElasticsearchServiceSetup} */
+  elasticsearch: ElasticsearchServiceSetup;
   /** {@link ExecutionContextSetup} */
   executionContext: ExecutionContextSetup;
   /** {@link ThemeServiceSetup} */

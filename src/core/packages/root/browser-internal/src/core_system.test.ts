@@ -51,6 +51,8 @@ import {
   UserProfileServiceConstructor,
   MockPricingService,
   PricingServiceConstructor,
+  MockElasticsearchService,
+  ElasticsearchServiceConstructor,
   MockCoreInjectionService,
   CoreInjectionServiceConstructor,
 } from './core_system.test.mocks';
@@ -162,6 +164,7 @@ describe('constructor', () => {
     expect(SecurityServiceConstructor).toHaveBeenCalledTimes(1);
     expect(UserProfileServiceConstructor).toHaveBeenCalledTimes(1);
     expect(PricingServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(ElasticsearchServiceConstructor).toHaveBeenCalledTimes(1);
     expect(CoreInjectionServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
@@ -336,6 +339,11 @@ describe('#setup()', () => {
   it('calls injection#setup()', async () => {
     await setupCore();
     expect(MockCoreInjectionService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls elasticsearch#setup()', async () => {
+    await setupCore();
+    expect(MockElasticsearchService.setup).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -543,6 +551,11 @@ describe('#start()', () => {
     await startCore();
     expect(MockCoreInjectionService.start).toHaveBeenCalledTimes(1);
   });
+
+  it('calls elasticsearch#start()', async () => {
+    await startCore();
+    expect(MockElasticsearchService.start).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('#stop()', () => {
@@ -607,6 +620,14 @@ describe('#stop()', () => {
     expect(MockThemeService.stop).not.toHaveBeenCalled();
     coreSystem.stop();
     expect(MockThemeService.stop).toHaveBeenCalled();
+  });
+
+  it('calls elasticsearch.stop()', () => {
+    const coreSystem = createCoreSystem();
+
+    expect(MockElasticsearchService.stop).not.toHaveBeenCalled();
+    coreSystem.stop();
+    expect(MockElasticsearchService.stop).toHaveBeenCalled();
   });
 
   it('clears the rootDomElement', async () => {
