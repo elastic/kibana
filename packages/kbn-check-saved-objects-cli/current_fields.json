@@ -876,6 +876,7 @@
     "delete_unenrolled_agents",
     "delete_unenrolled_agents.enabled",
     "delete_unenrolled_agents.is_preconfigured",
+    "download_source_auth_secret_storage_requirements_met",
     "fleet_server_hosts",
     "has_seen_add_data_notice",
     "ilm_migration_status",

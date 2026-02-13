@@ -20,6 +20,7 @@ interface LifecyclePhaseButtonProps {
   onClick: () => void;
   phaseColor?: string;
   size?: string;
+  testSubjPrefix?: string;
 }
 
 export const LifecyclePhaseButton = ({
@@ -30,71 +31,64 @@ export const LifecyclePhaseButton = ({
   onClick,
   phaseColor,
   size,
-}: LifecyclePhaseButtonProps) => (
-  <EuiPanel
-    paddingSize="s"
-    hasBorder={false}
-    hasShadow={false}
-    role="button"
-    data-test-subj={isDelete ? 'lifecyclePhase-delete-button' : `lifecyclePhase-${label}-button`}
-    aria-label={
-      isDelete
-        ? i18n.translate('xpack.streams.streamDetailLifecycle.deletePhase.ariaLabel', {
-            defaultMessage: 'Delete phase',
-          })
-        : i18n.translate('xpack.streams.streamDetailLifecycle.phase.ariaLabel', {
-            defaultMessage: '{phase} phase',
-            values: { phase: label },
-          })
-    }
-    onClick={onClick}
-    css={getInteractivePanelStyles({
-      euiTheme,
-      backgroundColor: phaseColor ?? euiTheme.colors.backgroundBaseSubdued,
-      isPopoverOpen,
-      minHeight: '48px',
-      ...(isDelete
-        ? {
-            minWidth: '50px',
-            padding: '0',
-            alignCenter: true,
-          }
-        : {}),
-    })}
-    grow={false}
-  >
-    {isDelete ? (
-      <EuiFlexGroup
-        justifyContent="center"
-        alignItems="center"
-        responsive={false}
-        style={{ width: '100%', height: '100%' }}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiIcon size="m" type="trash" data-test-subj="dataLifecycle-delete-icon" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ) : (
-      <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
-        <EuiText
-          size="xs"
-          color={euiTheme.colors.plainDark}
-          data-test-subj={`lifecyclePhase-${label}-name`}
-          style={{
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            maxWidth: '100%',
-          }}
+  testSubjPrefix,
+}: LifecyclePhaseButtonProps) => {
+  const prefix = testSubjPrefix ? `${testSubjPrefix}-` : '';
+
+  return (
+    <EuiPanel
+      paddingSize="s"
+      hasBorder={false}
+      hasShadow={false}
+      role="button"
+      data-test-subj={
+        isDelete
+          ? `${prefix}lifecyclePhase-delete-button`
+          : `${prefix}lifecyclePhase-${label}-button`
+      }
+      aria-label={
+        isDelete
+          ? i18n.translate('xpack.streams.streamDetailLifecycle.deletePhase.ariaLabel', {
+              defaultMessage: 'Delete phase',
+            })
+          : i18n.translate('xpack.streams.streamDetailLifecycle.phase.ariaLabel', {
+              defaultMessage: '{phase} phase',
+              values: { phase: label },
+            })
+      }
+      onClick={onClick}
+      css={getInteractivePanelStyles({
+        euiTheme,
+        backgroundColor: phaseColor ?? euiTheme.colors.backgroundBaseSubdued,
+        isPopoverOpen,
+        minHeight: '48px',
+        ...(isDelete
+          ? {
+              minWidth: '50px',
+              padding: '0',
+              alignCenter: true,
+            }
+          : {}),
+      })}
+      grow={false}
+    >
+      {isDelete ? (
+        <EuiFlexGroup
+          justifyContent="center"
+          alignItems="center"
+          responsive={false}
+          style={{ width: '100%', height: '100%' }}
         >
-          <b>{capitalize(label)}</b>
-        </EuiText>
-        {size && (
+          <EuiFlexItem grow={false}>
+            <EuiIcon size="m" type="trash" data-test-subj={`${prefix}dataLifecycle-delete-icon`} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
           <EuiText
             size="xs"
             color={euiTheme.colors.plainDark}
-            data-test-subj={`lifecyclePhase-${label}-size`}
-            title={size}
+            data-test-subj={`${prefix}lifecyclePhase-${label}-name`}
             style={{
               overflow: 'hidden',
               textOverflow: 'ellipsis',
@@ -102,10 +96,26 @@ export const LifecyclePhaseButton = ({
               maxWidth: '100%',
             }}
           >
-            {size}
+            <b>{capitalize(label)}</b>
           </EuiText>
-        )}
-      </EuiFlexGroup>
-    )}
-  </EuiPanel>
-);
+          {size && (
+            <EuiText
+              size="xs"
+              color={euiTheme.colors.plainDark}
+              data-test-subj={`${prefix}lifecyclePhase-${label}-size`}
+              title={size}
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: '100%',
+              }}
+            >
+              {size}
+            </EuiText>
+          )}
+        </EuiFlexGroup>
+      )}
+    </EuiPanel>
+  );
+};
