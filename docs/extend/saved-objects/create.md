@@ -1,5 +1,5 @@
 ---
-navigation_title: Create
+navigation_title: Create a type
 ---
 
 # Create a Saved Object type [saved-objects-create]

@@ -1,5 +1,5 @@
 ---
-navigation_title: Update
+navigation_title: Update a type
 ---
 
 # Update a Saved Object type [saved-objects-update]
@@ -35,10 +35,6 @@ const myType: SavedObjectsType = {
   // ...other mandatory properties
 };
 ```
-
-:::::{important}
-When integrating with saved objects via the Saved Objects import/export APIs or the deprecated Saved Objects HTTP CRUD APIs, preserve `coreMigrationVersion` and `typeMigrationVersion` when persisting raw saved object documents outside of Kibana (for example, in JSON/NDJSON files). These fields are required to retain forwards compatibility across Kibana versions as saved object types evolve.
-:::::
 
 ## Transitioning legacy Saved Object types
 
