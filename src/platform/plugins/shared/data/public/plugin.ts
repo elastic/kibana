@@ -31,7 +31,6 @@ import {
   setUiSettings,
   setTheme,
 } from './services';
-import { applyFilterTrigger } from './triggers';
 import { getTableViewDescription } from './utils/table_inspector_view';
 import type { NowProviderInternalContract } from './now_provider';
 import { NowProvider } from './now_provider';
@@ -93,8 +92,6 @@ export class DataPublicPlugin
       storage: this.storage,
       nowProvider: this.nowProvider,
     });
-
-    uiActions.registerTrigger(applyFilterTrigger);
 
     inspector.registerView(
       getTableViewDescription(() => ({

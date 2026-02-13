@@ -10,7 +10,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-  CONTROL_MENU_TRIGGER,
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
   TIME_SLIDER_CONTROL,
@@ -26,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
+import { CONTROL_MENU_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type {
   ControlGroupRuntimeState,
   ControlPanelState,

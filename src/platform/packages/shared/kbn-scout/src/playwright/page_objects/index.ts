@@ -21,11 +21,14 @@ import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
 import { Inspector } from './inspector';
 import { LensApp } from './lens_app';
+import { LoginPage } from './login_page';
+import type { KibanaUrl } from '../../common/services/kibana_url';
 
 export interface PageObjectsFixtures {
   page: ScoutPage;
   config: ScoutTestConfig;
   log: ScoutLogger;
+  kbnUrl: KibanaUrl;
 }
 
 export interface PageObjects {
@@ -39,6 +42,7 @@ export interface PageObjects {
   toasts: Toasts;
   inspector: Inspector;
   lens: LensApp;
+  login: LoginPage;
 }
 
 /**
@@ -59,6 +63,7 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     toasts: createLazyPageObject(Toasts, fixtures.page),
     inspector: createLazyPageObject(Inspector, fixtures.page),
     lens: createLazyPageObject(LensApp, fixtures.page),
+    login: createLazyPageObject(LoginPage, fixtures.page, fixtures.kbnUrl),
     // Add new page objects here
   };
 }
