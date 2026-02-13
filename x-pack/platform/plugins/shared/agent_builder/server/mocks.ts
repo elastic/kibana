@@ -13,7 +13,9 @@ import { createToolHandlerContextMock } from './test_utils/runner';
 
 export type { ToolHandlerContextMock } from './test_utils/runner';
 
-const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {
+export type AgentBuilderPluginSetupMock = jest.MockedObjectDeep<AgentBuilderPluginSetup>;
+
+const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
   return {
     agents: {
       register: jest.fn(),
@@ -33,7 +35,9 @@ const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {
   };
 };
 
-const createStartContractMock = (): jest.Mocked<AgentBuilderPluginStart> => {
+export type AgentBuilderPluginStartMock = jest.MockedObjectDeep<AgentBuilderPluginStart>;
+
+const createStartContractMock = (): AgentBuilderPluginStartMock => {
   return {
     agents: {
       runAgent: jest.fn(),
