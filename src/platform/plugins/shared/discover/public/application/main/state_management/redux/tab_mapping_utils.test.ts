@@ -8,7 +8,6 @@
  */
 
 import { omit } from 'lodash';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { getTabStateMock } from './__mocks__/internal_state.mocks';
@@ -16,7 +15,6 @@ import {
   fromSavedObjectTabToTabState,
   fromSavedObjectTabToSavedSearch,
   fromTabStateToSavedObjectTab,
-  fromTabStateToByValueAttributes,
   fromSavedSearchToSavedObjectTab,
 } from './tab_mapping_utils';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -264,7 +262,7 @@ describe('tab mapping utils', () => {
           "hideChart": false,
           "id": "the-saved-search-id-with-timefield",
           "isTextBasedQuery": false,
-          "managed": undefined,
+          "managed": false,
           "references": undefined,
           "refreshInterval": undefined,
           "rowHeight": undefined,
@@ -568,50 +566,6 @@ describe('tab mapping utils', () => {
           "visContext": undefined,
         }
       `);
-    });
-  });
-
-  describe('fromTabStateToByValueAttributes', () => {
-    it('should map tab state to by-value attributes', () => {
-      const attributes = fromTabStateToByValueAttributes({
-        tab: tab1,
-        dataView: dataViewMock,
-        services,
-      });
-
-      expect(attributes.title).toBe('Tab 1');
-      expect(attributes.description).toBe('');
-      expect(attributes.columns).toEqual(['column1']);
-      expect(attributes.sort).toEqual([]);
-      expect(attributes.grid).toEqual({});
-      expect(attributes.hideChart).toBe(false);
-      expect(attributes.isTextBasedQuery).toBe(false);
-      expect(attributes.usesAdHocDataView).toBe(false);
-      expect(attributes.timeRestore).toBe(false);
-      expect(attributes.timeRange).toBeUndefined();
-      expect(attributes.refreshInterval).toBeUndefined();
-      expect(attributes.visContext).toEqual({ foo: 'bar' });
-      expect(attributes.controlGroupJson).toBeUndefined();
-      expect(attributes.references).toBeDefined();
-      expect(attributes.kibanaSavedObjectMeta.searchSourceJSON).toBeDefined();
-
-      // Verify tabs array is included with a single tab
-      expect(attributes.tabs).toHaveLength(1);
-      expect(attributes.tabs[0].id).toBe('1');
-      expect(attributes.tabs[0].label).toBe('Tab 1');
-      expect(attributes.tabs[0].attributes.columns).toEqual(['column1']);
-    });
-
-    it('should include time settings when timeRestore is true', () => {
-      const attributes = fromTabStateToByValueAttributes({
-        tab: tab2,
-        dataView: dataViewMock,
-        services,
-      });
-
-      expect(attributes.timeRestore).toBe(true);
-      expect(attributes.timeRange).toEqual({ from: 'now-15m', to: 'now' });
-      expect(attributes.refreshInterval).toEqual({ pause: false, value: 1000 });
     });
   });
 });

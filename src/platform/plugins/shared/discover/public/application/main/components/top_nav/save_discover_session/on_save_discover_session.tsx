@@ -10,18 +10,20 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
-import type {
-  DiscoverSession,
-  SavedSearchByValueAttributes,
+import {
+  toSavedSearchAttributes,
+  type DiscoverSession,
+  type SavedSearchByValueAttributes,
 } from '@kbn/saved-search-plugin/common';
 import type { DiscoverServices } from '../../../../../build_services';
 import type { DiscoverStateContainer } from '../../../state_management/discover_state';
 import {
-  fromTabStateToByValueAttributes,
   getSerializedSearchSourceDataViewDetails,
   internalStateActions,
   selectAllTabs,
   selectTabRuntimeState,
+  fromTabStateToSavedObjectTab,
+  fromSavedObjectTabToSavedSearch,
 } from '../../../state_management/redux';
 import type { DiscoverSessionSaveModalOnSaveCallback } from './save_modal';
 import { DiscoverSessionSaveModal } from './save_modal';
@@ -47,18 +49,23 @@ export const onSaveDiscoverSession = async ({
       state.runtimeStateManager,
       currentTab.id
     ).currentDataView$.getValue();
-
     if (!currentDataView) {
       return;
     }
 
-    const attributes = fromTabStateToByValueAttributes({
-      tab: currentTab,
-      dataView: currentDataView,
+    const savedSearch = await fromSavedObjectTabToSavedSearch({
+      tab: fromTabStateToSavedObjectTab({
+        tab: currentTab,
+        dataView: currentDataView,
+        services,
+      }),
+      discoverSession: undefined,
       services,
     });
+    const { searchSourceJSON, references } = savedSearch.searchSource.serialize();
+    const attributes = toSavedSearchAttributes(savedSearch, searchSourceJSON);
 
-    onSaveCb?.(attributes);
+    onSaveCb?.({ ...attributes, references });
   } else {
     const internalState = state.internalState.getState();
     const persistedDiscoverSession = internalState.persistedDiscoverSession;

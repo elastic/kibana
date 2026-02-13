@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  DiscoverSession,
-  DiscoverSessionTab,
-  SavedSearchByValueAttributes,
-} from '@kbn/saved-search-plugin/common';
+import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isObject } from 'lodash';
@@ -87,17 +83,17 @@ export const fromSavedObjectTabToSavedSearch = async ({
   discoverSession,
   services,
 }: {
-  discoverSession: DiscoverSession;
+  discoverSession: DiscoverSession | undefined;
   tab: DiscoverSessionTab;
   services: DiscoverServices;
 }): Promise<SavedSearch> => ({
-  id: discoverSession.id,
-  title: discoverSession.title,
-  description: discoverSession.description,
-  tags: discoverSession.tags,
-  managed: discoverSession.managed,
-  references: discoverSession.references,
-  sharingSavedObjectProps: discoverSession.sharingSavedObjectProps,
+  id: discoverSession?.id,
+  title: discoverSession?.title,
+  description: discoverSession?.description,
+  tags: discoverSession?.tags,
+  managed: discoverSession?.managed ?? false,
+  references: discoverSession?.references,
+  sharingSavedObjectProps: discoverSession?.sharingSavedObjectProps,
   sort: tab.sort,
   columns: tab.columns,
   grid: tab.grid,
@@ -231,67 +227,5 @@ export const fromSavedSearchToSavedObjectTab = ({
         ? JSON.stringify(tab.attributes.controlGroupState)
         : undefined
       : savedSearch.controlGroupJson,
-  };
-};
-
-/**
- * Converts a TabState to SavedSearchByValueAttributes for use in by-value embeddables.
- * This is used when saving a Discover session embedded in another application (e.g., Dashboard).
- */
-export const fromTabStateToByValueAttributes = ({
-  tab,
-  dataView,
-  services,
-}: {
-  tab: TabState;
-  dataView: DataView;
-  services: DiscoverServices;
-}): SavedSearchByValueAttributes => {
-  const sessionTab = fromTabStateToSavedObjectTab({ tab, dataView, services });
-
-  const searchSource = createSearchSource({
-    dataView,
-    appState: tab.appState,
-    globalState: tab.globalState,
-    services,
-  });
-  const { searchSourceJSON, references } = searchSource.serialize();
-
-  const tabAttributes = {
-    kibanaSavedObjectMeta: { searchSourceJSON },
-    sort: sessionTab.sort,
-    columns: sessionTab.columns,
-    grid: sessionTab.grid,
-    hideChart: sessionTab.hideChart,
-    isTextBasedQuery: sessionTab.isTextBasedQuery,
-    usesAdHocDataView: sessionTab.usesAdHocDataView,
-    viewMode: sessionTab.viewMode,
-    hideAggregatedPreview: sessionTab.hideAggregatedPreview,
-    rowHeight: sessionTab.rowHeight,
-    headerRowHeight: sessionTab.headerRowHeight,
-    timeRestore: sessionTab.timeRestore ?? false,
-    timeRange: sessionTab.timeRange,
-    refreshInterval: sessionTab.refreshInterval,
-    rowsPerPage: sessionTab.rowsPerPage,
-    sampleSize: sessionTab.sampleSize,
-    breakdownField: sessionTab.breakdownField,
-    chartInterval: sessionTab.chartInterval,
-    density: sessionTab.density,
-    visContext: sessionTab.visContext,
-    controlGroupJson: sessionTab.controlGroupJson,
-  };
-
-  return {
-    ...tabAttributes,
-    title: sessionTab.label,
-    description: '',
-    tabs: [
-      {
-        id: sessionTab.id,
-        label: sessionTab.label,
-        attributes: tabAttributes,
-      },
-    ],
-    references,
   };
 };

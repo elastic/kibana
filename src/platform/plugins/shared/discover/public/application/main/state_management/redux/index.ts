@@ -82,6 +82,5 @@ export {
   fromSavedObjectTabToTabState,
   fromSavedObjectTabToSavedSearch,
   fromTabStateToSavedObjectTab,
-  fromTabStateToByValueAttributes,
   fromSavedSearchToSavedObjectTab,
 } from './tab_mapping_utils';
