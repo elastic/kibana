@@ -827,5 +827,92 @@ apiTest.describe(
         expect(updatedRule.status).toBe('disabled');
       }
     );
+
+    // E2E test: Index data, create draft stream, query via ESQL view
+    apiTest(
+      'should query indexed data through draft stream ESQL view',
+      async ({ apiClient, samlAuth, esClient }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const childStreamName = `${streamNamePrefix}-esql-e2e`;
+        const testServiceName = `draft-e2e-test-service-${Date.now()}`;
+
+        // Step 1: Index test documents into the 'logs' stream
+        // These documents have a unique service.name to isolate them from other tests
+        const testDocs = [
+          {
+            '@timestamp': new Date().toISOString(),
+            message: 'Test message 1 for draft ESQL view',
+            'service.name': testServiceName,
+            'log.level': 'info',
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: 'Test message 2 for draft ESQL view',
+            'service.name': testServiceName,
+            'log.level': 'error',
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: 'Test message 3 - different service',
+            'service.name': 'other-service',
+            'log.level': 'info',
+          },
+        ];
+
+        // Index all test documents
+        for (const doc of testDocs) {
+          await esClient.index({
+            index: 'logs',
+            document: doc,
+            refresh: true,
+          });
+        }
+
+        // Step 2: Create a draft child stream with routing condition
+        const { statusCode: forkStatus } = await apiClient.post('api/streams/logs/_fork', {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            stream: { name: childStreamName },
+            where: { field: 'service.name', eq: testServiceName },
+            status: 'enabled',
+            draft: true,
+          },
+          responseType: 'json',
+        });
+        expect(forkStatus).toBe(200);
+
+        // Verify it's a draft stream
+        const { body: streamBody } = await apiClient.get(`api/streams/${childStreamName}`, {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+        expect(streamBody.stream.ingest.wired.draft).toBe(true);
+
+        // Step 3: Query the draft stream's ESQL view
+        // The view name format is $.<stream_name>
+        const viewName = `$.${childStreamName}`;
+
+        // Query the ESQL view and verify it returns the filtered data
+        const esqlResult = await esClient.esql.query({
+          query: `FROM ${viewName} | KEEP message, \`service.name\`, \`log.level\` | SORT message ASC`,
+          format: 'json',
+        });
+
+        // The query result should contain only documents matching the routing condition
+        // (service.name == testServiceName), so 2 documents, not 3
+        const rows = esqlResult.values as string[][];
+        expect(rows.length).toBe(2);
+
+        // Verify the correct documents are returned (those with our test service name)
+        const messages = rows.map((row) => row[0]);
+        expect(messages).toContain('Test message 1 for draft ESQL view');
+        expect(messages).toContain('Test message 2 for draft ESQL view');
+        expect(messages).not.toContain('Test message 3 - different service');
+
+        // Verify the service.name values are correct
+        const serviceNames = rows.map((row) => row[1]);
+        expect(serviceNames.every((name) => name === testServiceName)).toBe(true);
+      }
+    );
   }
 );

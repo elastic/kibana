@@ -4,7 +4,7 @@ exports[`transpile - Streamlang DSL to ES|QL) prelude support should include pre
 "INSIST_🐔 \`attributes.foo\`
   | INSIST_🐔 \`body.message\`
   | EVAL \`attributes.foo\` = COALESCE(NULL, \`attributes.foo\`::INTEGER)
-  | EVAL \`body.message\` = COALESCE(NULL, \`body.message\`::STRING)
+  | EVAL \`body.message\` = COALESCE(NULL, \`body.message\`::KEYWORD)
   | EVAL \`attributes.status\` = \\"active\\""
 `;
 

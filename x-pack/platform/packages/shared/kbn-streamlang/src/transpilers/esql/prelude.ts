@@ -62,7 +62,7 @@ function getEsqlCastOperator(type: PreludeFieldType): string | undefined {
     case 'keyword':
     case 'text':
     case 'match_only_text':
-      return 'string';
+      return 'keyword';
     case 'long':
       return 'long';
     case 'integer':
@@ -179,7 +179,7 @@ export function generateTypedEvalCasts(fields: PreludeField[]): ESQLAstCommand[]
  * // | INSIST_🐔 `attributes.count`
  * // | INSIST_🐔 `attributes.status`
  * // | EVAL `attributes.count` = COALESCE(null, `attributes.count`::integer)
- * // | EVAL `attributes.status` = COALESCE(null, `attributes.status`::string)
+ * // | EVAL `attributes.status` = COALESCE(null, `attributes.status`::keyword)
  * ```
  *
  * @param options - Prelude generation options

@@ -68,7 +68,7 @@ describe('ESQL Prelude', () => {
 
       expect(formatted).toMatchInlineSnapshot(`
         "EVAL count = COALESCE(NULL, count::INTEGER)
-        | EVAL name = COALESCE(NULL, name::STRING)"
+        | EVAL name = COALESCE(NULL, name::KEYWORD)"
       `);
     });
 
@@ -144,11 +144,11 @@ describe('ESQL Prelude', () => {
         | EVAL field_half_float = COALESCE(NULL, field_half_float::DOUBLE)
         | EVAL field_integer = COALESCE(NULL, field_integer::INTEGER)
         | EVAL field_ip = COALESCE(NULL, field_ip::IP)
-        | EVAL field_keyword = COALESCE(NULL, field_keyword::STRING)
+        | EVAL field_keyword = COALESCE(NULL, field_keyword::KEYWORD)
         | EVAL field_long = COALESCE(NULL, field_long::LONG)
-        | EVAL field_match_only_text = COALESCE(NULL, field_match_only_text::STRING)
+        | EVAL field_match_only_text = COALESCE(NULL, field_match_only_text::KEYWORD)
         | EVAL field_short = COALESCE(NULL, field_short::INTEGER)
-        | EVAL field_text = COALESCE(NULL, field_text::STRING)
+        | EVAL field_text = COALESCE(NULL, field_text::KEYWORD)
         | EVAL field_unsigned_long = COALESCE(NULL, field_unsigned_long::UNSIGNED_LONG)
         | EVAL field_version = COALESCE(NULL, field_version::VERSION)"
       `);
@@ -187,7 +187,7 @@ describe('ESQL Prelude', () => {
         "INSIST_🐔 \`attributes.count\`
           | INSIST_🐔 \`attributes.status\`
           | EVAL \`attributes.count\` = COALESCE(NULL, \`attributes.count\`::INTEGER)
-          | EVAL \`attributes.status\` = COALESCE(NULL, \`attributes.status\`::STRING)"
+          | EVAL \`attributes.status\` = COALESCE(NULL, \`attributes.status\`::KEYWORD)"
       `);
     });
 
@@ -233,7 +233,7 @@ describe('ESQL Prelude', () => {
         "INSIST_🐔 a_field
           | INSIST_🐔 m_field
           | INSIST_🐔 z_field
-          | EVAL a_field = COALESCE(NULL, a_field::STRING)
+          | EVAL a_field = COALESCE(NULL, a_field::KEYWORD)
           | EVAL m_field = COALESCE(NULL, m_field::BOOLEAN)
           | EVAL z_field = COALESCE(NULL, z_field::LONG)"
       `);
