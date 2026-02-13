@@ -12,9 +12,8 @@ import { useGeneratedHtmlId } from '@elastic/eui';
 import { useMemo } from 'react';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
-// NOTE: These values were originally introduced in Security Solution's
-// `entity_highlights_gradients.tsx` while EUI does not yet provide reusable AI gradients.
-// Keep them local to this component so Storybook can be used to iterate independently.
+// Keep constants local to this file so Storybook can be used to iterate independently.
+// Hard-coded values are used to avoid relying on EUI tokens that are not yet available.
 const gradientStartPercent = 2.98;
 const gradientEndPercent = 66.24;
 

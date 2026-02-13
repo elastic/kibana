@@ -16,7 +16,7 @@ import { SvgAiGradientDefs } from './svg_ai_gradient_defs';
 
 type AiButtonVariant = 'primary' | 'secondary' | 'empty';
 
-type AiClassicButtonProps = React.ComponentProps<typeof EuiButton> & {
+type AiButtonProps = React.ComponentProps<typeof EuiButton> & {
   iconOnly?: false;
   fill?: never;
   variant: Exclude<AiButtonVariant, 'empty'>;
@@ -37,7 +37,7 @@ type AiButtonIconOnlyProps = React.ComponentProps<typeof EuiButtonIcon> & {
   'aria-label': string;
 };
 
-export type AiButtonBaseProps = AiClassicButtonProps | AiButtonEmptyProps | AiButtonIconOnlyProps;
+export type AiButtonBaseProps = AiButtonProps | AiButtonEmptyProps | AiButtonIconOnlyProps;
 
 const ICON_DISPLAY_MAP: Record<AiButtonVariant, NonNullable<EuiButtonIconProps['display']>> = {
   empty: 'empty',
@@ -55,6 +55,9 @@ export const AiButtonBase: React.FC<AiButtonBaseProps> = (props) => {
     isFilled,
     variant: props.variant,
   });
+
+  // Render local SVG <defs> so icon paths can reference url(#gradientId).
+  // Defs are rendered before each button/icon to guarantee the id exists in the same DOM tree.
   const svgGradientDefs = iconGradientCss ? (
     <SvgAiGradientDefs
       gradientId={gradientId}
@@ -67,12 +70,12 @@ export const AiButtonBase: React.FC<AiButtonBaseProps> = (props) => {
 
   if (props.iconOnly) {
     const {
-      iconOnly: _iconOnly,
       variant,
       iconType,
+      css: userCss,
+      iconOnly: _iconOnly,
       display: _display,
       children: _children,
-      css: userCss,
       ...rest
     } = props;
     const computedDisplay = ICON_DISPLAY_MAP[variant];
