@@ -93,7 +93,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       );
       setSelectedItems(updatedSelectedItems);
     }
-  }, [refetch, selectedItems]);
+  }, [refetch, selectedItems, workflows]);
 
   const handleRunWorkflow = useCallback(
     (id: string, event: Record<string, unknown>, triggerTab?: 'manual' | 'alert' | 'index') => {
