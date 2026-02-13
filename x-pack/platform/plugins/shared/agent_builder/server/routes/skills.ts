@@ -33,7 +33,8 @@ const REFERENCED_CONTENT_SCHEMA = schema.arrayOf(
     content: schema.string({
       meta: { description: 'Content of the reference.' },
     }),
-  })
+  }),
+  { maxSize: 20 }
 );
 
 const skillIdParamSchema = schema.object({
@@ -62,6 +63,7 @@ const createSkillBodySchema = schema.object({
     }),
     {
       defaultValue: [],
+      maxSize: 5,
       meta: {
         description: 'Tool IDs from the tool registry that this skill references.',
       },
@@ -92,6 +94,7 @@ const updateSkillBodySchema = schema.object({
         meta: { description: 'Updated tool ID.' },
       }),
       {
+        maxSize: 5,
         meta: { description: 'Updated tool IDs from the tool registry.' },
       }
     )
