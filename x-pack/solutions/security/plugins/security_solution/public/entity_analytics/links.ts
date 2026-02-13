@@ -64,7 +64,7 @@ const watchlistsLinks: LinkItem = {
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
-  experimentalKey: 'entityThreatHuntingEnabled',
+  experimentalKey: 'entityAnalyticsWatchlistEnabled',
 };
 
 const eaOverviewLinks: LinkItem = {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { i18n } from '@kbn/i18n';
 import { HeaderPage } from '../../common/components/header_page';
@@ -24,7 +24,7 @@ export const EntityAnalyticsWatchlistsManagementPage = () => {
   return (
     <>
       <SecuritySolutionPageWrapper>
-        <HeaderPage title={PAGE_TITLE} />
+        <HeaderPage title={PAGE_TITLE} data-test-subj="watchlistManagementPage" />
         <EuiFlexGroup direction="column" gutterSize="l" />
       </SecuritySolutionPageWrapper>
       <SpyRoute pageName={SecurityPageName.entityAnalyticsWatchlists} />
