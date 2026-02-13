@@ -214,7 +214,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Automatic Migration of Splunk dashboards in Security Solution
    */
-  splunkV2DashboardsEnabled: false,
+  splunkV2DashboardsEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
