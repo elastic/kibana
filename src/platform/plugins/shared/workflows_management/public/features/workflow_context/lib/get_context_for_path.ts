@@ -79,8 +79,11 @@ function getStepContextSchemaEnrichmentEntries(
   stepId: string
 ) {
   const enrichments: { key: 'foreach'; value: z.ZodType }[] = [];
-  const predecessors = workflowExecutionGraph.getAllPredecessors(stepId);
-  for (const node of predecessors) {
+  const stack = workflowExecutionGraph.getNodeStack(stepId);
+
+  for (const nodeId of stack) {
+    const node = workflowExecutionGraph.getNode(nodeId);
+
     if (isEnterForeach(node)) {
       enrichments.push({
         key: 'foreach',
