@@ -17,6 +17,15 @@ import { SuggestStreamPartitionsPrompt } from './prompt';
 import { schema } from './schema';
 
 const strictConditionSchema = DeepStrict(conditionSchema);
+export type PartitionSuggestionsReason =
+  | 'no_clusters'
+  | 'no_samples'
+  | 'all_data_partitioned';
+
+export interface PartitionStreamResponse {
+  partitions: Array<{ name: string; condition: Condition }>;
+  reason?: PartitionSuggestionsReason;
+}
 
 export async function partitionStream({
   definition,
@@ -36,7 +45,11 @@ export async function partitionStream({
   end: number;
   maxSteps?: number | undefined;
   signal: AbortSignal;
-}): Promise<Array<{ name: string; condition: Condition }>> {
+}): Promise<PartitionStreamResponse> {
+  const enabledChildConditions = definition.ingest.wired.routing
+    .filter((route) => route.status !== 'disabled')
+    .map((route) => route.where);
+
   const initialClusters = await clusterLogs({
     esClient,
     start,
@@ -44,17 +57,21 @@ export async function partitionStream({
     index: definition.name,
     logger,
     partitions: [],
+    excludeConditions: enabledChildConditions,
     size: 1000,
   });
 
   // No need to involve reasoning if there are no initial clusters
   if (initialClusters.length === 0) {
-    return [];
+    return { partitions: [], reason: 'no_clusters' };
   }
 
   // No need to involve reasoning if there are no sample documents
   if (initialClusters.every((cluster) => cluster.clustering.sampled === 0)) {
-    return [];
+    return {
+      partitions: [],
+      reason: enabledChildConditions.length > 0 ? 'all_data_partitioned' : 'no_samples',
+    };
   }
 
   const response = await executeAsReasoningAgent({
@@ -79,6 +96,7 @@ export async function partitionStream({
           end,
           index: toolCall.function.arguments.index,
           partitions,
+          excludeConditions: enabledChildConditions,
           logger,
         });
 
@@ -108,8 +126,13 @@ export async function partitionStream({
         };
       }) ?? [];
 
-  return proposedPartitions.filter(
+  const partitions = proposedPartitions.filter(
     ({ condition }) =>
       strictConditionSchema.safeParse(condition).success && !isEqual(condition, { always: {} })
   );
+
+  return {
+    partitions,
+    reason: partitions.length === 0 ? 'no_clusters' : undefined,
+  };
 }

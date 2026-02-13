@@ -30,6 +30,11 @@ export interface PartitionSuggestion {
   condition: Condition;
 }
 
+export type PartitionSuggestionReason =
+  | 'no_clusters'
+  | 'no_samples'
+  | 'all_data_partitioned';
+
 export type UseReviewSuggestionsFormResult = ReturnType<typeof useReviewSuggestionsForm>;
 
 export function useReviewSuggestionsForm() {
@@ -47,6 +52,9 @@ export function useReviewSuggestionsForm() {
   const streamsRoutingActorRef = useStreamsRoutingActorRef();
 
   const [suggestions, setSuggestions] = useState<PartitionSuggestion[] | undefined>(undefined);
+  const [suggestionReason, setSuggestionReason] = useState<PartitionSuggestionReason | undefined>(
+    undefined
+  );
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
 
   const abortController = useAbortController();
@@ -68,6 +76,7 @@ export function useReviewSuggestionsForm() {
         })
       );
       setSuggestions(response.partitions);
+      setSuggestionReason(response.reason);
     } catch (error) {
       if (error.name !== 'AbortError') {
         showFetchErrorToast(error);
@@ -111,6 +120,7 @@ export function useReviewSuggestionsForm() {
     abortController.abort();
     abortController.refresh();
     setSuggestions(undefined);
+    setSuggestionReason(undefined);
     resetPreview();
   };
 
@@ -121,6 +131,7 @@ export function useReviewSuggestionsForm() {
 
   return {
     suggestions,
+    suggestionReason,
     removeSuggestion,
     isLoadingSuggestions,
     fetchSuggestions,
