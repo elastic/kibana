@@ -46,6 +46,13 @@ const ALWAYS_EXCLUDE_PATHS: RegExp[] = [
   /\.mock\.(ts|tsx|js|jsx)$/,
   /\.stories\.(ts|tsx|js|jsx)$/,
   /\.d\.ts$/,
+  // Test infrastructure packages — changes here are framework-level, not plugin-level.
+  // Including them in dependency analysis would trigger burn-in for ALL Scout modules.
+  /\/packages\/.*\/kbn-scout\//,
+  /\/packages\/.*\/kbn-scout-reporting\//,
+  /\/packages\/.*\/kbn-scout-info\//,
+  /\/packages\/.*\/kbn-test\//,
+  /\/packages\/.*\/kbn-cypress-config\//,
 ];
 
 // ─── Moon Dependency Graph ──────────────────────────────────────────────────
