@@ -157,9 +157,3 @@ if [[ "${TEST_ENABLE_FIPS_VERSION:-}" == "140-2" ]] || [[ "${TEST_ENABLE_FIPS_VE
     echo -e '\nxpack.security.fipsMode.enabled: true' >>"$KIBANA_DIR/config/kibana.yml"
   fi
 fi
-
-# Use unverified snapshots for ES, until we have a verified snapshot for 9.4.0
-# Will revert it back after the snapshot verification passes
-export KBN_ES_SNAPSHOT_USE_UNVERIFIED=true
-export ES_SNAPSHOT_MANIFEST='https://storage.googleapis.com/kibana-ci-es-snapshots-daily/9.4.0/archives/20260211-031944_ce86f18f/manifest.json'
-
