@@ -50,10 +50,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await getStream(apiClient, childName)
       );
 
-      const {
-        ingest: childIngest,
-        description: childDescription,
-      } = childBefore.stream;
+      const { ingest: childIngest, description: childDescription } = childBefore.stream;
       const { updated_at: _childProcessingUpdatedAt, ...childProcessing } = childIngest.processing;
 
       await putStream(apiClient, childName, {
@@ -94,10 +91,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await getStream(apiClient, parentName)
       );
 
-      const {
-        ingest: parentIngest,
-        description: parentDescription,
-      } = parentBefore.stream;
+      const { ingest: parentIngest, description: parentDescription } = parentBefore.stream;
       const { updated_at: _parentProcessingUpdatedAt, ...parentProcessing } =
         parentIngest.processing;
 
