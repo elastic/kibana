@@ -11,12 +11,17 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenu,
+  EuiContextMenuItem,
   EuiHeader,
   EuiHeaderLinks,
   EuiHeaderLogo,
   EuiHeaderSection,
   EuiHeaderSectionItem,
+  EuiHorizontalRule,
+  EuiIcon,
   EuiImage,
+  EuiKeyPadMenu,
+  EuiKeyPadMenuItem,
   EuiLoadingSpinner,
   EuiPopover,
   EuiSplitButton,
@@ -89,35 +94,99 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
 
 type HeaderCss = ReturnType<typeof getHeaderCss>;
 
+/** Override EuiKeyPadMenuItem to compact size (72×48) in the overflow popover */
+const overflowKeyPadCss = css`
+  justify-content: center;
+  padding-block: 8px;
+`;
+
+const overflowKeyPadItemCss = css`
+  width: 72px;
+  height: 64px;
+  min-width: 72px;
+  min-height: 48px;
+`;
+
+const overflowMenuCss = css`
+  width: 240px;
+`;
+
 const noop = () => {};
+
+const OVERFLOW_LIST_SECTIONS: Array<
+  | { name: string; icon: ComponentProps<typeof EuiContextMenuItem>['icon']; onClick: () => void }
+  | { separator: true }
+> = [
+  { name: 'Open', icon: 'folderOpen', onClick: noop },
+  { name: 'Inspect', icon: 'inspect', onClick: noop },
+  { name: 'Data sets', icon: 'indexOpen', onClick: noop },
+  { name: 'Background searches', icon: 'search', onClick: noop },
+  // { separator: true },
+  { name: 'Alerts', icon: 'bell', onClick: noop },
+  { name: 'Export', icon: 'exportAction', onClick: noop },
+  { separator: true },
+  { name: 'Docs', icon: 'documentation', onClick: noop },
+  { name: 'Feedback', icon: 'editorComment', onClick: noop },
+  { separator: true },
+  { name: 'Rename', icon: 'pencil', onClick: noop },
+  { name: 'Settings', icon: 'gear', onClick: noop },
+  // { separator: true },
+  // { name: 'Save', icon: 'save', onClick: noop },
+  // { name: 'Save as', icon: 'save', onClick: noop },
+  // { name: 'Reset changes', icon: 'editorUndo', onClick: noop },
+];
+
+const OverflowPopoverContent: React.FC = () => (
+  <>
+    <EuiKeyPadMenu css={overflowKeyPadCss}>
+      <EuiKeyPadMenuItem
+        label="New"
+        onClick={noop}
+        css={overflowKeyPadItemCss}
+        data-test-subj="headerGlobalNav-overflowNew"
+      >
+        <EuiIcon type="plusInCircle" size="m" />
+      </EuiKeyPadMenuItem>
+      <EuiKeyPadMenuItem
+        label="Favorite"
+        onClick={noop}
+        css={overflowKeyPadItemCss}
+        data-test-subj="headerGlobalNav-overflowFavorite"
+      >
+        <EuiIcon type="star" size="m" />
+      </EuiKeyPadMenuItem>
+      <EuiKeyPadMenuItem
+        label="Share"
+        onClick={noop}
+        css={overflowKeyPadItemCss}
+        data-test-subj="headerGlobalNav-overflowShare"
+      >
+        <EuiIcon type="share" size="m" />
+      </EuiKeyPadMenuItem>
+    </EuiKeyPadMenu>
+    <EuiHorizontalRule margin="none" />
+    {OVERFLOW_LIST_SECTIONS.map((item, index) =>
+      'separator' in item && item.separator ? (
+        <EuiHorizontalRule key={`sep-${index}`} margin="none" />
+      ) : (
+        <EuiContextMenuItem
+          key={'name' in item ? item.name : index}
+          icon={'icon' in item ? item.icon : undefined}
+          onClick={'onClick' in item ? item.onClick : undefined}
+          size="s"
+        >
+          {'name' in item ? item.name : null}
+        </EuiContextMenuItem>
+      )
+    )}
+  </>
+);
 
 const OVERFLOW_PANELS = [
   {
     id: 0,
     title: '',
-    items: [
-      { name: 'New', icon: 'plusInCircle', onClick: noop },
-      { name: 'Favorite', icon: 'star', onClick: noop },
-      { name: 'Share', icon: 'share', onClick: noop },
-      { isSeparator: true as const, key: 'sep1' },
-      { name: 'Open', icon: 'folderOpen', onClick: noop },
-      { name: 'Inspect', icon: 'inspect', onClick: noop },
-      { name: 'Data sets', icon: 'indexOpen', onClick: noop },
-      { name: 'Background searches', icon: 'search', onClick: noop },
-      { isSeparator: true as const, key: 'sep2' },
-      { name: 'Alerts', icon: 'bell', onClick: noop },
-      { name: 'Export', icon: 'exportAction', onClick: noop },
-      { isSeparator: true as const, key: 'sep3' },
-      { name: 'Rename', icon: 'pencil', onClick: noop },
-      { name: 'Settings', icon: 'gear', onClick: noop },
-      { isSeparator: true as const, key: 'sep4' },
-      { name: 'Docs', icon: 'documentation', onClick: noop },
-      { name: 'Feedback', icon: 'editorComment', onClick: noop },
-      { isSeparator: true as const, key: 'sep5' },
-      { name: 'Save', icon: 'save', onClick: noop },
-      { name: 'Save as', icon: 'save', onClick: noop },
-      { name: 'Reset changes', icon: 'editorUndo', onClick: noop },
-    ],
+    content: <OverflowPopoverContent />,
   },
 ];
 
@@ -153,7 +222,7 @@ const GlobalHeaderAppActionsDumb: React.FC = () => {
         anchorPosition="downLeft"
         panelPaddingSize="none"
       >
-        <EuiContextMenu size="s" panels={OVERFLOW_PANELS} initialPanelId={0} />
+        <EuiContextMenu css={overflowMenuCss} size="s" panels={OVERFLOW_PANELS} initialPanelId={0} />
       </EuiPopover>
       <EuiButtonIcon size="xs" color="text" iconType="plusInCircle" data-test-subj="headerGlobalNav-appActionsNewButton">
         New
