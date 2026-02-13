@@ -1,5 +1,5 @@
 ---
-navigation_title: Update
+navigation_title: Update a type
 ---
 
 # Update a Saved Object type [saved-objects-update]
