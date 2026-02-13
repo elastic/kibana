@@ -36,6 +36,7 @@ interface BaseLifecyclePhaseProps {
   searchableSnapshot?: string;
   size?: string;
   sizeInBytes?: number;
+  testSubjPrefix?: string;
   isIlm?: boolean;
   onRemovePhase?: (phaseName: string) => void;
   canManageLifecycle: boolean;
@@ -69,6 +70,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
     searchableSnapshot,
     size,
     sizeInBytes,
+    testSubjPrefix,
     isIlm = false,
     onRemovePhase,
     canManageLifecycle,
@@ -76,6 +78,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
     removeDisabledReason,
   } = props;
   const isDelete = props.isDelete === true;
+  const prefix = testSubjPrefix ? `${testSubjPrefix}-` : '';
 
   const phaseColor = isDelete ? euiTheme.colors.backgroundBaseSubdued : color;
 
@@ -104,13 +107,14 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
           onClick={handleClick}
           phaseColor={phaseColor}
           size={size}
+          testSubjPrefix={testSubjPrefix}
         />
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       anchorPosition="upCenter"
     >
-      <EuiPopoverTitle data-test-subj={`lifecyclePhase-${label}-popoverTitle`}>
+      <EuiPopoverTitle data-test-subj={`${prefix}lifecyclePhase-${label}-popoverTitle`}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
@@ -121,7 +125,10 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
                 })}
               </EuiFlexItem>
               {isReadOnly && (
-                <EuiFlexItem grow={false} data-test-subj={`lifecyclePhase-${label}-readOnly`}>
+                <EuiFlexItem
+                  grow={false}
+                  data-test-subj={`${prefix}lifecyclePhase-${label}-readOnly`}
+                >
                   <EuiIconTip
                     type="readOnly"
                     size="m"
@@ -183,8 +190,11 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
           )}
         </EuiFlexGroup>
       </EuiPopoverTitle>
-      <div style={{ width: '300px' }} data-test-subj={`lifecyclePhase-${label}-popoverContent`}>
-        <EuiText size="s" data-test-subj={`lifecyclePhase-${label}-description`}>
+      <div
+        style={{ width: '300px' }}
+        data-test-subj={`${prefix}lifecyclePhase-${label}-popoverContent`}
+      >
+        <EuiText size="s" data-test-subj={`${prefix}lifecyclePhase-${label}-description`}>
           <p>{description}</p>
         </EuiText>
         <EuiSpacer size="s" />
@@ -193,7 +203,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
             <EuiFlexGroup direction="column" gutterSize="none">
               {showRetentionPeriod && (
                 <>
-                  <EuiFlexItem data-test-subj={`lifecyclePhase-${label}-minAge`}>
+                  <EuiFlexItem data-test-subj={`${prefix}lifecyclePhase-${label}-minAge`}>
                     <EuiFlexGroup
                       justifyContent="spaceBetween"
                       gutterSize="none"
@@ -212,7 +222,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
                         <EuiText
                           size="s"
                           textAlign="right"
-                          data-test-subj={`lifecyclePhase-${label}-minAgeValue`}
+                          data-test-subj={`${prefix}lifecyclePhase-${label}-minAgeValue`}
                         >
                           {minAge}
                         </EuiText>
@@ -224,7 +234,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
               )}
               {showStoredSize && sizeInBytes !== undefined && (
                 <>
-                  <EuiFlexItem data-test-subj={`lifecyclePhase-${label}-storedSize`}>
+                  <EuiFlexItem data-test-subj={`${prefix}lifecyclePhase-${label}-storedSize`}>
                     <EuiFlexGroup
                       justifyContent="spaceBetween"
                       gutterSize="none"
@@ -243,7 +253,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
                         <EuiText
                           size="s"
                           textAlign="right"
-                          data-test-subj={`lifecyclePhase-${label}-storedSizeValue`}
+                          data-test-subj={`${prefix}lifecyclePhase-${label}-storedSizeValue`}
                         >
                           {formatBytes(sizeInBytes)}
                         </EuiText>
@@ -254,7 +264,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
                 </>
               )}
               {showDocumentCount && docsCount !== undefined && (
-                <EuiFlexItem data-test-subj={`lifecyclePhase-${label}-docsCount`}>
+                <EuiFlexItem data-test-subj={`${prefix}lifecyclePhase-${label}-docsCount`}>
                   <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
                     <EuiFlexItem grow={false}>
                       <EuiText size="s">
@@ -269,7 +279,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
                       <EuiText
                         size="s"
                         textAlign="right"
-                        data-test-subj={`lifecyclePhase-${label}-docsCountValue`}
+                        data-test-subj={`${prefix}lifecyclePhase-${label}-docsCountValue`}
                       >
                         {docsCount.toLocaleString()}
                       </EuiText>
@@ -278,7 +288,9 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
                 </EuiFlexItem>
               )}
               {showSearchableSnapshot && (
-                <EuiPopoverFooter data-test-subj={`lifecyclePhase-${label}-searchableSnapshot`}>
+                <EuiPopoverFooter
+                  data-test-subj={`${prefix}lifecyclePhase-${label}-searchableSnapshot`}
+                >
                   <EuiText size="xs" color="subdued">
                     <strong>
                       {i18n.translate(
@@ -307,7 +319,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
                       <EuiText
                         size="s"
                         textAlign="right"
-                        data-test-subj={`lifecyclePhase-${label}-snapshotRepository`}
+                        data-test-subj={`${prefix}lifecyclePhase-${label}-snapshotRepository`}
                       >
                         {searchableSnapshot}
                       </EuiText>
