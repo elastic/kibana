@@ -133,7 +133,6 @@ export async function autocomplete(
           addSpaceAfterField: false,
           openSuggestions: false,
           promoteToTop: true,
-          isFieldsBrowserEnabled: Boolean(context?.isFieldsBrowserEnabled),
         }))
       );
 

@@ -10,6 +10,7 @@ import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions } from '../../../__tests__/commands/autocomplete';
 import type { ICommandCallbacks } from '../types';
+import { buildFieldsDefinitionsWithMetadata } from '../../definitions/utils';
 
 const keepExpectSuggestions = (
   query: string,
@@ -49,7 +50,11 @@ describe('KEEP Autocomplete', () => {
     const result = await autocomplete(
       'FROM a | KEEP ',
       { args: [] } as any,
-      { getByType: jest.fn(async () => []) } as any,
+      {
+        getByType: jest.fn(async () =>
+          buildFieldsDefinitionsWithMetadata([], [], { isFieldsBrowserEnabled: true })
+        ),
+      } as any,
       { ...mockContext, isFieldsBrowserEnabled: true } as any,
       'FROM a | KEEP '.length
     );

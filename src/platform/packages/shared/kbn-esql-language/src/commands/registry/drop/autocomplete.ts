@@ -42,7 +42,6 @@ export async function autocomplete(
     ? await getFieldsSuggestions(['any'], callbacks.getByType, {
         ignoreColumns: alreadyDeclaredFields,
         promoteToTop: true,
-        isFieldsBrowserEnabled: Boolean(context?.isFieldsBrowserEnabled),
       })
     : [];
 

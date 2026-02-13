@@ -44,15 +44,22 @@ export const buildResourceBrowserCommandArgs = ({
   return Object.keys(commandArgs).length ? commandArgs : undefined;
 };
 
+export interface PreloadedFieldItem {
+  name: string;
+  type?: string;
+}
+
 interface FieldsBrowserCommandArgsParams {
-  fields?: string[];
+  /** Suggested fields (name + optional type) used to preload the fields browser list. */
+  fields?: PreloadedFieldItem[];
 }
 
 /**
  * Builds the (optional) command payload for the "Browse fields" autocomplete item.
  *
- * The payload is a JSON-encoded list of suggested fields used to filter the fields browser list.
- * This is not a pre-selection — the fields browser always opens with no selected field.
+ * The payload is a JSON-encoded list of suggested fields (name and type) used to preload the
+ * fields browser list. This is not a pre-selection — the fields browser always opens with
+ * no selected field.
  */
 export const buildFieldsBrowserCommandArgs = ({
   fields,
