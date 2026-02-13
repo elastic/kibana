@@ -62,7 +62,7 @@ describe('getTemperatureIfValid', () => {
     });
   });
 
-  it('omits temperature for excluded models even if connector config sets it', () => {
+  it('keeps connector-config temperature even for excluded models (escape hatch)', () => {
     const connector = {
       type: InferenceConnectorType.OpenAI,
       config: { temperature: 0.25 },
@@ -70,7 +70,9 @@ describe('getTemperatureIfValid', () => {
 
     expect(
       getTemperatureIfValid(undefined, { connector, modelName: 'llm-gateway/gpt-5.2-chat' })
-    ).toEqual({});
+    ).toEqual({
+      temperature: 0.25,
+    });
   });
 
   it('uses connector-config temperature when model supports it (including 0)', () => {

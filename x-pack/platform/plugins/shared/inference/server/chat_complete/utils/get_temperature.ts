@@ -13,6 +13,17 @@ export const getTemperatureIfValid = (
   temperature?: number,
   { connector, modelName }: { connector?: InferenceConnector; modelName?: string } = {}
 ) => {
+  // Escape hatch: if user sets temperature in the connector config, use it by default (including 0).
+  // This should take priority over any automatic model-based exclusions.
+  const connectorTemperature = connector?.config?.temperature;
+  if (
+    typeof connectorTemperature === 'number' &&
+    isFinite(connectorTemperature) &&
+    connectorTemperature >= 0
+  ) {
+    return { temperature: connectorTemperature };
+  }
+
   const model =
     modelName ?? connector?.config?.providerConfig?.model_id ?? connector?.config?.defaultModel;
 
@@ -35,16 +46,6 @@ export const getTemperatureIfValid = (
       // provider default apply by omitting the parameter.
       return {};
     }
-  }
-
-  // If user sets temperature in the connector config, use it by default (including 0).
-  const connectorTemperature = connector?.config?.temperature;
-  if (
-    typeof connectorTemperature === 'number' &&
-    isFinite(connectorTemperature) &&
-    connectorTemperature >= 0
-  ) {
-    return { temperature: connectorTemperature };
   }
 
   if (temperature === undefined || temperature < 0) return {};
