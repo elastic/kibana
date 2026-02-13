@@ -67,6 +67,10 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
   `,
   breadcrumbsSectionItem: css`
     min-width: 0; // needed to enable breadcrumbs truncation
+
+    [data-test-subj="breadcrumbs"] [aria-current="page"] {
+      font-weight: 600;
+    }
   `,
   leftNavcontrols: css`
     .navcontrols__separator {

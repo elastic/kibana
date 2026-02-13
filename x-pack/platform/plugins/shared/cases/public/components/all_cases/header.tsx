@@ -21,16 +21,17 @@ type Props = OwnProps;
 
 export const CasesTableHeader: FunctionComponent<Props> = ({ actionsErrors }) => {
   return (
-    <HeaderPage title={i18n.PAGE_TITLE} border data-test-subj="cases-all-title">
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="m"
-        wrap={true}
-        data-test-subj="all-cases-header"
-      >
-        <NavButtons actionsErrors={actionsErrors} />
-      </EuiFlexGroup>
-    </HeaderPage>
+    // <HeaderPage title={i18n.PAGE_TITLE} border data-test-subj="cases-all-title">
+    //   <EuiFlexGroup
+    //     alignItems="center"
+    //     gutterSize="m"
+    //     wrap={true}
+    //     data-test-subj="all-cases-header"
+    //   >
+    //     <NavButtons actionsErrors={actionsErrors} />
+    //   </EuiFlexGroup>
+    // </HeaderPage>
+    null
   );
 };
 CasesTableHeader.displayName = 'CasesTableHeader';

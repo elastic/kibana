@@ -131,7 +131,7 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
             solutionNav={solution}
             // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
             // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
-            mainProps={{ paddingSize: 'l' }}
+            mainProps={{ paddingSize: 'm' }}
             panelled
           >
             <ManagementRouter
