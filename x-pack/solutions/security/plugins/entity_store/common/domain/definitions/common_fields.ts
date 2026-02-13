@@ -47,7 +47,6 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
   const prefix = rootField ? `${rootField}.entity` : 'entity';
 
   return [
-    newestValue({ source: `${prefix}.name`, destination: 'entity.name' }),
     newestValue({ source: `${prefix}.source`, destination: 'entity.source' }),
     newestValue({ source: `${prefix}.type`, destination: 'entity.type' }),
     newestValue({ source: `${prefix}.sub_type`, destination: 'entity.sub_type' }),

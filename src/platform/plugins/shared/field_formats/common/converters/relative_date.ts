@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { TextContextTypeConvert } from '../types';
+import type { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 
 /** @public */
@@ -23,8 +23,9 @@ export class RelativeDateFormat extends FieldFormat {
   static fieldType = KBN_FIELD_TYPES.DATE;
 
   textConvert: TextContextTypeConvert = (val: string | number) => {
-    if (val === null || val === undefined) {
-      return '-';
+    const missing = this.checkForMissingValueText(val);
+    if (missing) {
+      return missing;
     }
 
     const date = moment(val);
@@ -33,5 +34,14 @@ export class RelativeDateFormat extends FieldFormat {
     } else {
       return String(val);
     }
+  };
+
+  htmlConvert: HtmlContextTypeConvert = (val, options) => {
+    const missing = this.checkForMissingValueHtml(val);
+    if (missing) {
+      return missing;
+    }
+
+    return this.textConvert(val, options);
   };
 }

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { spaceTest, expect, tags } from '@kbn/scout';
+import { spaceTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import type { PageObjects } from '@kbn/scout';
 import {
   LENS_BASIC_KIBANA_ARCHIVE,
@@ -16,7 +17,7 @@ import {
   LENS_BASIC_TIME_RANGE,
 } from '../constants';
 
-spaceTest.describe('Lens by-value panels (dashboard)', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+spaceTest.describe('Lens by-value panels (dashboard)', { tag: tags.deploymentAgnostic }, () => {
   let lensSavedObjectId = '';
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {

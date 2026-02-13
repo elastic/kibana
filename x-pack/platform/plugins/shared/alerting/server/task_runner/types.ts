@@ -165,6 +165,11 @@ export interface RuleRunnerErrorStackTraceLog {
   stackTrace?: string;
 }
 
+export enum ApiKeyType {
+  ES = 'es',
+  UIAM = 'uiam',
+}
+
 export interface TaskRunnerContext {
   actionsConfigMap: ActionsConfigMap;
   actionsPlugin: ActionsPluginStartContract;
@@ -185,6 +190,7 @@ export interface TaskRunnerContext {
   maxAlerts: number;
   ruleTypeRegistry: RuleTypeRegistry;
   rulesSettingsService: RulesSettingsService;
+  apiKeyType: ApiKeyType;
   savedObjects: SavedObjectsServiceStart;
   share: SharePluginStart;
   spaceIdToNamespace: SpaceIdToNamespaceFunction;

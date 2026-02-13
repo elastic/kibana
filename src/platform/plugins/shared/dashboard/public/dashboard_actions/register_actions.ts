@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import {
+  ADD_PANEL_TRIGGER,
+  CONTEXT_MENU_TRIGGER,
+  PANEL_NOTIFICATION_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { DashboardStartDependencies } from '../plugin';
 import {
   ACTION_ADD_SECTION,

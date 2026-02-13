@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/task-manager-plugin'
   - '@kbn/config-schema'
+  - '@kbn/telemetry-plugin'
 tags:
   - plugin
   - prod

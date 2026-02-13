@@ -1,0 +1,20 @@
+{
+  "lastModified": "2026-02-09T13:21:47.840Z",
+  "sha1": "27126cc55b631209972a5c07f114ae006f0060aa",
+  "tests": [
+    {
+      "id": "76ddacbf8381e78-00e065404a881ec",
+      "title": "Lens ES|QL should display ES|QL conversion modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/esql_conversion.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    }
+  ]
+}

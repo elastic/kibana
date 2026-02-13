@@ -96,7 +96,7 @@ export const TimeoutPropSchema = z.object({
 export type TimeoutProp = z.infer<typeof TimeoutPropSchema>;
 
 const StepWithForEachSchema = z.object({
-  foreach: z.string().optional(),
+  foreach: z.union([z.string(), z.array(z.unknown())]).optional(),
 });
 export type StepWithForeach = z.infer<typeof StepWithForEachSchema>;
 
@@ -113,7 +113,6 @@ export const StepWithOnFailureSchema = z.object({
 
 export const BaseConnectorStepSchema = BaseStepSchema.extend({
   type: z.string().min(1),
-  'connector-id': z.string().optional(), // http.request for example, doesn't need connectorId
   with: z.record(z.string(), z.any()).optional(),
 })
   .merge(StepWithIfConditionSchema)
@@ -268,7 +267,7 @@ export function getHttpStepSchema(stepSchema: z.ZodType, loose: boolean = false)
 
 export const ForEachStepSchema = BaseStepSchema.extend({
   type: z.literal('foreach'),
-  foreach: z.string(),
+  foreach: z.union([z.string(), z.array(z.unknown())]),
   steps: z.array(BaseStepSchema).min(1),
 }).merge(StepWithIfConditionSchema);
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;
@@ -555,6 +554,8 @@ export const WorkflowExecutionContextSchema = z.object({
   isTestRun: z.boolean(),
   startedAt: z.date(),
   url: z.string(),
+  executedBy: z.string().optional(),
+  triggeredBy: z.string().optional(),
 });
 export type WorkflowExecutionContext = z.infer<typeof WorkflowExecutionContextSchema>;
 

@@ -92,6 +92,7 @@ describe('ConnectorFields renders', () => {
     expect(getAllByTestId('config.projectId-input')[0]).toBeInTheDocument();
     expect(getAllByTestId('open-ai-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('open-ai-api-keys-doc')[0]).toBeInTheDocument();
+    expect(getAllByTestId('optional-label')).toHaveLength(4);
   });
 
   test('azure ai connector fields are rendered', async () => {
@@ -383,7 +384,7 @@ describe('ConnectorFields renders', () => {
       expect(queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
     });
     it('Does not render if isEdit is true and dashboardUrl is null', async () => {
-      mockDashboard.mockImplementation((id: string) => ({
+      mockDashboard.mockImplementation(() => ({
         dashboardUrl: null,
       }));
       const { queryByTestId } = render(

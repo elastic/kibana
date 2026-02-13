@@ -19,6 +19,7 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
   indexPatterns: [],
   entityTypeFallback: 'Service',
   fields: [
+    newestValue({ destination: 'entity.name', source: 'service.name' }),
     oldestValue({ source: 'service.entity.id' }),
 
     collect({ source: 'service.name' }),
