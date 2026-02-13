@@ -42,8 +42,13 @@ export class ConversationServiceImpl implements ConversationService {
   }
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
-    const user = getUserFromRequest(request, this.security);
-    const esClient = this.elasticsearch.client.asScoped(request).asInternalUser;
+    const scopedClient = this.elasticsearch.client.asScoped(request);
+    const user = await getUserFromRequest({
+      request,
+      security: this.security,
+      esClient: scopedClient.asCurrentUser,
+    });
+    const esClient = scopedClient.asInternalUser;
     const space = getCurrentSpaceId({ request, spaces: this.spaces });
 
     return createClient({ user, esClient, logger: this.logger, space });

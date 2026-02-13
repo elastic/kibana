@@ -35,8 +35,9 @@ describe('PromQL "selector" node parsing', () => {
       const selector = parseSelector('http_requests_total{}');
 
       expect(selector.metric?.name).toBe('http_requests_total');
-      // Empty curly braces don't create a labelMap in PromQL grammar
-      expect(selector.labelMap).toBeUndefined();
+      expect(selector.labelMap).toBeDefined();
+      expect(selector.labelMap?.args).toHaveLength(0);
+      expect(selector.labelMap?.text).toBe('{}');
     });
 
     it('parses a metric selector with labels', () => {

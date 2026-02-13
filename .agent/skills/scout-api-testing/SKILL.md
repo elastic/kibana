@@ -1,5 +1,5 @@
 ---
-name: Scout API Testing
+name: scout-api-testing
 description: Use when creating, updating, debugging, or reviewing Scout API tests in Kibana (apiTest/apiClient/requestAuth/samlAuth/apiServices), including auth choices, response assertions, and API service patterns.
 ---
 

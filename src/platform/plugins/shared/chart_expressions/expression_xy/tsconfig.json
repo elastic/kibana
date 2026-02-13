@@ -37,12 +37,12 @@
     "@kbn/core-rendering-browser",
     "@kbn/palettes",
     "@kbn/alerts-ui-shared",
-    "@kbn/ui-actions-browser",
     "@kbn/ebt-tools",
     "@kbn/react-kibana-context-theme",
     "@kbn/chart-test-jest-helpers",
     "@kbn/field-formats-common",
-    "@kbn/visualizations-common"
+    "@kbn/visualizations-common",
+    "@kbn/ui-actions-plugin"
   ],
   "exclude": [
     "target/**/*",

@@ -31,7 +31,8 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
   const browser = getService('browser');
 
   describe('telemetry', () => {
-    describe('context', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/252235
+    describe.skip('context', () => {
       before(async () => {
         await svlCommonPage.loginAsAdmin();
         await esArchiver.loadIfNeeded(
@@ -129,7 +130,8 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       });
     });
 
-    describe('contextual profiles', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/252793
+    describe.skip('contextual profiles', () => {
       before(async () => {
         await esArchiver.loadIfNeeded(
           'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
@@ -240,7 +242,8 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       });
     });
 
-    describe('events', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/252799
+    describe.skip('events', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');
         await header.waitUntilLoadingHasFinished();
