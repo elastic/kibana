@@ -9,13 +9,13 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
 const v1Schema = schema.object({
-  updated_rule_ids: schema.arrayOf(schema.string()),
+  runs: schema.number(),
 });
 
 export const stateSchemaByVersion = {
   1: {
     up: () => ({
-      updated_rule_ids: [],
+      runs: 0,
     }),
     schema: v1Schema,
   },
@@ -25,5 +25,5 @@ const latestTaskStateSchema = stateSchemaByVersion[1].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
-  updated_rule_ids: [],
+  runs: 0,
 };

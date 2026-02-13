@@ -15,6 +15,7 @@ import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-obje
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { triggersActionsRoute, createRuleFromTemplateRoute } from '@kbn/rule-data-utils';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { UIAM_API_KEYS_PROVISIONING_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import { alertMappings } from '../../common/saved_objects/rules/mappings';
 import { rulesSettingsMappings } from './rules_settings_mappings';
 import { ruleTemplateMappings } from './rule_template_mappings';
@@ -33,6 +34,7 @@ import {
   ruleTemplateModelVersions,
   rulesSettingsModelVersions,
   gapAutoFillSchedulerModelVersions,
+  uiamApiKeysProvisioningStatusModelVersions,
 } from './model_versions';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
@@ -40,6 +42,8 @@ export const RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'alerting_rule_template';
 export const AD_HOC_RUN_SAVED_OBJECT_TYPE = 'ad_hoc_run_params';
 export const API_KEY_PENDING_INVALIDATION_TYPE = 'api_key_pending_invalidation';
 export const GAP_AUTO_FILL_SCHEDULER_SAVED_OBJECT_TYPE = 'gap_auto_fill_scheduler';
+export const UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE =
+  'uiam_api_keys_provisioning_status';
 
 export const RuleAttributesToEncrypt = ['apiKey'];
 
@@ -253,6 +257,30 @@ export function setupSavedObjects(
     },
     mappings: ruleTemplateMappings,
     modelVersions: ruleTemplateModelVersions,
+  });
+
+  savedObjects.registerType({
+    name: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
+    indexPattern: UIAM_API_KEYS_PROVISIONING_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: {
+      properties: {
+        '@timestamp': {
+          type: 'date',
+        },
+        entityId: {
+          type: 'keyword',
+        },
+        entityType: {
+          type: 'keyword',
+        },
+        status: {
+          type: 'keyword',
+        },
+      },
+    },
+    modelVersions: uiamApiKeysProvisioningStatusModelVersions,
   });
 
   // Encrypted attributes
