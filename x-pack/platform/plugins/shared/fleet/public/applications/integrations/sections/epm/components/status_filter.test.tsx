@@ -10,6 +10,12 @@ import { render, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 
+import {
+  STATUS_BETA,
+  STATUS_DEPRECATED,
+  type IntegrationStatusFilterType,
+} from '../screens/browse_integrations/types';
+
 import { StatusFilter } from './status_filter';
 
 const mockUseAuthz = jest.fn();
@@ -44,8 +50,7 @@ describe('StatusFilter', () => {
 
   function renderStatusFilter(props = {}) {
     const defaultProps = {
-      showBeta: undefined,
-      showDeprecated: undefined,
+      selectedStatuses: [] as IntegrationStatusFilterType[],
       onChange: mockOnChange,
       testSubjPrefix: 'test',
       popoverId: 'testPopover',
@@ -99,26 +104,22 @@ describe('StatusFilter', () => {
   });
 
   it('shows active filter count when beta is selected', () => {
-    const { getByTestId, container } = renderStatusFilter({ showBeta: true });
+    const { getByTestId, container } = renderStatusFilter({ selectedStatuses: ['beta'] });
     const button = getByTestId('test.statusBtn');
 
-    // Check that the button has the active filters class
     expect(button).toHaveClass('euiFilterButton-hasActiveFilters');
 
-    // Check that the notification badge exists and shows count
     const badge = container.querySelector('.euiNotificationBadge');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveTextContent('1');
   });
 
   it('shows active filter count when deprecated is selected', () => {
-    const { getByTestId, container } = renderStatusFilter({ showDeprecated: true });
+    const { getByTestId, container } = renderStatusFilter({ selectedStatuses: ['deprecated'] });
     const button = getByTestId('test.statusBtn');
 
-    // Check that the button has the active filters class
     expect(button).toHaveClass('euiFilterButton-hasActiveFilters');
 
-    // Check that the notification badge exists and shows count
     const badge = container.querySelector('.euiNotificationBadge');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveTextContent('1');
@@ -126,21 +127,18 @@ describe('StatusFilter', () => {
 
   it('shows active filter count when both are selected', () => {
     const { getByTestId, container } = renderStatusFilter({
-      showBeta: true,
-      showDeprecated: true,
+      selectedStatuses: [STATUS_BETA, STATUS_DEPRECATED],
     });
     const button = getByTestId('test.statusBtn');
 
-    // Check that the button has the active filters class
     expect(button).toHaveClass('euiFilterButton-hasActiveFilters');
 
-    // Check that the notification badge exists and shows count
     const badge = container.querySelector('.euiNotificationBadge');
     expect(badge).toBeInTheDocument();
     expect(badge).toHaveTextContent('2');
   });
 
-  it('calls onChange with showBeta=true when beta option is checked', async () => {
+  it('calls onChange with STATUS_BETA when beta option is checked', async () => {
     mockMutateAsync.mockResolvedValue({ error: null });
     const { getByTestId } = renderStatusFilter();
 
@@ -150,14 +148,11 @@ describe('StatusFilter', () => {
     fireEvent.click(betaOption);
 
     await waitFor(() => {
-      expect(mockOnChange).toHaveBeenCalledWith({
-        showBeta: true,
-        showDeprecated: undefined,
-      });
+      expect(mockOnChange).toHaveBeenCalledWith([STATUS_BETA]);
     });
   });
 
-  it('calls onChange with showDeprecated=true when deprecated option is checked', async () => {
+  it('calls onChange with STATUS_DEPRECATED when deprecated option is checked', async () => {
     const { getByTestId } = renderStatusFilter();
 
     fireEvent.click(getByTestId('test.statusBtn'));
@@ -166,16 +161,13 @@ describe('StatusFilter', () => {
     fireEvent.click(deprecatedOption);
 
     await waitFor(() => {
-      expect(mockOnChange).toHaveBeenCalledWith({
-        showBeta: undefined,
-        showDeprecated: true,
-      });
+      expect(mockOnChange).toHaveBeenCalledWith([STATUS_DEPRECATED]);
     });
   });
 
-  it('calls onChange with undefined when unchecking beta option', async () => {
+  it('calls onChange with empty array when unchecking beta option', async () => {
     mockMutateAsync.mockResolvedValue({ error: null });
-    const { getByTestId } = renderStatusFilter({ showBeta: true });
+    const { getByTestId } = renderStatusFilter({ selectedStatuses: [STATUS_BETA] });
 
     fireEvent.click(getByTestId('test.statusBtn'));
 
@@ -183,14 +175,11 @@ describe('StatusFilter', () => {
     fireEvent.click(betaOption);
 
     await waitFor(() => {
-      expect(mockOnChange).toHaveBeenCalledWith({
-        showBeta: undefined,
-        showDeprecated: undefined,
-      });
+      expect(mockOnChange).toHaveBeenCalledWith([]);
     });
   });
 
-  it('updates server settings when beta option is toggled', async () => {
+  it('updates server settings when beta option is toggled on', async () => {
     mockMutateAsync.mockResolvedValue({ error: null });
     const { getByTestId } = renderStatusFilter();
 
@@ -241,38 +230,6 @@ describe('StatusFilter', () => {
     });
   });
 
-  it('handles both filters being toggled simultaneously', async () => {
-    mockMutateAsync.mockResolvedValue({ error: null });
-    const { getByTestId } = renderStatusFilter();
-
-    fireEvent.click(getByTestId('test.statusBtn'));
-
-    const betaOption = getByTestId('test.statusBetaOption');
-    const deprecatedOption = getByTestId('test.statusDeprecatedOption');
-
-    // Click both options in succession
-    fireEvent.click(betaOption);
-    fireEvent.click(deprecatedOption);
-
-    // Each click triggers onChange independently, so we should have two calls
-    await waitFor(() => {
-      expect(mockOnChange).toHaveBeenCalledTimes(2);
-    });
-
-    // First call should enable beta
-    expect(mockOnChange).toHaveBeenNthCalledWith(1, {
-      showBeta: true,
-      showDeprecated: undefined,
-    });
-
-    // Second call should enable deprecated (beta state depends on if props were updated)
-    // Since we're not updating props between clicks, beta will be undefined in the second call
-    expect(mockOnChange).toHaveBeenNthCalledWith(2, {
-      showBeta: undefined,
-      showDeprecated: true,
-    });
-  });
-
   it('does not update beta settings when only deprecated filter is toggled', async () => {
     mockMutateAsync.mockResolvedValue({ error: null });
     const { getByTestId } = renderStatusFilter();
@@ -283,19 +240,15 @@ describe('StatusFilter', () => {
     fireEvent.click(deprecatedOption);
 
     await waitFor(() => {
-      expect(mockOnChange).toHaveBeenCalledWith({
-        showBeta: undefined,
-        showDeprecated: true,
-      });
+      expect(mockOnChange).toHaveBeenCalledWith([STATUS_DEPRECATED]);
     });
 
-    // Verify that beta settings were NOT updated
     expect(mockMutateAsync).not.toHaveBeenCalled();
   });
 
   it('updates beta settings to false when unchecking beta option', async () => {
     mockMutateAsync.mockResolvedValue({ error: null });
-    const { getByTestId } = renderStatusFilter({ showBeta: true });
+    const { getByTestId } = renderStatusFilter({ selectedStatuses: [STATUS_BETA] });
 
     fireEvent.click(getByTestId('test.statusBtn'));
 
@@ -308,27 +261,20 @@ describe('StatusFilter', () => {
       });
     });
 
-    expect(mockOnChange).toHaveBeenCalledWith({
-      showBeta: undefined,
-      showDeprecated: undefined,
-    });
+    expect(mockOnChange).toHaveBeenCalledWith([]);
   });
 
-  it('passes undefined for both filters when neither is checked', async () => {
-    const { getByTestId } = renderStatusFilter({ showDeprecated: true });
+  it('calls onChange with empty array when unchecking the last status', async () => {
+    const { getByTestId } = renderStatusFilter({ selectedStatuses: [STATUS_DEPRECATED] });
 
     fireEvent.click(getByTestId('test.statusBtn'));
 
     const deprecatedOption = getByTestId('test.statusDeprecatedOption');
 
-    // Click to disable (it's currently enabled)
     fireEvent.click(deprecatedOption);
 
     await waitFor(() => {
-      expect(mockOnChange).toHaveBeenCalledWith({
-        showBeta: undefined,
-        showDeprecated: undefined,
-      });
+      expect(mockOnChange).toHaveBeenCalledWith([]);
     });
   });
 });

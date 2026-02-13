@@ -10,6 +10,8 @@ import { useHistory } from 'react-router-dom';
 
 import { useUrlParams } from '../../../../../../../hooks';
 
+import { STATUS_BETA, STATUS_DEPRECATED } from '../types';
+
 import { useAddUrlFilters, useUrlFilters } from './url_filters';
 
 jest.mock('react-router-dom', () => ({
@@ -25,7 +27,7 @@ describe('useUrlFilters', () => {
     jest.clearAllMocks();
   });
 
-  it('returns undefined for showBeta when not in URL', () => {
+  it('returns undefined for status when not in URL', () => {
     (useUrlParams as jest.Mock).mockReturnValue({
       urlParams: {},
       toUrlParams: jest.fn(),
@@ -33,51 +35,62 @@ describe('useUrlFilters', () => {
 
     const { result } = renderHook(() => useUrlFilters());
 
-    expect(result.current.showBeta).toBeUndefined();
+    expect(result.current.status).toBeUndefined();
   });
 
-  it('returns true for showBeta when showBeta=true in URL', () => {
+  it('returns STATUS_BETA when status=beta in URL', () => {
     (useUrlParams as jest.Mock).mockReturnValue({
-      urlParams: { showBeta: 'true' },
+      urlParams: { status: 'beta' },
       toUrlParams: jest.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
 
-    expect(result.current.showBeta).toBe(true);
+    expect(result.current.status).toEqual([STATUS_BETA]);
   });
 
-  it('returns false for showBeta when showBeta=false in URL', () => {
+  it('returns STATUS_DEPRECATED when status=deprecated in URL', () => {
     (useUrlParams as jest.Mock).mockReturnValue({
-      urlParams: { showBeta: 'false' },
+      urlParams: { status: 'deprecated' },
       toUrlParams: jest.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
 
-    expect(result.current.showBeta).toBe(false);
+    expect(result.current.status).toEqual([STATUS_DEPRECATED]);
   });
 
-  it('returns undefined for showDeprecated when not in URL', () => {
+  it('returns STATUS_BETA and STATUS_DEPRECATED when both status values in URL', () => {
     (useUrlParams as jest.Mock).mockReturnValue({
-      urlParams: {},
+      urlParams: { status: ['beta', 'deprecated'] },
       toUrlParams: jest.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
 
-    expect(result.current.showDeprecated).toBeUndefined();
+    expect(result.current.status).toEqual([STATUS_BETA, STATUS_DEPRECATED]);
   });
 
-  it('returns true for showDeprecated when showDeprecated=true in URL', () => {
+  it('ignores invalid status values', () => {
     (useUrlParams as jest.Mock).mockReturnValue({
-      urlParams: { showDeprecated: 'true' },
+      urlParams: { status: 'invalid' },
       toUrlParams: jest.fn(),
     });
 
     const { result } = renderHook(() => useUrlFilters());
 
-    expect(result.current.showDeprecated).toBe(true);
+    expect(result.current.status).toBeUndefined();
+  });
+
+  it('filters out invalid values from array', () => {
+    (useUrlParams as jest.Mock).mockReturnValue({
+      urlParams: { status: [STATUS_BETA, 'invalid', STATUS_DEPRECATED] },
+      toUrlParams: jest.fn(),
+    });
+
+    const { result } = renderHook(() => useUrlFilters());
+
+    expect(result.current.status).toEqual([STATUS_BETA, STATUS_DEPRECATED]);
   });
 
   it('parses search query from URL', () => {
@@ -106,7 +119,17 @@ describe('useUrlFilters', () => {
 describe('useAddUrlFilters', () => {
   const mockPush = jest.fn();
   const mockReplace = jest.fn();
-  const mockToUrlParams = jest.fn((params) => new URLSearchParams(params).toString());
+  const mockToUrlParams = jest.fn((params) => {
+    const searchParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v) => searchParams.append(key, v as string));
+      } else {
+        searchParams.append(key, value as string);
+      }
+    });
+    return searchParams.toString();
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -120,28 +143,40 @@ describe('useAddUrlFilters', () => {
     });
   });
 
-  it('adds showBeta=true to URL when set', () => {
+  it('adds status=beta to URL when set', () => {
     const { result } = renderHook(() => useAddUrlFilters());
 
     act(() => {
-      result.current({ showBeta: true });
+      result.current({ status: ['beta'] });
     });
 
     expect(mockPush).toHaveBeenCalledWith({
-      search: 'showBeta=true',
+      search: 'status=beta',
     });
   });
 
-  it('removes showBeta from URL when set to undefined', () => {
+  it('adds both status values to URL when set', () => {
+    const { result } = renderHook(() => useAddUrlFilters());
+
+    act(() => {
+      result.current({ status: ['beta', 'deprecated'] });
+    });
+
+    expect(mockPush).toHaveBeenCalledWith({
+      search: 'status=beta&status=deprecated',
+    });
+  });
+
+  it('removes status from URL when set to undefined', () => {
     (useUrlParams as jest.Mock).mockReturnValue({
-      urlParams: { showBeta: 'true' },
+      urlParams: { status: 'beta' },
       toUrlParams: mockToUrlParams,
     });
 
     const { result } = renderHook(() => useAddUrlFilters());
 
     act(() => {
-      result.current({ showBeta: undefined });
+      result.current({ status: undefined });
     });
 
     expect(mockPush).toHaveBeenCalledWith({
@@ -149,44 +184,20 @@ describe('useAddUrlFilters', () => {
     });
   });
 
-  it('adds showDeprecated=true to URL when set', () => {
-    const { result } = renderHook(() => useAddUrlFilters());
-
-    act(() => {
-      result.current({ showDeprecated: true });
-    });
-
-    expect(mockPush).toHaveBeenCalledWith({
-      search: 'showDeprecated=true',
-    });
-  });
-
-  it('removes showDeprecated from URL when set to undefined', () => {
+  it('removes status from URL when set to empty array', () => {
     (useUrlParams as jest.Mock).mockReturnValue({
-      urlParams: { showDeprecated: 'true' },
+      urlParams: { status: 'beta' },
       toUrlParams: mockToUrlParams,
     });
 
     const { result } = renderHook(() => useAddUrlFilters());
 
     act(() => {
-      result.current({ showDeprecated: undefined });
+      result.current({ status: [] });
     });
 
     expect(mockPush).toHaveBeenCalledWith({
       search: '',
-    });
-  });
-
-  it('handles both filters together', () => {
-    const { result } = renderHook(() => useAddUrlFilters());
-
-    act(() => {
-      result.current({ showBeta: true, showDeprecated: true });
-    });
-
-    expect(mockPush).toHaveBeenCalledWith({
-      search: 'showBeta=true&showDeprecated=true',
     });
   });
 
@@ -199,14 +210,14 @@ describe('useAddUrlFilters', () => {
     const { result } = renderHook(() => useAddUrlFilters());
 
     act(() => {
-      result.current({ showBeta: true });
+      result.current({ status: ['beta'] });
     });
 
     expect(mockPush).toHaveBeenCalledWith({
       search: expect.stringContaining('q=apache'),
     });
     expect(mockPush).toHaveBeenCalledWith({
-      search: expect.stringContaining('showBeta=true'),
+      search: expect.stringContaining('status=beta'),
     });
   });
 
@@ -214,7 +225,7 @@ describe('useAddUrlFilters', () => {
     const { result } = renderHook(() => useAddUrlFilters());
 
     act(() => {
-      result.current({ showBeta: true }, { replace: true });
+      result.current({ status: ['beta'] }, { replace: true });
     });
 
     expect(mockReplace).toHaveBeenCalled();

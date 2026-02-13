@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 
 import { useUrlFilters, useAddUrlFilters } from '../hooks/url_filters';
-import type { BrowseIntegrationSortType } from '../types';
+import type { BrowseIntegrationSortType, IntegrationStatusFilterType } from '../types';
 import { StatusFilter } from '../../../components/status_filter';
 
 const SEARCH_DEBOUNCE_MS = 150;
@@ -176,9 +176,9 @@ export const SearchAndFiltersBar: React.FC = ({}) => {
   const urlFilters = useUrlFilters();
   const addUrlFilters = useAddUrlFilters();
 
-  const handleChange = useCallback(
-    (params: { showBeta?: boolean; showDeprecated?: boolean }) => {
-      addUrlFilters(params);
+  const handleStatusChange = useCallback(
+    (statuses: IntegrationStatusFilterType[]) => {
+      addUrlFilters({ status: statuses.length > 0 ? statuses : undefined });
     },
     [addUrlFilters]
   );
@@ -204,9 +204,8 @@ export const SearchAndFiltersBar: React.FC = ({}) => {
             </EuiFilterButton>
 
             <StatusFilter
-              showBeta={urlFilters.showBeta}
-              showDeprecated={urlFilters.showDeprecated}
-              onChange={handleChange}
+              selectedStatuses={urlFilters.status}
+              onChange={handleStatusChange}
               testSubjPrefix="browseIntegrations.searchBar"
               popoverId="browseIntegrationsStatusPopover"
             />

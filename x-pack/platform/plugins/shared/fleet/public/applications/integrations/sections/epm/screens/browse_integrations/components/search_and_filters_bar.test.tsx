@@ -41,8 +41,7 @@ describe('SearchAndFiltersBar', () => {
     mockUseUrlFilters.mockReturnValue({
       q: undefined,
       sort: undefined,
-      showBeta: undefined,
-      showDeprecated: undefined,
+      status: undefined,
     });
     mockUseAddUrlFilters.mockReturnValue(mockAddUrlFilters);
     mockUseAuthz.mockReturnValue({
@@ -76,17 +75,14 @@ describe('SearchAndFiltersBar', () => {
       mockUseUrlFilters.mockReturnValue({
         q: undefined,
         sort: undefined,
-        showBeta: true,
-        showDeprecated: undefined,
+        status: ['beta'],
       });
 
       const { getByTestId, container } = renderSearchAndFiltersBar();
       const button = getByTestId('browseIntegrations.searchBar.statusBtn');
 
-      // Check that the button has the active filters class
       expect(button).toHaveClass('euiFilterButton-hasActiveFilters');
 
-      // Check that the notification badge exists and shows count
       const badge = container.querySelector('.euiNotificationBadge');
       expect(badge).toBeInTheDocument();
       expect(badge).toHaveTextContent('1');
@@ -96,17 +92,14 @@ describe('SearchAndFiltersBar', () => {
       mockUseUrlFilters.mockReturnValue({
         q: undefined,
         sort: undefined,
-        showBeta: undefined,
-        showDeprecated: true,
+        status: ['deprecated'],
       });
 
       const { getByTestId, container } = renderSearchAndFiltersBar();
       const button = getByTestId('browseIntegrations.searchBar.statusBtn');
 
-      // Check that the button has the active filters class
       expect(button).toHaveClass('euiFilterButton-hasActiveFilters');
 
-      // Check that the notification badge exists and shows count
       const badge = container.querySelector('.euiNotificationBadge');
       expect(badge).toBeInTheDocument();
       expect(badge).toHaveTextContent('1');
@@ -116,17 +109,14 @@ describe('SearchAndFiltersBar', () => {
       mockUseUrlFilters.mockReturnValue({
         q: undefined,
         sort: undefined,
-        showBeta: true,
-        showDeprecated: true,
+        status: ['beta', 'deprecated'],
       });
 
       const { getByTestId, container } = renderSearchAndFiltersBar();
       const button = getByTestId('browseIntegrations.searchBar.statusBtn');
 
-      // Check that the button has the active filters class
       expect(button).toHaveClass('euiFilterButton-hasActiveFilters');
 
-      // Check that the notification badge exists and shows count
       const badge = container.querySelector('.euiNotificationBadge');
       expect(badge).toBeInTheDocument();
       expect(badge).toHaveTextContent('2');
@@ -144,8 +134,7 @@ describe('SearchAndFiltersBar', () => {
 
       await waitFor(() => {
         expect(mockAddUrlFilters).toHaveBeenCalledWith({
-          showBeta: true,
-          showDeprecated: undefined,
+          status: ['beta'],
         });
       });
     });
@@ -160,8 +149,7 @@ describe('SearchAndFiltersBar', () => {
 
       await waitFor(() => {
         expect(mockAddUrlFilters).toHaveBeenCalledWith({
-          showBeta: undefined,
-          showDeprecated: true,
+          status: ['deprecated'],
         });
       });
     });
@@ -171,8 +159,7 @@ describe('SearchAndFiltersBar', () => {
       mockUseUrlFilters.mockReturnValue({
         q: undefined,
         sort: undefined,
-        showBeta: true,
-        showDeprecated: undefined,
+        status: ['beta'],
       });
 
       const { getByTestId } = renderSearchAndFiltersBar();
@@ -184,8 +171,7 @@ describe('SearchAndFiltersBar', () => {
 
       await waitFor(() => {
         expect(mockAddUrlFilters).toHaveBeenCalledWith({
-          showBeta: undefined,
-          showDeprecated: undefined,
+          status: undefined,
         });
       });
     });
@@ -201,8 +187,7 @@ describe('SearchAndFiltersBar', () => {
       mockUseUrlFilters.mockReturnValue({
         q: 'apache',
         sort: undefined,
-        showBeta: undefined,
-        showDeprecated: undefined,
+        status: undefined,
       });
 
       const { getByTestId } = renderSearchAndFiltersBar();
@@ -222,8 +207,7 @@ describe('SearchAndFiltersBar', () => {
       mockUseUrlFilters.mockReturnValue({
         q: undefined,
         sort: 'a-z',
-        showBeta: undefined,
-        showDeprecated: undefined,
+        status: undefined,
       });
 
       const { getByTestId } = renderSearchAndFiltersBar();
@@ -239,8 +223,7 @@ describe('SearchAndFiltersBar', () => {
       mockUseUrlFilters.mockReturnValue({
         q: 'apache',
         sort: 'a-z',
-        showBeta: true,
-        showDeprecated: true,
+        status: ['beta', 'deprecated'],
       });
 
       const { getByTestId, container } = renderSearchAndFiltersBar();

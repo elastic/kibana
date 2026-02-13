@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+export const STATUS_BETA = 'beta';
+export const STATUS_DEPRECATED = 'deprecated';
+export type IntegrationStatusFilterType = typeof STATUS_BETA | typeof STATUS_DEPRECATED;
+
 export interface BrowseIntegrationsFilter {
   q?: string;
   sort?: BrowseIntegrationSortType;
-  showBeta?: boolean;
-  showDeprecated?: boolean;
+  status?: IntegrationStatusFilterType[];
 }
 
 export type BrowseIntegrationSortType = 'recent-old' | 'old-recent' | 'a-z' | 'z-a';

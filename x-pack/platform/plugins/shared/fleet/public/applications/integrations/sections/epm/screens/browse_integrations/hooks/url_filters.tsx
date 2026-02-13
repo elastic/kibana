@@ -11,7 +11,17 @@ import { omit } from 'lodash';
 
 import { useUrlParams } from '../../../../../../../hooks';
 
-import type { BrowseIntegrationsFilter, BrowseIntegrationSortType } from '../types';
+import type {
+  BrowseIntegrationsFilter,
+  BrowseIntegrationSortType,
+  IntegrationStatusFilterType,
+} from '../types';
+
+const VALID_STATUSES: IntegrationStatusFilterType[] = ['beta', 'deprecated'];
+
+function isValidStatus(value: string): value is IntegrationStatusFilterType {
+  return (VALID_STATUSES as string[]).includes(value);
+}
 
 export function useAddUrlFilters() {
   const urlFilters = useUrlFilters();
@@ -27,13 +37,12 @@ export function useAddUrlFilters() {
       method.call(history, {
         search: toUrlParams(
           {
-            ...omit(urlParams, 'q', 'sort', 'showBeta', 'showDeprecated'),
+            ...omit(urlParams, 'q', 'sort', 'status'),
             ...(newFilters.q ? { q: newFilters.q } : {}),
             ...(newFilters.sort ? { sort: newFilters.sort } : {}),
-            // Only add showBeta to URL when explicitly true, otherwise omit to fall back to default
-            ...(newFilters.showBeta === true ? { showBeta: 'true' } : {}),
-            // Only add showDeprecated to URL when explicitly true, otherwise omit to fall back to default
-            ...(newFilters.showDeprecated === true ? { showDeprecated: 'true' } : {}),
+            ...(newFilters.status && newFilters.status.length > 0
+              ? { status: newFilters.status }
+              : {}),
           },
           {
             skipEmptyString: true,
@@ -59,21 +68,27 @@ export function useUrlFilters(): BrowseIntegrationsFilter {
       sort = urlParams.sort;
     }
 
-    let showBeta: BrowseIntegrationsFilter['showBeta'];
-    if (typeof urlParams.showBeta === 'string') {
-      showBeta = urlParams.showBeta === 'true';
-    }
-
-    let showDeprecated: BrowseIntegrationsFilter['showDeprecated'];
-    if (typeof urlParams.showDeprecated === 'string') {
-      showDeprecated = urlParams.showDeprecated === 'true';
+    let status: BrowseIntegrationsFilter['status'];
+    const rawStatus = urlParams.status;
+    if (typeof rawStatus === 'string') {
+      // Single value: ?status=beta
+      if (isValidStatus(rawStatus)) {
+        status = [rawStatus];
+      }
+    } else if (Array.isArray(rawStatus)) {
+      // Multiple values: ?status=beta&status=deprecated
+      const validStatuses = rawStatus.filter(
+        (s): s is IntegrationStatusFilterType => typeof s === 'string' && isValidStatus(s)
+      );
+      if (validStatuses.length > 0) {
+        status = validStatuses;
+      }
     }
 
     return {
       q,
       sort,
-      showBeta,
-      showDeprecated,
+      status,
     };
   }, [urlParams]);
 }

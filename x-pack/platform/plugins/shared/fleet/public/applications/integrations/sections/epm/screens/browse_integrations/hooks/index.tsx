@@ -76,17 +76,20 @@ export function useBrowseIntegrationHook({
       ? sortedCards.filter((item) => searchResults.includes(item[searchIdField]) ?? [])
       : sortedCards;
 
-    // Apply deprecated filter
-    // When showDeprecated is true, show ONLY deprecated integrations
-    const showDeprecated = urlFilters.showDeprecated;
+    // Apply status filters
+    const statusFilters = urlFilters.status;
+    if (statusFilters && statusFilters.length > 0) {
+      const filterDeprecated = statusFilters.includes('deprecated');
 
-    cards = cards.filter((card) => {
-      const isDeprecated = 'isDeprecated' in card && card.isDeprecated === true;
-      return showDeprecated ? isDeprecated : true;
-    });
+      if (filterDeprecated) {
+        cards = cards.filter((card) => {
+          return 'isDeprecated' in card && card.isDeprecated === true;
+        });
+      }
+    }
 
     return cards;
-  }, [localSearch, searchTerm, sortedCards, urlFilters.showDeprecated]);
+  }, [localSearch, searchTerm, sortedCards, urlFilters.status]);
 
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {

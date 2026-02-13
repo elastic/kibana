@@ -55,7 +55,7 @@ describe('useBrowseIntegrationHook', () => {
   };
 
   describe('Deprecated filter', () => {
-    it('Return only deprecated integrations when showDeprecated=true', () => {
+    it('Return only deprecated integrations when status includes deprecated', () => {
       const cards = [
         { id: '1', name: 'Integration 1', isDeprecated: false },
         { id: '2', name: 'Integration 2', isDeprecated: true },
@@ -67,8 +67,7 @@ describe('useBrowseIntegrationHook', () => {
       (useUrlFilters as jest.Mock).mockReturnValue({
         q: undefined,
         sort: undefined,
-        showBeta: undefined,
-        showDeprecated: true,
+        status: ['deprecated'],
       });
 
       const { result } = renderHook(() =>
@@ -82,7 +81,7 @@ describe('useBrowseIntegrationHook', () => {
       ]);
     });
 
-    it('Return all integrations when showDeprecated=false', () => {
+    it('Return all integrations when status is undefined', () => {
       const cards = [
         { id: '1', name: 'Integration 1', isDeprecated: false },
         { id: '2', name: 'Integration 2', isDeprecated: true },
@@ -93,8 +92,7 @@ describe('useBrowseIntegrationHook', () => {
       (useUrlFilters as jest.Mock).mockReturnValue({
         q: undefined,
         sort: undefined,
-        showBeta: undefined,
-        showDeprecated: false,
+        status: undefined,
       });
 
       const { result } = renderHook(() =>
@@ -120,8 +118,7 @@ describe('useBrowseIntegrationHook', () => {
       (useUrlFilters as jest.Mock).mockReturnValue({
         q: undefined,
         sort: undefined,
-        showBeta: undefined,
-        showDeprecated: undefined,
+        status: undefined,
       });
 
       const { result } = renderHook(() =>
@@ -150,8 +147,7 @@ describe('useBrowseIntegrationHook', () => {
       (useUrlFilters as jest.Mock).mockReturnValue({
         q: undefined,
         sort: 'a-z',
-        showBeta: undefined,
-        showDeprecated: undefined,
+        status: undefined,
       });
 
       const { result } = renderHook(() =>
@@ -172,8 +168,7 @@ describe('useBrowseIntegrationHook', () => {
       (useUrlFilters as jest.Mock).mockReturnValue({
         q: undefined,
         sort: 'z-a',
-        showBeta: undefined,
-        showDeprecated: undefined,
+        status: undefined,
       });
 
       const { result } = renderHook(() =>
@@ -197,8 +192,7 @@ describe('useBrowseIntegrationHook', () => {
       (useUrlFilters as jest.Mock).mockReturnValue({
         q: undefined,
         sort: 'a-z',
-        showBeta: undefined,
-        showDeprecated: true,
+        status: ['deprecated'],
       });
 
       const { result } = renderHook(() =>

@@ -12,17 +12,21 @@ import { EuiPopover, EuiFilterButton, EuiSelectable, type EuiSelectableOption } 
 
 import { useAuthz, useStartServices, usePutSettingsMutation } from '../../../hooks';
 
+import {
+  STATUS_BETA,
+  STATUS_DEPRECATED,
+  type IntegrationStatusFilterType,
+} from '../screens/browse_integrations/types';
+
 export interface StatusFilterProps {
-  showBeta?: boolean;
-  showDeprecated?: boolean;
-  onChange: (params: { showBeta?: boolean; showDeprecated?: boolean }) => void;
+  selectedStatuses?: IntegrationStatusFilterType[];
+  onChange: (statuses: IntegrationStatusFilterType[]) => void;
   testSubjPrefix?: string;
   popoverId?: string;
 }
 
 export const StatusFilter: React.FC<StatusFilterProps> = ({
-  showBeta,
-  showDeprecated,
+  selectedStatuses = [],
   onChange,
   testSubjPrefix = 'statusFilter',
   popoverId = 'statusPopover',
@@ -60,14 +64,17 @@ export const StatusFilter: React.FC<StatusFilterProps> = ({
     [canUpdateBetaSetting, mutateSettingsAsync, notifications.toasts]
   );
 
+  const hasBeta = selectedStatuses.includes(STATUS_BETA);
+  const hasDeprecated = selectedStatuses.includes(STATUS_DEPRECATED);
+
   const options: EuiSelectableOption[] = useMemo(
     () => [
       {
         label: i18n.translate('xpack.fleet.epm.statusFilter.betaOption', {
           defaultMessage: 'Beta integrations',
         }),
-        key: 'beta',
-        checked: showBeta === true ? 'on' : undefined,
+        key: STATUS_BETA,
+        checked: hasBeta ? 'on' : undefined,
         hidden: !canUpdateBetaSetting,
         'data-test-subj': `${testSubjPrefix}.statusBetaOption`,
       },
@@ -75,37 +82,36 @@ export const StatusFilter: React.FC<StatusFilterProps> = ({
         label: i18n.translate('xpack.fleet.epm.statusFilter.deprecatedOption', {
           defaultMessage: 'Deprecated integrations',
         }),
-        key: 'deprecated',
-        checked: showDeprecated === true ? 'on' : undefined,
+        key: STATUS_DEPRECATED,
+        checked: hasDeprecated ? 'on' : undefined,
         'data-test-subj': `${testSubjPrefix}.statusDeprecatedOption`,
       },
     ],
-    [canUpdateBetaSetting, showBeta, showDeprecated, testSubjPrefix]
+    [canUpdateBetaSetting, hasBeta, hasDeprecated, testSubjPrefix]
   );
 
-  const activeCount = useMemo(() => {
-    let count = 0;
-    if (showBeta === true) count++;
-    if (showDeprecated === true) count++;
-    return count;
-  }, [showBeta, showDeprecated]);
+  const activeCount = selectedStatuses.length;
 
   const onSelectionChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
-      newOptions.forEach((option, index) => {
-        const isBeta = option.key === 'beta';
-        const isDeprecated = option.key === 'deprecated';
-        if (option.checked !== options[index].checked) {
-          if (isBeta) {
-            onChange({ showBeta: option.checked === 'on' ? true : undefined, showDeprecated });
-            updateBetaSettings(option.checked === 'on');
-          } else if (isDeprecated) {
-            onChange({ showBeta, showDeprecated: option.checked === 'on' ? true : undefined });
-          }
+      const newStatuses: IntegrationStatusFilterType[] = [];
+
+      newOptions.forEach((option) => {
+        if (option.checked === 'on' && option.key) {
+          newStatuses.push(option.key as IntegrationStatusFilterType);
         }
       });
+
+      // Check if beta was toggled
+      const betaWasOn = hasBeta;
+      const betaIsOn = newStatuses.includes('beta');
+      if (betaWasOn !== betaIsOn) {
+        updateBetaSettings(betaIsOn);
+      }
+
+      onChange(newStatuses);
     },
-    [onChange, options, showBeta, showDeprecated, updateBetaSettings]
+    [hasBeta, onChange, updateBetaSettings]
   );
 
   return (
