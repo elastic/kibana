@@ -32,11 +32,3 @@ export function savedObjectToItem(savedObject: SavedObject<MarkdownSavedObjectAt
     attributes,
   };
 }
-
-export function itemToAttributes(state: MarkdownSavedObjectAttributes): {
-  attributes: MarkdownSavedObjectAttributes;
-} {
-  return {
-    attributes: state,
-  };
-}
