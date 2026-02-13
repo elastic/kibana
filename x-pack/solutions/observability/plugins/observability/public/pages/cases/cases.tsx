@@ -5,23 +5,34 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { observabilityFeatureId } from '../../../common';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { Cases } from './components/cases';
 import { CaseFeatureNoPermissions } from './components/feature_no_permissions';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { useKibana } from '../../utils/kibana_react';
 
+/** Clear the App Menu (optional) slot for Cases so it does not show "Add data" as the only item. */
+function useClearAppMenu() {
+  const { appMountParameters } = usePluginContext();
+  useEffect(() => {
+    const setHeaderActionMenu = appMountParameters?.setHeaderActionMenu;
+    if (setHeaderActionMenu) {
+      setHeaderActionMenu(undefined);
+      return () => setHeaderActionMenu(undefined);
+    }
+  }, [appMountParameters?.setHeaderActionMenu]);
+}
+
 export function CasesPage() {
+  useClearAppMenu();
   const { ObservabilityPageTemplate } = usePluginContext();
   const canUseCases = useKibana().services.cases?.helpers.canUseCases;
   const userCasesPermissions = canUseCases?.([observabilityFeatureId]);
 
   return userCasesPermissions?.read ? (
     <ObservabilityPageTemplate isPageDataLoaded data-test-subj="o11yCasesPage">
-      <HeaderMenu />
       <Cases permissions={userCasesPermissions} />
     </ObservabilityPageTemplate>
   ) : (

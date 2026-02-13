@@ -48,13 +48,24 @@ import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 import { ObservabilityAlertsTable } from '../../components/alerts_table/alerts_table';
 import { getColumns } from '../../components/alerts_table/common/get_columns';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { buildEsQuery } from '../../utils/build_es_query';
 import type { RuleStatsState } from './components/rule_stats';
 import { renderRuleStats } from './components/rule_stats';
 import { mergeBoolQueries } from './helpers/merge_bool_queries';
 import { GroupingToolbarControls } from '../../components/alerts_table/grouping/grouping_toolbar_controls';
 import { AlertsLoader } from './components/alerts_loader';
+
+/** Clear the App Menu (optional) slot for Alerts so it does not show "Add data" as the only item. */
+function useClearAppMenu() {
+  const { appMountParameters } = usePluginContext();
+  useEffect(() => {
+    const setHeaderActionMenu = appMountParameters?.setHeaderActionMenu;
+    if (setHeaderActionMenu) {
+      setHeaderActionMenu(undefined);
+      return () => setHeaderActionMenu(undefined);
+    }
+  }, [appMountParameters?.setHeaderActionMenu]);
+}
 
 const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
@@ -67,6 +78,7 @@ const DEFAULT_EMPTY_FILTERS: Filter[] = [];
 const tableColumns = getColumns({ showRuleName: true });
 
 function InternalAlertsPage() {
+  useClearAppMenu();
   const kibanaServices = useKibana().services;
   const {
     data,
@@ -285,7 +297,6 @@ function InternalAlertsPage() {
           ),
         }}
       >
-        <HeaderMenu />
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem>
             <MaintenanceWindowCallout
