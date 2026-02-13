@@ -55,15 +55,17 @@ export interface ChangeAccessControlParams {
 /**
  * Validate that user profile IDs have the form `u_<principal>_<version>`
  * We cannot make any assumptions on the shape of principal and version.
- * @param userProfileId the userProfileId to validate
+ * @param id the userProfileId to validate
  * @returns true if the userProfileId matches the expected format
  */
-const isValidUserProfileId = (userProfileId: string): boolean => {
-  return (
-    userProfileId.startsWith('u_') &&
-    userProfileId.lastIndexOf('_') > 2 &&
-    userProfileId.length >= 5
-  );
+const isValidUserProfileId = (id: string): boolean => {
+  if (!id.startsWith('u_')) {
+    return false;
+  }
+  for (let i = 3; i < id.length - 1; i++) {
+    if (id.charAt(i) === '_') return true;
+  }
+  return false;
 };
 
 export const isSavedObjectsChangeAccessModeOptions = (
