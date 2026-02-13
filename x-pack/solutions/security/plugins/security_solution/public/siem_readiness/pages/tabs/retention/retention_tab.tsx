@@ -39,6 +39,10 @@ const getIlmPoliciesUrl = (basePath: string, policyName?: string): string => {
   return policyName ? `${baseUrl}?policy=${policyName}` : baseUrl;
 };
 
+const getDataStreamUrl = (basePath: string, dataStreamName: string): string => {
+  return `${basePath}/app/management/data/index_management/data_streams/${dataStreamName}`;
+};
+
 // Extended RetentionInfo for table compatibility
 interface RetentionInfoWithStatus extends RetentionInfo, Record<string, unknown> {}
 
@@ -289,24 +293,42 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
           defaultMessage: 'Action',
         }),
         width: '10%',
-        field: 'policyName',
-        render: (policyName: string) => {
-          if (!policyName) return null;
-          return (
-            <div style={{ textAlign: 'right' }}>
-              <EuiButtonEmpty
-                size="xs"
-                href={getIlmPoliciesUrl(basePath, policyName)}
-                target="_blank"
-                iconType="popout"
-                iconSide="right"
-              >
-                {i18n.translate('xpack.securitySolution.siemReadiness.retention.action.view', {
-                  defaultMessage: 'View ILM policies',
-                })}
-              </EuiButtonEmpty>
-            </div>
-          );
+        render: (item: RetentionInfoWithStatus) => {
+          if (item.retentionType === 'dsl') {
+            return (
+              <div style={{ textAlign: 'right' }}>
+                <EuiButtonEmpty
+                  size="xs"
+                  href={getDataStreamUrl(basePath, item.indexName)}
+                  target="_blank"
+                  iconType="popout"
+                  iconSide="right"
+                >
+                  {i18n.translate('xpack.securitySolution.siemReadiness.retention.action.viewDsl', {
+                    defaultMessage: 'View DSL',
+                  })}
+                </EuiButtonEmpty>
+              </div>
+            );
+          }
+          if (item.retentionType === 'ilm' && item.policyName) {
+            return (
+              <div style={{ textAlign: 'right' }}>
+                <EuiButtonEmpty
+                  size="xs"
+                  href={getIlmPoliciesUrl(basePath, item.policyName)}
+                  target="_blank"
+                  iconType="popout"
+                  iconSide="right"
+                >
+                  {i18n.translate('xpack.securitySolution.siemReadiness.retention.action.viewIlm', {
+                    defaultMessage: 'View ILM policies',
+                  })}
+                </EuiButtonEmpty>
+              </div>
+            );
+          }
+          return null;
         },
       },
     ],
