@@ -13,11 +13,7 @@ import {
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
 } from '@kbn/agent-builder-common';
-import type {
-  SkillProvider,
-  ReadonlySkillProvider,
-  WritableSkillProvider,
-} from './skill_provider';
+import type { SkillProvider, ReadonlySkillProvider, WritableSkillProvider } from './skill_provider';
 import { isReadonlySkillProvider } from './skill_provider';
 
 export interface SkillRegistry {
