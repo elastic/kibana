@@ -21,7 +21,7 @@ import {
   getQueryWithoutLastPipe,
   getRangeFromOffsets,
 } from './utils';
-import { BROWSER_POPOVER_VERTICAL_OFFSET } from './constants';
+import { BROWSER_POPOVER_VERTICAL_OFFSET, DEFAULT_FIELDS_BROWSER_INDEX } from './constants';
 
 interface UseFieldsBrowserParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -37,8 +37,6 @@ interface BrowserPopoverPosition {
   top?: number;
   left?: number;
 }
-
-const DEFAULT_FIELDS_BROWSER_INDEX = '*';
 
 export function useFieldsBrowser({
   editorRef,

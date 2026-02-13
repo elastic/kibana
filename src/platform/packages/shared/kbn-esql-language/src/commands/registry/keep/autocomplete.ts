@@ -17,7 +17,6 @@ import {
   handleFragment,
 } from '../../definitions/utils/autocomplete/helpers';
 import { isColumn } from '../../../ast/is';
-import { getFieldsSuggestions } from '../../definitions/utils';
 
 export async function autocomplete(
   query: string,
@@ -38,13 +37,7 @@ export async function autocomplete(
   const alreadyDeclaredFields = (command as ESQLCommand).args
     .filter(isColumn)
     .map((arg) => arg.parts.join('.'));
-  const fieldSuggestions = callbacks?.getByType
-    ? await getFieldsSuggestions(['any'], callbacks.getByType, {
-        ignoreColumns: alreadyDeclaredFields,
-        promoteToTop: true,
-      })
-    : [];
-
+  const fieldSuggestions = (await callbacks?.getByType?.('any', alreadyDeclaredFields)) ?? [];
   return handleFragment(
     innerText,
     (fragment) => columnExists(fragment, context),

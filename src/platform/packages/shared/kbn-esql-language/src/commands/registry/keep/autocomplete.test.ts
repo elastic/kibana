@@ -10,7 +10,6 @@ import { mockContext } from '../../../__tests__/commands/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions } from '../../../__tests__/commands/autocomplete';
 import type { ICommandCallbacks } from '../types';
-import { buildFieldsDefinitionsWithMetadata } from '../../definitions/utils';
 
 const keepExpectSuggestions = (
   query: string,
@@ -44,37 +43,5 @@ describe('KEEP Autocomplete', () => {
 
   it('suggests command and pipe after a field has been used in KEEP', async () => {
     keepExpectSuggestions('FROM logs* | KEEP doubleField ', ['| ', ',']);
-  });
-
-  it('prepends the fields browser suggestion when enabled', async () => {
-    const result = await autocomplete(
-      'FROM a | KEEP ',
-      { args: [] } as any,
-      {
-        getByType: jest.fn(async () =>
-          buildFieldsDefinitionsWithMetadata([], [], { isFieldsBrowserEnabled: true })
-        ),
-      } as any,
-      { ...mockContext, isFieldsBrowserEnabled: true } as any,
-      'FROM a | KEEP '.length
-    );
-
-    const containsFieldsBrowserCommand = result.some((s) => {
-      const cmd = s.command;
-      if (!cmd) return false;
-
-      if (cmd.id === 'esql.fieldsBrowser.open') return true;
-
-      if (cmd.id === 'esql.multiCommands') {
-        const payload = cmd.arguments?.[0]?.commands;
-        if (!payload) return false;
-        const commands = JSON.parse(payload) as Array<{ id: string }>;
-        return commands.some((c) => c.id === 'esql.fieldsBrowser.open');
-      }
-
-      return false;
-    });
-
-    expect(containsFieldsBrowserCommand).toBe(true);
   });
 });
