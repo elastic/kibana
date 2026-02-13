@@ -149,6 +149,7 @@ export const StdErrorLogs = ({
           pageSizeOptions: [2, 5, 10, 20, 50],
         }}
         onTableChange={onTableChange}
+        tableCaption={title ?? TEST_RUN_LOGS_LABEL}
       />
     </>
   );
