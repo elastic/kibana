@@ -32,44 +32,48 @@ export interface IStdDevAggConfig extends IResponseAggConfig {
   valProp: () => string[];
 }
 
+const getKeyedDetails = (
+  customLabel: string | undefined,
+  fieldDisplayName: string
+): Record<string, ValProp> => {
+  const label =
+    customLabel ||
+    i18n.translate('data.search.aggs.metrics.standardDeviation.keyDetailsLabel', {
+      defaultMessage: 'Standard Deviation of {fieldDisplayName}',
+      values: { fieldDisplayName },
+    });
+
+  return {
+    std_lower: {
+      valProp: ['std_deviation_bounds', 'lower'],
+      title: i18n.translate('data.search.aggs.metrics.standardDeviation.lowerKeyDetailsTitle', {
+        defaultMessage: 'Lower {label}',
+        values: { label },
+      }),
+    },
+    std_upper: {
+      valProp: ['std_deviation_bounds', 'upper'],
+      title: i18n.translate('data.search.aggs.metrics.standardDeviation.upperKeyDetailsTitle', {
+        defaultMessage: 'Upper {label}',
+        values: { label },
+      }),
+    },
+  };
+};
+
 const responseAggConfigProps = {
   valProp(this: IStdDevAggConfig) {
-    const customLabel = this.getParam('customLabel') as string;
-    const details = this.keyedDetails(customLabel)[this.key];
+    const customLabel = this.getParam('customLabel') as string | undefined;
+    const details = getKeyedDetails(customLabel, this.getFieldDisplayName())[this.key];
 
     return details.valProp;
   },
   makeLabel(this: IStdDevAggConfig) {
     const fieldDisplayName = this.getFieldDisplayName();
-    const customLabel = this.getParam('customLabel') as string;
-    const details = this.keyedDetails(customLabel, fieldDisplayName);
+    const customLabel = this.getParam('customLabel') as string | undefined;
+    const details = getKeyedDetails(customLabel, fieldDisplayName);
 
     return get(details, [this.key, 'title']);
-  },
-  keyedDetails(this: IStdDevAggConfig, customLabel: string, fieldDisplayName: string) {
-    const label =
-      customLabel ||
-      i18n.translate('data.search.aggs.metrics.standardDeviation.keyDetailsLabel', {
-        defaultMessage: 'Standard Deviation of {fieldDisplayName}',
-        values: { fieldDisplayName },
-      });
-
-    return {
-      std_lower: {
-        valProp: ['std_deviation_bounds', 'lower'],
-        title: i18n.translate('data.search.aggs.metrics.standardDeviation.lowerKeyDetailsTitle', {
-          defaultMessage: 'Lower {label}',
-          values: { label },
-        }),
-      },
-      std_upper: {
-        valProp: ['std_deviation_bounds', 'upper'],
-        title: i18n.translate('data.search.aggs.metrics.standardDeviation.upperKeyDetailsTitle', {
-          defaultMessage: 'Upper {label}',
-          values: { label },
-        }),
-      },
-    };
   },
 };
 

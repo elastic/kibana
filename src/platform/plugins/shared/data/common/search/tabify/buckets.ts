@@ -15,7 +15,22 @@ import type { AggResponseBucket, TabbedRangeFilterParams, TimeRangeInformation }
 
 type AggParams = IAggConfig['params'] & {
   drop_partials: boolean;
-  ranges: TabbedRangeFilterParams[];
+  filters?: Array<{
+    input: {
+      query:
+        | string
+        | {
+            query_string: {
+              query: string;
+            };
+          };
+    };
+    label: string;
+  }>;
+  ranges?:
+    | TabbedRangeFilterParams[]
+    | { mask: TabbedRangeFilterParams[] }
+    | { fromTo: TabbedRangeFilterParams[] };
 };
 
 const isRangeEqual = (range1: TabbedRangeFilterParams, range2: TabbedRangeFilterParams) =>
@@ -48,7 +63,7 @@ export class TabifyBuckets {
     }
 
     if (this.length && agg) {
-      this.orderBucketsAccordingToParams(agg.params as any);
+      this.orderBucketsAccordingToParams(agg.params as AggParams);
       if (agg.params.drop_partials) {
         this.dropPartials(agg, timeRange);
       }
@@ -73,22 +88,28 @@ export class TabifyBuckets {
 
   private orderBucketsAccordingToParams(params: AggParams) {
     if (params.filters && this.objectMode) {
-      this._keys = params.filters.map((filter: any) => {
+      this._keys = params.filters.map((filter) => {
         const query = get(filter, 'input.query.query_string.query', filter.input.query);
         const queryString = typeof query === 'string' ? query : JSON.stringify(query);
 
         return filter.label || queryString || '*';
       });
     } else if (params.ranges && this.objectMode) {
-      this._keys = params.ranges.map((range: TabbedRangeFilterParams) =>
+      this._keys = (params.ranges as TabbedRangeFilterParams[]).map((range) =>
         findKey(this.buckets, (el: TabbedRangeFilterParams) => isRangeEqual(el, range))
       );
     } else if (params.ranges && params.field.type !== 'date') {
-      let ranges = params.ranges;
+      let ranges = params.ranges as
+        | TabbedRangeFilterParams[]
+        | { mask: TabbedRangeFilterParams[] }
+        | { fromTo: TabbedRangeFilterParams[] };
       if (params.ipRangeType) {
-        ranges = params.ipRangeType === 'mask' ? (ranges as any).mask : (ranges as any).fromTo;
+        ranges =
+          params.ipRangeType === 'mask'
+            ? (ranges as { mask: TabbedRangeFilterParams[] }).mask
+            : (ranges as { fromTo: TabbedRangeFilterParams[] }).fromTo;
       }
-      this.buckets = ranges.map((range: any) => {
+      this.buckets = (ranges as TabbedRangeFilterParams[]).map((range) => {
         if (range.mask) {
           return this.buckets.find((el: AggResponseBucket) => el.key === range.mask);
         }

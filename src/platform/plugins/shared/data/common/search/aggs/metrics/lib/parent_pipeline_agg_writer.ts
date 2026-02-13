@@ -20,13 +20,15 @@ export const parentPipelineAggWriter = (
 
   const selectedMetric = customMetric || (aggConfigs && aggConfigs.getResponseAggById(metricAgg));
 
-  if (selectedMetric && customMetric && customMetric.type.name !== 'count') {
+  if (!selectedMetric) {
+    return;
+  }
+
+  if (customMetric && customMetric.type.name !== 'count') {
     output.parentAggs = (output.parentAggs || []).concat(selectedMetric);
   }
 
-  if (selectedMetric) {
-    output.params = {
-      buckets_path: selectedMetric.type.name === 'count' ? '_count' : selectedMetric.id,
-    };
-  }
+  output.params = {
+    buckets_path: selectedMetric.type.name === 'count' ? '_count' : selectedMetric.id,
+  };
 };

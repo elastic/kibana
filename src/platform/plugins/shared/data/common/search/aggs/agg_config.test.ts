@@ -245,20 +245,8 @@ describe('AggConfig', () => {
       expect(dsl).toMatchInlineSnapshot(`
         Object {
           "1": Object {
-            "avg_bucket": Object {
-              "buckets_path": "1-bucket>1-metric",
-            },
-          },
-          "1-bucket": Object {
             "aggs": Object {
               "1-bucket": Object {
-                "aggs": Object {
-                  "1-metric": Object {
-                    "sum": Object {
-                      "field": "bytes",
-                    },
-                  },
-                },
                 "date_histogram": Object {
                   "field": "@timestamp",
                   "fixed_interval": "30m",
@@ -266,6 +254,13 @@ describe('AggConfig', () => {
                   "time_zone": "dateFormat:tz",
                 },
               },
+            },
+            "avg_bucket": Object {
+              "buckets_path": "1-bucket>1-metric",
+            },
+          },
+          "1-bucket": Object {
+            "aggs": Object {
               "1-metric": Object {
                 "avg_bucket": Object {
                   "buckets_path": "1-bucket>1-metric",

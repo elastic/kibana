@@ -32,7 +32,7 @@ export const forwardModifyAggConfigOnSearchRequestStart = (paramName: string) =>
       return;
     }
 
-    const nestedAggConfig = aggConfig.getParam(paramName) as IMetricAggConfig;
+    const nestedAggConfig = aggConfig.getParam(paramName) as AggConfig;
 
     if (nestedAggConfig && nestedAggConfig.type && nestedAggConfig.type.params) {
       nestedAggConfig.type.params.forEach((param: MetricAggParam<AggConfig>) => {

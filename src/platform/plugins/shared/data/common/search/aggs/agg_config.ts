@@ -125,6 +125,10 @@ export class AggConfig {
     this.__type = this.__type;
   }
 
+  addSubAgg(agg: AggConfig) {
+    this.subAggs.push(agg);
+  }
+
   /**
    * Write the current values to this.params, filling in the defaults as we go
    *

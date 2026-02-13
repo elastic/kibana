@@ -18,13 +18,15 @@ export const siblingPipelineAggWriter = (agg: IMetricAggConfig, output: Record<s
 
   // if a bucket is selected, we must add this agg as a sibling to it, and add a metric to that bucket (or select one of its)
   if (metricAgg.type.name !== METRIC_TYPES.COUNT) {
-    (bucketAgg as any).subAggs = (output.subAggs || []).concat(metricAgg);
+    bucketAgg.addSubAgg(metricAgg);
     output.params.buckets_path = `${bucketAgg.id}>${metricAgg.id}`;
 
     // If the metric is another nested sibling pipeline agg, we need to include it as a sub-agg of this agg's bucket agg
     if (metricAgg.type.subtype === siblingPipelineType) {
       const subAgg = metricAgg.getParam('customBucket');
-      if (subAgg) (bucketAgg as any).subAggs.push(subAgg);
+      if (subAgg) {
+        output.subAggs = (output.subAggs || []).concat(subAgg);
+      }
     }
   } else {
     output.params.buckets_path = bucketAgg.id + '>_count';
