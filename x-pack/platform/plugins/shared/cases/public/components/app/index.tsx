@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
@@ -14,7 +14,8 @@ import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_fram
 
 import { APP_OWNER } from '../../../common/constants';
 import { getCasesLazy } from '../../client/ui/get_cases';
-import { useApplicationCapabilities } from '../../common/lib/kibana';
+import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
+import { getCasesHeaderAppActionsConfig } from '../../header_app_actions/header_app_actions_config';
 import type { CasesRoutesProps } from './types';
 
 export type CasesProps = CasesRoutesProps;
@@ -33,6 +34,11 @@ const CasesAppComponent: React.FC<CasesAppProps> = ({
   getFilesClient,
 }) => {
   const userCapabilities = useApplicationCapabilities();
+  const { chrome } = useKibana().services;
+
+  useEffect(() => {
+    chrome.setHeaderAppActionsConfig(getCasesHeaderAppActionsConfig());
+  }, [chrome]);
 
   return (
     <div data-test-subj="cases-app">
