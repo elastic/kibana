@@ -19,7 +19,6 @@ import {
   INTERNAL_TEMPLATES_URL,
 } from '../../../../common/constants';
 import { KibanaServices } from '../../../common/lib/kibana';
-import { MOCK_TEMPLATES } from './sample_data';
 import { templatesToYaml } from '../utils/templates_to_yaml';
 import type {
   TemplatesFindRequest,
