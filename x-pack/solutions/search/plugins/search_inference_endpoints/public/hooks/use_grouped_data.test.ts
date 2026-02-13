@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 
 import { InferenceEndpoints } from '../__mocks__/inference_endpoints';
 
-import { useGroupedData } from './use_grouped_data';
+import { useGroupedData, UNKNOWN_MODEL_ID_FALLBACK } from './use_grouped_data';
 import { GroupByOptions } from '../types';
 
 describe('useGroupedData', () => {
@@ -35,5 +35,16 @@ describe('useGroupedData', () => {
     );
 
     expect(result.current.data).toEqual({});
+  });
+
+  it('should group endpoints with unknown model_id under unknown model group', () => {
+    const { result } = renderHook(() =>
+      useGroupedData(InferenceEndpoints, GroupByOptions.Model, { provider: [], type: [] }, '')
+    );
+
+    const unknownModelGroup = result.current.data[UNKNOWN_MODEL_ID_FALLBACK];
+    expect(unknownModelGroup).toBeDefined();
+    expect(unknownModelGroup.groupLabel).toBe('Unknown Model');
+    expect(unknownModelGroup.endpoints).toHaveLength(2);
   });
 });
