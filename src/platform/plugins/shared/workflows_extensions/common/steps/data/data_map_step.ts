@@ -25,11 +25,7 @@ const PickSchema = z.union([z.record(z.string(), z.unknown()), z.array(PickNodeS
 
 export const InputSchema = z.object({
   fields: z.record(z.string(), z.unknown()).optional(),
-  transform: z
-    .object({
-      pick: PickSchema.optional(),
-    })
-    .optional(),
+  transform: z.object({ pick: PickSchema.optional() }).optional(),
 });
 
 export const OutputSchema = z.union([
