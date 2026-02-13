@@ -11,6 +11,7 @@ import { isOfAggregateQueryType, type AggregateQuery, type TimeRange } from '@kb
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ReactElement } from 'react';
 import { createContext, useContext } from 'react';
+import type { DataCascadeRestorableState } from '@kbn/shared-ux-document-data-cascade';
 import type {
   CascadedDocumentsState,
   DiscoverAppState,
@@ -26,7 +27,9 @@ export interface CascadedDocumentsContext
   esqlVariables: ESQLControlVariable[] | undefined;
   timeRange: TimeRange | undefined;
   viewModeToggle: ReactElement | undefined;
+  dataCascadeUiState?: Partial<DataCascadeRestorableState>;
   cascadeGroupingChangeHandler: (cascadeGrouping: string[]) => void;
+  onDataCascadeUiStateChange: (newState: Partial<DataCascadeRestorableState>) => void;
   onUpdateESQLQuery: UpdateESQLQueryFn;
   openInNewTab: (...args: Parameters<typeof internalStateActions.openInNewTab>) => void;
 }
