@@ -23,7 +23,7 @@ steps:
     id: store_cache
     soft_fail: true
     agents:
-      machineType: n2-standard-2
+      machineType: n2-highcpu-8
       diskSizeGb: 95
 
   - wait
