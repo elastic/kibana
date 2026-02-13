@@ -385,8 +385,11 @@ export const schemaFieldsConflictsRoute = createServerRoute({
       return { conflicts: [] };
     }
 
+    // Only check conflicts for fields that affect ES mappings
+    // Skip system fields, doc-only overrides (no type), and unmapped fields
     const userFieldDefinitions = params.body.field_definitions.filter(
-      (field) => field.type !== 'system'
+      (field): field is typeof field & { type: string } =>
+        !!field.type && field.type !== 'system' && field.type !== 'unmapped'
     );
 
     if (userFieldDefinitions.length === 0) {
@@ -411,8 +414,8 @@ export const schemaFieldsConflictsRoute = createServerRoute({
       const fields = stream.ingest.wired.fields;
 
       for (const [fieldName, config] of Object.entries(fields)) {
-        // Skip system fields
-        if (config.type === 'system') {
+        // Skip system fields and doc-only overrides (no type)
+        if (!config.type || config.type === 'system') {
           continue;
         }
 

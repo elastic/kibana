@@ -92,7 +92,7 @@ export type FieldDefinitionConfigAdvancedParameters = Omit<
   'type' | 'format' | 'description'
 >;
 
-export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.intersection(
+export const fieldDefinitionConfigSchema = z.intersection(
   recursiveRecord,
   z.union([
     z.object({
@@ -115,7 +115,7 @@ export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.in
       description: z.optional(z.string()),
     }),
   ])
-);
+) as z.ZodType<FieldDefinitionConfig>;
 
 export interface FieldDefinition {
   [x: string]: FieldDefinitionConfig;

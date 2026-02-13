@@ -67,7 +67,7 @@ export const convertToFieldDefinitionConfig = (field: MappedSchemaField): FieldD
     ...(field.additionalParameters && Object.keys(field.additionalParameters).length > 0
       ? field.additionalParameters
       : {}),
-  };
+  } as FieldDefinitionConfig;
 };
 
 export function isFieldUncommitted(field: SchemaEditorField, storedFields: SchemaEditorField[]) {
