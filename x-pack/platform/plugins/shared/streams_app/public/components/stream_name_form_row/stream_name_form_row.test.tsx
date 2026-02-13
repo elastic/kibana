@@ -106,17 +106,12 @@ describe('StreamNameFormRow', () => {
 
   describe('getHelpText', () => {
     it('should return empty error help text when stream name is shorter than the prefix', () => {
-      const result = getHelpText(true, false, false);
+      const result = getHelpText(true, false);
       expect(result).toBe('Stream name is required.');
     });
 
-    it('should return name too long error help text when stream name is longer than 200 characters', () => {
-      const result = getHelpText(false, true, false);
-      expect(result).toBe('Stream name cannot be longer than 200 characters.');
-    });
-
     it('should return undefined help text when input is valid', () => {
-      const result = getHelpText(false, false, false);
+      const result = getHelpText(false, false);
       expect(result).toBeUndefined();
     });
   });

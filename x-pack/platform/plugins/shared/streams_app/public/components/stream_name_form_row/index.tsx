@@ -18,7 +18,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { validateStreamName, MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
+import { validateStreamName } from '@kbn/streams-schema';
 import type { ReactNode } from 'react';
 import React, { useMemo, useState } from 'react';
 import type { StatefulStreamsAppRouter } from '../../hooks/use_streams_app_router';
@@ -44,23 +44,14 @@ const PREFIX_MAX_VISIBLE_CHARACTERS = 25;
 
 export const getHelpText = (
   isStreamNameEmpty: boolean,
-  isStreamNameTooLong: boolean,
   readOnly: boolean
 ): string | undefined => {
   if (isStreamNameEmpty && !readOnly) {
     return i18n.translate('xpack.streams.streamDetailRouting.minimumNameHelpText', {
       defaultMessage: `Stream name is required.`,
     });
-  } else if (isStreamNameTooLong && !readOnly) {
-    return i18n.translate('xpack.streams.streamDetailRouting.maximumNameHelpText', {
-      defaultMessage: `Stream name cannot be longer than {maxLength} characters.`,
-      values: {
-        maxLength: MAX_STREAM_NAME_LENGTH,
-      },
-    });
-  } else {
-    return undefined;
   }
+  return undefined;
 };
 
 export const getErrorMessage = (
@@ -170,13 +161,12 @@ export const useChildStreamInput = (
   // Use shared validation for basic stream name checks
   const baseValidation = validateStreamName(localStreamName);
   const isStreamNameEmpty = localStreamName.length <= prefix.length;
-  const isStreamNameTooLong = localStreamName.length > MAX_STREAM_NAME_LENGTH;
   // Base validation passes if the name is valid according to shared validator
   // However, we also need to check if the partition (the part after the prefix) is empty
   const baseValidationError =
     !baseValidation.valid && !isStreamNameEmpty ? baseValidation.message : undefined;
 
-  const helpText = getHelpText(isStreamNameEmpty, isStreamNameTooLong, readOnly);
+  const helpText = getHelpText(isStreamNameEmpty, readOnly);
 
   const isDotPresent = !readOnly && partitionName.includes('.');
 
