@@ -19,7 +19,7 @@ import {
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSiemReadinessApi } from '@kbn/siem-readiness';
-import type { RetentionInfo, RetentionStatus } from '@kbn/siem-readiness';
+import type { RetentionInfo, RetentionStatus, MainCategories } from '@kbn/siem-readiness';
 import {
   CategoryAccordionTable,
   type CategoryData,
@@ -30,6 +30,7 @@ import { useBasePath } from '../../../../common/lib/kibana';
 import { RetentionWarningPrompt } from './retention_warning_prompt';
 import { buildRetentionCaseDescription, getRetentionCaseTitle } from './retention_add_case_details';
 import { ViewCasesButton } from '../../components/view_cases_button';
+import type { SiemReadinessTabActiveCategoriesProps } from '../../components/configuration_panel';
 
 const RETENTION_CASE_TAGS = ['siem-readiness', 'retention', 'data-lifecycle'];
 
@@ -41,7 +42,9 @@ const getIlmPoliciesUrl = (basePath: string, policyName?: string): string => {
 // Extended RetentionInfo for table compatibility
 interface RetentionInfoWithStatus extends RetentionInfo, Record<string, unknown> {}
 
-export const RetentionTab: React.FC = () => {
+export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
+  activeCategories,
+}) => {
   const basePath = useBasePath();
   const { openNewCaseFlyout } = useSiemReadinessCases();
   const { getReadinessCategories, getReadinessRetention } = useSiemReadinessApi();
@@ -63,7 +66,11 @@ export const RetentionTab: React.FC = () => {
   const categories: Array<CategoryData<RetentionInfoWithStatus>> = useMemo(() => {
     if (!categoriesData?.mainCategoriesMap || !retentionData?.items) return [];
 
-    return categoriesData.mainCategoriesMap
+    const activeOnly = categoriesData.mainCategoriesMap.filter((category) =>
+      activeCategories.includes(category.category as MainCategories)
+    );
+
+    return activeOnly
       .map((category) => {
         // Find retention items where any backing index in this category contains the data stream name
         const matchingRetention = retentionData.items.filter((retention) =>
@@ -76,7 +83,7 @@ export const RetentionTab: React.FC = () => {
         };
       })
       .filter((cat) => cat.items.length > 0);
-  }, [categoriesData?.mainCategoriesMap, retentionData?.items]);
+  }, [categoriesData?.mainCategoriesMap, retentionData?.items, activeCategories]);
 
   // Calculate non-compliant statistics
   const nonCompliantStats = useMemo(() => {
