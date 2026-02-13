@@ -8,6 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/**/*",
     "../../../../../typings/**/*",
     ".storybook/**/*.ts",
     ".storybook/**/*.tsx",
@@ -77,7 +78,8 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/shared-ux-utility",
     "@kbn/licensing-types",
-    "@kbn/core-lifecycle-server-mocks"
+    "@kbn/core-lifecycle-server-mocks",
+    "@kbn/scout"
   ],
   "exclude": ["target/**/*"]
 }
