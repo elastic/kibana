@@ -35,7 +35,9 @@ export const getTransformOut = (
       transformTitlesOut<LensSerializedState>,
       (state: LensSerializedState) => transformDrilldownsOut(state, panelReferences)
     );
-    const state = transformsFlow(storedState);
+
+    const { syncColors, syncCursor, syncTooltips, query, filters, ...state } =
+      transformsFlow(storedState);
 
     const savedObjectRef = findLensReference(panelReferences);
 
