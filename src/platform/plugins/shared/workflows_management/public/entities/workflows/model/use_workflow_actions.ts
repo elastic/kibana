@@ -366,7 +366,6 @@ export function useWorkflowActions() {
     deleteWorkflows,
     runWorkflow,
     runIndividualStep,
-    cloneWorkflow,
-    getPreviousData: () => getPreviousData()?.[1]?.[1],
+    cloneWorkflow
   };
 }
