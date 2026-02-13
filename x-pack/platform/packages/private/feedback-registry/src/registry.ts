@@ -34,7 +34,7 @@ const feedbackRegistry: FeedbackRegistry = new Map([
         order: 2,
         placeholder: {
           i18nId: 'xpack.feedbackRegistry.defaultGeneralPlaceholder',
-          defaultMessage: 'Add more considerations',
+          defaultMessage: 'Add more thoughts',
         },
         label: {
           i18nId: 'xpack.feedbackRegistry.defaultGeneralLabel',
