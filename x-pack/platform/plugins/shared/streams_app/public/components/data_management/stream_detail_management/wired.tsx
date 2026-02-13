@@ -19,7 +19,7 @@ import { useStreamsDetailManagementTabs } from './use_streams_detail_management_
 import { WiredAdvancedView } from './advanced_view/wired_advanced_view';
 import { StreamDetailDataQuality } from '../../stream_data_quality';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
-import { WiredStreamBadge } from '../../stream_badges';
+import { DraftStreamBadge, WiredStreamBadge } from '../../stream_badges';
 import { StreamDetailAttachments } from '../../stream_detail_attachments';
 
 const wiredStreamManagementSubTabs = [
@@ -45,6 +45,10 @@ function isValidManagementSubTab(value: string): value is WiredStreamManagementS
   return wiredStreamManagementSubTabs.includes(value as WiredStreamManagementSubTab);
 }
 
+const isDraftStream = (def: Streams.WiredStream.GetResponse): boolean => {
+  return def.stream.ingest.wired.draft === true;
+};
+
 export function WiredStreamDetailManagement({
   definition,
   refreshDefinition,
@@ -65,6 +69,8 @@ export function WiredStreamDetailManagement({
     refreshDefinition,
   });
 
+  const isDraft = isDraftStream(definition);
+
   if (!definition.privileges.view_index_metadata) {
     return (
       <>
@@ -75,6 +81,7 @@ export function WiredStreamDetailManagement({
               {key}
               <EuiBadgeGroup gutterSize="s">
                 <WiredStreamBadge />
+                {isDraft && <DraftStreamBadge />}
               </EuiBadgeGroup>
             </EuiFlexGroup>
           }
@@ -101,26 +108,31 @@ export function WiredStreamDetailManagement({
   }
 
   const tabs = {
-    retention: {
-      content: (
-        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
-            defaultMessage:
-              'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
-          })}
-        >
-          <span data-test-subj="retentionTab" tabIndex={0}>
-            {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-              defaultMessage: 'Retention',
-            })}
-          </span>
-        </EuiToolTip>
-      ),
-    },
+    // Retention tab is not shown for draft streams as they are not materialized in Elasticsearch
+    ...(!isDraft
+      ? {
+          retention: {
+            content: (
+              <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
+            ),
+            label: (
+              <EuiToolTip
+                position="top"
+                content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
+                  defaultMessage:
+                    'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+                })}
+              >
+                <span data-test-subj="retentionTab" tabIndex={0}>
+                  {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+                    defaultMessage: 'Retention',
+                  })}
+                </span>
+              </EuiToolTip>
+            ),
+          },
+        }
+      : {}),
     partitioning: {
       content: (
         <StreamDetailRouting definition={definition} refreshDefinition={refreshDefinition} />
@@ -188,6 +200,13 @@ export function WiredStreamDetailManagement({
         path="/{key}/management/{tab}"
         params={{ path: { key, tab: redirectConfig.newTab } }}
       />
+    );
+  }
+
+  // Redirect from retention to partitioning for draft streams
+  if (isDraft && tab === 'retention') {
+    return (
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />
     );
   }
 

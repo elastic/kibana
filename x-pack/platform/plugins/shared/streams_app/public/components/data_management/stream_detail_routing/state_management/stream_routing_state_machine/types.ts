@@ -41,6 +41,7 @@ export interface StreamRoutingContext {
   editingSuggestionIndex: number | null;
   editedSuggestion: PartitionSuggestion | null;
   isRefreshing: boolean;
+  createAsDraft: boolean;
 }
 
 export type StreamRoutingEvent =
@@ -53,10 +54,11 @@ export type StreamRoutingEvent =
   | { type: 'routingRule.change'; routingRule: Partial<RoutingDefinitionWithUIAttributes> }
   | { type: 'routingRule.create' }
   | { type: 'routingRule.edit'; id: string }
-  | { type: 'routingRule.fork'; routingRule?: RoutingDefinition }
+  | { type: 'routingRule.fork'; routingRule?: RoutingDefinition; draft?: boolean }
   | { type: 'routingRule.reorder'; routing: RoutingDefinitionWithUIAttributes[] }
   | { type: 'routingRule.remove' }
   | { type: 'routingRule.save' }
+  | { type: 'routingRule.setDraft'; draft: boolean }
   | { type: 'routingSamples.setDocumentMatchFilter'; filter: DocumentMatchFilterOptions }
   | { type: 'routingSamples.setSelectedPreview'; preview: RoutingSamplesContext['selectedPreview'] }
   | {

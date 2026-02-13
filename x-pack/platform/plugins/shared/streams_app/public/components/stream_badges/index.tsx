@@ -92,6 +92,32 @@ export function WiredStreamBadge() {
   );
 }
 
+export function DraftStreamBadge() {
+  return (
+    <EuiToolTip
+      position="top"
+      title={i18n.translate('xpack.streams.badges.draft.title', {
+        defaultMessage: 'Draft Stream',
+      })}
+      content={i18n.translate('xpack.streams.badges.draft.description', {
+        defaultMessage:
+          'Draft streams are not materialized in Elasticsearch. Data is previewed using ES|QL queries. Materialize the stream to start ingesting data.',
+      })}
+      anchorProps={{
+        css: css`
+          display: inline-flex;
+        `,
+      }}
+    >
+      <EuiBadge color="warning" iconType="documentEdit" iconSide="left" data-test-subj="draftStreamBadge">
+        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.draftBadgeLabel', {
+          defaultMessage: 'Draft',
+        })}
+      </EuiBadge>
+    </EuiToolTip>
+  );
+}
+
 export function QueryStreamBadge() {
   const { euiTheme } = useEuiTheme();
   return (
