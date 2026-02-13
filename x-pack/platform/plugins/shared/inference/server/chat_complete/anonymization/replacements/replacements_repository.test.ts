@@ -76,5 +76,4 @@ describe('ReplacementsRepository', () => {
 
     expect(result?.tokenToOriginal).toEqual({ TOKEN_A: 'original-a' });
   });
-
 });
