@@ -98,14 +98,14 @@ export const mockDataViews = (): IndexPatternMap => {
 
 export const mockedColumns: Record<string, GenericIndexPatternColumn> = {
   count: {
-    label: 'Count of records',
+    label: '',
     dataType: 'number',
     isBucketed: false,
     sourceField: '___records___',
     operationType: 'count',
   },
   staticValue: {
-    label: 'Static value: 0.75',
+    label: '',
     dataType: 'number',
     operationType: 'static_value',
     isBucketed: false,
