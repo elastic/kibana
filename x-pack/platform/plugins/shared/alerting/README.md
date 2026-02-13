@@ -264,7 +264,7 @@ The `Rule` saved object has two fields for muting individual alert instances:
 - **`snoozedAlerts: SnoozedAlertInstance[]`** -- New field. Each entry can optionally carry an `expiresAt` timestamp and/or an array of `conditions` that, when met, automatically lift the mute.
 
 ```typescript
-interface MuteCondition {
+interface SnoozeCondition {
   type: 'severity_change' | 'severity_equals' | 'field_change';
   field: string;             // e.g. 'kibana.alert.severity'
   value?: string;            // for severity_equals: the target value
@@ -276,17 +276,17 @@ interface SnoozedAlertInstance {
   mutedAt: string;           // ISO timestamp
   mutedBy?: string;
   expiresAt?: string;        // ISO timestamp; absent = indefinite
-  conditions?: MuteCondition[];
+  conditions?: SnoozeCondition[];
   conditionOperator?: 'any' | 'all'; // 'any' = OR, 'all' = AND
 }
 ```
 
 ### API
 
-Mute an alert with conditions by sending a body to the existing mute endpoint:
+Snooze an alert with conditions using the dedicated snooze endpoint:
 
 ```
-POST /api/alerting/rule/{rule_id}/alert/{alert_id}/_mute
+POST /api/alerting/rule/{rule_id}/alert/{alert_id}/_snooze
 {
   "expires_at": "2025-03-01T00:00:00.000Z",
   "conditions": [
@@ -296,7 +296,15 @@ POST /api/alerting/rule/{rule_id}/alert/{alert_id}/_mute
 }
 ```
 
-When no body is provided, the alert is muted indefinitely (existing behavior).
+When no body is provided, the alert is snoozed indefinitely.
+
+To manually remove a per-alert snooze:
+
+```
+POST /api/alerting/rule/{rule_id}/alert/{alert_id}/_unsnooze
+```
+
+Note: The existing `_mute` / `_unmute` endpoints remain for simple (unconditional) muting.
 
 ### Condition Types
 

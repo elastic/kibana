@@ -394,11 +394,13 @@ export class PerAlertActionScheduler<
 
         const evalResult = evaluateSnoozeConditions(snoozedAlertEntry, alertData);
         if (evalResult.shouldUnmute) {
-          // Conditions met -- mark for auto-unmute, allow actions to fire
-          this.alertsToAutoUnmute.push({
-            alertInstanceId: alertId,
-            reason: evalResult.reason ?? 'conditions met',
-          });
+          // Conditions met -- mark for auto-unmute (deduplicated), allow actions to fire
+          if (!this.alertsToAutoUnmute.some((a) => a.alertInstanceId === alertId)) {
+            this.alertsToAutoUnmute.push({
+              alertInstanceId: alertId,
+              reason: evalResult.reason ?? 'conditions met',
+            });
+          }
           this.context.logger.debug(
             `auto-unmuting alert '${alertId}' in rule ${this.context.ruleLabel}: ${evalResult.reason}`
           );

@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { rawRuleSchema as rawRuleSchemaV8 } from './v8';
 
-const muteConditionSchema = schema.object({
+const snoozeConditionSchema = schema.object({
   type: schema.oneOf([
     schema.literal('severity_change'),
     schema.literal('severity_equals'),
@@ -24,7 +24,7 @@ const snoozedAlertInstanceSchema = schema.object({
   mutedAt: schema.string(),
   mutedBy: schema.maybe(schema.string()),
   expiresAt: schema.maybe(schema.string()),
-  conditions: schema.maybe(schema.arrayOf(muteConditionSchema)),
+  conditions: schema.maybe(schema.arrayOf(snoozeConditionSchema)),
   conditionOperator: schema.maybe(schema.oneOf([schema.literal('any'), schema.literal('all')])),
 });
 

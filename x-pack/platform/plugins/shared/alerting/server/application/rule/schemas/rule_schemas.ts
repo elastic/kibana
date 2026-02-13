@@ -150,7 +150,7 @@ export const alertDelaySchema = schema.object({
   active: schema.number(),
 });
 
-const muteConditionSchema = schema.object({
+const snoozeConditionSchema = schema.object({
   type: schema.oneOf([
     schema.literal('severity_change'),
     schema.literal('severity_equals'),
@@ -166,7 +166,7 @@ const snoozedAlertInstanceSchema = schema.object({
   mutedAt: schema.string(),
   mutedBy: schema.maybe(schema.string()),
   expiresAt: schema.maybe(schema.string()),
-  conditions: schema.maybe(schema.arrayOf(muteConditionSchema)),
+  conditions: schema.maybe(schema.arrayOf(snoozeConditionSchema)),
   conditionOperator: schema.oneOf([schema.literal('any'), schema.literal('all')]),
 });
 

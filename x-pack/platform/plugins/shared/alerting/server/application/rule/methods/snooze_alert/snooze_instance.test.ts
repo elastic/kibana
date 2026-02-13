@@ -154,7 +154,9 @@ describe('snooze alert instance', () => {
     });
 
     const updateCall = savedObjectsMock.update.mock.calls[0];
-    const updatedSnoozedAlerts = (updateCall[2] as Record<string, unknown>).snoozedAlerts as Array<Record<string, unknown>>;
+    const updatedSnoozedAlerts = (updateCall[2] as Record<string, unknown>).snoozedAlerts as Array<
+      Record<string, unknown>
+    >;
     expect(updatedSnoozedAlerts).toHaveLength(1);
     expect(updatedSnoozedAlerts[0].expiresAt).toBe('2099-12-31T00:00:00.000Z');
   });
@@ -182,5 +184,103 @@ describe('snooze alert instance', () => {
         alertInstanceId: 'nonexistent-alert',
       })
     ).rejects.toThrow('does not exist');
+  });
+
+  it('logs audit event with SNOOZE_ALERT action on success', async () => {
+    savedObjectsMock.get.mockResolvedValueOnce({
+      id: 'rule-1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: 'test-rule-type',
+        consumer: 'test-consumer',
+        name: 'my_rule',
+        actions: [],
+        muteAll: false,
+        mutedInstanceIds: [],
+        snoozedAlerts: [],
+      },
+      references: [],
+      version: 'abc',
+    });
+
+    await snoozeInstance(context, {
+      ruleId: 'rule-1',
+      alertInstanceId: 'alert-1',
+      expiresAt: '2099-01-01T00:00:00.000Z',
+    });
+
+    expect(auditLoggerMock.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: 'rule_alert_snooze',
+          outcome: 'unknown',
+        }),
+      })
+    );
+  });
+
+  it('logs audit event and throws when authorization fails', async () => {
+    savedObjectsMock.get.mockResolvedValueOnce({
+      id: 'rule-1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: 'test-rule-type',
+        consumer: 'test-consumer',
+        name: 'my_rule',
+        actions: [],
+        muteAll: false,
+        mutedInstanceIds: [],
+        snoozedAlerts: [],
+      },
+      references: [],
+      version: 'abc',
+    });
+
+    authorizationMock.ensureAuthorized.mockRejectedValueOnce(new Error('Unauthorized'));
+
+    await expect(
+      snoozeInstance(context, {
+        ruleId: 'rule-1',
+        alertInstanceId: 'alert-1',
+      })
+    ).rejects.toThrow('Unauthorized');
+
+    expect(auditLoggerMock.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({
+          action: 'rule_alert_snooze',
+          outcome: 'failure',
+        }),
+      })
+    );
+  });
+
+  it('throws RuleTypeDisabledError when rule type is disabled', async () => {
+    savedObjectsMock.get.mockResolvedValueOnce({
+      id: 'rule-1',
+      type: 'alert',
+      attributes: {
+        alertTypeId: 'test-rule-type',
+        consumer: 'test-consumer',
+        name: 'my_rule',
+        actions: [],
+        muteAll: false,
+        mutedInstanceIds: [],
+        snoozedAlerts: [],
+      },
+      references: [],
+      version: 'abc',
+    });
+
+    ruleTypeRegistryMock.ensureRuleTypeEnabled.mockImplementationOnce(() => {
+      throw new Error('Rule type is disabled');
+    });
+
+    await expect(
+      snoozeInstance(context, {
+        ruleId: 'rule-1',
+        alertInstanceId: 'alert-1',
+      })
+    ).rejects.toThrow('Rule type is disabled');
   });
 });
