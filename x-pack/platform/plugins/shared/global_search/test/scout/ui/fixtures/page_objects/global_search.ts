@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout/ui';
 import type { ScoutPage } from '@kbn/scout';
 
 interface SearchResult {
@@ -61,15 +60,18 @@ export class GlobalSearch {
   }
 
   async waitForResultsLoaded() {
-    // Wait for at least one option to appear
-    await this.page.testSubj.waitForSelector('nav-search-option');
+    // The search bar component sets isLoading=true immediately on input change,
+    // then sets it to false when the Observable completes (all result batches received).
+    // EUI renders a spinner (role="progressbar") while isLoading is true.
+    // Waiting for the spinner to appear then disappear ensures all results are in.
+    const popover = this.page.locator('.navSearch__panel');
+    const spinner = popover
+      .getByRole('status')
+      .filter({ hasText: 'Loading results' })
+      .getByRole('progressbar');
 
-    // Results are emitted in multiple batches. Poll the result count to ensure
-    // all batches have been received (count stabilizes when no more results are coming).
-    await expect(async () => {
-      const count = await this.page.testSubj.locator('nav-search-option').count();
-      expect(count).toBeGreaterThan(0);
-    }).toPass({ timeout: 10000, intervals: [500, 1000] });
+    await spinner.waitFor({ state: 'visible', timeout: 5000 });
+    await spinner.waitFor({ state: 'hidden', timeout: 10000 });
   }
 
   async getDisplayedResults(): Promise<SearchResult[]> {
