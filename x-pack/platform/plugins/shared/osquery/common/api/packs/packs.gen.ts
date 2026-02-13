@@ -26,6 +26,16 @@ import {
 import { FindPacksResponse, FindPackResponse } from './find_packs.gen';
 import { CreatePacksRequestBody, CreatePacksResponse } from './create_pack.gen';
 import { UpdatePacksRequestBody, UpdatePacksResponse } from './update_packs.gen';
+import { CopyPacksResponse } from './copy_pack.gen';
+
+export type OsqueryCopyPacksRequestParams = z.infer<typeof OsqueryCopyPacksRequestParams>;
+export const OsqueryCopyPacksRequestParams = z.object({
+  id: PackId,
+});
+export type OsqueryCopyPacksRequestParamsInput = z.input<typeof OsqueryCopyPacksRequestParams>;
+
+export type OsqueryCopyPacksResponse = z.infer<typeof OsqueryCopyPacksResponse>;
+export const OsqueryCopyPacksResponse = CopyPacksResponse;
 
 export type OsqueryCreatePacksRequestBody = z.infer<typeof OsqueryCreatePacksRequestBody>;
 export const OsqueryCreatePacksRequestBody = CreatePacksRequestBody;
