@@ -18,7 +18,7 @@ import { runAgentStepCommonDefinition } from '../../common/step_types/run_agent_
 
 /**
  * Server step definition for the "ai.agent" step.
- * This step executes an agentBuilder agent using the internal runner service.
+ * This step executes an agentBuilder agent using the execution service.
  */
 export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
   return createServerStepDefinition({
@@ -39,39 +39,43 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           throw new Error('No request available in workflow context');
         }
 
-        context.logger.debug('Executing ai.agent step', {
-          agentId: agentId || agentBuilderDefaultAgentId,
-        });
-
         const effectiveAgentId = (agentId as string | undefined) || agentBuilderDefaultAgentId;
         const effectiveConnectorId = connectorId as string | undefined;
 
         const storeConversation = createConversation || Boolean(conversationId);
 
-        const chatService = serviceManager.internalStart?.chat;
-        if (!chatService) {
-          throw new Error('chat service is not available');
+        const executionService = serviceManager.internalStart?.execution;
+        if (!executionService) {
+          throw new Error('execution service is not available');
         }
 
-        const chatEvents$ = chatService.converse({
+        context.logger.debug('Executing ai.agent step', {
           agentId: effectiveAgentId,
-          connectorId: effectiveConnectorId,
-          conversationId,
-          autoCreateConversationWithId: createConversation,
-          storeConversation,
-          request,
-          abortSignal: context.abortSignal,
-          structuredOutput: !!schema,
-          outputSchema: schema,
-          nextInput: {
-            message,
-          },
         });
 
-        const events = await firstValueFrom(chatEvents$.pipe(toArray()));
+        const { events$ } = await executionService.executeAgent({
+          request,
+          abortSignal: context.abortSignal,
+          params: {
+            agentId: effectiveAgentId,
+            connectorId: effectiveConnectorId,
+            conversationId,
+            autoCreateConversationWithId: createConversation,
+            storeConversation,
+            structuredOutput: !!schema,
+            outputSchema: schema,
+            nextInput: {
+              message,
+            },
+          },
+          // workflows already run as scheduled tasks
+          useTaskManager: false,
+        });
+
+        const events = await firstValueFrom(events$.pipe(toArray()));
         const roundEvent = events.find(isRoundCompleteEvent);
         if (!roundEvent) {
-          throw new Error('No round_complete event received from chat service');
+          throw new Error('No round_complete event received from execution service');
         }
 
         const round = roundEvent.data.round;

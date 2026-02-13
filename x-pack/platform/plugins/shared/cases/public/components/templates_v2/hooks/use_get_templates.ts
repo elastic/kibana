@@ -10,14 +10,17 @@ import { useQuery } from '@kbn/react-query';
 import { useToasts } from '../../../common/lib/kibana';
 import * as i18n from '../../templates/translations';
 import type { ServerError } from '../../../types';
-import type { QueryParams, TemplatesFindResponse } from '../types';
+import type {
+  TemplatesFindRequest,
+  TemplatesFindResponse,
+} from '../../../../common/types/api/template/v1';
 import { getTemplates } from '../api/api';
 import { DEFAULT_QUERY_PARAMS } from '../constants';
 import { casesQueriesKeys } from '../../../containers/constants';
 
 export const useGetTemplates = (
   params: {
-    queryParams?: Partial<QueryParams>;
+    queryParams?: Partial<TemplatesFindRequest>;
   } = {}
 ): UseQueryResult<TemplatesFindResponse> => {
   const toasts = useToasts();

@@ -18,6 +18,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -26,18 +27,22 @@ import { useRouterNavigate } from '../../../common/lib/kibana';
 import { PackForm } from '../../../packs/form';
 import { usePack } from '../../../packs/use_pack';
 import { useDeletePack } from '../../../packs/use_delete_pack';
+import { useCopyPack } from '../../../packs/use_copy_pack';
+import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
 
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 
 const EditPackPageComponent = () => {
   const confirmModalTitleId = useGeneratedHtmlId();
+  const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
 
   const { packId } = useParams<{ packId: string }>();
   const queryDetailsLinkProps = useRouterNavigate(`packs/${packId}`);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
-  const { isLoading, data } = usePack({ packId });
+  const { isLoading, data, error } = usePack({ packId });
   const deletePackMutation = useDeletePack({ packId, withRedirect: true });
+  const copyPackMutation = useCopyPack({ packId });
   const isReadOnly = useMemo(() => !!data?.read_only, [data]);
 
   useBreadcrumbs('pack_edit', {
@@ -58,6 +63,10 @@ const EditPackPageComponent = () => {
       handleCloseDeleteConfirmationModal();
     });
   }, [deletePackMutation, handleCloseDeleteConfirmationModal]);
+
+  const handleDuplicateClick = useCallback(() => {
+    copyPackMutation.mutateAsync();
+  }, [copyPackMutation]);
 
   const LeftColumn = useMemo(
     () => (
@@ -93,14 +102,31 @@ const EditPackPageComponent = () => {
 
   const RightColumn = useMemo(
     () => (
-      <EuiButton color="danger" onClick={handleDeleteClick} iconType="trash">
-        <FormattedMessage
-          id="xpack.osquery.editPack.deletePackButtonLabel"
-          defaultMessage="Delete pack"
-        />
-      </EuiButton>
+      <EuiFlexGroup gutterSize="s">
+        {queryHistoryRework && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={handleDuplicateClick}
+              iconType="copy"
+              isLoading={copyPackMutation.isLoading}
+            >
+              {i18n.translate('xpack.osquery.editPack.duplicatePackButtonLabel', {
+                defaultMessage: 'Duplicate pack',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiButton color="danger" onClick={handleDeleteClick} iconType="trash">
+            <FormattedMessage
+              id="xpack.osquery.editPack.deletePackButtonLabel"
+              defaultMessage="Delete pack"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     ),
-    [handleDeleteClick]
+    [queryHistoryRework, handleDuplicateClick, copyPackMutation.isLoading, handleDeleteClick]
   );
 
   const HeaderContent = useMemo(
@@ -123,6 +149,25 @@ const EditPackPageComponent = () => {
 
   if (isLoading) return null;
 
+  if (error) {
+    return (
+      <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
+        <EuiCallOut
+          title={i18n.translate('xpack.osquery.editPack.loadError.title', {
+            defaultMessage: 'Failed to load pack',
+          })}
+          color="danger"
+          iconType="error"
+        >
+          <FormattedMessage
+            id="xpack.osquery.editPack.loadError.body"
+            defaultMessage="The pack could not be loaded. Please try again later."
+          />
+        </EuiCallOut>
+      </WithHeaderLayout>
+    );
+  }
+
   return (
     <WithHeaderLayout
       leftColumn={LeftColumn}
@@ -130,10 +175,16 @@ const EditPackPageComponent = () => {
       rightColumnGrow={false}
       headerChildren={HeaderContent}
     >
-      {!data ? (
+      {!data || data.saved_object_id !== packId ? (
         <EuiSkeletonText lines={10} />
       ) : (
-        <PackForm editMode={true} defaultValue={data} isReadOnly={isReadOnly} packId={packId} />
+        <PackForm
+          key={packId}
+          editMode={true}
+          defaultValue={data}
+          isReadOnly={isReadOnly}
+          packId={packId}
+        />
       )}
       {isDeleteModalVisible ? (
         <EuiConfirmModal
