@@ -12,6 +12,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'header']);
   const browser = getService('browser');
   const security = getService('security');
+  const testSubjects = getService('testSubjects');
   const transform = getService('transform');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
@@ -61,8 +62,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('opens transform creation wizard', async () => {
-      await transform.management.startTransformCreation();
+      await transform.testExecution.logTestStep('should open the create transform wizard');
+
+      // The empty-state button navigates directly to the create wizard page.
+      await transform.management.assertCreateFirstTransformButtonExists();
+      await transform.management.assertCreateFirstTransformButtonEnabled(true);
+      await testSubjects.click('transformCreateFirstButton');
+
+      await testSubjects.existOrFail('transformPageCreateTransform');
+      await testSubjects.existOrFail('transformSourceDataSelectorButton');
+
+      // Source selection is now done from within the wizard via the data selector modal.
+      await testSubjects.click('transformSourceDataSelectorButton');
+      await testSubjects.existOrFail('transformSourceDataSelectorModal');
       await transform.sourceSelection.selectSource('logstash-2015.09.22');
+
       await transform.datePicker.assertUseFullDataButtonVisible(true);
       await transform.datePicker.assertDatePickerDataTierOptionsVisible(false);
     });
